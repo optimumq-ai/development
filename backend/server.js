@@ -65,8 +65,8 @@ function seedAdmin() {
   var sysAdminRole = get('SELECT id FROM function_roles WHERE name = ?', ['SYSTEM_ADMIN']);
   var allPerms = all('SELECT id FROM permission_roles');
   var uid = uuidv4();
-  var bcrypt = require('bcryptjs');
-  var hash = bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'OptimumQ@2024!', 12);
+  var crypto = require('crypto');
+  var hash = crypto.createHash('sha256').update((process.env.ADMIN_PASSWORD || 'RRowanne') + 'optimumq_salt_2024').digest('hex');
   run('INSERT INTO users (id,email,display_name,title,department_id,password_hash,temp_password) VALUES (?,?,?,?,?,?,?)',
     [uid,'admin@optimumq.ai','System Administrator','System Administrator','dept-openrecords',hash,1]);
   if (sysAdminRole) run('INSERT OR IGNORE INTO user_function_roles VALUES (?,?)',[uid,sysAdminRole.id]);

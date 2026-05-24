@@ -75,7 +75,7 @@ router.patch('/:id/stage', requireAuth, function(req, res) {
   const request = get('SELECT * FROM requests WHERE id = ?', [req.params.id]);
   if (!request) return res.status(404).json({ error: 'Request not found' });
   const stage = req.body.stage;
-  run('UPDATE requests SET stage = ?, status = ?, updated_at = datetime("now") WHERE id = ?',
+  run("UPDATE requests SET stage = ?, status = ?, updated_at = datetime('now') WHERE id = ?",
     [stage, stage === 'closed' ? 'closed' : 'active', req.params.id]);
   logHistory(req.params.id, req.user.sub, req.user.name, 'STAGE_ADVANCED', req.body.notes);
   res.json({ success: true, stage: stage });
