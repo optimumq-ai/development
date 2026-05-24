@@ -1,0 +1,85 @@
+require('dotenv').config();
+const express = require('express');
+const cors = require('cors');
+const helmet = require('helmet');
+const { initDb, get, all, run } = require('./src/db');
+const { createUser } = require('./src/services/auth');
+const { v4: uuidv4 } = require('uuid');
+
+const app = express();
+const PORT = process.env.PORT || 3001;
+
+app.use(helmet({ contentSecurityPolicy: false }));
+app.use(cors({ origin: true, credentials: true }));
+app.use(express.json({ limit: '10mb' }));
+
+app.use('/api/auth', require('./src/routes/auth'));
+app.use('/api/requests', require('./src/routes/requests'));
+
+app.get('/api/health', function(req, res) {
+  res.json({ status: 'ok', version: '1.0.0' });
+});
+
+app.post('/api/admin/seed', function(req, res) {
+  var existing = get('SELECT count(*) as c FROM requests');
+  if (existing && existing.c > 0) return res.json({ message: 'Already seeded', count: existing.c });
+  var depts=['dept-clerk','dept-police','dept-finance','dept-building','dept-attorney','dept-publicworks'];
+  var stages=['intake','record_search','redaction_review','fee_review','awaiting_payment','delivery'];
+  var classes=['simple','standard','complex','redaction_required'];
+  var data=[
+    ['Jane Martinez','jane.martinez@email.com','individual','Copies of all city council meeting minutes for calendar year 2024',0,0,0],
+    ['Robert Brooks','rbrooks@lawfirm.com','attorney','Body camera footage for Officer Smith badge 4471 on December 3 2025 between 4pm and 6pm',0,0,0],
+    ['Sarah Chen','schen@channel7.com','journalist','Complete payroll records for all department heads fiscal year 2024',1,0,0],
+    ['David Okafor','dokafor@nonprofit.org','nonprofit','All building permits issued for 1234 Main Street since January 2020',0,0,0],
+    ['Karen Ellis','kellis@gmail.com','individual','Legal opinion letters regarding the proposed downtown development agreement',0,1,0],
+    ['Tom Bradley','tbradley@consulting.com','individual','All water main inspection records for the Riverside District from 2022 to present',0,0,0],
+    ['Maria Garcia','mgarcia@email.com','individual','Email correspondence between the mayor office and Acme Development',0,0,0],
+    ['James Wilson','jwilson@university.edu','researcher','Complete incident report for case number 2025-CR-04471',0,0,1],
+  ];
+  data.forEach(function(d,i){
+    var id=uuidv4();
+    var num='2026-'+String(i+1).padStart(4,'0');
+    var dl=new Date();
+    dl.setDate(dl.getDate()+(i<2?-2:i<4?5:12));
+    run('INSERT OR IGNORE INTO requests (id,request_number,requestor_name,requestor_email,requestor_type,delivery_method,description,classification,department_id,stage,status,deadline_date,submission_channel,fee_waiver_requested,legal_flag,is_mrr) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+      [id,num,d[0],d[1],d[2],'email',d[3],classes[i%4],depts[i%6],stages[i%6],'active',dl.toISOString().split('T')[0],'portal',d[4],d[5],d[6]]);
+    run('INSERT OR IGNORE INTO request_history (id,request_id,actor_id,actor_name,action) VALUES (?,?,?,?,?)',[uuidv4(),id,null,'System','REQUEST_CREATED']);
+  });
+  var count=get('SELECT count(*) as c FROM requests');
+  res.json({ success: true, count: count.c });
+});
+
+app.use(function(req, res) {
+  res.status(404).json({ error: 'Not found' });
+});
+
+app.use(function(err, req, res, next) {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+function seedAdmin() {
+  var existing = get('SELECT id FROM users WHERE email = ?', ['admin@optimumq.ai']);
+  if (existing) return;
+  console.log('Seeding default admin...');
+  var sysAdminRole = get('SELECT id FROM function_roles WHERE name = ?', ['SYSTEM_ADMIN']);
+  var allPerms = all('SELECT id FROM permission_roles');
+  var uid = uuidv4();
+  var bcrypt = require('bcryptjs');
+  var hash = bcrypt.hashSync(process.env.ADMIN_PASSWORD || 'OptimumQ@2024!', 12);
+  run('INSERT INTO users (id,email,display_name,title,department_id,password_hash,temp_password) VALUES (?,?,?,?,?,?,?)',
+    [uid,'admin@optimumq.ai','System Administrator','System Administrator','dept-openrecords',hash,1]);
+  if (sysAdminRole) run('INSERT OR IGNORE INTO user_function_roles VALUES (?,?)',[uid,sysAdminRole.id]);
+  allPerms.forEach(function(p){ run('INSERT OR IGNORE INTO user_permission_roles VALUES (?,?)',[uid,p.id]); });
+  console.log('Admin created: admin@optimumq.ai');
+}
+
+function start() {
+  initDb();
+  seedAdmin();
+  app.listen(PORT, function() {
+    console.log('Optimum Q API running on port ' + PORT);
+  });
+}
+
+start();

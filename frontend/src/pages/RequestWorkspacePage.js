@@ -1,0 +1,220 @@
+import React, { useEffect, useState } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
+import api from '../lib/api';
+import RecordsPanel from '../components/ui/RecordsPanel';
+
+const STAGES = ['intake','record_search','redaction_review','fee_review','awaiting_payment','custodian_retrieval','delivery'];
+const STAGE_LABELS = { intake:'Intake Review', record_search:'Record Search', redaction_review:'Redaction Review', fee_review:'Fee Review', awaiting_payment:'Awaiting Payment', custodian_retrieval:'Custodian Retrieval', delivery:'Delivery' };
+const STAGE_COLORS = { intake:{bg:'#DBEAFE',color:'#1E40AF'}, record_search:{bg:'#EDE9FE',color:'#6D28D9'}, redaction_review:{bg:'#FEF3C7',color:'#92400E'}, fee_review:{bg:'#D1FAE5',color:'#065F46'}, awaiting_payment:{bg:'#FFEDD5',color:'#9A3412'}, custodian_retrieval:{bg:'#CCFBF1',color:'#0F766E'}, delivery:{bg:'#E0E7FF',color:'#3730A3'} };
+const NEXT_STAGE = { intake:'record_search', record_search:'redaction_review', redaction_review:'fee_review', fee_review:'awaiting_payment', awaiting_payment:'delivery', custodian_retrieval:'redaction_review', delivery:'closed' };
+const NEXT_LABEL = { intake:'Advance to Record Search', record_search:'Advance to Redaction Review', redaction_review:'Advance to Fee Review', fee_review:'Advance to Awaiting Payment', awaiting_payment:'Confirm Payment & Advance', custodian_retrieval:'Advance to Redaction Review', delivery:'Mark as Fulfilled' };
+
+export default function RequestWorkspacePage() {
+  const { id } = useParams();
+  const nav = useNavigate();
+  const [request, setRequest] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [advancing, setAdvancing] = useState(false);
+  const [tab, setTab] = useState('details');
+  const [stageNote, setStageNote] = useState('');
+  const [showAdvance, setShowAdvance] = useState(false);
+  const [err, setErr] = useState('');
+  const [records, setRecords] = useState([]);
+
+  useEffect(function() { load(); }, [id]);
+
+  async function load() {
+    setLoading(true);
+    try {
+      var r = await api.get('/requests/' + id);
+      setRequest(r.data.request);
+      setHistory(r.data.history);
+    } catch(e) { setErr('Request not found'); }
+    setLoading(false);
+  }
+
+  function addRecord(rec) { setRecords(function(prev){ return prev.concat(rec); }); }
+  function updateRecordStatus(recId, status) {
+    setRecords(function(prev){ return prev.map(function(r){ return r.id===recId ? Object.assign({},r,{status:status}) : r; }); });
+  }
+
+  var responsiveCount = records.filter(function(r){ return r.status==='responsive'; }).length;
+  var canAdvance = request && (request.stage !== 'record_search' || responsiveCount > 0);
+
+  async function advanceStage() {
+    if (!request || !canAdvance) return;
+    setAdvancing(true);
+    var next = NEXT_STAGE[request.stage];
+    try {
+      await api.patch('/requests/' + request.id + '/stage', { stage: next, notes: stageNote });
+      setStageNote(''); setShowAdvance(false);
+      await load();
+    } catch(e) { setErr('Failed to advance stage'); }
+    setAdvancing(false);
+  }
+
+  async function closeRequest(reason) {
+    setAdvancing(true);
+    try {
+      await api.patch('/requests/' + request.id + '/stage', { stage: 'closed', notes: reason });
+      await load();
+    } catch(e) { setErr('Failed to close request'); }
+    setAdvancing(false);
+  }
+
+  if (loading) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'256px',color:'#9CA3AF'}}>Loading request...</div>;
+  if (!request) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'256px'}}><div style={{textAlign:'center'}}><div style={{fontSize:'48px',marginBottom:'16px'}}>⚠️</div><div style={{fontSize:'16px',color:'#4B5563'}}>{err||'Request not found'}</div></div></div>;
+
+  var sc = STAGE_COLORS[request.stage];
+  var stageIdx = STAGES.indexOf(request.stage);
+  var isComplete = request.status === 'closed';
+  var od = request.deadline_date && new Date(request.deadline_date) < new Date() && !isComplete;
+  var showRecordsPanel = request.stage === 'record_search' || request.stage === 'redaction_review';
+
+  return (
+    <div style={{maxWidth:'1200px',display:'flex',flexDirection:'column',gap:'20px'}}>
+      <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:'16px'}}>
+        <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
+          <button onClick={function(){nav('/requests');}} style={{background:'none',border:'none',cursor:'pointer',color:'#6B7280',fontSize:'14px',padding:'8px 12px',borderRadius:'8px'}}>← Back</button>
+          <div>
+            <div style={{display:'flex',alignItems:'center',gap:'10px',flexWrap:'wrap'}}>
+              <h1 style={{fontSize:'22px',fontWeight:'700',margin:'0',fontFamily:'monospace'}}>{request.request_number}</h1>
+              {sc&&<span style={{background:sc.bg,color:sc.color,fontSize:'12px',fontWeight:'600',padding:'4px 12px',borderRadius:'20px'}}>{STAGE_LABELS[request.stage]||request.stage}</span>}
+              {request.is_mrr?<span style={{background:'#CCFBF1',color:'#0F766E',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>MRR</span>:null}
+              {request.legal_flag?<span style={{background:'#FEF2F2',color:'#DC2626',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>⚖ LEGAL HOLD</span>:null}
+              {od?<span style={{background:'#FEF2F2',color:'#DC2626',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>⚠ OVERDUE</span>:null}
+              {isComplete?<span style={{background:'#F0FDF4',color:'#166534',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>✓ CLOSED</span>:null}
+            </div>
+            <p style={{color:'#9CA3AF',fontSize:'13px',margin:'4px 0 0'}}>Submitted {new Date(request.created_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})} · {request.submission_channel}</p>
+          </div>
+        </div>
+        {!isComplete&&NEXT_STAGE[request.stage]&&(
+          <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:'6px'}}>
+            <button onClick={function(){if(canAdvance)setShowAdvance(!showAdvance);}}
+              disabled={!canAdvance}
+              style={{padding:'10px 20px',background:canAdvance?'#1F4E79':'#9CA3AF',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:canAdvance?'pointer':'not-allowed',whiteSpace:'nowrap'}}>
+              {NEXT_LABEL[request.stage]||'Advance Stage'} →
+            </button>
+            {!canAdvance&&request.stage==='record_search'&&(
+              <div style={{fontSize:'11px',color:'#D97706',textAlign:'right'}}>Attach and mark at least one Responsive record first</div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {showAdvance&&(
+        <div style={{background:'#EBF3FB',border:'2px solid #1F4E79',borderRadius:'12px',padding:'20px'}}>
+          <h3 style={{margin:'0 0 12px',fontSize:'15px',fontWeight:'700',color:'#1F4E79'}}>Advance to: {STAGE_LABELS[NEXT_STAGE[request.stage]]||'Closed'}</h3>
+          <textarea value={stageNote} onChange={function(e){setStageNote(e.target.value);}}
+            placeholder="Optional notes for the audit log..."
+            style={{width:'100%',padding:'10px 12px',border:'1px solid #D6E4F0',borderRadius:'8px',fontSize:'14px',outline:'none',minHeight:'80px',resize:'vertical',boxSizing:'border-box',fontFamily:'inherit',marginBottom:'12px'}}/>
+          <div style={{display:'flex',gap:'10px'}}>
+            <button onClick={advanceStage} disabled={advancing} style={{padding:'10px 24px',background:'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}>
+              {advancing?'Advancing...':'Confirm Advance'}
+            </button>
+            <button onClick={function(){setShowAdvance(false);}} style={{padding:'10px 16px',background:'white',color:'#6B7280',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'14px',cursor:'pointer'}}>Cancel</button>
+          </div>
+        </div>
+      )}
+
+      <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'20px'}}>
+        <div style={{fontSize:'12px',fontWeight:'600',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:'12px'}}>Processing Pipeline</div>
+        <div style={{display:'flex',alignItems:'center',overflowX:'auto'}}>
+          {STAGES.map(function(s,i){
+            var done=stageIdx>i; var current=stageIdx===i;
+            return(
+              <div key={s} style={{display:'flex',alignItems:'center',flex:i<STAGES.length-1?'1':'none'}}>
+                <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:'6px',minWidth:'80px'}}>
+                  <div style={{width:'32px',height:'32px',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',fontWeight:'700',background:done?'#1F4E79':current?'#EBF3FB':'#F9FAFB',color:done?'white':current?'#1F4E79':'#D1D5DB',border:current?'2px solid #1F4E79':done?'none':'2px solid #E5E7EB'}}>
+                    {done?'✓':i+1}
+                  </div>
+                  <div style={{fontSize:'10px',textAlign:'center',color:done||current?'#1F4E79':'#9CA3AF',fontWeight:current?'700':'400',lineHeight:'1.3'}}>{STAGE_LABELS[s]}</div>
+                </div>
+                {i<STAGES.length-1&&<div style={{flex:1,height:'2px',background:done?'#1F4E79':'#E5E7EB',margin:'0 4px',marginBottom:'20px'}}/>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      <div style={{display:'flex',borderBottom:'2px solid #E5E7EB',gap:'0'}}>
+        {[['details','Request Details'],['records','Records'],['history','Audit History'],['actions','Actions']].map(function(item){
+          return <button key={item[0]} onClick={function(){setTab(item[0]);}} style={{padding:'12px 20px',background:'none',border:'none',borderBottom:tab===item[0]?'2px solid #1F4E79':'2px solid transparent',marginBottom:'-2px',fontSize:'14px',fontWeight:tab===item[0]?'700':'500',color:tab===item[0]?'#1F4E79':'#6B7280',cursor:'pointer'}}>{item[1]}</button>;
+        })}
+      </div>
+
+      {tab==='details'&&(
+        <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'20px'}}>
+          <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',display:'flex',flexDirection:'column',gap:'16px'}}>
+            <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6'}}>Requestor Information</div>
+            {[['Name',request.requestor_name],['Email',request.requestor_email],['Phone',request.requestor_phone||'—'],['Type',request.requestor_type],['Delivery',request.delivery_method]].map(function(item){
+              return <div key={item[0]}><div style={{fontSize:'11px',fontWeight:'600',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.05em'}}>{item[0]}</div><div style={{fontSize:'14px',color:'#111',textTransform:'capitalize',marginTop:'2px'}}>{item[1]}</div></div>;
+            })}
+          </div>
+          <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',display:'flex',flexDirection:'column',gap:'16px'}}>
+            <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6'}}>Request Information</div>
+            {[['Classification',request.classification?request.classification.replace(/_/g,' '):'—'],['Department',request.department_name||'Unassigned'],['Deadline',request.deadline_date||'—'],['Fee Waiver',request.fee_waiver_requested?'Yes — Requested':'No'],['MRR',request.is_mrr?'Yes — Multi-Record Request':'No']].map(function(item){
+              return <div key={item[0]}><div style={{fontSize:'11px',fontWeight:'600',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.05em'}}>{item[0]}</div><div style={{fontSize:'14px',color:'#111',textTransform:'capitalize',marginTop:'2px'}}>{item[1]}</div></div>;
+            })}
+          </div>
+          <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',gridColumn:'1/-1'}}>
+            <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6',marginBottom:'16px'}}>Description of Records Requested</div>
+            <p style={{fontSize:'14px',color:'#374151',lineHeight:'1.7',margin:'0',whiteSpace:'pre-wrap'}}>{request.description}</p>
+          </div>
+        </div>
+      )}
+
+      {tab==='records'&&(
+        <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px'}}>
+          <RecordsPanel records={records} onAdd={addRecord} onUpdateStatus={updateRecordStatus} stage={request.stage}/>
+        </div>
+      )}
+
+      {tab==='history'&&(
+        <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',overflow:'hidden'}}>
+          {history.length===0?<div style={{padding:'48px',textAlign:'center',color:'#9CA3AF'}}>No history yet</div>:(
+            <div style={{display:'flex',flexDirection:'column'}}>
+              {history.map(function(h,i){
+                return <div key={h.id} style={{display:'flex',gap:'16px',padding:'16px 20px',borderBottom:i<history.length-1?'1px solid #F3F4F6':'none'}}>
+                  <div style={{width:'36px',height:'36px',borderRadius:'50%',background:'#EBF3FB',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'13px',fontWeight:'700',color:'#1F4E79',flexShrink:0}}>
+                    {h.actor_name?h.actor_name[0].toUpperCase():'?'}
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'4px',flexWrap:'wrap'}}>
+                      <span style={{fontSize:'13px',fontWeight:'600',color:'#111'}}>{h.actor_name}</span>
+                      <span style={{background:'#F3F4F6',color:'#6B7280',fontSize:'11px',fontWeight:'600',padding:'2px 8px',borderRadius:'20px'}}>{h.action.replace(/_/g,' ')}</span>
+                      {h.stage_from&&h.stage_to&&<span style={{fontSize:'12px',color:'#9CA3AF'}}>{STAGE_LABELS[h.stage_from]||h.stage_from} → {STAGE_LABELS[h.stage_to]||h.stage_to}</span>}
+                    </div>
+                    {h.notes&&<p style={{fontSize:'13px',color:'#6B7280',margin:'0',fontStyle:'italic'}}>{h.notes}</p>}
+                    <div style={{fontSize:'12px',color:'#9CA3AF',marginTop:'4px'}}>{new Date(h.created_at).toLocaleString()}</div>
+                  </div>
+                </div>;
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      {tab==='actions'&&(
+        <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',display:'flex',flexDirection:'column',gap:'16px'}}>
+          <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6'}}>Request Actions</div>
+          {!isComplete&&(
+            <div>
+              <div style={{fontSize:'13px',fontWeight:'600',color:'#374151',marginBottom:'8px'}}>Close Request</div>
+              <div style={{display:'flex',gap:'10px',flexWrap:'wrap'}}>
+                {[['No Responsive Records','CLOSE_NO_RECORDS'],['Withdrawn by Requestor','CLOSE_WITHDRAWN'],['Denied','CLOSE_DENIED']].map(function(item){
+                  return <button key={item[1]} onClick={function(){if(window.confirm('Close this request as: '+item[0]+'?'))closeRequest(item[0]);}}
+                    style={{padding:'8px 16px',background:'white',color:'#DC2626',border:'1px solid #FCA5A5',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>
+                    {item[0]}
+                  </button>;
+                })}
+              </div>
+            </div>
+          )}
+          {isComplete&&<div style={{padding:'16px',background:'#F0FDF4',borderRadius:'8px',color:'#166534',fontSize:'14px'}}>This request is closed. Closure reason: {request.closure_reason||'Not specified'}</div>}
+        </div>
+      )}
+    </div>
+  );
+}
