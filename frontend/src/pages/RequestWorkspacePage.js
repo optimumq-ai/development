@@ -21,8 +21,14 @@ export default function RequestWorkspacePage() {
   const [showAdvance, setShowAdvance] = useState(false);
   const [err, setErr] = useState('');
   const [records, setRecords] = useState([]);
+  const [staff, setStaff] = useState([]);
+  const [assigning, setAssigning] = useState(false);
 
-  useEffect(function() { load(); }, [id]);
+  useEffect(function() { load(); loadStaff(); }, [id]);
+
+  async function loadStaff() {
+    try { var r = await api.get('/staff'); setStaff(r.data.staff); } catch(e) {}
+  }
 
   async function load() {
     setLoading(true);
@@ -52,6 +58,16 @@ export default function RequestWorkspacePage() {
       await load();
     } catch(e) { setErr('Failed to advance stage'); }
     setAdvancing(false);
+  }
+
+  async function assignRequest(userId) {
+    
+    setAssigning(true);
+    try {
+      await api.patch('/requests/' + request.id + '/assign', { assignTo: userId });
+      await load();
+    } catch(e) { console.error(e); }
+    setAssigning(false);
   }
 
   async function closeRequest(reason) {
@@ -199,6 +215,27 @@ export default function RequestWorkspacePage() {
       {tab==='actions'&&(
         <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',display:'flex',flexDirection:'column',gap:'16px'}}>
           <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6'}}>Request Actions</div>
+          <div style={{marginBottom:'16px'}}>
+            <div style={{fontSize:'13px',fontWeight:'600',color:'#374151',marginBottom:'8px'}}>Assign Request</div>
+            <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
+              <select onChange={function(e){if(e.target.value)assignRequest(e.target.value);}} value={request.assigned_to||''}
+                style={{padding:'8px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',outline:'none',background:'white',cursor:'pointer'}}>
+                <option value="">— Unassigned —</option>
+                {staff.filter(function(s){return s.status==='active';}).map(function(s){
+                  return <option key={s.id} value={s.id}>{s.display_name}{s.title?' — '+s.title:''}</option>;
+                })}
+              </select>
+              <button onClick={function(){try{var t=localStorage.getItem('oq_token');var p=JSON.parse(atob(t.split('.')[1]));assignRequest(p.sub);}catch(e){}}} disabled={assigning}
+                style={{padding:'8px 14px',background:'#EBF3FB',color:'#1F4E79',border:'1px solid #D6E4F0',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>
+                Assign to Me
+              </button>
+              {request.assigned_to&&<button onClick={function(){assignRequest(null);}} disabled={assigning}
+                style={{padding:'8px 14px',background:'white',color:'#9CA3AF',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',cursor:'pointer'}}>
+                Unassign
+              </button>}
+            </div>
+            {request.assigned_to_name&&<div style={{fontSize:'12px',color:'#6B7280',marginTop:'6px'}}>Currently assigned to: <strong>{request.assigned_to_name}</strong></div>}
+          </div>
           {!isComplete&&(
             <div>
               <div style={{fontSize:'13px',fontWeight:'600',color:'#374151',marginBottom:'8px'}}>Close Request</div>

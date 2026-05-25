@@ -81,4 +81,17 @@ router.patch('/:id/stage', requireAuth, function(req, res) {
   res.json({ success: true, stage: stage });
 });
 
+
+router.patch('/:id/assign', requireAuth, function(req, res) {
+  var request = get('SELECT * FROM requests WHERE id = ?', [req.params.id]);
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  var assignTo = req.body.assignTo || null;
+  run('UPDATE requests SET assigned_to = ? WHERE id = ?', [assignTo, req.params.id]);
+  var actorName = req.user.name || 'Staff';
+  var assigneeName = assignTo ? (get('SELECT display_name FROM users WHERE id = ?', [assignTo]) || {display_name:'Unknown'}).display_name : 'Unassigned';
+  run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?, ?, ?, ?, ?, ?)',
+    [require('uuid').v4(), req.params.id, req.user.sub, actorName, 'ASSIGNED', 'Assigned to: ' + assigneeName]);
+  res.json({ success: true });
+});
+
 module.exports = router;
