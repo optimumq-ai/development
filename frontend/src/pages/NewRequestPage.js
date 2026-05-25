@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 
@@ -15,6 +15,7 @@ const DELIVERY = [ { value: 'email', label: 'Email' }, { value: 'mail', label: '
 export default function NewRequestPage() {
   const nav = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [departments, setDepartments] = useState([]);
   const [analyzing, setAnalyzing] = useState(false);
   const [aiSuggestion, setAiSuggestion] = useState(null);
   const [err, setErr] = useState('');
@@ -25,6 +26,10 @@ export default function NewRequestPage() {
   });
 
   function set(field, value) { setForm(function(f) { return Object.assign({}, f, { [field]: value }); }); }
+
+  useEffect(function() {
+    api.get('/departments').then(function(r){ setDepartments(r.data.departments); }).catch(function(){});
+  }, []);
 
   async function analyzeWithAI() {
     if (!form.description || form.description.length < 20) return;
