@@ -9,6 +9,7 @@ import NewRequestPage from './pages/NewRequestPage';
 import RequestWorkspacePage from './pages/RequestWorkspacePage';
 import StaffManagementPage from './pages/StaffManagementPage';
 import DepartmentsPage from './pages/DepartmentsPage';
+import MyTasksPage from './pages/MyTasksPage';
 
 function Guard({ c }) {
   const store = useAuthStore();
@@ -36,7 +37,7 @@ export default function App() {
           <Route path="requests" element={<RequestQueuePage />} />
           <Route path="requests/new" element={<NewRequestPage />} />
           <Route path="requests/:id" element={<RequestWorkspacePage />} />
-          <Route path="my-tasks" element={<Soon t="My Tasks" />} />
+          <Route path="my-tasks" element={<MyTasksPage />} />
           <Route path="reports" element={<Soon t="ARIA Reporting Agent" />} />
           <Route path="staff" element={<StaffManagementPage />} />
           <Route path="departments" element={<DepartmentsPage />} />
