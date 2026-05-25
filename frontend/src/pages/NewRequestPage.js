@@ -15,6 +15,8 @@ const DELIVERY = [ { value: 'email', label: 'Email' }, { value: 'mail', label: '
 export default function NewRequestPage() {
   const nav = useNavigate();
   const [loading, setLoading] = useState(false);
+  const [analyzing, setAnalyzing] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState(null);
   const [err, setErr] = useState('');
   const [form, setForm] = useState({
     requestorName: '', requestorEmail: '', requestorPhone: '', requestorType: 'individual',
@@ -23,6 +25,25 @@ export default function NewRequestPage() {
   });
 
   function set(field, value) { setForm(function(f) { return Object.assign({}, f, { [field]: value }); }); }
+
+  async function analyzeWithAI() {
+    if (!form.description || form.description.length < 20) return;
+    setAnalyzing(true); setAiSuggestion(null);
+    try {
+      var r = await api.post('/classify', { description: form.description });
+      setAiSuggestion(r.data);
+      if (r.data.confidence >= 85) {
+        setForm(function(f) {
+          var updates = { classification: r.data.classification };
+          if (r.data.department_id) updates.departmentId = r.data.department_id;
+          if (r.data.mrr_flag) updates.isMrr = true;
+          if (r.data.fee_waiver_signal) updates.feeWaiverRequested = true;
+          return Object.assign({}, f, updates);
+        });
+      }
+    } catch(e) { console.error(e); }
+    setAnalyzing(false);
+  }
 
   async function handleSubmit(e) {
     e.preventDefault(); setErr('');
@@ -112,6 +133,40 @@ export default function NewRequestPage() {
           <div style={sectionTitle}>Request Details</div>
           <div>
             <label style={label}>Description of Records Requested <span style={{ color: '#DC2626' }}>*</span></label>
+            <div style={{display:'flex',justifyContent:'flex-end',marginBottom:'8px'}}>
+              <button type="button" onClick={analyzeWithAI} disabled={analyzing||form.description.length<20}
+                style={{display:'flex',alignItems:'center',gap:'8px',padding:'8px 16px',background:form.description.length>=20?'#1F4E79':'#E5E7EB',color:form.description.length>=20?'white':'#9CA3AF',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:form.description.length>=20?'pointer':'not-allowed'}}>
+                {analyzing ? '⏳ Analyzing...' : '✨ Analyze with AI'}
+              </button>
+            </div>
+            {aiSuggestion && (
+              <div style={{background:aiSuggestion.confidence>=85?'#F0FDF4':'#FFFBEB',border:'1px solid '+(aiSuggestion.confidence>=85?'#86EFAC':'#FDE68A'),borderRadius:'10px',padding:'16px',marginBottom:'12px'}}>
+                <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'8px'}}>
+                  <span style={{fontSize:'16px'}}>{aiSuggestion.confidence>=85?'✅':'⚠️'}</span>
+                  <span style={{fontWeight:'700',fontSize:'14px',color:aiSuggestion.confidence>=85?'#166534':'#92400E'}}>
+                    AI Suggestion — {aiSuggestion.confidence}% confidence
+                  </span>
+                  {aiSuggestion.confidence>=85&&<span style={{fontSize:'12px',color:'#166534',fontStyle:'italic'}}>Auto-populated below</span>}
+                </div>
+                <div style={{display:'flex',gap:'16px',flexWrap:'wrap',marginBottom:'8px'}}>
+                  <div style={{fontSize:'13px'}}><strong>Classification:</strong> <span style={{textTransform:'capitalize'}}>{aiSuggestion.classification&&aiSuggestion.classification.replace(/_/g,' ')}</span></div>
+                  <div style={{fontSize:'13px'}}><strong>Department:</strong> {aiSuggestion.department_name||'Unknown'}</div>
+                  <div style={{fontSize:'13px'}}><strong>Redaction:</strong> {aiSuggestion.redaction_flag?'Yes — Review Required':'No'}</div>
+                </div>
+                <div style={{fontSize:'13px',color:'#374151',fontStyle:'italic'}}>"{aiSuggestion.reasoning}"</div>
+                {aiSuggestion.confidence<85&&(
+                  <button type="button" onClick={function(){
+                    setForm(function(f){
+                      var u={classification:aiSuggestion.classification};
+                      if(aiSuggestion.department_id) u.departmentId=aiSuggestion.department_id;
+                      return Object.assign({},f,u);
+                    });
+                  }} style={{marginTop:'10px',padding:'6px 14px',background:'#1F4E79',color:'white',border:'none',borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>
+                    Accept Suggestion
+                  </button>
+                )}
+              </div>
+            )}
             <textarea value={form.description} onChange={function(e) { set('description', e.target.value); }} style={Object.assign({}, inp, { minHeight: '120px', resize: 'vertical', fontFamily: 'inherit' })} placeholder="Describe the records being requested in detail..." required />
           </div>
           <div>

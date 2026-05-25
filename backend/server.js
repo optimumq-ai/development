@@ -18,6 +18,7 @@ app.use('/api/requests', require('./src/routes/requests'));
 app.use('/api/staff', require('./src/routes/staff'));
 app.use('/api/departments', require('./src/routes/departments'));
 app.use('/api/config', require('./src/routes/config'));
+app.use('/api/classify', require('./src/routes/classify'));
 
 app.get('/api/health', function(req, res) {
   res.json({ status: 'ok', version: '1.0.0' });
