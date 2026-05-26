@@ -67,4 +67,14 @@ router.get('/download/:fileId', requireAuth, function(req, res) {
   res.download(filePath, file.original_name);
 });
 
+router.patch('/:fileId/status', requireAuth, function(req, res) {
+  var file = get('SELECT * FROM request_files WHERE id = ?', [req.params.fileId]);
+  if (!file) return res.status(404).json({ error: 'File not found' });
+  var responsive = req.body.responsive ? 1 : 0;
+  run('UPDATE request_files SET responsive = ? WHERE id = ?', [responsive, req.params.fileId]);
+  run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?, ?, ?, ?, ?, ?)',
+    [uuidv4(), file.request_id, req.user.sub, req.user.name||'Staff', responsive ? 'MARKED_RESPONSIVE' : 'MARKED_NOT_RESPONSIVE', file.original_name]);
+  res.json({ success: true });
+});
+
 module.exports = router;

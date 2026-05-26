@@ -43,6 +43,7 @@ app.get('/api/config/public', function(req,res){var db=require('./src/db');var r
 app.use('/api/classify', require('./src/routes/classify'));
 app.use('/api/extract', require('./src/routes/extract'));
 app.use('/api/files', require('./src/routes/files'));
+app.use('/api/public', require('./src/routes/publicChat'));
 
 app.get('/api/health', function(req, res) {
   res.json({ status: 'ok', version: '1.0.0' });
