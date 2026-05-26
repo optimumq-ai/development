@@ -12,6 +12,7 @@ import DepartmentsPage from './pages/DepartmentsPage';
 import MyTasksPage from './pages/MyTasksPage';
 import ConfigurationPage from './pages/ConfigurationPage';
 import ARIAReportsPage from './pages/ARIAReportsPage';
+import PublicPortalPage from './pages/PublicPortalPage';
 
 function Guard({ c }) {
   const store = useAuthStore();
@@ -33,6 +34,7 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/portal" element={<PublicPortalPage />} />
         <Route path="/" element={<Guard c={<AppLayout />} />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />

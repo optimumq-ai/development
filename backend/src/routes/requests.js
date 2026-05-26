@@ -94,4 +94,35 @@ router.patch('/:id/assign', requireAuth, function(req, res) {
   res.json({ success: true });
 });
 
+
+router.get('/public/config', function(req, res) {
+  var { get } = require('../db');
+  var name = get('SELECT value FROM system_config WHERE key = ?', ['agency_name']);
+  var phone = get('SELECT value FROM system_config WHERE key = ?', ['contact_phone']);
+  var email = get('SELECT value FROM system_config WHERE key = ?', ['contact_email']);
+  res.json({ agency_name: name ? name.value : 'City', contact_phone: phone ? phone.value : '', contact_email: email ? email.value : '' });
+});
+
+router.post('/public', function(req, res) {
+  var { run, get } = require('../db');
+  var { v4: uuidv4 } = require('uuid');
+  var b = req.body;
+  if (!b.requestorName || !b.requestorEmail || !b.description) return res.status(400).json({ error: 'Name, email and description are required' });
+  var year = new Date().getFullYear();
+  var last = get('SELECT request_number FROM requests ORDER BY created_at DESC LIMIT 1');
+  var nextNum = 1;
+  if (last) { var parts = last.request_number.split('-'); if (parts[0] == year) nextNum = parseInt(parts[1]) + 1; }
+  var requestNumber = year + '-' + String(nextNum).padStart(4,'0');
+  var deadlineDays = { simple:5, standard:10, complex:20, redaction_required:30 };
+  var days = deadlineDays[b.classification||'standard'] || 10;
+  var deadline = new Date(); deadline.setDate(deadline.getDate() + days);
+  var deadlineStr = deadline.toISOString().split('T')[0];
+  var id = uuidv4();
+  run('INSERT INTO requests (id, request_number, requestor_name, requestor_email, requestor_phone, requestor_type, delivery_method, description, classification, department_id, fee_waiver_requested, is_mrr, submission_channel, stage, status, deadline_date, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'))',
+    [id, requestNumber, b.requestorName, b.requestorEmail, b.requestorPhone||'', b.requestorType||'individual', b.deliveryMethod||'email', b.description, b.classification||'standard', b.departmentId||null, b.feeWaiverRequested?1:0, b.isMrr?1:0, 'portal', 'intake', 'active', deadlineStr]);
+  run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+    [uuidv4(), id, 'public', 'Public Portal', 'CREATED', 'Request submitted via public portal']);
+  res.status(201).json({ success: true, requestNumber: requestNumber, requestId: id });
+});
+
 module.exports = router;
