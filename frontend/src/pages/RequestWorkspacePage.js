@@ -86,7 +86,7 @@ export default function RequestWorkspacePage() {
   var stageIdx = STAGES.indexOf(request.stage);
   var isComplete = request.status === 'closed';
   var od = request.deadline_date && new Date(request.deadline_date) < new Date() && !isComplete;
-  var showRecordsPanel = request.stage === 'record_search' || request.stage === 'redaction_review';
+  var showRecordsPanel = true;
 
   return (
     <div style={{maxWidth:'1200px',display:'flex',flexDirection:'column',gap:'20px'}}>
@@ -183,7 +183,7 @@ export default function RequestWorkspacePage() {
 
       {tab==='records'&&(
         <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px'}}>
-          <RecordsPanel records={records} onAdd={addRecord} onUpdateStatus={updateRecordStatus} stage={request.stage}/>
+          <RecordsPanel requestId={request.id} stage={request.stage}/>
         </div>
       )}
 

@@ -20,6 +20,7 @@ app.use('/api/departments', require('./src/routes/departments'));
 app.use('/api/config', require('./src/routes/config'));
 app.use('/api/classify', require('./src/routes/classify'));
 app.use('/api/extract', require('./src/routes/extract'));
+app.use('/api/files', require('./src/routes/files'));
 
 app.get('/api/health', function(req, res) {
   res.json({ status: 'ok', version: '1.0.0' });

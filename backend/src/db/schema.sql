@@ -17,3 +17,6 @@ CREATE INDEX IF NOT EXISTS idx_requests_status ON requests(status);
 CREATE TABLE IF NOT EXISTS request_history (id TEXT PRIMARY KEY, request_id TEXT NOT NULL, actor_id TEXT, actor_name TEXT NOT NULL, action TEXT NOT NULL, details TEXT, notes TEXT, stage_from TEXT, stage_to TEXT, created_at TEXT DEFAULT (datetime('now')));
 CREATE TABLE IF NOT EXISTS fee_matrix (id TEXT PRIMARY KEY, category TEXT NOT NULL, description TEXT, rate REAL NOT NULL, unit TEXT NOT NULL, is_active INTEGER DEFAULT 1, sort_order INTEGER DEFAULT 0);
 INSERT OR IGNORE INTO fee_matrix (id,category,description,rate,unit,sort_order) VALUES ('fee-research','Research Time','Staff time for research',15.00,'per_hour',1),('fee-photocopy','Photocopying','Paper copies per page',0.10,'per_page',2),('fee-electronic','Electronic Media','USB or electronic media',3.00,'per_item',3);
+
+CREATE TABLE IF NOT EXISTS request_files (id TEXT PRIMARY KEY, request_id TEXT NOT NULL, filename TEXT NOT NULL, original_name TEXT NOT NULL, mimetype TEXT, size INTEGER, status TEXT DEFAULT 'attached', responsive INTEGER DEFAULT 0, uploaded_by TEXT, uploaded_at TEXT DEFAULT (datetime('now')));
+CREATE INDEX IF NOT EXISTS idx_files_request ON request_files(request_id);
