@@ -37,7 +37,35 @@ const SYSTEM_PROMPT = [
   'START by greeting the user, briefly explaining what you do, and asking for their name.'
 ].join('\n');
 
+
+// Per-IP rate limiter: 20/min, 100/hour, 300/day
+var rateBuckets = {};
+function checkRate(ip) {
+  var now = Date.now();
+  if (!rateBuckets[ip]) rateBuckets[ip] = { minute: [], hour: [], day: [] };
+  var b = rateBuckets[ip];
+  b.minute = b.minute.filter(function(t) { return now - t < 60 * 1000; });
+  b.hour = b.hour.filter(function(t) { return now - t < 60 * 60 * 1000; });
+  b.day = b.day.filter(function(t) { return now - t < 24 * 60 * 60 * 1000; });
+  if (b.minute.length >= 20) return { ok: false, reason: 'minute', retry: 60 };
+  if (b.hour.length >= 100) return { ok: false, reason: 'hour', retry: 3600 };
+  if (b.day.length >= 300) return { ok: false, reason: 'day', retry: 86400 };
+  b.minute.push(now); b.hour.push(now); b.day.push(now);
+  return { ok: true };
+}
+setInterval(function() {
+  var now = Date.now();
+  Object.keys(rateBuckets).forEach(function(ip) {
+    var b = rateBuckets[ip];
+    if (b.day.length === 0 || now - b.day[b.day.length-1] > 24 * 60 * 60 * 1000) delete rateBuckets[ip];
+  });
+}, 60 * 60 * 1000);
+
 router.post('/chat', async function(req, res) {
+  var rate = checkRate(req.ip);
+  if (!rate.ok) {
+    return res.status(429).json({ reply: 'You are sending messages too quickly. Please wait a moment and try again.', submission: null, rateLimited: true });
+  }
   try {
     var messages = req.body.messages || [];
     var agencyRow = get('SELECT value FROM system_config WHERE key = ?', ['agency_name']);
