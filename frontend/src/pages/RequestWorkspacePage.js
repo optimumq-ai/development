@@ -9,6 +9,13 @@ const STAGE_COLORS = { intake:{bg:'#DBEAFE',color:'#1E40AF'}, record_search:{bg:
 const NEXT_STAGE = { intake:'record_search', record_search:'redaction_review', redaction_review:'fee_review', fee_review:'awaiting_payment', awaiting_payment:'delivery', custodian_retrieval:'redaction_review', delivery:'closed' };
 const NEXT_LABEL = { intake:'Advance to Record Search', record_search:'Advance to Redaction Review', redaction_review:'Advance to Fee Review', fee_review:'Advance to Awaiting Payment', awaiting_payment:'Confirm Payment & Advance', custodian_retrieval:'Advance to Redaction Review', delivery:'Mark as Fulfilled' };
 
+
+function prettyChannel(ch) {
+  if (!ch) return 'Portal';
+  var map = { chat_agent: 'Chat Agent', manual_form: 'Form', phone: 'Phone', email: 'Email', mail: 'Mail', walk_in: 'Walk-In', portal: 'Portal' };
+  return map[ch] || ch.replace(/_/g,' ').replace(/\b\w/g, function(m){ return m.toUpperCase(); });
+}
+
 export default function RequestWorkspacePage() {
   const { id } = useParams();
   const nav = useNavigate();
@@ -102,7 +109,7 @@ export default function RequestWorkspacePage() {
               {od?<span style={{background:'#FEF2F2',color:'#DC2626',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>⚠ OVERDUE</span>:null}
               {isComplete?<span style={{background:'#F0FDF4',color:'#166534',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>✓ CLOSED</span>:null}
             </div>
-            <p style={{color:'#9CA3AF',fontSize:'13px',margin:'4px 0 0'}}>Submitted {new Date(request.created_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})} · {request.submission_channel}</p>
+            <p style={{color:'#9CA3AF',fontSize:'13px',margin:'4px 0 0'}}>Submitted {new Date(request.created_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})} · {prettyChannel(request.submission_channel)}</p>
           </div>
         </div>
         {!isComplete&&NEXT_STAGE[request.stage]&&(

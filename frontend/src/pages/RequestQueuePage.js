@@ -6,6 +6,13 @@ const STAGES = { intake:'Intake Review', record_search:'Record Search', redactio
 const SC = { intake:{bg:'#DBEAFE',color:'#1E40AF'}, record_search:{bg:'#EDE9FE',color:'#6D28D9'}, redaction_review:{bg:'#FEF3C7',color:'#92400E'}, fee_review:{bg:'#D1FAE5',color:'#065F46'}, awaiting_payment:{bg:'#FFEDD5',color:'#9A3412'}, custodian_retrieval:{bg:'#CCFBF1',color:'#0F766E'}, delivery:{bg:'#E0E7FF',color:'#3730A3'} };
 const CC = { simple:{bg:'#F0FDF4',color:'#166534'}, standard:{bg:'#EFF6FF',color:'#1E40AF'}, complex:{bg:'#FFFBEB',color:'#92400E'}, redaction_required:{bg:'#FEF2F2',color:'#991B1B'} };
 
+
+function prettyChannel(ch) {
+  if (!ch) return 'Portal';
+  var map = { chat_agent: 'Chat Agent', manual_form: 'Form', phone: 'Phone', email: 'Email', mail: 'Mail', walk_in: 'Walk-In', portal: 'Portal' };
+  return map[ch] || ch.replace(/_/g,' ').replace(/\b\w/g, function(m){ return m.toUpperCase(); });
+}
+
 export default function RequestQueuePage() {
   const [searchParams] = useSearchParams();
   const [requests, setRequests] = useState([]);
@@ -94,7 +101,7 @@ export default function RequestQueuePage() {
                           {r.legal_flag?<span style={{background:'#FEF2F2',color:'#DC2626',fontSize:'10px',fontWeight:'700',padding:'2px 6px',borderRadius:'20px'}}>LEGAL</span>:null}
                           {od?<span style={{background:'#FEF2F2',color:'#DC2626',fontSize:'10px',fontWeight:'700',padding:'2px 6px',borderRadius:'20px'}}>OVERDUE</span>:null}
                         </div>
-                        <div style={{fontSize:'11px',color:'#9CA3AF',marginTop:'2px',textTransform:'capitalize'}}>{r.submission_channel}</div>
+                        <div style={{fontSize:'11px',color:'#9CA3AF',marginTop:'2px',textTransform:'none'}}>{prettyChannel(r.submission_channel)}</div>
                       </td>
                       <td style={{padding:'12px 16px'}}>
                         <div style={{fontWeight:'500',fontSize:'14px',color:'#111'}}>{r.requestor_name}</div>
@@ -105,7 +112,7 @@ export default function RequestQueuePage() {
                         {sc?<span style={{background:sc.bg,color:sc.color,fontSize:'12px',fontWeight:'500',padding:'4px 10px',borderRadius:'20px',whiteSpace:'nowrap'}}>{STAGES[r.stage]}</span>:<span style={{fontSize:'12px',color:'#6B7280'}}>{r.stage}</span>}
                       </td>
                       <td style={{padding:'12px 16px'}}>
-                        {cc?<span style={{background:cc.bg,color:cc.color,fontSize:'11px',fontWeight:'600',padding:'3px 8px',borderRadius:'20px',whiteSpace:'nowrap',textTransform:'capitalize'}}>{r.classification?r.classification.replace(/_/g,' '):'—'}</span>:<span style={{fontSize:'12px',color:'#9CA3AF'}}>—</span>}
+                        {cc?<span style={{background:cc.bg,color:cc.color,fontSize:'11px',fontWeight:'600',padding:'3px 8px',borderRadius:'20px',whiteSpace:'nowrap',textTransform:'none'}}>{r.classification?r.classification.replace(/_/g,' '):'—'}</span>:<span style={{fontSize:'12px',color:'#9CA3AF'}}>—</span>}
                       </td>
                       <td style={{padding:'12px 16px'}}>
                         <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
