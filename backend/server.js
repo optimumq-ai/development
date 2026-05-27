@@ -96,7 +96,20 @@ function seedAdmin() {
   var allPerms = all('SELECT id FROM permission_roles');
   var uid = uuidv4();
   var crypto = require('crypto');
-  var hash = crypto.createHash('sha256').update((process.env.ADMIN_PASSWORD || 'RRowanne') + 'optimumq_salt_2024').digest('hex');
+  // Use ADMIN_PASSWORD env var if provided, otherwise generate a strong random one
+  var adminPassword = process.env.ADMIN_PASSWORD;
+  if (!adminPassword) {
+    adminPassword = crypto.randomBytes(9).toString('base64').replace(/[+/=]/g, '').substring(0, 12) + '!';
+    console.log('');
+    console.log('============================================================');
+    console.log('  INITIAL ADMIN PASSWORD (save this — it will not be shown again):');
+    console.log('    Email:    admin@optimumq.ai');
+    console.log('    Password: ' + adminPassword);
+    console.log('  You will be required to change it on first login.');
+    console.log('============================================================');
+    console.log('');
+  }
+  var hash = crypto.createHash('sha256').update(adminPassword + 'optimumq_salt_2024').digest('hex');
   run('INSERT INTO users (id,email,display_name,title,department_id,password_hash,temp_password) VALUES (?,?,?,?,?,?,?)',
     [uid,'admin@optimumq.ai','System Administrator','System Administrator','dept-openrecords',hash,1]);
   if (sysAdminRole) run('INSERT OR IGNORE INTO user_function_roles VALUES (?,?)',[uid,sysAdminRole.id]);

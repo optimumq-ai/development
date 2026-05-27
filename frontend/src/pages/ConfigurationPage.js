@@ -42,7 +42,7 @@ export default function ConfigurationPage() {
     { key:'auth', label:'Authentication' },
     { key:'fees', label:'Fees & Deadlines' },
     { key:'notifications', label:'Notifications' },
-    { key:'email', label:'Email (SMTP)' },
+    { key:'email', label:'Email' },
   ];
 
   if (loading) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'256px',color:'#9CA3AF'}}>Loading configuration...</div>;
@@ -236,10 +236,24 @@ export default function ConfigurationPage() {
 
         {activeTab === 'email' && (
           <div style={section}>
-            <div style={sectionTitle}>Email (SMTP) Settings</div>
-            <div style={{background:'#F0FDF4',border:'1px solid #86EFAC',borderRadius:'8px',padding:'12px 14px',fontSize:'13px',color:'#166534'}}>
-              <strong>Recommended: Use Resend (HTTPS API)</strong><br/>
-              If a Resend API key is configured below, it takes priority over SMTP. Resend works on all hosting providers (including DigitalOcean where SMTP ports are blocked).
+            <div style={sectionTitle}>Email Provider Settings</div>
+            <div style={{background:'#EBF3FB',border:'1px solid #C7D9EB',borderRadius:'8px',padding:'14px 16px',fontSize:'13px',color:'#1F4E79'}}>
+              <strong>Supported email providers:</strong> Resend, SMTP, SendGrid, Postmark, Mailgun, AWS SES, and Microsoft 365 (Graph API).<br/>
+              <span style={{fontSize:'12px',color:'#4B6584'}}>If a Resend API key is configured, it takes priority over SMTP. Additional providers can be enabled on request — contact Optimum Q for activation.</span>
+            </div>
+            <div>
+              <label style={lbl}>Active Provider</label>
+              <select disabled value={config.resend_api_key ? 'resend' : (config.smtp_host ? 'smtp' : 'none')} style={Object.assign({}, inp, {background:'#F9FAFB',color:'#6B7280',cursor:'not-allowed'})}>
+                <option value="none">— Not configured —</option>
+                <option value="resend">Resend</option>
+                <option value="smtp">SMTP (Gmail, Office 365, etc.)</option>
+                <option value="sendgrid" disabled>SendGrid (available on request)</option>
+                <option value="postmark" disabled>Postmark (available on request)</option>
+                <option value="mailgun" disabled>Mailgun (available on request)</option>
+                <option value="ses" disabled>AWS SES (available on request)</option>
+                <option value="ms365" disabled>Microsoft 365 (available on request)</option>
+              </select>
+              <div style={hint}>Auto-detected based on which credentials are configured below</div>
             </div>
             <div>
               <label style={lbl}>Resend API Key</label>
