@@ -8,3 +8,6 @@ frontend/build/
 
 # Root .env (Docker secrets — never commit)
 /.env
+
+# Demo connectors live in their own repo
+demo-connectors/

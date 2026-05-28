@@ -231,11 +231,12 @@ export default function PublicPortalPage() {
         <div style={{flex:1,background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',display:'flex',flexDirection:'column',minHeight:0,overflow:'hidden'}}>
           <div ref={scrollRef} style={{flex:1,overflowY:'auto',padding:'20px',display:'flex',flexDirection:'column',gap:'12px'}}>
             {messages.map(function(m, i) {
+              if (i === 0 && m.role === 'user' && m.content === 'Hi') return null;
               if (m.content === '__SEARCH_RESULTS__' && m.searchResults) {
                 return (
                   <div key={i} ref={i === messages.length - 1 ? searchResultsRef : null} style={{display:'flex',justifyContent:'flex-start',scrollMarginTop:'12px'}}>
                     <div style={{maxWidth:'92%',width:'100%'}}>
-                      <div style={{fontSize:'13px',fontWeight:'700',color:'#1F4E79',marginBottom:'10px',padding:'8px 12px',background:'#EBF3FB',borderRadius:'8px',border:'1px solid #C7D9EB'}}>📂 Found {m.searchResults.length} matching document{m.searchResults.length!==1?'s':''}:</div>
+                      <div style={{fontSize:'13px',fontWeight:'700',color:'#1F4E79',marginBottom:'10px',padding:'8px 12px',background:'#EBF3FB',borderRadius:'8px',border:'1px solid #C7D9EB'}}>📂 Found {m.searchResults.length} matching record{m.searchResults.length!==1?'s':''}:</div>
                       <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
                         {m.searchResults.map(function(res, ri) {
                           var scoreColor = res.matchScore >= 85 ? '#16A34A' : res.matchScore >= 70 ? '#1F4E79' : '#D97706';
