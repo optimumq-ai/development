@@ -1,10 +1,12 @@
 const { all } = require('../db');
 const demoConnector = require('./connectors/demo');
 const tylerConnector = require('./connectors/tyler');
+const axonConnector = require('./connectors/axon');
 
 var connectors = {
   demo: demoConnector,
-  tyler: tylerConnector
+  tyler: tylerConnector,
+  axon: axonConnector
   // future: axon, laserfiche, accela
 };
 
