@@ -14,6 +14,7 @@ export default function PublicPortalPage() {
   const [formData, setFormData] = useState({ requestorName:'', requestorEmail:'', requestorPhone:'', deliveryMethod:'email', description:'', feeWaiverRequested:false, feeWaiverReason:'' });
   const [formSubmitting, setFormSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
+  const [selectedRecords, setSelectedRecords] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [agencyName, setAgencyName] = useState('');
   const scrollRef = useRef(null);
@@ -59,6 +60,15 @@ export default function PublicPortalPage() {
 
   function setFD(k, v) { setFormData(function(d){ return Object.assign({}, d, {[k]: v}); }); }
 
+  function toggleRecord(rec) {
+    setSelectedRecords(function(prev) {
+      var exists = prev.find(function(r){ return r.id === rec.id; });
+      if (exists) return prev.filter(function(r){ return r.id !== rec.id; });
+      return prev.concat([{ id: rec.id, title: rec.title, sourceSystem: rec.sourceSystem, publicAvailability: rec.publicAvailability }]);
+    });
+  }
+  function isSelected(id) { return selectedRecords.some(function(r){ return r.id === id; }); }
+
   async function handleFormSubmit(e) {
     e.preventDefault();
     setFormError('');
@@ -68,7 +78,7 @@ export default function PublicPortalPage() {
     }
     setFormSubmitting(true);
     try {
-      var payload = Object.assign({}, formData, { classification: 'standard', submissionChannel: 'manual_form' });
+      var payload = Object.assign({}, formData, { classification: 'standard', submissionChannel: 'manual_form', selectedRecords: selectedRecords });
       var s = await axios.post(API + '/public/submit', payload);
       setSubmitted(s.data);
     } catch(err) {
@@ -96,14 +106,20 @@ export default function PublicPortalPage() {
 
   async function sendMessage(userText, isInitial) {
     if (submitted) return;
-    var nextMessages = isInitial ? [{role:'user', content:'Hi'}] : messages.concat([{role:'user', content:userText}]);
-    if (!isInitial) setMessages(nextMessages);
+    // Full history for display (keeps search-result cards visible on screen)
+    var displayMessages = isInitial ? [] : messages.concat([{role:'user', content:userText}]);
+    if (!isInitial) setMessages(displayMessages);
+    // Cleaned history for the API (strip UI-only search cards + extra fields)
+    var cleanHistory = messages
+      .filter(function(m){ return m.content !== '__SEARCH_RESULTS__'; })
+      .map(function(m){ return { role: m.role, content: m.content }; });
+    var nextMessages = isInitial ? [{role:'user', content:'Hi'}] : cleanHistory.concat([{role:'user', content:userText}]);
     setInput('');
     setSending(true);
     try {
       var r = await axios.post(API + '/public/chat', { messages: nextMessages });
       var assistantMsg = { role: 'assistant', content: r.data.reply };
-      var msgsAfter = nextMessages.concat([assistantMsg]);
+      var msgsAfter = displayMessages.concat([assistantMsg]);
       if (r.data.searchResults && r.data.searchResults.length > 0) {
         msgsAfter = msgsAfter.concat([{ role: 'assistant', content: '__SEARCH_RESULTS__', searchResults: r.data.searchResults, searchQuery: r.data.searchQuery }]);
       }
@@ -119,12 +135,12 @@ export default function PublicPortalPage() {
         }
       }
       if (r.data.submission) {
-        var submitData = Object.assign({}, r.data.submission, { classification: 'standard', submissionChannel: 'chat_agent' });
+        var submitData = Object.assign({}, r.data.submission, { classification: 'standard', submissionChannel: 'chat_agent', selectedRecords: selectedRecords });
         var s = await axios.post(API + '/public/submit', submitData);
         setSubmitted(s.data);
       }
     } catch(e) {
-      setMessages(nextMessages.concat([{role:'assistant', content:'I had trouble responding. Please try again, or use the form link below.'}]));
+      setMessages(displayMessages.concat([{role:'assistant', content:'I had trouble responding. Please try again, or use the form link below.'}]));
     }
     setSending(false);
   }
@@ -170,9 +186,30 @@ export default function PublicPortalPage() {
 
       <div style={{flex:1,display:'flex',flexDirection:'column',maxWidth:'780px',width:'100%',margin:'0 auto',padding:'16px 24px',boxSizing:'border-box',minHeight:0}}>
         <div style={{background:'white',borderRadius:'12px',padding:'12px 16px',marginBottom:'12px',border:'1px solid #E5E7EB',flexShrink:0}}>
-          <h1 style={{fontSize:'16px',fontWeight:'700',color:'#111',margin:'0 0 2px'}}>Request Public Records</h1>
-          <p style={{fontSize:'13px',color:'#6B7280',margin:0,lineHeight:'1.4'}}>
-            Chat with our assistant below to submit your request. The assistant will ask a few questions and help organize your request. You can also <button onClick={function(){setShowForm(true);}} style={{background:'none',border:'none',color:'#1F4E79',textDecoration:'underline',cursor:'pointer',fontSize:'14px',padding:0}}>prefer a form</button> instead.
+          <h1 style={{fontSize:'17px',fontWeight:'700',color:'#1F4E79',margin:'0 0 6px'}}>Welcome to the {agencyName} Public Records Self-Service Portal</h1>
+          <p style={{fontSize:'13px',color:'#374151',margin:'0 0 10px',lineHeight:'1.5'}}>
+            Our AI assistant will guide you through a brief conversation to understand exactly what records you are looking for.
+          </p>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit, minmax(220px, 1fr))',gap:'8px',marginBottom:'8px'}}>
+            <div style={{fontSize:'12px',color:'#374151',lineHeight:'1.4'}}>
+              <span style={{fontSize:'15px',marginRight:'4px'}}>🔍</span>
+              <strong>Tell us what you need in plain language</strong> — no legal terms required
+            </div>
+            <div style={{fontSize:'12px',color:'#374151',lineHeight:'1.4'}}>
+              <span style={{fontSize:'15px',marginRight:'4px'}}>⚡</span>
+              <strong>Skip the wait when possible</strong> — already-public records may be available for immediate download
+            </div>
+            <div style={{fontSize:'12px',color:'#374151',lineHeight:'1.4'}}>
+              <span style={{fontSize:'15px',marginRight:'4px'}}>📋</span>
+              <strong>Or we will route it for you</strong> — your request goes to the right department
+            </div>
+          </div>
+          <div style={{fontSize:'12px',color:'#374151',background:'#EBF3FB',border:'1px solid #C7D9EB',borderRadius:'6px',padding:'8px 10px',marginBottom:'8px',lineHeight:'1.4'}}>
+            <span style={{fontSize:'15px',marginRight:'4px'}}>💬</span>
+            <strong>Have a question?</strong> Ask the assistant anytime — about what records exist, how the process works, deadlines, fees, or anything else.
+          </div>
+          <p style={{fontSize:'12px',color:'#6B7280',margin:0}}>
+            Prefer a traditional form? <button onClick={function(){setShowForm(true);}} style={{background:'none',border:'none',color:'#1F4E79',textDecoration:'underline',cursor:'pointer',fontSize:'12px',padding:0}}>Click here</button>.
           </p>
         </div>
 
@@ -253,7 +290,7 @@ export default function PublicPortalPage() {
                                 {res.publicAvailability === 'available' ? (
                                   <button style={{padding:'5px 10px',fontSize:'11px',background:'#1F4E79',color:'white',border:'none',borderRadius:'6px',cursor:'pointer',fontWeight:'600'}} onClick={function(){alert('Download functionality coming soon. For now, mention this in your request.');}}>⬇ Download</button>
                                 ) : null}
-                                <button style={{padding:'5px 10px',fontSize:'11px',background:'white',color:'#1F4E79',border:'1px solid #1F4E79',borderRadius:'6px',cursor:'pointer',fontWeight:'600'}} onClick={function(){sendMessage('Yes, please include "' + res.title + '" in my request', false);}}>+ Include in request</button>
+                                <button onClick={function(){toggleRecord(res);}} style={{padding:'5px 10px',fontSize:'11px',background:isSelected(res.id)?'#16A34A':'white',color:isSelected(res.id)?'white':'#1F4E79',border:'1px solid '+(isSelected(res.id)?'#16A34A':'#1F4E79'),borderRadius:'6px',cursor:'pointer',fontWeight:'600'}}>{isSelected(res.id)?'✓ Added':'+ Include in request'}</button>
                               </div>
                             </div>
                           );
@@ -302,6 +339,22 @@ export default function PublicPortalPage() {
             )}
           </div>
 
+          {selectedRecords.length > 0 && (
+            <div style={{borderTop:'1px solid #E5E7EB',padding:'10px 14px',background:'#F0FDF4'}}>
+              <div style={{fontSize:'12px',fontWeight:'700',color:'#166534',marginBottom:'6px'}}>{selectedRecords.length} record{selectedRecords.length!==1?'s':''} selected for your request:</div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
+                {selectedRecords.map(function(sr){
+                  return (
+                    <span key={sr.id} style={{display:'inline-flex',alignItems:'center',gap:'6px',background:'white',border:'1px solid #86EFAC',borderRadius:'12px',padding:'3px 8px 3px 10px',fontSize:'11px',color:'#166534'}}>
+                      {sr.title}
+                      {sr.publicAvailability === 'restricted' ? <span style={{color:'#D97706',fontWeight:'700'}}>(redaction review)</span> : null}
+                      <button onClick={function(){setSelectedRecords(function(prev){return prev.filter(function(r){return r.id !== sr.id;});});}} style={{background:'none',border:'none',color:'#9CA3AF',cursor:'pointer',fontSize:'14px',lineHeight:1,padding:0}}>×</button>
+                    </span>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           <form onSubmit={handleSend} style={{borderTop:'1px solid #E5E7EB',padding:'14px',display:'flex',gap:'8px'}}>
             <textarea
               value={input}
