@@ -117,7 +117,7 @@ export default function PublicPortalPage() {
     setInput('');
     setSending(true);
     try {
-      var r = await axios.post(API + '/public/chat', { messages: nextMessages });
+      var r = await axios.post(API + '/public/chat', { messages: nextMessages, selectedRecords: selectedRecords });
       var assistantMsg = { role: 'assistant', content: r.data.reply };
       var msgsAfter = displayMessages.concat([assistantMsg]);
       if (r.data.searchResults && r.data.searchResults.length > 0) {
@@ -342,7 +342,7 @@ export default function PublicPortalPage() {
           {selectedRecords.length > 0 && (
             <div style={{borderTop:'1px solid #E5E7EB',padding:'10px 14px',background:'#F0FDF4'}}>
               <div style={{fontSize:'12px',fontWeight:'700',color:'#166534',marginBottom:'6px'}}>{selectedRecords.length} record{selectedRecords.length!==1?'s':''} selected for your request:</div>
-              <div style={{display:'flex',flexWrap:'wrap',gap:'6px'}}>
+              <div style={{display:'flex',flexWrap:'wrap',gap:'6px',marginBottom:'10px'}}>
                 {selectedRecords.map(function(sr){
                   return (
                     <span key={sr.id} style={{display:'inline-flex',alignItems:'center',gap:'6px',background:'white',border:'1px solid #86EFAC',borderRadius:'12px',padding:'3px 8px 3px 10px',fontSize:'11px',color:'#166534'}}>
@@ -352,6 +352,28 @@ export default function PublicPortalPage() {
                     </span>
                   );
                 })}
+              </div>
+              <div style={{display:'flex',alignItems:'center',gap:'8px',fontSize:'11px',color:'#166534'}}>
+                <button
+                  onClick={function(){
+                    if (sending) return;
+                    var msg = "I'm done selecting records, please continue.";
+                    var nextMessages = messages.concat([{ role: 'user', content: msg }]);
+                    setMessages(nextMessages);
+                    setSending(true);
+                    axios.post(API + '/public/chat', { messages: nextMessages, selectedRecords: selectedRecords })
+                      .then(function(r){
+                        setMessages(function(prev){ return prev.concat([{ role: 'assistant', content: r.data.reply }]); });
+                      })
+                      .catch(function(){ setMessages(function(prev){ return prev.concat([{ role: 'assistant', content: 'Sorry, something went wrong. Please try again.' }]); }); })
+                      .finally(function(){ setSending(false); });
+                  }}
+                  disabled={sending}
+                  style={{background:'#166534',color:'white',border:'none',borderRadius:'6px',padding:'6px 12px',fontSize:'12px',fontWeight:'600',cursor: sending ? 'wait' : 'pointer',opacity: sending ? 0.6 : 1}}
+                >
+                  ✓ I'm done selecting — continue
+                </button>
+                <span style={{fontStyle:'italic',color:'#4B7864'}}>or keep browsing and pick more records</span>
               </div>
             </div>
           )}

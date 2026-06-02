@@ -21,6 +21,7 @@ export default function RequestWorkspacePage() {
   const nav = useNavigate();
   const [request, setRequest] = useState(null);
   const [history, setHistory] = useState([]);
+  const [selectedRecords, setSelectedRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [advancing, setAdvancing] = useState(false);
   const [tab, setTab] = useState('details');
@@ -43,6 +44,7 @@ export default function RequestWorkspacePage() {
       var r = await api.get('/requests/' + id);
       setRequest(r.data.request);
       setHistory(r.data.history);
+      setSelectedRecords(r.data.selectedRecords || []);
     } catch(e) { setErr('Request not found'); }
     setLoading(false);
   }
@@ -185,6 +187,38 @@ export default function RequestWorkspacePage() {
             <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6',marginBottom:'16px'}}>Description of Records Requested</div>
             <p style={{fontSize:'14px',color:'#374151',lineHeight:'1.7',margin:'0',whiteSpace:'pre-wrap'}}>{request.description}</p>
           </div>
+          {selectedRecords.length > 0 && (
+            <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',gridColumn:'1/-1'}}>
+              <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6',marginBottom:'16px',display:'flex',alignItems:'center',gap:'10px'}}>
+                <span>Records the Requestor Selected from Search Results</span>
+                <span style={{fontSize:'12px',background:'#F0FDF4',color:'#166534',border:'1px solid #86EFAC',borderRadius:'10px',padding:'2px 8px',fontWeight:'600'}}>{selectedRecords.length}</span>
+              </div>
+              <p style={{fontSize:'13px',color:'#6B7280',margin:'0 0 16px',lineHeight:'1.5'}}>
+                These are the specific records the requestor picked while submitting their request. They represent what the requestor explicitly identified — use them as a starting point for fulfillment.
+              </p>
+              <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
+                {selectedRecords.map(function(sr){
+                  var restricted = sr.public_availability === 'restricted';
+                  return (
+                    <div key={sr.id} style={{border:'1px solid #E5E7EB',borderRadius:'8px',padding:'12px 14px',background: restricted ? '#FFFBEB' : 'white'}}>
+                      <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:'12px'}}>
+                        <div style={{flex:1,minWidth:0}}>
+                          <div style={{fontSize:'14px',fontWeight:'600',color:'#111',marginBottom:'4px'}}>{sr.title || sr.record_id}</div>
+                          <div style={{fontSize:'12px',color:'#6B7280'}}>
+                            <span>Source: <strong style={{color:'#374151'}}>{sr.source_system || 'Unknown'}</strong></span>
+                            <span style={{marginLeft:'12px'}}>Record ID: <code style={{background:'#F3F4F6',padding:'1px 5px',borderRadius:'3px',fontSize:'11px'}}>{sr.record_id}</code></span>
+                          </div>
+                        </div>
+                        {restricted && (
+                          <span style={{flexShrink:0,fontSize:'11px',fontWeight:'700',color:'#92400E',background:'#FEF3C7',border:'1px solid #FCD34D',borderRadius:'10px',padding:'3px 10px'}}>⚠ Redaction Review Required</span>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
 

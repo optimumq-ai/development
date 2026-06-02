@@ -83,7 +83,10 @@ router.post('/chat', async function(req, res) {
     return res.status(429).json({ reply: 'You are sending messages too quickly. Please wait a moment and try again.', submission: null, rateLimited: true });
   }
   try {
-    var messages = req.body.messages || [];
+    var rawMessages = req.body.messages || [];
+    // Sanitize messages: the Anthropic API only accepts role + content per message.
+    // The frontend may attach UI-only fields like searchResults; strip them here.
+    var messages = rawMessages.map(function(m){ return { role: m.role, content: m.content }; });
     var agencyRow = get('SELECT value FROM system_config WHERE key = ?', ['agency_name']);
     var agencyName = agencyRow ? agencyRow.value : 'the agency';
     var todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
@@ -97,6 +100,22 @@ router.post('/chat', async function(req, res) {
         activeRules.forEach(function(r, i){ systemPrompt += '\n' + (i+1) + '. ' + r.rule_text; });
       }
     } catch(e) { console.error('[publicChat] failed to load agent rules:', e.message); }
+
+    // Inject awareness of records the citizen has already selected from search results.
+    // The citizen sees these as chips in the UI; the agent needs to know about them too.
+    try {
+      var sel = Array.isArray(req.body.selectedRecords) ? req.body.selectedRecords : [];
+      if (sel.length > 0) {
+        systemPrompt += '\n\nRECORDS THE CITIZEN HAS ALREADY SELECTED (' + sel.length + '):';
+        sel.forEach(function(sr, i){
+          var line = (i+1) + '. ' + (sr.title || sr.id || 'untitled');
+          if (sr.sourceSystem) line += ' (from ' + sr.sourceSystem + ')';
+          if (sr.publicAvailability === 'restricted') line += ' [redaction review required]';
+          systemPrompt += '\n' + line;
+        });
+        systemPrompt += '\n\nIMPORTANT: These records are already included in the request. You do NOT need to search for them again. When the citizen says they are done selecting ("submit", "done", "that\'s all", "continue", "proceed", "I have enough", "ready to submit", or similar), DO NOT run another search. Acknowledge what they\'ve selected and move the conversation forward — confirm any remaining required information (fee waiver, delivery method, etc.) and then finalize the request with the SUBMIT_READY marker.';
+      }
+    } catch(e) { console.error('[publicChat] failed to inject selectedRecords:', e.message); }
     var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     var response = await client.messages.create({
       model: 'claude-sonnet-4-5',

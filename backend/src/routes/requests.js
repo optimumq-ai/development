@@ -54,7 +54,8 @@ router.get('/:id', requireAuth, function(req, res) {
   if (!request) return res.status(404).json({ error: 'Request not found' });
   const history = all('SELECT * FROM request_history WHERE request_id = ? ORDER BY created_at ASC', [request.id]);
   const components = (request.is_mrr && !request.master_request_id) ? all('SELECT * FROM requests WHERE master_request_id = ? ORDER BY component_label', [request.id]) : [];
-  res.json({ request: request, history: history, components: components });
+  const selectedRecords = all('SELECT id, record_id, title, source_system, public_availability, created_at FROM request_selected_records WHERE request_id = ? ORDER BY created_at ASC', [request.id]);
+  res.json({ request: request, history: history, components: components, selectedRecords: selectedRecords });
 });
 
 router.post('/', requireAuth, function(req, res) {
