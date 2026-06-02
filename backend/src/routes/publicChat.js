@@ -86,7 +86,9 @@ router.post('/chat', async function(req, res) {
     var messages = req.body.messages || [];
     var agencyRow = get('SELECT value FROM system_config WHERE key = ?', ['agency_name']);
     var agencyName = agencyRow ? agencyRow.value : 'the agency';
-    var systemPrompt = SYSTEM_PROMPT.replace('{{AGENCY_NAME}}', agencyName);
+    var todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    var systemPrompt = SYSTEM_PROMPT.replace('{{AGENCY_NAME}}', agencyName) +
+      '\n\nIMPORTANT: Today\'s date is ' + todayStr + '. When the citizen mentions a date or month/year, treat their statement as accurate. Do not assume an earlier year or correct their date unless they themselves seem uncertain. Past dates are normal — citizens often request records from past months or years.';
     var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     var response = await client.messages.create({
       model: 'claude-sonnet-4-5',
@@ -145,6 +147,16 @@ router.post('/submit', function(req, res) {
     [id, requestNumber, b.requestorName, b.requestorEmail, b.requestorPhone || '', 'individual', b.deliveryMethod || 'email', b.description, classification, null, b.feeWaiverRequested ? 1 : 0, b.isMrr ? 1 : 0, b.submissionChannel || 'chat_agent', 'intake', 'active', deadlineStr]);
   run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
     [uuidv4(), id, 'public', b.submissionChannel === 'manual_form' ? 'Public Portal (Form)' : 'Public Portal (Chat Agent)', 'CREATED', b.submissionChannel === 'manual_form' ? 'Submitted via public portal form' : 'Submitted via AI chat agent']);
+
+  // Persist any records the citizen selected from search results
+  if (Array.isArray(b.selectedRecords) && b.selectedRecords.length > 0) {
+    b.selectedRecords.forEach(function(sr) {
+      run('INSERT INTO request_selected_records (id, request_id, record_id, title, source_system, public_availability) VALUES (?,?,?,?,?,?)',
+        [uuidv4(), id, sr.id || '', sr.title || '', sr.sourceSystem || '', sr.publicAvailability || '']);
+    });
+    run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+      [uuidv4(), id, 'public', 'Public Portal', 'RECORDS_SELECTED', 'Requestor selected ' + b.selectedRecords.length + ' record(s) from search results']);
+  }
   var newReq = get('SELECT * FROM requests WHERE id = ?', [id]);
   if (newReq) {
     emailService.sendSubmissionConfirmation(newReq).catch(function(e){ console.error('confirmation email failed:', e.message); });
