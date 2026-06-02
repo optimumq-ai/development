@@ -1,7 +1,7 @@
 # Optimum Q Taxonomy Feature — Design Document
 
 **Status:** Approved for implementation
-**Path:** Phased v1 (defer AI-assisted proposal to v2)
+**Path:** Full ambitious v1 (includes AI-assisted schema discovery + proposal)
 **Sessions estimated:** 6-10 sessions of focused work
 
 ---
@@ -166,7 +166,7 @@ At deployment, the customer selects their state. The active Jurisdiction Profile
 
 ---
 
-## v2 work explicitly deferred
+## AI-assisted features (NOW IN SCOPE for v1)
 
 - AI-assisted schema discovery from connected systems
 - AI-assisted synonym suggestions from observed conversations
