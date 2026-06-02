@@ -97,7 +97,7 @@ All edits logged in audit trail with who/what/when/before/after.
 
 ## Template — ships out of the box
 
-A new install seeds ~55 record types across 13 categories, Texas-default legal references.
+A new install seeds ~55 record types across 13 categories. Record-type descriptions are universal (don't vary by state). Legal references, deadlines, and procedural defaults are pulled from the active **Jurisdiction Profile** at deployment time.
 
 **Categories:**
 
@@ -115,7 +115,32 @@ A new install seeds ~55 record types across 13 categories, Texas-default legal r
 12. Public Information / Data (3 entries)
 13. Out-of-Scope / Refer Elsewhere (3 entries)
 
-Each template entry ships with realistic defaults for required fields, pre-populated synonyms, Texas Government Code Chapter 552 references where applicable, and reasonable redaction profile defaults.
+Each template entry ships with realistic defaults for required fields, pre-populated synonyms, and reasonable redaction profile defaults. Legal references (like "Texas Government Code Chapter 552") are not hardcoded — they're injected from the Jurisdiction Profile based on which state the customer is in.
+
+---
+
+## Jurisdiction Profiles — handling state-level variance
+
+**Architectural principle:** One codebase serves all customers regardless of state. NO Texas version, NO California version. Jurisdictional variance is configuration, not code.
+
+A Jurisdiction Profile is a small data structure (one JSON file per US state, initially) describing:
+- Primary public records statute and citation format
+- Standard response deadline (number of days)
+- Whether deadline is in business days or calendar days
+- Exemption categories specific to that state
+- Default fee structure rules
+- Procedural quirks (acknowledgment requirements, extension rules, etc.)
+
+At deployment, the customer selects their state. The active Jurisdiction Profile feeds:
+- Legal references displayed in taxonomy entries
+- Default deadlines for new requests
+- Default exemption checklist for staff
+- Fee calculation defaults
+- Agent system prompt (so the agent knows which statute applies)
+
+**Initial scope:** Ship with profiles for Texas (first market), then add California, Florida, New York, Illinois, etc. as customer demand dictates.
+
+**Agency overrides:** Each customer can override anything from their Jurisdiction Profile. A specific city ordinance extending deadlines, for example, stays at the agency level and doesn't affect the shared profile.
 
 ---
 
