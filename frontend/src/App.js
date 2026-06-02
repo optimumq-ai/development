@@ -16,7 +16,9 @@ import PublicPortalPage from './pages/PublicPortalPage';
 
 function Guard({ c }) {
   const store = useAuthStore();
-  return store.isAuthenticated ? c : React.createElement(Navigate, { to: '/login', replace: true });
+  if (!store.isAuthenticated) return React.createElement(Navigate, { to: '/login', replace: true });
+  if (!store.user) return React.createElement('div', { style:{ display:'flex',alignItems:'center',justifyContent:'center',height:'100vh',color:'#9CA3AF',fontSize:'14px' } }, 'Loading...');
+  return c;
 }
 function Soon({ t }) {
   return React.createElement('div', { style: { display:'flex', alignItems:'center', justifyContent:'center', height:'256px' } },
@@ -29,7 +31,8 @@ function Soon({ t }) {
 }
 export default function App() {
   const store = useAuthStore();
-  useEffect(function() { store.loadConfig(); if (store.isAuthenticated) store.refreshUser(); }, []);
+  useEffect(function() { store.loadConfig(); }, []);
+  useEffect(function() { if (store.isAuthenticated && !store.user) store.refreshUser(); }, [store.isAuthenticated]);
   return (
     <BrowserRouter>
       <Routes>

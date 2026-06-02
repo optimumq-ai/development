@@ -89,6 +89,14 @@ router.post('/chat', async function(req, res) {
     var todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     var systemPrompt = SYSTEM_PROMPT.replace('{{AGENCY_NAME}}', agencyName) +
       '\n\nIMPORTANT: Today\'s date is ' + todayStr + '. When the citizen mentions a date or month/year, treat their statement as accurate. Do not assume an earlier year or correct their date unless they themselves seem uncertain. Past dates are normal — citizens often request records from past months or years.';
+    // Append any active admin-configured behavior rules
+    try {
+      var activeRules = all('SELECT rule_text FROM agent_rules WHERE enabled = 1 ORDER BY sort_order ASC, created_at ASC');
+      if (activeRules && activeRules.length > 0) {
+        systemPrompt += '\n\nADMIN-CONFIGURED BEHAVIOR RULES (follow these in addition to the above):';
+        activeRules.forEach(function(r, i){ systemPrompt += '\n' + (i+1) + '. ' + r.rule_text; });
+      }
+    } catch(e) { console.error('[publicChat] failed to load agent rules:', e.message); }
     var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
     var response = await client.messages.create({
       model: 'claude-sonnet-4-5',

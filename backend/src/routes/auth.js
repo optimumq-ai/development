@@ -12,7 +12,9 @@ router.post('/login', function(req, res) {
   const result = localLogin(email, password);
   if (result.error) return res.status(result.code).json({ error: result.error });
   const accessToken = signAccessToken(result.user);
-  return res.json({ accessToken: accessToken, user: result.user, requiresPasswordChange: result.requiresPasswordChange });
+  // Re-fetch the full user (with roles) so the response shape matches /auth/me
+  const fullUser = getUserById(result.user.id) || result.user;
+  return res.json({ accessToken: accessToken, user: fullUser, requiresPasswordChange: result.requiresPasswordChange });
 });
 
 router.get('/me', requireAuth, function(req, res) {

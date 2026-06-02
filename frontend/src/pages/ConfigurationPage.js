@@ -8,6 +8,35 @@ export default function ConfigurationPage() {
   const [success, setSuccess] = useState('');
   const [err, setErr] = useState('');
   const [activeTab, setActiveTab] = useState('agency');
+  const [rules, setRules] = useState([]);
+  const [newRuleText, setNewRuleText] = useState('');
+  const [editingRuleId, setEditingRuleId] = useState(null);
+  const [editingText, setEditingText] = useState('');
+  function loadRules() {
+    api.get('/agent-rules')
+      .then(function(r){ if (Array.isArray(r.data)) setRules(r.data); })
+      .catch(function(){});
+  }
+  React.useEffect(function(){ loadRules(); }, []);
+  function addRule() {
+    var text = (newRuleText || '').trim();
+    if (!text) return;
+    api.post('/agent-rules', { rule_text: text })
+      .then(function(){ setNewRuleText(''); loadRules(); });
+  }
+  function toggleRule(id, enabled) {
+    api.patch('/agent-rules/' + id, { enabled: enabled ? 1 : 0 })
+      .then(function(){ loadRules(); });
+  }
+  function saveRuleEdit(id) {
+    api.patch('/agent-rules/' + id, { rule_text: editingText })
+      .then(function(){ setEditingRuleId(null); setEditingText(''); loadRules(); });
+  }
+  function deleteRule(id) {
+    if (!window.confirm('Delete this rule? The agent will stop following it on its next conversation.')) return;
+    api.delete('/agent-rules/' + id)
+      .then(function(){ loadRules(); });
+  }
 
   useEffect(function() { load(); }, []);
 
@@ -43,6 +72,7 @@ export default function ConfigurationPage() {
     { key:'fees', label:'Fees & Deadlines' },
     { key:'notifications', label:'Notifications' },
     { key:'email', label:'Email' },
+    { key:'agent', label:'Agent Rules' },
   ];
 
   if (loading) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'256px',color:'#9CA3AF'}}>Loading configuration...</div>;
@@ -297,6 +327,57 @@ export default function ConfigurationPage() {
               <label style={lbl}>New Request Alert Recipient</label>
               <input type="email" value={config.new_request_alert_email||''} onChange={function(e){set('new_request_alert_email',e.target.value);}} style={inp} placeholder="openrecords-team@cityofdallas.gov"/>
               <div style={hint}>Email address that receives an alert each time a new request is submitted. If blank, the Public Records Contact Email is used.</div>
+            </div>
+          </div>
+        )}
+        {activeTab === 'agent' && (
+          <div style={section}>
+            <div style={sectionTitle}>Agent Behavior Rules</div>
+            <p style={{fontSize:'13px',color:'#6B7280',margin:'0 0 16px',lineHeight:'1.5'}}>
+              Plain-English rules that guide the public chat agent's behavior. Use these to correct confusion, set priorities, or shape how the agent responds. Rules are applied to every conversation in addition to the agent's core instructions.
+            </p>
+            <div style={{display:'flex',flexDirection:'column',gap:'8px',marginBottom:'16px'}}>
+              {rules.length === 0 && <div style={{fontSize:'13px',color:'#9CA3AF',fontStyle:'italic',padding:'12px 0'}}>No rules configured yet. Add one below.</div>}
+              {rules.map(function(r){
+                var isEditing = editingRuleId === r.id;
+                return (
+                  <div key={r.id} style={{border:'1px solid #E5E7EB',borderRadius:'8px',padding:'12px',background: r.enabled ? 'white' : '#F9FAFB',opacity: r.enabled ? 1 : 0.6}}>
+                    <div style={{display:'flex',alignItems:'flex-start',gap:'12px'}}>
+                      <input type="checkbox" checked={r.enabled === 1} onChange={function(e){ toggleRule(r.id, e.target.checked); }} style={{marginTop:'3px',cursor:'pointer'}}/>
+                      <div style={{flex:1}}>
+                        {isEditing ? (
+                          <textarea value={editingText} onChange={function(e){ setEditingText(e.target.value); }} style={{width:'100%',minHeight:'80px',padding:'8px',border:'1px solid #D1D5DB',borderRadius:'6px',fontSize:'13px',fontFamily:'inherit',resize:'vertical'}}/>
+                        ) : (
+                          <div style={{fontSize:'13px',color:'#374151',lineHeight:'1.5',whiteSpace:'pre-wrap'}}>{r.rule_text}</div>
+                        )}
+                        <div style={{fontSize:'11px',color:'#9CA3AF',marginTop:'6px'}}>
+                          {r.created_by ? 'Added by ' + r.created_by : ''} {r.created_at ? '· ' + new Date(r.created_at + 'Z').toLocaleDateString() : ''}
+                        </div>
+                      </div>
+                      <div style={{display:'flex',gap:'6px'}}>
+                        {isEditing ? (
+                          <>
+                            <button type="button" onClick={function(){ saveRuleEdit(r.id); }} style={{padding:'5px 10px',fontSize:'12px',background:'#16A34A',color:'white',border:'none',borderRadius:'6px',cursor:'pointer'}}>Save</button>
+                            <button type="button" onClick={function(){ setEditingRuleId(null); setEditingText(''); }} style={{padding:'5px 10px',fontSize:'12px',background:'white',color:'#6B7280',border:'1px solid #D1D5DB',borderRadius:'6px',cursor:'pointer'}}>Cancel</button>
+                          </>
+                        ) : (
+                          <>
+                            <button type="button" onClick={function(){ setEditingRuleId(r.id); setEditingText(r.rule_text); }} style={{padding:'5px 10px',fontSize:'12px',background:'white',color:'#1F4E79',border:'1px solid #1F4E79',borderRadius:'6px',cursor:'pointer'}}>Edit</button>
+                            <button type="button" onClick={function(){ deleteRule(r.id); }} style={{padding:'5px 10px',fontSize:'12px',background:'white',color:'#B91C1C',border:'1px solid #FCA5A5',borderRadius:'6px',cursor:'pointer'}}>Delete</button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div style={{borderTop:'1px solid #E5E7EB',paddingTop:'16px'}}>
+              <label style={lbl}>Add a new rule</label>
+              <textarea value={newRuleText} onChange={function(e){ setNewRuleText(e.target.value); }} placeholder='Example: "When a citizen mentions a specific case number, always include that case number verbatim in the search query."' style={{width:'100%',minHeight:'70px',padding:'10px',border:'1px solid #D1D5DB',borderRadius:'8px',fontSize:'13px',fontFamily:'inherit',resize:'vertical'}}/>
+              <div style={{display:'flex',justifyContent:'flex-end',marginTop:'8px'}}>
+                <button type="button" onClick={addRule} disabled={!newRuleText.trim()} style={{padding:'8px 18px',background: newRuleText.trim() ? '#1F4E79' : '#D1D5DB',color:'white',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor: newRuleText.trim() ? 'pointer' : 'not-allowed'}}>+ Add Rule</button>
+              </div>
             </div>
           </div>
         )}
