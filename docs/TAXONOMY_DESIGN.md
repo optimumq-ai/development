@@ -208,3 +208,30 @@ The Agent Rules feature remains valuable for **style and judgment**. Taxonomy ha
 - Hierarchical relationships between record types?
 - Exportable/importable taxonomy for customer sharing?
 - How to handle records spanning multiple departments?
+
+---
+
+## Parked notes (deferred — revisit after Postgres/foundation)
+
+_Captured 2026-06-03 during pre-Session-2 check-in._
+
+### 1. Glossary (to ratify)
+Pin down loosely-used terms: document, form, record, record type, classification, repository, layout profile, and specific document (instance) vs document type (class).
+
+### 2. Redaction layout strategy — three tiers by predictability
+- Fixed layout + predictable content (a form): coordinate-based zones. Deterministic, auto-redact-capable now.
+- Flexible layout + predictable content (invoice: always has phone/address/DL; positions shift, may spill pages): anchor (form number/heading) + entity detection — find PII by what it IS, not where it sits. v2 automation candidate. NOTE: entity detection, NOT the AI zone-discovery that was unreliable in the prototype.
+- Free-form + unpredictable content (a letter): no definition possible; manual review only; not streamline-eligible by nature.
+- Streamlining scope: tiers 1 and 2 only; tier 3 never.
+
+### 3. Layout Profile <-> Record Type link
+Map Layout Profiles to the Record *Type* (class), not specific records (instance). This is the bridge enabling automated redaction: a known type arrives -> system knows which layout/strategy to apply. v1 affordance: a Layout Profile can declare positional vs content-based mode.
+
+### 4. Lateness / "panic" scoring
+Keep SEPARATE from complexity — do not blend into one scalar. Complexity sets per-stage time budgets; lateness = burn-down against the staged schedule (remaining required effort vs calendar time left). Surfaces slip early (stuck in a stage past its budget) rather than at the legal deadline. Escalation curve lives in config keys, not hardcoded.
+
+### 5. Streamlined fulfillment eligibility (open)
+- Record already available for immediate download + selected -> streamline decision moot (already served).
+- Specific document (canonical, e.g. 2023 policy) -> lookup; streamline candidate.
+- Document type (class, e.g. permits) -> responsiveness needs search/judgment -> normal flow.
+- Open: do some record types need a "singular/canonical" flag, or do specific-doc requests bypass the taxonomy via a direct search hit + availability flag?

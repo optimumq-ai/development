@@ -11,3 +11,4 @@ frontend/build/
 
 # Demo connectors live in their own repo
 demo-connectors/
+backups/
