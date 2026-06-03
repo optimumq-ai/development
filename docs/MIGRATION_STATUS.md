@@ -8,10 +8,10 @@ Branch: postgres-migration (off main). Commit progress frequently.
 - Ported schema backend/src/db/schema.postgres.sql (16 tables, 8 indexes) applied to Postgres.
 - Data copied via backend/migrate_to_pg.js. Verified: all 16 tables match + content spot-checked.
 - New async translator backend/src/db/index.pg.js, isolation-tested OK (?->$n, date/datetime('now'), INSERT OR IGNORE->ON CONFLICT, int8->number). NOT yet swapped into index.js.
-- Converted to async/await (still run on SQLite via await pass-through until swap): departments, services/recordSearch, services/connectors/demo, classify, extract, config, routes/agentRules, routes/auth, services/auth, routes/staff, routes/files.
+- Converted to async/await (still run on SQLite via await pass-through until swap): departments, services/recordSearch, services/connectors/demo, classify, extract, config, routes/agentRules, routes/auth, services/auth, routes/staff, routes/files, routes/requests.
 
 ## Remaining
-- Convert: routes/publicChat, routes/requests, server.js.
+- Convert: routes/publicChat, server.js.
 - Add express-async-errors + `await initDb()` in server.js.
 - CUTOVER: cp src/db/index.js src/db/index.sqlite.bak.js ; cp src/db/index.pg.js src/db/index.js. Then run app on Postgres, test: health, login, list/create requests, config.
 
