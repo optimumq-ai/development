@@ -11,7 +11,7 @@ var connectors = {
 };
 
 async function searchAll(query) {
-  var repos = all("SELECT id, name, connector_type, config FROM record_repositories WHERE status = 'active' ORDER BY sort_order");
+  var repos = await all("SELECT id, name, connector_type, config FROM record_repositories WHERE status = 'active' ORDER BY sort_order");
   var allResults = [];
   // Query each active repository in parallel
   var searches = repos.map(async function(repo) {

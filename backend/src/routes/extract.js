@@ -10,9 +10,9 @@ router.post('/', requireAuth, upload.single('document'), async function(req, res
   if (!req.file) return res.status(400).json({ error: 'No document uploaded' });
 
   var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-  var agencyRow = get('SELECT value FROM system_config WHERE key = ?', ['agency_name']);
+  var agencyRow = await get('SELECT value FROM system_config WHERE key = ?', ['agency_name']);
   var agency = agencyRow ? agencyRow.value : 'City';
-  var depts = all('SELECT id, name, code FROM departments WHERE active = 1 ORDER BY sort_order');
+  var depts = await all('SELECT id, name, code FROM departments WHERE active = 1 ORDER BY sort_order');
   var deptList = depts.map(function(d) { return d.code + ': ' + d.name; }).join(', ');
 
   var isImage = req.file.mimetype.startsWith('image/');

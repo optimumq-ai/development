@@ -2,7 +2,7 @@ const Anthropic = require('@anthropic-ai/sdk');
 const { all } = require('../../db');
 
 async function search(query) {
-  var docs = all('SELECT id, title, summary, department, doc_type, date_created, page_count, public_availability, tags FROM demo_documents');
+  var docs = await all('SELECT id, title, summary, department, doc_type, date_created, page_count, public_availability, tags FROM demo_documents');
   if (!docs.length) return [];
 
   // Build a compact catalog for Claude to rank
