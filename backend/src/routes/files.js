@@ -29,50 +29,50 @@ const upload = multer({
   }
 });
 
-router.post('/upload/:requestId', requireAuth, upload.single('file'), function(req, res) {
+router.post('/upload/:requestId', requireAuth, upload.single('file'), async function(req, res) {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
   var requestId = req.params.requestId;
-  var request = get('SELECT id FROM requests WHERE id = ?', [requestId]);
+  var request = await get('SELECT id FROM requests WHERE id = ?', [requestId]);
   if (!request) return res.status(404).json({ error: 'Request not found' });
 
   var fileId = uuidv4();
-  run('INSERT INTO request_files (id, request_id, filename, original_name, mimetype, size, uploaded_by, uploaded_at) VALUES (?, ?, ?, ?, ?, ?, ?, datetime(\'now\'))',
+  await run('INSERT INTO request_files (id, request_id, filename, original_name, mimetype, size, uploaded_by, uploaded_at) VALUES (?, ?, ?, ?, ?, ?, ?, datetime(\'now\'))',
     [fileId, requestId, req.file.filename, req.file.originalname, req.file.mimetype, req.file.size, req.user.sub]);
 
-  run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?, ?, ?, ?, ?, ?)',
+  await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?, ?, ?, ?, ?, ?)',
     [uuidv4(), requestId, req.user.sub, req.user.name||'Staff', 'FILE_UPLOADED', 'Uploaded: ' + req.file.originalname]);
 
   res.json({ success: true, fileId: fileId, filename: req.file.originalname, size: req.file.size });
 });
 
-router.get('/:requestId', requireAuth, function(req, res) {
-  var files = all('SELECT * FROM request_files WHERE request_id = ? ORDER BY uploaded_at DESC', [req.params.requestId]);
+router.get('/:requestId', requireAuth, async function(req, res) {
+  var files = await all('SELECT * FROM request_files WHERE request_id = ? ORDER BY uploaded_at DESC', [req.params.requestId]);
   res.json({ files: files });
 });
 
-router.delete('/:fileId', requireAuth, function(req, res) {
-  var file = get('SELECT * FROM request_files WHERE id = ?', [req.params.fileId]);
+router.delete('/:fileId', requireAuth, async function(req, res) {
+  var file = await get('SELECT * FROM request_files WHERE id = ?', [req.params.fileId]);
   if (!file) return res.status(404).json({ error: 'File not found' });
   var filePath = path.join(UPLOAD_DIR, file.filename);
   if (fs.existsSync(filePath)) fs.unlinkSync(filePath);
-  run('DELETE FROM request_files WHERE id = ?', [req.params.fileId]);
+  await run('DELETE FROM request_files WHERE id = ?', [req.params.fileId]);
   res.json({ success: true });
 });
 
-router.get('/download/:fileId', requireAuth, function(req, res) {
-  var file = get('SELECT * FROM request_files WHERE id = ?', [req.params.fileId]);
+router.get('/download/:fileId', requireAuth, async function(req, res) {
+  var file = await get('SELECT * FROM request_files WHERE id = ?', [req.params.fileId]);
   if (!file) return res.status(404).json({ error: 'File not found' });
   var filePath = path.join(UPLOAD_DIR, file.filename);
   if (!fs.existsSync(filePath)) return res.status(404).json({ error: 'File not found on disk' });
   res.download(filePath, file.original_name);
 });
 
-router.patch('/:fileId/status', requireAuth, function(req, res) {
-  var file = get('SELECT * FROM request_files WHERE id = ?', [req.params.fileId]);
+router.patch('/:fileId/status', requireAuth, async function(req, res) {
+  var file = await get('SELECT * FROM request_files WHERE id = ?', [req.params.fileId]);
   if (!file) return res.status(404).json({ error: 'File not found' });
   var responsive = req.body.responsive ? 1 : 0;
-  run('UPDATE request_files SET responsive = ? WHERE id = ?', [responsive, req.params.fileId]);
-  run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?, ?, ?, ?, ?, ?)',
+  await run('UPDATE request_files SET responsive = ? WHERE id = ?', [responsive, req.params.fileId]);
+  await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?, ?, ?, ?, ?, ?)',
     [uuidv4(), file.request_id, req.user.sub, req.user.name||'Staff', responsive ? 'MARKED_RESPONSIVE' : 'MARKED_NOT_RESPONSIVE', file.original_name]);
   res.json({ success: true });
 });
