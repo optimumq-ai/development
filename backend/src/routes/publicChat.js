@@ -87,14 +87,14 @@ router.post('/chat', async function(req, res) {
     // Sanitize messages: the Anthropic API only accepts role + content per message.
     // The frontend may attach UI-only fields like searchResults; strip them here.
     var messages = rawMessages.map(function(m){ return { role: m.role, content: m.content }; });
-    var agencyRow = get('SELECT value FROM system_config WHERE key = ?', ['agency_name']);
+    var agencyRow = await get('SELECT value FROM system_config WHERE key = ?', ['agency_name']);
     var agencyName = agencyRow ? agencyRow.value : 'the agency';
     var todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     var systemPrompt = SYSTEM_PROMPT.replace('{{AGENCY_NAME}}', agencyName) +
       '\n\nIMPORTANT: Today\'s date is ' + todayStr + '. When the citizen mentions a date or month/year, treat their statement as accurate. Do not assume an earlier year or correct their date unless they themselves seem uncertain. Past dates are normal — citizens often request records from past months or years.';
     // Append any active admin-configured behavior rules
     try {
-      var activeRules = all('SELECT rule_text FROM agent_rules WHERE enabled = 1 ORDER BY sort_order ASC, created_at ASC');
+      var activeRules = await all('SELECT rule_text FROM agent_rules WHERE enabled = 1 ORDER BY sort_order ASC, created_at ASC');
       if (activeRules && activeRules.length > 0) {
         systemPrompt += '\n\nADMIN-CONFIGURED BEHAVIOR RULES (follow these in addition to the above):';
         activeRules.forEach(function(r, i){ systemPrompt += '\n' + (i+1) + '. ' + r.rule_text; });
@@ -155,13 +155,13 @@ router.post('/chat', async function(req, res) {
   }
 });
 
-router.post('/submit', function(req, res) {
+router.post('/submit', async function(req, res) {
   var b = req.body || {};
   if (!b.requestorName || !b.requestorEmail || !b.description) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
   var year = new Date().getFullYear();
-  var countRow = get('SELECT COUNT(*) as n FROM requests WHERE request_number LIKE ?', [year + '-%']);
+  var countRow = await get('SELECT COUNT(*) as n FROM requests WHERE request_number LIKE ?', [year + '-%']);
   var nextNum = (countRow ? countRow.n : 0) + 1;
   var requestNumber = year + '-' + String(nextNum).padStart(Math.max(4, String(nextNum).length), '0');
   var deadlineDays = { simple: 5, standard: 10, complex: 20, redaction_required: 30 };
@@ -170,21 +170,21 @@ router.post('/submit', function(req, res) {
   var deadline = new Date(); deadline.setDate(deadline.getDate() + days);
   var deadlineStr = deadline.toISOString().split('T')[0];
   var id = uuidv4();
-  run('INSERT INTO requests (id, request_number, requestor_name, requestor_email, requestor_phone, requestor_type, delivery_method, description, classification, department_id, fee_waiver_requested, is_mrr, submission_channel, stage, status, deadline_date, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime(\'now\'))',
+  await run('INSERT INTO requests (id, request_number, requestor_name, requestor_email, requestor_phone, requestor_type, delivery_method, description, classification, department_id, fee_waiver_requested, is_mrr, submission_channel, stage, status, deadline_date, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime(\'now\'))',
     [id, requestNumber, b.requestorName, b.requestorEmail, b.requestorPhone || '', 'individual', b.deliveryMethod || 'email', b.description, classification, null, b.feeWaiverRequested ? 1 : 0, b.isMrr ? 1 : 0, b.submissionChannel || 'chat_agent', 'intake', 'active', deadlineStr]);
-  run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+  await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
     [uuidv4(), id, 'public', b.submissionChannel === 'manual_form' ? 'Public Portal (Form)' : 'Public Portal (Chat Agent)', 'CREATED', b.submissionChannel === 'manual_form' ? 'Submitted via public portal form' : 'Submitted via AI chat agent']);
 
   // Persist any records the citizen selected from search results
   if (Array.isArray(b.selectedRecords) && b.selectedRecords.length > 0) {
-    b.selectedRecords.forEach(function(sr) {
-      run('INSERT INTO request_selected_records (id, request_id, record_id, title, source_system, public_availability) VALUES (?,?,?,?,?,?)',
+    for (var sr of b.selectedRecords) {
+      await run('INSERT INTO request_selected_records (id, request_id, record_id, title, source_system, public_availability) VALUES (?,?,?,?,?,?)',
         [uuidv4(), id, sr.id || '', sr.title || '', sr.sourceSystem || '', sr.publicAvailability || '']);
-    });
-    run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+    }
+    await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
       [uuidv4(), id, 'public', 'Public Portal', 'RECORDS_SELECTED', 'Requestor selected ' + b.selectedRecords.length + ' record(s) from search results']);
   }
-  var newReq = get('SELECT * FROM requests WHERE id = ?', [id]);
+  var newReq = await get('SELECT * FROM requests WHERE id = ?', [id]);
   if (newReq) {
     emailService.sendSubmissionConfirmation(newReq).catch(function(e){ console.error('confirmation email failed:', e.message); });
     emailService.sendNewRequestAlert(newReq).catch(function(e){ console.error('alert email failed:', e.message); });
@@ -203,11 +203,11 @@ router.post('/request-verification', async function(req, res) {
   }
   var token = crypto.randomBytes(32).toString('hex');
   var expiresAt = new Date(Date.now() + 30 * 60 * 1000).toISOString();
-  run('INSERT INTO email_verifications (token, email, expires_at) VALUES (?, ?, ?)', [token, email, expiresAt]);
+  await run('INSERT INTO email_verifications (token, email, expires_at) VALUES (?, ?, ?)', [token, email, expiresAt]);
   var host = req.get('host');
   var protocol = req.protocol;
   var verifyUrl = protocol + '://' + host + '/api/public/verify/' + token;
-  var agencyName = (get('SELECT value FROM system_config WHERE key = ?', ['agency_name']) || {}).value || 'Public Records';
+  var agencyName = (await get('SELECT value FROM system_config WHERE key = ?', ['agency_name']) || {}).value || 'Public Records';
   var body = '<h2 style="margin:0 0 10px;color:#1F4E79;font-size:18px">Verify your email address</h2>' +
     '<p style="font-size:14px;color:#374151;line-height:1.5">You are submitting a public records request. Click the button below to verify this email address and continue.</p>' +
     '<div style="text-align:center;margin:24px 0"><a href="' + verifyUrl + '" style="display:inline-block;background:#1F4E79;color:white;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:600;font-size:15px">Verify Email Address</a></div>' +
@@ -230,16 +230,16 @@ router.post('/request-verification', async function(req, res) {
 });
 
 // Poll endpoint - chat client checks this to know when the user clicked the link
-router.get('/verify-status/:token', function(req, res) {
-  var row = get('SELECT email, verified_at, expires_at FROM email_verifications WHERE token = ?', [req.params.token]);
+router.get('/verify-status/:token', async function(req, res) {
+  var row = await get('SELECT email, verified_at, expires_at FROM email_verifications WHERE token = ?', [req.params.token]);
   if (!row) return res.json({ verified: false, expired: false, notFound: true });
   var expired = new Date(row.expires_at) < new Date();
   res.json({ verified: !!row.verified_at, expired: expired, email: row.email });
 });
 
 // User clicks the link in the email - this verifies and shows a confirmation page
-router.get('/verify/:token', function(req, res) {
-  var row = get('SELECT email, verified_at, expires_at FROM email_verifications WHERE token = ?', [req.params.token]);
+router.get('/verify/:token', async function(req, res) {
+  var row = await get('SELECT email, verified_at, expires_at FROM email_verifications WHERE token = ?', [req.params.token]);
   if (!row) {
     return res.status(404).send('<html><body style="font-family:Arial,sans-serif;text-align:center;padding:60px"><h1 style="color:#DC2626">Invalid Link</h1><p>This verification link is not recognized. It may have been already used or is incorrect.</p></body></html>');
   }
@@ -247,9 +247,9 @@ router.get('/verify/:token', function(req, res) {
     return res.status(410).send('<html><body style="font-family:Arial,sans-serif;text-align:center;padding:60px"><h1 style="color:#DC2626">Link Expired</h1><p>This verification link has expired. Please return to the records request portal and request a new one.</p></body></html>');
   }
   if (!row.verified_at) {
-    run('UPDATE email_verifications SET verified_at = datetime(\'now\') WHERE token = ?', [req.params.token]);
+    await run('UPDATE email_verifications SET verified_at = datetime(\'now\') WHERE token = ?', [req.params.token]);
   }
-  var agencyName = (get('SELECT value FROM system_config WHERE key = ?', ['agency_name']) || {}).value || 'Public Records';
+  var agencyName = (await get('SELECT value FROM system_config WHERE key = ?', ['agency_name']) || {}).value || 'Public Records';
   res.send('<html><head><title>Email Verified</title></head><body style="font-family:Arial,sans-serif;background:#F9FAFB;margin:0;padding:60px 20px"><div style="max-width:480px;margin:0 auto;background:white;border-radius:12px;padding:40px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.08)"><div style="font-size:64px;margin-bottom:16px">✅</div><h1 style="color:#1F4E79;font-size:24px;margin:0 0 12px">Email Verified</h1><p style="color:#374151;font-size:15px;line-height:1.5;margin:0 0 8px">Your email address <strong>' + row.email + '</strong> has been verified for ' + agencyName + '.</p><p style="color:#6B7280;font-size:14px;margin-top:24px">You can now return to the records request chat. It will continue automatically.</p></div></body></html>');
 });
 
