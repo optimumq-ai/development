@@ -24,3 +24,5 @@ Branch: postgres-migration (off main). Commit progress frequently.
 - db calls all/get/run are now async: add `await`, make enclosing fn `async`. Convert any `forEach` containing db calls to `for...of`.
 
 - POST-CUTOVER FIX: services/email.js was missed in the async sweep (cfg() read DB synchronously -> got a Promise -> all config empty -> "no provider configured"). Converted to async; verified Resend send works (admin@optimumq.ai got id). Gmail delivery still pending Resend optimumq.ai domain verification (test mode).
+
+- SECURITY ROTATIONS COMPLETE (2026-06-04): (1) GitHub PAT rotated — new token in remote, verified auth, old revoked in GitHub. (2) Gmail app password (smtp_pass) revoked in Google + cleared from system_config; email runs on Resend, SMTP was a dormant fallback. (3) Anthropic API key rotated — new key in backend/.env, app restarted + AI chat verified working, old key deleted in Console. REMAINING housekeeping (non-urgent): neutralize dormant Docker image/compose app-service (also scrub dead old-Anthropic-key copy in root .env); consolidate root .env vs backend/.env; clean up SQLite leftovers once confident on Postgres.
