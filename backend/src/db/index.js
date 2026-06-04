@@ -1,50 +1,70 @@
-const Database = require('better-sqlite3');
+const { Pool, types } = require('pg');
 const fs = require('fs');
 const path = require('path');
 
-const DB_PATH = path.join(__dirname, '../../data/optimumq.db');
-const SCHEMA_PATH = path.join(__dirname, 'schema.sql');
+// COUNT(*) / bigint (int8, oid 20) -> JS number, matching old driver behavior
+types.setTypeParser(20, function (v) { return v === null ? null : parseInt(v, 10); });
 
-let db = null;
+const SCHEMA_PATH = path.join(__dirname, 'schema.postgres.sql');
+let pool = null;
 
-function initDb() {
-  const dir = path.dirname(DB_PATH);
-  if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-  db = new Database(DB_PATH);
-  db.pragma('journal_mode = WAL');
-  db.pragma('foreign_keys = ON');
+function connString() {
+  if (process.env.DATABASE_URL) return process.env.DATABASE_URL;
+  const u = process.env.POSTGRES_USER || 'optimumq';
+  const p = process.env.POSTGRES_PASSWORD || '';
+  const d = process.env.POSTGRES_DB || 'optimumq';
+  const h = process.env.PGHOST || 'localhost';
+  const port = process.env.PGPORT || '5432';
+  return 'postgresql://' + u + ':' + p + '@' + h + ':' + port + '/' + d;
+}
+async function initDb() {
+  pool = new Pool({ connectionString: connString() });
   const schema = fs.readFileSync(SCHEMA_PATH, 'utf8');
-  schema.split(';').map(function(s){ return s.trim(); }).filter(function(s){ return s.length>0; }).forEach(function(stmt){
-    try { db.prepare(stmt).run(); } catch(e) {}
-  });
-  console.log('Database initialized:', DB_PATH);
-  return db;
+  await pool.query(schema);
+  console.log('Database initialized (Postgres)');
+  return pool;
 }
+function getDb() { if (!pool) throw new Error('DB not initialized'); return pool; }
 
-function getDb() { if (!db) throw new Error('DB not initialized'); return db; }
-
-function all(sql, params) {
-  var p = params || [];
-  if (!Array.isArray(p)) p = [p];
-  return getDb().prepare(sql).all(...p);
+function toPg(sql) {
+  let out = sql;
+  out = out.replace(/datetime\(\s*'now'\s*\)/gi, "to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')");
+  out = out.replace(/date\(\s*'now'\s*\)/gi, "to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD')");
+  let onConflict = false;
+  if (/INSERT\s+OR\s+IGNORE\s+INTO/i.test(out)) {
+    out = out.replace(/INSERT\s+OR\s+IGNORE\s+INTO/gi, 'INSERT INTO');
+    onConflict = true;
+  }
+  let n = 0;
+  out = out.replace(/\?/g, function () { n += 1; return '$' + n; });
+  if (onConflict) { out = out.replace(/;\s*$/, '') + ' ON CONFLICT DO NOTHING'; }
+  return out;
 }
-
-function get(sql, params) {
-  var p = params || [];
-  if (!Array.isArray(p)) p = [p];
-  return getDb().prepare(sql).get(...p) || null;
+function normP(params) {
+  if (params === undefined || params === null) return [];
+  return Array.isArray(params) ? params : [params];
 }
-
-function run(sql, params) {
-  var p = params || [];
-  if (!Array.isArray(p)) p = [p];
-  return getDb().prepare(sql).run(...p);
+async function all(sql, params) {
+  const r = await getDb().query(toPg(sql), normP(params));
+  return r.rows;
 }
-
-function transaction(fn) {
-  return getDb().transaction(fn)();
+async function get(sql, params) {
+  const r = await getDb().query(toPg(sql), normP(params));
+  return r.rows[0] || null;
 }
-
+async function run(sql, params) {
+  const r = await getDb().query(toPg(sql), normP(params));
+  return { changes: r.rowCount, rows: r.rows };
+}
+async function transaction(fn) {
+  const client = await getDb().connect();
+  try {
+    await client.query('BEGIN');
+    const result = await fn(client);
+    await client.query('COMMIT');
+    return result;
+  } catch (e) { await client.query('ROLLBACK'); throw e; }
+  finally { client.release(); }
+}
 function persist() {}
-
-module.exports = { initDb: initDb, getDb: getDb, all: all, get: get, run: run, transaction: transaction, persist: persist };
+module.exports = { initDb, getDb, all, get, run, transaction, persist };

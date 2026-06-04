@@ -13,7 +13,7 @@ Branch: postgres-migration (off main). Commit progress frequently.
 ## Remaining
 - Convert: DONE — all route/service files + server.js converted; express-async-errors added for async error handling.
 - Add express-async-errors + `await initDb()` in server.js.
-- CUTOVER: cp src/db/index.js src/db/index.sqlite.bak.js ; cp src/db/index.pg.js src/db/index.js. Then run app on Postgres, test: health, login, list/create requests, config.
+- CUTOVER: DONE 2026-06-03 — index.js swapped to Postgres; PM2 optimumq-api restarted on PG; verified no SQLite handle, connected :5544, serving real data; backend/.env given PG conn; pm2 saved. App LIVE on Postgres.
 
 ## Safety / rollback
 - Original DB + config backed up in /opt/optimumq/backups/.
