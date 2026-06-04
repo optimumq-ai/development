@@ -22,3 +22,5 @@ Branch: postgres-migration (off main). Commit progress frequently.
 
 ## Conversion rule
 - db calls all/get/run are now async: add `await`, make enclosing fn `async`. Convert any `forEach` containing db calls to `for...of`.
+
+- POST-CUTOVER FIX: services/email.js was missed in the async sweep (cfg() read DB synchronously -> got a Promise -> all config empty -> "no provider configured"). Converted to async; verified Resend send works (admin@optimumq.ai got id). Gmail delivery still pending Resend optimumq.ai domain verification (test mode).

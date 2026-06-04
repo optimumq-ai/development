@@ -2,16 +2,16 @@ const nodemailer = require('nodemailer');
 const { Resend } = require('resend');
 const { get } = require('../db');
 
-function cfg(key) {
-  var row = get('SELECT value FROM system_config WHERE key = ?', [key]);
+async function cfg(key) {
+  var row = await get('SELECT value FROM system_config WHERE key = ?', [key]);
   return row ? row.value : '';
 }
 
-function getTransport() {
-  var host = cfg('smtp_host');
-  var port = parseInt(cfg('smtp_port') || '587', 10);
-  var user = cfg('smtp_user');
-  var pass = cfg('smtp_pass');
+async function getTransport() {
+  var host = await cfg('smtp_host');
+  var port = parseInt(await cfg('smtp_port') || '587', 10);
+  var user = await cfg('smtp_user');
+  var pass = await cfg('smtp_pass');
   if (!host || !user || !pass) return null;
   return nodemailer.createTransport({
     host: host,
@@ -26,12 +26,12 @@ function getTransport() {
 }
 
 async function send(opts) {
-  var resendKey = cfg('resend_api_key');
-  var fromName = cfg('agency_name') || 'Public Records';
+  var resendKey = await cfg('resend_api_key');
+  var fromName = await cfg('agency_name') || 'Public Records';
 
   // Prefer Resend if API key is configured
   if (resendKey) {
-    var resendFrom = cfg('resend_from') || 'onboarding@resend.dev';
+    var resendFrom = await cfg('resend_from') || 'onboarding@resend.dev';
     try {
       var resend = new Resend(resendKey);
       var result = await resend.emails.send({
@@ -54,12 +54,12 @@ async function send(opts) {
   }
 
   // Fall back to SMTP
-  var transport = getTransport();
+  var transport = await getTransport();
   if (!transport) {
     console.log('[email] No email provider configured (no Resend key, no SMTP), skipping send to', opts.to);
     return { sent: false, reason: 'not_configured' };
   }
-  var from = cfg('smtp_from') || cfg('smtp_user');
+  var from = await cfg('smtp_from') || await cfg('smtp_user');
   try {
     var info = await transport.sendMail({
       from: '"' + fromName + '" <' + from + '>',
@@ -85,9 +85,9 @@ function template(body, agencyName) {
 }
 
 async function sendSubmissionConfirmation(req) {
-  var agencyName = cfg('agency_name') || 'Public Records';
-  var contactEmail = cfg('contact_email') || '';
-  var contactPhone = cfg('contact_phone') || '';
+  var agencyName = await cfg('agency_name') || 'Public Records';
+  var contactEmail = await cfg('contact_email') || '';
+  var contactPhone = await cfg('contact_phone') || '';
   var body = '<h2 style="margin:0 0 10px;color:#1F4E79;font-size:18px">Your records request has been received</h2>' +
     '<p style="font-size:14px;line-height:1.5;color:#374151">Thank you for your request. We have received it and will begin processing.</p>' +
     '<div style="background:white;border:1px solid #E5E7EB;border-radius:8px;padding:14px;margin:16px 0">' +
@@ -114,8 +114,8 @@ async function sendSubmissionConfirmation(req) {
 }
 
 async function sendNewRequestAlert(req) {
-  var agencyName = cfg('agency_name') || 'Public Records';
-  var alertTo = cfg('new_request_alert_email') || cfg('contact_email');
+  var agencyName = await cfg('agency_name') || 'Public Records';
+  var alertTo = await cfg('new_request_alert_email') || await cfg('contact_email');
   if (!alertTo) return { sent: false, reason: 'no_alert_recipient' };
   var body = '<h2 style="margin:0 0 10px;color:#1F4E79;font-size:18px">New Records Request</h2>' +
     '<div style="background:white;border:1px solid #E5E7EB;border-radius:8px;padding:14px;margin:12px 0">' +
