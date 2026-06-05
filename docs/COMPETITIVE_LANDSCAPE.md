@@ -29,3 +29,17 @@ Research scan 2026-06-05 (Claude + web). For positioning before sales.
 - BetaQuick "AI Intake for FOIA & Public Records" (Morgan), betaquick.com, May 2026.
 - Everlaw FOIA page; Reveal "Ask"; Logikcull; vidizmo legal-document-processing.
 - Route Fifty (Madison AI, Apr 2026); Federal News Network (AI personas mapped to disposition schedules, May 2026).
+
+## Deep dive: the real threats (added 2026-06-05)
+- MADISON AI -> DOWNGRADE. Shipped product = INTERNAL staff knowledge/research assistant + staff-report/memo drafting, code/parcel/contract lookup (Reno, Washoe County; built by OnStrategy). The "citizen can ask for anything" FOIA idea is the CEO's aspirational "Holy Grail... data not ready yet," NOT a shipped product. Not a direct competitor.
+- CASEPOINT -> the most complete conceptual overlap. AI FOIA platform end-to-end: intake, search, review, exemptions, redaction, production; eDiscovery-grade search over massive datasets; CITIZEN public portal (status + download); requester scope-assist (draft clearer/better-scoped requests); duplicate/bot detection; FOIA Reading Room (publish redacted docs = our public-ready index idea). BUT federal/enterprise-grade (FedRAMP High, DoD IL5/IL6; Fortune 500, Dept of War) - heavyweight, costly, built for large agencies. Leaves the small/mid-muni segment open.
+- Everlaw / Reveal / Logikcull / Relativity = eDiscovery review engines (find records, gen-AI coding/extractions, bulk redaction). STAFF-FACING only; the requester never touches them. Casepoint is the eDiscovery-tier exception with a citizen layer.
+- FOIAXpress (AINS) + Veritone Redact, ArkCase = case-mgmt incumbents + AI redaction.
+- Tyler "Resident AI Assistant" = citizen-facing AI for general inquiries/permitting (not a records-search engine), but a giant incumbent moving citizen-facing.
+- TechForGov = small-muni citizen-engagement tool incl. FOIA/OPRA request mgmt + help desk (workflow/chat, not a semantic search engine). boost.ai / Sally / Hamlet / myPHX311 = adjacent municipal conversational AI.
+
+## Sharpened positioning (2026-06-05)
+- The capability exists at the TOP of the market (Casepoint) and in pieces across tiers - but NOT as a unified, guided, taxonomy-intelligent, conversational product priced/sized for SMALL & MID local gov. That segment is the wedge. Our story isn't "only we can do this"; it's "we do the whole thing, guided and affordable, for the agencies the enterprise tools ignore."
+- Our public-ready index ~= Casepoint's Reading Room (not novel); our FRI specific-record cost-bypass may still be distinctive.
+- Scope-DERIVATION (council records -> email custodians/dates) still appears unique; others coach the requester to self-scope.
+- The barrier everyone names is DATA READINESS ("data not ready yet"). That's exactly our indexing/connector work -> both validation and a moat: whoever makes a small city's scattered records search-ready wins.
