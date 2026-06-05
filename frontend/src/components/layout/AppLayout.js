@@ -18,6 +18,7 @@ export default function AppLayout() {
     { to: '/reports', label: 'Reports (ARIA)', show: isElev },
     { to: '/staff', label: 'Staff Management', show: isElev },
     { to: '/departments', label: 'Departments', show: isElev },
+    { to: '/taxonomy', label: 'Taxonomy', show: isElev },
     { to: '/config', label: 'Configuration', show: isAdmin },
   ].filter(x => x.show);
 
