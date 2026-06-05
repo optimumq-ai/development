@@ -44,3 +44,10 @@ Key insight: citizens describe a SITUATION + CONTENT, not a type name. Synonyms 
 - identifying_facets: date, location, persons/officers, incident/case # -> the details that pin down a SPECIFIC instance.
 
 Agent behavior (resolves the "nothing found vs wrong result" dilemma): in the ambiguous middle, the agent ASKS one targeted, benign question driven by the type's identifying_facets (not a generic "tell me more"). Separates two questions that were tangled: (a) is this the right TYPE? [taxonomy + intent] vs (b) do we have THIS specific instance? [connector/index + facets]. Honest outputs: confident on both -> return; right type but unconfirmed instance -> say so, confirm one detail, route to records team; not a fit -> say so plainly. Never fabricate a match, never wrongly stonewall.
+
+## Two kinds of clarifying question (added 2026-06-04)
+Agent runs an in-conversation retrieval pass; candidates return TAGGED with record type + relevance score. The SHAPE of results decides what (if anything) to ask:
+- one type clearly dominant -> lead with it (no question).
+- several types, close + distinct purpose -> TYPE-LEVEL question ("which kind?"), from candidates' differing intent/purpose. E.g. "Milford Park pool" matches contract, council minutes, AND agenda; ask "the signed contract, or the council's record of approving it?"
+- one type, several instances -> INSTANCE-LEVEL question ("which one?"), from identifying_facets (body-cam case).
+Trigger to ask = multiple matches AND closely scored AND differ in a way that matters. Do NOT ask when the description already names a type ("the contract ...") -> lead with it + name alternatives. Over-asking erodes confidence as much as a wrong result.
