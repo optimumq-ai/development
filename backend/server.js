@@ -47,6 +47,7 @@ app.use('/api/extract', require('./src/routes/extract'));
 app.use('/api/files', require('./src/routes/files'));
 app.use('/api/public', require('./src/routes/publicChat'));
 app.use('/api/agent-rules', require('./src/routes/agentRules'));
+app.use('/api/taxonomy', require('./src/routes/taxonomy'));
 
 app.get('/api/health', function(req, res) {
   res.json({ status: 'ok', version: '1.0.0' });
