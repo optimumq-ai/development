@@ -185,4 +185,66 @@ router.delete('/record-types/:id/repositories/:linkId', requireAuth, async funct
   res.json({ success: true });
 });
 
+// ===== AI-ASSISTED SCHEMA DISCOVERY =====
+router.post('/discover', requireAuth, async function(req, res) {
+  var text = (req.body && req.body.text ? String(req.body.text) : '').trim();
+  if (!text) return res.status(400).json({ error: 'text is required' });
+  if (text.length > 16000) text = text.substring(0, 16000);
+  var Anthropic = require('@anthropic-ai/sdk');
+  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  var cats = await all('SELECT id, name FROM categories WHERE active = 1 ORDER BY sort_order');
+  var existing = await all('SELECT code, name FROM record_types ORDER BY name');
+  var catList = cats.map(function(c){ return c.id + ' = ' + c.name; }).join('\n');
+  var existingList = existing.map(function(r){ return r.code + ' (' + r.name + ')'; }).join('; ');
+  var prompt = 'You are a records-management taxonomy expert for a local government public-records system. '
+    + 'Analyze the document or description below and propose ONE record type for the agency taxonomy. '
+    + 'Return ONLY a JSON object, no other text.\n\n'
+    + 'Choose category_id from EXACTLY one of these:\n' + catList + '\n\n'
+    + 'Existing record types (if the input clearly matches one, set matches_existing true and matched_code to its code):\n' + existingList + '\n\n'
+    + 'Rules:\n'
+    + '- public_availability is one of: releasable, review_required, restricted, confidential. Be conservative; default review_required.\n';
+  prompt += '- auto_release_eligible is 1 ONLY if every plausible exemption is detectable from the document content itself (e.g. SSN, DOB, phone). Set 0 if any context-dependent exemption could apply (ongoing investigation, minors, privilege, medical, security).\n'
+    + '- code: short kebab-case, unique, not in the existing list.\n'
+    + '- formats: array drawn from document, video, audio, structured_data.\n\n'
+    + 'JSON shape:\n'
+    + '{"matches_existing": false, "matched_code": null, "name": "", "code": "", "category_id": "", '
+    + '"intent": "", "expected_content": "", "typical_request_reason": "", '
+    + '"synonyms": [], "disambiguators": [], "keywords": [], "identifying_facets": [], "formats": [], '
+    + '"public_availability": "review_required", "auto_release_eligible": 0, "confidence": 0, "reasoning": ""}\n\n'
+    + 'DOCUMENT OR DESCRIPTION:\n' + text;
+  try {
+    var message = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] });
+    var raw = message.content[0].text.trim().replace(/```json|```/g, '').trim();
+    var p = JSON.parse(raw);
+    if (!p.category_id || !cats.find(function(c){ return c.id === p.category_id; })) {
+      p.category_id = cats.length ? cats[cats.length - 1].id : null;
+    }
+    var matchedRow = p.matched_code ? existing.find(function(r){ return r.code === p.matched_code; }) : null;
+    if (p.matches_existing && matchedRow) {
+      return res.json({ matched_existing: true, matched_code: matchedRow.code, matched_name: matchedRow.name, proposal: p });
+    }
+    var code = (p.code || 'discovered-type').toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 48) || 'discovered-type';
+    var dup = await get('SELECT id FROM record_types WHERE code = ?', [code]);
+    if (dup) code = code + '-' + uuidv4().substring(0, 4);
+    var id = nid('rt');
+    var av = ['releasable','review_required','restricted','confidential'].indexOf(p.public_availability) >= 0 ? p.public_availability : 'review_required';
+    var cols = 'id, category_id, name, code, intent, expected_content, typical_request_reason, synonyms, disambiguators, keywords, identifying_facets, formats, is_structured_data, public_availability, auto_release_eligible, status, source, confidence, sort_order';
+    var ph = '?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?';
+    await run('INSERT INTO record_types (' + cols + ') VALUES (' + ph + ')', [
+      id, p.category_id, (p.name || 'Discovered type').toString().substring(0, 200), code,
+      p.intent || null, p.expected_content || null, p.typical_request_reason || null,
+      packArray(p.synonyms) || '[]', packArray(p.disambiguators) || '[]', packArray(p.keywords) || '[]',
+      packArray(p.identifying_facets) || '[]', packArray(p.formats) || '[]',
+      (p.formats && p.formats.indexOf('structured_data') >= 0) ? 1 : 0,
+      av, p.auto_release_eligible ? 1 : 0, 'draft', 'discovered',
+      (typeof p.confidence === 'number' ? p.confidence : null), 900
+    ]);
+    await audit('record_type', id, 'discover', req, { name: p.name, code: code, confidence: p.confidence });
+    res.json({ matched_existing: false, draft: hydrate(await get('SELECT * FROM record_types WHERE id = ?', [id])), reasoning: p.reasoning || null });
+  } catch (e) {
+    console.error('Discover error:', e.message);
+    res.status(500).json({ error: 'Schema discovery failed', details: e.message });
+  }
+});
+
 module.exports = router;
