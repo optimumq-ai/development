@@ -14,3 +14,10 @@ ON CONFLICT (code) DO UPDATE SET
   is_structured_data=EXCLUDED.is_structured_data, public_availability=EXCLUDED.public_availability,
   auto_release_eligible=EXCLUDED.auto_release_eligible, sort_order=EXCLUDED.sort_order,
   updated_at=to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS');
+INSERT INTO record_type_departments (id, record_type_id, department_id, role, sort_order) VALUES
+('rd-personnel-files-own','rt-personnel-files','dept-hr','owner',10),
+('rd-salary-compensation-own','rt-salary-compensation','dept-hr','owner',10),
+('rd-employee-roster-own','rt-employee-roster','dept-hr','owner',10),
+('rd-disciplinary-records-own','rt-disciplinary-records','dept-hr','owner',10),
+('rd-recruitment-hiring-own','rt-recruitment-hiring','dept-hr','owner',10)
+ON CONFLICT (record_type_id, department_id, role) DO NOTHING;

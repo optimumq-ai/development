@@ -14,3 +14,10 @@ ON CONFLICT (code) DO UPDATE SET
   is_structured_data=EXCLUDED.is_structured_data, public_availability=EXCLUDED.public_availability,
   auto_release_eligible=EXCLUDED.auto_release_eligible, sort_order=EXCLUDED.sort_order,
   updated_at=to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS');
+INSERT INTO record_type_departments (id, record_type_id, department_id, role, sort_order) VALUES
+('rd-official-email-own','rt-official-email','dept-pio','owner',10),
+('rd-text-messages-own','rt-text-messages','dept-pio','owner',10),
+('rd-social-media-own','rt-social-media','dept-pio','owner',10),
+('rd-press-releases-own','rt-press-releases','dept-pio','owner',10),
+('rd-internal-memos-own','rt-internal-memos','dept-pio','owner',10)
+ON CONFLICT (record_type_id, department_id, role) DO NOTHING;

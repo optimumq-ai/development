@@ -13,3 +13,9 @@ ON CONFLICT (code) DO UPDATE SET
   is_structured_data=EXCLUDED.is_structured_data, public_availability=EXCLUDED.public_availability,
   auto_release_eligible=EXCLUDED.auto_release_eligible, sort_order=EXCLUDED.sort_order,
   updated_at=to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS');
+INSERT INTO record_type_departments (id, record_type_id, department_id, role, sort_order) VALUES
+('rd-fire-incident-reports-own','rt-fire-incident-reports','dept-fire','owner',10),
+('rd-ems-patient-records-own','rt-ems-patient-records','dept-fire','owner',10),
+('rd-fire-inspection-reports-own','rt-fire-inspection-reports','dept-fire','owner',10),
+('rd-fire-investigation-own','rt-fire-investigation','dept-fire','owner',10)
+ON CONFLICT (record_type_id, department_id, role) DO NOTHING;
