@@ -10,6 +10,7 @@ import RequestWorkspacePage from './pages/RequestWorkspacePage';
 import StaffManagementPage from './pages/StaffManagementPage';
 import DepartmentsPage from './pages/DepartmentsPage';
 import TaxonomyPage from './pages/TaxonomyPage';
+import SchemaDiscoveryPage from './pages/SchemaDiscoveryPage';
 import MyTasksPage from './pages/MyTasksPage';
 import ConfigurationPage from './pages/ConfigurationPage';
 import ARIAReportsPage from './pages/ARIAReportsPage';
@@ -50,6 +51,7 @@ export default function App() {
           <Route path="staff" element={<StaffManagementPage />} />
           <Route path="departments" element={<DepartmentsPage />} />
           <Route path="taxonomy" element={<TaxonomyPage />} />
+          <Route path="discovery" element={<SchemaDiscoveryPage />} />
           <Route path="config" element={<ConfigurationPage />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
