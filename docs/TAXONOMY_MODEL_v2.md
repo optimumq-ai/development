@@ -36,3 +36,11 @@ A record type = finest level where redaction, public-availability, routing, and 
 
 ## What's already resolved
 Owner-vs-fulfiller, A/V multi-department, paper-then-PDF, data-vs-output, and where cost/public-ready live - all handled by the hub model above. Nothing Kevin typed is lost.
+
+## Descriptive knowledge on a record type (added 2026-06-04, from intent/content discussion)
+Key insight: citizens describe a SITUATION + CONTENT, not a type name. Synonyms only catch alternate names -> big gap. Add richer fields beyond synonyms:
+- intent/purpose: what the record exists to capture (body-cam = events an officer is directly involved in while on duty). Acts as a DISCRIMINATOR -> lets AI EXCLUDE plausible-but-wrong keyword matches (e.g. use-of-force training video, council clip).
+- expected_content + typical_request_reason: what's in it + situations that drive requests (use of force, wrongful arrest claim). Matches how citizens actually phrase requests; also guides what to extract at indexing time.
+- identifying_facets: date, location, persons/officers, incident/case # -> the details that pin down a SPECIFIC instance.
+
+Agent behavior (resolves the "nothing found vs wrong result" dilemma): in the ambiguous middle, the agent ASKS one targeted, benign question driven by the type's identifying_facets (not a generic "tell me more"). Separates two questions that were tangled: (a) is this the right TYPE? [taxonomy + intent] vs (b) do we have THIS specific instance? [connector/index + facets]. Honest outputs: confident on both -> return; right type but unconfirmed instance -> say so, confirm one detail, route to records team; not a fit -> say so plainly. Never fabricate a match, never wrongly stonewall.
