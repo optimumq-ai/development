@@ -79,7 +79,7 @@ router.get('/record-types', requireAuth, async function(req, res) {
   if (req.query.category_id) { clauses.push('rt.category_id = ?'); params.push(req.query.category_id); }
   if (req.query.status) { clauses.push('rt.status = ?'); params.push(req.query.status); }
   var where = clauses.length ? (' WHERE ' + clauses.join(' AND ')) : '';
-  var rows = await all('SELECT rt.*, c.name AS category_name FROM record_types rt LEFT JOIN categories c ON c.id = rt.category_id' + where + ' ORDER BY rt.sort_order, rt.name', params);
+  var rows = await all('SELECT rt.*, c.name AS category_name, (SELECT d.name FROM record_type_departments rd JOIN departments d ON d.id = rd.department_id WHERE rd.record_type_id = rt.id AND rd.role = \'owner\' ORDER BY rd.sort_order LIMIT 1) AS owner_department_name FROM record_types rt LEFT JOIN categories c ON c.id = rt.category_id' + where + ' ORDER BY rt.sort_order, rt.name', params);
   res.json({ record_types: rows.map(hydrate) });
 });
 
