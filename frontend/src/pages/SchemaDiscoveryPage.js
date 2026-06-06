@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
+import RecordTypeEditor from '../components/RecordTypeEditor';
 
 var AVAIL = {
   releasable: { label: 'Releasable', bg: '#DEF7EC', fg: '#03543F' },
@@ -16,12 +17,14 @@ export default function SchemaDiscoveryPage() {
   var [drafts, setDrafts] = useState([]);
   var [loading, setLoading] = useState(true);
   var [busy, setBusy] = useState(null);
+  var [cats, setCats] = useState([]);
+  var [editor, setEditor] = useState(null);
 
   useEffect(function(){ loadDrafts(); }, []);
 
   async function loadDrafts() {
     setLoading(true);
-    try { var r = await api.get('/taxonomy/record-types', { params: { status: 'draft' } }); setDrafts(r.data.record_types); }
+    try { var r = await api.get('/taxonomy/record-types', { params: { status: 'draft' } }); setDrafts(r.data.record_types); var cr = await api.get('/taxonomy/categories'); setCats(cr.data.categories); }
     catch (e) { console.error(e); }
     setLoading(false);
   }
@@ -76,6 +79,7 @@ export default function SchemaDiscoveryPage() {
         {(d.identifying_facets && d.identifying_facets.length) ? <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '2px' }}>Pinned by: {d.identifying_facets.join(' \u00b7 ')}</div> : null}
         <div style={{ display: 'flex', gap: '8px', marginTop: '12px' }}>
           <button onClick={function(){ approve(d.id); }} disabled={busy === d.id} style={{ padding: '7px 16px', borderRadius: '8px', border: 'none', background: '#059669', color: 'white', fontSize: '13px', fontWeight: '600', cursor: 'pointer', opacity: busy === d.id ? 0.6 : 1 }}>Approve</button>
+          <button onClick={function(){ setEditor(d); }} style={{ padding: '7px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Edit</button>
           <button onClick={function(){ reject(d.id); }} disabled={busy === d.id} style={{ padding: '7px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#DC2626', fontSize: '13px', fontWeight: '600', cursor: 'pointer', opacity: busy === d.id ? 0.6 : 1 }}>Reject</button>
         </div>
       </div>
@@ -119,6 +123,7 @@ export default function SchemaDiscoveryPage() {
           </div>
         )}
       </div>
+      {editor ? <RecordTypeEditor mode="edit" initial={editor} categories={cats} onClose={function(){ setEditor(null); }} onSaved={function(){ setEditor(null); loadDrafts(); }} /> : null}
     </div>
   );
 }
