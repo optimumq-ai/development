@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
+import RecordTypeEditor from '../components/RecordTypeEditor';
 
 var AVAIL = {
   releasable: { label: 'Releasable', bg: '#DEF7EC', fg: '#03543F' },
@@ -22,6 +23,7 @@ export default function TaxonomyPage() {
   var [q, setQ] = useState('');
   var [filter, setFilter] = useState('all');
   var [collapsed, setCollapsed] = useState({});
+  var [editor, setEditor] = useState(null);
 
   useEffect(function() { load(); }, []);
 
@@ -72,9 +74,12 @@ export default function TaxonomyPage() {
 
   return (
     <div style={{ maxWidth: '960px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <div>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
+        <div>
         <h1 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 4px' }}>Taxonomy</h1>
         <p style={{ color: '#9CA3AF', fontSize: '14px', margin: 0 }}>{types.length} record types across {cats.filter(function(c){ return types.some(function(t){ return t.category_id === c.id; }); }).length} categories</p>
+        </div>
+        <button onClick={function(){ setEditor({ mode: 'create', initial: null }); }} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '14px', fontWeight: '600', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}>+ New type</button>
       </div>
 
       <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
@@ -138,6 +143,7 @@ export default function TaxonomyPage() {
                             <div style={{ display: 'flex', gap: '6px', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                               {t.auto_release_eligible === 1 ? pill('#E1EFFE', '#1E429F', 'Auto-release') : null}
                               {pill(av.bg, av.fg, av.label)}
+                              <button onClick={function(){ setEditor({ mode: 'edit', initial: t }); }} style={{ marginLeft: '4px', padding: '2px 10px', borderRadius: '20px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '11px', fontWeight: '600', cursor: 'pointer' }}>Edit</button>
                             </div>
                           </div>
                           {t.intent ? <div style={{ fontSize: '13px', color: '#4B5563', marginTop: '4px' }}>{t.intent}</div> : null}
@@ -159,6 +165,7 @@ export default function TaxonomyPage() {
           {shown.length === 0 ? <div style={{ padding: '48px', textAlign: 'center', color: '#9CA3AF' }}>No record types match your search or filter.</div> : null}
         </div>
       )}
+      {editor ? <RecordTypeEditor mode={editor.mode} initial={editor.initial} categories={cats} onClose={function(){ setEditor(null); }} onSaved={function(){ setEditor(null); load(); }} /> : null}
     </div>
   );
 }

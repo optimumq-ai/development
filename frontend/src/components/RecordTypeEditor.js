@@ -1,0 +1,118 @@
+import React, { useState } from 'react';
+import api from '../lib/api';
+
+var AVAIL_OPTS = ['releasable', 'review_required', 'restricted', 'confidential'];
+
+function arrToStr(a) { return Array.isArray(a) ? a.join(', ') : ''; }
+function strToArr(s) { return (s || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean); }
+
+export default function RecordTypeEditor(props) {
+  var init = props.initial || {};
+  var [f, setF] = useState({
+    category_id: init.category_id || (props.categories[0] && props.categories[0].id) || '',
+    name: init.name || '',
+    code: init.code || '',
+    intent: init.intent || '',
+    expected_content: init.expected_content || '',
+    typical_request_reason: init.typical_request_reason || '',
+    public_availability: init.public_availability || 'review_required',
+    auto_release_eligible: init.auto_release_eligible === 1,
+    is_structured_data: init.is_structured_data === 1,
+    synonyms: arrToStr(init.synonyms),
+    disambiguators: arrToStr(init.disambiguators),
+    keywords: arrToStr(init.keywords),
+    identifying_facets: arrToStr(init.identifying_facets),
+    formats: arrToStr(init.formats),
+    status: init.status || 'active'
+  });
+  var [saving, setSaving] = useState(false);
+  var [err, setErr] = useState('');
+  function set(k, v) { setF(function(p){ var n = Object.assign({}, p); n[k] = v; return n; }); }
+
+  async function save() {
+    if (!f.name.trim() || !f.category_id) { setErr('Name and category are required.'); return; }
+    if (props.mode === 'create' && !f.code.trim()) { setErr('Code is required for a new type.'); return; }
+    setSaving(true); setErr('');
+    var payload = {
+      category_id: f.category_id, name: f.name.trim(), intent: f.intent,
+      expected_content: f.expected_content, typical_request_reason: f.typical_request_reason,
+      public_availability: f.public_availability, auto_release_eligible: f.auto_release_eligible,
+      is_structured_data: f.is_structured_data, synonyms: strToArr(f.synonyms),
+      disambiguators: strToArr(f.disambiguators), keywords: strToArr(f.keywords),
+      identifying_facets: strToArr(f.identifying_facets), formats: strToArr(f.formats), status: f.status
+    };
+    try {
+      if (props.mode === 'create') { payload.code = f.code.trim(); await api.post('/taxonomy/record-types', payload); }
+      else { await api.patch('/taxonomy/record-types/' + init.id, payload); }
+      props.onSaved();
+    } catch (e) {
+      setErr((e.response && e.response.data && e.response.data.error) || 'Save failed');
+      setSaving(false);
+    }
+  }
+
+  var overlay = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 16px', zIndex: 50, overflowY: 'auto' };
+  var modal = { background: 'white', borderRadius: '12px', width: '100%', maxWidth: '640px', padding: '24px', boxShadow: '0 10px 40px rgba(0,0,0,.2)' };
+  var lab = { fontSize: '12px', fontWeight: '600', color: '#374151', display: 'block', marginBottom: '4px', marginTop: '14px' };
+  var inp = { width: '100%', padding: '8px 10px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', fontFamily: 'inherit', boxSizing: 'border-box', outline: 'none' };
+
+  function field(lbl, key, opts) {
+    opts = opts || {};
+    return (
+      <div>
+        <label style={lab}>{lbl}{opts.hint ? <span style={{ color: '#9CA3AF', fontWeight: '400' }}> \u00b7 {opts.hint}</span> : null}</label>
+        {opts.area
+          ? <textarea value={f[key]} onChange={function(e){ set(key, e.target.value); }} style={Object.assign({}, inp, { minHeight: '60px', resize: 'vertical' })} />
+          : <input value={f[key]} onChange={function(e){ set(key, e.target.value); }} disabled={opts.disabled} style={Object.assign({}, inp, opts.disabled ? { background: '#F9FAFB', color: '#9CA3AF' } : {})} />}
+      </div>
+    );
+  }
+
+  return (
+    <div style={overlay} onClick={props.onClose}>
+      <div style={modal} onClick={function(e){ e.stopPropagation(); }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>{props.mode === 'create' ? 'New record type' : 'Edit record type'}</h2>
+          <button onClick={props.onClose} style={{ border: 'none', background: 'none', fontSize: '22px', color: '#9CA3AF', cursor: 'pointer', lineHeight: 1 }}>\u00d7</button>
+        </div>
+        <label style={lab}>Category</label>
+        <select value={f.category_id} onChange={function(e){ set('category_id', e.target.value); }} style={inp}>
+          {props.categories.map(function(c){ return <option key={c.id} value={c.id}>{c.name}</option>; })}
+        </select>
+        {field('Name', 'name')}
+        {field('Code', 'code', { disabled: props.mode !== 'create', hint: props.mode === 'create' ? 'kebab-case, unique' : 'fixed after creation' })}
+        {field('Intent', 'intent', { area: true })}
+        {field('Expected content', 'expected_content', { area: true })}
+        {field('Typical request reason', 'typical_request_reason', { area: true })}
+        <label style={lab}>Availability</label>
+        <select value={f.public_availability} onChange={function(e){ set('public_availability', e.target.value); }} style={inp}>
+          {AVAIL_OPTS.map(function(o){ return <option key={o} value={o}>{o}</option>; })}
+        </select>
+        <div style={{ display: 'flex', gap: '20px', marginTop: '14px' }}>
+          <label style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+            <input type="checkbox" checked={f.auto_release_eligible} onChange={function(e){ set('auto_release_eligible', e.target.checked); }} /> Auto-release eligible
+          </label>
+          <label style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+            <input type="checkbox" checked={f.is_structured_data} onChange={function(e){ set('is_structured_data', e.target.checked); }} /> Structured data
+          </label>
+        </div>
+        {field('Synonyms', 'synonyms', { hint: 'comma-separated' })}
+        {field('Disambiguators', 'disambiguators', { hint: 'comma-separated' })}
+        {field('Keywords', 'keywords', { hint: 'comma-separated' })}
+        {field('Identifying facets', 'identifying_facets', { hint: 'comma-separated' })}
+        {field('Formats', 'formats', { hint: 'document, video, audio, structured_data' })}
+        <label style={lab}>Status</label>
+        <select value={f.status} onChange={function(e){ set('status', e.target.value); }} style={inp}>
+          <option value="active">active</option>
+          <option value="draft">draft</option>
+          <option value="inactive">inactive</option>
+        </select>
+        {err ? <div style={{ color: '#DC2626', fontSize: '13px', marginTop: '14px' }}>{err}</div> : null}
+        <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
+          <button onClick={props.onClose} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
+          <button onClick={save} disabled={saving} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '14px', fontWeight: '600', cursor: 'pointer', opacity: saving ? 0.6 : 1 }}>{saving ? 'Saving...' : 'Save'}</button>
+        </div>
+      </div>
+    </div>
+  );
+}
