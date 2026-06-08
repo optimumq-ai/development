@@ -10,7 +10,8 @@ router.post('/', requireAuth, async function(req, res) {
 
   var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
-  var depts = await all('SELECT id, name, code FROM departments WHERE active = 1 ORDER BY sort_order');
+  var depts = await all("SELECT id, name, code, processed_by FROM departments WHERE active = 1 AND (kind <> 'team' OR kind IS NULL) ORDER BY sort_order");
+  var fallbackTeam = await get("SELECT id, name FROM departments WHERE kind = 'team' AND is_open_records = 1 ORDER BY sort_order LIMIT 1");
   var deptList = depts.map(function(d) { return d.code + ': ' + d.name; }).join(', ');
 
   var agencyName = await get('SELECT value FROM system_config WHERE key = ?', ['agency_name']);
@@ -30,8 +31,13 @@ router.post('/', requireAuth, async function(req, res) {
     var result = JSON.parse(clean);
 
     var dept = depts.find(function(d) { return d.code === result.department_code; });
-    result.department_id = dept ? dept.id : null;
-    result.department_name = dept ? dept.name : null;
+    var teamId = (dept && dept.processed_by) ? dept.processed_by : (fallbackTeam ? fallbackTeam.id : null);
+    var teamRow = teamId ? await get('SELECT id, name FROM departments WHERE id = ?', [teamId]) : null;
+    result.custodian_department_id = dept ? dept.id : null;
+    result.custodian_name = dept ? dept.name : null;
+    result.department_id = teamId;
+    result.department_name = teamRow ? teamRow.name : null;
+    result.fulfillment_team_name = result.department_name;
 
     res.json(result);
   } catch(e) {

@@ -272,7 +272,7 @@ export default function NewRequestPage() {
               <textarea value={form.description} onChange={function(e){setF('description',e.target.value);}} style={Object.assign({},lowConfidenceFields.description?inpLow:inp,{minHeight:'120px',resize:'vertical',fontFamily:'inherit'})} placeholder="Describe the records being requested..." required/>
             </div>
             <div>
-              <label style={lbl}>Department Routing</label>
+              <label style={lbl}>Fulfillment Team</label>
               <select value={form.departmentId} onChange={function(e){setF('departmentId',e.target.value);}} style={inp}>
                 <option value="">— Auto-route or select manually —</option>
                 {departments.map(function(d){return <option key={d.id} value={d.id}>{d.name}</option>;})}
