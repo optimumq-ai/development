@@ -40,6 +40,7 @@ app.post('/api/requests/public', async function(req, res) {
 app.use('/api/requests', require('./src/routes/requests'));
 app.use('/api/staff', require('./src/routes/staff'));
 app.use('/api/departments', require('./src/routes/departments'));
+app.use('/api/repositories', require('./src/routes/repositories'));
 app.use('/api/config', require('./src/routes/config'));
 app.get('/api/config/public', async function(req,res){var db=require('./src/db');var rows=await db.all('SELECT key,value FROM system_config WHERE key IN (?,?,?)',['agency_name','contact_email','contact_phone']);var cfg={};rows.forEach(function(r){cfg[r.key]=r.value;});res.json(cfg);});
 app.use('/api/classify', require('./src/routes/classify'));
