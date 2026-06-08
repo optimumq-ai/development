@@ -1,7 +1,7 @@
 var { all, get, run } = require('../db');
 var { v4: uuidv4 } = require('uuid');
 var Anthropic = require('@anthropic-ai/sdk');
-var connectors = { filestore: require('./connectors/filestore') };
+var connectors = { filestore: require('./connectors/filestore'), structured: require('./connectors/structured') };
 
 function nid(p){ return p + '-' + uuidv4().substring(0, 8); }
 function packArray(a){ return Array.isArray(a) ? JSON.stringify(a) : '[]'; }
