@@ -42,4 +42,27 @@ router.delete('/:id', requireAuth, async function(req, res){
   res.json({ success: true });
 });
 
+router.post('/ai-configure', requireAuth, async function(req, res) {
+  var b = req.body || {};
+  var desc = (b.description || '').toString().trim();
+  if (!desc) return res.status(400).json({ error: 'description is required' });
+  var docs = (b.documentation || '').toString().substring(0, 12000);
+  var keys = catalog.map(function(c){ return c.key; });
+  var catalogText = catalog.map(function(c){ return c.key + ': ' + c.label + ' - ' + c.description + ' | fields: ' + (c.fields||[]).map(function(f){ return f.key; }).join(', ') + ' | capabilities: ' + (c.capabilities||[]).join(','); }).join('\n');
+  var prompt = 'You help configure a data-source connector for a public-records system. Based on the description and any documentation of the system, choose the best connector type from the catalog and propose a configuration. Return ONLY a JSON object, no other text.\n\nConnector catalog:\n' + catalogText + '\n\nReturn JSON: {"connector_type":"<key>","name":"<suggested name>","config":{},"reasoning":"<one or two sentences>","missing":[]}\n\nRules:\n- connector_type MUST be one of: ' + keys.join(', ') + '.\n- Fill config fields you can infer; leave unknown ones out and list their keys in missing.\n- NEVER invent credentials or secrets; leave api_key or password-like fields empty and list them in missing.\n\nSystem description:\n' + desc + (docs ? ('\n\nDocumentation:\n' + docs) : '');
+  try {
+    var Anthropic = require('@anthropic-ai/sdk');
+    var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    var message = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 1000, messages: [{ role: 'user', content: prompt }] });
+    var raw = message.content[0].text.trim().replace(/```json|```/g, '').trim();
+    var p = JSON.parse(raw);
+    if (keys.indexOf(p.connector_type) < 0) p.connector_type = keys[0];
+    if (!p.config || typeof p.config !== 'object') p.config = {};
+    if (!Array.isArray(p.missing)) p.missing = [];
+    res.json({ proposal: p });
+  } catch (e) {
+    res.status(500).json({ error: 'AI configuration failed', details: e.message });
+  }
+});
+
 module.exports = router;

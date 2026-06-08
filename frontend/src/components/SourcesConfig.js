@@ -14,6 +14,7 @@ export default function SourcesConfig() {
   const [loading, setLoading] = useState(true);
   const [editor, setEditor] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [ai, setAi] = useState(null);
 
   useEffect(function(){ load(); }, []);
 
@@ -49,12 +50,52 @@ export default function SourcesConfig() {
     try { await api.delete('/repositories/' + s.id); await load(); } catch(e){ alert('Delete failed'); }
   }
 
+  function openAi(){ setAi({ description:'', documentation:'', loading:false, error:'' }); }
+  function setAiField(k,v){ setAi(function(a){ var n=Object.assign({},a); n[k]=v; return n; }); }
+  async function proposeAi(){
+    if (!ai.description.trim()) { setAiField('error','Describe the system first'); return; }
+    setAiField('loading', true); setAiField('error','');
+    try {
+      var r = await api.post('/repositories/ai-configure', { description: ai.description, documentation: ai.documentation });
+      var p = r.data.proposal;
+      setAi(null);
+      setEditor({ mode:'create', data:{ name:p.name||'', connector_type:p.connector_type, status:'active', config:p.config||{}, _ai:{ reasoning:p.reasoning||'', missing:p.missing||[] } } });
+    } catch(e){ setAiField('loading', false); setAiField('error', (e.response&&e.response.data&&e.response.data.error)||'AI configuration failed'); }
+  }
+
+  function renderAiPanel(){
+    return (
+      <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'16px', marginBottom:'16px' }}>
+        <div style={{ fontWeight:'700', fontSize:'15px', marginBottom:'4px' }}>Configure with AI</div>
+        <p style={{ color:'#6B7280', fontSize:'13px', margin:'0 0 12px' }}>Describe the system and where it lives. Optionally paste any documentation. The AI picks a connector type and proposes a configuration for you to review.</p>
+        <div style={{ marginBottom:'12px' }}>
+          <label style={lbl}>System description / location</label>
+          <textarea style={Object.assign({},inp,{minHeight:'70px',fontFamily:'inherit'})} value={ai.description} onChange={function(e){ setAiField('description', e.target.value); }} placeholder="e.g. A shared network folder of scanned permit PDFs, or our Tyler Munis ERP at https://..." />
+        </div>
+        <div style={{ marginBottom:'12px' }}>
+          <label style={lbl}>Documentation (optional)</label>
+          <textarea style={Object.assign({},inp,{minHeight:'70px',fontFamily:'inherit'})} value={ai.documentation} onChange={function(e){ setAiField('documentation', e.target.value); }} placeholder="Paste any schema, data dictionary, or system docs that describe the records..." />
+        </div>
+        {ai.error ? <div style={{ color:'#DC2626', fontSize:'13px', marginBottom:'10px' }}>{ai.error}</div> : null}
+        <div style={{ display:'flex', justifyContent:'flex-end', gap:'8px' }}>
+          <button onClick={function(){ setAi(null); }} style={btnGhost} disabled={ai.loading}>Cancel</button>
+          <button onClick={proposeAi} style={btnPrimary} disabled={ai.loading}>{ai.loading?'Analyzing...':'Propose configuration'}</button>
+        </div>
+      </div>
+    );
+  }
+
   function renderEditor() {
     var d = editor.data;
     var meta = typeMeta(d.connector_type);
     return (
       <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'16px', marginBottom:'16px' }}>
         <div style={{ fontWeight:'700', fontSize:'15px', marginBottom:'12px' }}>{editor.mode==='create'?'Add source':'Edit source'}</div>
+        {d._ai ? (
+          <div style={{ background:'#EFF6FF', border:'1px solid #BFDBFE', borderRadius:'8px', padding:'10px 12px', marginBottom:'12px', fontSize:'13px', color:'#1E40AF' }}>
+            <strong>AI suggestion:</strong> {d._ai.reasoning}{(d._ai.missing && d._ai.missing.length) ? (' Still needed: ' + d._ai.missing.join(', ') + '.') : ''}
+          </div>
+        ) : null}
         <div style={{ marginBottom:'12px' }}>
           <label style={lbl}>Name</label>
           <input style={inp} value={d.name} onChange={function(e){ setField('name', e.target.value); }} placeholder="e.g. HR Network Drive" />
@@ -93,9 +134,15 @@ export default function SourcesConfig() {
     <div>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px' }}>
         <div style={{ color:'#6B7280', fontSize:'14px' }}>Repositories and systems the platform can search and scan for record types.</div>
-        {!editor ? <button onClick={openCreate} style={btnPrimary}>+ Add source</button> : null}
+        {!editor && !ai ? (
+          <div style={{ display:'flex', gap:'8px' }}>
+            <button onClick={openAi} style={btnGhost}>Configure with AI</button>
+            <button onClick={openCreate} style={btnPrimary}>+ Add source</button>
+          </div>
+        ) : null}
       </div>
       {editor ? renderEditor() : null}
+      {ai ? renderAiPanel() : null}
       {loading ? <div style={{ color:'#9CA3AF', fontSize:'14px' }}>Loading sources...</div> : (
         <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
           {sources.length===0 ? <div style={{ color:'#9CA3AF', fontSize:'14px' }}>No sources configured yet.</div> : null}
