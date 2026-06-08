@@ -247,4 +247,19 @@ router.post('/discover', requireAuth, async function(req, res) {
   }
 });
 
+router.post('/discover-scan', requireAuth, async function(req, res) {
+  var repoId = req.body && req.body.repository_id;
+  if (!repoId) return res.status(400).json({ error: 'repository_id is required' });
+  var repo = await get('SELECT id, name, connector_type, config FROM record_repositories WHERE id = ?', [repoId]);
+  if (!repo) return res.status(404).json({ error: 'Repository not found' });
+  try {
+    var result = await require('../services/schemaDiscovery').scanRepository(repo);
+    if (result.error) return res.status(400).json(result);
+    await audit('repository', repo.id, 'discover-scan', req, { scanned: result.scanned, created: result.created.length, matched: result.matched.length });
+    res.json(Object.assign({ repository: repo.name }, result));
+  } catch (e) {
+    res.status(500).json({ error: 'Repository scan failed', details: e.message });
+  }
+});
+
 module.exports = router;
