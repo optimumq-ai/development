@@ -35,6 +35,19 @@ export default function StaffManagementPage() {
     });
   }
 
+  async function createTeam(){
+    var name = window.prompt('New fulfillment team name:');
+    if (!name || !name.trim()) return;
+    name = name.trim();
+    var code = name.replace(/[^A-Za-z]/g,'').toUpperCase().slice(0,5) || 'TEAM';
+    try {
+      var r = await api.post('/departments', { name:name, code:code, kind:'team' });
+      var dr = await api.get('/departments');
+      setDepartments(dr.data.departments);
+      setF('departmentId', r.data.department.id);
+    } catch(e){ setErr(e.response && e.response.data ? e.response.data.error : 'Failed to create team'); }
+  }
+
   async function handleAdd(e) {
     e.preventDefault(); setErr(''); setSuccess('');
     if (!form.displayName || !form.email || !form.tempPassword) { setErr('Name, email and temporary password are required'); return; }
@@ -93,11 +106,12 @@ export default function StaffManagementPage() {
                 <input value={form.title} onChange={function(e){setF('title',e.target.value);}} style={inp} placeholder="Records Coordinator"/>
               </div>
               <div>
-                <label style={lbl}>Department</label>
+                <label style={lbl}>Fulfillment Team</label>
                 <select value={form.departmentId} onChange={function(e){setF('departmentId',e.target.value);}} style={inp}>
-                  <option value="">— No department assigned —</option>
-                  {departments.map(function(d){ return <option key={d.id} value={d.id}>{d.name}</option>; })}
+                  <option value="">— No team assigned —</option>
+                  {departments.filter(function(d){ return d.kind==='team'; }).map(function(d){ return <option key={d.id} value={d.id}>{d.name}</option>; })}
                 </select>
+                <button type="button" onClick={createTeam} style={{marginTop:'6px',background:'none',border:'none',color:'#1F4E79',fontSize:'12px',fontWeight:'600',cursor:'pointer',padding:0}}>+ New team</button>
               </div>
               <div>
                 <label style={lbl}>Temporary Password <span style={{color:'#DC2626'}}>*</span></label>
@@ -143,7 +157,7 @@ export default function StaffManagementPage() {
           <table style={{width:'100%',borderCollapse:'collapse'}}>
             <thead>
               <tr style={{background:'#F9FAFB'}}>
-                {['Name','Email','Department','Roles','Status','Last Login',''].map(function(h){
+                {['Name','Email','Team','Roles','Status','Last Login',''].map(function(h){
                   return <th key={h} style={{textAlign:'left',fontSize:'11px',fontWeight:'600',color:'#6B7280',textTransform:'uppercase',letterSpacing:'.05em',padding:'10px 16px'}}>{h}</th>;
                 })}
               </tr>

@@ -40,4 +40,12 @@ router.patch('/:id', requireAuth, async function(req, res) {
   res.json({ department: row });
 });
 
+router.post('/:id/fulfills', requireAuth, async function(req, res) {
+  var teamId = req.params.id;
+  var ids = Array.isArray(req.body.departmentIds) ? req.body.departmentIds : [];
+  await run('UPDATE departments SET processed_by = NULL WHERE processed_by = ?', [teamId]);
+  for (var i = 0; i < ids.length; i++) { await run('UPDATE departments SET processed_by = ? WHERE id = ?', [teamId, ids[i]]); }
+  res.json({ success: true });
+});
+
 module.exports = router;

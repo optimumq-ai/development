@@ -60,8 +60,8 @@ export default function DepartmentsPage(){
   function toggle(id){ setExpanded(function(e){ return e === id ? null : id; }); }
   function setField(k, v){ setEditor(function(ed){ var nd = Object.assign({}, ed.data); nd[k] = v; return Object.assign({}, ed, { data: nd }); }); }
 
-  function openCreate(kind){ setEditor({ mode:'create', kind:kind, data:{ name:'', code:'', color:kind==='team'?'#6B8E23':'#2E75B6', parent_id:'', processed_by:'', is_open_records:0, is_catch_all:0, sort_order:99 } }); }
-  function openEdit(d){ setEditor({ mode:'edit', kind:isTeam(d)?'team':'department', data:Object.assign({}, d, { parent_id:d.parent_id||'', processed_by:d.processed_by||'' }) }); }
+  function openCreate(kind){ setEditor({ mode:'create', kind:kind, data:{ name:'', code:'', color:kind==='team'?'#6B8E23':'#2E75B6', parent_id:'', processed_by:'', fulfills_for:[], is_open_records:0, is_catch_all:0, sort_order:99 } }); }
+  function openEdit(d){ setEditor({ mode:'edit', kind:isTeam(d)?'team':'department', data:Object.assign({}, d, { parent_id:d.parent_id||'', processed_by:d.processed_by||'', fulfills_for: departments.filter(function(x){ return x.processed_by===d.id; }).map(function(x){ return x.id; }) }) }); }
 
   async function saveEditor(){
     var d = editor.data;
@@ -69,8 +69,10 @@ export default function DepartmentsPage(){
     setSaving(true);
     try {
       var payload = { name:d.name, code:d.code, color:d.color, kind:editor.kind, parent_id:editor.kind==='team'?(d.parent_id||null):null, processed_by:editor.kind==='department'?(d.processed_by||null):null, is_open_records:d.is_open_records?1:0, is_catch_all:d.is_catch_all?1:0, sort_order:Number(d.sort_order)||99 };
-      if (editor.mode==='create') await api.post('/departments', payload);
+      var savedId = d.id;
+      if (editor.mode==='create') { var rc = await api.post('/departments', payload); savedId = rc.data.department.id; }
       else await api.patch('/departments/' + d.id, payload);
+      if (editor.kind==='team') await api.post('/departments/' + savedId + '/fulfills', { departmentIds: d.fulfills_for || [] });
       setEditor(null); await load();
     } catch(e){ alert('Save failed: ' + ((e.response && e.response.data && e.response.data.error) || e.message)); }
     setSaving(false);
@@ -94,7 +96,10 @@ export default function DepartmentsPage(){
         <Field label="Code"><input style={inputStyle} value={d.code} maxLength={6} onChange={function(e){setField('code',e.target.value.toUpperCase());}} /></Field>
         <Field label="Color"><div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>{COLORS.map(function(c){ return <div key={c} onClick={function(){setField('color',c);}} style={{width:'28px',height:'28px',borderRadius:'7px',background:c,cursor:'pointer',border:d.color===c?'3px solid #111':'3px solid transparent'}} />; })}</div></Field>
         {kind==='team' ? (
-          <Field label="Parent department"><select style={inputStyle} value={d.parent_id} onChange={function(e){setField('parent_id',e.target.value);}}><option value="">— none —</option>{depts().map(function(x){ return <option key={x.id} value={x.id}>{x.name}</option>; })}</select></Field>
+          <div>
+          <Field label="Organizational parent (optional)"><select style={inputStyle} value={d.parent_id} onChange={function(e){setField('parent_id',e.target.value);}}><option value="">— none —</option>{depts().map(function(x){ return <option key={x.id} value={x.id}>{x.name}</option>; })}</select></Field>
+          <Field label="Fulfills requests for"><div style={{display:'flex',flexDirection:'column',gap:'5px',maxHeight:'160px',overflowY:'auto',border:'1px solid #E5E7EB',borderRadius:'8px',padding:'8px'}}>{depts().map(function(x){ var on=(d.fulfills_for||[]).indexOf(x.id)>=0; return <label key={x.id} style={{fontSize:'13px',display:'flex',alignItems:'center',gap:'7px',cursor:'pointer'}}><input type="checkbox" checked={on} onChange={function(){ var cur=(d.fulfills_for||[]).slice(); var i=cur.indexOf(x.id); if(i>=0)cur.splice(i,1); else cur.push(x.id); setField('fulfills_for',cur); }}/> {x.name}</label>; })}</div></Field>
+          </div>
         ) : (
           <Field label="Requests processed by (fulfillment team)"><select style={inputStyle} value={d.processed_by} onChange={function(e){setField('processed_by',e.target.value);}}><option value="">— unassigned —</option>{teams().map(function(x){ return <option key={x.id} value={x.id}>{x.name}</option>; })}</select></Field>
         )}
