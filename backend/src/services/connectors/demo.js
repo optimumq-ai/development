@@ -28,6 +28,7 @@ async function search(query) {
     var jsonMatch = text.match(/\[[\s\S]*\]/);
     if (!jsonMatch) return [];
     var ranked = JSON.parse(jsonMatch[0]);
+    var seen = {};
     var results = ranked.map(function(r) {
       var doc = docs.find(function(d) { return d.id.indexOf(r.id_prefix) === 0; });
       if (!doc) return null;
@@ -44,7 +45,11 @@ async function search(query) {
         publicAvailability: doc.public_availability,
         matchScore: r.match_score
       };
-    }).filter(function(x){ return x !== null; });
+    }).filter(function(x){
+      if (x === null || seen[x.id]) return false;
+      seen[x.id] = true;
+      return true;
+    });
     return results;
   } catch(e) {
     console.error('[demo connector] search failed:', e.message);
