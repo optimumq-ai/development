@@ -37,4 +37,31 @@ async function searchAll(query) {
   return allResults.slice(0, 10);
 }
 
-module.exports = { searchAll: searchAll };
+async function nativeSearchAll(query) {
+  var map = {
+    demo: demoConnector,
+    tyler: tylerConnector,
+    axon: axonConnector,
+    filestore: require('./connectors/filestore')
+  };
+  var repos = await all("SELECT id, name, connector_type, config FROM record_repositories WHERE status = 'active' ORDER BY sort_order");
+  var groups = await Promise.all(repos.map(async function(repo) {
+    var c = map[repo.connector_type];
+    if (!c || typeof c.nativeSearch !== 'function') return null;
+    var config = {};
+    try { config = repo.config ? JSON.parse(repo.config) : {}; } catch(e) {}
+    var results = [];
+    try {
+      results = repo.connector_type === 'demo'
+        ? await c.nativeSearch(query)
+        : await c.nativeSearch(query, config);
+    } catch(e) {
+      console.error('[nativeSearch]', repo.connector_type, 'failed:', e.message);
+      results = [];
+    }
+    return { sourceId: repo.id, sourceName: repo.name, connectorType: repo.connector_type, results: (results || []).filter(function(r){ return r.matchScore >= 30; }) };
+  }));
+  return groups.filter(function(g) { return g && g.results.length > 0; });
+}
+
+module.exports = { searchAll: searchAll, nativeSearchAll: nativeSearchAll };

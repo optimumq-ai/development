@@ -83,4 +83,31 @@ async function search(query, config) {
   }
 }
 
-module.exports = { search: search };
+async function nativeSearch(query, config) {
+  var kw = require('./keyword');
+  var terms = kw.tokenize(query);
+  if (!terms.length) return [];
+  if (!config || !config.baseUrl) return [];
+  var base = config.baseUrl.replace(/\/$/, '');
+  var incidents = [];
+  try {
+    var data = await fetchJson(base + '/api/evidence/v1/incidents?pageSize=100', config.apiKey || '');
+    incidents = data.data || [];
+  } catch(e) { console.error('[axon nativeSearch]', e.message); return []; }
+  var out = [];
+  incidents.forEach(function(inc) {
+    var primary = (inc.caseNumber || '') + ' ' + (inc.incidentType || '') + ' ' + (inc.location || '');
+    var secondary = (inc.officer || '') + ' ' + (inc.status || '') + ' ' + (inc.category || '') + ' ' + (inc.narrative || '');
+    var m = kw.match(terms, primary, secondary);
+    if (!m) return;
+    var avail = inc.redactionRequired ? 'restricted' : 'available';
+    var sum = inc.incidentType + ' at ' + inc.location + ' \u00b7 Officer ' + inc.officer + ' \u00b7 Status: ' + inc.status;
+    if (inc.redactionRequired) sum += ' \u00b7 \u26a0 Redaction review required';
+    if (inc.involvesMinor) sum += ' \u00b7 \u26a0 Involves a minor';
+    out.push({ id: inc.incidentId, sourceSystem: 'Axon Evidence (Police Records)', title: 'Case ' + inc.caseNumber + ' - ' + inc.incidentType, summary: sum, department: 'Police', docType: 'Police Incident', dateCreated: (inc.occurredAt || '').split('T')[0], pageCount: 1, publicAvailability: avail, matchScore: m.score, matchedTerms: m.matched });
+  });
+  out.sort(function(a, b) { return b.matchScore - a.matchScore; });
+  return out.slice(0, 8);
+}
+
+module.exports = { search: search, nativeSearch: nativeSearch };

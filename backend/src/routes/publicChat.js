@@ -253,4 +253,19 @@ router.get('/verify/:token', async function(req, res) {
   res.send('<html><head><title>Email Verified</title></head><body style="font-family:Arial,sans-serif;background:#F9FAFB;margin:0;padding:60px 20px"><div style="max-width:480px;margin:0 auto;background:white;border-radius:12px;padding:40px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.08)"><div style="font-size:64px;margin-bottom:16px">✅</div><h1 style="color:#1F4E79;font-size:24px;margin:0 0 12px">Email Verified</h1><p style="color:#374151;font-size:15px;line-height:1.5;margin:0 0 8px">Your email address <strong>' + row.email + '</strong> has been verified for ' + agencyName + '.</p><p style="color:#6B7280;font-size:14px;margin-top:24px">You can now return to the records request chat. It will continue automatically.</p></div></body></html>');
 });
 
+router.post('/native-search', async function(req, res) {
+  var rate = checkRate(req.ip);
+  if (!rate.ok) return res.status(429).json({ error: 'Too many requests', rateLimited: true });
+  var query = (req.body && req.body.query) || '';
+  if (!query.trim()) return res.status(400).json({ error: 'Empty query' });
+  try {
+    var groups = await recordSearch.nativeSearchAll(query.trim());
+    var total = groups.reduce(function(n, g) { return n + g.results.length; }, 0);
+    res.json({ query: query.trim(), groups: groups, totalResults: total });
+  } catch(e) {
+    console.error('native-search failed:', e.message);
+    res.status(500).json({ error: 'Search failed' });
+  }
+});
+
 module.exports = router;

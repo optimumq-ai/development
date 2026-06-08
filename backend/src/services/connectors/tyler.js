@@ -81,4 +81,27 @@ async function search(query, config) {
   }
 }
 
-module.exports = { search: search };
+async function nativeSearch(query, config) {
+  var kw = require('./keyword');
+  var terms = kw.tokenize(query);
+  if (!terms.length) return [];
+  if (!config || !config.baseUrl) return [];
+  var base = config.baseUrl.replace(/\/$/, '');
+  var invoices = [];
+  try {
+    var data = await fetchJson(base + '/api/munis/v1/invoices?pageSize=100', config.apiKey || '');
+    invoices = data.data || [];
+  } catch(e) { console.error('[tyler nativeSearch]', e.message); return []; }
+  var out = [];
+  invoices.forEach(function(inv) {
+    var primary = (inv.vendorName || '') + ' ' + (inv.invoiceNumber || '') + ' ' + (inv.poNumber || '') + ' ' + (inv.checkNumber || '');
+    var secondary = (inv.description || '') + ' ' + (inv.department || '') + ' ' + (inv.fundCode || '') + ' ' + (inv.paymentStatus || '');
+    var m = kw.match(terms, primary, secondary);
+    if (!m) return;
+    out.push({ id: inv.invoiceId, sourceSystem: 'Tyler Munis (Financial/ERP)', title: 'Invoice ' + inv.invoiceNumber + ' - ' + inv.vendorName, summary: inv.description + ' \u2014 $' + inv.amount.toLocaleString() + ' (' + inv.paymentStatus + ')', department: inv.department, docType: 'Invoice', dateCreated: inv.invoiceDate, pageCount: 1, publicAvailability: 'available', matchScore: m.score, matchedTerms: m.matched });
+  });
+  out.sort(function(a, b) { return b.matchScore - a.matchScore; });
+  return out.slice(0, 8);
+}
+
+module.exports = { search: search, nativeSearch: nativeSearch };

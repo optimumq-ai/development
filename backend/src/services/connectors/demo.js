@@ -57,4 +57,19 @@ async function search(query) {
   }
 }
 
-module.exports = { search: search };
+async function nativeSearch(query) {
+  var kw = require('./keyword');
+  var terms = kw.tokenize(query);
+  if (!terms.length) return [];
+  var docs = await all('SELECT id, title, summary, body, department, doc_type, date_created, page_count, public_availability, tags FROM demo_documents');
+  var out = [];
+  docs.forEach(function(d) {
+    var m = kw.match(terms, (d.title || '') + ' ' + (d.tags || ''), (d.summary || '') + ' ' + (d.body || '') + ' ' + (d.department || '') + ' ' + (d.doc_type || ''));
+    if (!m) return;
+    out.push({ id: d.id, sourceSystem: 'Demo Document Library', title: d.title, summary: d.summary, department: d.department, docType: d.doc_type, dateCreated: d.date_created, pageCount: d.page_count, publicAvailability: d.public_availability, matchScore: m.score, matchedTerms: m.matched });
+  });
+  out.sort(function(a, b) { return b.matchScore - a.matchScore; });
+  return out.slice(0, 8);
+}
+
+module.exports = { search: search, nativeSearch: nativeSearch };

@@ -17,6 +17,11 @@ export default function PublicPortalPage() {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [agencyName, setAgencyName] = useState('');
+  const [lastSearchQuery, setLastSearchQuery] = useState('');
+  const [nativeOpen, setNativeOpen] = useState(false);
+  const [nativeQuery, setNativeQuery] = useState('');
+  const [nativeGroups, setNativeGroups] = useState(null);
+  const [nativeSearching, setNativeSearching] = useState(false);
   const scrollRef = useRef(null);
   const searchResultsRef = useRef(null);
 
@@ -123,6 +128,7 @@ export default function PublicPortalPage() {
       if (r.data.searchResults && r.data.searchResults.length > 0) {
         msgsAfter = msgsAfter.concat([{ role: 'assistant', content: '__SEARCH_RESULTS__', searchResults: r.data.searchResults, searchQuery: r.data.searchQuery }]);
       }
+      if (r.data.searchQuery) setLastSearchQuery(r.data.searchQuery);
       setMessages(msgsAfter);
       if (r.data.verifyEmail) {
         try {
@@ -143,6 +149,28 @@ export default function PublicPortalPage() {
       setMessages(displayMessages.concat([{role:'assistant', content:'I had trouble responding. Please try again, or use the form link below.'}]));
     }
     setSending(false);
+  }
+
+  async function runNativeSearch(q) {
+    var query = (q != null ? q : nativeQuery).trim();
+    if (!query || nativeSearching) return;
+    setNativeQuery(query);
+    setNativeSearching(true);
+    try {
+      var r = await axios.post(API + '/public/native-search', { query: query });
+      setNativeGroups(r.data.groups || []);
+    } catch(e) {
+      setNativeGroups([]);
+    }
+    setNativeSearching(false);
+  }
+
+  function openNativePanel() {
+    var seed = (nativeQuery || lastSearchQuery || '').trim();
+    setNativeOpen(true);
+    setNativeGroups(null);
+    setNativeQuery(seed);
+    if (seed) runNativeSearch(seed);
   }
 
   function handleSend(e) {
@@ -377,6 +405,12 @@ export default function PublicPortalPage() {
               </div>
             </div>
           )}
+          {lastSearchQuery && (
+            <div style={{borderTop:'1px solid #E5E7EB',padding:'10px 14px',background:'#FAFAFA',display:'flex',alignItems:'center',gap:'10px',flexWrap:'wrap'}}>
+              <span style={{fontSize:'12px',color:'#6B7280'}}>Not seeing the record you need?</span>
+              <button type="button" onClick={openNativePanel} style={{padding:'6px 12px',fontSize:'12px',fontWeight:'600',background:'white',color:'#1F4E79',border:'1px solid #1F4E79',borderRadius:'8px',cursor:'pointer'}}>Search connected systems directly</button>
+            </div>
+          )}
           <form onSubmit={handleSend} style={{borderTop:'1px solid #E5E7EB',padding:'14px',display:'flex',gap:'8px'}}>
             <textarea
               value={input}
@@ -393,6 +427,69 @@ export default function PublicPortalPage() {
             </button>
           </form>
         </div>
+        )}
+
+        {nativeOpen && (
+          <div style={{position:'fixed',inset:0,background:'rgba(17,24,39,0.45)',display:'flex',alignItems:'center',justifyContent:'center',padding:'20px',zIndex:50}}>
+            <div style={{background:'white',borderRadius:'14px',width:'100%',maxWidth:'620px',maxHeight:'85vh',display:'flex',flexDirection:'column',overflow:'hidden',boxShadow:'0 12px 48px rgba(0,0,0,0.25)'}}>
+              <div style={{padding:'16px 20px',borderBottom:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+                <div>
+                  <div style={{fontSize:'15px',fontWeight:'700',color:'#1F4E79'}}>Search connected systems</div>
+                  <div style={{fontSize:'12px',color:'#6B7280',marginTop:'2px'}}>Direct keyword search across all connected record sources</div>
+                </div>
+                <button onClick={function(){setNativeOpen(false);}} style={{background:'none',border:'none',fontSize:'22px',color:'#9CA3AF',cursor:'pointer',lineHeight:1}}>×</button>
+              </div>
+              <div style={{padding:'14px 20px',borderBottom:'1px solid #F3F4F6',display:'flex',gap:'8px'}}>
+                <input value={nativeQuery} onChange={function(e){setNativeQuery(e.target.value);}} onKeyDown={function(e){if(e.key==='Enter'){e.preventDefault();runNativeSearch();}}} placeholder="Enter keywords (e.g. building permit 123 Main St)" style={{flex:1,padding:'9px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',outline:'none'}} />
+                <button onClick={function(){runNativeSearch();}} disabled={nativeSearching||!nativeQuery.trim()} style={{padding:'9px 16px',background:(nativeSearching||!nativeQuery.trim())?'#D1D5DB':'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:(nativeSearching||!nativeQuery.trim())?'not-allowed':'pointer'}}>{nativeSearching?'Searching...':'Search'}</button>
+              </div>
+              <div style={{flex:1,overflowY:'auto',padding:'16px 20px'}}>
+                {nativeSearching && <div style={{textAlign:'center',color:'#6B7280',fontSize:'13px',padding:'20px'}}>Searching connected systems...</div>}
+                {!nativeSearching && nativeGroups && nativeGroups.length === 0 && (
+                  <div style={{textAlign:'center',padding:'24px 12px'}}>
+                    <div style={{fontSize:'13px',color:'#374151',marginBottom:'14px'}}>No records found in the connected systems for that search.</div>
+                    <button onClick={function(){setNativeOpen(false);}} style={{padding:'10px 18px',background:'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Continue with a formal request</button>
+                  </div>
+                )}
+                {!nativeSearching && nativeGroups === null && <div style={{textAlign:'center',color:'#9CA3AF',fontSize:'13px',padding:'20px'}}>Enter keywords and press Search.</div>}
+                {!nativeSearching && nativeGroups && nativeGroups.map(function(g, gi){
+                  return (
+                    <div key={gi} style={{marginBottom:'18px'}}>
+                      <div style={{fontSize:'12px',fontWeight:'700',color:'#1F4E79',textTransform:'uppercase',letterSpacing:'0.4px',marginBottom:'8px',display:'flex',alignItems:'center',gap:'8px'}}>
+                        <span>{g.sourceName}</span>
+                        <span style={{background:'#EBF3FB',color:'#1F4E79',borderRadius:'10px',padding:'1px 8px',fontSize:'11px',fontWeight:'700'}}>{g.results.length}</span>
+                      </div>
+                      <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
+                        {g.results.map(function(res, ri){
+                          return (
+                            <div key={ri} style={{border:'1px solid #E5E7EB',borderRadius:'10px',padding:'10px 12px'}}>
+                              <div style={{display:'flex',justifyContent:'space-between',gap:'8px',marginBottom:'4px'}}>
+                                <div style={{fontSize:'13px',fontWeight:'700',color:'#111',flex:1}}>{res.title}</div>
+                                {res.publicAvailability === 'restricted' && <span style={{flexShrink:0,fontSize:'10px',fontWeight:'700',color:'#D97706'}}>REDACTION REVIEW</span>}
+                              </div>
+                              {(res.dateCreated || res.docType || res.department) && <div style={{fontSize:'11px',color:'#9CA3AF',marginBottom:'4px'}}>{[res.docType,res.department,res.dateCreated].filter(Boolean).join(' · ')}</div>}
+                              {res.summary && <div style={{fontSize:'12px',color:'#374151',marginBottom:'6px',lineHeight:'1.4'}}>{res.summary}</div>}
+                              {res.matchedTerms && res.matchedTerms.length > 0 && <div style={{fontSize:'11px',color:'#6B7280',marginBottom:'8px'}}>Matched: {res.matchedTerms.join(', ')}</div>}
+                              <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
+                                {res.publicAvailability === 'available' && <button onClick={function(){alert('Download functionality coming soon. For now, include it in your request.');}} style={{padding:'5px 10px',fontSize:'11px',background:'#1F4E79',color:'white',border:'none',borderRadius:'6px',cursor:'pointer',fontWeight:'600'}}>View / Download</button>}
+                                <button onClick={function(){toggleRecord(res);}} style={{padding:'5px 10px',fontSize:'11px',background:isSelected(res.id)?'#16A34A':'white',color:isSelected(res.id)?'white':'#1F4E79',border:'1px solid '+(isSelected(res.id)?'#16A34A':'#1F4E79'),borderRadius:'6px',cursor:'pointer',fontWeight:'600'}}>{isSelected(res.id)?'✓ Added':'+ Include in request'}</button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              {nativeGroups && nativeGroups.length > 0 && (
+                <div style={{padding:'12px 20px',borderTop:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'space-between',gap:'10px'}}>
+                  <span style={{fontSize:'11px',color:'#6B7280'}}>Selected records carry into your request.</span>
+                  <button onClick={function(){setNativeOpen(false);}} style={{padding:'8px 16px',background:'#16A34A',color:'white',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Done</button>
+                </div>
+              )}
+            </div>
+          </div>
         )}
 
         <div style={{textAlign:'center',marginTop:'8px',fontSize:'11px',color:'#9CA3AF',flexShrink:0}}>
