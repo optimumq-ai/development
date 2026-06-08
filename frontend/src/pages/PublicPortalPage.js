@@ -22,6 +22,9 @@ export default function PublicPortalPage() {
   const [nativeQuery, setNativeQuery] = useState('');
   const [nativeGroups, setNativeGroups] = useState(null);
   const [nativeSearching, setNativeSearching] = useState(false);
+  const [nativeSources, setNativeSources] = useState(null);
+  const [nativeSourceId, setNativeSourceId] = useState(null);
+  const [nativeSourceName, setNativeSourceName] = useState('');
   const scrollRef = useRef(null);
   const searchResultsRef = useRef(null);
 
@@ -151,13 +154,14 @@ export default function PublicPortalPage() {
     setSending(false);
   }
 
-  async function runNativeSearch(q) {
+  async function runNativeSearch(q, sid) {
     var query = (q != null ? q : nativeQuery).trim();
     if (!query || nativeSearching) return;
+    var src = (sid !== undefined ? sid : nativeSourceId);
     setNativeQuery(query);
     setNativeSearching(true);
     try {
-      var r = await axios.post(API + '/public/native-search', { query: query });
+      var r = await axios.post(API + '/public/native-search', { query: query, sourceId: src === 'ALL' ? null : src });
       setNativeGroups(r.data.groups || []);
     } catch(e) {
       setNativeGroups([]);
@@ -169,8 +173,28 @@ export default function PublicPortalPage() {
     var seed = (nativeQuery || lastSearchQuery || '').trim();
     setNativeOpen(true);
     setNativeGroups(null);
+    setNativeSourceId(null);
+    setNativeSourceName('');
     setNativeQuery(seed);
-    if (seed) runNativeSearch(seed);
+    loadNativeSources();
+  }
+
+  async function loadNativeSources() {
+    setNativeSources(null);
+    try {
+      var r = await axios.get(API + '/public/sources');
+      setNativeSources(r.data.sources || []);
+    } catch(e) {
+      setNativeSources([]);
+    }
+  }
+
+  function pickSource(id, name) {
+    setNativeSourceId(id);
+    setNativeSourceName(name);
+    setNativeGroups(null);
+    var seed = (nativeQuery || '').trim();
+    if (seed) runNativeSearch(seed, id);
   }
 
   function handleSend(e) {
@@ -439,6 +463,31 @@ export default function PublicPortalPage() {
                 </div>
                 <button onClick={function(){setNativeOpen(false);}} style={{background:'none',border:'none',fontSize:'22px',color:'#9CA3AF',cursor:'pointer',lineHeight:1}}>×</button>
               </div>
+              {nativeSourceId === null && (
+                <div style={{flex:1,overflowY:'auto',padding:'14px 20px'}}>
+                  <div style={{fontSize:'13px',color:'#374151',marginBottom:'12px'}}>Choose a system to search directly. Each one holds different kinds of records.</div>
+                  {nativeSources === null && <div style={{color:'#9CA3AF',fontSize:'13px',padding:'10px'}}>Loading systems...</div>}
+                  {nativeSources && (
+                    <div onClick={function(){pickSource('ALL','All connected sources');}} style={{border:'1px solid #C7D9EB',background:'#F5F9FD',borderRadius:'10px',padding:'12px 14px',marginBottom:'8px',cursor:'pointer'}}>
+                      <div style={{fontSize:'14px',fontWeight:'700',color:'#1F4E79'}}>All connected systems</div>
+                      <div style={{fontSize:'12px',color:'#374151',marginTop:'4px'}}>Search every connected system at once.</div>
+                    </div>
+                  )}
+                  {nativeSources && nativeSources.map(function(src){
+                    return (
+                      <div key={src.id} onClick={function(){pickSource(src.id, src.name);}} style={{border:'1px solid #E5E7EB',borderRadius:'10px',padding:'12px 14px',marginBottom:'8px',cursor:'pointer'}}>
+                        <div style={{fontSize:'14px',fontWeight:'700',color:'#1F4E79'}}>{src.name}</div>
+                        {src.description && <div style={{fontSize:'12px',color:'#374151',marginTop:'4px',lineHeight:'1.4'}}>{src.description}</div>}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+              {nativeSourceId !== null && (<>
+              <div style={{padding:'10px 20px',borderBottom:'1px solid #F3F4F6'}}>
+                <button onClick={function(){setNativeSourceId(null);setNativeGroups(null);}} style={{background:'none',border:'none',color:'#1F4E79',fontSize:'12px',fontWeight:'600',cursor:'pointer',padding:0}}>← Choose a different system</button>
+                <div style={{fontSize:'13px',fontWeight:'700',color:'#111',marginTop:'4px'}}>{nativeSourceName}</div>
+              </div>
               <div style={{padding:'14px 20px',borderBottom:'1px solid #F3F4F6',display:'flex',gap:'8px'}}>
                 <input value={nativeQuery} onChange={function(e){setNativeQuery(e.target.value);}} onKeyDown={function(e){if(e.key==='Enter'){e.preventDefault();runNativeSearch();}}} placeholder="Enter keywords (e.g. building permit 123 Main St)" style={{flex:1,padding:'9px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',outline:'none'}} />
                 <button onClick={function(){runNativeSearch();}} disabled={nativeSearching||!nativeQuery.trim()} style={{padding:'9px 16px',background:(nativeSearching||!nativeQuery.trim())?'#D1D5DB':'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:(nativeSearching||!nativeQuery.trim())?'not-allowed':'pointer'}}>{nativeSearching?'Searching...':'Search'}</button>
@@ -482,6 +531,7 @@ export default function PublicPortalPage() {
                   );
                 })}
               </div>
+              </>)}
               {nativeGroups && nativeGroups.length > 0 && (
                 <div style={{padding:'12px 20px',borderTop:'1px solid #E5E7EB',display:'flex',alignItems:'center',justifyContent:'space-between',gap:'10px'}}>
                   <span style={{fontSize:'11px',color:'#6B7280'}}>Selected records carry into your request.</span>

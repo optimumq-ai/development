@@ -37,7 +37,7 @@ async function searchAll(query) {
   return allResults.slice(0, 10);
 }
 
-async function nativeSearchAll(query) {
+async function nativeSearchAll(query, sourceId) {
   var map = {
     demo: demoConnector,
     tyler: tylerConnector,
@@ -45,6 +45,7 @@ async function nativeSearchAll(query) {
     filestore: require('./connectors/filestore')
   };
   var repos = await all("SELECT id, name, connector_type, config FROM record_repositories WHERE status = 'active' ORDER BY sort_order");
+  if (sourceId) repos = repos.filter(function(r){ return r.id === sourceId; });
   var groups = await Promise.all(repos.map(async function(repo) {
     var c = map[repo.connector_type];
     if (!c || typeof c.nativeSearch !== 'function') return null;

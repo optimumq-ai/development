@@ -259,12 +259,31 @@ router.post('/native-search', async function(req, res) {
   var query = (req.body && req.body.query) || '';
   if (!query.trim()) return res.status(400).json({ error: 'Empty query' });
   try {
-    var groups = await recordSearch.nativeSearchAll(query.trim());
+    var sourceId = (req.body && req.body.sourceId) || null;
+    var groups = await recordSearch.nativeSearchAll(query.trim(), sourceId);
     var total = groups.reduce(function(n, g) { return n + g.results.length; }, 0);
     res.json({ query: query.trim(), groups: groups, totalResults: total });
   } catch(e) {
     console.error('native-search failed:', e.message);
     res.status(500).json({ error: 'Search failed' });
+  }
+});
+
+router.get('/sources', async function(req, res) {
+  try {
+    var registry = require('../services/connectors/registry');
+    var cat = {};
+    registry.forEach(function(c){ cat[c.key] = c; });
+    var rows = await all("SELECT id, name, description, connector_type FROM record_repositories WHERE status = 'active' ORDER BY sort_order, name");
+    var sources = rows.map(function(r){
+      var meta = cat[r.connector_type] || {};
+      var desc = (r.description && r.description.trim()) ? r.description.trim() : (meta.description || '');
+      return { id: r.id, name: r.name, description: desc, kind: meta.label || r.connector_type };
+    });
+    res.json({ sources: sources });
+  } catch(e) {
+    console.error('public sources failed:', e.message);
+    res.status(500).json({ error: 'Failed to load sources' });
   }
 });
 

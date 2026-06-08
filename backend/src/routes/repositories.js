@@ -20,7 +20,7 @@ router.post('/', requireAuth, async function(req, res){
   var id = b.id || nid();
   var config = typeof b.config === 'string' ? b.config : JSON.stringify(b.config || {});
   try {
-    await run('INSERT INTO record_repositories (id, name, connector_type, status, config, sort_order) VALUES (?,?,?,?,?,?)', [id, b.name, b.connector_type, b.status || 'active', config, b.sort_order || 50]);
+    await run('INSERT INTO record_repositories (id, name, connector_type, status, config, sort_order, description) VALUES (?,?,?,?,?,?,?)', [id, b.name, b.connector_type, b.status || 'active', config, b.sort_order || 50, b.description || '']);
   } catch(e){ return res.status(400).json({ error: String(e.message || e) }); }
   var row = await get('SELECT * FROM record_repositories WHERE id = ?', [id]);
   res.json({ repository: row });
@@ -29,7 +29,7 @@ router.post('/', requireAuth, async function(req, res){
 router.patch('/:id', requireAuth, async function(req, res){
   var b = req.body || {};
   var sets = [], vals = [];
-  ['name','connector_type','status','sort_order'].forEach(function(f){ if (b.hasOwnProperty(f)) { sets.push(f + ' = ?'); vals.push(b[f]); } });
+  ['name','connector_type','status','sort_order','description'].forEach(function(f){ if (b.hasOwnProperty(f)) { sets.push(f + ' = ?'); vals.push(b[f]); } });
   if (b.hasOwnProperty('config')) { sets.push('config = ?'); vals.push(typeof b.config === 'string' ? b.config : JSON.stringify(b.config || {})); }
   if (!sets.length) return res.status(400).json({ error: 'no fields to update' });
   vals.push(req.params.id);

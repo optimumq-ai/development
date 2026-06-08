@@ -112,3 +112,6 @@ CREATE INDEX IF NOT EXISTS idx_rtdept_rt ON record_type_departments(record_type_
 CREATE INDEX IF NOT EXISTS idx_rtdept_dept ON record_type_departments(department_id);
 CREATE INDEX IF NOT EXISTS idx_rtrepo_rt ON record_type_repositories(record_type_id);
 CREATE INDEX IF NOT EXISTS idx_taxaudit_entity ON taxonomy_audit(entity_type, entity_id);
+
+-- Public-facing source description (shown to requestors in the portal source picker)
+ALTER TABLE record_repositories ADD COLUMN IF NOT EXISTS description TEXT;

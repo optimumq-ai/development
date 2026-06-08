@@ -30,8 +30,8 @@ export default function SourcesConfig() {
   function typeMeta(key){ return catalog.find(function(c){ return c.key === key; }) || { label:key, fields:[], capabilities:[], description:'' }; }
   function setField(k,v){ setEditor(function(ed){ var d=Object.assign({},ed.data); d[k]=v; return Object.assign({},ed,{data:d}); }); }
   function setCfg(k,v){ setEditor(function(ed){ var c=Object.assign({},ed.data.config); c[k]=v; return Object.assign({},ed,{data:Object.assign({},ed.data,{config:c})}); }); }
-  function openCreate(){ var first = catalog[0] || {key:''}; setEditor({ mode:'create', data:{ name:'', connector_type:first.key, status:'active', config:{} } }); }
-  function openEdit(s){ setEditor({ mode:'edit', data:{ id:s.id, name:s.name, connector_type:s.connector_type, status:s.status, config:Object.assign({}, s.config||{}) } }); }
+  function openCreate(){ var first = catalog[0] || {key:''}; setEditor({ mode:'create', data:{ name:'', connector_type:first.key, status:'active', config:{}, description:'' } }); }
+  function openEdit(s){ setEditor({ mode:'edit', data:{ id:s.id, name:s.name, connector_type:s.connector_type, status:s.status, config:Object.assign({}, s.config||{}), description:s.description||'' } }); }
 
   async function save() {
     var d = editor.data;
@@ -59,7 +59,7 @@ export default function SourcesConfig() {
       var r = await api.post('/repositories/ai-configure', { description: ai.description, documentation: ai.documentation });
       var p = r.data.proposal;
       setAi(null);
-      setEditor({ mode:'create', data:{ name:p.name||'', connector_type:p.connector_type, status:'active', config:p.config||{}, _ai:{ reasoning:p.reasoning||'', missing:p.missing||[] } } });
+      setEditor({ mode:'create', data:{ name:p.name||'', connector_type:p.connector_type, status:'active', config:p.config||{}, description:'', _ai:{ reasoning:p.reasoning||'', missing:p.missing||[] } } });
     } catch(e){ setAiField('loading', false); setAiField('error', (e.response&&e.response.data&&e.response.data.error)||'AI configuration failed'); }
   }
 
@@ -99,6 +99,13 @@ export default function SourcesConfig() {
         <div style={{ marginBottom:'12px' }}>
           <label style={lbl}>Name</label>
           <input style={inp} value={d.name} onChange={function(e){ setField('name', e.target.value); }} placeholder="e.g. HR Network Drive" />
+        </div>
+        <div style={{ marginBottom:'12px' }}>
+          <label style={lbl}>Public description <span style={{color:'#B45309'}}>(shown to requestors)</span></label>
+          <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'8px', padding:'10px 12px', marginBottom:'8px', fontSize:'12px', color:'#92400E', lineHeight:'1.5' }}>
+            This text is <strong>public and citizen-facing</strong>. It appears in the self-service portal when a requestor is choosing which connected system to keyword-search. Write it for a member of the public, not staff: plainly state what kinds of records this system holds (for example, "Building permits, inspection reports, and certificates of occupancy"). Accuracy matters - a vague or wrong description sends people to the wrong system, or leads them to file requests they did not need to.
+          </div>
+          <textarea style={Object.assign({},inp,{minHeight:'72px',fontFamily:'inherit'})} value={d.description||''} onChange={function(e){ setField('description', e.target.value); }} placeholder="e.g. Building permits, inspection reports, and certificates of occupancy issued by the City." />
         </div>
         <div style={{ marginBottom:'12px' }}>
           <label style={lbl}>Connector type</label>
@@ -158,6 +165,7 @@ export default function SourcesConfig() {
                     {s.status!=='active' ? <span style={badge('#F3F4F6','#6B7280')}>Inactive</span> : null}
                   </div>
                   <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'2px' }}>{meta.label}</div>
+                  {s.description ? <div style={{ fontSize:'12px', color:'#6B7280', marginTop:'4px', lineHeight:'1.4' }}>{s.description}</div> : null}
                 </div>
                 <button onClick={function(){ openEdit(s); }} style={btnGhostSm}>Edit</button>
                 <button onClick={function(){ del(s); }} style={Object.assign({},btnGhostSm,{color:'#DC2626'})}>Delete</button>
