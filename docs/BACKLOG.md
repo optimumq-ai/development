@@ -34,3 +34,7 @@ Audience clarification (2025-06-08): the original wording ("a user reviews the A
 - Portal/citizen: found -> view/download; none -> CTA to file a formal records request.
 - Internal/staff (in the request workspace): found -> mark responsive / attach to the request being fulfilled; none -> continue fulfillment.
 Same engine (recordSearch native keyword mode across connectors) and same results-grouped-by-source panel; differing entry point, permissions, and what happens to a found record. Build as one shared search component with two thin wrappers.
+
+### STATUS UPDATE (2025-06-08): Native Source Search - PORTAL CONTEXT BUILT (commit e24bcac)
+- BUILT: shared keyword matcher (connectors/keyword.js); nativeSearch() on demo, filestore, tyler, axon; recordSearch.nativeSearchAll() (grouped by source, relevance floor 30); public endpoint POST /api/public/native-search; portal UI on PublicPortalPage.js (trigger appears after any AI search via lastSearchQuery; overlay panel with refine-keywords input, results grouped by source, view/download + include-in-request reusing toggleRecord/selectedRecords, empty-state CTA to file a formal request). Tested across all sources via curl + nginx; frontend compiled + live.
+- REMAINING: (1) internal/staff wrapper in RequestWorkspacePage (same engine; outcome = mark responsive/attach to the request; staff permissions). (2) Real view/download wiring (placeholder alert, shared with AI cards). (3) structured connector has no nativeSearch yet (skipped gracefully).
