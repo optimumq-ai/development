@@ -29,3 +29,8 @@ Reconciliation with current build:
 - This is the "native per-connector keyword search" mode, distinct from the (future) pgvector AI semantic index. Three search modes total: AI semantic index (future, blocked on pgvector+Voyage), native per-connector keyword search (this feature), and the current portal chat path.
 - recordSearch.searchAll() already fans a query across active connectors and is wired into the public portal chat (publicChat.js) - the natural host for the button.
 - To build: portal "Search Connected Systems" button + results-grouped-by-source panel + empty-state CTA to submit a formal request; expose connector search explicitly as a keyword fallback (separate from the AI-ranked path); real per-source search() in each connector for production systems.
+
+Audience clarification (2025-06-08): the original wording ("a user reviews the AI results", "a search panel within the Optimum Q interface") spans BOTH a public-portal citizen AND an internal staff user - not citizen-only. Treat as one shared search capability with two contexts:
+- Portal/citizen: found -> view/download; none -> CTA to file a formal records request.
+- Internal/staff (in the request workspace): found -> mark responsive / attach to the request being fulfilled; none -> continue fulfillment.
+Same engine (recordSearch native keyword mode across connectors) and same results-grouped-by-source panel; differing entry point, permissions, and what happens to a found record. Build as one shared search component with two thin wrappers.
