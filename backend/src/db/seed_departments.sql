@@ -10,5 +10,6 @@ INSERT INTO departments (id, name, code, color, is_open_records, is_catch_all, s
 ('dept-publicworks','Public Works','PW','#7F6000',0,0,7,1),
 ('dept-fire','Fire Department','FD','#C0392B',0,0,8,1),
 ('dept-hr','Human Resources','HR','#27AE60',0,0,9,1),
-('dept-pio','Public Information Office','PIO','#8E44AD',0,0,10,1)
+('dept-pio','Public Information Office','PIO','#8E44AD',0,0,10,1),
+('dept-parks','Parks & Recreation','PR','#6B8E23',0,0,11,1)
 ON CONFLICT (id) DO NOTHING;

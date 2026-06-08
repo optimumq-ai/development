@@ -1,0 +1,6 @@
+-- Parks & Recreation sample records for the demo document library. Idempotent via ON CONFLICT (id).
+INSERT INTO demo_documents (id, title, summary, body, department, doc_type, date_created, page_count, public_availability, tags) VALUES
+('demo-parks-field-sched','Athletic Field Reservation Schedule - 2025 Season','Seasonal reservation schedule for city baseball, softball, and soccer fields, showing reserved dates, times, leagues, and field assignments.','','Parks and Recreation','Schedule','2025-03-01',9,'available','parks,athletic fields,baseball,softball,reservations,schedule,fields'),
+('demo-parks-pavilion-log','Pavilion & Shelter Reservation Log - 2025','Log of reservations for park pavilions, picnic shelters, and gazebos, including reserving party, facility, date, and fees paid.','','Parks and Recreation','Log','2025-02-15',22,'available','parks,pavilion,shelter,reservations,rentals,facilities'),
+('demo-parks-facility-inv','Park Facilities & Amenities Inventory - 2025','Inventory of parks and recreation facilities citywide, listing amenities, playgrounds, courts, fields, trails, restrooms, and hours of operation.','','Parks and Recreation','Index','2025-01-20',31,'available','parks,facilities,amenities,inventory,playgrounds,courts,trails')
+ON CONFLICT (id) DO NOTHING;
