@@ -43,4 +43,9 @@ router.patch('/:id/status', requireAuth, requireRole('SYSTEM_ADMIN','DIRECTOR'),
   res.json({ success: true });
 });
 
+router.patch('/:id/team', requireAuth, requireRole('SYSTEM_ADMIN','DIRECTOR','SUPERVISOR'), async function(req, res) {
+  await run('UPDATE users SET department_id = ? WHERE id = ?', [req.body.departmentId || null, req.params.id]);
+  res.json({ success: true });
+});
+
 module.exports = router;
