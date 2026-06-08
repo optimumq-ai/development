@@ -13,6 +13,7 @@ import TaxonomyPage from './pages/TaxonomyPage';
 import SchemaDiscoveryPage from './pages/SchemaDiscoveryPage';
 import MyTasksPage from './pages/MyTasksPage';
 import ConfigurationPage from './pages/ConfigurationPage';
+import SourcesPage from './pages/SourcesPage';
 import ARIAReportsPage from './pages/ARIAReportsPage';
 import PublicPortalPage from './pages/PublicPortalPage';
 
@@ -52,6 +53,7 @@ export default function App() {
           <Route path="departments" element={<DepartmentsPage />} />
           <Route path="taxonomy" element={<TaxonomyPage />} />
           <Route path="discovery" element={<SchemaDiscoveryPage />} />
+          <Route path="sources" element={<SourcesPage />} />
           <Route path="config" element={<ConfigurationPage />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>

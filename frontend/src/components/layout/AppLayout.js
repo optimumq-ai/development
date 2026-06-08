@@ -20,6 +20,7 @@ export default function AppLayout() {
     { to: '/departments', label: 'Departments & Teams', show: isElev },
     { to: '/taxonomy', label: 'Taxonomy', show: isElev },
     { to: '/discovery', label: 'AI Discovery', show: isElev },
+    { to: '/sources', label: 'Sources', show: isElev },
     { to: '/config', label: 'Configuration', show: isAdmin },
   ].filter(x => x.show);
 

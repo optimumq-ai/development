@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
-import SourcesConfig from '../components/SourcesConfig';
 
 export default function ConfigurationPage() {
   const [config, setConfig] = useState({});
@@ -74,7 +73,6 @@ export default function ConfigurationPage() {
     { key:'notifications', label:'Notifications' },
     { key:'email', label:'Email' },
     { key:'agent', label:'Agent Rules' },
-    { key:'sources', label:'Sources' },
   ];
 
   if (loading) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'256px',color:'#9CA3AF'}}>Loading configuration...</div>;
@@ -330,12 +328,6 @@ export default function ConfigurationPage() {
               <input type="email" value={config.new_request_alert_email||''} onChange={function(e){set('new_request_alert_email',e.target.value);}} style={inp} placeholder="openrecords-team@cityofdallas.gov"/>
               <div style={hint}>Email address that receives an alert each time a new request is submitted. If blank, the Public Records Contact Email is used.</div>
             </div>
-          </div>
-        )}
-        {activeTab === 'sources' && (
-          <div style={section}>
-            <div style={sectionTitle}>Sources & Connectors</div>
-            <SourcesConfig />
           </div>
         )}
         {activeTab === 'agent' && (
