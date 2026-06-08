@@ -262,4 +262,9 @@ router.post('/discover-scan', requireAuth, async function(req, res) {
   }
 });
 
+router.get('/repositories', requireAuth, async function(req, res) {
+  var repos = await all("SELECT id, name, connector_type, status FROM record_repositories ORDER BY sort_order, name");
+  res.json({ repositories: repos });
+});
+
 module.exports = router;

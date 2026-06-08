@@ -19,12 +19,16 @@ export default function SchemaDiscoveryPage() {
   var [busy, setBusy] = useState(null);
   var [cats, setCats] = useState([]);
   var [editor, setEditor] = useState(null);
+  var [repos, setRepos] = useState([]);
+  var [selRepo, setSelRepo] = useState('');
+  var [scanning, setScanning] = useState(false);
+  var [scanResult, setScanResult] = useState(null);
 
   useEffect(function(){ loadDrafts(); }, []);
 
   async function loadDrafts() {
     setLoading(true);
-    try { var r = await api.get('/taxonomy/record-types', { params: { status: 'draft' } }); setDrafts(r.data.record_types); var cr = await api.get('/taxonomy/categories'); setCats(cr.data.categories); }
+    try { var r = await api.get('/taxonomy/record-types', { params: { status: 'draft' } }); setDrafts(r.data.record_types); var cr = await api.get('/taxonomy/categories'); setCats(cr.data.categories); var rr = await api.get('/taxonomy/repositories'); setRepos(rr.data.repositories); if (rr.data.repositories.length && !selRepo) setSelRepo(rr.data.repositories[0].id); }
     catch (e) { console.error(e); }
     setLoading(false);
   }
@@ -40,6 +44,30 @@ export default function SchemaDiscoveryPage() {
       setError((e.response && e.response.data && e.response.data.error) || 'Discovery failed');
     }
     setDiscovering(false);
+  }
+
+  async function scan() {
+    if (!selRepo || scanning) return;
+    setScanning(true); setScanResult(null); setError('');
+    try {
+      var r = await api.post('/taxonomy/discover-scan', { repository_id: selRepo });
+      setScanResult(r.data);
+      await loadDrafts();
+    } catch (e) {
+      setError((e.response && e.response.data && e.response.data.error) || 'Scan failed');
+    }
+    setScanning(false);
+  }
+
+  function renderScanResult() {
+    var sr = scanResult;
+    return (
+      <div style={{ marginTop: '12px', padding: '12px', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px' }}>
+        <div style={{ fontWeight: '600', marginBottom: '6px' }}>Scanned {sr.scanned} record{sr.scanned!==1?'s':''} from {sr.repository}: {(sr.created||[]).length} new draft{(sr.created||[]).length!==1?'s':''}, {(sr.matched||[]).length} already in taxonomy.</div>
+        {(sr.created||[]).length ? <div style={{ color: '#059669' }}>New: {(sr.created||[]).map(function(c){ return c.name; }).join(', ')}</div> : null}
+        {(sr.matched||[]).length ? <div style={{ color: '#6B7280', marginTop: '4px' }}>Matched existing: {(sr.matched||[]).map(function(m){ return m.name; }).join(', ')}</div> : null}
+      </div>
+    );
   }
 
   async function approve(id) {
@@ -109,6 +137,18 @@ export default function SchemaDiscoveryPage() {
         {result && !result.matched_existing && result.draft ? (
           <div style={{ marginTop: '12px', fontSize: '13px', color: '#059669' }}>Draft created and added to the review queue below.</div>
         ) : null}
+      </div>
+      <div style={{ background: 'white', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '16px' }}>
+        <div style={{ fontWeight: '700', fontSize: '15px', marginBottom: '4px' }}>Scan a source</div>
+        <p style={{ color: '#9CA3AF', fontSize: '13px', margin: '0 0 12px' }}>Point the AI at a connected repository. It samples the records, identifies the distinct record types, and adds any new ones as drafts below.</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+          <select value={selRepo} onChange={function(e){ setSelRepo(e.target.value); }} style={{ flex: 1, minWidth: '220px', padding: '9px 11px', border: '1px solid #D1D5DB', borderRadius: '8px', fontSize: '14px' }}>
+            {repos.map(function(rp){ return <option key={rp.id} value={rp.id}>{rp.name} ({rp.connector_type})</option>; })}
+          </select>
+          <button onClick={scan} disabled={scanning || !selRepo} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '14px', fontWeight: '600', cursor: 'pointer', opacity: (scanning || !selRepo) ? 0.6 : 1 }}>{scanning ? 'Scanning...' : 'Scan source'}</button>
+        </div>
+        {scanning ? <div style={{ marginTop: '10px', fontSize: '13px', color: '#6B7280' }}>Sampling records and identifying types — this can take up to a minute.</div> : null}
+        {scanResult ? renderScanResult() : null}
       </div>
       <div>
         <h2 style={{ fontSize: '16px', fontWeight: '700', margin: '0 0 4px' }}>Review queue {drafts.length ? '(' + drafts.length + ')' : ''}</h2>
