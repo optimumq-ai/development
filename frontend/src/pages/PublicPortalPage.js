@@ -18,6 +18,7 @@ export default function PublicPortalPage() {
   const [showForm, setShowForm] = useState(false);
   const [agencyName, setAgencyName] = useState('');
   const [lastSearchQuery, setLastSearchQuery] = useState('');
+  const [quickReplies, setQuickReplies] = useState([]);
   const [nativeOpen, setNativeOpen] = useState(false);
   const [nativeQuery, setNativeQuery] = useState('');
   const [nativeGroups, setNativeGroups] = useState(null);
@@ -124,6 +125,7 @@ export default function PublicPortalPage() {
     var nextMessages = isInitial ? [{role:'user', content:'Hi'}] : cleanHistory.concat([{role:'user', content:userText}]);
     setInput('');
     setSending(true);
+    setQuickReplies([]);
     try {
       var r = await axios.post(API + '/public/chat', { messages: nextMessages, selectedRecords: selectedRecords });
       var assistantMsg = { role: 'assistant', content: r.data.reply };
@@ -132,6 +134,7 @@ export default function PublicPortalPage() {
         msgsAfter = msgsAfter.concat([{ role: 'assistant', content: '__SEARCH_RESULTS__', searchResults: r.data.searchResults, searchQuery: r.data.searchQuery }]);
       }
       if (r.data.searchQuery) setLastSearchQuery(r.data.searchQuery);
+      setQuickReplies(Array.isArray(r.data.quickReplies) ? r.data.quickReplies : []);
       setMessages(msgsAfter);
       if (r.data.verifyEmail) {
         try {
@@ -409,16 +412,7 @@ export default function PublicPortalPage() {
                 <button
                   onClick={function(){
                     if (sending) return;
-                    var msg = "I'm done selecting records, please continue.";
-                    var nextMessages = messages.concat([{ role: 'user', content: msg }]);
-                    setMessages(nextMessages);
-                    setSending(true);
-                    axios.post(API + '/public/chat', { messages: nextMessages, selectedRecords: selectedRecords })
-                      .then(function(r){
-                        setMessages(function(prev){ return prev.concat([{ role: 'assistant', content: r.data.reply }]); });
-                      })
-                      .catch(function(){ setMessages(function(prev){ return prev.concat([{ role: 'assistant', content: 'Sorry, something went wrong. Please try again.' }]); }); })
-                      .finally(function(){ setSending(false); });
+                    sendMessage("I'm done selecting records, please continue.", false);
                   }}
                   disabled={sending}
                   style={{background:'#166534',color:'white',border:'none',borderRadius:'6px',padding:'6px 12px',fontSize:'12px',fontWeight:'600',cursor: sending ? 'wait' : 'pointer',opacity: sending ? 0.6 : 1}}
@@ -427,6 +421,18 @@ export default function PublicPortalPage() {
                 </button>
                 <span style={{fontStyle:'italic',color:'#4B7864'}}>or keep browsing and pick more records</span>
               </div>
+            </div>
+          )}
+          {quickReplies.length > 0 && !sending && !verifyingEmail && (
+            <div style={{borderTop:'1px solid #E5E7EB',padding:'10px 14px',background:'#FAFAFA',display:'flex',flexWrap:'wrap',gap:'8px'}}>
+              {quickReplies.map(function(qr, qi){
+                return (
+                  <button key={qi} type="button" onClick={function(){ if (sending) return; sendMessage(qr, false); }}
+                    style={{padding:'8px 14px',fontSize:'13px',fontWeight:'600',background:'white',color:'#1F4E79',border:'1px solid #1F4E79',borderRadius:'18px',cursor:'pointer'}}>
+                    {qr}
+                  </button>
+                );
+              })}
             </div>
           )}
           {lastSearchQuery && (

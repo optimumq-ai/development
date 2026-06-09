@@ -45,6 +45,16 @@ const SYSTEM_PROMPT = [
   '- Only emit [[SUBMIT_READY]] after the user has explicitly confirmed.',
   '- The JSON between [[SUBMIT_READY]] and [[END_SUBMIT]] must be valid JSON.',
   '',
+  'QUICK REPLIES (tappable buttons):',
+  '- When the question you just asked has a small set of expected answers, offer tappable buttons by emitting on its own line: [[QUICK_REPLIES: Label one | Label two]]. Keep labels short. The citizen can tap a button OR type their own answer instead.',
+  '- Offer quick replies at these moments specifically:',
+  '  * Verification email prompt -> [[QUICK_REPLIES: Yes, send a verification email | No, skip it]]',
+  '  * Delivery preference -> [[QUICK_REPLIES: Email | Postal mail]]',
+  '  * Combined vs separate requests (Phase 3) -> [[QUICK_REPLIES: One combined request | Separate requests]]',
+  '  * Fee waiver question (Phase 4) -> [[QUICK_REPLIES: Yes | No]]',
+  '  * After search results, asking whether any match -> [[QUICK_REPLIES: Yes, one of these matches | No, none match]]',
+  '- Emit at most one [[QUICK_REPLIES:...]] marker per message, and only when it matches the single question you just asked. Never offer quick replies for open-ended questions such as the records description.',
+  '',
   'TONE:',
   '- One question at a time. Short messages.',
   '- Acknowledge what the user said before asking the next thing.',
@@ -159,6 +169,11 @@ router.post('/chat', async function(req, res) {
     var verifyEmail = null;
     var verifyEmailMatch = fullText.match(/\[\[VERIFY_EMAIL:([^\]]+)\]\]/);
     if (verifyEmailMatch) verifyEmail = verifyEmailMatch[1].trim();
+    var quickReplies = [];
+    var qrMatch = fullText.match(/\[\[QUICK_REPLIES:([^\]]*)\]\]/);
+    if (qrMatch) {
+      quickReplies = qrMatch[1].split('|').map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 0; });
+    }
     var searchQuery = null;
     var searchResults = null;
     var searchQueryMatch = fullText.match(/\[\[SEARCH_QUERY:([^\]]+)\]\]/);
@@ -174,8 +189,9 @@ router.post('/chat', async function(req, res) {
       .replace(/\[\[FEE_WAIVER_INFO:[^\]]+\]\]/g, '')
       .replace(/\[\[SEARCH_QUERY:[^\]]+\]\]/g, '')
       .replace(/\[\[NON_TRAD_ITEMS:[^\]]+\]\]/g, '')
+      .replace(/\[\[QUICK_REPLIES:[^\]]*\]\]/g, '')
       .trim();
-    res.json({ reply: visibleText, submission: submission, verifyEmail: verifyEmail, searchQuery: searchQuery, searchResults: searchResults });
+    res.json({ reply: visibleText, submission: submission, verifyEmail: verifyEmail, searchQuery: searchQuery, searchResults: searchResults, quickReplies: quickReplies });
   } catch(e) {
     console.error('Chat error:', e.message);
     res.status(500).json({ error: 'Chat unavailable', details: e.message });
