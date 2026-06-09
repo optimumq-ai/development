@@ -143,6 +143,7 @@ export default function TaxonomyPage() {
                             <div style={{ display: 'flex', gap: '6px', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                               {t.auto_release_eligible === 1 ? pill('#E1EFFE', '#1E429F', 'Auto-release') : null}
                               {pill(av.bg, av.fg, av.label)}
+                              {t.fulfillment_method && t.fulfillment_method !== 'electronic_search' ? pill('#F5F3FF', '#6D28D9', t.fulfillment_method === 'paper_index' ? 'Paper \u00b7 on-site' : (t.fulfillment_method === 'bulk_export' ? 'Bulk export' : 'Manual collection')) : null}
                               <button onClick={function(){ setEditor({ mode: 'edit', initial: t }); }} style={{ marginLeft: '4px', padding: '2px 10px', borderRadius: '20px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '11px', fontWeight: '600', cursor: 'pointer' }}>Edit</button>
                             </div>
                           </div>

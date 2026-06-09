@@ -18,6 +18,8 @@ export default function RecordTypeEditor(props) {
     public_availability: init.public_availability || 'review_required',
     auto_release_eligible: init.auto_release_eligible === 1,
     is_structured_data: init.is_structured_data === 1,
+    fulfillment_method: init.fulfillment_method || 'electronic_search',
+    medium: init.medium || 'electronic',
     synonyms: arrToStr(init.synonyms),
     disambiguators: arrToStr(init.disambiguators),
     keywords: arrToStr(init.keywords),
@@ -37,7 +39,7 @@ export default function RecordTypeEditor(props) {
       category_id: f.category_id, name: f.name.trim(), intent: f.intent,
       expected_content: f.expected_content, typical_request_reason: f.typical_request_reason,
       public_availability: f.public_availability, auto_release_eligible: f.auto_release_eligible,
-      is_structured_data: f.is_structured_data, synonyms: strToArr(f.synonyms),
+      is_structured_data: f.is_structured_data, fulfillment_method: f.fulfillment_method, medium: f.medium, synonyms: strToArr(f.synonyms),
       disambiguators: strToArr(f.disambiguators), keywords: strToArr(f.keywords),
       identifying_facets: strToArr(f.identifying_facets), formats: strToArr(f.formats), status: f.status
     };
@@ -96,6 +98,19 @@ export default function RecordTypeEditor(props) {
             <input type="checkbox" checked={f.is_structured_data} onChange={function(e){ set('is_structured_data', e.target.checked); }} /> Structured data
           </label>
         </div>
+        <label style={lab}>Fulfillment method</label>
+        <select value={f.fulfillment_method} onChange={function(e){ set('fulfillment_method', e.target.value); }} style={inp}>
+          <option value="electronic_search">electronic_search — retrieved by system/connector search</option>
+          <option value="paper_index">paper_index — physical record located via index</option>
+          <option value="manual_collection">manual_collection — gathered by hand from devices/systems</option>
+          <option value="bulk_export">bulk_export — produced as a data extract or copy</option>
+        </select>
+        <label style={lab}>Medium</label>
+        <select value={f.medium} onChange={function(e){ set('medium', e.target.value); }} style={inp}>
+          <option value="electronic">electronic</option>
+          <option value="paper">paper</option>
+          <option value="mixed">mixed</option>
+        </select>
         {field('Synonyms', 'synonyms', { hint: 'comma-separated' })}
         {field('Disambiguators', 'disambiguators', { hint: 'comma-separated' })}
         {field('Keywords', 'keywords', { hint: 'comma-separated' })}
