@@ -41,3 +41,18 @@ Same engine (recordSearch native keyword mode across connectors) and same result
 
 ### UPDATE (2025-06-08): Native Source Search - source-picker model (commit 8d7bf28)
 Panel now opens to a MENU of connected systems (each with a public, citizen-facing description) plus an "All connected systems" option; requestor picks the system that fits, then keyword-searches within it (change-system back step). Dissolves the data-vs-DMS tension - interaction is uniform (pick then search); only the description text differs per source. Added record_repositories.description; public GET /api/public/sources (falls back to connector-type description when blank); optional sourceId on /native-search. Admin Sources screen has a "Public description" field with an amber callout stressing the text is requestor-facing. NOTE: sources show the connector-type fallback text until an admin fills in real public descriptions.
+
+### BUILT (2025-06-08): Paper Records Index connector + record-type medium/fulfillment dimension (commits c254090, c350a9f)
+Answers the "things you cannot search for" + "paper records" design questions.
+
+Paper Records Index (commit c254090):
+- New connector type `paper-index` (registry.js). Admin adds the source, then imports a CSV index of physical files (Sources screen -> "Import index", paste CSV; columns title/description/location/box/folder/date/tags, title required, re-import replaces). Backend: paper_index_items table; connectors/paperindex.js nativeSearch returns each record's physical LOCATION (facility/box/shelf) with publicAvailability='paper' (no download; retrieved on request); recordSearch.nativeSearchAll injects repo id into config + includes paper-index in the connector map; import/list routes at /repositories/:id/paper-index (requireAuth). Portal cards render a PAPER badge + location line. Appears in the source picker like any other source. Seed: seed_paper_archive.sql (repo-paper-archive, 5 sample items).
+
+Medium / fulfillment dimension (commit c350a9f):
+- record_types.fulfillment_method (electronic_search | paper_index | manual_collection | bulk_export) and medium (electronic | paper | mixed). Existing non-searchable types classified (email/texts/memos/legal opinions/911 audio/body+dash video -> manual_collection; GIS + system data exports -> bulk_export). Added example types mobile-device-data (manual_collection) and forensic-images (bulk_export). Taxonomy page shows a fulfillment pill for non-electronic types; RecordTypeEditor has Fulfillment method + Medium dropdowns; taxonomy POST/PATCH accept the fields. Seed: seed_rt_fulfillment.sql.
+
+REMAINING / follow-ups:
+- AI handling: the portal agent / classification does not yet USE fulfillment_method to set citizen expectations (e.g. "these are paper records in storage - retrieval takes longer, copy fees may apply" or "text messages are collected from devices, handled as a manual collection"). This depends on taxonomy-first routing (the agent mapping a request to a record type). Highest-value next step for this dimension.
+- Real view/download wiring is still a placeholder alert on electronic result cards (paper correctly shows none).
+- structured connector still has no nativeSearch (skipped gracefully in native search).
+- paper-index has no scan() (not discoverable for record-type discovery yet).
