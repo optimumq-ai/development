@@ -213,6 +213,20 @@ router.patch('/record-types/:id/routing', requireAuth, async function(req, res) 
   res.json({ success: true, owning_department_id: ownId, fulfillment_team_id: teamId });
 });
 
+// ===== SOURCES: bulk-set which sources hold this record type =====
+router.patch('/record-types/:id/sources', requireAuth, async function(req, res) {
+  var rt = await get('SELECT id FROM record_types WHERE id = ?', [req.params.id]);
+  if (!rt) return res.status(404).json({ error: 'Record type not found' });
+  var ids = Array.isArray(req.body.repository_ids) ? req.body.repository_ids : [];
+  await run('DELETE FROM record_type_repositories WHERE record_type_id = ?', [req.params.id]);
+  for (var i = 0; i < ids.length; i++) {
+    var repo = await get('SELECT id FROM record_repositories WHERE id = ?', [ids[i]]);
+    if (repo) await run('INSERT INTO record_type_repositories (id, record_type_id, repository_id, format, filter_spec, sort_order) VALUES (?,?,?,?,?,?)', [nid('rr'), req.params.id, ids[i], null, '{}', 100]);
+  }
+  await audit('rt_sources', req.params.id, 'update', req, { repository_ids: ids });
+  res.json({ success: true, repository_ids: ids });
+});
+
 // ===== LINKS: repositories (where it lives) =====
 router.post('/record-types/:id/repositories', requireAuth, async function(req, res) {
   var rt = await get('SELECT id FROM record_types WHERE id = ?', [req.params.id]);
@@ -304,7 +318,7 @@ router.post('/discover-scan', requireAuth, async function(req, res) {
   try {
     var result = await require('../services/schemaDiscovery').scanRepository(repo);
     if (result.error) return res.status(400).json(result);
-    await audit('repository', repo.id, 'discover-scan', req, { scanned: result.scanned, created: result.created.length, matched: result.matched.length });
+    await audit('repository', repo.id, 'discover-scan', req, { scanned: result.scanned, created: result.created.length, matched: result.matched.length, linked: result.linked });
     res.json(Object.assign({ repository: repo.name }, result));
   } catch (e) {
     res.status(500).json({ error: 'Repository scan failed', details: e.message });

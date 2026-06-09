@@ -40,7 +40,22 @@ export default function RecordTypeEditor(props) {
       setTeams(ds.filter(function(d){ return d.kind === 'team'; }));
     }).catch(function(){});
   }, []);
+  var [sources, setSources] = useState([]);
+  var [selectedSources, setSelectedSources] = useState([]);
+  useEffect(function(){
+    api.get('/repositories').then(function(r){
+      var rs = (r.data && (r.data.repositories || r.data)) || [];
+      setSources(Array.isArray(rs) ? rs : []);
+    }).catch(function(){});
+    if (props.mode !== 'create' && init.id) {
+      api.get('/taxonomy/record-types/' + init.id).then(function(r){
+        var reps = (r.data && r.data.repositories) || [];
+        setSelectedSources(reps.map(function(x){ return x.repository_id; }));
+      }).catch(function(){});
+    }
+  }, []);
   function set(k, v) { setF(function(p){ var n = Object.assign({}, p); n[k] = v; return n; }); }
+  function toggleSource(id) { setSelectedSources(function(prev){ return prev.indexOf(id) >= 0 ? prev.filter(function(x){ return x !== id; }) : prev.concat([id]); }); }
 
   async function save() {
     if (!f.name.trim() || !f.category_id) { setErr('Name and category are required.'); return; }
@@ -59,6 +74,7 @@ export default function RecordTypeEditor(props) {
       if (props.mode === 'create') { payload.code = f.code.trim(); var resp = await api.post('/taxonomy/record-types', payload); rid = resp.data && resp.data.id; }
       else { await api.patch('/taxonomy/record-types/' + init.id, payload); }
       if (rid) { await api.patch('/taxonomy/record-types/' + rid + '/routing', { owning_department_id: owningDeptId || null, fulfillment_team_id: teamOverrideId || null }); }
+      if (rid) { await api.patch('/taxonomy/record-types/' + rid + '/sources', { repository_ids: selectedSources }); }
       props.onSaved();
     } catch (e) {
       setErr((e.response && e.response.data && e.response.data.error) || 'Save failed');
@@ -109,6 +125,18 @@ export default function RecordTypeEditor(props) {
           <option value="">Use owning department default{derivedTeam ? ' (' + derivedTeam.name + ')' : ''}</option>
           {teams.map(function(t){ return <option key={t.id} value={t.id}>{t.name} (override)</option>; })}
         </select>
+        <label style={lab}>Found in these sources</label>
+        <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '6px', marginTop: '-2px' }}>Which connected systems hold this record type. Auto-filled by AI scans for scannable sources; set API systems (Axon, Tyler) here by hand. Powers search targeting.</div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {sources.length === 0 ? <span style={{ fontSize: '12px', color: '#9CA3AF' }}>No sources configured yet.</span> : sources.map(function(s){
+            var on = selectedSources.indexOf(s.id) >= 0;
+            return (
+              <label key={s.id} style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                <input type="checkbox" checked={on} onChange={function(){ toggleSource(s.id); }} /> {s.name} <span style={{ color: '#9CA3AF' }}>({s.connector_type})</span>
+              </label>
+            );
+          })}
+        </div>
         {field('Name', 'name')}
         {field('Code', 'code', { disabled: props.mode !== 'create', hint: props.mode === 'create' ? 'kebab-case, unique' : 'fixed after creation' })}
         {field('Intent', 'intent', { area: true })}

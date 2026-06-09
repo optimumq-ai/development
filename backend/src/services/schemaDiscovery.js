@@ -6,6 +6,14 @@ var connectors = { filestore: require('./connectors/filestore'), structured: req
 function nid(p){ return p + '-' + uuidv4().substring(0, 8); }
 function packArray(a){ return Array.isArray(a) ? JSON.stringify(a) : '[]'; }
 
+async function linkRepo(recordTypeId, repositoryId, formats) {
+  var dup = await get('SELECT id FROM record_type_repositories WHERE record_type_id = ? AND repository_id = ?', [recordTypeId, repositoryId]);
+  if (dup) return false;
+  var fmt = (Array.isArray(formats) && formats.length) ? formats[0] : null;
+  await run('INSERT INTO record_type_repositories (id, record_type_id, repository_id, format, filter_spec, sort_order) VALUES (?,?,?,?,?,?)', [nid('rr'), recordTypeId, repositoryId, fmt, '{}', 100]);
+  return true;
+}
+
 async function scanRepository(repo) {
   var connector = connectors[repo.connector_type];
   if (!connector || !connector.scan) return { error: 'Connector ' + repo.connector_type + ' does not support scanning' };
@@ -38,10 +46,15 @@ async function scanRepository(repo) {
   var raw = message.content[0].text.trim().replace(/```json|```/g, '').trim();
   var proposals = JSON.parse(raw);
   if (!Array.isArray(proposals)) proposals = [];
-  var created = [], matched = [];
+  var created = [], matched = [], linked = 0;
   for (var i = 0; i < proposals.length; i++) {
     var p = proposals[i];
-    if (p.matches_existing && p.matched_code && existing.find(function(r){ return r.code === p.matched_code; })) { matched.push({ name: p.name, matched_code: p.matched_code }); continue; }
+    if (p.matches_existing && p.matched_code && existing.find(function(r){ return r.code === p.matched_code; })) {
+      var exRow = await get('SELECT id FROM record_types WHERE code = ?', [p.matched_code]);
+      if (exRow && await linkRepo(exRow.id, repo.id, p.formats)) linked++;
+      matched.push({ name: p.name, matched_code: p.matched_code });
+      continue;
+    }
     if (!p.category_id || !cats.find(function(c){ return c.id === p.category_id; })) { p.category_id = cats.length ? cats[cats.length - 1].id : null; }
     var code = (p.code || 'discovered-type').toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 48) || 'discovered-type';
     var dup = await get('SELECT id FROM record_types WHERE code = ?', [code]);
@@ -51,9 +64,10 @@ async function scanRepository(repo) {
     var cols = 'id, category_id, name, code, intent, expected_content, typical_request_reason, synonyms, disambiguators, keywords, identifying_facets, formats, is_structured_data, public_availability, auto_release_eligible, status, source, confidence, sort_order';
     var ph = '?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?';
     await run('INSERT INTO record_types (' + cols + ') VALUES (' + ph + ')', [ id, p.category_id, (p.name || 'Discovered type').toString().substring(0, 200), code, p.intent || null, p.expected_content || null, p.typical_request_reason || null, packArray(p.synonyms), packArray(p.disambiguators), packArray(p.keywords), packArray(p.identifying_facets), packArray(p.formats), (p.formats && p.formats.indexOf('structured_data') >= 0) ? 1 : 0, av, p.auto_release_eligible ? 1 : 0, 'draft', 'discovered', (typeof p.confidence === 'number' ? p.confidence : null), 900 ]);
+    if (await linkRepo(id, repo.id, p.formats)) linked++;
     created.push({ id: id, name: p.name, code: code, confidence: p.confidence, example_files: p.example_files || [] });
   }
-  return { created: created, matched: matched, scanned: samples.length };
+  return { created: created, matched: matched, linked: linked, scanned: samples.length };
 }
 
 module.exports = { scanRepository: scanRepository };
