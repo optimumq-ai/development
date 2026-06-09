@@ -16,3 +16,9 @@ UPDATE departments SET processed_by='team-legal'          WHERE id='dept-attorne
 UPDATE departments SET processed_by='team-it'             WHERE id='dept-it';
 UPDATE departments SET processed_by='team-clerk-archives' WHERE id='dept-clerk';
 UPDATE departments SET processed_by='team-hr'             WHERE id='dept-hr';
+
+-- Fire team (added on request)
+INSERT INTO departments (id, name, code, color, is_open_records, kind, parent_id, sort_order, active) VALUES
+ ('team-fire', 'Fire Records Team', 'FRE', '#DC2626', 0, 'team', 'dept-fire', 36, 1)
+ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name, code=EXCLUDED.code, color=EXCLUDED.color, kind=EXCLUDED.kind, parent_id=EXCLUDED.parent_id, sort_order=EXCLUDED.sort_order, active=1;
+UPDATE departments SET processed_by='team-fire' WHERE id='dept-fire';
