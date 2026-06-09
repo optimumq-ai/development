@@ -133,4 +133,18 @@ router.delete('/rules/:id', requireAuth, async function(req, res) {
   res.json({ success: true });
 });
 
+// POST /discover -> AI auto-population: add jurisdiction-appropriate exemptions as pending drafts (elevated)
+router.post('/discover', requireAuth, async function(req, res) {
+  if (!isElevated(req)) return res.status(403).json({ error: 'Only a supervisor can auto-populate rules' });
+  var jur = await activeJurisdiction();
+  try {
+    var ruleDiscovery = require('../services/ruleDiscovery');
+    var r = await ruleDiscovery.discoverRules(jur);
+    res.json(Object.assign({ success: true }, r));
+  } catch (e) {
+    console.error('[redaction discover]', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = router;

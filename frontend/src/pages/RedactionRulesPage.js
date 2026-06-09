@@ -57,6 +57,8 @@ export default function RedactionRulesPage() {
   var [showSources, setShowSources] = useState(false);
   var [sources, setSources] = useState(null);
   var [srcOpen, setSrcOpen] = useState({});
+  var [discovering, setDiscovering] = useState(false);
+  var [notice, setNotice] = useState(null);
 
   useEffect(function () { load(); }, []);
   async function load() {
@@ -87,6 +89,17 @@ export default function RedactionRulesPage() {
     catch (e) { console.error(e); }
   }
 
+  async function discover() {
+    setDiscovering(true); setNotice(null);
+    try {
+      var r = await api.post('/redaction/discover');
+      await load();
+      setFilter('pending');
+      setNotice(r.data.added > 0 ? ('Added ' + r.data.added + ' AI-suggested rule(s) as Pending Review. Verify each citation against current law, then approve or delete.') : 'No new exemptions were found to add.');
+    } catch (e) { setNotice('Auto-populate failed (supervisor role required).'); }
+    setDiscovering(false);
+  }
+
   var shown = rules.filter(function (r) {
     if (filter === 'all') return true;
     if (filter === 'pending') return r.approval_status === 'pending_review';
@@ -114,10 +127,18 @@ export default function RedactionRulesPage() {
         </div>
         <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
           <button onClick={openSources} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>View Legal Sources</button>
+          <button disabled={discovering} onClick={discover} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '13px', fontWeight: '600', cursor: discovering ? 'wait' : 'pointer' }}>{discovering ? 'Checking...' : 'Check for Updates'}</button>
           <button onClick={load} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Refresh</button>
           <button onClick={function () { setShowAdd(true); }} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>+ Add Rule</button>
         </div>
       </div>
+
+      {notice ? (
+        <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', padding: '10px 14px', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <span style={{ fontSize: '13px', color: '#1E40AF', flex: 1 }}>{notice}</span>
+          <button onClick={function () { setNotice(null); }} style={{ border: 'none', background: 'transparent', color: '#1E40AF', cursor: 'pointer', fontSize: '16px', lineHeight: 1 }}>&times;</button>
+        </div>
+      ) : null}
 
       {/* Stat cards */}
       <div style={{ display: 'flex', gap: '12px', marginBottom: '16px', flexWrap: 'wrap' }}>
@@ -174,6 +195,7 @@ export default function RedactionRulesPage() {
                       <span style={{ fontWeight: '700', fontSize: '14.5px', color: '#1F4E79' }}>{r.title}</span>
                       <Pill bg={cc.bg} fg={cc.fg}>{r.category_label}</Pill>
                       <Pill bg={st.bg} fg={st.fg}>{st.label}</Pill>
+                      {r.source === 'ai' ? <Pill bg="#EDE9FE" fg="#5B21B6">AI-suggested</Pill> : null}
                       {!r.is_active ? <Pill bg="#F3F4F6" fg="#6B7280">Inactive</Pill> : null}
                     </div>
                     {!open ? <div style={{ fontSize: '13px', color: '#6B7280', marginTop: '4px', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{r.description}</div> : null}
