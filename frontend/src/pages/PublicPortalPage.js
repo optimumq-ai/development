@@ -19,6 +19,8 @@ export default function PublicPortalPage() {
   const [agencyName, setAgencyName] = useState('');
   const [lastSearchQuery, setLastSearchQuery] = useState('');
   const [quickReplies, setQuickReplies] = useState([]);
+  const [showContactForm, setShowContactForm] = useState(false);
+  const [contactDraft, setContactDraft] = useState({ name:'', email:'', phone:'' });
   const [nativeOpen, setNativeOpen] = useState(false);
   const [nativeQuery, setNativeQuery] = useState('');
   const [nativeGroups, setNativeGroups] = useState(null);
@@ -126,6 +128,7 @@ export default function PublicPortalPage() {
     setInput('');
     setSending(true);
     setQuickReplies([]);
+    setShowContactForm(false);
     try {
       var r = await axios.post(API + '/public/chat', { messages: nextMessages, selectedRecords: selectedRecords });
       var assistantMsg = { role: 'assistant', content: r.data.reply };
@@ -135,6 +138,7 @@ export default function PublicPortalPage() {
       }
       if (r.data.searchQuery) setLastSearchQuery(r.data.searchQuery);
       setQuickReplies(Array.isArray(r.data.quickReplies) ? r.data.quickReplies : []);
+      if (r.data.contactForm) { setShowContactForm(true); setContactDraft({ name:'', email:'', phone:'' }); }
       setMessages(msgsAfter);
       if (r.data.verifyEmail) {
         try {
@@ -208,6 +212,16 @@ export default function PublicPortalPage() {
 
   function handleKey(e) {
     if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleSend(); }
+  }
+
+  function submitContact() {
+    if (sending) return;
+    var nm = contactDraft.name.trim();
+    var em = contactDraft.email.trim();
+    var ph = contactDraft.phone.trim();
+    if (!nm || !em) return;
+    var msg = 'My contact information: Name: ' + nm + ', Email: ' + em + (ph ? ', Phone: ' + ph : ' (no phone provided)') + '.';
+    sendMessage(msg, false);
   }
 
   if (submitted) {
@@ -420,6 +434,26 @@ export default function PublicPortalPage() {
                   ✓ I'm done selecting — continue
                 </button>
                 <span style={{fontStyle:'italic',color:'#4B7864'}}>or keep browsing and pick more records</span>
+              </div>
+            </div>
+          )}
+          {showContactForm && !sending && !verifyingEmail && (
+            <div style={{borderTop:'1px solid #E5E7EB',padding:'14px',background:'#F8FAFC'}}>
+              <div style={{fontSize:'12px',fontWeight:'700',color:'#1F4E79',marginBottom:'10px',textTransform:'uppercase',letterSpacing:'0.4px'}}>Your contact information</div>
+              <div style={{display:'flex',flexDirection:'column',gap:'8px'}}>
+                <div>
+                  <label style={{fontSize:'12px',color:'#6B7280',display:'block',marginBottom:'3px'}}>Name</label>
+                  <input value={contactDraft.name} onChange={function(e){var v=e.target.value;setContactDraft(function(p){return Object.assign({},p,{name:v});});}} placeholder="Jane Smith" style={{width:'100%',padding:'9px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'14px',outline:'none',boxSizing:'border-box'}} />
+                </div>
+                <div>
+                  <label style={{fontSize:'12px',color:'#6B7280',display:'block',marginBottom:'3px'}}>Email address</label>
+                  <input type="email" value={contactDraft.email} onChange={function(e){var v=e.target.value;setContactDraft(function(p){return Object.assign({},p,{email:v});});}} placeholder="jane@example.com" style={{width:'100%',padding:'9px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'14px',outline:'none',boxSizing:'border-box'}} />
+                </div>
+                <div>
+                  <label style={{fontSize:'12px',color:'#6B7280',display:'block',marginBottom:'3px'}}>Phone number (optional)</label>
+                  <input value={contactDraft.phone} onChange={function(e){var v=e.target.value;setContactDraft(function(p){return Object.assign({},p,{phone:v});});}} placeholder="(555) 123-4567" style={{width:'100%',padding:'9px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'14px',outline:'none',boxSizing:'border-box'}} />
+                </div>
+                <button type="button" onClick={submitContact} disabled={!contactDraft.name.trim()||!contactDraft.email.trim()} style={{marginTop:'4px',padding:'10px 16px',background:(!contactDraft.name.trim()||!contactDraft.email.trim())?'#D1D5DB':'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:(!contactDraft.name.trim()||!contactDraft.email.trim())?'not-allowed':'pointer'}}>Continue</button>
               </div>
             </div>
           )}

@@ -15,13 +15,14 @@ const SYSTEM_PROMPT = [
   '',
   'PHASES:',
   '',
-  'Phase 1 - Identity: Collect the requestor full name first. Then ask for their email address. When they provide it, read it back and ask: "You entered <email> as your email address. Would you like me to send a verification email to confirm it works? (You can also skip this if you prefer.)"',
+  'Phase 1 - Contact info: Greet the citizen and briefly explain what you do, then ask for their contact information and emit on its own line: [[CONTACT_FORM]] (the system then shows the citizen a single form with Name, Email address, and Phone number (optional) fields). Do NOT ask for name, email, and phone as separate questions. The form collects them together in one step.',
+  'When the citizen provides their contact information (the system sends their name, email, and optional phone), read the email back and ask: "You entered <email> as your email address. Would you like me to send a verification email to confirm it works? (You can also skip this if you prefer.)"',
   '',
   'If they say yes to verification, emit on its own line: [[VERIFY_EMAIL:address@example.com]] then say "I just sent a verification email to <email>. Please check your inbox and click the link. I will wait here." Then stop and wait.',
   '',
-  'If they say no or skip, emit on its own line: [[VERIFY_SKIPPED:address@example.com]] and continue: acknowledge their choice neutrally and proceed to ask for their delivery preference (email or postal mail) and optional phone number.',
+  'If they say no or skip, emit on its own line: [[VERIFY_SKIPPED:address@example.com]] and continue: acknowledge their choice neutrally and proceed to ask for their delivery preference (email or postal mail). Their phone number was already collected on the contact form, so do not ask for it again.',
   '',
-  'When the system tells you the verification is complete via a system message like "VERIFIED_OK: <email>", confirm warmly and proceed to delivery preference and phone. When the system tells you "VERIFIED_TIMEOUT: <email>", say the verification did not complete in time and that you can continue without it, then proceed to delivery preference and phone.',
+  'When the system tells you the verification is complete via a system message like "VERIFIED_OK: <email>", confirm warmly and proceed to delivery preference. When the system tells you "VERIFIED_TIMEOUT: <email>", say the verification did not complete in time and that you can continue without it, then proceed to delivery preference.',
   '',
   'Phase 2 - Description: Ask what records they are seeking. Ask clarifying questions one at a time: date range, departments involved, specific people or events, format preference. Confirm scope back to them in plain language.',
   '',
@@ -57,10 +58,11 @@ const SYSTEM_PROMPT = [
   '',
   'TONE:',
   '- One question at a time. Short messages.',
+  '- Write in plain text only. Do not use Markdown formatting such as **bold**, asterisks, headers, or bullet symbols. The portal displays your text exactly as written.',
   '- Acknowledge what the user said before asking the next thing.',
   '- If the user is frustrated or stuck, suggest the "Prefer a form?" link.',
   '',
-  'START by greeting the user, briefly explaining what you do, and asking for their name.'
+  'START by greeting the user, briefly explaining what you do, and asking for their contact information (emit [[CONTACT_FORM]] on its own line).'
 ].join('\n');
 
 
@@ -174,6 +176,7 @@ router.post('/chat', async function(req, res) {
     if (qrMatch) {
       quickReplies = qrMatch[1].split('|').map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 0; });
     }
+    var contactForm = /\[\[CONTACT_FORM\]\]/.test(fullText);
     var searchQuery = null;
     var searchResults = null;
     var searchQueryMatch = fullText.match(/\[\[SEARCH_QUERY:([^\]]+)\]\]/);
@@ -190,8 +193,11 @@ router.post('/chat', async function(req, res) {
       .replace(/\[\[SEARCH_QUERY:[^\]]+\]\]/g, '')
       .replace(/\[\[NON_TRAD_ITEMS:[^\]]+\]\]/g, '')
       .replace(/\[\[QUICK_REPLIES:[^\]]*\]\]/g, '')
+      .replace(/\[\[CONTACT_FORM\]\]/g, '')
+      .replace(/\*\*([^*]+)\*\*/g, '$1')
+      .replace(/__([^_]+)__/g, '$1')
       .trim();
-    res.json({ reply: visibleText, submission: submission, verifyEmail: verifyEmail, searchQuery: searchQuery, searchResults: searchResults, quickReplies: quickReplies });
+    res.json({ reply: visibleText, submission: submission, verifyEmail: verifyEmail, searchQuery: searchQuery, searchResults: searchResults, quickReplies: quickReplies, contactForm: contactForm });
   } catch(e) {
     console.error('Chat error:', e.message);
     res.status(500).json({ error: 'Chat unavailable', details: e.message });
