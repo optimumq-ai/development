@@ -77,6 +77,32 @@ setInterval(function() {
   });
 }, 60 * 60 * 1000);
 
+// Builds a plain-language "set expectations" section from the taxonomy: which
+// record types are NOT instantly retrievable (paper, manual collection, bulk export)
+// so the agent can tell citizens what to expect. Regenerated each turn so it stays
+// in sync as admins reclassify record types.
+async function buildFulfillmentGuidance() {
+  try {
+    var nonElec = await all("SELECT name, fulfillment_method FROM record_types WHERE status='active' AND fulfillment_method IN ('manual_collection','bulk_export') ORDER BY fulfillment_method, name");
+    var paperSources = await all("SELECT name, description FROM record_repositories WHERE status='active' AND connector_type='paper-index' ORDER BY sort_order, name");
+    var hasPaper = paperSources && paperSources.length;
+    if ((!nonElec || !nonElec.length) && !hasPaper) return '';
+    var manual = (nonElec || []).filter(function(r){ return r.fulfillment_method === 'manual_collection'; }).map(function(r){ return r.name; });
+    var bulk = (nonElec || []).filter(function(r){ return r.fulfillment_method === 'bulk_export'; }).map(function(r){ return r.name; });
+    var L = [];
+    L.push('\n\nSETTING EXPECTATIONS - RECORDS THAT ARE NOT INSTANTLY AVAILABLE:');
+    L.push('Some records cannot be pulled by a quick system search. If the records the citizen is asking for appear to fall into a category below, proactively and warmly tell them what to expect - when you confirm scope or just before submitting. Say it once, kindly, framed as helpful (never discouraging). Do not recite this whole list; mention only the part that applies to their request.');
+    if (hasPaper) {
+      var ps = paperSources.map(function(s){ return s.name + (s.description ? ' - ' + s.description : ''); });
+      L.push('- PAPER / PHYSICAL records held in storage: ' + ps.join('; ') + '. If the citizen asks for OLDER records (roughly 10+ years old) that fall into these areas - for example older building permits, historical council minutes, old zoning maps, closed or older case files, or older utility records - then right when you confirm scope (before or alongside searching) tell them plainly that records that old are usually kept as PAPER in the records center, located and pulled by hand, so expect a longer turnaround than digital records and possibly modest copy fees. Also let them know they can use the "Search connected systems" option in the portal to look up the specific record and its exact storage location.');
+    }
+    if (manual.length) L.push('- MANUALLY COLLECTED by staff (from devices, mailboxes, recording or evidence systems, or archives) - not a simple search, so expect a longer turnaround: ' + manual.join('; ') + '.');
+    if (bulk.length) L.push('- PRODUCED AS A DATA EXPORT OR COPY (staff generate an extract rather than hand over a single document; processing time and fees may apply for large datasets): ' + bulk.join('; ') + '.');
+    L.push('Also: records that are sensitive or confidential go through a redaction review before release and may be released with redactions or withheld where the law requires - mention this only if their request clearly involves such records.');
+    return L.join('\n');
+  } catch(e) { console.error('[publicChat] fulfillment guidance failed:', e.message); return ''; }
+}
+
 router.post('/chat', async function(req, res) {
   var rate = checkRate(req.ip);
   if (!rate.ok) {
@@ -92,6 +118,7 @@ router.post('/chat', async function(req, res) {
     var todayStr = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     var systemPrompt = SYSTEM_PROMPT.replace('{{AGENCY_NAME}}', agencyName) +
       '\n\nIMPORTANT: Today\'s date is ' + todayStr + '. When the citizen mentions a date or month/year, treat their statement as accurate. Do not assume an earlier year or correct their date unless they themselves seem uncertain. Past dates are normal — citizens often request records from past months or years.';
+    try { systemPrompt += await buildFulfillmentGuidance(); } catch(e) { console.error('[publicChat] guidance inject failed:', e.message); }
     // Append any active admin-configured behavior rules
     try {
       var activeRules = await all('SELECT rule_text FROM agent_rules WHERE enabled = 1 ORDER BY sort_order ASC, created_at ASC');
