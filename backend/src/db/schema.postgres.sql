@@ -176,17 +176,22 @@ CREATE TABLE IF NOT EXISTS redaction_categories (
   label TEXT,
   sort_order INTEGER DEFAULT 0
 );
--- status = pending_review | approved | rejected | inactive ; source = seed | ai | manual
+-- approval_status = approved | pending_review | rejected ; is_active separates "in effect" from approval ; source = seed | ai | manual
 CREATE TABLE IF NOT EXISTS redaction_rules (
   id TEXT PRIMARY KEY,
   jurisdiction_id TEXT NOT NULL,
   title TEXT,
   description TEXT,
   category TEXT,
-  status TEXT DEFAULT 'pending_review',
+  approval_status TEXT DEFAULT 'pending_review',
+  is_active INTEGER DEFAULT 0,
   source TEXT DEFAULT 'seed',
   approved_by TEXT,
   approved_at TEXT,
+  source_document TEXT,
+  effective_date TEXT,
+  expiration_date TEXT,
+  metadata TEXT,
   sort_order INTEGER DEFAULT 0,
   created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS'),
   updated_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
