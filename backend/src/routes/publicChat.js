@@ -5,6 +5,7 @@ const { run, get } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const emailService = require('../services/email');
 const recordSearch = require('../services/recordSearch');
+const classifier = require('../services/classifier');
 const crypto = require('crypto');
 const { all } = require('../db');
 
@@ -233,6 +234,17 @@ router.post('/submit', async function(req, res) {
     await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
       [uuidv4(), id, 'public', 'Public Portal', 'RECORDS_SELECTED', 'Requestor selected ' + b.selectedRecords.length + ' record(s) from search results']);
   }
+  // Auto-classify and route the request to the appropriate fulfillment team
+  try {
+    var cls = await classifier.classifyAndRoute(b.description);
+    var dl = new Date(); dl.setDate(dl.getDate() + (cls.deadlineDays || 10));
+    var dlStr = dl.toISOString().split('T')[0];
+    await run("UPDATE requests SET classification = ?, department_id = ?, deadline_date = ?, is_mrr = ?, updated_at = datetime('now') WHERE id = ?",
+      [cls.classification, cls.departmentId, dlStr, cls.isMrr ? 1 : 0, id]);
+    await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+      [uuidv4(), id, 'system', 'AI Classification', 'CLASSIFIED', 'Auto-classified as ' + cls.classification + (cls.teamName ? '; routed to ' + cls.teamName : '') + (cls.reasoning ? ' - ' + cls.reasoning : '')]);
+  } catch(ce) { console.error('[publicChat] auto-classify failed:', ce.message); }
+
   var newReq = await get('SELECT * FROM requests WHERE id = ?', [id]);
   if (newReq) {
     emailService.sendSubmissionConfirmation(newReq).catch(function(e){ console.error('confirmation email failed:', e.message); });
