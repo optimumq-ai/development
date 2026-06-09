@@ -156,3 +156,76 @@ CREATE TABLE IF NOT EXISTS document_pages (
   created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
 );
 CREATE INDEX IF NOT EXISTS idx_document_pages_file ON document_pages(file_id);
+
+-- Jurisdiction Profile: variance (statutes, exemptions, later deadlines/fees) lives here as
+-- configuration data, not product forks. Minimal now; expandable.
+CREATE TABLE IF NOT EXISTS jurisdiction_profiles (
+  id TEXT PRIMARY KEY,
+  code TEXT,
+  name TEXT,
+  statute_name TEXT,
+  statute_citation TEXT,
+  status TEXT DEFAULT 'active',
+  created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
+);
+
+-- Exemption Reference Library: the legal bases a redaction can cite, scoped to a jurisdiction.
+-- source = seed | ai | manual  (AI-populated location-based statutes slot in here later).
+-- statute_text is left NULL until populated from a real source.
+CREATE TABLE IF NOT EXISTS exemption_reference_library (
+  id TEXT PRIMARY KEY,
+  jurisdiction_id TEXT NOT NULL,
+  citation TEXT,
+  label TEXT,
+  description TEXT,
+  statute_text TEXT,
+  category TEXT,
+  source TEXT DEFAULT 'seed',
+  status TEXT DEFAULT 'active',
+  sort_order INTEGER DEFAULT 0,
+  created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
+);
+CREATE INDEX IF NOT EXISTS idx_exemptions_jur ON exemption_reference_library(jurisdiction_id);
+
+-- A redaction effort on one uploaded file.
+CREATE TABLE IF NOT EXISTS redaction_jobs (
+  id TEXT PRIMARY KEY,
+  file_id TEXT NOT NULL,
+  request_id TEXT,
+  jurisdiction_id TEXT,
+  status TEXT DEFAULT 'draft',
+  output_file_id TEXT,
+  created_by TEXT,
+  created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS'),
+  updated_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
+);
+CREATE INDEX IF NOT EXISTS idx_redaction_jobs_file ON redaction_jobs(file_id);
+
+-- A single redaction box. Coords normalized 0-1, top-left origin (same frame as document_pages.words).
+CREATE TABLE IF NOT EXISTS redaction_zones (
+  id TEXT PRIMARY KEY,
+  job_id TEXT NOT NULL,
+  file_id TEXT,
+  page_no INTEGER NOT NULL,
+  x REAL, y REAL, w REAL, h REAL,
+  exemption_id TEXT,
+  note TEXT,
+  zone_type TEXT DEFAULT 'manual',
+  created_by TEXT,
+  created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
+);
+CREATE INDEX IF NOT EXISTS idx_redaction_zones_job ON redaction_zones(job_id);
+
+-- Layout Profile: reusable zone POSITIONS for a recurring form. Kept separate from the
+-- exemption library (positions here, legal basis there). zones = JSON [{page_no,x,y,w,h,label,exemption_id?}].
+CREATE TABLE IF NOT EXISTS layout_profiles (
+  id TEXT PRIMARY KEY,
+  name TEXT,
+  record_type_id TEXT,
+  description TEXT,
+  zones TEXT,
+  source TEXT DEFAULT 'manual',
+  status TEXT DEFAULT 'active',
+  created_by TEXT,
+  created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
+);

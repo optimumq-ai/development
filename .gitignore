@@ -12,3 +12,6 @@ frontend/build/
 # Demo connectors live in their own repo
 demo-connectors/
 backups/
+
+# rendered page images (regenerated on demand)
+uploads/processed/
