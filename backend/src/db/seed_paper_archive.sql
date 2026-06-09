@@ -12,3 +12,16 @@ INSERT INTO paper_index_items (id, repository_id, title, description, location, 
  ('pi-seed-3','repo-paper-archive','Historical Zoning and Land-Use Maps 1965-1985','Large-format paper zoning and land-use maps for the city and surrounding annexed areas.','Map Cabinet 3','1965-1985','','','zoning maps land use planning annexation', now()::text),
  ('pi-seed-4','repo-paper-archive','Closed Police Case Files 1985-1995','Archived paper case files for closed police investigations. Confidential; redaction review required before any release.','Aisle 7, Shelf 1','1985-1995','201','','police case files investigations reports closed', now()::text),
  ('pi-seed-5','repo-paper-archive','Water Utility Service Records 1992-2000','Paper service connection and billing history cards for water utility accounts.','Aisle 5, Shelf 3','1992-2000','133','','water utility service billing connection', now()::text);
+
+-- Second paper location (demonstrates multiple paper records sources at different facilities)
+INSERT INTO record_repositories (id, name, connector_type, status, config, sort_order, description)
+VALUES ('repo-paper-annex', 'City Hall Annex - Historical Vault', 'paper-index', 'active',
+  '{"facility":"City Hall Annex"}', 61,
+  'Older recorded documents kept in the secured vault at the City Hall Annex: recorded deeds and property transfers, original plat maps and subdivision plans, and bound ordinance and resolution books. A search returns the vault location; staff retrieve the document on request.')
+ON CONFLICT (id) DO UPDATE SET name=EXCLUDED.name, connector_type=EXCLUDED.connector_type, status=EXCLUDED.status, config=EXCLUDED.config, description=EXCLUDED.description;
+
+DELETE FROM paper_index_items WHERE repository_id='repo-paper-annex';
+INSERT INTO paper_index_items (id, repository_id, title, description, location, record_date, box, folder, tags, created_at) VALUES
+ ('pi-annex-1','repo-paper-annex','Recorded Deeds & Property Transfers 1950-1980','Paper records of recorded deeds and property ownership transfers, indexed by grantor and grantee.','Vault Room B, Cabinet 2','1950-1980','','','deed property transfer title land ownership grantor', now()::text),
+ ('pi-annex-2','repo-paper-annex','Original Plat Maps & Subdivision Plans 1955-1990','Original large-format plat maps and recorded subdivision plans for developments across the city.','Vault Room B, Flat File 1','1955-1990','','','plat map subdivision survey land development plans', now()::text),
+ ('pi-annex-3','repo-paper-annex','Bound Ordinance & Resolution Books 1945-1985','Bound volumes of adopted ordinances and resolutions, organized chronologically.','Vault Room B, Shelf 7','1945-1985','','','ordinance resolution code bound book adopted legislation', now()::text);

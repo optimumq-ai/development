@@ -33,6 +33,7 @@ export default function SourcesConfig() {
   function setCfg(k,v){ setEditor(function(ed){ var c=Object.assign({},ed.data.config); c[k]=v; return Object.assign({},ed,{data:Object.assign({},ed.data,{config:c})}); }); }
   function openCreate(){ var first = catalog[0] || {key:''}; setEditor({ mode:'create', data:{ name:'', connector_type:first.key, status:'active', config:{}, description:'' } }); }
   function openEdit(s){ setEditor({ mode:'edit', data:{ id:s.id, name:s.name, connector_type:s.connector_type, status:s.status, config:Object.assign({}, s.config||{}), description:s.description||'' } }); }
+  function openCreatePaper(){ setEditor({ mode:'create', data:{ name:'', connector_type:'paper-index', status:'active', config:{}, description:'' } }); }
 
   async function save() {
     var d = editor.data;
@@ -169,43 +170,62 @@ export default function SourcesConfig() {
     );
   }
 
+  function renderSourceRow(s){
+    var meta = typeMeta(s.connector_type);
+    return (
+      <div key={s.id} style={{ display:'flex', alignItems:'center', gap:'14px', background:'white', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'12px 16px' }}>
+        <div style={{ flex:1, minWidth:0 }}>
+          <div style={{ display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap' }}>
+            <span style={{ fontWeight:'700', fontSize:'14px', color:'#111' }}>{s.name}</span>
+            {(meta.capabilities||[]).indexOf('scan')>=0 ? <span style={badge('#ECFDF5','#065F46')}>Scannable</span> : null}
+            {(meta.capabilities||[]).indexOf('search')>=0 ? <span style={badge('#EFF6FF','#1E40AF')}>Searchable</span> : null}
+            {s.status!=='active' ? <span style={badge('#F3F4F6','#6B7280')}>Inactive</span> : null}
+          </div>
+          <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'2px' }}>{meta.label}</div>
+          {s.description ? <div style={{ fontSize:'12px', color:'#6B7280', marginTop:'4px', lineHeight:'1.4' }}>{s.description}</div> : null}
+        </div>
+        {s.connector_type==='paper-index' ? <button onClick={function(){ openPaperImport(s); }} style={btnGhostSm}>Import index</button> : null}
+        <button onClick={function(){ openEdit(s); }} style={btnGhostSm}>Edit</button>
+        <button onClick={function(){ del(s); }} style={Object.assign({},btnGhostSm,{color:'#DC2626'})}>Delete</button>
+      </div>
+    );
+  }
+
+  function sectionHeader(title, subtitle, addLabel, addFn, canAdd){
+    return (
+      <div style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', margin:'4px 0 10px' }}>
+        <div style={{ flex:1, minWidth:0, paddingRight:'12px' }}>
+          <div style={{ fontSize:'15px', fontWeight:'700', color:'#111' }}>{title}</div>
+          <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'2px', lineHeight:'1.4' }}>{subtitle}</div>
+        </div>
+        {canAdd ? <button onClick={addFn} style={btnPrimary}>{addLabel}</button> : null}
+      </div>
+    );
+  }
+
   return (
     <div>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px' }}>
         <div style={{ color:'#6B7280', fontSize:'14px' }}>Repositories and systems the platform can search and scan for record types.</div>
-        {!editor && !ai && !paperImport ? (
-          <div style={{ display:'flex', gap:'8px' }}>
-            <button onClick={openAi} style={btnGhost}>Configure with AI</button>
-            <button onClick={openCreate} style={btnPrimary}>+ Add source</button>
-          </div>
-        ) : null}
+        {(!editor && !ai && !paperImport) ? <button onClick={openAi} style={btnGhost}>Configure with AI</button> : null}
       </div>
       {editor ? renderEditor() : null}
       {ai ? renderAiPanel() : null}
       {paperImport ? renderPaperImport() : null}
       {loading ? <div style={{ color:'#9CA3AF', fontSize:'14px' }}>Loading sources...</div> : (
-        <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
-          {sources.length===0 ? <div style={{ color:'#9CA3AF', fontSize:'14px' }}>No sources configured yet.</div> : null}
-          {sources.map(function(s){
-            var meta = typeMeta(s.connector_type);
-            return (
-              <div key={s.id} style={{ display:'flex', alignItems:'center', gap:'14px', background:'white', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'12px 16px' }}>
-                <div style={{ flex:1, minWidth:0 }}>
-                  <div style={{ display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap' }}>
-                    <span style={{ fontWeight:'700', fontSize:'14px', color:'#111' }}>{s.name}</span>
-                    {(meta.capabilities||[]).indexOf('scan')>=0 ? <span style={badge('#ECFDF5','#065F46')}>Scannable</span> : null}
-                    {(meta.capabilities||[]).indexOf('search')>=0 ? <span style={badge('#EFF6FF','#1E40AF')}>Searchable</span> : null}
-                    {s.status!=='active' ? <span style={badge('#F3F4F6','#6B7280')}>Inactive</span> : null}
-                  </div>
-                  <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'2px' }}>{meta.label}</div>
-                  {s.description ? <div style={{ fontSize:'12px', color:'#6B7280', marginTop:'4px', lineHeight:'1.4' }}>{s.description}</div> : null}
-                </div>
-                {s.connector_type==='paper-index' ? <button onClick={function(){ openPaperImport(s); }} style={btnGhostSm}>Import index</button> : null}
-                <button onClick={function(){ openEdit(s); }} style={btnGhostSm}>Edit</button>
-                <button onClick={function(){ del(s); }} style={Object.assign({},btnGhostSm,{color:'#DC2626'})}>Delete</button>
-              </div>
-            );
-          })}
+        <div>
+          <div style={{ marginBottom:'26px' }}>
+            {sectionHeader('Digital record connectors', 'Live links to systems and document stores - searched and scanned automatically. Add one from the connector library, or let AI configure it for you.', '+ Add connector', openCreate, (!editor && !ai && !paperImport))}
+            <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+              {sources.filter(function(s){ return s.connector_type !== 'paper-index'; }).length===0 ? <div style={{ color:'#9CA3AF', fontSize:'14px', padding:'6px 0' }}>No digital connectors yet.</div> : sources.filter(function(s){ return s.connector_type !== 'paper-index'; }).map(renderSourceRow)}
+            </div>
+          </div>
+          <div>
+            {sectionHeader('Paper / physical records locations', 'One entry per place the city keeps paper records (a records center, an offsite vault, a department file room). Import an index of what is stored there; a search returns the physical location of a record.', '+ Add paper location', openCreatePaper, (!editor && !ai && !paperImport))}
+            <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+              {sources.filter(function(s){ return s.connector_type === 'paper-index'; }).length===0 ? <div style={{ color:'#9CA3AF', fontSize:'14px', padding:'6px 0' }}>No paper records locations yet - add one for each place the city stores paper records.</div> : sources.filter(function(s){ return s.connector_type === 'paper-index'; }).map(renderSourceRow)}
+            </div>
+          </div>
         </div>
       )}
     </div>
