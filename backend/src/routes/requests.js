@@ -83,6 +83,36 @@ router.patch('/:id/stage', requireAuth, async function(req, res) {
 });
 
 
+router.patch('/:id/route', requireAuth, async function(req, res) {
+  var userRoles = req.user.roles || [];
+  var canRoute = ['SUPERVISOR','DIRECTOR','SYSTEM_ADMIN','DEPT_MANAGER','COORDINATOR'].some(function(r){ return userRoles.indexOf(r) !== -1; });
+  if (!canRoute) return res.status(403).json({ error: 'You do not have permission to re-route requests' });
+  var request = await get('SELECT * FROM requests WHERE id = ?', [req.params.id]);
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  var teamId = req.body.departmentId;
+  if (!teamId) return res.status(400).json({ error: 'departmentId (a fulfillment team) is required' });
+  var team = await get("SELECT id, name FROM departments WHERE id = ? AND kind = 'team' AND active = 1", [teamId]);
+  if (!team) return res.status(400).json({ error: 'Invalid fulfillment team' });
+  var fromName = 'Unassigned';
+  if (request.department_id) {
+    var fromRow = await get('SELECT name FROM departments WHERE id = ?', [request.department_id]);
+    if (fromRow) fromName = fromRow.name;
+  }
+  await run("UPDATE requests SET department_id = ?, updated_at = datetime('now') WHERE id = ?", [teamId, req.params.id]);
+  var cleared = false;
+  if (request.assigned_to) {
+    var assignee = await get('SELECT department_id FROM users WHERE id = ?', [request.assigned_to]);
+    if (!assignee || assignee.department_id !== teamId) {
+      await run('UPDATE requests SET assigned_to = NULL WHERE id = ?', [req.params.id]);
+      cleared = true;
+    }
+  }
+  await logHistory(req.params.id, req.user.sub, req.user.name, 'REROUTED',
+    'Re-routed from ' + fromName + ' to ' + team.name + (cleared ? ' (prior assignment cleared)' : '') + (req.body.notes ? ' - ' + req.body.notes : ''));
+  res.json({ success: true, departmentId: teamId, teamName: team.name, assignmentCleared: cleared });
+});
+
+
 router.patch('/:id/assign', requireAuth, async function(req, res) {
   var request = await get('SELECT * FROM requests WHERE id = ?', [req.params.id]);
   if (!request) return res.status(404).json({ error: 'Request not found' });

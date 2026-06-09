@@ -31,11 +31,17 @@ export default function RequestWorkspacePage() {
   const [records, setRecords] = useState([]);
   const [staff, setStaff] = useState([]);
   const [assigning, setAssigning] = useState(false);
+  const [teams, setTeams] = useState([]);
+  const [rerouting, setRerouting] = useState(false);
 
-  useEffect(function() { load(); loadStaff(); }, [id]);
+  useEffect(function() { load(); loadStaff(); loadTeams(); }, [id]);
 
   async function loadStaff() {
     try { var r = await api.get('/staff'); setStaff(r.data.staff); } catch(e) {}
+  }
+
+  async function loadTeams() {
+    try { var r = await api.get('/departments'); var ds = (r.data && r.data.departments) || []; setTeams(ds.filter(function(d){ return d.kind === 'team'; })); } catch(e) {}
   }
 
   async function load() {
@@ -77,6 +83,16 @@ export default function RequestWorkspacePage() {
       await load();
     } catch(e) { console.error(e); }
     setAssigning(false);
+  }
+
+  async function rerouteRequest(teamId) {
+    if (!teamId || teamId === request.department_id) return;
+    setRerouting(true);
+    try {
+      await api.patch('/requests/' + request.id + '/route', { departmentId: teamId });
+      await load();
+    } catch(e) { setErr((e.response && e.response.data && e.response.data.error) || 'Failed to re-route'); }
+    setRerouting(false);
   }
 
   async function closeRequest(reason) {
@@ -276,6 +292,20 @@ export default function RequestWorkspacePage() {
               </button>}
             </div>
             {request.assigned_to_name&&<div style={{fontSize:'12px',color:'#6B7280',marginTop:'6px'}}>Currently assigned to: <strong>{request.assigned_to_name}</strong></div>}
+          </div>
+          <div style={{marginBottom:'16px'}}>
+            <div style={{fontSize:'13px',fontWeight:'600',color:'#374151',marginBottom:'8px'}}>Fulfillment Team</div>
+            <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
+              <select onChange={function(e){if(e.target.value)rerouteRequest(e.target.value);}} value={request.department_id||''} disabled={rerouting}
+                style={{padding:'8px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',outline:'none',background:'white',cursor:'pointer'}}>
+                <option value="">— Unrouted —</option>
+                {teams.map(function(t){
+                  return <option key={t.id} value={t.id}>{t.name}</option>;
+                })}
+              </select>
+              {rerouting&&<span style={{fontSize:'12px',color:'#9CA3AF'}}>Re-routing...</span>}
+            </div>
+            <div style={{fontSize:'12px',color:'#6B7280',marginTop:'6px'}}>Currently routed to: <strong>{request.department_name||'Unrouted'}</strong>. Changing this moves the request to another team{request.assigned_to_name?' and may clear the current assignment':''}.</div>
           </div>
           {!isComplete&&(
             <div>
