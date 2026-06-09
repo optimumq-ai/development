@@ -127,7 +127,7 @@ export default function TaxonomyPage() {
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
                       <span style={{ fontWeight: '700', fontSize: '15px', color: '#111' }}>{cat.name}</span>
                       <span style={{ fontSize: '12px', color: '#9CA3AF' }}>{catTypes.length} type{catTypes.length !== 1 ? 's' : ''}</span>
-                      {owner ? pill('#EBF3FB', '#1F4E79', 'Owner: ' + owner) : pill('#F3F4F6', '#6B7280', 'No owner dept')}
+                      {owner ? pill('#EBF3FB', '#1F4E79', 'Owning dept: ' + owner) : pill('#F3F4F6', '#6B7280', 'No owning dept')}
                     </div>
                   </div>
                   <div style={{ fontSize: '20px', color: '#9CA3AF', transform: isCollapsed ? 'rotate(0deg)' : 'rotate(180deg)', transition: 'transform .2s' }}>⌄</div>
@@ -155,6 +155,9 @@ export default function TaxonomyPage() {
                           {(t.identifying_facets && t.identifying_facets.length) ? (
                             <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '2px' }}>Pinned by: {t.identifying_facets.join(' \u00b7 ')}</div>
                           ) : null}
+                          <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '4px' }}>
+                            Routing: <strong>{t.owner_department_name || 'No owning dept'}</strong>{t.fulfillment_team_name ? ' -> ' + t.fulfillment_team_name : ''}{t.fulfillment_team_is_override ? ' (override)' : ''}
+                          </div>
                         </div>
                       );
                     })}

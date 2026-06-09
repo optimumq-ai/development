@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
 
 var AVAIL_OPTS = ['releasable', 'review_required', 'restricted', 'confidential'];
@@ -29,6 +29,17 @@ export default function RecordTypeEditor(props) {
   });
   var [saving, setSaving] = useState(false);
   var [err, setErr] = useState('');
+  var [owningDeptId, setOwningDeptId] = useState(init.owner_department_id || '');
+  var [teamOverrideId, setTeamOverrideId] = useState(init.fulfillment_team_is_override ? (init.fulfillment_team_id || '') : '');
+  var [bizDepts, setBizDepts] = useState([]);
+  var [teams, setTeams] = useState([]);
+  useEffect(function(){
+    api.get('/departments').then(function(r){
+      var ds = (r.data && r.data.departments) || [];
+      setBizDepts(ds.filter(function(d){ return d.kind !== 'team'; }));
+      setTeams(ds.filter(function(d){ return d.kind === 'team'; }));
+    }).catch(function(){});
+  }, []);
   function set(k, v) { setF(function(p){ var n = Object.assign({}, p); n[k] = v; return n; }); }
 
   async function save() {
@@ -44,8 +55,10 @@ export default function RecordTypeEditor(props) {
       identifying_facets: strToArr(f.identifying_facets), formats: strToArr(f.formats), status: f.status
     };
     try {
-      if (props.mode === 'create') { payload.code = f.code.trim(); await api.post('/taxonomy/record-types', payload); }
+      var rid = init.id;
+      if (props.mode === 'create') { payload.code = f.code.trim(); var resp = await api.post('/taxonomy/record-types', payload); rid = resp.data && resp.data.id; }
       else { await api.patch('/taxonomy/record-types/' + init.id, payload); }
+      if (rid) { await api.patch('/taxonomy/record-types/' + rid + '/routing', { owning_department_id: owningDeptId || null, fulfillment_team_id: teamOverrideId || null }); }
       props.onSaved();
     } catch (e) {
       setErr((e.response && e.response.data && e.response.data.error) || 'Save failed');
@@ -70,6 +83,9 @@ export default function RecordTypeEditor(props) {
     );
   }
 
+  var selOwner = bizDepts.filter(function(d){ return d.id === owningDeptId; })[0];
+  var derivedTeam = selOwner ? teams.filter(function(t){ return t.id === selOwner.processed_by; })[0] : null;
+
   return (
     <div style={overlay} onClick={props.onClose}>
       <div style={modal} onClick={function(e){ e.stopPropagation(); }}>
@@ -80,6 +96,18 @@ export default function RecordTypeEditor(props) {
         <label style={lab}>Category</label>
         <select value={f.category_id} onChange={function(e){ set('category_id', e.target.value); }} style={inp}>
           {props.categories.map(function(c){ return <option key={c.id} value={c.id}>{c.name}</option>; })}
+        </select>
+        <label style={lab}>Owning department</label>
+        <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '4px', marginTop: '-2px' }}>The org-chart department that owns these records. The AI matches requests to this.</div>
+        <select value={owningDeptId} onChange={function(e){ setOwningDeptId(e.target.value); }} style={inp}>
+          <option value="">- None -</option>
+          {bizDepts.map(function(d){ return <option key={d.id} value={d.id}>{d.name}</option>; })}
+        </select>
+        <label style={lab}>Fulfillment team</label>
+        <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '4px', marginTop: '-2px' }}>Leave on default unless this record type is handled by a different team than its owning department.</div>
+        <select value={teamOverrideId} onChange={function(e){ setTeamOverrideId(e.target.value); }} style={inp}>
+          <option value="">Use owning department default{derivedTeam ? ' (' + derivedTeam.name + ')' : ''}</option>
+          {teams.map(function(t){ return <option key={t.id} value={t.id}>{t.name} (override)</option>; })}
         </select>
         {field('Name', 'name')}
         {field('Code', 'code', { disabled: props.mode !== 'create', hint: props.mode === 'create' ? 'kebab-case, unique' : 'fixed after creation' })}

@@ -22,6 +22,30 @@ function hydrate(rt) {
   return rt;
 }
 
+async function attachRouting(list) {
+  if (!list || !list.length) return;
+  var links = await all("SELECT record_type_id, department_id, role FROM record_type_departments WHERE role IN ('owner','fulfiller') ORDER BY sort_order");
+  var depts = await all("SELECT id, name, kind, processed_by FROM departments");
+  var dById = {}; depts.forEach(function(d){ dById[d.id] = d; });
+  var ownerOf = {}, fulfillerOf = {};
+  links.forEach(function(l){
+    if (l.role === 'owner' && !ownerOf[l.record_type_id]) ownerOf[l.record_type_id] = l.department_id;
+    if (l.role === 'fulfiller' && !fulfillerOf[l.record_type_id]) fulfillerOf[l.record_type_id] = l.department_id;
+  });
+  list.forEach(function(rt){
+    var ownerId = ownerOf[rt.id] || null;
+    var ownerDept = ownerId ? dById[ownerId] : null;
+    rt.owner_department_id = ownerId;
+    rt.owner_department_name = ownerDept ? ownerDept.name : null;
+    var overrideId = fulfillerOf[rt.id] || null;
+    var teamId = overrideId || (ownerDept ? ownerDept.processed_by : null);
+    var team = teamId ? dById[teamId] : null;
+    rt.fulfillment_team_id = teamId || null;
+    rt.fulfillment_team_name = team ? team.name : null;
+    rt.fulfillment_team_is_override = !!overrideId;
+  });
+}
+
 function packArray(v) {
   if (v === undefined) return undefined;
   if (Array.isArray(v)) return JSON.stringify(v);
@@ -79,8 +103,10 @@ router.get('/record-types', requireAuth, async function(req, res) {
   if (req.query.category_id) { clauses.push('rt.category_id = ?'); params.push(req.query.category_id); }
   if (req.query.status) { clauses.push('rt.status = ?'); params.push(req.query.status); }
   var where = clauses.length ? (' WHERE ' + clauses.join(' AND ')) : '';
-  var rows = await all('SELECT rt.*, c.name AS category_name, (SELECT d.name FROM record_type_departments rd JOIN departments d ON d.id = rd.department_id WHERE rd.record_type_id = rt.id AND rd.role = \'owner\' ORDER BY rd.sort_order LIMIT 1) AS owner_department_name FROM record_types rt LEFT JOIN categories c ON c.id = rt.category_id' + where + ' ORDER BY rt.sort_order, rt.name', params);
-  res.json({ record_types: rows.map(hydrate) });
+  var rows = await all('SELECT rt.*, c.name AS category_name FROM record_types rt LEFT JOIN categories c ON c.id = rt.category_id' + where + ' ORDER BY rt.sort_order, rt.name', params);
+  var out = rows.map(hydrate);
+  await attachRouting(out);
+  res.json({ record_types: out });
 });
 
 router.get('/record-types/:id', requireAuth, async function(req, res) {
@@ -89,6 +115,7 @@ router.get('/record-types/:id', requireAuth, async function(req, res) {
   hydrate(rt);
   rt.departments = await all('SELECT rd.*, d.name AS department_name FROM record_type_departments rd LEFT JOIN departments d ON d.id = rd.department_id WHERE rd.record_type_id = ? ORDER BY rd.role, rd.sort_order', [rt.id]);
   rt.repositories = await all('SELECT rr.*, rp.name AS repository_name FROM record_type_repositories rr LEFT JOIN record_repositories rp ON rp.id = rr.repository_id WHERE rr.record_type_id = ? ORDER BY rr.sort_order', [rt.id]);
+  await attachRouting([rt]);
   res.json(rt);
 });
 
@@ -163,6 +190,27 @@ router.delete('/record-types/:id/departments/:linkId', requireAuth, async functi
   await run('DELETE FROM record_type_departments WHERE id = ?', [req.params.linkId]);
   await audit('rt_department', req.params.linkId, 'delete', req, null);
   res.json({ success: true });
+});
+
+// ===== ROUTING: owning department + optional fulfillment team override =====
+router.patch('/record-types/:id/routing', requireAuth, async function(req, res) {
+  var rt = await get('SELECT id FROM record_types WHERE id = ?', [req.params.id]);
+  if (!rt) return res.status(404).json({ error: 'Record type not found' });
+  var ownId = req.body.owning_department_id || null;
+  var teamId = req.body.fulfillment_team_id || null;
+  if (ownId) {
+    var od = await get("SELECT id FROM departments WHERE id = ? AND (kind <> 'team' OR kind IS NULL)", [ownId]);
+    if (!od) return res.status(400).json({ error: 'owning_department_id must be a business department' });
+  }
+  if (teamId) {
+    var tm = await get("SELECT id FROM departments WHERE id = ? AND kind = 'team'", [teamId]);
+    if (!tm) return res.status(400).json({ error: 'fulfillment_team_id must be a fulfillment team' });
+  }
+  await run("DELETE FROM record_type_departments WHERE record_type_id = ? AND role IN ('owner','fulfiller')", [req.params.id]);
+  if (ownId) await run('INSERT INTO record_type_departments (id, record_type_id, department_id, role, sort_order) VALUES (?,?,?,?,?)', [nid('rd'), req.params.id, ownId, 'owner', 100]);
+  if (teamId) await run('INSERT INTO record_type_departments (id, record_type_id, department_id, role, sort_order) VALUES (?,?,?,?,?)', [nid('rd'), req.params.id, teamId, 'fulfiller', 100]);
+  await audit('rt_routing', req.params.id, 'update', req, { owning_department_id: ownId, fulfillment_team_id: teamId });
+  res.json({ success: true, owning_department_id: ownId, fulfillment_team_id: teamId });
 });
 
 // ===== LINKS: repositories (where it lives) =====
