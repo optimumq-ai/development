@@ -239,10 +239,12 @@ router.post('/submit', async function(req, res) {
     var cls = await classifier.classifyAndRoute(b.description);
     var dl = new Date(); dl.setDate(dl.getDate() + (cls.deadlineDays || 10));
     var dlStr = dl.toISOString().split('T')[0];
-    await run("UPDATE requests SET classification = ?, department_id = ?, deadline_date = ?, is_mrr = ?, updated_at = datetime('now') WHERE id = ?",
-      [cls.classification, cls.departmentId, dlStr, cls.isMrr ? 1 : 0, id]);
+    var basisText = cls.routingBasis === 'taxonomy' ? ('matched record type "' + cls.recordTypeName + '" at ' + cls.recordTypeConfidence + '% confidence')
+      : (cls.routingBasis === 'general' ? 'general-knowledge department match' : 'no confident match - sent to central intake');
+    await run("UPDATE requests SET classification = ?, department_id = ?, deadline_date = ?, is_mrr = ?, record_type_id = ?, classification_confidence = ?, routing_basis = ?, updated_at = datetime('now') WHERE id = ?",
+      [cls.classification, cls.departmentId, dlStr, cls.isMrr ? 1 : 0, cls.recordTypeId, cls.recordTypeConfidence, cls.routingBasis, id]);
     await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
-      [uuidv4(), id, 'system', 'AI Classification', 'CLASSIFIED', 'Auto-classified as ' + cls.classification + (cls.teamName ? '; routed to ' + cls.teamName : '') + (cls.reasoning ? ' - ' + cls.reasoning : '')]);
+      [uuidv4(), id, 'system', 'AI Classification', 'CLASSIFIED', 'Auto-classified as ' + cls.classification + '; ' + basisText + (cls.teamName ? '; routed to ' + cls.teamName : '') + (cls.reasoning ? ' - ' + cls.reasoning : '')]);
   } catch(ce) { console.error('[publicChat] auto-classify failed:', ce.message); }
 
   var newReq = await get('SELECT * FROM requests WHERE id = ?', [id]);

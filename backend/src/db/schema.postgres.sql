@@ -134,3 +134,6 @@ CREATE TABLE IF NOT EXISTS paper_index_items (
   created_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_paper_index_repo ON paper_index_items(repository_id);
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS record_type_id TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS classification_confidence INTEGER;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS routing_basis TEXT;
