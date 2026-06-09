@@ -21,6 +21,7 @@ export default function AppLayout() {
     { to: '/taxonomy', label: 'Taxonomy', show: isElev },
     { to: '/discovery', label: 'AI Discovery', show: isElev },
     { to: '/sources', label: 'Sources', show: isElev },
+    { to: '/redaction-rules', label: 'Redaction Rules', show: isElev },
     { to: '/config', label: 'Configuration', show: isAdmin },
   ].filter(x => x.show);
 

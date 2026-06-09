@@ -15,6 +15,7 @@ import MyTasksPage from './pages/MyTasksPage';
 import ConfigurationPage from './pages/ConfigurationPage';
 import SourcesPage from './pages/SourcesPage';
 import ARIAReportsPage from './pages/ARIAReportsPage';
+import RedactionRulesPage from './pages/RedactionRulesPage';
 import PublicPortalPage from './pages/PublicPortalPage';
 
 function Guard({ c }) {
@@ -54,6 +55,7 @@ export default function App() {
           <Route path="taxonomy" element={<TaxonomyPage />} />
           <Route path="discovery" element={<SchemaDiscoveryPage />} />
           <Route path="sources" element={<SourcesPage />} />
+          <Route path="redaction-rules" element={<RedactionRulesPage />} />
           <Route path="config" element={<ConfigurationPage />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
