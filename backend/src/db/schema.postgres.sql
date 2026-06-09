@@ -137,3 +137,22 @@ CREATE INDEX IF NOT EXISTS idx_paper_index_repo ON paper_index_items(repository_
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS record_type_id TEXT;
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS classification_confidence INTEGER;
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS routing_basis TEXT;
+
+-- Per-page processed view of an uploaded document: rendered image + text layer + word boxes.
+-- Coordinates in `words` are normalized 0-1 (origin top-left) so they overlay any render resolution.
+CREATE TABLE IF NOT EXISTS document_pages (
+  id TEXT PRIMARY KEY,
+  file_id TEXT NOT NULL,
+  request_id TEXT,
+  page_no INTEGER NOT NULL,
+  width REAL,
+  height REAL,
+  image_path TEXT,
+  image_width INTEGER,
+  image_height INTEGER,
+  words TEXT,
+  text TEXT,
+  has_text_layer INTEGER DEFAULT 0,
+  created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
+);
+CREATE INDEX IF NOT EXISTS idx_document_pages_file ON document_pages(file_id);

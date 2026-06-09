@@ -6,6 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
+const docProcessing = require('../services/docProcessing');
 
 const UPLOAD_DIR = path.join(__dirname, '../../../uploads');
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -75,6 +76,44 @@ router.patch('/:fileId/status', requireAuth, async function(req, res) {
   await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?, ?, ?, ?, ?, ?)',
     [uuidv4(), file.request_id, req.user.sub, req.user.name||'Staff', responsive ? 'MARKED_RESPONSIVE' : 'MARKED_NOT_RESPONSIVE', file.original_name]);
   res.json({ success: true });
+});
+
+// --- Document processing foundation (render pages + extract text/word boxes) ---
+router.post('/:fileId/process', requireAuth, async function(req, res) {
+  var file = await get('SELECT * FROM request_files WHERE id = ?', [req.params.fileId]);
+  if (!file) return res.status(404).json({ error: 'File not found' });
+  try {
+    var result = await docProcessing.processFile(req.params.fileId);
+    await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?, ?, ?, ?, ?, ?)',
+      [uuidv4(), file.request_id, req.user.sub, req.user.name||'Staff', 'DOCUMENT_PROCESSED', file.original_name + ' (' + result.pageCount + ' pages' + (result.needsOcr ? ', scanned - OCR needed' : '') + ')']);
+    res.json(Object.assign({ success: true }, result));
+  } catch(e) {
+    console.error('[files] process failed:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.get('/page-image/:pageId', requireAuth, async function(req, res) {
+  var page = await get('SELECT image_path FROM document_pages WHERE id = ?', [req.params.pageId]);
+  if (!page || !page.image_path) return res.status(404).json({ error: 'Page image not found' });
+  var imgPath = path.join(UPLOAD_DIR, page.image_path);
+  if (!fs.existsSync(imgPath)) return res.status(404).json({ error: 'Image missing on disk' });
+  res.type('png').sendFile(imgPath);
+});
+
+router.get('/:fileId/pages', requireAuth, async function(req, res) {
+  var rows = await all('SELECT id, page_no, width, height, image_width, image_height, words, has_text_layer FROM document_pages WHERE file_id = ? ORDER BY page_no', [req.params.fileId]);
+  var pages = rows.map(function(r){
+    var words = [];
+    try { words = r.words ? JSON.parse(r.words) : []; } catch(e) { words = []; }
+    return {
+      id: r.id, page_no: r.page_no, width: r.width, height: r.height,
+      image_width: r.image_width, image_height: r.image_height,
+      has_text_layer: !!r.has_text_layer, word_count: words.length, words: words,
+      image_url: '/api/files/page-image/' + r.id
+    };
+  });
+  res.json({ fileId: req.params.fileId, pageCount: pages.length, pages: pages });
 });
 
 module.exports = router;
