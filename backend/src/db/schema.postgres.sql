@@ -169,23 +169,48 @@ CREATE TABLE IF NOT EXISTS jurisdiction_profiles (
   created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
 );
 
--- Exemption Reference Library: the legal bases a redaction can cite, scoped to a jurisdiction.
--- source = seed | ai | manual  (AI-populated location-based statutes slot in here later).
--- statute_text is left NULL until populated from a real source.
-CREATE TABLE IF NOT EXISTS exemption_reference_library (
+-- Redaction Rules Library: rules (what to redact) + categories + legal sources (many-to-many).
+CREATE TABLE IF NOT EXISTS redaction_categories (
+  id TEXT PRIMARY KEY,
+  key TEXT,
+  label TEXT,
+  sort_order INTEGER DEFAULT 0
+);
+-- status = pending_review | approved | rejected | inactive ; source = seed | ai | manual
+CREATE TABLE IF NOT EXISTS redaction_rules (
   id TEXT PRIMARY KEY,
   jurisdiction_id TEXT NOT NULL,
+  title TEXT,
+  description TEXT,
+  category TEXT,
+  status TEXT DEFAULT 'pending_review',
+  source TEXT DEFAULT 'seed',
+  approved_by TEXT,
+  approved_at TEXT,
+  sort_order INTEGER DEFAULT 0,
+  created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS'),
+  updated_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
+);
+CREATE INDEX IF NOT EXISTS idx_redaction_rules_jur ON redaction_rules(jurisdiction_id);
+-- source_type = statute | regulation | case_law ; statute_text NULL until populated from a verified source
+CREATE TABLE IF NOT EXISTS legal_sources (
+  id TEXT PRIMARY KEY,
+  jurisdiction_id TEXT,
+  name TEXT,
   citation TEXT,
-  label TEXT,
+  source_type TEXT DEFAULT 'statute',
   description TEXT,
   statute_text TEXT,
-  category TEXT,
   source TEXT DEFAULT 'seed',
-  status TEXT DEFAULT 'active',
-  sort_order INTEGER DEFAULT 0,
   created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
 );
-CREATE INDEX IF NOT EXISTS idx_exemptions_jur ON exemption_reference_library(jurisdiction_id);
+CREATE INDEX IF NOT EXISTS idx_legal_sources_jur ON legal_sources(jurisdiction_id);
+CREATE TABLE IF NOT EXISTS rule_legal_sources (
+  id TEXT PRIMARY KEY,
+  rule_id TEXT NOT NULL,
+  legal_source_id TEXT NOT NULL
+);
+CREATE INDEX IF NOT EXISTS idx_rule_legal_sources_rule ON rule_legal_sources(rule_id);
 
 -- A redaction effort on one uploaded file.
 CREATE TABLE IF NOT EXISTS redaction_jobs (
@@ -208,7 +233,7 @@ CREATE TABLE IF NOT EXISTS redaction_zones (
   file_id TEXT,
   page_no INTEGER NOT NULL,
   x REAL, y REAL, w REAL, h REAL,
-  exemption_id TEXT,
+  rule_id TEXT,
   note TEXT,
   zone_type TEXT DEFAULT 'manual',
   created_by TEXT,

@@ -63,7 +63,7 @@ Closes the top follow-up from the fulfillment/medium work. publicChat.js builds 
 ## Document Processing & Redaction (in progress)
 Build sequence (grounded in Replit lessons: manual drag-drop is the DEFAULT, server-side processing, Layout Profiles separate from Exemption Reference Library):
 1. [DONE] Document-processing foundation - render pages to PNG (pdftoppm 150dpi) + extract text/word boxes (pdftotext -bbox, normalized 0-1). Table document_pages; routes POST /files/:fileId/process, GET /files/:fileId/pages, GET /files/page-image/:pageId. needsOcr flag set when a page has an image but no text layer (scanned -> tesseract later).
-2. [NEXT] Redaction data model - redaction_jobs, redaction_zones (page, normalized x/y/w/h, exemption_id, type manual|auto), exemption_reference_library (legal bases), layout_profiles (zone templates, positions only).
+2. [DONE] Redaction data model + Redaction Rules Library (rules + 8 categories + legal_sources many-to-many + pending->approved workflow; API at /api/redaction; AI auto-population of location-based statutes still TODO, schema ready via source field). Original line: - redaction_jobs, redaction_zones (page, normalized x/y/w/h, exemption_id, type manual|auto), exemption_reference_library (legal bases), layout_profiles (zone templates, positions only).
 3. Manual redaction workspace UI - render page, drag boxes, attach exemption. Default path.
 4. Apply redaction server-side - rasterize -> burn black boxes -> flatten (pdf-lib + jimp, pure npm) so content is truly gone. Output feeds the Fulfilled Request Index (Tier 1 of search).
 5. Auto-suggest (assist, not default) - pattern detection (SSN/DOB/phone) + AI. INSTALL tesseract here for scanned docs (needs sudo apt; archive.ubuntu.com allowed).
