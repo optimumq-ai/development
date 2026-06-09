@@ -6,8 +6,8 @@ const axonConnector = require('./connectors/axon');
 var connectors = {
   demo: demoConnector,
   tyler: tylerConnector,
-  axon: axonConnector
-  // future: axon, laserfiche, accela
+  axon: axonConnector,
+  laserfiche: require('./connectors/laserfiche')
 };
 
 var STOPWORDS = { the:1,a:1,an:1,of:1,for:1,to:1,and:1,or:1,in:1,on:1,my:1,me:1,all:1,any:1,copy:1,copies:1,record:1,request:1,please:1,need:1,want:1,would:1,like:1,from:1,with:1,about:1,that:1,this:1 };
@@ -107,7 +107,8 @@ async function nativeSearchAll(query, sourceId) {
     tyler: tylerConnector,
     axon: axonConnector,
     filestore: require('./connectors/filestore'),
-    'paper-index': require('./connectors/paperindex')
+    'paper-index': require('./connectors/paperindex'),
+    laserfiche: require('./connectors/laserfiche')
   };
   var repos = await all("SELECT id, name, connector_type, config FROM record_repositories WHERE status = 'active' ORDER BY sort_order");
   if (sourceId) repos = repos.filter(function(r){ return r.id === sourceId; });
