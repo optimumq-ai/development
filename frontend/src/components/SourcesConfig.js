@@ -15,6 +15,7 @@ export default function SourcesConfig() {
   const [editor, setEditor] = useState(null);
   const [saving, setSaving] = useState(false);
   const [ai, setAi] = useState(null);
+  const [paperImport, setPaperImport] = useState(null);
 
   useEffect(function(){ load(); }, []);
 
@@ -61,6 +62,37 @@ export default function SourcesConfig() {
       setAi(null);
       setEditor({ mode:'create', data:{ name:p.name||'', connector_type:p.connector_type, status:'active', config:p.config||{}, description:'', _ai:{ reasoning:p.reasoning||'', missing:p.missing||[] } } });
     } catch(e){ setAiField('loading', false); setAiField('error', (e.response&&e.response.data&&e.response.data.error)||'AI configuration failed'); }
+  }
+
+  function openPaperImport(s){
+    setPaperImport({ sourceId:s.id, name:s.name, csv:'', busy:false, error:'', count:null, imported:null });
+    api.get('/repositories/' + s.id + '/paper-index').then(function(r){ setPaperImport(function(p){ return (p && p.sourceId===s.id) ? Object.assign({},p,{count:r.data.count}) : p; }); }).catch(function(){});
+  }
+  function setPI(k,v){ setPaperImport(function(p){ if(!p) return p; var n=Object.assign({},p); n[k]=v; return n; }); }
+  async function doPaperImport(){
+    if(!paperImport.csv.trim()){ setPI('error','Paste a CSV first'); return; }
+    setPI('busy', true); setPI('error','');
+    try {
+      var r = await api.post('/repositories/' + paperImport.sourceId + '/paper-index/import', { csv: paperImport.csv });
+      setPI('busy', false); setPI('imported', r.data.imported); setPI('count', r.data.imported);
+    } catch(e){ setPI('busy', false); setPI('error', (e.response&&e.response.data&&e.response.data.error)||'Import failed'); }
+  }
+
+  function renderPaperImport(){
+    var p = paperImport;
+    return (
+      <div style={{ background:'#F9FAFB', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'16px', marginBottom:'16px' }}>
+        <div style={{ fontWeight:'700', fontSize:'15px', marginBottom:'4px' }}>Import paper records index — {p.name}</div>
+        <p style={{ color:'#6B7280', fontSize:'13px', margin:'0 0 10px' }}>Paste a CSV of the physical files in this storage location. The first row is column headers. Recognized columns: title, description, location, box, folder, date, tags (only title is required). Re-importing replaces the current index.{p.count != null ? ' Currently ' + p.count + ' record(s) indexed.' : ''}</p>
+        <textarea style={Object.assign({},inp,{minHeight:'120px',fontFamily:'monospace',fontSize:'12px'})} value={p.csv} onChange={function(e){ setPI('csv', e.target.value); }} placeholder={"title,description,location,box,date,tags\nBuilding Permit Files 1988-1995,Paper permit applications,Aisle 4 Shelf 2,47,1988-1995,permit building"} />
+        {p.error ? <div style={{ color:'#DC2626', fontSize:'13px', marginTop:'8px' }}>{p.error}</div> : null}
+        {p.imported != null ? <div style={{ color:'#065F46', fontSize:'13px', marginTop:'8px' }}>Imported {p.imported} record(s). They are now searchable in the portal.</div> : null}
+        <div style={{ display:'flex', justifyContent:'flex-end', gap:'8px', marginTop:'10px' }}>
+          <button onClick={function(){ setPaperImport(null); load(); }} style={btnGhost} disabled={p.busy}>Close</button>
+          <button onClick={doPaperImport} style={btnPrimary} disabled={p.busy}>{p.busy?'Importing...':'Import index'}</button>
+        </div>
+      </div>
+    );
   }
 
   function renderAiPanel(){
@@ -141,7 +173,7 @@ export default function SourcesConfig() {
     <div>
       <div style={{ display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'16px' }}>
         <div style={{ color:'#6B7280', fontSize:'14px' }}>Repositories and systems the platform can search and scan for record types.</div>
-        {!editor && !ai ? (
+        {!editor && !ai && !paperImport ? (
           <div style={{ display:'flex', gap:'8px' }}>
             <button onClick={openAi} style={btnGhost}>Configure with AI</button>
             <button onClick={openCreate} style={btnPrimary}>+ Add source</button>
@@ -150,6 +182,7 @@ export default function SourcesConfig() {
       </div>
       {editor ? renderEditor() : null}
       {ai ? renderAiPanel() : null}
+      {paperImport ? renderPaperImport() : null}
       {loading ? <div style={{ color:'#9CA3AF', fontSize:'14px' }}>Loading sources...</div> : (
         <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
           {sources.length===0 ? <div style={{ color:'#9CA3AF', fontSize:'14px' }}>No sources configured yet.</div> : null}
@@ -167,6 +200,7 @@ export default function SourcesConfig() {
                   <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'2px' }}>{meta.label}</div>
                   {s.description ? <div style={{ fontSize:'12px', color:'#6B7280', marginTop:'4px', lineHeight:'1.4' }}>{s.description}</div> : null}
                 </div>
+                {s.connector_type==='paper-index' ? <button onClick={function(){ openPaperImport(s); }} style={btnGhostSm}>Import index</button> : null}
                 <button onClick={function(){ openEdit(s); }} style={btnGhostSm}>Edit</button>
                 <button onClick={function(){ del(s); }} style={Object.assign({},btnGhostSm,{color:'#DC2626'})}>Delete</button>
               </div>

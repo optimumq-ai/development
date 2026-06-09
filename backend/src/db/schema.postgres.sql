@@ -115,3 +115,22 @@ CREATE INDEX IF NOT EXISTS idx_taxaudit_entity ON taxonomy_audit(entity_type, en
 
 -- Public-facing source description (shown to requestors in the portal source picker)
 ALTER TABLE record_repositories ADD COLUMN IF NOT EXISTS description TEXT;
+
+-- Record-type medium / fulfillment dimension (so non-searchable types are still cataloged and handled)
+ALTER TABLE record_types ADD COLUMN IF NOT EXISTS fulfillment_method TEXT DEFAULT 'electronic_search';
+ALTER TABLE record_types ADD COLUMN IF NOT EXISTS medium TEXT DEFAULT 'electronic';
+
+-- Paper Records Index: imported index of physical files in a storage location
+CREATE TABLE IF NOT EXISTS paper_index_items (
+  id TEXT PRIMARY KEY,
+  repository_id TEXT,
+  title TEXT,
+  description TEXT,
+  location TEXT,
+  record_date TEXT,
+  box TEXT,
+  folder TEXT,
+  tags TEXT,
+  created_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_paper_index_repo ON paper_index_items(repository_id);

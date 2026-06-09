@@ -42,7 +42,8 @@ async function nativeSearchAll(query, sourceId) {
     demo: demoConnector,
     tyler: tylerConnector,
     axon: axonConnector,
-    filestore: require('./connectors/filestore')
+    filestore: require('./connectors/filestore'),
+    'paper-index': require('./connectors/paperindex')
   };
   var repos = await all("SELECT id, name, connector_type, config FROM record_repositories WHERE status = 'active' ORDER BY sort_order");
   if (sourceId) repos = repos.filter(function(r){ return r.id === sourceId; });
@@ -51,6 +52,7 @@ async function nativeSearchAll(query, sourceId) {
     if (!c || typeof c.nativeSearch !== 'function') return null;
     var config = {};
     try { config = repo.config ? JSON.parse(repo.config) : {}; } catch(e) {}
+    config.__repoId = repo.id;
     var results = [];
     try {
       results = repo.connector_type === 'demo'

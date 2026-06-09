@@ -65,4 +65,70 @@ router.post('/ai-configure', requireAuth, async function(req, res) {
   }
 });
 
+// --- Paper Records Index import/list ---
+function parseCsv(text) {
+  var rows = [], field = '', row = [], inQ = false, i = 0;
+  text = String(text).replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  while (i < text.length) {
+    var ch = text[i];
+    if (inQ) {
+      if (ch === '"') { if (text[i+1] === '"') { field += '"'; i += 2; continue; } inQ = false; i++; continue; }
+      field += ch; i++; continue;
+    }
+    if (ch === '"') { inQ = true; i++; continue; }
+    if (ch === ',') { row.push(field); field = ''; i++; continue; }
+    if (ch === '\n') { row.push(field); rows.push(row); row = []; field = ''; i++; continue; }
+    field += ch; i++;
+  }
+  if (field.length || row.length) { row.push(field); rows.push(row); }
+  return rows.filter(function(r){ return r.length && !(r.length === 1 && r[0].trim() === ''); });
+}
+
+function piId(){ return 'pi-' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
+
+router.post('/:id/paper-index/import', requireAuth, async function(req, res){
+  var repoId = req.params.id;
+  var repo = await get('SELECT id, connector_type FROM record_repositories WHERE id = ?', [repoId]);
+  if (!repo) return res.status(404).json({ error: 'source not found' });
+  var items = [];
+  if (Array.isArray(req.body.items)) {
+    items = req.body.items;
+  } else if (req.body.csv) {
+    var rows = parseCsv(req.body.csv);
+    if (rows.length < 2) return res.status(400).json({ error: 'CSV needs a header row and at least one data row' });
+    var headers = rows[0].map(function(h){ return h.trim().toLowerCase(); });
+    function col(r, names){ for (var j = 0; j < names.length; j++){ var idx = headers.indexOf(names[j]); if (idx >= 0 && r[idx] != null) return String(r[idx]).trim(); } return ''; }
+    for (var k = 1; k < rows.length; k++) {
+      var r = rows[k];
+      items.push({
+        title: col(r, ['title','file title','name','record']),
+        description: col(r, ['description','desc','summary','contents']),
+        location: col(r, ['location','storage location','shelf']),
+        record_date: col(r, ['date','record_date','year','record date']),
+        box: col(r, ['box','box number','box #','carton']),
+        folder: col(r, ['folder','file','folder number','file number']),
+        tags: col(r, ['tags','keywords'])
+      });
+    }
+  } else {
+    return res.status(400).json({ error: 'provide csv text or an items array' });
+  }
+  items = items.filter(function(it){ return it && (it.title || it.description); });
+  await run('DELETE FROM paper_index_items WHERE repository_id = ?', [repoId]);
+  var now = new Date().toISOString();
+  for (var x = 0; x < items.length; x++) {
+    var it = items[x];
+    await run('INSERT INTO paper_index_items (id, repository_id, title, description, location, record_date, box, folder, tags, created_at) VALUES (?,?,?,?,?,?,?,?,?,?)',
+      [piId(), repoId, it.title||'', it.description||'', it.location||'', it.record_date||'', it.box||'', it.folder||'', it.tags||'', now]);
+  }
+  res.json({ success: true, imported: items.length });
+});
+
+router.get('/:id/paper-index', requireAuth, async function(req, res){
+  var repoId = req.params.id;
+  var cnt = await get('SELECT COUNT(*) AS n FROM paper_index_items WHERE repository_id = ?', [repoId]);
+  var items = await all('SELECT id, title, description, location, record_date, box, folder, tags FROM paper_index_items WHERE repository_id = ? ORDER BY title LIMIT 20', [repoId]);
+  res.json({ count: cnt ? Number(cnt.n) : 0, items: items });
+});
+
 module.exports = router;

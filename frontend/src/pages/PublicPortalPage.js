@@ -515,8 +515,10 @@ export default function PublicPortalPage() {
                               <div style={{display:'flex',justifyContent:'space-between',gap:'8px',marginBottom:'4px'}}>
                                 <div style={{fontSize:'13px',fontWeight:'700',color:'#111',flex:1}}>{res.title}</div>
                                 {res.publicAvailability === 'restricted' && <span style={{flexShrink:0,fontSize:'10px',fontWeight:'700',color:'#D97706'}}>REDACTION REVIEW</span>}
+                                {res.publicAvailability === 'paper' && <span style={{flexShrink:0,fontSize:'10px',fontWeight:'700',color:'#7C3AED'}}>PAPER · ON-SITE</span>}
                               </div>
                               {(res.dateCreated || res.docType || res.department) && <div style={{fontSize:'11px',color:'#9CA3AF',marginBottom:'4px'}}>{[res.docType,res.department,res.dateCreated].filter(Boolean).join(' · ')}</div>}
+                              {res.location && <div style={{fontSize:'12px',color:'#5B21B6',background:'#F5F3FF',border:'1px solid #DDD6FE',borderRadius:'6px',padding:'5px 8px',marginBottom:'6px'}}>Location: {res.location}</div>}
                               {res.summary && <div style={{fontSize:'12px',color:'#374151',marginBottom:'6px',lineHeight:'1.4'}}>{res.summary}</div>}
                               {res.matchedTerms && res.matchedTerms.length > 0 && <div style={{fontSize:'11px',color:'#6B7280',marginBottom:'8px'}}>Matched: {res.matchedTerms.join(', ')}</div>}
                               <div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>
