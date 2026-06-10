@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
+import MassJobsPanel from '../components/MassJobsPanel';
 
 function scoreColor(pass) { return pass === true ? '#03543F' : pass === false ? '#92400E' : '#6B7280'; }
 function scoreBg(pass) { return pass === true ? '#DEF7EC' : pass === false ? '#FEF3C7' : '#F3F4F6'; }
@@ -19,7 +20,18 @@ export default function MassRedactionPage() {
   var [batchResults, setBatchResults] = useState(null);
   var [batchErr, setBatchErr] = useState('');
 
+  // scheduled-job state
+  var [scheduleMode, setScheduleMode] = useState(false);
+  var [scheduleForm, setScheduleForm] = useState(false);
+  var [jobName, setJobName] = useState('');
+  var [chunkSize, setChunkSize] = useState(500);
+  var [creating, setCreating] = useState(false);
+  var [createdJob, setCreatedJob] = useState(null);
+  var [cfg, setCfg] = useState(null);
+  var [jobsReload, setJobsReload] = useState(0);
+
   useEffect(function () { load(); }, []);
+  useEffect(function () { api.get('/mass-jobs/config').then(function (r) { setCfg(r.data); }).catch(function () {}); }, []);
   async function load() {
     setLoading(true);
     try { var r = await api.get('/redaction-templates'); setTemplates(r.data.templates || []); } catch (e) { console.error(e); }
@@ -30,12 +42,17 @@ export default function MassRedactionPage() {
     try { await api.delete('/redaction-templates/' + t.id); load(); } catch (e) { alert('Could not delete the template.'); }
   }
 
-  async function runBatch(t) {
-    setBatchTpl(t); setSelected({}); setCheckResults(null); setBatchResults(null); setBatchErr(''); setCandidates([]); setCandLoading(true);
+  async function openCandidates(t, schedule) {
+    setBatchTpl(t); setSelected({}); setCheckResults(null); setBatchResults(null); setBatchErr(''); setCandidates([]);
+    setScheduleMode(!!schedule); setScheduleForm(false); setCreatedJob(null);
+    setJobName(t.name + ' \u2014 batch'); setChunkSize(500);
+    setCandLoading(true);
     try { var r = await api.get('/redaction-templates/' + t.id + '/candidates'); setCandidates(r.data.candidates || []); } catch (e) { setBatchErr('Could not load documents.'); }
     setCandLoading(false);
   }
-  function closeBatch() { if (processing) return; setBatchTpl(null); }
+  function runBatch(t) { openCandidates(t, false); }
+  function scheduleJob(t) { openCandidates(t, true); }
+  function closeBatch() { if (processing || creating) return; setBatchTpl(null); setScheduleMode(false); setScheduleForm(false); setCreatedJob(null); }
   function toggleSel(id) { setSelected(function (m) { var n = Object.assign({}, m); if (n[id]) delete n[id]; else n[id] = true; return n; }); }
   function selectAll() { var n = {}; candidates.forEach(function (c) { n[c.id] = true; }); setSelected(n); }
   function clearSel() { setSelected({}); }
@@ -61,12 +78,27 @@ export default function MassRedactionPage() {
     } catch (e) { setBatchErr('Processing failed. ' + ((e.response && e.response.data && e.response.data.error) || '')); }
     setProcessing(false);
   }
+  async function createJob() {
+    setCreating(true); setBatchErr('');
+    try {
+      var r = await api.post('/mass-jobs', { name: jobName || (batchTpl.name + ' batch'), template_id: batchTpl.id, file_ids: selIds, chunk_size: parseInt(chunkSize, 10) || 500 });
+      setCreatedJob(r.data);
+      setJobsReload(function (n) { return n + 1; });
+    } catch (e) { setBatchErr('Could not create the job. ' + ((e.response && e.response.data && e.response.data.error) || '')); }
+    setCreating(false);
+  }
   async function downloadOut(fileId, name) {
     try {
       var r = await api.get('/files/download/' + fileId, { responseType: 'blob' });
       var url = URL.createObjectURL(r.data); var a = document.createElement('a'); a.href = url; a.download = name || 'redacted.pdf'; a.click(); URL.revokeObjectURL(url);
     } catch (e) { alert('Download failed.'); }
   }
+
+  var budget = cfg ? cfg.nightly_budget : 500;
+  var effChunk = Math.max(1, Math.min(parseInt(chunkSize, 10) || 500, budget));
+  var estNights = selIds.length ? Math.ceil(selIds.length / effChunk) : 0;
+  var estDate = '';
+  if (estNights > 0) { var d = new Date(); d.setDate(d.getDate() + estNights); estDate = d.toISOString().slice(0, 10); }
 
   return (
     <div style={{ padding: '28px 32px', maxWidth: '900px', margin: '0 auto' }}>
@@ -78,6 +110,8 @@ export default function MassRedactionPage() {
       <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', fontSize: '13px', color: '#1E40AF', lineHeight: 1.5 }}>
         To create a template: open a sample document in the redaction workspace (the <strong>Redact</strong> button on a PDF in a request's Records tab), place your boxes and attach a rule to each, then choose <strong>Save as Reusable Template</strong>. For a structured CSV record, use <strong>Redact fields</strong> on the record, mark the exempt columns, and choose <strong>Save as reusable template</strong>.
       </div>
+
+      <MassJobsPanel reloadKey={jobsReload} />
 
       <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '10px' }}>Templates ({templates.length})</div>
       {loading ? (
@@ -104,6 +138,7 @@ export default function MassRedactionPage() {
                     {t.created_at ? ' \u00b7 ' + (t.created_at || '').slice(0, 10) : ''}
                   </div>
                 </div>
+                <button onClick={function () { scheduleJob(t); }} title="Queue a large batch for overnight processing" style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Schedule job</button>
                 <button onClick={function () { runBatch(t); }} style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Run batch</button>
                 <button onClick={function () { remove(t); }} style={{ flexShrink: 0, padding: '7px 12px', borderRadius: '8px', border: '1px solid #FCA5A5', background: 'white', color: '#DC2626', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Delete</button>
               </div>
@@ -116,14 +151,26 @@ export default function MassRedactionPage() {
         <div onClick={closeBatch} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '20px' }}>
           <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '14px', width: '660px', maxWidth: '100%', maxHeight: '88vh', display: 'flex', flexDirection: 'column' }}>
             <div style={{ padding: '18px 22px', borderBottom: '1px solid #F3F4F6' }}>
-              <div style={{ fontWeight: '700', fontSize: '16px' }}>Run batch &mdash; {batchTpl.name}</div>
-              <div style={{ fontSize: '12.5px', color: '#6B7280', marginTop: '3px' }}>{batchTpl.zone_count} box(es) &middot; safety threshold {batchTpl.safety_threshold != null ? batchTpl.safety_threshold : 80}%. Each document is matched to the template's layout; only documents at or above the threshold are redacted.</div>
+              <div style={{ fontWeight: '700', fontSize: '16px' }}>{scheduleMode ? 'Schedule nightly job' : 'Run batch'} &mdash; {batchTpl.name}</div>
+              <div style={{ fontSize: '12.5px', color: '#6B7280', marginTop: '3px' }}>{batchTpl.kind === 'fields' ? (batchTpl.field_count + ' field(s)') : (batchTpl.zone_count + ' box(es)')} &middot; safety threshold {batchTpl.safety_threshold != null ? batchTpl.safety_threshold : 80}%. Each document is matched to the template's layout; only documents at or above the threshold are redacted.</div>
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px' }}>
               {batchErr ? <div style={{ background: '#FEF2F2', color: '#991B1B', padding: '9px 12px', borderRadius: '8px', fontSize: '12.5px', marginBottom: '12px' }}>{batchErr}</div> : null}
 
-              {batchResults ? (
+              {createdJob ? (
+                <div style={{ textAlign: 'center', padding: '14px 4px' }}>
+                  <div style={{ fontSize: '15px', fontWeight: '700', color: '#03543F', marginBottom: '8px' }}>Job scheduled</div>
+                  <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.6 }}>
+                    <strong>{createdJob.name}</strong><br />
+                    {createdJob.total_items} document(s) queued, up to {createdJob.chunk_size}/night.<br />
+                    {createdJob.nights_remaining > 0
+                      ? ('Estimated to finish in about ' + createdJob.nights_remaining + ' night' + (createdJob.nights_remaining !== 1 ? 's' : '') + (createdJob.est_completion ? ', around ' + createdJob.est_completion : '') + '.')
+                      : 'Ready to process.'}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '10px' }}>It will run automatically during the nightly window. Track its progress in "Scheduled jobs" above.</div>
+                </div>
+              ) : batchResults ? (
                 <div>
                   <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '10px' }}>Results</div>
                   {batchResults.results.map(function (r) {
@@ -152,6 +199,19 @@ export default function MassRedactionPage() {
                   })}
                   <div style={{ fontSize: '12.5px', color: '#6B7280', marginTop: '10px' }}>{checkResults.summary.passing} of {checkResults.results.length} match the template and will be redacted. Mismatches are skipped &mdash; redact those individually in the workspace.</div>
                 </div>
+              ) : scheduleForm ? (
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '12px' }}>Schedule details</div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#6B7280', marginBottom: '4px' }}>Job name</label>
+                  <input value={jobName} onChange={function (e) { setJobName(e.target.value); }} style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', marginBottom: '14px' }} />
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#6B7280', marginBottom: '4px' }}>Documents per night</label>
+                  <input type="number" min="1" value={chunkSize} onChange={function (e) { setChunkSize(e.target.value); }} style={{ width: '160px', boxSizing: 'border-box', padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', marginBottom: '14px' }} />
+                  <div style={{ background: '#F0F9FF', border: '1px solid #BAE6FD', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#075985', lineHeight: 1.6 }}>
+                    <strong>{selIds.length}</strong> document(s) selected &rarr; up to <strong>{effChunk}</strong>/night &rarr; finishes in about <strong>{estNights}</strong> night{estNights !== 1 ? 's' : ''}{estDate ? (', around ' + estDate) : ''}.
+                    {cfg && parseInt(chunkSize, 10) > budget ? <div style={{ marginTop: '6px', color: '#92400E' }}>Note: the shared nightly budget is {budget}/night, so no more than {budget} will run per night across all jobs.</div> : null}
+                  </div>
+                  <div style={{ fontSize: '12px', color: '#9CA3AF', marginTop: '10px' }}>The job processes automatically during the nightly window and resumes where it left off each night until complete. You can pause, resume, or cancel it anytime.</div>
+                </div>
               ) : (
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
@@ -162,7 +222,7 @@ export default function MassRedactionPage() {
                     </div>
                   </div>
                   {candLoading ? <div style={{ color: '#9CA3AF', fontSize: '13px', padding: '20px', textAlign: 'center' }}>Loading documents...</div>
-                    : candidates.length === 0 ? <div style={{ color: '#9CA3AF', fontSize: '13px', padding: '20px', textAlign: 'center' }}>No PDF documents available.</div>
+                    : candidates.length === 0 ? <div style={{ color: '#9CA3AF', fontSize: '13px', padding: '20px', textAlign: 'center' }}>No documents available.</div>
                     : candidates.map(function (c) {
                       return (
                         <label key={c.id} style={{ display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #E5E7EB', borderRadius: '8px', padding: '9px 12px', marginBottom: '8px', cursor: 'pointer' }}>
@@ -179,17 +239,28 @@ export default function MassRedactionPage() {
             </div>
 
             <div style={{ padding: '16px 22px', borderTop: '1px solid #F3F4F6', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
-              {batchResults ? (
+              {createdJob ? (
+                <button onClick={function () { setBatchTpl(null); }} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>Done</button>
+              ) : batchResults ? (
                 <button onClick={function () { setBatchTpl(null); }} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>Done</button>
               ) : checkResults ? (
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button onClick={function () { setCheckResults(null); }} disabled={processing} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Back</button>
                   <button onClick={runProcess} disabled={processing || checkResults.summary.passing === 0} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: (processing || checkResults.summary.passing === 0) ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>{processing ? 'Processing...' : 'Redact ' + checkResults.summary.passing + ' matching'}</button>
                 </div>
+              ) : scheduleForm ? (
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button onClick={function () { setScheduleForm(false); }} disabled={creating} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Back</button>
+                  <button onClick={createJob} disabled={creating || !selIds.length} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: (creating || !selIds.length) ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>{creating ? 'Scheduling...' : 'Schedule job'}</button>
+                </div>
               ) : (
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button onClick={closeBatch} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
-                  <button onClick={runCheck} disabled={checking || !selIds.length} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: (checking || !selIds.length) ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>{checking ? 'Checking...' : 'Run safety check'}</button>
+                  {scheduleMode ? (
+                    <button onClick={function () { setScheduleForm(true); setBatchErr(''); }} disabled={!selIds.length} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: !selIds.length ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>Next: schedule ({selIds.length})</button>
+                  ) : (
+                    <button onClick={runCheck} disabled={checking || !selIds.length} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: (checking || !selIds.length) ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>{checking ? 'Checking...' : 'Run safety check'}</button>
+                  )}
                 </div>
               )}
             </div>
