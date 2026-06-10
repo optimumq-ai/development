@@ -31,8 +31,35 @@ export default function RedactionWorkspacePage() {
   var [tplMsg, setTplMsg] = useState(null);
   var [discovering, setDiscovering] = useState(false);
   var [suggestions, setSuggestions] = useState([]);
+  var [labelDraft, setLabelDraft] = useState({});
+  var [labelBusy, setLabelBusy] = useState({});
+  var dragRef = useRef(null);
 
   useEffect(function () { init(); }, [fileId]);
+  useEffect(function () {
+    function mv(e) {
+      var d = dragRef.current; if (!d) return;
+      var p = rel(e); var nb;
+      if (d.mode === 'move') {
+        var nx = Math.max(0, Math.min(1 - d.orig.w, p.x - d.offx));
+        var ny = Math.max(0, Math.min(1 - d.orig.h, p.y - d.offy));
+        nb = { x: nx, y: ny, w: d.orig.w, h: d.orig.h };
+      } else {
+        var L = d.orig.x, T = d.orig.y, R = d.orig.x + d.orig.w, B = d.orig.y + d.orig.h;
+        if (d.handle.indexOf('e') >= 0) R = Math.max(L + 0.006, p.x);
+        if (d.handle.indexOf('w') >= 0) L = Math.min(R - 0.006, p.x);
+        if (d.handle.indexOf('s') >= 0) B = Math.max(T + 0.006, p.y);
+        if (d.handle.indexOf('n') >= 0) T = Math.min(B - 0.006, p.y);
+        L = Math.max(0, L); T = Math.max(0, T); R = Math.min(1, R); B = Math.min(1, B);
+        nb = { x: L, y: T, w: R - L, h: B - T };
+      }
+      d.last = nb;
+      setZones(function (zs) { return zs.map(function (z) { return z.id === d.id ? Object.assign({}, z, nb) : z; }); });
+    }
+    function up() { var d = dragRef.current; if (!d) return; dragRef.current = null; if (d.last) { api.patch('/redaction-jobs/zones/' + d.id, d.last).catch(function () {}); } }
+    window.addEventListener('mousemove', mv); window.addEventListener('mouseup', up);
+    return function () { window.removeEventListener('mousemove', mv); window.removeEventListener('mouseup', up); };
+  }, []);
   async function init() {
     setLoading(true); setError('');
     try {
@@ -84,6 +111,19 @@ export default function RedactionWorkspacePage() {
   async function delZone(zid) {
     try { await api.delete('/redaction-jobs/zones/' + zid); setZones(function (z) { return z.filter(function (x) { return x.id !== zid; }); }); } catch (e) {}
   }
+  function startMove(e, z) { e.stopPropagation(); var p = rel(e); dragRef.current = { mode: 'move', id: z.id, orig: { x: z.x, y: z.y, w: z.w, h: z.h }, offx: p.x - z.x, offy: p.y - z.y, last: null }; }
+  function startResize(e, z, handle) { e.stopPropagation(); dragRef.current = { mode: 'resize', id: z.id, handle: handle, orig: { x: z.x, y: z.y, w: z.w, h: z.h }, last: null }; }
+  async function pickRuleByLabel(zid) {
+    var label = (labelDraft[zid] || '').trim(); if (!label) return;
+    setLabelBusy(function (m) { var n = Object.assign({}, m); n[zid] = true; return n; }); setError('');
+    try {
+      var r = await api.post('/redaction-jobs/suggest-rule', { label: label });
+      if (r.data && r.data.rule_id) { await setZoneRule(zid, r.data.rule_id); setLabelDraft(function (m) { var n = Object.assign({}, m); n[zid] = ''; return n; }); }
+      else { setError('No matching rule for "' + label + '". A plain name has no standing exemption; pick a context rule manually if one applies.'); }
+    } catch (e) { setError('Rule match failed.'); }
+    setLabelBusy(function (m) { var n = Object.assign({}, m); n[zid] = false; return n; });
+  }
+
   async function discover() {
     setDiscovering(true); setError('');
     try {
@@ -180,9 +220,18 @@ export default function RedactionWorkspacePage() {
               style={{ position: 'relative', width: '720px', maxWidth: '100%', alignSelf: 'flex-start', boxShadow: '0 2px 10px rgba(0,0,0,.12)', cursor: 'crosshair', userSelect: 'none', background: 'white' }}>
               {imgUrls[page.id] ? <img src={imgUrls[page.id]} alt={'Page ' + page.page_no} draggable={false} style={{ width: '100%', display: 'block', pointerEvents: 'none' }} /> : <div style={{ width: '100%', aspectRatio: '8.5/11', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9CA3AF' }}>Loading page...</div>}
               {pageZones.map(function (z) {
+                var hc = catColor(z.rule_id);
+                var hbase = { position: 'absolute', width: '11px', height: '11px', background: 'white', border: '1.5px solid ' + hc, borderRadius: '2px', boxSizing: 'border-box', pointerEvents: 'auto', zIndex: 3 };
+                var corners = [
+                  { k: 'nw', s: { top: '-6px', left: '-6px', cursor: 'nwse-resize' } },
+                  { k: 'ne', s: { top: '-6px', right: '-6px', cursor: 'nesw-resize' } },
+                  { k: 'sw', s: { bottom: '-6px', left: '-6px', cursor: 'nesw-resize' } },
+                  { k: 'se', s: { bottom: '-6px', right: '-6px', cursor: 'nwse-resize' } }
+                ];
                 return (
-                  <div key={z.id} style={{ position: 'absolute', left: pct(z.x), top: pct(z.y), width: pct(z.w), height: pct(z.h), background: 'rgba(0,0,0,.80)', border: '1px solid ' + catColor(z.rule_id), boxSizing: 'border-box', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>
-                    <span style={{ marginLeft: '2px', width: '15px', height: '15px', minWidth: '15px', borderRadius: '50%', background: 'white', color: '#111', fontSize: '9px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>{numById[z.id]}</span>
+                  <div key={z.id} onMouseDown={function (e) { startMove(e, z); }} style={{ position: 'absolute', left: pct(z.x), top: pct(z.y), width: pct(z.w), height: pct(z.h), background: 'rgba(0,0,0,.78)', border: '1px solid ' + hc, boxSizing: 'border-box', pointerEvents: 'auto', cursor: 'move', display: 'flex', alignItems: 'center' }}>
+                    <span style={{ marginLeft: '2px', width: '15px', height: '15px', minWidth: '15px', borderRadius: '50%', background: 'white', color: '#111', fontSize: '9px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1, pointerEvents: 'none' }}>{numById[z.id]}</span>
+                    {corners.map(function (c) { return <div key={c.k} onMouseDown={function (e) { startResize(e, z, c.k); }} style={Object.assign({}, hbase, c.s)} />; })}
                   </div>
                 );
               })}
@@ -202,7 +251,7 @@ export default function RedactionWorkspacePage() {
               <option value="">(No rule / manual)</option>
               {rules.map(function (r) { return <option key={r.id} value={r.id}>{r.title} ({r.category_label})</option>; })}
             </select>
-            <p style={{ fontSize: '12px', color: '#9CA3AF', margin: '10px 0 0', lineHeight: 1.5 }}>Drag on the page to draw a redaction box. New boxes get the rule selected above.</p>
+            <p style={{ fontSize: '12px', color: '#9CA3AF', margin: '10px 0 0', lineHeight: 1.5 }}>Drag on the page to draw a box. Drag a box to move it, or its corners to resize. New boxes get the rule selected above.</p>
             <button onClick={discover} disabled={discovering} style={{ width: '100%', marginTop: '12px', padding: '9px', borderRadius: '8px', border: 'none', background: discovering ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: discovering ? 'wait' : 'pointer' }}>{discovering ? 'Scanning document...' : 'Find exempt content (AI)'}</button>
             {rules.length === 0 ? <p style={{ fontSize: '12px', color: '#B45309', margin: '8px 0 0' }}>No approved + active rules yet. Boxes will be unlabeled until you attach a rule.</p> : null}
           </div>
@@ -241,6 +290,10 @@ export default function RedactionWorkspacePage() {
                     <option value="">(No rule)</option>
                     {rules.map(function (r) { return <option key={r.id} value={r.id}>{r.title}</option>; })}
                   </select>
+                  <div style={{ display: 'flex', gap: '6px', marginTop: '6px' }}>
+                    <input value={labelDraft[z.id] || ''} onChange={function (e) { var v = e.target.value; setLabelDraft(function (m) { var n = Object.assign({}, m); n[z.id] = v; return n; }); }} onKeyDown={function (e) { if (e.key === 'Enter') pickRuleByLabel(z.id); }} placeholder="Describe field, AI picks rule" style={{ flex: 1, minWidth: 0, padding: '5px 8px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '11.5px' }} />
+                    <button onClick={function () { pickRuleByLabel(z.id); }} disabled={labelBusy[z.id] || !(labelDraft[z.id] || '').trim()} style={{ padding: '5px 9px', borderRadius: '6px', border: 'none', background: (labelBusy[z.id] || !(labelDraft[z.id] || '').trim()) ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '11.5px', fontWeight: '700', cursor: 'pointer', whiteSpace: 'nowrap' }}>{labelBusy[z.id] ? '...' : 'AI rule'}</button>
+                  </div>
                 </div>
               );
             })}

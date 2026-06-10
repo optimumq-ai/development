@@ -58,6 +58,7 @@ router.patch('/zones/:zoneId', requireAuth, async function(req, res) {
   var sets = [], params = [];
   if (b.rule_id !== undefined) { sets.push('rule_id = ?'); params.push(b.rule_id || null); }
   if (b.note !== undefined) { sets.push('note = ?'); params.push(b.note || null); }
+  ['x', 'y', 'w', 'h'].forEach(function (k) { if (b[k] !== undefined && b[k] !== null && !isNaN(b[k])) { sets.push(k + ' = ?'); params.push(Number(b[k])); } });
   if (!sets.length) return res.status(400).json({ error: 'nothing to update' });
   params.push(req.params.zoneId);
   await run('UPDATE redaction_zones SET ' + sets.join(', ') + ' WHERE id = ?', params);
@@ -68,6 +69,15 @@ router.patch('/zones/:zoneId', requireAuth, async function(req, res) {
 router.delete('/zones/:zoneId', requireAuth, async function(req, res) {
   await run('DELETE FROM redaction_zones WHERE id = ?', [req.params.zoneId]);
   res.json({ success: true });
+});
+
+// POST /suggest-rule -> given a field description, AI picks the best rule from the library
+router.post('/suggest-rule', requireAuth, async function(req, res) {
+  try {
+    var zd = require('../services/zoneDiscovery');
+    var r = await zd.suggestRule(req.body && req.body.label);
+    res.json(r);
+  } catch (e) { console.error('[suggest-rule]', e.message); res.status(500).json({ error: e.message }); }
 });
 
 // POST /file/:fileId/discover -> AI suggests redaction boxes from document content (ephemeral)

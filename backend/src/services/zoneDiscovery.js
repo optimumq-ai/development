@@ -85,4 +85,24 @@ async function discoverZones(fileId) {
   return { suggestions: suggestions.slice(0, 50), scanned_pages: pages.length, found: items.length, unmatched: unmatched };
 }
 
-module.exports = { discoverZones: discoverZones };
+// Given a human description of a field (e.g. "driver's license number"), pick the best rule from the library.
+async function suggestRule(label) {
+  if (!label || !label.trim()) return { rule_id: null };
+  var jurRow = await get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'");
+  var jurId = (jurRow && jurRow.value) || 'jur-tx';
+  var rules = await all("SELECT id, title, category, description FROM redaction_rules WHERE jurisdiction_id = ? AND approval_status = 'approved' AND is_active = 1", [jurId]);
+  if (!rules.length) return { rule_id: null };
+  var menu = rules.map(function (r) { return r.id + ' | ' + r.title + ' (' + r.category + ')' + (r.description ? ' - ' + r.description.slice(0, 90) : ''); }).join('\n');
+  var prompt = 'A records officer drew a redaction box over a field they describe as: "' + label.trim() + '".\n\n' +
+    'Choose the single best-matching redaction rule for this field from the list below, or null if none reasonably fits. ' +
+    'Match on the meaning of the field (e.g. a driver\'s license or license plate maps to a motor vehicle record rule; a home phone maps to a home address/telephone rule).\n\n' +
+    'Rules:\n' + menu + '\n\nReturn ONLY JSON: {"rule_id": "<id from the list, or null>"}.';
+  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  var resp = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 200, messages: [{ role: 'user', content: prompt }] });
+  var txt = resp.content.map(function (b) { return b.type === 'text' ? b.text : ''; }).join('');
+  var m = txt.match(/\{[\s\S]*\}/); var obj = {}; try { obj = JSON.parse(m ? m[0] : '{}'); } catch (e) {}
+  var hit = obj.rule_id && rules.filter(function (r) { return r.id === obj.rule_id; })[0];
+  return hit ? { rule_id: hit.id, rule_title: hit.title, category: hit.category } : { rule_id: null };
+}
+
+module.exports = { discoverZones: discoverZones, suggestRule: suggestRule };
