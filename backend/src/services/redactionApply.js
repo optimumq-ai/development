@@ -28,7 +28,7 @@ async function applyRedaction(jobId, actor) {
   if (!file) throw new Error('source file not found');
   var pages = await all('SELECT * FROM document_pages WHERE file_id = ? ORDER BY page_no', [job.file_id]);
   if (!pages.length) throw new Error('document not processed (no pages)');
-  var zones = await all('SELECT * FROM redaction_zones WHERE job_id = ?', [jobId]);
+  var zones = await all("SELECT * FROM redaction_zones WHERE job_id = ? AND (review_state IS NULL OR review_state <> 'rejected')", [jobId]);
   var agencyRow = await get("SELECT value FROM system_config WHERE key = 'agency_name'");
   var agencyName = agencyRow ? agencyRow.value : 'Agency';
 

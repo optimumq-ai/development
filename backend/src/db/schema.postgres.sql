@@ -226,6 +226,11 @@ CREATE TABLE IF NOT EXISTS redaction_jobs (
   jurisdiction_id TEXT,
   status TEXT DEFAULT 'draft',
   output_file_id TEXT,
+  review_stage TEXT DEFAULT 'editing',
+  reviewed_by TEXT,
+  reviewed_at TEXT,
+  submitted_by TEXT,
+  submitted_at TEXT,
   created_by TEXT,
   created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS'),
   updated_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
@@ -242,6 +247,7 @@ CREATE TABLE IF NOT EXISTS redaction_zones (
   rule_id TEXT,
   note TEXT,
   zone_type TEXT DEFAULT 'manual',
+  review_state TEXT,
   created_by TEXT,
   created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
 );

@@ -58,6 +58,7 @@ router.patch('/zones/:zoneId', requireAuth, async function(req, res) {
   var sets = [], params = [];
   if (b.rule_id !== undefined) { sets.push('rule_id = ?'); params.push(b.rule_id || null); }
   if (b.note !== undefined) { sets.push('note = ?'); params.push(b.note || null); }
+  if (b.review_state !== undefined) { var rv = b.review_state; if (['proposed','approved','rejected'].indexOf(rv) < 0) rv = null; sets.push('review_state = ?'); params.push(rv); }
   ['x', 'y', 'w', 'h'].forEach(function (k) { if (b[k] !== undefined && b[k] !== null && !isNaN(b[k])) { sets.push(k + ' = ?'); params.push(Number(b[k])); } });
   if (!sets.length) return res.status(400).json({ error: 'nothing to update' });
   params.push(req.params.zoneId);
@@ -99,11 +100,28 @@ router.post('/jobs/:jobId/apply', requireAuth, async function(req, res) {
   if (!job) return res.status(404).json({ error: 'Job not found' });
   try {
     var result = await redactionApply.applyRedaction(req.params.jobId, req.user.name || 'Staff');
+    await run("UPDATE redaction_jobs SET review_stage = 'released', reviewed_by = ?, reviewed_at = datetime('now'), updated_at = datetime('now') WHERE id = ?", [req.user.name || req.user.sub, req.params.jobId]);
     res.json(Object.assign({ success: true }, result));
   } catch (e) {
     console.error('[redaction apply]', e.message);
     res.status(500).json({ error: e.message });
   }
+});
+
+// Submit a job for review (redactor hands off to an approver/legal).
+router.post('/jobs/:jobId/submit', requireAuth, async function(req, res) {
+  var job = await get('SELECT * FROM redaction_jobs WHERE id = ?', [req.params.jobId]);
+  if (!job) return res.status(404).json({ error: 'Job not found' });
+  await run("UPDATE redaction_jobs SET review_stage = 'pending_review', submitted_by = ?, submitted_at = datetime('now'), updated_at = datetime('now') WHERE id = ?", [req.user.name || req.user.sub, req.params.jobId]);
+  res.json({ success: true, review_stage: 'pending_review' });
+});
+
+// Send a job back to editing (reviewer returns it to the redactor).
+router.post('/jobs/:jobId/return', requireAuth, async function(req, res) {
+  var job = await get('SELECT * FROM redaction_jobs WHERE id = ?', [req.params.jobId]);
+  if (!job) return res.status(404).json({ error: 'Job not found' });
+  await run("UPDATE redaction_jobs SET review_stage = 'editing', updated_at = datetime('now') WHERE id = ?", [req.params.jobId]);
+  res.json({ success: true, review_stage: 'editing' });
 });
 
 // GET /released -> the Fulfilled Request Index (Released Records Library)
