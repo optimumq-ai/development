@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import api from '../../lib/api';
+import { useNavigate } from 'react-router-dom';
 
 const RECORD_TYPES = ['Document / PDF','Email','Photo / Image','Audio Recording','Video Recording','Spreadsheet','Paper Record (Scanned)','Physical Record (Non-Digital)','External Reference'];
 
@@ -22,6 +23,7 @@ function fileIcon(mimetype, isNonDigital) {
 }
 
 export default function RecordsPanel({ requestId, stage }) {
+  const nav = useNavigate();
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
@@ -211,6 +213,7 @@ export default function RecordsPanel({ requestId, stage }) {
                   <button onClick={function(){updateStatus(r.id, false);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid '+(isNR?'#DC2626':'#D1D5DB'),background:isNR?'#FEF2F2':'white',color:isNR?'#DC2626':'#6B7280',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>
                     {isNR?'✗ Not Responsive':'Not Responsive'}
                   </button>
+                  {(r.mimetype && r.mimetype.indexOf('pdf') >= 0) ? <button onClick={function(){nav('/redact/' + r.id);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid #1F4E79',background:'white',color:'#1F4E79',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>Redact</button> : null}
                   <button onClick={function(){deleteFile(r.id);}} style={{padding:'5px 8px',borderRadius:'6px',border:'1px solid #FCA5A5',background:'white',color:'#DC2626',fontSize:'11px',cursor:'pointer'}}>✕</button>
                 </div>
               </div>
