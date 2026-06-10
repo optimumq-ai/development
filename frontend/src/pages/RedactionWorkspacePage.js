@@ -50,7 +50,9 @@ export default function RedactionWorkspacePage() {
   function gotoPage(i) { if (i < 0 || i >= pages.length) return; setPageIdx(i); loadImg(pages[i]); }
 
   var page = pages[pageIdx];
-  var pageZones = zones.filter(function (z) { return page && z.page_no === page.page_no; });
+  function sortReading(a, b) { if (a.page_no !== b.page_no) return a.page_no - b.page_no; if (Math.abs(a.y - b.y) > 0.02) return a.y - b.y; return a.x - b.x; }
+  var numById = {}; zones.slice().sort(sortReading).forEach(function (z, i) { numById[z.id] = i + 1; });
+  var pageZones = zones.filter(function (z) { return page && z.page_no === page.page_no; }).sort(sortReading);
   function ruleOf(id) { return rules.filter(function (r) { return r.id === id; })[0]; }
   function catColor(id) { var r = ruleOf(id); return (r && CAT_COLORS[r.category]) || '#374151'; }
   function zoneLabel(z) { var r = ruleOf(z.rule_id); return r ? r.category_label : 'REDACTED'; }
@@ -117,8 +119,8 @@ export default function RedactionWorkspacePage() {
               {imgUrls[page.id] ? <img src={imgUrls[page.id]} alt={'Page ' + page.page_no} draggable={false} style={{ width: '100%', display: 'block', pointerEvents: 'none' }} /> : <div style={{ width: '100%', aspectRatio: '8.5/11', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9CA3AF' }}>Loading page...</div>}
               {pageZones.map(function (z) {
                 return (
-                  <div key={z.id} style={{ position: 'absolute', left: pct(z.x), top: pct(z.y), width: pct(z.w), height: pct(z.h), background: 'rgba(0,0,0,.78)', border: '1px solid ' + catColor(z.rule_id), boxSizing: 'border-box', pointerEvents: 'none', overflow: 'hidden' }}>
-                    <span style={{ fontSize: '9px', color: 'white', padding: '1px 3px', whiteSpace: 'nowrap' }}>{zoneLabel(z)}</span>
+                  <div key={z.id} style={{ position: 'absolute', left: pct(z.x), top: pct(z.y), width: pct(z.w), height: pct(z.h), background: 'rgba(0,0,0,.80)', border: '1px solid ' + catColor(z.rule_id), boxSizing: 'border-box', pointerEvents: 'none', display: 'flex', alignItems: 'center' }}>
+                    <span style={{ marginLeft: '2px', width: '15px', height: '15px', minWidth: '15px', borderRadius: '50%', background: 'white', color: '#111', fontSize: '9px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>{numById[z.id]}</span>
                   </div>
                 );
               })}
@@ -145,7 +147,8 @@ export default function RedactionWorkspacePage() {
                 <div key={z.id} style={{ border: '1px solid #E5E7EB', borderRadius: '8px', padding: '8px 10px', marginBottom: '8px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                     <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: catColor(z.rule_id), flexShrink: 0 }} />
-                    <span style={{ fontSize: '12px', color: '#6B7280', flex: 1 }}>Box {i + 1}</span>
+                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '17px', height: '17px', minWidth: '17px', borderRadius: '50%', background: '#111', color: 'white', fontSize: '10px', fontWeight: '700', flexShrink: 0 }}>{numById[z.id]}</span>
+                    <span style={{ fontSize: '12px', color: '#6B7280', flex: 1 }}>{ruleOf(z.rule_id) ? ruleOf(z.rule_id).category_label : 'No rule attached'}</span>
                     <button onClick={function () { delZone(z.id); }} style={{ border: 'none', background: 'transparent', color: '#DC2626', cursor: 'pointer', fontSize: '13px' }}>Remove</button>
                   </div>
                   <select value={z.rule_id || ''} onChange={function (e) { setZoneRule(z.id, e.target.value); }} style={{ width: '100%', padding: '5px 8px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '12px', background: 'white' }}>

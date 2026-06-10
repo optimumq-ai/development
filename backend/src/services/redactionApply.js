@@ -80,12 +80,21 @@ async function applyRedaction(jobId, actor) {
       var png = await pdf.embedPng(buf);
       page.drawImage(png, { x: 0, y: 0, width: wPt, height: hPt });
     }
-    // white index number near the top-left of each box
+    // white circle badge with the index number, at the left of each box
     pageZones.forEach(function(z){
       var bxPt = z.x * wPt, byPt = z.y * hPt, bwPt = z.w * wPt, bhPt = z.h * hPt;
-      if (bhPt < 8 || bwPt < 10) return;
-      var size = Math.min(11, bhPt - 2);
-      page.drawText(String(z.idx), { x: bxPt + 3, y: hPt - byPt - size - 1, size: size, font: fontB, color: rgb(1, 1, 1) });
+      var num = String(z.idx);
+      var r = Math.max(4, Math.min(7, bhPt / 2 - 1));
+      if (bhPt >= 7 && bwPt >= 2 * r + 2) {
+        var cx = bxPt + r + 2, cy = hPt - byPt - bhPt / 2;
+        page.drawCircle({ x: cx, y: cy, size: r, color: rgb(1, 1, 1) });
+        var fs = 8;
+        while (fs > 4 && fontB.widthOfTextAtSize(num, fs) > 2 * r - 3) fs -= 0.5;
+        page.drawText(num, { x: cx - fontB.widthOfTextAtSize(num, fs) / 2, y: cy - fs * 0.36, size: fs, font: fontB, color: rgb(0.1, 0.1, 0.1) });
+      } else if (bhPt >= 5 && bwPt >= 8) {
+        var s2 = Math.min(7, bhPt - 1);
+        page.drawText(num, { x: bxPt + 2, y: hPt - byPt - s2, size: s2, font: fontB, color: rgb(1, 1, 1) });
+      }
     });
   }
 
