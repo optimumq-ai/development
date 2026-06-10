@@ -18,6 +18,7 @@ import ARIAReportsPage from './pages/ARIAReportsPage';
 import RedactionRulesPage from './pages/RedactionRulesPage';
 import RedactionWorkspacePage from './pages/RedactionWorkspacePage';
 import ReleasedRecordsPage from './pages/ReleasedRecordsPage';
+import MassRedactionPage from './pages/MassRedactionPage';
 import PublicPortalPage from './pages/PublicPortalPage';
 
 function Guard({ c }) {
@@ -60,6 +61,7 @@ export default function App() {
           <Route path="redaction-rules" element={<RedactionRulesPage />} />
           <Route path="redact/:fileId" element={<RedactionWorkspacePage />} />
           <Route path="released" element={<ReleasedRecordsPage />} />
+          <Route path="mass-redaction" element={<MassRedactionPage />} />
           <Route path="config" element={<ConfigurationPage />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>

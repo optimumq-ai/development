@@ -256,8 +256,15 @@ CREATE TABLE IF NOT EXISTS layout_profiles (
   zones TEXT,
   source TEXT DEFAULT 'manual',
   status TEXT DEFAULT 'active',
+  source_file_id TEXT,
+  source_filename TEXT,
+  layout_fingerprint TEXT,
+  safety_threshold INTEGER DEFAULT 80,
+  processing_manager_name TEXT,
+  processing_manager_email TEXT,
   created_by TEXT,
-  created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
+  created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS'),
+  updated_at TEXT
 );
 
 -- Fulfilled Request Index (a.k.a. Released Records Library): records already processed and released.

@@ -24,6 +24,11 @@ export default function RedactionWorkspacePage() {
   var [applying, setApplying] = useState(false);
   var [result, setResult] = useState(null);
   var wrapRef = useRef(null);
+  var [tplOpen, setTplOpen] = useState(false);
+  var [tplName, setTplName] = useState('');
+  var [tplDesc, setTplDesc] = useState('');
+  var [savingTpl, setSavingTpl] = useState(false);
+  var [tplMsg, setTplMsg] = useState(null);
 
   useEffect(function () { init(); }, [fileId]);
   async function init() {
@@ -82,6 +87,19 @@ export default function RedactionWorkspacePage() {
     try { var r = await api.post('/redaction-jobs/jobs/' + job.id + '/apply'); setResult(r.data); } catch (e) { setError('Apply failed. ' + ((e.response && e.response.data && e.response.data.error) || '')); }
     setApplying(false);
   }
+  async function saveTemplate() {
+    setSavingTpl(true); setTplMsg(null);
+    try {
+      await api.post('/redaction-templates', {
+        name: tplName.trim(), description: tplDesc.trim() || null, source_file_id: fileId,
+        zones: zones.map(function (z) { var r = ruleOf(z.rule_id); return { page_no: z.page_no, x: z.x, y: z.y, w: z.w, h: z.h, rule_id: z.rule_id || null, label: r ? r.title : null }; })
+      });
+      setTplMsg({ ok: true, text: 'Template saved. Find it under Mass Redaction.' });
+      setTimeout(function () { setTplOpen(false); setTplMsg(null); setTplName(''); setTplDesc(''); }, 1300);
+    } catch (e) { setTplMsg({ ok: false, text: (e.response && e.response.data && e.response.data.error) || 'Could not save template.' }); }
+    setSavingTpl(false);
+  }
+
   async function download() {
     if (!result) return;
     var r = await api.get('/files/download/' + result.outputFileId, { responseType: 'blob' });
@@ -109,6 +127,24 @@ export default function RedactionWorkspacePage() {
       </div>
 
       {error ? <div style={{ background: '#FEF2F2', color: '#991B1B', padding: '10px 20px', fontSize: '13px' }}>{error}</div> : null}
+
+      {tplOpen ? (
+        <div onClick={function () { if (!savingTpl) setTplOpen(false); }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '12px', padding: '22px', width: '440px', maxWidth: '92%' }}>
+            <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '4px' }}>Save as Reusable Template</div>
+            <p style={{ fontSize: '12.5px', color: '#6B7280', margin: '0 0 14px', lineHeight: 1.5 }}>Saves these {zones.length} box(es) and their rules as a template you can reuse on other documents of the same form type.</p>
+            <label style={{ fontSize: '12px', fontWeight: '600', color: '#374151' }}>Template name</label>
+            <input value={tplName} onChange={function (e) { setTplName(e.target.value); }} placeholder="e.g. PD Incident Report - PII" style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', margin: '4px 0 12px' }} />
+            <label style={{ fontSize: '12px', fontWeight: '600', color: '#374151' }}>Description (optional)</label>
+            <input value={tplDesc} onChange={function (e) { setTplDesc(e.target.value); }} placeholder="What this template redacts" style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', margin: '4px 0 16px' }} />
+            {tplMsg ? <div style={{ fontSize: '12.5px', color: tplMsg.ok ? '#03543F' : '#9B1C1C', marginBottom: '10px' }}>{tplMsg.text}</div> : null}
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <button onClick={function () { setTplOpen(false); }} disabled={savingTpl} style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={saveTemplate} disabled={savingTpl || !tplName.trim()} style={{ padding: '8px 14px', borderRadius: '8px', border: 'none', background: (savingTpl || !tplName.trim()) ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>{savingTpl ? 'Saving...' : 'Save Template'}</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div style={{ flex: 1, display: 'flex', minHeight: 0 }}>
         {/* Canvas */}
@@ -169,7 +205,10 @@ export default function RedactionWorkspacePage() {
                 <button onClick={function () { job && job.request_id ? nav('/requests/' + job.request_id) : nav(-1); }} style={{ width: '100%', padding: '9px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Done</button>
               </div>
             ) : (
-              <button onClick={apply} disabled={applying || zones.length === 0} style={{ width: '100%', padding: '11px', borderRadius: '8px', border: 'none', background: (applying || zones.length === 0) ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '14px', fontWeight: '700', cursor: (applying || zones.length === 0) ? 'default' : 'pointer' }}>{applying ? 'Applying...' : 'Apply Redaction (' + zones.length + ')'}</button>
+              <div>
+                <button onClick={apply} disabled={applying || zones.length === 0} style={{ width: '100%', padding: '11px', borderRadius: '8px', border: 'none', background: (applying || zones.length === 0) ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '14px', fontWeight: '700', cursor: (applying || zones.length === 0) ? 'default' : 'pointer' }}>{applying ? 'Applying...' : 'Apply Redaction (' + zones.length + ')'}</button>
+                <button onClick={function () { setTplMsg(null); setTplOpen(true); }} disabled={zones.length === 0} style={{ width: '100%', marginTop: '8px', padding: '9px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '13px', fontWeight: '600', cursor: zones.length === 0 ? 'default' : 'pointer', opacity: zones.length === 0 ? 0.5 : 1 }}>Save as Reusable Template</button>
+              </div>
             )}
           </div>
         </div>
