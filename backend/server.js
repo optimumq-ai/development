@@ -52,6 +52,7 @@ app.use('/api/taxonomy', require('./src/routes/taxonomy'));
 app.use('/api/redaction', require('./src/routes/redactionRules'));
 app.use('/api/redaction-jobs', require('./src/routes/redactionJobs'));
 app.use('/api/redaction-templates', require('./src/routes/redactionTemplates'));
+app.use('/api/structured-redaction', require('./src/routes/structuredRedaction'));
 
 app.get('/api/health', function(req, res) {
   res.json({ status: 'ok', version: '1.0.0' });
