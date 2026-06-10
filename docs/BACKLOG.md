@@ -99,3 +99,11 @@ REMAINING / next-steps to discuss with Kevin:
 - WINDOW TIMEZONE: the after-hours window is evaluated in server-local (UTC) time, not Central. Refinement before customers rely on the exact window (add a tz config / store agency tz).
 - Document Processing Manager email alert on held/mismatch (partly blocked: email is test-mode -> only admin@optimumq.ai until the optimumq.ai domain is verified at Resend).
 - Connector-row ingestion adapter (live feed -> job items), and record-type filtering of candidates.
+
+### MEASURED (2026-06-10): Mass-redaction throughput benchmark on the live droplet (1 vCPU, serial)
+Ran a pure-compute benchmark to replace the placeholder nightly budget with real numbers. Three cost regimes:
+- FIELD-DATA transform (drop exempt columns -> index row): ~153,000 rows/sec. Effectively free; a 25k-row 911 file is <1s of compute. Real limit is DB write speed, not CPU -> bulk field-data jobs are NOT compute-bound.
+- PDF-PER-RECORD (born-redacted one-pager via pdf-lib): ~142 PDFs/sec (~7ms each). Cheap render-on-demand; confirms we should render on demand, not pre-render millions.
+- PER-PAGE RASTER (pdftoppm 150dpi + jimp bake/encode): ~709 ms/page raster + ~1,130 ms bake = ~1.8 sec/page. THE binding constraint. Scanned docs add tesseract OCR on top (heavier still).
+Implication: in a 12h window on 1 vCPU, page redaction does ~20k pages/night raw; for typical 5-15pp PDFs that's ~1,400-4,300 files/night. Set default mass_redaction_nightly_budget 500 -> 2000 (conservative, leaves headroom for the live app + OCR overhead). Field-data jobs could safely run far more than 2000/night.
+REFINEMENT (proposed, needs Kevin): budget is still a single FILE-count cap, but a page and a record differ ~1000x in cost. Right model = separate lanes/units: a HEAVY lane metered in pages (~15-20k pages/night) for raster/OCR/AI-scan, and a LIGHT lane for field-data that's effectively unmetered. Ties into the big-single-dataset (row-index) design.
