@@ -70,6 +70,19 @@ router.delete('/zones/:zoneId', requireAuth, async function(req, res) {
   res.json({ success: true });
 });
 
+// POST /file/:fileId/discover -> AI suggests redaction boxes from document content (ephemeral)
+router.post('/file/:fileId/discover', requireAuth, async function(req, res) {
+  var file = await get('SELECT * FROM request_files WHERE id = ?', [req.params.fileId]);
+  if (!file) return res.status(404).json({ error: 'File not found' });
+  try {
+    var pc = await get('SELECT count(*) AS c FROM document_pages WHERE file_id = ?', [req.params.fileId]);
+    if (!pc || !pc.c) await docProcessing.processFile(req.params.fileId);
+    var zoneDiscovery = require('../services/zoneDiscovery');
+    var r = await zoneDiscovery.discoverZones(req.params.fileId);
+    res.json(Object.assign({ success: true }, r));
+  } catch (e) { console.error('[zone discover]', e.message); res.status(500).json({ error: e.message }); }
+});
+
 // POST /jobs/:jobId/apply -> burn redactions, produce released PDF + documentation sheet
 router.post('/jobs/:jobId/apply', requireAuth, async function(req, res) {
   var job = await get('SELECT * FROM redaction_jobs WHERE id = ?', [req.params.jobId]);

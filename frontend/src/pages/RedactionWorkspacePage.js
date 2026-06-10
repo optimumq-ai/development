@@ -29,6 +29,8 @@ export default function RedactionWorkspacePage() {
   var [tplDesc, setTplDesc] = useState('');
   var [savingTpl, setSavingTpl] = useState(false);
   var [tplMsg, setTplMsg] = useState(null);
+  var [discovering, setDiscovering] = useState(false);
+  var [suggestions, setSuggestions] = useState([]);
 
   useEffect(function () { init(); }, [fileId]);
   async function init() {
@@ -58,6 +60,7 @@ export default function RedactionWorkspacePage() {
   function sortReading(a, b) { if (a.page_no !== b.page_no) return a.page_no - b.page_no; if (Math.abs(a.y - b.y) > 0.02) return a.y - b.y; return a.x - b.x; }
   var numById = {}; zones.slice().sort(sortReading).forEach(function (z, i) { numById[z.id] = i + 1; });
   var pageZones = zones.filter(function (z) { return page && z.page_no === page.page_no; }).sort(sortReading);
+  var pageSuggestions = suggestions.filter(function (s) { return page && s.page_no === page.page_no; });
   function ruleOf(id) { return rules.filter(function (r) { return r.id === id; })[0]; }
   function catColor(id) { var r = ruleOf(id); return (r && CAT_COLORS[r.category]) || '#374151'; }
   function zoneLabel(z) { var r = ruleOf(z.rule_id); return r ? r.category_label : 'REDACTED'; }
@@ -81,6 +84,29 @@ export default function RedactionWorkspacePage() {
   async function delZone(zid) {
     try { await api.delete('/redaction-jobs/zones/' + zid); setZones(function (z) { return z.filter(function (x) { return x.id !== zid; }); }); } catch (e) {}
   }
+  async function discover() {
+    setDiscovering(true); setError('');
+    try {
+      var r = await api.post('/redaction-jobs/file/' + fileId + '/discover');
+      var sug = (r.data.suggestions || []).map(function (s, i) { return Object.assign({}, s, { _k: 'sug_' + Date.now() + '_' + i }); });
+      setSuggestions(sug);
+      if (!sug.length) setError('No exempt content was detected. You can still draw boxes manually.');
+    } catch (e) { setError('AI scan failed. ' + ((e.response && e.response.data && e.response.data.error) || '')); }
+    setDiscovering(false);
+  }
+  async function acceptSuggestion(s) {
+    try {
+      var r = await api.post('/redaction-jobs/jobs/' + job.id + '/zones', { page_no: s.page_no, x: s.x, y: s.y, w: s.w, h: s.h, rule_id: s.rule_id || null });
+      setZones(function (z) { return z.concat(r.data.zone); });
+      setSuggestions(function (arr) { return arr.filter(function (x) { return x._k !== s._k; }); });
+    } catch (e) { setError('Could not accept the suggestion.'); }
+  }
+  function dismissSuggestion(s) { setSuggestions(function (arr) { return arr.filter(function (x) { return x._k !== s._k; }); }); }
+  async function acceptAllOnPage() {
+    var list = suggestions.filter(function (s) { return page && s.page_no === page.page_no; });
+    for (var i = 0; i < list.length; i++) { await acceptSuggestion(list[i]); }
+  }
+
   async function apply() {
     if (!window.confirm('Apply ' + zones.length + ' redaction(s) and generate the released copy? The redacted content will be permanently removed from the output.')) return;
     setApplying(true); setError('');
@@ -160,6 +186,9 @@ export default function RedactionWorkspacePage() {
                   </div>
                 );
               })}
+              {pageSuggestions.map(function (s) {
+                return <div key={s._k} style={{ position: 'absolute', left: pct(s.x), top: pct(s.y), width: pct(s.w), height: pct(s.h), border: '1.5px dashed ' + (s.category && CAT_COLORS[s.category] ? CAT_COLORS[s.category] : '#B45309'), background: 'rgba(245,158,11,.20)', boxSizing: 'border-box', pointerEvents: 'none', borderRadius: '2px' }} />;
+              })}
               {draftBox ? <div style={{ position: 'absolute', left: draftBox.left, top: draftBox.top, width: draftBox.width, height: draftBox.height, background: 'rgba(31,78,121,.25)', border: '1px dashed #1F4E79', pointerEvents: 'none' }} /> : null}
             </div>
           ) : <div style={{ color: '#9CA3AF' }}>No pages.</div>}
@@ -174,9 +203,30 @@ export default function RedactionWorkspacePage() {
               {rules.map(function (r) { return <option key={r.id} value={r.id}>{r.title} ({r.category_label})</option>; })}
             </select>
             <p style={{ fontSize: '12px', color: '#9CA3AF', margin: '10px 0 0', lineHeight: 1.5 }}>Drag on the page to draw a redaction box. New boxes get the rule selected above.</p>
+            <button onClick={discover} disabled={discovering} style={{ width: '100%', marginTop: '12px', padding: '9px', borderRadius: '8px', border: 'none', background: discovering ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: discovering ? 'wait' : 'pointer' }}>{discovering ? 'Scanning document...' : 'Find exempt content (AI)'}</button>
             {rules.length === 0 ? <p style={{ fontSize: '12px', color: '#B45309', margin: '8px 0 0' }}>No approved + active rules yet. Boxes will be unlabeled until you attach a rule.</p> : null}
           </div>
           <div style={{ flex: 1, overflowY: 'auto', padding: '14px 18px' }}>
+            {pageSuggestions.length ? (
+              <div style={{ marginBottom: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '12px', fontWeight: '700', color: '#B45309' }}>AI SUGGESTIONS ({pageSuggestions.length})</span>
+                  <button onClick={acceptAllOnPage} style={{ border: 'none', background: 'transparent', color: '#1F4E79', fontSize: '12px', fontWeight: '700', cursor: 'pointer' }}>Accept all</button>
+                </div>
+                {pageSuggestions.map(function (s) {
+                  return (
+                    <div key={s._k} style={{ border: '1px dashed #FCD34D', background: '#FFFBEB', borderRadius: '8px', padding: '8px 10px', marginBottom: '8px' }}>
+                      <div style={{ fontSize: '12px', color: '#111', fontWeight: '600', marginBottom: '2px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{s.text}</div>
+                      <div style={{ fontSize: '11px', color: '#6B7280', marginBottom: '6px' }}>{s.rule_title ? s.rule_title : 'No matching rule - pick one after accepting'}</div>
+                      <div style={{ display: 'flex', gap: '6px' }}>
+                        <button onClick={function () { acceptSuggestion(s); }} style={{ flex: 1, padding: '5px', borderRadius: '6px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '11px', fontWeight: '600', cursor: 'pointer' }}>Accept</button>
+                        <button onClick={function () { dismissSuggestion(s); }} style={{ flex: 1, padding: '5px', borderRadius: '6px', border: '1px solid #E5E7EB', background: 'white', color: '#6B7280', fontSize: '11px', fontWeight: '600', cursor: 'pointer' }}>Dismiss</button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : null}
             <div style={{ fontSize: '12px', fontWeight: '700', color: '#374151', marginBottom: '10px' }}>BOXES ON PAGE {pageIdx + 1} ({pageZones.length})</div>
             {pageZones.length === 0 ? <div style={{ fontSize: '13px', color: '#9CA3AF' }}>None yet.</div> : pageZones.map(function (z, i) {
               return (
