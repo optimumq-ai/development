@@ -107,3 +107,23 @@ Ran a pure-compute benchmark to replace the placeholder nightly budget with real
 - PER-PAGE RASTER (pdftoppm 150dpi + jimp bake/encode): ~709 ms/page raster + ~1,130 ms bake = ~1.8 sec/page. THE binding constraint. Scanned docs add tesseract OCR on top (heavier still).
 Implication: in a 12h window on 1 vCPU, page redaction does ~20k pages/night raw; for typical 5-15pp PDFs that's ~1,400-4,300 files/night. Set default mass_redaction_nightly_budget 500 -> 2000 (conservative, leaves headroom for the live app + OCR overhead). Field-data jobs could safely run far more than 2000/night.
 REFINEMENT (proposed, needs Kevin): budget is still a single FILE-count cap, but a page and a record differ ~1000x in cost. Right model = separate lanes/units: a HEAVY lane metered in pages (~15-20k pages/night) for raster/OCR/AI-scan, and a LIGHT lane for field-data that's effectively unmetered. Ties into the big-single-dataset (row-index) design.
+
+### DEFERRED (build LAST, after feature functions are complete): Workflow Routing & Smart Routing
+Not defined in detail in any spec beyond a one-line placeholder in TAXONOMY_MODEL_v2.md (record-type -> dept/queue; employee-level "later", granularity open). Captured here from Kevin's verbal spec (2026-06-10) so it's ready for the workflow phase. DECISION: do not build routing now; finish each feature's own function first, then build workflow/routing as the final step.
+
+NORMAL ROUTING (role-based + claim):
+- Hardcoded workflow rules route a request to a ROLE defined in workflow (not just a department).
+- Exactly one person in that role -> auto-assigned to them.
+- Multiple people in the role -> the task shows on ALL their My Tasks lists with a "Click to claim" button; claiming makes that person the owner and drops it off the others' lists.
+- This claim/role primitive is REUSABLE for redaction-review tasks and any other assignable work, not just requests.
+- Current state: requests carry department_id + a single manual assigned_to; My Tasks = your dept's requests + your assignments. Gaps: role targeting, the claim->owner mechanic.
+
+SMART ROUTING (optional AI overlay, OFF by default):
+- A free-text "Specialization" info box on each USER (entered via a button on their Staff Management line), AND the same kind of info box on each DEPARTMENT and each TEAM.
+- Flow: hardcoded rules decide the route as usual; THEN, if smart routing is toggled on, the system compares the request description against the specialization text (of people / departments / teams) with AI; on a HIGH-CONFIDENCE match it OVERRIDES the hardcoded decision and routes to that person/dept/team instead.
+- Example: a part-time mounted-police barn manager (specialization: "horses, mounted police, barn") is the only one who knows mounted-police records; a matching request overrides the default police-department role routing and goes straight to him.
+- Depends on: the normal-routing claim/role primitive, the specialization fields (user + dept + team), a global on/off toggle, and an AI match step at routing time.
+
+BUILD ORDER for this phase: (1) claim + role fan-out primitive; (2) wire redaction-review (and other) tasks onto it; (3) specialization fields on user/dept/team; (4) the AI smart-routing override + toggle. Open decision to settle then: workflow-config granularity (a screen mapping request types -> target roles, vs. a simpler department-default-role).
+
+NOTE: the redaction review screen's `review_stage` (editing -> pending_review -> released, + an "in_review"/in-process state to add) is the per-task status backbone this routing will surface in My Tasks. The review feature can be finished standalone now (begin-review status flip + add/delete/approve panel); only its automatic appearance in My Tasks waits on routing.
