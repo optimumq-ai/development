@@ -116,6 +116,17 @@ async function applyRedaction(jobId, actor) {
     await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
       [uuidv4(), file.request_id, actor || null, actor || 'Staff', 'REDACTION_APPLIED', zones.length + ' redaction(s) on ' + (file.original_name || file.filename)]);
   }
+  // Record into the Fulfilled Request Index (public-ready tier of search).
+  try {
+    var reqRow = file.request_id ? await get('SELECT description, record_type_id, department_id FROM requests WHERE id = ?', [file.request_id]) : null;
+    var rtName = '';
+    if (reqRow && reqRow.record_type_id) { var rt = await get('SELECT name FROM record_types WHERE id = ?', [reqRow.record_type_id]); rtName = rt ? rt.name : ''; }
+    var baseTitle = (file.original_name || file.filename || 'Released record').replace(/\.[a-z0-9]+$/i, '');
+    await run('DELETE FROM fulfilled_records WHERE source_file_id = ?', [file.id]);
+    await run('INSERT INTO fulfilled_records (id, request_id, source_file_id, output_file_id, title, summary, record_type_id, department_id, keywords, public_availability, page_count, released_by, released_at, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,datetime(\'now\'),?)',
+      [uuidv4(), file.request_id || null, file.id, outId, baseTitle, (reqRow && reqRow.description) || baseTitle, (reqRow && reqRow.record_type_id) || null, (reqRow && reqRow.department_id) || null, (rtName + ' ' + baseTitle).trim(), zones.length ? 'redacted' : 'released', pages.length, actor || null, 'released']);
+  } catch (e) { console.error('[fulfilled index]', e.message); }
+
   return { outputFileId: outId, fileName: origLabel, zoneCount: zones.length, pageCount: pages.length, bytes: bytes.length };
 }
 

@@ -83,4 +83,10 @@ router.post('/jobs/:jobId/apply', requireAuth, async function(req, res) {
   }
 });
 
+// GET /released -> the Fulfilled Request Index (Released Records Library)
+router.get('/released', requireAuth, async function(req, res) {
+  var rows = await all("SELECT fr.id, fr.title, fr.summary, fr.public_availability, fr.page_count, fr.released_at, fr.output_file_id, rt.name AS record_type_name, d.name AS department_name FROM fulfilled_records fr LEFT JOIN record_types rt ON rt.id = fr.record_type_id LEFT JOIN departments d ON d.id = fr.department_id WHERE fr.status = 'released' ORDER BY fr.released_at DESC");
+  res.json({ records: rows });
+});
+
 module.exports = router;

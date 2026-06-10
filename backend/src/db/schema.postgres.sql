@@ -259,3 +259,25 @@ CREATE TABLE IF NOT EXISTS layout_profiles (
   created_by TEXT,
   created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
 );
+
+-- Fulfilled Request Index (a.k.a. Released Records Library): records already processed and released.
+-- Tier 1 of search reads this so previously-released records surface first and similar future
+-- requests can be fast-tracked. public_availability: released (no redaction) | redacted.
+CREATE TABLE IF NOT EXISTS fulfilled_records (
+  id TEXT PRIMARY KEY,
+  request_id TEXT,
+  source_file_id TEXT,
+  output_file_id TEXT,
+  title TEXT,
+  summary TEXT,
+  record_type_id TEXT,
+  department_id TEXT,
+  keywords TEXT,
+  public_availability TEXT DEFAULT 'released',
+  page_count INTEGER,
+  released_by TEXT,
+  released_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS'),
+  status TEXT DEFAULT 'released',
+  created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
+);
+CREATE INDEX IF NOT EXISTS idx_fulfilled_source ON fulfilled_records(source_file_id);

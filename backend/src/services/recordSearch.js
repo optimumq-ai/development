@@ -19,11 +19,37 @@ function flatTokens(jsonArr) {
   var out = []; arr.forEach(function(s){ tokenize(s).forEach(function(t){ out.push(t); }); }); return out;
 }
 
-// Tier 1 seam: already-released ("public-ready") records. Returns [] until the
-// Fulfilled Request Index exists; always runs first and is never narrowed by taxonomy.
-// When built, results should carry publicReady:true so they sort to the top.
+// Tier 1: already-released ("public-ready") records from the Fulfilled Request Index.
+// Always runs first, never narrowed by taxonomy; results carry publicReady:true so they sort to top.
 async function searchPublicReady(query) {
-  return [];
+  var kw = require('./connectors/keyword');
+  var terms = kw.tokenize(query);
+  if (!terms.length) return [];
+  var rows = await all("SELECT fr.*, rt.name AS record_type_name, d.name AS department_name FROM fulfilled_records fr LEFT JOIN record_types rt ON rt.id = fr.record_type_id LEFT JOIN departments d ON d.id = fr.department_id WHERE fr.status = 'released'");
+  var out = [];
+  rows.forEach(function(r){
+    var primary = (r.title || '') + ' ' + (r.record_type_name || '');
+    var secondary = (r.summary || '') + ' ' + (r.keywords || '');
+    var m = kw.match(terms, primary, secondary);
+    if (!m) return;
+    out.push({
+      id: 'fulfilled:' + r.id,
+      sourceSystem: 'Fulfilled Request Index',
+      title: r.title,
+      summary: (r.summary || '').slice(0, 200),
+      department: r.department_name || '',
+      docType: r.record_type_name || 'Released record',
+      dateCreated: (r.released_at || '').slice(0, 10),
+      pageCount: r.page_count || null,
+      publicAvailability: 'available',
+      matchScore: (m.score || 0) + 50,
+      matchedTerms: m.matched,
+      publicReady: true,
+      fileId: r.output_file_id
+    });
+  });
+  out.sort(function(a, b){ return b.matchScore - a.matchScore; });
+  return out.slice(0, 5);
 }
 
 // Lightweight (no extra AI call) match of a query to a taxonomy record type by
