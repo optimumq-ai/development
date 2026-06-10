@@ -335,6 +335,7 @@ export default function RedactionWorkspacePage() {
               <div>
                 <button onClick={apply} disabled={applying || zones.length === 0} style={{ width: '100%', padding: '11px', borderRadius: '8px', border: 'none', background: (applying || zones.length === 0) ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '14px', fontWeight: '700', cursor: (applying || zones.length === 0) ? 'default' : 'pointer' }}>{applying ? 'Applying...' : 'Apply Redaction (' + zones.length + ')'}</button>
                 <button onClick={function () { setTplMsg(null); setTplOpen(true); }} disabled={zones.length === 0} style={{ width: '100%', marginTop: '8px', padding: '9px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '13px', fontWeight: '600', cursor: zones.length === 0 ? 'default' : 'pointer', opacity: zones.length === 0 ? 0.5 : 1 }}>Save as Reusable Template</button>
+                <button onClick={function () { nav('/redact/' + fileId + '/review'); }} style={{ width: '100%', marginTop: '8px', padding: '9px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Review side-by-side</button>
               </div>
             )}
           </div>
