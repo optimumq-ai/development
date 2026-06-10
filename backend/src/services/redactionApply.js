@@ -1,7 +1,8 @@
 // Server-side redaction apply. For each page: bake opaque black boxes into the rendered raster
 // with jimp (the underlying pixels are destroyed -> true redaction), then assemble a PDF with pdf-lib
-// at the original page size, paint the exemption-category label in white on each box, and append a
-// documentation sheet. Output is registered as a new (released) request_file.
+// at the original page size, paint each box's INDEX NUMBER in white, and append a Vaughn Index:
+// a numbered, itemized table where each number matches the number printed on its black box, giving
+// the exemption, legal authority, and basis for every redaction. Output is a new (released) file.
 const fs = require('fs');
 const path = require('path');
 const Jimp = require('jimp');
@@ -12,6 +13,13 @@ const { all, get, run } = require('../db');
 const UPLOAD_DIR = path.join(__dirname, '../../../uploads');
 
 function clampInt(v, max) { v = Math.round(v); if (v < 0) v = 0; if (v > max) v = max; return v; }
+// Keep only characters the standard PDF font (WinAnsi/Latin-1) can render.
+function safe(s) {
+  return String(s == null ? '' : s)
+    .replace(/[\u2018\u2019]/g, "'").replace(/[\u201C\u201D]/g, '"')
+    .replace(/[\u2013\u2014]/g, '-').replace(/\u2026/g, '...')
+    .replace(/[^\x20-\x7E\xA0-\xFF]/g, '');
+}
 
 async function applyRedaction(jobId, actor) {
   var job = await get('SELECT * FROM redaction_jobs WHERE id = ?', [jobId]);
@@ -20,31 +28,37 @@ async function applyRedaction(jobId, actor) {
   if (!file) throw new Error('source file not found');
   var pages = await all('SELECT * FROM document_pages WHERE file_id = ? ORDER BY page_no', [job.file_id]);
   if (!pages.length) throw new Error('document not processed (no pages)');
-  var zones = await all('SELECT * FROM redaction_zones WHERE job_id = ? ORDER BY page_no', [jobId]);
+  var zones = await all('SELECT * FROM redaction_zones WHERE job_id = ?', [jobId]);
+  var agencyRow = await get("SELECT value FROM system_config WHERE key = 'agency_name'");
+  var agencyName = agencyRow ? agencyRow.value : 'Agency';
 
-  // category labels + rule lookup (title, category, citations) for labels and the doc sheet
+  // Number boxes in reading order: page, then top-to-bottom, then left-to-right.
+  zones.sort(function(a, b){
+    if (a.page_no !== b.page_no) return a.page_no - b.page_no;
+    if (Math.abs(a.y - b.y) > 0.02) return a.y - b.y;
+    return a.x - b.x;
+  });
+  zones.forEach(function(z, i){ z.idx = i + 1; });
+
+  // category labels + rule lookup (title, category, description, citations)
   var catRows = await all('SELECT key, label FROM redaction_categories');
   var catLabel = {}; catRows.forEach(function(c){ catLabel[c.key] = c.label; });
   var ruleMap = {};
   var ruleIds = zones.map(function(z){ return z.rule_id; }).filter(Boolean);
   if (ruleIds.length) {
     var ph = ruleIds.map(function(){ return '?'; }).join(',');
-    var rs = await all('SELECT id, title, category FROM redaction_rules WHERE id IN (' + ph + ')', ruleIds);
+    var rs = await all('SELECT id, title, category, description FROM redaction_rules WHERE id IN (' + ph + ')', ruleIds);
     for (var i = 0; i < rs.length; i++) {
       var cites = await all('SELECT ls.citation FROM rule_legal_sources rls JOIN legal_sources ls ON ls.id = rls.legal_source_id WHERE rls.rule_id = ?', [rs[i].id]);
-      ruleMap[rs[i].id] = { title: rs[i].title, category: rs[i].category, citations: cites.map(function(c){ return c.citation; }) };
+      ruleMap[rs[i].id] = { title: rs[i].title, category: rs[i].category, description: rs[i].description, citations: cites.map(function(c){ return c.citation; }) };
     }
-  }
-  function zoneLabel(z) {
-    var r = z.rule_id && ruleMap[z.rule_id];
-    if (r) return catLabel[r.category] || r.title;
-    return 'REDACTED';
   }
 
   var pdf = await PDFDocument.create();
   var font = await pdf.embedFont(StandardFonts.Helvetica);
   var fontB = await pdf.embedFont(StandardFonts.HelveticaBold);
 
+  // ---- Render pages with redaction boxes + index numbers ----
   for (var p = 0; p < pages.length; p++) {
     var pg = pages[p];
     var pageZones = zones.filter(function(z){ return z.page_no === pg.page_no; });
@@ -66,43 +80,74 @@ async function applyRedaction(jobId, actor) {
       var png = await pdf.embedPng(buf);
       page.drawImage(png, { x: 0, y: 0, width: wPt, height: hPt });
     }
-    // white category label near the top-left of each box
+    // white index number near the top-left of each box
     pageZones.forEach(function(z){
-      var label = zoneLabel(z);
       var bxPt = z.x * wPt, byPt = z.y * hPt, bwPt = z.w * wPt, bhPt = z.h * hPt;
-      if (bhPt < 9 || bwPt < 18) return;
-      var maxChars = Math.max(3, Math.floor(bwPt / 5));
-      if (label.length > maxChars) label = label.slice(0, maxChars - 1) + '...';
-      var size = Math.min(9, bhPt - 3);
-      page.drawText(label, { x: bxPt + 3, y: hPt - byPt - size - 2, size: size, font: font, color: rgb(1, 1, 1) });
+      if (bhPt < 8 || bwPt < 10) return;
+      var size = Math.min(11, bhPt - 2);
+      page.drawText(String(z.idx), { x: bxPt + 3, y: hPt - byPt - size - 1, size: size, font: fontB, color: rgb(1, 1, 1) });
     });
   }
 
-  // Documentation sheet(s)
-  function addDocPage() {
-    var dp = pdf.addPage([612, 792]); return { page: dp, y: 740 };
+  // ---- Vaughn Index ----
+  var cols = {
+    no:    { x: 48,  w: 24,  h: 'No.' },
+    page:  { x: 76,  w: 30,  h: 'Page' },
+    ex:    { x: 110, w: 134, h: 'Exemption' },
+    auth:  { x: 248, w: 126, h: 'Legal Authority' },
+    basis: { x: 378, w: 186, h: 'Basis for Redaction' }
+  };
+  var SZ = 8.5, LH = 11;
+  var V = { page: null, y: 0 };
+  function wrap(text, sz, maxW) {
+    var words = safe(text).split(/\s+/), lines = [], cur = '';
+    for (var i = 0; i < words.length; i++) {
+      var t = cur ? cur + ' ' + words[i] : words[i];
+      if (cur && font.widthOfTextAtSize(t, sz) > maxW) { lines.push(cur); cur = words[i]; } else { cur = t; }
+    }
+    if (cur) lines.push(cur);
+    return lines.length ? lines : [''];
   }
-  var dpState = addDocPage();
-  function line(text, opts) {
-    opts = opts || {};
-    if (dpState.y < 54) dpState = addDocPage();
-    dpState.page.drawText(text, { x: 54, y: dpState.y, size: opts.size || 10, font: opts.bold ? fontB : font, color: rgb(0.1, 0.1, 0.1) });
-    dpState.y -= (opts.gap || 16);
+  function headerRow() {
+    Object.keys(cols).forEach(function(k){ V.page.drawText(cols[k].h, { x: cols[k].x, y: V.y, size: 9, font: fontB, color: rgb(0.1, 0.1, 0.1) }); });
+    V.y -= 5;
+    V.page.drawLine({ start: { x: 48, y: V.y }, end: { x: 564, y: V.y }, thickness: 0.6, color: rgb(0.55, 0.55, 0.55) });
+    V.y -= 13;
   }
-  line('Redaction Documentation Sheet', { bold: true, size: 16, gap: 24 });
-  line('Source document: ' + (file.original_name || file.filename), { size: 10 });
-  line('Generated: ' + new Date().toISOString().slice(0, 19).replace('T', ' ') + ' UTC', { size: 10 });
-  line('Processed by: ' + (actor || 'Staff'), { size: 10, gap: 22 });
-  line('Redactions applied (' + zones.length + '):', { bold: true, gap: 18 });
-  if (!zones.length) line('No redactions were applied.', { size: 10 });
-  zones.forEach(function(z, i) {
-    var r = z.rule_id && ruleMap[z.rule_id];
-    var cat = r ? (catLabel[r.category] || r.category) : 'Unspecified';
-    var title = r ? r.title : 'Manual redaction (no rule attached)';
-    var cites = r && r.citations.length ? r.citations.join('; ') : 'No citation';
-    line((i + 1) + '. Page ' + z.page_no + ' - ' + title + ' [' + cat + ']', { size: 10, gap: 14 });
-    line('     Legal basis: ' + cites, { size: 9, gap: 16 });
-  });
+  function newIndexPage(withHeader) { V.page = pdf.addPage([612, 792]); V.y = 744; if (withHeader) headerRow(); }
+  function row(no, pageNo, exemption, authority, basis) {
+    var exL = wrap(exemption, SZ, cols.ex.w), auL = wrap(authority, SZ, cols.auth.w), baL = wrap(basis, SZ, cols.basis.w);
+    var n = Math.max(exL.length, auL.length, baL.length, 1);
+    var rowH = n * LH + 7;
+    if (V.y - rowH < 54) newIndexPage(true);
+    var top = V.y;
+    V.page.drawText(String(no), { x: cols.no.x, y: top, size: SZ, font: fontB, color: rgb(0.1, 0.1, 0.1) });
+    V.page.drawText('p.' + pageNo, { x: cols.page.x, y: top, size: SZ, font: font, color: rgb(0.1, 0.1, 0.1) });
+    exL.forEach(function(ln, i){ V.page.drawText(ln, { x: cols.ex.x, y: top - i * LH, size: SZ, font: font, color: rgb(0.12, 0.12, 0.12) }); });
+    auL.forEach(function(ln, i){ V.page.drawText(ln, { x: cols.auth.x, y: top - i * LH, size: SZ, font: font, color: rgb(0.25, 0.25, 0.25) }); });
+    baL.forEach(function(ln, i){ V.page.drawText(ln, { x: cols.basis.x, y: top - i * LH, size: SZ, font: font, color: rgb(0.25, 0.25, 0.25) }); });
+    V.y = top - n * LH - 7;
+    V.page.drawLine({ start: { x: 48, y: V.y + 4 }, end: { x: 564, y: V.y + 4 }, thickness: 0.3, color: rgb(0.88, 0.88, 0.88) });
+  }
+
+  newIndexPage(false);
+  V.page.drawText('Vaughn Index', { x: 48, y: V.y, size: 18, font: fontB, color: rgb(0.1, 0.1, 0.1) }); V.y -= 21;
+  V.page.drawText('Itemized index of information withheld or redacted, keyed to the numbered boxes on the document.', { x: 48, y: V.y, size: 9, font: font, color: rgb(0.35, 0.35, 0.35) }); V.y -= 22;
+  var meta = ['Agency: ' + agencyName, 'Source document: ' + (file.original_name || file.filename), 'Prepared: ' + new Date().toISOString().slice(0, 19).replace('T', ' ') + ' UTC', 'Prepared by: ' + (actor || 'Staff'), 'Total redactions: ' + zones.length];
+  meta.forEach(function(m){ V.page.drawText(safe(m), { x: 48, y: V.y, size: 9.5, font: font, color: rgb(0.2, 0.2, 0.2) }); V.y -= 14; });
+  V.y -= 8;
+  if (!zones.length) {
+    V.page.drawText('No redactions were applied to this document.', { x: 48, y: V.y, size: 10, font: font, color: rgb(0.3, 0.3, 0.3) });
+  } else {
+    headerRow();
+    zones.forEach(function(z){
+      var r = z.rule_id && ruleMap[z.rule_id];
+      var exemption = r ? ((catLabel[r.category] || r.category) + ' - ' + r.title) : 'Manual redaction';
+      var authority = r && r.citations.length ? r.citations.join('; ') : 'Not specified';
+      var basis = r ? (r.description || 'Withheld under the cited authority.') : (z.note || 'Redacted by staff; no rule attached.');
+      row(z.idx, z.page_no, exemption, authority, basis);
+    });
+  }
 
   var bytes = await pdf.save();
   var outName = uuidv4() + '.pdf';
@@ -114,8 +159,9 @@ async function applyRedaction(jobId, actor) {
   await run("UPDATE redaction_jobs SET status = 'applied', output_file_id = ?, updated_at = datetime('now') WHERE id = ?", [outId, jobId]);
   if (file.request_id) {
     await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
-      [uuidv4(), file.request_id, actor || null, actor || 'Staff', 'REDACTION_APPLIED', zones.length + ' redaction(s) on ' + (file.original_name || file.filename)]);
+      [uuidv4(), file.request_id, actor || null, actor || 'Staff', 'REDACTION_APPLIED', zones.length + ' redaction(s) on ' + (file.original_name || file.filename) + ' (Vaughn Index generated)']);
   }
+
   // Record into the Fulfilled Request Index (public-ready tier of search).
   try {
     var reqRow = file.request_id ? await get('SELECT description, record_type_id, department_id FROM requests WHERE id = ?', [file.request_id]) : null;
