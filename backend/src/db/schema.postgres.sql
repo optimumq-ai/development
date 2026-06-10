@@ -261,6 +261,8 @@ CREATE TABLE IF NOT EXISTS layout_profiles (
   source_filename TEXT,
   layout_fingerprint TEXT,
   safety_threshold INTEGER DEFAULT 80,
+  kind TEXT DEFAULT 'pages',
+  field_map TEXT,
   processing_manager_name TEXT,
   processing_manager_email TEXT,
   created_by TEXT,

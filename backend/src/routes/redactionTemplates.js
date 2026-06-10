@@ -9,6 +9,7 @@ const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const docProcessing = require('../services/docProcessing');
 const redactionApply = require('../services/redactionApply');
+const structuredRedaction = require('../services/structuredRedaction');
 
 var ELEVATED = ['SUPERVISOR', 'DIRECTOR', 'SYSTEM_ADMIN', 'DEPT_MANAGER'];
 function isElevated(req) { return (req.user.roles || []).some(function(r){ return ELEVATED.indexOf(r) >= 0; }); }
@@ -17,6 +18,15 @@ async function activeJurisdiction() {
   return (row && row.value) || 'jur-tx';
 }
 function parseZones(t) { try { return JSON.parse(t.zones || '[]'); } catch (e) { return []; } }
+function parseFieldMap(t) { try { return JSON.parse(t.field_map || '[]'); } catch (e) { return []; } }
+function fpColumns(fp) { try { var o = JSON.parse(fp); return (o && o.kind === 'fields' && Array.isArray(o.columns)) ? o.columns : null; } catch (e) { return null; } }
+async function fieldsScore(cols, fileId) {
+  if (!cols || !cols.length) return { score: null };
+  var pv; try { pv = await structuredRedaction.preview(fileId); } catch (e) { return { score: 0, rowCount: 0 }; }
+  var have = {}; (pv.columns || []).forEach(function (c) { have[String(c).trim().toLowerCase()] = 1; });
+  var inter = 0; cols.forEach(function (c) { if (have[String(c).trim().toLowerCase()]) inter++; });
+  return { score: Math.round(100 * inter / cols.length), rowCount: pv.rowCount, file_columns: pv.columns };
+}
 
 // Tokenize text into the set of "structural" words (labels/captions), dropping pure numbers
 // (which are the variable filled-in values), so the fingerprint reflects the FORM, not the data.
@@ -80,14 +90,26 @@ async function applyTemplateToFile(t, file, zones, actorName, actorSub) {
 router.post('/', requireAuth, async function(req, res) {
   if (!isElevated(req)) return res.status(403).json({ error: 'Only a supervisor can create templates' });
   var b = req.body || {};
-  if (!b.name || !Array.isArray(b.zones) || !b.zones.length) return res.status(400).json({ error: 'name and at least one zone are required' });
-  var zones = b.zones.map(function(z){ return { page_no: z.page_no || 1, x: z.x, y: z.y, w: z.w, h: z.h, rule_id: z.rule_id || null, label: z.label || null }; });
+  if (!b.name) return res.status(400).json({ error: 'name is required' });
+  var kind = b.kind === 'fields' ? 'fields' : 'pages';
+  var zonesJson = '[]', fieldMapJson = null, fingerprint = null;
   var srcFile = b.source_file_id ? await get('SELECT original_name, filename FROM request_files WHERE id = ?', [b.source_file_id]) : null;
+  if (kind === 'fields') {
+    if (!Array.isArray(b.field_map) || !b.field_map.length) return res.status(400).json({ error: 'field_map with at least one field is required' });
+    fieldMapJson = JSON.stringify(b.field_map.map(function(f){ return { field: f.field, rule_id: f.rule_id || null }; }));
+    var cols = [];
+    if (b.source_file_id) { try { var pv = await structuredRedaction.preview(b.source_file_id); cols = pv.columns || []; } catch (e) {} }
+    fingerprint = JSON.stringify({ v: 1, kind: 'fields', columns: cols });
+  } else {
+    if (!Array.isArray(b.zones) || !b.zones.length) return res.status(400).json({ error: 'name and at least one zone are required' });
+    zonesJson = JSON.stringify(b.zones.map(function(z){ return { page_no: z.page_no || 1, x: z.x, y: z.y, w: z.w, h: z.h, rule_id: z.rule_id || null, label: z.label || null }; }));
+    fingerprint = await buildFingerprint(b.source_file_id);
+  }
   var id = uuidv4();
-  await run('INSERT INTO layout_profiles (id, name, record_type_id, description, zones, source, status, source_file_id, source_filename, layout_fingerprint, safety_threshold, processing_manager_name, processing_manager_email, created_by, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime(\'now\'))',
-    [id, b.name, b.record_type_id || null, b.description || null, JSON.stringify(zones), 'manual', 'active',
+  await run('INSERT INTO layout_profiles (id, name, record_type_id, description, zones, kind, field_map, source, status, source_file_id, source_filename, layout_fingerprint, safety_threshold, processing_manager_name, processing_manager_email, created_by, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime(\'now\'))',
+    [id, b.name, b.record_type_id || null, b.description || null, zonesJson, kind, fieldMapJson, 'manual', 'active',
      b.source_file_id || null, srcFile ? (srcFile.original_name || srcFile.filename) : null,
-     await buildFingerprint(b.source_file_id), b.safety_threshold != null ? b.safety_threshold : 80,
+     fingerprint, b.safety_threshold != null ? b.safety_threshold : 80,
      b.processing_manager_name || null, b.processing_manager_email || null, req.user.sub]);
   res.json({ success: true, template: await get('SELECT * FROM layout_profiles WHERE id = ?', [id]) });
 });
@@ -95,14 +117,14 @@ router.post('/', requireAuth, async function(req, res) {
 // GET / -> list templates
 router.get('/', requireAuth, async function(req, res) {
   var rows = await all("SELECT lp.*, rt.name AS record_type_name FROM layout_profiles lp LEFT JOIN record_types rt ON rt.id = lp.record_type_id WHERE lp.status != 'deleted' ORDER BY lp.created_at DESC");
-  res.json({ templates: rows.map(function(t){ return { id: t.id, name: t.name, description: t.description, record_type_id: t.record_type_id, record_type_name: t.record_type_name, zone_count: parseZones(t).length, source_filename: t.source_filename, safety_threshold: t.safety_threshold, status: t.status, created_at: t.created_at }; }) });
+  res.json({ templates: rows.map(function(t){ return { id: t.id, name: t.name, description: t.description, kind: t.kind || 'pages', record_type_id: t.record_type_id, record_type_name: t.record_type_name, zone_count: parseZones(t).length, field_count: parseFieldMap(t).length, source_filename: t.source_filename, safety_threshold: t.safety_threshold, status: t.status, created_at: t.created_at }; }) });
 });
 
 // GET /:id -> full template incl zones
 router.get('/:id', requireAuth, async function(req, res) {
   var t = await get('SELECT * FROM layout_profiles WHERE id = ?', [req.params.id]);
   if (!t) return res.status(404).json({ error: 'Template not found' });
-  res.json({ template: Object.assign({}, t, { zones: parseZones(t) }) });
+  res.json({ template: Object.assign({}, t, { zones: parseZones(t), field_map: parseFieldMap(t) }) });
 });
 
 // PATCH /:id -> update (elevated)
@@ -152,8 +174,11 @@ router.post('/:id/apply', requireAuth, async function(req, res) {
 
 // GET /:id/candidates -> PDF files that could be batch-processed with this template
 router.get('/:id/candidates', requireAuth, async function(req, res) {
-  var rows = await all("SELECT rf.id, rf.original_name, rf.filename, rf.request_id, rf.status, r.description AS request_desc FROM request_files rf LEFT JOIN requests r ON r.id = rf.request_id WHERE (rf.mimetype = 'application/pdf' OR rf.filename ILIKE '%.pdf') AND COALESCE(rf.status,'') <> 'redacted' ORDER BY rf.original_name");
-  res.json({ candidates: rows.map(function(f){ return { id: f.id, name: f.original_name || f.filename, request_id: f.request_id, request_desc: f.request_desc ? String(f.request_desc).slice(0, 70) : null, status: f.status }; }) });
+  var t = await get('SELECT kind FROM layout_profiles WHERE id = ?', [req.params.id]);
+  var isFields = t && t.kind === 'fields';
+  var where = isFields ? "(rf.mimetype ILIKE '%csv%' OR rf.filename ILIKE '%.csv')" : "(rf.mimetype = 'application/pdf' OR rf.filename ILIKE '%.pdf')";
+  var rows = await all("SELECT rf.id, rf.original_name, rf.filename, rf.request_id, rf.status, r.description AS request_desc FROM request_files rf LEFT JOIN requests r ON r.id = rf.request_id WHERE " + where + " AND COALESCE(rf.status,'') <> 'redacted' ORDER BY rf.original_name");
+  res.json({ kind: isFields ? 'fields' : 'pages', candidates: rows.map(function(f){ return { id: f.id, name: f.original_name || f.filename, request_id: f.request_id, request_desc: f.request_desc ? String(f.request_desc).slice(0, 70) : null, status: f.status }; }) });
 });
 
 // POST /:id/apply-batch -> safety check (commit:false) or process (commit:true) over many files. Body: { file_ids:[], commit }
@@ -161,13 +186,36 @@ router.post('/:id/apply-batch', requireAuth, async function(req, res) {
   if (!isElevated(req)) return res.status(403).json({ error: 'Only a supervisor can run batch redaction' });
   var t = await get('SELECT * FROM layout_profiles WHERE id = ?', [req.params.id]);
   if (!t) return res.status(404).json({ error: 'Template not found' });
-  var zones = parseZones(t);
-  if (!zones.length) return res.status(400).json({ error: 'Template has no zones' });
   var b = req.body || {};
   var ids = Array.isArray(b.file_ids) ? b.file_ids : [];
   if (!ids.length) return res.status(400).json({ error: 'file_ids is required' });
   var commit = !!b.commit;
   var threshold = t.safety_threshold != null ? t.safety_threshold : 80;
+
+  if (t.kind === 'fields') {
+    var fmap = parseFieldMap(t);
+    if (!fmap.length) return res.status(400).json({ error: 'Template has no fields' });
+    var fcols = fpColumns(t.layout_fingerprint) || [];
+    var fres = [];
+    for (var fi = 0; fi < ids.length; fi++) {
+      var ffid = ids[fi];
+      var ffile = await get('SELECT * FROM request_files WHERE id = ?', [ffid]);
+      if (!ffile) { fres.push({ file_id: ffid, status: 'error', error: 'File not found' }); continue; }
+      var fnm = ffile.original_name || ffile.filename;
+      try {
+        var fsc = await fieldsScore(fcols, ffid);
+        var fpass = fsc.score == null ? null : fsc.score >= threshold;
+        if (!commit) { fres.push({ file_id: ffid, name: fnm, status: 'checked', score: fsc.score, pass: fpass, file_pages: fsc.rowCount }); continue; }
+        if (fsc.score != null && fsc.score < threshold) { fres.push({ file_id: ffid, name: fnm, status: 'held', score: fsc.score, reason: 'Field match ' + fsc.score + '% is below the ' + threshold + '% safety threshold' }); continue; }
+        var fout = await structuredRedaction.applyFieldMap(ffid, fmap, req.user.name || 'Mass Redaction', req.user.sub);
+        fres.push({ file_id: ffid, name: fnm, status: 'redacted', score: fsc.score, outputFileId: fout.outputFileId, fileName: fout.fileName, zoneCount: fout.withheldFields.length });
+      } catch (e) { fres.push({ file_id: ffid, name: fnm, status: 'error', error: e.message }); }
+    }
+    return res.json({ success: true, template_id: t.id, kind: 'fields', threshold: threshold, committed: commit, results: fres, summary: { total: ids.length, redacted: fres.filter(function(r){return r.status==='redacted';}).length, held: fres.filter(function(r){return r.status==='held';}).length, errors: fres.filter(function(r){return r.status==='error';}).length, passing: fres.filter(function(r){return r.pass===true;}).length } });
+  }
+
+  var zones = parseZones(t);
+  if (!zones.length) return res.status(400).json({ error: 'Template has no zones' });
   var results = [];
   for (var i = 0; i < ids.length; i++) {
     var fid = ids[i];
