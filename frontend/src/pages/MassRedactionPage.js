@@ -76,7 +76,7 @@ export default function MassRedactionPage() {
       </p>
 
       <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', fontSize: '13px', color: '#1E40AF', lineHeight: 1.5 }}>
-        To create a template: open a sample document in the redaction workspace (the <strong>Redact</strong> button on a PDF in a request's Records tab), place your boxes and attach a rule to each, then choose <strong>Save as Reusable Template</strong>.
+        To create a template: open a sample document in the redaction workspace (the <strong>Redact</strong> button on a PDF in a request's Records tab), place your boxes and attach a rule to each, then choose <strong>Save as Reusable Template</strong>. For a structured CSV record, use <strong>Redact fields</strong> on the record, mark the exempt columns, and choose <strong>Save as reusable template</strong>.
       </div>
 
       <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '10px' }}>Templates ({templates.length})</div>
@@ -92,10 +92,13 @@ export default function MassRedactionPage() {
             return (
               <div key={t.id} style={{ background: 'white', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontWeight: '700', fontSize: '14.5px', color: '#1F4E79', marginBottom: '3px' }}>{t.name}</div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+                    <span style={{ fontWeight: '700', fontSize: '14.5px', color: '#1F4E79' }}>{t.name}</span>
+                    <span style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '.03em', padding: '1px 7px', borderRadius: '999px', color: t.kind === 'fields' ? '#3730A3' : '#374151', background: t.kind === 'fields' ? '#E0E7FF' : '#F3F4F6' }}>{t.kind === 'fields' ? 'FIELDS' : 'PAGES'}</span>
+                  </div>
                   {t.description ? <div style={{ fontSize: '12.5px', color: '#6B7280', marginBottom: '3px' }}>{t.description}</div> : null}
                   <div style={{ fontSize: '12px', color: '#9CA3AF' }}>
-                    {t.zone_count} box{t.zone_count !== 1 ? 'es' : ''}
+                    {t.kind === 'fields' ? (t.field_count + ' field' + (t.field_count !== 1 ? 's' : '')) : (t.zone_count + ' box' + (t.zone_count !== 1 ? 'es' : ''))}
                     {t.record_type_name ? ' \u00b7 ' + t.record_type_name : ''}
                     {t.source_filename ? ' \u00b7 from ' + t.source_filename : ''}
                     {t.created_at ? ' \u00b7 ' + (t.created_at || '').slice(0, 10) : ''}

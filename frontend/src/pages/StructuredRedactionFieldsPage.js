@@ -15,6 +15,11 @@ export default function StructuredRedactionFieldsPage() {
   var [fieldMap, setFieldMap] = useState({});
   var [busy, setBusy] = useState(false);
   var [result, setResult] = useState(null);
+  var [tplOpen, setTplOpen] = useState(false);
+  var [tplName, setTplName] = useState('');
+  var [tplDesc, setTplDesc] = useState('');
+  var [savingTpl, setSavingTpl] = useState(false);
+  var [tplMsg, setTplMsg] = useState(null);
 
   useEffect(function () { init(); }, [fileId]);
   async function init() {
@@ -43,6 +48,16 @@ export default function StructuredRedactionFieldsPage() {
       setResult(r.data);
     } catch (e) { setError('Could not generate the redacted record. ' + ((e.response && e.response.data && e.response.data.error) || '')); }
     setBusy(false);
+  }
+  async function saveTemplate() {
+    setSavingTpl(true); setTplMsg(null);
+    try {
+      var field_map = withheld.map(function (c) { return { field: c, rule_id: fieldMap[c].rule_id || null }; });
+      await api.post('/redaction-templates', { name: tplName.trim(), description: tplDesc.trim() || null, kind: 'fields', source_file_id: fileId, field_map: field_map });
+      setTplMsg({ ok: true, text: 'Template saved. Find it under Mass Redaction.' });
+      setTimeout(function () { setTplOpen(false); setTplMsg(null); setTplName(''); setTplDesc(''); }, 1300);
+    } catch (e) { setTplMsg({ ok: false, text: (e.response && e.response.data && e.response.data.error) || 'Could not save template.' }); }
+    setSavingTpl(false);
   }
   async function download() {
     if (!result) return;
@@ -111,8 +126,26 @@ export default function StructuredRedactionFieldsPage() {
           </div>
           <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '14px' }}>
             <button onClick={generate} disabled={busy} style={{ padding: '11px 18px', borderRadius: '8px', border: 'none', background: busy ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '14px', fontWeight: '700', cursor: busy ? 'wait' : 'pointer' }}>{busy ? 'Generating...' : 'Generate Redacted Record'}</button>
+            <button onClick={function(){ setTplMsg(null); setTplOpen(true); }} disabled={!withheld.length} style={{ padding: '11px 16px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '13px', fontWeight: '600', cursor: withheld.length ? 'pointer' : 'default', opacity: withheld.length ? 1 : 0.5 }}>Save as reusable template</button>
             <span style={{ fontSize: '12.5px', color: '#6B7280' }}>{withheld.length} of {columns.length} column(s) marked to withhold</span>
           </div>
+          {tplOpen ? (
+            <div onClick={function(){ if(!savingTpl) setTplOpen(false); }} style={{ position:'fixed', inset:0, background:'rgba(0,0,0,.4)', display:'flex', alignItems:'center', justifyContent:'center', zIndex:50 }}>
+              <div onClick={function(e){ e.stopPropagation(); }} style={{ background:'white', borderRadius:'12px', padding:'22px', width:'440px', maxWidth:'92%' }}>
+                <div style={{ fontWeight:'700', fontSize:'16px', marginBottom:'4px' }}>Save as Reusable Template</div>
+                <p style={{ fontSize:'12.5px', color:'#6B7280', margin:'0 0 14px', lineHeight:1.5 }}>Saves the {withheld.length} withheld field(s) and their rules as a template you can run across other records of this report type under Mass Redaction.</p>
+                <label style={{ fontSize:'12px', fontWeight:'600', color:'#374151' }}>Template name</label>
+                <input value={tplName} onChange={function(e){ setTplName(e.target.value); }} placeholder="e.g. CAD Call Log - PII" style={{ width:'100%', boxSizing:'border-box', padding:'8px 10px', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'13px', margin:'4px 0 12px' }} />
+                <label style={{ fontSize:'12px', fontWeight:'600', color:'#374151' }}>Description (optional)</label>
+                <input value={tplDesc} onChange={function(e){ setTplDesc(e.target.value); }} placeholder="What this template withholds" style={{ width:'100%', boxSizing:'border-box', padding:'8px 10px', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'13px', margin:'4px 0 16px' }} />
+                {tplMsg ? <div style={{ fontSize:'12.5px', color: tplMsg.ok?'#03543F':'#9B1C1C', marginBottom:'10px' }}>{tplMsg.text}</div> : null}
+                <div style={{ display:'flex', justifyContent:'flex-end', gap:'8px' }}>
+                  <button onClick={function(){ setTplOpen(false); }} disabled={savingTpl} style={{ padding:'8px 14px', borderRadius:'8px', border:'1px solid #E5E7EB', background:'white', color:'#374151', fontSize:'13px', fontWeight:'600', cursor:'pointer' }}>Cancel</button>
+                  <button onClick={saveTemplate} disabled={savingTpl || !tplName.trim()} style={{ padding:'8px 14px', borderRadius:'8px', border:'none', background:(savingTpl||!tplName.trim())?'#9CB4CC':'#1F4E79', color:'white', fontSize:'13px', fontWeight:'700', cursor:'pointer' }}>{savingTpl?'Saving...':'Save Template'}</button>
+                </div>
+              </div>
+            </div>
+          ) : null}
         </div>
       )}
     </div>
