@@ -221,6 +221,32 @@ router.post('/match', requireAuth, async function(req, res) {
   } catch (e) { console.error('[template match]', e.message); res.status(500).json({ error: e.message }); }
 });
 
+// POST /match-batch -> for each file, the best matching active template. Side-effect-free: only scores
+// files that are ALREADY processed (won't trigger OCR/processing just to render a badge).
+router.post('/match-batch', requireAuth, async function(req, res) {
+  var ids = Array.isArray((req.body || {}).file_ids) ? req.body.file_ids : [];
+  if (!ids.length) return res.json({ matches: {} });
+  var tpls = await all("SELECT * FROM layout_profiles WHERE status = 'active'");
+  var withZones = tpls.map(function(t){ return { t: t, zones: parseZones(t), thr: t.safety_threshold != null ? t.safety_threshold : 80 }; }).filter(function(x){ return x.zones.length; });
+  var matches = {};
+  for (var i = 0; i < ids.length; i++) {
+    var fid = ids[i];
+    var pc = await get('SELECT count(*) AS c FROM document_pages WHERE file_id = ?', [fid]);
+    if (!pc || !pc.c) { matches[fid] = { processed: false }; continue; }
+    var ft = await fileTokens(fid);
+    var best = null;
+    for (var j = 0; j < withZones.length; j++) {
+      var tt = tokensFromFingerprint(withZones[j].t.layout_fingerprint);
+      var keys = Object.keys(tt); if (!keys.length) continue;
+      var inter = 0; for (var k = 0; k < keys.length; k++) { if (ft.tokens[keys[k]]) inter++; }
+      var score = Math.round(100 * inter / keys.length);
+      if (score >= withZones[j].thr && (!best || score > best.score)) best = { id: withZones[j].t.id, name: withZones[j].t.name, score: score };
+    }
+    matches[fid] = best ? { matched: true, template: best } : { matched: false };
+  }
+  res.json({ matches: matches });
+});
+
 // POST /:id/stage -> copy this template's zones onto an existing draft job for human review (no release). Body: { job_id, file_id }
 router.post('/:id/stage', requireAuth, async function(req, res) {
   var t = await get('SELECT * FROM layout_profiles WHERE id = ?', [req.params.id]);

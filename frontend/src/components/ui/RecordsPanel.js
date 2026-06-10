@@ -25,6 +25,7 @@ function fileIcon(mimetype, isNonDigital) {
 export default function RecordsPanel({ requestId, stage }) {
   const nav = useNavigate();
   const [records, setRecords] = useState([]);
+  const [matches, setMatches] = useState({});
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -41,6 +42,8 @@ export default function RecordsPanel({ requestId, stage }) {
       setRecords(r.data.files.map(function(f) {
         return { id: f.id, title: f.original_name, recordType: f.mimetype||'Document / PDF', description:'', isNonDigital: false, status: f.responsive ? 'responsive' : 'attached', size: f.size, mimetype: f.mimetype, uploadedAt: f.uploaded_at };
       }));
+      var pdfIds = r.data.files.filter(function(f){ return f.mimetype && f.mimetype.indexOf('pdf') >= 0; }).map(function(f){ return f.id; });
+      if (pdfIds.length) { api.post('/redaction-templates/match-batch', { file_ids: pdfIds }).then(function(mr){ setMatches(mr.data.matches || {}); }).catch(function(){}); }
     } catch(e) { console.error(e); }
     setLoading(false);
   }
@@ -201,6 +204,7 @@ export default function RecordsPanel({ requestId, stage }) {
                 <div style={{fontSize:'28px',flexShrink:0}}>{fileIcon(r.mimetype, r.isNonDigital)}</div>
                 <div style={{flex:1,minWidth:0}}>
                   <div style={{fontWeight:'600',fontSize:'14px',color:'#111',marginBottom:'2px',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{r.title}</div>
+                  {matches[r.id] && matches[r.id].matched ? <div style={{marginBottom:'4px'}}><span style={{fontSize:'11px',fontWeight:'700',color:'#1E40AF',background:'#EFF6FF',border:'1px solid #BFDBFE',borderRadius:'999px',padding:'2px 9px'}}>Template match: {matches[r.id].template.name} ({matches[r.id].template.score}%)</span></div> : null}
                   <div style={{fontSize:'12px',color:'#9CA3AF'}}>
                     {r.size ? formatSize(r.size) : 'Non-digital record'}
                     {r.uploadedAt ? ' · ' + new Date(r.uploadedAt).toLocaleDateString() : ''}
@@ -213,7 +217,7 @@ export default function RecordsPanel({ requestId, stage }) {
                   <button onClick={function(){updateStatus(r.id, false);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid '+(isNR?'#DC2626':'#D1D5DB'),background:isNR?'#FEF2F2':'white',color:isNR?'#DC2626':'#6B7280',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>
                     {isNR?'✗ Not Responsive':'Not Responsive'}
                   </button>
-                  {(r.mimetype && r.mimetype.indexOf('pdf') >= 0) ? <button onClick={function(){nav('/redact/' + r.id);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid #1F4E79',background:'white',color:'#1F4E79',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>Redact</button> : null}
+                  {(r.mimetype && r.mimetype.indexOf('pdf') >= 0) ? <button onClick={function(){nav('/redact/' + r.id);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid #1F4E79',background:(matches[r.id]&&matches[r.id].matched)?'#1F4E79':'white',color:(matches[r.id]&&matches[r.id].matched)?'white':'#1F4E79',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>{(matches[r.id]&&matches[r.id].matched)?'Auto-redact':'Redact'}</button> : null}
                   <button onClick={function(){deleteFile(r.id);}} style={{padding:'5px 8px',borderRadius:'6px',border:'1px solid #FCA5A5',background:'white',color:'#DC2626',fontSize:'11px',cursor:'pointer'}}>✕</button>
                 </div>
               </div>
