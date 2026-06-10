@@ -17,6 +17,7 @@ import SourcesPage from './pages/SourcesPage';
 import ARIAReportsPage from './pages/ARIAReportsPage';
 import RedactionRulesPage from './pages/RedactionRulesPage';
 import RedactionWorkspacePage from './pages/RedactionWorkspacePage';
+import StructuredRedactionFieldsPage from './pages/StructuredRedactionFieldsPage';
 import ReleasedRecordsPage from './pages/ReleasedRecordsPage';
 import MassRedactionPage from './pages/MassRedactionPage';
 import PublicPortalPage from './pages/PublicPortalPage';
@@ -60,6 +61,7 @@ export default function App() {
           <Route path="sources" element={<SourcesPage />} />
           <Route path="redaction-rules" element={<RedactionRulesPage />} />
           <Route path="redact/:fileId" element={<RedactionWorkspacePage />} />
+          <Route path="redact-fields/:fileId" element={<StructuredRedactionFieldsPage />} />
           <Route path="released" element={<ReleasedRecordsPage />} />
           <Route path="mass-redaction" element={<MassRedactionPage />} />
           <Route path="config" element={<ConfigurationPage />} />
