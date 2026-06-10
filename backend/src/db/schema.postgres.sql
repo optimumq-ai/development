@@ -291,3 +291,35 @@ CREATE TABLE IF NOT EXISTS fulfilled_records (
   created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
 );
 CREATE INDEX IF NOT EXISTS idx_fulfilled_source ON fulfilled_records(source_file_id);
+
+-- Mass redaction job queue: durable, resumable, chunked batch jobs processed by a background
+-- worker during an after-hours window, drawing from a shared nightly budget across all jobs.
+CREATE TABLE IF NOT EXISTS mass_redaction_jobs (
+  id TEXT PRIMARY KEY,
+  name TEXT,
+  template_id TEXT,
+  kind TEXT DEFAULT 'pages',
+  file_ids TEXT,
+  total_items INTEGER DEFAULT 0,
+  processed_items INTEGER DEFAULT 0,
+  redacted_count INTEGER DEFAULT 0,
+  held_count INTEGER DEFAULT 0,
+  error_count INTEGER DEFAULT 0,
+  chunk_size INTEGER DEFAULT 500,
+  window_start TEXT DEFAULT '18:00',
+  window_end TEXT DEFAULT '06:00',
+  priority INTEGER DEFAULT 100,
+  status TEXT DEFAULT 'queued',
+  error_log TEXT,
+  created_by TEXT,
+  created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS'),
+  updated_at TEXT,
+  last_run_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_mass_jobs_status ON mass_redaction_jobs(status, priority, created_at);
+
+-- Per-day shared compute budget counter (UTC date -> items processed that day across all jobs).
+CREATE TABLE IF NOT EXISTS mass_job_budget (
+  day TEXT PRIMARY KEY,
+  used INTEGER DEFAULT 0
+);

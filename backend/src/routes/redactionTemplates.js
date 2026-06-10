@@ -314,3 +314,12 @@ router.post('/:id/stage', requireAuth, async function(req, res) {
 });
 
 module.exports = router;
+// Expose the engine internals so the mass-job worker reuses the exact same drift-check + apply logic.
+module.exports.engine = {
+  applyTemplateToFile: applyTemplateToFile,
+  safetyScore: safetyScore,
+  fieldsScore: fieldsScore,
+  parseZones: parseZones,
+  parseFieldMap: parseFieldMap,
+  fpColumns: fpColumns
+};

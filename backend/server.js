@@ -53,6 +53,7 @@ app.use('/api/redaction', require('./src/routes/redactionRules'));
 app.use('/api/redaction-jobs', require('./src/routes/redactionJobs'));
 app.use('/api/redaction-templates', require('./src/routes/redactionTemplates'));
 app.use('/api/structured-redaction', require('./src/routes/structuredRedaction'));
+app.use('/api/mass-jobs', require('./src/routes/massJobs'));
 
 app.get('/api/health', function(req, res) {
   res.json({ status: 'ok', version: '1.0.0' });
@@ -130,6 +131,7 @@ async function start() {
   await seedAdmin();
   app.listen(PORT, function() {
     console.log('Optimum Q API running on port ' + PORT);
+    require('./src/services/massJobs').startWorker();
   });
 }
 
