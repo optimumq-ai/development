@@ -198,4 +198,45 @@ router.post('/:id/apply-batch', requireAuth, async function(req, res) {
   res.json({ success: true, template_id: t.id, threshold: threshold, committed: commit, results: results, summary: summary });
 });
 
+// POST /match -> the best active template whose layout matches this file (>= its safety threshold), or none.
+router.post('/match', requireAuth, async function(req, res) {
+  var fileId = (req.body || {}).file_id;
+  if (!fileId) return res.status(400).json({ error: 'file_id is required' });
+  var file = await get('SELECT * FROM request_files WHERE id = ?', [fileId]);
+  if (!file) return res.status(404).json({ error: 'File not found' });
+  try {
+    var pc = await get('SELECT count(*) AS c FROM document_pages WHERE file_id = ?', [fileId]);
+    if (!pc || !pc.c) await docProcessing.processFile(fileId);
+    var tpls = await all("SELECT * FROM layout_profiles WHERE status = 'active'");
+    var best = null;
+    for (var i = 0; i < tpls.length; i++) {
+      var z = parseZones(tpls[i]); if (!z.length) continue;
+      var s = await safetyScore(tpls[i], fileId);
+      var thr = tpls[i].safety_threshold != null ? tpls[i].safety_threshold : 80;
+      if (s.score != null && s.score >= thr && (!best || s.score > best.score)) {
+        best = { id: tpls[i].id, name: tpls[i].name, zone_count: z.length, safety_threshold: thr, score: s.score };
+      }
+    }
+    res.json({ matched: !!best, template: best });
+  } catch (e) { console.error('[template match]', e.message); res.status(500).json({ error: e.message }); }
+});
+
+// POST /:id/stage -> copy this template's zones onto an existing draft job for human review (no release). Body: { job_id, file_id }
+router.post('/:id/stage', requireAuth, async function(req, res) {
+  var t = await get('SELECT * FROM layout_profiles WHERE id = ?', [req.params.id]);
+  if (!t) return res.status(404).json({ error: 'Template not found' });
+  var b = req.body || {};
+  if (!b.job_id || !b.file_id) return res.status(400).json({ error: 'job_id and file_id are required' });
+  var zones = parseZones(t);
+  if (!zones.length) return res.status(400).json({ error: 'Template has no zones' });
+  var created = [];
+  for (var i = 0; i < zones.length; i++) {
+    var z = zones[i]; var zid = uuidv4();
+    await run('INSERT INTO redaction_zones (id, job_id, file_id, page_no, x, y, w, h, rule_id, note, zone_type, created_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
+      [zid, b.job_id, b.file_id, z.page_no || 1, z.x, z.y, z.w, z.h, z.rule_id || null, z.label || null, 'template', req.user.sub]);
+    created.push({ id: zid, job_id: b.job_id, file_id: b.file_id, page_no: z.page_no || 1, x: z.x, y: z.y, w: z.w, h: z.h, rule_id: z.rule_id || null, note: z.label || null, zone_type: 'template' });
+  }
+  res.json({ success: true, template_id: t.id, zones: created });
+});
+
 module.exports = router;

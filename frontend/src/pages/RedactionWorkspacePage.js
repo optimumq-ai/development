@@ -34,6 +34,8 @@ export default function RedactionWorkspacePage() {
   var [labelDraft, setLabelDraft] = useState({});
   var [labelBusy, setLabelBusy] = useState({});
   var dragRef = useRef(null);
+  var [matchTpl, setMatchTpl] = useState(null);
+  var [matchBusy, setMatchBusy] = useState(false);
 
   useEffect(function () { init(); }, [fileId]);
   useEffect(function () {
@@ -70,6 +72,7 @@ export default function RedactionWorkspacePage() {
       setRules(active);
       if (active[0]) setRuleId(active[0].id);
       if (jr.data.pages[0]) loadImg(jr.data.pages[0]);
+      if (!(jr.data.zones || []).length) checkMatch();
     } catch (e) { setError('Could not open the document for redaction. ' + ((e.response && e.response.data && e.response.data.error) || '')); }
     setLoading(false);
   }
@@ -122,6 +125,20 @@ export default function RedactionWorkspacePage() {
       else { setError('No matching rule for "' + label + '". A plain name has no standing exemption; pick a context rule manually if one applies.'); }
     } catch (e) { setError('Rule match failed.'); }
     setLabelBusy(function (m) { var n = Object.assign({}, m); n[zid] = false; return n; });
+  }
+
+  async function checkMatch() {
+    try { var r = await api.post('/redaction-templates/match', { file_id: fileId }); if (r.data && r.data.matched) setMatchTpl(r.data.template); } catch (e) { /* no match, manual redaction */ }
+  }
+  async function applyTemplate() {
+    if (!matchTpl || !job) return;
+    setMatchBusy(true);
+    try {
+      var r = await api.post('/redaction-templates/' + matchTpl.id + '/stage', { job_id: job.id, file_id: fileId });
+      setZones(function (z) { return z.concat(r.data.zones || []); });
+      setMatchTpl(null);
+    } catch (e) { setError('Could not apply the template.'); }
+    setMatchBusy(false);
   }
 
   async function discover() {
@@ -193,6 +210,13 @@ export default function RedactionWorkspacePage() {
       </div>
 
       {error ? <div style={{ background: '#FEF2F2', color: '#991B1B', padding: '10px 20px', fontSize: '13px' }}>{error}</div> : null}
+      {matchTpl ? (
+        <div style={{ background: '#EFF6FF', borderBottom: '1px solid #BFDBFE', padding: '10px 20px', fontSize: '13px', color: '#1E40AF', display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span style={{ flex: 1 }}>Template <strong>{matchTpl.name}</strong> matches this document ({matchTpl.score}%). Apply it to pre-place its redaction boxes for review.</span>
+          <button onClick={applyTemplate} disabled={matchBusy} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '7px', border: 'none', background: matchBusy ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>{matchBusy ? 'Applying...' : 'Apply template'}</button>
+          <button onClick={function () { setMatchTpl(null); }} style={{ flexShrink: 0, padding: '6px 12px', borderRadius: '7px', border: '1px solid #BFDBFE', background: 'white', color: '#1E40AF', fontSize: '12.5px', fontWeight: '600', cursor: 'pointer' }}>Not this form</button>
+        </div>
+      ) : null}
 
       {tplOpen ? (
         <div onClick={function () { if (!savingTpl) setTplOpen(false); }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
