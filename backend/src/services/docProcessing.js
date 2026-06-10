@@ -39,6 +39,29 @@ function parseBboxPage(xml) {
   return { width: W, height: H, words: words };
 }
 
+// Read PNG pixel dimensions straight from the file header (bytes 16-23).
+function pngSize(p) { var b = fs.readFileSync(p); return { w: b.readUInt32BE(16), h: b.readUInt32BE(20) }; }
+
+// OCR a rendered page image with tesseract (TSV output) -> normalized word boxes + text.
+function ocrPage(imgPath) {
+  var dim = pngSize(imgPath);
+  if (!dim.w || !dim.h) return { words: [], text: '' };
+  var tsv = execFileSync('tesseract', [imgPath, 'stdout', '--psm', '3', 'tsv'], { encoding: 'utf8', timeout: 120000, maxBuffer: 20 * 1024 * 1024 });
+  var lines = tsv.split('\n'); var words = []; var parts = []; var lastLineKey = '';
+  for (var i = 1; i < lines.length; i++) {
+    var c = lines[i].split('\t'); if (c.length < 12) continue;
+    if (c[0] !== '5') continue; // level 5 = a word
+    var conf = parseFloat(c[10]); var t = (c[11] || '').trim();
+    if (!t || isNaN(conf) || conf < 35) continue;
+    var left = parseInt(c[6], 10), top = parseInt(c[7], 10), w = parseInt(c[8], 10), h = parseInt(c[9], 10);
+    words.push({ t: t, x: +(left / dim.w).toFixed(5), y: +(top / dim.h).toFixed(5), w: +(w / dim.w).toFixed(5), h: +(h / dim.h).toFixed(5) });
+    var lineKey = c[2] + '-' + c[3] + '-' + c[4];
+    if (lastLineKey && lineKey !== lastLineKey) parts.push('\n');
+    parts.push(t); lastLineKey = lineKey;
+  }
+  return { words: words, text: parts.join(' ').replace(/ ?\n ?/g, '\n') };
+}
+
 async function processFile(fileId) {
   var file = await get('SELECT * FROM request_files WHERE id = ?', [fileId]);
   if (!file) throw new Error('file not found');
@@ -74,20 +97,28 @@ async function processFile(fileId) {
     var plain = '';
     try { plain = execFileSync('pdftotext', ['-f', String(p), '-l', String(p), src, '-'], { encoding: 'utf8', timeout: 60000 }); } catch (e) { plain = ''; }
 
+    // No native text layer but a rendered image exists -> scanned page; OCR it for word boxes.
+    var ocrUsed = 0;
+    if (parsed.words.length === 0 && hasImg) {
+      try { var o = ocrPage(imgPath); if (o.words.length) { parsed.words = o.words; plain = o.text; ocrUsed = 1; } } catch (e) { /* OCR failed; leave page wordless */ }
+    }
+    var hasWords = parsed.words.length > 0;
+
     var imgW = Math.round(parsed.width * RENDER_DPI / 72);
     var imgH = Math.round(parsed.height * RENDER_DPI / 72);
     var relImg = hasImg ? path.relative(UPLOAD_DIR, imgPath) : null;
 
     await run(
-      'INSERT INTO document_pages (id, file_id, request_id, page_no, width, height, image_path, image_width, image_height, words, text, has_text_layer) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
-      [uuidv4(), fileId, file.request_id, p, parsed.width, parsed.height, relImg, imgW, imgH, JSON.stringify(parsed.words), plain, parsed.words.length > 0 ? 1 : 0]
+      'INSERT INTO document_pages (id, file_id, request_id, page_no, width, height, image_path, image_width, image_height, words, text, has_text_layer, ocr) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)',
+      [uuidv4(), fileId, file.request_id, p, parsed.width, parsed.height, relImg, imgW, imgH, JSON.stringify(parsed.words), plain, hasWords ? 1 : 0, ocrUsed]
     );
-    pages.push({ page_no: p, words: parsed.words.length, has_image: hasImg, has_text_layer: parsed.words.length > 0 });
+    pages.push({ page_no: p, words: parsed.words.length, has_image: hasImg, has_text_layer: hasWords, ocr: ocrUsed === 1 });
   }
 
-  // A page with an image but no text layer is almost certainly scanned -> needs OCR (tesseract), added in a later phase.
+  // Pages still without words even after the OCR attempt (blank or unreadable scans).
   var needsOcr = pages.some(function (pg) { return pg.has_image && !pg.has_text_layer; });
-  return { fileId: fileId, pageCount: pageCount, needsOcr: needsOcr, pages: pages };
+  var ocrPages = pages.filter(function (pg) { return pg.ocr; }).length;
+  return { fileId: fileId, pageCount: pageCount, needsOcr: needsOcr, ocrPages: ocrPages, pages: pages };
 }
 
 module.exports = { processFile: processFile, PROCESSED_DIR: PROCESSED_DIR, UPLOAD_DIR: UPLOAD_DIR };

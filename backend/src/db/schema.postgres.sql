@@ -153,6 +153,7 @@ CREATE TABLE IF NOT EXISTS document_pages (
   words TEXT,
   text TEXT,
   has_text_layer INTEGER DEFAULT 0,
+  ocr INTEGER DEFAULT 0,
   created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
 );
 CREATE INDEX IF NOT EXISTS idx_document_pages_file ON document_pages(file_id);
