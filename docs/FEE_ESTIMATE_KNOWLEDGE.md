@@ -144,6 +144,12 @@ figures or statute language:
       established or sanctioned method anywhere? source? how are tiers defined and priced?
 - [ ] How COMPETITOR PRR platforms handle fee estimates (auto vs. manual) and their workflow for
       estimate -> deposit -> processing. Do any auto-generate estimates, especially from content?
+- [ ] Estimate vs. actual GRANULARITY / ROUNDING: full / half / quarter hour vs. actual minutes;
+      round up / down / nearest; minimum labor increments. Per-state norms + statutory requirements.
+- [ ] In-flight estimate REVISION rules: when allowed; does an increase force re-consent / new
+      deposit / work pause; how are decreases treated.
+- [ ] Estimate VALIDITY / EXPIRATION and the deposit-payment window before a request is abandoned.
+- [ ] NOT-TO-EXCEED / guaranteed-maximum estimate rules: which jurisdictions, what constraints.
 - [ ] Current per-page, labor, and programming rates by state (these change; verify year).
 - [ ] Estimate-notification and deposit thresholds across a sample of real cities (10-20).
 - [ ] Over/under reconciliation legal requirements (where refunds are mandatory vs. optional).
@@ -193,3 +199,33 @@ over/under reconciliation; (c) continuously improving estimate profiles (feeds S
 - Federal: DOJ Office of Information Policy (OIP) guidance; FOIA Advisory Committee reports.
 - PRR platform vendor docs/webinars: Granicus/GovQA, NextRequest, JustFOIA/WebQA, Veritone.
 - MuckRock (real request data and agency fee behavior).
+
+---
+
+## 12. Configurable variants the engine must support (axes of configurability + research targets)
+
+The engine must be configurable across ALL of these. This list is also the research checklist:
+for each axis, find the governing authority and the range of real-world settings.
+
+A. **Estimate-creation method** (per record type): human-expert seed | sampled average |
+   historical actuals | scoping search | per-request manual.  -> which are legally sanctioned?
+B. **Regulatory authority per jurisdiction**: the statute / AG opinion / court ruling governing
+   estimates, deposits, refunds, average-based estimation, disclosure. (jurisdiction_profiles
+   already stores statute_name + statute_citation - hang this here.)
+C. **Deposit model**: none | flat | % of estimate | tiered thresholds; threshold $; refundable?
+D. **Over/under (final vs estimate)**: refund overage | agency absorbs | pause-and-bill-more |
+   not-to-exceed guarantee | keep deposit as floor.  -> where is each mandatory vs optional?
+E. **In-flight estimate revision**: when may an estimate be revised mid-process? does an INCREASE
+   require re-consent / re-acknowledgement / a new deposit / pausing work? what about a DECREASE?
+F. **Redaction complexity definition**: number of tiers (e.g., simple/medium/complex), criteria
+   defining each tier, per-tier time formula (minutes per page).  -> sanctioned method anywhere?
+G. **Granularity & rounding** (invisible until you compute a real bill - must be configurable):
+   - Estimate labor unit: full hour | half hour | quarter hour | actual minutes.
+   - Actual-cost labor rounding: up | down | nearest; to hour | half | quarter | minute.
+   - Minimum billing increment for labor (e.g., min 15 min); may differ estimate vs. actual.
+   - Page counting: per sheet | per side (main spec Group 4).
+   - Money rounding precision (to the cent).
+H. **Estimate validity / expiration**: does an estimate expire? how long does the requestor have
+   to pay the deposit before the request is abandoned/closed? (workflow dimension)
+I. **Is the scoping/estimate search itself billable?** (also in research queue)
+J. **Always-free record types** short-circuit to $0 (record-type flag; main spec Open Q 5).
