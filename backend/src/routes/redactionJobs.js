@@ -116,6 +116,17 @@ router.post('/jobs/:jobId/submit', requireAuth, async function(req, res) {
   res.json({ success: true, review_stage: 'pending_review' });
 });
 
+// Begin review (reviewer opens a submitted doc -> moves Awaiting review to Review in process).
+router.post('/jobs/:jobId/begin-review', requireAuth, async function(req, res) {
+  var job = await get('SELECT * FROM redaction_jobs WHERE id = ?', [req.params.jobId]);
+  if (!job) return res.status(404).json({ error: 'Job not found' });
+  if (job.review_stage === 'pending_review') {
+    await run("UPDATE redaction_jobs SET review_stage = 'in_review', reviewed_by = ?, updated_at = datetime('now') WHERE id = ?", [req.user.name || req.user.sub, req.params.jobId]);
+    return res.json({ success: true, review_stage: 'in_review' });
+  }
+  res.json({ success: true, review_stage: job.review_stage });
+});
+
 // Send a job back to editing (reviewer returns it to the redactor).
 router.post('/jobs/:jobId/return', requireAuth, async function(req, res) {
   var job = await get('SELECT * FROM redaction_jobs WHERE id = ?', [req.params.jobId]);

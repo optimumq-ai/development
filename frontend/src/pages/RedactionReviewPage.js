@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
@@ -10,9 +10,10 @@ var CAT_COLORS = {
 var ELEVATED = ['SUPERVISOR', 'DIRECTOR', 'SYSTEM_ADMIN', 'DEPT_MANAGER'];
 function pct(v) { return (v * 100) + '%'; }
 function stagePill(stage) {
-  if (stage === 'pending_review') return { c: '#92400E', b: '#FEF3C7', label: 'Awaiting approval' };
+  if (stage === 'pending_review') return { c: '#92400E', b: '#FEF3C7', label: 'Awaiting review' };
+  if (stage === 'in_review') return { c: '#1E40AF', b: '#DBEAFE', label: 'Review in process' };
   if (stage === 'released') return { c: '#03543F', b: '#DEF7EC', label: 'Released' };
-  return { c: '#374151', b: '#F3F4F6', label: 'In review' };
+  return { c: '#374151', b: '#F3F4F6', label: 'In editing' };
 }
 function navBtn(dis) { return { padding: '6px 12px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: dis ? '#D1D5DB' : '#374151', fontSize: '12.5px', fontWeight: '600', cursor: dis ? 'default' : 'pointer' }; }
 function primaryBtn(dis) { return { width: '100%', padding: '11px', borderRadius: '8px', border: 'none', background: dis ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13.5px', fontWeight: '700', cursor: dis ? 'default' : 'pointer' }; }
@@ -37,6 +38,11 @@ export default function RedactionReviewPage() {
   var [applying, setApplying] = useState(false);
   var [result, setResult] = useState(null);
   var [stage, setStage] = useState('editing');
+  var [adding, setAdding] = useState(false);
+  var [pendingRule, setPendingRule] = useState('');
+  var [draft, setDraft] = useState(null);
+  var wrapRef = useRef(null);
+  var drawRef = useRef(null);
 
   useEffect(function () { init(); }, [fileId]);
   async function init() {
@@ -44,10 +50,14 @@ export default function RedactionReviewPage() {
     try {
       var jr = await api.post('/redaction-jobs/file/' + fileId + '/job');
       setJob(jr.data.job); setPages(jr.data.pages || []); setZones(jr.data.zones || []);
-      setStage((jr.data.job && jr.data.job.review_stage) || 'editing');
+      var st = (jr.data.job && jr.data.job.review_stage) || 'editing';
       var rr = await api.get('/redaction/rules');
       setRules((rr.data.rules || []).filter(function (r) { return r.approval_status === 'approved' && r.is_active; }));
       if ((jr.data.pages || []).length) loadImg(jr.data.pages[0]);
+      if (st === 'pending_review') {
+        try { var br = await api.post('/redaction-jobs/jobs/' + jr.data.job.id + '/begin-review'); st = (br.data && br.data.review_stage) || 'in_review'; } catch (e) {}
+      }
+      setStage(st);
     } catch (e) { setError('Could not load this document for review.'); }
     setLoading(false);
   }
@@ -68,7 +78,6 @@ export default function RedactionReviewPage() {
   var pageZones = zones.filter(function (z) { return page && z.page_no === page.page_no; });
   function ruleOf(id) { return rules.filter(function (r) { return r.id === id; })[0]; }
   function catColor(id) { var r = ruleOf(id); return (r && CAT_COLORS[r.category]) || '#374151'; }
-  function labelOf(z) { var r = ruleOf(z.rule_id); return r ? (r.category_label || r.title) : 'Redaction (no rule)'; }
   function isDropped(z) { return z.review_state === 'rejected'; }
   var kept = zones.filter(function (z) { return !isDropped(z); }).length;
   var dropped = zones.length - kept;
@@ -78,6 +87,34 @@ export default function RedactionReviewPage() {
     setZones(function (zs) { return zs.map(function (x) { return x.id === z.id ? Object.assign({}, x, { review_state: ns }) : x; }); });
     try { await api.patch('/redaction-jobs/zones/' + z.id, { review_state: ns }); } catch (e) {}
   }
+  async function changeRule(z, ruleId) {
+    setZones(function (zs) { return zs.map(function (x) { return x.id === z.id ? Object.assign({}, x, { rule_id: ruleId || null }) : x; }); });
+    try { await api.patch('/redaction-jobs/zones/' + z.id, { rule_id: ruleId || null }); } catch (e) {}
+  }
+  async function deleteZone(z) {
+    setZones(function (zs) { return zs.filter(function (x) { return x.id !== z.id; }); });
+    try { await api.delete('/redaction-jobs/zones/' + z.id); } catch (e) {}
+  }
+
+  function relCoords(e) {
+    var rect = wrapRef.current.getBoundingClientRect();
+    var x = (e.clientX - rect.left) / rect.width;
+    var y = (e.clientY - rect.top) / rect.height;
+    return { x: Math.max(0, Math.min(1, x)), y: Math.max(0, Math.min(1, y)) };
+  }
+  function onDown(e) { if (!adding || !wrapRef.current) return; e.preventDefault(); var p = relCoords(e); drawRef.current = { sx: p.x, sy: p.y }; setDraft({ x: p.x, y: p.y, w: 0, h: 0 }); }
+  function onMove(e) { if (!adding || !drawRef.current) return; var p = relCoords(e); var s = drawRef.current; setDraft({ x: Math.min(s.sx, p.x), y: Math.min(s.sy, p.y), w: Math.abs(p.x - s.sx), h: Math.abs(p.y - s.sy) }); }
+  async function onUp() {
+    if (!adding || !drawRef.current) return;
+    var d = draft; drawRef.current = null; setDraft(null);
+    if (d && d.w > 0.006 && d.h > 0.006 && page) {
+      try {
+        var r = await api.post('/redaction-jobs/jobs/' + job.id + '/zones', { page_no: page.page_no, x: d.x, y: d.y, w: d.w, h: d.h, rule_id: pendingRule || null, zone_type: 'manual', review_state: 'approved' });
+        var z = r.data.zone; setZones(function (zs) { return zs.concat([z]); });
+      } catch (e) {}
+    }
+  }
+
   async function finalize() {
     if (!window.confirm('Release this record? ' + kept + ' redaction(s) will be applied' + (dropped ? ' and ' + dropped + ' dropped' : '') + ', and the redacted copy will be published to Public Ready.')) return;
     setApplying(true); setError('');
@@ -87,16 +124,8 @@ export default function RedactionReviewPage() {
     } catch (e) { setError('Release failed. ' + ((e.response && e.response.data && e.response.data.error) || '')); }
     setApplying(false);
   }
-  async function submit() {
-    setBusy(true);
-    try { await api.post('/redaction-jobs/jobs/' + job.id + '/submit'); setStage('pending_review'); } catch (e) {}
-    setBusy(false);
-  }
-  async function sendBack() {
-    setBusy(true);
-    try { await api.post('/redaction-jobs/jobs/' + job.id + '/return'); setStage('editing'); } catch (e) {}
-    setBusy(false);
-  }
+  async function submit() { setBusy(true); try { await api.post('/redaction-jobs/jobs/' + job.id + '/submit'); setStage('pending_review'); } catch (e) {} setBusy(false); }
+  async function sendBack() { setBusy(true); try { await api.post('/redaction-jobs/jobs/' + job.id + '/return'); setStage('editing'); } catch (e) {} setBusy(false); }
 
   if (loading) return <div style={{ padding: '40px', textAlign: 'center', color: '#9CA3AF' }}>Loading review...</div>;
   if (error && !job) return <div style={{ padding: '40px', textAlign: 'center', color: '#9B1C1C' }}>{error}</div>;
@@ -110,7 +139,7 @@ export default function RedactionReviewPage() {
         <div style={{ fontSize: '17px', fontWeight: '700', color: '#111' }}>Redaction Review</div>
         <span style={{ fontSize: '11px', fontWeight: '700', padding: '2px 9px', borderRadius: '999px', color: sp.c, background: sp.b }}>{sp.label}</span>
         <span style={{ flex: 1 }} />
-        <button onClick={function () { nav('/redact/' + fileId); }} style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Edit boxes in workspace</button>
+        <button onClick={function () { nav('/redact/' + fileId); }} style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '12.5px', fontWeight: '600', cursor: 'pointer' }}>Open full workspace</button>
         {pages.length > 1 ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <button onClick={function () { gotoPage(pageIdx - 1); }} disabled={pageIdx === 0} style={navBtn(pageIdx === 0)}>Prev</button>
@@ -129,32 +158,52 @@ export default function RedactionReviewPage() {
             </div>
           </div>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: '12px', fontWeight: '700', color: '#1F4E79', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '.04em' }}>Proposed redactions</div>
-            <div style={{ position: 'relative', background: 'white', border: '1px solid #E5E7EB', borderRadius: '6px', overflow: 'hidden' }}>
-              {imgSrc ? <img src={imgSrc} alt="redacted" style={{ width: '100%', display: 'block' }} /> : <div style={{ aspectRatio: '8.5/11', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9CA3AF' }}>Loading...</div>}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+              <div style={{ fontSize: '12px', fontWeight: '700', color: '#1F4E79', textTransform: 'uppercase', letterSpacing: '.04em' }}>Proposed redactions</div>
+              {adding ? <span style={{ fontSize: '11px', color: '#1F4E79', fontWeight: '600' }}>Drag on the page to draw a box</span> : null}
+            </div>
+            <div ref={wrapRef} onMouseDown={onDown} onMouseMove={onMove} onMouseUp={onUp} onMouseLeave={onUp} style={{ position: 'relative', background: 'white', border: '1px solid ' + (adding ? '#1F4E79' : '#E5E7EB'), borderRadius: '6px', overflow: 'hidden', cursor: adding ? 'crosshair' : 'default', userSelect: 'none' }}>
+              {imgSrc ? <img src={imgSrc} alt="redacted" draggable={false} style={{ width: '100%', display: 'block', pointerEvents: 'none' }} /> : <div style={{ aspectRatio: '8.5/11', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#9CA3AF' }}>Loading...</div>}
               {imgSrc ? pageZones.map(function (z) {
                 var hc = catColor(z.rule_id);
                 if (isDropped(z)) {
-                  return <div key={z.id} style={{ position: 'absolute', left: pct(z.x), top: pct(z.y), width: pct(z.w), height: pct(z.h), border: '1.5px dashed #DC2626', background: 'rgba(220,38,38,.08)', boxSizing: 'border-box', borderRadius: '2px' }} />;
+                  return <div key={z.id} style={{ position: 'absolute', left: pct(z.x), top: pct(z.y), width: pct(z.w), height: pct(z.h), border: '1.5px dashed #DC2626', background: 'rgba(220,38,38,.08)', boxSizing: 'border-box', borderRadius: '2px', pointerEvents: adding ? 'none' : 'auto' }} />;
                 }
                 return (
-                  <div key={z.id} style={{ position: 'absolute', left: pct(z.x), top: pct(z.y), width: pct(z.w), height: pct(z.h), background: 'rgba(0,0,0,.82)', border: '1px solid ' + hc, boxSizing: 'border-box', display: 'flex', alignItems: 'center' }}>
+                  <div key={z.id} style={{ position: 'absolute', left: pct(z.x), top: pct(z.y), width: pct(z.w), height: pct(z.h), background: 'rgba(0,0,0,.82)', border: '1px solid ' + hc, boxSizing: 'border-box', display: 'flex', alignItems: 'center', pointerEvents: adding ? 'none' : 'auto' }}>
                     <span style={{ marginLeft: '2px', width: '15px', height: '15px', minWidth: '15px', borderRadius: '50%', background: 'white', color: '#111', fontSize: '9px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center', lineHeight: 1 }}>{numById[z.id]}</span>
                   </div>
                 );
               }) : null}
+              {draft ? <div style={{ position: 'absolute', left: pct(draft.x), top: pct(draft.y), width: pct(draft.w), height: pct(draft.h), border: '2px dashed #1F4E79', background: 'rgba(31,78,121,.12)', boxSizing: 'border-box', pointerEvents: 'none' }} /> : null}
             </div>
           </div>
         </div>
 
-        <div style={{ width: '320px', flexShrink: 0, background: 'white', borderLeft: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <div style={{ width: '330px', flexShrink: 0, background: 'white', borderLeft: '1px solid #E5E7EB', display: 'flex', flexDirection: 'column', minHeight: 0 }}>
           <div style={{ padding: '14px 18px', borderBottom: '1px solid #F3F4F6' }}>
             <div style={{ fontSize: '12px', fontWeight: '700', color: '#374151' }}>{zones.length} redaction(s) proposed</div>
             <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '3px' }}>{kept} to apply{dropped ? ' \u00b7 ' + dropped + ' dropped' : ''}</div>
           </div>
+
+          <div style={{ padding: '10px 16px', borderBottom: '1px solid #F3F4F6' }}>
+            {adding ? (
+              <div>
+                <div style={{ fontSize: '11.5px', color: '#6B7280', marginBottom: '6px' }}>Exemption for the new box:</div>
+                <select value={pendingRule} onChange={function (e) { setPendingRule(e.target.value); }} style={{ width: '100%', padding: '7px', borderRadius: '7px', border: '1px solid #E5E7EB', fontSize: '12px', marginBottom: '8px' }}>
+                  <option value="">No rule (assign later)</option>
+                  {rules.map(function (r) { return <option key={r.id} value={r.id}>{r.title}</option>; })}
+                </select>
+                <button onClick={function () { setAdding(false); setDraft(null); }} style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px solid #1F4E79', background: '#EFF6FF', color: '#1F4E79', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Done adding</button>
+              </div>
+            ) : (
+              <button onClick={function () { setAdding(true); }} style={{ width: '100%', padding: '8px', borderRadius: '8px', border: '1px dashed #1F4E79', background: 'white', color: '#1F4E79', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>+ Add redaction</button>
+            )}
+          </div>
+
           <div style={{ flex: 1, overflowY: 'auto', padding: '12px 16px' }}>
             {ordered.length === 0 ? (
-              <div style={{ fontSize: '13px', color: '#9CA3AF', padding: '10px 0', lineHeight: 1.5 }}>No redactions proposed yet. Use "Edit boxes in workspace" to add them, or run AI detection there, then come back to review.</div>
+              <div style={{ fontSize: '13px', color: '#9CA3AF', padding: '10px 0', lineHeight: 1.5 }}>No redactions yet. Use "+ Add redaction" to draw one, or run AI detection in the full workspace, then come back.</div>
             ) : ordered.map(function (z) {
               var onPage = page && z.page_no === page.page_no;
               var drop = isDropped(z);
@@ -163,9 +212,13 @@ export default function RedactionReviewPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
                     <span style={{ width: '17px', height: '17px', minWidth: '17px', borderRadius: '50%', background: drop ? '#9CA3AF' : '#111', color: 'white', fontSize: '10px', fontWeight: '700', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>{numById[z.id]}</span>
                     <span style={{ width: '10px', height: '10px', borderRadius: '2px', background: catColor(z.rule_id), flexShrink: 0 }} />
-                    <span style={{ fontSize: '12px', color: '#374151', flex: 1, textDecoration: drop ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{labelOf(z)}</span>
-                    <span style={{ fontSize: '11px', color: '#9CA3AF', flexShrink: 0 }}>p{z.page_no}</span>
+                    <span style={{ fontSize: '11px', color: '#9CA3AF', flex: 1, textAlign: 'right' }}>p{z.page_no}</span>
+                    <button onClick={function (e) { e.stopPropagation(); deleteZone(z); }} title="Delete box" style={{ border: 'none', background: 'transparent', color: '#9CA3AF', fontSize: '15px', fontWeight: '700', cursor: 'pointer', lineHeight: 1, padding: '0 2px' }}>&times;</button>
                   </div>
+                  <select value={z.rule_id || ''} onClick={function (e) { e.stopPropagation(); }} onChange={function (e) { changeRule(z, e.target.value); }} style={{ width: '100%', padding: '5px 6px', borderRadius: '6px', border: '1px solid #E5E7EB', fontSize: '11.5px', marginBottom: '6px', color: z.rule_id ? '#111' : '#9B1C1C', textDecoration: drop ? 'line-through' : 'none' }}>
+                    <option value="">No rule (needs one)</option>
+                    {rules.map(function (r) { return <option key={r.id} value={r.id}>{r.title}</option>; })}
+                  </select>
                   <div style={{ display: 'flex', gap: '6px' }}>
                     <button onClick={function (e) { e.stopPropagation(); setZoneDecision(z, false); }} style={{ flex: 1, padding: '5px', borderRadius: '6px', border: '1px solid ' + (!drop ? '#1F4E79' : '#E5E7EB'), background: !drop ? '#EFF6FF' : 'white', color: !drop ? '#1F4E79' : '#6B7280', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>Keep</button>
                     <button onClick={function (e) { e.stopPropagation(); setZoneDecision(z, true); }} style={{ flex: 1, padding: '5px', borderRadius: '6px', border: '1px solid ' + (drop ? '#DC2626' : '#E5E7EB'), background: drop ? '#FEF2F2' : 'white', color: drop ? '#DC2626' : '#6B7280', fontSize: '11px', fontWeight: '700', cursor: 'pointer' }}>Drop</button>
@@ -190,10 +243,10 @@ export default function RedactionReviewPage() {
                 ) : (
                   <button onClick={submit} disabled={busy || stage === 'pending_review'} style={primaryBtn(busy || stage === 'pending_review')}>{stage === 'pending_review' ? 'Submitted for approval' : (busy ? 'Submitting...' : 'Submit for approval')}</button>
                 )}
-                {canFinalize && stage !== 'pending_review' ? (
+                {canFinalize ? (
                   <button onClick={submit} disabled={busy} style={Object.assign({ marginTop: '8px' }, secondaryBtn())}>Send for legal review</button>
                 ) : null}
-                {canFinalize && stage === 'pending_review' ? (
+                {canFinalize && (stage === 'pending_review' || stage === 'in_review') ? (
                   <button onClick={sendBack} disabled={busy} style={Object.assign({ marginTop: '8px' }, secondaryBtn())}>Send back to editing</button>
                 ) : null}
                 <p style={{ fontSize: '11.5px', color: '#9CA3AF', margin: '10px 0 0', lineHeight: 1.5 }}>{canFinalize ? 'Dropped boxes are not applied. Releasing publishes the redacted copy and logs the legal basis for each redaction.' : 'An authorized approver will review and release this record.'}</p>
