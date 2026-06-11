@@ -140,6 +140,8 @@ figures or statute language:
 - [ ] Legal authority for HUMAN-EXPERT / experience-based estimates applied to a record type.
 - [ ] Disclosure-of-basis requirements (must an estimate state it was based on averages or on
       staff experience? required wording? which states / federal?).
+- [ ] Redaction-effort estimation by COMPLEXITY TIER (simple / medium / complex): is this an
+      established or sanctioned method anywhere? source? how are tiers defined and priced?
 - [ ] Current per-page, labor, and programming rates by state (these change; verify year).
 - [ ] Estimate-notification and deposit thresholds across a sample of real cities (10-20).
 - [ ] Over/under reconciliation legal requirements (where refunds are mandatory vs. optional).
