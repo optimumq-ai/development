@@ -142,9 +142,54 @@ figures or statute language:
       staff experience? required wording? which states / federal?).
 - [ ] Redaction-effort estimation by COMPLEXITY TIER (simple / medium / complex): is this an
       established or sanctioned method anywhere? source? how are tiers defined and priced?
+- [ ] How COMPETITOR PRR platforms handle fee estimates (auto vs. manual) and their workflow for
+      estimate -> deposit -> processing. Do any auto-generate estimates, especially from content?
 - [ ] Current per-page, labor, and programming rates by state (these change; verify year).
 - [ ] Estimate-notification and deposit thresholds across a sample of real cities (10-20).
 - [ ] Over/under reconciliation legal requirements (where refunds are mandatory vs. optional).
 - [ ] Rules on charging for the scoping/estimate work itself (is the estimate search billable?).
 - [ ] Self-service/portal fee law (CA CPRA parity; IL debate) - confirm current state.
 - [ ] Best-practice estimate templates/notices used by well-run agencies (examples to model).
+
+---
+
+## 10. Workflow integration - the REAL driver of estimate automation
+
+The point of automating estimates is FLOW, not just accuracy: maximize the share of requests that
+move forward WITHOUT bouncing (search -> back up to build an estimate -> send to requestor -> wait
+for deposit -> resume work already partly done). Each bounce is a stall and a re-context cost.
+
+Self-service / selected-records auto-estimate path (high-volume, low-friction case):
+1. Requestor selects record(s) on the portal. Page count is READ from the files (known, not estimated).
+2. Record type has an estimate PROFILE -> price directly (duplication/media exact; redaction from profile).
+3. No profile (or no matching record type yet) -> AI scans the selected records for exempt content,
+   assigns a redaction complexity tier (simple/medium/complex), estimates redaction labor by a
+   per-tier per-page formula (e.g., simple = N min/page, medium = M min/page). [VERIFY method - research queue]
+4. NON-HUMAN stagegate: estimate auto-sent to requestor; the request parks here awaiting deposit.
+5. EXCEPTION -> human: if AI rates redaction COMPLEX, or there is no record type / no profile and
+   confidence is low -> route to a human for manual estimate creation (a process still to define).
+6. Deposit paid (e.g., 50%) -> request advances to "processing / awaiting final payment".
+7. On completion -> actuals (see Section 11) are written into the record type's estimate PROFILE,
+   so the next request of this type needs no human. If no record type existed, this may also be
+   where one is created. [CONFIRM whether request-completion can create a record type today.]
+
+This is a state machine, not a pile of rules: Awaiting-estimate -> (auto OR human) -> Estimate-sent/
+awaiting-deposit -> Deposit-paid/processing -> Awaiting-final-payment -> Closed (+ profile updated).
+
+## 11. Actuals capture - the work timer (carry forward from the Replit build)
+
+A timer that runs while a user works a task and feeds REAL labor minutes into actuals. Serves three
+purposes: (a) actual-cost compliance where states require it (refunds / not-to-exceed); (b) the
+over/under reconciliation; (c) continuously improving estimate profiles (feeds Section 7a).
+- Starts when a user opens a task (record SEARCH; also REDACTION; also REDACTION REVIEW).
+- Pauses on window blur / machine idle; resumes on refocus.
+- On task submit: shows computed elapsed time and offers a manual ADJUSTMENT (e.g., time spent
+  off-screen discussing the search). Recommend requiring a short reason for any adjustment.
+- Captured per task type -> actual labor by component, per request/component.
+
+## Where to look for best practices (to mine + verify in the research pass)
+- American Society of Access Professionals (ASAP); NAGARA (records administrators association).
+- State FOIA councils / public-access ombudsmen / AG public-records guidance (per target state).
+- Federal: DOJ Office of Information Policy (OIP) guidance; FOIA Advisory Committee reports.
+- PRR platform vendor docs/webinars: Granicus/GovQA, NextRequest, JustFOIA/WebQA, Veritone.
+- MuckRock (real request data and agency fee behavior).
