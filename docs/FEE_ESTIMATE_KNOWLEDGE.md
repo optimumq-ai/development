@@ -88,6 +88,34 @@ Store not just an average but a SPREAD (range/variance) and sample size per reco
   search (count matching items x average pages/item).
 - Also force human/scoping review for high-dollar, unusually large, or novel-type requests.
 
+### 7d. Human-expert estimate applied at the PROFILE level (not per request)
+Key reframing (Kevin, 2026-06-10): a human expert's estimate should seed the record-type
+PROFILE once, not be re-created per request. Example - "home building permit" record type:
+an experienced clerk seeds typical values (1 hr search; ~20 oversized blueprint pages; 3
+standard permit pages; 1 blueprint shipping tube). Every future request of that type auto-
+estimates from that seed - human effort spent ONCE per type, then reused (same philosophy as
+reusable redaction templates). It is not a separate fallback path; it is one more SOURCE that
+populates the same profile, alongside historical actuals (7a) and sampling (7b).
+
+### 7e. Profiles store QUANTITIES, not dollars (wherever possible)
+A profile captures expected QUANTITIES typed by fee component / copy-category (search hours,
+redaction hours, standard pages, oversized/specialty pages, color pages, media items), NOT
+pre-computed dollar amounts. The engine then prices those quantities with the CITY'S current
+rate config. Benefits: (1) the estimate stays correct when a city updates a rate; (2) the same
+seeded profile is portable across cities with different rates - keeping the engine generic.
+Capture a flat dollar ONLY for true pass-throughs with no rate (e.g., the $3 blueprint tube).
+So George seeds "20 oversized pages + 3 standard pages + 1 search hour + 1 tube ($3)", and the
+engine applies each city's oversized / standard / labor rates.
+
+### 7f. Provenance, disclosure & safeguards
+- Each estimate's feeContext stamps its basis: source (historical | sampled | human-expert),
+  who/when seeded, confidence/variance. Supports disclosure to the requestor where law requires
+  it (disclosure wording configurable per jurisdiction).
+- Profile = DEFAULT estimate. Safeguards that keep it sound: (1) reconcile to actual at delivery
+  under the over/under policy; (2) allow per-request OVERRIDE for known atypicals (e.g., a
+  mansion with 80 blueprint pages) via the adjustment log; (3) optional drift-check that compares
+  accumulating actuals to the seed and suggests a profile update over time.
+
 ### The estimate-automation ladder (cheapest first)
 1. Historical actuals for the exact record type (best for consistent types).
 2. Sampled average for the type (from discovery).
@@ -109,6 +137,9 @@ This is what prevents splitting a request to dodge the per-request maximum.
 These need a dedicated web-research pass with citations; do not rely on memory for current
 figures or statute language:
 - [ ] Per-state statutory language explicitly permitting AVERAGE-BASED / good-faith estimates.
+- [ ] Legal authority for HUMAN-EXPERT / experience-based estimates applied to a record type.
+- [ ] Disclosure-of-basis requirements (must an estimate state it was based on averages or on
+      staff experience? required wording? which states / federal?).
 - [ ] Current per-page, labor, and programming rates by state (these change; verify year).
 - [ ] Estimate-notification and deposit thresholds across a sample of real cities (10-20).
 - [ ] Over/under reconciliation legal requirements (where refunds are mandatory vs. optional).
