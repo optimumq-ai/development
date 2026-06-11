@@ -4,7 +4,8 @@
 PATTERNS for the *estimate* side of the fee engine. The specific dollar figures and statute
 specifics below are illustrative - drawn from the uploaded Fee Engine document and general
 knowledge - and MUST be verified against current primary sources in a dedicated web-research
-pass before being relied on operationally. This file is the home for that research as gathered.
+pass before being relied on operationally. This file is the home for that research as gathered. See Section 13 for Research Pass 1 findings
+(ChatGPT, 2026-06-11; citations specific but NOT yet independently verified).
 
 ---
 
@@ -229,3 +230,98 @@ H. **Estimate validity / expiration**: does an estimate expire? how long does th
    to pay the deposit before the request is abandoned/closed? (workflow dimension)
 I. **Is the scoping/estimate search itself billable?** (also in research queue)
 J. **Always-free record types** short-circuit to $0 (record-type flag; main spec Open Q 5).
+
+---
+
+## 13. Research findings - Pass 1 (ChatGPT, 2026-06-11) - CITATIONS TO VERIFY
+
+Provenance: ONE AI research pass. Statute citations are specific but NOT yet independently
+verified. Treat as strong leads to confirm against primary sources, not as settled law.
+
+### Design-relevant CORRECTIONS to earlier assumptions in this doc
+1. No statutory "margin of error" tolerance was found. The legal cover for estimate inaccuracy
+   is RECONCILIATION (refund / additional invoice / payment-before-release), NOT a tolerated
+   percentage error. => the engine's safety net is the reconcile-to-actual step, not a "good-faith
+   margin." (Revises Section 2.)
+2. Averages/sampling (7b) and experience-based estimates (7d) are common in PRACTICE but have
+   sparse legal blessing (strongest: a Colorado community-college CORA "rule of thumb", ~20
+   emails/hour). => build both as CONFIGURABLE methods gated by a per-jurisdiction policy note +
+   legal-review flag + audit trail; do NOT assume they are lawful everywhere by default.
+3. "Agency absorbs the overage" is nowhere a legal REQUIREMENT - it is optional policy. (Keep it
+   as one configurable option among several.)
+4. The redaction simple/medium/complex tier (Sections 7c, 10) is NOT a sanctioned legal method in
+   any priority jurisdiction. => build it ONLY as an optional INTERNAL estimate method with a
+   visible disclaimer and audit trail, always reconciled to actual time.
+
+### STRATEGIC finding (competitors)
+No competitor platform publicly documents AUTO-GENERATING estimates from record content (page
+counts + redaction effort). Most-tooled on fees: JustFOIA/WebQA (payment portal: send estimates,
+track hourly rates + employee time + materials, invoice, collect cards) - but workflow-assisted /
+manually configured, not content-derived. NextRequest/CivicPlus: end-to-end workflow, agency fee
+policies shown, no documented content-based auto-estimation. Granicus/GovQA: no public estimate-
+workflow detail found. Veritone: positioned around AI redaction/media, not fee estimation.
+CAVEAT: may exist behind demos/customer-only docs; unverified from public sources. => supports the
+auto-estimate-from-content differentiation thesis, pending confirmation.
+
+### Findings by topic (citations to verify)
+1. Estimate basis: required/authorized above a threshold, on request, or when advance payment is
+   sought. Federal: advance pay only if prior nonpayment or est > $250 (5 U.S.C. Sec. 552(a)(4)(A)(v);
+   28 C.F.R. Sec. 16.10). GA: > $25 -> notify + estimate in 3 business days, may defer search until
+   requester agrees; > $500 -> prepayment (O.C.G.A. Sec. 50-18-71(d)). VA: offer estimate before
+   searching if requested; > $200 -> deposit (Va. Code Sec. 2.2-3704(F)). MI: deposit if est > $50,
+   max 50%, itemized (MCL Sec. 15.234). THRESHOLDS: GA $25 est / $500 prepay; MI $50; PA $100
+   (practice); VA $200; federal $250.
+2. Averages/sampling: CO CCCS CORA rule-of-thumb ~20 emails/hr (2023). WA flat $2 when "reasonably
+   estimates and documents" cost >= $2 (RCW 42.56.120; WAC 44-14-07001). No statute expressly
+   authorizing statistical sampling found.
+3. Experience-based: common in practice; VA FOIA Council says a "minimum estimate" must be
+   meaningful under Va. Code Sec. 2.2-3704(F). No squarely-approving case found.
+4. Disclosure of basis: itemization required in some (MI "detailed itemization"; WA cost-basis
+   statement); NO mandatory methodology wording ("based on averages/experience").
+5. Deposits: federal $250/prior-nonpayment; MI 50% max > $50; GA full prepay > $500; WA up to 10%
+   copying deposit + installments (RCW 42.56.120(4)); PA prepay > $100; VA deposit > $200; FL
+   estimated special-service prepay w/ refund-or-additional after actual (Fla. Admin. Code R.
+   1-2.0031). GAP: CA, IL specifics not sourced.
+6. Over/under: FL refund excess / collect additional; CO DOLA pay remaining before production,
+   refund if less; VA (UVA) refund overage / invoice additional; WA installments. No broad "must
+   absorb" rule. Options: refund, additional invoice, payment-before-release, installment, waiver,
+   not-to-exceed.
+7. In-flight revision: mostly implied via payment-before-release (CO DOLA pay remaining before
+   production; FL additional payment if over). No mandated re-consent workflow except GA's initial
+   > $25 consent.
+8. Validity/expiration: policy-based. MI practitioner material: deposit not received within 48 days
+   of emailed response -> may deem abandoned. WA: installment not claimed -> agency not obligated.
+   GAP: needs more sampling.
+9. Granularity/rounding: CO Parks & Wildlife $41.37/hr in QUARTER-HOUR increments (2025); CO DOLA
+   rounds DOWN to nearest 0.10 hour; FL AGO example 15-min increments at $2.50; WA per-page /
+   per-file / per-GB / flat (RCW 42.56.120). No universal rule that estimate granularity must equal
+   actual-billing granularity.
+10. Redaction complexity tiers: NO primary authority endorsing simple/medium/complex. Closest: CO
+    20 emails/hr (volume-based, not tiered). => optional internal method + disclaimer + audit.
+11. Billable search: varies. Federal: commercial pays search/review/dup; others limited. GA: may
+    charge search/retrieval/redaction/production/copying (O.C.G.A. Sec. 50-18-71(c)). CO: research/
+    retrieval after free period, cap $41.37/hr (2024). VA: actual cost of accessing/searching, AND
+    estimate-related costs applied toward overall charges (Va. Code Sec. 2.2-3704(F)). CA: generally
+    only direct cost of duplication; search not in ordinary dup cost. WA: no fee for inspection/
+    locating; only copying/customized. => "is scoping/estimate search billable" is JURISDICTION-
+    DEPENDENT; VA explicitly folds estimate work into the charges.
+12. Self-service/portal: CA only "direct cost of duplication" (+ data compilation/extraction in
+    limited cases) (Cal. Gov't Code Sec. 7922.530, 7922.575). WA statutory electronic charges + $2
+    flat alt, no inspection fee. CO will not charge per-page for electronic production. GAP: IL
+    portal doctrine not sourced.
+13. Competitors: see STRATEGIC finding above.
+14. Regulatory authority: Federal FOIA 5 U.S.C. Sec. 552 (DOJ 28 C.F.R. Sec. 16.10; OIP/OGIS). CA
+    CPRA, Gov. Code Sec. 7920.000 et seq. MI FOIA, MCL Sec. 15.234. CO CORA, C.R.S. Sec. 24-72-205
+    (Leg. Council publishes max research rate $41.37/hr eff. 2024-07-01). GA Open Records Act,
+    O.C.G.A. Sec. 50-18-71. PA Right-to-Know Law (Office of Open Records). WA Public Records Act,
+    RCW 42.56.120 (MRSC; WAC model rules). VA FOIA, Va. Code Sec. 2.2-3704 (VA FOIA Advisory
+    Council). FL ch. 119, esp. Sec. 119.07 (AG opinions; Fla. Admin. Code R. 1-2.0031).
+
+### Still open after Pass 1 (targets for a second pass / verification)
+- Margin-of-error tolerance (likely none; confirm).
+- Broad legal authority for statistical SAMPLING of page counts.
+- Mandatory disclosure WORDING for estimate methodology.
+- CALIFORNIA and ILLINOIS deposit / advance-payment workflow specifics.
+- ILLINOIS portal-download fee doctrine.
+- Any competitor that DOES auto-generate estimates from content (behind demos?).
+- Independent VERIFICATION of every citation above against primary sources.
