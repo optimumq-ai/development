@@ -62,5 +62,10 @@ var TX6 = JSON.parse(JSON.stringify(TX)); TX6.labor.search.increment = 0.25; TX6
 var r6 = engine.compute(TX6, { components: [{ quantities: { searchHours: 1.1 } }] });
 check('6 total (1.1h ->1.25h @15)', r6.requestLevel.total, 18.75);
 
+// Case 7: "Other" one-off cost adds to the total and is itemized
+var r7 = engine.compute(TX, { components: [{ quantities: { bwPages: 100 } }], other: { amount: 5, description: 'Vendor retrieval fee' } });
+check('7 total (10 bw + 5 other)', r7.requestLevel.total, 15);
+check('7 otherSubtotal', r7.requestLevel.otherSubtotal, 5);
+
 console.log('\n' + pass + ' passed, ' + fail + ' failed');
 process.exit(fail ? 1 : 0);

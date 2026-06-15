@@ -144,7 +144,12 @@ function compute(profile, request) {
   var certCount = num(request && request.certification && request.certification.count);
   if (certCount > 0 && cert.rate) { var camt = r2(certCount * num(cert.rate)); certItem = { kind: 'certification', unit: cert.unit || 'per_record', count: certCount, rate: num(cert.rate), amount: camt }; certSubtotal += camt; }
 
-  var adjustedSubtotal = r2(laborSubtotal + dupSubtotal + mediaSubtotal + deliverySubtotal + certSubtotal);
+  // ---- other: a staff-entered one-off cost not covered by the configured scope (amount + label) ----
+  var otherItem = null, otherSubtotal = 0;
+  var other = request && request.other;
+  if (other && num(other.amount) !== 0) { otherSubtotal = r2(num(other.amount)); otherItem = { kind: 'other', description: (other.description || 'Other'), amount: otherSubtotal }; }
+
+  var adjustedSubtotal = r2(laborSubtotal + dupSubtotal + mediaSubtotal + deliverySubtotal + certSubtotal + otherSubtotal);
 
   // ---- floor -> ceiling -> de minimis waive (documented order) ----
   var total = adjustedSubtotal, floorApplied = false, ceilingApplied = false, deMinimisWaived = false;
@@ -170,6 +175,7 @@ function compute(profile, request) {
       media: mediaItems, mediaSubtotal: r2(mediaSubtotal),
       delivery: deliveryItem, deliverySubtotal: r2(deliverySubtotal),
       certification: certItem, certificationSubtotal: r2(certSubtotal),
+      other: otherItem, otherSubtotal: r2(otherSubtotal),
       freeAllowances: { freeLaborHours: num(rules.freeLaborHours), freePageAllowance: freePages },
       adjustedSubtotal: adjustedSubtotal,
       floorApplied: floorApplied, ceilingApplied: ceilingApplied, deMinimisWaived: deMinimisWaived,

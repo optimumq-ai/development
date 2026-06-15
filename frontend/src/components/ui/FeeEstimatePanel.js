@@ -15,6 +15,7 @@ export default function FeeEstimatePanel(props) {
   var [result, setResult] = useState(null);
   var [calc, setCalc] = useState(false);
   var [err, setErr] = useState('');
+  var [other, setOther] = useState({ amount: 0, description: '' });
 
   useEffect(function () { load(); }, [requestId]);
   async function load() {
@@ -32,6 +33,7 @@ export default function FeeEstimatePanel(props) {
       setQty(init);
       if (r.data.latest && r.data.latest.feeContext) setResult(r.data.latest.feeContext);
       if (r.data.latest && r.data.latest.input && r.data.latest.input.delivery) setDelivery(r.data.latest.input.delivery.method || 'email');
+      if (r.data.latest && r.data.latest.input && r.data.latest.input.other) setOther({ amount: r.data.latest.input.other.amount || 0, description: r.data.latest.input.other.description || '' });
     } catch (e) { setErr('Could not load fee estimate.'); }
   }
   function setQ(cid, field, val) { setQty(function (p) { var n = Object.assign({}, p); n[cid] = Object.assign({}, n[cid]); n[cid][field] = val; return n; }); }
@@ -45,7 +47,8 @@ export default function FeeEstimatePanel(props) {
         if (num(q.mediaCount) > 0) quant.media = [{ type: q.mediaType, count: num(q.mediaCount) }];
         return { id: c.id, label: c.label, recordType: c.recordType, quantities: quant };
       });
-      var r = await api.post('/fee-estimates/request/' + requestId, { components: comps, delivery: { method: delivery } });
+      var otherPayload = (num(other.amount) !== 0 || (other.description || '').trim()) ? { amount: num(other.amount), description: other.description || 'Other' } : null;
+      var r = await api.post('/fee-estimates/request/' + requestId, { components: comps, delivery: { method: delivery }, other: otherPayload });
       setResult(r.data.estimate.feeContext);
     } catch (e) { setErr((e.response && e.response.data && e.response.data.error) || 'Calculation failed.'); }
     setCalc(false);
@@ -80,6 +83,13 @@ export default function FeeEstimatePanel(props) {
               </div>
             );
           })}
+          <div style={{ border: '1px solid #E5E7EB', borderRadius: '10px', padding: '14px', marginBottom: '12px' }}>
+            <div style={{ fontSize: '13px', fontWeight: 700, color: '#111', marginBottom: '4px' }}>Other charge <span style={{ fontWeight: 400, color: '#9CA3AF' }}>(optional &middot; a one-off cost not covered above)</span></div>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end' }}>
+              <div style={{ flex: 1 }}><label style={lbl}>Description</label><input type="text" value={other.description} onChange={function (e) { setOther(function (o) { return Object.assign({}, o, { description: e.target.value }); }); }} placeholder="e.g. third-party retrieval fee, special postage" style={inp} /></div>
+              <div style={{ width: '120px' }}><label style={lbl}>Amount $</label><input type="number" step="any" value={other.amount} onChange={function (e) { setOther(function (o) { return Object.assign({}, o, { amount: e.target.value === '' ? 0 : parseFloat(e.target.value) }); }); }} style={inp} /></div>
+            </div>
+          </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
             <div><label style={lbl}>Delivery</label><select value={delivery} onChange={function (e) { setDelivery(e.target.value); }} style={Object.assign({}, inp, { width: 'auto' })}><option value="email">Email</option><option value="pickup">Pickup</option><option value="mail">Mail</option></select></div>
             <button onClick={calculate} disabled={calc} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: calc ? '#9CB4CC' : NAVY, color: 'white', fontSize: '13px', fontWeight: 700, cursor: calc ? 'default' : 'pointer' }}>{calc ? 'Calculating...' : 'Calculate estimate'}</button>
@@ -104,6 +114,7 @@ export default function FeeEstimatePanel(props) {
                   <Row k="Labor" v={money(R.laborSubtotal)} />
                   <Row k="Duplication" v={money(R.duplicationSubtotal)} />
                   <Row k="Media" v={money(R.mediaSubtotal)} />
+                  {R.other ? <Row k={R.other.description} v={money(R.other.amount)} /> : null}
                   {R.deliverySubtotal ? <Row k="Delivery" v={money(R.deliverySubtotal)} /> : null}
                   {(R.freeAllowances.freePageAllowance || R.freeAllowances.freeLaborHours) ? <Row k="Free allowances" muted v={(R.freeAllowances.freePageAllowance || 0) + ' pg / ' + (R.freeAllowances.freeLaborHours || 0) + ' hr'} /> : null}
                   {R.ceilingApplied ? <Row k="Ceiling applied" amber v="" /> : null}

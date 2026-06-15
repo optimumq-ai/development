@@ -82,7 +82,8 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
     var request = {
       components: (b.components || []).map(function (c) { return { id: c.id, label: c.label, recordType: c.recordType || null, quantities: c.quantities || {} }; }),
       delivery: b.delivery || { method: 'email' },
-      certification: b.certification || null
+      certification: b.certification || null,
+      other: b.other || null
     };
     var feeContext = engine.compute(config, request);
     var R = feeContext.requestLevel;
