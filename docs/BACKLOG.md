@@ -162,3 +162,52 @@ xyz, payments to xyz, etc."
 Depends on: the Smart Routing AI-match step (shared), a notification email path (Resend - currently
 test-mode, domain verification deferred), and a hold/pause state + manual-task-assignment in the
 workflow. Build with the routing phase.
+
+### DEFERRED (part of the routing phase): Redaction Handling Routing - tiered, default + exceptions (captured 2026-06-15, from Kevin's description)
+
+Goal: offload redaction + redaction-review from the legal team for the predictable majority of
+documents, while keeping legal's attention concentrated on the genuinely sensitive minority. The
+failure mode to AVOID is a full per-document-type path matrix (a decision for every type x every
+content situation) - cumbersome, confusing, error-prone. The model that stays simple is
+"DEFAULT + EXCEPTIONS," not a decision table.
+
+HANDLING TIERS (keep small, ~4; these are the output of the routing decision):
+  - Tier 0 - Releasable as-is, no redaction (already flagged on record types via auto_release_eligible).
+  - Tier 1 - Team handles fully: a trained team member redacts AND self-reviews; legal never sees it.
+  - Tier 2 - Team redacts (best effort), legal does a mandatory FINAL review/sign-off.
+  - Tier 3 - Expert from the start: route straight to legal/expert; team effort would be wasted
+    (typically: no reusable redaction template exists and content is not predictable).
+
+TWO LAYERS DECIDE THE TIER:
+  1. DEFAULT TIER PER DOCUMENT TYPE - but the platform PROPOSES it rather than forcing the city to
+     hand-set all ~82 types. Two strong signals already exist: (a) does a reusable redaction TEMPLATE
+     exist for the type, (b) the type's sensitivity/predictability profile in the taxonomy. Template +
+     predictable -> propose Tier 1; no template + unpredictable -> propose Tier 3. Human reviews and
+     adjusts only the edges. This removes most of the config burden.
+  2. CONTENT-TRIGGERED ESCALATION RULES (overlay) - the Smart Routing description mechanism applied to
+     redaction. A SMALL set of plain-language entries, e.g. "anything involving a police matter",
+     "a building permit connected to a sexually-oriented business". When the AI content scan (the same
+     zone-discovery scan that finds exempt content) reads a retrieved document and matches a rule, it
+     BUMPS the request UP a tier. These handle only the EXCEPTIONS, so they need not be exhaustive.
+
+SAFETY PRINCIPLE (the property that makes automation trustworthy): escalation is FAIL-SAFE and
+ONE-DIRECTIONAL - it only ever moves toward MORE review, never less, and any AI uncertainty also
+escalates. Worst case of a wrong AI call = "legal reviewed something it didn't strictly need to"
+(mild inefficiency), never "sensitive content released without legal review" (catastrophic). This
+asymmetry is what lets a city automate the easy ~80% and concentrate legal on the hard ~20%.
+
+TIMING: the type-based DEFAULT tier can be known early (at classification/intake); the CONTENT
+escalation can only fire AFTER records are retrieved and scanned - which is the correct time, since
+that is when the documents are actually in hand.
+
+CAPABILITY FALLBACK: Tier 1/2 presume the fulfillment team has a member with a "trained redactor"
+capability. If the team has no such member, it falls back to legal automatically - another fail-safe.
+The redactor capability is a role/skill on the team member (ties to the routing-phase role primitive).
+
+POLICY NOTE: the tier definitions, type defaults, and escalation topics are the CITY's policy to
+define (what legal exemptions apply to what content is their legal judgment); the platform only
+operationalizes the policy they set - it does not decide the law.
+
+Depends on: Smart Routing AI-match step (shared), the AI content scan (built), reusable redaction
+templates (built), taxonomy sensitivity profile (built), the role/capability primitive + task
+assignment + hold states (routing phase). Build with the routing phase.
