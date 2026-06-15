@@ -24,6 +24,7 @@ export default function AppLayout() {
     { to: '/redaction-rules', label: 'Redaction Rules', show: isElev },
     { to: '/mass-redaction', label: 'Mass Redaction', show: isElev },
     { to: '/released', label: 'Released Records', show: isElev },
+    { to: '/fee-config', label: 'Fee Configuration', show: isElev },
     { to: '/config', label: 'Configuration', show: isAdmin },
   ].filter(x => x.show);
 
