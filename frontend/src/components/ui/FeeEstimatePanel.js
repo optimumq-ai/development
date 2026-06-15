@@ -16,6 +16,13 @@ export default function FeeEstimatePanel(props) {
   var [calc, setCalc] = useState(false);
   var [err, setErr] = useState('');
   var [other, setOther] = useState({ amount: 0, description: '' });
+  var [noticeTo, setNoticeTo] = useState('');
+  var [noticeSubject, setNoticeSubject] = useState('');
+  var [noticeText, setNoticeText] = useState('');
+  var [noticeNotifiedAt, setNoticeNotifiedAt] = useState(null);
+  var [noticeNotifyTriggered, setNoticeNotifyTriggered] = useState(false);
+  var [sending, setSending] = useState(false);
+  var [sendMsg, setSendMsg] = useState('');
 
   useEffect(function () { load(); }, [requestId]);
   async function load() {
@@ -52,6 +59,25 @@ export default function FeeEstimatePanel(props) {
       setResult(r.data.estimate.feeContext);
     } catch (e) { setErr((e.response && e.response.data && e.response.data.error) || 'Calculation failed.'); }
     setCalc(false);
+  }
+
+  async function loadNotice() {
+    try {
+      var r = await api.get('/fee-estimates/request/' + requestId + '/notice');
+      setNoticeTo(r.data.to || ''); setNoticeSubject(r.data.subject || ''); setNoticeText(r.data.text || '');
+      setNoticeNotifiedAt(r.data.notifiedAt || null); setNoticeNotifyTriggered(!!r.data.notifyTriggered);
+    } catch (e) { /* no saved estimate yet */ }
+  }
+  useEffect(function () { if (result) loadNotice(); }, [result]);
+
+  async function sendNotice() {
+    setSending(true); setSendMsg('');
+    try {
+      var r = await api.post('/fee-estimates/request/' + requestId + '/notice/send', { to: noticeTo, subject: noticeSubject, text: noticeText });
+      if (r.data.sent) { setNoticeNotifiedAt(r.data.at); setSendMsg('Sent to ' + r.data.to + '.'); }
+      else { setSendMsg('Not sent: ' + (r.data.note || 'provider error') + '.'); }
+    } catch (e) { setSendMsg('Send failed. ' + ((e.response && e.response.data && e.response.data.error) || '')); }
+    setSending(false);
   }
 
   if (!ctx) return <div style={{ color: '#9CA3AF', fontSize: '13px' }}>{err || 'Loading...'}</div>;
@@ -130,6 +156,22 @@ export default function FeeEstimatePanel(props) {
           </div>
         </div>
       </div>
+      {result ? (
+        <div style={{ marginTop: '18px', borderTop: '1px solid #E5E7EB', paddingTop: '16px' }}>
+          <div style={{ fontSize: '14px', fontWeight: 700, color: '#111', marginBottom: '4px' }}>Notify requestor</div>
+          <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '10px' }}>This is what the requestor sees - plain language, no internal worksheet detail. Review and edit if needed, then send.{noticeNotifyTriggered ? ' This estimate exceeds the notification threshold.' : ''}</div>
+          {noticeNotifiedAt ? <div style={{ fontSize: '12px', color: '#03543F', background: '#DEF7EC', padding: '8px 10px', borderRadius: '6px', marginBottom: '10px' }}>Sent to {noticeTo} on {noticeNotifiedAt}. Sending again delivers an updated notice.</div> : null}
+          <div style={{ maxWidth: '640px' }}>
+            <div style={{ marginBottom: '8px' }}><label style={lbl}>To</label><input type="text" value={noticeTo} onChange={function (e) { setNoticeTo(e.target.value); }} style={inp} /></div>
+            <div style={{ marginBottom: '8px' }}><label style={lbl}>Subject</label><input type="text" value={noticeSubject} onChange={function (e) { setNoticeSubject(e.target.value); }} style={inp} /></div>
+            <div style={{ marginBottom: '8px' }}><label style={lbl}>Message</label><textarea value={noticeText} onChange={function (e) { setNoticeText(e.target.value); }} rows={14} style={Object.assign({}, inp, { fontFamily: 'inherit', resize: 'vertical', lineHeight: '1.5' })} /></div>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+              <button onClick={sendNotice} disabled={sending || !noticeTo} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: (sending || !noticeTo) ? '#9CB4CC' : NAVY, color: 'white', fontSize: '13px', fontWeight: 700, cursor: (sending || !noticeTo) ? 'default' : 'pointer' }}>{sending ? 'Sending...' : (noticeNotifiedAt ? 'Resend to requestor' : 'Send to requestor')}</button>
+              {sendMsg ? <span style={{ fontSize: '12.5px', color: sendMsg.indexOf('Sent') === 0 ? '#03543F' : '#9B1C1C' }}>{sendMsg}</span> : null}
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

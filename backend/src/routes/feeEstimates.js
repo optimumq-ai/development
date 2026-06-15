@@ -9,8 +9,13 @@ const { requireAuth } = require('../middleware/auth');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const engine = require('../services/feeEngine');
+const email = require('../services/email');
+const feeNotice = require('../services/feeNotice');
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
+function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+async function sysCfg(key, def) { var r = await get('SELECT value FROM system_config WHERE key = ?', [key]); return (r && r.value != null && r.value !== '') ? r.value : def; }
+async function latestEstimate(requestId) { return await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [requestId]); }
 
 async function activeJurisdiction() {
   var row = await get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'");
@@ -97,6 +102,42 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
 
     res.json({ estimate: { id: id, total: R.total, depositDue: R.depositDue, notify: R.estimateNotifyTriggered, feeContext: feeContext, configProfile: { id: cfgRow.id, name: cfgRow.name } } });
   } catch (e) { res.status(500).json({ error: 'Could not compute estimate: ' + (e && e.message) }); }
+});
+
+// build the requestor-facing notice (preview) from the latest saved estimate
+router.get('/request/:requestId/notice', requireAuth, async function (req, res) {
+  try {
+    var reqRow = await get('SELECT id, request_number, requestor_name, requestor_email FROM requests WHERE id = ?', [req.params.requestId]);
+    if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
+    var snap = await latestEstimate(req.params.requestId);
+    if (!snap) return res.status(400).json({ error: 'No saved estimate yet - calculate an estimate first.' });
+    var feeContext = {}; try { feeContext = JSON.parse(snap.fee_context_json || '{}'); } catch (e) { feeContext = {}; }
+    var agency = await sysCfg('agency_name', 'the City');
+    var notice = feeNotice.buildNotice(reqRow, feeContext, { agencyName: agency });
+    var R = feeContext.requestLevel || {};
+    res.json({ to: reqRow.requestor_email || null, requestorName: reqRow.requestor_name || null, subject: notice.subject, text: notice.text, total: R.total || 0, depositDue: R.depositDue || 0, notifyTriggered: !!R.estimateNotifyTriggered, notifiedAt: snap.notified_at || null, notifiedTo: snap.notified_to || null });
+  } catch (e) { res.status(500).json({ error: 'Could not build the notice.' }); }
+});
+
+// send the (staff-reviewed) notice to the requestor + record it on the snapshot
+router.post('/request/:requestId/notice/send', requireAuth, async function (req, res) {
+  try {
+    var reqRow = await get('SELECT id, requestor_email FROM requests WHERE id = ?', [req.params.requestId]);
+    if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
+    var to = (req.body && req.body.to) || reqRow.requestor_email;
+    if (!to) return res.status(400).json({ error: 'No requestor email address on this request.' });
+    var snap = await latestEstimate(req.params.requestId);
+    if (!snap) return res.status(400).json({ error: 'No saved estimate to send.' });
+    var subject = (req.body && req.body.subject) || 'Cost estimate for your public records request';
+    var text = (req.body && req.body.text) || '';
+    if (!text.trim()) return res.status(400).json({ error: 'The notice body is empty.' });
+    var html = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#111;white-space:pre-wrap">' + escapeHtml(text) + '</div>';
+    var result = await email.send({ to: to, subject: subject, text: text, html: html });
+    var ok = !!(result && result.sent);
+    var now = nowStr();
+    if (ok) await run('UPDATE request_fee_estimates SET notified_at = ?, notified_to = ? WHERE id = ?', [now, to, snap.id]);
+    res.json({ sent: ok, provider: result && result.provider, to: to, at: ok ? now : null, note: ok ? null : 'Email provider did not confirm send.' });
+  } catch (e) { res.status(502).json({ error: 'Send failed: ' + (e && e.message ? e.message : 'unknown error') }); }
 });
 
 module.exports = router;

@@ -359,3 +359,6 @@ CREATE TABLE IF NOT EXISTS request_fee_estimates (
   created_by TEXT,
   created_at TEXT
 );
+-- (fee estimate notice tracking)
+ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS notified_at TEXT;
+ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS notified_to TEXT;
