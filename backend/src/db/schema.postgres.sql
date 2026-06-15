@@ -329,3 +329,18 @@ CREATE TABLE IF NOT EXISTS mass_job_budget (
   day TEXT PRIMARY KEY,
   used INTEGER DEFAULT 0
 );
+
+-- Fee engine: per-jurisdiction, per-context (FR/SS), versioned fee configuration.
+-- config_json holds the structured policy the deterministic feeEngine prices against.
+CREATE TABLE IF NOT EXISTS fee_profiles (
+  id TEXT PRIMARY KEY,
+  jurisdiction_id TEXT,
+  context TEXT,
+  version INTEGER DEFAULT 1,
+  status TEXT DEFAULT 'draft',
+  name TEXT,
+  config_json TEXT,
+  created_by TEXT,
+  created_at TEXT,
+  updated_at TEXT
+);

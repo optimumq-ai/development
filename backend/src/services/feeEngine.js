@@ -1,0 +1,184 @@
+// Deterministic public-records fee engine.
+//
+// PURE: (jurisdiction fee config + request quantities) -> itemized feeContext.
+// No AI, no DB, no side effects, no randomness. The same inputs always produce the same
+// itemized, line-by-line result, so every charge is explainable and reproducible. AI is used
+// only to CONFIGURE (elsewhere); the engine only COMPUTES.
+//
+// Two tiers (matches the parent/child request model):
+//   - per COMPONENT: gross line items (transparency: what each record type would cost).
+//   - per REQUEST: free allowances, floor/ceiling, de minimis, deposit, notify - applied ONCE on
+//     the aggregated total. Applying these at the request level is what stops a requester (or the
+//     intake) from splitting one ask into many to dodge a per-request maximum.
+//
+// Used in two MODES by passing different quantities: ESTIMATE (projected) and FINAL (actual).
+// ES5 style to match the codebase. All money rounded to cents.
+
+function num(x) { x = Number(x); return isFinite(x) ? x : 0; }
+function r2(n) { return Math.round((Number(n) || 0) * 100) / 100; }
+function r4(n) { return Math.round((Number(n) || 0) * 10000) / 10000; }
+function capWord(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
+function dupDesc(k) { return k === 'bw' ? 'B&W copies' : k === 'color' ? 'Color copies' : k === 'oversized' ? 'Oversized copies' : (k + ' copies'); }
+
+// Round labor hours to the billing increment (e.g. 0.25). mode: 'up' (default) | 'down' | 'nearest'.
+// increment 0/null -> bill actual hours, no rounding.
+function roundHours(hours, increment, mode) {
+  hours = num(hours);
+  increment = num(increment);
+  if (increment <= 0) return hours;
+  var q = hours / increment;
+  if (mode === 'down') q = Math.floor(q);
+  else if (mode === 'nearest') q = Math.round(q);
+  else q = Math.ceil(q);
+  return r4(q * increment);
+}
+
+var LABOR_ORDER = ['search', 'review', 'programming']; // order free hours are consumed in
+
+function compute(profile, request) {
+  profile = profile || {};
+  var labor = profile.labor || {};
+  var dup = profile.duplication || {};
+  var media = profile.media || {};
+  var delivery = profile.delivery || {};
+  var cert = profile.certification || {};
+  var rules = profile.requestRules || {};
+  var components = (request && request.components) || [];
+
+  var i, k;
+  var agg = { search: 0, review: 0, programming: 0, bw: 0, color: 0, oversized: 0 };
+  var mediaAgg = {};
+  var compOut = [];
+
+  function laborGross(kind, hours) {
+    var cfg = labor[kind]; hours = num(hours);
+    if (!cfg || hours <= 0) return null;
+    var rate = num(cfg.rate);
+    return { kind: kind + '_labor', description: capWord(kind) + ' labor', unit: 'hour', quantity: hours, rate: rate, amount: r2(hours * rate) };
+  }
+  function dupGross(kind, pages) {
+    var cfg = dup[kind]; pages = num(pages);
+    if (!cfg || pages <= 0) return null;
+    if (cfg.rate === 'actual') return { kind: 'dup_' + kind, description: dupDesc(kind), unit: 'page', quantity: pages, rate: 'actual', amount: 0, needsActual: true };
+    var rate = num(cfg.rate);
+    return { kind: 'dup_' + kind, description: dupDesc(kind), unit: 'page', quantity: pages, rate: rate, amount: r2(pages * rate) };
+  }
+
+  for (i = 0; i < components.length; i++) {
+    var c = components[i] || {};
+    var q = c.quantities || {};
+    var items = [], gross = 0, ln;
+    ln = laborGross('search', q.searchHours); if (ln) { items.push(ln); gross += ln.amount; agg.search += num(q.searchHours); }
+    ln = laborGross('review', q.reviewHours); if (ln) { items.push(ln); gross += ln.amount; agg.review += num(q.reviewHours); }
+    ln = laborGross('programming', q.programmingHours); if (ln) { items.push(ln); gross += ln.amount; agg.programming += num(q.programmingHours); }
+    ln = dupGross('bw', q.bwPages); if (ln) { items.push(ln); gross += ln.amount; agg.bw += num(q.bwPages); }
+    ln = dupGross('color', q.colorPages); if (ln) { items.push(ln); gross += ln.amount; agg.color += num(q.colorPages); }
+    ln = dupGross('oversized', q.oversizedPages); if (ln) { items.push(ln); gross += ln.amount; agg.oversized += num(q.oversizedPages); }
+    var mlist = q.media || [];
+    for (var m = 0; m < mlist.length; m++) {
+      var mt = mlist[m].type, mc = num(mlist[m].count);
+      if (!mt || mc <= 0) continue;
+      mediaAgg[mt] = (mediaAgg[mt] || 0) + mc;
+      var mr = media[mt];
+      if (mr === 'actual' || mr == null) items.push({ kind: 'media', description: 'Media: ' + mt, unit: 'item', quantity: mc, rate: (mr == null ? 0 : 'actual'), amount: 0, needsActual: mr === 'actual' });
+      else { var ma = r2(mc * num(mr)); items.push({ kind: 'media', description: 'Media: ' + mt, unit: 'item', quantity: mc, rate: num(mr), amount: ma }); gross += ma; }
+    }
+    compOut.push({ id: c.id || ('comp-' + (i + 1)), label: c.label || ('Component ' + (i + 1)), recordType: c.recordType || null, lineItems: items, componentGross: r2(gross) });
+  }
+
+  var grossSubtotal = 0;
+  for (i = 0; i < compOut.length; i++) grossSubtotal += compOut[i].componentGross;
+  grossSubtotal = r2(grossSubtotal);
+
+  // ---- request-level: free labor hours consumed in order, then increment-rounded + priced ----
+  var billable = { search: agg.search, review: agg.review, programming: agg.programming };
+  var remainingFree = num(rules.freeLaborHours);
+  for (i = 0; i < LABOR_ORDER.length && remainingFree > 0; i++) {
+    k = LABOR_ORDER[i];
+    var take = Math.min(remainingFree, billable[k]);
+    billable[k] = r4(billable[k] - take);
+    remainingFree = r4(remainingFree - take);
+  }
+  var laborItems = [], laborSubtotal = 0;
+  for (i = 0; i < LABOR_ORDER.length; i++) {
+    k = LABOR_ORDER[i]; var lcfg = labor[k];
+    if (!lcfg || agg[k] <= 0) continue;
+    var bh = roundHours(billable[k], lcfg.increment, lcfg.rounding);
+    var amt = r2(bh * num(lcfg.rate));
+    laborItems.push({ kind: k + '_labor', aggregateHours: r4(agg[k]), billableHours: bh, rate: num(lcfg.rate), amount: amt });
+    laborSubtotal += amt;
+  }
+
+  // ---- free B&W page allowance (request-level), then duplication ----
+  var freePages = num(rules.freePageAllowance);
+  var dupItems = [], dupSubtotal = 0;
+  if (agg.bw > 0 && dup.bw) {
+    var billBw = Math.max(0, agg.bw - freePages);
+    var bwAmt = (dup.bw.rate === 'actual') ? 0 : r2(billBw * num(dup.bw.rate));
+    dupItems.push({ kind: 'dup_bw', aggregatePages: agg.bw, freePagesApplied: Math.min(freePages, agg.bw), billablePages: billBw, rate: dup.bw.rate, amount: bwAmt, needsActual: dup.bw.rate === 'actual' });
+    dupSubtotal += bwAmt;
+  }
+  if (agg.color > 0 && dup.color) { var cAmt = (dup.color.rate === 'actual') ? 0 : r2(agg.color * num(dup.color.rate)); dupItems.push({ kind: 'dup_color', pages: agg.color, rate: dup.color.rate, amount: cAmt, needsActual: dup.color.rate === 'actual' }); dupSubtotal += cAmt; }
+  if (agg.oversized > 0 && dup.oversized) { var oAmt = (dup.oversized.rate === 'actual') ? 0 : r2(agg.oversized * num(dup.oversized.rate)); dupItems.push({ kind: 'dup_oversized', pages: agg.oversized, rate: dup.oversized.rate, amount: oAmt, needsActual: dup.oversized.rate === 'actual' }); dupSubtotal += oAmt; }
+
+  // ---- media (request-level aggregate) ----
+  var mediaItems = [], mediaSubtotal = 0;
+  for (var mtype in mediaAgg) {
+    if (!mediaAgg.hasOwnProperty(mtype)) continue;
+    var mrate = media[mtype], cnt = mediaAgg[mtype];
+    if (mrate === 'actual' || mrate == null) mediaItems.push({ kind: 'media', type: mtype, count: cnt, rate: (mrate == null ? 0 : 'actual'), amount: 0, needsActual: mrate === 'actual' });
+    else { var mamt = r2(cnt * num(mrate)); mediaItems.push({ kind: 'media', type: mtype, count: cnt, rate: num(mrate), amount: mamt }); mediaSubtotal += mamt; }
+  }
+
+  // ---- delivery (once per request) ----
+  var deliveryItem = null, deliverySubtotal = 0;
+  var dmethod = (request && request.delivery && request.delivery.method) || null;
+  if (dmethod && delivery[dmethod] != null) {
+    var dr = delivery[dmethod];
+    if (dr === 'actual') deliveryItem = { kind: 'delivery', method: dmethod, rate: 'actual', amount: 0, needsActual: true };
+    else { var handling = r2(num(delivery.handling)); var damt = r2(num(dr) + handling); deliveryItem = { kind: 'delivery', method: dmethod, rate: num(dr), handling: handling, amount: damt }; deliverySubtotal += damt; }
+  }
+
+  // ---- certification (once per request) ----
+  var certItem = null, certSubtotal = 0;
+  var certCount = num(request && request.certification && request.certification.count);
+  if (certCount > 0 && cert.rate) { var camt = r2(certCount * num(cert.rate)); certItem = { kind: 'certification', unit: cert.unit || 'per_record', count: certCount, rate: num(cert.rate), amount: camt }; certSubtotal += camt; }
+
+  var adjustedSubtotal = r2(laborSubtotal + dupSubtotal + mediaSubtotal + deliverySubtotal + certSubtotal);
+
+  // ---- floor -> ceiling -> de minimis waive (documented order) ----
+  var total = adjustedSubtotal, floorApplied = false, ceilingApplied = false, deMinimisWaived = false;
+  var minFee = num(rules.minFee), maxFee = (rules.maxFee == null ? null : num(rules.maxFee));
+  if (minFee > 0 && total > 0 && total < minFee) { total = r2(minFee); floorApplied = true; }
+  if (maxFee != null && total > maxFee) { total = r2(maxFee); ceilingApplied = true; }
+  var deMinimis = num(rules.deMinimis);
+  if (deMinimis > 0 && total > 0 && total <= deMinimis) { total = 0; deMinimisWaived = true; }
+
+  // ---- deposit + estimate-notify ----
+  var depositDue = 0, depositBasis = null, dep = rules.deposit || {};
+  if (dep.threshold != null && total > num(dep.threshold) && dep.percent) { depositDue = r2(total * (num(dep.percent) / 100)); depositBasis = num(dep.percent) + '% of $' + total.toFixed(2) + ' (estimate exceeds $' + num(dep.threshold) + ')'; }
+  var notify = (rules.estimateNotifyThreshold != null && total > num(rules.estimateNotifyThreshold));
+
+  return {
+    context: profile.context || 'FR',
+    configVersion: (profile.version != null ? profile.version : null),
+    components: compOut,
+    requestLevel: {
+      grossSubtotal: grossSubtotal,
+      labor: laborItems, laborSubtotal: r2(laborSubtotal),
+      duplication: dupItems, duplicationSubtotal: r2(dupSubtotal),
+      media: mediaItems, mediaSubtotal: r2(mediaSubtotal),
+      delivery: deliveryItem, deliverySubtotal: r2(deliverySubtotal),
+      certification: certItem, certificationSubtotal: r2(certSubtotal),
+      freeAllowances: { freeLaborHours: num(rules.freeLaborHours), freePageAllowance: freePages },
+      adjustedSubtotal: adjustedSubtotal,
+      floorApplied: floorApplied, ceilingApplied: ceilingApplied, deMinimisWaived: deMinimisWaived,
+      total: r2(total),
+      depositDue: depositDue, depositBasis: depositBasis,
+      estimateNotifyTriggered: notify
+    },
+    generatedAt: new Date().toISOString()
+  };
+}
+
+module.exports = { compute: compute, roundHours: roundHours };
