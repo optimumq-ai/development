@@ -8,6 +8,7 @@ const { requireAuth } = require('../middleware/auth');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const engine = require('../services/feeEngine');
+const feePolicyExtract = require('../services/feePolicyExtract');
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 function parseConfig(row) { if (!row) return row; var c = {}; try { c = JSON.parse(row.config_json || '{}'); } catch (e) { c = {}; } row.config = c; delete row.config_json; return row; }
@@ -18,6 +19,16 @@ router.get('/jurisdictions', requireAuth, async function (req, res) {
     var rows = await all('SELECT id, code, name, status FROM jurisdiction_profiles ORDER BY name');
     res.json({ jurisdictions: rows || [] });
   } catch (e) { res.status(500).json({ error: 'Could not load jurisdictions.' }); }
+});
+
+// AI extraction: { text, context } -> proposed config + per-field citations/confidence (no persistence)
+router.post('/extract', requireAuth, async function (req, res) {
+  try {
+    var text = (req.body && req.body.text) || '';
+    var context = (req.body && req.body.context) || 'FR';
+    var result = await feePolicyExtract.extract(text, { context: context });
+    res.json(result);
+  } catch (e) { res.status(502).json({ error: 'Extraction failed: ' + (e && e.message ? e.message : 'unknown error') }); }
 });
 
 // pure preview: { config, request } -> itemized feeContext (no persistence)

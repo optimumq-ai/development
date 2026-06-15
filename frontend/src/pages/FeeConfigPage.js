@@ -20,6 +20,12 @@ function mergeDefaults(def, loaded) {
   return out;
 }
 function clone(o) { return JSON.parse(JSON.stringify(o)); }
+function applyProposed(cur, prop) {
+  if (prop == null) return cur;
+  if (isObj(prop)) { var out = isObj(cur) ? Object.assign({}, cur) : {}; for (var k in prop) { if (prop.hasOwnProperty(k)) { var m = applyProposed(out[k], prop[k]); if (m !== undefined) out[k] = m; } } return out; }
+  return prop;
+}
+function confColor(c) { c = Number(c) || 0; return c >= 0.8 ? { bg: '#DEF7EC', fg: '#03543F' } : c >= 0.5 ? { bg: '#FEF3C7', fg: '#92400E' } : { bg: '#FDE8E8', fg: '#9B1C1C' }; }
 function money(n) { return '$' + (Number(n) || 0).toFixed(2); }
 
 var lbl = { fontSize: '11px', fontWeight: 600, color: '#6B7280', display: 'block', marginBottom: '3px' };
@@ -54,6 +60,12 @@ export default function FeeConfigPage() {
   var [saving, setSaving] = useState(false);
   var [msg, setMsg] = useState('');
   var [sample, setSample] = useState({ searchHours: 1, reviewHours: 0, bwPages: 50, colorPages: 0, oversizedPages: 0, mediaType: 'cd', mediaCount: 0, delivery: 'email', components: 1 });
+  var [showExtract, setShowExtract] = useState(false);
+  var [extractText, setExtractText] = useState('');
+  var [extracting, setExtracting] = useState(false);
+  var [provenance, setProvenance] = useState([]);
+  var [extractNotes, setExtractNotes] = useState('');
+  var [extractMsg, setExtractMsg] = useState('');
 
   useEffect(function () { loadList(); }, []);
   async function loadList() {
@@ -64,6 +76,19 @@ export default function FeeConfigPage() {
   }
 
   function setCfg(mutator) { setConfig(function (prev) { var n = clone(prev || DEFAULT_CONFIG); mutator(n); return n; }); }
+
+  async function runExtract() {
+    setExtracting(true); setExtractMsg('');
+    try {
+      var r = await api.post('/fee-profiles/extract', { text: extractText, context: (config && config.context) || 'FR' });
+      var prop = r.data.config || {};
+      setConfig(function (prev) { return applyProposed(prev || DEFAULT_CONFIG, prop); });
+      setProvenance(r.data.provenance || []);
+      setExtractNotes(r.data.notes || '');
+      setExtractMsg('Proposed ' + ((r.data.provenance || []).length) + ' values - review below, then Save.');
+    } catch (e) { setExtractMsg('Extraction failed. ' + ((e.response && e.response.data && e.response.data.error) || '')); }
+    setExtracting(false);
+  }
 
   // build a request from the sample inputs (supports 1 or 2 identical components to show aggregation)
   var buildRequest = useCallback(function () {
@@ -112,6 +137,40 @@ export default function FeeConfigPage() {
         </div>
         <button onClick={save} disabled={saving} style={{ alignSelf: 'flex-end', padding: '8px 18px', borderRadius: '8px', border: 'none', background: saving ? '#9CB4CC' : NAVY, color: 'white', fontSize: '13px', fontWeight: 700, cursor: saving ? 'default' : 'pointer' }}>{saving ? 'Saving...' : 'Save config'}</button>
         {msg ? <span style={{ alignSelf: 'flex-end', fontSize: '12.5px', color: msg === 'Saved.' ? '#03543F' : '#9B1C1C' }}>{msg}</span> : null}
+      </div>
+
+      <div style={Object.assign({}, card, { border: '1px solid #DBEAFE', background: '#F8FAFF', marginBottom: '18px' })}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={sectionTitle}>Configure from policy text (AI)</div>
+          <button onClick={function () { setShowExtract(function (s) { return !s; }); }} style={{ padding: '5px 12px', borderRadius: '7px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>{showExtract ? 'Hide' : 'Open'}</button>
+        </div>
+        {showExtract ? (
+          <div style={{ marginTop: '10px' }}>
+            <div style={{ fontSize: '11.5px', color: '#6B7280', marginBottom: '6px' }}>Paste the city's fee ordinance or schedule. Claude proposes config values with a citation and confidence for each - they're applied to the form below for you to verify, then Save. Claude proposes; you approve; the engine computes.</div>
+            <textarea value={extractText} onChange={function (e) { setExtractText(e.target.value); }} rows={6} placeholder="Paste fee ordinance / fee schedule text here..." style={Object.assign({}, inp, { fontFamily: 'inherit', resize: 'vertical' })} />
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', marginTop: '8px' }}>
+              <button onClick={runExtract} disabled={extracting || !extractText.trim()} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: (extracting || !extractText.trim()) ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: 700, cursor: (extracting || !extractText.trim()) ? 'default' : 'pointer' }}>{extracting ? 'Reading policy...' : 'Extract with AI'}</button>
+              {extractMsg ? <span style={{ fontSize: '12px', color: extractMsg.indexOf('fail') >= 0 ? '#9B1C1C' : '#6B7280' }}>{extractMsg}</span> : null}
+            </div>
+            {provenance.length ? (
+              <div style={{ marginTop: '12px', borderTop: '1px solid #E5E7EB', paddingTop: '10px' }}>
+                <div style={{ fontSize: '11px', fontWeight: 700, color: '#374151', marginBottom: '6px' }}>Proposed values (applied to the form - verify each against the citation):</div>
+                {provenance.map(function (p, i) {
+                  var cc = confColor(p.confidence);
+                  return (
+                    <div key={i} style={{ display: 'flex', gap: '8px', alignItems: 'baseline', fontSize: '11px', padding: '2px 0' }}>
+                      <span style={{ fontFamily: 'monospace', color: '#1F4E79', minWidth: '190px' }}>{p.field}</span>
+                      <span style={{ fontWeight: 700, minWidth: '46px' }}>{String(p.value)}</span>
+                      <span style={{ background: cc.bg, color: cc.fg, borderRadius: '999px', padding: '1px 7px', fontWeight: 700, fontSize: '10px' }}>{Math.round((Number(p.confidence) || 0) * 100)}%</span>
+                      <span style={{ color: '#9CA3AF', fontStyle: 'italic' }}>&ldquo;{p.citation}&rdquo;</span>
+                    </div>
+                  );
+                })}
+                {extractNotes ? <div style={{ fontSize: '11px', color: '#92400E', marginTop: '8px', background: '#FEF3C7', padding: '8px 10px', borderRadius: '6px' }}><strong>AI notes:</strong> {extractNotes}</div> : null}
+              </div>
+            ) : null}
+          </div>
+        ) : null}
       </div>
 
       <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start' }}>
