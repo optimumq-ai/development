@@ -127,3 +127,38 @@ SMART ROUTING (optional AI overlay, OFF by default):
 BUILD ORDER for this phase: (1) claim + role fan-out primitive; (2) wire redaction-review (and other) tasks onto it; (3) specialization fields on user/dept/team; (4) the AI smart-routing override + toggle. Open decision to settle then: workflow-config granularity (a screen mapping request types -> target roles, vs. a simpler department-default-role).
 
 NOTE: the redaction review screen's `review_stage` (editing -> pending_review -> released, + an "in_review"/in-process state to add) is the per-task status backbone this routing will surface in My Tasks. The review feature can be finished standalone now (begin-review status flip + add/delete/approve panel); only its automatic appearance in My Tasks waits on routing.
+
+### DEFERRED (part of the routing phase): Special Routing (captured 2026-06-15, from Kevin's description)
+
+Purpose: let leadership flag certain sensitive / high-profile request topics so that a matching
+incoming request is HELD and a designated high-level person (e.g., the mayor) is notified - so they
+can be aware, discuss processing strategy, or direct it (e.g., to litigation) before normal work
+proceeds. Neutral framing only: the feature is called "Special Routing"; it is simply a hold-and-
+notify-on-match. Keep it simple.
+
+Mechanism: a specific application of the Smart Routing AI-description-matching engine (above). An
+incoming request's description is compared by AI against the configured Special Routing entries; a
+high-confidence match triggers it.
+
+UI: a "Special Routing" tab on the main screen. Inside, a section to configure individual entries,
+each with:
+  - a DESCRIPTION of the content to match (the text AI matches an incoming request description
+    against), e.g. "xyz contracts, payments, donations";
+  - the NAME of the person who requested the special routing (who it's on behalf of);
+  - the NAME + EMAIL of the person to notify when it triggers.
+  - (active flag implied.)
+
+On trigger (high-confidence AI match):
+  - the request PAUSES / is held in Open Records;
+  - an email notification is sent to the designated person;
+  - further processing requires MANUAL assignment of the additional processing tasks (no automatic
+    advance while held).
+
+Worked example (for the leadership demo): an entry created at the mayor's request with text
+"xyz contracts, payments, donations" should match a request whose description is
+"all donations from xyz corporation mentioned in email, text message, as well as contracts with
+xyz, payments to xyz, etc."
+
+Depends on: the Smart Routing AI-match step (shared), a notification email path (Resend - currently
+test-mode, domain verification deferred), and a hold/pause state + manual-task-assignment in the
+workflow. Build with the routing phase.
