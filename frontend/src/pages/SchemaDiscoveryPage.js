@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import RecordTypeEditor from '../components/RecordTypeEditor';
 
@@ -10,6 +11,7 @@ var AVAIL = {
 };
 
 export default function SchemaDiscoveryPage() {
+  var navigate = useNavigate();
   var [text, setText] = useState('');
   var [discovering, setDiscovering] = useState(false);
   var [result, setResult] = useState(null);
@@ -117,6 +119,7 @@ export default function SchemaDiscoveryPage() {
   return (
     <div style={{ maxWidth: '860px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <div>
+        <button onClick={function(){ navigate('/taxonomy'); }} style={{ background: 'none', border: 'none', color: '#1F4E79', fontSize: '13px', fontWeight: '600', cursor: 'pointer', padding: '0 0 6px' }}>&larr; Back to Taxonomy</button>
         <h1 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 4px' }}>AI Schema Discovery</h1>
         <p style={{ color: '#9CA3AF', fontSize: '14px', margin: 0 }}>Paste a document or describe a record. The AI proposes a record type as a draft for your review. Nothing is added to the taxonomy until you approve it.</p>
       </div>
