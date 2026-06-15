@@ -434,3 +434,44 @@ PURPOSE = FLOW: maximize requests that never need a human estimate step.
 ### Still UNDESIGNED (the one real gap)
 - The MANUAL ESTIMATE CREATION experience itself (the screen/steps a staffer uses at Step 4).
   Named, not yet designed.
+
+---
+
+## 16. Two more design requirements (added 2026-06-12)
+
+### A. Estimate transparency / explainability (no black box)
+The deterministic engine makes every estimate explainable by construction. Surface it as TWO views
+of the same feeContext:
+- STAFF view: full worksheet - each line = config rate x quantity, plus the METHOD that produced
+  each projected quantity (profile / sample / scoping / manual / expert-seed) and its confidence.
+- REQUESTOR view: a plain-language BASIS summary on the email/mail notification - what is charged
+  for, the rates, and the basis in human terms ("based on the records you selected" / "typical
+  values for this record type" / "staff review"), framed as a good-faith estimate to be reconciled.
+Notes: output #4 of the estimate run (the "how derived" stamp) is the seed for the requestor
+summary. Make requestor-facing detail level CONFIGURABLE per jurisdiction (disclosure norms vary;
+itemization required in some, methodology wording mandated nowhere). Keep internal tier labels OUT
+of the requestor view - express as concrete pages/hours, not "complexity: high".
+
+### B. Financial integration mode - internal vs ERP/accounting (NEW; not previously mapped)
+The underlying question: WHO is the system of record for the money?
+- INTERNAL mode: Optimum Q issues the invoice, records payments, tracks balance/refunds itself.
+  For small agencies with no finance-system integration.
+- ERP/ACCOUNTING-INTEGRATION mode: Optimum Q computes fee + estimate + reconciliation LOGIC, hands
+  the charge to the city's financial system (Tyler Munis / Workday / SAP / etc., the AR/GL book of
+  record), and receives payment status BACK to advance the workflow. Larger agencies often require
+  this (records system may not be the book of record for public funds).
+- HYBRID (likely common): Optimum Q keeps a request-side ledger for WORKFLOW (owed, deposit status,
+  balance) while the ERP holds the authoritative transaction.
+
+Design: a configurable FINANCIAL-INTEGRATION MODE with an adapter interface - internal-ledger impl
+vs ERP-connector impl. Fee/estimate/reconciliation logic is identical across modes; only the
+system-of-record and money-movement differ. Workflow stagegates (awaiting-deposit -> paid ->
+awaiting-final -> closed) are driven by PAYMENT EVENTS sourced from whichever mode is configured.
+
+Rides the EXISTING connector pattern (platform already has connector stubs incl. Tyler Munis).
+Extend that (or add a finance connector) rather than invent a new mechanism; Munis is notable
+because it IS the finance system, so records-side and money-side could share a path.
+
+Staging (consistent with payments caution): build the logic + ledger + mode/adapter abstraction now
+(internal ledger as default, ERP connector as a defined interface/stub); live money-movement (card
+processing internally, or true cash sync with the ERP) is the later, careful step.
