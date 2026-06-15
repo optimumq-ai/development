@@ -55,6 +55,7 @@ app.use('/api/redaction-templates', require('./src/routes/redactionTemplates'));
 app.use('/api/structured-redaction', require('./src/routes/structuredRedaction'));
 app.use('/api/mass-jobs', require('./src/routes/massJobs'));
 app.use('/api/fee-profiles', require('./src/routes/feeProfiles'));
+app.use('/api/fee-estimates', require('./src/routes/feeEstimates'));
 
 app.get('/api/health', function(req, res) {
   res.json({ status: 'ok', version: '1.0.0' });

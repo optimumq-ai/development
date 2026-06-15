@@ -344,3 +344,18 @@ CREATE TABLE IF NOT EXISTS fee_profiles (
   created_at TEXT,
   updated_at TEXT
 );
+
+-- Per-request fee estimate / final snapshots (immutable feeContext history; estimate vs final).
+CREATE TABLE IF NOT EXISTS request_fee_estimates (
+  id TEXT PRIMARY KEY,
+  request_id TEXT,
+  kind TEXT DEFAULT 'estimate',
+  config_profile_id TEXT,
+  input_json TEXT,
+  fee_context_json TEXT,
+  total DOUBLE PRECISION,
+  deposit_due DOUBLE PRECISION,
+  notify_flag INTEGER DEFAULT 0,
+  created_by TEXT,
+  created_at TEXT
+);

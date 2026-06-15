@@ -1,0 +1,101 @@
+// Per-request fee estimate API. Wires the deterministic engine onto a real request: loads the
+// request's components (MRR master+children, or a master-of-one), prices them against the active
+// jurisdiction's FR config using the supplied quantities (the manual/staff path for now; the
+// automated projection ladder - profiles/sampling/known-page-counts - will later pre-fill these),
+// persists an immutable feeContext snapshot, and updates the request's headline estimate.
+const express = require('express');
+const router = express.Router();
+const { requireAuth } = require('../middleware/auth');
+const { run, get, all } = require('../db');
+const { v4: uuidv4 } = require('uuid');
+const engine = require('../services/feeEngine');
+
+function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
+
+async function activeJurisdiction() {
+  var row = await get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'");
+  return (row && row.value) || 'jur-tx';
+}
+async function pickConfig(jid) {
+  return await get("SELECT * FROM fee_profiles WHERE jurisdiction_id = ? AND context = 'FR' ORDER BY CASE WHEN status = 'active' THEN 0 ELSE 1 END, version DESC LIMIT 1", [jid]);
+}
+
+// A request becomes one-or-more fee components: MRR master -> its children (or master-of-one if no
+// children exist yet); a plain request -> itself as a single component.
+async function loadComponents(requestId) {
+  var reqRow = await get('SELECT * FROM requests WHERE id = ?', [requestId]);
+  if (!reqRow) return null;
+  var rows;
+  if (reqRow.is_mrr && !reqRow.master_request_id) {
+    var kids = await all('SELECT * FROM requests WHERE master_request_id = ?', [requestId]);
+    rows = (kids && kids.length) ? kids : [reqRow];
+  } else {
+    rows = [reqRow];
+  }
+  var comps = [];
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var rtName = null;
+    if (r.record_type_id) { var rt = await get('SELECT name FROM record_types WHERE id = ?', [r.record_type_id]); rtName = rt && rt.name; }
+    var label = (r.component_label && r.component_label.trim()) || rtName || (r.description ? r.description.slice(0, 40) : ('Request ' + (r.request_number || '')));
+    comps.push({ id: r.id, label: label, recordType: r.record_type_id || null, recordTypeName: rtName });
+  }
+  return { request: reqRow, components: comps };
+}
+
+function hydrate(row) {
+  if (!row) return null;
+  try { row.feeContext = JSON.parse(row.fee_context_json || '{}'); } catch (e) { row.feeContext = {}; }
+  try { row.input = JSON.parse(row.input_json || '{}'); } catch (e) { row.input = {}; }
+  delete row.fee_context_json; delete row.input_json;
+  return row;
+}
+
+// context for the estimate panel: components to price, the config that applies, and the latest snapshot
+router.get('/request/:requestId', requireAuth, async function (req, res) {
+  try {
+    var loaded = await loadComponents(req.params.requestId);
+    if (!loaded) return res.status(404).json({ error: 'Request not found.' });
+    var jid = await activeJurisdiction();
+    var cfg = await pickConfig(jid);
+    var latest = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [req.params.requestId]);
+    res.json({
+      request: { id: loaded.request.id, number: loaded.request.request_number, isMrr: !!loaded.request.is_mrr },
+      components: loaded.components,
+      configProfile: cfg ? { id: cfg.id, name: cfg.name, status: cfg.status } : null,
+      latest: hydrate(latest)
+    });
+  } catch (e) { res.status(500).json({ error: 'Could not load estimate context.' }); }
+});
+
+// compute + persist an estimate snapshot from supplied per-component quantities
+router.post('/request/:requestId', requireAuth, async function (req, res) {
+  try {
+    var loaded = await loadComponents(req.params.requestId);
+    if (!loaded) return res.status(404).json({ error: 'Request not found.' });
+    var jid = await activeJurisdiction();
+    var cfgRow = await pickConfig(jid);
+    if (!cfgRow) return res.status(400).json({ error: 'No fee configuration exists for the active jurisdiction. Set one up under Fee Configuration first.' });
+    var config = {}; try { config = JSON.parse(cfgRow.config_json || '{}'); } catch (e) { config = {}; }
+
+    var b = req.body || {};
+    var request = {
+      components: (b.components || []).map(function (c) { return { id: c.id, label: c.label, recordType: c.recordType || null, quantities: c.quantities || {} }; }),
+      delivery: b.delivery || { method: 'email' },
+      certification: b.certification || null
+    };
+    var feeContext = engine.compute(config, request);
+    var R = feeContext.requestLevel;
+
+    var id = 'feeest-' + uuidv4().slice(0, 8);
+    await run(
+      'INSERT INTO request_fee_estimates (id, request_id, kind, config_profile_id, input_json, fee_context_json, total, deposit_due, notify_flag, created_by, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+      [id, req.params.requestId, 'estimate', cfgRow.id, JSON.stringify(request), JSON.stringify(feeContext), R.total, R.depositDue, R.estimateNotifyTriggered ? 1 : 0, (req.user && req.user.name) || (req.user && req.user.sub) || 'system', nowStr()]
+    );
+    await run('UPDATE requests SET estimated_fee = ? WHERE id = ?', [R.total, req.params.requestId]);
+
+    res.json({ estimate: { id: id, total: R.total, depositDue: R.depositDue, notify: R.estimateNotifyTriggered, feeContext: feeContext, configProfile: { id: cfgRow.id, name: cfgRow.name } } });
+  } catch (e) { res.status(500).json({ error: 'Could not compute estimate: ' + (e && e.message) }); }
+});
+
+module.exports = router;
