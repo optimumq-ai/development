@@ -18,6 +18,25 @@ function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/
 async function sysCfg(key, def) { var r = await get('SELECT value FROM system_config WHERE key = ?', [key]); return (r && r.value != null && r.value !== '') ? r.value : def; }
 async function latestEstimate(requestId) { return await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [requestId]); }
 
+// Projection ladder, rung 1: derive KNOWN page counts for a component (request/child id) from records
+// already in hand - paginated attached documents + selected records that resolve to a page count.
+// Where records are known, the page count is a fact, not an estimate (and search labor is ~0).
+async function knownQuantities(componentId) {
+  var att = await get('SELECT count(*) n, count(DISTINCT file_id) f FROM document_pages WHERE request_id = ?', [componentId]);
+  var attachedPages = (att && Number(att.n)) || 0;
+  var attachedFiles = (att && Number(att.f)) || 0;
+  var sel = await all('SELECT s.record_id, dd.page_count AS pages FROM request_selected_records s LEFT JOIN demo_documents dd ON dd.id = s.record_id WHERE s.request_id = ?', [componentId]);
+  var selectedPages = 0, selKnown = 0, selUnknown = 0;
+  (sel || []).forEach(function (r) { if (r.pages != null) { selectedPages += Number(r.pages); selKnown++; } else { selUnknown++; } });
+  var knownPages = attachedPages + selectedPages;
+  var parts = [];
+  if (attachedPages) parts.push(attachedPages + ' page' + (attachedPages === 1 ? '' : 's') + ' from ' + attachedFiles + ' attached document' + (attachedFiles === 1 ? '' : 's'));
+  if (selKnown) parts.push(selectedPages + ' page' + (selectedPages === 1 ? '' : 's') + ' across ' + selKnown + ' selected record' + (selKnown === 1 ? '' : 's'));
+  var basis = parts.join('; ');
+  if (selUnknown) basis += (basis ? '; ' : '') + selUnknown + ' selected record' + (selUnknown === 1 ? '' : 's') + ' with no page count available (enter manually)';
+  return { knownPages: knownPages, hasKnown: knownPages > 0, attachedPages: attachedPages, attachedFiles: attachedFiles, selectedPages: selectedPages, selectedUnknown: selUnknown, basis: basis };
+}
+
 async function activeJurisdiction() {
   var row = await get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'");
   return (row && row.value) || 'jur-tx';
@@ -65,6 +84,7 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
     var jid = await activeJurisdiction();
     var cfg = await pickConfig(jid);
     var latest = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [req.params.requestId]);
+    for (var ci = 0; ci < loaded.components.length; ci++) { loaded.components[ci].suggested = await knownQuantities(loaded.components[ci].id); }
     res.json({
       request: { id: loaded.request.id, number: loaded.request.request_number, isMrr: !!loaded.request.is_mrr },
       components: loaded.components,

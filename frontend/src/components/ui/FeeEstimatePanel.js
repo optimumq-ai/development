@@ -35,7 +35,7 @@ export default function FeeEstimatePanel(props) {
         var prev = li && li.filter(function (x) { return x.id === c.id; })[0];
         var pq = (prev && prev.quantities) || {};
         var m = (pq.media && pq.media[0]) || {};
-        init[c.id] = { searchHours: pq.searchHours || 0, reviewHours: pq.reviewHours || 0, bwPages: pq.bwPages || 0, colorPages: pq.colorPages || 0, oversizedPages: pq.oversizedPages || 0, mediaType: m.type || 'cd', mediaCount: m.count || 0 };
+        init[c.id] = { searchHours: pq.searchHours || 0, reviewHours: pq.reviewHours || 0, bwPages: (prev ? (pq.bwPages || 0) : ((c.suggested && c.suggested.hasKnown) ? c.suggested.knownPages : 0)), colorPages: pq.colorPages || 0, oversizedPages: pq.oversizedPages || 0, mediaType: m.type || 'cd', mediaCount: m.count || 0 };
       });
       setQty(init);
       if (r.data.latest && r.data.latest.feeContext) setResult(r.data.latest.feeContext);
@@ -95,6 +95,12 @@ export default function FeeEstimatePanel(props) {
             return (
               <div key={c.id} style={{ border: '1px solid #E5E7EB', borderRadius: '10px', padding: '14px', marginBottom: '12px' }}>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: '#111', marginBottom: '10px' }}>{c.label}{c.recordTypeName ? <span style={{ fontWeight: 400, color: '#9CA3AF' }}> &middot; {c.recordTypeName}</span> : null}</div>
+                {c.suggested && c.suggested.hasKnown ? (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', background: '#EFF6FF', border: '1px solid #DBEAFE', borderRadius: '8px', padding: '7px 10px', marginBottom: '10px', fontSize: '11.5px', color: '#1F4E79' }}>
+                    <span>Known page count: <strong>{c.suggested.knownPages}</strong> &middot; {c.suggested.basis}</span>
+                    <button onClick={function () { setQ(c.id, 'bwPages', c.suggested.knownPages); }} style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '11px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>Use</button>
+                  </div>
+                ) : null}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
                   {[['searchHours', 'Search hrs'], ['reviewHours', 'Review/redaction hrs'], ['bwPages', 'B&W pages'], ['colorPages', 'Color pages'], ['oversizedPages', 'Oversized pages']].map(function (f) {
                     return <div key={f[0]}><label style={lbl}>{f[1]}</label><input type="number" step="any" value={q[f[0]]} onChange={function (e) { setQ(c.id, f[0], e.target.value === '' ? 0 : parseFloat(e.target.value)); }} style={inp} /></div>;
