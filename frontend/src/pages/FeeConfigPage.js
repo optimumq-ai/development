@@ -9,7 +9,8 @@ var DEFAULT_CONFIG = {
   media: { cd: 1, dvd: 3, usb: 'actual' },
   delivery: { email: 0, pickup: 0, mail: 'actual', handling: 0 },
   certification: { rate: 0, unit: 'per_record' },
-  requestRules: { freePageAllowance: 0, freeLaborHours: 0, deMinimis: 0, minFee: 0, maxFee: null, deposit: { threshold: null, percent: null }, estimateNotifyThreshold: null }
+  requestRules: { freePageAllowance: 0, freeLaborHours: 0, deMinimis: 0, minFee: 0, maxFee: null, deposit: { threshold: null, percent: null }, estimateNotifyThreshold: null },
+  estimatePolicy: { requesterResponseDays: null, revisionNotifyPercent: null, estimateValidityDays: null }
 };
 function isObj(x) { return x && typeof x === 'object' && !Array.isArray(x); }
 function mergeDefaults(def, loaded) {
@@ -251,6 +252,16 @@ export default function FeeConfigPage() {
               <div><label style={lbl}>Deposit if estimate &gt;</label><Num value={config.requestRules.deposit.threshold} placeholder="none" onChange={function (v) { setCfg(function (c) { c.requestRules.deposit.threshold = v; }); }} /></div>
               <div><label style={lbl}>Deposit percent %</label><Num value={config.requestRules.deposit.percent} placeholder="e.g. 50" onChange={function (v) { setCfg(function (c) { c.requestRules.deposit.percent = v; }); }} /></div>
             </div>
+          </div>
+
+          <div style={card}>
+            <div style={sectionTitle}>Estimate handling policy</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+              <div><label style={lbl}>Requester response (business days)</label><Num value={config.estimatePolicy.requesterResponseDays} placeholder="e.g. 10" onChange={function (v) { setCfg(function (c) { if (!c.estimatePolicy) c.estimatePolicy = {}; c.estimatePolicy.requesterResponseDays = v; }); }} /></div>
+              <div><label style={lbl}>Re-notify if cost changes &gt; %</label><Num value={config.estimatePolicy.revisionNotifyPercent} placeholder="e.g. 20" onChange={function (v) { setCfg(function (c) { if (!c.estimatePolicy) c.estimatePolicy = {}; c.estimatePolicy.revisionNotifyPercent = v; }); }} /></div>
+              <div><label style={lbl}>Estimate valid (days)</label><Num value={config.estimatePolicy.estimateValidityDays} placeholder="e.g. 90" onChange={function (v) { setCfg(function (c) { if (!c.estimatePolicy) c.estimatePolicy = {}; c.estimatePolicy.estimateValidityDays = v; }); }} /></div>
+            </div>
+            <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '8px' }}>Captured from policy and shown on estimates; the response window appears in the requestor notice. Time-based enforcement (auto-withdraw, revised-estimate triggers) comes with the workflow phase.</div>
           </div>
         </div>
 

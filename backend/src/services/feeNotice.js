@@ -39,6 +39,7 @@ function buildNotice(request, feeContext, opts) {
   if (lines.length) body += 'This estimate is based on:\n' + lines.join('\n') + '\n\n';
   if (R.depositDue && R.depositDue > 0) body += 'A deposit of ' + money(R.depositDue) + ' is required before we begin processing. Once it is received we will proceed, and any remaining balance will be due upon completion.\n\n';
   else body += 'Please confirm you would like us to proceed at this estimated cost.\n\n';
+  if (opts.responseDays) body += 'Please respond within ' + opts.responseDays + ' business days, or this request may be considered withdrawn.\n\n';
   body += 'This is an estimate; the final cost may differ based on the records actually located and the time required. Any item shown as "actual cost to be determined" will be calculated once known. If you have questions, or would like to narrow your request to reduce the cost, please reply to this message.\n\n';
   body += 'Sincerely,\n' + agency + ' - Open Records';
 

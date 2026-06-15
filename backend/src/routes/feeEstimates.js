@@ -11,6 +11,7 @@ const { v4: uuidv4 } = require('uuid');
 const engine = require('../services/feeEngine');
 const email = require('../services/email');
 const feeNotice = require('../services/feeNotice');
+const emailTemplate = require('../services/emailTemplate');
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
@@ -113,7 +114,9 @@ router.get('/request/:requestId/notice', requireAuth, async function (req, res) 
     if (!snap) return res.status(400).json({ error: 'No saved estimate yet - calculate an estimate first.' });
     var feeContext = {}; try { feeContext = JSON.parse(snap.fee_context_json || '{}'); } catch (e) { feeContext = {}; }
     var agency = await sysCfg('agency_name', 'the City');
-    var notice = feeNotice.buildNotice(reqRow, feeContext, { agencyName: agency });
+    var responseDays = null;
+    if (snap.config_profile_id) { var prof = await get('SELECT config_json FROM fee_profiles WHERE id = ?', [snap.config_profile_id]); if (prof) { try { var cj = JSON.parse(prof.config_json || '{}'); responseDays = cj.estimatePolicy && cj.estimatePolicy.requesterResponseDays; } catch (e) {} } }
+    var notice = feeNotice.buildNotice(reqRow, feeContext, { agencyName: agency, responseDays: responseDays });
     var R = feeContext.requestLevel || {};
     res.json({ to: reqRow.requestor_email || null, requestorName: reqRow.requestor_name || null, subject: notice.subject, text: notice.text, total: R.total || 0, depositDue: R.depositDue || 0, notifyTriggered: !!R.estimateNotifyTriggered, notifiedAt: snap.notified_at || null, notifiedTo: snap.notified_to || null });
   } catch (e) { res.status(500).json({ error: 'Could not build the notice.' }); }
@@ -131,7 +134,8 @@ router.post('/request/:requestId/notice/send', requireAuth, async function (req,
     var subject = (req.body && req.body.subject) || 'Cost estimate for your public records request';
     var text = (req.body && req.body.text) || '';
     if (!text.trim()) return res.status(400).json({ error: 'The notice body is empty.' });
-    var html = '<div style="font-family:Arial,Helvetica,sans-serif;font-size:14px;color:#111;white-space:pre-wrap">' + escapeHtml(text) + '</div>';
+    var agencyName = await sysCfg('agency_name', 'Open Records');
+    var html = emailTemplate.wrap({ agencyName: agencyName, contentHtml: emailTemplate.textToHtml(text) });
     var result = await email.send({ to: to, subject: subject, text: text, html: html });
     var ok = !!(result && result.sent);
     var now = nowStr();
