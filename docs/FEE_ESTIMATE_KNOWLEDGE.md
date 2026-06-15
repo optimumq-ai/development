@@ -325,3 +325,59 @@ auto-estimate-from-content differentiation thesis, pending confirmation.
 - ILLINOIS portal-download fee doctrine.
 - Any competitor that DOES auto-generate estimates from content (behind demos?).
 - Independent VERIFICATION of every citation above against primary sources.
+
+---
+
+## 14. Research Pass 2 (Grok, 2026-06-12) + cross-pass reconciliation - CITATIONS TO VERIFY
+
+Provenance: second independent AI pass (Grok), compared against Pass 1 (ChatGPT, Section 13).
+Citations still unverified. Where two independent passes AGREE, treat as higher-confidence; where
+they DIVERGE, verify before relying.
+
+### A. AGREEMENTS across both passes (higher confidence)
+- Standard is "good-faith / reasonable" estimate; NO quantified statutory margin-of-error in either
+  pass. Protection comes from RECONCILIATION, not a tolerated error band.
+- Redaction simple/medium/complex tiers have NO formal legal sanction; only ad-hoc/practical use
+  (per-page or per-minute). => keep as an internal estimating aid + disclaimer + audit trail.
+- Absorbing the overage is NOT required (rare/optional). Refunds of overpayment common; additional
+  billing / pause-for-more varies; not-to-exceed optional.
+- COMPETITORS do not (in public docs) auto-generate estimates from record CONTENT; estimating is
+  staff-driven/templated even where workflow/invoicing/deposits are automated. Two independent
+  passes agree - strongest support yet for the auto-estimate-from-content differentiation (same
+  public-docs-only caveat).
+- California limits to "direct cost of duplication"; portal fees generally capped at the statutory
+  copy rate; Illinois electronic/portal treatment is unsettled/debated.
+- Itemization required in some jurisdictions (e.g., Michigan); no jurisdiction mandates disclosing
+  the METHOD ("based on averages/experience").
+
+### B. DIVERGENCES / conflicts to verify
+- Averages & experience-based: Grok reads them as "generally permissible" (cites a Texas AG cost-
+  estimate MODEL and Massachusetts good-faith regs); ChatGPT found "limited primary authority."
+  Likely reconciliation: AVERAGING within a good-faith estimate is supported; formal STATISTICAL
+  SAMPLING is thin. VERIFY: Texas AG cost model; Massachusetts public-records regs.
+- Colorado rounding DIRECTION: Grok says round to NEAREST 0.1 hour; ChatGPT says round DOWN to 0.10
+  hour. Conflict - VERIFY (affects every CO labor bill).
+
+### C. NET-NEW leads from Grok (concrete + configurable; VERIFY)
+- TEXAS PIA, Tex. Gov't Code Sec. 552.2615: mandatory WRITTEN ITEMIZED estimate when charges exceed
+  $40, BEFORE work; requester has 10 BUSINESS DAYS to respond or the request is considered
+  withdrawn. Deposit/bond when est > $100 (or > $50 for a small agency). Re-notify when costs change
+  by more than 20%. (Consistent with the general structure of the Texas PIA as understood here -
+  still verify the figures.) This one framework yields several engine knobs: estimate-trigger $,
+  response-window days, deposit-trigger $, and a revision re-consent % threshold.
+- ILLINOIS FOIA, 5 ILCS 140/6: response includes an estimate of time and fees; agency may require
+  full payment before copying.
+- MASSACHUSETTS public-records regs: cited as explicitly blessing detailed GOOD-FAITH estimates
+  based on staff EXPERIENCE - potentially the strongest express authority for the profile/averages
+  approach. VERIFY (likely M.G.L. c. 66 / 950 CMR 32.00; Supervisor of Records).
+- ESTIMATE EXPIRATION: Texas 10 business days; Virginia ~30 days (vs Pass 1's Michigan 48-day
+  practitioner figure). Configurable per jurisdiction.
+- GEORGIA DPS: per-page or per-minute redaction/review charging (a practical, non-tiered example).
+
+### D. Still open after two passes
+- A quantified margin-of-error standard (both passes found none; likely truly absent).
+- Formal authority for statistical SAMPLING (vs. averaging) of page counts.
+- CALIFORNIA deposit/advance-payment specifics (neither pass nailed these).
+- ILLINOIS portal/electronic fee doctrine (unsettled in both).
+- Any competitor that DOES auto-generate from content (behind demos/customer-only docs?).
+- Independent VERIFICATION of all citations in Sections 13-14.
