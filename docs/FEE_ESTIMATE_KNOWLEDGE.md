@@ -381,3 +381,56 @@ they DIVERGE, verify before relying.
 - ILLINOIS portal/electronic fee doctrine (unsettled in both).
 - Any competitor that DOES auto-generate from content (behind demos/customer-only docs?).
 - Independent VERIFICATION of all citations in Sections 13-14.
+
+---
+
+## 15. Consolidated: architecture + estimate-method selection (the single source for "how it fits")
+
+### Architecture: ONE engine, two wraps (not three engines)
+- FEE ENGINE (deterministic calculator). Generic; configured per jurisdiction from the city's
+  uploaded fee policy (AI extracts config w/ citations + confidence -> human approves; NO AI at
+  runtime). Computes in two tiers:
+  - CHILD/component level: per-record-type unit charges (labor, pages, media).
+  - PARENT/request level: once-per-request rules on the aggregated total (free allowances, de
+    minimis, floor/ceiling, delivery, certification, deposit thresholds). Parent-level application
+    defeats split-to-dodge-the-cap.
+- TWO MODES of the SAME engine: ESTIMATE = engine on PROJECTED quantities; FINAL = engine on
+  ACTUAL quantities. There is no separate "estimate engine."
+- The estimate run produces FOUR outputs: (1) itemized estimate; (2) deposit due (from deposit
+  policy: threshold/%/tiers); (3) whether the notification/consent threshold is crossed; (4) a
+  stamp of HOW it was derived (disclosure). These drive the workflow stagegate.
+- ACCOUNTING/LEDGER WRAP: captures actuals (work timer + known page counts), tracks deposits/
+  payments/balance, applies reconciliation policy (refund / bill difference / pause / not-to-
+  exceed), holds immutable engine output + separate adjustment ledger, and feeds actuals back into
+  record-type profiles.
+
+### Estimate-method selection (per component) - the projection front-end
+Walk most-automatic -> manual; stop at the first method that clears a confidence bar.
+0. Record type flagged ALWAYS-FREE -> estimate $0. Done.
+1. Records ALREADY SELECTED/KNOWN (portal pick or chosen from public/fulfilled index) -> page
+   count is a FACT, not a projection. Copies + media exact; search labor ~0; only redaction effort
+   is soft (see star). Near-deterministic, no-human bucket (the high-volume one).
+2. Else (records described, must be located): does the record type have a usable ESTIMATION
+   PROFILE (avg quantities + variance + sample size; populated by historical actuals, discovery
+   sampling, or human-expert seed)?
+   - Profile exists AND low variance/adequate sample -> use it. Auto-estimate, no human.
+   - Profile exists BUT high variance, or request atypical/large/high-dollar -> go to 3.
+   - No profile -> go to 4.
+3. Cheap SCOPING signal? (matching-item count x profile avg pages/item) -> project from it. Auto if
+   confidence holds; else -> 4.
+4. MANUAL estimate (fallback): no profile, or low confidence, or atypical/high-dollar/novel, or
+   redaction judged complex w/ no profile. If the type recurs, the human estimate SEEDS the profile
+   (quantities, not dollars) so the next one is automatic.
+
+star. REDACTION EFFORT (soft variable in both selected + projected paths): minutes from the type's
+complexity tier, an AI content scan of the actual records (exempt-span count -> minutes), or
+historical actuals. Simple/medium w/ confidence -> auto; complex or no-profile/low-confidence ->
+human. Tier is an INTERNAL aid (no legal sanction) always trued-up to actual via the timer.
+
+THE GATE under all steps: auto-vs-human is decided by confidence/variance + override triggers
+(dollar size, novelty). Low uncertainty -> automatic (no stall); high uncertainty/stakes -> human.
+PURPOSE = FLOW: maximize requests that never need a human estimate step.
+
+### Still UNDESIGNED (the one real gap)
+- The MANUAL ESTIMATE CREATION experience itself (the screen/steps a staffer uses at Step 4).
+  Named, not yet designed.
