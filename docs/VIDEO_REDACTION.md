@@ -90,3 +90,23 @@ overwhelmingly law-enforcement products (Axon Redaction Assistant, Veritone Reda
 Motorola/WatchGuard, Genetec). Non-police video (security/CCTV, meeting recordings) is handled ad hoc
 - IT/Facilities/Clerk, often manual or via the system/streaming vendor, often already public or
 withheld under security exemptions.
+
+---
+
+## Phase 1 progress (build log)
+
+- ffmpeg/ffprobe installed on droplet (apt, v4.4.2). This was THE missing piece.
+- Built `backend/src/services/avRedactionApply.js` - server-side "burn":
+  - `apply({inputPath, outputPath, zones})` -> re-encodes a redacted copy (h264/aac, +faststart).
+  - Video zones: `black` => `drawbox` solid fill (gold-standard, irreversible); `blur` => crop+boxblur+overlay; `pixelate`/`mosaic` => crop+neighbor-scale down/up+overlay. Any unknown style FAILS SAFE to solid black.
+  - All zones time-gated via `enable='between(t,start,end)'`.
+  - Audio zones: silence via `volume=0` gated to the window (tone/noise map to silence for now - content is removed either way).
+  - Coordinate scaling: zones drawn in refWidth/refHeight are scaled to the actual probed video resolution.
+  - Reusable as a library (require) and as a CLI (node avRedactionApply.js in out zones.json).
+- VERIFIED end-to-end on a generated clip: valid output; black-box region = pure black (000000) inside its time window, normal color (non-black) outside it, control region untouched; pixelate overlay + audio-silence ran clean.
+
+### Remaining Phase 1
+- Pull the two standalone HTML workbench files into the repo + code-review (needs access to the uploaded files; not reachable from the droplet over SSH).
+- Port the synthetic workbench into the app as a staff screen (draw/adjust zones -> export zone JSON).
+- Backend "internal redaction" endpoint: given a request's A/V file + zone JSON, run the burn, store output as a redacted request_files row, preserve original, record provenance (parallels the external check-in flow).
+- Later (Phase 2/3): real-video detection, DB persistence of zones, job queue for heavy compute, detect-all-frames + tracking.
