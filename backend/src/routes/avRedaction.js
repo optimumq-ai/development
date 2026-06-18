@@ -6,6 +6,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const { v4: uuidv4 } = require('uuid');
+const avApply = require('../services/avRedactionApply');
 
 const UPLOAD_DIR = path.join(__dirname, '../../../uploads');
 if (!fs.existsSync(UPLOAD_DIR)) fs.mkdirSync(UPLOAD_DIR, { recursive: true });
@@ -85,6 +86,41 @@ router.post('/task/:taskId/cancel', requireAuth, async function(req, res) {
   await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?, ?, ?, ?, ?, ?)',
     [uuidv4(), task.request_id, req.user.sub, req.user.name || 'Staff', 'AV_REDACTION_CANCELLED', 'Cancelled external redaction send-out']);
   res.json({ success: true });
+});
+
+// POST apply-internal: run the in-system burn on a stored original, store redacted copy
+router.post('/request/:requestId/apply-internal', requireAuth, async function(req, res) {
+  var requestId = req.params.requestId;
+  var originalFileId = req.body && req.body.original_file_id;
+  var zones = (req.body && req.body.zones) || {};
+  if (!originalFileId) return res.status(400).json({ error: 'original_file_id is required' });
+  var request = await get('SELECT id FROM requests WHERE id = ?', [requestId]);
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  var orig = await get('SELECT * FROM request_files WHERE id = ? AND request_id = ?', [originalFileId, requestId]);
+  if (!orig) return res.status(400).json({ error: 'Original file not found on this request' });
+  var inputPath = path.join(UPLOAD_DIR, orig.filename);
+  if (!fs.existsSync(inputPath)) return res.status(400).json({ error: 'Original file is missing on disk' });
+  var outName = uuidv4() + '.mp4';
+  var outputPath = path.join(UPLOAD_DIR, outName);
+  try {
+    var result = await avApply.apply({ inputPath: inputPath, outputPath: outputPath, zones: zones });
+    var stat = fs.statSync(outputPath);
+    var baseName = (orig.original_name || 'media').replace(/\.[^.]+$/, '');
+    var redactedName = baseName + ' (redacted).mp4';
+    var fileId = uuidv4();
+    await run("INSERT INTO request_files (id, request_id, filename, original_name, mimetype, size, status, uploaded_by, uploaded_at) VALUES (?, ?, ?, ?, 'video/mp4', ?, 'redacted', ?, datetime('now'))",
+      [fileId, requestId, outName, redactedName, stat.size, req.user.sub]);
+    var taskId = uuidv4();
+    await run("INSERT INTO av_redaction_tasks (id, request_id, original_file_id, mode, status, redacted_file_id, attested, zones_json, started_by, started_at, checked_in_by, checked_in_at) VALUES (?, ?, ?, 'internal', 'checked_in', ?, 1, ?, ?, datetime('now'), ?, datetime('now'))",
+      [taskId, requestId, originalFileId, fileId, JSON.stringify(zones), req.user.sub, req.user.sub]);
+    await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?, ?, ?, ?, ?, ?)',
+      [uuidv4(), requestId, req.user.sub, req.user.name || 'Staff', 'AV_REDACTION_APPLIED', 'Applied in-system redaction (' + (result.videoCount||0) + ' video, ' + (result.audioCount||0) + ' audio zones): ' + redactedName]);
+    var task = await get('SELECT * FROM av_redaction_tasks WHERE id = ?', [taskId]);
+    res.json({ success: true, task: task, fileId: fileId, result: result });
+  } catch (e) {
+    try { if (fs.existsSync(outputPath)) fs.unlinkSync(outputPath); } catch (ignore) {}
+    res.status(500).json({ error: 'Redaction failed: ' + e.message });
+  }
 });
 
 module.exports = router;

@@ -377,3 +377,5 @@ CREATE TABLE IF NOT EXISTS av_redaction_tasks (
   checked_in_by TEXT,
   checked_in_at TEXT
 );
+
+ALTER TABLE av_redaction_tasks ADD COLUMN IF NOT EXISTS zones_json TEXT;
