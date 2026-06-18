@@ -123,4 +123,22 @@ router.post('/request/:requestId/apply-internal', requireAuth, async function(re
   }
 });
 
+// POST release-as-is: reviewer confirms media is releasable without redaction (not_required path)
+router.post('/request/:requestId/release-as-is', requireAuth, async function(req, res) {
+  var requestId = req.params.requestId;
+  var originalFileId = (req.body && req.body.original_file_id) || null;
+  var note = (req.body && req.body.note) || null;
+  var attested = (req.body && (req.body.attested === true || req.body.attested === '1' || req.body.attested === 'true')) ? 1 : 0;
+  if (!attested) return res.status(400).json({ error: 'Attestation is required to release without redaction' });
+  var request = await get('SELECT id FROM requests WHERE id = ?', [requestId]);
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  var taskId = uuidv4();
+  await run("INSERT INTO av_redaction_tasks (id, request_id, original_file_id, mode, status, attested, note, started_by, started_at, checked_in_by, checked_in_at) VALUES (?, ?, ?, 'not_required', 'checked_in', 1, ?, ?, datetime('now'), ?, datetime('now'))",
+    [taskId, requestId, originalFileId, note, req.user.sub, req.user.sub]);
+  await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?, ?, ?, ?, ?, ?)',
+    [uuidv4(), requestId, req.user.sub, req.user.name || 'Staff', 'AV_RELEASED_AS_IS', 'Confirmed media releasable without redaction (attested)' + (note ? (': ' + note) : '')]);
+  var task = await get('SELECT * FROM av_redaction_tasks WHERE id = ?', [taskId]);
+  res.json({ success: true, task: task });
+});
+
 module.exports = router;

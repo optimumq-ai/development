@@ -10,19 +10,31 @@ function fmtBytes(n){
 }
 
 var MODE = {
-  internal: { label:'Internal', tone:{bg:'#EFF6FF',fg:'#1F4E79',bd:'#BFDBFE'}, desc:'Default: media is redacted inside Optimum Q (annotate, review, then the system writes the redactions into a new copy). The in-system workbench is a later phase; for now you can still handle a clip externally below.' },
-  external: { label:'External', tone:{bg:'#FEF3C7',fg:'#92400E',bd:'#FCD34D'}, desc:'Default: media is redacted in your agency\u2019s own tool (for example Axon or Veritone). The request is held while the file is out, then you check the redacted copy back in here. The original is always kept.' },
-  not_required: { label:'Not required', tone:{bg:'#DEF7EC',fg:'#03543F',bd:'#84E1BC'}, desc:'Default: this media type is presumed releasable. A reviewer still confirms before release. The confirmation gate is a later phase; for now you can handle a clip externally below if needed.' }
+  internal: { label:'Internal', tone:{bg:'#EFF6FF',fg:'#1F4E79',bd:'#BFDBFE'}, desc:'Media is redacted inside Optimum Q. Mark the boxes, and the system writes the redactions permanently into a new copy. The original is always kept.' },
+  external: { label:'External', tone:{bg:'#FEF3C7',fg:'#92400E',bd:'#FCD34D'}, desc:'Media is redacted in your agency\u2019s own tool (for example Axon or Veritone). The request is held while the file is out, then the redacted copy is checked back in here. The original is always kept.' },
+  not_required: { label:'Not required', tone:{bg:'#DEF7EC',fg:'#03543F',bd:'#84E1BC'}, desc:'This media type is presumed releasable. A reviewer still confirms before anything goes out \u2014 nothing is released automatically.' }
 };
+var ORDER = ['external','internal','not_required'];
 
 export default function AvRedactionPanel(props){
   var requestId = props.requestId;
   var [data, setData] = useState(null);
   var [loading, setLoading] = useState(true);
   var [err, setErr] = useState('');
-  var [selFile, setSelFile] = useState('');
-  var [note, setNote] = useState('');
   var [busy, setBusy] = useState(false);
+
+  // external send-out
+  var [extFile, setExtFile] = useState('');
+  var [extNote, setExtNote] = useState('');
+  // internal apply
+  var [intFile, setIntFile] = useState('');
+  var [zonesObj, setZonesObj] = useState(null);
+  var [zonesName, setZonesName] = useState('');
+  // not-required release
+  var [nrFile, setNrFile] = useState('');
+  var [nrNote, setNrNote] = useState('');
+  var [nrAttest, setNrAttest] = useState(false);
+  // per-task check-in
   var [checkin, setCheckin] = useState({});
 
   var load = useCallback(async function(){
@@ -44,29 +56,53 @@ export default function AvRedactionPanel(props){
 
   async function startOut(){
     setBusy(true);
-    try { await api.post('/av-redaction/request/'+requestId+'/start', { original_file_id: selFile||null, note: note||null }); setSelFile(''); setNote(''); await load(); }
+    try { await api.post('/av-redaction/request/'+requestId+'/start', { original_file_id: extFile||null, note: extNote||null }); setExtFile(''); setExtNote(''); await load(); }
     catch(e){ alert((e.response&&e.response.data&&e.response.data.error)||'Could not send out.'); }
     setBusy(false);
   }
 
+  function onZonesFile(e){
+    var f = e.target.files && e.target.files[0];
+    if(!f){ setZonesObj(null); setZonesName(''); return; }
+    var reader = new FileReader();
+    reader.onload = function(){
+      try { var obj = JSON.parse(reader.result); setZonesObj(obj); setZonesName(f.name); }
+      catch(err){ alert('That file is not a valid redaction plan (expected JSON).'); setZonesObj(null); setZonesName(''); }
+    };
+    reader.readAsText(f);
+  }
+
+  async function applyInternal(){
+    if(!intFile){ alert('Choose the original file to redact.'); return; }
+    if(!zonesObj){ alert('Load the redaction plan (zones file) first.'); return; }
+    setBusy(true);
+    try { await api.post('/av-redaction/request/'+requestId+'/apply-internal', { original_file_id: intFile, zones: zonesObj }); setIntFile(''); setZonesObj(null); setZonesName(''); await load(); }
+    catch(e){ alert((e.response&&e.response.data&&e.response.data.error)||'Redaction failed.'); }
+    setBusy(false);
+  }
+
+  async function releaseAsIs(){
+    if(!nrAttest){ alert('Please confirm the media can be released without redaction.'); return; }
+    setBusy(true);
+    try { await api.post('/av-redaction/request/'+requestId+'/release-as-is', { original_file_id: nrFile||null, note: nrNote||null, attested:true }); setNrFile(''); setNrNote(''); setNrAttest(false); await load(); }
+    catch(e){ alert((e.response&&e.response.data&&e.response.data.error)||'Could not record release.'); }
+    setBusy(false);
+  }
+
+  function setC(taskId, patch){ setCheckin(function(prev){ var n=Object.assign({},prev); n[taskId]=Object.assign({},prev[taskId]||{},patch); return n; }); }
   async function cancelTask(taskId){
     if(!window.confirm('Cancel this send-out? The hold will be removed.')) return;
     setBusy(true);
     try { await api.post('/av-redaction/task/'+taskId+'/cancel'); await load(); } catch(e){ alert('Cancel failed.'); }
     setBusy(false);
   }
-
-  function setC(taskId, patch){ setCheckin(function(prev){ var n=Object.assign({},prev); n[taskId]=Object.assign({},prev[taskId]||{},patch); return n; }); }
-
   async function doCheckin(taskId){
     var c = checkin[taskId]||{};
     if(!c.file){ alert('Choose the redacted file first.'); return; }
     if(!c.attested){ alert('You must confirm the file is properly redacted before checking it in.'); return; }
     setBusy(true);
     try {
-      var fd = new FormData();
-      fd.append('file', c.file);
-      fd.append('attested', '1');
+      var fd = new FormData(); fd.append('file', c.file); fd.append('attested','1');
       await api.post('/av-redaction/task/'+taskId+'/checkin', fd);
       setCheckin(function(prev){ var n=Object.assign({},prev); delete n[taskId]; return n; });
       await load();
@@ -81,10 +117,60 @@ export default function AvRedactionPanel(props){
   var files = data.files || [];
   var openTasks = (data.tasks||[]).filter(function(t){ return t.status==='out'; });
   var doneTasks = (data.tasks||[]).filter(function(t){ return t.status==='checked_in'; });
+
   var lbl = {fontSize:'11px',fontWeight:'600',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:'6px'};
   var card = {background:'white',border:'1px solid #E5E7EB',borderRadius:'10px',padding:'18px',marginBottom:'16px'};
+  var inp = {width:'100%',padding:'8px 10px',border:'1px solid #D1D5DB',borderRadius:'8px',fontSize:'13px',boxSizing:'border-box'};
   var btn = {padding:'8px 14px',borderRadius:'8px',border:'1px solid #D1D5DB',background:'white',color:'#374151',fontSize:'13px',fontWeight:'600',cursor:'pointer'};
-  var btnPri = {padding:'8px 16px',borderRadius:'8px',border:'none',background:'#1F4E79',color:'white',fontSize:'13px',fontWeight:'600',cursor:'pointer'};
+  var btnPri = {padding:'9px 16px',borderRadius:'8px',border:'none',background:'#1F4E79',color:'white',fontSize:'13px',fontWeight:'600',cursor:'pointer'};
+
+  function fileSelect(val, set, optional){
+    return <select value={val} onChange={function(e){set(e.target.value);}} style={Object.assign({},inp,{marginBottom:'12px'})}>
+      <option value="">{optional?'Not stored in Optimum Q / select later':'Select the file...'}</option>
+      {files.map(function(f){ return <option key={f.id} value={f.id}>{f.original_name}</option>; })}
+    </select>;
+  }
+
+  function actionBody(key){
+    if(key==='external'){
+      return <div>
+        <p style={{fontSize:'12px',color:'#6B7280',margin:'0 0 14px',lineHeight:'1.5'}}>Marks the request on hold. Redact the file in your agency tool, then check the redacted copy back in below.</p>
+        <div style={lbl}>Original file</div>
+        {fileSelect(extFile, setExtFile, true)}
+        <div style={lbl}>Note (optional)</div>
+        <input value={extNote} onChange={function(e){setExtNote(e.target.value);}} placeholder="e.g. body-cam clip, 00:00-04:30" style={Object.assign({},inp,{marginBottom:'14px'})}/>
+        <button onClick={startOut} disabled={busy} style={Object.assign({},btnPri,{opacity:busy?0.6:1})}>Send out for redaction</button>
+      </div>;
+    }
+    if(key==='internal'){
+      return <div>
+        <p style={{fontSize:'12px',color:'#6B7280',margin:'0 0 14px',lineHeight:'1.5'}}>Pick the original and load a redaction plan (the boxes-and-timestamps file exported from the workbench). The system burns the redactions into a new copy and keeps the original.</p>
+        <div style={lbl}>Original file</div>
+        {fileSelect(intFile, setIntFile, false)}
+        <div style={lbl}>Redaction plan</div>
+        <input type="file" accept="application/json,.json" onChange={onZonesFile} style={{fontSize:'13px',display:'block',marginBottom:zonesName?'6px':'14px'}}/>
+        {zonesName && <div style={{fontSize:'12px',color:'#03543F',marginBottom:'14px'}}>Loaded: {zonesName}</div>}
+        <button onClick={applyInternal} disabled={busy} style={Object.assign({},btnPri,{opacity:busy?0.6:1})}>{busy?'Applying redaction...':'Apply redaction'}</button>
+        <div style={{fontSize:'11px',color:'#9CA3AF',marginTop:'10px',lineHeight:'1.5'}}>In-app drawing workbench is coming; for now this accepts a plan exported from the standalone tool.</div>
+      </div>;
+    }
+    // not_required
+    return <div>
+      <p style={{fontSize:'12px',color:'#6B7280',margin:'0 0 14px',lineHeight:'1.5'}}>If you have reviewed the media and it can go out as-is, confirm below. This is recorded with your name and time \u2014 it is never automatic.</p>
+      <div style={lbl}>File (optional)</div>
+      {fileSelect(nrFile, setNrFile, true)}
+      <div style={lbl}>Note (optional)</div>
+      <input value={nrNote} onChange={function(e){setNrNote(e.target.value);}} placeholder="e.g. public council meeting, no PII present" style={Object.assign({},inp,{marginBottom:'12px'})}/>
+      <label style={{display:'flex',alignItems:'flex-start',gap:'8px',fontSize:'12px',color:'#374151',marginBottom:'12px',cursor:'pointer'}}>
+        <input type="checkbox" checked={nrAttest} onChange={function(e){setNrAttest(e.target.checked);}} style={{marginTop:'2px'}}/>
+        <span>I have reviewed this media and confirm it can be released without redaction.</span>
+      </label>
+      <button onClick={releaseAsIs} disabled={busy} style={Object.assign({},btnPri,{opacity:busy?0.6:1})}>Confirm and release as-is</button>
+    </div>;
+  }
+
+  var titles = { external:'Send out for external redaction', internal:'Redact in-system', not_required:'Release without redaction' };
+  var ordered = [data.mode].concat(ORDER.filter(function(k){ return k!==data.mode; }));
 
   return (
     <div>
@@ -119,17 +205,22 @@ export default function AvRedactionPanel(props){
         )}
       </div>
 
-      <div style={card}>
-        <div style={{fontSize:'14px',fontWeight:'700',marginBottom:'4px'}}>Send media out for external redaction</div>
-        <p style={{fontSize:'12px',color:'#6B7280',margin:'0 0 14px',lineHeight:'1.5'}}>Marks the request on hold. Redact the file in your agency tool, then check the redacted copy back in below.</p>
-        <div style={lbl}>Original file (optional)</div>
-        <select value={selFile} onChange={function(e){setSelFile(e.target.value);}} style={{width:'100%',padding:'8px 10px',border:'1px solid #D1D5DB',borderRadius:'8px',fontSize:'13px',marginBottom:'12px'}}>
-          <option value="">Not stored in Optimum Q / select later</option>
-          {files.map(function(f){ return <option key={f.id} value={f.id}>{f.original_name}</option>; })}
-        </select>
-        <div style={lbl}>Note (optional)</div>
-        <input value={note} onChange={function(e){setNote(e.target.value);}} placeholder="e.g. body-cam clip, 00:00-04:30" style={{width:'100%',padding:'8px 10px',border:'1px solid #D1D5DB',borderRadius:'8px',fontSize:'13px',marginBottom:'14px',boxSizing:'border-box'}}/>
-        <button onClick={startOut} disabled={busy} style={Object.assign({},btnPri,{opacity:busy?0.6:1})}>Send out for redaction</button>
+      <div style={Object.assign({},card,{borderColor:m.tone.bd})}>
+        <div style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:'4px'}}>
+          <div style={{fontSize:'14px',fontWeight:'700'}}>{titles[ordered[0]]}</div>
+          <span style={{fontSize:'10px',fontWeight:'700',background:m.tone.bg,color:m.tone.fg,borderRadius:'8px',padding:'2px 8px'}}>AGENCY DEFAULT</span>
+        </div>
+        {actionBody(ordered[0])}
+      </div>
+
+      <div style={{marginBottom:'16px'}}>
+        <div style={{fontSize:'12px',fontWeight:'700',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.05em',margin:'0 4px 10px'}}>Other handling options</div>
+        {[ordered[1],ordered[2]].map(function(k){
+          return <div key={k} style={Object.assign({},card,{background:'#FAFAFA'})}>
+            <div style={{fontSize:'13px',fontWeight:'700',marginBottom:'4px',color:'#374151'}}>{titles[k]}</div>
+            {actionBody(k)}
+          </div>;
+        })}
       </div>
 
       {openTasks.length>0 && (
@@ -159,15 +250,16 @@ export default function AvRedactionPanel(props){
 
       {doneTasks.length>0 && (
         <div style={card}>
-          <div style={{fontSize:'14px',fontWeight:'700',marginBottom:'12px'}}>Completed redactions</div>
+          <div style={{fontSize:'14px',fontWeight:'700',marginBottom:'12px'}}>Completed</div>
           {doneTasks.map(function(t){
+            var isRelease = (t.mode==='not_required') || !t.redacted_file_id;
             return <div key={t.id} style={{border:'1px solid #84E1BC',background:'#F3FBF7',borderRadius:'8px',padding:'12px 14px',marginBottom:'8px'}}>
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:'12px'}}>
                 <div style={{minWidth:0}}>
-                  <div style={{fontSize:'13px',fontWeight:'600',color:'#03543F'}}>Redacted copy checked in &middot; attested</div>
-                  <div style={{fontSize:'11px',color:'#6B7280',marginTop:'2px'}}>{t.redacted_name||'file'} &middot; {t.checked_in_at}</div>
+                  <div style={{fontSize:'13px',fontWeight:'600',color:'#03543F'}}>{isRelease ? 'Released without redaction \u00b7 attested' : 'Redacted copy ready \u00b7 attested'} <span style={{fontSize:'10px',fontWeight:'700',color:'#6B7280'}}>({t.mode})</span></div>
+                  <div style={{fontSize:'11px',color:'#6B7280',marginTop:'2px'}}>{isRelease ? (t.note||'No note') : (t.redacted_name||'file')} &middot; {t.checked_in_at}</div>
                 </div>
-                {t.redacted_file_id && <button onClick={function(){download(t.redacted_file_id, t.redacted_name);}} style={btn}>Download redacted</button>}
+                {!isRelease && t.redacted_file_id && <button onClick={function(){download(t.redacted_file_id, t.redacted_name);}} style={btn}>Download redacted</button>}
               </div>
             </div>;
           })}
