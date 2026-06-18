@@ -56,3 +56,37 @@ Future: a real connector (push original out, poll, pull redacted file back) ride
   pattern - deferred.
 Build note: external pause+check-in is the first concrete piece of workflow hold/resume; build
   self-contained now (like the review screen), wire into routing/My-Tasks during the routing phase.
+
+## "Release as-is" safety model + team-level AV mode (added 2026-06-17 per Kevin)
+Core rule: a taxonomy "no redaction required" flag is a TYPE-LEVEL PRESUMPTION, not an INSTANCE-LEVEL
+guarantee. The specific file can always differ (a bystander, a minor, a screen showing PII, a spoken
+account number). The flag sets the default path and lowers effort; it NEVER authorizes silent
+auto-release. The only true bypass of human eyes is content already vetted and sitting in the PUBLIC
+REPOSITORY (vetting already happened there). Distinguish "no redaction required" from "no review
+required" - presumed-releasable still gets a fast, INFORMED human confirmation.
+
+How the reviewer knows, without leaving the system:
+1. Taxonomy carries presumption + WHAT-TO-WATCH-FOR: the record type points at the exemptions that
+   could apply (Exemption Reference Library), so even a "usually public" type says "check for
+   bystanders / displayed documents / minors."
+2. Advisory CONTENT SCAN of the specific file: the same face/object detection that powers redaction,
+   run non-committally, reports what is actually present ("4 faces, a screen-share segment, speech")
+   - an in-system heads-up before deciding.
+3. In-system preview + a CONFIRMATION / ATTESTATION recorded before release.
+
+Maturity gradient: early on the per-request confirmation IS the vetting; each confirmed release can be
+promoted into the public repository, so the next request for it is instant and never re-reviewed.
+Safety does not depend on maturity; effort drops as vetted content accumulates.
+
+Team-level AV redaction MODE (refines the earlier system/jurisdiction toggle): redaction
+responsibility/tooling is fragmented by department (PD bodycam -> external tool like Axon/Veritone;
+IT/Facilities security video -> varies; Clerk meeting video -> usually released as-is under
+open-meetings law). So AV redaction mode is set per RESPONSIBLE TEAM, as a jurisdiction DEFAULT with
+team OVERRIDE. Values: internal | external | not_required. "not_required" = the presumptively-
+releasable path above (still confirmed), never a silent skip.
+
+Market note (domain knowledge; verify when search available): commercial video redaction tools are
+overwhelmingly law-enforcement products (Axon Redaction Assistant, Veritone Redact, CaseGuard,
+Motorola/WatchGuard, Genetec). Non-police video (security/CCTV, meeting recordings) is handled ad hoc
+- IT/Facilities/Clerk, often manual or via the system/streaming vendor, often already public or
+withheld under security exemptions.
