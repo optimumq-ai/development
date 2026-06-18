@@ -40,3 +40,19 @@ Phase 3: detect-all-frames + tracking; rules-driven pre-population (exemption li
 - CDN dep @vladmandic/face-api@1.7.13 (self-host for air-gapped/on-prem).
 - HTML files not yet code-reviewed or in repo; review + commit before integrating. Assessed from
   SUMMARY.md + PROMPT_FOR_OPUS.md.
+
+## Internal vs External redaction MODE (admin toggle) - added 2026-06-17 per Kevin
+Admin setting selects how a jurisdiction handles VIDEO/AUDIO redaction (documents stay internal):
+- INTERNAL: Optimum Q built-in workbench + server-side ffmpeg burn (Phases above).
+- EXTERNAL: city uses its own third-party AV redaction tool. For now (no connector) = manual
+  pause/check-in: (1) request PAUSES at the AV-redaction step (held); (2) staff downloads the
+  original; (3) redaction happens offline in the city's tool; (4) staff CHECKS IN the redacted file;
+  OQ stores it as the redacted output, keeps the original, records who/when + "external" provenance,
+  and the workflow RESUMES.
+Granularity: a config setting; system-level to start, can move to per-jurisdiction profile later.
+Defensibility: external mode trusts the city's tool - include a reviewer attestation on check-in for
+  chain of custody. Original always preserved.
+Future: a real connector (push original out, poll, pull redacted file back) rides the connector
+  pattern - deferred.
+Build note: external pause+check-in is the first concrete piece of workflow hold/resume; build
+  self-contained now (like the review screen), wire into routing/My-Tasks during the routing phase.
