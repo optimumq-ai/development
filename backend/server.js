@@ -46,6 +46,7 @@ app.get('/api/config/public', async function(req,res){var db=require('./src/db')
 app.use('/api/classify', require('./src/routes/classify'));
 app.use('/api/extract', require('./src/routes/extract'));
 app.use('/api/files', require('./src/routes/files'));
+app.use('/api/av-redaction', require('./src/routes/avRedaction'));
 app.use('/api/public', require('./src/routes/publicChat'));
 app.use('/api/agent-rules', require('./src/routes/agentRules'));
 app.use('/api/taxonomy', require('./src/routes/taxonomy'));

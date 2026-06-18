@@ -362,3 +362,18 @@ CREATE TABLE IF NOT EXISTS request_fee_estimates (
 -- (fee estimate notice tracking)
 ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS notified_at TEXT;
 ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS notified_to TEXT;
+
+CREATE TABLE IF NOT EXISTS av_redaction_tasks (
+  id TEXT PRIMARY KEY,
+  request_id TEXT,
+  original_file_id TEXT,
+  mode TEXT DEFAULT 'external',
+  status TEXT DEFAULT 'out',
+  redacted_file_id TEXT,
+  attested INTEGER DEFAULT 0,
+  note TEXT,
+  started_by TEXT,
+  started_at TEXT,
+  checked_in_by TEXT,
+  checked_in_at TEXT
+);
