@@ -72,6 +72,7 @@ export default function ConfigurationPage() {
     { key:'fees', label:'Fees & Deadlines' },
     { key:'notifications', label:'Notifications' },
     { key:'email', label:'Email' },
+    { key:'redaction', label:'Redaction' },
     { key:'agent', label:'Agent Rules' },
   ];
 
@@ -327,6 +328,23 @@ export default function ConfigurationPage() {
               <label style={lbl}>New Request Alert Recipient</label>
               <input type="email" value={config.new_request_alert_email||''} onChange={function(e){set('new_request_alert_email',e.target.value);}} style={inp} placeholder="openrecords-team@cityofdallas.gov"/>
               <div style={hint}>Email address that receives an alert each time a new request is submitted. If blank, the Public Records Contact Email is used.</div>
+            </div>
+          </div>
+        )}
+        {activeTab === 'redaction' && (
+          <div style={section}>
+            <div style={sectionTitle}>Video &amp; Audio Redaction</div>
+            <p style={{fontSize:'13px',color:'#6B7280',margin:'0 0 16px',lineHeight:'1.5'}}>
+              How this jurisdiction handles redaction of video and audio records. (Documents are always handled within Optimum Q.) This is the jurisdiction default; individual teams will be able to override it once team routing is configured.
+            </p>
+            <div>
+              <label style={lbl}>Default video/audio redaction mode</label>
+              <select value={config.av_redaction_mode||'internal'} onChange={function(e){set('av_redaction_mode',e.target.value);}} style={inp}>
+                <option value="internal">Internal - redact with Optimum Q's built-in tools</option>
+                <option value="external">External - city uses its own tool; Optimum Q holds the request and resumes on check-in</option>
+                <option value="not_required">Not required - presumptively releasable (still reviewed and confirmed before release)</option>
+              </select>
+              <div style={hint}>Internal: annotate and burn redactions inside Optimum Q. External: download the original, redact in your own tool (e.g. a body-cam vendor's software), then check the redacted file back in. Not required: for records that are public by default (e.g. council meeting video) - a reviewer still confirms before release; nothing is auto-released on this setting alone.</div>
             </div>
           </div>
         )}
