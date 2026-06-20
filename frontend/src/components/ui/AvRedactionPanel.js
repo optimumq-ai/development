@@ -24,6 +24,7 @@ export default function AvRedactionPanel(props){
   var [loading, setLoading] = useState(true);
   var [err, setErr] = useState('');
   var [busy, setBusy] = useState(false);
+  var [uploading, setUploading] = useState(false);
 
   // external send-out
   var [extFile, setExtFile] = useState('');
@@ -54,6 +55,14 @@ export default function AvRedactionPanel(props){
       var a = document.createElement('a'); a.href=url; a.download=name||'download';
       document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
     } catch(e){ alert('Download failed.'); }
+  }
+
+  async function uploadFile(file){
+    if(!file) return;
+    setUploading(true);
+    try { var fd=new FormData(); fd.append('file', file); await api.post('/files/upload/'+requestId, fd); await load(); }
+    catch(e){ alert((e.response&&e.response.data&&e.response.data.error)||'Upload failed.'); }
+    setUploading(false);
   }
 
   async function startOut(){
@@ -190,7 +199,13 @@ export default function AvRedactionPanel(props){
       )}
 
       <div style={card}>
-        <div style={{fontSize:'14px',fontWeight:'700',marginBottom:'12px'}}>Files on this request</div>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:'12px'}}>
+          <div style={{fontSize:'14px',fontWeight:'700'}}>Files on this request</div>
+          <label style={{cursor:'pointer'}}>
+            <span style={Object.assign({},btn,{display:'inline-block'})}>{uploading?'Uploading...':'Upload a file'}</span>
+            <input type="file" disabled={uploading} onChange={function(e){ var f=e.target.files&&e.target.files[0]; e.target.value=''; uploadFile(f); }} style={{display:'none'}}/>
+          </label>
+        </div>
         {files.length===0 ? (
           <div style={{fontSize:'13px',color:'#9CA3AF'}}>No files uploaded to this request yet.</div>
         ) : (
