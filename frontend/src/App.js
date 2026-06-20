@@ -22,6 +22,7 @@ import StructuredRedactionFieldsPage from './pages/StructuredRedactionFieldsPage
 import ReleasedRecordsPage from './pages/ReleasedRecordsPage';
 import MassRedactionPage from './pages/MassRedactionPage';
 import FeeConfigPage from './pages/FeeConfigPage';
+import AvWorkbenchPage from './pages/AvWorkbenchPage';
 import PublicPortalPage from './pages/PublicPortalPage';
 
 function Guard({ c }) {
@@ -64,6 +65,7 @@ export default function App() {
           <Route path="redaction-rules" element={<RedactionRulesPage />} />
           <Route path="redact/:fileId" element={<RedactionWorkspacePage />} />
           <Route path="redact/:fileId/review" element={<RedactionReviewPage />} />
+          <Route path="av-redact/:requestId/:fileId" element={<AvWorkbenchPage />} />
           <Route path="redact-fields/:fileId" element={<StructuredRedactionFieldsPage />} />
           <Route path="released" element={<ReleasedRecordsPage />} />
           <Route path="mass-redaction" element={<MassRedactionPage />} />

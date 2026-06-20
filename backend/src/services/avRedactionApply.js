@@ -26,8 +26,8 @@ function fmt(n){ return (Math.round((n||0)*1000)/1000).toString(); }
 
 function buildFilterComplex(zones, dims){
   var vw = dims.width, vh = dims.height;
-  var refW = zones.refWidth || zones.sourceWidth || vw || 1;
-  var refH = zones.refHeight || zones.sourceHeight || vh || 1;
+  var refW = zones.refWidth || zones.sourceWidth || zones.videoWidth || vw || 1;
+  var refH = zones.refHeight || zones.sourceHeight || zones.videoHeight || vh || 1;
   var sx = vw / refW, sy = vh / refH;
 
   var vids = (zones.videoRedactions || []).map(function(z){
@@ -45,7 +45,7 @@ function buildFilterComplex(zones, dims){
   var cur = '0:v';
   var blackChain = [];
   vids.forEach(function(z){
-    if (z.style!=='blur' && z.style!=='pixelate' && z.style!=='mosaic'){
+    if (z.style!=='blur' && z.style!=='pixelate' && z.style!=='mosaic' && z.style!=='pixel'){
       // fail-safe: any unknown style becomes a solid black box (more redaction, not less)
       blackChain.push("drawbox=x="+z.x+":y="+z.y+":w="+z.w+":h="+z.h+":color=black:t=fill:enable='between(t,"+fmt(z.s)+","+fmt(z.e)+")'");
     }
@@ -54,7 +54,7 @@ function buildFilterComplex(zones, dims){
 
   var oi = 0;
   vids.forEach(function(z){
-    if (z.style!=='blur' && z.style!=='pixelate' && z.style!=='mosaic') return;
+    if (z.style!=='blur' && z.style!=='pixelate' && z.style!=='mosaic' && z.style!=='pixel') return;
     var main='m'+oi, src='s'+oi, proc='p'+oi, out='vo'+oi; oi++;
     parts.push('['+cur+']split=2['+main+']['+src+']');
     var chain;

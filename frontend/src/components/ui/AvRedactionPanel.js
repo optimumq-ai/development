@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import api from '../../lib/api';
+import { useNavigate } from 'react-router-dom';
 
 function fmtBytes(n){
   if(n===null||n===undefined||n==='') return '';
@@ -18,6 +19,7 @@ var ORDER = ['external','internal','not_required'];
 
 export default function AvRedactionPanel(props){
   var requestId = props.requestId;
+  var navigate = useNavigate();
   var [data, setData] = useState(null);
   var [loading, setLoading] = useState(true);
   var [err, setErr] = useState('');
@@ -144,14 +146,15 @@ export default function AvRedactionPanel(props){
     }
     if(key==='internal'){
       return <div>
-        <p style={{fontSize:'12px',color:'#6B7280',margin:'0 0 14px',lineHeight:'1.5'}}>Pick the original and load a redaction plan (the boxes-and-timestamps file exported from the workbench). The system burns the redactions into a new copy and keeps the original.</p>
+        <p style={{fontSize:'12px',color:'#6B7280',margin:'0 0 14px',lineHeight:'1.5'}}>Pick the original file, then open the workbench to draw the redactions. The system burns them into a new copy and keeps the original.</p>
         <div style={lbl}>Original file</div>
         {fileSelect(intFile, setIntFile, false)}
-        <div style={lbl}>Redaction plan</div>
-        <input type="file" accept="application/json,.json" onChange={onZonesFile} style={{fontSize:'13px',display:'block',marginBottom:zonesName?'6px':'14px'}}/>
-        {zonesName && <div style={{fontSize:'12px',color:'#03543F',marginBottom:'14px'}}>Loaded: {zonesName}</div>}
-        <button onClick={applyInternal} disabled={busy} style={Object.assign({},btnPri,{opacity:busy?0.6:1})}>{busy?'Applying redaction...':'Apply redaction'}</button>
-        <div style={{fontSize:'11px',color:'#9CA3AF',marginTop:'10px',lineHeight:'1.5'}}>In-app drawing workbench is coming; for now this accepts a plan exported from the standalone tool.</div>
+        <button onClick={function(){ if(!intFile){alert('Choose the original file first.');return;} navigate('/av-redact/'+requestId+'/'+intFile); }} style={Object.assign({},btnPri,{opacity:intFile?1:0.6})}>Open drawing workbench</button>
+        <div style={{borderTop:'1px solid #F3F4F6',margin:'16px 0 12px'}}></div>
+        <div style={{fontSize:'12px',color:'#6B7280',marginBottom:'8px'}}>Or load a plan exported elsewhere:</div>
+        <input type="file" accept="application/json,.json" onChange={onZonesFile} style={{fontSize:'13px',display:'block',marginBottom:zonesName?'6px':'12px'}}/>
+        {zonesName && <div style={{fontSize:'12px',color:'#03543F',marginBottom:'12px'}}>Loaded: {zonesName}</div>}
+        <button onClick={applyInternal} disabled={busy||!zonesObj} style={Object.assign({},btn,{opacity:(busy||!zonesObj)?0.6:1})}>{busy?'Applying...':'Apply loaded plan'}</button>
       </div>;
     }
     // not_required
