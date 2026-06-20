@@ -5,6 +5,8 @@ import api from '../lib/api';
 var V_TYPES = [['face','Face'],['plate','License plate'],['manual','Manual area']];
 var V_STYLES = [['black','Black box'],['pixel','Pixelate'],['mosaic','Mosaic']];
 var A_STYLES = [['silence','Silence'],['tone','Tone (beep)'],['noise','Noise']];
+var FACEAPI_LIB = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js';
+var MODEL_URIS = ['https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model','https://vladmandic.github.io/face-api/model','https://justadudewhohacks.github.io/face-api.js/models'];
 
 function fmt(s){ s=s||0; var m=Math.floor(s/60); var sec=(s%60); return m+':'+(sec<10?'0':'')+sec.toFixed(1); }
 function rid(){ return 'z'+Math.random().toString(36).slice(2,9); }
@@ -16,6 +18,7 @@ export default function AvWorkbenchPage(){
   var videoRef = useRef(null);
   var canvasRef = useRef(null);
   var draw = useRef({active:false,sx:0,sy:0,cx:0,cy:0});
+  var faceReady = useRef(false);
 
   var [fileName, setFileName] = useState('');
   var [videoUrl, setVideoUrl] = useState('');
@@ -32,6 +35,10 @@ export default function AvWorkbenchPage(){
   var [aStyle, setAStyle] = useState('silence');
   var [aReds, setAReds] = useState([]);
   var [busy, setBusy] = useState(false);
+
+  var [detecting, setDetecting] = useState(false);
+  var [progress, setProgress] = useState(0);
+  var [detectMsg, setDetectMsg] = useState('');
 
   useEffect(function(){
     var revoked=false, url='';
@@ -74,11 +81,9 @@ export default function AvWorkbenchPage(){
           var active = t>=z.startTime && t<=z.endTime;
           ctx.lineWidth=Math.max(2,c.width/400);
           if(active){ ctx.fillStyle='rgba(0,0,0,0.45)'; ctx.fillRect(z.x,z.y,z.w,z.h); }
-          ctx.strokeStyle = active?'#16A34A':'rgba(140,140,140,0.7)';
+          ctx.strokeStyle = active?(z.auto?'#2563EB':'#16A34A'):'rgba(140,140,140,0.6)';
           ctx.strokeRect(z.x,z.y,z.w,z.h);
-          ctx.fillStyle = active?'#16A34A':'rgba(140,140,140,0.9)';
-          ctx.font='bold '+Math.max(12,c.width/55)+'px sans-serif';
-          ctx.fillText(z.label||z.type, z.x+3, Math.max(14,z.y-4));
+          if(active){ ctx.fillStyle=z.auto?'#2563EB':'#16A34A'; ctx.font='bold '+Math.max(12,c.width/55)+'px sans-serif'; ctx.fillText(z.label||z.type, z.x+3, Math.max(14,z.y-4)); }
         });
         if(draw.current.active){
           var d=draw.current; ctx.setLineDash([6,4]); ctx.strokeStyle='#1F4E79'; ctx.lineWidth=Math.max(2,c.width/400);
@@ -104,9 +109,65 @@ export default function AvWorkbenchPage(){
   function clampT(val){ var n=parseFloat(val); if(isNaN(n)) n=0; if(n<0)n=0; if(duration&&n>duration)n=duration; return +n.toFixed(3); }
   function delV(id){ setVReds(function(p){return p.filter(function(z){return z.id!==id;});}); }
   function setVField(id,field,val){ setVReds(function(p){return p.map(function(z){ if(z.id!==id) return z; var o=Object.assign({},z); o[field]=val; return o; });}); }
+  function delTrack(tid){ setVReds(function(p){return p.filter(function(z){return z.trackId!==tid;});}); }
+  function setTrackStyle(tid,val){ setVReds(function(p){return p.map(function(z){ if(z.trackId!==tid) return z; var o=Object.assign({},z); o.style=val; return o; });}); }
+  function clearAuto(){ setVReds(function(p){return p.filter(function(z){return !z.auto;});}); }
   function addAudio(){ var v=videoRef.current; var t=v?v.currentTime:0; var dur=v?v.duration:0; setAReds(function(p){return p.concat([{id:rid(),startTime:+t.toFixed(3),endTime:+Math.min(dur,t+3).toFixed(3),style:aStyle}]);}); }
   function delA(id){ setAReds(function(p){return p.filter(function(z){return z.id!==id;});}); }
   function setAField(id,field,val){ setAReds(function(p){return p.map(function(z){ if(z.id!==id) return z; var o=Object.assign({},z); o[field]=val; return o; });}); }
+
+  function loadScript(src){ return new Promise(function(res,rej){ if(window.faceapi){res();return;} var s=document.createElement('script'); s.src=src; s.onload=function(){res();}; s.onerror=function(){rej(new Error('Could not load the face-detection library (network blocked?)'));}; document.body.appendChild(s); }); }
+  async function ensureFaceApi(){
+    if(window.faceapi && faceReady.current) return window.faceapi;
+    await loadScript(FACEAPI_LIB);
+    if(!window.faceapi) throw new Error('Face-detection library did not initialize');
+    if(!faceReady.current){
+      var ok=false, lastErr;
+      for(var i=0;i<MODEL_URIS.length;i++){ try{ await window.faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URIS[i]); ok=true; break; }catch(e){ lastErr=e; } }
+      if(!ok) throw (lastErr||new Error('Could not load the face model'));
+      faceReady.current=true;
+    }
+    return window.faceapi;
+  }
+  function seekTo(v,t){ return new Promise(function(res){ var done=false; function on(){ if(done)return; done=true; v.removeEventListener('seeked',on); setTimeout(res,25); } v.addEventListener('seeked',on); try{ v.currentTime=t; }catch(e){ done=true; res(); } setTimeout(function(){ if(!done){ done=true; v.removeEventListener('seeked',on); res(); } },1500); }); }
+
+  async function autoDetect(){
+    var v=videoRef.current; if(!v||!ready){ alert('Load a video first.'); return; }
+    setDetecting(true); setProgress(0); setDetectMsg('Loading detector...');
+    var wasTime=v.currentTime;
+    try {
+      var faceapi=await ensureFaceApi();
+      v.pause(); setPlaying(false);
+      var dur=v.duration||0; var step = dur>90 ? 1.0 : (dur>30 ? 0.6 : 0.4);
+      var opts=new faceapi.TinyFaceDetectorOptions({inputSize:416, scoreThreshold:0.4});
+      var samples=[]; for(var t=0;t<dur;t+=step) samples.push(+t.toFixed(3));
+      var prev=[]; var nextId=1; var out=[];
+      for(var i=0;i<samples.length;i++){
+        var st=samples[i];
+        await seekTo(v, st);
+        var dets=[]; try { dets=await faceapi.detectAllFaces(v, opts); } catch(e){ dets=[]; }
+        setProgress(Math.round((i+1)/samples.length*100)); setDetectMsg('Scanning '+fmt(st)+' / '+fmt(dur)+'  ('+out.length+' so far)');
+        var cur=[];
+        dets.forEach(function(d){
+          var b=d.box; var cx=b.x+b.width/2, cy=b.y+b.height/2;
+          var match=null, best=1e9;
+          prev.forEach(function(p){ var dx=p.cx-cx, dy=p.cy-cy; var dist=Math.sqrt(dx*dx+dy*dy); var tol=Math.max(b.width,b.height,p.w,p.h); if(dist<tol && dist<best){ best=dist; match=p; } });
+          var tid = match ? match.tid : ('t'+(nextId++));
+          var padX=b.width*0.12, padY=b.height*0.12;
+          var x=Math.max(0,Math.round(b.x-padX)), y=Math.max(0,Math.round(b.y-padY));
+          var w=Math.round(b.width+padX*2), h=Math.round(b.height+padY*2);
+          out.push({ id:rid(), trackId:tid, auto:true, x:x, y:y, w:w, h:h, type:'face', style:'black', label:'Face '+tid.replace('t',''), startTime:st, endTime:+Math.min(dur, st+step).toFixed(3), detected:true });
+          cur.push({tid:tid, cx:cx, cy:cy, w:b.width, h:b.height});
+        });
+        prev=cur;
+      }
+      setVReds(function(p){ return p.filter(function(z){return !z.auto;}).concat(out); });
+      var nTracks = nextId-1;
+      setDetectMsg(nTracks>0 ? ('Found '+nTracks+' face track(s), '+out.length+' segments.') : 'No faces detected. Try drawing boxes manually.');
+      try { await seekTo(v, wasTime); } catch(e){}
+    } catch(e){ alert('Auto-detect failed: '+e.message); setDetectMsg(''); }
+    setDetecting(false); setProgress(0);
+  }
 
   function buildPlan(){
     var v=videoRef.current;
@@ -123,7 +184,7 @@ export default function AvWorkbenchPage(){
   }
   async function applyNow(){
     if(vReds.length===0 && aReds.length===0){ alert('Add at least one redaction first.'); return; }
-    if(!window.confirm('Apply '+vReds.length+' video and '+aReds.length+' audio redaction(s)? This creates a redacted copy; the original is kept.')) return;
+    if(!window.confirm('Apply '+vReds.length+' video and '+aReds.length+' audio redaction segment(s)? This creates a redacted copy; the original is kept.')) return;
     setBusy(true);
     try { await api.post('/av-redaction/request/'+requestId+'/apply-internal', { original_file_id:fileId, zones:buildPlan() }); navigate('/requests/'+requestId); }
     catch(e){ alert((e.response&&e.response.data&&e.response.data.error)||'Redaction failed.'); setBusy(false); }
@@ -135,6 +196,11 @@ export default function AvWorkbenchPage(){
   var btnPri={padding:'10px 18px',borderRadius:'8px',border:'none',background:'#1F4E79',color:'white',fontSize:'14px',fontWeight:'700',cursor:'pointer'};
   var btn={padding:'8px 14px',borderRadius:'8px',border:'1px solid #D1D5DB',background:'white',color:'#374151',fontSize:'13px',fontWeight:'600',cursor:'pointer'};
   var card={background:'white',border:'1px solid #E5E7EB',borderRadius:'10px',padding:'16px',marginBottom:'16px'};
+
+  var manualReds = vReds.filter(function(z){ return !z.trackId; });
+  var trackMap = {};
+  vReds.forEach(function(z){ if(z.trackId){ if(!trackMap[z.trackId]) trackMap[z.trackId]={id:z.trackId,label:z.label,style:z.style,n:0,start:1e9,end:0}; var tr=trackMap[z.trackId]; tr.n++; tr.start=Math.min(tr.start,z.startTime); tr.end=Math.max(tr.end,z.endTime); tr.style=z.style; } });
+  var tracks = Object.keys(trackMap).map(function(k){return trackMap[k];}).sort(function(a,b){return a.start-b.start;});
 
   return (
     <div style={{padding:'24px',maxWidth:'1100px',margin:'0 auto'}}>
@@ -154,20 +220,49 @@ export default function AvWorkbenchPage(){
             <input type="range" min={0} max={duration||0} step={0.05} value={currentTime} onChange={function(e){seek(parseFloat(e.target.value));}} style={{flex:1}}/>
             <span style={{fontSize:'12px',color:'#6B7280',minWidth:'92px',textAlign:'right'}}>{fmt(currentTime)} / {fmt(duration)}</span>
           </div>
-          <div style={{...card,marginTop:'12px'}}>
+
+          <div style={{...card,marginTop:'12px',background:'#F8FAFF',borderColor:'#BFDBFE'}}>
+            <div style={{display:'flex',alignItems:'center',gap:'12px',flexWrap:'wrap'}}>
+              <button onClick={autoDetect} disabled={detecting||!ready} style={{...btnPri,opacity:(detecting||!ready)?0.6:1}}>{detecting?'Detecting...':'Auto-detect faces'}</button>
+              {vReds.some(function(z){return z.auto;}) && <button onClick={clearAuto} disabled={detecting} style={btn}>Clear auto-detections</button>}
+              {detectMsg && <span style={{fontSize:'12px',color:'#1F4E79'}}>{detectMsg}</span>}
+            </div>
+            {detecting && <div style={{height:'6px',background:'#DBEAFE',borderRadius:'3px',marginTop:'10px',overflow:'hidden'}}><div style={{height:'100%',width:progress+'%',background:'#1F4E79'}}></div></div>}
+            <div style={{fontSize:'11px',color:'#6B7280',marginTop:'10px',lineHeight:'1.5'}}>Auto-detect finds <strong>candidate</strong> faces for you to confirm. It can miss faces (turned away, blurry, distant), so always review the whole clip yourself. It does not detect license plates.</div>
+          </div>
+
+          <div style={card}>
             <div style={{display:'flex',gap:'14px',alignItems:'flex-end',flexWrap:'wrap'}}>
               <div><div style={lbl}>Type</div><select value={vType} onChange={function(e){setVType(e.target.value);}} style={sel}>{V_TYPES.map(function(o){return <option key={o[0]} value={o[0]}>{o[1]}</option>;})}</select></div>
               <div><div style={lbl}>Style</div><select value={vStyle} onChange={function(e){setVStyle(e.target.value);}} style={sel}>{V_STYLES.map(function(o){return <option key={o[0]} value={o[0]}>{o[1]}</option>;})}</select></div>
-              <div style={{fontSize:'12px',color:'#6B7280',paddingBottom:'8px'}}>Click and drag on the video to draw a box.</div>
+              <div style={{fontSize:'12px',color:'#6B7280',paddingBottom:'8px'}}>Click and drag on the video to draw a box manually.</div>
             </div>
           </div>
         </div>
 
         <div style={{flex:'1 1 380px',minWidth:'300px'}}>
           <div style={card}>
-            <div style={{fontSize:'14px',fontWeight:'700',marginBottom:'10px'}}>Video redactions ({vReds.length})</div>
-            {vReds.length===0 ? <div style={{fontSize:'13px',color:'#9CA3AF'}}>None yet. Draw a box on the video.</div> :
-              vReds.map(function(z){ return (
+            <div style={{fontSize:'14px',fontWeight:'700',marginBottom:'10px'}}>Detected faces ({tracks.length})</div>
+            {tracks.length===0 ? <div style={{fontSize:'13px',color:'#9CA3AF'}}>None. Run auto-detect, or draw boxes manually below.</div> :
+              tracks.map(function(tr){ return (
+                <div key={tr.id} style={{border:'1px solid #DBEAFE',background:'#F8FAFF',borderRadius:'8px',padding:'10px',marginBottom:'8px'}}>
+                  <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'6px'}}>
+                    <div style={{fontSize:'13px',fontWeight:'600',color:'#1F4E79'}}>{tr.label} <span style={{fontSize:'11px',color:'#6B7280'}}>{fmt(tr.start)}&ndash;{fmt(tr.end)} &middot; {tr.n} seg</span></div>
+                    <div style={{display:'flex',gap:'6px'}}>
+                      <button onClick={function(){seek(tr.start);}} style={{...btn,padding:'3px 8px',fontSize:'12px'}}>Jump</button>
+                      <button onClick={function(){delTrack(tr.id);}} style={{...btn,padding:'3px 8px',fontSize:'12px',color:'#9B1C1C',borderColor:'#FDE8E8'}}>Keep visible</button>
+                    </div>
+                  </div>
+                  <select value={tr.style} onChange={function(e){setTrackStyle(tr.id,e.target.value);}} style={{...sel,padding:'4px 7px',fontSize:'12px'}}>{V_STYLES.map(function(o){return <option key={o[0]} value={o[0]}>{o[1]}</option>;})}</select>
+                </div>
+              );})
+            }
+          </div>
+
+          <div style={card}>
+            <div style={{fontSize:'14px',fontWeight:'700',marginBottom:'10px'}}>Manual boxes ({manualReds.length})</div>
+            {manualReds.length===0 ? <div style={{fontSize:'13px',color:'#9CA3AF'}}>None yet. Draw a box on the video.</div> :
+              manualReds.map(function(z){ return (
                 <div key={z.id} style={{border:'1px solid #F3F4F6',borderRadius:'8px',padding:'10px',marginBottom:'8px'}}>
                   <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'6px'}}>
                     <div style={{fontSize:'13px',fontWeight:'600'}}>{z.label} <span style={{fontSize:'11px',color:'#9CA3AF'}}>({z.w}x{z.h})</span></div>
@@ -185,6 +280,7 @@ export default function AvWorkbenchPage(){
               );})
             }
           </div>
+
           <div style={card}>
             <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'10px'}}>
               <div style={{fontSize:'14px',fontWeight:'700'}}>Audio redactions ({aReds.length})</div>
@@ -205,11 +301,12 @@ export default function AvWorkbenchPage(){
               );})
             }
           </div>
+
           <div style={{display:'flex',gap:'10px',alignItems:'center'}}>
             <button onClick={applyNow} disabled={busy} style={{...btnPri,opacity:busy?0.6:1}}>{busy?'Applying redaction...':'Apply redaction'}</button>
             <button onClick={exportPlan} style={btn}>Export plan</button>
           </div>
-          <div style={{fontSize:'11px',color:'#9CA3AF',marginTop:'10px',lineHeight:'1.5'}}>Applying creates a redacted copy on the request and keeps the original. Boxes are stored in the video's native pixels.</div>
+          <div style={{fontSize:'11px',color:'#9CA3AF',marginTop:'10px',lineHeight:'1.5'}}>Applying creates a redacted copy on the request and keeps the original. "Keep visible" removes a detected face from redaction (e.g. an officer).</div>
         </div>
       </div>
       )}
