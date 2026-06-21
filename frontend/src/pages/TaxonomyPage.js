@@ -26,9 +26,30 @@ export default function TaxonomyPage() {
   var [filter, setFilter] = useState('all');
   var [collapsed, setCollapsed] = useState({});
   var [editor, setEditor] = useState(null);
+  var [semQ, setSemQ] = useState('');
+  var [semResults, setSemResults] = useState(null);
+  var [semLoading, setSemLoading] = useState(false);
+  var [semErr, setSemErr] = useState('');
 
   useEffect(function() { load(); }, []);
 
+  async function runSemantic() {
+    var query = semQ.trim();
+    if (!query) return;
+    setSemLoading(true); setSemErr(''); setSemResults(null);
+    try {
+      var r = await api.post('/semantic-search/record-types', { query: query, topN: 8 });
+      setSemResults(r.data.results || []);
+    } catch (e) {
+      setSemErr((e.response && e.response.data && e.response.data.error) || 'Search failed');
+    }
+    setSemLoading(false);
+  }
+  function openType(id) {
+    var t = null;
+    for (var i = 0; i < types.length; i++) { if (types[i].id === id) { t = types[i]; break; } }
+    if (t) setEditor({ mode: 'edit', initial: t });
+  }
   async function load() {
     setLoading(true);
     try {
@@ -99,6 +120,50 @@ export default function TaxonomyPage() {
             </div>
           );
         })}
+      </div>
+
+      <div style={{ background: 'white', border: '1px solid #DBEAFE', borderRadius: '12px', padding: '16px 18px' }}>
+        <div style={{ fontSize: '14px', fontWeight: '700', color: '#1F4E79', marginBottom: '4px' }}>AI semantic search</div>
+        <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '10px' }}>Describe a request the way a citizen might &mdash; the assistant finds the closest record types by meaning, not just matching words.</div>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+          <input value={semQ} onChange={function(e){ setSemQ(e.target.value); }} onKeyDown={function(e){ if (e.key === 'Enter') runSemantic(); }}
+            placeholder='e.g. "body cam video from a traffic stop last March"'
+            style={{ flex: '1 1 320px', padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '14px', outline: 'none' }} />
+          <button onClick={runSemantic} disabled={semLoading || !semQ.trim()}
+            style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: (semLoading || !semQ.trim()) ? '#9CA3AF' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '600', cursor: (semLoading || !semQ.trim()) ? 'default' : 'pointer' }}>
+            {semLoading ? 'Searching...' : 'Search'}
+          </button>
+          {(semResults !== null || semErr) ? <button onClick={function(){ setSemResults(null); setSemErr(''); setSemQ(''); }} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#6B7280', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Clear</button> : null}
+        </div>
+        {semErr ? <div style={{ fontSize: '13px', color: '#9B1C1C', marginTop: '10px' }}>{semErr}</div> : null}
+        {(semResults !== null && !semErr) ? (
+          semResults.length === 0 ? <div style={{ fontSize: '13px', color: '#9CA3AF', marginTop: '10px' }}>No matches found.</div> : (
+          <div style={{ marginTop: '12px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+            {semResults.map(function(r, idx) {
+              var pct = Math.max(0, Math.min(100, Math.round(r.score * 100)));
+              var full = null; for (var i = 0; i < types.length; i++) { if (types[i].id === r.id) { full = types[i]; break; } }
+              var catName = full ? (full.category_name || '') : '';
+              return (
+                <div key={r.id} onClick={function(){ openType(r.id); }} title="Open this record type"
+                  style={{ display: 'flex', alignItems: 'center', gap: '12px', padding: '10px 12px', border: '1px solid #E5E7EB', borderRadius: '8px', cursor: 'pointer', background: idx === 0 ? '#F8FAFF' : 'white' }}>
+                  <div style={{ width: '20px', fontSize: '12px', fontWeight: '700', color: '#9CA3AF' }}>{idx + 1}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '14px', fontWeight: '600', color: '#111' }}>{r.name}</div>
+                    {catName ? <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{catName}</div> : null}
+                  </div>
+                  <div style={{ width: '120px', flexShrink: 0 }}>
+                    <div style={{ height: '6px', background: '#E5E7EB', borderRadius: '3px', overflow: 'hidden' }}>
+                      <div style={{ width: pct + '%', height: '100%', background: '#1F4E79' }}></div>
+                    </div>
+                    <div style={{ fontSize: '11px', color: '#6B7280', textAlign: 'right', marginTop: '2px' }}>{r.score.toFixed(2)} match</div>
+                  </div>
+                </div>
+              );
+            })}
+            <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '2px' }}>Ranked by semantic similarity. Click a result to open that record type.</div>
+          </div>
+          )
+        ) : null}
       </div>
 
       <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'center' }}>
