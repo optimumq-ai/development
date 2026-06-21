@@ -4,6 +4,7 @@ import api from '../lib/api';
 import RecordsPanel from '../components/ui/RecordsPanel';
 import FeeEstimatePanel from '../components/ui/FeeEstimatePanel';
 import AvRedactionPanel from '../components/ui/AvRedactionPanel';
+import DocSearchPanel from '../components/ui/DocSearchPanel';
 
 const STAGES = ['intake','record_search','redaction_review','fee_review','awaiting_payment','custodian_retrieval','delivery'];
 const STAGE_LABELS = { intake:'Intake Review', record_search:'Record Search', redaction_review:'Redaction Review', fee_review:'Fee Review', awaiting_payment:'Awaiting Payment', custodian_retrieval:'Custodian Retrieval', delivery:'Delivery' };
@@ -182,7 +183,7 @@ export default function RequestWorkspacePage() {
       </div>
 
       <div style={{display:'flex',borderBottom:'2px solid #E5E7EB',gap:'0'}}>
-        {[['details','Request Details'],['records','Records'],['fees','Fees']].concat(request.av_applicable?[['redaction','Redaction for Audio/Video']]:[]).concat([['history','Audit History'],['actions','Actions']]).map(function(item){
+        {[['details','Request Details'],['records','Records'],['documents','Search Documents'],['fees','Fees']].concat(request.av_applicable?[['redaction','Redaction for Audio/Video']]:[]).concat([['history','Audit History'],['actions','Actions']]).map(function(item){
           return <button key={item[0]} onClick={function(){setTab(item[0]);}} style={{padding:'12px 20px',background:'none',border:'none',borderBottom:tab===item[0]?'2px solid #1F4E79':'2px solid transparent',marginBottom:'-2px',fontSize:'14px',fontWeight:tab===item[0]?'700':'500',color:tab===item[0]?'#1F4E79':'#6B7280',cursor:'pointer'}}>{item[1]}</button>;
         })}
       </div>
@@ -243,6 +244,12 @@ export default function RequestWorkspacePage() {
       {tab==='records'&&(
         <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px'}}>
           <RecordsPanel requestId={request.id} stage={request.stage}/>
+        </div>
+      )}
+
+      {tab==='documents'&&(
+        <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px'}}>
+          <DocSearchPanel requestId={request.id}/>
         </div>
       )}
 

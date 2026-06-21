@@ -73,3 +73,11 @@ OTHER OPEN THREADS:
 - Fee polish: projection rungs 2/3, accounting wrap (deposits/payments/ledger), estimate/final reconciliation, fee_profiles versioning-on-activate, AI extraction from uploaded ordinance PDF (paste-only today), manual estimate-creation screen.
 
 SECURITY: Anthropic API key ALREADY ROTATED after the Docker exposure (done) - no longer pending.
+
+## 2026-06-21 - pgvector enabled + semantic search wired into UI
+- pgvector now LIVE (details in MIGRATION_STATUS.md). embeddings table has a real vector(1024) column + HNSW cosine index; semanticSearch.js uses the native <=> operator.
+- Record-type semantic search: POST /api/semantic-search/record-types. UI = "AI semantic search" panel on the Taxonomy page (plain-language query -> ranked record types, click to open).
+- Document-content semantic search (last major v1 piece): document_pages.text embedded per page via scripts/indexDocumentPages.js (22 pages indexed, owner_type='document_page'). Endpoint POST /api/semantic-search/documents { query, requestId?, topN }. UI = "Search Documents" tab on RequestWorkspacePage (components/ui/DocSearchPanel.js), scoped to the open request; shows ranked page hits w/ snippet + similarity bar + View (opens the PDF via authenticated blob).
+- Re-index commands (manual/batch for now): `cd backend && node scripts/indexRecordTypes.js` and `node scripts/indexDocumentPages.js`. Both populate vec (TEXT) + embedding (vector) and use INSERT ... ?::vector.
+- Real cosine ranges: strong record-type match ~0.55-0.66; strong doc-page match ~0.5-0.6. Calibrate any confidence thresholds to THESE ranges (the taxonomy design's 0.8 is too high for this model).
+- NEXT / remaining: (1) two-stage routing (taxonomy-first, doc-content fallback) with a calibrated threshold; (2) optional: upgrade the public portal/agent record matching to use this same engine; (3) auto-index new uploads + new/edited record types (today indexing is a manual batch run).
