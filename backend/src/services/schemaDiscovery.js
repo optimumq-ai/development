@@ -1,5 +1,6 @@
 var { all, get, run } = require('../db');
 var { v4: uuidv4 } = require('uuid');
+var embedIndex = require('./embedIndex');
 var Anthropic = require('@anthropic-ai/sdk');
 var connectors = { filestore: require('./connectors/filestore'), structured: require('./connectors/structured') };
 
@@ -67,6 +68,7 @@ async function scanRepository(repo) {
     if (await linkRepo(id, repo.id, p.formats)) linked++;
     created.push({ id: id, name: p.name, code: code, confidence: p.confidence, example_files: p.example_files || [] });
   }
+  embedIndex.bg(embedIndex.reindexRecordTypes(created.map(function(c){ return c.id; })), 'discover-scan');
   return { created: created, matched: matched, linked: linked, scanned: samples.length };
 }
 

@@ -6,6 +6,7 @@ const path = require('path');
 const { execFileSync } = require('child_process');
 const { v4: uuidv4 } = require('uuid');
 const { get, run } = require('../db');
+const embedIndex = require('./embedIndex');
 
 const UPLOAD_DIR = path.join(__dirname, '../../../uploads');
 const PROCESSED_DIR = path.join(UPLOAD_DIR, 'processed');
@@ -118,6 +119,7 @@ async function processFile(fileId) {
   // Pages still without words even after the OCR attempt (blank or unreadable scans).
   var needsOcr = pages.some(function (pg) { return pg.has_image && !pg.has_text_layer; });
   var ocrPages = pages.filter(function (pg) { return pg.ocr; }).length;
+  embedIndex.bg(embedIndex.reindexDocumentPagesForFile(fileId), 'doc-pages ' + fileId);
   return { fileId: fileId, pageCount: pageCount, needsOcr: needsOcr, ocrPages: ocrPages, pages: pages };
 }
 

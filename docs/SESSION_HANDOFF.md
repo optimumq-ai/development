@@ -81,3 +81,12 @@ SECURITY: Anthropic API key ALREADY ROTATED after the Docker exposure (done) - n
 - Re-index commands (manual/batch for now): `cd backend && node scripts/indexRecordTypes.js` and `node scripts/indexDocumentPages.js`. Both populate vec (TEXT) + embedding (vector) and use INSERT ... ?::vector.
 - Real cosine ranges: strong record-type match ~0.55-0.66; strong doc-page match ~0.5-0.6. Calibrate any confidence thresholds to THESE ranges (the taxonomy design's 0.8 is too high for this model).
 - NEXT / remaining: (1) two-stage routing (taxonomy-first, doc-content fallback) with a calibrated threshold; (2) optional: upgrade the public portal/agent record matching to use this same engine; (3) auto-index new uploads + new/edited record types (today indexing is a manual batch run).
+
+## 2026-06-21 (cont.) - automatic (incremental) indexing [CLOSES the manual-index gap]
+- New service backend/src/services/embedIndex.js keeps `embeddings` current automatically:
+  - record types: reindexed on create / edit / single-discover (routes/taxonomy.js) and on bulk discovery scan (services/schemaDiscovery.js); embedding pruned on delete and when a type is archived.
+  - document pages: reindexed whenever services/docProcessing.processFile() runs - this is the single chokepoint for ALL upload/redaction/mass-job paths, so every new document gets embedded once its text is extracted.
+- All hooks are fire-and-forget via embedIndex.bg(promise,label): a Voyage outage logs an error but never breaks a save or upload.
+- Batch scripts (scripts/indexRecordTypes.js, scripts/indexDocumentPages.js) remain as one-shot backfill/repair tools.
+- Verified live: create -> auto-embedded + searchable (0.68); delete -> record + embedding both gone (no orphans); doc reindex idempotent.
+- NEXT remaining: two-stage routing (taxonomy-first, doc-content fallback, calibrated threshold ~0.5-0.66); optional portal/agent upgrade to use this engine.

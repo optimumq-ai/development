@@ -3,6 +3,7 @@ const router = express.Router();
 const { get, all, run } = require('../db');
 const { requireAuth } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
+const embedIndex = require('../services/embedIndex');
 
 var ARRAY_FIELDS = ['synonyms','disambiguators','keywords','identifying_facets','formats'];
 var BOOL_FIELDS = ['is_structured_data','auto_release_eligible','is_canonical'];
@@ -139,6 +140,7 @@ router.post('/record-types', requireAuth, async function(req, res) {
     b.fulfillment_method || 'electronic_search', b.medium || 'electronic'];
   await run('INSERT INTO record_types (' + cols + ') VALUES (' + ph + ')', vals);
   await audit('record_type', id, 'create', req, { name: name, code: code, source: b.source || 'manual' });
+  embedIndex.bg(embedIndex.reindexRecordType(id), 'rt-create ' + id);
   res.json(hydrate(await get('SELECT * FROM record_types WHERE id = ?', [id])));
 });
 
@@ -156,6 +158,7 @@ router.patch('/record-types/:id', requireAuth, async function(req, res) {
   params.push(rt.id);
   await run('UPDATE record_types SET ' + sets.join(', ') + ' WHERE id = ?', params);
   await audit('record_type', rt.id, 'update', req, b);
+  embedIndex.bg(embedIndex.reindexRecordType(rt.id), 'rt-update ' + rt.id);
   res.json(hydrate(await get('SELECT * FROM record_types WHERE id = ?', [rt.id])));
 });
 
@@ -166,6 +169,7 @@ router.delete('/record-types/:id', requireAuth, async function(req, res) {
   await run('DELETE FROM record_type_repositories WHERE record_type_id = ?', [req.params.id]);
   await run('DELETE FROM record_types WHERE id = ?', [req.params.id]);
   await audit('record_type', req.params.id, 'delete', req, null);
+  embedIndex.bg(embedIndex.removeEmbedding('record_type', req.params.id), 'rt-delete ' + req.params.id);
   res.json({ success: true });
 });
 
@@ -303,6 +307,7 @@ router.post('/discover', requireAuth, async function(req, res) {
       (typeof p.confidence === 'number' ? p.confidence : null), 900
     ]);
     await audit('record_type', id, 'discover', req, { name: p.name, code: code, confidence: p.confidence });
+    embedIndex.bg(embedIndex.reindexRecordType(id), 'rt-discover ' + id);
     res.json({ matched_existing: false, draft: hydrate(await get('SELECT * FROM record_types WHERE id = ?', [id])), reasoning: p.reasoning || null });
   } catch (e) {
     console.error('Discover error:', e.message);
