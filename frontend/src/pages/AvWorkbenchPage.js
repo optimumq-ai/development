@@ -138,32 +138,35 @@ export default function AvWorkbenchPage(){
     try {
       var faceapi=await ensureFaceApi();
       v.pause(); setPlaying(false);
-      var dur=v.duration||0; var step = dur>90 ? 1.0 : (dur>30 ? 0.6 : 0.4);
-      var opts=new faceapi.TinyFaceDetectorOptions({inputSize:416, scoreThreshold:0.4});
+      var dur=v.duration||0; var step = dur>120 ? 0.5 : (dur>45 ? 0.25 : 0.15); var hold=step*1.6;
+      var opts=new faceapi.TinyFaceDetectorOptions({inputSize:512, scoreThreshold:0.3});
       var samples=[]; for(var t=0;t<dur;t+=step) samples.push(+t.toFixed(3));
-      var prev=[]; var nextId=1; var out=[];
+      var live=[]; var nextId=1; var out=[];
       for(var i=0;i<samples.length;i++){
         var st=samples[i];
         await seekTo(v, st);
         var dets=[]; try { dets=await faceapi.detectAllFaces(v, opts); } catch(e){ dets=[]; }
-        setProgress(Math.round((i+1)/samples.length*100)); setDetectMsg('Scanning '+fmt(st)+' / '+fmt(dur)+'  ('+out.length+' so far)');
-        var cur=[];
+        setProgress(Math.round((i+1)/samples.length*100)); setDetectMsg('Scanning '+fmt(st)+' / '+fmt(dur)+'  ('+out.length+' boxes)');
+        var used={};
         dets.forEach(function(d){
           var b=d.box; var cx=b.x+b.width/2, cy=b.y+b.height/2;
           var match=null, best=1e9;
-          prev.forEach(function(p){ var dx=p.cx-cx, dy=p.cy-cy; var dist=Math.sqrt(dx*dx+dy*dy); var tol=Math.max(b.width,b.height,p.w,p.h); if(dist<tol && dist<best){ best=dist; match=p; } });
-          var tid = match ? match.tid : ('t'+(nextId++));
-          var padX=b.width*0.12, padY=b.height*0.12;
+          live.forEach(function(p){ if(used[p.tid]) return; var dx=p.cx-cx, dy=p.cy-cy; var dist=Math.sqrt(dx*dx+dy*dy); var tol=Math.max(b.width,b.height,p.w,p.h)*1.2; if(dist<tol && dist<best){ best=dist; match=p; } });
+          var tid;
+          if(match){ tid=match.tid; match.cx=cx; match.cy=cy; match.w=b.width; match.h=b.height; match.misses=0; }
+          else { tid='t'+(nextId++); live.push({tid:tid,cx:cx,cy:cy,w:b.width,h:b.height,misses:0}); }
+          used[tid]=1;
+          var padX=b.width*0.18, padY=b.height*0.18;
           var x=Math.max(0,Math.round(b.x-padX)), y=Math.max(0,Math.round(b.y-padY));
           var w=Math.round(b.width+padX*2), h=Math.round(b.height+padY*2);
-          out.push({ id:rid(), trackId:tid, auto:true, x:x, y:y, w:w, h:h, type:'face', style:'black', label:'Face '+tid.replace('t',''), startTime:st, endTime:+Math.min(dur, st+step).toFixed(3), detected:true });
-          cur.push({tid:tid, cx:cx, cy:cy, w:b.width, h:b.height});
+          out.push({ id:rid(), trackId:tid, auto:true, x:x, y:y, w:w, h:h, type:'face', style:'black', label:'Face '+tid.replace('t',''), startTime:st, endTime:+Math.min(dur, st+hold).toFixed(3), detected:true });
         });
-        prev=cur;
+        live.forEach(function(p){ if(!used[p.tid]) p.misses=(p.misses||0)+1; });
+        live=live.filter(function(p){ return p.misses<=4; });
       }
       setVReds(function(p){ return p.filter(function(z){return !z.auto;}).concat(out); });
       var nTracks = nextId-1;
-      setDetectMsg(nTracks>0 ? ('Found '+nTracks+' face track(s), '+out.length+' segments.') : 'No faces detected. Try drawing boxes manually.');
+      setDetectMsg(nTracks>0 ? ('Found '+nTracks+' face appearance(s), '+out.length+' boxes. Review the whole clip - it can still miss some.') : 'No faces detected. Draw boxes manually.');
       try { await seekTo(v, wasTime); } catch(e){}
     } catch(e){ alert('Auto-detect failed: '+e.message); setDetectMsg(''); }
     setDetecting(false); setProgress(0);
