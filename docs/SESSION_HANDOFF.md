@@ -58,3 +58,18 @@ Still pending from Replit: RCS Engine description, chat agent / search intake de
 - SSH MCP server: optimumq-ssh:exec for commands on droplet
 - Claude in Chrome: browser interaction if needed
 - 1000-char command length limit on SSH MCP — write longer scripts via multiple echo appends or temp files
+
+---
+
+## CURRENT STATUS (2026-06-20) - supersedes the 2026-06-02 plan above
+
+DONE since the big-bang plan: Postgres migration; taxonomy + AI schema discovery + approval queue; Agent Rules; document redaction subsystem (rules library, adjustable boxes, templates, mass-redaction queue, review screen); native per-connector keyword search (portal + paper-index + fulfillment dimension); FEE/ESTIMATE subsystem (deterministic engine, config screen, AI policy extraction, per-request estimates, projection rung 1, requestor notice + branded email template); A/V REDACTION Phase 1 (parked - see VIDEO_REDACTION.md).
+
+BIGGEST REMAINING v1 ITEM: document indexing + AI SEMANTIC SEARCH (OCR -> chunking -> embeddings -> pgvector vector search, embeddings via Voyage AI). Blocked on a Voyage API key. This is the headline "AI-powered" differentiator and the main unbuilt piece of the original big-bang scope.
+
+OTHER OPEN THREADS:
+- MRR component-split (a master request holding child components; makes parent/child fee aggregation demonstrable; 0 children exist today).
+- Workflow routing phase (Normal/Smart/Special/Redaction-handling routing; route redaction-review into My Tasks - see BACKLOG.md). The "configurable workflow engine" vision.
+- Fee polish: projection rungs 2/3, accounting wrap (deposits/payments/ledger), estimate/final reconciliation, fee_profiles versioning-on-activate, AI extraction from uploaded ordinance PDF (paste-only today), manual estimate-creation screen.
+
+SECURITY BEFORE GO-LIVE: rotate the Anthropic API key (exposed in earlier Docker images; now also used by fee policy extraction).

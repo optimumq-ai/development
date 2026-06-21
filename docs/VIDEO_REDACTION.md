@@ -110,3 +110,13 @@ withheld under security exemptions.
 - Port the synthetic workbench into the app as a staff screen (draw/adjust zones -> export zone JSON).
 - Backend "internal redaction" endpoint: given a request's A/V file + zone JSON, run the burn, store output as a redacted request_files row, preserve original, record provenance (parallels the external check-in flow).
 - Later (Phase 2/3): real-video detection, DB persistence of zones, job queue for heavy compute, detect-all-frames + tracking.
+
+---
+
+## STATUS (2026-06-20): Phase 1 COMPLETE - parked by Kevin
+
+In use now: server-side ffmpeg burn (avRedactionApply.js, black/pixel/mosaic + audio silence, time-gated, native-px coords); INTERNAL mode (workbench draws boxes -> apply-internal burns -> redacted copy stored, original preserved, zones + attestation recorded); EXTERNAL mode (send-out hold -> check-in attested redacted copy); NOT-REQUIRED release-as-is attestation gate; mode-aware AvRedactionPanel; "Redaction for Audio/Video" tab shown only when A/V is involved (av_applicable via EXISTS); in-app drawing workbench (manual boxes + browser face auto-detect via face-api TinyFaceDetector, per-appearance tracking by re-detection, keep-visible exemption, finer sampling/overlapping box-hold); 1GB upload cap; inline upload in the tab.
+
+Decision: leave as-is for now; revisit later to improve function + interface.
+
+Deferred (revisit with a paying customer / GPU): GPU Python detection sidecar (YOLO-face + RetinaFace + WBF + ByteTrack), license-plate detection, smoother tracking/interpolation, guided play-pause-verify review, audio waveform UI, background job queue for long clips, cloud-API detection option. DO GPU pricing reviewed: low-tier cards ~$0.45-0.82/hr; bursty (destroy when idle) ~$10-15/mo; "stop" does NOT halt GPU billing per DO agent (verify) - must destroy.
