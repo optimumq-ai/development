@@ -72,4 +72,4 @@ OTHER OPEN THREADS:
 - Workflow routing phase (Normal/Smart/Special/Redaction-handling routing; route redaction-review into My Tasks - see BACKLOG.md). The "configurable workflow engine" vision.
 - Fee polish: projection rungs 2/3, accounting wrap (deposits/payments/ledger), estimate/final reconciliation, fee_profiles versioning-on-activate, AI extraction from uploaded ordinance PDF (paste-only today), manual estimate-creation screen.
 
-SECURITY BEFORE GO-LIVE: rotate the Anthropic API key (exposed in earlier Docker images; now also used by fee policy extraction).
+SECURITY: Anthropic API key ALREADY ROTATED after the Docker exposure (done) - no longer pending.
