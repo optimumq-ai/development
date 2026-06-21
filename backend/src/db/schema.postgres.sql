@@ -380,6 +380,7 @@ CREATE TABLE IF NOT EXISTS av_redaction_tasks (
 
 ALTER TABLE av_redaction_tasks ADD COLUMN IF NOT EXISTS zones_json TEXT;
 
+CREATE EXTENSION IF NOT EXISTS vector;
 CREATE TABLE IF NOT EXISTS embeddings (
   id TEXT PRIMARY KEY,
   owner_type TEXT,
@@ -387,7 +388,9 @@ CREATE TABLE IF NOT EXISTS embeddings (
   model TEXT,
   dim INTEGER,
   vec TEXT,
+  embedding vector(1024),
   content TEXT,
   created_at TEXT
 );
 CREATE UNIQUE INDEX IF NOT EXISTS embeddings_owner_uniq ON embeddings(owner_type, owner_id, model);
+CREATE INDEX IF NOT EXISTS embeddings_embedding_hnsw ON embeddings USING hnsw (embedding vector_cosine_ops);

@@ -15,3 +15,6 @@ backups/
 
 # rendered page images (regenerated on demand)
 uploads/processed/
+uploads/
+*.bak
+docker-compose.yml.bak.*

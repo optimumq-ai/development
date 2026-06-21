@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres:16-alpine
+    image: pgvector/pgvector:pg16
     container_name: optimumq-postgres
     restart: unless-stopped
     environment:
@@ -10,7 +10,7 @@ services:
     ports:
       - "5544:5432"
     volumes:
-      - optimumq-pgdata:/var/lib/postgresql/data
+      - optimumq-pgdata-v2:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
       interval: 10s
@@ -19,4 +19,4 @@ services:
       start_period: 10s
 
 volumes:
-  optimumq-pgdata:
+  optimumq-pgdata-v2:

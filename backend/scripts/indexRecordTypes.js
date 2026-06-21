@@ -21,8 +21,9 @@ function txt(rt){
     var texts = slice.map(txt);
     var vecs = await v.embed(texts, { inputType:'document' });
     for (var k=0;k<slice.length;k++){
-      await db.run("INSERT INTO embeddings (id, owner_type, owner_id, model, dim, vec, content, created_at) VALUES (?,?,?,?,?,?,?,datetime('now'))",
-        [uuid.v4(), 'record_type', slice[k].id, v.MODEL, v.DIM, JSON.stringify(vecs[k]), texts[k].slice(0,400)]);
+      var vj = JSON.stringify(vecs[k]);
+      await db.run("INSERT INTO embeddings (id, owner_type, owner_id, model, dim, vec, embedding, content, created_at) VALUES (?,?,?,?,?,?,?::vector,?,datetime('now'))",
+        [uuid.v4(), 'record_type', slice[k].id, v.MODEL, v.DIM, vj, vj, texts[k].slice(0,400)]);
     }
     done += slice.length; console.log('indexed', done, '/', rts.length);
   }
