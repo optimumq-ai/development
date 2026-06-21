@@ -379,3 +379,15 @@ CREATE TABLE IF NOT EXISTS av_redaction_tasks (
 );
 
 ALTER TABLE av_redaction_tasks ADD COLUMN IF NOT EXISTS zones_json TEXT;
+
+CREATE TABLE IF NOT EXISTS embeddings (
+  id TEXT PRIMARY KEY,
+  owner_type TEXT,
+  owner_id TEXT,
+  model TEXT,
+  dim INTEGER,
+  vec TEXT,
+  content TEXT,
+  created_at TEXT
+);
+CREATE UNIQUE INDEX IF NOT EXISTS embeddings_owner_uniq ON embeddings(owner_type, owner_id, model);
