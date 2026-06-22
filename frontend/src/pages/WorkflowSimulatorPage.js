@@ -85,7 +85,7 @@ export default function WorkflowSimulatorPage(){
 
   var node = current ? model.nodes[current] : null;
   var res = node ? resolve(node.id) : null;
-  var outs = node ? (node.outcomes && node.outcomes.length ? node.outcomes : [{ label:'Continue' }]) : [];
+  var outs = node ? (node.outcomes && node.outcomes.length ? node.outcomes : (/^(Is|Does|Has|Have|Can|Are|Should|Was|Were|Do|Did)\b/i.test((node.label || '').trim()) ? [{ label:'Yes' }, { label:'No' }] : [{ label:'Continue' }])) : [];
   var timeNode = node && node.trigger === 'time';
 
   return (
@@ -130,16 +130,18 @@ export default function WorkflowSimulatorPage(){
           {res && res.banner ? <div style={{ background:'#EFF6FF', border:'1px solid #DBEAFE', borderRadius:'8px', padding:'9px 12px', fontSize:'13px', color:'#1F4E79', marginBottom:'12px' }}>{res.banner}</div> : null}
 
           <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.04em', marginBottom:'7px' }}>{timeNode ? 'Advance the clock' : 'Your answer'}</div>
-          <div style={{ display:'flex', flexDirection:'column', gap:'8px' }}>
+          <div style={{ display:'flex', flexWrap:'wrap', gap:'8px' }}>
             {outs.map(function(o, idx){
               var picked = res && res.idx === idx;
+              var fill = picked || outs.length === 1;
               return (
-                <button key={idx} onClick={function(){ choose(node, o, o.label); }} style={{ textAlign:'left', padding:'10px 14px', borderRadius:'8px', border:'1px solid ' + (picked ? '#1F4E79' : '#E5E7EB'), background: picked ? '#F8FAFF' : 'white', color:'#111', fontSize:'13px', fontWeight: picked ? '600' : '500', cursor:'pointer' }}>
-                  {o.label}{picked ? <span style={{ color:'#1F4E79', fontWeight:'700' }}> &middot; what the system does</span> : null}
+                <button key={idx} onClick={function(){ choose(node, o, o.label); }} style={{ textAlign:'left', padding:'9px 16px', borderRadius:'8px', border:'1px solid #1F4E79', background: fill ? '#1F4E79' : 'white', color: fill ? 'white' : '#1F4E79', fontSize:'13px', fontWeight: fill ? '700' : '600', cursor:'pointer' }}>
+                  {o.label}
                 </button>
               );
             })}
           </div>
+          {res ? <div style={{ fontSize:'11px', color:'#9CA3AF', marginTop:'8px' }}>The highlighted answer is what the system does. Pick any option to explore a different path.</div> : null}
           {node.automatedBy ? <div style={{ marginTop:'12px', fontSize:'12px', color:'#6B7280' }}><b style={{ color:'#1F4E79' }}>Configure once:</b> {node.automatedBy}</div> : null}
         </div>
       ) : done ? (
