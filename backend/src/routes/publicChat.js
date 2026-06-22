@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const emailService = require('../services/email');
 const recordSearch = require('../services/recordSearch');
 const classifier = require('../services/classifier');
+const workflowEngine = require('../services/workflowEngine');
 const crypto = require('crypto');
 const { all } = require('../db');
 
@@ -246,6 +247,8 @@ router.post('/submit', async function(req, res) {
     await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
       [uuidv4(), id, 'system', 'AI Classification', 'CLASSIFIED', 'Auto-classified as ' + cls.classification + '; ' + basisText + (cls.teamName ? '; routed to ' + cls.teamName : '') + (cls.reasoning ? ' - ' + cls.reasoning : '')]);
   } catch(ce) { console.error('[publicChat] auto-classify failed:', ce.message); }
+
+  workflowEngine.bg(workflowEngine.onIntake(id, cls), 'intake ' + id);
 
   var newReq = await get('SELECT * FROM requests WHERE id = ?', [id]);
   if (newReq) {

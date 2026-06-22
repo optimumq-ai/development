@@ -3,6 +3,7 @@ const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
 const { all, get, run } = require('../db');
 const { v4: uuidv4 } = require('uuid');
+const workflowEngine = require('../services/workflowEngine');
 
 async function generateRequestNumber() {
   const year = new Date().getFullYear();
@@ -71,6 +72,7 @@ router.post('/', requireAuth, async function(req, res) {
   await run('INSERT INTO requests (id, request_number, requestor_name, requestor_email, requestor_phone, requestor_type, delivery_method, description, record_types, classification, fee_waiver_requested, submission_channel, is_mrr, deadline_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
     [requestId, requestNumber, b.requestorName, b.requestorEmail, b.requestorPhone || null, b.requestorType || 'individual', b.deliveryMethod || 'email', b.description, JSON.stringify(b.recordTypes || []), b.classification || 'standard', b.feeWaiverRequested ? 1 : 0, b.submissionChannel || 'portal', b.isMrr ? 1 : 0, deadline.toISOString().split('T')[0]]);
   await logHistory(requestId, req.user.sub, req.user.name, 'REQUEST_CREATED');
+  workflowEngine.bg(workflowEngine.onIntake(requestId), 'intake ' + requestId);
   res.status(201).json({ requestId: requestId, requestNumber: requestNumber, success: true });
 });
 
@@ -155,6 +157,7 @@ router.post('/public', async function(req, res) {
     [id, requestNumber, b.requestorName, b.requestorEmail, b.requestorPhone||'', b.requestorType||'individual', b.deliveryMethod||'email', b.description, b.classification||'standard', b.departmentId||null, b.feeWaiverRequested?1:0, b.isMrr?1:0, 'portal', 'intake', 'active', deadlineStr]);
   await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
     [uuidv4(), id, 'public', 'Public Portal', 'CREATED', 'Request submitted via public portal']);
+  workflowEngine.bg(workflowEngine.onIntake(id), 'intake ' + id);
   res.status(201).json({ success: true, requestNumber: requestNumber, requestId: id });
 });
 

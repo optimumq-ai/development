@@ -1,0 +1,94 @@
+'use strict';
+// Deterministic workflow engine.
+// The AI classifier supplies the match SIGNALS (record type, confidence, flags, etc.).
+// This engine applies a human-authored, deterministic RULEBOOK to those signals,
+// decides the routing (stage + team), applies it, and records WHY (decision trail).
+// Reproducible and explainable by design - no LLM in the decision path.
+var db = require('../db');
+var classifier = require('./classifier');
+var uuid = require('uuid');
+
+function parseJSON(s, dflt){ try { var v = JSON.parse(s); return v == null ? dflt : v; } catch(e){ return dflt; } }
+
+function cmp(op, a, b){
+  switch(op){
+    case 'gte': return Number(a) >= Number(b);
+    case 'gt':  return Number(a) >  Number(b);
+    case 'lte': return Number(a) <= Number(b);
+    case 'lt':  return Number(a) <  Number(b);
+    case 'eq':  return String(a) === String(b);
+    case 'neq': return String(a) !== String(b);
+    case 'is_true':  return a === true || a === 1 || a === '1' || a === 'true';
+    case 'is_false': return !(a === true || a === 1 || a === '1' || a === 'true');
+    case 'in': return Array.isArray(b) && b.map(String).indexOf(String(a)) >= 0;
+    case 'contains': return Array.isArray(a) ? a.map(String).indexOf(String(b)) >= 0 : String(a||'').toLowerCase().indexOf(String(b).toLowerCase()) >= 0;
+    case 'contains_any': return Array.isArray(b) && Array.isArray(a) && a.some(function(x){ return b.map(String).indexOf(String(x)) >= 0; });
+    default: return false;
+  }
+}
+
+function matches(conditions, signals){
+  if (!Array.isArray(conditions) || conditions.length === 0) return true;
+  return conditions.every(function(c){ return cmp(c.op, signals[c.field], c.value); });
+}
+
+async function buildSignals(request, m){
+  var rt = null;
+  if (m.recordTypeId) rt = await db.get("SELECT rt.code, rt.public_availability, c.name AS category FROM record_types rt LEFT JOIN categories c ON c.id = rt.category_id WHERE rt.id = ?", [m.recordTypeId]);
+  return {
+    record_type_confidence: typeof m.recordTypeConfidence === 'number' ? m.recordTypeConfidence : 0,
+    record_type_code: rt ? rt.code : null,
+    record_type_name: m.recordTypeName || null,
+    category: rt ? rt.category : null,
+    public_availability: rt ? rt.public_availability : null,
+    classification: m.classification || 'standard',
+    redaction_flag: !!m.redactionFlag,
+    mrr_flag: !!m.isMrr,
+    origin: (request.submission_channel === 'portal') ? 'portal' : 'manual',
+    has_owner_team: !!m.custodianDepartmentId,
+    flags: Array.isArray(m.flags) ? m.flags : []
+  };
+}
+
+async function resolveTeam(ref, m){
+  if (!ref || ref === 'matched') return m.departmentId || null;
+  if (ref === 'open_records'){ var t = await db.get("SELECT id FROM departments WHERE kind='team' AND is_open_records=1 ORDER BY sort_order LIMIT 1"); return t ? t.id : (m.departmentId || null); }
+  return ref;
+}
+
+async function evaluate(signals){
+  var rules = await db.all("SELECT * FROM workflow_rules WHERE enabled = 1 ORDER BY priority ASC, created_at ASC");
+  for (var i=0;i<rules.length;i++){
+    if (matches(parseJSON(rules[i].conditions, []), signals)) return { rule: rules[i], actions: parseJSON(rules[i].actions, {}) };
+  }
+  return null;
+}
+
+// Main entry: decide + apply + record. Designed to be called fire-and-forget after a request is created.
+async function onIntake(requestId, matcherResult){
+  var request = await db.get("SELECT * FROM requests WHERE id = ?", [requestId]);
+  if (!request) return null;
+  var m = matcherResult;
+  if (!m){
+    try { m = await classifier.classifyAndRoute(request.description); }
+    catch(e){ m = { classification:'standard', recordTypeConfidence:0, flags:[], departmentId:null, custodianDepartmentId:null, reasoning:'Automatic classification was unavailable.' }; }
+  }
+  var signals = await buildSignals(request, m);
+  var hit = await evaluate(signals);
+  var actions = hit ? hit.actions : { stage:'intake', team:'open_records', note:'No rulebook match.' };
+  var teamId = await resolveTeam(actions.team, m);
+  var teamRow = teamId ? await db.get("SELECT name FROM departments WHERE id = ?", [teamId]) : null;
+  var stage = actions.stage || request.stage || 'intake';
+
+  await db.run("UPDATE requests SET stage = ?, department_id = ?, updated_at = datetime('now') WHERE id = ?", [stage, teamId, requestId]);
+
+  var reasoning = [m.reasoning, actions.note].filter(Boolean).join(' ');
+  await db.run("INSERT INTO workflow_decisions (id, request_id, record_type_id, record_type_name, confidence, classification, rule_id, rule_name, decided_stage, decided_team_id, decided_team_name, reasoning, flags, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'))",
+    [uuid.v4(), requestId, m.recordTypeId || null, signals.record_type_name, Math.round(signals.record_type_confidence||0), signals.classification, hit?hit.rule.id:null, hit?hit.rule.name:'(no match)', stage, teamId, teamRow?teamRow.name:null, reasoning, JSON.stringify(signals.flags)]);
+
+  return { stage:stage, teamId:teamId, teamName: teamRow?teamRow.name:null, rule: hit?hit.rule.name:null, signals:signals };
+}
+
+function bg(promise, label){ Promise.resolve(promise).catch(function(e){ console.error('[workflowEngine] '+(label||'task')+' failed:', e && e.message); }); }
+
+module.exports = { onIntake:onIntake, evaluate:evaluate, buildSignals:buildSignals, resolveTeam:resolveTeam, matches:matches, cmp:cmp, bg:bg };

@@ -10,6 +10,7 @@ import RequestWorkspacePage from './pages/RequestWorkspacePage';
 import StaffManagementPage from './pages/StaffManagementPage';
 import DepartmentsPage from './pages/DepartmentsPage';
 import TaxonomyPage from './pages/TaxonomyPage';
+import WorkflowPage from './pages/WorkflowPage';
 import SchemaDiscoveryPage from './pages/SchemaDiscoveryPage';
 import MyTasksPage from './pages/MyTasksPage';
 import ConfigurationPage from './pages/ConfigurationPage';
@@ -60,6 +61,7 @@ export default function App() {
           <Route path="staff" element={<StaffManagementPage />} />
           <Route path="departments" element={<DepartmentsPage />} />
           <Route path="taxonomy" element={<TaxonomyPage />} />
+          <Route path="workflow" element={<WorkflowPage />} />
           <Route path="discovery" element={<SchemaDiscoveryPage />} />
           <Route path="sources" element={<SourcesPage />} />
           <Route path="redaction-rules" element={<RedactionRulesPage />} />
