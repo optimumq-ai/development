@@ -20,6 +20,7 @@ export default function AppLayout() {
     { to: '/departments', label: 'Departments & Teams', show: isElev },
     { to: '/taxonomy', label: 'Taxonomy', show: isElev },
     { to: '/workflow', label: 'Workflow', show: isElev },
+    { to: '/workflow-map', label: 'Process Map', show: isElev },
     { to: '/sources', label: 'Sources', show: isElev },
     { to: '/redaction-rules', label: 'Redaction Rules', show: isElev },
     { to: '/mass-redaction', label: 'Mass Redaction', show: isElev },
