@@ -240,3 +240,11 @@ assignment + hold states (routing phase). Build with the routing phase.
 ### Vaughn index button (redaction workspace)
 - Button to view the Vaughn index immediately after AI auto-redaction completes. Generate ON-DEMAND from CURRENT redaction_zones each click so edits to suggested redactions are always reflected (no stale snapshot).
 - Each entry: page, item/description (zone label), exemption basis (from redaction rule/category -> statute), justification. NEEDS: redaction rules/categories to carry an exemption/statute citation. (Confirm with Kevin what exemption framework - TX Gov Code 552 etc.)
+
+## 2026-06-21 - Smart Routing specialization capture (BUILT, capture-only)
+- Added routing_specialization TEXT to users + departments (ALTER IF NOT EXISTS; in schema.postgres.sql). Skipped department-level UI per Kevin (column exists on departments table but only teams expose it, since teams live in the departments table).
+- API: PATCH /api/staff/:id/specialization (body routingSpecialization); departments PATCH allowlist now includes routing_specialization.
+- UI: Staff Management -> per-row "Routing" button opens a modal textarea (individual specialization). Departments & Teams -> team editor has a "Routing specialization" textarea. Both plain free text.
+- CAPTURE-ONLY: nothing reads this yet. No embedding, no routing behavior change. Inert until the workflow/matcher consumes it.
+- Current routing reality (verified): routing stops at the TEAM (requests.department_id). My Tasks / queue visibility = (department_id = user's team) OR (assigned_to = user). No role-based or stage-based filtering. assigned_to is manual only; no auto-assign, no Claim. Function roles exist + populated (10 roles incl REDACTION_REVIEWER/APPROVER, CUSTODIAN, COORDINATOR; 20 user assignments) but are used for permissions/identity, NOT routing.
+- FUTURE consumption: function role narrows eligible team members for a stage; specialization text (semantic match via pgvector embeddings, same pattern as record types) promotes to a specific individual; otherwise team pool + Claim. Claim/multi-user-assignment mechanic NOT built yet.

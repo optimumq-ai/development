@@ -4,7 +4,9 @@ CREATE TABLE IF NOT EXISTS departments (id TEXT PRIMARY KEY, name TEXT NOT NULL,
 ALTER TABLE departments ADD COLUMN IF NOT EXISTS kind TEXT DEFAULT 'department';
 ALTER TABLE departments ADD COLUMN IF NOT EXISTS parent_id TEXT;
 ALTER TABLE departments ADD COLUMN IF NOT EXISTS processed_by TEXT;
+ALTER TABLE departments ADD COLUMN IF NOT EXISTS routing_specialization TEXT;
 CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, display_name TEXT NOT NULL, title TEXT, department_id TEXT, password_hash TEXT, mfa_secret TEXT, mfa_enrolled INTEGER DEFAULT 0, temp_password INTEGER DEFAULT 0, status TEXT DEFAULT 'active', last_login TEXT, created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
+ALTER TABLE users ADD COLUMN IF NOT EXISTS routing_specialization TEXT;
 CREATE TABLE IF NOT EXISTS function_roles (id TEXT PRIMARY KEY, name TEXT UNIQUE NOT NULL, sort_order INTEGER DEFAULT 0);
 CREATE TABLE IF NOT EXISTS permission_roles (id TEXT PRIMARY KEY, name TEXT UNIQUE NOT NULL);
 CREATE TABLE IF NOT EXISTS user_function_roles (user_id TEXT NOT NULL, function_role_id TEXT NOT NULL, PRIMARY KEY (user_id, function_role_id));

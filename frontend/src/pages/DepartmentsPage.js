@@ -68,7 +68,7 @@ export default function DepartmentsPage(){
     if (!d.name || !d.code){ alert('Name and code are required'); return; }
     setSaving(true);
     try {
-      var payload = { name:d.name, code:d.code, color:d.color, kind:editor.kind, parent_id:editor.kind==='team'?(d.parent_id||null):null, processed_by:editor.kind==='department'?(d.processed_by||null):null, is_open_records:d.is_open_records?1:0, is_catch_all:d.is_catch_all?1:0, sort_order:Number(d.sort_order)||99 };
+      var payload = { name:d.name, code:d.code, color:d.color, kind:editor.kind, parent_id:editor.kind==='team'?(d.parent_id||null):null, processed_by:editor.kind==='department'?(d.processed_by||null):null, is_open_records:d.is_open_records?1:0, is_catch_all:d.is_catch_all?1:0, routing_specialization: editor.kind==='team' ? (d.routing_specialization||null) : null, sort_order:Number(d.sort_order)||99 };
       var savedId = d.id;
       if (editor.mode==='create') { var rc = await api.post('/departments', payload); savedId = rc.data.department.id; }
       else await api.patch('/departments/' + d.id, payload);
@@ -99,6 +99,7 @@ export default function DepartmentsPage(){
           <div>
           <Field label="Organizational parent (optional)"><select style={inputStyle} value={d.parent_id} onChange={function(e){setField('parent_id',e.target.value);}}><option value="">— none —</option>{depts().map(function(x){ return <option key={x.id} value={x.id}>{x.name}</option>; })}</select></Field>
           <Field label="Fulfills requests for"><div style={{display:'flex',flexDirection:'column',gap:'5px',maxHeight:'160px',overflowY:'auto',border:'1px solid #E5E7EB',borderRadius:'8px',padding:'8px'}}>{depts().map(function(x){ var on=(d.fulfills_for||[]).indexOf(x.id)>=0; return <label key={x.id} style={{fontSize:'13px',display:'flex',alignItems:'center',gap:'7px',cursor:'pointer'}}><input type="checkbox" checked={on} onChange={function(){ var cur=(d.fulfills_for||[]).slice(); var i=cur.indexOf(x.id); if(i>=0)cur.splice(i,1); else cur.push(x.id); setField('fulfills_for',cur); }}/> {x.name}</label>; })}</div></Field>
+          <Field label="Routing specialization (optional)"><textarea style={Object.assign({},inputStyle,{minHeight:'90px',fontFamily:'inherit',lineHeight:'1.5',resize:'vertical'})} value={d.routing_specialization||''} placeholder="Plain-language description of what this team specializes in handling. Used to help route matching requests here." onChange={function(e){setField('routing_specialization',e.target.value);}} /></Field>
           </div>
         ) : (
           <Field label="Requests processed by (fulfillment team)"><select style={inputStyle} value={d.processed_by} onChange={function(e){setField('processed_by',e.target.value);}}><option value="">— unassigned —</option>{teams().map(function(x){ return <option key={x.id} value={x.id}>{x.name}</option>; })}</select></Field>

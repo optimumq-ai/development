@@ -13,6 +13,9 @@ export default function StaffManagementPage() {
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
   const [success, setSuccess] = useState('');
+  const [specFor, setSpecFor] = useState(null);
+  const [specText, setSpecText] = useState('');
+  const [specSaving, setSpecSaving] = useState(false);
 
   useEffect(function() { load(); }, []);
 
@@ -24,6 +27,17 @@ export default function StaffManagementPage() {
       setDepartments(dr.data.departments);
     } catch(e) { console.error(e); }
     setLoading(false);
+  }
+
+  async function saveSpec() {
+    if (!specFor) return;
+    setSpecSaving(true);
+    try {
+      await api.patch('/staff/' + specFor.id + '/specialization', { routingSpecialization: specText });
+      setSpecFor(null); setSpecText('');
+      await load();
+    } catch(e) { setErr('Failed to save specialization'); }
+    setSpecSaving(false);
   }
 
   function setF(k,v){ setForm(function(f){ return Object.assign({},f,{[k]:v}); }); }
@@ -197,10 +211,17 @@ export default function StaffManagementPage() {
                       {s.last_login ? new Date(s.last_login).toLocaleDateString() : 'Never'}
                     </td>
                     <td style={{padding:'14px 16px'}}>
-                      <button onClick={function(){toggleStatus(s.id,s.status);}}
-                        style={{padding:'5px 12px',background:'white',color:isActive?'#DC2626':'#16A34A',border:'1px solid '+(isActive?'#FCA5A5':'#86EFAC'),borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>
-                        {isActive?'Deactivate':'Activate'}
-                      </button>
+                      <div style={{display:'flex',gap:'8px',justifyContent:'flex-end'}}>
+                        <button onClick={function(){setSpecFor(s);setSpecText(s.routing_specialization||'');}}
+                          title="Routing specialization"
+                          style={{padding:'5px 12px',background:s.routing_specialization?'#DBEAFE':'white',color:'#1F4E79',border:'1px solid #BFDBFE',borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>
+                          Routing
+                        </button>
+                        <button onClick={function(){toggleStatus(s.id,s.status);}}
+                          style={{padding:'5px 12px',background:'white',color:isActive?'#DC2626':'#16A34A',border:'1px solid '+(isActive?'#FCA5A5':'#86EFAC'),borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>
+                          {isActive?'Deactivate':'Activate'}
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -209,6 +230,23 @@ export default function StaffManagementPage() {
           </table>
         )}
       </div>
+
+      {specFor && (
+        <div onClick={function(){if(!specSaving)setSpecFor(null);}} style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(17,24,39,0.45)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,padding:'20px'}}>
+          <div onClick={function(e){e.stopPropagation();}} style={{background:'white',borderRadius:'12px',padding:'24px',width:'540px',maxWidth:'100%',boxShadow:'0 10px 40px rgba(0,0,0,0.2)'}}>
+            <div style={{fontSize:'16px',fontWeight:'700',color:'#1F4E79'}}>Routing specialization</div>
+            <div style={{fontSize:'13px',color:'#374151',marginTop:'2px'}}>{specFor.display_name}{specFor.title?' \u00b7 '+specFor.title:''}</div>
+            <div style={{fontSize:'12px',color:'#9CA3AF',margin:'10px 0 12px'}}>Describe, in plain language, the kinds of records or requests this person specializes in. The system can use this to route matching requests to them within their team.</div>
+            <textarea value={specText} onChange={function(e){setSpecText(e.target.value);}} rows={5}
+              placeholder="e.g., All records related to the mounted unit: horses (purchase, veterinary, farrier), saddle and tack inventory, and barn maintenance."
+              style={{width:'100%',padding:'10px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'14px',fontFamily:'inherit',lineHeight:'1.5',resize:'vertical',boxSizing:'border-box',outline:'none'}}/>
+            <div style={{display:'flex',justifyContent:'flex-end',gap:'8px',marginTop:'16px'}}>
+              <button onClick={function(){setSpecFor(null);}} disabled={specSaving} style={{padding:'9px 16px',background:'white',color:'#6B7280',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Cancel</button>
+              <button onClick={saveSpec} disabled={specSaving} style={{padding:'9px 18px',background:specSaving?'#9CA3AF':'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:specSaving?'default':'pointer'}}>{specSaving?'Saving...':'Save'}</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
