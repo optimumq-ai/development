@@ -66,6 +66,7 @@ The Workflow Engine is the "code enforces and records" layer. The classifier is 
 | Does projected cost exceed the estimate threshold? | CODE (fee math) | BUILT |
 | What is the estimated cost? | CODE (fee profile) | BUILT |
 | Should a requested fee waiver be granted? | HUMAN (approver) | PARTIAL |
+| **Manual or automated estimate?** (auto-estimate from the record-type profile, or route to a human?) | CODE (profile + variance gate) + POLICY | PARTIAL (engine BUILT; profile gating PLANNED) |
 | Is a deposit required before work begins? | CODE (policy) | PARTIAL |
 | Has the required deposit been paid? | CODE (payment status) | PLANNED |
 | **Can work begin?** (deposit paid OR none required OR waiver granted) | CODE gate | PLANNED |
@@ -236,13 +237,56 @@ Every `<...>` in this document is one of these. They are **not** hardcoded - the
 
 ---
 
-## Part 6 - How this powers the Process Flow Simulator
+## Part 6 - The criteria-transparency principle (and automation readiness)
+
+A core functional-design principle for the visualization / simulator tool: **at every decision node, wherever possible, the user can reveal the exact criteria the system used to decide** - hover or click the node to "show the work." It does two jobs at once: it removes the black box (trust), and it teaches the user what one-time configuration would *automate* that step for every similar request afterward.
+
+### Worked example: "Manual estimate or automated estimate?"
+
+This is the clumsiest, highest-friction decision in real open-records work, which is why it is the model case. The conundrum: to estimate search and redaction labor you normally have to do most of the search and redaction first - so for small, high-volume requests, *building the estimate can cost nearly as much labor as fulfilling the request.* The whole point of automating it is to spend the labor once per record type, then reuse it.
+
+**Where it sits:** immediately after the fee-waiver determination. If there is no waiver, the system asks - can this request be auto-estimated, or does it need a human?
+
+**Decided by:** CODE (profile lookup + variance / confidence gate) + POLICY (size and dollar bounds). Routes to HUMAN only on exception.
+
+**The criteria the node checks, cheapest first (the estimate-automation ladder):**
+1. Does the matched **record type have an estimation profile?** - seeded from historical actuals of completed requests, from sampling at taxonomy discovery, or from a one-time human-expert seed.
+2. Is the profile **reliable** - low variance and a sufficient sample size? (a type that is 1 page sometimes and 20 other times is not safe to auto-average)
+3. Is the request **within normal bounds** - not unusually large, not high-dollar, not a novel type?
+
+All yes -> **AUTOMATED** estimate, zero human effort. Any no -> route to a **MANUAL** estimate (or trigger a scoping search: matching-item count x average pages per item).
+
+**What the "show criteria" panel displays at this node:**
+- When automated - the exact basis: *"Record type 'Building permit' has a profile seeded from 14 completed requests; page-count variance +/- 2 (low); within normal size and dollar bounds -> auto-estimated at $X. Basis: historical actuals."*
+- When manual - the teaching moment: *"No reliable estimation profile exists for this record type yet, so this request needs a human estimate. Seed the profile - enter typical values on the record type, sample during discovery, or simply complete a few of these - and every future request of this type will auto-estimate."*
+
+That second message is the configuration payoff made concrete: the user sees that the manual step in front of them is optional *for the next one*, if they invest once.
+
+### The same pattern everywhere (automation readiness)
+
+The estimate is the showcase, but the principle generalizes: most "manual" nodes are manual only because a piece of reusable configuration has not been created yet. At any such node the tool can show *why it was manual* and *what converts it to automatic*:
+
+| Node | Manual today because... | Configure this once -> automatic next time |
+|---|---|---|
+| Estimate | no reliable profile for this record type | seed the record-type estimate profile (historical / sampling / expert seed) |
+| Redaction | no template for this record type / exemption pattern | build a mass-redaction template or redaction profile |
+| Routing to a team | low match confidence or no owning team | enrich the taxonomy (record types, owning teams) |
+| Routing to a person | no specialization captured | add specialization text to the person / team |
+| Public-readiness / bypass | type not marked releasable-as-is | add the type to the known-clean registry |
+| Deadlines / tolling / deposit gates | jurisdiction values blank | fill the Jurisdiction Profile (Part 5) |
+
+This is the onboarding and sales story made visible: a prospect or a new clerk walks a real-looking request, sees which steps ran automatically and which needed a person, and sees exactly what one-time setup turns the manual ones into automatic ones for every similar request after. "Effort spent once per type, then reused" - the same philosophy behind reusable redaction templates and seeded estimate profiles.
+
+---
+
+## Part 7 - How this powers the Process Flow Simulator
 
 The simulator (functional spec 15.9) walks a hypothetical request through this tree. Each row in Parts 1-2 becomes a **node**, and the *Decided by* column tells the simulator how to handle it:
 
 - **HUMAN** node -> asks you the question and waits for a click (e.g., "Are there responsive records? Yes / No").
 - **CODE** node -> auto-resolves and shows the rule or math that fired (e.g., "cost $312 > approved $250 -> pause + revise").
 - **AI** node -> shows what the model proposed and at what confidence, and lets you accept or override.
+- **Criteria panel (every node)** -> hover or click reveals the exact criteria the node used and, where it was manual, the one-time configuration that would automate it next time (see Part 6).
 - **POLICY** values -> appear as the simulator's toggle/number panel (the same knobs from Part 5), so changing "deposit % = 50" and re-walking shows a different path.
 - **Time-driven** nodes -> the simulator lets you "advance the clock N days" to watch reminders fire and terminal states trigger - the only way to *see* the stall/exit branches.
 
