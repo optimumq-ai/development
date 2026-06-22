@@ -1,3 +1,5 @@
+## Workflow engine BUILT (2026-06-22, commit 7476555) - deterministic rulebook + decision trail + AI plain-English authoring; Routing tab + Workflow admin page. See SESSION_HANDOFF.md. Follow-ons: redaction-stage entry hook for auto-redaction; calibrated 2-stage match; specialization->individual promotion.
+
 # Backlog / Ideas to Consider
 
 Running list of enhancement ideas captured during build sessions. Not yet scheduled.

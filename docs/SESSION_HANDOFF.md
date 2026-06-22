@@ -90,3 +90,18 @@ SECURITY: Anthropic API key ALREADY ROTATED after the Docker exposure (done) - n
 - Batch scripts (scripts/indexRecordTypes.js, scripts/indexDocumentPages.js) remain as one-shot backfill/repair tools.
 - Verified live: create -> auto-embedded + searchable (0.68); delete -> record + embedding both gone (no orphans); doc reindex idempotent.
 - NEXT remaining: two-stage routing (taxonomy-first, doc-content fallback, calibrated threshold ~0.5-0.66); optional portal/agent upgrade to use this engine.
+
+## Workflow Engine (BUILT - balanced AI + deterministic) - 2026-06-22
+The routing brain. AI does what it's good at (matching + authoring); a deterministic engine executes the rulebook so routing is reproducible, auditable, explainable.
+- DB: `workflow_rules` (conditions[json]/actions[json]/priority/enabled/source) + `workflow_decisions` (per-request trail). In schema.postgres.sql w/ 4 seed rules (ON CONFLICT DO NOTHING).
+- `backend/src/services/workflowEngine.js`: buildSignals(request,matcher) -> evaluate(signals) first-match-by-priority -> onIntake() applies stage+team to the request and logs a decision. cmp() ops: gte/gt/lte/lt/eq/neq/in/contains/contains_any/is_true/is_false. Fire-and-forget via bg(); catch-all fallback rule => nothing is ever unrouted. Engine sets ONLY stage + department_id (does not touch classification/deadline set at creation).
+- `backend/src/routes/workflow.js` (/api/workflow): GET/POST/PATCH/DELETE /rules; POST /rules/draft (AI: plain English -> structured rule, vocab-constrained); GET /decisions/:requestId.
+- Wired fire-and-forget into ALL 3 intake paths: requests.js POST '/' (manual) + POST '/public', publicChat.js (passes existing `cls` to avoid a 2nd matcher call).
+- Frontend: `components/ui/WorkflowDecisionPanel.js` -> "Routing" tab on RequestWorkspacePage (per-request "how this was routed" + why). `pages/WorkflowPage.js` (nav "Workflow", isElev): rulebook list w/ enable toggle + editable priority + delete, and "Add a rule in plain English" -> AI draft preview (When/Then/warnings) -> Save.
+- Seed rulebook: P5 sensitive->intake (flags), P20 confident+has team->record_search/matched, P30 low conf->intake/open_records, P100 fallback->intake/open_records. TAXONOMY_CONFIDENCE=70 threshold.
+- VERIFIED end-to-end: manual "body-worn camera from a traffic stop" -> matched 100% -> Confident rule -> record_search @ Police Records Unit, full trail logged. AI draft tested (mrr->hold at intake). Commit 7476555.
+
+### Workflow follow-ons (not yet built)
+- State-transition hooks: fire AI auto-redaction when a request ENTERS the redaction stage (not on a human click), since confident routing may skip record_search.
+- Calibrated two-stage match (record-type first, doc-content fallback). Optionally route portal/agent matching through the same engine signals.
+- More action types if needed (assign function-role, set flag, deadline override). Specialization text (already captured on users/teams) -> promote to a specific individual via pgvector match.
