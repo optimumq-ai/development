@@ -211,3 +211,32 @@ operationalizes the policy they set - it does not decide the law.
 Depends on: Smart Routing AI-match step (shared), the AI content scan (built), reusable redaction
 templates (built), taxonomy sensitivity profile (built), the role/capability primitive + task
 assignment + hold states (routing phase). Build with the routing phase.
+
+## 2026-06-21 - Kevin walkthrough notes (routing + redaction workspace)
+
+### FIXED this session
+- [DONE] Advance-to-Redaction button ignored Responsive marks. Root cause: RequestWorkspacePage gating read a parent `records` array that was never loaded, while RecordsPanel tracked its own. Wired RecordsPanel onChange -> parent loadRecords so responsiveCount/canAdvance reflect reality. (commit 1ab2db9)
+
+### Smart routing / auto-completion of early stages (workflow engine)
+- When the responsive record(s) are KNOWN (portal requestor selected, or AI-suggested+confirmed), auto-complete Intake.
+- If record is not public-ready AND requires redaction + human review -> route to the REDACTION user(s) on the record's associated team. If team can't be determined w/ HIGH CONFIDENCE -> route to Intake (Open Records team).
+- AI suggests records for ALL requests regardless of origin (portal OR manual), attached up front to save redaction-review effort. Auto-advance to Record Search if team match high-confidence; else route to Intake.
+- Confidence-gated auto-advance with safe fallback to Intake is the governing pattern. Needs: routing decision fn on request-create/record-attach; record_type -> team mapping + confidence; audit trail explaining each auto-decision.
+- VERIFY: does the portal agent script already confirm "is this the right record + anything else needed?" before submit. (check publicChat agent prompt)
+
+### AI auto-redaction trigger = state transition, NOT a human click (Kevin's insight, agreed)
+- Triggering auto-redaction on the human "advance from Record Search" click breaks if smart-routing BYPASSES record search. Tie the trigger to ENTERING the redaction stage (server-side stage-transition hook), idempotent (run once). Then My Tasks "open" just shows results / "processing", no waiting.
+- Argues for a workflow engine that owns stage transitions and fires side-effects on transition, decoupled from UI.
+
+### Records UI layout redesign
+- Bring records to the front (no drill-down): right-side pane, grouped by provenance - (a) requestor-selected via portal, (b) AI-suggested, (c) manual search. Click-to-delete AI suggestions. NEEDS: store provenance/source on each attached record.
+
+### Stage/role-specific UIs - TO DISCUSS
+- Decide whether INTAKE, ESTIMATE/PAYMENT/ACCOUNTING, and REDACTION each need a dedicated workspace vs tabs vs task-driven views. Tie to My Tasks.
+
+### My Tasks for redaction users
+- A department redaction user should see his redaction-ready requests in My Tasks. VERIFY current My Tasks filtering (assignment + stage + role); likely depends on routing/assignment landing the request on him.
+
+### Vaughn index button (redaction workspace)
+- Button to view the Vaughn index immediately after AI auto-redaction completes. Generate ON-DEMAND from CURRENT redaction_zones each click so edits to suggested redactions are always reflected (no stale snapshot).
+- Each entry: page, item/description (zone label), exemption basis (from redaction rule/category -> statute), justification. NEEDS: redaction rules/categories to carry an exemption/statute citation. (Confirm with Kevin what exemption framework - TX Gov Code 552 etc.)
