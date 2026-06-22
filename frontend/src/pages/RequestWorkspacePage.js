@@ -37,7 +37,7 @@ export default function RequestWorkspacePage() {
   const [teams, setTeams] = useState([]);
   const [rerouting, setRerouting] = useState(false);
 
-  useEffect(function() { load(); loadStaff(); loadTeams(); }, [id]);
+  useEffect(function() { load(); loadStaff(); loadTeams(); loadRecords(); }, [id]);
 
   async function loadStaff() {
     try { var r = await api.get('/staff'); setStaff(r.data.staff); } catch(e) {}
@@ -45,6 +45,10 @@ export default function RequestWorkspacePage() {
 
   async function loadTeams() {
     try { var r = await api.get('/departments'); var ds = (r.data && r.data.departments) || []; setTeams(ds.filter(function(d){ return d.kind === 'team'; })); } catch(e) {}
+  }
+
+  async function loadRecords() {
+    try { var r = await api.get('/files/' + id); setRecords((r.data.files||[]).map(function(f){ return { id: f.id, status: f.responsive ? 'responsive' : 'attached' }; })); } catch(e) {}
   }
 
   async function load() {
@@ -243,7 +247,7 @@ export default function RequestWorkspacePage() {
 
       {tab==='records'&&(
         <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px'}}>
-          <RecordsPanel requestId={request.id} stage={request.stage}/>
+          <RecordsPanel requestId={request.id} stage={request.stage} onChange={loadRecords}/>
         </div>
       )}
 

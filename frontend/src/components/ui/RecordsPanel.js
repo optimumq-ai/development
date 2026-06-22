@@ -22,7 +22,7 @@ function fileIcon(mimetype, isNonDigital) {
   return '📄';
 }
 
-export default function RecordsPanel({ requestId, stage }) {
+export default function RecordsPanel({ requestId, stage, onChange }) {
   const nav = useNavigate();
   const [records, setRecords] = useState([]);
   const [matches, setMatches] = useState({});
@@ -44,6 +44,7 @@ export default function RecordsPanel({ requestId, stage }) {
       }));
       var pdfIds = r.data.files.filter(function(f){ return f.mimetype && f.mimetype.indexOf('pdf') >= 0; }).map(function(f){ return f.id; });
       if (pdfIds.length) { api.post('/redaction-templates/match-batch', { file_ids: pdfIds }).then(function(mr){ setMatches(mr.data.matches || {}); }).catch(function(){}); }
+      if (onChange) onChange();
     } catch(e) { console.error(e); }
     setLoading(false);
   }
@@ -94,6 +95,7 @@ export default function RecordsPanel({ requestId, stage }) {
     try {
       await api.patch('/files/' + fileId + '/status', { responsive: responsive });
       setRecords(function(prev){ return prev.map(function(r){ return r.id===fileId ? Object.assign({},r,{status:responsive?'responsive':'attached'}) : r; }); });
+      if (onChange) onChange();
     } catch(e) {
       setRecords(function(prev){ return prev.map(function(r){ return r.id===fileId ? Object.assign({},r,{status:responsive?'responsive':'attached'}) : r; }); });
     }
