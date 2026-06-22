@@ -21,6 +21,7 @@ export default function AppLayout() {
     { to: '/taxonomy', label: 'Taxonomy', show: isElev },
     { to: '/workflow', label: 'Workflow', show: isElev },
     { to: '/workflow-map', label: 'Process Map', show: isElev },
+    { to: '/workflow-sim', label: 'Simulator', show: isElev },
     { to: '/sources', label: 'Sources', show: isElev },
     { to: '/redaction-rules', label: 'Redaction Rules', show: isElev },
     { to: '/mass-redaction', label: 'Mass Redaction', show: isElev },

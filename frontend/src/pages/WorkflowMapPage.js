@@ -72,6 +72,7 @@ export default function WorkflowMapPage(){
                 <span style={chip('#F3F4F6', (S[node.status]||{}).color)}>{(S[node.status]||{}).label}</span>
                 {node.trigger==='time' ? <span style={chip('#FEF3C7','#92400E')}>&#9201; time-driven</span> : null}
               </div>
+              {node.description ? <div style={{ fontSize:'13px', color:'#374151', lineHeight:'1.6', marginBottom:'14px' }}>{node.description}</div> : null}
               {node.criteria && node.criteria.length ? (
                 <div style={{ marginBottom:'14px' }}>
                   <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.04em', marginBottom:'5px' }}>What it checks</div>
