@@ -9,6 +9,7 @@ const { requireAuth } = require('../middleware/auth');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const engine = require('../services/feeEngine');
+const ep = require('../services/estimateProfile');
 const email = require('../services/email');
 const feeNotice = require('../services/feeNotice');
 const emailTemplate = require('../services/emailTemplate');
@@ -84,7 +85,11 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
     var jid = await activeJurisdiction();
     var cfg = await pickConfig(jid);
     var latest = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [req.params.requestId]);
-    for (var ci = 0; ci < loaded.components.length; ci++) { loaded.components[ci].suggested = await knownQuantities(loaded.components[ci].id); }
+    for (var ci = 0; ci < loaded.components.length; ci++) {
+      loaded.components[ci].suggested = await knownQuantities(loaded.components[ci].id);
+      var rtid = loaded.components[ci].recordType;
+      loaded.components[ci].autoEstimate = rtid ? await ep.assess(rtid, { jurisdictionId: jid }) : { decision: 'manual', confidence: 'none', reasons: ['No record type identified for this component.'] };
+    }
     res.json({
       request: { id: loaded.request.id, number: loaded.request.request_number, isMrr: !!loaded.request.is_mrr },
       components: loaded.components,

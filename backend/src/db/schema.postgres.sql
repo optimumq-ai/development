@@ -405,3 +405,16 @@ INSERT INTO workflow_rules (id,name,description,enabled,priority,conditions,acti
 ('wfr-uncertain','Uncertain match to Open Records','If confidence in the record-type match is low, route to the Open Records team at intake for human triage.',1,30,'[{"field":"record_type_confidence","op":"lt","value":70}]','{"stage":"intake","team":"open_records","note":"Low match confidence; routed to Open Records for human triage.","stop":true}','seed'),
 ('wfr-fallback','Fallback to Open Records intake','When no other rule applies, default to Open Records at intake so nothing is ever left unrouted.',1,100,'[]','{"stage":"intake","team":"open_records","note":"No specific rule matched; default to Open Records intake.","stop":true}','seed')
 ON CONFLICT (id) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS record_type_estimate_profiles (
+  record_type_id TEXT PRIMARY KEY,
+  quantities_json TEXT DEFAULT '{}',
+  stats_json TEXT DEFAULT '{}',
+  sample_size INTEGER DEFAULT 0,
+  has_expert_seed INTEGER DEFAULT 0,
+  source TEXT,
+  notes TEXT,
+  seeded_by TEXT,
+  seeded_at TEXT,
+  updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);

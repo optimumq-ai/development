@@ -105,3 +105,12 @@ The routing brain. AI does what it's good at (matching + authoring); a determini
 - State-transition hooks: fire AI auto-redaction when a request ENTERS the redaction stage (not on a human click), since confident routing may skip record_search.
 - Calibrated two-stage match (record-type first, doc-content fallback). Optionally route portal/agent matching through the same engine signals.
 - More action types if needed (assign function-role, set flag, deadline override). Specialization text (already captured on users/teams) -> promote to a specific individual via pgvector match.
+
+## Estimate Automation - record-type estimation profiles (BUILT) - 2026-06-22
+The "manual vs automated estimate" decision (see WORKFLOW_DECISIONS.md Part 6) is now real.
+- DB: `record_type_estimate_profiles` (record_type_id PK, quantities_json, stats_json [Welford per-driver {n,mean,M2}], sample_size, has_expert_seed, source, notes). In schema.postgres.sql.
+- `backend/src/services/estimateProfile.js`: getProfile, seedProfile (expert seed), recordActuals (Welford running mean+variance), confidenceOf (none/seeded/low/high), assess(recordTypeId) -> {decision automated|manual, confidence, basis, quantities, estimatedTotal, depositDue, reasons[], drivers}. Prices via feeEngine.compute with the active jurisdiction's FR fee config. POLICY knobs (defaults, destined for the Jurisdiction Profile): minSample=3, maxCV=0.5, highDollar=$200. Estimates over the dollar bound force manual.
+- `backend/src/routes/estimateProfiles.js` (/api/estimate-profiles): GET/:id, PUT/:id (seed, elevated), POST/:id/actuals (elevated), DELETE/:id, POST /assess.
+- Wired: feeEstimates.js GET /request/:requestId attaches `autoEstimate` (assess result) per component. Frontend: components/EstimateProfilePanel.js inside RecordTypeEditor (existing types) - auto/manual banner + est $, editable typical quantities (search/review hrs; b&w/color/oversized pages), seed save, sample-size note.
+- Decision ladder realized: expert seed -> automated(seeded); >=3 consistent actuals -> automated(high); noisy (CV>0.5) or <3 -> manual(low); none -> manual; over $200 -> manual. VERIFIED: service unit tests (all 5 paths) + API + estimate-context wiring.
+- PENDING: historical writeback hook (call recordActuals at final/reconciliation - that step is itself PLANNED, and must use ACTUAL not projected quantities); sampling-at-discovery (7b); wire POLICY knobs to the Jurisdiction Profile UI; media quantities in the seed form.

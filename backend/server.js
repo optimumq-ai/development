@@ -39,6 +39,7 @@ app.post('/api/requests/public', async function(req, res) {
 
 app.use('/api/requests', require('./src/routes/requests'));
 app.use('/api/workflow', require('./src/routes/workflow'));
+app.use('/api/estimate-profiles', require('./src/routes/estimateProfiles'));
 app.use('/api/staff', require('./src/routes/staff'));
 app.use('/api/departments', require('./src/routes/departments'));
 app.use('/api/repositories', require('./src/routes/repositories'));

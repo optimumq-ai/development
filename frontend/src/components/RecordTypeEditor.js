@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../lib/api';
+import EstimateProfilePanel from './EstimateProfilePanel';
 
 var AVAIL_OPTS = ['releasable', 'review_required', 'restricted', 'confidential'];
 
@@ -178,6 +179,7 @@ export default function RecordTypeEditor(props) {
           <option value="draft">draft</option>
           <option value="inactive">inactive</option>
         </select>
+        {props.mode !== 'create' && init.id ? <EstimateProfilePanel recordTypeId={init.id} /> : null}
         {err ? <div style={{ color: '#DC2626', fontSize: '13px', marginTop: '14px' }}>{err}</div> : null}
         <div style={{ display: 'flex', gap: '10px', justifyContent: 'flex-end', marginTop: '20px' }}>
           <button onClick={props.onClose} style={{ padding: '9px 18px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '14px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
