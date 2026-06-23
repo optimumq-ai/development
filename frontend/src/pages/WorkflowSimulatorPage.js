@@ -18,6 +18,7 @@ export default function WorkflowSimulatorPage(){
   var [desc, setDesc] = useState('I need the body-worn camera footage from the traffic stop on Main St last Tuesday.');
   var [feeWaiver, setFeeWaiver] = useState(false);
   var [sensitive, setSensitive] = useState(false);
+  var [verifyEmail, setVerifyEmail] = useState(false);
   var [sim, setSim] = useState(null);
   var [starting, setStarting] = useState(false);
   var [current, setCurrent] = useState(null);
@@ -49,7 +50,7 @@ export default function WorkflowSimulatorPage(){
   async function start(){
     setStarting(true); setDone(null); setTrail([]); setCurrent(null);
     try {
-      var r = await api.post('/workflow-model/simulate', { description: desc, feeWaiver: feeWaiver, sensitive: sensitive });
+      var r = await api.post('/workflow-model/simulate', { description: desc, feeWaiver: feeWaiver, sensitive: sensitive, verifyEmail: verifyEmail });
       setSim(r.data); setCurrent(happyOrder[0]);
     } catch (e) { setSim({ error: (e.response && e.response.data && e.response.data.error) || 'Simulation failed' }); }
     setStarting(false);
@@ -68,6 +69,7 @@ export default function WorkflowSimulatorPage(){
     if (!sim || sim.error) return null;
     var m = sim.match, sg = sim.signals, rl = sim.rule, as = sim.assess;
     switch (nodeId){
+      case 'verify-email': return { idx: sg.emailVerified ? 0 : 1, banner: sg.emailVerified ? 'You marked the email as verified on the start screen.' : 'Email not marked verified - the request would wait on verification.' };
       case 'classify-type': return { idx: m.confidence >= 70 ? 0 : 1, banner: 'AI matched "' + (m.recordTypeName || 'no type') + '" at ' + m.confidence + '% confidence.' };
       case 'sensitivity': return { idx: (sg.flags && sg.flags.length) ? 0 : 1, banner: (sg.flags && sg.flags.length) ? ('Flags detected: ' + sg.flags.join(', ') + '.') : 'No sensitivity flags.' };
       case 'dept-confidence': return { idx: m.confidence >= 70 ? 0 : 1, banner: 'Match confidence ' + m.confidence + '%.' };
@@ -101,9 +103,14 @@ export default function WorkflowSimulatorPage(){
         {!sim ? (
           <div>
             <textarea value={desc} onChange={function(e){ setDesc(e.target.value); }} rows={3} placeholder="Describe a hypothetical public records request..." style={inp} />
-            <div style={{ display:'flex', gap:'18px', margin:'10px 0 12px' }}>
-              <label style={{ fontSize:'13px', color:'#374151', display:'flex', alignItems:'center', gap:'6px', cursor:'pointer' }}><input type="checkbox" checked={feeWaiver} onChange={function(e){ setFeeWaiver(e.target.checked); }} /> Fee waiver requested</label>
-              <label style={{ fontSize:'13px', color:'#374151', display:'flex', alignItems:'center', gap:'6px', cursor:'pointer' }}><input type="checkbox" checked={sensitive} onChange={function(e){ setSensitive(e.target.checked); }} /> Mark sensitive</label>
+            <div style={{ margin:'10px 0 12px' }}>
+              <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.04em', marginBottom:'8px' }}>Optional inputs &middot; reflected later in the walk</div>
+              <div style={{ display:'flex', gap:'18px', flexWrap:'wrap' }}>
+                <label style={{ fontSize:'13px', color:'#374151', display:'flex', alignItems:'center', gap:'6px', cursor:'pointer' }}><input type="checkbox" checked={verifyEmail} onChange={function(e){ setVerifyEmail(e.target.checked); }} /> Email address verified</label>
+                <label style={{ fontSize:'13px', color:'#374151', display:'flex', alignItems:'center', gap:'6px', cursor:'pointer' }}><input type="checkbox" checked={feeWaiver} onChange={function(e){ setFeeWaiver(e.target.checked); }} /> Fee waiver requested</label>
+                <label style={{ fontSize:'13px', color:'#374151', display:'flex', alignItems:'center', gap:'6px', cursor:'pointer' }}><input type="checkbox" checked={sensitive} onChange={function(e){ setSensitive(e.target.checked); }} /> Mark sensitive</label>
+              </div>
+              <div style={{ fontSize:'12px', color:'#374151', background:'#F8FAFF', border:'1px solid #DBEAFE', borderRadius:'8px', padding:'9px 11px', marginTop:'10px', lineHeight:'1.5' }}>These checkboxes have <b>no immediate effect</b>. Each one is simply carried into the simulation and surfaces at its matching decision later - email verification, the fee-waiver branch, and the sensitivity check. Leave one unchecked to walk the opposite path.</div>
             </div>
             <button onClick={start} disabled={starting || !desc.trim()} style={Object.assign({}, goBtn, { opacity: (starting || !desc.trim()) ? 0.6 : 1 })}>{starting ? 'Classifying...' : 'Start walk'}</button>
             <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'10px', lineHeight:'1.5' }}>The built decisions run for real - the AI classifies the text, the routing rules fire, and the estimate is assessed - so the path reflects how this request would actually be handled. Click any earlier step to go back and try a different answer.</div>

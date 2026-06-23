@@ -34,7 +34,7 @@ router.post('/simulate', requireAuth, async function (req, res) {
     var assess = cls.recordTypeId ? await estimateProfile.assess(cls.recordTypeId) : null;
     res.json({
       match: { recordTypeId: cls.recordTypeId || null, recordTypeName: cls.recordTypeName || null, confidence: Math.round(cls.recordTypeConfidence || 0) },
-      signals: { flags: signals.flags || [], hasOwnerTeam: !!signals.has_owner_team, classification: signals.classification, redactionFlag: !!signals.redaction_flag, mrr: !!signals.mrr_flag, feeWaiver: !!cls.feeWaiverSignal },
+      signals: { flags: signals.flags || [], hasOwnerTeam: !!signals.has_owner_team, classification: signals.classification, redactionFlag: !!signals.redaction_flag, mrr: !!signals.mrr_flag, feeWaiver: !!cls.feeWaiverSignal, emailVerified: !!b.verifyEmail },
       rule: hit ? { id: hit.rule.id, name: hit.rule.name } : null,
       routedTeam: cls.teamName || null,
       reasoning: cls.reasoning || null,
