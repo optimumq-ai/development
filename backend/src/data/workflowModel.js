@@ -29,7 +29,7 @@ function N(o){ if(!o.trigger)o.trigger='event'; if(!o.criteria)o.criteria=[]; if
 
 // ---- intake ----
 N({id:'intake-channel',phase:'intake',label:'Which channel did it arrive on?',decider:'code',status:'built',outcomes:[{label:'Portal form'},{label:'Chat agent'},{label:'Staff-created'}]});
-N({id:'verify-email',phase:'intake',label:'Is the requestor email verified?',decider:'code',status:'built'});
+N({id:'verify-email',phase:'intake',label:'Is the requestor email verified?',decider:'code',status:'built',outcomes:[{label:'Yes',note:'Verified - notices and deliveries can proceed by email.'},{label:'No',note:'Attempt outreach (a phone call or an alternate contact) to confirm a valid email before relying on email delivery.'}]});
 N({id:'classify-type',phase:'intake',label:'What record type is this, and how confident?',decider:'ai',status:'built',criteria:['Semantic + AI match of the request text against the taxonomy','Returns a record type and a 0-100 confidence score'],outcomes:[{label:'Confident match',to:'route-confident'},{label:'No confident match',to:'route-uncertain'}],automatedBy:'enrich the taxonomy (record types, synonyms, keywords)'});
 N({id:'complexity',phase:'intake',label:'How complex is it (simple / standard / complex / redaction)?',decider:'ai',status:'built'});
 N({id:'redaction-flag',phase:'intake',label:'Does it likely need redaction?',decider:'ai',status:'built'});
@@ -130,7 +130,7 @@ var policyKnobs = [
 
 var descriptions = {
 "intake-channel":"Records where the request came from - the public form, the AI chat agent, or a staff member entering it by hand. This sets how much the system already knows and which confirmations are needed.",
-"verify-email":"Confirms the requestor's email is real before work proceeds, so notices and deliveries actually reach them and the request is traceable.",
+"verify-email":"Confirms the requestor's email is real before work proceeds, so notices and deliveries actually reach them and the request is traceable. If the requestor chose postal mail for delivery, verifying the email is less critical.",
 "classify-type":"The AI reads the request and matches it to a record type in your taxonomy, with a confidence score. This single match drives routing, fee estimation, and redaction expectations downstream.",
 "complexity":"The AI gauges how involved the request is (simple, standard, complex, or redaction-heavy), which sets the statutory deadline and signals how much labor to expect.",
 "redaction-flag":"An early read on whether the records will need redaction (e.g., body-cam video, personnel files), so the request can be routed and resourced accordingly.",

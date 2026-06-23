@@ -82,7 +82,7 @@ export default function WorkflowMapPage(){
               {node.outcomes && node.outcomes.length ? (
                 <div style={{ marginBottom:'14px' }}>
                   <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.04em', marginBottom:'5px' }}>Outcomes</div>
-                  {node.outcomes.map(function(o,i){ return <div key={i} onClick={o.to?function(){ setSel(o.to); }:null} style={{ fontSize:'13px', color:o.to?'#1F4E79':'#374151', lineHeight:'1.5', marginBottom:'3px', cursor:o.to?'pointer':'default' }}>&middot; {o.label}</div>; })}
+                  {node.outcomes.map(function(o,i){ return <div key={i} style={{ marginBottom:'5px' }}><div onClick={o.to?function(){ setSel(o.to); }:null} style={{ fontSize:'13px', color:o.to?'#1F4E79':'#374151', lineHeight:'1.5', cursor:o.to?'pointer':'default' }}>&middot; {o.label}</div>{o.note ? <div style={{ fontSize:'12px', color:'#9CA3AF', lineHeight:'1.45', marginLeft:'10px' }}>{o.note}</div> : null}</div>; })}
                 </div>
               ) : null}
               {node.automatedBy ? (

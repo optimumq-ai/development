@@ -161,7 +161,10 @@ export default function WorkflowSimulatorPage(){
               return (
                 <div key={idx} onClick={function(){ choose(node, o, o.label); }} style={{ display:'flex', alignItems:'flex-start', gap:'10px', padding:'11px 13px', borderRadius:'9px', border:'1px solid ' + (picked ? '#1F4E79' : '#E5E7EB'), background: picked ? '#F8FAFF' : 'white', cursor:'pointer', marginBottom:'7px' }}>
                   <span style={{ width:'16px', height:'16px', borderRadius:'50%', flexShrink:0, marginTop:'1px', border:'2px solid ' + (picked ? '#1F4E79' : '#CBD5E1'), background: picked ? '#1F4E79' : 'white', boxShadow: picked ? 'inset 0 0 0 2px #fff' : 'none' }} />
-                  <div style={{ fontSize:'13px', color:'#111', fontWeight: picked ? '600' : '500', lineHeight:'1.45' }}>{o.label}{picked ? <span style={{ color:'#1F4E79', fontWeight:'700' }}> &middot; what the system does</span> : null}</div>
+                  <div>
+                    <div style={{ fontSize:'13px', color:'#111', fontWeight: picked ? '600' : '500', lineHeight:'1.45' }}>{o.label}{picked ? <span style={{ color:'#1F4E79', fontWeight:'700' }}> &middot; what the system does</span> : null}</div>
+                    {o.note ? <div style={{ fontSize:'12px', color:'#6B7280', marginTop:'3px', lineHeight:'1.45' }}>{o.note}</div> : null}
+                  </div>
                 </div>
               );
             })}
