@@ -65,7 +65,7 @@ The Workflow Engine is the "code enforces and records" layer. The classifier is 
 |---|---|---|
 | Does projected cost exceed the estimate threshold? | CODE (fee math) | BUILT |
 | What is the estimated cost? | CODE (fee profile) | BUILT |
-| Should a requested fee waiver be granted? | HUMAN (approver) | PARTIAL |
+| Should a requested fee waiver be granted? | HUMAN (approver) | BUILT (grant/deny + denial notice + reason library) |
 | **Manual or automated estimate?** (auto-estimate from the record-type profile, or route to a human?) | CODE (profile + variance gate) + POLICY | BUILT (profile + variance gate + assess + seed UI); historical writeback PLANNED |
 | Is a deposit required before work begins? | CODE (policy) | PARTIAL |
 | Has the required deposit been paid? | CODE (payment status) | PLANNED |

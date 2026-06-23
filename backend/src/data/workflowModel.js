@@ -51,7 +51,7 @@ N({id:'mrr-child-type',phase:'scoping',label:'Record type & routing per child?',
 
 // ---- fees ----
 N({id:'fee-waiver-requested',phase:'fees',label:'Was a fee waiver requested?',decider:'code',status:'built',outcomes:[{label:'Yes -> waiver decision'},{label:'No -> estimate'}]});
-N({id:'fee-waiver-grant',phase:'fees',label:'Should the fee waiver be granted?',decider:'human',status:'partial'});
+N({id:'fee-waiver-grant',phase:'fees',label:'Should the fee waiver be granted?',decider:'human',status:'built',outcomes:[{label:'Granted -> fees waived, request continues'},{label:'Denied -> denial notice sent, request continues as normal'}]});
 N({id:'estimate-auto-manual',phase:'fees',label:'Manual or automated estimate?',decider:'code',status:'built',criteria:['Does the matched record type have an estimation profile? (expert seed / historical actuals / sampling)','Is the profile reliable - low variance and enough samples?','Is the request within normal size and dollar bounds?'],outcomes:[{label:'All yes -> AUTOMATED estimate (priced from the profile)'},{label:'Any no -> MANUAL estimate / scoping search'}],automatedBy:'seed the record-type estimate profile (Taxonomy -> Estimate automation)',note:'Showcase node for criteria transparency. Profile + variance gate BUILT; historical writeback PLANNED.'});
 N({id:'estimate-cost',phase:'fees',label:'What is the estimated cost?',decider:'code',status:'built',criteria:['Fee engine prices the component quantities with the city rate config']});
 N({id:'estimate-threshold',phase:'fees',label:'Does the estimate exceed the notify threshold?',decider:'code',status:'built',outcomes:[{label:'Yes -> notify / consent required'},{label:'No -> proceed'}]});
@@ -146,7 +146,7 @@ var descriptions = {
 "mrr-split":"For a bundled multi-record request, the AI proposes how to break it into separate child requests and a person confirms - so each piece gets its own routing, estimate, and deadline.",
 "mrr-child-type":"Each child of a split request is classified and routed on its own, exactly like a standalone request.",
 "fee-waiver-requested":"Notes whether the requestor asked for the fees to be waived (e.g., a journalist or a public-interest request), which branches the flow toward a waiver decision.",
-"fee-waiver-grant":"A person decides whether the fee waiver is justified under policy. This is a judgment call, not something to automate.",
+"fee-waiver-grant":"A person decides whether the fee waiver is justified under policy - a judgment call, not automated. Denying it sends the requestor a denial notice (reason picked from a reusable library or typed fresh, which is then saved for reuse) and the request continues through the normal fee process; it is not closed.",
 "estimate-auto-manual":"The pivotal cost decision: can the system estimate this request's labor and copies automatically from what it already knows about this record type, or does a person have to work it up by hand? Automating it is the single biggest time-saver for small, high-volume requests.",
 "estimate-cost":"Turns the expected quantities (search hours, pages, media) into a dollar figure using the city's current rate schedule.",
 "estimate-threshold":"Checks whether the estimate is high enough that the requestor must be notified and agree before work continues, per local policy.",

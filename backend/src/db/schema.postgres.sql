@@ -418,3 +418,20 @@ CREATE TABLE IF NOT EXISTS record_type_estimate_profiles (
   seeded_at TEXT,
   updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
 );
+
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS fee_waiver_status TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS fee_waiver_reason TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS fee_waiver_decided_by TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS fee_waiver_decided_at TEXT;
+CREATE TABLE IF NOT EXISTS decision_reasons (
+  id TEXT PRIMARY KEY, category TEXT NOT NULL, text TEXT NOT NULL,
+  is_active INTEGER DEFAULT 1, usage_count INTEGER DEFAULT 0,
+  created_by TEXT, created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+INSERT INTO decision_reasons (id, category, text, created_by) VALUES
+('dr-fw-1','fee_waiver_denial','The request does not demonstrate a public interest that outweighs the cost of providing the records.','seed'),
+('dr-fw-2','fee_waiver_denial','The requestor does not qualify under the agency''s fee-waiver criteria.','seed'),
+('dr-fw-3','fee_waiver_denial','The request is primarily in the requestor''s commercial or personal interest.','seed'),
+('dr-fw-4','fee_waiver_denial','Insufficient information was provided to evaluate the fee-waiver request.','seed'),
+('dr-fw-5','fee_waiver_denial','The requested records are already publicly available at no cost.','seed')
+ON CONFLICT (id) DO NOTHING;

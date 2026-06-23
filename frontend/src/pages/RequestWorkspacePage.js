@@ -6,6 +6,7 @@ import FeeEstimatePanel from '../components/ui/FeeEstimatePanel';
 import AvRedactionPanel from '../components/ui/AvRedactionPanel';
 import DocSearchPanel from '../components/ui/DocSearchPanel';
 import WorkflowDecisionPanel from '../components/ui/WorkflowDecisionPanel';
+import FeeWaiverDecisionPanel from '../components/ui/FeeWaiverDecisionPanel';
 
 const STAGES = ['intake','record_search','redaction_review','fee_review','awaiting_payment','custodian_retrieval','delivery'];
 const STAGE_LABELS = { intake:'Intake Review', record_search:'Record Search', redaction_review:'Redaction Review', fee_review:'Fee Review', awaiting_payment:'Awaiting Payment', custodian_retrieval:'Custodian Retrieval', delivery:'Delivery' };
@@ -266,6 +267,7 @@ export default function RequestWorkspacePage() {
 
       {tab==='fees'&&(
         <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px'}}>
+          <FeeWaiverDecisionPanel request={request} onChange={load}/>
           <FeeEstimatePanel requestId={request.id}/>
         </div>
       )}

@@ -138,4 +138,26 @@ async function sendNewRequestAlert(req) {
   });
 }
 
-module.exports = { send: send, sendSubmissionConfirmation: sendSubmissionConfirmation, sendNewRequestAlert: sendNewRequestAlert };
+async function sendFeeWaiverDenial(req, reasonText) {
+  var agencyName = await cfg('agency_name') || 'Public Records';
+  var contactEmail = await cfg('contact_email') || '';
+  var contactPhone = await cfg('contact_phone') || '';
+  var body = '<h2 style="margin:0 0 10px;color:#1F4E79;font-size:18px">Decision on your fee-waiver request</h2>' +
+    '<p style="font-size:14px;line-height:1.5;color:#374151">After review, your request to waive the fees associated with the following records request has been <strong>denied</strong>.</p>' +
+    '<div style="background:white;border:1px solid #E5E7EB;border-radius:8px;padding:14px;margin:16px 0">' +
+      '<div style="font-size:11px;text-transform:uppercase;color:#6B7280;letter-spacing:0.5px;margin-bottom:4px">Request Number</div>' +
+      '<div style="font-size:22px;font-weight:700;color:#1F4E79;font-family:monospace">' + req.request_number + '</div>' +
+    '</div>' +
+    '<p style="font-size:13px;color:#374151;margin:14px 0 6px"><strong>Reason for denial:</strong></p>' +
+    '<div style="background:white;border:1px solid #E5E7EB;border-left:4px solid #D97706;border-radius:8px;padding:14px;font-size:14px;color:#374151">' + (reasonText || '').replace(/</g,'&lt;') + '</div>' +
+    '<p style="font-size:13px;color:#374151;margin-top:16px">Your records request <strong>remains open</strong> and will continue to be processed. If fees apply, we will send you an estimate before any work begins, and you may decide how to proceed at that time.</p>' +
+    (contactEmail || contactPhone ? '<p style="font-size:12px;color:#6B7280;margin-top:16px">Questions about this decision? Contact us at ' + (contactEmail || '') + (contactEmail && contactPhone ? ' or ' : '') + (contactPhone || '') + '.</p>' : '');
+  return send({
+    to: req.requestor_email,
+    subject: 'Fee-Waiver Decision: ' + req.request_number,
+    text: 'Your fee-waiver request for ' + req.request_number + ' has been denied. Reason: ' + (reasonText || '') + '. Your records request remains open and will continue to be processed.',
+    html: template(body, agencyName)
+  });
+}
+
+module.exports = { send: send, sendSubmissionConfirmation: sendSubmissionConfirmation, sendNewRequestAlert: sendNewRequestAlert, sendFeeWaiverDenial: sendFeeWaiverDenial };

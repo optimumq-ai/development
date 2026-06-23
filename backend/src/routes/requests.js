@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRole } = require('../middleware/auth');
+const email = require('../services/email');
 const { all, get, run } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const workflowEngine = require('../services/workflowEngine');
@@ -161,4 +162,43 @@ router.post('/public', async function(req, res) {
   res.status(201).json({ success: true, requestNumber: requestNumber, requestId: id });
 });
 
+// Fee-waiver decision: grant or deny. Denial sends a mandatory notice, then the request
+// continues like any normal inbound request (it is NOT closed). Reasons come from a reusable
+// library; a newly typed reason is saved back into that library.
+router.post('/:id/fee-waiver-decision', requireAuth, requireRole('SYSTEM_ADMIN','DIRECTOR','SUPERVISOR','FEE_WAIVER_APPROVER'), async function(req, res) {
+  var b = req.body || {};
+  var decision = b.decision;
+  if (decision !== 'grant' && decision !== 'deny') return res.status(400).json({ error: 'decision must be grant or deny' });
+  var request = await get('SELECT * FROM requests WHERE id = ? OR request_number = ?', [req.params.id, req.params.id]);
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'system';
+
+  if (decision === 'grant') {
+    await run("UPDATE requests SET fee_waiver_status='granted', fee_waiver_decided_by=?, fee_waiver_decided_at=datetime('now'), updated_at=datetime('now') WHERE id=?", [actor, request.id]);
+    await logHistory(request.id, req.user.sub, actor, 'FEE_WAIVER_GRANTED', 'Fee waiver granted');
+    return res.json({ decision: 'granted' });
+  }
+
+  // deny - resolve the reason (existing id, or new free text added to the library)
+  var reasonText = (b.reasonText || '').trim();
+  if (b.reasonId) {
+    var r = await get('SELECT * FROM decision_reasons WHERE id = ?', [b.reasonId]);
+    if (r) { reasonText = r.text; await run('UPDATE decision_reasons SET usage_count = usage_count + 1 WHERE id = ?', [b.reasonId]); }
+  } else if (reasonText) {
+    var existing = await get("SELECT * FROM decision_reasons WHERE category='fee_waiver_denial' AND lower(text)=lower(?)", [reasonText]);
+    if (existing) { await run('UPDATE decision_reasons SET usage_count = usage_count + 1 WHERE id = ?', [existing.id]); }
+    else { var nid = 'dr-' + uuidv4().substring(0,8); await run("INSERT INTO decision_reasons (id, category, text, usage_count, created_by) VALUES (?,?,?,1,?)", [nid, 'fee_waiver_denial', reasonText, req.user.sub]); }
+  }
+  if (!reasonText) return res.status(400).json({ error: 'A denial reason is required' });
+
+  await run("UPDATE requests SET fee_waiver_status='denied', fee_waiver_reason=?, fee_waiver_decided_by=?, fee_waiver_decided_at=datetime('now'), updated_at=datetime('now') WHERE id=?", [reasonText, actor, request.id]);
+  await logHistory(request.id, req.user.sub, actor, 'FEE_WAIVER_DENIED', 'Denied: ' + reasonText);
+
+  var mail = { sent: false };
+  try { mail = await email.sendFeeWaiverDenial(request, reasonText); } catch (e) { console.error('[fee-waiver] denial email failed:', e.message); }
+
+  res.json({ decision: 'denied', reason: reasonText, emailed: !!mail.sent, emailReason: mail.reason || null });
+});
+
 module.exports = router;
+
