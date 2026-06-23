@@ -30,7 +30,7 @@ function N(o){ if(!o.trigger)o.trigger='event'; if(!o.criteria)o.criteria=[]; if
 // ---- intake ----
 N({id:'intake-channel',phase:'intake',label:'Which channel did it arrive on?',decider:'code',status:'built',outcomes:[{label:'Portal form'},{label:'Chat agent'},{label:'Staff-created'}]});
 N({id:'verify-email',phase:'intake',label:'Is the requestor email verified?',decider:'code',status:'built',outcomes:[{label:'Yes',note:'Verified - notices and deliveries can proceed by email.'},{label:'No',note:'Attempt outreach (a phone call or an alternate contact) to confirm a valid email before relying on email delivery.'}]});
-N({id:'classify-type',phase:'intake',label:'What record type is this, and how confident?',decider:'ai',status:'built',criteria:['Semantic + AI match of the request text against the taxonomy','Returns a record type and a 0-100 confidence score'],outcomes:[{label:'Confident match',to:'route-confident'},{label:'No confident match',to:'route-uncertain'}],automatedBy:'enrich the taxonomy (record types, synonyms, keywords)'});
+N({id:'classify-type',phase:'intake',label:'What record type is this, and how confident?',decider:'ai',status:'built',criteria:['Semantic + AI match of the request text against the taxonomy','Returns a record type and a 0-100 confidence score'],outcomes:[{label:'Confident match',to:'route-confident'},{label:'No confident match',to:'route-confident'}],automatedBy:'enrich the taxonomy (record types, synonyms, keywords)'});
 N({id:'complexity',phase:'intake',label:'How complex is it (simple / standard / complex / redaction)?',decider:'ai',status:'built'});
 N({id:'redaction-flag',phase:'intake',label:'Does it likely need redaction?',decider:'ai',status:'built'});
 N({id:'mrr-flag',phase:'intake',label:'Is it a multi-record request?',decider:'ai',status:'partial',note:'Flag is set; splitting not yet built.'});
@@ -39,8 +39,7 @@ N({id:'dept-confidence',phase:'intake',label:'Can the AI determine the departmen
 
 // ---- routing ----
 N({id:'route-sensitive',phase:'routing',label:'Does a sensitivity flag force human intake?',decider:'code',status:'built',criteria:['Rule: flags contains LEGAL_HOLD / ONGOING_INVESTIGATION / SENSITIVE'],outcomes:[{label:'Yes -> hold at Intake (Open Records)'},{label:'No -> continue'}]});
-N({id:'route-confident',phase:'routing',label:'Confident match AND owning team known?',decider:'code',status:'built',criteria:['Rule: confidence >= 70 AND has_owner_team is true'],outcomes:[{label:'Yes -> auto-advance to Record Search at the owning team'},{label:'No -> continue'}]});
-N({id:'route-uncertain',phase:'routing',label:'Low match confidence?',decider:'code',status:'built',criteria:['Rule: confidence < 70'],outcomes:[{label:'Yes -> Open Records intake for triage'}]});
+N({id:'route-confident',phase:'routing',label:'Can we confidently assign a team?',decider:'code',status:'partial',criteria:['Rule: confidence >= 70 AND a team is known','Team source today: the record type owning team. Team/User Smart Routing is a planned addition.'],outcomes:[{label:'Yes -> auto-advance to Record Search at the assigned team',to:'fee-waiver-requested',note:'Assignment uses the record type owning team today; Team/User Smart Routing is a planned additional source.'},{label:'No -> route to Open Records for manual team assignment',to:'route-fallback'}]});
 N({id:'route-fallback',phase:'routing',label:'Catch-all so nothing is unrouted',decider:'code',status:'built',outcomes:[{label:'-> Open Records intake'}]});
 N({id:'route-person',phase:'routing',label:'Route to a specific person by specialization?',decider:'hybrid',status:'planned',automatedBy:'add specialization text to the person / team (matched via pgvector)'});
 N({id:'route-workload',phase:'routing',label:'Balance across team members by workload?',decider:'code',status:'planned'});
@@ -138,8 +137,7 @@ var descriptions = {
 "sensitivity":"Looks for signals that a request touches a legal hold, an active investigation, or otherwise sensitive matter - cases that should always pause for a human even when everything else looks routine.",
 "dept-confidence":"Decides whether the AI is confident enough about which department owns the records to route automatically, or whether a person should triage it. The 70% line is the cutoff.",
 "route-sensitive":"The first routing rule: if anything flagged the request as sensitive, it is held at intake for a person - this rule outranks the confident-match shortcut so sensitive matters never auto-advance.",
-"route-confident":"If the record type matched with high confidence and that type has a known owning team, the system completes intake automatically and sends the request straight to that team to begin searching.",
-"route-uncertain":"When the match confidence is low, the request goes to the Open Records team for a human to read it and decide where it belongs, rather than guessing.",
+"route-confident":"Decides whether the system can confidently assign a fulfillment team. Today that means a high-confidence record-type match whose type has a known owning team; a planned enhancement also matches Team/User Smart Routing descriptions. If yes, the request auto-advances to that team to begin searching. If no, it goes to Open Records for a person to assign the team, rather than guessing.",
 "route-fallback":"A safety net: if no other rule applies, the request still lands somewhere (Open Records intake) so nothing is ever left unrouted.",
 "route-person":"Beyond routing to a team, this would send the request to a specific person whose stated specialty best matches it - matched by meaning, not just keywords.",
 "route-workload":"Spreads incoming work across the people on a team based on current load, so no one is overwhelmed while others sit idle.",

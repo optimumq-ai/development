@@ -3,6 +3,13 @@ import api from '../lib/api';
 
 function chip(bg, color){ return { display:'inline-block', background:bg, color:color, fontSize:'10px', fontWeight:'700', padding:'2px 8px', borderRadius:'20px' }; }
 var CARD = { background:'white', border:'1px solid #E5E7EB', borderRadius:'12px', boxShadow:'0 1px 2px rgba(0,0,0,0.04)' };
+var DECIDER_EXPLAIN = {
+  ai: "An AI step - the system reads the request and proposes an answer.",
+  code: "An automated step - the software applies a fixed rule to the request's data and computes the answer, with no human or AI judgment.",
+  human: "A human step - a person makes this judgment call; the software records and enforces it but does not decide it.",
+  policy: "A policy step - the answer comes from a setting your agency configures once, rather than a per-request decision.",
+  hybrid: "A combined step - an AI proposes the answer and a person confirms it."
+};
 
 function Connector(){
   return (
@@ -67,17 +74,46 @@ export default function WorkflowSimulatorPage(){
 
   function resolve(nodeId){
     if (!sim || sim.error) return null;
-    var m = sim.match, sg = sim.signals, rl = sim.rule, as = sim.assess;
+    var m = sim.match || {}, sg = sim.signals || {}, rl = sim.rule, as = sim.assess;
+    var conf = (m.confidence != null) ? m.confidence : 0;
+    var hasF = sg.flags && sg.flags.length;
     switch (nodeId){
-      case 'verify-email': return { idx: sg.emailVerified ? 0 : 1, banner: sg.emailVerified ? 'You marked the email as verified on the start screen.' : 'Email not marked verified - the request would wait on verification.' };
-      case 'classify-type': return { idx: m.confidence >= 70 ? 0 : 1, banner: 'AI matched "' + (m.recordTypeName || 'no type') + '" at ' + m.confidence + '% confidence.' };
-      case 'sensitivity': return { idx: (sg.flags && sg.flags.length) ? 0 : 1, banner: (sg.flags && sg.flags.length) ? ('Flags detected: ' + sg.flags.join(', ') + '.') : 'No sensitivity flags.' };
-      case 'dept-confidence': return { idx: m.confidence >= 70 ? 0 : 1, banner: 'Match confidence ' + m.confidence + '%.' };
-      case 'route-sensitive': return { idx: rl && rl.id === 'wfr-sensitive' ? 0 : 1, banner: 'Rule that fired: ' + ((rl && rl.name) || 'none') + '.' };
-      case 'route-confident': return { idx: rl && rl.id === 'wfr-confident' ? 0 : 1, banner: rl && rl.id === 'wfr-confident' ? ('Routed to ' + (sim.routedTeam || 'the owning team') + '.') : 'The confident-match rule did not fire.' };
-      case 'route-uncertain': return { idx: rl && rl.id === 'wfr-uncertain' ? 0 : null, banner: rl && rl.id === 'wfr-uncertain' ? 'Low confidence - sent to Open Records.' : 'This rule did not fire here.' };
-      case 'fee-waiver-requested': return { idx: sg.feeWaiver ? 0 : 1, banner: sg.feeWaiver ? 'A fee waiver was requested.' : 'No fee waiver requested.' };
-      case 'estimate-auto-manual': return { idx: (as && as.decision === 'automated') ? 0 : 1, banner: as ? (as.decision === 'automated' ? ('Auto-estimated' + (as.basis ? ' (' + as.basis + ')' : '') + (as.estimatedTotal != null ? ' ~$' + Number(as.estimatedTotal).toFixed(2) : '') + '.') : 'Needs a human estimate - no reliable profile for this type yet.') : 'No record type to estimate.' };
+      case 'verify-email': return { idx: sg.emailVerified ? 0 : 1,
+        rule: ['Requestor email confirmed as valid before delivery'],
+        values: [{ k:'Email verified', v: sg.emailVerified ? 'Yes' : 'No' }],
+        verdict: sg.emailVerified ? 'Verified - the request proceeds.' : 'Not verified - staff should reach out to confirm a valid email.' };
+      case 'classify-type': return { idx: conf >= 70 ? 0 : 1,
+        rule: ['Semantic + AI match of the request against the taxonomy', 'Returns a record type with a 0-100 confidence score'],
+        values: [{ k:'Matched type', v: m.recordTypeName || 'none' }, { k:'Confidence', v: conf + '%' }],
+        verdict: conf >= 70 ? 'Confident match.' : 'No confident match.' };
+      case 'sensitivity': return { idx: hasF ? 0 : 1,
+        rule: ['Any sensitivity flag present (legal hold, open investigation, sealed, etc.)'],
+        values: [{ k:'Flags found', v: hasF ? sg.flags.join(', ') : 'None' }],
+        verdict: hasF ? 'Sensitive - diverts for special handling.' : 'No flags - normal handling.' };
+      case 'dept-confidence': return { idx: conf >= 70 ? 0 : 1,
+        rule: ['AI proposes a department', 'Code applies the 70% confidence threshold'],
+        values: [{ k:'Confidence', v: conf + '%' }],
+        verdict: conf >= 70 ? 'Confident enough to auto-assign.' : 'Not confident - needs a person.' };
+      case 'route-sensitive': var sf = rl && rl.id === 'wfr-sensitive'; return { idx: sf ? 0 : 1,
+        rule: ['Rule: flags contains LEGAL_HOLD / ONGOING_INVESTIGATION / SENSITIVE'],
+        values: [{ k:'Rule that fired', v: (rl && rl.name) || 'none' }],
+        verdict: sf ? 'Sensitivity rule fired - held at Intake.' : 'No sensitivity hold.' };
+      case 'route-confident':
+        var cf = rl && rl.id === 'wfr-confident'; var sens = rl && rl.id === 'wfr-sensitive';
+        var rcVals = [{ k:'Confidence', v: conf + '%' }, { k:'Has owning team', v: sg.hasOwnerTeam ? 'Yes' : 'No' }];
+        if (hasF) rcVals.push({ k:'Sensitivity flags', v: sg.flags.join(', ') });
+        return { idx: cf ? 0 : 1,
+          rule: ['Rule: confidence >= 70 AND a team is known', 'A sensitivity flag, if present, takes priority and holds the request'],
+          values: rcVals,
+          verdict: cf ? ('Assigned to ' + (sim.routedTeam || 'the owning team') + '.') : (sens ? 'A sensitivity flag took priority - held at Open Records for special handling.' : 'Cannot confidently assign a team - goes to Open Records for manual assignment.') };
+      case 'fee-waiver-requested': return { idx: sg.feeWaiver ? 0 : 1,
+        rule: ['Requestor asked for the fees to be waived'],
+        values: [{ k:'Fee waiver requested', v: sg.feeWaiver ? 'Yes' : 'No' }],
+        verdict: sg.feeWaiver ? 'Waiver requested - goes to the waiver decision.' : 'No waiver - goes to the estimate.' };
+      case 'estimate-auto-manual': var auto = as && as.decision === 'automated'; return { idx: auto ? 0 : 1,
+        rule: ['Does the matched record type have a reliable estimation profile?', 'Is the request within normal size and dollar bounds?'],
+        values: as ? [{ k:'Decision', v: as.decision }, { k:'Basis', v: as.basis || '-' }].concat(as.estimatedTotal != null ? [{ k:'Estimated total', v: '$' + Number(as.estimatedTotal).toFixed(2) }] : []) : [{ k:'Note', v: 'no record type to estimate' }],
+        verdict: auto ? 'Auto-estimated from the profile.' : 'Needs a human estimate.' };
       default: return null;
     }
   }
@@ -87,6 +123,11 @@ export default function WorkflowSimulatorPage(){
   var res = node ? resolve(node.id) : null;
   var outs = node ? defaultOuts(node) : [];
   var timeNode = node && node.trigger === 'time';
+  var takenIdx = res && res.idx != null ? res.idx : 0;
+  if (takenIdx >= outs.length) takenIdx = 0;
+  var leftRule = (res && res.rule) ? res.rule : (node && node.criteria ? node.criteria : []);
+  var rightVals = (res && res.values) ? res.values : null;
+  var illustrative = node && !res;
 
   var inp = { width:'100%', padding:'10px 12px', border:'1px solid #E5E7EB', borderRadius:'8px', fontSize:'14px', fontFamily:'inherit', lineHeight:'1.5', boxSizing:'border-box', outline:'none', resize:'vertical' };
   var goBtn = { padding:'9px 18px', borderRadius:'8px', border:'none', background:'#1F4E79', color:'white', fontSize:'14px', fontWeight:'600', cursor:'pointer' };
@@ -146,30 +187,40 @@ export default function WorkflowSimulatorPage(){
               <span style={chip('#F3F4F6', (S[node.status] || {}).color)}>{(S[node.status] || {}).label}</span>
               {timeNode ? <span style={chip('#FEF3C7', '#92400E')}>&#9201; time-driven</span> : null}
             </div>
+            {DECIDER_EXPLAIN[node.decider] ? <div style={{ fontSize:'12px', color:'#6B7280', fontStyle:'italic', marginBottom:'10px', lineHeight:'1.5' }}>{DECIDER_EXPLAIN[node.decider]}</div> : null}
             <div style={{ fontSize:'18px', fontWeight:'700', color:'#111', marginBottom:'8px', lineHeight:'1.4' }}>{node.label}</div>
-            {node.description ? <div style={{ fontSize:'14px', color:'#374151', lineHeight:'1.6', marginBottom:'12px' }}>{node.description}</div> : null}
-            {node.criteria && node.criteria.length ? (
-              <div style={{ marginBottom:'12px' }}>
-                <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.04em', marginBottom:'4px' }}>What it checks</div>
-                {node.criteria.map(function(c, i){ return <div key={i} style={{ fontSize:'13px', color:'#374151', lineHeight:'1.5' }}>&middot; {c}</div>; })}
+            {node.description ? <div style={{ fontSize:'14px', color:'#374151', lineHeight:'1.6', marginBottom:'14px' }}>{node.description}</div> : null}
+            {(leftRule.length || rightVals) ? (
+              <div style={{ display:'flex', gap:'16px', flexWrap:'wrap', marginBottom:'14px', background:'#F9FAFB', border:'1px solid #F3F4F6', borderRadius:'10px', padding:'12px 14px' }}>
+                <div style={{ flex:'1 1 240px', minWidth:'200px' }}>
+                  <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.04em', marginBottom:'6px' }}>What it checks</div>
+                  {leftRule.length ? leftRule.map(function(c, ci){ return <div key={ci} style={{ fontSize:'13px', color:'#374151', lineHeight:'1.55' }}>&middot; {c}</div>; }) : <div style={{ fontSize:'13px', color:'#9CA3AF' }}>&mdash;</div>}
+                </div>
+                {rightVals ? (
+                  <div style={{ flex:'1 1 200px', minWidth:'180px', borderLeft:'1px solid #E5E7EB', paddingLeft:'16px' }}>
+                    <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.04em', marginBottom:'6px' }}>This request</div>
+                    {rightVals.map(function(pv, vi){ return <div key={vi} style={{ fontSize:'13px', color:'#374151', lineHeight:'1.55' }}>{pv.k}: <b style={{ color:'#111' }}>{pv.v}</b></div>; })}
+                  </div>
+                ) : null}
               </div>
             ) : null}
-            {res && res.banner ? <div style={{ background:'#EFF6FF', border:'1px solid #DBEAFE', borderRadius:'8px', padding:'9px 12px', fontSize:'13px', color:'#1F4E79', marginBottom:'14px' }}>{res.banner}</div> : null}
-            <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.04em', marginBottom:'8px' }}>{timeNode ? 'Advance the clock' : 'Choose an answer'}</div>
-            {outs.map(function(o, idx){
-              var picked = res && res.idx === idx;
-              return (
-                <div key={idx} onClick={function(){ choose(node, o, o.label); }} style={{ display:'flex', alignItems:'flex-start', gap:'10px', padding:'11px 13px', borderRadius:'9px', border:'1px solid ' + (picked ? '#1F4E79' : '#E5E7EB'), background: picked ? '#F8FAFF' : 'white', cursor:'pointer', marginBottom:'7px' }}>
-                  <span style={{ width:'16px', height:'16px', borderRadius:'50%', flexShrink:0, marginTop:'1px', border:'2px solid ' + (picked ? '#1F4E79' : '#CBD5E1'), background: picked ? '#1F4E79' : 'white', boxShadow: picked ? 'inset 0 0 0 2px #fff' : 'none' }} />
-                  <div>
-                    <div style={{ fontSize:'13px', color:'#111', fontWeight: picked ? '600' : '500', lineHeight:'1.45' }}>{o.label}{picked ? <span style={{ color:'#1F4E79', fontWeight:'700' }}> &middot; what the system does</span> : null}</div>
-                    {o.note ? <div style={{ fontSize:'12px', color:'#6B7280', marginTop:'3px', lineHeight:'1.45' }}>{o.note}</div> : null}
+            {res && res.verdict ? <div style={{ fontSize:'13px', color:'#1F4E79', fontWeight:'600', marginBottom:'12px', lineHeight:'1.5' }}>{res.verdict}</div> : null}
+            {illustrative ? <div style={{ fontSize:'12px', color:'#92400E', background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'8px', padding:'8px 11px', marginBottom:'12px', lineHeight:'1.5' }}>This step is not built yet, so there is no live computation. The highlighted path below is the typical one, shown to illustrate the flow.</div> : null}
+            <div style={{ fontSize:'11px', fontWeight:'700', color:'#6B7280', textTransform:'uppercase', letterSpacing:'.04em', marginBottom:'8px' }}>{outs.length > 1 ? 'Possible paths' : 'Next'}</div>
+            <div style={{ display:'flex', gap:'10px', flexWrap:'wrap', marginBottom:'16px' }}>
+              {outs.map(function(o, oi){
+                var taken = oi === takenIdx;
+                return (
+                  <div key={oi} style={{ flex: outs.length === 2 ? '1 1 44%' : '1 1 100%', minWidth:'200px', border:'1.5px solid ' + (taken ? '#1F4E79' : '#E5E7EB'), background: taken ? '#F8FAFF' : '#FCFCFD', borderRadius:'10px', padding:'12px 13px', opacity: taken ? 1 : 0.65 }}>
+                    <div style={{ fontSize:'10px', fontWeight:'700', letterSpacing:'.05em', marginBottom:'4px', color: taken ? '#1F4E79' : '#9CA3AF' }}>{taken ? (illustrative ? 'PATH SHOWN' : 'SYSTEM PATH') : 'NOT TAKEN'}</div>
+                    <div style={{ fontSize:'13px', color: taken ? '#111' : '#6B7280', fontWeight: taken ? '600' : '500', lineHeight:'1.45' }}>{o.label}</div>
+                    {o.note ? <div style={{ fontSize:'12px', color:'#6B7280', marginTop:'4px', lineHeight:'1.45' }}>{o.note}</div> : null}
                   </div>
-                </div>
-              );
-            })}
-            {res ? <div style={{ fontSize:'11px', color:'#9CA3AF', marginTop:'4px' }}>The highlighted answer is what the system does. Pick any option to branch a different way.</div> : null}
-            {node.automatedBy ? <div style={{ marginTop:'12px', fontSize:'12px', color:'#6B7280', borderTop:'1px solid #F3F4F6', paddingTop:'10px' }}><b style={{ color:'#1F4E79' }}>Configure once:</b> {node.automatedBy}</div> : null}
+                );
+              })}
+            </div>
+            <button onClick={function(){ choose(node, outs[takenIdx], outs[takenIdx].label); }} style={goBtn}>Continue &rarr;</button>
+            {node.automatedBy ? <div style={{ marginTop:'14px', fontSize:'12px', color:'#6B7280', borderTop:'1px solid #F3F4F6', paddingTop:'10px' }}><b style={{ color:'#1F4E79' }}>Configure once:</b> {node.automatedBy}</div> : null}
           </div>
         </div>
       ) : null}

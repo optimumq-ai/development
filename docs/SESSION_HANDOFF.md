@@ -139,3 +139,18 @@ Behavior (per Kevin): deny -> send mandatory denial notice -> request CONTINUES 
 - workflowModel fee-waiver-grant node -> status built, outcomes (granted/denied), description updated.
 - VERIFIED end-to-end: deny with a new typed reason -> emailed=true, status stays active, library grew 5->6; library/grant paths tested.
 - PENDING follow-ons: grant should make the estimate path skip fees (estimate engine could read fee_waiver_status='granted'); reuse the reason-library component on the request-denial (t-denied) path with statutory citations; optional grant-confirmation email.
+
+## Simulator redesign: flowchart step-box + node merge (BUILT) - 2026-06-23
+Per Kevin's screen-by-screen review. The step box is no longer clickable radio answers (which invited users to try non-real paths and get confused). New per-step box:
+- Decider + status chips, PLUS a plain-language sentence explaining the decider type (DECIDER_EXPLAIN map: ai/code/human/policy/hybrid) - e.g. code = "An automated step - the software applies a fixed rule to the request's data and computes the answer".
+- Title + description.
+- Two-column "What it checks" | "This request": left = the rule criteria, right = the ACTUAL signal values from this simulated request (node-specific, only the signals that rule reads). Makes the computation transparent.
+- A one-line verdict (e.g. "Confident match.", "A sensitivity flag took priority - held at Open Records.").
+- ALL possible path boxes rendered side by side; the computed one highlighted (navy "SYSTEM PATH"), others muted "NOT TAKEN". NONE clickable.
+- A single Continue -> button advances down the computed path only. (Trail cards still clickable to rewind.)
+- Planned nodes (no live computation) show an amber "not built yet - path shown is illustrative" note and default to the primary path.
+- resolve(nodeId) now returns { idx, rule[], values[{k,v}], verdict } per built node; route-confident is sensitivity-aware (shows flags + explains when wfr-sensitive took priority).
+
+NODE MERGE (was batched tweak #4, folded in because the deterministic Continue-only walk requires coherent forward links): route-confident + route-uncertain merged into ONE node id 'route-confident', label "Can we confidently assign a team?", status partial (Smart Routing not yet wired). Outcomes: Yes -> auto-advance to Record Search at assigned team (to: fee-waiver-requested); No -> route to Open Records for manual team assignment (to: route-fallback). classify-type BOTH outcomes now -> route-confident. route-uncertain node + description removed. This matches the real engine better (one pass -> one outcome) and removes the contradictory "low confidence?" step that appeared after a confident match.
+
+STILL PENDING (batched, NOT done): verify-email "Yes" -> "Yes . Proceed" label; connector lines darker/wider; MRR check moved ahead of record-type match (branch to Open Records, Coordinator role, specialization-or-claim); Smart Routing semantic team/user match (the shared dependency - next focused build after review). NOTE: simulator currently skips route-sensitive on the classify->assign jump, so the "Mark sensitive" checkbox surfaces only at the assign node's verdict, not its own step - candidate future tweak.
