@@ -109,6 +109,9 @@ async function onIntake(requestId, matcherResult){
     } catch (e) { console.error('[workflowEngine] estimate task spawn failed:', e && e.message); }
   }
 
+  // Statutory clocks: create the jurisdiction intake clocks (idempotent) + sync primary clock -> deadline_date.
+  try { await require('./tolling').startClocksForRequest(requestId); } catch (e) { console.error('[workflowEngine] clock start failed:', e && e.message); }
+
   return { stage:stage, teamId:teamId, teamName: teamRow?teamRow.name:null, rule: hit?hit.rule.name:null, signals:signals };
 }
 
