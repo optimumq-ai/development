@@ -465,3 +465,7 @@ ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS declined_reason TEXT;
 ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS deposit_paid_at TEXT;
 ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS deposit_paid_by TEXT;
 ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS deposit_paid_amount REAL;
+
+ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS baseline_total REAL;
+ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS variance_pct REAL;
+ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS renotify_required INTEGER;

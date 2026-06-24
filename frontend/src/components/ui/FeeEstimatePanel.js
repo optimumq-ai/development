@@ -19,6 +19,8 @@ export default function FeeEstimatePanel(props) {
   var [prefilled, setPrefilled] = useState({});
   var [resp, setResp] = useState({ busy: false, msg: '' });
   var [declineReason, setDeclineReason] = useState('');
+  var [reconResult, setReconResult] = useState(null);
+  var [reconBusy, setReconBusy] = useState(false);
   var [noticeTo, setNoticeTo] = useState('');
   var [noticeSubject, setNoticeSubject] = useState('');
   var [noticeText, setNoticeText] = useState('');
@@ -123,6 +125,20 @@ export default function FeeEstimatePanel(props) {
     </div>);
   }
 
+  async function reconcile() {
+    setReconBusy(true);
+    try {
+      var comps = (ctx.components || []).map(function (c) {
+        var q = qty[c.id] || {};
+        var quant = { searchHours: num(q.searchHours), reviewHours: num(q.reviewHours), bwPages: num(q.bwPages), colorPages: num(q.colorPages), oversizedPages: num(q.oversizedPages) };
+        if (num(q.mediaCount) > 0) quant.media = [{ type: q.mediaType, count: num(q.mediaCount) }];
+        return { id: c.id, label: c.label, recordType: c.recordType, quantities: quant };
+      });
+      var r = await api.post('/fee-estimates/request/' + requestId + '/reconcile', { components: comps, delivery: { method: delivery } });
+      setReconResult(r.data);
+    } catch (e) { setReconResult({ error: (e.response && e.response.data && e.response.data.error) || 'Reconcile failed.' }); }
+    setReconBusy(false);
+  }
   var R = result && result.requestLevel;
   return (
     <div>
@@ -220,6 +236,26 @@ export default function FeeEstimatePanel(props) {
           </div>
         </div>
       ) : null}
+              {ctx.latest && ctx.latest.accepted_at ? (
+                <div style={{ marginTop: '18px', borderTop: '1px solid #E5E7EB', paddingTop: '16px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#111', marginBottom: '4px' }}>Reconcile actuals</div>
+                  <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '10px' }}>After the work is done, set the quantities above to the ACTUAL amounts, then record the reconciliation. This compares actuals to the estimate, flags whether a revised notice is required, and sharpens future auto-estimates for this record type.</div>
+                  <button onClick={reconcile} disabled={reconBusy} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: reconBusy ? '#9CB4CC' : NAVY, color: 'white', fontSize: '13px', fontWeight: 700, cursor: reconBusy ? 'default' : 'pointer' }}>{reconBusy ? 'Recording...' : 'Record actuals & reconcile'}</button>
+                  {reconResult && reconResult.error ? <div style={{ marginTop: '10px', fontSize: '12.5px', color: '#9B1C1C' }}>{reconResult.error}</div> : null}
+                  {reconResult && !reconResult.error ? (
+                    <div style={{ marginTop: '12px', maxWidth: '520px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#374151', padding: '2px 0' }}><span>Estimated</span><span>{money(reconResult.estimateTotal)}</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', color: '#374151', padding: '2px 0' }}><span>Actual</span><span>{money(reconResult.actualTotal)}</span></div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', fontWeight: 800, color: NAVY, padding: '4px 0', borderTop: '1px solid #E5E7EB' }}><span>Variance</span><span>{reconResult.variancePct == null ? 'n/a' : ((reconResult.variancePct >= 0 ? '+' : '') + reconResult.variancePct + '%')}</span></div>
+                      {reconResult.reNotifyRequired ? (
+                        <div style={{ marginTop: '8px', fontSize: '12.5px', color: '#92400E', background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '8px', padding: '9px 12px' }}>Actual cost exceeds the estimate by more than {reconResult.reNotifyThreshold}% &mdash; a revised notice to the requestor is required before delivery.</div>
+                      ) : (
+                        <div style={{ marginTop: '8px', fontSize: '12.5px', color: '#03543F', background: '#DEF7EC', border: '1px solid #BCF0DA', borderRadius: '8px', padding: '9px 12px' }}>Within the {reconResult.reNotifyThreshold}% notification threshold &mdash; no revised notice required. Actuals recorded to the estimate profile.</div>
+                      )}
+                    </div>
+                  ) : null}
+                </div>
+              ) : null}
     </div>
   );
 }

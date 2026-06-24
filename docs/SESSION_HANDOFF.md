@@ -294,3 +294,21 @@ The connective tissue: estimate sent -> requestor responds -> (deposit gate) -> 
   change still works (same shared path). NOTE: deposit "recording" is a staff action (no payment-processor
   integration); awaiting_payment has no clock yet (tickler still pending). Requestor-facing self-serve accept on the
   public portal is a later option (currently staff records the response).
+
+## Estimate reconciliation (BUILT) - 2026-06-23
+Actual-vs-estimate at fulfillment: variance, 20% re-notify, and Welford write-back to sharpen auto-estimates.
+- request_fee_estimates gained baseline_total, variance_pct, renotify_required (set on kind='reconciliation' rows).
+- feeEstimates.js POST /request/:id/reconcile {components:[{id,recordType,quantities=ACTUALS}], delivery?, other?}:
+  prices actuals via feeEngine; baseline = latest kind='estimate' total; variancePct = (actual-est)/est*100;
+  re-notify threshold = config.estimatePolicy.revisionNotifyPercent (default 20); reNotifyRequired = variance > threshold;
+  calls estimateProfile.recordActuals(recordType, quantities) per component (Welford writeback -> profile means/stats
+  -> better future assess()); persists a kind='reconciliation' snapshot; logs ESTIMATE_RECONCILED. Returns
+  {actualTotal, estimateTotal, variancePct, reNotifyThreshold, reNotifyRequired, profilesUpdated}.
+- FeeEstimatePanel: "Reconcile actuals" section (shows once latest estimate is accepted). Staff set the worksheet
+  quantities to ACTUALS, click "Record actuals & reconcile"; shows Estimated/Actual/Variance and a re-notify banner
+  (amber if a revised notice is required, green if within threshold). Reuses the worksheet inputs as actuals.
+- VERIFIED (API, throwaway record type): est $10 (100 bw pp); reconcile 200pp -> actual $20 +100% reNotify TRUE;
+  reconcile 110pp -> actual $11 +10% reNotify FALSE; profile Welford n=2, bwPages mean=155 (avg of 200,110);
+  history events written. Cleaned up (incl throwaway profile row).
+- NOTE: reconcile is a staff action (no auto-trigger at delivery yet); generating the actual revised NOTICE when
+  reNotifyRequired reuses the existing notice/send path but is currently flagged, not auto-sent.

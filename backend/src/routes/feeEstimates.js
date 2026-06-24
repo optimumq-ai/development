@@ -231,4 +231,45 @@ router.post('/request/:requestId/deposit/record', requireAuth, async function (r
   res.json({ recorded: true, amount: amount, stage: 'record_search' });
 });
 
+
+// Reconcile ACTUAL quantities against the accepted estimate: compute variance, flag a revised notice when the
+// cost rose more than the jurisdiction's revisionNotifyPercent, and write the actuals back into the record-type
+// estimate profiles (Welford) so future auto-estimates get sharper.
+router.post('/request/:requestId/reconcile', requireAuth, async function (req, res) {
+  try {
+    var rid = req.params.requestId;
+    var loaded = await loadComponents(rid);
+    if (!loaded) return res.status(404).json({ error: 'Request not found.' });
+    var jid = await activeJurisdiction();
+    var cfgRow = await pickConfig(jid);
+    if (!cfgRow) return res.status(400).json({ error: 'No fee configuration for the active jurisdiction.' });
+    var config = {}; try { config = JSON.parse(cfgRow.config_json || '{}'); } catch (e) { config = {}; }
+    var b = req.body || {};
+    var request = {
+      components: (b.components || []).map(function (c) { return { id: c.id, label: c.label, recordType: c.recordType || null, quantities: c.quantities || {} }; }),
+      delivery: b.delivery || { method: 'email' },
+      other: b.other || null
+    };
+    var feeContext = engine.compute(config, request);
+    var actualTotal = Number(feeContext.requestLevel.total) || 0;
+    var base = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [rid]);
+    var estTotal = base ? (Number(base.total) || 0) : null;
+    var pol = (config.estimatePolicy && typeof config.estimatePolicy.revisionNotifyPercent === 'number') ? config.estimatePolicy.revisionNotifyPercent : 20;
+    var variancePct = (estTotal != null && estTotal > 0) ? Math.round(((actualTotal - estTotal) / estTotal) * 1000) / 10 : null;
+    var reNotify = (variancePct != null && variancePct > pol);
+    var updates = [];
+    for (var i = 0; i < request.components.length; i++) {
+      var c = request.components[i];
+      if (c.recordType) { try { await ep.recordActuals(c.recordType, c.quantities); updates.push(c.recordType); } catch (e) {} }
+    }
+    var id = 'feerec-' + uuidv4().slice(0, 8);
+    await run(
+      'INSERT INTO request_fee_estimates (id, request_id, kind, config_profile_id, input_json, fee_context_json, total, deposit_due, notify_flag, baseline_total, variance_pct, renotify_required, created_by, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
+      [id, rid, 'reconciliation', cfgRow.id, JSON.stringify(request), JSON.stringify(feeContext), actualTotal, 0, 0, estTotal, variancePct, reNotify ? 1 : 0, (req.user && req.user.name) || (req.user && req.user.sub) || 'system', nowStr()]
+    );
+    await hist(rid, req.user, 'ESTIMATE_RECONCILED', 'Actual $' + actualTotal.toFixed(2) + (estTotal != null ? (' vs estimate $' + estTotal.toFixed(2) + ' (' + (variancePct >= 0 ? '+' : '') + variancePct + '%)') : '') + (reNotify ? ' \u2014 revised notice required.' : ''), null, null);
+    res.json({ actualTotal: actualTotal, estimateTotal: estTotal, variancePct: variancePct, reNotifyThreshold: pol, reNotifyRequired: reNotify, feeContext: feeContext, profilesUpdated: updates });
+  } catch (e) { res.status(500).json({ error: 'Could not reconcile: ' + (e && e.message) }); }
+});
+
 module.exports = router;
