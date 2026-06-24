@@ -401,3 +401,20 @@ straddling each tickler/deadline threshold, optionally runs the tickler sweep so
 Preserves admin/staff logins, fee config, taxonomy, and reference embeddings (no costly re-embedding).
 Full spec in BACKLOG.md ("Demo Mode - one-click reset with RELATIVE-DATE aging"). Build once the demoed
 feature set is stable. Directly addresses the tickler heads-up (old demo data flagged 'stalled' inconsistently).
+
+## Auto-Configuration & Trust Model - GOVERNING SPEC added - 2026-06-24
+docs/AUTO_CONFIG_DESIGN.md is now authoritative for how the system configures itself to a city's laws.
+Key decisions captured: expressiveness-before-automation (build the config "slots" before the AI that fills
+them); the assistive trust model (AI drafts -> city reviews w/ per-field provenance+confidence -> per-AREA,
+VERSION-BOUND, HARD attestation gate that defaults un-attested areas to safe/manual and re-arms on material
+change; attest restricted to an authorized role; disclaimer wording flagged ATTORNEY-REVIEW); hub-and-spoke UI
+(config stays in each area's editor; a thin Jurisdiction Setup/Compliance hub owns address resolution, source
+registry+uploads, the Run-auto-config action, and a readiness dashboard that deep-links into editors);
+address->jurisdiction precedence stack (federal/state/county/municipal; home-rule vs Dillon's rule); source
+registry + freshness/re-validate; feePolicyExtract generalized into per-domain extractors; the Jurisdiction
+Profile becomes ONE versioned, sectioned, provenance+attestation-bearing artifact. Biggest MISSING primitive
+flagged: a statutory DEADLINE/TOLLING engine (clock pauses for AG ruling/clarification/payment/extension;
+business-day + holiday calendars; stacked acknowledge/respond/produce/appeal clocks) - reuse tickler bones,
+needs its own design doc. Fee-engine gaps 1-4 (CITY_FEE_SURVEY.md) promoted to FOUNDATIONAL. Build sequencing
+in Section 12: slots -> deadline engine -> profile model -> extractor framework -> attestation gate/hub ->
+resolution+sources -> remaining extractors. Nothing built yet; this governs future build.
