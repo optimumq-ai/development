@@ -490,3 +490,5 @@ ALTER TABLE config_proposals ADD COLUMN IF NOT EXISTS current_json text;
 ALTER TABLE config_proposals ADD COLUMN IF NOT EXISTS applied_json text;
 ALTER TABLE config_proposals ADD COLUMN IF NOT EXISTS attested_by text;
 ALTER TABLE config_proposals ADD COLUMN IF NOT EXISTS attested_at text;
+CREATE TABLE IF NOT EXISTS jurisdiction_profile_sections ( id text PRIMARY KEY, jurisdiction_id text, section text, label text, content_hash text, version integer DEFAULT 0, status text DEFAULT 'not_configured', source text DEFAULT 'seed', last_changed_at text, last_changed_by text, attested_by text, attested_at text, attested_version integer, attested_hash text, notes text, created_at text DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS'), updated_at text DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS') );
+CREATE UNIQUE INDEX IF NOT EXISTS jps_jur_section ON jurisdiction_profile_sections (jurisdiction_id, section);

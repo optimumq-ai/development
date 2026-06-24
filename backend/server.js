@@ -66,6 +66,7 @@ app.use('/api/mass-jobs', require('./src/routes/massJobs'));
 app.use('/api/fee-profiles', require('./src/routes/feeProfiles'));
 app.use('/api/fee-estimates', require('./src/routes/feeEstimates'));
 app.use('/api/config-freshness', require('./src/routes/configFreshness'));
+app.use('/api/jurisdiction-profile', require('./src/routes/jurisdictionProfile'));
 
 app.get('/api/health', function(req, res) {
   res.json({ status: 'ok', version: '1.0.0' });

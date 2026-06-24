@@ -114,6 +114,7 @@ router.post('/proposals/:id/apply', requireAuth, ROLE, async function (req, res)
     var result = await ad.apply(pr.jurisdiction_id, cfg, req.user && req.user.name);
     var actor = (req.user && req.user.name) || 'staff';
     await run("UPDATE config_proposals SET status='applied', applied_json=?, attested_by=?, attested_at=?, reviewed_by=?, reviewed_at=? WHERE id=?", [JSON.stringify(cfg), actor, nowStr(), actor, nowStr(), pr.id]);
+    try { await require('../services/jurisdictionProfile').sync(pr.jurisdiction_id, { source: 'auto-config', actor: actor }); } catch (e) {}
     res.json({ applied: true, target: result && result.target });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
