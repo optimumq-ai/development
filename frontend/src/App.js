@@ -18,6 +18,7 @@ import MyTasksPage from './pages/MyTasksPage';
 import EstimateTaskPage from './pages/EstimateTaskPage';
 import TicklerPage from './pages/TicklerPage';
 import RuleUpdatesPage from './pages/RuleUpdatesPage';
+import JurisdictionProfilePage from './pages/JurisdictionProfilePage';
 import ConfigurationPage from './pages/ConfigurationPage';
 import SourcesPage from './pages/SourcesPage';
 import ARIAReportsPage from './pages/ARIAReportsPage';
@@ -65,6 +66,7 @@ export default function App() {
           <Route path="estimate/:taskId" element={<EstimateTaskPage />} />
           <Route path="tickler" element={<TicklerPage />} />
           <Route path="rule-updates" element={<RuleUpdatesPage />} />
+          <Route path="jurisdiction-profile" element={<JurisdictionProfilePage />} />
           <Route path="reports" element={<ARIAReportsPage />} />
           <Route path="staff" element={<StaffManagementPage />} />
           <Route path="departments" element={<DepartmentsPage />} />

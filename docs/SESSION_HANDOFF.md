@@ -495,3 +495,6 @@ B: configExtractors.js per-domain adapter framework (fetch paste/URL + sha256 dr
 
 ## Config Freshness Slice D (BUILT 2026-06-24)
 Redaction/taxonomy apply by staging pending-review drafts (applyMode stage_drafts); stageFromSource pipeline; opt-in scheduled auto-extract (system_config freshness_auto_extract, default off); POST /settings + POST /upload (multer+pdftotext); RuleUpdatesPage Settings card + file upload + applyMode-aware review modal. Backend recovered from an interrupted turn (commit 69ffabe), frontend+upload this commit. Loop complete end-to-end. NEXT foundational item: Jurisdiction Profile data model (fold in source registry + attestation).
+
+## Jurisdiction Profile data model (BUILT 2026-06-24)
+Versioned/sectioned INDEX over per-area config stores (not a migration). Table jurisdiction_profile_sections + jurisdictionProfile service (signature/sync/getProfile) + /api/jurisdiction-profile (status/sync) + readiness dashboard page (nav isElev, read-only) + freshness-apply bumps section version. 6 TX sections at v1; version-bump verified. See JURISDICTION_PROFILE_DESIGN.md. NEXT: version-bound attestation gate (columns already in schema).
