@@ -86,6 +86,26 @@ async function onIntake(requestId, matcherResult){
   await db.run("INSERT INTO workflow_decisions (id, request_id, record_type_id, record_type_name, confidence, classification, rule_id, rule_name, decided_stage, decided_team_id, decided_team_name, reasoning, flags, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'))",
     [uuid.v4(), requestId, m.recordTypeId || null, signals.record_type_name, Math.round(signals.record_type_confidence||0), signals.classification, hit?hit.rule.id:null, hit?hit.rule.name:'(no match)', stage, teamId, teamRow?teamRow.name:null, reasoning, JSON.stringify(signals.flags)]);
 
+  // Auto path: a confident match routed to an owning team -> spawn the ESTIMATE task and route it
+  // (Smart Routing to a specialist, else into the team's claim pool). Estimate precedes record search.
+  if (hit && hit.rule && hit.rule.id === 'wfr-confident' && teamId) {
+    try {
+      var tr = require('./taskRouting');
+      var existing = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'estimate' AND status IN ('open','assigned','in_progress')", [requestId]);
+      if (!existing) {
+        var etitle = 'Create estimate';
+        try {
+          if (m.recordTypeId) {
+            var a = await require('./estimateProfile').assess(m.recordTypeId);
+            if (a && a.decision === 'automated') etitle = 'Review auto-generated estimate';
+          }
+        } catch (e2) {}
+        var task = await tr.createTask({ requestId: requestId, type: 'estimate', title: etitle, teamId: teamId, createdBy: 'workflow' });
+        await tr.autoRouteOrPool(task.id, request.description, {});
+      }
+    } catch (e) { console.error('[workflowEngine] estimate task spawn failed:', e && e.message); }
+  }
+
   return { stage:stage, teamId:teamId, teamName: teamRow?teamRow.name:null, rule: hit?hit.rule.name:null, signals:signals };
 }
 

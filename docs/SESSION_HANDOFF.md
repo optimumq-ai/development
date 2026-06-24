@@ -205,3 +205,20 @@ One shared primitive for ALL task types (estimate, record_search, redaction, ext
 - NOT YET: UI surface (Task Pool / claim page) and wiring task creation into the live workflow stages
   (auto path: create estimate task on confidence-cleared; then record_search after estimate accepted; redaction at
   readiness). Auto Load Balancing (smallest-workload) is a SEPARATE future knob layered on top of this.
+
+## Task wiring (auto path) + claim/My-Tasks UI (BUILT) - 2026-06-23
+- workflowEngine.onIntake: on the CONFIDENT path (rule wfr-confident fires, team resolved), it now spawns an
+  ESTIMATE task for that team and runs autoRouteOrPool (Smart Routing to a FEE_MANAGER specialist, else pool).
+  Idempotent (skips if an open/active estimate task already exists for the request). Title = "Review auto-generated
+  estimate" if estimateProfile.assess says automated, else "Create estimate". Wrapped/safe; failures logged only.
+- Frontend components/ui/TaskPoolSection.js (rendered atop MyTasksPage /my-tasks): "My tasks" (assigned, from the
+  tasks table, with Open link) + "Available to claim" (pool for the user's team+roles, with Claim button -> POST
+  /tasks/:id/claim; 409 handled). Renders nothing when there are no tasks. Existing request-based My Tasks view
+  preserved below it.
+- VERIFIED live: a building-permit request classified confident (95%), spawned an estimate task (role FEE_MANAGER,
+  status open, basis pool) via the workflow; cleaned up.
+- STILL PENDING: record_search task spawned AFTER estimate accepted; redaction task at readiness; the estimate-task
+  SCREEN itself (Create/Review using the per-type driver template + fee engine). And next: AUTO LOAD BALANCING as a
+  per-team toggle = a 3rd branch in autoRouteOrPool. Agreed priority: Smart-Routing match first, then Load Balancing
+  (smallest open-task count among eligible) if the team has it on, else pool. Workload = count of open/assigned tasks
+  per eligible user (read from the tasks table). Per-team setting could let LB precede smart routing for some teams.
