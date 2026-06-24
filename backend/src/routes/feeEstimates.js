@@ -165,6 +165,7 @@ router.post('/request/:requestId/notice/send', requireAuth, async function (req,
     var ok = !!(result && result.sent);
     var now = nowStr();
     if (ok) await run('UPDATE request_fee_estimates SET notified_at = ?, notified_to = ? WHERE id = ?', [now, to, snap.id]);
+    if (ok) await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE request_id = ? AND type = 'estimate' AND status IN ('open','assigned','in_progress')", [req.params.requestId]);
     res.json({ sent: ok, provider: result && result.provider, to: to, at: ok ? now : null, note: ok ? null : 'Email provider did not confirm send.' });
   } catch (e) { res.status(502).json({ error: 'Send failed: ' + (e && e.message ? e.message : 'unknown error') }); }
 });

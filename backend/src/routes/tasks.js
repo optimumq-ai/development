@@ -62,4 +62,21 @@ router.post('/', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISO
   res.json({ task: task });
 });
 
+// Task detail (with request + record-type context) for the work screen.
+router.get('/:id', requireAuth, async function (req, res) {
+  var t = await get(
+    "SELECT t.*, r.request_number, r.requestor_name, r.description AS request_description, r.record_type_id, " +
+    "rt.name AS record_type_name, d.name AS team_name " +
+    "FROM tasks t LEFT JOIN requests r ON r.id = t.request_id LEFT JOIN record_types rt ON rt.id = r.record_type_id " +
+    "LEFT JOIN departments d ON d.id = t.team_id WHERE t.id = ?", [req.params.id]);
+  if (!t) return res.status(404).json({ error: 'Task not found' });
+  res.json({ task: t });
+});
+
+// Mark a task complete.
+router.post('/:id/complete', requireAuth, async function (req, res) {
+  await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [req.params.id]);
+  res.json({ task: await tr.getTask(req.params.id) });
+});
+
 module.exports = router;

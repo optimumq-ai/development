@@ -67,7 +67,7 @@ export default function TaskPoolSection() {
             {busy === t.id ? 'Claiming...' : 'Claim'}
           </button>
         ) : (
-          <Link to={'/requests/' + t.request_id} style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#1F4E79', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>Open</Link>
+          <Link to={t.type === 'estimate' ? ('/estimate/' + t.id) : ('/requests/' + t.request_id)} style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#1F4E79', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>Open</Link>
         )}
       </div>
     );

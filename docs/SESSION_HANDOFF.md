@@ -237,3 +237,27 @@ One shared primitive for ALL task types (estimate, record_search, redaction, ext
 - STILL PENDING: estimate-task SCREEN (Create/Review w/ per-type driver template + fee engine); record_search after
   estimate ACCEPTED rather than on manual stage change (needs the estimate-acceptance flow); Departments UI toggle
   for Auto Load Balancing; optional per-team "LB precedes smart routing" override.
+
+## Estimate task SCREEN (BUILT) - 2026-06-23
+The work surface a FEE_MANAGER uses after claiming/being-assigned an estimate task. Reuses the existing
+FeeEstimatePanel (fee engine compute + itemized result + requestor notice) rather than rebuilding.
+- frontend/src/pages/EstimateTaskPage.js at route /estimate/:taskId: loads GET /tasks/:id, header shows
+  request #, requestor, record type, a CREATE vs REVIEW badge (review = task title contains "review"), and a
+  TASK COMPLETE badge when done; body embeds <FeeEstimatePanel requestId={task.request_id} />.
+- FeeEstimatePanel: now pre-fills driver quantities from the estimate PROFILE (c.autoEstimate.quantities) when
+  decision==='automated' and there is no prior manual estimate -> Review mode pre-fill; shows an amber
+  "Pre-filled from the estimate profile - review & adjust" chip on those components. Create mode (no profile)
+  stays blank as before.
+- backend tasks.js: GET /:id (task + request + record-type context), POST /:id/complete.
+- backend feeEstimates.js: POST /request/:id/notice/send now ALSO marks the request's open estimate task(s)
+  status='done' on successful send -> sending the estimate completes the task automatically.
+- TaskPoolSection: estimate-type tasks open /estimate/:taskId (others still open /requests/:request_id).
+- VERIFIED live end-to-end: confident request -> spawned "Create estimate" task -> GET /tasks/:id -> estimate
+  context (fee config present) -> compute (total computed) -> notice sent to admin@optimumq.ai -> task auto-set
+  to 'done'. Cleaned up.
+- STILL PENDING (estimate arc): record_type_id often null on requests so the record-type name/profile lookup is
+  weak -> wire the classifier's matched record type onto requests.record_type_id so Review/auto-fill triggers more
+  often. Video per-MINUTE driver ($10/recording+$1/min TX) still absent from fee engine + UI (panel only has media
+  cd/dvd/usb count). record_search currently spawns on manual stage change, not on estimate ACCEPTANCE (an
+  accept/deposit flow is the remaining link). Estimate reconciliation (actual vs estimate, 20% re-notify, Welford
+  writeback) still pending.

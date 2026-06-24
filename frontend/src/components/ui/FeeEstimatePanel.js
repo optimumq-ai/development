@@ -16,6 +16,7 @@ export default function FeeEstimatePanel(props) {
   var [calc, setCalc] = useState(false);
   var [err, setErr] = useState('');
   var [other, setOther] = useState({ amount: 0, description: '' });
+  var [prefilled, setPrefilled] = useState({});
   var [noticeTo, setNoticeTo] = useState('');
   var [noticeSubject, setNoticeSubject] = useState('');
   var [noticeText, setNoticeText] = useState('');
@@ -31,13 +32,19 @@ export default function FeeEstimatePanel(props) {
       setCtx(r.data);
       var init = {};
       var li = r.data.latest && r.data.latest.input && r.data.latest.input.components;
+      var pf = {};
       (r.data.components || []).forEach(function (c) {
         var prev = li && li.filter(function (x) { return x.id === c.id; })[0];
-        var pq = (prev && prev.quantities) || {};
+        var ae = c.autoEstimate;
+        var fromProfile = (!prev && ae && ae.decision === 'automated' && ae.quantities) ? ae.quantities : null;
+        if (fromProfile) pf[c.id] = true;
+        var pq = (prev && prev.quantities) || fromProfile || {};
         var m = (pq.media && pq.media[0]) || {};
-        init[c.id] = { searchHours: pq.searchHours || 0, reviewHours: pq.reviewHours || 0, bwPages: (prev ? (pq.bwPages || 0) : ((c.suggested && c.suggested.hasKnown) ? c.suggested.knownPages : 0)), colorPages: pq.colorPages || 0, oversizedPages: pq.oversizedPages || 0, mediaType: m.type || 'cd', mediaCount: m.count || 0 };
+        var hasSource = !!(prev || fromProfile);
+        init[c.id] = { searchHours: pq.searchHours || 0, reviewHours: pq.reviewHours || 0, bwPages: (hasSource ? (pq.bwPages || 0) : ((c.suggested && c.suggested.hasKnown) ? c.suggested.knownPages : 0)), colorPages: pq.colorPages || 0, oversizedPages: pq.oversizedPages || 0, mediaType: m.type || 'cd', mediaCount: m.count || 0 };
       });
       setQty(init);
+      setPrefilled(pf);
       if (r.data.latest && r.data.latest.feeContext) setResult(r.data.latest.feeContext);
       if (r.data.latest && r.data.latest.input && r.data.latest.input.delivery) setDelivery(r.data.latest.input.delivery.method || 'email');
       if (r.data.latest && r.data.latest.input && r.data.latest.input.other) setOther({ amount: r.data.latest.input.other.amount || 0, description: r.data.latest.input.other.description || '' });
@@ -95,6 +102,7 @@ export default function FeeEstimatePanel(props) {
             return (
               <div key={c.id} style={{ border: '1px solid #E5E7EB', borderRadius: '10px', padding: '14px', marginBottom: '12px' }}>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: '#111', marginBottom: '10px' }}>{c.label}{c.recordTypeName ? <span style={{ fontWeight: 400, color: '#9CA3AF' }}> &middot; {c.recordTypeName}</span> : null}</div>
+                {prefilled[c.id] ? <div style={{ fontSize: '11px', color: '#92400E', background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '6px', padding: '5px 9px', marginBottom: '10px' }}>Pre-filled from the estimate profile &mdash; review &amp; adjust before sending.</div> : null}
                 {c.suggested && c.suggested.hasKnown ? (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', background: '#EFF6FF', border: '1px solid #DBEAFE', borderRadius: '8px', padding: '7px 10px', marginBottom: '10px', fontSize: '11.5px', color: '#1F4E79' }}>
                     <span>Known page count: <strong>{c.suggested.knownPages}</strong> &middot; {c.suggested.basis}</span>
