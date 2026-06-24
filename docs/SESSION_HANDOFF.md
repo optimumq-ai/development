@@ -391,3 +391,13 @@ Daily sweep that FLAGS overdue requests (non-destructive by default; no auto-clo
   flags. Thresholds currently: requesterResponseDays from estimatePolicy, the rest are tickler.js DEFAULTS (could move
   to Jurisdiction Profile later).
 - TODO next: UI surface (status card + flagged list + Run-now + clear), then optionally surface flags on request rows.
+
+## Demo Mode reset (SPEC ADDED, not built) - 2026-06-24
+One-click admin reset that restores a curated demo dataset with RELATIVE-DATE aging: all timestamps are
+computed as offsets from now() at click time, so the data is aged identically every demo (stalled = always
+~25d, deposit-overdue = always ~14d past acceptance, a lapsed estimate = always ~13d past notice, etc.).
+Wipes transactional tables, idempotently re-seeds reference/config, recreates a curated set of requests
+straddling each tickler/deadline threshold, optionally runs the tickler sweep so flags show immediately.
+Preserves admin/staff logins, fee config, taxonomy, and reference embeddings (no costly re-embedding).
+Full spec in BACKLOG.md ("Demo Mode - one-click reset with RELATIVE-DATE aging"). Build once the demoed
+feature set is stable. Directly addresses the tickler heads-up (old demo data flagged 'stalled' inconsistently).

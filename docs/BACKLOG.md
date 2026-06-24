@@ -250,3 +250,69 @@ assignment + hold states (routing phase). Build with the routing phase.
 - CAPTURE-ONLY: nothing reads this yet. No embedding, no routing behavior change. Inert until the workflow/matcher consumes it.
 - Current routing reality (verified): routing stops at the TEAM (requests.department_id). My Tasks / queue visibility = (department_id = user's team) OR (assigned_to = user). No role-based or stage-based filtering. assigned_to is manual only; no auto-assign, no Claim. Function roles exist + populated (10 roles incl REDACTION_REVIEWER/APPROVER, CUSTODIAN, COORDINATOR; 20 user assignments) but are used for permissions/identity, NOT routing.
 - FUTURE consumption: function role narrows eligible team members for a stage; specialization text (semantic match via pgvector embeddings, same pattern as record types) promotes to a specific individual; otherwise team pool + Claim. Claim/multi-user-assignment mechanic NOT built yet.
+
+## Demo Mode — one-click reset with RELATIVE-DATE aging (captured 2026-06-24)
+
+**Goal.** A single admin button that resets the demo environment to one known, curated state so every
+demo starts identically. The defining requirement: **all dates are computed as offsets from the current
+date at the moment the button is clicked** — the data is "aged" the same way every time. A request that
+should look 30 days stale is always exactly 30 days old at demo start, regardless of the calendar date.
+This is what makes time-driven features demo reliably: the tickler clocks (estimate-response lapse,
+deposit overdue, stall), statutory deadlines / SLA burn-down, estimate validity, and any "X days ago"
+history all land in the same place on every run.
+
+**Core principle — anchor + offsets.** Capture a single `anchor = now()` when the button is clicked.
+Define the demo dataset declaratively, with each time field expressed as an offset (e.g. `createdDaysAgo`,
+`updatedDaysAgo`, `noticeSentDaysAgo`, `acceptedDaysAgo`), and on reset compute the real timestamp as
+`anchor - offset`. Never store absolute demo dates. One anchor for the whole run keeps multi-record
+relationships coherent (an estimate accepted "2 days after it was sent" stays 2 days apart).
+
+**What resets vs. what is preserved.**
+- WIPE + RECREATE (transactional): requests, request_fee_estimates, tasks, request_history,
+  workflow_decisions, request_selected_records, redaction jobs/boxes, mass-jobs, tickler_runs, and all
+  tickler_flag / lapsed_at state.
+- PRESERVE / RESTORE-IF-MISSING (reference & config, from the existing seed_*.sql + feeProfile seed):
+  departments & teams, taxonomy/record types & categories, jurisdiction profile, fee profiles/config,
+  agent rules, redaction rules/templates, demo source connectors (Laserfiche/paper archive),
+  demo_documents. These are idempotent re-seeds, not deletes.
+- NEVER TOUCH: the admin login (admin@optimumq.ai) and the test staff login (kruss@optimumq.ai), any
+  API keys / secrets. Reset must not require re-login.
+- Embeddings are EXPENSIVE (Voyage API). Preserve reference embeddings (record-type, document-content);
+  only re-create request-scoped ones (user_spec already seeded with staff; request content embeds lazily).
+  Keep the reset cheap and fast (target < a few seconds, no bulk re-embedding).
+
+**Curated scenarios to include** (each offset chosen to straddle the relevant threshold so the feature it
+demonstrates is visibly "on"; thresholds today: requesterResponseDays 10, depositDueDays 10, stallDays 21):
+- A confident, auto-routed request mid record-search (recent) — shows smart routing + tasks.
+- A request that needed manual routing at Open Records — shows the fallback path.
+- A fresh estimate just sent (noticeSentDaysAgo ~3) — awaiting response, NOT yet lapsed.
+- An estimate sent past the window (noticeSentDaysAgo ~13) — fires ESTIMATE_LAPSED / "response overdue".
+- An accepted estimate awaiting payment, fresh (acceptedDaysAgo ~2) — clean awaiting_payment.
+- An accepted estimate, deposit unpaid past window (acceptedDaysAgo ~14) — fires deposit_overdue.
+- A request untouched ~25 days (updatedDaysAgo ~25) in a mid stage — fires "stalled".
+- One in redaction review with a draft job + boxes — shows the redaction workbench.
+- One delivered/closed — shows a completed lifecycle + reconciliation (actual vs estimate).
+- A fee-waiver granted and a fee-waiver denied (with a decision_reason) — shows the waiver path.
+- An MRR (master + components) — shows component split (data model already supports is_mrr/master_request_id).
+- A couple of routine healthy active requests for queue texture.
+
+**Reset behavior.** After recreating the fixture, OPTIONALLY run the tickler sweep once so the intended
+flags are already showing when the demo opens (otherwise they appear only on the next scheduled sweep).
+Make this a flag on the reset (e.g. `runTicklerAfter: true`).
+
+**Implementation sketch.**
+- `backend/src/services/demoFixture.js` — the declarative dataset (offsets, not dates) + a `reset(anchor)`
+  that runs inside a single DB transaction: wipe transactional tables, idempotent re-seed of reference data,
+  insert the fixture with `anchor - offset` timestamps, recompute request_number sequence, optional tickler run.
+- `POST /api/admin/demo/reset` (SYSTEM_ADMIN only) — captures anchor=now(), calls reset, returns a summary
+  (counts created). Guard with an explicit confirm in the UI; consider a config flag so the route only exists
+  in demo/non-production builds.
+- UI: a "Demo Mode" / "Reset demo data" button on the Configuration page (admin-only) with a confirm dialog
+  ("This replaces all request data with the standard demo set, aged to today.") and a result toast.
+- Determinism checks: a quick self-test that, given a fixed anchor, the produced timestamps match expected
+  offsets; and that two resets back-to-back yield identical relative state.
+
+**Why now / dependency note.** Surfaced while building the tickler: the scheduled sweep will flag the ~28
+old demo requests as "stalled," which is correct but inconsistent across demo days. Demo Mode is the clean
+fix — it replaces ad-hoc aged data with a curated, re-agable set. Build when the feature set being demoed
+is stable enough that the curated fixture won't churn constantly. Not yet scheduled.
