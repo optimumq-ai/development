@@ -486,3 +486,6 @@ formal Jurisdiction Profile data model is built, fold exemption_model (and deadl
 into that versioned/attestation-bearing artifact. NEXT per AUTO_CONFIG_DESIGN build sequence: Jurisdiction Profile
 data model -> extractor framework -> attestation gate + readiness hub -> address/source resolution -> remaining
 domain extractors. Also still open: tickler->tolling.overdue() statutory-overdue flag; Demo Mode reset (spec'd).
+
+## Config Freshness loop - Slice A (BUILT 2026-06-24)
+Periodic rule-update reminder + source registry + generic staging. See CONFIG_FRESHNESS_DESIGN.md. Tables config_sources/config_proposals/config_freshness_runs; service configFreshness.js (scheduler like tickler); email.sendFreshnessReminder (reminder fires regardless; Resend test-mode -> admin only); routes /api/config-freshness. NEXT: Slice B (source fetch + version-diff + per-domain extractors), Slice C (review->import->edit->disclaimer->agree->apply attestation UI), Slice D (remaining domains). Recipient cfg key freshness_reminder_to; cadence key freshness_scan_days (default 30).

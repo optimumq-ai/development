@@ -160,4 +160,24 @@ async function sendFeeWaiverDenial(req, reasonText) {
   });
 }
 
-module.exports = { send: send, sendSubmissionConfirmation: sendSubmissionConfirmation, sendNewRequestAlert: sendNewRequestAlert, sendFeeWaiverDenial: sendFeeWaiverDenial };
+async function sendFreshnessReminder(data, to) {
+  var agencyName = await cfg('agency_name') || 'Public Records';
+  if (!to) return { sent: false, reason: 'no_recipient' };
+  data = data || {}; var summary = data.summary || []; var anyPending = (data.total || 0) > 0;
+  var rows = summary.map(function (s) { return '<tr><td style="padding:5px 0;color:#374151">' + s.label + '</td><td style="text-align:right;font-weight:600;color:' + (s.pending > 0 ? '#92400E' : '#9CA3AF') + '">' + (s.pending > 0 ? (s.pending + ' pending') : 'none') + '</td></tr>'; }).join('');
+  var body = '<h2 style="margin:0 0 10px;color:#1F4E79;font-size:18px">Reminder: review rule &amp; law updates</h2>' +
+    '<p style="font-size:14px;line-height:1.5;color:#374151">This is your periodic reminder to check whether the laws, ordinances, and rules behind your Optimum Q configuration have changed for <strong>' + (data.jurisdiction || 'your jurisdiction') + '</strong>.</p>' +
+    (anyPending
+      ? '<p style="font-size:14px;line-height:1.5;color:#374151">Proposed updates are <strong>pending your review and configuration</strong>. Open Optimum Q to review the source, import, edit, and confirm before anything is applied.</p>'
+      : '<p style="font-size:14px;line-height:1.5;color:#374151">Nothing is currently pending review. Please periodically verify your configuration still reflects current law.</p>') +
+    '<div style="background:white;border:1px solid #E5E7EB;border-radius:8px;padding:14px;margin:16px 0"><table style="width:100%;font-size:13px"><tbody>' + rows + '</tbody></table></div>' +
+    '<p style="font-size:12px;color:#6B7280">Nothing is changed automatically. Updates take effect only after you review and approve them.</p>';
+  return send({
+    to: to,
+    subject: 'Reminder: review public-records rule & law updates' + (anyPending ? ' (' + data.total + ' pending)' : ''),
+    text: 'Periodic reminder to review rule/law updates for ' + (data.jurisdiction || 'your jurisdiction') + '. ' + (anyPending ? (data.total + ' item(s) pending review and configuration.') : 'Nothing currently pending.'),
+    html: template(body, agencyName)
+  });
+}
+
+module.exports = { send: send, sendSubmissionConfirmation: sendSubmissionConfirmation, sendNewRequestAlert: sendNewRequestAlert, sendFeeWaiverDenial: sendFeeWaiverDenial, sendFreshnessReminder: sendFreshnessReminder };

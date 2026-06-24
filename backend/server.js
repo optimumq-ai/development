@@ -65,6 +65,7 @@ app.use('/api/structured-redaction', require('./src/routes/structuredRedaction')
 app.use('/api/mass-jobs', require('./src/routes/massJobs'));
 app.use('/api/fee-profiles', require('./src/routes/feeProfiles'));
 app.use('/api/fee-estimates', require('./src/routes/feeEstimates'));
+app.use('/api/config-freshness', require('./src/routes/configFreshness'));
 
 app.get('/api/health', function(req, res) {
   res.json({ status: 'ok', version: '1.0.0' });
@@ -144,6 +145,7 @@ async function start() {
     console.log('Optimum Q API running on port ' + PORT);
     require('./src/services/massJobs').startWorker();
     require('./src/services/tickler').startScheduler();
+    require('./src/services/configFreshness').startScheduler();
   });
 }
 
