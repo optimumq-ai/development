@@ -12,6 +12,7 @@ export default function FeeEstimatePanel(props) {
   var [ctx, setCtx] = useState(null);
   var [qty, setQty] = useState({});
   var [delivery, setDelivery] = useState('email');
+  var [purpose, setPurpose] = useState('standard');
   var [result, setResult] = useState(null);
   var [calc, setCalc] = useState(false);
   var [err, setErr] = useState('');
@@ -51,6 +52,7 @@ export default function FeeEstimatePanel(props) {
       setPrefilled(pf);
       if (r.data.latest && r.data.latest.feeContext) setResult(r.data.latest.feeContext);
       if (r.data.latest && r.data.latest.input && r.data.latest.input.delivery) setDelivery(r.data.latest.input.delivery.method || 'email');
+      if (r.data.request && r.data.request.purpose) setPurpose(r.data.request.purpose);
       if (r.data.latest && r.data.latest.input && r.data.latest.input.other) setOther({ amount: r.data.latest.input.other.amount || 0, description: r.data.latest.input.other.description || '' });
     } catch (e) { setErr('Could not load fee estimate.'); }
   }
@@ -67,7 +69,7 @@ export default function FeeEstimatePanel(props) {
         return { id: c.id, label: c.label, recordType: c.recordType, quantities: quant };
       });
       var otherPayload = (num(other.amount) !== 0 || (other.description || '').trim()) ? { amount: num(other.amount), description: other.description || 'Other' } : null;
-      var r = await api.post('/fee-estimates/request/' + requestId, { components: comps, delivery: { method: delivery }, other: otherPayload });
+      var r = await api.post('/fee-estimates/request/' + requestId, { components: comps, delivery: { method: delivery }, other: otherPayload, purpose: purpose });
       setResult(r.data.estimate.feeContext);
     } catch (e) { setErr((e.response && e.response.data && e.response.data.error) || 'Calculation failed.'); }
     setCalc(false);
@@ -136,7 +138,7 @@ export default function FeeEstimatePanel(props) {
         if (num(q.avRecordings) > 0 || num(q.avMinutes) > 0) quant.av = { recordings: num(q.avRecordings), minutes: num(q.avMinutes) };
         return { id: c.id, label: c.label, recordType: c.recordType, quantities: quant };
       });
-      var r = await api.post('/fee-estimates/request/' + requestId + '/reconcile', { components: comps, delivery: { method: delivery } });
+      var r = await api.post('/fee-estimates/request/' + requestId + '/reconcile', { components: comps, delivery: { method: delivery }, purpose: purpose });
       setReconResult(r.data);
     } catch (e) { setReconResult({ error: (e.response && e.response.data && e.response.data.error) || 'Reconcile failed.' }); }
     setReconBusy(false);
@@ -190,6 +192,7 @@ export default function FeeEstimatePanel(props) {
           </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
             <div><label style={lbl}>Delivery</label><select value={delivery} onChange={function (e) { setDelivery(e.target.value); }} style={Object.assign({}, inp, { width: 'auto' })}><option value="email">Email</option><option value="pickup">Pickup</option><option value="mail">Mail</option></select></div>
+            <div><label style={lbl}>Purpose</label><select value={purpose} onChange={function (e) { setPurpose(e.target.value); }} style={Object.assign({}, inp, { width: 'auto' })}><option value="standard">Standard</option><option value="commercial">Commercial</option></select></div>
             <button onClick={calculate} disabled={calc} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: calc ? '#9CB4CC' : NAVY, color: 'white', fontSize: '13px', fontWeight: 700, cursor: calc ? 'default' : 'pointer' }}>{calc ? 'Calculating...' : 'Calculate estimate'}</button>
             {err ? <span style={{ fontSize: '12px', color: '#9B1C1C' }}>{err}</span> : null}
           </div>
@@ -213,6 +216,7 @@ export default function FeeEstimatePanel(props) {
                   {R.laborOverhead ? <Row k={"Labor overhead (" + R.laborOverheadPct + "%)"} v={money(R.laborOverhead)} /> : null}
                   {(R.labor && R.labor.some(function (l) { return l.nonBillable; })) ? <Row k="Labor not chargeable" muted v={((R.labor.filter(function (l) { return l.nonBillable && l.billabilityNote; })[0]) || {}).billabilityNote || "Per policy"} /> : null}
                   <Row k="Duplication" v={money(R.duplicationSubtotal)} />
+                  {R.surcharge ? <Row k={(R.purpose === 'commercial' ? 'Commercial' : 'Purpose') + ' surcharge (' + R.surchargePct + '%)'} v={money(R.surcharge)} /> : null}
                   <Row k="Media" v={money(R.mediaSubtotal)} />
                   {R.avSubtotal ? <Row k="Audio/Video" v={money(R.avSubtotal)} /> : null}
                   {R.other ? <Row k={R.other.description} v={money(R.other.amount)} /> : null}

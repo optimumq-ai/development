@@ -81,6 +81,10 @@ export default function FeeConfigPage() {
   function billMode(d) { if (d && d.billable === false) return 'never'; var bw = d && d.billableWhen; if (bw && bw.trigger === 'pages') return 'pages'; if (bw && bw.trigger === 'hours') return 'hours'; return 'always'; }
   function setBillMode(k, mode) { setCfg(function (c) { var d = c.labor[k]; if (mode === 'always') { d.billable = true; delete d.billableWhen; } else if (mode === 'never') { d.billable = false; delete d.billableWhen; } else { d.billable = true; d.billableWhen = { mode: 'all_or_nothing', trigger: mode, threshold: (d.billableWhen && d.billableWhen.threshold) || (mode === 'pages' ? 50 : 2) }; } }); }
   function setBillThreshold(k, v) { setCfg(function (c) { var d = c.labor[k]; if (!d.billableWhen) d.billableWhen = { mode: 'all_or_nothing', trigger: 'pages' }; d.billableWhen.threshold = v || 0; }); }
+  function commSurcharge() { var po = config.purposeOverrides; return (po && po.commercial && po.commercial.requestRules && po.commercial.requestRules.surchargePct) || 0; }
+  function setCommSurcharge(v) { setCfg(function (c) { c.purposeOverrides = c.purposeOverrides || {}; c.purposeOverrides.commercial = c.purposeOverrides.commercial || {}; c.purposeOverrides.commercial.requestRules = c.purposeOverrides.commercial.requestRules || {}; c.purposeOverrides.commercial.requestRules.surchargePct = v || 0; }); }
+  function commLabor() { var po = config.purposeOverrides; return !!(po && po.commercial && po.commercial.labor && po.commercial.labor.search && po.commercial.labor.search.billable === true); }
+  function setCommLabor(on) { setCfg(function (c) { c.purposeOverrides = c.purposeOverrides || {}; c.purposeOverrides.commercial = c.purposeOverrides.commercial || {}; if (on) { c.purposeOverrides.commercial.labor = { search: { billable: true, billableWhen: null }, review: { billable: true, billableWhen: null }, programming: { billable: true, billableWhen: null } }; } else { if (c.purposeOverrides.commercial.labor) delete c.purposeOverrides.commercial.labor; } }); }
 
   async function runExtract() {
     setExtracting(true); setExtractMsg('');
@@ -250,6 +254,15 @@ export default function FeeConfigPage() {
               <div><label style={lbl}>free minutes</label><Num value={config.av ? config.av.freeMinutes : 0} onChange={function (v) { setCfg(function (c) { if (!c.av) c.av = {}; c.av.freeMinutes = v || 0; }); }} /></div>
             </div>
             <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '8px' }}>For police body-cam / dash-cam and other recordings (e.g. Texas: $10 per recording + $1 per minute).</div>
+          </div>
+
+          <div style={card}>
+            <div style={sectionTitle}>Commercial-purpose overrides</div>
+            <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '10px' }}>Some jurisdictions charge commercial-purpose requests differently (e.g. Arizona, Illinois). A request marked “Commercial” applies these on top of the base schedule.</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', alignItems: 'start' }}>
+              <div><label style={lbl}>Commercial surcharge %</label><Num value={commSurcharge()} onChange={setCommSurcharge} /></div>
+              <label style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '7px', cursor: 'pointer', marginTop: '18px' }}><input type="checkbox" checked={commLabor()} onChange={function (e) { setCommLabor(e.target.checked); }} /> Charge labor for commercial requests even where normally non-chargeable</label>
+            </div>
           </div>
 
           <div style={card}>

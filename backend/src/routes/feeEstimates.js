@@ -99,7 +99,7 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
       loaded.components[ci].autoEstimate = rtid ? await ep.assess(rtid, { jurisdictionId: jid }) : { decision: 'manual', confidence: 'none', reasons: ['No record type identified for this component.'] };
     }
     res.json({
-      request: { id: loaded.request.id, number: loaded.request.request_number, isMrr: !!loaded.request.is_mrr },
+      request: { id: loaded.request.id, number: loaded.request.request_number, isMrr: !!loaded.request.is_mrr, purpose: loaded.request.purpose || 'standard' },
       components: loaded.components,
       configProfile: cfg ? { id: cfg.id, name: cfg.name, status: cfg.status } : null,
       latest: hydrate(latest)
@@ -122,8 +122,10 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
       components: (b.components || []).map(function (c) { return { id: c.id, label: c.label, recordType: c.recordType || null, quantities: c.quantities || {} }; }),
       delivery: b.delivery || { method: 'email' },
       certification: b.certification || null,
-      other: b.other || null
+      other: b.other || null,
+      purpose: b.purpose || 'standard'
     };
+    if (b.purpose) { try { await run("UPDATE requests SET purpose = ? WHERE id = ?", [b.purpose, req.params.requestId]); } catch (e) {} }
     var feeContext = engine.compute(config, request);
     var R = feeContext.requestLevel;
 
@@ -249,8 +251,10 @@ router.post('/request/:requestId/reconcile', requireAuth, async function (req, r
     var request = {
       components: (b.components || []).map(function (c) { return { id: c.id, label: c.label, recordType: c.recordType || null, quantities: c.quantities || {} }; }),
       delivery: b.delivery || { method: 'email' },
-      other: b.other || null
+      other: b.other || null,
+      purpose: b.purpose || 'standard'
     };
+    if (b.purpose) { try { await run("UPDATE requests SET purpose = ? WHERE id = ?", [b.purpose, rid]); } catch (e) {} }
     var feeContext = engine.compute(config, request);
     var actualTotal = Number(feeContext.requestLevel.total) || 0;
     var base = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [rid]);

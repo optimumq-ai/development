@@ -33,6 +33,15 @@ function roundHours(hours, increment, mode) {
   return r4(q * increment);
 }
 
+function clone(o) { return o == null ? o : JSON.parse(JSON.stringify(o)); }
+function isPlainObj(o) { return o && typeof o === 'object' && !Array.isArray(o); }
+function deepMerge(base, ov) {
+  if (!isPlainObj(base) || !isPlainObj(ov)) return ov === undefined ? base : ov;
+  var out = clone(base) || {};
+  for (var k in ov) { if (ov.hasOwnProperty(k)) { out[k] = (isPlainObj(out[k]) && isPlainObj(ov[k])) ? deepMerge(out[k], ov[k]) : (isPlainObj(ov[k]) ? deepMerge({}, ov[k]) : ov[k]); } }
+  return out;
+}
+
 var LABOR_ORDER = ['search', 'review', 'programming']; // order free hours are consumed in
 
 // Per-driver labor billability: a hard non-billable flag (CA/NY/OH forbid labor charges) OR an all-or-nothing
@@ -51,6 +60,12 @@ function laborGate(lcfg, totalPages, totalLaborHours) {
 
 function compute(profile, request) {
   profile = profile || {};
+  // Requester-PURPOSE schedule switch: a commercial (or other) purpose deep-merges its override config
+  // onto the base (e.g. labor becomes chargeable, a commercial surcharge applies). Additive: no purpose /
+  // no override -> base config unchanged.
+  var purpose = (request && request.purpose) || 'standard';
+  var purposeApplied = false;
+  if (purpose && purpose !== 'standard' && profile.purposeOverrides && profile.purposeOverrides[purpose]) { profile = deepMerge(profile, profile.purposeOverrides[purpose]); purposeApplied = true; }
   var labor = profile.labor || {};
   var dup = profile.duplication || {};
   var media = profile.media || {};
@@ -187,8 +202,13 @@ function compute(profile, request) {
 
   var adjustedSubtotal = r2(laborSubtotal + laborOverhead + dupSubtotal + mediaSubtotal + avSubtotal + deliverySubtotal + certSubtotal + otherSubtotal);
 
+  // ---- purpose/commercial surcharge (percent of the subtotal) ----
+  var surchargePct = num(rules.surchargePct);
+  var surcharge = surchargePct > 0 ? r2(adjustedSubtotal * surchargePct / 100) : 0;
+  var surchargedSubtotal = r2(adjustedSubtotal + surcharge);
+
   // ---- floor -> ceiling -> de minimis waive (documented order) ----
-  var total = adjustedSubtotal, floorApplied = false, ceilingApplied = false, deMinimisWaived = false;
+  var total = surchargedSubtotal, floorApplied = false, ceilingApplied = false, deMinimisWaived = false;
   var minFee = num(rules.minFee), maxFee = (rules.maxFee == null ? null : num(rules.maxFee));
   if (minFee > 0 && total > 0 && total < minFee) { total = r2(minFee); floorApplied = true; }
   if (maxFee != null && total > maxFee) { total = r2(maxFee); ceilingApplied = true; }
@@ -216,6 +236,8 @@ function compute(profile, request) {
       other: otherItem, otherSubtotal: r2(otherSubtotal),
       freeAllowances: { freeLaborHours: num(rules.freeLaborHours), freePageAllowance: freePages },
       adjustedSubtotal: adjustedSubtotal,
+      surchargePct: surchargePct, surcharge: surcharge, surchargedSubtotal: surchargedSubtotal,
+      purpose: purpose, purposeApplied: purposeApplied,
       floorApplied: floorApplied, ceilingApplied: ceilingApplied, deMinimisWaived: deMinimisWaived,
       total: r2(total),
       depositDue: depositDue, depositBasis: depositBasis,
