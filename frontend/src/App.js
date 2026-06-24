@@ -16,6 +16,7 @@ import WorkflowSimulatorPage from './pages/WorkflowSimulatorPage';
 import SchemaDiscoveryPage from './pages/SchemaDiscoveryPage';
 import MyTasksPage from './pages/MyTasksPage';
 import EstimateTaskPage from './pages/EstimateTaskPage';
+import TicklerPage from './pages/TicklerPage';
 import ConfigurationPage from './pages/ConfigurationPage';
 import SourcesPage from './pages/SourcesPage';
 import ARIAReportsPage from './pages/ARIAReportsPage';
@@ -61,6 +62,7 @@ export default function App() {
           <Route path="requests/:id" element={<RequestWorkspacePage />} />
           <Route path="my-tasks" element={<MyTasksPage />} />
           <Route path="estimate/:taskId" element={<EstimateTaskPage />} />
+          <Route path="tickler" element={<TicklerPage />} />
           <Route path="reports" element={<ARIAReportsPage />} />
           <Route path="staff" element={<StaffManagementPage />} />
           <Route path="departments" element={<DepartmentsPage />} />
