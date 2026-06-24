@@ -161,3 +161,22 @@ Kevin is shifting from screen tweaks to a decision-by-decision reshape (principl
 - AUTO LOAD BALANCING = a per-TEAM toggle that governs ANY automatic person-level assignment of Record Search OR Redaction tasks. Role-aware workload pool. Depends on: claim mechanic (unbuilt), workload metric (undefined - likely count of open assigned tasks), and the assignment layer (assignment node = partial, manual only).
 - TERMINOLOGY decision (Kevin + Claude agreed): use "route" for getting a request to a team/queue, "assign" for getting a task to a specific person. This node is assignment. Consider renaming route-person -> assign-person too.
 - NOT YET BUILT: the toggle UI/config, the workload query, the claim pool. Slot into the assignment / Smart Routing build phase.
+
+## Multi-state jurisdiction research + estimate-workflow design - 2026-06-23
+Researched TX/CA/FL/NY/WA public-records cost rules + exemption processes -> docs/JURISDICTION_RULES.md.
+Two biggest cross-state forks that MUST be jurisdiction-configurable (not hardcoded):
+(1) what labor is billable + on what trigger (TX labor >50pp; FL >15-30min incl redaction; CA none; NY only
+"prep" >2hr, no search/redaction; WA customized svc charge) -> fee engine must treat each cost DRIVER as
+{rate, billable_yes_no, threshold} per jurisdiction and zero non-billable drivers.
+(2) exemption-decision MODEL: pre-clearance AG ruling (TX, with 10-biz-day clock + external dependency) vs
+self-determine+court (CA/FL/WA) vs self+internal-appeal+court (NY). The "request AG ruling" stage + clock
+must be a jurisdiction TOGGLE (jurisdiction.exemption_model), or we'd rip it out for ~49 states.
+Also per-jurisdiction: self-redact-without-ruling categories (Exemption Reference Library), clocks, deposit
+thresholds, fee-waiver existence, itemized-estimate threshold + 20% variance rule.
+ESTIMATE WORKFLOW (Part E of the doc): estimate precedes Record Search on the auto path; key insight = it's
+a GOOD-FAITH estimate (no full search needed; reconciliation + 20% rule is the safety valve). Estimate
+"template" per record type = its billable DRIVERS (already in record_type_estimate_profiles; add media
+drivers for video). Create vs Review estimate task = blank vs pre-filled, same screen/engine. Reuse
+FEE_MANAGER as the per-team estimate role (no new role). Reconcile writes ACTUAL quantities back to profile
+(Welford) to improve auto-estimates. NET-NEW: estimate task type, assignment layer (claim+Smart Routing),
+media drivers, jurisdiction billable-driver gating, AG-ruling stage toggle.
