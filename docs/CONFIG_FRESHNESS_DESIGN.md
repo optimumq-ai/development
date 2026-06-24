@@ -9,7 +9,7 @@ attestation gate = the warning/disclaimer/agree step before apply), and Section 
 
 ## Slices
 - SLICE A (BUILT 2026-06-24): registry + staging + scheduler + reminder. Decision-independent foundation.
-- SLICE B (next): pluggable source FETCH (registered URL / uploaded file / pasted text -> one "source document")
+- SLICE B (BUILT 2026-06-24): pluggable source FETCH (registered URL / uploaded file / pasted text -> one "source document")
   + version-diff (detect drift vs last_version_hash) + per-domain extractors that turn a source doc into a
   proposed config diff and stage it. This is where "AI located updated content" becomes real/authoritative.
 - SLICE C: the generic review UI - review doc -> import -> editable proposed config -> disclaimer -> agree ->
@@ -55,3 +55,27 @@ pluggable source-fetch interface.
 This loop will fold into the Jurisdiction Profile data model (the versioned/sectioned/attestation artifact) once
 that exists - the profile sections will carry the source freshness dates + attestation; today config lives
 per-area and proposals/apply target those per-area stores.
+
+## Slice B (built 2026-06-24)
+src/services/configExtractors.js: per-domain adapter framework.
+- fetchSource(source, rawText): pasted/uploaded text wins; else best-effort URL fetch (12s timeout, 200k cap,
+  HTML->text). hashText = sha256 for drift detection.
+- ADAPTERS by domain, each {label, applyTarget, current(jid), extract(jid,text)->{proposed,summary}, apply(jid,cfg,actor)|null}:
+  - fee: extract via feePolicyExtract; current/apply = the in-effect fee profile (pickConfig selection:
+    jurisdiction + context 'FR', prefer status active then version desc); apply deepMerges the approved config.
+  - deadline: generic AI extract; current/apply = system_config 'deadline_rules'.
+  - exemption: generic AI extract; current/apply = jurisdiction_profiles.exemption_model (validated enum).
+  - redaction, taxonomy: generic AI extract (proposal+summary) but apply=null (REVIEW-ONLY -> direct staff to
+    the native area editor; redaction rules + taxonomy are multi-row libraries with their own approval).
+- genericExtract(domainLabel, jurName, currentCfg, sourceText): AI returns {config, summary}; "No change
+  indicated" when source implies no change.
+Tables: config_source_snapshots(id, source_id, jurisdiction_id, domain, hash, text, fetched_at); config_proposals
+gained snapshot_id, current_json, applied_json, attested_by, attested_at.
+Endpoints (added to /api/config-freshness): POST /sources/:id/check {rawText?} and POST /extract {domain,rawText}
+(fetch->snapshot->diff->extract->stage a pending proposal; update source last_checked/last_version_hash/last_change_at);
+GET /proposals/:id (proposal + proposed + current + snapshot text + applyTarget/reviewOnly); POST /proposals/:id/apply
+{editedConfig?, attested} (requires attested=true; applies via adapter; marks applied + attested_by/at + applied_json).
+VERIFIED live (fee): pasted 2026 fee schedule -> proposal bw $0.15/color $0.50/labor $20 vs current bw $0.10;
+review detail returned proposed-vs-current + 227-char snapshot; attested apply wrote bw 0.10->0.15 to the live
+profile; restored + cleaned. NOTE: scheduled scan still does the cheap reminder only; AI extraction is on-demand
+(cost/latency + live-fetch reliability) - a 'freshness_auto_extract' flag can later let the scheduled scan auto-check URL sources.
