@@ -180,3 +180,28 @@ drivers for video). Create vs Review estimate task = blank vs pre-filled, same s
 FEE_MANAGER as the per-team estimate role (no new role). Reconcile writes ACTUAL quantities back to profile
 (Welford) to improve auto-estimates. NET-NEW: estimate task type, assignment layer (claim+Smart Routing),
 media drivers, jurisdiction billable-driver gating, AG-ruling stage toggle.
+
+## Reusable task routing: pool claim + smart routing (BUILT, backend) - 2026-06-23
+One shared primitive for ALL task types (estimate, record_search, redaction, extensible). Net-new:
+- DB `tasks` (id, request_id, type, title, team_id, role_required, status[open|assigned|in_progress|done],
+  assigned_to, assignment_basis[claim|smart_routing|manual], match_score, ...) + indexes. In schema.postgres.sql.
+- `backend/src/services/taskRouting.js`:
+  - TASK_ROLES map: estimate->FEE_MANAGER, record_search->SEARCH_AND_TRIAGE, redaction->REDACTION_WORKER
+    (the eligible PERMISSION role per task type; overridable per task).
+  - eligibleUsers(teamId, roleName) - active users on the team holding the permission role.
+  - embedUserSpec(userId, text) - (re)embeds a user's routing_specialization into embeddings(owner_type='user_spec')
+    via voyageEmbed; wired into staff.js PATCH /:id/specialization (fire-and-forget).
+  - suggestAssignee(requestText, teamId, roleName, k) - SMART ROUTING: pgvector cosine of request text vs
+    eligible users' specialization vectors; ranked (users w/o spec ranked last, score null).
+  - createTask / getTask / assign / claim (race-safe + eligibility-checked) / mine / poolForUser.
+  - autoRouteOrPool(taskId, requestText) - the shared decision: auto-assign to top match if score >= FLOOR(0.45)
+    AND lead over runner-up >= MARGIN(0.06); else leave in the pool to claim. (voyage short-text cosine runs
+    modest, so margin test > absolute cutoff. FLOOR/MARGIN tunable; later -> per-team / Jurisdiction config.)
+- `backend/src/routes/tasks.js` (/api/tasks): GET /pool (claimable by me), GET /mine, POST /:id/claim,
+  GET /:id/suggest (smart-routing ranking for a supervisor), POST /:id/assign (manual), POST / (create [+autoRoute]).
+- VERIFIED end-to-end: role auto-mapping for all 3 types; eligibility blocks wrong-role claim; race-safe double-claim
+  rejected; smart routing ranked video specialist (0.49-0.53) above permits specialist (0.36) for a body-cam request
+  and auto-assigned the clear winner; pools when ambiguous. All test artifacts cleaned up.
+- NOT YET: UI surface (Task Pool / claim page) and wiring task creation into the live workflow stages
+  (auto path: create estimate task on confidence-cleared; then record_search after estimate accepted; redaction at
+  readiness). Auto Load Balancing (smallest-workload) is a SEPARATE future knob layered on top of this.

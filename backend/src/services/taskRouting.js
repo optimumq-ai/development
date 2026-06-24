@@ -1,0 +1,187 @@
+// Reusable task routing + assignment primitive, shared by ALL task types
+// (estimate, record_search, redaction, ...). Two mechanisms:
+//   (1) POOL CLAIM  - an open task is offered to every eligible user (right team + role); any can claim it.
+//   (2) SMART ROUTING - semantic match of the request text against eligible users' specialization text
+//                       (pgvector cosine over voyage embeddings); high-confidence match auto-assigns.
+// autoRouteOrPool() ties them together: try smart routing first; if no confident person, leave in the pool.
+
+var db = require('../db');
+var all = db.all, get = db.get, run = db.run;
+var v = require('./voyageEmbed');
+var uuidv4 = require('uuid').v4;
+
+// Default eligible permission-role per task type. (Overridable per task / later per team config.)
+var TASK_ROLES = {
+  estimate: 'FEE_MANAGER',
+  record_search: 'SEARCH_AND_TRIAGE',
+  redaction: 'REDACTION_WORKER'
+};
+
+// Smart Routing auto-assigns to the top match only when it is both decent (>= FLOOR) AND clearly ahead of
+// the runner-up (lead >= MARGIN). Otherwise the task stays in the pool to claim. (Absolute cosine on short
+// specialization text runs modest, so a margin test is more robust than a single high cutoff. Tunable; later
+// these can move to per-team / Jurisdiction Profile config.)
+var SMART_ROUTING_FLOOR = 0.45;
+var SMART_ROUTING_MARGIN = 0.06;
+
+function lit(vec) { return '[' + vec.join(',') + ']'; }
+
+// Users on a team who hold the required permission role and are active.
+async function eligibleUsers(teamId, roleName) {
+  if (!roleName) return [];
+  var params = [roleName];
+  var deptClause = '';
+  if (teamId) { deptClause = ' AND u.department_id = ?'; params.push(teamId); }
+  return await all(
+    "SELECT u.id, u.display_name, u.routing_specialization " +
+    "FROM users u " +
+    "JOIN user_permission_roles upr ON upr.user_id = u.id " +
+    "JOIN permission_roles pr ON pr.id = upr.permission_role_id " +
+    "WHERE pr.name = ? AND u.status = 'active'" + deptClause,
+    params
+  );
+}
+
+// (Re)embed a user's specialization text so Smart Routing can match against it.
+async function embedUserSpec(userId, text) {
+  await run("DELETE FROM embeddings WHERE owner_type = 'user_spec' AND owner_id = ?", [userId]);
+  if (!text || !text.trim()) return;
+  var e = await v.embed(text.trim(), { inputType: 'document' });
+  var vec = e[0];
+  if (!vec || !vec.length) return;
+  await run(
+    "INSERT INTO embeddings (id, owner_type, owner_id, model, dim, vec, embedding, content, created_at) " +
+    "VALUES (?,?,?,?,?,?,?::vector,?,datetime('now'))",
+    [uuidv4(), 'user_spec', userId, v.MODEL, v.DIM, JSON.stringify(vec), lit(vec), text.trim()]
+  );
+}
+
+// Smart Routing: rank eligible users by how well their specialization matches the request text.
+// Returns [{ userId, name, score|null }] - users without specialization embeddings get score null (ranked last).
+async function suggestAssignee(requestText, teamId, roleName, k) {
+  k = k || 5;
+  var elig = await eligibleUsers(teamId, roleName);
+  if (!elig.length) return [];
+  var byId = {}; elig.forEach(function (u) { byId[u.id] = u; });
+  var scores = {};
+  if (requestText && requestText.trim()) {
+    var e = await v.embed(requestText.trim(), { inputType: 'query' });
+    var qv = e[0];
+    if (qv && qv.length) {
+      var ql = lit(qv);
+      var ids = elig.map(function (u) { return u.id; });
+      var ph = ids.map(function () { return '?'; }).join(',');
+      var rows = await all(
+        "SELECT e.owner_id AS id, 1 - (e.embedding <=> ?::vector) AS score " +
+        "FROM embeddings e " +
+        "WHERE e.owner_type = 'user_spec' AND e.embedding IS NOT NULL AND e.owner_id IN (" + ph + ") " +
+        "ORDER BY e.embedding <=> ?::vector LIMIT ?",
+        [ql].concat(ids).concat([ql, k])
+      );
+      rows.forEach(function (r) { scores[r.id] = Math.round(Number(r.score) * 1000) / 1000; });
+    }
+  }
+  var ranked = elig.map(function (u) {
+    return { userId: u.id, name: u.display_name, score: (u.id in scores) ? scores[u.id] : null };
+  });
+  ranked.sort(function (a, b) {
+    if (a.score == null && b.score == null) return 0;
+    if (a.score == null) return 1;
+    if (b.score == null) return -1;
+    return b.score - a.score;
+  });
+  return ranked.slice(0, k);
+}
+
+async function getTask(taskId) { return await get('SELECT * FROM tasks WHERE id = ?', [taskId]); }
+
+async function createTask(opts) {
+  var id = 't-' + uuidv4().substring(0, 8);
+  var role = opts.roleRequired || TASK_ROLES[opts.type] || null;
+  await run(
+    "INSERT INTO tasks (id, request_id, type, title, team_id, role_required, status, created_by) " +
+    "VALUES (?,?,?,?,?,?, 'open', ?)",
+    [id, opts.requestId, opts.type, opts.title || null, opts.teamId || null, role, opts.createdBy || null]
+  );
+  return await getTask(id);
+}
+
+// Assign a task to a specific user (manual or smart-routing). basis: 'manual'|'smart_routing'|'claim'.
+async function assign(taskId, userId, basis, score) {
+  await run(
+    "UPDATE tasks SET assigned_to = ?, status = 'assigned', assignment_basis = ?, match_score = ?, updated_at = datetime('now') WHERE id = ?",
+    [userId, basis || 'manual', (score == null ? null : score), taskId]
+  );
+  return await getTask(taskId);
+}
+
+// Claim an open task from the pool. Atomic + race-safe + eligibility-checked.
+async function claim(taskId, userId) {
+  var task = await getTask(taskId);
+  if (!task) return { error: 'Task not found' };
+  if (task.status !== 'open' || task.assigned_to) return { error: 'This task has already been taken' };
+  var elig = await eligibleUsers(task.team_id, task.role_required);
+  if (task.role_required && elig.filter(function (u) { return u.id === userId; }).length === 0) {
+    return { error: 'You are not eligible to claim this task' };
+  }
+  await run(
+    "UPDATE tasks SET assigned_to = ?, status = 'assigned', assignment_basis = 'claim', claimed_at = datetime('now'), updated_at = datetime('now') " +
+    "WHERE id = ? AND status = 'open' AND assigned_to IS NULL",
+    [userId, taskId]
+  );
+  var after = await getTask(taskId);
+  if (!after || after.assigned_to !== userId) return { error: 'This task was just claimed by someone else' };
+  return { task: after };
+}
+
+// The shared decision: try Smart Routing to a person; if no confident match, leave the task in the pool to claim.
+async function autoRouteOrPool(taskId, requestText, opts) {
+  opts = opts || {};
+  var task = await getTask(taskId);
+  if (!task) return { error: 'Task not found' };
+  var floor = (opts.floor != null) ? opts.floor : SMART_ROUTING_FLOOR;
+  var margin = (opts.margin != null) ? opts.margin : SMART_ROUTING_MARGIN;
+  var suggestions = await suggestAssignee(requestText, task.team_id, task.role_required, 5);
+  var scored = suggestions.filter(function (s2) { return s2.score != null; });
+  var top = scored[0];
+  var second = scored[1];
+  var confident = top && top.score >= floor && (!second || (top.score - second.score) >= margin);
+  if (confident) {
+    var assigned = await assign(taskId, top.userId, 'smart_routing', top.score);
+    return { assigned: true, via: 'smart_routing', user: top, task: assigned, suggestions: suggestions };
+  }
+  return { assigned: false, via: 'pool', suggestions: suggestions, task: task };
+}
+
+// Open tasks the given user is eligible to claim (their team + a role they hold).
+async function poolForUser(userId) {
+  return await all(
+    "SELECT t.* FROM tasks t " +
+    "WHERE t.status = 'open' AND t.assigned_to IS NULL " +
+    "AND (t.team_id IS NULL OR t.team_id = (SELECT department_id FROM users WHERE id = ?)) " +
+    "AND (t.role_required IS NULL OR t.role_required IN (" +
+    "  SELECT pr.name FROM user_permission_roles upr JOIN permission_roles pr ON pr.id = upr.permission_role_id WHERE upr.user_id = ?)) " +
+    "ORDER BY t.created_at",
+    [userId, userId]
+  );
+}
+
+async function mine(userId) {
+  return await all("SELECT * FROM tasks WHERE assigned_to = ? AND status IN ('assigned','in_progress') ORDER BY updated_at DESC", [userId]);
+}
+
+module.exports = {
+  TASK_ROLES: TASK_ROLES,
+  SMART_ROUTING_FLOOR: SMART_ROUTING_FLOOR,
+  SMART_ROUTING_MARGIN: SMART_ROUTING_MARGIN,
+  eligibleUsers: eligibleUsers,
+  embedUserSpec: embedUserSpec,
+  suggestAssignee: suggestAssignee,
+  createTask: createTask,
+  getTask: getTask,
+  assign: assign,
+  claim: claim,
+  autoRouteOrPool: autoRouteOrPool,
+  poolForUser: poolForUser,
+  mine: mine
+};

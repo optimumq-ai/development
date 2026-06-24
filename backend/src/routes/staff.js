@@ -50,6 +50,7 @@ router.patch('/:id/team', requireAuth, requireRole('SYSTEM_ADMIN','DIRECTOR','SU
 
 router.patch('/:id/specialization', requireAuth, requireRole('SYSTEM_ADMIN','DIRECTOR','SUPERVISOR'), async function(req, res) {
   await run('UPDATE users SET routing_specialization = ? WHERE id = ?', [req.body.routingSpecialization || null, req.params.id]);
+  try { require('../services/taskRouting').embedUserSpec(req.params.id, req.body.routingSpecialization || '').catch(function(e){ console.error('[spec embed]', e.message); }); } catch (e) {}
   var row = await get('SELECT id, routing_specialization FROM users WHERE id = ?', [req.params.id]);
   res.json({ success: true, routing_specialization: row ? row.routing_specialization : null });
 });

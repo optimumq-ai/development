@@ -42,6 +42,7 @@ app.use('/api/workflow', require('./src/routes/workflow'));
 app.use('/api/estimate-profiles', require('./src/routes/estimateProfiles'));
 app.use('/api/workflow-model', require('./src/routes/workflowModel'));
 app.use('/api/decision-reasons', require('./src/routes/decisionReasons'));
+app.use('/api/tasks', require('./src/routes/tasks'));
 app.use('/api/staff', require('./src/routes/staff'));
 app.use('/api/departments', require('./src/routes/departments'));
 app.use('/api/repositories', require('./src/routes/repositories'));

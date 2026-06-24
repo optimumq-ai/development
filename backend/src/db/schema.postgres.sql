@@ -435,3 +435,23 @@ INSERT INTO decision_reasons (id, category, text, created_by) VALUES
 ('dr-fw-4','fee_waiver_denial','Insufficient information was provided to evaluate the fee-waiver request.','seed'),
 ('dr-fw-5','fee_waiver_denial','The requested records are already publicly available at no cost.','seed')
 ON CONFLICT (id) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS tasks (
+  id TEXT PRIMARY KEY,
+  request_id TEXT NOT NULL,
+  type TEXT NOT NULL,
+  title TEXT,
+  team_id TEXT,
+  role_required TEXT,
+  status TEXT DEFAULT 'open',
+  assigned_to TEXT,
+  assignment_basis TEXT,
+  match_score REAL,
+  created_by TEXT,
+  created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')),
+  claimed_at TEXT,
+  updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+CREATE INDEX IF NOT EXISTS idx_tasks_pool ON tasks(team_id, role_required, status);
+CREATE INDEX IF NOT EXISTS idx_tasks_assignee ON tasks(assigned_to, status);
+CREATE INDEX IF NOT EXISTS idx_tasks_request ON tasks(request_id);
