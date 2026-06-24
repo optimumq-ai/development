@@ -39,6 +39,8 @@ export default function RequestWorkspacePage() {
   const [teams, setTeams] = useState([]);
   const [rerouting, setRerouting] = useState(false);
   const [clocks, setClocks] = useState([]);
+  const [exemptionNote, setExemptionNote] = useState('');
+  const [agOutcome, setAgOutcome] = useState('partial');
   const [clockBusy, setClockBusy] = useState(false);
   const [reasonByClock, setReasonByClock] = useState({});
 
@@ -61,6 +63,8 @@ export default function RequestWorkspacePage() {
   function resumeClock(cid) { clockAction(api.post('/clocks/' + cid + '/resume')); }
   function satisfyClock(cid) { clockAction(api.post('/clocks/' + cid + '/satisfy')); }
   function startClocks() { clockAction(api.post('/clocks/request/' + id + '/start')); }
+  function assertExemption() { clockAction(api.post('/requests/' + id + '/assert-exemption', { note: exemptionNote })); setExemptionNote(''); }
+  function recordAgRuling() { clockAction(api.post('/requests/' + id + '/ag-ruling', { outcome: agOutcome, note: exemptionNote })); setExemptionNote(''); }
 
   async function load() {
     setLoading(true);
@@ -258,6 +262,36 @@ export default function RequestWorkspacePage() {
             )}
             <p style={{fontSize:'11px',color:'#9CA3AF',marginTop:'12px',lineHeight:'1.5'}}>Pausing a clock (awaiting clarification, payment, or an AG ruling) stops the count; the due date moves out by the paused time. The primary clock drives the request deadline date.</p>
           </div>
+
+          {request.exemption_model ? (
+          <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',gridColumn:'1/-1'}}>
+            <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6',marginBottom:'16px'}}>Exemptions &amp; AG Pre-clearance</div>
+            {request.exemption_model==='pre_clearance'?(
+              <p style={{fontSize:'13px',color:'#6B7280',margin:'0 0 16px',lineHeight:'1.5'}}>This jurisdiction requires an Attorney General ruling before records may be withheld. Submitting for pre-clearance pauses the response clock until the ruling is recorded.</p>
+            ):(
+              <p style={{fontSize:'13px',color:'#6B7280',margin:'0 0 16px',lineHeight:'1.5'}}>This jurisdiction reviews exemptions internally; the requestor’s recourse is appeal{request.exemption_model==='self_appeal_court'?' or court':''}. Asserting an exemption does not pause the response clock.</p>
+            )}
+            {request.stage==='ag_review'?(
+              <div style={{border:'1px solid #FEF3C7',background:'#FFFBEB',borderRadius:'8px',padding:'14px 16px'}}>
+                <div style={{fontSize:'14px',fontWeight:'600',color:'#92400E',marginBottom:'10px'}}>Awaiting Attorney General ruling — response clock paused.</div>
+                <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
+                  <select value={agOutcome} onChange={function(e){setAgOutcome(e.target.value);}} style={{padding:'8px 10px',borderRadius:'8px',border:'1px solid #E5E7EB',fontSize:'13px'}}>
+                    <option value="sustained">Ruling: withholding sustained</option>
+                    <option value="partial">Ruling: partial release</option>
+                    <option value="overruled">Ruling: must release</option>
+                  </select>
+                  <input value={exemptionNote} onChange={function(e){setExemptionNote(e.target.value);}} placeholder="Ruling note (optional)" style={{flex:'1',minWidth:'200px',padding:'8px 10px',borderRadius:'8px',border:'1px solid #E5E7EB',fontSize:'13px'}} />
+                  <button onClick={recordAgRuling} disabled={clockBusy} style={{padding:'8px 16px',borderRadius:'8px',border:'none',background:'#1F4E79',color:'white',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Record AG ruling</button>
+                </div>
+              </div>
+            ):(
+              <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
+                <input value={exemptionNote} onChange={function(e){setExemptionNote(e.target.value);}} placeholder="Basis / records to withhold (optional)" style={{flex:'1',minWidth:'200px',padding:'8px 10px',borderRadius:'8px',border:'1px solid #E5E7EB',fontSize:'13px'}} />
+                <button onClick={assertExemption} disabled={clockBusy} style={{padding:'8px 16px',borderRadius:'8px',border:'none',background:'#1F4E79',color:'white',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>{request.exemption_model==='pre_clearance'?'Submit for AG pre-clearance':'Assert exemption (internal review)'}</button>
+              </div>
+            )}
+          </div>
+          ):null}
 
           <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',gridColumn:'1/-1'}}>
             <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6',marginBottom:'16px'}}>Description of Records Requested</div>

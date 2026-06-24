@@ -5,6 +5,14 @@ const email = require('../services/email');
 const { all, get, run } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const workflowEngine = require('../services/workflowEngine');
+async function activeExemptionModel() {
+  try {
+    var jrow = await get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'");
+    var jid = jrow && jrow.value; if (!jid) return 'self_court';
+    var jp = await get('SELECT exemption_model FROM jurisdiction_profiles WHERE id = ?', [jid]);
+    return (jp && jp.exemption_model) || 'self_court';
+  } catch (e) { return 'self_court'; }
+}
 
 async function generateRequestNumber() {
   const year = new Date().getFullYear();
@@ -59,6 +67,7 @@ router.get('/:id', requireAuth, async function(req, res) {
   const selectedRecords = await all('SELECT id, record_id, title, source_system, public_availability, created_at FROM request_selected_records WHERE request_id = ? ORDER BY created_at ASC', [request.id]);
   const avRow = await get("SELECT EXISTS(SELECT 1 FROM record_types rt WHERE rt.id = r.record_type_id AND (rt.formats LIKE '%video%' OR rt.formats LIKE '%audio%')) AS by_type, EXISTS(SELECT 1 FROM request_files f WHERE f.request_id = r.id AND (f.mimetype LIKE 'video/%' OR f.mimetype LIKE 'audio/%')) AS by_file, EXISTS(SELECT 1 FROM av_redaction_tasks t WHERE t.request_id = r.id) AS by_task, EXISTS(SELECT 1 FROM requests c JOIN record_types rt2 ON rt2.id = c.record_type_id WHERE c.master_request_id = r.id AND (rt2.formats LIKE '%video%' OR rt2.formats LIKE '%audio%')) AS by_comp FROM requests r WHERE r.id = ?", [request.id]);
   request.av_applicable = (avRow && (avRow.by_type || avRow.by_file || avRow.by_task || avRow.by_comp)) ? 1 : 0;
+  request.exemption_model = await activeExemptionModel();
   res.json({ request: request, history: history, components: components, selectedRecords: selectedRecords });
 });
 
@@ -168,6 +177,47 @@ router.post('/public', async function(req, res) {
 // Fee-waiver decision: grant or deny. Denial sends a mandatory notice, then the request
 // continues like any normal inbound request (it is NOT closed). Reasons come from a reusable
 // library; a newly typed reason is saved back into that library.
+router.post('/:id/assert-exemption', requireAuth, async function(req, res) {
+  var request = await get('SELECT * FROM requests WHERE id = ? OR request_number = ?', [req.params.id, req.params.id]);
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  var T = require('../services/tolling');
+  var model = await activeExemptionModel();
+  var actor = (req.user && req.user.name) || 'Staff';
+  var note = (req.body && req.body.note) || '';
+  if (model === 'pre_clearance') {
+    try { await T.startClocksForRequest(request.id); } catch (e) {}
+    var primary = await get("SELECT id FROM request_clocks WHERE request_id = ? AND is_primary = 1 ORDER BY created_at LIMIT 1", [request.id]);
+    if (primary) { try { await T.toll(primary.id, 'ag_ruling_pending', 'Awaiting AG pre-clearance ruling' + (note ? ' - ' + note : '')); } catch (e) {} }
+    var openAg = await get("SELECT id FROM request_clocks WHERE request_id = ? AND clock_type = 'ag_ruling' AND status != 'satisfied' ORDER BY created_at DESC LIMIT 1", [request.id]);
+    var agId = openAg && openAg.id;
+    if (!agId) { try { agId = await T.startClock(request.id, 'ag_ruling', {}); } catch (e) {} }
+    await run("UPDATE requests SET stage = 'ag_review', updated_at = datetime('now') WHERE id = ?", [request.id]);
+    await logHistory(request.id, req.user.sub, actor, 'AG_PRECLEARANCE_SUBMITTED', 'Submitted for Attorney General pre-clearance; response clock tolled.' + (note ? ' ' + note : ''));
+    return res.json({ model: model, stage: 'ag_review', tolled: !!primary, agClockId: agId });
+  }
+  await run("UPDATE requests SET stage = 'exemption_review', updated_at = datetime('now') WHERE id = ?", [request.id]);
+  await logHistory(request.id, req.user.sub, actor, 'EXEMPTION_ASSERTED', 'Exemption asserted (internal review).' + (note ? ' ' + note : ''));
+  return res.json({ model: model, stage: 'exemption_review', tolled: false });
+});
+
+router.post('/:id/ag-ruling', requireAuth, async function(req, res) {
+  var request = await get('SELECT * FROM requests WHERE id = ? OR request_number = ?', [req.params.id, req.params.id]);
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  var T = require('../services/tolling');
+  var actor = (req.user && req.user.name) || 'Staff';
+  var outcome = (req.body && req.body.outcome) || 'sustained';
+  var note = (req.body && req.body.note) || '';
+  var ag = await get("SELECT id FROM request_clocks WHERE request_id = ? AND clock_type = 'ag_ruling' AND status != 'satisfied' ORDER BY created_at DESC LIMIT 1", [request.id]);
+  if (ag) { try { await T.satisfy(ag.id); } catch (e) {} }
+  var primary = await get("SELECT id FROM request_clocks WHERE request_id = ? AND is_primary = 1 ORDER BY created_at LIMIT 1", [request.id]);
+  if (primary) { try { await T.resume(primary.id); } catch (e) {} }
+  var nextStage = outcome === 'overruled' ? 'delivery' : 'redaction_review';
+  await run("UPDATE requests SET stage = ?, updated_at = datetime('now') WHERE id = ?", [nextStage, request.id]);
+  var label = outcome === 'sustained' ? 'withholding sustained' : outcome === 'overruled' ? 'must release' : 'partial release';
+  await logHistory(request.id, req.user.sub, actor, 'AG_RULING_RECORDED', 'AG ruling recorded (' + label + '); response clock resumed.' + (note ? ' ' + note : ''));
+  return res.json({ outcome: outcome, stage: nextStage, agSatisfied: !!ag, resumed: !!primary });
+});
+
 router.post('/:id/fee-waiver-decision', requireAuth, requireRole('SYSTEM_ADMIN','DIRECTOR','SUPERVISOR','FEE_WAIVER_APPROVER'), async function(req, res) {
   var b = req.body || {};
   var decision = b.decision;

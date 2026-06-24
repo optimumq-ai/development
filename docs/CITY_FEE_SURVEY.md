@@ -180,3 +180,20 @@ All additive / regression-tested (configs without the new fields price byte-iden
 REMAINING from this survey: only the workflow toggles (GAP 7: exemption_model pre-clearance/appeal segments,
 inspection-no-fee) - those belong to the workflow-segment + jurisdiction-profile work, not the fee engine.
 The fee engine now expresses the fee/estimate structure of the surveyed jurisdictions.
+
+## BUILD STATUS UPDATE 3 - 2026-06-24 (GAP 7 BUILT - survey fully closed)
+- GAP 7a AG PRE-CLEARANCE: jurisdiction_profiles.exemption_model (pre_clearance | self_appeal_court | self_court);
+  active jurisdiction (TX) = pre_clearance. New request actions: POST /api/requests/:id/assert-exemption (in a
+  pre_clearance jurisdiction -> stage 'ag_review', tolls the primary response clock with reason ag_ruling_pending,
+  starts the ag_ruling clock [10 business days]; otherwise -> stage 'exemption_review', no toll) and POST
+  /api/requests/:id/ag-ruling (satisfies the ag_ruling clock, resumes the response clock, advances stage:
+  overruled->delivery, else redaction_review). GET /:id now returns exemption_model. RequestWorkspacePage has an
+  "Exemptions & AG Pre-clearance" card (submit / record-ruling, model-aware copy). VERIFIED live (submit tolled
+  respond + started ag_ruling due +10 business days; ruling satisfied ag + resumed respond + advanced stage;
+  full history REQUEST_CREATED -> AG_PRECLEARANCE_SUBMITTED -> AG_RULING_RECORDED).
+- GAP 7b INSPECTION-NO-FEE: 'inspection' purpose (estimate panel) + a FeeConfig toggle "On-site inspection is
+  free" that sets purposeOverrides.inspection (labor non-billable). Uses the existing purpose-override mechanism;
+  copies are naturally zero for on-site viewing. Extractor populates it for WA/OH. VERIFIED live (standard $30 vs
+  inspection $0).
+ALL CITY_FEE_SURVEY gaps (1-7) are now built. The fee/estimate engine + the exemption/deadline workflow express
+the surveyed jurisdictions' rules through configuration; exemption_model is a per-jurisdiction toggle, not code.

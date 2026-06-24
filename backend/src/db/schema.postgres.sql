@@ -480,3 +480,4 @@ CREATE INDEX IF NOT EXISTS idx_request_clocks_req ON request_clocks(request_id);
 CREATE TABLE IF NOT EXISTS clock_tolls (id TEXT PRIMARY KEY, clock_id TEXT NOT NULL, reason TEXT, tolled_from TEXT, tolled_until TEXT, note TEXT, created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
 CREATE INDEX IF NOT EXISTS idx_clock_tolls_clock ON clock_tolls(clock_id);
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS purpose TEXT DEFAULT 'standard';
+ALTER TABLE jurisdiction_profiles ADD COLUMN IF NOT EXISTS exemption_model TEXT;

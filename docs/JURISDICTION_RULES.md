@@ -122,3 +122,6 @@ estimate task to each owning team per item; each item uses its own type template
 NET-NEW build pieces this implies: estimate task (Create/Review variants) as an assignable task; the
 assignment layer (claim pool + Smart Routing match - already flagged); media drivers in the profile/engine;
 jurisdiction billable-driver gating in the fee engine; the AG-ruling stage as a jurisdiction toggle.
+
+## exemption_model wired (2026-06-24)
+The exemption_model toggle (pre_clearance | self_appeal_court | self_court) described here is now a real column on jurisdiction_profiles and drives the AG pre-clearance workflow segment + tolling. TX seeded as pre_clearance. See SESSION_HANDOFF / CITY_FEE_SURVEY GAP 7.

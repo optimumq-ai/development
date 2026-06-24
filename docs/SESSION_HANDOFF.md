@@ -473,3 +473,16 @@ live-verified through the estimate path; configs restored after each test.
 The fee engine instruction set is now broadly complete for cross-jurisdiction coverage. Only GAP 7 (workflow
 toggles: exemption_model AG-preclearance/appeal segments + inspection-no-fee) remains, and it belongs to the
 workflow-segment + Jurisdiction Profile track, not the fee engine.
+
+## GAP 7 workflow toggles (BUILT) - 2026-06-24
+Closes the CITY_FEE_SURVEY. exemption_model lives on jurisdiction_profiles (TX=pre_clearance).
+- AG pre-clearance segment: assert-exemption / ag-ruling request endpoints orchestrate tolling (toll primary
+  respond clock + start ag_ruling on submit; satisfy ag_ruling + resume respond on ruling) and stage moves
+  (ag_review -> redaction_review/delivery). Workspace "Exemptions & AG Pre-clearance" card. Non-pre_clearance
+  jurisdictions get internal exemption_review (no toll). VERIFIED live.
+- Inspection-no-fee: 'inspection' purpose + purposeOverrides.inspection (labor non-billable) + FeeConfig toggle.
+NOTE: exemption_model is the first jurisdiction-level workflow toggle stored on jurisdiction_profiles - when the
+formal Jurisdiction Profile data model is built, fold exemption_model (and deadline_rules / fee config pointers)
+into that versioned/attestation-bearing artifact. NEXT per AUTO_CONFIG_DESIGN build sequence: Jurisdiction Profile
+data model -> extractor framework -> attestation gate + readiness hub -> address/source resolution -> remaining
+domain extractors. Also still open: tickler->tolling.overdue() statutory-overdue flag; Demo Mode reset (spec'd).

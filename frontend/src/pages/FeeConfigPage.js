@@ -90,6 +90,8 @@ export default function FeeConfigPage() {
   function setTierField(k, i, field, v) { setCfg(function (c) { c.duplication[k].tiers[i][field] = (field === 'upTo' ? (v === '' || v == null ? null : Number(v)) : (Number(v) || 0)); }); }
   function addTier(k) { setCfg(function (c) { c.duplication[k].tiers.push({ upTo: null, rate: 0 }); }); }
   function removeTier(k, i) { setCfg(function (c) { c.duplication[k].tiers.splice(i, 1); }); }
+  function inspectionFree() { var po = config.purposeOverrides; return !!(po && po.inspection && po.inspection.labor && po.inspection.labor.search && po.inspection.labor.search.billable === false); }
+  function setInspectionFree(on) { setCfg(function (c) { c.purposeOverrides = c.purposeOverrides || {}; c.purposeOverrides.inspection = c.purposeOverrides.inspection || {}; if (on) { c.purposeOverrides.inspection.labor = { search: { billable: false }, review: { billable: false }, programming: { billable: false } }; } else { if (c.purposeOverrides.inspection.labor) delete c.purposeOverrides.inspection.labor; } }); }
 
   async function runExtract() {
     setExtracting(true); setExtractMsg('');
@@ -277,12 +279,13 @@ export default function FeeConfigPage() {
           </div>
 
           <div style={card}>
-            <div style={sectionTitle}>Commercial-purpose overrides</div>
+            <div style={sectionTitle}>Purpose-based overrides</div>
             <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '10px' }}>Some jurisdictions charge commercial-purpose requests differently (e.g. Arizona, Illinois). A request marked “Commercial” applies these on top of the base schedule.</div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', alignItems: 'start' }}>
               <div><label style={lbl}>Commercial surcharge %</label><Num value={commSurcharge()} onChange={setCommSurcharge} /></div>
               <label style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '7px', cursor: 'pointer', marginTop: '18px' }}><input type="checkbox" checked={commLabor()} onChange={function (e) { setCommLabor(e.target.checked); }} /> Charge labor for commercial requests even where normally non-chargeable</label>
             </div>
+            <label style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '7px', cursor: 'pointer', marginTop: '12px', paddingTop: '12px', borderTop: '1px solid #F3F4F6' }}><input type="checkbox" checked={inspectionFree()} onChange={function (e) { setInspectionFree(e.target.checked); }} /> On-site inspection is free — no labor charge (e.g. Washington, Ohio)</label>
           </div>
 
           <div style={card}>
