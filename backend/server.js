@@ -43,6 +43,7 @@ app.use('/api/estimate-profiles', require('./src/routes/estimateProfiles'));
 app.use('/api/workflow-model', require('./src/routes/workflowModel'));
 app.use('/api/decision-reasons', require('./src/routes/decisionReasons'));
 app.use('/api/tasks', require('./src/routes/tasks'));
+app.use('/api/tickler', require('./src/routes/tickler'));
 app.use('/api/staff', require('./src/routes/staff'));
 app.use('/api/departments', require('./src/routes/departments'));
 app.use('/api/repositories', require('./src/routes/repositories'));
@@ -141,6 +142,7 @@ async function start() {
   app.listen(PORT, function() {
     console.log('Optimum Q API running on port ' + PORT);
     require('./src/services/massJobs').startWorker();
+    require('./src/services/tickler').startScheduler();
   });
 }
 

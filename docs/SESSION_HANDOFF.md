@@ -365,3 +365,29 @@ TX body-cam rule ($X per recording + $Y per minute) now fully priceable end-to-e
 - NOTE: AV is a MANUAL driver (not in the scalar auto-estimate DRIVERS / Welford writeback) - video estimates are
   staff-entered; reconciliation still prices AV actuals (variance reflects them) but does not yet build an AV auto-
   profile. Fine for now (video is inherently manual-quantity).
+
+## Tickler: time-driven sweep (BUILT - backend) - 2026-06-24
+Daily sweep that FLAGS overdue requests (non-destructive by default; no auto-close unless policy opts in).
+- DB: requests.tickler_flag / tickler_flagged_at; request_fee_estimates.lapsed_at; tickler_runs (run history).
+- services/tickler.js runSweep({trigger}) - three idempotent clocks:
+  (1) estimate-response lapse: latest sent estimate not accepted/declined older than requesterResponseDays (default
+      10; read from active config estimatePolicy if set) -> set lapsed_at + flag 'estimate_response_overdue' + log
+      ESTIMATE_LAPSED. If estimatePolicy.autoWithdrawOnLapse -> instead close request (stage/status closed,
+      closure_reason estimate_lapsed). Default = flag only.
+  (2) deposit overdue: stage awaiting_payment + accepted estimate unpaid older than depositDueDays (default 10) ->
+      flag 'deposit_overdue' + log DEPOSIT_OVERDUE.
+  (3) stall: active, non-terminal (not delivery/closed), updated_at older than stallDays (default 21), unflagged ->
+      flag 'stalled' + log REQUEST_STALLED.
+  Records a tickler_runs row each run. startScheduler() = 60s-after-boot sweep + daily setInterval (no node-cron);
+  wired in server.js listen callback next to massJobs.startWorker().
+- routes/tickler.js (/api/tickler): POST /run (elevated, manual), GET /status (last run + flagged list),
+  POST /clear/:requestId (clear a handled flag).
+- feeEstimates accept/deposit/decline now CLEAR tickler_flag when the condition resolves.
+- VERIFIED: 3 backdated requests flagged correctly across all clocks; lapsed_at set; history logged; 2nd run 0 new
+  (idempotent); deposit-record cleared flag + advanced stage; status endpoint works. All flags + runs restored to
+  empty after test.
+- HEADS UP for demo: ~28 old demo requests (updated_at > 21d) WILL be flagged 'stalled' by the scheduled sweep (the
+  startup sweep did so; I cleared them). That is correct behavior - to quiet it for the demo, raise stallDays or clear
+  flags. Thresholds currently: requesterResponseDays from estimatePolicy, the rest are tickler.js DEFAULTS (could move
+  to Jurisdiction Profile later).
+- TODO next: UI surface (status card + flagged list + Run-now + clear), then optionally surface flags on request rows.

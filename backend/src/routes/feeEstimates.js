@@ -196,7 +196,7 @@ router.post('/request/:requestId/estimate/accept', requireAuth, async function (
   await run('UPDATE request_fee_estimates SET accepted_at = ?, accepted_by = ? WHERE id = ?', [now, actor, snap.id]);
   var depositDue = Number(snap.deposit_due) || 0;
   var newStage = depositDue > 0 ? 'awaiting_payment' : 'record_search';
-  await run("UPDATE requests SET stage = ?, status = 'active', updated_at = datetime('now') WHERE id = ?", [newStage, rid]);
+  await run("UPDATE requests SET stage = ?, status = 'active', tickler_flag = NULL, tickler_flagged_at = NULL, updated_at = datetime('now') WHERE id = ?", [newStage, rid]);
   await hist(rid, req.user, 'ESTIMATE_ACCEPTED', depositDue > 0 ? ('Deposit of $' + depositDue.toFixed(2) + ' required before work begins.') : 'No deposit required; record search begins.', reqRow.stage, newStage);
   if (newStage === 'record_search') { try { await taskRouting.spawnForStage(rid, 'record_search', req.user && req.user.sub); } catch (e) {} }
   res.json({ accepted: true, depositDue: depositDue, stage: newStage });
@@ -210,6 +210,7 @@ router.post('/request/:requestId/estimate/decline', requireAuth, async function 
   if (snap.accepted_at) return res.status(409).json({ error: 'This estimate was already accepted.' });
   var reason = (req.body && req.body.reason) || null;
   await run('UPDATE request_fee_estimates SET declined_at = ?, declined_reason = ? WHERE id = ?', [nowStr(), reason, snap.id]);
+  await run("UPDATE requests SET tickler_flag = NULL, tickler_flagged_at = NULL WHERE id = ?", [rid]);
   await hist(rid, req.user, 'ESTIMATE_DECLINED', reason || 'Requestor declined the cost estimate.', null, null);
   res.json({ declined: true });
 });
@@ -225,7 +226,7 @@ router.post('/request/:requestId/deposit/record', requireAuth, async function (r
   var amount = (req.body && req.body.amount != null) ? Number(req.body.amount) : (Number(snap.deposit_due) || 0);
   var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'system';
   await run('UPDATE request_fee_estimates SET deposit_paid_at = ?, deposit_paid_by = ?, deposit_paid_amount = ? WHERE id = ?', [nowStr(), actor, amount, snap.id]);
-  await run("UPDATE requests SET stage = 'record_search', status = 'active', updated_at = datetime('now') WHERE id = ?", [rid]);
+  await run("UPDATE requests SET stage = 'record_search', status = 'active', tickler_flag = NULL, tickler_flagged_at = NULL, updated_at = datetime('now') WHERE id = ?", [rid]);
   await hist(rid, req.user, 'DEPOSIT_RECORDED', 'Deposit of $' + amount.toFixed(2) + ' recorded; record search begins.', reqRow.stage, 'record_search');
   try { await taskRouting.spawnForStage(rid, 'record_search', req.user && req.user.sub); } catch (e) {}
   res.json({ recorded: true, amount: amount, stage: 'record_search' });

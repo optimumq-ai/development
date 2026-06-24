@@ -469,3 +469,8 @@ ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS deposit_paid_amount R
 ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS baseline_total REAL;
 ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS variance_pct REAL;
 ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS renotify_required INTEGER;
+
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS tickler_flag TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS tickler_flagged_at TEXT;
+ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS lapsed_at TEXT;
+CREATE TABLE IF NOT EXISTS tickler_runs (id TEXT PRIMARY KEY, ran_at TEXT, trigger TEXT, scanned INTEGER, flagged INTEGER, summary_json TEXT);
