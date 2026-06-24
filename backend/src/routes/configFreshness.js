@@ -19,7 +19,8 @@ router.get('/status', requireAuth, async function (req, res) {
     if (lastRun && lastRun.summary_json) { try { lastRun.summary = JSON.parse(lastRun.summary_json); } catch (e) {} }
     var toRow = await get("SELECT value FROM system_config WHERE key = 'freshness_reminder_to'");
     var contact = await get("SELECT value FROM system_config WHERE key = 'contact_email'");
-    res.json({ jurisdiction: jid, sources: sources || [], pending: pending, lastRun: lastRun || null, cadenceDays: await F.cadenceDays(), recipient: (toRow && toRow.value) || (contact && contact.value) || 'admin@optimumq.ai' });
+    var ax = await get("SELECT value FROM system_config WHERE key = 'freshness_auto_extract'");
+    res.json({ jurisdiction: jid, sources: sources || [], pending: pending, lastRun: lastRun || null, cadenceDays: await F.cadenceDays(), recipient: (toRow && toRow.value) || (contact && contact.value) || 'admin@optimumq.ai', autoExtract: !!(ax && (ax.value === '1' || ax.value === 'true')) });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -61,22 +62,7 @@ router.post('/proposals/:id/dismiss', requireAuth, ROLE, async function (req, re
 });
 
 async function runCheck(jid, source, rawText, domain, actor) {
-  domain = domain || (source && source.domain);
-  var ad = CE.adapter(domain);
-  if (!ad) throw new Error('Unknown domain: ' + domain);
-  var fr = await CE.fetchSource(source || {}, rawText);
-  if (!fr.ok) return { ok: false, error: fr.error };
-  var hash = CE.hashText(fr.text);
-  var changed = !(source && source.last_version_hash && source.last_version_hash === hash);
-  var snapId = 'snap-' + uuidv4().slice(0, 8);
-  await run("INSERT INTO config_source_snapshots (id, source_id, jurisdiction_id, domain, hash, text, fetched_at) VALUES (?,?,?,?,?,?,?)", [snapId, source ? source.id : null, jid, domain, hash, fr.text.slice(0, 100000), nowStr()]);
-  if (source) await run("UPDATE config_sources SET last_checked_at = ?, last_version_hash = ?" + (changed ? ", last_change_at = ?" : "") + " WHERE id = ?", changed ? [nowStr(), hash, nowStr(), source.id] : [nowStr(), hash, source.id]);
-  var ex = await ad.extract(jid, fr.text);
-  var current = await ad.current(jid);
-  var pid = 'prop-' + uuidv4().slice(0, 8);
-  await run("INSERT INTO config_proposals (id, jurisdiction_id, domain, status, summary, proposed_json, current_json, source_ref, snapshot_id, created_by, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-    [pid, jid, domain, 'pending', ex.summary, JSON.stringify(ex.proposed), JSON.stringify(current), source ? source.id : '(pasted)', snapId, actor || 'scan', nowStr()]);
-  return { ok: true, proposalId: pid, changed: changed, via: fr.via, summary: ex.summary };
+  return await CE.stageFromSource(jid, source, rawText, actor, { domain: domain });
 }
 
 router.post('/sources/:id/check', requireAuth, ROLE, async function (req, res) {
@@ -106,7 +92,7 @@ router.get('/proposals/:id', requireAuth, async function (req, res) {
     var proposed = {}, current = {};
     try { proposed = JSON.parse(pr.proposed_json || '{}'); } catch (e) {}
     try { current = JSON.parse(pr.current_json || '{}'); } catch (e) {}
-    res.json({ proposal: pr, proposed: proposed, current: current, snapshot: snap || null, applyTarget: ad ? ad.applyTarget : null, reviewOnly: !!(ad && !ad.apply), reviewOnlyNote: ad ? ad.reviewOnlyNote : null });
+    res.json({ proposal: pr, proposed: proposed, current: current, snapshot: snap || null, applyTarget: ad ? ad.applyTarget : null, applyMode: ad ? (ad.apply ? (ad.applyMode || 'live') : null) : null, reviewOnly: !!(ad && !ad.apply) });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -124,6 +110,17 @@ router.post('/proposals/:id/apply', requireAuth, ROLE, async function (req, res)
     var actor = (req.user && req.user.name) || 'staff';
     await run("UPDATE config_proposals SET status='applied', applied_json=?, attested_by=?, attested_at=?, reviewed_by=?, reviewed_at=? WHERE id=?", [JSON.stringify(cfg), actor, nowStr(), actor, nowStr(), pr.id]);
     res.json({ applied: true, target: result && result.target });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.post('/settings', requireAuth, ROLE, async function (req, res) {
+  try {
+    var b = req.body || {};
+    async function setCfg(k, v) { await run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [k, String(v)]); }
+    if (b.autoExtract !== undefined) await setCfg('freshness_auto_extract', b.autoExtract ? '1' : '0');
+    if (b.cadenceDays !== undefined && Number(b.cadenceDays) > 0) await setCfg('freshness_scan_days', Math.round(Number(b.cadenceDays)));
+    if (b.recipient !== undefined && String(b.recipient).trim()) await setCfg('freshness_reminder_to', String(b.recipient).trim());
+    res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

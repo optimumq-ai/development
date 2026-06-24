@@ -11,6 +11,7 @@
 var { all, get, run } = require('../db');
 var { v4: uuidv4 } = require('uuid');
 var email = require('./email');
+var CE = require('./configExtractors');
 
 var DOMAINS = [
   { key: 'redaction', label: 'Redaction / exemption rules' },
@@ -45,6 +46,12 @@ async function runScan(opts) {
   var jid = await activeJurisdiction();
   var now = nowStr();
   if (jid) { try { await run("UPDATE config_sources SET last_checked_at = ? WHERE jurisdiction_id = ? AND active = 1", [now, jid]); } catch (e) {} }
+  // Optional: AI auto-extract from registered URL sources (opt-in; default off).
+  var autoExtracted = 0;
+  if (jid) { var ax = await cfgVal('freshness_auto_extract'); if (ax === '1' || ax === 'true') {
+    try { var srcs = await all("SELECT * FROM config_sources WHERE jurisdiction_id = ? AND active = 1 AND url IS NOT NULL", [jid]);
+      for (var si = 0; si < (srcs || []).length; si++) { try { var st = await CE.stageFromSource(jid, srcs[si], null, 'scheduled-scan', { onlyIfChanged: true }); if (st && st.ok && st.proposalId) autoExtracted++; } catch (e) { console.error('[configFreshness] auto-extract', srcs[si].id, e && e.message); } }
+    } catch (e) { console.error('[configFreshness] auto-extract loop', e && e.message); } } }
   var summary = await pendingSummary(jid);
   var total = summary.reduce(function (a, s) { return a + s.pending; }, 0);
   var id = 'cfr-' + uuidv4().slice(0, 8);
@@ -57,7 +64,7 @@ async function runScan(opts) {
     emailed = !!(res && res.sent); emailReason = res && res.reason;
     if (emailed) await run("UPDATE config_freshness_runs SET emailed = 1 WHERE id = ?", [id]);
   } catch (e) { console.error('[configFreshness] reminder email failed:', e && e.message); emailReason = e && e.message; }
-  return { jurisdiction: jid, summary: summary, total: total, emailed: emailed, emailReason: emailReason, runId: id, at: now };
+  return { jurisdiction: jid, summary: summary, total: total, emailed: emailed, emailReason: emailReason, autoExtracted: autoExtracted, runId: id, at: now };
 }
 
 async function maybeRun() {
