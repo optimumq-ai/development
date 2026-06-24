@@ -84,6 +84,20 @@ router.patch('/:id/stage', requireAuth, async function(req, res) {
   await run("UPDATE requests SET stage = ?, status = ?, updated_at = datetime('now') WHERE id = ?",
     [stage, stage === 'closed' ? 'closed' : 'active', req.params.id]);
   await logHistory(req.params.id, req.user.sub, req.user.name, 'STAGE_ADVANCED', req.body.notes);
+  // Task on stage entry: entering record_search / redaction spawns the matching task and routes it
+  // (Smart Routing -> Load Balancing -> pool), reusing the shared task primitive. Idempotent.
+  var STAGE_TASK = { record_search: 'record_search', redaction_review: 'redaction', redaction: 'redaction' };
+  var ttype = STAGE_TASK[stage];
+  if (ttype && stage !== 'closed') {
+    try {
+      var tr = require('../services/taskRouting');
+      var existing = await get("SELECT id FROM tasks WHERE request_id = ? AND type = ? AND status IN ('open','assigned','in_progress')", [req.params.id, ttype]);
+      if (!existing) {
+        var task = await tr.createTask({ requestId: req.params.id, type: ttype, teamId: request.department_id, createdBy: req.user.sub });
+        tr.autoRouteOrPool(task.id, request.description, {}).catch(function (e) { console.error('[stage-task route]', e.message); });
+      }
+    } catch (e) { console.error('[stage-task spawn]', e.message); }
+  }
   res.json({ success: true, stage: stage });
 });
 

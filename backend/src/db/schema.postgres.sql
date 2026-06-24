@@ -455,3 +455,5 @@ CREATE TABLE IF NOT EXISTS tasks (
 CREATE INDEX IF NOT EXISTS idx_tasks_pool ON tasks(team_id, role_required, status);
 CREATE INDEX IF NOT EXISTS idx_tasks_assignee ON tasks(assigned_to, status);
 CREATE INDEX IF NOT EXISTS idx_tasks_request ON tasks(request_id);
+
+ALTER TABLE departments ADD COLUMN IF NOT EXISTS auto_load_balancing INTEGER DEFAULT 0;

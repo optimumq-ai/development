@@ -24,7 +24,7 @@ router.post('/', requireAuth, async function(req, res) {
 
 router.patch('/:id', requireAuth, async function(req, res) {
   var b = req.body || {};
-  var fields = ['name','code','color','kind','parent_id','processed_by','is_open_records','is_catch_all','sort_order','active','routing_specialization'];
+  var fields = ['name','code','color','kind','parent_id','processed_by','is_open_records','is_catch_all','sort_order','active','routing_specialization','auto_load_balancing'];
   var sets = [], vals = [];
   fields.forEach(function(f){
     if (b.hasOwnProperty(f)) {

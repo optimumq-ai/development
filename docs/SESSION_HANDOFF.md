@@ -222,3 +222,18 @@ One shared primitive for ALL task types (estimate, record_search, redaction, ext
   per-team toggle = a 3rd branch in autoRouteOrPool. Agreed priority: Smart-Routing match first, then Load Balancing
   (smallest open-task count among eligible) if the team has it on, else pool. Workload = count of open/assigned tasks
   per eligible user (read from the tasks table). Per-team setting could let LB precede smart routing for some teams.
+
+## Record-search/redaction task wiring + Auto Load Balancing (BUILT) - 2026-06-23
+- requests.js PATCH /:id/stage: entering record_search spawns a record_search task; entering redaction_review/
+  redaction spawns a redaction task. Idempotent; routes via autoRouteOrPool (Smart Routing -> Load Balancing -> pool).
+  VERIFIED live: one request spawned estimate (confident path) + record_search + redaction tasks on stage entry.
+- AUTO LOAD BALANCING (3rd routing branch): departments.auto_load_balancing (INTEGER, settable via departments
+  update endpoint). taskRouting: teamLoadBalancing(teamId), workloadCounts(userIds)=count of open/assigned tasks,
+  leastLoaded(teamId,role). autoRouteOrPool priority now: (1) confident Smart-Routing match -> assign smart_routing;
+  (2) else if team LB on -> assign least-loaded eligible person basis 'load_balanced'; (3) else pool. VERIFIED:
+  LB on + ambiguous match -> assigned least-loaded; LB off -> pool. (Workload = open/assigned task count.)
+- workflowModel assign-workload node -> status partial (engine live; per-team toggle settable via API; friendly
+  UI toggle on the Departments editor still pending).
+- STILL PENDING: estimate-task SCREEN (Create/Review w/ per-type driver template + fee engine); record_search after
+  estimate ACCEPTED rather than on manual stage change (needs the estimate-acceptance flow); Departments UI toggle
+  for Auto Load Balancing; optional per-team "LB precedes smart routing" override.

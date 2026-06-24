@@ -134,6 +134,38 @@ async function claim(taskId, userId) {
   return { task: after };
 }
 
+// Is Auto Load Balancing turned on for this team?
+async function teamLoadBalancing(teamId) {
+  if (!teamId) return false;
+  var d = await get('SELECT auto_load_balancing FROM departments WHERE id = ?', [teamId]);
+  return !!(d && Number(d.auto_load_balancing) === 1);
+}
+
+// Open/active task counts per user (the workload metric for load balancing).
+async function workloadCounts(userIds) {
+  var map = {};
+  if (!userIds || !userIds.length) return map;
+  var ph = userIds.map(function () { return '?'; }).join(',');
+  var rows = await all(
+    "SELECT assigned_to AS uid, COUNT(*) AS n FROM tasks " +
+    "WHERE status IN ('assigned','in_progress') AND assigned_to IN (" + ph + ") GROUP BY assigned_to", userIds);
+  rows.forEach(function (r) { map[r.uid] = Number(r.n); });
+  return map;
+}
+
+// Pick the eligible user with the smallest current workload (ties -> first by name for stability).
+async function leastLoaded(teamId, roleName) {
+  var elig = await eligibleUsers(teamId, roleName);
+  if (!elig.length) return null;
+  var counts = await workloadCounts(elig.map(function (u) { return u.id; }));
+  elig.sort(function (a, b) {
+    var ca = counts[a.id] || 0, cb = counts[b.id] || 0;
+    if (ca !== cb) return ca - cb;
+    return (a.display_name || '').localeCompare(b.display_name || '');
+  });
+  return { userId: elig[0].id, name: elig[0].display_name, load: counts[elig[0].id] || 0 };
+}
+
 // The shared decision: try Smart Routing to a person; if no confident match, leave the task in the pool to claim.
 async function autoRouteOrPool(taskId, requestText, opts) {
   opts = opts || {};
@@ -149,6 +181,15 @@ async function autoRouteOrPool(taskId, requestText, opts) {
   if (confident) {
     var assigned = await assign(taskId, top.userId, 'smart_routing', top.score);
     return { assigned: true, via: 'smart_routing', user: top, task: assigned, suggestions: suggestions };
+  }
+  // No confident specialist. If the owning team runs Auto Load Balancing, hand it to the least-loaded
+  // eligible person; otherwise leave it in the pool to claim. (Priority: smart match -> load balance -> pool.)
+  if (await teamLoadBalancing(task.team_id)) {
+    var lb = await leastLoaded(task.team_id, task.role_required);
+    if (lb) {
+      var assignedLb = await assign(taskId, lb.userId, 'load_balanced', null);
+      return { assigned: true, via: 'load_balanced', user: lb, task: assignedLb, suggestions: suggestions };
+    }
   }
   return { assigned: false, via: 'pool', suggestions: suggestions, task: task };
 }
@@ -183,5 +224,8 @@ module.exports = {
   claim: claim,
   autoRouteOrPool: autoRouteOrPool,
   poolForUser: poolForUser,
-  mine: mine
+  mine: mine,
+  teamLoadBalancing: teamLoadBalancing,
+  workloadCounts: workloadCounts,
+  leastLoaded: leastLoaded
 };
