@@ -45,7 +45,7 @@ export default function FeeEstimatePanel(props) {
         var pq = (prev && prev.quantities) || fromProfile || {};
         var m = (pq.media && pq.media[0]) || {};
         var hasSource = !!(prev || fromProfile);
-        init[c.id] = { searchHours: pq.searchHours || 0, reviewHours: pq.reviewHours || 0, bwPages: (hasSource ? (pq.bwPages || 0) : ((c.suggested && c.suggested.hasKnown) ? c.suggested.knownPages : 0)), colorPages: pq.colorPages || 0, oversizedPages: pq.oversizedPages || 0, mediaType: m.type || 'cd', mediaCount: m.count || 0 };
+        init[c.id] = { searchHours: pq.searchHours || 0, reviewHours: pq.reviewHours || 0, bwPages: (hasSource ? (pq.bwPages || 0) : ((c.suggested && c.suggested.hasKnown) ? c.suggested.knownPages : 0)), colorPages: pq.colorPages || 0, oversizedPages: pq.oversizedPages || 0, mediaType: m.type || 'cd', mediaCount: m.count || 0, avRecordings: (pq.av && pq.av.recordings) || 0, avMinutes: (pq.av && pq.av.minutes) || 0 };
       });
       setQty(init);
       setPrefilled(pf);
@@ -63,6 +63,7 @@ export default function FeeEstimatePanel(props) {
         var q = qty[c.id] || {};
         var quant = { searchHours: num(q.searchHours), reviewHours: num(q.reviewHours), bwPages: num(q.bwPages), colorPages: num(q.colorPages), oversizedPages: num(q.oversizedPages) };
         if (num(q.mediaCount) > 0) quant.media = [{ type: q.mediaType, count: num(q.mediaCount) }];
+        if (num(q.avRecordings) > 0 || num(q.avMinutes) > 0) quant.av = { recordings: num(q.avRecordings), minutes: num(q.avMinutes) };
         return { id: c.id, label: c.label, recordType: c.recordType, quantities: quant };
       });
       var otherPayload = (num(other.amount) !== 0 || (other.description || '').trim()) ? { amount: num(other.amount), description: other.description || 'Other' } : null;
@@ -132,6 +133,7 @@ export default function FeeEstimatePanel(props) {
         var q = qty[c.id] || {};
         var quant = { searchHours: num(q.searchHours), reviewHours: num(q.reviewHours), bwPages: num(q.bwPages), colorPages: num(q.colorPages), oversizedPages: num(q.oversizedPages) };
         if (num(q.mediaCount) > 0) quant.media = [{ type: q.mediaType, count: num(q.mediaCount) }];
+        if (num(q.avRecordings) > 0 || num(q.avMinutes) > 0) quant.av = { recordings: num(q.avRecordings), minutes: num(q.avMinutes) };
         return { id: c.id, label: c.label, recordType: c.recordType, quantities: quant };
       });
       var r = await api.post('/fee-estimates/request/' + requestId + '/reconcile', { components: comps, delivery: { method: delivery } });
@@ -169,6 +171,12 @@ export default function FeeEstimatePanel(props) {
                       <input type="number" step="1" value={q.mediaCount} onChange={function (e) { setQ(c.id, 'mediaCount', e.target.value === '' ? 0 : parseInt(e.target.value, 10)); }} style={inp} />
                     </div>
                   </div>
+                  <div><label style={lbl}>Recordings</label>
+                    <input type="number" step="1" value={q.avRecordings} onChange={function (e) { setQ(c.id, 'avRecordings', e.target.value === '' ? 0 : parseInt(e.target.value, 10)); }} style={inp} />
+                  </div>
+                  <div><label style={lbl}>Rec. minutes</label>
+                    <input type="number" step="1" value={q.avMinutes} onChange={function (e) { setQ(c.id, 'avMinutes', e.target.value === '' ? 0 : parseInt(e.target.value, 10)); }} style={inp} />
+                  </div>
                 </div>
               </div>
             );
@@ -204,6 +212,7 @@ export default function FeeEstimatePanel(props) {
                   <Row k="Labor" v={money(R.laborSubtotal)} />
                   <Row k="Duplication" v={money(R.duplicationSubtotal)} />
                   <Row k="Media" v={money(R.mediaSubtotal)} />
+                  {R.avSubtotal ? <Row k="Audio/Video" v={money(R.avSubtotal)} /> : null}
                   {R.other ? <Row k={R.other.description} v={money(R.other.amount)} /> : null}
                   {R.deliverySubtotal ? <Row k="Delivery" v={money(R.deliverySubtotal)} /> : null}
                   {(R.freeAllowances.freePageAllowance || R.freeAllowances.freeLaborHours) ? <Row k="Free allowances" muted v={(R.freeAllowances.freePageAllowance || 0) + ' pg / ' + (R.freeAllowances.freeLaborHours || 0) + ' hr'} /> : null}

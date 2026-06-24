@@ -346,3 +346,22 @@ reconciliation flags reNotifyRequired; MRR component split; Resend domain verifi
 
 NOTE: 3 pre-existing test requests (2026-0032/33/34 "Test A/B/C", dated 2026-06-09) are from an earlier session, not
 this run - left untouched intentionally.
+
+## Video / AV per-minute fee driver (BUILT) - 2026-06-24
+TX body-cam rule ($X per recording + $Y per minute) now fully priceable end-to-end.
+- feeEngine.compute: NEW `av` config block { perRecording, perMinute, freeMinutes } + component quantity q.av =
+  { recordings, minutes }. Prices per-recording + per-minute (free-minute allowance applied request-level), folds
+  into a new avSubtotal -> adjustedSubtotal. PURELY ADDITIVE; requestLevel.av/avSubtotal exposed. Regression-tested:
+  estimates with no AV are byte-identical to before.
+- FeeConfigPage: "Audio/video recordings" card (perRecording / perMinute / free minutes). DEFAULT_CONFIG.av added;
+  mergeDefaults backfills av into older saved profiles.
+- FeeEstimatePanel: "Recordings" + "Rec. minutes" worksheet inputs per component; included in BOTH calculate() and
+  reconcile() payloads (so reconciliation prices AV actuals too); "Audio/Video" result row when avSubtotal>0.
+- feePolicyExtract: av.perRecording/perMinute/freeMinutes added to the extraction JSON schema + units prompt, so a
+  city's AV fee rule is captured by the AI policy importer (applyProposed deep-merges it).
+- VERIFIED: engine unit tests (2 rec+30 min @ $10/$1 = $50; freeMinutes 5 -> $45; no-AV regression -> unchanged;
+  mixed pages+AV); live end-to-end (set av on active config via PUT /fee-profiles/:id, compute estimate w/ av qty ->
+  avSubtotal 50 total 50, restored config). All cleaned up.
+- NOTE: AV is a MANUAL driver (not in the scalar auto-estimate DRIVERS / Welford writeback) - video estimates are
+  staff-entered; reconciliation still prices AV actuals (variance reflects them) but does not yet build an AV auto-
+  profile. Fine for now (video is inherently manual-quantity).

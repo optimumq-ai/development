@@ -40,6 +40,7 @@ function compute(profile, request) {
   var labor = profile.labor || {};
   var dup = profile.duplication || {};
   var media = profile.media || {};
+  var av = profile.av || {};
   var delivery = profile.delivery || {};
   var cert = profile.certification || {};
   var rules = profile.requestRules || {};
@@ -48,6 +49,7 @@ function compute(profile, request) {
   var i, k;
   var agg = { search: 0, review: 0, programming: 0, bw: 0, color: 0, oversized: 0 };
   var mediaAgg = {};
+  var avAgg = { recordings: 0, minutes: 0 };
   var compOut = [];
 
   function laborGross(kind, hours) {
@@ -82,6 +84,13 @@ function compute(profile, request) {
       var mr = media[mt];
       if (mr === 'actual' || mr == null) items.push({ kind: 'media', description: 'Media: ' + mt, unit: 'item', quantity: mc, rate: (mr == null ? 0 : 'actual'), amount: 0, needsActual: mr === 'actual' });
       else { var ma = r2(mc * num(mr)); items.push({ kind: 'media', description: 'Media: ' + mt, unit: 'item', quantity: mc, rate: num(mr), amount: ma }); gross += ma; }
+    }
+    var avq = q.av || null;
+    if (avq) {
+      var recs = num(avq.recordings), mins = num(avq.minutes);
+      if (recs > 0 && num(av.perRecording) > 0) { var rAmt = r2(recs * num(av.perRecording)); items.push({ kind: 'av_recording', description: 'Recordings (per recording)', unit: 'recording', quantity: recs, rate: num(av.perRecording), amount: rAmt }); gross += rAmt; }
+      if (mins > 0 && num(av.perMinute) > 0) { var mAmt2 = r2(mins * num(av.perMinute)); items.push({ kind: 'av_minute', description: 'Recording duration (per minute)', unit: 'minute', quantity: mins, rate: num(av.perMinute), amount: mAmt2 }); gross += mAmt2; }
+      avAgg.recordings += recs; avAgg.minutes += mins;
     }
     compOut.push({ id: c.id || ('comp-' + (i + 1)), label: c.label || ('Component ' + (i + 1)), recordType: c.recordType || null, lineItems: items, componentGross: r2(gross) });
   }
@@ -130,6 +139,12 @@ function compute(profile, request) {
     else { var mamt = r2(cnt * num(mrate)); mediaItems.push({ kind: 'media', type: mtype, count: cnt, rate: num(mrate), amount: mamt }); mediaSubtotal += mamt; }
   }
 
+  // ---- audio/video (request-level): per-recording + per-minute, with optional free-minute allowance ----
+  var avItems = [], avSubtotal = 0;
+  if (avAgg.recordings > 0 && num(av.perRecording) > 0) { var avR = r2(avAgg.recordings * num(av.perRecording)); avItems.push({ kind: 'av_recording', count: avAgg.recordings, rate: num(av.perRecording), amount: avR }); avSubtotal += avR; }
+  if (avAgg.minutes > 0 && num(av.perMinute) > 0) { var freeMin = num(av.freeMinutes); var billMin = Math.max(0, avAgg.minutes - freeMin); var avM = r2(billMin * num(av.perMinute)); avItems.push({ kind: 'av_minute', totalMinutes: avAgg.minutes, freeMinutesApplied: Math.min(freeMin, avAgg.minutes), billableMinutes: billMin, rate: num(av.perMinute), amount: avM }); avSubtotal += avM; }
+  avSubtotal = r2(avSubtotal);
+
   // ---- delivery (once per request) ----
   var deliveryItem = null, deliverySubtotal = 0;
   var dmethod = (request && request.delivery && request.delivery.method) || null;
@@ -149,7 +164,7 @@ function compute(profile, request) {
   var other = request && request.other;
   if (other && num(other.amount) !== 0) { otherSubtotal = r2(num(other.amount)); otherItem = { kind: 'other', description: (other.description || 'Other'), amount: otherSubtotal }; }
 
-  var adjustedSubtotal = r2(laborSubtotal + dupSubtotal + mediaSubtotal + deliverySubtotal + certSubtotal + otherSubtotal);
+  var adjustedSubtotal = r2(laborSubtotal + dupSubtotal + mediaSubtotal + avSubtotal + deliverySubtotal + certSubtotal + otherSubtotal);
 
   // ---- floor -> ceiling -> de minimis waive (documented order) ----
   var total = adjustedSubtotal, floorApplied = false, ceilingApplied = false, deMinimisWaived = false;
@@ -173,6 +188,7 @@ function compute(profile, request) {
       labor: laborItems, laborSubtotal: r2(laborSubtotal),
       duplication: dupItems, duplicationSubtotal: r2(dupSubtotal),
       media: mediaItems, mediaSubtotal: r2(mediaSubtotal),
+      av: avItems, avSubtotal: r2(avSubtotal),
       delivery: deliveryItem, deliverySubtotal: r2(deliverySubtotal),
       certification: certItem, certificationSubtotal: r2(certSubtotal),
       other: otherItem, otherSubtotal: r2(otherSubtotal),

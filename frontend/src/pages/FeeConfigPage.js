@@ -7,6 +7,7 @@ var DEFAULT_CONFIG = {
   labor: { search: { rate: 0, increment: 0, rounding: 'up' }, review: { rate: 0, increment: 0, rounding: 'up' }, programming: { rate: 0, increment: 0, rounding: 'up' } },
   duplication: { bw: { rate: 0 }, color: { rate: 0 }, oversized: { rate: 0 }, specialty: { rate: 'actual' } },
   media: { cd: 1, dvd: 3, usb: 'actual' },
+  av: { perRecording: 0, perMinute: 0, freeMinutes: 0 },
   delivery: { email: 0, pickup: 0, mail: 'actual', handling: 0 },
   certification: { rate: 0, unit: 'per_record' },
   requestRules: { freePageAllowance: 0, freeLaborHours: 0, deMinimis: 0, minFee: 0, maxFee: null, deposit: { threshold: null, percent: null }, estimateNotifyThreshold: null },
@@ -221,6 +222,16 @@ export default function FeeConfigPage() {
                 </div>
               );
             })}
+          </div>
+
+          <div style={card}>
+            <div style={sectionTitle}>Audio/video recordings</div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px' }}>
+              <div><label style={lbl}>$ per recording</label><Num value={config.av ? config.av.perRecording : 0} onChange={function (v) { setCfg(function (c) { if (!c.av) c.av = {}; c.av.perRecording = v || 0; }); }} /></div>
+              <div><label style={lbl}>$ per minute</label><Num value={config.av ? config.av.perMinute : 0} onChange={function (v) { setCfg(function (c) { if (!c.av) c.av = {}; c.av.perMinute = v || 0; }); }} /></div>
+              <div><label style={lbl}>free minutes</label><Num value={config.av ? config.av.freeMinutes : 0} onChange={function (v) { setCfg(function (c) { if (!c.av) c.av = {}; c.av.freeMinutes = v || 0; }); }} /></div>
+            </div>
+            <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '8px' }}>For police body-cam / dash-cam and other recordings (e.g. Texas: $10 per recording + $1 per minute).</div>
           </div>
 
           <div style={card}>
