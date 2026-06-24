@@ -80,7 +80,10 @@ async function onIntake(requestId, matcherResult){
   var teamRow = teamId ? await db.get("SELECT name FROM departments WHERE id = ?", [teamId]) : null;
   var stage = actions.stage || request.stage || 'intake';
 
-  await db.run("UPDATE requests SET stage = ?, department_id = ?, updated_at = datetime('now') WHERE id = ?", [stage, teamId, requestId]);
+  // Pin the classifier-matched record type onto the request when the match is confident (>= taxonomy threshold).
+  // This feeds the estimate profile lookup (Create vs Review auto-fill) and the record-type name on task screens.
+  var rtid = (m.recordTypeId && (signals.record_type_confidence || 0) >= 70) ? m.recordTypeId : null;
+  await db.run("UPDATE requests SET stage = ?, department_id = ?, record_type_id = COALESCE(?, record_type_id), updated_at = datetime('now') WHERE id = ?", [stage, teamId, rtid, requestId]);
 
   var reasoning = [m.reasoning, actions.note].filter(Boolean).join(' ');
   await db.run("INSERT INTO workflow_decisions (id, request_id, record_type_id, record_type_name, confidence, classification, rule_id, rule_name, decided_stage, decided_team_id, decided_team_name, reasoning, flags, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'))",

@@ -261,3 +261,13 @@ FeeEstimatePanel (fee engine compute + itemized result + requestor notice) rathe
   cd/dvd/usb count). record_search currently spawns on manual stage change, not on estimate ACCEPTANCE (an
   accept/deposit flow is the remaining link). Estimate reconciliation (actual vs estimate, 20% re-notify, Welford
   writeback) still pending.
+
+## Pin classifier record type onto requests (BUILT) - 2026-06-23
+- workflowEngine.onIntake now sets requests.record_type_id = COALESCE(<confident match>, existing) when the
+  classifier's record_type_confidence >= 70 (the taxonomy threshold). Never clobbers an existing type with null.
+- Effect: loadComponents (feeEstimates) reads record_type_id, so the estimate component now carries the real
+  record type + name, the task screen header shows it, and ep.assess() runs against the right type -> Create/Review
+  auto-fill triggers whenever that record type has an estimate profile.
+- VERIFIED: confident building-permit request -> record_type_id=rt-building-permits; GET /tasks/:id rt="Building
+  permits"; estimate context component rt populated. (autoEstimate still 'manual' only because that type has no
+  accumulated estimate profile yet - expected; Review mode lights up once a profile exists.)
