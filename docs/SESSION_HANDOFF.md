@@ -318,3 +318,31 @@ Actual-vs-estimate at fulfillment: variance, 20% re-notify, and Welford write-ba
   saveEditor payload sends auto_load_balancing (team-only; 0 for departments). departments PATCH already accepted the
   field; GET returns it (SELECT *). Verified the value round-trips through the endpoint.
 - assign-workload workflow node can now be considered fully wired (engine + UI toggle).
+
+## Session wrap - 2026-06-23 (dinner-window autonomous run)
+Completed + pushed this run: (1) estimate acceptance flow (accept/decline/deposit -> record search); (2) record
+type pinned at intake; (3) estimate reconciliation (variance + re-notify + Welford writeback); (4) Departments Auto
+Load Balancing toggle. All tested; artifacts cleaned. HEAD ff93ee8.
+
+NOT done (deliberately deferred - touches fee-engine pricing core; wants a design decision; too risky to rush solo):
+### Video / AV per-minute fee driver - READY-TO-BUILD design
+TX body-cam rule = $10 per recording + $1 per minute. Plan that keeps existing media (cd/dvd/usb scalar) pricing
+intact:
+- feeEngine config: add a SEPARATE block `av: { perRecording: <$>, perMinute: <$>, freeMinutes?: <n> }` (do NOT
+  overload the scalar `media[type]` map). 
+- feeEngine.compute: add an AV pricing block - if a component has q.av = { recordings, minutes }, amount =
+  recordings*av.perRecording + minutes*av.perMinute (minus freeMinutes if set); push line items; fold into a new
+  avSubtotal that adds into adjustedSubtotal alongside mediaSubtotal. Purely additive; leave labor/dup/media as-is.
+- estimateProfile DRIVERS: optionally add 'avRecordings','avMinutes' so reconciliation/Welford track them.
+- FeeEstimatePanel worksheet: add Recordings + Minutes inputs (show when record type format includes video/audio).
+- FeeConfigPage: add perRecording / perMinute (/ freeMinutes) inputs.
+- feePolicyExtract: add av.perRecording/perMinute to the extraction JSON schema + prompt so a city's AV fee rule is
+  captured automatically.
+- TEST: body-cam estimate 2 recordings + 30 min -> $20 + $30 = $50; assert a normal (no-AV) estimate is unchanged.
+
+Also still pending (longer-horizon): tickler/time-sweep (deposit & estimate-validity clocks, stall/auto-withdraw);
+requestor self-serve estimate accept on the public portal (tokenized link); auto-send the revised notice when
+reconciliation flags reNotifyRequired; MRR component split; Resend domain verification.
+
+NOTE: 3 pre-existing test requests (2026-0032/33/34 "Test A/B/C", dated 2026-06-09) are from an earlier session, not
+this run - left untouched intentionally.
