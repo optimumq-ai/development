@@ -12,7 +12,7 @@ attestation gate = the warning/disclaimer/agree step before apply), and Section 
 - SLICE B (BUILT 2026-06-24): pluggable source FETCH (registered URL / uploaded file / pasted text -> one "source document")
   + version-diff (detect drift vs last_version_hash) + per-domain extractors that turn a source doc into a
   proposed config diff and stage it. This is where "AI located updated content" becomes real/authoritative.
-- SLICE C: the generic review UI - review doc -> import -> editable proposed config -> disclaimer -> agree ->
+- SLICE C (BUILT 2026-06-24): the generic review UI - review doc -> import -> editable proposed config -> disclaimer -> agree ->
   apply. This is the attestation gate, reused by every domain.
 - SLICE D: roll remaining domains (deadlines, exemption-model, taxonomy) onto the framework.
 
@@ -79,3 +79,21 @@ VERIFIED live (fee): pasted 2026 fee schedule -> proposal bw $0.15/color $0.50/l
 review detail returned proposed-vs-current + 227-char snapshot; attested apply wrote bw 0.10->0.15 to the live
 profile; restored + cleaned. NOTE: scheduled scan still does the cheap reminder only; AI extraction is on-demand
 (cost/latency + live-fetch reliability) - a 'freshness_auto_extract' flag can later let the scheduled scan auto-check URL sources.
+
+## Slice C (built 2026-06-24)
+frontend/src/pages/RuleUpdatesPage.js at /rule-updates (nav 'Rule Updates', isElev). One screen:
+- Status card: recipient + cadence + last-check date + "Send reminder now" (POST /run).
+- Pending review list: each proposal (domain badge, summary, source, date) with Review / Dismiss.
+- Registered sources grouped by domain (last-checked, source link, pending count) + per-source "Check now"
+  (POST /sources/:id/check; tells the user to paste if the URL can't be read).
+- "Paste a document to check": domain picker + textarea -> POST /extract -> stages a proposal.
+- ReviewModal (2 steps): (1) summary + collapsible source document + EDITABLE proposed config (JSON textarea)
+  side-by-side with read-only current config; (2) disclaimer/warning (names the live applyTarget, states OQ
+  proposes config but is not legal advice) + a required "I have reviewed and authorize" checkbox -> "Agree &
+  apply" (POST /proposals/:id/apply {editedConfig, attested:true}). Review-only domains (redaction/taxonomy)
+  show the note and no apply. Invalid JSON is caught before confirm/apply.
+VERIFIED: status/proposals/detail endpoint sequence the page drives returns the right shapes; generic extractor
+works for deadline (proposed calendar_days/10 -> business_days/15 from a pasted amendment, with citing summary);
+fee apply verified in Slice B. This is the attestation gate (review -> edit -> disclaimer -> agree -> apply),
+reused by every JSON-config domain. SLICE D (remaining: richer redaction/taxonomy apply via their native
+editors; optional scheduled auto-extract; file-upload source ingestion; fold into Jurisdiction Profile model).

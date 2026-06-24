@@ -28,6 +28,7 @@ export default function AppLayout() {
     { to: '/released', label: 'Released Records', show: isElev },
     { to: '/fee-config', label: 'Fee Configuration', show: isElev },
     { to: '/tickler', label: 'Tickler', show: isElev },
+    { to: '/rule-updates', label: 'Rule Updates', show: isElev },
     { to: '/config', label: 'Configuration', show: isAdmin },
   ].filter(x => x.show);
 
