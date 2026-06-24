@@ -418,3 +418,33 @@ business-day + holiday calendars; stacked acknowledge/respond/produce/appeal clo
 needs its own design doc. Fee-engine gaps 1-4 (CITY_FEE_SURVEY.md) promoted to FOUNDATIONAL. Build sequencing
 in Section 12: slots -> deadline engine -> profile model -> extractor framework -> attestation gate/hub ->
 resolution+sources -> remaining extractors. Nothing built yet; this governs future build.
+
+## Deadline & Tolling engine (BUILT) - 2026-06-24
+The "biggest missing primitive" from AUTO_CONFIG_DESIGN.md, now built + tested. See DEADLINE_TOLLING_DESIGN.md.
+- deadlineCalc.js: pure business-day + holiday math (addBusinessDays/addCalendarDays/businessDaysBetween/
+  basis dispatchers). 9/9 unit tests pass.
+- tolling.js: per-request CLOCKS with DERIVED due dates (never store-and-mutate) + a TOLL LEDGER (pause/resume).
+  computeStatus = elapsed - tolled => consumed/remaining + dueDate pushed out by tolled time. start/toll/resume/
+  satisfy/statusForRequest/overdue + writeback of the PRIMARY clock's due date to requests.deadline_date (so the
+  existing dashboard overdue count + emails stay correct, now toll-aware). 19/19 service tests pass.
+- DB: request_clocks + clock_tolls (toll interval ledger; open interval = currently paused). Config-driven rules
+  in system_config 'deadline_rules' (default: respond=calendar/classification durations 5/10/20/30 [matches old
+  deadline_date exactly, no demo shift], ag_ruling=business_days/10 startOn demand; US federal observed holidays
+  2026-27). Reproducible via backend/scripts/seedDeadlineRules.js. Rules will be supplied by the Jurisdiction
+  Profile later (no hardcoded TX; engine reads a rules object).
+- Routes /api/clocks: GET /request/:id (status), POST /request/:id/start (idempotent backfill), POST
+  /request/:id/clock {type} (on-demand, e.g. ag_ruling), POST /:clockId/toll {reason,note}, /resume, /satisfy,
+  GET /overdue.
+- Integration: workflowEngine.onIntake auto-starts intake clocks (idempotent) + writes deadline_date. UI: a
+  "Deadlines & Clocks" card on the request workspace details tab (per-clock due/remaining/state badge; Pause w/
+  reason select [clarification/payment/AG-ruling/extension], Resume, Mark satisfied; Start-clocks for old reqs).
+- VERIFIED live: new request auto-got respond clock (due +10 cal, deadline_date written); toll->paused; on-demand
+  ag_ruling due correctly +10 BUSINESS days (skipped weekend + Jul 3 holiday => Jul 9); resume restored. Cleaned.
+- DEPENDENCY DESIGN (per Kevin's Q): built config-driven so the (unbuilt) Jurisdiction Profile just becomes the
+  rules supplier; auto-actions kept manual/intake-only so the (unbuilt) attestation gate has nothing to retrofit.
+  The AG/appeal WORKFLOW SEGMENTS depend on this (toll reason 'ag_ruling_pending' + startClock('ag_ruling')) - so
+  tolling-first was correct ordering.
+- FOLLOW-ONS: (1) tickler to consume tolling.overdue() for a STATUTORY-overdue flag (today it flags on the flat
+  deadline_date<now + estimate/deposit/stall); (2) the AG/appeal workflow segments that call toll/satisfy on
+  entry/exit; (3) holiday-set + clock rules move into the Jurisdiction Profile; (4) optional acknowledge/appeal
+  clocks per jurisdiction. Backfill for existing requests: POST /clocks/request/:id/start (idempotent).

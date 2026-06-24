@@ -38,8 +38,11 @@ export default function RequestWorkspacePage() {
   const [assigning, setAssigning] = useState(false);
   const [teams, setTeams] = useState([]);
   const [rerouting, setRerouting] = useState(false);
+  const [clocks, setClocks] = useState([]);
+  const [clockBusy, setClockBusy] = useState(false);
+  const [reasonByClock, setReasonByClock] = useState({});
 
-  useEffect(function() { load(); loadStaff(); loadTeams(); loadRecords(); }, [id]);
+  useEffect(function() { load(); loadStaff(); loadTeams(); loadRecords(); loadClocks(); }, [id]);
 
   async function loadStaff() {
     try { var r = await api.get('/staff'); setStaff(r.data.staff); } catch(e) {}
@@ -52,6 +55,12 @@ export default function RequestWorkspacePage() {
   async function loadRecords() {
     try { var r = await api.get('/files/' + id); setRecords((r.data.files||[]).map(function(f){ return { id: f.id, status: f.responsive ? 'responsive' : 'attached' }; })); } catch(e) {}
   }
+  async function loadClocks() { try { var r = await api.get('/clocks/request/' + id); setClocks(r.data.clocks || []); } catch(e) {} }
+  async function clockAction(promise) { setClockBusy(true); try { await promise; } catch(e) {} await loadClocks(); await load(); setClockBusy(false); }
+  function tollClock(cid) { clockAction(api.post('/clocks/' + cid + '/toll', { reason: reasonByClock[cid] || 'clarification_pending' })); }
+  function resumeClock(cid) { clockAction(api.post('/clocks/' + cid + '/resume')); }
+  function satisfyClock(cid) { clockAction(api.post('/clocks/' + cid + '/satisfy')); }
+  function startClocks() { clockAction(api.post('/clocks/request/' + id + '/start')); }
 
   async function load() {
     setLoading(true);
@@ -208,6 +217,48 @@ export default function RequestWorkspacePage() {
               return <div key={item[0]}><div style={{fontSize:'11px',fontWeight:'600',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.05em'}}>{item[0]}</div><div style={{fontSize:'14px',color:'#111',textTransform:'capitalize',marginTop:'2px'}}>{item[1]}</div></div>;
             })}
           </div>
+          <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',gridColumn:'1/-1'}}>
+            <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6',marginBottom:'16px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
+              <span>Deadlines &amp; Clocks</span>
+              {clocks.length===0?<button onClick={startClocks} disabled={clockBusy} style={{padding:'6px 14px',borderRadius:'8px',border:'1px solid #E5E7EB',background:'white',color:'#1F4E79',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Start clocks</button>:null}
+            </div>
+            {clocks.length===0?<p style={{fontSize:'13px',color:'#9CA3AF',margin:'0'}}>No statutory clocks on this request yet.</p>:(
+              <div style={{display:'flex',flexDirection:'column',gap:'10px'}}>
+                {clocks.map(function(c){
+                  var badge = c.state==='satisfied'?{bg:'#F0FDF4',color:'#166534',label:'Satisfied'}:c.state==='tolled'?{bg:'#FEF3C7',color:'#92400E',label:'Paused'}:c.state==='expired'?{bg:'#FDE8E8',color:'#9B1C1C',label:'Overdue'}:{bg:'#EBF3FB',color:'#1F4E79',label:'Running'};
+                  return (
+                    <div key={c.clockId} style={{border:'1px solid #E5E7EB',borderRadius:'8px',padding:'12px 14px',display:'flex',alignItems:'center',gap:'12px',flexWrap:'wrap'}}>
+                      <span style={{background:badge.bg,color:badge.color,fontSize:'11px',fontWeight:'700',padding:'3px 10px',borderRadius:'20px',whiteSpace:'nowrap'}}>{badge.label}</span>
+                      <div style={{flex:'1',minWidth:'180px'}}>
+                        <div style={{fontSize:'14px',fontWeight:'600',color:'#111'}}>{c.label}{c.isPrimary?' · primary':''}</div>
+                        <div style={{fontSize:'12px',color:'#6B7280'}}>due {c.dueDate} · {c.remainingDays>=0?(c.remainingDays+' day'+(c.remainingDays===1?'':'s')+' left'):(Math.abs(c.remainingDays)+' day'+(Math.abs(c.remainingDays)===1?'':'s')+' overdue')} · {String(c.basis).replace('_',' ')}{c.tolledDays?(' · '+c.tolledDays+' day'+(c.tolledDays===1?'':'s')+' paused'):''}</div>
+                      </div>
+                      {c.state!=='satisfied'&&(
+                        <div style={{display:'flex',alignItems:'center',gap:'6px',flexWrap:'wrap'}}>
+                          {c.currentlyTolled?(
+                            <button onClick={function(){resumeClock(c.clockId);}} disabled={clockBusy} style={{padding:'6px 13px',borderRadius:'8px',border:'none',background:'#1F4E79',color:'white',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Resume</button>
+                          ):(
+                            <span style={{display:'flex',gap:'6px',alignItems:'center'}}>
+                              <select value={reasonByClock[c.clockId]||'clarification_pending'} onChange={function(e){var v=e.target.value;setReasonByClock(function(p){var n=Object.assign({},p);n[c.clockId]=v;return n;});}} style={{padding:'6px 8px',borderRadius:'8px',border:'1px solid #E5E7EB',fontSize:'12px'}}>
+                                <option value="clarification_pending">Awaiting clarification</option>
+                                <option value="payment_pending">Awaiting payment</option>
+                                <option value="ag_ruling_pending">Awaiting AG ruling</option>
+                                <option value="extension">Extension</option>
+                              </select>
+                              <button onClick={function(){tollClock(c.clockId);}} disabled={clockBusy} style={{padding:'6px 13px',borderRadius:'8px',border:'1px solid #E5E7EB',background:'white',color:'#92400E',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Pause</button>
+                            </span>
+                          )}
+                          <button onClick={function(){satisfyClock(c.clockId);}} disabled={clockBusy} style={{padding:'6px 13px',borderRadius:'8px',border:'1px solid #E5E7EB',background:'white',color:'#166534',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Mark satisfied</button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+            <p style={{fontSize:'11px',color:'#9CA3AF',marginTop:'12px',lineHeight:'1.5'}}>Pausing a clock (awaiting clarification, payment, or an AG ruling) stops the count; the due date moves out by the paused time. The primary clock drives the request deadline date.</p>
+          </div>
+
           <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',gridColumn:'1/-1'}}>
             <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6',marginBottom:'16px'}}>Description of Records Requested</div>
             <p style={{fontSize:'14px',color:'#374151',lineHeight:'1.7',margin:'0',whiteSpace:'pre-wrap'}}>{request.description}</p>
