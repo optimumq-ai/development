@@ -23,11 +23,15 @@ export default function RuleUpdatesPage() {
   const [pasteDomain, setPasteDomain] = useState('fee');
   const [pasteText, setPasteText] = useState('');
   const [review, setReview] = useState(null);
+  const [cadenceInput, setCadenceInput] = useState(30);
+  const [recipientInput, setRecipientInput] = useState('');
+  const [autoInput, setAutoInput] = useState(false);
 
   useEffect(function () { load(); }, []);
   async function load() {
     try {
       var s = await api.get('/config-freshness/status'); setStatus(s.data);
+      setCadenceInput(s.data.cadenceDays || 30); setRecipientInput(s.data.recipient || ''); setAutoInput(!!s.data.autoExtract);
       var p = await api.get('/config-freshness/proposals?status=pending'); setProposals(p.data.proposals || []);
     } catch (e) {}
   }
@@ -62,6 +66,8 @@ export default function RuleUpdatesPage() {
     await load(); setBusy(false);
   }
   async function dismiss(id) { setBusy(true); try { await api.post('/config-freshness/proposals/' + id + '/dismiss'); setReview(null); } catch (e) {} await load(); setBusy(false); }
+  async function saveSettings() { setBusy(true); setMsg(''); try { await api.post('/config-freshness/settings', { cadenceDays: Number(cadenceInput) || 30, recipient: recipientInput, autoExtract: autoInput }); setMsg('Settings saved.'); } catch (e) { setMsg('Could not save settings.'); } await load(); setBusy(false); }
+  async function uploadFile(file) { if (!file) return; setBusy(true); setMsg(''); try { var fd = new FormData(); fd.append('file', file); fd.append('domain', pasteDomain); var r = await api.post('/config-freshness/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } }); if (r.data && r.data.ok === false) setMsg('Could not read that file: ' + r.data.error); else setMsg('File analyzed — a proposal is staged below for your review.'); } catch (e) { setMsg('Upload failed.'); } await load(); setBusy(false); }
 
   if (!status) return <div style={{ padding: '32px', color: '#6B7280' }}>Loading…</div>;
   var sourcesByDomain = {};
@@ -86,6 +92,17 @@ export default function RuleUpdatesPage() {
           </div>
           <button onClick={runReminder} disabled={busy} style={btnOutline}>Send reminder now</button>
         </div>
+      </div>
+
+      <div style={card}>
+        <div style={{ fontSize: '15px', fontWeight: 700, color: '#111', marginBottom: '12px' }}>Settings</div>
+        <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+          <div><label style={lbl}>Remind every (days)</label><input type="number" min="1" value={cadenceInput} onChange={function (e) { setCadenceInput(e.target.value); }} style={{ display: 'block', marginTop: '4px', width: '100px', padding: '7px 10px', borderRadius: '8px', border: '1px solid #E5E7EB', fontSize: '13px' }} /></div>
+          <div style={{ flex: 1, minWidth: '220px' }}><label style={lbl}>Reminder recipient</label><input type="email" value={recipientInput} onChange={function (e) { setRecipientInput(e.target.value); }} style={{ display: 'block', marginTop: '4px', width: '100%', boxSizing: 'border-box', padding: '7px 10px', borderRadius: '8px', border: '1px solid #E5E7EB', fontSize: '13px' }} /></div>
+          <label style={{ fontSize: '13px', display: 'flex', alignItems: 'center', gap: '7px', cursor: 'pointer', paddingBottom: '7px' }}><input type="checkbox" checked={autoInput} onChange={function (e) { setAutoInput(e.target.checked); }} /> Auto-check sources on schedule</label>
+          <button onClick={saveSettings} disabled={busy} style={btn}>Save</button>
+        </div>
+        <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '8px' }}>With auto-check on, each scheduled run also fetches your registered source URLs and stages any changes for review (best-effort). The reminder email always sends regardless.</div>
       </div>
 
       {proposals.length > 0 ? (
@@ -142,7 +159,7 @@ export default function RuleUpdatesPage() {
           </select>
         </div>
         <textarea value={pasteText} onChange={function (e) { setPasteText(e.target.value); }} placeholder="Paste the statute, ordinance, or fee-schedule text here…" rows={5} style={{ width: '100%', boxSizing: 'border-box', padding: '10px', borderRadius: '8px', border: '1px solid #E5E7EB', fontSize: '13px', fontFamily: 'inherit' }} />
-        <div style={{ marginTop: '8px' }}><button onClick={submitPaste} disabled={busy || !pasteText.trim()} style={btn}>Analyze &amp; stage proposal</button></div>
+        <div style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}><button onClick={submitPaste} disabled={busy || !pasteText.trim()} style={btn}>Analyze &amp; stage proposal</button><span style={{ fontSize: '12px', color: '#9CA3AF' }}>or upload a file (PDF / text):</span><input type="file" accept=".pdf,.txt,.md,.html,.htm" onChange={function (e) { var f = e.target.files && e.target.files[0]; if (f) { uploadFile(f); e.target.value = ''; } }} style={{ fontSize: '12px' }} /></div>
       </div>
 
       {review ? <ReviewModal review={review} setReview={setReview} busy={busy} onApply={applyProposal} onDismiss={dismiss} /> : null}
@@ -185,26 +202,24 @@ function ReviewModal(props) {
             {review.error ? <div style={{ color: '#9B1C1C', fontSize: '13px', marginTop: '10px' }}>{review.error}</div> : null}
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '16px' }}>
               <button onClick={function () { props.onDismiss(p.id); }} disabled={busy} style={Object.assign({}, btnOutline, { color: '#9B1C1C' })}>Dismiss</button>
-              {d.reviewOnly
-                ? null
-                : <button onClick={function () { try { JSON.parse(review.editedText); set({ step: 2, error: '' }); } catch (e) { set({ error: 'The edited configuration is not valid JSON — please fix it first.' }); } }} disabled={busy} style={btn}>Continue to confirm</button>}
+              <button onClick={function () { try { JSON.parse(review.editedText); set({ step: 2, error: '' }); } catch (e) { set({ error: 'The edited configuration is not valid JSON — please fix it first.' }); } }} disabled={busy} style={btn}>Continue to confirm</button>
             </div>
-            {d.reviewOnly ? <div style={{ background: '#FFFBEB', border: '1px solid #FEF3C7', borderRadius: '8px', padding: '12px', fontSize: '13px', color: '#92400E', marginTop: '14px' }}>{d.reviewOnlyNote || 'This domain is reviewed and applied in its own editor.'} This proposal is a reference for that review.</div> : null}
+            {d.applyMode === 'stage_drafts' ? <div style={{ background: '#FFFBEB', border: '1px solid #FEF3C7', borderRadius: '8px', padding: '12px', fontSize: '13px', color: '#92400E', marginTop: '14px' }}>Applying will add the proposed items as <strong>pending-review drafts</strong> in {d.applyTarget}; they will not take effect until separately approved there.</div> : null}
           </div>
         ) : (
           <div>
             <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#111', margin: '6px 0 10px' }}>Confirm &amp; apply</h2>
             <div style={{ background: '#FFFBEB', border: '1px solid #F59E0B', borderRadius: '8px', padding: '14px 16px', fontSize: '13px', color: '#92400E', lineHeight: 1.55 }}>
-              <strong>Please confirm before applying.</strong> Applying this change updates the live configuration that the system uses to process requests ({d.applyTarget}). You are responsible for verifying it against the cited authority. Optimum Q proposes configuration but does not provide legal advice; this is not a substitute for review by your legal counsel.
+              {d.applyMode === 'stage_drafts' ? <span><strong>Please confirm.</strong> These items will be added as <strong>pending-review drafts</strong> in {d.applyTarget}. They do not take effect until separately reviewed and approved there. Optimum Q proposes configuration but does not provide legal advice.</span> : <span><strong>Please confirm before applying.</strong> Applying this change updates the live configuration the system uses to process requests ({d.applyTarget}). You are responsible for verifying it against the cited authority. Optimum Q proposes configuration but does not provide legal advice; this is not a substitute for review by your legal counsel.</span>}
             </div>
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '13px', color: '#374151', marginTop: '14px', cursor: 'pointer' }}>
               <input type="checkbox" checked={review.agreed} onChange={function (e) { set({ agreed: e.target.checked }); }} style={{ marginTop: '3px' }} />
-              <span>I have reviewed this update against its source and authorize applying it to the live configuration.</span>
+              <span>I have reviewed this update against its source and authorize {d.applyMode === 'stage_drafts' ? 'adding it as pending-review drafts' : 'applying it to the live configuration'}.</span>
             </label>
             {review.error ? <div style={{ color: '#9B1C1C', fontSize: '13px', marginTop: '10px' }}>{review.error}</div> : null}
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', marginTop: '18px' }}>
               <button onClick={function () { set({ step: 1, error: '' }); }} disabled={busy} style={btnOutline}>Back</button>
-              <button onClick={props.onApply} disabled={busy || !review.agreed} style={Object.assign({}, btn, { background: review.agreed ? navy : '#9CA3AF' })}>Agree &amp; apply</button>
+              <button onClick={props.onApply} disabled={busy || !review.agreed} style={Object.assign({}, btn, { background: review.agreed ? navy : '#9CA3AF' })}>{d.applyMode === 'stage_drafts' ? 'Add as drafts' : 'Agree & apply'}</button>
             </div>
           </div>
         )}

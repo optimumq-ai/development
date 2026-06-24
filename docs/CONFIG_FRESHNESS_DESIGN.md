@@ -95,5 +95,28 @@ frontend/src/pages/RuleUpdatesPage.js at /rule-updates (nav 'Rule Updates', isEl
 VERIFIED: status/proposals/detail endpoint sequence the page drives returns the right shapes; generic extractor
 works for deadline (proposed calendar_days/10 -> business_days/15 from a pasted amendment, with citing summary);
 fee apply verified in Slice B. This is the attestation gate (review -> edit -> disclaimer -> agree -> apply),
-reused by every JSON-config domain. SLICE D (remaining: richer redaction/taxonomy apply via their native
+reused by every JSON-config domain. SLICE D (BUILT 2026-06-24: richer redaction/taxonomy apply via their native
 editors; optional scheduled auto-extract; file-upload source ingestion; fold into Jurisdiction Profile model).
+
+## Slice D (built 2026-06-24)
+Completes the loop across all domains + makes the periodic scan optionally autonomous.
+- Redaction & taxonomy now APPLY by staging pending-review DRAFTS into their native libraries (not review-only):
+  configExtractors adds doc-aware extractRedactionRules / extractTaxonomy; redaction apply inserts redaction_rules
+  (approval_status='pending_review', is_active=0) + legal_sources + rule_legal_sources (mirrors ruleDiscovery);
+  taxonomy apply inserts record_types (status='draft', source='ai'). Each still goes through that library's own
+  approval before taking effect. applyMode = 'live' (fee/deadline/exemption) | 'stage_drafts' (redaction/taxonomy).
+- stageFromSource(jid, source, rawText, actor, opts): consolidated fetch->snapshot->drift-diff->extract->stage
+  pipeline, shared by the on-demand check/extract endpoints AND the optional scheduled auto-extract.
+- Scheduled AUTO-EXTRACT (opt-in): system_config 'freshness_auto_extract' ('1' to enable; default off). When on,
+  runScan also fetches each active URL source and stages changes (onlyIfChanged). Reminder still sends regardless.
+- POST /settings (elevated): set cadenceDays / recipient / autoExtract. POST /upload (multer + pdftotext): upload
+  a PDF or text file as a source document -> stageFromSource. /status now returns autoExtract.
+- UI (RuleUpdatesPage): Settings card (cadence, recipient, auto-check toggle -> /settings); file upload in the
+  "paste a document" card (PDF/text); review modal is applyMode-aware (stage_drafts shows "added as pending-review
+  drafts in <library>, not applied live" + "Add as drafts" button; live shows the apply wording + "Agree & apply").
+VERIFIED live: redaction apply staged pending-review drafts (then cleaned); /settings round-trip; file upload
+(text -> fee proposal bw $0.20/color $0.75). NOTE: this whole feature was first built in a turn that the client
+interrupted (connection/limit) before committing; the work was recovered intact from the working tree, verified,
+and committed (backend = commit 69ffabe; frontend + upload = this commit).
+The config-freshness loop is now complete end to end. Remaining future work: fold the source registry +
+attestation into the Jurisdiction Profile data model (the next foundational item).

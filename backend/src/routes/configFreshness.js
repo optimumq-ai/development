@@ -6,6 +6,11 @@ const { all, get, run } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const F = require('../services/configFreshness');
 const CE = require('../services/configExtractors');
+const multer = require('multer');
+const fs = require('fs');
+const { execFileSync } = require('child_process');
+const _upDir = '/tmp/oq-cfsrc'; try { fs.mkdirSync(_upDir, { recursive: true }); } catch (e) {}
+const upload = multer({ dest: _upDir, limits: { fileSize: 15 * 1024 * 1024 } });
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 const ROLE = requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER');
@@ -121,6 +126,20 @@ router.post('/settings', requireAuth, ROLE, async function (req, res) {
     if (b.cadenceDays !== undefined && Number(b.cadenceDays) > 0) await setCfg('freshness_scan_days', Math.round(Number(b.cadenceDays)));
     if (b.recipient !== undefined && String(b.recipient).trim()) await setCfg('freshness_reminder_to', String(b.recipient).trim());
     res.json({ ok: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.post('/upload', requireAuth, ROLE, upload.single('file'), async function (req, res) {
+  try {
+    if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+    var domain = (req.body && req.body.domain) || 'fee';
+    var fpath = req.file.path, text = '';
+    var isPdf = (req.file.mimetype === 'application/pdf') || /\.pdf$/i.test(req.file.originalname || '');
+    try { text = isPdf ? execFileSync('pdftotext', [fpath, '-'], { encoding: 'utf8', timeout: 30000 }) : fs.readFileSync(fpath, 'utf8'); } catch (e) { text = ''; }
+    try { fs.unlinkSync(fpath); } catch (e) {}
+    if (!text || !text.trim()) return res.status(400).json({ ok: false, error: 'Could not extract readable text from that file.' });
+    var jid = await F.activeJurisdiction();
+    res.json(await CE.stageFromSource(jid, null, text, req.user && req.user.name, { domain: domain }));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
