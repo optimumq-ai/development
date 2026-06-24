@@ -312,3 +312,9 @@ Actual-vs-estimate at fulfillment: variance, 20% re-notify, and Welford write-ba
   history events written. Cleaned up (incl throwaway profile row).
 - NOTE: reconcile is a staff action (no auto-trigger at delivery yet); generating the actual revised NOTICE when
   reNotifyRequired reuses the existing notice/send path but is currently flagged, not auto-sent.
+
+## Departments: Auto Load Balancing toggle (BUILT) - 2026-06-23
+- DepartmentsPage editor (team section, next to Routing specialization) now has an "Auto Load Balancing" checkbox;
+  saveEditor payload sends auto_load_balancing (team-only; 0 for departments). departments PATCH already accepted the
+  field; GET returns it (SELECT *). Verified the value round-trips through the endpoint.
+- assign-workload workflow node can now be considered fully wired (engine + UI toggle).
