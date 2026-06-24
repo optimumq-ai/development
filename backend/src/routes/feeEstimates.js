@@ -98,10 +98,13 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
       var rtid = loaded.components[ci].recordType;
       loaded.components[ci].autoEstimate = rtid ? await ep.assess(rtid, { jurisdictionId: jid }) : { decision: 'manual', confidence: 'none', reasons: ['No record type identified for this component.'] };
     }
+    var actualRateDrivers = [], laborRates = {};
+    try { var cfgObj = cfg ? JSON.parse(cfg.config_json || '{}') : {}; var lab = cfgObj.labor || {}; ['search','review','programming'].forEach(function (k) { if (lab[k]) { laborRates[k] = Number(lab[k].rate) || 0; if (lab[k].actualRate) actualRateDrivers.push(k); } }); } catch (e) {}
     res.json({
       request: { id: loaded.request.id, number: loaded.request.request_number, isMrr: !!loaded.request.is_mrr, purpose: loaded.request.purpose || 'standard' },
       components: loaded.components,
       configProfile: cfg ? { id: cfg.id, name: cfg.name, status: cfg.status } : null,
+      actualRateDrivers: actualRateDrivers, laborRates: laborRates,
       latest: hydrate(latest)
     });
   } catch (e) { res.status(500).json({ error: 'Could not load estimate context.' }); }
@@ -123,7 +126,8 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
       delivery: b.delivery || { method: 'email' },
       certification: b.certification || null,
       other: b.other || null,
-      purpose: b.purpose || 'standard'
+      purpose: b.purpose || 'standard',
+      rateOverrides: b.rateOverrides || {}
     };
     if (b.purpose) { try { await run("UPDATE requests SET purpose = ? WHERE id = ?", [b.purpose, req.params.requestId]); } catch (e) {} }
     var feeContext = engine.compute(config, request);
@@ -252,7 +256,8 @@ router.post('/request/:requestId/reconcile', requireAuth, async function (req, r
       components: (b.components || []).map(function (c) { return { id: c.id, label: c.label, recordType: c.recordType || null, quantities: c.quantities || {} }; }),
       delivery: b.delivery || { method: 'email' },
       other: b.other || null,
-      purpose: b.purpose || 'standard'
+      purpose: b.purpose || 'standard',
+      rateOverrides: b.rateOverrides || {}
     };
     if (b.purpose) { try { await run("UPDATE requests SET purpose = ? WHERE id = ?", [b.purpose, rid]); } catch (e) {} }
     var feeContext = engine.compute(config, request);

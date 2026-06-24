@@ -17,7 +17,7 @@ function buildPrompt(text, context) {
     + 'text does NOT specify it. Never guess a number.\n'
     + '{\n'
     + '  "context": "' + (context === 'SS' ? 'SS' : 'FR') + '",\n'
-    + '  "labor": {"overheadPct": null, "search": {"rate": null, "increment": 0, "rounding": "up", "billable": true, "billableWhen": null}, "review": {"rate": null, "increment": 0, "rounding": "up", "billable": true, "billableWhen": null}, "programming": {"rate": null, "increment": 0, "rounding": "up", "billable": true, "billableWhen": null}},\n'
+    + '  "labor": {"overheadPct": null, "search": {"rate": null, "increment": 0, "rounding": "up", "billable": true, "billableWhen": null, "actualRate": false}, "review": {"rate": null, "increment": 0, "rounding": "up", "billable": true, "billableWhen": null, "actualRate": false}, "programming": {"rate": null, "increment": 0, "rounding": "up", "billable": true, "billableWhen": null, "actualRate": false}},\n'
     + '  "duplication": {"bw": {"rate": null}, "color": {"rate": null}, "oversized": {"rate": null}, "specialty": {"rate": null}},\n'
     + '  "media": {"cd": null, "dvd": null, "usb": null},\n'
     + '  "av": {"perRecording": null, "perMinute": null, "freeMinutes": null},\n'

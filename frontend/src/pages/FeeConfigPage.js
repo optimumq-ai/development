@@ -211,6 +211,7 @@ export default function FeeConfigPage() {
                       <option value="hours">Only if total labor hours over…</option>
                     </select>
                     {(billMode(config.labor[k]) === 'pages' || billMode(config.labor[k]) === 'hours') ? <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ fontSize: '12px', color: '#6B7280' }}>threshold</span><div style={{ width: '90px' }}><Num value={(config.labor[k].billableWhen && config.labor[k].billableWhen.threshold) || 0} onChange={function (v) { setBillThreshold(k, v); }} /></div></span> : null}
+                    <label style={{ fontSize: '12px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', marginLeft: '8px' }}><input type="checkbox" checked={!!config.labor[k].actualRate} onChange={function (e) { var on = e.target.checked; setCfg(function (c) { c.labor[k].actualRate = on; }); }} /> rate set per request (actual employee)</label>
                   </div>
                 </div>
               );

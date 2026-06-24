@@ -13,6 +13,8 @@ export default function FeeEstimatePanel(props) {
   var [qty, setQty] = useState({});
   var [delivery, setDelivery] = useState('email');
   var [purpose, setPurpose] = useState('standard');
+  var [rateOverrides, setRateOverrides] = useState({});
+  var [actualRateDrivers, setActualRateDrivers] = useState([]);
   var [result, setResult] = useState(null);
   var [calc, setCalc] = useState(false);
   var [err, setErr] = useState('');
@@ -53,6 +55,7 @@ export default function FeeEstimatePanel(props) {
       if (r.data.latest && r.data.latest.feeContext) setResult(r.data.latest.feeContext);
       if (r.data.latest && r.data.latest.input && r.data.latest.input.delivery) setDelivery(r.data.latest.input.delivery.method || 'email');
       if (r.data.request && r.data.request.purpose) setPurpose(r.data.request.purpose);
+      var ard = r.data.actualRateDrivers || []; setActualRateDrivers(ard); if (ard.length) { var ro = {}; ard.forEach(function (k) { ro[k] = (r.data.laborRates || {})[k] || 0; }); setRateOverrides(ro); }
       if (r.data.latest && r.data.latest.input && r.data.latest.input.other) setOther({ amount: r.data.latest.input.other.amount || 0, description: r.data.latest.input.other.description || '' });
     } catch (e) { setErr('Could not load fee estimate.'); }
   }
@@ -69,7 +72,7 @@ export default function FeeEstimatePanel(props) {
         return { id: c.id, label: c.label, recordType: c.recordType, quantities: quant };
       });
       var otherPayload = (num(other.amount) !== 0 || (other.description || '').trim()) ? { amount: num(other.amount), description: other.description || 'Other' } : null;
-      var r = await api.post('/fee-estimates/request/' + requestId, { components: comps, delivery: { method: delivery }, other: otherPayload, purpose: purpose });
+      var r = await api.post('/fee-estimates/request/' + requestId, { components: comps, delivery: { method: delivery }, other: otherPayload, purpose: purpose, rateOverrides: rateOverrides });
       setResult(r.data.estimate.feeContext);
     } catch (e) { setErr((e.response && e.response.data && e.response.data.error) || 'Calculation failed.'); }
     setCalc(false);
@@ -138,7 +141,7 @@ export default function FeeEstimatePanel(props) {
         if (num(q.avRecordings) > 0 || num(q.avMinutes) > 0) quant.av = { recordings: num(q.avRecordings), minutes: num(q.avMinutes) };
         return { id: c.id, label: c.label, recordType: c.recordType, quantities: quant };
       });
-      var r = await api.post('/fee-estimates/request/' + requestId + '/reconcile', { components: comps, delivery: { method: delivery }, purpose: purpose });
+      var r = await api.post('/fee-estimates/request/' + requestId + '/reconcile', { components: comps, delivery: { method: delivery }, purpose: purpose, rateOverrides: rateOverrides });
       setReconResult(r.data);
     } catch (e) { setReconResult({ error: (e.response && e.response.data && e.response.data.error) || 'Reconcile failed.' }); }
     setReconBusy(false);
@@ -193,6 +196,7 @@ export default function FeeEstimatePanel(props) {
           <div style={{ display: 'flex', gap: '10px', alignItems: 'flex-end' }}>
             <div><label style={lbl}>Delivery</label><select value={delivery} onChange={function (e) { setDelivery(e.target.value); }} style={Object.assign({}, inp, { width: 'auto' })}><option value="email">Email</option><option value="pickup">Pickup</option><option value="mail">Mail</option></select></div>
             <div><label style={lbl}>Purpose</label><select value={purpose} onChange={function (e) { setPurpose(e.target.value); }} style={Object.assign({}, inp, { width: 'auto' })}><option value="standard">Standard</option><option value="commercial">Commercial</option></select></div>
+            {actualRateDrivers.map(function (k) { return <div key={k}><label style={lbl}>{k} $/hr (actual)</label><input type="number" step="any" value={rateOverrides[k] != null ? rateOverrides[k] : ''} onChange={function (e) { var v = e.target.value; setRateOverrides(function (pr) { var n = Object.assign({}, pr); n[k] = v === '' ? '' : parseFloat(v); return n; }); }} style={inp} /></div>; })}
             <button onClick={calculate} disabled={calc} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: calc ? '#9CB4CC' : NAVY, color: 'white', fontSize: '13px', fontWeight: 700, cursor: calc ? 'default' : 'pointer' }}>{calc ? 'Calculating...' : 'Calculate estimate'}</button>
             {err ? <span style={{ fontSize: '12px', color: '#9B1C1C' }}>{err}</span> : null}
           </div>

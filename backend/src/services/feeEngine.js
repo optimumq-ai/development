@@ -74,6 +74,10 @@ function compute(profile, request) {
   var cert = profile.certification || {};
   var rules = profile.requestRules || {};
   var components = (request && request.components) || [];
+  // Per-request ACTUAL-RATE override: jurisdictions (FL/NY/TN) bill labor at the actual wage of the assigned
+  // (lowest-paid capable) employee, which varies per request. request.rateOverrides[k] overrides the config rate.
+  var rateOv = (request && request.rateOverrides) || {};
+  function laborRate(k) { var ov = rateOv[k]; return (ov != null && ov !== '') ? num(ov) : num((labor[k] || {}).rate); }
 
   var i, k;
   var agg = { search: 0, review: 0, programming: 0, bw: 0, color: 0, oversized: 0 };
@@ -84,7 +88,7 @@ function compute(profile, request) {
   function laborGross(kind, hours) {
     var cfg = labor[kind]; hours = num(hours);
     if (!cfg || hours <= 0) return null;
-    var rate = num(cfg.rate);
+    var rate = laborRate(kind);
     return { kind: kind + '_labor', description: capWord(kind) + ' labor', unit: 'hour', quantity: hours, rate: rate, amount: r2(hours * rate) };
   }
   function dupGross(kind, pages) {
@@ -145,8 +149,9 @@ function compute(profile, request) {
     if (!lcfg || agg[k] <= 0) continue;
     var bh = roundHours(billable[k], lcfg.increment, lcfg.rounding);
     var gate = laborGate(lcfg, totalPages, totalLaborHours);
-    var amt = gate.charge ? r2(bh * num(lcfg.rate)) : 0;
-    laborItems.push({ kind: k + '_labor', aggregateHours: r4(agg[k]), billableHours: bh, rate: num(lcfg.rate), amount: amt, nonBillable: !gate.charge, billabilityNote: gate.reason });
+    var lrate = laborRate(k);
+    var amt = gate.charge ? r2(bh * lrate) : 0;
+    laborItems.push({ kind: k + '_labor', aggregateHours: r4(agg[k]), billableHours: bh, rate: lrate, amount: amt, nonBillable: !gate.charge, billabilityNote: gate.reason });
     if (gate.charge) laborSubtotal += amt;
   }
 
