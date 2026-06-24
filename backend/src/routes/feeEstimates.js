@@ -15,6 +15,14 @@ const feeNotice = require('../services/feeNotice');
 const emailTemplate = require('../services/emailTemplate');
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
+var taskRouting = require('../services/taskRouting');
+async function hist(requestId, actor, action, details, stageFrom, stageTo) {
+  try {
+    await run("INSERT INTO request_history (id, request_id, actor_id, actor_name, action, details, stage_from, stage_to, created_at) VALUES (?,?,?,?,?,?,?,?,?)",
+      ['rh-' + uuidv4().slice(0, 8), requestId, actor && actor.sub, (actor && actor.name) || (actor && actor.sub), action, details || null, stageFrom || null, stageTo || null, nowStr()]);
+  } catch (e) { console.error('[estimate hist]', e.message); }
+}
+
 function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 async function sysCfg(key, def) { var r = await get('SELECT value FROM system_config WHERE key = ?', [key]); return (r && r.value != null && r.value !== '') ? r.value : def; }
 async function latestEstimate(requestId) { return await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [requestId]); }
@@ -168,6 +176,59 @@ router.post('/request/:requestId/notice/send', requireAuth, async function (req,
     if (ok) await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE request_id = ? AND type = 'estimate' AND status IN ('open','assigned','in_progress')", [req.params.requestId]);
     res.json({ sent: ok, provider: result && result.provider, to: to, at: ok ? now : null, note: ok ? null : 'Email provider did not confirm send.' });
   } catch (e) { res.status(502).json({ error: 'Send failed: ' + (e && e.message ? e.message : 'unknown error') }); }
+});
+
+
+// --- Estimate response lifecycle: accept / decline / deposit ---
+
+// Record requestor ACCEPTANCE of the latest sent estimate. Deposit due -> awaiting_payment;
+// otherwise -> record_search (which spawns the record-search task via the shared stage path).
+router.post('/request/:requestId/estimate/accept', requireAuth, async function (req, res) {
+  var rid = req.params.requestId;
+  var reqRow = await get('SELECT id, stage FROM requests WHERE id = ?', [rid]);
+  if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
+  var snap = await latestEstimate(rid);
+  if (!snap) return res.status(400).json({ error: 'No estimate to accept.' });
+  if (!snap.notified_at) return res.status(400).json({ error: 'This estimate has not been sent to the requestor yet.' });
+  if (snap.declined_at) return res.status(409).json({ error: 'This estimate was already declined.' });
+  var now = nowStr();
+  var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'system';
+  await run('UPDATE request_fee_estimates SET accepted_at = ?, accepted_by = ? WHERE id = ?', [now, actor, snap.id]);
+  var depositDue = Number(snap.deposit_due) || 0;
+  var newStage = depositDue > 0 ? 'awaiting_payment' : 'record_search';
+  await run("UPDATE requests SET stage = ?, status = 'active', updated_at = datetime('now') WHERE id = ?", [newStage, rid]);
+  await hist(rid, req.user, 'ESTIMATE_ACCEPTED', depositDue > 0 ? ('Deposit of $' + depositDue.toFixed(2) + ' required before work begins.') : 'No deposit required; record search begins.', reqRow.stage, newStage);
+  if (newStage === 'record_search') { try { await taskRouting.spawnForStage(rid, 'record_search', req.user && req.user.sub); } catch (e) {} }
+  res.json({ accepted: true, depositDue: depositDue, stage: newStage });
+});
+
+// Record requestor DECLINE of the estimate.
+router.post('/request/:requestId/estimate/decline', requireAuth, async function (req, res) {
+  var rid = req.params.requestId;
+  var snap = await latestEstimate(rid);
+  if (!snap) return res.status(400).json({ error: 'No estimate to decline.' });
+  if (snap.accepted_at) return res.status(409).json({ error: 'This estimate was already accepted.' });
+  var reason = (req.body && req.body.reason) || null;
+  await run('UPDATE request_fee_estimates SET declined_at = ?, declined_reason = ? WHERE id = ?', [nowStr(), reason, snap.id]);
+  await hist(rid, req.user, 'ESTIMATE_DECLINED', reason || 'Requestor declined the cost estimate.', null, null);
+  res.json({ declined: true });
+});
+
+// Record a DEPOSIT payment on an accepted estimate; begins record search.
+router.post('/request/:requestId/deposit/record', requireAuth, async function (req, res) {
+  var rid = req.params.requestId;
+  var reqRow = await get('SELECT id, stage FROM requests WHERE id = ?', [rid]);
+  if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
+  var snap = await latestEstimate(rid);
+  if (!snap) return res.status(400).json({ error: 'No estimate on this request.' });
+  if (!snap.accepted_at) return res.status(400).json({ error: 'Record the requestor acceptance before logging a deposit.' });
+  var amount = (req.body && req.body.amount != null) ? Number(req.body.amount) : (Number(snap.deposit_due) || 0);
+  var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'system';
+  await run('UPDATE request_fee_estimates SET deposit_paid_at = ?, deposit_paid_by = ?, deposit_paid_amount = ? WHERE id = ?', [nowStr(), actor, amount, snap.id]);
+  await run("UPDATE requests SET stage = 'record_search', status = 'active', updated_at = datetime('now') WHERE id = ?", [rid]);
+  await hist(rid, req.user, 'DEPOSIT_RECORDED', 'Deposit of $' + amount.toFixed(2) + ' recorded; record search begins.', reqRow.stage, 'record_search');
+  try { await taskRouting.spawnForStage(rid, 'record_search', req.user && req.user.sub); } catch (e) {}
+  res.json({ recorded: true, amount: amount, stage: 'record_search' });
 });
 
 module.exports = router;

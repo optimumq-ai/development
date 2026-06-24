@@ -17,6 +17,8 @@ export default function FeeEstimatePanel(props) {
   var [err, setErr] = useState('');
   var [other, setOther] = useState({ amount: 0, description: '' });
   var [prefilled, setPrefilled] = useState({});
+  var [resp, setResp] = useState({ busy: false, msg: '' });
+  var [declineReason, setDeclineReason] = useState('');
   var [noticeTo, setNoticeTo] = useState('');
   var [noticeSubject, setNoticeSubject] = useState('');
   var [noticeText, setNoticeText] = useState('');
@@ -90,9 +92,41 @@ export default function FeeEstimatePanel(props) {
   if (!ctx) return <div style={{ color: '#9CA3AF', fontSize: '13px' }}>{err || 'Loading...'}</div>;
   if (!ctx.configProfile) return <div style={{ fontSize: '13px', color: '#92400E', background: '#FEF3C7', padding: '14px', borderRadius: '8px' }}>No fee configuration exists for the active jurisdiction yet. Set one up under <strong>Fee Configuration</strong> in the sidebar, then return here.</div>;
 
+  async function respond(path, body) {
+    setResp({ busy: true, msg: '' });
+    try { await api.post('/fee-estimates/request/' + requestId + '/' + path, body || {}); await load(); setResp({ busy: false, msg: '' }); }
+    catch (e) { setResp({ busy: false, msg: (e.response && e.response.data && e.response.data.error) || 'Action failed.' }); }
+  }
+  function rBtn(label, onClick, primary) {
+    return <button onClick={onClick} disabled={resp.busy} style={{ padding: '7px 14px', borderRadius: '8px', border: primary ? 'none' : '1px solid #E5E7EB', background: primary ? NAVY : 'white', color: primary ? 'white' : '#374151', fontSize: '13px', fontWeight: 700, cursor: resp.busy ? 'default' : 'pointer', opacity: resp.busy ? 0.6 : 1 }}>{label}</button>;
+  }
+  function renderResponse() {
+    var L = ctx.latest;
+    if (!L || !L.notified_at) return null;
+    var box = function (bg, bd, col, children) { return <div style={{ background: bg, border: '1px solid ' + bd, borderRadius: '10px', padding: '13px 15px', marginBottom: '16px', fontSize: '13px', color: col }}>{children}</div>; };
+    if (L.declined_at) return box('#FDE8E8', '#FBD5D5', '#9B1C1C', <span>Requestor <strong>declined</strong> the estimate on {L.declined_at}{L.declined_reason ? ' \u2014 ' + L.declined_reason : ''}.</span>);
+    if (L.accepted_at) {
+      var depDue = Number(L.deposit_due) || 0;
+      if (depDue > 0 && !L.deposit_paid_at) {
+        return box('#FEF3C7', '#FDE68A', '#92400E', <div><div style={{ marginBottom: '9px' }}>Accepted on {L.accepted_at}. A deposit of <strong>{money(depDue)}</strong> is required before record search begins.</div><div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>{rBtn('Record deposit received', function () { respond('deposit/record', {}); }, true)}{resp.msg ? <span style={{ color: '#9B1C1C', fontSize: '12px' }}>{resp.msg}</span> : null}</div></div>);
+      }
+      return box('#DEF7EC', '#BCF0DA', '#03543F', <span>Estimate <strong>accepted</strong> on {L.accepted_at}{L.deposit_paid_at ? ' \u00b7 deposit ' + money(L.deposit_paid_amount || depDue) + ' recorded' : ''} \u2014 record search underway.</span>);
+    }
+    return box('#EFF6FF', '#DBEAFE', '#1F4E79', <div>
+      <div style={{ marginBottom: '9px' }}><strong>Estimate sent</strong> on {L.notified_at} \u00b7 total {money(L.total)}{Number(L.deposit_due) > 0 ? ' \u00b7 deposit ' + money(L.deposit_due) : ''}. Record the requestor's response:</div>
+      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+        {rBtn('Mark accepted', function () { respond('estimate/accept', {}); }, true)}
+        {rBtn('Mark declined', function () { respond('estimate/decline', { reason: declineReason }); }, false)}
+        <input type="text" value={declineReason} onChange={function (e) { setDeclineReason(e.target.value); }} placeholder="decline reason (optional)" style={{ flex: 1, minWidth: '160px', padding: '7px 10px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '12.5px' }} />
+        {resp.msg ? <span style={{ color: '#9B1C1C', fontSize: '12px' }}>{resp.msg}</span> : null}
+      </div>
+    </div>);
+  }
+
   var R = result && result.requestLevel;
   return (
     <div>
+      {renderResponse()}
       <div style={{ fontSize: '12.5px', color: '#6B7280', marginBottom: '14px' }}>Priced against <strong>{ctx.configProfile.name}</strong>{ctx.configProfile.status !== 'active' ? ' (' + ctx.configProfile.status + ')' : ''}. Enter the quantities for each component; the engine itemizes the estimate and saves it to the request.</div>
 
       <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', flexWrap: 'wrap' }}>

@@ -457,3 +457,11 @@ CREATE INDEX IF NOT EXISTS idx_tasks_assignee ON tasks(assigned_to, status);
 CREATE INDEX IF NOT EXISTS idx_tasks_request ON tasks(request_id);
 
 ALTER TABLE departments ADD COLUMN IF NOT EXISTS auto_load_balancing INTEGER DEFAULT 0;
+
+ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS accepted_at TEXT;
+ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS accepted_by TEXT;
+ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS declined_at TEXT;
+ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS declined_reason TEXT;
+ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS deposit_paid_at TEXT;
+ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS deposit_paid_by TEXT;
+ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS deposit_paid_amount REAL;

@@ -271,3 +271,26 @@ FeeEstimatePanel (fee engine compute + itemized result + requestor notice) rathe
 - VERIFIED: confident building-permit request -> record_type_id=rt-building-permits; GET /tasks/:id rt="Building
   permits"; estimate context component rt populated. (autoEstimate still 'manual' only because that type has no
   accumulated estimate profile yet - expected; Review mode lights up once a profile exists.)
+
+## Estimate acceptance flow (BUILT) - 2026-06-23
+The connective tissue: estimate sent -> requestor responds -> (deposit gate) -> record search begins.
+- request_fee_estimates gained accepted_at/accepted_by, declined_at/declined_reason, deposit_paid_at/deposit_paid_by/
+  deposit_paid_amount (schema.postgres.sql).
+- taskRouting.spawnForStage(requestId, stage, createdBy): shared, idempotent helper that creates+routes the task a
+  stage implies (record_search / redaction). requests.js PATCH /:id/stage now calls it (refactor; one task-spawn path).
+- feeEstimates.js endpoints (all require a sent estimate = notified_at):
+  - POST /request/:id/estimate/accept -> marks accepted; if deposit_due>0 -> stage awaiting_payment (gate), else
+    stage record_search + spawnForStage (record-search task). Logs ESTIMATE_ACCEPTED.
+  - POST /request/:id/estimate/decline {reason} -> marks declined; logs ESTIMATE_DECLINED.
+  - POST /request/:id/deposit/record {amount?} -> requires accepted; marks deposit paid; stage record_search +
+    spawnForStage. Logs DEPOSIT_RECORDED. (amount defaults to deposit_due.)
+- FeeEstimatePanel: new response section (shows once latest estimate has notified_at): sent -> [Mark accepted]
+  [Mark declined]+reason; accepted w/ deposit due -> [Record deposit received]; accepted (paid / none) -> "record
+  search underway"; declined -> declined banner. Appears on both the request workspace Fees tab and /estimate/:taskId.
+- VERIFIED end-to-end (API): (A) $0.50 est, no deposit -> accept -> stage record_search + record_search task spawned;
+  (B) $500 est, $250 deposit -> accept -> awaiting_payment (NO task) -> record deposit -> record_search + task spawned;
+  (C) decline -> declined_at + reason saved. Cleaned up.
+- So record_search now spawns on real estimate ACCEPTANCE (+deposit), not just a manual stage change. Manual stage
+  change still works (same shared path). NOTE: deposit "recording" is a staff action (no payment-processor
+  integration); awaiting_payment has no clock yet (tickler still pending). Requestor-facing self-serve accept on the
+  public portal is a later option (currently staff records the response).

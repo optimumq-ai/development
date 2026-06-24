@@ -207,6 +207,21 @@ async function poolForUser(userId) {
   );
 }
 
+// Spawn the task that a workflow STAGE implies (record_search / redaction) and route it. Idempotent.
+// Shared by manual stage changes and by the estimate-acceptance / deposit flow so there is one task-spawn path.
+var STAGE_TASK = { record_search: 'record_search', redaction_review: 'redaction', redaction: 'redaction' };
+async function spawnForStage(requestId, stage, createdBy) {
+  var ttype = STAGE_TASK[stage];
+  if (!ttype || stage === 'closed') return null;
+  var existing = await get("SELECT id FROM tasks WHERE request_id = ? AND type = ? AND status IN ('open','assigned','in_progress')", [requestId, ttype]);
+  if (existing) return null;
+  var reqRow = await get('SELECT description, department_id FROM requests WHERE id = ?', [requestId]);
+  if (!reqRow) return null;
+  var task = await createTask({ requestId: requestId, type: ttype, teamId: reqRow.department_id, createdBy: createdBy || 'system' });
+  autoRouteOrPool(task.id, reqRow.description, {}).catch(function (e) { console.error('[spawnForStage route]', e.message); });
+  return task;
+}
+
 async function mine(userId) {
   return await all("SELECT * FROM tasks WHERE assigned_to = ? AND status IN ('assigned','in_progress') ORDER BY updated_at DESC", [userId]);
 }
@@ -227,5 +242,6 @@ module.exports = {
   mine: mine,
   teamLoadBalancing: teamLoadBalancing,
   workloadCounts: workloadCounts,
-  leastLoaded: leastLoaded
+  leastLoaded: leastLoaded,
+  spawnForStage: spawnForStage
 };
