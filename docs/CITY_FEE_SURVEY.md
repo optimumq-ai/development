@@ -163,3 +163,20 @@ STILL OPEN from this survey: GAP 4 (requester-PURPOSE / commercial schedule swit
 GAP 6 (per-estimate actual-employee rate override), and the workflow toggles (GAP 7: exemption_model, inspection).
 Also: DUPLICATION billability gate (billable:false for copies) - rarely needed (copies near-universally billable),
 deferred; free_then_bill mode (per-driver free allowance) deferred (global free allowances cover the common case).
+
+## BUILD STATUS UPDATE 2 - 2026-06-24 (Gaps 4, 5, 6 BUILT)
+- GAP 4 (requester-PURPOSE / commercial schedule switch): engine supports request.purpose selecting a deep-merged
+  config override (purposeOverrides.commercial) + requestRules.surchargePct (commercial-value surcharge). request
+  .purpose persisted. FeeConfig "Commercial-purpose overrides" card (surcharge % + "charge labor for commercial"
+  toggle). Estimate panel Purpose selector + surcharge row. Extractor populates purposeOverrides. VERIFIED live
+  (standard $10 vs commercial $11.50 @15%).
+- GAP 6 (per-estimate ACTUAL-employee rate override, FL/NY/TN): engine request.rateOverrides[k] overrides the
+  config labor rate; config.labor[k].actualRate flag; GET advertises actualRateDrivers + default rates; estimate
+  panel shows per-driver "$/hr (actual)" inputs; extractor field. VERIFIED live ($42/hr override -> $84).
+- GAP 5 (TIERED / graduated rate bands): engine duplication.<type>.tiers=[{upTo,rate},...] (tieredAmount walks
+  bands; last band upTo null = unlimited; supersedes flat+free for that driver). FeeConfig graduated-tiers editor
+  (toggle + add/remove bands). Extractor guidance. VERIFIED live (first 50 free then $0.15: 30pp=$0, 100pp=$7.50).
+All additive / regression-tested (configs without the new fields price byte-identically). 
+REMAINING from this survey: only the workflow toggles (GAP 7: exemption_model pre-clearance/appeal segments,
+inspection-no-fee) - those belong to the workflow-segment + jurisdiction-profile work, not the fee engine.
+The fee engine now expresses the fee/estimate structure of the surveyed jurisdictions.

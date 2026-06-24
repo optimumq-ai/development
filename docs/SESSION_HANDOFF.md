@@ -459,3 +459,17 @@ CITY_FEE_SURVEY.md Gaps 1-3 - the foundational "slot" for auto-config (per AUTO_
 - Lets a city correctly express: CA/NY/OH (labor not chargeable), TX 50-page rule, NY >2hr prep, TX +20% overhead.
 - VERIFIED live + unit. Next fee gaps: GAP 4 commercial-purpose schedule switch (the other "can't be one
   component" case), GAP 6 per-estimate actual-rate override, GAP 5 tiered bands.
+
+## Fee gaps 4, 5, 6 (BUILT) - 2026-06-24
+Completing the fee-engine instruction set (CITY_FEE_SURVEY). All additive/regression-safe; engine unit-tested +
+live-verified through the estimate path; configs restored after each test.
+- GAP 4 commercial/purpose switch: request.purpose -> deep-merged purposeOverrides + requestRules.surchargePct;
+  purpose persisted on request; panel Purpose selector + surcharge row; FeeConfig commercial-overrides card;
+  extractor. (standard $10 vs commercial $11.50.)
+- GAP 6 actual-employee rate override: request.rateOverrides[k] beats config rate; labor[k].actualRate flag;
+  GET returns actualRateDrivers; panel per-driver $/hr inputs; extractor. ($42/hr -> $84.)
+- GAP 5 tiered bands: duplication.<type>.tiers=[{upTo,rate}]; FeeConfig band editor; extractor. (50 free then
+  $0.15: 100pp=$7.50.)
+The fee engine instruction set is now broadly complete for cross-jurisdiction coverage. Only GAP 7 (workflow
+toggles: exemption_model AG-preclearance/appeal segments + inspection-no-fee) remains, and it belongs to the
+workflow-segment + Jurisdiction Profile track, not the fee engine.

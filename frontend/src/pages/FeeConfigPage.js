@@ -85,6 +85,11 @@ export default function FeeConfigPage() {
   function setCommSurcharge(v) { setCfg(function (c) { c.purposeOverrides = c.purposeOverrides || {}; c.purposeOverrides.commercial = c.purposeOverrides.commercial || {}; c.purposeOverrides.commercial.requestRules = c.purposeOverrides.commercial.requestRules || {}; c.purposeOverrides.commercial.requestRules.surchargePct = v || 0; }); }
   function commLabor() { var po = config.purposeOverrides; return !!(po && po.commercial && po.commercial.labor && po.commercial.labor.search && po.commercial.labor.search.billable === true); }
   function setCommLabor(on) { setCfg(function (c) { c.purposeOverrides = c.purposeOverrides || {}; c.purposeOverrides.commercial = c.purposeOverrides.commercial || {}; if (on) { c.purposeOverrides.commercial.labor = { search: { billable: true, billableWhen: null }, review: { billable: true, billableWhen: null }, programming: { billable: true, billableWhen: null } }; } else { if (c.purposeOverrides.commercial.labor) delete c.purposeOverrides.commercial.labor; } }); }
+  function dupTiers(k) { return (config.duplication[k] && config.duplication[k].tiers) || null; }
+  function setDupTiered(k, on) { setCfg(function (c) { if (!c.duplication[k]) c.duplication[k] = {}; if (on) { c.duplication[k].tiers = c.duplication[k].tiers || [{ upTo: 50, rate: 0 }, { upTo: null, rate: c.duplication[k].rate || 0 }]; } else { delete c.duplication[k].tiers; } }); }
+  function setTierField(k, i, field, v) { setCfg(function (c) { c.duplication[k].tiers[i][field] = (field === 'upTo' ? (v === '' || v == null ? null : Number(v)) : (Number(v) || 0)); }); }
+  function addTier(k) { setCfg(function (c) { c.duplication[k].tiers.push({ upTo: null, rate: 0 }); }); }
+  function removeTier(k, i) { setCfg(function (c) { c.duplication[k].tiers.splice(i, 1); }); }
 
   async function runExtract() {
     setExtracting(true); setExtractMsg('');
@@ -227,9 +232,23 @@ export default function FeeConfigPage() {
             <div style={sectionTitle}>Duplication (per page)</div>
             {['bw', 'color', 'oversized', 'specialty'].map(function (k) {
               return (
-                <div key={k} style={{ display: 'grid', gridTemplateColumns: '110px 1fr', gap: '8px', alignItems: 'center', marginBottom: '8px' }}>
-                  <div style={{ fontSize: '12px', color: '#374151' }}>{k === 'bw' ? 'B&W' : k.charAt(0).toUpperCase() + k.slice(1)}</div>
-                  <RateField value={config.duplication[k] ? config.duplication[k].rate : 0} onChange={function (v) { setCfg(function (c) { if (!c.duplication[k]) c.duplication[k] = {}; c.duplication[k].rate = v; }); }} />
+                <div key={k} style={{ marginBottom: '12px' }}>
+                  <div style={{ display: 'grid', gridTemplateColumns: '110px 1fr', gap: '8px', alignItems: 'center' }}>
+                    <div style={{ fontSize: '12px', color: '#374151' }}>{k === 'bw' ? 'B&W' : k.charAt(0).toUpperCase() + k.slice(1)}</div>
+                    {dupTiers(k) ? <div style={{ fontSize: '12px', color: '#6B7280' }}>tiered (bands below)</div> : <RateField value={config.duplication[k] ? config.duplication[k].rate : 0} onChange={function (v) { setCfg(function (c) { if (!c.duplication[k]) c.duplication[k] = {}; c.duplication[k].rate = v; }); }} />}
+                  </div>
+                  {k !== 'specialty' ? (
+                    <div style={{ marginLeft: '110px', marginTop: '4px' }}>
+                      <label style={{ fontSize: '11px', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer', color: '#6B7280' }}><input type="checkbox" checked={!!dupTiers(k)} onChange={function (e) { setDupTiered(k, e.target.checked); }} /> graduated tiers</label>
+                      {dupTiers(k) ? (
+                        <div style={{ marginTop: '6px', display: 'flex', flexDirection: 'column', gap: '5px' }}>
+                          {dupTiers(k).map(function (tr, i) { return <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px' }}><span style={{ color: '#6B7280' }}>up to</span><input type="number" placeholder="∞" value={tr.upTo == null ? '' : tr.upTo} onChange={function (e) { setTierField(k, i, 'upTo', e.target.value); }} style={Object.assign({}, inp, { width: '70px' })} /><span style={{ color: '#6B7280' }}>pages @ $</span><input type="number" step="any" value={tr.rate} onChange={function (e) { setTierField(k, i, 'rate', e.target.value); }} style={Object.assign({}, inp, { width: '70px' })} /><button onClick={function () { removeTier(k, i); }} style={{ border: 'none', background: 'none', color: '#9B1C1C', cursor: 'pointer', fontSize: '14px' }}>×</button></div>; })}
+                          <button onClick={function () { addTier(k); }} style={{ alignSelf: 'flex-start', border: '1px solid #E5E7EB', background: 'white', borderRadius: '6px', padding: '3px 10px', fontSize: '12px', cursor: 'pointer', color: '#1F4E79' }}>+ band</button>
+                          <div style={{ fontSize: '10px', color: '#9CA3AF' }}>Bands apply in order; leave the final band up-to blank for unlimited (e.g. up to 50 @ $0, then blank @ $0.15).</div>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
                 </div>
               );
             })}

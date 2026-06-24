@@ -19,6 +19,17 @@ function r2(n) { return Math.round((Number(n) || 0) * 100) / 100; }
 function r4(n) { return Math.round((Number(n) || 0) * 10000) / 10000; }
 function capWord(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 function dupDesc(k) { return k === 'bw' ? 'B&W copies' : k === 'color' ? 'Color copies' : k === 'oversized' ? 'Oversized copies' : (k + ' copies'); }
+// Graduated rate bands: tiers=[{upTo, rate}, ...] price qty in bands (upTo null/missing = unlimited top band).
+// e.g. [{upTo:50,rate:0},{rate:0.15}] = first 50 free then $0.15; [{upTo:1,rate:0.25},{rate:0.10}] = first page $0.25 then $0.10.
+function tieredAmount(qty, tiers) {
+  qty = num(qty); var amt = 0, lower = 0;
+  for (var i = 0; i < tiers.length && qty > lower; i++) {
+    var t = tiers[i]; var upTo = (t.upTo == null) ? Infinity : num(t.upTo);
+    var inBand = Math.min(qty, upTo) - lower; if (inBand > 0) amt += inBand * num(t.rate); lower = upTo;
+  }
+  return r2(amt);
+}
+function hasTiers(cfg) { return cfg && cfg.tiers && cfg.tiers.length; }
 
 // Round labor hours to the billing increment (e.g. 0.25). mode: 'up' (default) | 'down' | 'nearest'.
 // increment 0/null -> bill actual hours, no rounding.
@@ -163,13 +174,14 @@ function compute(profile, request) {
   var freePages = num(rules.freePageAllowance);
   var dupItems = [], dupSubtotal = 0;
   if (agg.bw > 0 && dup.bw) {
-    var billBw = Math.max(0, agg.bw - freePages);
-    var bwAmt = (dup.bw.rate === 'actual') ? 0 : r2(billBw * num(dup.bw.rate));
-    dupItems.push({ kind: 'dup_bw', aggregatePages: agg.bw, freePagesApplied: Math.min(freePages, agg.bw), billablePages: billBw, rate: dup.bw.rate, amount: bwAmt, needsActual: dup.bw.rate === 'actual' });
+    var billBw, bwAmt, bwFree;
+    if (hasTiers(dup.bw)) { billBw = agg.bw; bwFree = 0; bwAmt = tieredAmount(agg.bw, dup.bw.tiers); }
+    else { billBw = Math.max(0, agg.bw - freePages); bwFree = Math.min(freePages, agg.bw); bwAmt = (dup.bw.rate === 'actual') ? 0 : r2(billBw * num(dup.bw.rate)); }
+    dupItems.push({ kind: 'dup_bw', aggregatePages: agg.bw, freePagesApplied: bwFree, billablePages: billBw, rate: hasTiers(dup.bw) ? 'tiered' : dup.bw.rate, amount: bwAmt, needsActual: dup.bw.rate === 'actual' });
     dupSubtotal += bwAmt;
   }
-  if (agg.color > 0 && dup.color) { var cAmt = (dup.color.rate === 'actual') ? 0 : r2(agg.color * num(dup.color.rate)); dupItems.push({ kind: 'dup_color', pages: agg.color, rate: dup.color.rate, amount: cAmt, needsActual: dup.color.rate === 'actual' }); dupSubtotal += cAmt; }
-  if (agg.oversized > 0 && dup.oversized) { var oAmt = (dup.oversized.rate === 'actual') ? 0 : r2(agg.oversized * num(dup.oversized.rate)); dupItems.push({ kind: 'dup_oversized', pages: agg.oversized, rate: dup.oversized.rate, amount: oAmt, needsActual: dup.oversized.rate === 'actual' }); dupSubtotal += oAmt; }
+  if (agg.color > 0 && dup.color) { var cAmt = hasTiers(dup.color) ? tieredAmount(agg.color, dup.color.tiers) : ((dup.color.rate === 'actual') ? 0 : r2(agg.color * num(dup.color.rate))); dupItems.push({ kind: 'dup_color', pages: agg.color, rate: hasTiers(dup.color) ? 'tiered' : dup.color.rate, amount: cAmt, needsActual: dup.color.rate === 'actual' }); dupSubtotal += cAmt; }
+  if (agg.oversized > 0 && dup.oversized) { var oAmt = hasTiers(dup.oversized) ? tieredAmount(agg.oversized, dup.oversized.tiers) : ((dup.oversized.rate === 'actual') ? 0 : r2(agg.oversized * num(dup.oversized.rate))); dupItems.push({ kind: 'dup_oversized', pages: agg.oversized, rate: hasTiers(dup.oversized) ? 'tiered' : dup.oversized.rate, amount: oAmt, needsActual: dup.oversized.rate === 'actual' }); dupSubtotal += oAmt; }
 
   // ---- media (request-level aggregate) ----
   var mediaItems = [], mediaSubtotal = 0;
