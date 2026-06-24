@@ -144,3 +144,22 @@ x (plus/minus overhead) x (which schedule applies by purpose). The remaining lon
 schedules, unusual local surcharges) is covered by GAP 5 or by the generic "other" one-off line already in the
 engine. The structural risk is LOW once the per-driver billable/trigger switch exists; today, without it, any
 no-labor state (CA, NY, OH, WA) and the TX 50-page rule are only approximated.
+
+## BUILD STATUS UPDATE - 2026-06-24
+GAPS 1, 2, 3 are now BUILT and verified (the per-driver billable/trigger switch + overhead):
+- Fee engine: laborGate (was present) handles billable:false (CA/NY/OH) + billableWhen all_or_nothing
+  {trigger:'pages'|'hours', threshold} (TX 50-page rule; NY >2hr). NOW ADDED: labor.overheadPct surcharge on
+  BILLABLE labor (TX +20%), zeroed when labor is non-billable/below-threshold. Purely additive - estimates with
+  no billable/billableWhen/overhead config are byte-identical to before (regression-tested).
+- Config UI (FeeConfigPage, Labor section): per-driver "Chargeable" selector (Always / Never / Only if total
+  pages over N / Only if total labor hours over N) + a threshold field + a labor "Overhead %" field.
+- AI extractor (feePolicyExtract): labor schema now includes overheadPct + per-driver billable + billableWhen,
+  with prompt guidance (CA/NY/OH -> billable:false; TX 50-page -> trigger pages/50; NY -> hours/2).
+- Estimate panel: shows a "Labor overhead (N%)" row and a muted "Labor not chargeable - <reason>" note.
+- VERIFIED live (active TX config): 40pp+2hr -> labor $0 + overhead $0 (gate closed) + dup $4; 60pp+2hr -> labor
+  $30 + overhead $6 + dup $6 = $42 (gate open). Engine unit tests: regression unchanged, overhead, 50-page gate
+  both sides, CA no-labor. Config restored, request cleaned.
+STILL OPEN from this survey: GAP 4 (requester-PURPOSE / commercial schedule switch), GAP 5 (tiered rate bands),
+GAP 6 (per-estimate actual-employee rate override), and the workflow toggles (GAP 7: exemption_model, inspection).
+Also: DUPLICATION billability gate (billable:false for copies) - rarely needed (copies near-universally billable),
+deferred; free_then_bill mode (per-driver free allowance) deferred (global free allowances cover the common case).

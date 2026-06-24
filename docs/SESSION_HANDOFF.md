@@ -448,3 +448,14 @@ The "biggest missing primitive" from AUTO_CONFIG_DESIGN.md, now built + tested. 
   deadline_date<now + estimate/deposit/stall); (2) the AG/appeal workflow segments that call toll/satisfy on
   entry/exit; (3) holiday-set + clock rules move into the Jurisdiction Profile; (4) optional acknowledge/appeal
   clocks per jurisdiction. Backfill for existing requests: POST /clocks/request/:id/start (idempotent).
+
+## Fee-engine billable/trigger switch + overhead (BUILT) - 2026-06-24
+CITY_FEE_SURVEY.md Gaps 1-3 - the foundational "slot" for auto-config (per AUTO_CONFIG_DESIGN.md build step 1).
+- Engine laborGate (billable:false + billableWhen all_or_nothing pages/hours threshold) was already present; ADDED
+  labor.overheadPct (surcharge on billable labor, zeroed when labor non-billable). Additive/regression-safe.
+- FeeConfigPage Labor: per-driver Chargeable selector (Always/Never/Only-if-pages-over-N/Only-if-hours-over-N) +
+  threshold + Overhead %. feePolicyExtract labor schema extended (overheadPct/billable/billableWhen + guidance).
+  Estimate panel shows overhead row + "Labor not chargeable" note.
+- Lets a city correctly express: CA/NY/OH (labor not chargeable), TX 50-page rule, NY >2hr prep, TX +20% overhead.
+- VERIFIED live + unit. Next fee gaps: GAP 4 commercial-purpose schedule switch (the other "can't be one
+  component" case), GAP 6 per-estimate actual-rate override, GAP 5 tiered bands.

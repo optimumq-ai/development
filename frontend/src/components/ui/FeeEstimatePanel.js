@@ -210,6 +210,8 @@ export default function FeeEstimatePanel(props) {
                 })}
                 <div style={{ borderTop: '1px solid #E5E7EB', paddingTop: '8px', fontSize: '12px', color: '#374151' }}>
                   <Row k="Labor" v={money(R.laborSubtotal)} />
+                  {R.laborOverhead ? <Row k={"Labor overhead (" + R.laborOverheadPct + "%)"} v={money(R.laborOverhead)} /> : null}
+                  {(R.labor && R.labor.some(function (l) { return l.nonBillable; })) ? <Row k="Labor not chargeable" muted v={((R.labor.filter(function (l) { return l.nonBillable && l.billabilityNote; })[0]) || {}).billabilityNote || "Per policy"} /> : null}
                   <Row k="Duplication" v={money(R.duplicationSubtotal)} />
                   <Row k="Media" v={money(R.mediaSubtotal)} />
                   {R.avSubtotal ? <Row k="Audio/Video" v={money(R.avSubtotal)} /> : null}

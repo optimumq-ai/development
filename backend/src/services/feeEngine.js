@@ -35,6 +35,20 @@ function roundHours(hours, increment, mode) {
 
 var LABOR_ORDER = ['search', 'review', 'programming']; // order free hours are consumed in
 
+// Per-driver labor billability: a hard non-billable flag (CA/NY/OH forbid labor charges) OR an all-or-nothing
+// trigger (TX: no labor until total pages exceed 50; FL/NY: no labor until total labor time exceeds a threshold).
+// Purely additive: a driver with no billable/billableWhen config charges normally (unchanged behavior).
+function laborGate(lcfg, totalPages, totalLaborHours) {
+  if (lcfg && lcfg.billable === false) return { charge: false, reason: 'Not chargeable in this jurisdiction.' };
+  var bw = lcfg && lcfg.billableWhen;
+  if (bw && bw.mode === 'all_or_nothing' && bw.trigger && bw.trigger !== 'none') {
+    var q = bw.trigger === 'pages' ? totalPages : (bw.trigger === 'hours' ? totalLaborHours : 0);
+    var thr = num(bw.threshold);
+    if (q <= thr) return { charge: false, reason: 'Not chargeable until ' + bw.trigger + ' exceed ' + thr + ' (currently ' + q + ').' };
+  }
+  return { charge: true, reason: null };
+}
+
 function compute(profile, request) {
   profile = profile || {};
   var labor = profile.labor || {};
@@ -108,15 +122,22 @@ function compute(profile, request) {
     billable[k] = r4(billable[k] - take);
     remainingFree = r4(remainingFree - take);
   }
+  var totalPages = num(agg.bw) + num(agg.color) + num(agg.oversized);
+  var totalLaborHours = num(agg.search) + num(agg.review) + num(agg.programming);
   var laborItems = [], laborSubtotal = 0;
   for (i = 0; i < LABOR_ORDER.length; i++) {
     k = LABOR_ORDER[i]; var lcfg = labor[k];
     if (!lcfg || agg[k] <= 0) continue;
     var bh = roundHours(billable[k], lcfg.increment, lcfg.rounding);
-    var amt = r2(bh * num(lcfg.rate));
-    laborItems.push({ kind: k + '_labor', aggregateHours: r4(agg[k]), billableHours: bh, rate: num(lcfg.rate), amount: amt });
-    laborSubtotal += amt;
+    var gate = laborGate(lcfg, totalPages, totalLaborHours);
+    var amt = gate.charge ? r2(bh * num(lcfg.rate)) : 0;
+    laborItems.push({ kind: k + '_labor', aggregateHours: r4(agg[k]), billableHours: bh, rate: num(lcfg.rate), amount: amt, nonBillable: !gate.charge, billabilityNote: gate.reason });
+    if (gate.charge) laborSubtotal += amt;
   }
+
+  // ---- labor overhead surcharge (e.g. TX +20% of billable labor); zero when labor is non-billable ----
+  var laborOverheadPct = num(labor.overheadPct);
+  var laborOverhead = laborOverheadPct > 0 ? r2(laborSubtotal * laborOverheadPct / 100) : 0;
 
   // ---- free B&W page allowance (request-level), then duplication ----
   var freePages = num(rules.freePageAllowance);
@@ -164,7 +185,7 @@ function compute(profile, request) {
   var other = request && request.other;
   if (other && num(other.amount) !== 0) { otherSubtotal = r2(num(other.amount)); otherItem = { kind: 'other', description: (other.description || 'Other'), amount: otherSubtotal }; }
 
-  var adjustedSubtotal = r2(laborSubtotal + dupSubtotal + mediaSubtotal + avSubtotal + deliverySubtotal + certSubtotal + otherSubtotal);
+  var adjustedSubtotal = r2(laborSubtotal + laborOverhead + dupSubtotal + mediaSubtotal + avSubtotal + deliverySubtotal + certSubtotal + otherSubtotal);
 
   // ---- floor -> ceiling -> de minimis waive (documented order) ----
   var total = adjustedSubtotal, floorApplied = false, ceilingApplied = false, deMinimisWaived = false;
@@ -186,6 +207,7 @@ function compute(profile, request) {
     requestLevel: {
       grossSubtotal: grossSubtotal,
       labor: laborItems, laborSubtotal: r2(laborSubtotal),
+      laborOverhead: laborOverhead, laborOverheadPct: laborOverheadPct,
       duplication: dupItems, duplicationSubtotal: r2(dupSubtotal),
       media: mediaItems, mediaSubtotal: r2(mediaSubtotal),
       av: avItems, avSubtotal: r2(avSubtotal),

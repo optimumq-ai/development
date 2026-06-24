@@ -4,7 +4,7 @@ import api from '../lib/api';
 var NAVY = '#1F4E79';
 var DEFAULT_CONFIG = {
   context: 'FR', version: 1,
-  labor: { search: { rate: 0, increment: 0, rounding: 'up' }, review: { rate: 0, increment: 0, rounding: 'up' }, programming: { rate: 0, increment: 0, rounding: 'up' } },
+  labor: { overheadPct: 0, search: { rate: 0, increment: 0, rounding: 'up' }, review: { rate: 0, increment: 0, rounding: 'up' }, programming: { rate: 0, increment: 0, rounding: 'up' } },
   duplication: { bw: { rate: 0 }, color: { rate: 0 }, oversized: { rate: 0 }, specialty: { rate: 'actual' } },
   media: { cd: 1, dvd: 3, usb: 'actual' },
   av: { perRecording: 0, perMinute: 0, freeMinutes: 0 },
@@ -78,6 +78,9 @@ export default function FeeConfigPage() {
   }
 
   function setCfg(mutator) { setConfig(function (prev) { var n = clone(prev || DEFAULT_CONFIG); mutator(n); return n; }); }
+  function billMode(d) { if (d && d.billable === false) return 'never'; var bw = d && d.billableWhen; if (bw && bw.trigger === 'pages') return 'pages'; if (bw && bw.trigger === 'hours') return 'hours'; return 'always'; }
+  function setBillMode(k, mode) { setCfg(function (c) { var d = c.labor[k]; if (mode === 'always') { d.billable = true; delete d.billableWhen; } else if (mode === 'never') { d.billable = false; delete d.billableWhen; } else { d.billable = true; d.billableWhen = { mode: 'all_or_nothing', trigger: mode, threshold: (d.billableWhen && d.billableWhen.threshold) || (mode === 'pages' ? 50 : 2) }; } }); }
+  function setBillThreshold(k, v) { setCfg(function (c) { var d = c.labor[k]; if (!d.billableWhen) d.billableWhen = { mode: 'all_or_nothing', trigger: 'pages' }; d.billableWhen.threshold = v || 0; }); }
 
   async function runExtract() {
     setExtracting(true); setExtractMsg('');
@@ -195,9 +198,24 @@ export default function FeeConfigPage() {
                       <option value="up">up</option><option value="nearest">nearest</option><option value="down">down</option>
                     </select>
                   </div>
+                  <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', marginTop: '2px' }}>
+                    <label style={lbl}>Chargeable:</label>
+                    <select value={billMode(config.labor[k])} onChange={function (e) { setBillMode(k, e.target.value); }} style={Object.assign({}, inp, { width: 'auto' })}>
+                      <option value="always">Always</option>
+                      <option value="never">Never (not chargeable here)</option>
+                      <option value="pages">Only if total pages over…</option>
+                      <option value="hours">Only if total labor hours over…</option>
+                    </select>
+                    {(billMode(config.labor[k]) === 'pages' || billMode(config.labor[k]) === 'hours') ? <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}><span style={{ fontSize: '12px', color: '#6B7280' }}>threshold</span><div style={{ width: '90px' }}><Num value={(config.labor[k].billableWhen && config.labor[k].billableWhen.threshold) || 0} onChange={function (v) { setBillThreshold(k, v); }} /></div></span> : null}
+                  </div>
                 </div>
               );
             })}
+            <div style={{ display: 'grid', gridTemplateColumns: '90px 1fr 2fr', gap: '8px', alignItems: 'end', marginTop: '6px', borderTop: '1px solid #F3F4F6', paddingTop: '10px' }}>
+              <div style={{ fontSize: '12px', color: '#374151', paddingBottom: '7px' }}>Overhead</div>
+              <div><label style={lbl}>% of labor</label><Num value={config.labor.overheadPct || 0} onChange={function (v) { setCfg(function (c) { c.labor.overheadPct = v || 0; }); }} /></div>
+              <div style={{ fontSize: '11px', color: '#9CA3AF', paddingBottom: '7px' }}>Surcharge on billable labor (e.g. Texas adds 20%). Zero where labor is not chargeable.</div>
+            </div>
           </div>
 
           <div style={card}>
