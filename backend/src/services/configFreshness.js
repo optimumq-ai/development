@@ -1,6 +1,6 @@
 'use strict';
 // Config freshness loop. On a cadence (and on demand) it:
-//  - touches last_checked_at on the active jurisdiction's registered sources,
+//  - sends the periodic courtesy reminder (no external source is fetched or monitored),
 //  - tallies what is PENDING REVIEW per rule-domain (redaction uses its own pending_review rows;
 //    other domains use the generic config_proposals staging table),
 //  - logs the run and sends a REMINDER email to the designated recipient REGARDLESS of whether
@@ -24,7 +24,7 @@ var DOMAINS = [
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 async function cfgVal(key) { try { var r = await get("SELECT value FROM system_config WHERE key = ?", [key]); return r ? r.value : null; } catch (e) { return null; } }
 async function activeJurisdiction() { return (await cfgVal('jurisdiction_profile')) || null; }
-async function cadenceDays() { var n = Number(await cfgVal('freshness_scan_days')); return (isFinite(n) && n > 0) ? n : 30; }
+async function cadenceDays() { var n = Number(await cfgVal('freshness_reminder_days')); if (!(isFinite(n) && n > 0)) { n = Number(await cfgVal('freshness_scan_days')); } return (isFinite(n) && n > 0) ? n : 182; }
 
 async function pendingSummary(jid) {
   var out = [];
@@ -42,29 +42,23 @@ async function pendingSummary(jid) {
 }
 
 async function runScan(opts) {
+  // Sends the periodic courtesy reminder to the configured recipient and logs the send.
+  // It does NOT fetch, check, or monitor any external source - the agency brings approved
+  // documents itself; Optimum Q never tracks the law.
   opts = opts || {};
   var jid = await activeJurisdiction();
   var now = nowStr();
-  if (jid) { try { await run("UPDATE config_sources SET last_checked_at = ? WHERE jurisdiction_id = ? AND active = 1", [now, jid]); } catch (e) {} }
-  // Optional: AI auto-extract from registered URL sources (opt-in; default off).
-  var autoExtracted = 0;
-  if (jid) { var ax = await cfgVal('freshness_auto_extract'); if (ax === '1' || ax === 'true') {
-    try { var srcs = await all("SELECT * FROM config_sources WHERE jurisdiction_id = ? AND active = 1 AND url IS NOT NULL", [jid]);
-      for (var si = 0; si < (srcs || []).length; si++) { try { var st = await CE.stageFromSource(jid, srcs[si], null, 'scheduled-scan', { onlyIfChanged: true }); if (st && st.ok && st.proposalId) autoExtracted++; } catch (e) { console.error('[configFreshness] auto-extract', srcs[si].id, e && e.message); } }
-    } catch (e) { console.error('[configFreshness] auto-extract loop', e && e.message); } } }
-  var summary = await pendingSummary(jid);
-  var total = summary.reduce(function (a, s) { return a + s.pending; }, 0);
   var id = 'cfr-' + uuidv4().slice(0, 8);
-  await run("INSERT INTO config_freshness_runs (id, trigger, jurisdiction_id, summary_json, emailed, created_at) VALUES (?,?,?,?,?,?)", [id, opts.trigger || 'manual', jid, JSON.stringify(summary), 0, now]);
+  await run("INSERT INTO config_freshness_runs (id, trigger, jurisdiction_id, summary_json, emailed, created_at) VALUES (?,?,?,?,?,?)", [id, opts.trigger || 'manual', jid, JSON.stringify([]), 0, now]);
   var emailed = false, emailReason = null;
   try {
     var to = (await cfgVal('freshness_reminder_to')) || (await cfgVal('contact_email')) || 'admin@optimumq.ai';
     var jrow = jid ? await get("SELECT name FROM jurisdiction_profiles WHERE id = ?", [jid]) : null;
-    var res = await email.sendFreshnessReminder({ summary: summary, total: total, jurisdiction: jrow ? jrow.name : (jid || 'your jurisdiction') }, to);
+    var res = await email.sendFreshnessReminder({ jurisdiction: jrow ? jrow.name : null }, to);
     emailed = !!(res && res.sent); emailReason = res && res.reason;
     if (emailed) await run("UPDATE config_freshness_runs SET emailed = 1 WHERE id = ?", [id]);
-  } catch (e) { console.error('[configFreshness] reminder email failed:', e && e.message); emailReason = e && e.message; }
-  return { jurisdiction: jid, summary: summary, total: total, emailed: emailed, emailReason: emailReason, autoExtracted: autoExtracted, runId: id, at: now };
+  } catch (e) { console.error('[reminder] send failed:', e && e.message); emailReason = e && e.message; }
+  return { jurisdiction: jid, emailed: emailed, emailReason: emailReason, runId: id, at: now };
 }
 
 async function maybeRun() {
@@ -80,7 +74,7 @@ async function maybeRun() {
 }
 
 function startScheduler() {
-  setTimeout(function () { maybeRun().then(function (r) { if (r && !r.skipped) console.log('[configFreshness] startup scan:', r.total, 'pending'); }).catch(function (e) { console.error('[configFreshness]', e && e.message); }); }, 90000);
+  setTimeout(function () { maybeRun().then(function (r) { if (r && !r.skipped) console.log('[reminder] periodic reminder sent'); }).catch(function (e) { console.error('[configFreshness]', e && e.message); }); }, 90000);
   setInterval(function () { maybeRun().catch(function (e) { console.error('[configFreshness]', e && e.message); }); }, 86400000);
 }
 
