@@ -32,6 +32,13 @@ async function searchPublicReady(query) {
     var secondary = (r.summary || '') + ' ' + (r.keywords || '');
     var m = kw.match(terms, primary, secondary);
     if (!m) return;
+    // Relevance floor: a released/public-ready record surfaces only when it matches at least
+    // two distinct query terms, OR matches a term in its title / record type. A single weak
+    // body-text hit on a common word (e.g. a month like "January") is not enough - that
+    // previously let unrelated records (a tax return matching only "january") appear at 60%.
+    var primaryLower = (primary || '').toLowerCase();
+    var titleHits = m.matched.filter(function(t){ return primaryLower.indexOf(t) !== -1; }).length;
+    if (m.matched.length < 2 && titleHits < 1) return;
     out.push({
       id: 'fulfilled:' + r.id,
       sourceSystem: 'Fulfilled Request Index',
@@ -42,8 +49,9 @@ async function searchPublicReady(query) {
       dateCreated: (r.released_at || '').slice(0, 10),
       pageCount: r.page_count || null,
       publicAvailability: 'available',
-      matchScore: (m.score || 0) + 50,
+      matchScore: Math.min(100, (m.score || 0) + 15),
       matchedTerms: m.matched,
+      relevanceNote: 'Matched your search terms: ' + m.matched.join(', '),
       publicReady: true,
       fileId: r.output_file_id
     });
