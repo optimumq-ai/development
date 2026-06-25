@@ -60,29 +60,72 @@ async function searchPublicReady(query) {
   return out.slice(0, 5);
 }
 
-// Lightweight (no extra AI call) match of a query to a taxonomy record type by
-// term overlap with the type's name + synonyms + keywords. Conservative: needs
-// >= 2 distinct term hits, else returns null (caller searches broadly).
-async function matchRecordType(query) {
+// Map a query to the most likely taxonomy record type, so the search can narrow to that
+// type's linked source system(s) - this prevents e.g. a payroll request drowning under HR
+// documents that merely share words like "January"/"compensation". HYBRID router: a cheap
+// keyword pass handles clear lexical matches; when it is weak or ambiguous (exactly when
+// keyword routing misfires onto the wrong source) a small AI classifier arbitrates against
+// the full taxonomy. AI step is toggle-gated (portal_search_ai_routing, default ON) and
+// FAIL-OPEN: any error falls back to the keyword winner (old behavior), never breaks search.
+function scoreTypesByKeyword(query, rts) {
   var qTokens = tokenize(query);
-  if (!qTokens.length) return null;
+  if (!qTokens.length) return [];
   var qset = {}; qTokens.forEach(function(t){ qset[t] = 1; });
-  var rts = await all("SELECT id, name, synonyms, keywords FROM record_types WHERE status = 'active'");
-  var best = null;
-  rts.forEach(function(rt){
+  return rts.map(function(rt){
     var terms = tokenize(rt.name).concat(flatTokens(rt.synonyms)).concat(flatTokens(rt.keywords));
     var seen = {}, hits = 0;
     terms.forEach(function(t){ if (qset[t] && !seen[t]) { seen[t] = 1; hits++; } });
-    if (!best || hits > best.hits) best = { rt: rt, hits: hits };
-  });
-  if (!best || best.hits < 2) return null;
-  var links = await all('SELECT repository_id FROM record_type_repositories WHERE record_type_id = ?', [best.rt.id]);
+    return { rt: rt, hits: hits };
+  }).sort(function(a, b){ return b.hits - a.hits; });
+}
+
+async function aiClassifyType(query, rts) {
+  var Anthropic = require('@anthropic-ai/sdk');
+  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  var catalog = rts.map(function(rt, i){
+    var aka = flatTokens(rt.synonyms).slice(0, 6).join(', ');
+    return (i + 1) + '. ' + rt.name + (aka ? ' (' + aka + ')' : '');
+  }).join('\n');
+  var prompt = 'A person is requesting a public record. Their request: "' + query + '"\n\n' +
+    'Here is the catalog of record types this agency keeps:\n' + catalog + '\n\n' +
+    'Which ONE record type best matches the kind of record the person is asking for? ' +
+    'Judge by what the record actually IS, not just shared words. Reply with ONLY the item number. ' +
+    'If no type clearly fits, reply 0.';
+  var resp = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 10, messages: [{ role: 'user', content: prompt }] });
+  var text = resp.content.map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
+  var n = parseInt((text.match(/[0-9]+/) || ['0'])[0], 10);
+  if (!n || n < 1 || n > rts.length) return null;
+  return rts[n - 1];
+}
+
+async function matchRecordType(query) {
+  var rts = await all("SELECT id, name, synonyms, keywords FROM record_types WHERE status = 'active'");
+  if (!rts.length) return null;
+  var scored = scoreTypesByKeyword(query, rts);
+  var top = scored[0] || { hits: 0 };
+  var second = scored[1] || { hits: 0 };
+  var chosen = null;
+  // Trust the keyword pass only when it is a strong, unambiguous winner.
+  if (top.hits >= 3 && (top.hits - second.hits) >= 2) {
+    chosen = top.rt;
+  } else {
+    var aiFlag = await get("SELECT value FROM system_config WHERE key = 'portal_search_ai_routing'");
+    var aiOn = !aiFlag || aiFlag.value === '1' || aiFlag.value === 'true';
+    if (aiOn) {
+      try {
+        chosen = await aiClassifyType(query, rts);
+        if (chosen) console.log('[routing] AI -> "' + chosen.name + '" for: ' + query);
+      } catch (e) { console.error('[routing] AI classify failed:', e && e.message); }
+    }
+    if (!chosen && top.hits >= 2) chosen = top.rt; // fall back to old keyword behavior
+  }
+  if (!chosen) return null;
+  var links = await all('SELECT repository_id FROM record_type_repositories WHERE record_type_id = ?', [chosen.id]);
   return {
-    recordTypeId: best.rt.id,
-    recordTypeName: best.rt.name,
-    hits: best.hits,
+    recordTypeId: chosen.id,
+    recordTypeName: chosen.name,
     sourceIds: links.map(function(l){ return l.repository_id; }),
-    expandedTerms: flatTokens(best.rt.synonyms).concat(flatTokens(best.rt.keywords)).slice(0, 10).join(' ')
+    expandedTerms: flatTokens(chosen.synonyms).concat(flatTokens(chosen.keywords)).slice(0, 10).join(' ')
   };
 }
 
