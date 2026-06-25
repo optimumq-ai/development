@@ -13,6 +13,7 @@ const ep = require('../services/estimateProfile');
 const email = require('../services/email');
 const feeNotice = require('../services/feeNotice');
 const emailTemplate = require('../services/emailTemplate');
+const enforcement = require('../services/enforcement');
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 var taskRouting = require('../services/taskRouting');
@@ -170,6 +171,8 @@ router.post('/request/:requestId/notice/send', requireAuth, async function (req,
     if (!to) return res.status(400).json({ error: 'No requestor email address on this request.' });
     var snap = await latestEstimate(req.params.requestId);
     if (!snap) return res.status(400).json({ error: 'No saved estimate to send.' });
+    var gate = await enforcement.checkSection(null, 'fees');
+    if (!gate.ok) return res.status(409).json({ error: gate.reason, needsAttestation: true, section: 'fees', drift: !!gate.drift });
     var subject = (req.body && req.body.subject) || 'Cost estimate for your public records request';
     var text = (req.body && req.body.text) || '';
     if (!text.trim()) return res.status(400).json({ error: 'The notice body is empty.' });
