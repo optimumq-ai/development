@@ -120,3 +120,21 @@ interrupted (connection/limit) before committing; the work was recovered intact 
 and committed (backend = commit 69ffabe; frontend + upload = this commit).
 The config-freshness loop is now complete end to end. Remaining future work: fold the source registry +
 attestation into the Jurisdiction Profile data model (the next foundational item).
+
+## Repositioned: no autonomous law-tracking (2026-06-24)
+Decision: Optimum Q must never imply it monitors, tracks, or detects changes in the law - that would
+quietly assume responsibility for being right about the law and invite reliance on the software. The agency
+(whose managers are informed of changes through their associations/newsletters well before effective dates)
+brings the approved document; Optimum Q only stages, reviews, and (next) effective-dates it.
+Removed/neutered:
+- Backend: the scheduled run no longer fetches/checks/monitors any source or auto-extracts. runScan now ONLY
+  sends the periodic courtesy reminder and logs it. Seeded source URLs (config_sources) cleared. Auto-extract
+  left off and unreachable from the UI. Cadence default 30d -> 182d (~6 months; freshness_reminder_days).
+- Email: reminder reworded to a six-monthly courtesy reminder - review changes you're aware of and update
+  before each effective date; explicit that it's routine (not a notice that anything changed) and that staying
+  current is the office's responsibility; upload/effective-date/review/approve/auto-deploy framing.
+- Frontend: 'Rule Updates' -> 'Update Configuration'. Removed registered-sources card, URLs, 'Check now',
+  auto-check toggle, 'last checked'. Page is now upload-approved-copy -> review -> approve.
+Dormant (not removed, just unused by UI): the /sources, /sources/:id/check endpoints and the configExtractors
+URL-fetch path. NEXT: effective-dated configuration (schedule an approved change for a future date; a nightly
+check promotes it on its effective date; prior versions retained as superseded history for defensibility).

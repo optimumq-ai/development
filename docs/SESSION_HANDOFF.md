@@ -504,3 +504,6 @@ Version-bound per-section sign-off: attest/unattest (SYSTEM_ADMIN/DIRECTOR) reco
 
 ## Attestation enforcement hardwired behind dev_mode (BUILT 2026-06-24)
 enforcement.js master switch system_config dev_mode (default ON=bypass, fail-open). checkSection gate wired into cost-notice SEND (409 when dev_mode OFF + fees unattested/drifted). GET/POST /jurisdiction-profile/enforcement (toggle=SYSTEM_ADMIN). Hidden UI panel at /jurisdiction-profile#dev. dev_mode ON now. Reusable as a master bypass for other incomplete features. Verified all gate states + route-order fix (literals before /:jid).
+
+## Repositioned: no autonomous law-tracking (2026-06-24)
+Removed all user-facing + scheduled law-monitoring. runScan = reminder-only (no fetch/check/auto-extract); source URLs cleared; cadence default 182d. Reminder email reframed to six-monthly courtesy reminder (office responsibility; upload approved doc -> effective date -> review -> approve -> auto-deploy). Frontend Rule Updates -> Update Configuration: upload-approved-copy -> review -> approve (no sources/URLs/check-now/auto-check/last-checked). NEXT: effective-dated configuration + nightly promotion + superseded history.
