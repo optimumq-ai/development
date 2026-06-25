@@ -498,3 +498,6 @@ Redaction/taxonomy apply by staging pending-review drafts (applyMode stage_draft
 
 ## Jurisdiction Profile data model (BUILT 2026-06-24)
 Versioned/sectioned INDEX over per-area config stores (not a migration). Table jurisdiction_profile_sections + jurisdictionProfile service (signature/sync/getProfile) + /api/jurisdiction-profile (status/sync) + readiness dashboard page (nav isElev, read-only) + freshness-apply bumps section version. 6 TX sections at v1; version-bump verified. See JURISDICTION_PROFILE_DESIGN.md. NEXT: version-bound attestation gate (columns already in schema).
+
+## Jurisdiction Profile attestation gate (BUILT 2026-06-24)
+Version-bound per-section sign-off: attest/unattest (SYSTEM_ADMIN/DIRECTOR) record who/when/which version+hash; underlying change (manual or freshness-apply) bumps version -> readiness needs_reattestation (stale sign-off cannot persist); dashboard has Review&attest modal + drift re-attest + Remove sign-off. Enforcement boundary documented (human-in-loop already safe; sectionState() is the hook for future autonomous features; no hard-gate on live processing yet by design). NEXT: readiness hub actions + address->jurisdiction precedence.

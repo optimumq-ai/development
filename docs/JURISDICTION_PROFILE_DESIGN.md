@@ -30,7 +30,7 @@ keeps every existing area working untouched.
 VERIFIED: 6 TX sections index at v1; version bumps v1->v2 on an underlying fee change; sections table is fully
 derived (safe to delete + re-sync to a clean baseline).
 
-## NEXT slice — version-bound attestation gate (the keystone for "eliminate the OQ consultant")
+## Version-bound attestation gate (BUILT 2026-06-24) — the keystone for "eliminate the OQ consultant"
 Build on the columns already present:
 - Per-section ATTEST action: record attested_by / attested_at / attested_version / attested_hash = current.
 - Un-attested sections default to safe/manual handling (do not silently apply unreviewed config).
@@ -39,3 +39,30 @@ Build on the columns already present:
 - UI: per-section "Review & attest" with the version/hash being signed; surface drift prominently.
 Then: readiness hub actions (run auto-config from here, fold in the source registry), and later
 address->jurisdiction resolution + precedence stack.
+
+### Attestation gate — built
+- backend service: attest(jid,section,actor) records attested_by/at/version + attested_hash = current content_hash;
+  unattest clears it; sectionState(jid,section) exposes per-section readiness for other modules.
+- routes: POST /api/jurisdiction-profile/attest + /unattest (SYSTEM_ADMIN / DIRECTOR only).
+- drift / re-arm: a section's version bumps whenever its underlying config changes (manual edit OR a
+  config-freshness apply, via the apply->sync hook). Once version/hash move past the attested ones,
+  readiness becomes 'needs_reattestation' — a stale sign-off can never silently cover changed config.
+- UI: per-section "Review & attest" -> sign-off modal naming the section + exact version, disclaimer +
+  confirm checkbox; attested rows show who/when/which version + "Remove sign-off"; drifted rows show the
+  amber re-review detail + "Re-attest"; summary counts attested + needs-re-attestation.
+- VERIFIED full cycle: attest (v1) -> underlying change (v2) -> needs_reattestation -> re-attest (v2) ->
+  un-attest. Drift loop is closed by composition: apply-hook bumps the section version (verified) and a
+  version bump on an attested section yields needs_reattestation (verified).
+
+### Enforcement boundary (deliberate)
+The system today is human-in-the-loop: AI only PROPOSES config; a person reviews and applies it. Nothing
+applies un-reviewed config autonomously, so "un-attested defaults to safe/manual" is already honored by the
+architecture. The attestation layer adds (a) a recorded, version-bound sign-off trail and (b) readiness
+visibility. sectionState() is the hook any FUTURE autonomous feature must consult before acting on a section
+that isn't attested. We intentionally did NOT hard-gate live request processing (fees/routing/redaction) on
+attestation now: with nothing yet attested that would flip the whole demo to manual and break working flows.
+That hard-gate becomes meaningful only once cities actually sign off in production.
+
+## NEXT (after attestation)
+Readiness hub actions (run auto-config from the profile; fold the config-freshness source registry in as
+per-section sources), then address->jurisdiction resolution + the precedence stack (which profile applies).
