@@ -25,6 +25,7 @@ export default function RuleUpdatesPage() {
   const [review, setReview] = useState(null);
   const [cadenceInput, setCadenceInput] = useState(182);
   const [recipientInput, setRecipientInput] = useState('');
+  const [scheduled, setScheduled] = useState([]);
 
   useEffect(function () { load(); }, []);
   async function load() {
@@ -32,6 +33,7 @@ export default function RuleUpdatesPage() {
       var s = await api.get('/config-freshness/status'); setStatus(s.data);
       setCadenceInput(s.data.cadenceDays || 182); setRecipientInput(s.data.recipient || '');
       var p = await api.get('/config-freshness/proposals?status=pending'); setProposals(p.data.proposals || []);
+      var sc = await api.get('/config-freshness/scheduled'); setScheduled(sc.data.scheduled || []);
     } catch (e) {}
   }
   async function runReminder() {
@@ -48,16 +50,19 @@ export default function RuleUpdatesPage() {
     await load(); setBusy(false);
   }
   async function openReview(id) {
-    try { var r = await api.get('/config-freshness/proposals/' + id); setReview({ detail: r.data, step: 1, editedText: JSON.stringify(r.data.proposed, null, 2), agreed: false, error: '' }); } catch (e) {}
+    try { var r = await api.get('/config-freshness/proposals/' + id); setReview({ detail: r.data, step: 1, editedText: JSON.stringify(r.data.proposed, null, 2), agreed: false, error: '', mode: 'now', effectiveDate: '' }); } catch (e) {}
   }
   async function applyProposal() {
     var rv = review, cfg;
-    try { cfg = JSON.parse(rv.editedText); } catch (e) { setReview(Object.assign({}, rv, { error: 'The edited configuration is not valid JSON — please fix it before applying.' })); return; }
+    try { cfg = JSON.parse(rv.editedText); } catch (e) { setReview(Object.assign({}, rv, { error: 'The edited configuration is not valid JSON — please fix it before approving.' })); return; }
+    var payload = { editedConfig: cfg, attested: true };
+    if (rv.mode === 'schedule' && rv.effectiveDate) payload.effectiveDate = rv.effectiveDate;
     setBusy(true);
-    try { await api.post('/config-freshness/proposals/' + rv.detail.proposal.id + '/apply', { editedConfig: cfg, attested: true }); setReview(null); setMsg('Approved. The configuration has been updated.'); }
-    catch (e) { setReview(Object.assign({}, rv, { error: (e.response && e.response.data && e.response.data.error) || 'Apply failed.' })); setBusy(false); return; }
+    try { var r = await api.post('/config-freshness/proposals/' + rv.detail.proposal.id + '/apply', payload); setReview(null); setMsg(r.data && r.data.scheduled ? ('Scheduled. This change will take effect automatically on ' + r.data.effectiveDate + '.') : 'Approved. The configuration has been updated.'); }
+    catch (e) { setReview(Object.assign({}, rv, { error: (e.response && e.response.data && e.response.data.error) || 'Could not complete.' })); setBusy(false); return; }
     await load(); setBusy(false);
   }
+  async function cancelScheduled(id) { setBusy(true); setMsg(''); try { await api.post('/config-freshness/scheduled/' + id + '/cancel'); setMsg('Scheduled change cancelled — it has been returned to Review & approve.'); } catch (e) { setMsg('Could not cancel that scheduled change.'); } await load(); setBusy(false); }
   async function dismiss(id) { setBusy(true); try { await api.post('/config-freshness/proposals/' + id + '/dismiss'); setReview(null); } catch (e) {} await load(); setBusy(false); }
   async function saveSettings() { setBusy(true); setMsg(''); try { await api.post('/config-freshness/settings', { cadenceDays: Number(cadenceInput) || 182, recipient: recipientInput }); setMsg('Reminder settings saved.'); } catch (e) { setMsg('Could not save settings.'); } await load(); setBusy(false); }
   async function uploadFile(file) { if (!file) return; setBusy(true); setMsg(''); try { var fd = new FormData(); fd.append('file', file); fd.append('domain', pasteDomain); var r = await api.post('/config-freshness/upload', fd, { headers: { 'Content-Type': 'multipart/form-data' } }); if (r.data && r.data.ok === false) setMsg('Could not read that file: ' + r.data.error); else setMsg('Document received — Optimum Q drafted a proposed update below for your review.'); } catch (e) { setMsg('Upload failed.'); } await load(); setBusy(false); }
@@ -107,6 +112,28 @@ export default function RuleUpdatesPage() {
         </div>
       ) : null}
 
+      {scheduled.length > 0 ? (
+        <div style={card}>
+          <div style={{ fontSize: '15px', fontWeight: 700, color: '#111', marginBottom: '4px' }}>Scheduled changes ({scheduled.length})</div>
+          <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '12px', lineHeight: 1.5 }}>Approved changes waiting for their effective date. Each deploys automatically on that date — no further action needed. Cancelling returns a change to Review &amp; approve.</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {scheduled.map(function (sc) {
+              return (
+                <div key={sc.id} style={{ border: '1px solid #E5E7EB', borderRadius: '8px', padding: '12px 14px', display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                  <span style={{ background: '#EBF3FB', color: navy, fontSize: '11px', fontWeight: 700, padding: '3px 10px', borderRadius: '20px', whiteSpace: 'nowrap' }}>{domLabel(sc.domain)}</span>
+                  <div style={{ flex: 1, minWidth: '200px' }}>
+                    <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.4 }}>{sc.summary || 'Approved configuration update'}</div>
+                    <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '2px' }}>scheduled {String(sc.created_at).slice(0, 10)}{sc.created_by ? ' by ' + sc.created_by : ''}</div>
+                  </div>
+                  <span style={{ background: '#F0FDF4', color: '#166534', fontSize: '12px', fontWeight: 700, padding: '4px 12px', borderRadius: '8px', whiteSpace: 'nowrap' }}>Effective {sc.effective_date}</span>
+                  <button onClick={function () { cancelScheduled(sc.id); }} disabled={busy} style={Object.assign({}, btnOutline, { color: '#9B1C1C' })}>Cancel</button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
       <div style={card}>
         <div style={{ fontSize: '15px', fontWeight: 700, color: '#111', marginBottom: '12px' }}>Reminder settings</div>
         <div style={{ display: 'flex', gap: '16px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
@@ -126,6 +153,7 @@ export default function RuleUpdatesPage() {
 function ReviewModal(props) {
   var review = props.review, setReview = props.setReview, busy = props.busy;
   var d = review.detail, p = d.proposal;
+  var tomorrow = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
   function set(patch) { setReview(Object.assign({}, review, patch)); }
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,.5)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '40px 16px', overflowY: 'auto', zIndex: 50 }} onClick={function () { setReview(null); }}>
@@ -168,14 +196,31 @@ function ReviewModal(props) {
             <div style={{ background: '#FFFBEB', border: '1px solid #F59E0B', borderRadius: '8px', padding: '14px 16px', fontSize: '13px', color: '#92400E', lineHeight: 1.55 }}>
               {d.applyMode === 'stage_drafts' ? <span><strong>Please confirm.</strong> These items will be added as <strong>pending-review drafts</strong> in {d.applyTarget}. They do not take effect until separately reviewed and approved there. Optimum Q proposes configuration but does not provide legal advice.</span> : <span><strong>Please confirm before approving.</strong> Approving this change updates the configuration the system uses to process requests ({d.applyTarget}). You are responsible for verifying it against the approved source. Optimum Q proposes configuration but does not provide legal advice; this is not a substitute for review by your legal counsel.</span>}
             </div>
+            {d.applyMode !== 'stage_drafts' ? (
+              <div style={{ marginTop: '14px', border: '1px solid #E5E7EB', borderRadius: '8px', padding: '12px 14px' }}>
+                <div style={{ fontSize: '13px', fontWeight: 600, color: '#111', marginBottom: '8px' }}>When should this take effect?</div>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#374151', cursor: 'pointer', marginBottom: '6px' }}>
+                  <input type="radio" name="effmode" checked={review.mode !== 'schedule'} onChange={function () { set({ mode: 'now' }); }} /> Apply now
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', color: '#374151', cursor: 'pointer' }}>
+                  <input type="radio" name="effmode" checked={review.mode === 'schedule'} onChange={function () { set({ mode: 'schedule' }); }} /> Schedule for a future effective date
+                </label>
+                {review.mode === 'schedule' ? (
+                  <div style={{ marginTop: '8px', paddingLeft: '24px' }}>
+                    <input type="date" min={tomorrow} value={review.effectiveDate || ''} onChange={function (e) { set({ effectiveDate: e.target.value }); }} style={{ padding: '7px 10px', borderRadius: '8px', border: '1px solid #E5E7EB', fontSize: '13px' }} />
+                    <div style={{ fontSize: '11px', color: '#9CA3AF', marginTop: '6px', lineHeight: 1.5 }}>The current configuration stays in effect until this date, when Optimum Q applies the change automatically.</div>
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
             <label style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', fontSize: '13px', color: '#374151', marginTop: '14px', cursor: 'pointer' }}>
               <input type="checkbox" checked={review.agreed} onChange={function (e) { set({ agreed: e.target.checked }); }} style={{ marginTop: '3px' }} />
-              <span>I have reviewed this update against its approved source and authorize {d.applyMode === 'stage_drafts' ? 'adding it as pending-review drafts' : 'updating the configuration'}.</span>
+              <span>I have reviewed this update against its approved source and authorize {d.applyMode === 'stage_drafts' ? 'adding it as pending-review drafts' : (review.mode === 'schedule' ? 'scheduling it to take effect on the date above' : 'updating the configuration')}.</span>
             </label>
             {review.error ? <div style={{ color: '#9B1C1C', fontSize: '13px', marginTop: '10px' }}>{review.error}</div> : null}
             <div style={{ display: 'flex', justifyContent: 'space-between', gap: '8px', marginTop: '18px' }}>
               <button onClick={function () { set({ step: 1, error: '' }); }} disabled={busy} style={btnOutline}>Back</button>
-              <button onClick={props.onApply} disabled={busy || !review.agreed} style={Object.assign({}, btn, { background: review.agreed ? navy : '#9CA3AF' })}>{d.applyMode === 'stage_drafts' ? 'Add as drafts' : 'Approve'}</button>
+              <button onClick={props.onApply} disabled={busy || !review.agreed || (review.mode === 'schedule' && !review.effectiveDate)} style={Object.assign({}, btn, { background: review.agreed ? navy : '#9CA3AF' })}>{review.mode === 'schedule' ? 'Schedule' : (d.applyMode === 'stage_drafts' ? 'Add as drafts' : 'Approve')}</button>
             </div>
           </div>
         )}
