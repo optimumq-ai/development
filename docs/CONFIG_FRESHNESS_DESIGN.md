@@ -138,3 +138,27 @@ Removed/neutered:
 Dormant (not removed, just unused by UI): the /sources, /sources/:id/check endpoints and the configExtractors
 URL-fetch path. NEXT: effective-dated configuration (schedule an approved change for a future date; a nightly
 check promotes it on its effective date; prior versions retained as superseded history for defensibility).
+
+## Effective-dated configuration (BUILT 2026-06-24)
+The agency brings an approved change and decides WHEN it takes effect; Optimum Q deploys it on that date.
+- Tables: scheduled_config_changes (approved changes awaiting a future effective date: jurisdiction, domain,
+  effective_date, config_json to apply, summary, source_ref, proposal_id, status scheduled|applied|cancelled);
+  config_history (each live config's effective window per domain: config_json, effective_from, effective_to,
+  source initial|applied|scheduled_promotion) for "what configuration was in effect on date X?" defensibility.
+- Service effectiveConfig.js: schedule() (future date; live config untouched), promoteDue() (applies any
+  scheduled change whose effective_date <= today; idempotent; ordered by date), cancel() (before it lands;
+  returns the linked proposal to the review queue), applyConfig() (shared apply: adapter.apply + history
+  snapshot + profile re-index), recordHistory/seedBaselineHistory, startPromotionScheduler (startup + hourly).
+- Approve endpoint branches: future effective date on a live area (fee/deadline/exemption) -> schedule
+  (proposal -> 'scheduled'); else apply now (records history). Endpoints: GET /scheduled, POST
+  /scheduled/:id/cancel, POST /promote. server.js starts the hourly promotion.
+- UI (Update Configuration): the approve step offers Apply now / Schedule for a future date (date picker,
+  live areas only); a "Scheduled changes" list shows pending changes (area, summary, Effective <date>) with
+  Cancel. Scheduling only applies to live areas; redaction/taxonomy stay add-as-drafts-now.
+- Effective-date scheduling is NOT offered for stage_drafts areas (redaction/taxonomy) - those create drafts
+  that need separate approval anyway.
+VERIFIED: schedule (live config untouched) -> appears in list -> promoteDue applies on/after effective date
+(history window captured) -> cancel returns proposal to queue; future-dated waits; all reversible. Baseline
+config_history seeded for jur-tx (one open window per live area). Promotion runs hourly + at startup.
+NEXT (optional): a read-only history viewer ("what was in effect on <date>"); a per-section "1 change
+scheduled for <date>" indicator on the Jurisdiction Profile dashboard.
