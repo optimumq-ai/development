@@ -147,6 +147,7 @@ async function start() {
     require('./src/services/massJobs').startWorker();
     require('./src/services/tickler').startScheduler();
     require('./src/services/configFreshness').startScheduler();
+    require('./src/services/effectiveConfig').startPromotionScheduler();
   });
 }
 

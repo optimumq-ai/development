@@ -6,6 +6,7 @@ const { all, get, run } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const F = require('../services/configFreshness');
 const CE = require('../services/configExtractors');
+const EC = require('../services/effectiveConfig');
 const multer = require('multer');
 const fs = require('fs');
 const { execFileSync } = require('child_process');
@@ -111,10 +112,15 @@ router.post('/proposals/:id/apply', requireAuth, ROLE, async function (req, res)
     var ad = CE.adapter(pr.domain);
     if (!ad || !ad.apply) return res.status(400).json({ error: 'This domain is review-only; apply the change in its area editor.', reviewOnly: true });
     var cfg = b.editedConfig; if (cfg == null) { try { cfg = JSON.parse(pr.proposed_json || '{}'); } catch (e) { cfg = {}; } }
-    var result = await ad.apply(pr.jurisdiction_id, cfg, req.user && req.user.name);
     var actor = (req.user && req.user.name) || 'staff';
+    var eff = b.effectiveDate;
+    if (eff && ad.applyMode === 'live' && eff > EC.today()) {
+      var sc = await EC.schedule(pr.jurisdiction_id, pr.domain, eff, cfg, { summary: pr.summary, sourceRef: pr.source_ref, proposalId: pr.id, actor: actor });
+      await run("UPDATE config_proposals SET status='scheduled', applied_json=?, reviewed_by=?, reviewed_at=? WHERE id=?", [JSON.stringify(cfg), actor, nowStr(), pr.id]);
+      return res.json({ scheduled: true, effectiveDate: eff, id: sc.id });
+    }
+    var result = await EC.applyConfig(pr.jurisdiction_id, pr.domain, cfg, actor, 'auto-config', pr.summary);
     await run("UPDATE config_proposals SET status='applied', applied_json=?, attested_by=?, attested_at=?, reviewed_by=?, reviewed_at=? WHERE id=?", [JSON.stringify(cfg), actor, nowStr(), actor, nowStr(), pr.id]);
-    try { await require('../services/jurisdictionProfile').sync(pr.jurisdiction_id, { source: 'auto-config', actor: actor }); } catch (e) {}
     res.json({ applied: true, target: result && result.target });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
@@ -144,4 +150,13 @@ router.post('/upload', requireAuth, ROLE, upload.single('file'), async function 
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+router.get('/scheduled', requireAuth, async function (req, res) {
+  try { var jid = await F.activeJurisdiction(); res.json({ scheduled: await EC.listScheduled(jid) }); } catch (e) { res.status(500).json({ error: e.message }); }
+});
+router.post('/scheduled/:id/cancel', requireAuth, ROLE, async function (req, res) {
+  try { res.json(await EC.cancel(req.params.id, req.user && req.user.name)); } catch (e) { res.status(400).json({ error: e.message }); }
+});
+router.post('/promote', requireAuth, ROLE, async function (req, res) {
+  try { res.json(await EC.promoteDue({ trigger: 'manual' })); } catch (e) { res.status(500).json({ error: e.message }); }
+});
 module.exports = router;
