@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
+import { Link } from 'react-router-dom';
 
 var CAT_COLORS = {
   privacy: { bg: '#DBEAFE', fg: '#1E40AF' },
@@ -59,6 +60,9 @@ export default function RedactionRulesPage() {
   var [srcOpen, setSrcOpen] = useState({});
   var [discovering, setDiscovering] = useState(false);
   var [notice, setNotice] = useState(null);
+  var [tplReminder, setTplReminder] = useState(false);
+  var [tplRemindedOnce, setTplRemindedOnce] = useState(false);
+  function remindTemplates() { if (!tplRemindedOnce) { setTplReminder(true); setTplRemindedOnce(true); } }
 
   useEffect(function () { load(); }, []);
   async function load() {
@@ -73,13 +77,13 @@ export default function RedactionRulesPage() {
   function setB(id, v) { setBusy(function (b) { var n = Object.assign({}, b); n[id] = v; return n; }); }
   function toggle(id) { setExpanded(function (e) { var n = Object.assign({}, e); n[id] = !n[id]; return n; }); }
 
-  async function approve(id) { setB(id, true); try { await api.patch('/redaction/rules/' + id + '/approve'); await load(); } catch (e) { alert('Approve failed (supervisor role required).'); } setB(id, false); }
-  async function toggleActive(r) { setB(r.id, true); try { await api.patch('/redaction/rules/' + r.id, { is_active: !r.is_active }); await load(); } catch (e) { alert('Update failed (supervisor role required).'); } setB(r.id, false); }
-  async function del(r) { if (!window.confirm('Permanently delete "' + r.title + '"? This cannot be undone.')) return; setB(r.id, true); try { await api.delete('/redaction/rules/' + r.id); await load(); } catch (e) { alert('Delete failed (supervisor role required).'); } setB(r.id, false); }
+  async function approve(id) { setB(id, true); try { await api.patch('/redaction/rules/' + id + '/approve'); await load(); remindTemplates(); } catch (e) { alert('Approve failed (supervisor role required).'); } setB(id, false); }
+  async function toggleActive(r) { setB(r.id, true); try { await api.patch('/redaction/rules/' + r.id, { is_active: !r.is_active }); await load(); remindTemplates(); } catch (e) { alert('Update failed (supervisor role required).'); } setB(r.id, false); }
+  async function del(r) { if (!window.confirm('Permanently delete "' + r.title + '"? This cannot be undone.')) return; setB(r.id, true); try { await api.delete('/redaction/rules/' + r.id); await load(); remindTemplates(); } catch (e) { alert('Delete failed (supervisor role required).'); } setB(r.id, false); }
   async function submitAdd() {
     if (!addForm.title.trim() || !addForm.description.trim()) return;
     setAdding(true);
-    try { await api.post('/redaction/rules', addForm); setShowAdd(false); setAddForm({ title: '', description: '', legal_basis: '', category: 'privacy' }); await load(); }
+    try { await api.post('/redaction/rules', addForm); setShowAdd(false); setAddForm({ title: '', description: '', legal_basis: '', category: 'privacy' }); await load(); remindTemplates(); }
     catch (e) { alert('Could not add rule.'); }
     setAdding(false);
   }
@@ -310,6 +314,21 @@ export default function RedactionRulesPage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      ) : null}
+
+      {tplReminder ? (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px', zIndex: 60 }} onClick={function () { setTplReminder(false); }}>
+          <div style={{ background: 'white', borderRadius: '12px', maxWidth: '520px', width: '100%', padding: '24px' }} onClick={function (e) { e.stopPropagation(); }}>
+            <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#111', margin: '0 0 12px' }}>Remember to check your redaction templates</h2>
+            <div style={{ background: '#FFFBEB', border: '1px solid #F59E0B', borderRadius: '8px', padding: '14px 16px', fontSize: '13px', color: '#92400E', lineHeight: 1.55 }}>
+              You changed a redaction rule. The redaction rules engine affects <strong>template creation and document redaction going forward only</strong> &mdash; it does not change documents already redacted, and it does not automatically update existing redaction templates. If this change should also apply to mass redaction, update the affected redaction template(s) so they match.
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '18px' }}>
+              <Link to="/mass-redaction" style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#1F4E79', fontSize: '13px', fontWeight: 600, textDecoration: 'none' }}>Go to templates</Link>
+              <button onClick={function () { setTplReminder(false); }} style={{ padding: '8px 14px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Got it</button>
+            </div>
           </div>
         </div>
       ) : null}
