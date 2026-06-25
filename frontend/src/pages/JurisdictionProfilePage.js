@@ -21,9 +21,12 @@ export default function JurisdictionProfilePage() {
   const [msg, setMsg] = useState('');
   const [attestTarget, setAttestTarget] = useState(null);
   const [agreed, setAgreed] = useState(false);
+  const [devMode, setDevMode] = useState(null);
+  const devReveal = (typeof window !== 'undefined' && window.location.hash.toLowerCase().indexOf('dev') >= 0);
 
   useEffect(function () { load(); }, []);
-  async function load() { try { var r = await api.get('/jurisdiction-profile/status'); setProfile(r.data); } catch (e) {} }
+  async function load() { try { var r = await api.get('/jurisdiction-profile/status'); setProfile(r.data); } catch (e) {} try { var e2 = await api.get('/jurisdiction-profile/enforcement'); setDevMode(!!e2.data.devMode); } catch (e) {} }
+  async function toggleDev() { setBusy(true); setMsg(''); try { var r = await api.post('/jurisdiction-profile/enforcement', { devMode: !devMode }); setDevMode(!!r.data.devMode); setMsg('Developer mode ' + (r.data.devMode ? 'ON — enforcement bypassed.' : 'OFF — attestation now enforced for gated actions.')); } catch (e) { setMsg((e.response && e.response.status === 403) ? 'Only a system administrator can change this.' : 'Could not change developer mode.'); } setBusy(false); }
   async function resync() { setBusy(true); setMsg(''); try { var r = await api.post('/jurisdiction-profile/sync'); setProfile(r.data); setMsg('Re-indexed from the live configuration.'); } catch (e) { setMsg('Re-sync failed.'); } setBusy(false); }
   async function doAttest() { if (!attestTarget) return; setBusy(true); setMsg(''); try { var r = await api.post('/jurisdiction-profile/attest', { section: attestTarget.section }); setProfile(r.data); setMsg('Signed off: ' + attestTarget.label + ' (version ' + attestTarget.version + ').'); } catch (e) { setMsg((e.response && e.response.data && e.response.data.error) || 'Sign-off failed.'); } setAttestTarget(null); setAgreed(false); setBusy(false); }
   async function doUnattest(section) { setBusy(true); setMsg(''); try { var r = await api.post('/jurisdiction-profile/unattest', { section: section }); setProfile(r.data); } catch (e) { setMsg('Could not remove sign-off.'); } setBusy(false); }
@@ -95,6 +98,19 @@ export default function JurisdictionProfilePage() {
               <button onClick={function () { setAttestTarget(null); setAgreed(false); }} disabled={busy} style={btnOutline}>Cancel</button>
               <button onClick={doAttest} disabled={busy || !agreed} style={Object.assign({}, btn, { background: agreed ? navy : '#9CA3AF' })}>Sign off</button>
             </div>
+          </div>
+        </div>
+      ) : null}
+
+      {devReveal ? (
+        <div style={{ marginTop: '24px', border: '1px dashed #CBD5E1', borderRadius: '10px', padding: '14px 16px', background: '#F8FAFC' }}>
+          <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '.05em' }}>Developer settings</div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap', marginTop: '8px' }}>
+            <div style={{ fontSize: '13px', color: '#475569', lineHeight: 1.5, maxWidth: '620px' }}>
+              <strong>Developer mode (enforcement bypass): {devMode === null ? '…' : devMode ? 'ON' : 'OFF'}.</strong>{' '}
+              {devMode ? 'Attestation is NOT yet required — gated actions (e.g. sending a cost notice) proceed normally regardless of sign-off. Leave ON until configuration and testing are complete.' : 'Attestation is ENFORCED — a gated action will be blocked if its section is not signed off (or has changed since sign-off).'}
+            </div>
+            <button onClick={toggleDev} disabled={busy || devMode === null} style={Object.assign({}, btn, { whiteSpace: 'nowrap', background: devMode ? '#92400E' : '#166534' })}>{devMode ? 'Turn enforcement ON' : 'Turn enforcement OFF (back to dev)'}</button>
           </div>
         </div>
       ) : null}
