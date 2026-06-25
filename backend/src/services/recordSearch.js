@@ -142,23 +142,28 @@ async function searchAll(query) {
   var match = null;
   try { match = await matchRecordType(query); } catch(e) {}
 
-  // Narrow to the matched type's linked sources ONLY when that yields a non-empty
-  // searchable set; otherwise fall back to searching everything (broad fallback).
-  var targetRepos = searchable;
-  if (match && match.sourceIds.length) {
-    var narrowed = searchable.filter(function(r){ return match.sourceIds.indexOf(r.id) >= 0; });
-    if (narrowed.length) targetRepos = narrowed;
-  }
   // Query expansion: add the matched type's synonyms/keywords to improve recall.
   var effectiveQuery = (match && match.expandedTerms) ? (query + ' ' + match.expandedTerms) : query;
 
-  var searches = targetRepos.map(async function(repo) {
+  // SOFT routing (robust to thin / partial / lazily-built taxonomies): we ALWAYS search every
+  // active source - routing never EXCLUDES a source - so a mis-classified record type (or a
+  // wanted type that simply was not created) can never hide the source where the real record
+  // lives. Instead, results from the matched type's linked source(s) are PRIORITIZED in the
+  // ranking below. Worst case (wrong route, or no route at all) degrades to a plain broad
+  // search + the judge - never a silent hard miss. The payoff of a complete taxonomy is better
+  // ranking; the cost of an incomplete one is only the loss of that ranking boost.
+  var routedSet = {};
+  if (match && match.sourceIds.length) match.sourceIds.forEach(function(id){ routedSet[id] = 1; });
+
+  var searches = searchable.map(async function(repo) {
     var connector = connectors[repo.connector_type];
     if (!connector) return [];
     var config = {};
     try { config = repo.config ? JSON.parse(repo.config) : {}; } catch(e) {}
     try {
-      return (repo.connector_type === 'demo' ? await connector.search(effectiveQuery) : await connector.search(effectiveQuery, config)) || [];
+      var res = (repo.connector_type === 'demo' ? await connector.search(effectiveQuery) : await connector.search(effectiveQuery, config)) || [];
+      if (routedSet[repo.id]) res.forEach(function(r){ r._routed = 1; });
+      return res;
     } catch(e) {
       console.error('[recordSearch] connector', repo.connector_type, 'failed:', e.message);
       return [];
@@ -172,10 +177,12 @@ async function searchAll(query) {
   results.forEach(function(r){ var k = r.id || (r.sourceSystem + '|' + r.title); if (!seen[k]) { seen[k] = 1; deduped.push(r); } });
   deduped.sort(function(a, b) {
     var ap = a.publicReady ? 1 : 0, bp = b.publicReady ? 1 : 0;
-    if (bp !== ap) return bp - ap;
+    if (bp !== ap) return bp - ap;                       // released/public-ready first (unchanged)
+    var ar = a._routed ? 1 : 0, br = b._routed ? 1 : 0;
+    if (br !== ar) return br - ar;                       // then results from the routed source (soft boost)
     return (b.matchScore || 0) - (a.matchScore || 0);
   });
-  return deduped.slice(0, 10);
+  return deduped.slice(0, 10).map(function(r){ if (r._routed) { delete r._routed; } return r; });
 }
 
 async function nativeSearchAll(query, sourceId) {
