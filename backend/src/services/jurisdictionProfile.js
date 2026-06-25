@@ -106,4 +106,28 @@ async function getProfile(jid) {
   return { jurisdiction: jur, sections: secs, summary: { total: secs.length, configured: configured, attested: attested, drifted: drifted, notConfigured: secs.length - configured } };
 }
 
-module.exports = { SECTIONS: SECTIONS, sync: sync, getProfile: getProfile, signature: signature, hashOf: hashOf };
+async function attest(jid, section, actor) {
+  if (!jid || !section) throw new Error('Jurisdiction and section are required.');
+  await sync(jid);
+  var row = await get("SELECT * FROM jurisdiction_profile_sections WHERE jurisdiction_id = ? AND section = ?", [jid, section]);
+  if (!row) throw new Error('Unknown section: ' + section);
+  if (row.status === 'not_configured') throw new Error('This section has no configuration yet, so there is nothing to sign off on.');
+  var now = nowStr();
+  await run("UPDATE jurisdiction_profile_sections SET attested_by = ?, attested_at = ?, attested_version = ?, attested_hash = ?, updated_at = ? WHERE id = ?", [actor || 'unknown', now, row.version, row.content_hash, now, row.id]);
+  return await rows(jid);
+}
+async function unattest(jid, section) {
+  if (!jid || !section) throw new Error('Jurisdiction and section are required.');
+  var row = await get("SELECT * FROM jurisdiction_profile_sections WHERE jurisdiction_id = ? AND section = ?", [jid, section]);
+  if (!row) throw new Error('Unknown section: ' + section);
+  await run("UPDATE jurisdiction_profile_sections SET attested_by = NULL, attested_at = NULL, attested_version = NULL, attested_hash = NULL, updated_at = ? WHERE id = ?", [nowStr(), row.id]);
+  return await rows(jid);
+}
+async function sectionState(jid, section) {
+  if (!jid) return null;
+  await sync(jid);
+  var list = await rows(jid);
+  for (var i = 0; i < list.length; i++) { if (list[i].section === section) return list[i]; }
+  return null;
+}
+module.exports = { SECTIONS: SECTIONS, sync: sync, getProfile: getProfile, signature: signature, hashOf: hashOf, attest: attest, unattest: unattest, sectionState: sectionState };

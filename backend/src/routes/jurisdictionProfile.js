@@ -17,4 +17,11 @@ router.post('/sync', requireAuth, ROLE, async function (req, res) {
 router.get('/:jid', requireAuth, async function (req, res) {
   try { res.json(await JP.getProfile(req.params.jid)); } catch (e) { res.status(500).json({ error: e.message }); }
 });
+const ATTEST = requireRole('SYSTEM_ADMIN', 'DIRECTOR');
+router.post('/attest', requireAuth, ATTEST, async function (req, res) {
+  try { var jid = await activeJid(); await JP.attest(jid, req.body && req.body.section, req.user && req.user.name); res.json(await JP.getProfile(jid)); } catch (e) { res.status(400).json({ error: e.message }); }
+});
+router.post('/unattest', requireAuth, ATTEST, async function (req, res) {
+  try { var jid = await activeJid(); await JP.unattest(jid, req.body && req.body.section); res.json(await JP.getProfile(jid)); } catch (e) { res.status(400).json({ error: e.message }); }
+});
 module.exports = router;
