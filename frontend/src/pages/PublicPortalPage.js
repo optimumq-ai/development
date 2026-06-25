@@ -254,6 +254,7 @@ export default function PublicPortalPage() {
       </header>
 
       <div style={{flex:1,display:'flex',flexDirection:'column',maxWidth:'780px',width:'100%',margin:'0 auto',padding:'16px 24px',boxSizing:'border-box',minHeight:0}}>
+        {messages.length === 0 && !showForm ? (
         <div style={{background:'white',borderRadius:'12px',padding:'12px 16px',marginBottom:'12px',border:'1px solid #E5E7EB',flexShrink:0}}>
           <h1 style={{fontSize:'17px',fontWeight:'700',color:'#1F4E79',margin:'0 0 6px'}}>Welcome to the {agencyName} Public Records Self-Service Portal</h1>
           <p style={{fontSize:'13px',color:'#374151',margin:'0 0 10px',lineHeight:'1.5'}}>
@@ -281,6 +282,12 @@ export default function PublicPortalPage() {
             Prefer a traditional form? <button onClick={function(){setShowForm(true);}} style={{background:'none',border:'none',color:'#1F4E79',textDecoration:'underline',cursor:'pointer',fontSize:'12px',padding:0}}>Click here</button>.
           </p>
         </div>
+        ) : (
+        <div style={{background:'white',borderRadius:'10px',padding:'8px 14px',marginBottom:'12px',border:'1px solid #E5E7EB',flexShrink:0,display:'flex',alignItems:'center',justifyContent:'space-between',gap:'12px'}}>
+          <div style={{fontSize:'12px',color:'#374151',lineHeight:'1.4'}}><span style={{marginRight:'4px'}}>💬</span>Ask the assistant about records, the process, deadlines, or fees — anytime.</div>
+          {!showForm ? <button onClick={function(){setShowForm(true);}} style={{background:'none',border:'none',color:'#1F4E79',textDecoration:'underline',cursor:'pointer',fontSize:'12px',padding:0,whiteSpace:'nowrap'}}>Prefer a form?</button> : null}
+        </div>
+        )}
 
         {showForm ? (
           <div style={{flex:1,background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',overflowY:'auto'}}>
