@@ -186,6 +186,7 @@ router.post('/chat', async function(req, res) {
       searchQuery = searchQueryMatch[1].trim();
       try {
         searchResults = await recordSearch.searchAll(searchQuery);
+        searchResults = await recordSearch.judgeResults(searchQuery, searchResults);
       } catch(e) { console.error('search failed:', e.message); searchResults = []; }
     }
     var visibleText = fullText

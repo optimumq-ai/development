@@ -1,4 +1,4 @@
-const { all } = require('../db');
+const { all, get } = require('../db');
 const demoConnector = require('./connectors/demo');
 const tylerConnector = require('./connectors/tyler');
 const axonConnector = require('./connectors/axon');
@@ -166,4 +166,40 @@ async function nativeSearchAll(query, sourceId) {
   return groups.filter(function(g) { return g && g.results.length > 0; });
 }
 
-module.exports = { searchAll: searchAll, nativeSearchAll: nativeSearchAll, matchRecordType: matchRecordType };
+// Post-search relevance JUDGE. Holds the original request intent, looks at the candidate
+// results, and keeps only those that actually SATISFY the request (right kind of record /
+// deliverable), ignoring match scores. Catches the "topically related but wrong thing"
+// failure (a policy document returned for a video-footage request). FAIL-OPEN: on any error,
+// disabled toggle, or empty input it returns the results unchanged, so it can only ever
+// improve the result set, never break search. Conservative: drops only clearly-wrong kinds.
+async function judgeResults(query, results) {
+  if (!results || !results.length) return results || [];
+  try {
+    var flag = await get("SELECT value FROM system_config WHERE key = 'portal_search_judge'");
+    var enabled = !flag || flag.value === '1' || flag.value === 'true'; // default ON
+    if (!enabled) return results;
+    var Anthropic = require('@anthropic-ai/sdk');
+    var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    var catalog = results.map(function(r, i){
+      return (i + 1) + '. ' + (r.title || 'untitled') + ' | type: ' + (r.docType || 'unknown') + ' | ' + ((r.summary || '').slice(0, 160));
+    }).join('\n');
+    var prompt = 'A person requested public records. Their request: "' + query + '"\n\n' +
+      'A search returned these candidate records:\n' + catalog + '\n\n' +
+      'Decide which candidates would ACTUALLY satisfy what the person asked for - i.e. they are the kind of record or deliverable the person wants, not merely related to the same topic. Ignore any relevance or match scores entirely.\n' +
+      'Example: if someone asks for video footage of an incident, an actual footage/video record satisfies it, but a POLICY, CONTRACT, MANUAL, or RESOLUTION that only discusses cameras does NOT.\n' +
+      'Be reasonable, not overly strict: keep anything that plausibly IS the kind of record requested; drop only candidates that are clearly the wrong kind of thing.\n\n' +
+      'Return ONLY a JSON array of the item numbers (1-based) that genuinely satisfy the request. If none do, return [].';
+    var resp = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 200, messages: [{ role: 'user', content: prompt }] });
+    var text = resp.content.map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
+    var mm = text.match(/\[[\s\S]*?\]/);
+    if (!mm) return results;
+    var keep = JSON.parse(mm[0]);
+    if (!Array.isArray(keep)) return results;
+    var keepSet = {}; keep.forEach(function(n){ keepSet[parseInt(n, 10)] = 1; });
+    var filtered = results.filter(function(r, i){ return keepSet[i + 1]; });
+    if (filtered.length !== results.length) console.log('[searchJudge] kept ' + filtered.length + '/' + results.length + ' for query: ' + query);
+    return filtered;
+  } catch (e) { console.error('[searchJudge] failed, returning unfiltered:', e && e.message); return results; }
+}
+
+module.exports = { searchAll: searchAll, nativeSearchAll: nativeSearchAll, matchRecordType: matchRecordType, judgeResults: judgeResults };
