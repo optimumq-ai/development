@@ -66,3 +66,16 @@ That hard-gate becomes meaningful only once cities actually sign off in producti
 ## NEXT (after attestation)
 Readiness hub actions (run auto-config from the profile; fold the config-freshness source registry in as
 per-section sources), then address->jurisdiction resolution + the precedence stack (which profile applies).
+
+### Enforcement hardwired behind a master dev_mode switch (2026-06-24)
+backend/src/services/enforcement.js: system_config 'dev_mode' (default ON = bypass) is a master switch for
+not-yet-finalized enforcement (reusable for other half-built features). checkSection(jid,section) is the
+attestation gate; FAIL-OPEN (dev_mode on, error, missing section, or no jurisdiction -> ok=true), so it can
+only ever add a block when confident (dev_mode OFF and the section genuinely unattested/drifted).
+Wired into the cost-notice SEND (POST /api/feeEstimates/request/:id/notice/send): dev_mode OFF + fees section
+unattested/drifted -> 409 {needsAttestation} with a plain-language reason; dev_mode ON -> proceeds unchanged.
+Toggle: GET /api/jurisdiction-profile/enforcement (read), POST (SYSTEM_ADMIN) flips dev_mode. Hidden UI: the
+Jurisdiction Profile page shows a "Developer settings" panel ONLY when the URL ends with #dev
+(/jurisdiction-profile#dev). dev_mode is ON now. ROUTE NOTE: literal routes must precede /:jid (it shadowed
+GET /enforcement initially; fixed). To extend enforcement to other actions, call enforcement.checkSection at
+the action and honor !ok; new feature gates can reuse enforcement.devMode()/cfg() as a master bypass.

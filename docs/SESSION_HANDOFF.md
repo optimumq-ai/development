@@ -501,3 +501,6 @@ Versioned/sectioned INDEX over per-area config stores (not a migration). Table j
 
 ## Jurisdiction Profile attestation gate (BUILT 2026-06-24)
 Version-bound per-section sign-off: attest/unattest (SYSTEM_ADMIN/DIRECTOR) record who/when/which version+hash; underlying change (manual or freshness-apply) bumps version -> readiness needs_reattestation (stale sign-off cannot persist); dashboard has Review&attest modal + drift re-attest + Remove sign-off. Enforcement boundary documented (human-in-loop already safe; sectionState() is the hook for future autonomous features; no hard-gate on live processing yet by design). NEXT: readiness hub actions + address->jurisdiction precedence.
+
+## Attestation enforcement hardwired behind dev_mode (BUILT 2026-06-24)
+enforcement.js master switch system_config dev_mode (default ON=bypass, fail-open). checkSection gate wired into cost-notice SEND (409 when dev_mode OFF + fees unattested/drifted). GET/POST /jurisdiction-profile/enforcement (toggle=SYSTEM_ADMIN). Hidden UI panel at /jurisdiction-profile#dev. dev_mode ON now. Reusable as a master bypass for other incomplete features. Verified all gate states + route-order fix (literals before /:jid).
