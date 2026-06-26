@@ -234,14 +234,13 @@ async function judgeResults(query, results) {
       return (i + 1) + '. ' + (r.title || 'untitled') + ' | type: ' + (r.docType || 'unknown') + ' | ' + ((r.summary || '').slice(0, 160));
     }).join('\n');
     var prompt = 'A person asked for a specific public record. Their request: "' + query + '"\n\n' +
-      'A search returned these candidate records:\n' + catalog + '\n\n' +
-      'Keep ONLY the candidates that are actually the KIND and FORMAT of record the person asked for. Topical relatedness is NOT enough. Ignore all match/relevance scores.\n' +
-      'KEY RULE: if the request asks for a particular kind or format - VIDEO / FOOTAGE / RECORDING, a PHOTOGRAPH, an AUDIO recording, or a specific named document - then a candidate that merely DISCUSSES, GOVERNS, or RELATES TO that subject does NOT satisfy it and must be dropped. Concretely: for a request for dash-cam or body-cam VIDEO FOOTAGE, an actual video/footage record qualifies, but a camera POLICY, a CONTRACT, a MANUAL, MEETING MINUTES, or a RESOLUTION do NOT qualify - drop every one of them, even though they mention cameras.\n' +
-      'Conversely, if the person asked for a policy/report/document, that document qualifies and unrelated items do not.\n\n' +
-      'Return ONLY a JSON array of the 1-based item numbers that are the right KIND of record. If none qualify, return [].';
-    var resp = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 200, temperature: 0, messages: [{ role: 'user', content: prompt }] });
-    var text = resp.content.map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
-    var mm = text.match(/\[[\s\S]*?\]/);
+      'Candidate records returned by a search:\n' + catalog + '\n\n' +
+      'Decide what physical DELIVERABLE the person wants (a video/footage file, an audio recording, a photograph, a specific document such as a report/policy/contract/minutes, a dataset, etc), then keep ONLY candidates that ARE that deliverable. A candidate that merely discusses, governs, names, or relates to the same subject is NOT the deliverable - drop it, even if its title shares words with the request. Ignore all match/relevance scores.\n' +
+      'Example: request "body worn camera FOOTAGE of the pursuit" -> deliverable is video footage -> KEEP the actual camera footage / incident video recordings; DROP a "Body-Worn Camera Policy", a "Contract", a "Manual", "Meeting Minutes", a "Resolution" (documents, not footage, however similar the titles). The reverse holds for a document request.\n\n' +
+      'Output ONLY a JSON array of the 1-based item numbers to keep (e.g. [1,3]); use [] if none are the right deliverable. No other text.';
+    var resp = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 120, temperature: 0, messages: [{ role: 'user', content: prompt }, { role: 'assistant', content: '[' }] });
+    var text = '[' + resp.content.map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
+    var mm = text.match(/\[[\d,\s]*\]/);
     if (!mm) return results;
     var keep = JSON.parse(mm[0]);
     if (!Array.isArray(keep)) return results;
