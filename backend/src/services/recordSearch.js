@@ -56,6 +56,34 @@ async function searchPublicReady(query) {
       fileId: r.output_file_id
     });
   });
+  // Semantic recall pass over the public-ready library (fail-open; never breaks keyword search).
+  // Catches vocabulary mismatches keyword misses (e.g. "fight" vs a record that says "assault").
+  try {
+    var vEmb = require('./voyageEmbed');
+    var qv = await vEmb.embed([query], { inputType: 'query' });
+    var qvec = JSON.stringify(qv[0]);
+    var SEM_FLOOR = 0.45; // calibratable; voyage short-text cosine for a strong match runs ~0.45-0.65
+    var sem = await all(
+      "SELECT fr.*, rt.name AS record_type_name, d.name AS department_name, 1 - (e.embedding <=> ?::vector) AS sem_score " +
+      "FROM embeddings e JOIN fulfilled_records fr ON fr.id = e.owner_id AND fr.status = 'released' " +
+      "LEFT JOIN record_types rt ON rt.id = fr.record_type_id LEFT JOIN departments d ON d.id = fr.department_id " +
+      "WHERE e.owner_type = 'fulfilled_record' ORDER BY e.embedding <=> ?::vector LIMIT 8", [qvec, qvec]);
+    var seen = {}; out.forEach(function(o){ seen[o.id] = 1; });
+    sem.forEach(function(r){
+      if ((r.sem_score || 0) < SEM_FLOOR) return;
+      var rid = 'fulfilled:' + r.id;
+      if (seen[rid]) return; seen[rid] = 1;
+      out.push({
+        id: rid, sourceSystem: 'Fulfilled Request Index', title: r.title,
+        summary: (r.summary || '').slice(0, 200), department: r.department_name || '',
+        docType: r.record_type_name || 'Released record', dateCreated: (r.released_at || '').slice(0, 10),
+        pageCount: r.page_count || null, publicAvailability: 'available',
+        matchScore: Math.round((r.sem_score || 0) * 100), matchedTerms: [],
+        relevanceNote: 'Closely matches the meaning of your search', publicReady: true,
+        fileId: r.output_file_id, semantic: true
+      });
+    });
+  } catch (e) { /* fail-open: keyword results stand */ }
   out.sort(function(a, b){ return b.matchScore - a.matchScore; });
   return out.slice(0, 5);
 }
