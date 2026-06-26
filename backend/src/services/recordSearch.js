@@ -233,13 +233,13 @@ async function judgeResults(query, results) {
     var catalog = results.map(function(r, i){
       return (i + 1) + '. ' + (r.title || 'untitled') + ' | type: ' + (r.docType || 'unknown') + ' | ' + ((r.summary || '').slice(0, 160));
     }).join('\n');
-    var prompt = 'A person requested public records. Their request: "' + query + '"\n\n' +
+    var prompt = 'A person asked for a specific public record. Their request: "' + query + '"\n\n' +
       'A search returned these candidate records:\n' + catalog + '\n\n' +
-      'Decide which candidates would ACTUALLY satisfy what the person asked for - i.e. they are the kind of record or deliverable the person wants, not merely related to the same topic. Ignore any relevance or match scores entirely.\n' +
-      'Example: if someone asks for video footage of an incident, an actual footage/video record satisfies it, but a POLICY, CONTRACT, MANUAL, or RESOLUTION that only discusses cameras does NOT.\n' +
-      'Be reasonable, not overly strict: keep anything that plausibly IS the kind of record requested; drop only candidates that are clearly the wrong kind of thing.\n\n' +
-      'Return ONLY a JSON array of the item numbers (1-based) that genuinely satisfy the request. If none do, return [].';
-    var resp = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 200, messages: [{ role: 'user', content: prompt }] });
+      'Keep ONLY the candidates that are actually the KIND and FORMAT of record the person asked for. Topical relatedness is NOT enough. Ignore all match/relevance scores.\n' +
+      'KEY RULE: if the request asks for a particular kind or format - VIDEO / FOOTAGE / RECORDING, a PHOTOGRAPH, an AUDIO recording, or a specific named document - then a candidate that merely DISCUSSES, GOVERNS, or RELATES TO that subject does NOT satisfy it and must be dropped. Concretely: for a request for dash-cam or body-cam VIDEO FOOTAGE, an actual video/footage record qualifies, but a camera POLICY, a CONTRACT, a MANUAL, MEETING MINUTES, or a RESOLUTION do NOT qualify - drop every one of them, even though they mention cameras.\n' +
+      'Conversely, if the person asked for a policy/report/document, that document qualifies and unrelated items do not.\n\n' +
+      'Return ONLY a JSON array of the 1-based item numbers that are the right KIND of record. If none qualify, return [].';
+    var resp = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 200, temperature: 0, messages: [{ role: 'user', content: prompt }] });
     var text = resp.content.map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
     var mm = text.match(/\[[\s\S]*?\]/);
     if (!mm) return results;
