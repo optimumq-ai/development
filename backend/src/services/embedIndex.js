@@ -110,6 +110,7 @@ module.exports = {
   reindexFulfilledRecord: reindexFulfilledRecord,
   redactedTextForSource: redactedTextForSource,
   removeEmbedding: removeEmbedding,
+  upsertEmbedding: upsertEmbedding,
   rtText: rtText,
   bg: bg
 };
