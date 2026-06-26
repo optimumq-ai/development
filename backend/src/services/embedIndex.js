@@ -59,6 +59,18 @@ async function reindexDocumentPagesForFile(fileId) {
   }
 }
 
+function frText(fr) {
+  return [fr.title, fr.summary, fr.keywords, fr.record_type_name].filter(Boolean).join('. ');
+}
+async function reindexFulfilledRecord(id) {
+  var fr = await db.get("SELECT fr.id, fr.title, fr.summary, fr.keywords, rt.name AS record_type_name FROM fulfilled_records fr LEFT JOIN record_types rt ON rt.id = fr.record_type_id WHERE fr.id = ?", [id]);
+  if (!fr) { await removeEmbedding('fulfilled_record', id); return; }
+  var text = frText(fr);
+  if (!text || !text.trim()) return;
+  var vecs = await v.embed([text], { inputType: 'document' });
+  await upsertEmbedding('fulfilled_record', fr.id, vecs[0], text);
+}
+
 // Fire-and-forget guard: run in background, swallow+log errors so indexing never breaks the caller.
 function bg(promise, label) {
   Promise.resolve(promise).catch(function (e) { console.error('[embedIndex] ' + (label || 'task') + ' failed:', e && e.message); });
@@ -68,6 +80,7 @@ module.exports = {
   reindexRecordType: reindexRecordType,
   reindexRecordTypes: reindexRecordTypes,
   reindexDocumentPagesForFile: reindexDocumentPagesForFile,
+  reindexFulfilledRecord: reindexFulfilledRecord,
   removeEmbedding: removeEmbedding,
   rtText: rtText,
   bg: bg
