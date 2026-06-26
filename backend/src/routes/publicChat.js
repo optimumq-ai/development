@@ -188,6 +188,30 @@ router.post('/chat', async function(req, res) {
         searchResults = await recordSearch.searchAll(searchQuery);
         searchResults = await recordSearch.judgeResults(searchQuery, searchResults);
       } catch(e) { console.error('search failed:', e.message); searchResults = []; }
+
+      // STEP 2 - result-aware response. The first model call is blind to what the search found
+      // (it only emitted the query). Re-compose the citizen-facing reply now that we know the
+      // outcome, so a zero-result case reads gracefully ("no public-ready match - I'll submit
+      // for processing") instead of awkwardly asking "do any of these match?" over an empty list.
+      // Fail-open: if this second call errors, we keep the first call's text.
+      try {
+        var outcome;
+        if (searchResults && searchResults.length) {
+          outcome = 'The search returned ' + searchResults.length + ' candidate record(s), shown to the citizen as cards directly below your message:\n' +
+            searchResults.map(function(r, i){ return (i + 1) + '. ' + r.title + (r.publicReady ? ' (public-ready)' : '') + (r.docType ? ' - ' + r.docType : ''); }).join('\n') +
+            '\n\nWrite a brief reply telling the citizen you found some possible matches shown below and asking whether any of them match what they need. End with this on its own line: [[QUICK_REPLIES: Yes, one of these matches | No, none match]]';
+        } else {
+          outcome = 'The search returned NO public-ready records matching the description. Write a brief, warm reply letting the citizen know there is no public-ready record matching their request, so you will submit their request for processing and a staff member will locate and prepare it. Then continue the intake toward any remaining required info (e.g. delivery method). Do NOT ask them to choose from results (there are none) and do NOT run another search.';
+        }
+        var composeSys = 'You are the warm, helpful public records assistant for ' + agencyName + '. You just searched the agency records on the citizen\'s behalf for: "' + searchQuery + '". The search is COMPLETE.\n' + outcome + '\n\nWrite ONLY your next chat message to the citizen - brief, warm, plain text. Do NOT emit ANY bracketed markers (no [[SEARCH_QUERY]], [[VERIFY_EMAIL]], [[VERIFY_SKIPPED]], [[CONTACT_FORM]], [[SUBMIT_READY]], etc.)' + ((searchResults && searchResults.length) ? ', except the single [[QUICK_REPLIES:...]] line specified above' : '') + '. Do not say you are "searching" or "checking" - the search already happened and its outcome is given above.';
+        var compose = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 700, system: composeSys, messages: messages });
+        var composedText = compose.content.map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
+        if (composedText && composedText.trim()) {
+          fullText = composedText;
+          qrMatch = fullText.match(/\[\[QUICK_REPLIES:([^\]]*)\]\]/);
+          quickReplies = qrMatch ? qrMatch[1].split('|').map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 0; }) : [];
+        }
+      } catch(e) { console.error('[publicChat] result-aware compose failed:', e.message); }
     }
     var visibleText = fullText
       .replace(/\[\[SUBMIT_READY\]\][\s\S]*?\[\[END_SUBMIT\]\]/g, '')
