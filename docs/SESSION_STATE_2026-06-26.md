@@ -150,3 +150,43 @@ scripted regression = "did this exact thing change". Use both.
 Sequencing: requestor-side scenarios first (runnable today), staff-side layered in as docs + Help
 Assistant + test accounts mature. The scenario specs are the durable, reusable asset; put the
 approach in the spec.
+
+## Thread 10 — Email-request search as a distinct COUNT-ONLY mode (for the spec; not built)
+What exists: email appears in the taxonomy as record-type buckets — "Official email correspondence",
+"Text & instant messages", "Internal memos & correspondence" — but there is NO email connector and
+NO email-specific search behavior. Today an email request falls through the normal document path
+(wrong). The taxonomy buckets give the router a hook to DETECT an email request and switch modes.
+
+Kevin's approach (validated as sound + matching real practice):
+- Email is searched KEYWORD-ONLY, always. Basis: the public-records "reasonably describe identifiable
+  records" standard, which for email means (per e-discovery practice) search TERMS + CUSTODIANS +
+  DATE RANGE. Semantic/AI search over raw email is awkward (email APIs are term-based) and legally
+  murkier. Email is the purest case of the "keyword-first explainable search" goal (Thread 2).
+  Specifics vary by jurisdiction -> Jurisdiction Profile config. (Do NOT fabricate a specific statute.)
+- COUNT-THEN-NARROW: run the term search, report the hit count; if large, disclose it and invite
+  narrowing. Highest-leverage levers for email are CUSTODIANS (sender/recipient) and DATE RANGE, not
+  just more terms — the narrowing prompt should solicit those specifically.
+- COUNT-ONLY, never content or subject lines. KEY distinction from the document path: released docs
+  show titles/summaries because vetted; raw email hits are UNREVIEWED, and even a subject line or
+  sender can contain exempt/PII content. Email mode renders NO content cards — just a number + the
+  narrowing conversation. The post-search JUDGE does not apply (no content to judge).
+- DISCLOSURE: all requested email is subject to inspection for exempt content before release (email
+  almost always needs review/redaction: PII, personnel, attorney-client, security, third-party).
+  Fold into the same message as the count. Even the count is pre-review.
+- Zero-hit: "no emails matched those terms — broaden, or submit for staff to search."
+- Configurable threshold for what counts as "large" enough to trigger narrowing.
+
+Workload framing (honest): front-loads SCOPING so the request reaches staff/email-system owner
+already targeted and reasonably-described, not a fishing expedition that bounces back. Reduces
+back-and-forth a lot but does NOT eliminate staff — authoritative search + review stays internal.
+Real value: helps the requester meet the "reasonably describe" standard before submitting.
+
+Build needs (net-new): an EMAIL CONNECTOR that runs a term/count query WITHOUT returning content,
+against Exchange/O365 (Microsoft Graph or Purview eDiscovery) or Google Workspace (Vault) — these
+support count-style queries with custodian + date filters. Credentialed access required; a stub can
+return synthetic counts for demos. Self-contained search MODE gated by the router detecting an email
+request: distinct conversation (narrowing loop), distinct presentation (count not cards), distinct
+disclosure.
+
+Ties to: Thread 1 (taxonomy-driven clarification — email facets = terms/custodians/date-range) and
+Thread 2 (keyword-first explainable search).
