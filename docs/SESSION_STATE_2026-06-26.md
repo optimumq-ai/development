@@ -277,3 +277,67 @@ mismatch misses, judge to clean up.
 ALSO worth fixing regardless of indexing: the Axon "fetch fixed 100, no query filter" retrieval is a
 latent production bug — at minimum it should pass query/date/location filters to the source so
 retrieval is query-driven, not an arbitrary slice.
+
+---
+
+## Public-Ready Library build — continuation (2026-06-26, evening)
+
+Read `docs/PUBLIC_READY_LIBRARY_DESIGN.md` first. At write time: HEAD **f52dae5**, tree clean,
+API healthy on :3001. The library currently holds **4 demo records** (the old 1040 was deleted).
+
+### Built + committed this run (all pushed)
+- **Design doc** `PUBLIC_READY_LIBRARY_DESIGN.md` (07f80cc) — the governing spec for this whole arc.
+- **Slice 1 — semantic search-first over the released library:**
+  - `embedIndex.reindexFulfilledRecord(id)` embeds released records under `owner_type='fulfilled_record'` (dddd944).
+  - `searchPublicReady` (recordSearch.js) gained a pgvector semantic pass merged with the keyword pass,
+    fail-open, floor **0.45** (70447ae).
+  - Both redaction deposit paths (`redactionApply` + `structuredRedaction`) auto-embed via `bg()` (9f6a135).
+  - Calibration: a strong/related cosine match runs ~0.54–0.66, unrelated ~0.26.
+- **Slice 2a — safe full-text recall:** `embedIndex.redactedTextForSource()` reconstructs the CLEARED body
+  text from `document_pages.words` MINUS `redaction_zones` (bbox-intersection — over-redacts toward safety,
+  never leaks). Included in the embedding. No-leak VERIFIED on a fixture: exactly the under-zone words
+  dropped, the redacted SSN absent (8d759c8).
+  - IMPORTANT mechanism note: redaction output is TRUE RASTER redaction (jimp bakes black into the page
+    pixels; the output PDF has no text layer), so we must reconstruct from the SOURCE word-boxes, never
+    `pdftotext` the output. `redactedTextForSource` returns text only where `document_pages.words` exist.
+- **Demo corpus:** `backend/scripts/seedDemoPermits.js` seeds 4 **City of Autumn Falls** building-permit
+  records — single-family + industrial, each an application/issued PAIR (same project within a pair, so the
+  ONLY difference is application-vs-issued) — into `fulfilled_records` (status='released') with full-text
+  embeddings; `upsertEmbedding` exported (f52dae5). Idempotent/re-runnable (ids `demo-af-*`).
+- Deleted the bad **1040** demo record (a confidential tax return with PII that had been mislabeled as a
+  public building permit). Library is now clean.
+
+### KEY TEST FINDING — application vs. issued (the confusion Kevin worried about)
+Search battery over the 4 records showed:
+1. **Type separation (residential vs industrial) works** via keyword (warehouse→industrial, etc.).
+2. **Application-vs-issued is the real confusion, and keyword CANNOT reliably separate it.** "I want to
+   *apply* for a permit to build a single-family home" tied the application and the issued permit at 97.
+   Keyword only separates them when the query uses issued-specific words (issued / certificate of occupancy).
+3. **Semantic** catches vocabulary mismatch ("authorization to construct a factory" surfaced industrial via
+   the semantic path only, 0.46) but does NOT fix app-vs-issued — a same-project application and issued
+   permit are semantically near-identical (by meaning they are twins).
+- CONCLUSION: app-vs-issued is a **status/type distinction, not a ranking problem**. The fix is a structured
+  sub-type OR a lifecycle/status facet so search/browse can FILTER + LABEL by it, not infer it from prose.
+  This is concrete evidence for the deferred sub-type / browse-leaf-granularity decision.
+
+### OPEN loose ends (nothing is in-flight; this is a clean stopping point)
+1. **SECURITY — rotate the Anthropic API key.** It was exposed in a shell log this session (a `. ./.env`
+   sourcing error echoed `ANTHROPIC_API_KEY`). Rotate in the Anthropic console + update `.env`. Kevin's
+   action; the one item genuinely worth doing soon.
+2. **Step 3b — the approval gate (needs Kevin's design call).** Today the `/apply` route applies the
+   redaction AND marks `review_stage='released'` atomically — no human-approval pause. Decide: should
+   applying a redaction auto-publish to the public library, or wait for a separate approval? The
+   pending→released gate mechanism is designed (deposit as 'pending'; promote on release) but NOT wired
+   (deposits currently insert 'released').
+3. **Sub-type / status facet for application-vs-issued** (from the test finding). Taxonomy has ONE coarse
+   "Building permits" type. Decide sub-types vs. a status facet — drives both the confusion fix and browse leaves.
+4. **Optional / quick:** the multi-family permit pair (to complete six variants); PDFs for the 4 demo records
+   (currently searchable but with no downloadable backing file).
+5. **Future phases (per design doc):** Slice 2b (AI-extracted title/summary at deposit — root-cause fix for
+   crude metadata); the mass-redaction deposit path; the browse surface; the map (open basemap + optional
+   city GIS); the dedicated Reading Room page.
+
+### Reload protocol (unchanged) + env note
+`git log --oneline`; `curl :3001/api/health`; `git status`. For node one-offs, export ONLY `DATABASE_URL`
+and `VOYAGE_API_KEY` via `grep` (NEVER `. ./.env` — that executes the file and leaked a key this session).
+Re-seed the demo corpus: `cd backend && node scripts/seedDemoPermits.js` with those two env vars set.
