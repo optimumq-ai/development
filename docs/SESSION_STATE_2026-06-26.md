@@ -190,3 +190,49 @@ disclosure.
 
 Ties to: Thread 1 (taxonomy-driven clarification — email facets = terms/custodians/date-range) and
 Thread 2 (keyword-first explainable search).
+
+## Thread 11 — How file/document search ACTUALLY works (corrects the "samples" confusion) + hybrid architecture
+CORRECTION to an earlier confusion: auto-discovery's SAMPLE (filestore scan(), default 50 PDFs) is
+for DISCOVERY ONLY — lets the AI glance at a handful to propose the taxonomy BUCKET ("this folder
+contains building permits"). It does NOT limit what search can find.
+
+filestore.js (verified): exports scan() + nativeSearch() (NO .search()).
+- scan(config): up to sample_limit (50) PDFs, pdftotext -> {filename, first 1500 chars}. Discovery.
+- nativeSearch(query, config): loops EVERY PDF in the dir (no limit), pdftotext extracts FULL text,
+  keyword-matches terms vs filename + content, returns top 8 with snippets. Reads the live corpus at
+  query time; samples are irrelevant to it.
+
+Lenmark example: "building permit for Lenmark Homes ~March 15 2025, all PDF" IS findable today IF
+"Lenmark Homes" literally appears in the PDF text — nativeSearch reads every PDF live and
+keyword-matches. Found whether or not it was sampled. Date match is literal. Keyword-only (no
+semantic): a conceptual query ("permits for that new subdivision") finds nothing.
+
+Two REAL gaps exposed:
+- GAP 1 (architectural): filestore has NO .search(). The MAIN conversational search
+  (recordSearch.searchAll, the agent's [[SEARCH_QUERY]]) calls connector.search() — demo/tyler/axon/
+  laserfiche have it, filestore does NOT. So a raw PDF file store is reachable ONLY via the separate
+  "Search connected systems directly" button (nativeSearch path), NOT via the chat agent's search.
+  A citizen describing the Lenmark permit to the agent may not get it. Inconsistency.
+- GAP 2: nativeSearch does not apply taxonomy query expansion/synonyms; on the file path the
+  taxonomy under-helps even for routing/expansion.
+- SCALE limit: re-running pdftotext over EVERY PDF on EVERY query doesn't scale to the tens of
+  thousands of files a real city has.
+
+Taxonomy synonyms/intent value: operate at the ROUTING + QUERY-EXPANSION layer (which source to
+prioritize, broaden the query), independent of sampling. NOT document indexing.
+
+HYBRID architecture conclusion (the real answer to "our live search vs Replit's index-everything"):
+SOURCE-DEPENDENT, not one-or-the-other.
+- Systems with their own good search APIs (Tyler, Laserfiche, Axon, email/O365): LIVE-QUERY — always
+  current, no index to maintain. Indexing them ourselves = redundant + staleness.
+- Raw FILE STORES / unstructured (PDFs on a drive): build a VECTOR+KEYWORD INDEX (Replit's approach).
+  Extract/index each file once with a job catching new/changed files; queries become fast and (if
+  embedded) semantically recall-able. Cost: ingestion + reindex pipeline, storage + embedding cost,
+  staleness management, decide what to index (records vs config, esp. DB sources). Replit was right
+  FOR THIS CASE ("least likely to miss a record").
+Net target: index selectively where it earns its keep; live-query the API-capable systems. Not
+"index everything", not "never index".
+
+Replit context (Kevin's inquiry): their 2nd build used the vector DB for semantic search (OpenAI
+scoring), intended to index ALL documents, but search was incomplete/untested. Stated pro of
+index-all: lowest chance of missing a record. (Kevin bringing full doc + screenshot — see Thread 8.)
