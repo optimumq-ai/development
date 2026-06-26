@@ -103,3 +103,50 @@ Commit chain this session: f229993 (floor) -> 4064696 (judge step1) -> a18ebba (
 - COMMIT EACH VERIFIED SLICE IMMEDIATELY (orphaned uncommitted work has bitten twice).
 - Patch method: python heredoc with rep(a,b) asserting count==1. Mask pushes:
   `| sed -E 's#//[^@]*@#//***@#g'`. Bracket-check JS before frontend build. Never echo secrets.
+
+## Thread 9 — Agent-driven exploratory user testing (for the spec; not built)
+Kevin's goal: a "next-generation" AI-leveraged company — cut headcount/overhead, improve code
+quality + customer experience, reduce dev/test + onboarding effort. He wants AI agents to perform
+simulated USER testing that finds system issues AND flags where documentation needs fixing.
+
+Two distinct kinds (keep separate):
+- DETERMINISTIC regression (Playwright/Cypress): records exact selectors/clicks/values, replays
+  identically. Good for "is this EXACT thing byte-identical before/after a change" (a calc, a data
+  write). Brittle to UI changes, no judgment. NOT the main thing Kevin wants.
+- GOAL-DRIVEN EXPLORATORY agent testing (what Kevin wants): give the agent a plain-English
+  objective + portal access + ONLY what is self-evident in the UI and learnable from user guides;
+  it finds the path like a real user and REPORTS what was confusing / not self-evident / where it
+  got stuck / what broke. A synthetic user WITH judgment.
+
+Why reusable across future UI changes (Kevin's instinct, confirmed): tests describe INTENT
+(goal + constraints), not implementation (selectors/steps), so a redesign doesn't break them. To be
+durable AND rigorous each scenario needs three parts: OBJECTIVE + WHAT IS KNOWABLE (UI + guides
+only) + OBSERVABLE SUCCESS CONDITIONS (e.g. "a request number was issued", "fee notice shows the
+second estimate", "footage result marked redaction-required, no download"). Success conditions give
+clear pass/fail despite the non-deterministic path. Do not omit them.
+
+Docs-audit benefit: restricting the agent to UI + guides means every stuck/guess pinpoints a
+UI-clarity gap or documentation defect with high specificity. One pass tests the system AND audits
+the docs against each other.
+
+Now vs later:
+- REQUESTOR-SIDE: achievable today via Claude-in-Chrome against the live portal. Give a scenario
+  (vague request / multiple-match clarification / unpaid second estimate / footage needing
+  redaction); Claude drives the portal as that citizen and returns a narrative. Repeatability =
+  re-run the SAME scenarios and compare narrative reports (catches regressions a rigid script
+  misses).
+- STAFF MULTI-ROLE sim (agent logs in as different employees, reads docs + AI Help Assistant,
+  figures out who does each task to process a request to completion): reusable in DESIGN but more
+  FRAGILE in practice. GATED on user guides, the AI Help Assistant, and stable test accounts. Claude
+  must only log in as users whose credentials Kevin explicitly provides for that session.
+
+OpenClaw / computer-use: OS/pixel-screenshot level (any app, slower, more brittle, more setup). For
+a WEB portal, Claude-in-Chrome is better (reads DOM -> faster, less brittle). OpenClaw only earns
+its keep for non-browser desktop apps; no need to coordinate both here.
+
+Complementarity: agent testing = "does it make sense, roughly work, and where are doc gaps";
+scripted regression = "did this exact thing change". Use both.
+
+Sequencing: requestor-side scenarios first (runnable today), staff-side layered in as docs + Help
+Assistant + test accounts mature. The scenario specs are the durable, reusable asset; put the
+approach in the spec.
