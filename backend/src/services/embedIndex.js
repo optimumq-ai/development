@@ -59,13 +59,40 @@ async function reindexDocumentPagesForFile(fileId) {
   }
 }
 
+// Reconstruct the CLEARED full text of a redacted record from the source OCR word-boxes
+// MINUS any word that touches a redaction zone (bbox intersection -> over-redacts toward safety,
+// never leaks a redacted word). Coords are normalized 0-1, top-left, same frame for words+zones.
+function _wordsMinusZones(wordsJson, zones) {
+  var words; try { words = JSON.parse(wordsJson || '[]'); } catch (e) { return ''; }
+  if (!Array.isArray(words)) return '';
+  return words.filter(function (wd) {
+    for (var i = 0; i < zones.length; i++) {
+      var z = zones[i];
+      var noOverlap = (wd.x + wd.w) <= z.x || wd.x >= (z.x + z.w) || (wd.y + wd.h) <= z.y || wd.y >= (z.y + z.h);
+      if (!noOverlap) return false; // word touches a redaction box -> drop it
+    }
+    return true;
+  }).map(function (wd) { return wd.t; }).join(' ');
+}
+async function redactedTextForSource(sourceFileId) {
+  if (!sourceFileId) return '';
+  var pages = await db.all("SELECT page_no, words FROM document_pages WHERE file_id = ? AND words IS NOT NULL ORDER BY page_no", [sourceFileId]);
+  if (!pages.length) return '';
+  var zoneRows = await db.all("SELECT rz.page_no, rz.x, rz.y, rz.w, rz.h FROM redaction_zones rz JOIN redaction_jobs rj ON rj.id = rz.job_id WHERE rj.file_id = ? AND (rz.review_state IS NULL OR rz.review_state <> 'rejected')", [sourceFileId]);
+  var byPage = {}; zoneRows.forEach(function (z) { (byPage[z.page_no] = byPage[z.page_no] || []).push(z); });
+  var parts = [];
+  for (var i = 0; i < pages.length; i++) { parts.push(_wordsMinusZones(pages[i].words, byPage[pages[i].page_no] || [])); }
+  return parts.join(' ').replace(/\s+/g, ' ').trim();
+}
+
 function frText(fr) {
   return [fr.title, fr.summary, fr.keywords, fr.record_type_name].filter(Boolean).join('. ');
 }
 async function reindexFulfilledRecord(id) {
-  var fr = await db.get("SELECT fr.id, fr.title, fr.summary, fr.keywords, rt.name AS record_type_name FROM fulfilled_records fr LEFT JOIN record_types rt ON rt.id = fr.record_type_id WHERE fr.id = ?", [id]);
+  var fr = await db.get("SELECT fr.id, fr.title, fr.summary, fr.keywords, fr.source_file_id, rt.name AS record_type_name FROM fulfilled_records fr LEFT JOIN record_types rt ON rt.id = fr.record_type_id WHERE fr.id = ?", [id]);
   if (!fr) { await removeEmbedding('fulfilled_record', id); return; }
   var text = frText(fr);
+  try { var body = await redactedTextForSource(fr.source_file_id); if (body) text = (text + ". " + body).slice(0, 14000); } catch (e) {}
   if (!text || !text.trim()) return;
   var vecs = await v.embed([text], { inputType: 'document' });
   await upsertEmbedding('fulfilled_record', fr.id, vecs[0], text);
@@ -81,6 +108,7 @@ module.exports = {
   reindexRecordTypes: reindexRecordTypes,
   reindexDocumentPagesForFile: reindexDocumentPagesForFile,
   reindexFulfilledRecord: reindexFulfilledRecord,
+  redactedTextForSource: redactedTextForSource,
   removeEmbedding: removeEmbedding,
   rtText: rtText,
   bg: bg
