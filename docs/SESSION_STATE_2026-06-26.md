@@ -236,3 +236,44 @@ Net target: index selectively where it earns its keep; live-query the API-capabl
 Replit context (Kevin's inquiry): their 2nd build used the vector DB for semantic search (OpenAI
 scoring), intended to index ALL documents, but search was incomplete/untested. Stated pro of
 index-all: lowest chance of missing a record. (Kevin bringing full doc + screenshot — see Thread 8.)
+
+## Thread 12 — Vocabulary mismatch ("fight" vs "assault") + the Axon "fetch-100-and-rank" reality
+Test case (Kevin): "incident report for a fight at a convenience store near Main & Jefferson, late
+Dec 2025" — but the report says "assault" / "physically attacked", not "fight". Can we find it?
+
+What the AXON connector actually does (verified, axon.js): search() fetches a BROAD page —
+/incidents?pageSize=100 with NO query/keyword passed to the source API — then hands ALL of them to
+Claude, which RANKS relevance (match_score >= 50). Matching is Claude reading incidents and judging,
+NOT keyword matching. Claude understands fight ~= assault ~= physically attacked. So:
+- DEMO (80 incidents, all fit in the 100-page): YES, it finds the assault report for a "fight" query
+  — "accidentally semantic" via the AI ranker.
+- PRODUCTION scale: BREAKS — a fixed page of 100 with NO query-driven retrieval means that in a
+  system with millions of incidents the relevant one almost certainly is not in the slice Claude ever
+  sees, so it is missed — NOT for vocabulary reasons, but because nothing used the query to RETRIEVE
+  it from the source. Demo works, production silently fails.
+
+Path comparison for vocabulary mismatch:
+- Pure KEYWORD (filestore nativeSearch, or passing terms to a source keyword API): MISSES it —
+  "assault" is not "fight". Taxonomy synonym-expansion helps PARTIALLY (if the type lists "assault,
+  altercation" as synonyms) but cannot enumerate open-ended paraphrases like "physically attacked".
+  Keyword is fundamentally word-bound.
+- SEMANTIC vector index: solves BOTH — embeddings encode MEANING, so "fight at a store" lands next to
+  "physically attacked outside the store" with zero shared words; AND it scales (top-K by meaning over
+  millions, fast). The fight/assault case is the canonical argument FOR a semantic layer.
+
+REFINEMENT to the Thread-11 hybrid conclusion: "live-query the API systems" inherits the SOURCE's OWN
+search quality. If the source API is keyword-only, live-querying it inherits the vocabulary blindness
+— you just moved the weakness to the source. To GUARANTEE semantic recall, either (a) the source
+itself offers semantic search, or (b) we index its content into our own vector DB. The real decision
+axis is NOT just "does the source have an API?" but "is the source's OWN search good enough (semantic
++ scalable), or do we need to index its content ourselves for recall?" High-stakes, vocabulary-rich,
+high-volume sources (incident reports, email) lean toward indexing.
+
+Precision/recall footnote: semantic trades some PRECISION for RECALL (can surface conceptually-near-
+but-wrong items) — exactly why the post-search JUDGE exists, and why keyword-first -> semantic-
+fallback -> judge (Thread 2) is attractive: keyword for precise hits, semantic to catch vocabulary-
+mismatch misses, judge to clean up.
+
+ALSO worth fixing regardless of indexing: the Axon "fetch fixed 100, no query filter" retrieval is a
+latent production bug — at minimum it should pass query/date/location filters to the source so
+retrieval is query-driven, not an arbitrary slice.
