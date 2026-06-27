@@ -378,4 +378,43 @@ router.get('/sources', async function(req, res) {
   }
 });
 
+// ---- Public-ready library BROWSE (deterministic drill-down: dept -> record type -> year) ----
+router.get('/browse', async function(req, res) {
+  try {
+    var rows = await all(
+      "SELECT fr.department_id, d.name AS dept_name, fr.record_type_id, rt.name AS rt_name, " +
+      "COALESCE(substr(fr.event_date,1,4), substr(fr.released_at,1,4)) AS yr, count(*) AS n " +
+      "FROM fulfilled_records fr LEFT JOIN departments d ON d.id=fr.department_id " +
+      "LEFT JOIN record_types rt ON rt.id=fr.record_type_id WHERE fr.status='released' " +
+      "GROUP BY fr.department_id, d.name, fr.record_type_id, rt.name, yr ORDER BY d.name, rt.name, yr DESC");
+    var depts = {}, order = [];
+    rows.forEach(function(r){
+      var dk = r.department_id || 'none';
+      if(!depts[dk]){ depts[dk] = { id:r.department_id, name:r.dept_name||'Other', count:0, types:{}, typeOrder:[] }; order.push(dk); }
+      var dep = depts[dk]; dep.count += r.n;
+      var tk = r.record_type_id || 'none';
+      if(!dep.types[tk]){ dep.types[tk] = { id:r.record_type_id, name:r.rt_name||'Uncategorized', count:0, years:[] }; dep.typeOrder.push(tk); }
+      var t = dep.types[tk]; t.count += r.n;
+      t.years.push({ year: r.yr || 'Undated', count: r.n });
+    });
+    var tree = order.map(function(dk){ var dep=depts[dk]; return { id:dep.id, name:dep.name, count:dep.count,
+      types: dep.typeOrder.map(function(tk){ return dep.types[tk]; }) }; });
+    res.json({ tree: tree });
+  } catch(e){ console.error('browse tree failed:', e.message); res.status(500).json({ error:'Failed to load library' }); }
+});
+
+router.get('/browse/records', async function(req, res) {
+  try {
+    var rtId = req.query.recordType || null, yr = req.query.year || null, deptId = req.query.department || null;
+    var where = ["status='released'"], params = [];
+    if(rtId){ where.push("record_type_id = ?"); params.push(rtId); }
+    if(deptId){ where.push("department_id = ?"); params.push(deptId); }
+    if(yr && yr !== 'Undated'){ where.push("COALESCE(substr(event_date,1,4), substr(released_at,1,4)) = ?"); params.push(yr); }
+    var rows = await all("SELECT id, title, summary, event_date, released_at, output_file_id, page_count FROM fulfilled_records WHERE " +
+      where.join(' AND ') + " ORDER BY COALESCE(event_date, released_at) DESC LIMIT 200", params);
+    res.json({ records: rows.map(function(r){ return { id:r.id, title:r.title, summary:r.summary,
+      date:(r.event_date||r.released_at||'').slice(0,10), fileId:r.output_file_id, pageCount:r.page_count }; }) });
+  } catch(e){ console.error('browse records failed:', e.message); res.status(500).json({ error:'Failed to load records' }); }
+});
+
 module.exports = router;
