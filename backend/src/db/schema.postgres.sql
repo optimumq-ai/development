@@ -291,6 +291,7 @@ CREATE TABLE IF NOT EXISTS fulfilled_records (
   record_type_id TEXT,
   department_id TEXT,
   keywords TEXT,
+  event_date TEXT,
   public_availability TEXT DEFAULT 'released',
   page_count INTEGER,
   released_by TEXT,

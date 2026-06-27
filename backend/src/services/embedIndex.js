@@ -76,12 +76,18 @@ function _wordsMinusZones(wordsJson, zones) {
 }
 async function redactedTextForSource(sourceFileId) {
   if (!sourceFileId) return '';
-  var pages = await db.all("SELECT page_no, words FROM document_pages WHERE file_id = ? AND words IS NOT NULL ORDER BY page_no", [sourceFileId]);
+  var pages = await db.all("SELECT page_no, words, text FROM document_pages WHERE file_id = ? ORDER BY page_no", [sourceFileId]);
   if (!pages.length) return '';
   var zoneRows = await db.all("SELECT rz.page_no, rz.x, rz.y, rz.w, rz.h FROM redaction_zones rz JOIN redaction_jobs rj ON rj.id = rz.job_id WHERE rj.file_id = ? AND (rz.review_state IS NULL OR rz.review_state <> 'rejected')", [sourceFileId]);
   var byPage = {}; zoneRows.forEach(function (z) { (byPage[z.page_no] = byPage[z.page_no] || []).push(z); });
   var parts = [];
-  for (var i = 0; i < pages.length; i++) { parts.push(_wordsMinusZones(pages[i].words, byPage[pages[i].page_no] || [])); }
+  for (var i = 0; i < pages.length; i++) {
+    var pz = byPage[pages[i].page_no] || [];
+    var w; try { w = JSON.parse(pages[i].words || '[]'); } catch (e) { w = []; }
+    if (Array.isArray(w) && w.length) parts.push(_wordsMinusZones(pages[i].words, pz));     // redactable: words minus zones
+    else if (!pz.length) parts.push(String(pages[i].text || ''));                            // no geometry + no redactions: full text is cleared text
+    // else: text-only page WITH zones -> cannot positionally subtract -> drop page (safe)
+  }
   return parts.join(' ').replace(/\s+/g, ' ').trim();
 }
 
