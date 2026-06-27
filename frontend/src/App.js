@@ -31,6 +31,7 @@ import MassRedactionPage from './pages/MassRedactionPage';
 import FeeConfigPage from './pages/FeeConfigPage';
 import AvWorkbenchPage from './pages/AvWorkbenchPage';
 import PublicPortalPage from './pages/PublicPortalPage';
+import PublicLibraryPage from './pages/PublicLibraryPage';
 
 function Guard({ c }) {
   const store = useAuthStore();
@@ -56,6 +57,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/portal" element={<PublicPortalPage />} />
+        <Route path="/portal/library" element={<PublicLibraryPage />} />
         <Route path="/" element={<Guard c={<AppLayout />} />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
