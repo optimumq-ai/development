@@ -278,6 +278,9 @@ export default function PublicPortalPage() {
             <span style={{fontSize:'15px',marginRight:'4px'}}>💬</span>
             <strong>Have a question?</strong> Ask the assistant anytime — about what records exist, how the process works, deadlines, fees, or anything else.
           </div>
+          <a href="/portal/library" style={{display:'block',fontSize:'12px',color:'#1F4E79',background:'#F0FDF4',border:'1px solid #BBF7D0',borderRadius:'6px',padding:'8px 10px',marginBottom:'8px',lineHeight:'1.4',textDecoration:'none',fontWeight:600}}>
+            <span style={{fontSize:'15px',marginRight:'4px'}}>📚</span>Browse the records library — records already released to the public, ready to view now →
+          </a>
           <p style={{fontSize:'12px',color:'#6B7280',margin:0}}>
             Prefer a traditional form? <button onClick={function(){setShowForm(true);}} style={{background:'none',border:'none',color:'#1F4E79',textDecoration:'underline',cursor:'pointer',fontSize:'12px',padding:0}}>Click here</button>.
           </p>

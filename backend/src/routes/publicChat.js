@@ -417,4 +417,21 @@ router.get('/browse/records', async function(req, res) {
   } catch(e){ console.error('browse records failed:', e.message); res.status(500).json({ error:'Failed to load records' }); }
 });
 
+// Download a public-ready record's file. Security: only serves a file that backs a RELEASED record.
+router.get('/file/:id', async function(req, res) {
+  try {
+    var fileId = req.params.id;
+    var ok = await all("SELECT 1 FROM fulfilled_records WHERE output_file_id = ? AND status = 'released' LIMIT 1", [fileId]);
+    if (!ok.length) return res.status(404).send('Not found');
+    var rows = await all("SELECT filename, original_name, mimetype FROM request_files WHERE id = ? LIMIT 1", [fileId]);
+    if (!rows.length) return res.status(404).send('Not found');
+    var rf = rows[0];
+    var p = require('path').join(__dirname, '../../../uploads', rf.filename);
+    if (!require('fs').existsSync(p)) return res.status(404).send('File missing');
+    res.setHeader('Content-Type', rf.mimetype || 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="' + String(rf.original_name || 'record.pdf').replace(/[^\w.\- ]/g, '_') + '"');
+    require('fs').createReadStream(p).pipe(res);
+  } catch (e) { console.error('public file failed:', e.message); res.status(500).send('Failed'); }
+});
+
 module.exports = router;
