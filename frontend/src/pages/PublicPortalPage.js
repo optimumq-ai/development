@@ -248,7 +248,7 @@ export default function PublicPortalPage() {
           <div style={{width:'40px',height:'40px',background:'#1F4E79',borderRadius:'8px',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'18px',fontWeight:'700'}}>OQ</div>
           <div>
             <div style={{fontSize:'15px',fontWeight:'700',color:'#1F4E79'}}>{agencyName}</div>
-            <div style={{fontSize:'12px',color:'#6B7280'}}>Public Records Request Portal</div>
+            <div style={{fontSize:'13px',color:'#4B5563'}}>Public Records Request Portal</div>
           </div>
         </div>
       </header>

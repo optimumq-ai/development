@@ -131,7 +131,7 @@ export default function PublicLibraryPage() {
       <header style={sHeader}>
         <div>
           <div style={{ fontSize: '16px', fontWeight: 700, color: BLUE }}>{agencyName} Records Library</div>
-          <div style={{ fontSize: '12px', color: '#6B7280' }}>Browse records already released to the public</div>
+          <div style={{ fontSize: '13px', color: '#4B5563' }}>Browse records already released to the public</div>
         </div>
         <a href="/portal" style={{ fontSize: '13px', color: BLUE, textDecoration: 'none', fontWeight: 600 }}>Search instead →</a>
       </header>
