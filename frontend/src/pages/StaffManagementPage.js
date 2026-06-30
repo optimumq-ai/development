@@ -120,7 +120,7 @@ export default function StaffManagementPage() {
                 <input value={form.title} onChange={function(e){setF('title',e.target.value);}} style={inp} placeholder="Records Coordinator"/>
               </div>
               <div>
-                <label style={lbl}>Fulfillment Team</label>
+                <label style={lbl}>Request Fulfillment Team</label>
                 <select value={form.departmentId} onChange={function(e){setF('departmentId',e.target.value);}} style={inp}>
                   <option value="">— No team assigned —</option>
                   {departments.filter(function(d){ return d.kind==='team'; }).map(function(d){ return <option key={d.id} value={d.id}>{d.name}</option>; })}

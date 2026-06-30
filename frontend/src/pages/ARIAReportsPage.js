@@ -112,7 +112,7 @@ export default function ARIAReportsPage() {
         </div>
 
         <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px'}}>
-          <h3 style={{fontSize:'15px',fontWeight:'700',margin:'0 0 20px'}}>Requests by Department</h3>
+          <h3 style={{fontSize:'15px',fontWeight:'700',margin:'0 0 20px'}}>Requests by City Department</h3>
           <div style={{display:'flex',flexDirection:'column',gap:'12px'}}>
             {Object.entries(byDept).sort(function(a,b){return b[1]-a[1];}).map(function(entry, i){
               var k=entry[0]; var v=entry[1];
@@ -180,7 +180,7 @@ export default function ARIAReportsPage() {
         ) : (
           <table style={{width:'100%',borderCollapse:'collapse'}}>
             <thead><tr style={{background:'#F9FAFB'}}>
-              {['Request #','Requestor','Stage','Fulfillment Team','Deadline','Days Overdue'].map(function(h){
+              {['Request #','Requestor','Stage','Request Fulfillment Team','Deadline','Days Overdue'].map(function(h){
                 return <th key={h} style={{textAlign:'left',fontSize:'11px',fontWeight:'600',color:'#6B7280',textTransform:'uppercase',letterSpacing:'.05em',padding:'10px 16px'}}>{h}</th>;
               })}
             </tr></thead>

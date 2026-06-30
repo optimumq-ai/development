@@ -264,7 +264,7 @@ export default function NewRequestPage() {
                   </div>
                   <div style={{fontSize:'13px',display:'flex',gap:'16px',flexWrap:'wrap',marginBottom:'6px'}}>
                     <span><strong>Classification:</strong> {aiSuggestion.classification&&aiSuggestion.classification.replace(/_/g,' ')}</span>
-                    <span><strong>Department:</strong> {aiSuggestion.department_name||'—'}</span>
+                    <span><strong>City Department:</strong> {aiSuggestion.department_name||'—'}</span>
                   </div>
                   <div style={{fontSize:'12px',color:'#374151',fontStyle:'italic'}}>"{aiSuggestion.reasoning}"</div>
                 </div>
@@ -272,7 +272,7 @@ export default function NewRequestPage() {
               <textarea value={form.description} onChange={function(e){setF('description',e.target.value);}} style={Object.assign({},lowConfidenceFields.description?inpLow:inp,{minHeight:'120px',resize:'vertical',fontFamily:'inherit'})} placeholder="Describe the records being requested..." required/>
             </div>
             <div>
-              <label style={lbl}>Fulfillment Team</label>
+              <label style={lbl}>Request Fulfillment Team</label>
               <select value={form.departmentId} onChange={function(e){setF('departmentId',e.target.value);}} style={inp}>
                 <option value="">— Auto-route or select manually —</option>
                 {departments.map(function(d){return <option key={d.id} value={d.id}>{d.name}</option>;})}

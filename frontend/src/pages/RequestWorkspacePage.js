@@ -217,7 +217,7 @@ export default function RequestWorkspacePage() {
           </div>
           <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',display:'flex',flexDirection:'column',gap:'16px'}}>
             <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6'}}>Request Information</div>
-            {[['Classification',request.classification?request.classification.replace(/_/g,' '):'—'],['Fulfillment Team',request.department_name||'Unassigned'],['Deadline',request.deadline_date||'—'],['Fee Waiver',request.fee_waiver_requested?'Yes — Requested':'No'],['MRR',request.is_mrr?'Yes — Multi-Record Request':'No']].map(function(item){
+            {[['Classification',request.classification?request.classification.replace(/_/g,' '):'—'],['Request Fulfillment Team',request.department_name||'Unassigned'],['Deadline',request.deadline_date||'—'],['Fee Waiver',request.fee_waiver_requested?'Yes — Requested':'No'],['MRR',request.is_mrr?'Yes — Multi-Record Request':'No']].map(function(item){
               return <div key={item[0]}><div style={{fontSize:'11px',fontWeight:'600',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.05em'}}>{item[0]}</div><div style={{fontSize:'14px',color:'#111',textTransform:'capitalize',marginTop:'2px'}}>{item[1]}</div></div>;
             })}
           </div>
@@ -413,7 +413,7 @@ export default function RequestWorkspacePage() {
             {request.assigned_to_name&&<div style={{fontSize:'12px',color:'#6B7280',marginTop:'6px'}}>Currently assigned to: <strong>{request.assigned_to_name}</strong></div>}
           </div>
           <div style={{marginBottom:'16px'}}>
-            <div style={{fontSize:'13px',fontWeight:'600',color:'#374151',marginBottom:'8px'}}>Fulfillment Team</div>
+            <div style={{fontSize:'13px',fontWeight:'600',color:'#374151',marginBottom:'8px'}}>Request Fulfillment Team</div>
             <div style={{display:'flex',gap:'8px',alignItems:'center',flexWrap:'wrap'}}>
               <select onChange={function(e){if(e.target.value)rerouteRequest(e.target.value);}} value={request.department_id||''} disabled={rerouting}
                 style={{padding:'8px 12px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',outline:'none',background:'white',cursor:'pointer'}}>

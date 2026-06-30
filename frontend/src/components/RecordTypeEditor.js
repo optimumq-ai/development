@@ -114,16 +114,16 @@ export default function RecordTypeEditor(props) {
         <select value={f.category_id} onChange={function(e){ set('category_id', e.target.value); }} style={inp}>
           {props.categories.map(function(c){ return <option key={c.id} value={c.id}>{c.name}</option>; })}
         </select>
-        <label style={lab}>Owning department</label>
+        <label style={lab}>Owning City Department</label>
         <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '4px', marginTop: '-2px' }}>The org-chart department that owns these records. The AI matches requests to this.</div>
         <select value={owningDeptId} onChange={function(e){ setOwningDeptId(e.target.value); }} style={inp}>
           <option value="">- None -</option>
           {bizDepts.map(function(d){ return <option key={d.id} value={d.id}>{d.name}</option>; })}
         </select>
-        <label style={lab}>Fulfillment team</label>
+        <label style={lab}>Request Fulfillment Team</label>
         <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '4px', marginTop: '-2px' }}>Leave on default unless this record type is handled by a different team than its owning department.</div>
         <select value={teamOverrideId} onChange={function(e){ setTeamOverrideId(e.target.value); }} style={inp}>
-          <option value="">Use owning department default{derivedTeam ? ' (' + derivedTeam.name + ')' : ''}</option>
+          <option value="">Use owning City Department default{derivedTeam ? ' (' + derivedTeam.name + ')' : ''}</option>
           {teams.map(function(t){ return <option key={t.id} value={t.id}>{t.name} (override)</option>; })}
         </select>
         <label style={lab}>Found in these sources</label>

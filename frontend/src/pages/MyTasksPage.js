@@ -98,7 +98,7 @@ export default function MyTasksPage() {
               <table style={{width:'100%',borderCollapse:'collapse'}}>
                 <thead>
                   <tr style={{background:'#F9FAFB'}}>
-                    {['Request #','Requestor','Stage','Fulfillment Team','Deadline',''].map(function(h){
+                    {['Request #','Requestor','Stage','Request Fulfillment Team','Deadline',''].map(function(h){
                       return <th key={h} style={{textAlign:'left',fontSize:'11px',fontWeight:'600',color:'#6B7280',textTransform:'uppercase',letterSpacing:'.05em',padding:'10px 16px'}}>{h}</th>;
                     })}
                   </tr>

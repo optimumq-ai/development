@@ -91,7 +91,7 @@ export default function DepartmentsPage(){
     var d = editor.data; var kind = editor.kind;
     return (
       <Modal onClose={function(){ if(!saving) setEditor(null); }}>
-        <h2 style={{fontSize:'18px',fontWeight:'700',margin:'0 0 16px'}}>{editor.mode==='create'?'New ':'Edit '}{kind==='team'?'Fulfillment Team':'Department'}</h2>
+        <h2 style={{fontSize:'18px',fontWeight:'700',margin:'0 0 16px'}}>{editor.mode==='create'?'New ':'Edit '}{kind==='team'?'Request Fulfillment Team':'City Department'}</h2>
         <Field label="Name"><input style={inputStyle} value={d.name} onChange={function(e){setField('name',e.target.value);}} /></Field>
         <Field label="Code"><input style={inputStyle} value={d.code} maxLength={6} onChange={function(e){setField('code',e.target.value.toUpperCase());}} /></Field>
         <Field label="Color"><div style={{display:'flex',gap:'6px',flexWrap:'wrap'}}>{COLORS.map(function(c){ return <div key={c} onClick={function(){setField('color',c);}} style={{width:'28px',height:'28px',borderRadius:'7px',background:c,cursor:'pointer',border:d.color===c?'3px solid #111':'3px solid transparent'}} />; })}</div></Field>
@@ -149,12 +149,12 @@ export default function DepartmentsPage(){
     <div style={{maxWidth:'920px',display:'flex',flexDirection:'column',gap:'20px'}}>
       <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:'16px'}}>
         <div>
-          <h1 style={{fontSize:'22px',fontWeight:'700',margin:'0 0 4px'}}>Departments &amp; Teams</h1>
+          <h1 style={{fontSize:'22px',fontWeight:'700',margin:'0 0 4px'}}>City Departments &amp; Request Fulfillment Teams</h1>
           <p style={{color:'#9CA3AF',fontSize:'14px',margin:0}}>{depts().length} departments &middot; {teams().length} fulfillment teams</p>
         </div>
         <div style={{display:'flex',gap:'8px',flexShrink:0}}>
           <button onClick={function(){openCreate('team');}} style={btnSecondary}>+ New Team</button>
-          <button onClick={function(){openCreate('department');}} style={btnPrimary}>+ New Department</button>
+          <button onClick={function(){openCreate('department');}} style={btnPrimary}>+ New City Department</button>
         </div>
       </div>
 
@@ -199,7 +199,7 @@ export default function DepartmentsPage(){
                           <div style={{display:'flex',alignItems:'center',gap:'10px',marginBottom:members.length?'10px':0}}>
                             <div style={chipSm(team.color)}>{team.code}</div>
                             <span style={{fontWeight:'700',fontSize:'14px',color:'#111'}}>{team.name}</span>
-                            <span style={badge('#ECFDF5','#065F46')}>Fulfillment Team</span>
+                            <span style={badge('#ECFDF5','#065F46')}>Request Fulfillment Team</span>
                             <div style={{flex:1}}></div>
                             <button onClick={function(){setAddStaff({teamId:team.id,teamName:team.name});}} style={btnGhostSm}>Add staff</button>
                             <button onClick={function(){openEdit(team);}} style={btnGhostSm}>Edit</button>

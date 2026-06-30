@@ -17,7 +17,7 @@ export default function AppLayout() {
     { to: '/my-tasks', label: 'My Tasks', show: true },
     { to: '/reports', label: 'Reports (ARIA)', show: isElev },
     { to: '/staff', label: 'Staff Management', show: isElev },
-    { to: '/departments', label: 'Departments & Teams', show: isElev },
+    { to: '/departments', label: 'City Departments & Teams', show: isElev },
     { to: '/taxonomy', label: 'Taxonomy', show: isElev },
     { to: '/workflow', label: 'Workflow', show: isElev },
     { to: '/workflow-map', label: 'Process Map', show: isElev },
