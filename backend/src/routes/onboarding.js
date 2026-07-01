@@ -65,6 +65,12 @@ router.get('/', requireAuth, async function (req, res) {
   const phases = await all("SELECT p.*, u.display_name AS completed_by_name, r.display_name AS reviewer_name, r.email AS reviewer_email FROM onboarding_progress p LEFT JOIN users u ON u.id = p.completed_by LEFT JOIN users r ON r.id = p.reviewer_id ORDER BY p.phase_order");
   const sig = await signals();
   phases.forEach(function (p) { p.signal = sig[p.phase_key] || null; });
+  try {
+    const jr = await get("SELECT value FROM system_config WHERE key='jurisdiction_profile'");
+    const fp = await get("SELECT version FROM fee_profiles WHERE jurisdiction_id = ? AND context = 'FR' ORDER BY CASE WHEN status='active' THEN 0 ELSE 1 END, version DESC LIMIT 1", [jr && jr.value]);
+    const fpv = fp ? String(fp.version) : null;
+    phases.forEach(function (p) { if (p.phase_key === 'fees') p.current_fee_config_version = fpv; });
+  } catch (e) {}
   const complete = phases.filter(function (p) { return p.status === 'complete'; }).length;
   const current = phases.find(function (p) { return p.status !== 'complete'; });
   res.json({ phases: phases, currentPhase: current ? current.phase_key : null, percentComplete: phases.length ? Math.round(100 * complete / phases.length) : 0 });
@@ -111,6 +117,13 @@ router.post('/:phase/approve', requireAuth, async function (req, res) {
   if (p.requires_review && p.reviewer_id && p.reviewer_id !== req.user.sub && !isAdmin) {
     return res.status(403).json({ error: 'Only the designated reviewer or an administrator can approve this phase' });
   }
+  if (p.phase_key === 'fees') {
+    const jr = await get("SELECT value FROM system_config WHERE key='jurisdiction_profile'");
+    const fp = await get("SELECT version FROM fee_profiles WHERE jurisdiction_id = ? AND context = 'FR' ORDER BY CASE WHEN status='active' THEN 0 ELSE 1 END, version DESC LIMIT 1", [jr && jr.value]);
+    const curVer = fp ? String(fp.version) : null;
+    if (p.test_status !== 'confirmed') return res.status(400).json({ error: 'Run the fee/estimate test and confirm it behaves correctly before approving Fees & Estimates.' });
+    if (curVer && String(p.test_config_ref) !== curVer) return res.status(400).json({ error: 'The fee configuration changed since the last test. Please re-run and confirm the fee test before approving.' });
+  }
   await run("UPDATE onboarding_progress SET status = 'complete', completed_by = ?, completed_at = datetime('now'), notes = ?, updated_at = datetime('now') WHERE phase_key = ?", [req.user.sub, req.body.notes || null, req.params.phase]);
   res.json({ success: true, phase: req.params.phase, status: 'complete' });
 });
@@ -130,6 +143,21 @@ router.patch('/:phase', requireAuth, async function (req, res) {
     await run("UPDATE onboarding_progress SET status = ?, completed_by = NULL, completed_at = NULL, review_requested_at = NULL, updated_at = datetime('now') WHERE phase_key = ?", [status, req.params.phase]);
   }
   res.json({ success: true, phase: req.params.phase, status: status });
+});
+
+// Record the fee/estimate sandbox test outcome on the Fees phase (mandatory before Fees approval).
+router.post('/fees/test-result', requireAuth, async function (req, res) {
+  const outcome = req.body.outcome;
+  if (['confirmed', 'issues'].indexOf(outcome) < 0) return res.status(400).json({ error: 'outcome must be confirmed or issues' });
+  const jr = await get("SELECT value FROM system_config WHERE key='jurisdiction_profile'");
+  const fp = await get("SELECT version FROM fee_profiles WHERE jurisdiction_id = ? AND context = 'FR' ORDER BY CASE WHEN status='active' THEN 0 ELSE 1 END, version DESC LIMIT 1", [jr && jr.value]);
+  const ver = fp ? String(fp.version) : null;
+  if (outcome === 'confirmed') {
+    await run("UPDATE onboarding_progress SET test_status='confirmed', test_by=?, test_at=datetime('now'), test_notes=NULL, test_config_ref=?, updated_at=datetime('now') WHERE phase_key='fees'", [req.user.sub, ver]);
+  } else {
+    await run("UPDATE onboarding_progress SET test_status='issues', test_by=?, test_at=datetime('now'), test_notes=?, status='in_progress', updated_at=datetime('now') WHERE phase_key='fees'", [req.user.sub, req.body.notes || null]);
+  }
+  res.json({ success: true, outcome: outcome });
 });
 
 module.exports = router;
