@@ -475,3 +475,35 @@ because it IS the finance system, so records-side and money-side could share a p
 Staging (consistent with payments caution): build the logic + ledger + mode/adapter abstraction now
 (internal ledger as default, ERP connector as a defined interface/stub); live money-movement (card
 processing internally, or true cash sync with the ERP) is the later, careful step.
+
+---
+
+## 12K. Collection timing & release gating (added axis, 2026-07-01)
+
+Per estimate band, what gates the work and the records:
+- **nothing** — work proceeds, invoice on completion (records may ship before payment);
+- **estimate acceptance** — requestor must agree within the response window or the request is withdrawn by operation of law (no money up front);
+- **deposit/bond before processing** — money (or a bond) required before work begins.
+Plus the timing side-effects: does the deadline clock shift to the deposit-receipt date? is a bond an accepted alternative to cash? is there a delinquent-requestor prepay trigger? This axis drives BOTH the requestor confirmation wording and the workflow stage-gate.
+
+## Verified state profile: TEXAS (primary sources, verified 2026-07-01)
+
+Sources: Tex. Gov't Code Sec. 552.2615 (cost estimates) + Sec. 552.263 (deposit/bond); AG cost-rules summary "12-3CostBasics.pdf" (req 2026-0036). VERIFIED against statute text (not an AI pass).
+
+**Estimate bands (Sec. 552.2615):**
+- **<= $40:** No cost estimate required before work. Work proceeds; an invoice may be provided upon completion. No deposit may be required before work. Act deadlines unaffected. (If charges include labor, requestor may ask for a written time statement.)
+- **> $40 and <= $100:** Written cost estimate + proper notices REQUIRED before beginning work. Deposit may NOT be required. Deadlines unaffected. Requestor must respond within 10 business days or the request is withdrawn by operation of law.
+- **> $100 (> $50 for a "small" body, fewer than 16 FTE):** Written cost estimate + proper notices required before work. Deposit or bond MAY be required (Sec. 552.263). Same 10-business-day acceptance rule.
+
+**Deposit / bond (Sec. 552.263):**
+- Permitted ONLY IF (1) the itemized statement was provided AND (2) the estimate exceeds $100 (>15 FTE) or $50 (<16 FTE).
+- **Amount: for "anticipated costs" - i.e., up to the FULL estimated charge. Texas sets NO statutory percentage cap. The deposit % is an AGENCY POLICY choice (commonly ~50%, but that is policy, not law).**
+- A **bond** is an accepted alternative to a cash deposit.
+- **Deadline effect (e):** when a deposit/bond is required, the request is considered RECEIVED on the date the deposit/bond arrives (the clock starts then).
+- **10-business-day withdrawal (f):** failure to pay the deposit / post the bond before the 10th business day after it is required = request withdrawn.
+- **Delinquent-requestor trigger (c):** a deposit/bond may ALSO be required for unpaid amounts from previous requests exceeding $100, before preparing a new copy; the agency may not pursue those debts by other means.
+- **No future down-payments (b).**
+- **Documentation duty (d):** the agency must document the anticipated costs / unpaid amounts before requiring a deposit/bond; that documentation is publicly disclosable.
+- **Modified request (e-1):** a request modified in response to a deposit demand is a SEPARATE request, received on the modification date.
+
+**Agency-policy choices (within the statutory floor):** whether to actually require a deposit; the deposit % (<= anticipated cost); FTE size (sets the $100 vs $50 threshold); whether to accept bonds; reconciliation policy (Section 5). Everything above the "policy" line is statutory and should seed the Texas jurisdiction profile; the policy line is agency-override config.
