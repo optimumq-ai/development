@@ -131,7 +131,7 @@ Taxonomy is currently **flat** (category -> record type). Granular sub-types / a
 | 2 | Catch-all -> Unassigned + triage queue + Smart-Routing trigger | DECISION | Interlocking UNIT (do together) | Section 5; don't ship classifier change alone |
 | 3 | Reassignment re-route symmetry (+ move task `team_id`) | DECISION | Medium | Section 7; interacts with #2 |
 | 4 | Lift Smart Routing to the team tier (Level 2 team matching) | PLANNED / optional | Medium | Section 6; build if a need appears |
-| 5 | Drop/demote `team.parent_id` -> serves-association | DECISION | Medium | Section 2; PREREQUISITE: dependency-check what reads `parent_id` |
+| 5 | Drop/demote `team.parent_id` -> serves-association | **DEMOTE done (26a...); serves-association was already BUILT** | Small | Dependency check done: `parent_id` reads = 1 display-grouping line only, nothing in routing. Team-side "Fulfills requests for" multi-select + `/fulfills` endpoint already existed. parent_id relabeled display-only. FULL removal = optional page-IA refactor (teams only render nested under a parent today; no standalone teams list) - deferred. |
 | 6 | Standardize "custodian" to one meaning; (longer-term) rename `department_id`-holds-a-team | Cleanup | Low risk for terminology; rename is larger | Section 1 |
 
 **Sequencing guidance:** implement deliberately, as coherent units, with explicit go-ahead per item — not all at once. #2 and #3 are the interlocking pair (catch-all + reassignment both touch the assign/triage flow). #5 needs its dependency-check first. #1 is the most self-contained. None is a blocker for the current build sprint; all are enhancements/cleanups recorded here so they aren't lost.
