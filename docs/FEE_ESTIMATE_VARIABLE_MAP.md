@@ -178,3 +178,30 @@ Sets `requestor_type` / `purpose`. Not mutually exclusive → two checkboxes, no
 - **STAT/POLICY is per-(state x variable)** — the resolver supports it; the map must not assume a variable's layer is fixed across states.
 
 **Pending:** primary-source text of R.S. 44:32; the city fee-schedule policies (actual LA numbers).
+
+---
+
+## City profile: NEW ORLEANS (primary sources — municipal code text provided)
+
+**Sources:** NOLA Municipal Code Art. V (Sec. 70-551..565, general city fees) + Sec. 90-123 (NOPD police report fee schedule), text provided by user. General public records copy fees live in **70-557** (NOT 70-564 — that section, "permit/license preparation fees," was repealed by Ord. 19,972 in 2000 and is reserved; any citation to 70-564 for record fees is stale). Police records carved out under 90-123 / 90-124.
+
+**Big structural additions this document forces into the map:**
+
+- **NEW: Fee-computation MODE (per record type / department).** Two modes:
+  - **computed** — the labor + duplication engine (`feeEngine.compute`). `[BUILT]`
+  - **fixed/tiered schedule** — a lookup table of item -> price (NOPD: offense report $25 for 1-10 pp then $1/pp; accident report $5 + $15 processing; photos $10/print; fingerprinting $25; computer printouts $150-$300 tiered by man-hours x file size; research study $100). `[NOT BUILT — engine only does computed]`
+  - A record type/department selects its mode. Police-class records need the fixed-schedule mode; general records use the computed engine. **This is a core architectural addition.**
+- **NEW: Per-item state-law override.** NOPD schedule: "if valid state law imposes a higher or lower maximum fee for any one of the items, the fee for that item shall be that state maximum." So the STAT/POLICY resolution is **per-line-item**, not one floor over the whole schedule. (Extends section 9.1.)
+- **No-record fee (section 8.3) confirmed + refined:** it is a **flat, outcome-independent search fee** — "none found $5 / located $5." You pay for the search; the copy is incidental. For fixed-schedule record types the fee IS the search, not the copy.
+- **Certification deliverables as line items:** e.g., "letter of good conduct for visa - $25" — a certification output priced as its own item (fits fixed-schedule mode).
+
+**Smaller additions (integrate into existing sections):**
+- **Delinquency / indebtedness gating (70-554):** 33-1/3% delinquency fee + 15% interest; applicant must certify under oath they owe the city nothing or **no service/permit/license issues**. Broader than Texas's requestor-specific trigger (section 8.1) — a general no-service-if-indebted rule.
+- **Annual fee-schedule review (70-553):** departments submit a proposed schedule yearly, adjust for inflation, and **flag which fees are state-law-limited**. Dovetails with LA Act 247's must-post-schedule (compliance dimension).
+- **Returned-check / payment-failure penalty (70-551):** greater of 1% or $15. (payment-failure dimension)
+- **Payment-form constraints:** NOPD accepts cash and/or personal check; **no foreign checks or money orders**. -> add "accepted payment forms" as a policy field (also intake-relevant).
+- **General copy fees (70-557):** documents $0.50/page; audio/video $30/copy; maps $0.40/sqft; various fixed code-copy prices. (LA city "reasonable fee" made concrete.)
+
+**Provenance refinement (section 9.2):** "verified" must include **citation-currency** — is the cited ordinance section still in force, or repealed/renumbered? (70-564 is the cautionary example.)
+
+**Comparison data point (Orleans Parish DA, via web):** pay-in-advance; **30 business days** to pay the estimated cost or the request must be resubmitted; no cost to view records (inspection free); "Notice of Estimated Costs" issued after a disclosability review. (Another LA collection-timing variant.)
