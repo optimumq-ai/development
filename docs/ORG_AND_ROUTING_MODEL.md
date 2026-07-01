@@ -162,3 +162,7 @@ Tier 2 is architecturally consistent with the onboarding-vision theme (AI propos
 ---
 
 *Recorded 2026-06-30 from the architecture review with Kevin. Decisions captured here are the source of truth; update Status as items move to BUILT.*
+
+## 12. Build log addendum (2026-06-30)
+
+- **#2/#3 Unassigned + triage + reassignment symmetry: BUILT** (8747e22, b01b4bb). Classifier can abstain (department null); genuinely unroutable requests are left Unassigned (team null) rather than stamped Open Records; onIntake honors it; Open Records sees the Unassigned/triage queue (internal LIBRARY container excluded); reassigning a team moves + re-routes the active task (or spawns one) on the new team; queue shows "Unassigned - needs triage". Verified: classifier abstain + Unassigned->null, triage-visibility SQL, LIBRARY exclusion. Reassignment re-route is parse-checked but not yet live-exercised (Starlink was flaky). Tuning note: the abstain option is conservative; if triage over/under-fires, adjust the STEP 2 prompt.
