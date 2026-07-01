@@ -68,6 +68,7 @@ app.use('/api/fee-estimates', require('./src/routes/feeEstimates'));
 app.use('/api/config-freshness', require('./src/routes/configFreshness'));
 app.use('/api/jurisdiction-profile', require('./src/routes/jurisdictionProfile'));
 app.use('/api/onboarding', require('./src/routes/onboarding'));
+app.use('/api/fee-sandbox', require('./src/routes/feeSandbox'));
 
 app.get('/api/health', function(req, res) {
   res.json({ status: 'ok', version: '1.0.0' });
