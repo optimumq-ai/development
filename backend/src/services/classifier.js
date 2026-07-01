@@ -21,7 +21,7 @@ async function classifyAndRoute(description) {
   var deptById = {}; depts.forEach(function(d){ deptById[d.id] = d; });
   var teamById = {}; teams.forEach(function(t){ teamById[t.id] = t; });
 
-  var rts = await all("SELECT rt.id, rt.code, rt.name, c.name AS category_name, rt.synonyms, rt.keywords, (SELECT department_id FROM record_type_departments WHERE record_type_id = rt.id AND role = 'owner' ORDER BY sort_order LIMIT 1) AS owner_department_id FROM record_types rt LEFT JOIN categories c ON c.id = rt.category_id WHERE rt.status = 'active' ORDER BY c.sort_order, rt.sort_order");
+  var rts = await all("SELECT rt.id, rt.code, rt.name, c.name AS category_name, rt.synonyms, rt.keywords, (SELECT department_id FROM record_type_departments WHERE record_type_id = rt.id AND role = 'owner' ORDER BY sort_order LIMIT 1) AS owner_department_id, (SELECT department_id FROM record_type_departments WHERE record_type_id = rt.id AND role = 'fulfiller' ORDER BY sort_order LIMIT 1) AS fulfiller_team_id FROM record_types rt LEFT JOIN categories c ON c.id = rt.category_id WHERE rt.status = 'active' ORDER BY c.sort_order, rt.sort_order");
   var rtByCode = {}; rts.forEach(function(rt){ rtByCode[rt.code] = rt; });
 
   var taxoLines = rts.map(function(rt){
@@ -65,6 +65,10 @@ async function classifyAndRoute(description) {
 
   var ownerDept = ownerId ? deptById[ownerId] : null;
   var teamId = (ownerDept && ownerDept.processed_by) ? ownerDept.processed_by : (fallbackTeam ? fallbackTeam.id : null);
+  // Per-record-type fulfillment-team override (record_type_departments role='fulfiller'):
+  // a confident taxonomy match naming a fulfiller team wins over the owning department's default
+  // team, so a record can be OWNED BY one City Department but FULFILLED BY a different team.
+  if (routingBasis === 'taxonomy' && matchedRt && matchedRt.fulfiller_team_id && teamById[matchedRt.fulfiller_team_id]) teamId = matchedRt.fulfiller_team_id;
   if (routingBasis === 'unassigned' && fallbackTeam) teamId = fallbackTeam.id;
   var team = teamId ? teamById[teamId] : null;
 
