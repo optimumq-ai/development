@@ -46,7 +46,12 @@ router.get('/', requireAuth, async function(req, res) {
   const isElevated = ['SUPERVISOR','DIRECTOR','SYSTEM_ADMIN','DEPT_MANAGER','ATTORNEY_REVIEWER'].some(function(r) { return userRoles.indexOf(r) !== -1; });
   let sql = "SELECT r.*, d.name as department_name, d.color as department_color, u.display_name as assigned_to_name, (SELECT t.status FROM tasks t WHERE t.request_id = r.id AND t.status IN ('open','assigned','in_progress') ORDER BY t.updated_at DESC LIMIT 1) AS active_task_status, (SELECT tu.display_name FROM tasks t2 LEFT JOIN users tu ON tu.id = t2.assigned_to WHERE t2.request_id = r.id AND t2.status IN ('assigned','in_progress') ORDER BY t2.updated_at DESC LIMIT 1) AS active_task_assignee FROM requests r LEFT JOIN departments d ON d.id = r.department_id LEFT JOIN users u ON u.id = r.assigned_to WHERE 1=1";
   const params = [];
-  if (!isElevated) { sql += ' AND (r.department_id = ? OR r.assigned_to = ?)'; params.push(req.user.dept, req.user.sub); }
+  if (!isElevated) {
+    var orTeam = await get("SELECT id FROM departments WHERE kind='team' AND is_open_records=1 ORDER BY sort_order LIMIT 1");
+    var triage = (orTeam && req.user.dept === orTeam.id) ? ' OR r.department_id IS NULL' : '';
+    sql += ' AND (r.department_id = ? OR r.assigned_to = ?' + triage + ')';
+    params.push(req.user.dept, req.user.sub);
+  }
   if (req.query.stage) { sql += ' AND r.stage = ?'; params.push(req.query.stage); }
   if (req.query.status) { sql += ' AND r.status = ?'; params.push(req.query.status); }
   else { sql += " AND r.status != 'closed'"; }
@@ -124,6 +129,26 @@ router.patch('/:id/route', requireAuth, async function(req, res) {
       cleared = true;
     }
   }
+  // #3 reassignment symmetry: move the request's active work onto the new team and re-route it there
+  // (a specialist on the new team via Smart Routing, else the new team's pool). If none exists yet
+  // (e.g. the request was Unassigned/triage), spawn the first work task on the new team and route it.
+  try {
+    var tr = require('../services/taskRouting');
+    var openTasks = await all("SELECT id, assigned_to FROM tasks WHERE request_id = ? AND status IN ('open','assigned','in_progress')", [req.params.id]);
+    for (var oti = 0; oti < openTasks.length; oti++) {
+      var ot = openTasks[oti];
+      await run("UPDATE tasks SET team_id = ?, updated_at = datetime('now') WHERE id = ?", [teamId, ot.id]);
+      if (ot.assigned_to) {
+        var au = await get('SELECT department_id FROM users WHERE id = ?', [ot.assigned_to]);
+        if (!au || au.department_id !== teamId) await run("UPDATE tasks SET assigned_to = NULL, status = 'open' WHERE id = ?", [ot.id]);
+      }
+      await tr.autoRouteOrPool(ot.id, request.description, {});
+    }
+    if (openTasks.length === 0) {
+      var ntask = await tr.createTask({ requestId: req.params.id, type: 'estimate', title: 'Create estimate', teamId: teamId, createdBy: req.user.sub });
+      await tr.autoRouteOrPool(ntask.id, request.description, {});
+    }
+  } catch (e) { console.error('[requests] reassignment re-route failed:', e && e.message); }
   await logHistory(req.params.id, req.user.sub, req.user.name, 'REROUTED',
     'Re-routed from ' + fromName + ' to ' + team.name + (cleared ? ' (prior assignment cleared)' : '') + (req.body.notes ? ' - ' + req.body.notes : ''));
   res.json({ success: true, departmentId: teamId, teamName: team.name, assignmentCleared: cleared });

@@ -266,7 +266,7 @@ router.post('/submit', async function(req, res) {
     var dl = new Date(); dl.setDate(dl.getDate() + (cls.deadlineDays || 10));
     var dlStr = dl.toISOString().split('T')[0];
     var basisText = cls.routingBasis === 'taxonomy' ? ('matched record type "' + cls.recordTypeName + '" at ' + cls.recordTypeConfidence + '% confidence')
-      : (cls.routingBasis === 'general' ? 'general-knowledge department match' : 'no confident match - sent to central intake');
+      : (cls.routingBasis === 'general' ? 'general-knowledge department match' : 'no confident match - left Unassigned for triage review');
     await run("UPDATE requests SET classification = ?, department_id = ?, deadline_date = ?, is_mrr = ?, record_type_id = ?, classification_confidence = ?, routing_basis = ?, updated_at = datetime('now') WHERE id = ?",
       [cls.classification, cls.departmentId, dlStr, cls.isMrr ? 1 : 0, cls.recordTypeId, cls.recordTypeConfidence, cls.routingBasis, id]);
     await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',

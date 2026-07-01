@@ -36,12 +36,12 @@ async function classifyAndRoute(description) {
     + 'Request: "' + description + '"\n\n'
     + 'STEP 1 - Match to the agency record-type catalog below. Pick the ONE record type whose meaning best fits the request. Use the record type names and their "also called" terms together with your understanding of what the request is asking for. If nothing in the catalog is a reasonable fit, set record_type_code to null.\n\n'
     + 'RECORD TYPE CATALOG (code | name | category | also called):\n' + taxoLines + '\n\n'
-    + 'STEP 2 - Independently, using general knowledge of how a city is organized, say which department this request belongs to. Departments: ' + deptList + '\n\n'
+    + 'STEP 2 - Independently, using general knowledge of how a city is organized, say which department this request belongs to. If the request is off-topic, nonsensical, or too vague to place with any confidence, set department_code to null instead of guessing. Departments: ' + deptList + '\n\n'
     + 'Classifications: simple (single clean digital record, 5d), standard (1-3 items, 10d), complex (4+ items or complex, 20d), redaction_required (any redaction review needed, 30d).\n\n'
     + 'Return ONLY this JSON:\n{\n'
     + '  "record_type_code": "code from the catalog, or null",\n'
     + '  "record_type_confidence": 0-100,\n'
-    + '  "department_code": "two-letter code from the department list",\n'
+    + '  "department_code": "two-letter code from the department list, or null if no department reasonably fits",\n'
     + '  "classification": "simple|standard|complex|redaction_required",\n'
     + '  "redaction_flag": true|false,\n  "mrr_flag": true|false,\n  "fee_waiver_signal": true|false,\n'
     + '  "reasoning": "one sentence",\n  "flags": ["LEGAL_HOLD|SENSITIVE|ONGOING_INVESTIGATION if any"]\n}';
@@ -69,7 +69,7 @@ async function classifyAndRoute(description) {
   // a confident taxonomy match naming a fulfiller team wins over the owning department's default
   // team, so a record can be OWNED BY one City Department but FULFILLED BY a different team.
   if (routingBasis === 'taxonomy' && matchedRt && matchedRt.fulfiller_team_id && teamById[matchedRt.fulfiller_team_id]) teamId = matchedRt.fulfiller_team_id;
-  if (routingBasis === 'unassigned' && fallbackTeam) teamId = fallbackTeam.id;
+  if (routingBasis === 'unassigned') teamId = null; // catch-all: leave the request Unassigned for triage rather than stamping a real team
   var team = teamId ? teamById[teamId] : null;
 
   return {
@@ -81,7 +81,7 @@ async function classifyAndRoute(description) {
     custodianDepartmentId: ownerId,
     custodianName: ownerDept ? ownerDept.name : null,
     departmentId: teamId,
-    teamName: team ? team.name : (fallbackTeam ? fallbackTeam.name : null),
+    teamName: team ? team.name : null,
     routingBasis: routingBasis,
     redactionFlag: !!result.redaction_flag,
     isMrr: !!result.mrr_flag,

@@ -129,7 +129,7 @@ export default function RequestQueuePage() {
                       <td style={{padding:'12px 16px'}}>
                         <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
                           <div style={{width:'8px',height:'8px',borderRadius:'50%',background:r.department_color||'#9CA3AF',flexShrink:0}}/>
-                          <span style={{fontSize:'13px',color:'#374151'}}>{r.department_name||'—'}</span>
+                          {r.department_name ? <span style={{fontSize:'13px',color:'#374151'}}>{r.department_name}</span> : <span style={{fontSize:'13px',color:'#92400E',fontWeight:'600'}}>{r.routing_basis==='unassigned'?'Unassigned \u00b7 needs triage':'\u2014'}</span>}
                         </div>
                       </td>
                       <td style={{padding:'12px 16px'}}>

@@ -77,6 +77,7 @@ async function onIntake(requestId, matcherResult){
   var hit = await evaluate(signals);
   var actions = hit ? hit.actions : { stage:'intake', team:'open_records', note:'No rulebook match.' };
   var teamId = await resolveTeam(actions.team, m);
+  if (m && m.routingBasis === 'unassigned') teamId = null; // Unassigned classification stays Unassigned (triage), not auto-stamped to Open Records
   var teamRow = teamId ? await db.get("SELECT name FROM departments WHERE id = ?", [teamId]) : null;
   var stage = actions.stage || request.stage || 'intake';
 
