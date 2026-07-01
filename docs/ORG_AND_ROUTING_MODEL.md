@@ -63,7 +63,7 @@ This is **record-type-first**: when the taxonomy match is confident, the topical
 
 `routing_basis` (taxonomy|general|unassigned), `record_type_id`, and `classification_confidence` are stored on the request, plus a plain-language `request_history` note explaining the decision.  [BUILT]
 
-**GAP — owner vs fulfiller cannot yet differ:** routing always goes owner City Department -> `processed_by` team. The per-record-type **"Fulfillment team" override** that exists in the Record Type editor (`fulfillment_team_id`) is **not read by the classifier**. So to send a record type to a team other than its owner's default, you currently have to change its *owner*, which collapses owner and fulfiller. To let a record be *owned by* Dept A but *fulfilled by* Team B, the classifier must honor the override. Status: PARTIAL (UI field exists, routing ignores it).
+**GAP — owner vs fulfiller cannot yet differ:** routing always goes owner City Department -> `processed_by` team. The per-record-type **"Fulfillment team" override** that exists in the Record Type editor (`fulfillment_team_id`) is **not read by the classifier**. So to send a record type to a team other than its owner's default, you currently have to change its *owner*, which collapses owner and fulfiller. **RESOLVED 2026-06-30 (commit 6fa632f):** the classifier now honors the override — a confident taxonomy match whose record type has a `fulfiller` link routes to that team, while the owning City Department stays the custodian; falls back to `owner.processed_by` when no override. Verified end-to-end (body-cam -> IT override, custodian stayed Police). Latent for existing data (0 fulfiller links today). Status: BUILT.
 
 ---
 
@@ -127,7 +127,7 @@ Taxonomy is currently **flat** (category -> record type). Granular sub-types / a
 
 | # | Change | Status | Contained? | Notes / depends on |
 |---|--------|--------|-----------|--------------------|
-| 1 | Honor record-type `fulfillment_team_id` override in `classifier.js` (let owner != fulfiller) | DECISION-pending | Contained, low risk (latent until a type sets it) | Section 4 gap |
+| 1 | Honor record-type fulfillment-team override (`role='fulfiller'`) in `classifier.js` (let owner != fulfiller) | **BUILT (6fa632f)** | Contained, latent until a type sets it | Section 4 |
 | 2 | Catch-all -> Unassigned + triage queue + Smart-Routing trigger | DECISION | Interlocking UNIT (do together) | Section 5; don't ship classifier change alone |
 | 3 | Reassignment re-route symmetry (+ move task `team_id`) | DECISION | Medium | Section 7; interacts with #2 |
 | 4 | Lift Smart Routing to the team tier (Level 2 team matching) | PLANNED / optional | Medium | Section 6; build if a need appears |
