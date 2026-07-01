@@ -142,8 +142,22 @@ Taxonomy is currently **flat** (category -> record type). Granular sub-types / a
 
 - **Fulfillment-team override (change #1): BUILT** (6fa632f) - see Section 4.
 - **Paper-record routing + Smart-Routing-to-person, verified end to end.** Created record type "Historical Property & Land Records (paper archive)" - owned by Building & Planning, fulfilled (override) by City Clerk Records & Archives, linked to the two paper-index repositories. A paper request classifies to it and routes to the archives team; Thomas Jackson (paper specialist on that team) auto-assigns via Smart Routing.
-  - **Smart Routing spec wording matters:** an instruction-style spec ("all paper requests go to Thomas Jackson") scored 0.42, below the 0.45 floor -> pool. A spec that *describes the records handled* scored 0.60-0.70 -> auto-assigns. Thomas's spec was rewritten to the descriptive form. Candidate UI improvement: a placeholder/hint in the Smart Routing field nudging staff to describe records, not name themselves.
+  - **Smart Routing spec wording matters:** an instruction-style spec ("all paper requests go to Thomas Jackson") scored 0.42, below the 0.45 floor -> pool. A spec that *describes the records handled* scored 0.60-0.70 -> auto-assigns. Thomas's spec was rewritten to the descriptive form. **Static hint: BUILT** (3ce0663) - the Smart Routing description field now steers staff toward concrete record vocabulary over instruction-style phrasing, with good/weak examples inline. This is the cheap floor; see Section 11 for the more effective (undecided) approach.
 - **Queue "Assigned To" reflects work state: BUILT** (048dfd6). The request queue derives the current active task and shows "In pool - <team>" (awaiting claim) / "<person> - assigned" (on their My Tasks) / "<person> - working" (in progress) / a manual request owner - instead of a bare "Unassigned." Reminder of the layering: task assignment still does not write `requests.assigned_to`; the queue now reads the task layer directly to show reality. (Assignment happens when the task lands on a person's My Tasks as `assigned`, before they open it; `in_progress` = they've started; `open` = pooled, on nobody's list.)
+
+---
+
+## 11. OPEN / not yet decided - AI-assisted Smart Routing spec authoring
+
+**Status: NOT nailed down. Revisit when the build is near completion; potentially deferred to a future release.**
+
+The static hint (Section 10) is the cheap floor. A more effective way to get good Smart Routing specs was discussed but not decided. Three tiers, increasing value and effort:
+
+1. **Static hint (BUILT).** Guidance text on the field. Helps only those who read and apply it.
+2. **Taxonomy-grounded draft + score preview (recommended direction, high value).** Auto-draft a starting description from the record types that route to the person's team - their names/synonyms/keywords are the exact vocabulary that appears in real requests - and let the person curate it. Then show how the draft actually performs: which representative requests it would catch/miss, and whether it over-matches *other* teams' requests (the invisible failure a hint can't catch; cf. Thomas 0.42 -> pool vs 0.65 -> auto-assign). Turns "write good prose" into "trim a proposal and watch the score."
+3. **Guided chat agent (flashiest, least efficient for a single field).** Worth it only if the goal is to *elicit* specialties the person wouldn't volunteer, not merely polish phrasing.
+
+Tier 2 is architecturally consistent with the onboarding-vision theme (AI proposes from what the system already knows; human approves) and could be a component of that wizard rather than a one-off. **Decision deferred - discuss near build completion.**
 
 ---
 
