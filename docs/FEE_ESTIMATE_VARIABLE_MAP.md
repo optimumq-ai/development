@@ -154,3 +154,27 @@ Sets `requestor_type` / `purpose`. Not mutually exclusive → two checkboxes, no
 3. No-record certification (8.3): its own workflow outcome, or a special line item?
 4. Deposit form: do we build the bond option now (4.3) or defer?
 5. Which reconciliation behaviors (7.1/7.2) are mandatory per state vs agency choice — needs the research.
+
+---
+
+## State profile: LOUISIANA (state-level via Grok summary — LEAD, pending primary source + city policies)
+
+**Source:** Grok summary of La. R.S. 44:32 (legis.la.gov), citing Act 247 of 2023. **AI pass — NOT primary-source-verified.** City fee-schedule policies pending (they supply the actual numbers).
+
+**Structural finding — Louisiana is the inverse of Texas.** The state sets almost no specific numbers; it delegates fee-setting to the city under a "reasonable" standard. Nearly every amount/threshold variable is `[POLICY]` (city choice), bounded only by a reasonableness test + a few hard rules. This confirms the STAT-floor + POLICY-layer architecture and proves the **STAT/POLICY tag is per-(state x variable), not global.**
+
+- **Inspection / review: FREE (hard rule).** No fee to examine records in business hours; no fee for initial disclosability review unless a court orders. `[STAT hard rule]` -> maps to the existing "on-site inspection free" toggle.
+- **Copies: "reasonable" fees, city sets them** (incl. electronic + transmission). Must notify amount in advance; may require upfront payment. `[POLICY, reasonableness-bounded]`
+- **Must post a public fee schedule (Act 247 of 2023)** if the city charges. `[STAT compliance obligation]` -> NEW dimension: a compliance requirement + platform feature opportunity (generate/publish the schedule).
+- **Waivers/reductions:** indigent citizens OR public-purpose use. `[POLICY]` -> NEW dimension: waiver *basis* categories vary by state.
+- **No statutory bands, no deposit-received clock rule, no tiers** in the state law. Collection timing is simply "notify in advance, upfront payment allowed." `[POLICY]`
+- **Reasonableness standard, not hard caps:** fees can't hinder access; courts evaluate reasonableness. State agencies benchmark $0.25/page; cities vary. `[soft constraint]`
+- **Commercial:** state law does not define a commercial rate class -> `[COMM?]` data point: commercial distinction is NOT universal.
+
+**Dimensions Louisiana adds to the map (to integrate into sections above):**
+- **Constraint type** (new property of every bounded variable): **hard-cap** (TX) / **reasonableness-standard** (LA) / **benchmark-only** (LA $0.25/pg) / **none**. Drives whether the config UI hard-limits, soft-warns, or free-sets a value.
+- **Must-post-fee-schedule** compliance requirement (belongs in section 8).
+- **Waiver-basis categories** (extends 1.3 / intake): indigent / public-purpose / non-commercial-public-interest / journalist / researcher / nonprofit — the SET varies by state.
+- **STAT/POLICY is per-(state x variable)** — the resolver supports it; the map must not assume a variable's layer is fixed across states.
+
+**Pending:** primary-source text of R.S. 44:32; the city fee-schedule policies (actual LA numbers).
