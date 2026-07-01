@@ -176,3 +176,9 @@ Two distinct layers - do NOT conflate them:
 - **Per-document redaction (fulfillment-time, manual supplement):** when redacting a specific document on a request, the AI suggests redactions and a person can drag/highlight ADDITIONAL content beyond those suggestions and associate it with a rule (the `redaction_zones`). Drag-and-drop lives ONLY here - it is NOT part of rule population or onboarding. (The Replit-era lesson "AI zone discovery unreliable -> manual drag-and-drop became default" applies to *per-document zone detection*, not to rule generation - which works well.)
 
 **General wizard principle:** AI pre-populates every applicable phase to its best effort, but human review / add / delete / approval is required before any configuration takes effect. The designated-reviewer approval gate (Jurisdiction, Fees & Estimates, Redaction) is how that requirement is enforced.
+
+### REVISIT AFTER WIZARD BUILD - remove any implication that the platform auto-maintains rule currency
+
+The Redaction Rules page has a "Check for updates" button. Per an earlier decision, the system must NOT give the impression that it is responsible for automatically keeping rules of ANY sort current - redaction rules/exemptions, statutory deadlines, fee frameworks, etc. AI pre-population is a best-effort convenience the agency reviews and approves; the **agency**, not the platform, is responsible for legal currency. Over-implying otherwise creates real liability (agencies relying on us to keep their law current).
+
+**Action (after the onboarding wizard is built):** audit and remove/reword the "Check for updates" button and any similar UI or language across the redaction and other rule/config surfaces that could suggest the platform guarantees, tracks, or auto-maintains legal currency. Frame AI assistance as "best-effort suggestions you must review," never "kept current for you."
