@@ -205,3 +205,17 @@ Sets `requestor_type` / `purpose`. Not mutually exclusive → two checkboxes, no
 **Provenance refinement (section 9.2):** "verified" must include **citation-currency** — is the cited ordinance section still in force, or repealed/renumbered? (70-564 is the cautionary example.)
 
 **Comparison data point (Orleans Parish DA, via web):** pay-in-advance; **30 business days** to pay the estimated cost or the request must be resubmitted; no cost to view records (inspection free); "Notice of Estimated Costs" issued after a disclosability review. (Another LA collection-timing variant.)
+
+---
+
+## Data point: NEW ORLEANS OIG public-records fee schedule (compliance anti-pattern -> platform feature)
+
+Source: NOLA OIG "Request for Records" page (user-provided). Fees: paper $0.50/pg; **electronic base fee $25**; delivery "additional... may apply"; **"Additional Fees: additional service fees may apply depending on the scope of the request."**
+
+**Compliance observation (NOT legal advice):** the vague "additional service fees may apply" catch-all is in tension with LA Act 247 / R.S. 44:32(C)'s requirement to establish and post a **reasonable, definite fee schedule** — the mandate's purpose is advance predictability, which an open-ended "fees may apply" defeats. It is also harder to defend under LA's reasonableness standard (courts evaluate reasonableness). Whether it is a technical violation is an enforcement question; at minimum it is bad practice.
+
+**Turned into a design principle + platform value:**
+- **Schedule-definiteness (compliance principle):** the config model must NOT provide a vague "misc / catch-all fee" escape hatch. Every charge must be either a fixed amount or a **defined computed rule** (labor rate, per-page rate) — never "may apply depending on scope." Scope-dependent costs are expressed as a defined rule, not vague language.
+- **Platform-as-compliance-tool (pitch):** forcing a definite, itemized, posted schedule is exactly what Act 247 requires -> configuring the platform drags the agency into compliance AND hardens their fees against reasonableness challenges. "We don't just calculate your fees, we make them legally defensible."
+- **Base-fee-per-delivery-method** data point: OIG charges a flat $25 base for *electronic* delivery (itself reasonableness-questionable). Add "base fee per delivery method" as a config field (partially present in the delivery section).
+- **Public-posting intake mode (tangent):** OIG posts requests publicly and auto-redacts SSN/DOB, rejects non-PRR and profane submissions. A distinct intake/publishing mode some agencies use; not core to fees but note it exists.
