@@ -15,6 +15,7 @@ export default function AppLayout() {
     { to: '/dashboard', label: 'Dashboard', show: true },
     { to: '/requests', label: 'Request Queue', show: true },
     { to: '/my-tasks', label: 'My Tasks', show: true },
+    { to: '/setup', label: 'Setup', show: isElev },
     { to: '/reports', label: 'Reports (ARIA)', show: isElev },
     { to: '/staff', label: 'Staff Management', show: isElev },
     { to: '/departments', label: 'City Departments & Teams', show: isElev },

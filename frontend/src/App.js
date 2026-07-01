@@ -9,6 +9,7 @@ import NewRequestPage from './pages/NewRequestPage';
 import RequestWorkspacePage from './pages/RequestWorkspacePage';
 import StaffManagementPage from './pages/StaffManagementPage';
 import DepartmentsPage from './pages/DepartmentsPage';
+import SetupPage from './pages/SetupPage';
 import TaxonomyPage from './pages/TaxonomyPage';
 import WorkflowPage from './pages/WorkflowPage';
 import WorkflowMapPage from './pages/WorkflowMapPage';
@@ -72,6 +73,7 @@ export default function App() {
           <Route path="reports" element={<ARIAReportsPage />} />
           <Route path="staff" element={<StaffManagementPage />} />
           <Route path="departments" element={<DepartmentsPage />} />
+          <Route path="setup" element={<SetupPage />} />
           <Route path="taxonomy" element={<TaxonomyPage />} />
           <Route path="workflow" element={<WorkflowPage />} />
           <Route path="workflow-map" element={<WorkflowMapPage />} />
