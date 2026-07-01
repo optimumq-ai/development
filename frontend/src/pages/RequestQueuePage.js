@@ -6,6 +6,18 @@ const STAGES = { intake:'Intake Review', record_search:'Record Search', redactio
 const SC = { intake:{bg:'#DBEAFE',color:'#1E40AF'}, record_search:{bg:'#EDE9FE',color:'#6D28D9'}, redaction_review:{bg:'#FEF3C7',color:'#92400E'}, fee_review:{bg:'#D1FAE5',color:'#065F46'}, awaiting_payment:{bg:'#FFEDD5',color:'#9A3412'}, custodian_retrieval:{bg:'#CCFBF1',color:'#0F766E'}, delivery:{bg:'#E0E7FF',color:'#3730A3'} };
 const CC = { simple:{bg:'#F0FDF4',color:'#166534'}, standard:{bg:'#EFF6FF',color:'#1E40AF'}, complex:{bg:'#FFFBEB',color:'#92400E'}, redaction_required:{bg:'#FEF2F2',color:'#991B1B'} };
 
+// Derive the queue's "Assigned To" cell from the request's current active task:
+// a manually-owned request shows the owner; otherwise show whether the work is
+// sitting in the team pool (awaiting claim) or on a specific person's My Tasks.
+function workLabel(r) {
+  if (r.assigned_to_name) return { text: r.assigned_to_name, tone: '#374151', bold: true };
+  var st = r.active_task_status;
+  if (st === 'in_progress') return { text: (r.active_task_assignee || 'Assignee') + ' \u00b7 working', tone: '#065F46', bold: true };
+  if (st === 'assigned')    return { text: (r.active_task_assignee || 'Assignee') + ' \u00b7 assigned', tone: '#1F4E79', bold: true };
+  if (st === 'open')        return { text: 'In pool \u00b7 ' + (r.department_name || 'team'), tone: '#92400E', bold: false };
+  return { text: 'Awaiting assignment', tone: '#9CA3AF', bold: false };
+}
+
 
 function prettyChannel(ch) {
   if (!ch) return 'Portal';
@@ -124,7 +136,7 @@ export default function RequestQueuePage() {
                         <span style={{fontSize:'13px',color:od?'#DC2626':'#6B7280',fontWeight:od?'700':'400'}}>{r.deadline_date||'—'}</span>
                       </td>
                       <td style={{padding:'12px 16px'}}>
-                        <span style={{fontSize:'13px',color:'#6B7280'}}>{r.assigned_to_name||'Unassigned'}</span>
+                        {(function(){ var w = workLabel(r); return <span style={{fontSize:'13px',color:w.tone,fontWeight:w.bold?'600':'400'}}>{w.text}</span>; })()}
                       </td>
                       <td style={{padding:'12px 16px'}}>
                         <Link to={'/requests/'+r.id} style={{display:'inline-flex',alignItems:'center',fontSize:'13px',color:'#1F4E79',textDecoration:'none',fontWeight:'600',padding:'6px 12px',background:'#EBF3FB',borderRadius:'6px'}}>Open →</Link>

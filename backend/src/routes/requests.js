@@ -44,7 +44,7 @@ router.get('/stats/dashboard', requireAuth, async function(req, res) {
 router.get('/', requireAuth, async function(req, res) {
   const userRoles = req.user.roles || [];
   const isElevated = ['SUPERVISOR','DIRECTOR','SYSTEM_ADMIN','DEPT_MANAGER','ATTORNEY_REVIEWER'].some(function(r) { return userRoles.indexOf(r) !== -1; });
-  let sql = "SELECT r.*, d.name as department_name, d.color as department_color, u.display_name as assigned_to_name FROM requests r LEFT JOIN departments d ON d.id = r.department_id LEFT JOIN users u ON u.id = r.assigned_to WHERE 1=1";
+  let sql = "SELECT r.*, d.name as department_name, d.color as department_color, u.display_name as assigned_to_name, (SELECT t.status FROM tasks t WHERE t.request_id = r.id AND t.status IN ('open','assigned','in_progress') ORDER BY t.updated_at DESC LIMIT 1) AS active_task_status, (SELECT tu.display_name FROM tasks t2 LEFT JOIN users tu ON tu.id = t2.assigned_to WHERE t2.request_id = r.id AND t2.status IN ('assigned','in_progress') ORDER BY t2.updated_at DESC LIMIT 1) AS active_task_assignee FROM requests r LEFT JOIN departments d ON d.id = r.department_id LEFT JOIN users u ON u.id = r.assigned_to WHERE 1=1";
   const params = [];
   if (!isElevated) { sql += ' AND (r.department_id = ? OR r.assigned_to = ?)'; params.push(req.user.dept, req.user.sub); }
   if (req.query.stage) { sql += ' AND r.stage = ?'; params.push(req.query.stage); }
