@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../lib/api';
+import FeeSandboxPanel from '../components/FeeSandboxPanel';
 
 const PHASE_META = {
   jurisdiction: { link: '/jurisdiction-profile', linkLabel: 'Open Jurisdiction Profile', guide: "Select your state's jurisdiction profile. This sets statutory response deadlines, tolling rules, and the exemption basis used for redaction." },
@@ -120,10 +121,14 @@ export default function SetupPage() {
 
                   {p.status === 'complete' && p.completed_by_name ? <div style={{ fontSize: '12px', color: '#065F46', marginBottom: '10px' }}>{p.requires_review ? 'Approved' : 'Completed'} by {p.completed_by_name}{p.completed_at ? (' \u00b7 ' + String(p.completed_at).slice(0, 10)) : ''}.</div> : null}
 
+                  {p.phase_key === 'fees' && p.status !== 'complete' ? <FeeSandboxPanel onTested={load} /> : null}
+                  {p.phase_key === 'fees' && p.test_status === 'issues' ? <div style={{ fontSize: '12px', color: '#B91C1C', marginBottom: '8px' }}>Last test flagged issues{p.test_notes ? ': ' + p.test_notes : ''}. Fix the configuration and re-test.</div> : null}
+                  {p.phase_key === 'fees' && p.test_status === 'confirmed' && String(p.test_config_ref) === String(p.current_fee_config_version) ? <div style={{ fontSize: '12px', color: '#065F46', marginBottom: '8px' }}>Fee test confirmed - approval is unlocked.</div> : null}
+                  {p.phase_key === 'fees' && p.test_status === 'confirmed' && String(p.test_config_ref) !== String(p.current_fee_config_version) ? <div style={{ fontSize: '12px', color: '#92400E', marginBottom: '8px' }}>Fee configuration changed since the last test - please re-test before approving.</div> : null}
                   <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
                     {meta.link ? <Link to={meta.link} style={{ fontSize: '13px', color: '#1F4E79', background: '#EBF3FB', borderRadius: '6px', padding: '8px 14px', textDecoration: 'none', fontWeight: '600' }}>{meta.linkLabel} {'\u2192'}</Link> : null}
                     {p.requires_review && p.status !== 'complete' ? <button disabled={busy === p.phase_key || !p.reviewer_id} onClick={function () { requestReview(p.phase_key); }} style={reqBtn(!!p.reviewer_id)}>Request review email</button> : null}
-                    {p.requires_review && p.status !== 'complete' ? <button disabled={busy === p.phase_key} onClick={function () { approve(p.phase_key); }} style={btnPrimary}>Approve &amp; complete</button> : null}
+                    {p.requires_review && p.status !== 'complete' ? <button disabled={busy === p.phase_key || (p.phase_key === 'fees' && !(p.test_status === 'confirmed' && String(p.test_config_ref) === String(p.current_fee_config_version)))} onClick={function () { approve(p.phase_key); }} style={btnPrimary}>Approve &amp; complete</button> : null}
                     {!p.requires_review && p.status !== 'complete' ? <button disabled={busy === p.phase_key} onClick={function () { setStatus(p.phase_key, 'complete'); }} style={btnPrimary}>Mark complete</button> : null}
                     {p.status === 'complete' ? <button disabled={busy === p.phase_key} onClick={function () { setStatus(p.phase_key, 'in_progress'); }} style={btnGhost}>Reopen</button> : null}
                   </div>
