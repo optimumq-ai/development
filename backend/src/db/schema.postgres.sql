@@ -497,3 +497,23 @@ CREATE TABLE IF NOT EXISTS scheduled_config_changes ( id text PRIMARY KEY, juris
 CREATE INDEX IF NOT EXISTS scc_due ON scheduled_config_changes (status, effective_date);
 CREATE TABLE IF NOT EXISTS config_history ( id text PRIMARY KEY, jurisdiction_id text, domain text, config_json text, summary text, effective_from text, effective_to text, source text, created_at text DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS') );
 CREATE INDEX IF NOT EXISTS ch_window ON config_history (jurisdiction_id, domain, effective_from);
+
+-- Onboarding wizard: guided-setup progress with per-phase completion audit
+CREATE TABLE IF NOT EXISTS onboarding_progress (
+  phase_key TEXT PRIMARY KEY,
+  phase_order INTEGER NOT NULL,
+  title TEXT NOT NULL,
+  status TEXT NOT NULL DEFAULT 'not_started',
+  completed_by TEXT,
+  completed_at TIMESTAMP,
+  notes TEXT,
+  updated_at TIMESTAMP DEFAULT now()
+);
+INSERT INTO onboarding_progress (phase_key, phase_order, title) VALUES
+  ('jurisdiction', 0, 'Jurisdiction Profile'),
+  ('departments', 1, 'City Departments'),
+  ('teams',       2, 'Request Fulfillment Teams'),
+  ('ownership',   3, 'Record Ownership'),
+  ('repositories',4, 'Repositories & Discovery'),
+  ('redaction',   5, 'Redaction Readiness')
+ON CONFLICT (phase_key) DO NOTHING;
