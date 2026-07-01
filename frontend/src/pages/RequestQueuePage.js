@@ -38,7 +38,8 @@ export default function RequestQueuePage() {
     setLoading(true);
     try {
       var url = '/requests?';
-      if (stageFilter) url += 'stage=' + stageFilter + '&';
+      if (stageFilter === 'triage') url += 'triage=1&';
+      else if (stageFilter) url += 'stage=' + stageFilter + '&';
       var r = await api.get(url);
       setRequests(r.data.requests);
     } catch(e) { console.error(e); }
@@ -64,6 +65,7 @@ export default function RequestQueuePage() {
         <Link to="/requests/new" style={{display:'inline-flex',alignItems:'center',gap:'8px',padding:'10px 18px',background:'#1F4E79',color:'white',borderRadius:'8px',textDecoration:'none',fontSize:'14px',fontWeight:'600'}}>+ Log New Request</Link>
       </div>
       <div style={{display:'flex',gap:'8px',overflowX:'auto',paddingBottom:'4px'}}>
+        {(function(){ var tcount = requests.filter(function(r){ return !r.department_id; }).length; var active = stageFilter === 'triage'; return (tcount>0 || active) ? <button onClick={function(){setStageFilter('triage');}} style={{padding:'7px 16px',borderRadius:'20px',border:'1px solid '+(active?'#92400E':'#F4D9B0'),background:active?'#92400E':'#FFF7ED',color:active?'white':'#92400E',fontSize:'13px',fontWeight:'600',cursor:'pointer',whiteSpace:'nowrap'}}>Needs triage ({tcount})</button> : null; })()}
         {[['','All']].concat(Object.entries(STAGES)).map(function(item) {
           var k=item[0]; var v=item[1];
           var active=stageFilter===k;

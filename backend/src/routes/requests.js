@@ -55,6 +55,7 @@ router.get('/', requireAuth, async function(req, res) {
   if (req.query.stage) { sql += ' AND r.stage = ?'; params.push(req.query.stage); }
   if (req.query.status) { sql += ' AND r.status = ?'; params.push(req.query.status); }
   else { sql += " AND r.status != 'closed'"; }
+  if (req.query.triage) { sql += " AND r.department_id IS NULL"; } // Needs-triage: Unassigned requests awaiting placement
   if (req.query.search) {
     sql += ' AND (r.request_number LIKE ? OR r.requestor_name LIKE ? OR r.requestor_email LIKE ?)';
     const s = '%' + req.query.search + '%';
