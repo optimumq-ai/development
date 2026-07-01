@@ -138,4 +138,13 @@ Taxonomy is currently **flat** (category -> record type). Granular sub-types / a
 
 ---
 
+## 10. Build log (post-review, 2026-06-30)
+
+- **Fulfillment-team override (change #1): BUILT** (6fa632f) - see Section 4.
+- **Paper-record routing + Smart-Routing-to-person, verified end to end.** Created record type "Historical Property & Land Records (paper archive)" - owned by Building & Planning, fulfilled (override) by City Clerk Records & Archives, linked to the two paper-index repositories. A paper request classifies to it and routes to the archives team; Thomas Jackson (paper specialist on that team) auto-assigns via Smart Routing.
+  - **Smart Routing spec wording matters:** an instruction-style spec ("all paper requests go to Thomas Jackson") scored 0.42, below the 0.45 floor -> pool. A spec that *describes the records handled* scored 0.60-0.70 -> auto-assigns. Thomas's spec was rewritten to the descriptive form. Candidate UI improvement: a placeholder/hint in the Smart Routing field nudging staff to describe records, not name themselves.
+- **Queue "Assigned To" reflects work state: BUILT** (048dfd6). The request queue derives the current active task and shows "In pool - <team>" (awaiting claim) / "<person> - assigned" (on their My Tasks) / "<person> - working" (in progress) / a manual request owner - instead of a bare "Unassigned." Reminder of the layering: task assignment still does not write `requests.assigned_to`; the queue now reads the task layer directly to show reality. (Assignment happens when the task lands on a person's My Tasks as `assigned`, before they open it; `in_progress` = they've started; `open` = pooled, on nobody's list.)
+
+---
+
 *Recorded 2026-06-30 from the architecture review with Kevin. Decisions captured here are the source of truth; update Status as items move to BUILT.*
