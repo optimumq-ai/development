@@ -175,4 +175,16 @@ function deriveDefaultPaymentTiming(config) {
   };
 }
 
-module.exports = { resolvePaymentPlan: resolvePaymentPlan, deriveDefaultPaymentTiming: deriveDefaultPaymentTiming, selectBand: selectBand, GATES: GATES };
+// Map a resolved gate to the request workflow stage applied on estimate acceptance.
+// deposit_before_work holds the request at awaiting_payment; every other gate proceeds
+// to record_search (work begins; pay-in-full / invoice-on-completion are enforced later
+// at the delivery/release step, not here).
+var GATE_STAGE = {
+  invoice_on_completion: 'record_search',
+  estimate_acceptance: 'record_search',
+  deposit_before_work: 'awaiting_payment',
+  pay_in_full_before_release: 'record_search'
+};
+function gateToStage(gate) { return GATE_STAGE[gate] || 'record_search'; }
+
+module.exports = { resolvePaymentPlan: resolvePaymentPlan, deriveDefaultPaymentTiming: deriveDefaultPaymentTiming, selectBand: selectBand, gateToStage: gateToStage, GATES: GATES };

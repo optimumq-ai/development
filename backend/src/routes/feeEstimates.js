@@ -12,6 +12,7 @@ const engine = require('../services/feeEngine');
 const ep = require('../services/estimateProfile');
 const email = require('../services/email');
 const feeNotice = require('../services/feeNotice');
+const pt = require('../services/paymentTiming');
 const emailTemplate = require('../services/emailTemplate');
 const enforcement = require('../services/enforcement');
 
@@ -53,6 +54,20 @@ async function activeJurisdiction() {
 }
 async function pickConfig(jid) {
   return await get("SELECT * FROM fee_profiles WHERE jurisdiction_id = ? AND context = 'FR' ORDER BY CASE WHEN status = 'active' THEN 0 ELSE 1 END, version DESC LIMIT 1", [jid]);
+}
+
+// Resolve the payment & delivery plan for a saved estimate snapshot: the snapshot's own config
+// profile (fallback active), its paymentTiming block (or a derived default), and the snapshot total.
+// Read-only; used to surface the plan (4a) and drive the accept-time stage gate (4b).
+async function planForSnapshot(snap, extra) {
+  var prof = (snap && snap.config_profile_id) ? await get('SELECT config_json FROM fee_profiles WHERE id = ?', [snap.config_profile_id]) : null;
+  if (!prof) { prof = await pickConfig(await activeJurisdiction()); }
+  var cfg = {}; try { cfg = JSON.parse((prof && prof.config_json) || '{}'); } catch (e) { cfg = {}; }
+  var hasPT = !!(cfg.paymentTiming && Object.keys(cfg.paymentTiming).length);
+  var ptCfg = hasPT ? cfg.paymentTiming : pt.deriveDefaultPaymentTiming(cfg);
+  var total = (snap && snap.total != null) ? Number(snap.total) : 0;
+  var plan = pt.resolvePaymentPlan(ptCfg, Object.assign({ estimateTotal: total }, extra || {}));
+  return { plan: plan, source: hasPT ? 'profile' : 'derived' };
 }
 
 // A request becomes one-or-more fee components: MRR master -> its children (or master-of-one if no
@@ -101,12 +116,14 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
     }
     var actualRateDrivers = [], laborRates = {};
     try { var cfgObj = cfg ? JSON.parse(cfg.config_json || '{}') : {}; var lab = cfgObj.labor || {}; ['search','review','programming'].forEach(function (k) { if (lab[k]) { laborRates[k] = Number(lab[k].rate) || 0; if (lab[k].actualRate) actualRateDrivers.push(k); } }); } catch (e) {}
+    var planCtx = latest ? await planForSnapshot(latest) : null;
     res.json({
       request: { id: loaded.request.id, number: loaded.request.request_number, isMrr: !!loaded.request.is_mrr, purpose: loaded.request.purpose || 'standard' },
       components: loaded.components,
       configProfile: cfg ? { id: cfg.id, name: cfg.name, status: cfg.status } : null,
       actualRateDrivers: actualRateDrivers, laborRates: laborRates,
-      latest: hydrate(latest)
+      latest: hydrate(latest),
+      paymentPlan: planCtx ? planCtx.plan : null, paymentTimingSource: planCtx ? planCtx.source : null
     });
   } catch (e) { res.status(500).json({ error: 'Could not load estimate context.' }); }
 });
@@ -156,7 +173,8 @@ router.get('/request/:requestId/notice', requireAuth, async function (req, res) 
     var agency = await sysCfg('agency_name', 'the City');
     var responseDays = null;
     if (snap.config_profile_id) { var prof = await get('SELECT config_json FROM fee_profiles WHERE id = ?', [snap.config_profile_id]); if (prof) { try { var cj = JSON.parse(prof.config_json || '{}'); responseDays = cj.estimatePolicy && cj.estimatePolicy.requesterResponseDays; } catch (e) {} } }
-    var notice = feeNotice.buildNotice(reqRow, feeContext, { agencyName: agency, responseDays: responseDays });
+    var noticePlan = await planForSnapshot(snap);
+    var notice = feeNotice.buildNotice(reqRow, feeContext, { agencyName: agency, responseDays: responseDays, paymentPlan: noticePlan.plan });
     var R = feeContext.requestLevel || {};
     res.json({ to: reqRow.requestor_email || null, requestorName: reqRow.requestor_name || null, subject: notice.subject, text: notice.text, total: R.total || 0, depositDue: R.depositDue || 0, notifyTriggered: !!R.estimateNotifyTriggered, notifiedAt: snap.notified_at || null, notifiedTo: snap.notified_to || null });
   } catch (e) { res.status(500).json({ error: 'Could not build the notice.' }); }
@@ -204,7 +222,10 @@ router.post('/request/:requestId/estimate/accept', requireAuth, async function (
   var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'system';
   await run('UPDATE request_fee_estimates SET accepted_at = ?, accepted_by = ? WHERE id = ?', [now, actor, snap.id]);
   var depositDue = Number(snap.deposit_due) || 0;
-  var newStage = depositDue > 0 ? 'awaiting_payment' : 'record_search';
+  var acceptPlan = (await planForSnapshot(snap)).plan;
+  var newStage = pt.gateToStage(acceptPlan.gate);
+  // Safety: never regress a request that previously required a deposit out of awaiting_payment.
+  if (depositDue > 0 && newStage !== 'awaiting_payment') newStage = 'awaiting_payment';
   await run("UPDATE requests SET stage = ?, status = 'active', tickler_flag = NULL, tickler_flagged_at = NULL, updated_at = datetime('now') WHERE id = ?", [newStage, rid]);
   await hist(rid, req.user, 'ESTIMATE_ACCEPTED', depositDue > 0 ? ('Deposit of $' + depositDue.toFixed(2) + ' required before work begins.') : 'No deposit required; record search begins.', reqRow.stage, newStage);
   if (newStage === 'record_search') { try { await taskRouting.spawnForStage(rid, 'record_search', req.user && req.user.sub); } catch (e) {} }
