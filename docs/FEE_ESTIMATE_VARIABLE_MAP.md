@@ -295,3 +295,18 @@ The event that releases records — NOT universally "balance = 0":
 - **Missouri** — RSMo §610.026: paper ≤ **$0.10/pg** (≤ 9×14); duplication time ≤ avg clerical hourly; **research at actual cost**; must staff to lowest total charge; estimate on request; waiver for public interest; electronic/media at cost + programming. *Springfield:* Sunshine page (403 to tool); SPS example ≤ $0.10/pg + reasonable search time, estimate by end of 3rd business day.
 
 <!-- END ADDENDUM 2026-07-01 -->
+
+## E. Verification log — 2026-07-01 (primary-source checks)
+
+Supersedes the `[LEAD]` tag for the entries below.
+
+- **Virginia — VERIFIED ✓** against Code of Va. §2.2-3704 (law.lis.virginia.gov, current). All batch-2 lead values confirmed: actual-cost only, no overhead recoupment (F); mandatory offer of a cost estimate on request (F); response tolled during estimate pendency, **deemed withdrawn if no requester response within 30 days** (F); deposit permitted when the advance determination is **> $200**, capped at that determination, **credited to final** (H); may require payment of prior balances **unpaid ≥ 30 days** before processing a new request (I). Added detail: base response clock is **5 working days, +7 extension** (B).
+- **Michigan — VERIFIED ✓ + enriched** against MCL 15.234 (legislature.mi.gov, complete through PA 7 of 2026). Confirmed: labor at lowest-paid capable in **15-min increments rounded down** (1a); paper **≤ $0.10/sheet** (1d); **fringe add-on ≤ 50%**, no overtime in fringe, overtime only if requester stipulates (2); **deposit if est > $50, ≤ 50%** (8); **100% deposit** for delinquent requestor under conditions (a)-(f) incl. prior final ≤ 105% of estimate, 90-day notice, released at proof-of-payment or **365 days** (11-12). NET-NEW enrichments to fold in:
+  - **Deposit due-window (feeds C.1):** if the deposit is not received within **45 days of the requester's receipt** of the notice → request is **abandoned**; notice deemed received 3 days after sending; the notice must state a due date = **48 days after it is sent** (14). First concrete first-payment due-window in the map besides Texas.
+  - **Agency-late fee penalty (new dimension):** an untimely response cuts labor charges **5%/day, max 50%**, if the lateness was willful or the request was clearly marked FOIA (9). Agency-side penalty — distinct from requester payment-failure penalties.
+  - **Indigent / designated-nonprofit waiver:** first **$20** of each request's fee is waived on an indigency affidavit or qualifying nonprofit (2). Extends waiver-basis categories + adds a fee-floor-waiver mechanic.
+  - **Redaction-dedup:** no charge for redaction labor if the body previously redacted the record and still holds it (1b); contracted redaction labor capped at 6× state minimum wage.
+  - **Deposit "is a fee" (13); deposit-amount appeal under §10a; must-post procedures incl. "avenues for challenge and appeal" (4)** — concretely confirms the B.1 appeal path.
+- **Pending:** Georgia (agency 3-business-day estimate-issue deadline; O.C.G.A. §50-18-71) and Arizona (commercial market-value basis; ARS §39-121.03) — queued for the next verification pass; both remain `[LEAD]`.
+
+<!-- END VERIFICATION LOG 2026-07-01 -->
