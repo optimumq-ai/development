@@ -11,7 +11,8 @@ var DEFAULT_CONFIG = {
   delivery: { email: 0, pickup: 0, mail: 'actual', handling: 0 },
   certification: { rate: 0, unit: 'per_record' },
   requestRules: { freePageAllowance: 0, freeLaborHours: 0, deMinimis: 0, minFee: 0, maxFee: null, deposit: { threshold: null, percent: null }, estimateNotifyThreshold: null },
-  estimatePolicy: { requesterResponseDays: null, revisionNotifyPercent: null, estimateValidityDays: null }
+  estimatePolicy: { requesterResponseDays: null, revisionNotifyPercent: null, estimateValidityDays: null },
+  payment_mode: 'internal'
 };
 function isObj(x) { return x && typeof x === 'object' && !Array.isArray(x); }
 function mergeDefaults(def, loaded) {
@@ -155,6 +156,14 @@ export default function FeeConfigPage() {
         {msg ? <span style={{ alignSelf: 'flex-end', fontSize: '12.5px', color: msg === 'Saved.' ? '#03543F' : '#9B1C1C' }}>{msg}</span> : null}
       </div>
 
+      <div style={Object.assign({}, card, { marginBottom: '18px' })}>
+        <div style={sectionTitle}>Payment handling</div>
+        <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '10px', maxWidth: '680px' }}>How this jurisdiction collects fees. <strong>Self-contained</strong> uses Optimum Q&apos;s built-in payment recording and Cash Drawer. <strong>External / ERP</strong> means finance collects (online, mail, walk-in) in the ERP; Optimum Q hands off charges and applies payments finance reports back, and does not send its own payment reminders.</div>
+        <select value={config.payment_mode || 'internal'} onChange={function (e) { setCfg(function (c) { c.payment_mode = e.target.value; }); }} style={Object.assign({}, inp, { width: 'auto' })}>
+          <option value="internal">Self-contained (collect &amp; reconcile in Optimum Q)</option>
+          <option value="erp">External / ERP (finance collects; hand off charges)</option>
+        </select>
+      </div>
       <div style={Object.assign({}, card, { border: '1px solid #DBEAFE', background: '#F8FAFF', marginBottom: '18px' })}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div style={sectionTitle}>Configure from policy text (AI)</div>

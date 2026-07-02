@@ -135,6 +135,7 @@ export default function FeeEstimatePanel(props) {
     setPayBusy(false);
   }
   function renderTakePayment() {
+    if (ctx.paymentMode === 'erp') return <div style={{ marginTop: '14px', fontSize: '12.5px', color: '#6B7280', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '12px 14px', maxWidth: '660px' }}>Payments for this jurisdiction are handled in the external finance / ERP system. Optimum Q hands off the charge and reflects the balance once finance reports the payment.</div>;
     var ps = ctx.paymentState, L = ctx.latest;
     if (!ps || !L || !L.accepted_at || ps.paidInFull) return null;
     var depDue = Number(L.deposit_due) || 0;

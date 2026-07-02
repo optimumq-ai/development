@@ -19,7 +19,7 @@ function subBusinessDays(fromMs, n) { var d = new Date(fromMs); var left = n; wh
 function overdue(anchorStr, days, unit, nowMs) { if (!anchorStr || !days) return false; var a = Date.parse(String(anchorStr).replace(' ', 'T')); if (isNaN(a)) return false; var cutoff = (unit === 'business') ? subBusinessDays(nowMs, days).getTime() : (nowMs - days * 86400000); return a < cutoff; }
 function windowFromPlan(plan, fallbackDays) { var w = plan && plan.firstPayment && plan.firstPayment.dueWindow; if (w && w.days) return { days: Number(w.days), unit: w.unit || 'calendar', onExpiry: w.onExpiry || 'withdrawn', fromPlan: true }; return { days: fallbackDays, unit: 'calendar', onExpiry: 'withdrawn', fromPlan: false }; }
 var _cfgCache = {};
-async function planForEstimate(est) {
+async function cfgForEstimate(est) {
   var pid = est.config_profile_id || '_active';
   var cfg = _cfgCache[pid];
   if (cfg === undefined) {
@@ -27,6 +27,10 @@ async function planForEstimate(est) {
     try { cfg = row ? JSON.parse(row.config_json || '{}') : {}; } catch (e) { cfg = {}; }
     _cfgCache[pid] = cfg;
   }
+  return cfg;
+}
+async function planForEstimate(est) {
+  var cfg = await cfgForEstimate(est);
   var ptCfg = (cfg.paymentTiming && Object.keys(cfg.paymentTiming).length) ? cfg.paymentTiming : pt.deriveDefaultPaymentTiming(cfg);
   return pt.resolvePaymentPlan(ptCfg, { estimateTotal: Number(est.total) || 0 });
 }
@@ -100,6 +104,8 @@ async function runSweep(opts) {
     "AND e.id = (SELECT id FROM request_fee_estimates WHERE request_id = r.id AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1)");
   for (var j = 0; j < depCandidates.length; j++) {
     var dr = depCandidates[j];
+    var drCfg = await cfgForEstimate(dr);
+    if (drCfg && drCfg.payment_mode === 'erp') continue; // ERP owns dunning; suppress our deposit reminder
     var dw = windowFromPlan(await planForEstimate(dr), T.depositDueDays);
     if (!overdue(dr.accepted_at, dw.days, dw.unit, nowMs)) continue;
     await flagRequest(dr.rid, 'deposit_overdue');

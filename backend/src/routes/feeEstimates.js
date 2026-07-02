@@ -130,6 +130,7 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
     try { var cfgObj = cfg ? JSON.parse(cfg.config_json || '{}') : {}; var lab = cfgObj.labor || {}; ['search','review','programming'].forEach(function (k) { if (lab[k]) { laborRates[k] = Number(lab[k].rate) || 0; if (lab[k].actualRate) actualRateDrivers.push(k); } }); } catch (e) {}
     var planCtx = latest ? await planForSnapshot(latest) : null;
     var payState = await paymentState(req.params.requestId);
+    var paymentMode = 'internal'; try { var _pc = cfg ? JSON.parse(cfg.config_json || '{}') : {}; if (_pc.payment_mode === 'erp') paymentMode = 'erp'; } catch (e) {}
     res.json({
       request: { id: loaded.request.id, number: loaded.request.request_number, isMrr: !!loaded.request.is_mrr, purpose: loaded.request.purpose || 'standard' },
       components: loaded.components,
@@ -137,7 +138,7 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
       actualRateDrivers: actualRateDrivers, laborRates: laborRates,
       latest: hydrate(latest),
       paymentPlan: planCtx ? planCtx.plan : null, paymentTimingSource: planCtx ? planCtx.source : null,
-      paymentState: payState
+      paymentState: payState, paymentMode: paymentMode
     });
   } catch (e) { res.status(500).json({ error: 'Could not load estimate context.' }); }
 });
