@@ -70,6 +70,18 @@ async function planForSnapshot(snap, extra) {
   return { plan: plan, source: hasPT ? 'profile' : 'derived' };
 }
 
+// Payment state (4e): effective total (reconciled actual if present, else the estimate), deposit +
+// final paid to date, and the resulting balance / paid-in-full flag. Drives the release gate (4d).
+async function paymentState(rid) {
+  var est = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [rid]);
+  if (!est) return null;
+  var recon = await get("SELECT total FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC LIMIT 1", [rid]);
+  var effectiveTotal = (recon && recon.total != null) ? Number(recon.total) : (Number(est.total) || 0);
+  var bal = pt.computeBalance(effectiveTotal, est.deposit_paid_amount, est.final_paid_amount);
+  return { effectiveTotal: bal.effectiveTotal, reconciled: !!recon, depositPaid: Number(est.deposit_paid_amount) || 0,
+    finalPaid: Number(est.final_paid_amount) || 0, paid: bal.paid, balanceDue: bal.balanceDue, paidInFull: bal.paidInFull, estimateId: est.id };
+}
+
 // A request becomes one-or-more fee components: MRR master -> its children (or master-of-one if no
 // children exist yet); a plain request -> itself as a single component.
 async function loadComponents(requestId) {
@@ -117,13 +129,15 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
     var actualRateDrivers = [], laborRates = {};
     try { var cfgObj = cfg ? JSON.parse(cfg.config_json || '{}') : {}; var lab = cfgObj.labor || {}; ['search','review','programming'].forEach(function (k) { if (lab[k]) { laborRates[k] = Number(lab[k].rate) || 0; if (lab[k].actualRate) actualRateDrivers.push(k); } }); } catch (e) {}
     var planCtx = latest ? await planForSnapshot(latest) : null;
+    var payState = await paymentState(req.params.requestId);
     res.json({
       request: { id: loaded.request.id, number: loaded.request.request_number, isMrr: !!loaded.request.is_mrr, purpose: loaded.request.purpose || 'standard' },
       components: loaded.components,
       configProfile: cfg ? { id: cfg.id, name: cfg.name, status: cfg.status } : null,
       actualRateDrivers: actualRateDrivers, laborRates: laborRates,
       latest: hydrate(latest),
-      paymentPlan: planCtx ? planCtx.plan : null, paymentTimingSource: planCtx ? planCtx.source : null
+      paymentPlan: planCtx ? planCtx.plan : null, paymentTimingSource: planCtx ? planCtx.source : null,
+      paymentState: payState
     });
   } catch (e) { res.status(500).json({ error: 'Could not load estimate context.' }); }
 });
@@ -260,6 +274,24 @@ router.post('/request/:requestId/deposit/record', requireAuth, async function (r
   await hist(rid, req.user, 'DEPOSIT_RECORDED', 'Deposit of $' + amount.toFixed(2) + ' recorded; record search begins.', reqRow.stage, 'record_search');
   try { await taskRouting.spawnForStage(rid, 'record_search', req.user && req.user.sub); } catch (e) {}
   res.json({ recorded: true, amount: amount, stage: 'record_search' });
+});
+
+// Record a FINAL (balance) payment on a request's estimate (4e); used before release for pay-in-full bands.
+router.post('/request/:requestId/final-payment/record', requireAuth, async function (req, res) {
+  var rid = req.params.requestId;
+  var reqRow = await get('SELECT id, stage FROM requests WHERE id = ?', [rid]);
+  if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
+  var est = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [rid]);
+  if (!est) return res.status(400).json({ error: 'No estimate on this request.' });
+  var before = await paymentState(rid);
+  var amount = (req.body && req.body.amount != null) ? Number(req.body.amount) : (before ? before.balanceDue : 0);
+  if (!(amount > 0)) return res.status(400).json({ error: 'Enter a payment amount.' });
+  var newFinal = (Number(est.final_paid_amount) || 0) + amount;
+  var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'system';
+  await run('UPDATE request_fee_estimates SET final_paid_at = ?, final_paid_by = ?, final_paid_amount = ? WHERE id = ?', [nowStr(), actor, newFinal, est.id]);
+  var after = await paymentState(rid);
+  await hist(rid, req.user, 'FINAL_PAYMENT_RECORDED', 'Payment of $' + amount.toFixed(2) + ' recorded; balance now $' + after.balanceDue.toFixed(2) + (after.paidInFull ? ' (paid in full).' : '.'), null, null);
+  res.json({ recorded: true, amount: amount, paymentState: after });
 });
 
 

@@ -187,4 +187,13 @@ var GATE_STAGE = {
 };
 function gateToStage(gate) { return GATE_STAGE[gate] || 'record_search'; }
 
-module.exports = { resolvePaymentPlan: resolvePaymentPlan, deriveDefaultPaymentTiming: deriveDefaultPaymentTiming, selectBand: selectBand, gateToStage: gateToStage, GATES: GATES };
+// Balance math: effective total (reconciled actual if present, else estimate) minus deposit +
+// final paid to date. paidInFull tolerates a half-cent rounding epsilon.
+function computeBalance(effectiveTotal, depositPaid, finalPaid) {
+  var eff = Number(effectiveTotal) || 0;
+  var paid = (Number(depositPaid) || 0) + (Number(finalPaid) || 0);
+  var bal = Math.round((eff - paid) * 100) / 100;
+  return { effectiveTotal: Math.round(eff*100)/100, paid: Math.round(paid*100)/100, balanceDue: Math.max(0, bal), paidInFull: bal <= 0.005 };
+}
+
+module.exports = { resolvePaymentPlan: resolvePaymentPlan, deriveDefaultPaymentTiming: deriveDefaultPaymentTiming, selectBand: selectBand, gateToStage: gateToStage, computeBalance: computeBalance, GATES: GATES };
