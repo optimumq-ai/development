@@ -219,3 +219,79 @@ Source: NOLA OIG "Request for Records" page (user-provided). Fees: paper $0.50/p
 - **Platform-as-compliance-tool (pitch):** forcing a definite, itemized, posted schedule is exactly what Act 247 requires -> configuring the platform drags the agency into compliance AND hardens their fees against reasonableness challenges. "We don't just calculate your fees, we make them legally defensible."
 - **Base-fee-per-delivery-method** data point: OIG charges a flat $25 base for *electronic* delivery (itself reasonableness-questionable). Add "base fee per delivery method" as a config field (partially present in the delivery section).
 - **Public-posting intake mode (tangent):** OIG posts requests publicly and auto-redacts SSN/DOB, rejects non-PRR and profane submissions. A distinct intake/publishing mode some agencies use; not core to fees but note it exists.
+
+---
+
+# ADDENDUM — 2026-07-01: multi-state sweep consolidation (ChatGPT batches 1 & 2)
+
+**Provenance.** Every jurisdiction value below is `[LEAD — unverified]`: AI-collected (ChatGPT) *with* primary-source citations, NOT yet checked against primary text. Do not promote any value to active config until the cited source is confirmed. Verified profiles remain Texas (primary) and New Orleans (primary). Fuller extracts + URLs live in the two source PDFs retained by Kevin — batch 1: AL / AR / OK / NC / GA / PA / MI / ID; batch 2: SD / IA / NM / AZ / NV / VA / RI / OR / MO.
+
+**Reconciliation with FEE_ESTIMATE_KNOWLEDGE.md.** These are new jurisdictions, distinct from Knowledge-doc research Pass 1 (ChatGPT 2026-06-11) and Pass 2 (Grok 2026-06-12), which were topic-level not city-level. Collection-timing (Knowledge §12K) and configurable-variants (§12) are *extended*, not duplicated, by sections C.1–C.2 below.
+
+**Sweep verdict.** By batch 2 the returns were mostly repetition — the map's ten-section spine absorbed everything. That saturation is the signal we've captured the common variables. Net-new below: 4 structural dimensions (A), 3 watch-items promoted to common (B), and the 3 agreed design sections (C). One finding — Arizona commercial market-value basis (A.1) — has a genuine engine implication.
+
+## A. New structural dimensions (not previously in the map)
+
+### A.1 Commercial fee BASIS — cost-recovery vs market-value  `[extends §3.7] [ENGINE IMPLICATION]`
+Arizona (ARS §39-121.03(A)) permits, for commercial-purpose requests, a charge combining (a) a portion of the cost of obtaining the original, (b) a reasonable time/materials/equipment/personnel fee, AND (c) **the value of the reproduction on the commercial market**.
+- **This breaks the engine's foundational assumption that a fee is cost-recovery.** `purposeOverrides` can hold a different commercial *schedule* but cannot express *market-value* pricing. → confirms commercial belongs in its own policy view, and adds **fee basis** (cost-recovery | market-value) as a commercial config axis.
+- Bundled: commercial-purpose **attestation/affidavit** at intake + **misuse liability** (ARS §39-121.03(C)). → extends §1.3 commercial capture and the combined intake eligibility question.
+
+### A.2 Request-aggregation window  `[new — cross-cutting; touches §3.3 free allowances]`
+Rhode Island (§38-2-4(b)): multiple requests from the same requester to the same body within **30 days** count as **one request** for search/retrieval fees (and the free first hour). Without it, free-tier allowances are gameable by splitting requests. New variable: aggregation window (days) × scope (same requester × same body).
+
+### A.3 Attorney / legal-review labor — distinct component with a carve-out  `[extends §3.2 components]`
+Oregon (ORS §192.324(4)(b)) and Iowa (§22.3): attorney time for **redaction/segregation** is billable, but attorney time spent **determining whether the records law applies** is NOT. → attorney-review is its own labor component with an explicit "legal-applicability determination" exclusion, separate from search/review.
+
+### A.4 Cost-basis composition — what may enter the basis  `[extends §3.6 labor overhead]`
+States both mandate and forbid specific inclusions:
+- **Exclude** (IA §22.3; VA §2.2-3704(F)): employee benefits, depreciation, maintenance, electricity, insurance, general business/overhead costs.
+- **Include, capped** (MI MCL 15.234): fringe-benefit add-on up to **50%** of labor if itemized; overtime generally excluded.
+→ cost-basis composition is a per-jurisdiction allow/deny list, not a single overhead-% line.
+
+## B. Reinforced dimensions — now common enough to be first-class
+
+### B.1 Fee dispute / appeal / mediation path  `[NEW SECTION — was a §8 watch-item]`
+A requester route to contest an estimate/fee: NC (§132-6.2) mediation by the State CIO; PA (RTKL) challenge via state OOR; SD (§1-27-38) civil action or administrative review of a fee estimate. We model none of this. Ties to TX documentation duty (§4.4): the estimate-basis artifact the platform generates IS the defense. New outputs: appeal info in the estimate notice + a preserved estimate-basis record.
+
+### B.2 Burden / extraordinary-use trigger  `[extends §2 / §8 — new trigger TYPE]`
+A fee-switch keyed to operational burden, not dollars or purpose: OK (51 O.S. §24A.5) search+copy chargeable if solely commercial OR would **clearly cause excessive disruption of essential functions**; NV (NRS §239.055) **extraordinary-use** fees. New trigger type alongside dollar-threshold and purpose.
+
+### B.3 Agency-side deadline to ISSUE the estimate  `[new timing sub-variable — §6]`
+GA (§50-18-71): estimate notice required within **3 business days**. Every other timing variable is requester-side; this is the agency's clock to *produce* the estimate.
+
+## C. Agreed new sections (design decisions locked this session)
+
+### C.1 Payment due-dates & terms — BOTH payments  `[NEW — consolidates scattered §6 + fills the second-payment gap]`
+- **First payment (deposit / advance) due-by** = the acceptance/deposit window. TX 10 business days `[✓]`; VA 30 days; OR (Eugene) 60 days; RI tolled-pending-payment. Expiry → request withdrawn/closed by operation of law.
+- **Second payment (final invoice) due-by & terms** = *was unmodeled.* Options seen: invoice-on-completion (records already shipped, bill after) vs due-before-release; net-period per agency. `[GAP — build as an explicit variable, both payments]`
+
+### C.2 Delivery trigger — promoted to a first-class variable  `[was smeared across §5 / §6 / §7]`
+The event that releases records — NOT universally "balance = 0":
+- **pay_in_full_before_release** (no deposit stage): Birmingham ("do not pre-pay; released on full payment"), Henderson ("pay before receiving copy"), Eugene ("paid before retrieval begins").
+- **deposit_before_work**, release on final settlement: VA (deposit if likely > $200, credited to final).
+- **invoice_on_completion** (ship before payment): TX ≤ $40 band.
+- **estimate_acceptance** only (no money up front): TX $40–$100 band.
+→ per-jurisdiction enum { invoice_on_completion | estimate_acceptance | deposit_before_work | pay_in_full_before_release }.
+
+## D. Jurisdiction leads (unverified; citation-carrying)  `[LEAD — verify before config]`
+
+- **Alabama** — Ala. Code §36-12-41: "reasonable fee"; no uniform municipal schedule. *Birmingham:* paper $0.50/1-side, $0.75/2-side, B&W only; electronic $8/media unit + $0.10/pg; certified +$5; **no prepayment — released on full payment after completion** (delivery-trigger case).
+- **Arkansas** — §25-19-105(d)(3): actual repro cost, **personnel search/retrieval/review time excluded**; advance payment if est > **$25**; itemized breakdown; custodian bears exempt-separation cost. *Fayetteville:* no citywide schedule located; state $10 accident-report fee.
+- **Oklahoma** — 51 O.S. §24A.5 (am. SB535 eff. 2025-11-01): copies ≤ **$0.25/pg** (≤ legal), certified ≤ $1/pg; search fee if **solely commercial** or **excessive disruption**; no search fee if public interest (media/scholars/taxpayers); advance payment if est > **$75** or prior unpaid; must-post schedule. *Tulsa:* EO 2024-08; Tulsa PD (Ord. 19224) $3 / ≤10 pg then $1/pg.
+- **North Carolina** — §132-6.2: actual repro cost; special service charge for extensive IT/clerical; **fee-dispute mediation via State CIO**. *Charlotte:* no citywide schedule located.
+- **Georgia** — O.C.G.A. §50-18-71(c)-(d): search/retrieval/redaction at lowest-paid capable FTE hourly, **first 15 min free**; copies ≤ **$0.10/pg**; **estimate notice within 3 business days**; prepay allowed if est > **$500**; prepay if prior unpaid. *Atlanta:* Office of Transparency mirrors state.
+- **Pennsylvania** — 65 P.S. §67.1307 + OOR schedule: **no fee for access-determination review**; B&W ≤ $0.25 first 1,000 pp then ≤ $0.20 (**volume step-down**); color ≤ $0.50; certification ≤ $5; **redaction no fee**; challenge via state OOR. *Pittsburgh:* defers to OOR schedule.
+- **Michigan** — MCL 15.234: labor at lowest-paid capable; paper ≤ **$0.10/sheet**; **fringe-benefit add-on ≤ 50%**, no overtime; **deposit ≤ 50% if est > $50**; **100% deposit** for subsequent requests when prior unpaid (statutory conditions: prior final ≤ 105% of est, delivered within timeframe, 90 days post-notice, no proof of payment; released at proof-of-payment or 365 days). *Dearborn:* mirrors — >$50 → ≤50% good-faith deposit; the 105% / 90-day / 365-day mechanics.
+- **Idaho** — §74-102(10): **first 2 labor hours + first 100 pages free**; beyond → actual labor+copy at lowest-paid capable/attorney; advance payment allowed. *Boise:* free unless > 100 printed pages or > 2 hrs; pay estimate before work; top-up if over.
+- **South Dakota** — SDCL §§1-27-1.2 / 35 / 36 / 38: actual retrieval/repro; specialized-service charge separate; **§1-27-38 = review of a fee estimate**. *Sioux Falls:* no citywide schedule located.
+- **Iowa** — §22.3: actual cost only; supervision fee allowed; **benefits / depreciation / maintenance / electricity / insurance excluded**; legal-services cost only for redaction/review; IPIB guidance: communicate estimate on receipt, may require payment before retrieval. *Des Moines PD:* per-event, defers to state.
+- **New Mexico** — NMSA §14-2-9: copies ≤ **$1.00/pg** (≤ 11×17); actual cost for disk/transmission; **no fee for electronically-produced records** (DOJ guidance: print $0.75/pg, CD/DVD $10/disc); may require advance before copies. *Albuquerque:* request page + fee-waiver form; no separate citywide schedule located.
+- **Arizona** — ARS §§39-121.01 / .03: may require advance for mailed copies; **commercial = cost-portion + labor/materials + MARKET VALUE** (see A.1); commercial affidavit + misuse liability. *Mesa:* many records pre-posted online; no separate citywide schedule located. *(Mesa/AZ also in CITY_FEE_SURVEY; this adds state-code detail.)*
+- **Nevada** — NRS ch. 239 (§239.052 fees, §239.055 **extraordinary-use**; NAC §239.864): estimate if actual cost > **$25**; deposit ≤ estimated actual cost; **payment before receiving copy** (delivery-trigger case). *Henderson:* City-Wide Public Records & Document Fee Schedule (Oct 2025); fees per NRS 239.055.
+- **Virginia** — §2.2-3704(F)-(I): actual cost; **no overhead / general-cost recoupment**; must offer estimate on request; **response tolled during estimate pendency; withdrawn if no response in 30 days**; **deposit if likely > $200** (credited to final); may require payment of prior unpaid > 30 days. *Chesapeake:* mirrors (5-day clock excludes estimate-pendency; closed at 30 days).
+- **Rhode Island** — §38-2-4: copies ≤ **$0.15/pg**; search/retrieval ≤ **$15/hr, first hour free**; **same-requester requests within 30 days = one request** (see A.2); estimate on request; itemization on request; court may waive for public interest. *Providence:* mirrors verbatim; tolling per §38-2-7(b).
+- **Oregon** — ORS §§192.324 / .329: fees ≈ actual cost incl. summarizing/compiling/tailoring; **attorney redaction/segregation billable, law-applicability determination NOT** (see A.3); fee > **$25** requires written estimate + requester confirmation; waiver if public benefit. *Eugene:* ≤ 30 min free (Level 3); **paid before retrieval**; refund if under; **60 days to pay or request closed** (ORS 192.329(3)(b)).
+- **Missouri** — RSMo §610.026: paper ≤ **$0.10/pg** (≤ 9×14); duplication time ≤ avg clerical hourly; **research at actual cost**; must staff to lowest total charge; estimate on request; waiver for public interest; electronic/media at cost + programming. *Springfield:* Sunshine page (403 to tool); SPS example ≤ $0.10/pg + reasonable search time, estimate by end of 3rd business day.
+
+<!-- END ADDENDUM 2026-07-01 -->
