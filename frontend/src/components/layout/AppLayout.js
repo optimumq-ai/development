@@ -28,6 +28,7 @@ export default function AppLayout() {
     { to: '/mass-redaction', label: 'Mass Redaction', show: isElev },
     { to: '/released', label: 'Released Records', show: isElev },
     { to: '/fee-config', label: 'Fee Configuration', show: isElev },
+    { to: '/cash-drawer', label: 'Cash Drawer', show: isElev },
     { to: '/tickler', label: 'Tickler', show: isElev },
     { to: '/rule-updates', label: 'Update Configuration', show: isElev },
     { to: '/jurisdiction-profile', label: 'Jurisdiction Profile', show: isElev },

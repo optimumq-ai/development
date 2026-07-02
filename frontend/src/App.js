@@ -30,6 +30,7 @@ import StructuredRedactionFieldsPage from './pages/StructuredRedactionFieldsPage
 import ReleasedRecordsPage from './pages/ReleasedRecordsPage';
 import MassRedactionPage from './pages/MassRedactionPage';
 import FeeConfigPage from './pages/FeeConfigPage';
+import CashDrawerPage from './pages/CashDrawerPage';
 import AvWorkbenchPage from './pages/AvWorkbenchPage';
 import PublicPortalPage from './pages/PublicPortalPage';
 import PublicLibraryPage from './pages/PublicLibraryPage';
@@ -88,6 +89,7 @@ export default function App() {
           <Route path="released" element={<ReleasedRecordsPage />} />
           <Route path="mass-redaction" element={<MassRedactionPage />} />
           <Route path="fee-config" element={<FeeConfigPage />} />
+          <Route path="cash-drawer" element={<CashDrawerPage />} />
           <Route path="config" element={<ConfigurationPage />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
