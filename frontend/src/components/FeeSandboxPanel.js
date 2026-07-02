@@ -17,6 +17,19 @@ const QFIELDS = [
 function money(n) { return '$' + (Number(n) || 0).toFixed(2); }
 const inp = { width: '100%', padding: '6px 8px', border: '1px solid #E5E7EB', borderRadius: '6px', fontSize: '13px', boxSizing: 'border-box' };
 const lbl = { fontSize: '11px', color: '#6B7280', marginBottom: '3px', display: 'block' };
+const GATE_LABELS = {
+  invoice_on_completion: 'Invoice on completion',
+  estimate_acceptance: 'Estimate acceptance (no money up front)',
+  deposit_before_work: 'Deposit before work begins',
+  pay_in_full_before_release: 'Pay in full before release',
+};
+const DELIVERY_LABELS = {
+  invoice_on_completion: 'Records released, then invoiced',
+  estimate_acceptance: 'Released after estimate accepted and work done',
+  deposit_before_work: 'Work gated on deposit; final release per policy',
+  pay_in_full_before_release: 'Released only after fee paid in full',
+};
+
 
 export default function FeeSandboxPanel({ onTested }) {
   const [q, setQ] = useState({});
@@ -107,6 +120,26 @@ export default function FeeSandboxPanel({ onTested }) {
             </tbody>
           </table>
 
+          {result.paymentPlan ? (
+            <div style={{ marginTop: '14px', borderTop: '1px solid #F0F0F0', paddingTop: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '6px' }}>
+                <div style={{ fontSize: '12px', fontWeight: '700', color: '#111' }}>Payment &amp; delivery plan</div>
+                <span style={{ fontSize: '10px', fontWeight: '600', color: result.paymentTimingSource === 'profile' ? '#065F46' : '#92400E', background: result.paymentTimingSource === 'profile' ? '#D1FAE5' : '#FEF3C7', borderRadius: '999px', padding: '2px 8px' }}>{result.paymentTimingSource === 'profile' ? 'from jurisdiction config' : 'inferred from legacy config'}</span>
+              </div>
+              <div style={{ fontSize: '12px', color: '#374151', lineHeight: '1.5', marginBottom: '8px' }}>{result.paymentPlan.summary}</div>
+              <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+                <tbody>
+                  <tr><td style={{ color: '#6B7280', padding: '3px 0', width: '42%' }}>Estimate required</td><td style={{ textAlign: 'right' }}>{result.paymentPlan.estimateRequired ? 'yes' : 'no'}</td></tr>
+                  <tr><td style={{ color: '#6B7280', padding: '3px 0' }}>Gate</td><td style={{ textAlign: 'right' }}>{GATE_LABELS[result.paymentPlan.gate] || result.paymentPlan.gate}</td></tr>
+                  <tr><td style={{ color: '#6B7280', padding: '3px 0' }}>First payment</td><td style={{ textAlign: 'right' }}>{result.paymentPlan.firstPayment && result.paymentPlan.firstPayment.required ? (result.paymentPlan.firstPayment.basisText || 'required') : 'none required'}</td></tr>
+                  {result.paymentPlan.firstPayment && result.paymentPlan.firstPayment.required && result.paymentPlan.firstPayment.dueWindowText ? <tr><td style={{ color: '#6B7280', padding: '3px 0' }}>Payment due</td><td style={{ textAlign: 'right' }}>{result.paymentPlan.firstPayment.dueWindowText}</td></tr> : null}
+                  <tr><td style={{ color: '#6B7280', padding: '3px 0' }}>Delivery trigger</td><td style={{ textAlign: 'right' }}>{DELIVERY_LABELS[result.paymentPlan.deliveryTrigger] || result.paymentPlan.deliveryTrigger}</td></tr>
+                  <tr><td style={{ color: '#6B7280', padding: '3px 0' }}>Second payment</td><td style={{ textAlign: 'right' }}>{result.paymentPlan.secondPayment && result.paymentPlan.secondPayment.terms ? ('final actual — ' + String(result.paymentPlan.secondPayment.terms).replace(/_/g, ' ')) : 'final actual'}</td></tr>
+                </tbody>
+              </table>
+              {result.paymentPlan.notes && result.paymentPlan.notes.length ? <ul style={{ margin: '8px 0 0', paddingLeft: '16px', fontSize: '11px', color: '#92400E' }}>{result.paymentPlan.notes.map(function (n, i) { return <li key={i}>{n}</li>; })}</ul> : null}
+            </div>
+          ) : null}
           <div style={{ marginTop: '14px', borderTop: '1px solid #F0F0F0', paddingTop: '12px' }}>
             <div style={{ fontSize: '12px', color: '#374151', marginBottom: '8px' }}>Does this behave correctly?</div>
             {!showIssue ? (
