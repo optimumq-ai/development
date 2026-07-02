@@ -13,6 +13,9 @@ export default function MyTasksPage() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('all');
+  const [myObjs, setMyObjs] = useState([]);
+  const [pendingObjs, setPendingObjs] = useState([]);
+  const canApprove = store.hasAnyRole('FEE_WAIVER_APPROVER', 'SYSTEM_ADMIN', 'DIRECTOR');
 
   useEffect(function() { load(); }, []);
 
@@ -21,6 +24,8 @@ export default function MyTasksPage() {
     try {
       var r = await api.get('/requests');
       setRequests(r.data.requests);
+      try { var mo = await api.get('/objections/mine'); setMyObjs(mo.data.objections || []); } catch (e2) {}
+      if (store.hasAnyRole('FEE_WAIVER_APPROVER', 'SYSTEM_ADMIN', 'DIRECTOR')) { try { var pa = await api.get('/objections/pending-approval'); setPendingObjs(pa.data.objections || []); } catch (e3) {} }
     } catch(e) { console.error(e); }
     setLoading(false);
   }
@@ -51,6 +56,28 @@ export default function MyTasksPage() {
           Requests assigned to you — {myRequests.length} active{overdue.length>0?' · '+overdue.length+' overdue':''}
         </p>
       </div>
+      {myObjs.length ? (
+        <div style={{background:'white',border:'1px solid #FDE68A',borderRadius:'12px',padding:'16px 18px'}}>
+          <div style={{fontSize:'14px',fontWeight:700,color:'#92400E',marginBottom:'8px'}}>Fee Estimate Objections <span style={{fontSize:'12px',fontWeight:600,color:'#B45309'}}>({myObjs.length})</span></div>
+          {myObjs.map(function(o){ return (
+            <div key={o.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderTop:'1px solid #F3F4F6'}}>
+              <div style={{fontSize:'13px',color:'#374151'}}><strong>{o.reason}</strong> <span style={{color:'#9CA3AF'}}>&middot; {o.requestNumber||o.requestId} &middot; {o.status==='tentative'?'pending approval':'open'}</span></div>
+              <Link to={'/requests/'+o.requestId} style={{fontSize:'12.5px',color:'#1F4E79',textDecoration:'none',fontWeight:700}}>Open &rarr; Fees</Link>
+            </div>
+          ); })}
+        </div>
+      ) : null}
+      {canApprove && pendingObjs.length ? (
+        <div style={{background:'white',border:'1px solid #FCA5A5',borderRadius:'12px',padding:'16px 18px'}}>
+          <div style={{fontSize:'14px',fontWeight:700,color:'#9B1C1C',marginBottom:'8px'}}>Fee resolutions awaiting your approval <span style={{fontSize:'12px',fontWeight:600}}>({pendingObjs.length})</span></div>
+          {pendingObjs.map(function(o){ return (
+            <div key={o.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderTop:'1px solid #F3F4F6'}}>
+              <div style={{fontSize:'13px',color:'#374151'}}>{o.resolutionType} of <strong>${(Number(o.resolutionAmount)||0).toFixed(2)}</strong> <span style={{color:'#9CA3AF'}}>&middot; {o.requestNumber||o.requestId} &middot; proposed by {o.assigneeName}</span></div>
+              <Link to={'/requests/'+o.requestId} style={{fontSize:'12.5px',color:'#1F4E79',textDecoration:'none',fontWeight:700}}>Review &rarr; Fees</Link>
+            </div>
+          ); })}
+        </div>
+      ) : null}
 
       <TaskPoolSection />
 
