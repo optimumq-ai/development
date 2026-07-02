@@ -316,3 +316,18 @@ Make this a flag on the reset (e.g. `runTicklerAfter: true`).
 old demo requests as "stalled," which is correct but inconsistent across demo days. Demo Mode is the clean
 fix — it replaces ad-hoc aged data with a curated, re-agable set. Build when the feature set being demoed
 is stable enough that the curated fixture won't churn constantly. Not yet scheduled.
+
+## Revisit queue — added 2026-07-01 (deferred; discuss before building)
+
+### R1. Dashboard top-of-page revision + objections count
+- Add an **objections count** to the dashboard header (the oversight surface for objections, in place of per-request My Tasks visibility — decided against standing passive watchers).
+- While there, **revisit the header layout**: `awaiting_payment` is not a clean finite status — it spans deposit-paid / pending-final-payment / etc. The header counts should reflect these sub-states rather than lump them under one ambiguous label.
+
+### R2. Request queue — objection designation
+- Surface an **objection designation** on the request queue (a marker/column/filter) so a flagged request is visible in the list view, distinct from its process stage.
+
+### R3. Reports view revision
+- Revisit the Reports view. Concept: a **conversational AI report agent** (build reports via chat).
+- **User-defined report views** containing a mix of **graphic/chart reports** and **text line-item reports**.
+
+_Objection My Tasks visibility (standing passive watchers): decided AGAINST 2026-07-01. Single assigned owner, freely reassignable; team-level oversight via dashboard count (R1) once designed._
