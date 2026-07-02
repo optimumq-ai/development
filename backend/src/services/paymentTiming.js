@@ -1,19 +1,17 @@
-// paymentTiming.js - Payment & delivery-plan resolver (slice 1)
+// paymentTiming.js - Payment & delivery-plan resolver (slice 1 + slice 2 derive helper)
 //
 // Pure, dependency-free. Given an estimate total + a jurisdiction's paymentTiming
 // config + request context, returns the "payment & delivery plan" card described in
 // FEE_ESTIMATE_VARIABLE_MAP.md sections C.1 (due-dates), C.2 (delivery trigger), 5, 6.
 //
-// INERT: nothing imports this yet. Wiring into the sandbox (slice 2), notices
-// (slice 3), and the live workflow (slice 4) comes later.
-//
-// It does NOT compute the fee amount - feeEngine.compute() does that. It consumes the
+// Consumed read-only by the fee sandbox (slice 2). Live-workflow wiring is slice 4.
+// Does NOT compute the fee amount - feeEngine.compute() does that. It consumes the
 // resulting estimate total and decides WHAT must be collected, WHEN, and what that gates.
 'use strict';
 
 var GATES = ['invoice_on_completion', 'estimate_acceptance', 'deposit_before_work', 'pay_in_full_before_release'];
 
-function num(v) { return typeof v === 'number' && isFinite(v) ? v : 0; }
+function num(v) { return typeof v === 'number' && isFinite(v) ? v : (isFinite(Number(v)) ? Number(v) : 0); }
 function r2(n) { return Math.round(n * 100) / 100; }
 
 // First band whose upTo >= total (upTo null = unlimited top band).
@@ -140,4 +138,41 @@ function resolvePaymentPlan(pt, ctx) {
   };
 }
 
-module.exports = { resolvePaymentPlan: resolvePaymentPlan, selectBand: selectBand, GATES: GATES };
+// Build a minimal paymentTiming config from a legacy fee profile's requestRules, for
+// jurisdictions that don't yet carry a dedicated paymentTiming block. Lossy: bands come
+// from estimateNotifyThreshold + deposit.threshold; due-windows are unknown (null) since
+// legacy config never captured them. Callers flag the result as 'derived'.
+function deriveDefaultPaymentTiming(config) {
+  config = config || {};
+  var rules = config.requestRules || {};
+  var dep = rules.deposit || {};
+  var notifyOver = rules.estimateNotifyThreshold;
+  var depThr = dep.threshold;
+  var bands = [];
+  if (notifyOver != null && depThr != null && num(depThr) > num(notifyOver)) {
+    bands.push({ upTo: num(notifyOver), gate: 'invoice_on_completion', deliveryTrigger: 'invoice_on_completion' });
+    bands.push({ upTo: num(depThr), gate: 'estimate_acceptance', deliveryTrigger: 'estimate_acceptance' });
+    bands.push({ upTo: null, gate: 'deposit_before_work', deliveryTrigger: 'deposit_before_work' });
+  } else if (depThr != null) {
+    bands.push({ upTo: num(depThr), gate: 'estimate_acceptance', deliveryTrigger: 'invoice_on_completion' });
+    bands.push({ upTo: null, gate: 'deposit_before_work', deliveryTrigger: 'deposit_before_work' });
+  } else {
+    bands.push({ upTo: null, gate: 'invoice_on_completion', deliveryTrigger: 'invoice_on_completion' });
+  }
+  var firstPayment;
+  if (dep.percent != null) {
+    firstPayment = { basis: 'percent', percent: num(dep.percent), cap: null, dueWindow: null, creditedToFinal: true };
+  } else {
+    firstPayment = { basis: 'up_to_anticipated_cost', cap: 'estimate', dueWindow: null, creditedToFinal: true };
+  }
+  return {
+    estimateRequiredOver: notifyOver != null ? num(notifyOver) : 0,
+    bands: bands,
+    firstPayment: firstPayment,
+    secondPayment: { basis: 'actual', terms: null },
+    delinquent: null,
+    _derived: true
+  };
+}
+
+module.exports = { resolvePaymentPlan: resolvePaymentPlan, deriveDefaultPaymentTiming: deriveDefaultPaymentTiming, selectBand: selectBand, GATES: GATES };

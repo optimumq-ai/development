@@ -3,6 +3,7 @@ const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
 const { get } = require('../db');
 const engine = require('../services/feeEngine');
+const pt = require('../services/paymentTiming');
 
 function num(x) { x = Number(x); return isFinite(x) ? x : 0; }
 function r2(n) { return Math.round((Number(n) || 0) * 100) / 100; }
@@ -34,6 +35,16 @@ router.post('/preview', requireAuth, async function (req, res) {
   const effectiveTotal = waived ? 0 : rl.total;
   const payment = num(b.payment);
   const depositDue = waived ? 0 : num(rl.depositDue);
+
+  // --- Payment & delivery plan (read-only; slice 2). Additive: does not alter the fields above. ---
+  const hasProfilePT = !!(config.paymentTiming && Object.keys(config.paymentTiming).length);
+  const ptConfig = hasProfilePT ? config.paymentTiming : pt.deriveDefaultPaymentTiming(config);
+  const paymentPlan = pt.resolvePaymentPlan(ptConfig, {
+    estimateTotal: effectiveTotal,
+    delinquent: !!b.delinquent,
+    commercial: (request.purpose === 'commercial')
+  });
+
   res.json({
     configVersion: prof.version,
     requestLevel: rl,
@@ -42,7 +53,9 @@ router.post('/preview', requireAuth, async function (req, res) {
     waived: waived,
     effectiveTotal: effectiveTotal,
     deposit: { required: depositDue, basis: rl.depositBasis, satisfiedByPayment: payment >= depositDue },
-    payment: { entered: payment, balanceDue: r2(Math.max(0, effectiveTotal - payment)) }
+    payment: { entered: payment, balanceDue: r2(Math.max(0, effectiveTotal - payment)) },
+    paymentPlan: paymentPlan,
+    paymentTimingSource: hasProfilePT ? 'profile' : 'derived'
   });
 });
 
