@@ -39,12 +39,16 @@ export default function FeeEstimatePanel(props) {
   var [payReference, setPayReference] = useState('');
   var [payBusy, setPayBusy] = useState(false);
   var [payMsg, setPayMsg] = useState('');
+  var [erpCharges, setErpCharges] = useState([]);
+  var [erpBusy, setErpBusy] = useState(false);
+  var [erpMsg, setErpMsg] = useState('');
 
   useEffect(function () { load(); }, [requestId]);
   async function load() {
     try {
       var r = await api.get('/fee-estimates/request/' + requestId);
       setCtx(r.data);
+      if (r.data.paymentMode === 'erp') loadErpCharges();
       var init = {};
       var li = r.data.latest && r.data.latest.input && r.data.latest.input.components;
       var pf = {};
@@ -134,8 +138,45 @@ export default function FeeEstimatePanel(props) {
     } catch (e) { setPayMsg((e.response && e.response.data && e.response.data.error) || 'Could not record payment.'); }
     setPayBusy(false);
   }
+  function loadErpCharges() { api.get('/settlement/request/' + requestId + '/charges').then(function (r) { setErpCharges(r.data.charges || []); }).catch(function () {}); }
+  async function sendCharge(target, amount) {
+    setErpBusy(true); setErpMsg('');
+    try {
+      var pp = ctx.paymentPlan || {};
+      var gating = (pp.deliveryTrigger === 'pay_in_full_before_release') ? 'release_gated' : (target === 'deposit' ? 'work_gated' : 'net_terms');
+      var dueDate = (pp.firstPayment && pp.firstPayment.dueWindow && target === 'deposit') ? 'window-end' : 'immediate';
+      await api.post('/settlement/request/' + requestId + '/charge', { target: target, amount: amount, dueDate: dueDate, gatingSemantic: gating });
+      setErpMsg('Sent to ERP.');
+      load();
+    } catch (e) { setErpMsg((e.response && e.response.data && e.response.data.error) || 'Could not send the charge.'); }
+    setErpBusy(false);
+  }
+  function renderErpPanel() {
+    var ps = ctx.paymentState, L = ctx.latest;
+    var owed = 0, target = 'balance';
+    if (ps && L) { var depOut = Math.max(0, (Number(L.deposit_due) || 0) - (ps.depositPaid || 0)); if (depOut > 0) { target = 'deposit'; owed = depOut; } else { owed = ps.balanceDue; } }
+    var th = { textAlign: 'left', color: '#6B7280', padding: '4px 6px', fontWeight: 600 };
+    return (
+      <div style={{ marginTop: '14px', padding: '13px 15px', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '10px', maxWidth: '700px' }}>
+        <div style={{ fontSize: '13px', fontWeight: 700, color: '#111', marginBottom: '4px' }}>External payment (ERP)</div>
+        <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '10px' }}>Finance collects this payment in the ERP (online, mail, or walk-in). Hand off the charge; the balance updates automatically when the ERP reports the payment. Optimum Q sends no payment reminders in this mode.</div>
+        {ps && !ps.paidInFull && owed > 0 && L && L.accepted_at ? (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginBottom: erpCharges.length ? '12px' : 0, flexWrap: 'wrap' }}>
+            <button onClick={function () { sendCharge(target, owed); }} disabled={erpBusy} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: erpBusy ? '#9CB4CC' : NAVY, color: 'white', fontSize: '13px', fontWeight: 700, cursor: erpBusy ? 'default' : 'pointer' }}>{erpBusy ? 'Sending...' : 'Send ' + target + ' charge to ERP (' + money(owed) + ')'}</button>
+            {erpMsg ? <span style={{ fontSize: '12px', color: erpMsg.indexOf('Sent') === 0 ? '#03543F' : '#9B1C1C' }}>{erpMsg}</span> : null}
+          </div>
+        ) : null}
+        {erpCharges.length ? (
+          <table style={{ width: '100%', fontSize: '12px', borderCollapse: 'collapse' }}>
+            <thead><tr><th style={th}>Charge</th><th style={th}>Target</th><th style={Object.assign({}, th, { textAlign: 'right' })}>Amount</th><th style={Object.assign({}, th, { textAlign: 'right' })}>Paid</th><th style={th}>Status</th></tr></thead>
+            <tbody>{erpCharges.map(function (c) { return <tr key={c.id}><td style={{ padding: '4px 6px', color: '#374151' }}>{c.erp_charge_id}</td><td style={{ padding: '4px 6px', color: '#374151' }}>{c.target}</td><td style={{ padding: '4px 6px', textAlign: 'right' }}>{money(c.amount)}</td><td style={{ padding: '4px 6px', textAlign: 'right' }}>{money(c.paid_amount)}</td><td style={{ padding: '4px 6px' }}><span style={{ fontSize: '11px', fontWeight: 700, padding: '2px 8px', borderRadius: '20px', background: c.status === 'paid' ? '#DEF7EC' : '#FEF3C7', color: c.status === 'paid' ? '#03543F' : '#92400E' }}>{c.status}</span></td></tr>; })}</tbody>
+          </table>
+        ) : null}
+      </div>
+    );
+  }
   function renderTakePayment() {
-    if (ctx.paymentMode === 'erp') return <div style={{ marginTop: '14px', fontSize: '12.5px', color: '#6B7280', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '12px 14px', maxWidth: '660px' }}>Payments for this jurisdiction are handled in the external finance / ERP system. Optimum Q hands off the charge and reflects the balance once finance reports the payment.</div>;
+    if (ctx.paymentMode === 'erp') return renderErpPanel();
     var ps = ctx.paymentState, L = ctx.latest;
     if (!ps || !L || !L.accepted_at || ps.paidInFull) return null;
     var depDue = Number(L.deposit_due) || 0;
