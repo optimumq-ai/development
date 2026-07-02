@@ -33,6 +33,12 @@ export default function FeeEstimatePanel(props) {
   var [noticeNotifyTriggered, setNoticeNotifyTriggered] = useState(false);
   var [sending, setSending] = useState(false);
   var [sendMsg, setSendMsg] = useState('');
+  var [payMethod, setPayMethod] = useState('cash');
+  var [payAmount, setPayAmount] = useState('');
+  var [payTendered, setPayTendered] = useState('');
+  var [payReference, setPayReference] = useState('');
+  var [payBusy, setPayBusy] = useState(false);
+  var [payMsg, setPayMsg] = useState('');
 
   useEffect(function () { load(); }, [requestId]);
   async function load() {
@@ -113,6 +119,49 @@ export default function FeeEstimatePanel(props) {
     setResp({ busy: true, msg: '' });
     try { await api.post('/fee-estimates/request/' + requestId + '/' + path, body || {}); await load(); setResp({ busy: false, msg: '' }); }
     catch (e) { setResp({ busy: false, msg: (e.response && e.response.data && e.response.data.error) || 'Action failed.' }); }
+  }
+  async function takePayment(target, owed) {
+    setPayBusy(true); setPayMsg('');
+    try {
+      var amt = payAmount === '' ? owed : Number(payAmount);
+      var body = { target: target, method: payMethod, amount: amt, reference: payReference || null };
+      if (payMethod === 'cash' && payTendered !== '') body.tendered = Number(payTendered);
+      var r = await api.post('/fee-estimates/request/' + requestId + '/payment/record', body);
+      var chg = r.data && r.data.changeGiven;
+      setPayMsg('Recorded' + (chg > 0 ? ' \u00b7 change due ' + money(chg) : ''));
+      setPayAmount(''); setPayTendered(''); setPayReference('');
+      await load();
+    } catch (e) { setPayMsg((e.response && e.response.data && e.response.data.error) || 'Could not record payment.'); }
+    setPayBusy(false);
+  }
+  function renderTakePayment() {
+    var ps = ctx.paymentState, L = ctx.latest;
+    if (!ps || !L || !L.accepted_at || ps.paidInFull) return null;
+    var depDue = Number(L.deposit_due) || 0;
+    var depOut = Math.max(0, depDue - (ps.depositPaid || 0));
+    var target = depOut > 0 ? 'deposit' : 'balance';
+    var owed = depOut > 0 ? depOut : ps.balanceDue;
+    if (!(owed > 0)) return null;
+    var amt = payAmount === '' ? owed : Number(payAmount);
+    var change = (payMethod === 'cash' && payTendered !== '') ? Math.max(0, Math.round((Number(payTendered) - amt) * 100) / 100) : null;
+    return (
+      <div style={{ marginTop: '14px', padding: '12px 14px', background: 'white', border: '1px solid #E5E7EB', borderRadius: '10px', maxWidth: '660px' }}>
+        <div style={{ fontSize: '13px', fontWeight: 700, color: '#111', marginBottom: '8px' }}>Take a payment <span style={{ fontWeight: 400, color: '#6B7280' }}>({target} \u00b7 {money(owed)} owed)</span></div>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+          <div><label style={lbl}>Method</label><select value={payMethod} onChange={function (e) { setPayMethod(e.target.value); }} style={Object.assign({}, inp, { width: 'auto' })}><option value="cash">Cash</option><option value="check">Check</option><option value="card">Card</option><option value="money_order">Money order</option><option value="other">Other</option></select></div>
+          <div style={{ width: '110px' }}><label style={lbl}>Amount $</label><input type="number" step="any" value={payAmount} onChange={function (e) { setPayAmount(e.target.value); }} placeholder={owed.toFixed(2)} style={inp} /></div>
+          <button onClick={function () { setPayAmount(String(owed)); }} style={{ padding: '7px 10px', borderRadius: '6px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '11px', fontWeight: 700, cursor: 'pointer' }}>Copy owed</button>
+          {payMethod === 'cash' ? <div style={{ width: '120px' }}><label style={lbl}>Cash tendered $</label><input type="number" step="any" value={payTendered} onChange={function (e) { setPayTendered(e.target.value); }} style={inp} /></div> : null}
+          {(payMethod === 'check' || payMethod === 'money_order' || payMethod === 'other') ? <div style={{ width: '150px' }}><label style={lbl}>Reference / #</label><input type="text" value={payReference} onChange={function (e) { setPayReference(e.target.value); }} style={inp} /></div> : null}
+        </div>
+        {change != null ? <div style={{ fontSize: '13px', fontWeight: 700, color: change > 0 ? '#92400E' : '#03543F', marginTop: '8px' }}>Change due: {money(change)}</div> : null}
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '10px', flexWrap: 'wrap' }}>
+          <button onClick={function () { takePayment(target, owed); }} disabled={payBusy} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: payBusy ? '#9CB4CC' : NAVY, color: 'white', fontSize: '13px', fontWeight: 700, cursor: payBusy ? 'default' : 'pointer' }}>{payBusy ? 'Recording...' : 'Record payment'}</button>
+          <button onClick={loadBalanceNotice} style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Load balance-due notice</button>
+          {payMsg ? <span style={{ fontSize: '12px', color: payMsg.indexOf('Recorded') === 0 ? '#03543F' : '#9B1C1C' }}>{payMsg}</span> : null}
+        </div>
+      </div>
+    );
   }
   function rBtn(label, onClick, primary) {
     return <button onClick={onClick} disabled={resp.busy} style={{ padding: '7px 14px', borderRadius: '8px', border: primary ? 'none' : '1px solid #E5E7EB', background: primary ? NAVY : 'white', color: primary ? 'white' : '#374151', fontSize: '13px', fontWeight: 700, cursor: resp.busy ? 'default' : 'pointer', opacity: resp.busy ? 0.6 : 1 }}>{label}</button>;
@@ -269,13 +318,7 @@ export default function FeeEstimatePanel(props) {
               </div>
             ) : null}
           </div>
-          {ctx.paymentState && !ctx.paymentState.paidInFull && ctx.latest && ctx.latest.accepted_at ? (
-            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '12px', flexWrap: 'wrap' }}>
-              {rBtn('Record balance payment (' + money(ctx.paymentState.balanceDue) + ')', function () { respond('final-payment/record', {}); }, true)}
-              <button onClick={loadBalanceNotice} style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Load balance-due notice</button>
-              {resp.msg ? <span style={{ color: '#9B1C1C', fontSize: '12px' }}>{resp.msg}</span> : null}
-            </div>
-          ) : null}
+          {renderTakePayment()}
         </div>
       ) : null}
       {result ? (
