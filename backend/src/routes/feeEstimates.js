@@ -355,4 +355,56 @@ router.get('/request/:requestId/balance-notice', requireAuth, async function (re
   } catch (e) { res.status(500).json({ error: 'Could not build the balance-due notice.' }); }
 });
 
+// Cashiering (internal payment mode): record a mail-in / walk-in payment to the fee_payments ledger,
+// update the estimate's paid amounts, and — for a deposit that clears awaiting_payment — advance the stage.
+router.post('/request/:requestId/payment/record', requireAuth, async function (req, res) {
+  try {
+    var rid = req.params.requestId;
+    var reqRow = await get('SELECT id, stage FROM requests WHERE id = ?', [rid]);
+    if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
+    var est = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [rid]);
+    if (!est) return res.status(400).json({ error: 'No estimate on this request.' });
+    var b = req.body || {};
+    var target = (b.target === 'deposit') ? 'deposit' : 'balance';
+    var method = String(b.method || 'cash');
+    var amount = Number(b.amount);
+    if (!(amount > 0)) return res.status(400).json({ error: 'Enter a payment amount greater than zero.' });
+    var tendered = (b.tendered != null && b.tendered !== '') ? Number(b.tendered) : null;
+    var changeGiven = (method === 'cash' && tendered != null) ? pt.computeChange(tendered, amount) : 0;
+    var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'system';
+    var today = nowStr().slice(0, 10);
+    await run('INSERT INTO fee_payments (id, request_id, estimate_id, target, method, amount, tendered, change_given, reference, clerk, drawer_date, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
+      ['feepay-' + uuidv4().slice(0, 8), rid, est.id, target, method, amount, tendered, changeGiven, b.reference || null, actor, today, nowStr()]);
+    if (target === 'deposit') {
+      var newDep = (Number(est.deposit_paid_amount) || 0) + amount;
+      await run('UPDATE request_fee_estimates SET deposit_paid_at = ?, deposit_paid_by = ?, deposit_paid_amount = ? WHERE id = ?', [nowStr(), actor, newDep, est.id]);
+      if (reqRow.stage === 'awaiting_payment') {
+        await run("UPDATE requests SET stage = 'record_search', status = 'active', tickler_flag = NULL, tickler_flagged_at = NULL, updated_at = datetime('now') WHERE id = ?", [rid]);
+        await hist(rid, req.user, 'DEPOSIT_RECORDED', 'Deposit of $' + amount.toFixed(2) + ' (' + method + ') recorded; record search begins.', reqRow.stage, 'record_search');
+        try { await taskRouting.spawnForStage(rid, 'record_search', req.user && req.user.sub); } catch (e) {}
+      } else {
+        await hist(rid, req.user, 'DEPOSIT_RECORDED', 'Deposit of $' + amount.toFixed(2) + ' (' + method + ') recorded.', null, null);
+      }
+    } else {
+      var newFinal = (Number(est.final_paid_amount) || 0) + amount;
+      await run('UPDATE request_fee_estimates SET final_paid_at = ?, final_paid_by = ?, final_paid_amount = ? WHERE id = ?', [nowStr(), actor, newFinal, est.id]);
+      var afterH = await paymentState(rid);
+      await hist(rid, req.user, 'FINAL_PAYMENT_RECORDED', 'Payment of $' + amount.toFixed(2) + ' (' + method + ') recorded; balance now $' + afterH.balanceDue.toFixed(2) + (afterH.paidInFull ? ' (paid in full).' : '.'), null, null);
+    }
+    var after = await paymentState(rid);
+    res.json({ recorded: true, target: target, amount: amount, method: method, changeGiven: changeGiven, paymentState: after });
+  } catch (e) { res.status(500).json({ error: 'Could not record the payment: ' + (e && e.message) }); }
+});
+
+// Daily cash-drawer reconciliation: non-voided payments collected on a date (default today), by method.
+router.get('/payments/drawer', requireAuth, async function (req, res) {
+  try {
+    var date = (req.query && req.query.date) || nowStr().slice(0, 10);
+    var rows = await all("SELECT p.*, r.request_number FROM fee_payments p LEFT JOIN requests r ON r.id = p.request_id WHERE p.drawer_date = ? AND COALESCE(p.voided,0) = 0 ORDER BY p.created_at", [date]);
+    var totals = {}; var cash = 0;
+    (rows || []).forEach(function (p) { var m = p.method || 'other'; totals[m] = Math.round(((totals[m] || 0) + (Number(p.amount) || 0)) * 100) / 100; if (m === 'cash') cash += (Number(p.amount) || 0); });
+    res.json({ date: date, count: rows.length, totalsByMethod: totals, cashCollected: Math.round(cash * 100) / 100, transactions: rows });
+  } catch (e) { res.status(500).json({ error: 'Could not load the drawer report.' }); }
+});
+
 module.exports = router;

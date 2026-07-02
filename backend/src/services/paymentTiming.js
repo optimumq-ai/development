@@ -199,4 +199,7 @@ function computeBalance(effectiveTotal, depositPaid, finalPaid) {
 // Does this plan require the balance be settled BEFORE records are released? (drives the 4d gate)
 function requiresPaymentBeforeRelease(plan){ if(!plan) return false; if(plan.deliveryTrigger==="pay_in_full_before_release") return true; if(plan.secondPayment && plan.secondPayment.terms==="due_before_release") return true; return false; }
 
-module.exports = { resolvePaymentPlan: resolvePaymentPlan, deriveDefaultPaymentTiming: deriveDefaultPaymentTiming, selectBand: selectBand, gateToStage: gateToStage, computeBalance: computeBalance, requiresPaymentBeforeRelease: requiresPaymentBeforeRelease, GATES: GATES };
+// Cash change due: tendered minus amount, floored at 0 (never negative).
+function computeChange(tendered, amount){ var t=Number(tendered)||0, a=Number(amount)||0; var c=Math.round((t-a)*100)/100; return c>0?c:0; }
+
+module.exports = { resolvePaymentPlan: resolvePaymentPlan, deriveDefaultPaymentTiming: deriveDefaultPaymentTiming, selectBand: selectBand, gateToStage: gateToStage, computeBalance: computeBalance, requiresPaymentBeforeRelease: requiresPaymentBeforeRelease, computeChange: computeChange, GATES: GATES };
