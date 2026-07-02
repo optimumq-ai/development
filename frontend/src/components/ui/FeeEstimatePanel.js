@@ -6,6 +6,8 @@ var inp = { width: '100%', padding: '6px 8px', borderRadius: '6px', border: '1px
 var lbl = { fontSize: '10.5px', fontWeight: 600, color: '#9CA3AF', display: 'block', marginBottom: '3px' };
 function money(n) { return '$' + (Number(n) || 0).toFixed(2); }
 function num(x) { x = Number(x); return isFinite(x) ? x : 0; }
+var GATE_LABELS = { invoice_on_completion: 'Invoice on completion', estimate_acceptance: 'Estimate acceptance (no money up front)', deposit_before_work: 'Deposit before work begins', pay_in_full_before_release: 'Pay in full before release' };
+var DELIVERY_LABELS = { invoice_on_completion: 'Records released, then invoiced', estimate_acceptance: 'Released after estimate accepted and work done', deposit_before_work: 'Work gated on deposit; final release per policy', pay_in_full_before_release: 'Released only after fee paid in full' };
 
 export default function FeeEstimatePanel(props) {
   var requestId = props.requestId;
@@ -86,6 +88,13 @@ export default function FeeEstimatePanel(props) {
     } catch (e) { /* no saved estimate yet */ }
   }
   useEffect(function () { if (result) loadNotice(); }, [result]);
+  async function loadBalanceNotice() {
+    try {
+      var r = await api.get('/fee-estimates/request/' + requestId + '/balance-notice');
+      setNoticeTo(r.data.to || ''); setNoticeSubject(r.data.subject || ''); setNoticeText(r.data.text || '');
+      setSendMsg('Balance-due notice loaded into "Notify requestor" below \u2014 review and send.');
+    } catch (e) { setSendMsg((e.response && e.response.data && e.response.data.error) || 'Could not load balance-due notice.'); }
+  }
 
   async function sendNotice() {
     setSending(true); setSendMsg('');
@@ -239,6 +248,36 @@ export default function FeeEstimatePanel(props) {
           </div>
         </div>
       </div>
+      {ctx.paymentPlan ? (
+        <div style={{ marginTop: '18px', borderTop: '1px solid #E5E7EB', paddingTop: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px', maxWidth: '700px' }}>
+            <div style={{ fontSize: '14px', fontWeight: 700, color: '#111' }}>Payment &amp; delivery plan</div>
+            <span style={{ fontSize: '10.5px', fontWeight: 700, color: ctx.paymentTimingSource === 'profile' ? '#03543F' : '#92400E', background: ctx.paymentTimingSource === 'profile' ? '#DEF7EC' : '#FEF3C7', borderRadius: '999px', padding: '2px 9px' }}>{ctx.paymentTimingSource === 'profile' ? 'from jurisdiction config' : 'inferred from legacy config'}</span>
+          </div>
+          <div style={{ fontSize: '12.5px', color: '#374151', lineHeight: '1.5', marginBottom: '10px', maxWidth: '700px' }}>{ctx.paymentPlan.summary}</div>
+          <div style={{ display: 'flex', gap: '26px', flexWrap: 'wrap', maxWidth: '700px' }}>
+            <div style={{ fontSize: '12.5px', color: '#374151', lineHeight: '1.7' }}>
+              <div><span style={{ color: '#6B7280' }}>Gate: </span>{GATE_LABELS[ctx.paymentPlan.gate] || ctx.paymentPlan.gate}</div>
+              <div><span style={{ color: '#6B7280' }}>Delivery: </span>{DELIVERY_LABELS[ctx.paymentPlan.deliveryTrigger] || ctx.paymentPlan.deliveryTrigger}</div>
+              <div><span style={{ color: '#6B7280' }}>First payment: </span>{ctx.paymentPlan.firstPayment && ctx.paymentPlan.firstPayment.required ? (ctx.paymentPlan.firstPayment.basisText + (ctx.paymentPlan.firstPayment.dueWindowText ? ' \u00b7 due ' + ctx.paymentPlan.firstPayment.dueWindowText : '')) : 'none required'}</div>
+            </div>
+            {ctx.paymentState ? (
+              <div style={{ fontSize: '12.5px', color: '#374151', lineHeight: '1.7', minWidth: '230px' }}>
+                <div><span style={{ color: '#6B7280' }}>Effective total: </span>{money(ctx.paymentState.effectiveTotal)}{ctx.paymentState.reconciled ? ' (reconciled)' : ''}</div>
+                <div><span style={{ color: '#6B7280' }}>Paid: </span>{money(ctx.paymentState.paid)} <span style={{ color: '#9CA3AF' }}>({money(ctx.paymentState.depositPaid)} deposit + {money(ctx.paymentState.finalPaid)} final)</span></div>
+                <div style={{ fontWeight: 700 }}><span style={{ color: '#6B7280', fontWeight: 400 }}>Balance due: </span>{ctx.paymentState.paidInFull ? <span style={{ color: '#03543F' }}>paid in full</span> : <span style={{ color: NAVY }}>{money(ctx.paymentState.balanceDue)}</span>}</div>
+              </div>
+            ) : null}
+          </div>
+          {ctx.paymentState && !ctx.paymentState.paidInFull && ctx.latest && ctx.latest.accepted_at ? (
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center', marginTop: '12px', flexWrap: 'wrap' }}>
+              {rBtn('Record balance payment (' + money(ctx.paymentState.balanceDue) + ')', function () { respond('final-payment/record', {}); }, true)}
+              <button onClick={loadBalanceNotice} style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Load balance-due notice</button>
+              {resp.msg ? <span style={{ color: '#9B1C1C', fontSize: '12px' }}>{resp.msg}</span> : null}
+            </div>
+          ) : null}
+        </div>
+      ) : null}
       {result ? (
         <div style={{ marginTop: '18px', borderTop: '1px solid #E5E7EB', paddingTop: '16px' }}>
           <div style={{ fontSize: '14px', fontWeight: 700, color: '#111', marginBottom: '4px' }}>Notify requestor</div>
