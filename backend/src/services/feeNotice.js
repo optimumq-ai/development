@@ -9,6 +9,56 @@ function hrLabel(n) { n = Number(n) || 0; return n + (n === 1 ? ' hour' : ' hour
 var LABOR_LABEL = { search_labor: 'Staff time to locate and compile records', review_labor: 'Staff time to review and prepare records', programming_labor: 'Programming / data extraction time' };
 var DUP_LABEL = { dup_bw: 'Black-and-white copies', dup_color: 'Color copies', dup_oversized: 'Oversized copies' };
 
+// --- Payment-plan-aware requestor language (slice 3). Given a resolved paymentPlan
+// (see paymentTiming.resolvePaymentPlan), return band-specific plain-language paragraphs. ---
+function windowSentence(fp) {
+  var w = fp && fp.dueWindow;
+  if (!w) return null;
+  var unit = (w.unit === 'business') ? 'business day' : 'day';
+  unit += (w.days === 1 ? '' : 's');
+  var from = (w.from === 'notice_received') ? 'after you receive this notice' : 'from the date of this notice';
+  var onExpiry = w.onExpiry === 'abandoned' ? 'considered abandoned' : (w.onExpiry === 'withdrawn' ? 'considered withdrawn' : 'closed');
+  return 'Please respond within ' + w.days + ' ' + unit + ' ' + from + ', or this request may be ' + onExpiry + '.';
+}
+
+function paymentLanguage(pp, moneyFn) {
+  moneyFn = moneyFn || money;
+  var out = [];
+  var fp = pp.firstPayment || {};
+  var beforeRelease = pp.secondPayment && pp.secondPayment.terms === 'due_before_release';
+  var balanceLine = beforeRelease
+    ? 'Any remaining balance must be paid before the records are released.'
+    : 'Any remaining balance will be due upon completion.';
+  switch (pp.gate) {
+    case 'invoice_on_completion':
+      out.push('We will begin processing your request. The estimated cost shown above will be invoiced to you when the records are ready.');
+      break;
+    case 'estimate_acceptance':
+      out.push('Before we begin, please confirm that you accept this estimated cost. No payment is required up front.');
+      var ws = windowSentence(fp); if (ws) out.push(ws);
+      out.push(balanceLine);
+      break;
+    case 'deposit_before_work':
+      var amtTxt;
+      if (fp.isCeiling) amtTxt = 'A deposit of up to ' + moneyFn(fp.amount) + ' (the full anticipated cost)';
+      else if (fp.amount != null) amtTxt = 'A deposit of ' + moneyFn(fp.amount);
+      else amtTxt = 'A deposit';
+      out.push(amtTxt + ' is required before we begin processing your request.' + (fp.creditedToFinal ? ' It will be credited toward your final invoice.' : ''));
+      var ws2 = windowSentence(fp); if (ws2) out.push(ws2);
+      out.push(balanceLine);
+      break;
+    case 'pay_in_full_before_release':
+      out.push('We will process your request. The fee shown above must be paid in full before the records are released.');
+      break;
+    default:
+      out.push('Please confirm you would like us to proceed at this estimated cost.');
+  }
+  (pp.notes || []).forEach(function (n) {
+    if (/Delinquent|prior unpaid/i.test(n)) out.push('Because a previous request has an unpaid balance, an advance payment is required before we can begin this one.');
+  });
+  return out;
+}
+
 function buildNotice(request, feeContext, opts) {
   opts = opts || {};
   var R = (feeContext && feeContext.requestLevel) || {};
@@ -37,13 +87,17 @@ function buildNotice(request, feeContext, opts) {
   body += 'Thank you for your public records request' + (num ? ' (' + num + ')' : '') + '. We have reviewed it and prepared an estimate of the cost to fulfill it.\n\n';
   body += 'Estimated cost: ' + money(total) + '\n\n';
   if (lines.length) body += 'This estimate is based on:\n' + lines.join('\n') + '\n\n';
-  if (R.depositDue && R.depositDue > 0) body += 'A deposit of ' + money(R.depositDue) + ' is required before we begin processing. Once it is received we will proceed, and any remaining balance will be due upon completion.\n\n';
-  else body += 'Please confirm you would like us to proceed at this estimated cost.\n\n';
-  if (opts.responseDays) body += 'Please respond within ' + opts.responseDays + ' business days, or this request may be considered withdrawn.\n\n';
+  if (opts.paymentPlan) {
+    paymentLanguage(opts.paymentPlan, money).forEach(function (p) { body += p + '\n\n'; });
+  } else {
+    if (R.depositDue && R.depositDue > 0) body += 'A deposit of ' + money(R.depositDue) + ' is required before we begin processing. Once it is received we will proceed, and any remaining balance will be due upon completion.\n\n';
+    else body += 'Please confirm you would like us to proceed at this estimated cost.\n\n';
+    if (opts.responseDays) body += 'Please respond within ' + opts.responseDays + ' business days, or this request may be considered withdrawn.\n\n';
+  }
   body += 'This is an estimate; the final cost may differ based on the records actually located and the time required. Any item shown as "actual cost to be determined" will be calculated once known. If you have questions, or would like to narrow your request to reduce the cost, please reply to this message.\n\n';
   body += 'Sincerely,\n' + agency + ' - Open Records';
 
   return { subject: subject, text: body };
 }
 
-module.exports = { buildNotice: buildNotice };
+module.exports = { buildNotice: buildNotice, paymentLanguage: paymentLanguage };

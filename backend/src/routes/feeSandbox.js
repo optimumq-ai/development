@@ -4,6 +4,7 @@ const { requireAuth } = require('../middleware/auth');
 const { get } = require('../db');
 const engine = require('../services/feeEngine');
 const pt = require('../services/paymentTiming');
+const feeNotice = require('../services/feeNotice');
 
 function num(x) { x = Number(x); return isFinite(x) ? x : 0; }
 function r2(n) { return Math.round((Number(n) || 0) * 100) / 100; }
@@ -45,6 +46,13 @@ router.post('/preview', requireAuth, async function (req, res) {
     commercial: (request.purpose === 'commercial')
   });
 
+  const agencyRow = await get("SELECT value FROM system_config WHERE key='agency_name'");
+  const notice = feeNotice.buildNotice(
+    { request_number: 'PREVIEW', requestor_name: 'Requestor' },
+    fc,
+    { agencyName: (agencyRow && agencyRow.value) || 'the City', paymentPlan: paymentPlan }
+  );
+
   res.json({
     configVersion: prof.version,
     requestLevel: rl,
@@ -55,7 +63,8 @@ router.post('/preview', requireAuth, async function (req, res) {
     deposit: { required: depositDue, basis: rl.depositBasis, satisfiedByPayment: payment >= depositDue },
     payment: { entered: payment, balanceDue: r2(Math.max(0, effectiveTotal - payment)) },
     paymentPlan: paymentPlan,
-    paymentTimingSource: hasProfilePT ? 'profile' : 'derived'
+    paymentTimingSource: hasProfilePT ? 'profile' : 'derived',
+    requestorNotice: { subject: notice.subject, text: notice.text }
   });
 });
 
