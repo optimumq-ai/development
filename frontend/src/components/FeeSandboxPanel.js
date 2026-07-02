@@ -140,6 +140,12 @@ export default function FeeSandboxPanel({ onTested }) {
               {result.paymentPlan.notes && result.paymentPlan.notes.length ? <ul style={{ margin: '8px 0 0', paddingLeft: '16px', fontSize: '11px', color: '#92400E' }}>{result.paymentPlan.notes.map(function (n, i) { return <li key={i}>{n}</li>; })}</ul> : null}
             </div>
           ) : null}
+          {result.requestorNotice ? (
+            <div style={{ marginTop: '12px' }}>
+              <div style={{ fontSize: '12px', fontWeight: '700', color: '#111', marginBottom: '6px' }}>Requestor sees</div>
+              <pre style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word', fontFamily: 'ui-monospace, Menlo, monospace', fontSize: '11px', color: '#374151', background: '#F9FAFB', border: '1px solid #E5E7EB', borderRadius: '8px', padding: '10px 12px', margin: 0 }}>{result.requestorNotice.text}</pre>
+            </div>
+          ) : null}
           <div style={{ marginTop: '14px', borderTop: '1px solid #F0F0F0', paddingTop: '12px' }}>
             <div style={{ fontSize: '12px', color: '#374151', marginBottom: '8px' }}>Does this behave correctly?</div>
             {!showIssue ? (
