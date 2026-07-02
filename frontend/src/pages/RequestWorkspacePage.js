@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import RecordsPanel from '../components/ui/RecordsPanel';
 import FeeEstimatePanel from '../components/ui/FeeEstimatePanel';
+import ObjectionPanel from '../components/ui/ObjectionPanel';
 import AvRedactionPanel from '../components/ui/AvRedactionPanel';
 import DocSearchPanel from '../components/ui/DocSearchPanel';
 import WorkflowDecisionPanel from '../components/ui/WorkflowDecisionPanel';
@@ -354,6 +355,7 @@ export default function RequestWorkspacePage() {
         <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px'}}>
           <FeeWaiverDecisionPanel request={request} onChange={load}/>
           <FeeEstimatePanel requestId={request.id}/>
+          <ObjectionPanel requestId={request.id}/>
         </div>
       )}
 
