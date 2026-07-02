@@ -75,6 +75,7 @@ async function runSweep(opts) {
     "JOIN requests r ON r.id = e.request_id " +
     "WHERE e.kind = 'estimate' AND e.notified_at IS NOT NULL AND e.accepted_at IS NULL AND e.declined_at IS NULL " +
     "AND e.lapsed_at IS NULL AND r.status = 'active' " +
+    "AND NOT EXISTS (SELECT 1 FROM objections o WHERE o.request_id = r.id AND o.status IN ('open','tentative') AND o.clock_frozen = 1) " +
     "AND e.id = (SELECT id FROM request_fee_estimates WHERE request_id = r.id AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1)");
   for (var i = 0; i < lapseCandidates.length; i++) {
     var lr = lapseCandidates[i];
@@ -101,6 +102,7 @@ async function runSweep(opts) {
     "WHERE r.stage = 'awaiting_payment' AND r.status = 'active' AND e.kind = 'estimate' " +
     "AND e.accepted_at IS NOT NULL AND e.deposit_paid_at IS NULL " +
     "AND COALESCE(r.tickler_flag, '') <> 'deposit_overdue' " +
+    "AND NOT EXISTS (SELECT 1 FROM objections o WHERE o.request_id = r.id AND o.status IN ('open','tentative') AND o.clock_frozen = 1) " +
     "AND e.id = (SELECT id FROM request_fee_estimates WHERE request_id = r.id AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1)");
   for (var j = 0; j < depCandidates.length; j++) {
     var dr = depCandidates[j];
@@ -117,7 +119,7 @@ async function runSweep(opts) {
   var stallCut = daysAgoStr(T.stallDays);
   var ph = TERMINAL_STAGES.map(function () { return '?'; }).join(',');
   var stalledRows = await all(
-    "SELECT id FROM requests WHERE status = 'active' AND stage NOT IN (" + ph + ") AND updated_at < ? AND COALESCE(tickler_flag, '') = ''",
+    "SELECT id FROM requests WHERE status = 'active' AND stage NOT IN (" + ph + ") AND updated_at < ? AND COALESCE(tickler_flag, '') = '' AND NOT EXISTS (SELECT 1 FROM objections o WHERE o.request_id = requests.id AND o.status IN ('open','tentative') AND o.clock_frozen = 1)",
     TERMINAL_STAGES.concat([stallCut]));
   for (var s = 0; s < stalledRows.length; s++) {
     await flagRequest(stalledRows[s].id, 'stalled');

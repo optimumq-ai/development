@@ -498,6 +498,39 @@ CREATE TABLE IF NOT EXISTS fee_payments (
   voided_by TEXT,
   voided_at TEXT
 );
+
+-- Fee-estimate objection overlay (operational objection layer). An objection rides on a request
+-- without changing its process stage; while open (and clock_frozen) the tickler holds its clocks.
+-- Manual person-based ownership (assignee_id), freely reassignable. Resolution splits by financial
+-- effect: non-financial clears directly; financial is tentative pending a Fee Authorizer approval.
+CREATE TABLE IF NOT EXISTS objections (
+  id TEXT PRIMARY KEY,
+  request_id TEXT NOT NULL,
+  status TEXT DEFAULT 'open',
+  source_type TEXT,
+  evidence_file_id TEXT,
+  recap_text TEXT,
+  reason TEXT,
+  assignee_id TEXT,
+  assignee_name TEXT,
+  raised_by TEXT,
+  raised_by_name TEXT,
+  raised_at TEXT,
+  clock_frozen INTEGER DEFAULT 0,
+  resolution_type TEXT,
+  resolution_detail TEXT,
+  resolution_amount REAL,
+  approval_status TEXT,
+  approved_by TEXT,
+  approved_at TEXT,
+  resolved_by TEXT,
+  resolved_at TEXT,
+  created_at TEXT,
+  updated_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_objections_request ON objections(request_id);
+CREATE INDEX IF NOT EXISTS idx_objections_assignee ON objections(assignee_id);
+CREATE INDEX IF NOT EXISTS idx_objections_status ON objections(status);
 CREATE TABLE IF NOT EXISTS tickler_runs (id TEXT PRIMARY KEY, ran_at TEXT, trigger TEXT, scanned INTEGER, flagged INTEGER, summary_json TEXT);
 
 CREATE TABLE IF NOT EXISTS request_clocks (id TEXT PRIMARY KEY, request_id TEXT NOT NULL, clock_type TEXT NOT NULL, label TEXT, basis TEXT NOT NULL DEFAULT 'calendar_days', duration INTEGER NOT NULL, started_at TEXT, status TEXT NOT NULL DEFAULT 'running', satisfied_at TEXT, is_primary INTEGER DEFAULT 0, created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')), updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
