@@ -70,6 +70,7 @@ app.use('/api/jurisdiction-profile', require('./src/routes/jurisdictionProfile')
 app.use('/api/onboarding', require('./src/routes/onboarding'));
 app.use('/api/fee-sandbox', require('./src/routes/feeSandbox'));
 app.use('/api/objections', require('./src/routes/objections'));
+app.use('/api/settlement', require('./src/routes/settlement'));
 
 app.get('/api/health', function(req, res) {
   res.json({ status: 'ok', version: '1.0.0' });

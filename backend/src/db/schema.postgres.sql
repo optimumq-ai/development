@@ -531,6 +531,28 @@ CREATE TABLE IF NOT EXISTS objections (
 CREATE INDEX IF NOT EXISTS idx_objections_request ON objections(request_id);
 CREATE INDEX IF NOT EXISTS idx_objections_assignee ON objections(assignee_id);
 CREATE INDEX IF NOT EXISTS idx_objections_status ON objections(status);
+
+-- ERP settlement tracking: charges Optimum Q handed off to the ERP (erp mode). Matches the ERP's
+-- payment-applied webhook back to a request so the balance/gate update. Optimum Q never holds the money.
+CREATE TABLE IF NOT EXISTS erp_charges (
+  id TEXT PRIMARY KEY,
+  request_id TEXT NOT NULL,
+  estimate_id TEXT,
+  target TEXT,
+  amount REAL,
+  reference TEXT,
+  erp_charge_id TEXT,
+  status TEXT DEFAULT 'sent',
+  paid_amount REAL DEFAULT 0,
+  method TEXT,
+  sent_by TEXT,
+  sent_at TEXT,
+  paid_at TEXT,
+  created_at TEXT,
+  updated_at TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_erpcharges_request ON erp_charges(request_id);
+CREATE INDEX IF NOT EXISTS idx_erpcharges_erpid ON erp_charges(erp_charge_id);
 CREATE TABLE IF NOT EXISTS tickler_runs (id TEXT PRIMARY KEY, ran_at TEXT, trigger TEXT, scanned INTEGER, flagged INTEGER, summary_json TEXT);
 
 CREATE TABLE IF NOT EXISTS request_clocks (id TEXT PRIMARY KEY, request_id TEXT NOT NULL, clock_type TEXT NOT NULL, label TEXT, basis TEXT NOT NULL DEFAULT 'calendar_days', duration INTEGER NOT NULL, started_at TEXT, status TEXT NOT NULL DEFAULT 'running', satisfied_at TEXT, is_primary INTEGER DEFAULT 0, created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')), updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
