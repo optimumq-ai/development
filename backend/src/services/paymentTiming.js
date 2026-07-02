@@ -196,4 +196,7 @@ function computeBalance(effectiveTotal, depositPaid, finalPaid) {
   return { effectiveTotal: Math.round(eff*100)/100, paid: Math.round(paid*100)/100, balanceDue: Math.max(0, bal), paidInFull: bal <= 0.005 };
 }
 
-module.exports = { resolvePaymentPlan: resolvePaymentPlan, deriveDefaultPaymentTiming: deriveDefaultPaymentTiming, selectBand: selectBand, gateToStage: gateToStage, computeBalance: computeBalance, GATES: GATES };
+// Does this plan require the balance be settled BEFORE records are released? (drives the 4d gate)
+function requiresPaymentBeforeRelease(plan){ if(!plan) return false; if(plan.deliveryTrigger==="pay_in_full_before_release") return true; if(plan.secondPayment && plan.secondPayment.terms==="due_before_release") return true; return false; }
+
+module.exports = { resolvePaymentPlan: resolvePaymentPlan, deriveDefaultPaymentTiming: deriveDefaultPaymentTiming, selectBand: selectBand, gateToStage: gateToStage, computeBalance: computeBalance, requiresPaymentBeforeRelease: requiresPaymentBeforeRelease, GATES: GATES };

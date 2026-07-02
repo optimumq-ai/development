@@ -338,4 +338,21 @@ router.post('/request/:requestId/reconcile', requireAuth, async function (req, r
   } catch (e) { res.status(500).json({ error: 'Could not reconcile: ' + (e && e.message) }); }
 });
 
+// Balance-due notice preview (4d): records ready, pre-release balance remains. Staff review, then send
+// via the existing /notice/send path. Payment instructions come from the jurisdiction profile config.
+router.get('/request/:requestId/balance-notice', requireAuth, async function (req, res) {
+  try {
+    var reqRow = await get('SELECT id, request_number, requestor_name, requestor_email FROM requests WHERE id = ?', [req.params.requestId]);
+    if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
+    var state = await paymentState(req.params.requestId);
+    if (!state) return res.status(400).json({ error: 'No estimate on this request.' });
+    var agency = await sysCfg('agency_name', 'the City');
+    var snap = await latestEstimate(req.params.requestId);
+    var pi = null;
+    if (snap && snap.config_profile_id) { var prof = await get('SELECT config_json FROM fee_profiles WHERE id = ?', [snap.config_profile_id]); if (prof) { try { pi = JSON.parse(prof.config_json || '{}').paymentInstructions || null; } catch (e) {} } }
+    var notice = feeNotice.buildBalanceDueNotice(reqRow, state, { agencyName: agency, paymentInstructions: pi });
+    res.json({ to: reqRow.requestor_email || null, requestorName: reqRow.requestor_name || null, subject: notice.subject, text: notice.text, balanceDue: state.balanceDue, paymentState: state });
+  } catch (e) { res.status(500).json({ error: 'Could not build the balance-due notice.' }); }
+});
+
 module.exports = router;

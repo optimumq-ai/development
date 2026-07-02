@@ -96,6 +96,15 @@ router.patch('/:id/stage', requireAuth, async function(req, res) {
   const request = await get('SELECT * FROM requests WHERE id = ?', [req.params.id]);
   if (!request) return res.status(404).json({ error: 'Request not found' });
   const stage = req.body.stage;
+  // 4d release gate: hold records at delivery until a pre-release balance is settled. Fails open.
+  if (stage === 'delivery') {
+    try {
+      const rg = await require('../services/feeRelease').releaseGate(req.params.id);
+      if (rg.hasEstimate && rg.requiresPaymentBeforeRelease && !rg.paidInFull) {
+        return res.status(409).json({ error: 'Final payment of $' + rg.balanceDue.toFixed(2) + ' is required before these records can be released. Record the payment (or send the balance-due notice), then advance.', code: 'PAYMENT_REQUIRED_BEFORE_RELEASE', balanceDue: rg.balanceDue });
+      }
+    } catch (e) { console.error('[release gate]', e.message); }
+  }
   await run("UPDATE requests SET stage = ?, status = ?, updated_at = datetime('now') WHERE id = ?",
     [stage, stage === 'closed' ? 'closed' : 'active', req.params.id]);
   await logHistory(req.params.id, req.user.sub, req.user.name, 'STAGE_ADVANCED', req.body.notes);

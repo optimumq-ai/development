@@ -100,4 +100,27 @@ function buildNotice(request, feeContext, opts) {
   return { subject: subject, text: body };
 }
 
-module.exports = { buildNotice: buildNotice, paymentLanguage: paymentLanguage };
+// Balance-due notice (4d): records are ready but a pre-release balance remains. Includes configurable
+// payment instructions (online link / mail / walk-in); each is omitted when not configured.
+function buildBalanceDueNotice(request, state, opts) {
+  opts = opts || {};
+  var agency = opts.agencyName || 'the City';
+  var num = request.request_number || '';
+  var name = request.requestor_name || 'Requestor';
+  var pi = opts.paymentInstructions || {};
+  var bal = (state && state.balanceDue != null) ? state.balanceDue : 0;
+  var subject = 'Your records are ready \u2014 balance due before release' + (num ? ' (' + num + ')' : '');
+  var body = 'Dear ' + name + ',\n\n';
+  body += 'Good news: processing of your public records request' + (num ? ' (' + num + ')' : '') + ' is complete and your records are ready.\n\n';
+  body += 'Before we can release them, the remaining balance of ' + money(bal) + ' must be paid.\n\n';
+  var how = [];
+  if (pi.onlineUrl) how.push('- Online: ' + pi.onlineUrl);
+  if (pi.mailText) how.push('- By mail: ' + pi.mailText);
+  if (pi.walkInText) how.push('- In person: ' + pi.walkInText);
+  if (how.length) body += 'How to pay:\n' + how.join('\n') + '\n\n';
+  body += 'As soon as your payment is received, your records will be delivered promptly. If you have any questions, please reply to this message.\n\n';
+  body += 'Sincerely,\n' + agency + ' - Open Records';
+  return { subject: subject, text: body };
+}
+
+module.exports = { buildNotice: buildNotice, buildBalanceDueNotice: buildBalanceDueNotice, paymentLanguage: paymentLanguage };
