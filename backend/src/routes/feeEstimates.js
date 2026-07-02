@@ -76,9 +76,12 @@ async function paymentState(rid) {
   var est = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [rid]);
   if (!est) return null;
   var recon = await get("SELECT total FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC LIMIT 1", [rid]);
-  var effectiveTotal = (recon && recon.total != null) ? Number(recon.total) : (Number(est.total) || 0);
+  var base = (recon && recon.total != null) ? Number(recon.total) : (Number(est.total) || 0);
+  var credRow = await get("SELECT COALESCE(SUM(resolution_amount),0) AS credits FROM objections WHERE request_id = ? AND status = 'resolved' AND approval_status = 'approved' AND resolution_type IN ('reduction','waiver','write_off')", [rid]);
+  var credits = Math.round((Number(credRow && credRow.credits) || 0) * 100) / 100;
+  var effectiveTotal = Math.max(0, Math.round((base - credits) * 100) / 100);
   var bal = pt.computeBalance(effectiveTotal, est.deposit_paid_amount, est.final_paid_amount);
-  return { effectiveTotal: bal.effectiveTotal, reconciled: !!recon, depositPaid: Number(est.deposit_paid_amount) || 0,
+  return { effectiveTotal: bal.effectiveTotal, reconciled: !!recon, adjustments: credits, depositPaid: Number(est.deposit_paid_amount) || 0,
     finalPaid: Number(est.final_paid_amount) || 0, paid: bal.paid, balanceDue: bal.balanceDue, paidInFull: bal.paidInFull, estimateId: est.id };
 }
 

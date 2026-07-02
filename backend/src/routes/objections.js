@@ -5,7 +5,7 @@
 // via a Fee Authorizer) is a later increment. See FEE_ESTIMATE_OBJECTION_DESIGN.md.
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRole } = require('../middleware/auth');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 
@@ -123,6 +123,68 @@ router.get('/mine', requireAuth, async function (req, res) {
     var rows = await all("SELECT o.*, r.request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id WHERE o.assignee_id = ? AND o.status IN ('open','tentative') ORDER BY o.created_at DESC", [req.user.sub]);
     res.json({ objections: (rows || []).map(shape) });
   } catch (e) { res.status(500).json({ error: 'Could not load your objections.' }); }
+});
+
+// Resolution outcomes split by financial effect.
+var FINANCIAL = ['reduction', 'waiver', 'write_off'];
+var NONFINANCIAL = ['uphold', 'new_due_date', 'requestor_withdrew'];
+
+// The owner records an outcome. Non-financial clears directly; financial goes TENTATIVE pending a
+// Fee Authorizer approval (segregation of duties) and only clears on approval.
+router.post('/:id/resolve', requireAuth, async function (req, res) {
+  try {
+    var o = await get('SELECT * FROM objections WHERE id = ?', [req.params.id]);
+    if (!o) return res.status(404).json({ error: 'Objection not found.' });
+    if (o.status === 'resolved') return res.status(409).json({ error: 'This objection is already resolved.' });
+    var b = req.body || {};
+    var rtype = String(b.resolutionType || '');
+    var detail = (b.detail || '').trim() || null;
+    var now = nowStr();
+    if (NONFINANCIAL.indexOf(rtype) >= 0) {
+      await run("UPDATE objections SET status = 'resolved', resolution_type = ?, resolution_detail = ?, resolution_amount = NULL, approval_status = NULL, resolved_by = ?, resolved_at = ?, updated_at = ? WHERE id = ?",
+        [rtype, detail, req.user.name || req.user.sub, now, now, o.id]);
+      await hist(o.request_id, req.user, 'OBJECTION_RESOLVED', 'Objection resolved (' + rtype + ')' + (detail ? ': ' + detail : '') + '.');
+    } else if (FINANCIAL.indexOf(rtype) >= 0) {
+      var amount = Number(b.amount);
+      if (!(amount > 0)) return res.status(400).json({ error: 'Enter the adjustment amount.' });
+      await run("UPDATE objections SET status = 'tentative', resolution_type = ?, resolution_detail = ?, resolution_amount = ?, approval_status = 'pending', resolved_by = NULL, resolved_at = NULL, updated_at = ? WHERE id = ?",
+        [rtype, detail, amount, now, o.id]);
+      await hist(o.request_id, req.user, 'OBJECTION_RESOLUTION_PROPOSED', 'Proposed ' + rtype + ' of $' + amount.toFixed(2) + ' \u2014 pending Fee Authorizer approval.');
+    } else {
+      return res.status(400).json({ error: 'Choose a valid resolution outcome.' });
+    }
+    var row = await get("SELECT o.*, r.request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id WHERE o.id = ?", [o.id]);
+    res.json({ objection: shape(row) });
+  } catch (e) { res.status(500).json({ error: 'Could not resolve the objection: ' + (e && e.message) }); }
+});
+
+// Fee Authorizer decision on a tentative financial resolution. Approve -> applies the credit and
+// resolves; reject -> returns the objection to the owner. Uses the existing fee-waiver authority.
+router.post('/:id/approve', requireAuth, requireRole('FEE_WAIVER_APPROVER', 'SYSTEM_ADMIN', 'DIRECTOR'), async function (req, res) {
+  try {
+    var o = await get('SELECT * FROM objections WHERE id = ?', [req.params.id]);
+    if (!o) return res.status(404).json({ error: 'Objection not found.' });
+    if (o.approval_status !== 'pending') return res.status(409).json({ error: 'There is no pending financial resolution to decide on.' });
+    var decision = (req.body && req.body.decision) === 'reject' ? 'reject' : 'approve';
+    var now = nowStr(); var who = req.user.name || req.user.sub;
+    if (decision === 'approve') {
+      await run("UPDATE objections SET status = 'resolved', approval_status = 'approved', approved_by = ?, approved_at = ?, resolved_by = ?, resolved_at = ?, updated_at = ? WHERE id = ?", [who, now, who, now, now, o.id]);
+      await hist(o.request_id, req.user, 'OBJECTION_ADJUSTMENT_APPROVED', 'Approved ' + o.resolution_type + ' of $' + Number(o.resolution_amount || 0).toFixed(2) + ' \u2014 objection resolved and credit applied.');
+    } else {
+      await run("UPDATE objections SET status = 'open', approval_status = 'rejected', approved_by = ?, approved_at = ?, updated_at = ? WHERE id = ?", [who, now, now, o.id]);
+      await hist(o.request_id, req.user, 'OBJECTION_ADJUSTMENT_REJECTED', 'Rejected the proposed ' + o.resolution_type + ' \u2014 returned to ' + (o.assignee_name || 'the owner') + '.');
+    }
+    var row = await get("SELECT o.*, r.request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id WHERE o.id = ?", [o.id]);
+    res.json({ objection: shape(row) });
+  } catch (e) { res.status(500).json({ error: 'Could not record the decision.' }); }
+});
+
+// Pending financial resolutions awaiting a Fee Authorizer (their approval queue).
+router.get('/pending-approval', requireAuth, requireRole('FEE_WAIVER_APPROVER', 'SYSTEM_ADMIN', 'DIRECTOR'), async function (req, res) {
+  try {
+    var rows = await all("SELECT o.*, r.request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id WHERE o.approval_status = 'pending' AND o.status = 'tentative' ORDER BY o.updated_at DESC");
+    res.json({ objections: (rows || []).map(shape) });
+  } catch (e) { res.status(500).json({ error: 'Could not load the approval queue.' }); }
 });
 
 module.exports = router;
