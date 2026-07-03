@@ -137,8 +137,19 @@ router.post('/jobs/:jobId/return', requireAuth, async function(req, res) {
 
 // GET /released -> the Fulfilled Request Index (Released Records Library)
 router.get('/released', requireAuth, async function(req, res) {
-  var rows = await all("SELECT fr.id, fr.title, fr.summary, fr.public_availability, fr.page_count, fr.released_at, fr.output_file_id, rt.name AS record_type_name, d.name AS department_name FROM fulfilled_records fr LEFT JOIN record_types rt ON rt.id = fr.record_type_id LEFT JOIN departments d ON d.id = fr.department_id WHERE fr.status = 'released' ORDER BY fr.released_at DESC");
+  var rows = await all("SELECT fr.id, fr.title, fr.summary, fr.public_availability, fr.page_count, fr.released_at, fr.output_file_id, COALESCE(fr.published,0) AS published, rt.name AS record_type_name, rt.auto_publish AS rt_auto_publish, d.name AS department_name FROM fulfilled_records fr LEFT JOIN record_types rt ON rt.id = fr.record_type_id LEFT JOIN departments d ON d.id = fr.department_id WHERE fr.status = 'released' ORDER BY fr.released_at DESC");
   res.json({ records: rows });
+});
+
+// Toggle whether a released record is PUBLISHED to the open public library (searchable/browsable).
+// Independent of delivery to the requestor - unpublishing removes it from public discovery only.
+router.post('/released/:id/publish', requireAuth, async function(req, res) {
+  try {
+    var pub = (req.body && req.body.published) ? 1 : 0;
+    var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'staff';
+    await run("UPDATE fulfilled_records SET published = ?, published_at = CASE WHEN ? = 1 THEN datetime('now') ELSE published_at END, published_by = ? WHERE id = ?", [pub, pub, actor, req.params.id]);
+    res.json({ id: req.params.id, published: !!pub });
+  } catch (e) { res.status(500).json({ error: 'Could not update publication.' }); }
 });
 
 module.exports = router;

@@ -183,6 +183,7 @@ async function applyRedaction(jobId, actor) {
     await run('DELETE FROM fulfilled_records WHERE source_file_id = ?', [file.id]);
     await run('INSERT INTO fulfilled_records (id, request_id, source_file_id, output_file_id, title, summary, record_type_id, department_id, keywords, public_availability, page_count, released_by, released_at, status) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,datetime(\'now\'),?)',
       [frId, file.request_id || null, file.id, outId, baseTitle, (reqRow && reqRow.description) || baseTitle, (reqRow && reqRow.record_type_id) || null, (reqRow && reqRow.department_id) || null, (rtName + ' ' + baseTitle).trim(), zones.length ? 'redacted' : 'released', pages.length, actor || null, frStatus]);
+    try { var rtp = (reqRow && reqRow.record_type_id) ? await get('SELECT auto_publish FROM record_types WHERE id = ?', [reqRow.record_type_id]) : null; if (rtp && rtp.auto_publish) await run("UPDATE fulfilled_records SET published = 1, published_at = datetime('now'), published_by = ? WHERE id = ?", [actor || 'auto', frId]); } catch (eP) {}
     require('./embedIndex').bg(require('./recordMetaExtract').enrichFulfilledMeta(frId), 'enrich ' + frId);
   } catch (e) { console.error('[fulfilled index]', e.message); }
 

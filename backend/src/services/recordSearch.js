@@ -25,7 +25,7 @@ async function searchPublicReady(query) {
   var kw = require('./connectors/keyword');
   var terms = kw.tokenize(query);
   if (!terms.length) return [];
-  var rows = await all("SELECT fr.*, rt.name AS record_type_name, d.name AS department_name FROM fulfilled_records fr LEFT JOIN record_types rt ON rt.id = fr.record_type_id LEFT JOIN departments d ON d.id = fr.department_id WHERE fr.status = 'released'");
+  var rows = await all("SELECT fr.*, rt.name AS record_type_name, d.name AS department_name FROM fulfilled_records fr LEFT JOIN record_types rt ON rt.id = fr.record_type_id LEFT JOIN departments d ON d.id = fr.department_id WHERE fr.status = 'released' AND COALESCE(fr.published,0) = 1");
   var out = [];
   rows.forEach(function(r){
     var primary = (r.title || '') + ' ' + (r.record_type_name || '');
@@ -65,7 +65,7 @@ async function searchPublicReady(query) {
     var SEM_FLOOR = 0.45; // calibratable; voyage short-text cosine for a strong match runs ~0.45-0.65
     var sem = await all(
       "SELECT fr.*, rt.name AS record_type_name, d.name AS department_name, 1 - (e.embedding <=> ?::vector) AS sem_score " +
-      "FROM embeddings e JOIN fulfilled_records fr ON fr.id = e.owner_id AND fr.status = 'released' " +
+      "FROM embeddings e JOIN fulfilled_records fr ON fr.id = e.owner_id AND fr.status = 'released' AND COALESCE(fr.published,0) = 1 " +
       "LEFT JOIN record_types rt ON rt.id = fr.record_type_id LEFT JOIN departments d ON d.id = fr.department_id " +
       "WHERE e.owner_type = 'fulfilled_record' ORDER BY e.embedding <=> ?::vector LIMIT 8", [qvec, qvec]);
     var seen = {}; out.forEach(function(o){ seen[o.id] = 1; });

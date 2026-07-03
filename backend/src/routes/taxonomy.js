@@ -148,7 +148,7 @@ router.patch('/record-types/:id', requireAuth, async function(req, res) {
   var rt = await get('SELECT * FROM record_types WHERE id = ?', [req.params.id]);
   if (!rt) return res.status(404).json({ error: 'Record type not found' });
   var b = req.body;
-  var fields = ['category_id','name','code','description','intent','expected_content','typical_request_reason','public_availability','redaction_profile_id','fee_estimate_note','status','source','confidence','sort_order','fee_estimate_low','fee_estimate_high','fulfillment_method','medium'];
+  var fields = ['category_id','name','code','description','intent','expected_content','typical_request_reason','public_availability','redaction_profile_id','fee_estimate_note','status','source','confidence','sort_order','fee_estimate_low','fee_estimate_high','fulfillment_method','medium','auto_publish'];
   var sets = [], params = [];
   fields.forEach(function(f) { if (b[f] !== undefined) { sets.push(f + ' = ?'); params.push(b[f]); } });
   ARRAY_FIELDS.forEach(function(f) { if (b[f] !== undefined) { sets.push(f + ' = ?'); params.push(packArray(b[f])); } });
