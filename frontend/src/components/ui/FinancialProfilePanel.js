@@ -44,6 +44,7 @@ export default function FinancialProfilePanel(props) {
   var [adjReason, setAdjReason] = useState('');
   var [adjBusy, setAdjBusy] = useState(false);
   var [adjMsg, setAdjMsg] = useState('');
+  var [reopenBusy, setReopenBusy] = useState(false);
 
   function load() {
     api.get('/fee-estimates/request/' + requestId + '/financial-profile')
@@ -62,6 +63,12 @@ export default function FinancialProfilePanel(props) {
       load();
     } catch (e) { setAdjMsg((e.response && e.response.data && e.response.data.error) || 'Could not record the adjustment.'); }
     setAdjBusy(false);
+  }
+
+  async function reopen() {
+    setReopenBusy(true);
+    try { await api.post('/fee-estimates/request/' + requestId + '/reopen', {}); load(); }
+    catch (e) { setReopenBusy(false); }
   }
 
   if (loading) return <div style={{ padding: '20px', color: '#9CA3AF' }}>Loading financial profile\u2026</div>;
@@ -111,6 +118,12 @@ export default function FinancialProfilePanel(props) {
         </div>
       ) : null}
 
+      {p.paymentStatus.current === 'closed_nonpayment' ? (
+        <div style={{ background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '12px', padding: '14px 18px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px' }}>
+          <div><div style={{ fontSize: '14px', fontWeight: 700, color: '#92400E', marginBottom: '2px' }}>Closed for nonpayment</div><div style={{ fontSize: '12.5px', color: '#374151' }}>The balance was not paid within the allowed window. You can reopen this request if the requestor still wishes to proceed.</div></div>
+          <button onClick={reopen} disabled={reopenBusy} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: reopenBusy ? '#9CB4CC' : NAVY, color: 'white', fontSize: '13px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>{reopenBusy ? 'Reopening\u2026' : 'Reopen request'}</button>
+        </div>
+      ) : null}
       {!est ? <div style={card}>No estimate has been created for this request yet.</div> : (
         <div>
           {/* reconciling ledger - balance never moves without a dated, reasoned line */}
