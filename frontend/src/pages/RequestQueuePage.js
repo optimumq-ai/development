@@ -39,6 +39,7 @@ export default function RequestQueuePage() {
     try {
       var url = '/requests?';
       if (stageFilter === 'triage') url += 'triage=1&';
+      else if (stageFilter === 'objections') url += 'objections=1&';
       else if (stageFilter) url += 'stage=' + stageFilter + '&';
       var r = await api.get(url);
       setRequests(r.data.requests);
@@ -66,6 +67,7 @@ export default function RequestQueuePage() {
       </div>
       <div style={{display:'flex',gap:'8px',overflowX:'auto',paddingBottom:'4px'}}>
         {(function(){ var tcount = requests.filter(function(r){ return !r.department_id; }).length; var active = stageFilter === 'triage'; return (tcount>0 || active) ? <button onClick={function(){setStageFilter('triage');}} style={{padding:'7px 16px',borderRadius:'20px',border:'1px solid '+(active?'#92400E':'#F4D9B0'),background:active?'#92400E':'#FFF7ED',color:active?'white':'#92400E',fontSize:'13px',fontWeight:'600',cursor:'pointer',whiteSpace:'nowrap'}}>Needs triage ({tcount})</button> : null; })()}
+        {(function(){ var ocount = requests.filter(function(r){ return r.open_objections>0; }).length; var active = stageFilter === 'objections'; return (ocount>0 || active) ? <button onClick={function(){setStageFilter('objections');}} style={{padding:'7px 16px',borderRadius:'20px',border:'1px solid '+(active?'#9B1C1C':'#F5C2C2'),background:active?'#9B1C1C':'#FDECEC',color:active?'white':'#9B1C1C',fontSize:'13px',fontWeight:'600',cursor:'pointer',whiteSpace:'nowrap'}}>Objections ({ocount})</button> : null; })()}
         {[['','All']].concat(Object.entries(STAGES)).map(function(item) {
           var k=item[0]; var v=item[1];
           var active=stageFilter===k;
@@ -114,6 +116,7 @@ export default function RequestQueuePage() {
                           {r.is_mrr?<span style={{background:'#CCFBF1',color:'#0F766E',fontSize:'10px',fontWeight:'700',padding:'2px 6px',borderRadius:'20px'}}>MRR</span>:null}
                           {r.legal_flag?<span style={{background:'#FEF2F2',color:'#DC2626',fontSize:'10px',fontWeight:'700',padding:'2px 6px',borderRadius:'20px'}}>LEGAL</span>:null}
                           {od?<span style={{background:'#FEF2F2',color:'#DC2626',fontSize:'10px',fontWeight:'700',padding:'2px 6px',borderRadius:'20px'}}>OVERDUE</span>:null}
+                          {r.open_objections>0?<span title="Open fee-estimate objection" style={{background:'#FDECEC',color:'#9B1C1C',fontSize:'10px',fontWeight:'700',padding:'2px 6px',borderRadius:'20px'}}>OBJECTION</span>:null}
                         </div>
                         <div style={{fontSize:'11px',color:'#9CA3AF',marginTop:'2px',textTransform:'none'}}>{prettyChannel(r.submission_channel)}</div>
                       </td>

@@ -44,7 +44,7 @@ router.get('/stats/dashboard', requireAuth, async function(req, res) {
 router.get('/', requireAuth, async function(req, res) {
   const userRoles = req.user.roles || [];
   const isElevated = ['SUPERVISOR','DIRECTOR','SYSTEM_ADMIN','DEPT_MANAGER','ATTORNEY_REVIEWER'].some(function(r) { return userRoles.indexOf(r) !== -1; });
-  let sql = "SELECT r.*, d.name as department_name, d.color as department_color, u.display_name as assigned_to_name, (SELECT t.status FROM tasks t WHERE t.request_id = r.id AND t.status IN ('open','assigned','in_progress') ORDER BY t.updated_at DESC LIMIT 1) AS active_task_status, (SELECT tu.display_name FROM tasks t2 LEFT JOIN users tu ON tu.id = t2.assigned_to WHERE t2.request_id = r.id AND t2.status IN ('assigned','in_progress') ORDER BY t2.updated_at DESC LIMIT 1) AS active_task_assignee FROM requests r LEFT JOIN departments d ON d.id = r.department_id LEFT JOIN users u ON u.id = r.assigned_to WHERE 1=1 AND r.request_number != 'LIBRARY'";
+  let sql = "SELECT r.*, d.name as department_name, d.color as department_color, u.display_name as assigned_to_name, (SELECT t.status FROM tasks t WHERE t.request_id = r.id AND t.status IN ('open','assigned','in_progress') ORDER BY t.updated_at DESC LIMIT 1) AS active_task_status, (SELECT tu.display_name FROM tasks t2 LEFT JOIN users tu ON tu.id = t2.assigned_to WHERE t2.request_id = r.id AND t2.status IN ('assigned','in_progress') ORDER BY t2.updated_at DESC LIMIT 1) AS active_task_assignee, (SELECT COUNT(*) FROM objections o WHERE o.request_id = r.id AND o.status IN ('open','tentative')) AS open_objections FROM requests r LEFT JOIN departments d ON d.id = r.department_id LEFT JOIN users u ON u.id = r.assigned_to WHERE 1=1 AND r.request_number != 'LIBRARY'";
   const params = [];
   if (!isElevated) {
     var orTeam = await get("SELECT id FROM departments WHERE kind='team' AND is_open_records=1 ORDER BY sort_order LIMIT 1");
@@ -56,6 +56,7 @@ router.get('/', requireAuth, async function(req, res) {
   if (req.query.status) { sql += ' AND r.status = ?'; params.push(req.query.status); }
   else { sql += " AND r.status != 'closed'"; }
   if (req.query.triage) { sql += " AND r.department_id IS NULL"; } // Needs-triage: Unassigned requests awaiting placement
+  if (req.query.objections) { sql += " AND EXISTS (SELECT 1 FROM objections o WHERE o.request_id = r.id AND o.status IN ('open','tentative'))"; }
   if (req.query.search) {
     sql += ' AND (r.request_number LIKE ? OR r.requestor_name LIKE ? OR r.requestor_email LIKE ?)';
     const s = '%' + req.query.search + '%';
