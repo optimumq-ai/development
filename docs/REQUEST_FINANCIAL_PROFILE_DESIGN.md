@@ -389,3 +389,40 @@ derived status are three views of one event stream (build once).
 Build order: (a) event log + deriveStatus + recompute wiring; (b) typed adjustments (credit/correction/
 refund) + revised-notice; (c) release-gate-governs-publication; (d) auto-close; (e) reconciling-ledger
 + timeline UI. (a) unblocks the rest.
+
+## 16. Phase 3 build log (built 2026-07-02) — COMPLETE
+
+All Phase 3 increments built, verified, and live:
+- **3a** payment-status engine (commit 2758e00): `paymentStatus.js` — PURE `deriveStatus` (the
+  derived photograph, 17/17 unit cases incl. the credit that flips the start gate) + live
+  `computeSituation` (deposit/gates derived from the CURRENT effective total) + `deriveCurrent` +
+  `recordEvent` (recompute-and-append) + `timeline`. `request_payment_events` table. Financial-
+  profile status now derived; timeline exposed via `/request/:id/payment-timeline`.
+- **3b** typed adjustments + event emission (commit 054130a): `fee_adjustments` table (credit =
+  non-cash reduction; refund = cash out); folded into `computeSituation` + `paymentState` so status
+  and balance agree. `POST /request/:id/adjustment`. Events emitted on all triggers (estimate
+  issued/accepted, deposit/final/cashiering payment, reconciliation, objection credit approved, ERP
+  payment). Corrections = re-estimates. Verified: a mid-flight credit re-derives the plan (deposit
+  gate -> acceptance gate) and the film fills.
+- **3c** release gate governs PUBLICATION (commit cd9ca81) — closes the confirmed leak:
+  `publicationHeld(rid)` sets fulfilled_records 'held' vs 'released' at redaction-apply (both paths);
+  `promoteOnRelease` (called from every `recordEvent`) promotes held->released when the gate opens.
+  Held records are invisible to the public library + download (they filter 'released'). 7/7 verified.
+- **3e** reconciling ledger + timeline UI (commit ced124c): Financial Profile shows the money as one
+  event stream — reconciling ledger (dated/reasoned credit/payment/refund lines from total to
+  balance), inline Record-adjustment control (credit/refund), and the payment timeline (each event +
+  the status it produced). Backend exposes manual adjustments.
+- **3d** auto-close on nonpayment (commits 4057921 + f30e28f): `feeNonpayment.js` — OPT-IN per
+  jurisdiction (`nonpaymentClose` config), targets completion-phase unpaid (awaiting_final /
+  released_payment_due), dunning at reminderDays then close at windowDays, wired into the daily
+  tickler. Closed maps to the `closed_nonpayment` terminal; held records stay held unless
+  publishOnClose. Reopenable (`POST /request/:id/reopen` + a Reopen button on the profile).
+  buildDunningNotice added. Verified end-to-end (dunning email sent, close, held preserved, reopen)
+  with a safety pre-check so the sweep test never touched other active requests.
+
+Config knobs an agency sets (in the fee profile config_json), all with safe defaults:
+  `nonpaymentClose: { enabled:false, windowDays:30, reminderDays:15, publishOnClose:false }`.
+
+Deferred / not built (as designed): reuse-held-redaction-for-a-future-paid-request optimization;
+the internal cost-accounting overlay; a requestor portal status page (the emails are the requestor
+view); a config UI for nonpaymentClose (set via fee config today).
