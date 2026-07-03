@@ -180,15 +180,7 @@ export default function ConfigurationPage() {
 
         {activeTab === 'fees' && (
           <div style={section}>
-            <div style={sectionTitle}>Fees & Response Deadlines</div>
-            <div>
-              <label style={lbl}>Fee Waiver Threshold</label>
-              <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
-                <span style={{color:'#6B7280',fontSize:'14px'}}>$</span>
-                <input type="number" value={config.fee_threshold||'40'} onChange={function(e){set('fee_threshold',e.target.value);}} style={Object.assign({},inp,{width:'120px'})} min="0" step="0.01"/>
-              </div>
-              <div style={hint}>Requests with estimated fees below this amount are automatically waived. Default: $40.00 (Texas PIA standard)</div>
-            </div>
+            <div style={sectionTitle}>Response Deadlines</div>
             <div>
               <label style={lbl}>Response Deadlines (Business Days)</label>
               <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'12px',marginTop:'8px'}}>
@@ -205,22 +197,9 @@ export default function ConfigurationPage() {
                 })}
               </div>
             </div>
-            <div>
-              <label style={lbl}>Cost Per Page (Photocopies)</label>
-              <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
-                <span style={{color:'#6B7280',fontSize:'14px'}}>$</span>
-                <input type="number" value={config.cost_per_page||'0.10'} onChange={function(e){set('cost_per_page',e.target.value);}} style={Object.assign({},inp,{width:'120px'})} min="0" step="0.01"/>
-                <span style={{fontSize:'13px',color:'#9CA3AF'}}>per page</span>
-              </div>
-            </div>
-            <div>
-              <label style={lbl}>Staff Labor Rate</label>
-              <div style={{display:'flex',alignItems:'center',gap:'8px'}}>
-                <span style={{color:'#6B7280',fontSize:'14px'}}>$</span>
-                <input type="number" value={config.labor_rate||'15.00'} onChange={function(e){set('labor_rate',e.target.value);}} style={Object.assign({},inp,{width:'120px'})} min="0" step="0.01"/>
-                <span style={{fontSize:'13px',color:'#9CA3AF'}}>per hour</span>
-              </div>
-              <div style={hint}>Used for fee estimates on research-intensive requests</div>
+            <div style={{background:'#F0F6FF',border:'1px solid #DBEAFE',borderRadius:'8px',padding:'12px 14px'}}>
+              <div style={{fontSize:'13px',fontWeight:600,color:'#1E40AF',marginBottom:'3px'}}>Fee amounts are configured on the Fee Configuration page</div>
+              <div style={{fontSize:'12px',color:'#6B7280'}}>Per-page copy rates, labor rates, minimum and maximum fees, de minimis auto-waive, free allowances, and deposit rules all live on the Fee Configuration page, which the estimate engine reads directly. They are not set here.</div>
             </div>
           </div>
         )}
