@@ -176,4 +176,17 @@ function buildAdjustmentNotice(request, estimateFc, actualFc, opts) {
   return { subject: subject, text: body };
 }
 
-module.exports = { buildNotice: buildNotice, buildBalanceDueNotice: buildBalanceDueNotice, buildAdjustmentNotice: buildAdjustmentNotice, paymentLanguage: paymentLanguage };
+function buildDunningNotice(request, state, opts) {
+  opts = opts || {};
+  var name = request.requestor_name || 'Requestor', num = request.request_number || '', agency = opts.agencyName || 'the City';
+  var bal = Number(state.balanceDue) || 0, closeBy = Number(state.closeByDays) || 15;
+  var subject = 'Payment reminder \u2014 public records request' + (num ? ' ' + num : '');
+  var body = 'Dear ' + name + ',\n\n';
+  body += 'Our records show an outstanding balance of ' + money(bal) + ' on your public records request' + (num ? ' (' + num + ')' : '') + '.\n\n';
+  body += 'Please submit payment to complete your request. If payment is not received within ' + closeBy + ' days, this request may be closed for nonpayment. A closed request can be reopened if you still wish to proceed.\n\n';
+  body += 'If you have already paid, or have any questions, please reply to this message.\n\n';
+  body += 'Sincerely,\n' + agency + ' - Open Records';
+  return { subject: subject, text: body };
+}
+
+module.exports = { buildNotice: buildNotice, buildBalanceDueNotice: buildBalanceDueNotice, buildAdjustmentNotice: buildAdjustmentNotice, buildDunningNotice: buildDunningNotice, paymentLanguage: paymentLanguage };

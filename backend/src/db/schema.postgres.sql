@@ -27,6 +27,7 @@ CREATE INDEX IF NOT EXISTS idx_files_request ON request_files(request_id);
 CREATE INDEX IF NOT EXISTS idx_requests_dept ON requests(department_id);
 CREATE INDEX IF NOT EXISTS idx_requests_stage ON requests(stage);
 CREATE INDEX IF NOT EXISTS idx_requests_status ON requests(status);
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS nonpayment_dunning_at TEXT;
 CREATE INDEX IF NOT EXISTS idx_rules_enabled ON agent_rules(enabled, sort_order);
 CREATE INDEX IF NOT EXISTS idx_selected_request ON request_selected_records(request_id);
 

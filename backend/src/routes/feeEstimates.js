@@ -467,6 +467,15 @@ router.post('/request/:requestId/adjustment-notice/send', requireAuth, async fun
   } catch (e) { res.status(500).json({ error: 'Could not send the adjustment notice.' }); }
 });
 
+// Reopen a request that was closed for nonpayment (the rare late payer).
+router.post('/request/:requestId/reopen', requireAuth, async function (req, res) {
+  try {
+    var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'staff';
+    var r = await require('../services/feeNonpayment').reopen(req.params.requestId, actor);
+    res.json(r);
+  } catch (e) { res.status(400).json({ error: (e && e.message) || 'Could not reopen the request.' }); }
+});
+
 // Payment-status event timeline (the dated film) for a request.
 router.get('/request/:requestId/payment-timeline', requireAuth, async function (req, res) {
   try { res.json({ events: (await require('../services/paymentStatus').timeline(req.params.requestId)) || [], status: await require('../services/paymentStatus').deriveCurrent(req.params.requestId) }); }

@@ -41,7 +41,7 @@ function deriveStatus(s) {
 // lowers the total re-derives the deposit (may drop to $0) and can flip the start gate.
 async function computeSituation(rid) {
   var est = await db.get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [rid]);
-  var reqRow = await db.get("SELECT stage, status, fee_waiver_status FROM requests WHERE id = ?", [rid]);
+  var reqRow = await db.get("SELECT stage, status, closure_reason, fee_waiver_status FROM requests WHERE id = ?", [rid]);
   if (!est) return { hasEstimate: false };
   var recon = await db.get("SELECT total FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC LIMIT 1", [rid]);
   var base = (recon && recon.total != null) ? Number(recon.total) : (Number(est.total) || 0);
@@ -68,7 +68,7 @@ async function computeSituation(rid) {
     releaseHeld: pt.requiresPaymentBeforeRelease(plan),
     workComplete: !!recon,
     delivered: !!(reqRow && (reqRow.stage === 'delivery' || reqRow.status === 'closed')),
-    terminal: (reqRow && (reqRow.status === 'withdrawn' || reqRow.status === 'abandoned')) ? 'withdrawn' : null,
+    terminal: (reqRow && reqRow.status === 'closed' && /nonpayment/i.test(reqRow.closure_reason || '')) ? 'closed_nonpayment' : ((reqRow && (reqRow.status === 'withdrawn' || reqRow.status === 'abandoned')) ? 'withdrawn' : null),
     base: base, credits: credits, plan: plan
   };
 }
