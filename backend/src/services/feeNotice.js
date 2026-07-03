@@ -81,20 +81,31 @@ function buildNotice(request, feeContext, opts) {
   if (R.certification && R.certification.amount > 0) lines.push('- Certification: ' + R.certification.count + ' at ' + money(R.certification.rate) + ' = ' + money(R.certification.amount));
   if (R.other && R.other.amount) lines.push('- ' + (R.other.description || 'Other') + ': ' + money(R.other.amount));
 
-  var subject = 'Cost estimate for your public records request' + (num ? ' ' + num : '');
+  var waiverGranted = !!(opts.feeWaiver && opts.feeWaiver.granted);
+  var method = opts.computationMethod || 'Standard';
+  var traceRel = (R.rulesTrace || []).filter(function (t) { return ['free_allowances', 'surcharge', 'min_fee', 'max_fee', 'de_minimis'].indexOf(t.rule) >= 0 && (t.applied || t.configured); });
+
+  var subject = (waiverGranted ? 'Your public records request \u2014 fees waived' : 'Cost estimate for your public records request') + (num ? ' ' + num : '');
   var body = '';
   body += 'Dear ' + name + ',\n\n';
-  body += 'Thank you for your public records request' + (num ? ' (' + num + ')' : '') + '. We have reviewed it and prepared an estimate of the cost to fulfill it.\n\n';
-  body += 'Estimated cost: ' + money(total) + '\n\n';
+  body += 'Thank you for your public records request' + (num ? ' (' + num + ')' : '') + '. We have reviewed it and prepared the cost detail below.\n\n';
+  if (method && method !== 'Standard' && !waiverGranted) body += 'This request was priced using ' + method.toLowerCase() + '.\n\n';
+  body += (waiverGranted ? 'Computed cost: ' + money(total) + ' (waived)\n\n' : 'Estimated cost: ' + money(total) + '\n\n');
   if (lines.length) body += 'This estimate is based on:\n' + lines.join('\n') + '\n\n';
-  if (opts.paymentPlan) {
+  if (traceRel.length) body += 'How your total was determined:\n' + traceRel.map(function (t) { return '- ' + t.plainLine; }).join('\n') + '\n\n';
+  if (waiverGranted) {
+    body += 'These fees have been waived. No payment is required, and we will proceed with your request.\n\n';
+  } else if (opts.paymentMode === 'erp') {
+    body += 'This notice explains how your cost was calculated. You will receive an invoice and payment instructions in a separate communication from our finance office.\n\n';
+    if (opts.responseDays) body += 'Please respond within ' + opts.responseDays + ' business days to confirm you would like us to proceed, or this request may be considered withdrawn.\n\n';
+  } else if (opts.paymentPlan) {
     paymentLanguage(opts.paymentPlan, money).forEach(function (p) { body += p + '\n\n'; });
   } else {
     if (R.depositDue && R.depositDue > 0) body += 'A deposit of ' + money(R.depositDue) + ' is required before we begin processing. Once it is received we will proceed, and any remaining balance will be due upon completion.\n\n';
     else body += 'Please confirm you would like us to proceed at this estimated cost.\n\n';
     if (opts.responseDays) body += 'Please respond within ' + opts.responseDays + ' business days, or this request may be considered withdrawn.\n\n';
   }
-  body += 'This is an estimate; the final cost may differ based on the records actually located and the time required. Any item shown as "actual cost to be determined" will be calculated once known. If you have questions, or would like to narrow your request to reduce the cost, please reply to this message.\n\n';
+  if (!waiverGranted) body += 'This is an estimate; the final cost may differ based on the records actually located and the time required. Any item shown as "actual cost to be determined" will be calculated once known. If you have questions, or would like to narrow your request to reduce the cost, please reply to this message.\n\n';
   body += 'Sincerely,\n' + agency + ' - Open Records';
 
   return { subject: subject, text: body };

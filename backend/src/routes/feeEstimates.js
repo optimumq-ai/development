@@ -183,17 +183,19 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
 // build the requestor-facing notice (preview) from the latest saved estimate
 router.get('/request/:requestId/notice', requireAuth, async function (req, res) {
   try {
-    var reqRow = await get('SELECT id, request_number, requestor_name, requestor_email FROM requests WHERE id = ?', [req.params.requestId]);
+    var reqRow = await get('SELECT id, request_number, requestor_name, requestor_email, fee_waiver_status FROM requests WHERE id = ?', [req.params.requestId]);
     if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
     var snap = await latestEstimate(req.params.requestId);
     if (!snap) return res.status(400).json({ error: 'No saved estimate yet - calculate an estimate first.' });
     var feeContext = {}; try { feeContext = JSON.parse(snap.fee_context_json || '{}'); } catch (e) { feeContext = {}; }
     var agency = await sysCfg('agency_name', 'the City');
-    var responseDays = null;
-    if (snap.config_profile_id) { var prof = await get('SELECT config_json FROM fee_profiles WHERE id = ?', [snap.config_profile_id]); if (prof) { try { var cj = JSON.parse(prof.config_json || '{}'); responseDays = cj.estimatePolicy && cj.estimatePolicy.requesterResponseDays; } catch (e) {} } }
+    var responseDays = null, paymentMode = 'internal';
+    if (snap.config_profile_id) { var prof = await get('SELECT config_json FROM fee_profiles WHERE id = ?', [snap.config_profile_id]); if (prof) { try { var cj = JSON.parse(prof.config_json || '{}'); responseDays = cj.estimatePolicy && cj.estimatePolicy.requesterResponseDays; if (cj.payment_mode === 'erp') paymentMode = 'erp'; } catch (e) {} } }
     var noticePlan = await planForSnapshot(snap);
-    var notice = feeNotice.buildNotice(reqRow, feeContext, { agencyName: agency, responseDays: responseDays, paymentPlan: noticePlan.plan });
     var R = feeContext.requestLevel || {};
+    var waiverGranted = reqRow.fee_waiver_status === 'granted';
+    var method = waiverGranted ? 'Fee waiver approved' : ((R.purposeApplied && R.purpose && R.purpose !== 'standard') ? (R.purpose === 'commercial' ? 'Commercial rates' : (R.purpose === 'inspection' ? 'Inspection (no fee)' : (String(R.purpose).charAt(0).toUpperCase() + String(R.purpose).slice(1)))) : 'Standard');
+    var notice = feeNotice.buildNotice(reqRow, feeContext, { agencyName: agency, responseDays: responseDays, paymentPlan: noticePlan.plan, paymentMode: paymentMode, computationMethod: method, feeWaiver: { granted: waiverGranted } });
     res.json({ to: reqRow.requestor_email || null, requestorName: reqRow.requestor_name || null, subject: notice.subject, text: notice.text, total: R.total || 0, depositDue: R.depositDue || 0, notifyTriggered: !!R.estimateNotifyTriggered, notifiedAt: snap.notified_at || null, notifiedTo: snap.notified_to || null });
   } catch (e) { res.status(500).json({ error: 'Could not build the notice.' }); }
 });
@@ -428,15 +430,20 @@ function deriveFinancialStatus(est, ps, mode, waiverStatus) {
 }
 
 async function computeSnapshot(row, fallbackCfgRow) {
-  // Recompute from stored inputs (fresh trace); fall back to the stored fee_context_json.
+  // Faithfulness: prefer the IMMUTABLE stored snapshot when it already carries a rule trace, so the
+  // profile reflects the estimate AS QUOTED (a later rule change cannot rewrite it). Only older
+  // snapshots (pre-trace) recompute from stored inputs to synthesize a trace.
   var profRow = row.config_profile_id ? await get('SELECT id, name, version, config_json FROM fee_profiles WHERE id = ?', [row.config_profile_id]) : fallbackCfgRow;
+  var stored = {}; try { stored = JSON.parse(row.fee_context_json || '{}'); } catch (e) { stored = {}; }
+  if (stored && stored.requestLevel && Array.isArray(stored.requestLevel.rulesTrace)) {
+    return { fc: stored, profRow: profRow, source: 'snapshot' };
+  }
   var inputs = null; try { inputs = row.input_json ? JSON.parse(row.input_json) : null; } catch (e) { inputs = null; }
   if (inputs && profRow) {
     var profile = {}; try { profile = JSON.parse(profRow.config_json || '{}'); } catch (e) { profile = {}; }
-    return { fc: engine.compute(profile, inputs), profRow: profRow };
+    return { fc: engine.compute(profile, inputs), profRow: profRow, source: 'recompute' };
   }
-  var fc = {}; try { fc = JSON.parse(row.fee_context_json || '{}'); } catch (e) { fc = {}; }
-  return { fc: fc, profRow: profRow };
+  return { fc: stored, profRow: profRow, source: 'snapshot' };
 }
 
 router.get('/request/:requestId/financial-profile', requireAuth, async function (req, res) {
