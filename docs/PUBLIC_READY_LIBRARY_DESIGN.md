@@ -323,3 +323,34 @@ Still deferred (later phases, unchanged): move the deposit trigger from apply ->
 redaction deposit path; browse metadata (geo/address/entities/topic/homogeneous/mappable flags);
 the browse surface; the map; the dedicated no-login Reading Room page; staff-side semantic indexing
 of high-stakes sources.
+
+---
+
+## 14. Map build log (2026-07-02) — the wow feature, BUILT
+
+The section-8 map is live (commits 8d992bf + 1c0c2f0). Records with a known address plot as pins on
+an open basemap; click a pin to read the record.
+- **Basemap:** Leaflet over OpenStreetMap tiles (leaflet@1.9.4, npm) - no API key, no billing, exactly
+  as specced. Amber circle-marker dots (no webpack icon-path issue), popups with type/date/address/
+  summary + a "View record" link to the public download.
+- **Geocoding (`services/geocode.js`):** two paths, per the doc. A REAL geocoder (Nominatim/OSM, free,
+  UA-tagged, 1 req/s throttle) for production; and a deterministic DEMO geocoder that clusters
+  believable pins around a configurable anchor (the demo's addresses are fictional "Autumn Falls, TX",
+  so real geocoding can't place them). Address is extracted from the record's title/summary by regex.
+  City-GIS geocoding remains the future authoritative source.
+- **Schema:** fulfilled_records +geo_address/latitude/longitude/geocode_source/geocoded_at;
+  record_types +mappable (default 1).
+- **Guardrails (both live):** the map only shows records that passed the publish-eligibility gate
+  (published=1) AND whose type is mappable AND that geocoded. The **mappable** flag ("Show on public
+  map" in the record-type editor, default on) is the surveillance-mode defense - sensitive types are
+  searchable-but-not-pinned.
+- **Config (system_config):** map_center_lat / map_center_lng / map_zoom / map_demo_geocode. Demo
+  anchored near Dallas (32.7767, -96.7970), demo geocode ON. Flip map_demo_geocode to 0 for real
+  geocoding.
+- **Endpoint:** GET /api/public/library/map (public) -> anchor + pins. **Page:** PublicLibraryMapPage
+  at /library-map (staff nav "Records Map") and /portal/library/map (public). Geocoding now runs
+  automatically at deposit (enrichFulfilledMeta), so the map self-maintains. 42 demo records backfilled.
+
+Still deferred (later map phases): the optional city-GIS overlay/geocoding (per-jurisdiction config);
+marker clustering at scale; time-scrub axis; "more like this" from a pin; the dedicated no-login
+Reading Room shell around the map.
