@@ -71,6 +71,7 @@ async function enrichFulfilledMeta(frId) {
     }
   } catch (e) { console.error('[enrichFulfilledMeta]', e && e.message); }
   try { await ei.reindexFulfilledRecord(frId); } catch (e) { console.error('[enrichFulfilledMeta embed]', e && e.message); }
+  try { var frRow = await db.get("SELECT id, title, summary, geo_address FROM fulfilled_records WHERE id = ?", [frId]); if (frRow) await require('./geocode').geocodeRecord(frRow); } catch (e) { console.error('[enrichFulfilledMeta geocode]', e && e.message); }
 }
 
 module.exports = { extractRecordMeta: extractRecordMeta, enrichFulfilledMeta: enrichFulfilledMeta };
