@@ -263,3 +263,129 @@ the requestor was formally told. Fix (Phase 2/3), using tools that already exist
 This keeps a historical estimate faithful while new estimates use the new rules. Not a Phase-1
 blocker (config rarely changes mid-request); belongs with the emails (Phase 2), since an emailed
 estimate is the formal quote that must not silently change.
+
+## 15. Phase 3 spec — payment-status model, event timeline, adjustments, reconciling ledger (added 2026-07-02)
+
+Phase 3 is ONE build: the payment side of the request is an event stream, and three things
+are just views of it — the dated timeline, the reconciling ledger, and the current status.
+This also absorbs the payment half of the parked two-track status model.
+
+### 15.1 Core principle — two layers
+- **Status = a photograph** (where the payment gates are right now). Exactly one at a time. DERIVED,
+  never stored/hand-set.
+- **Events = a film** (everything that happened, dated, in order): estimate issued, notice sent,
+  payment received, credit applied, estimate corrected, refund issued, records released, closed.
+- An adjustment (credit or correction) is an EVENT, not a status. There is no "concession status"
+  or "correction status" to invent. After any event the gates re-derive and the photograph redraws.
+
+### 15.2 Two gates (the only places payment touches processing)
+- **Start gate** (before Record Search): held by a deposit OR estimate acceptance; open when the
+  deposit requirement is satisfied, the estimate is accepted, or no deposit is required.
+- **Release gate** (before delivery AND before public-ready publication — see 15.7): held when the
+  jurisdiction requires payment before release and the balance is unpaid; bypassed under net-terms,
+  waiver, or zero fee.
+Every scenario ("process on payment", "no deposit needed", "proceed on invoicing vs payment") is a
+combination of {start gate: none|acceptance|deposit} x {release gate: held|net-terms} x {waived/
+no-fee -> both off} x {mode: internal|erp = wording only}. No combination is inexpressible.
+
+### 15.3 Payment states (derived; suggested labels)
+Disposition: **No Fee Due** (total $0 by rule); **Fees Waived** (waiver granted).
+Start-gate: **Awaiting Estimate Acceptance**; **Deposit Due — On Hold** (mode wording: "Deposit
+Invoiced" / "Deposit Charge Sent").
+Cleared to work (one state, reason qualifier): **Cleared to Proceed** — deposit paid / estimate
+accepted / no deposit required.
+Completion: **Awaiting Final Payment — Records Held**; **Released — Payment Due** (net terms:
+delivered while still owed); **Paid in Full — Cleared for Release**.
+Terminal/tail: **Paid in Full**; **Refund / Credit Due** (overpayment); **Closed — Nonpayment**;
+**Withdrawn** (never accepted/paid a required deposit in the window).
+Keep state names mode-neutral; the existing payment-mode badge + the event detail line carry
+internal-vs-ERP. Keep "Cleared for Release" (payment) separate from "Delivered" (processing) — the
+two tracks must not claim each other's events (esp. net-terms: Delivered while Payment Due).
+
+### 15.4 Triggers -> recompute -> re-derive status (the engine of it)
+NOTHING sets status directly. After EVERY event, recompute the LIVE plan from (current effective
+total, current rules, total paid) and re-derive both gates; the status is whatever the gates say.
+Events that fire a recompute: estimate issued; requestor accepts; payment recorded / ERP paid
+(webhook); **credit applied**; **estimate corrected (re-estimate)**; reconciliation (actuals);
+refund issued; window lapse (tickler -> Withdrawn pre-work / Closed — Nonpayment post-invoice);
+overpayment detected -> Refund/Credit Due. A gate flip (e.g. a credit pushing the total under the
+deposit threshold) redraws the status automatically.
+
+### 15.5 Live-derived plan (replaces the frozen plan) — REQUIRED for adjustments to work
+Today deposit_due and the deposit/final split are FROZEN at estimate time and payments accumulate
+into fixed deposit-paid / final-paid buckets. Change to: derive the deposit requirement and gate
+satisfaction LIVE from (current effective total, current rules, total paid). Then a mid-flight
+credit/correction that lowers the total re-derives the deposit (may drop to $0), and "start gate
+satisfied" becomes "total paid >= currently-required deposit" — no bucket re-mapping needed. This is
+simpler AND handles the in-flight scenarios (a reduction can flip the start gate from held to
+cleared because the already-paid amount now covers the reduced deposit).
+
+### 15.6 Adjustments are TYPED (not payments) — accounting-correct, matches the fee doc
+The fee doc's model for a wrong/changed number is RECONCILIATION (re-run the engine) + refund /
+credit / additional invoice — never a fictitious payment. So a single "record an adjustment" entry
+point asks WHICH kind:
+- **Payment** — cash in.
+- **Credit** — non-cash reduction of the receivable, with a reason (objection settlements are this).
+  Triggers recompute (a credit can flip a gate).
+- **Refund** — cash out (overpayment).
+- **Correction** — the estimate was WRONG (e.g. redaction hours entered for a record needing none);
+  handled as a RE-ESTIMATE: re-run the engine with corrected inputs -> accurate total that
+  re-derives deposit/threshold/gates. This is the accurate path; a payment-offset would record
+  phantom cash and leave the erroneous charge + wrong gates standing.
+Do NOT collapse corrections/credits into "payments": it misstates cash receipts (audit red flag),
+leaves the wrong receivable, and can't reproduce the correct (lower/zero) deposit. Auditability is a
+core value prop. Any adjustment can fire the revised notice (reuse the phase-2 adjustment email).
+(Resolves the doc's open "in-flight estimate REVISION rules" item this way.)
+
+### 15.7 Release gate governs PUBLICATION, not just delivery (closes a real leak)
+CONFIRMED leak in current build: redaction Apply inserts fulfilled_records status='released', and
+the public download (GET /file/:id) + library browse + record search all serve status='released'
+with NO payment check. So a pay-before-release record becomes free-downloadable from the public
+library the moment redaction is applied — around the gate. Fix:
+- At redaction-apply, check the release gate. If requiresPaymentBeforeRelease && !paidInFull, create
+  the fulfilled_record as **'held'** (cleared for disclosure, NOT published). All public surfaces
+  already filter status='released', so 'held' is automatically invisible — makes "Records Held" true.
+- On payment (release gate opens) -> promote held -> 'released' (publish + deliver). That's the
+  "Paid in Full — Cleared for Release" trigger doing real work.
+- Net-terms / waiver / no-fee publish normally (deliberate).
+- On **Closed — Nonpayment**: default HOLD (don't publish; preserves the gate; the held redaction can
+  be promoted later if a future requester pays). Optional per-jurisdiction "publish-on-close" flag
+  for access-first agencies. (Reusing a held redaction for a later paid request = deferred optimization.)
+
+### 15.8 Auto-close on nonpayment
+Automatic WHERE the per-jurisdiction config permits it (reflects whether the law allows closing for
+nonpayment), only after a defined window AND >= 1 dunning notice, and a closed request stays
+RE-OPENABLE for the rare late payer. Rationale (Kevin): ~99/100 never pay; manual review+close costs
+more than the rare reopen. Not automatic unless the agency turns it on (wrongful close = compliance
+risk).
+
+### 15.9 The reconciling ledger UI (financial page) — self-justifying balance
+The balance must never move without a visible, dated reason. Render a running ledger UP NEAR THE
+TOTAL (before the fine-grained rule trace) that reconciles estimate -> balance:
+  Estimated total                                   $240.00
+    Jul 2  Payment received - deposit (check #1041)  -$50.00
+    Jul 4  Credit applied - objection settlement     -$100.00 (approved by J. Ruiz)
+  Balance due                                        $90.00
+Each line: date, TYPE (payment/credit/refund/correction), amount, and reference (method/check# for
+payments) or reason + approver (for credits) or before->after (for corrections). Corrections show as
+the re-estimate event. Show Paid-in-Full / Released as an explicit closing line so a settled request
+reads as visibly closed. Today's profile already has a Balance section + a payments-only activity
+list at the bottom; widen it to include credit/correction lines (not just payments), date+reason each,
+and move it up. The ledger entries ARE the timeline's financial events — timeline, ledger, and
+derived status are three views of one event stream (build once).
+
+### 15.10 Data / build sketch
+- `request_payment_events` (or a typed ledger): id, request_id, type (estimate_issued | notice_sent |
+  payment | credit | refund | correction | reconciliation | released | closed | withdrawn | ...),
+  amount (signed, nullable for non-money events), reason/detail, reference, actor, approver, created_at,
+  and the derived status AFTER the event (for the timeline photograph).
+- A pure deriveStatus(currentPlan, totalPaid, gates, flags) function (unit-testable like paymentTiming).
+- A recompute step invoked on every event: rebuild the live plan, re-derive gates, append the event
+  with its resulting status.
+- Point the two existing gates (deposit->record_search advance; the 409 into delivery; and NOW the
+  redaction-apply publication) at the derived status.
+- Financial page: reconciling ledger (15.9) + the event timeline (same rows) + the derived status
+  photograph.
+Build order: (a) event log + deriveStatus + recompute wiring; (b) typed adjustments (credit/correction/
+refund) + revised-notice; (c) release-gate-governs-publication; (d) auto-close; (e) reconciling-ledger
++ timeline UI. (a) unblocks the rest.
