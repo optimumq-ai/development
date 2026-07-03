@@ -222,3 +222,44 @@ status track (separate two-track status effort); the permits->variant taxonomy-g
   field on the request (avoid two sources of status truth).
 - Confirm the assembly endpoint's caching / recompute behavior (the engine is cheap and pure, so
   recompute-on-read is likely fine).
+
+## 14. Build log & refinements (added 2026-07-02)
+
+Phase 1 built and live:
+- 1a: engine explanation trace (`feeEngine.compute` -> `requestLevel.rulesTrace`), commit c91d37f.
+- 1b: assembly endpoint `GET /request/:id/financial-profile`, commit 9918647.
+- 1c: staff Financial Profile tab (FinancialProfilePanel), commit 2ee8047.
+- Follow-on: **computation-method descriptor** (Standard / Commercial rates / Fee waiver
+  approved, derived from the engine's `purpose`+`purposeApplied` and `fee_waiver_status`) and
+  **fee-waiver reflection** (a granted waiver still computes and shows the cost, with a "Fees
+  waived" banner and payable $0 — the profile honors the existing `fee_waiver_status` flag, no
+  special-cased path), commit da9dc37.
+
+Confirmed capabilities (already built, relevant to this feature):
+- **Fee waiver** has a full decision flow (`POST /requests/:id/fee-waiver-decision`, grant/deny,
+  `fee_waiver_status`); denial already sends a mandatory requestor notice.
+- **Purpose overrides** deep-merge and CAN null out a rule (e.g. commercial removing a max), and
+  the rule trace is computed AFTER the merge, so it reflects the effective per-purpose rule set.
+  (Authoring note: to REMOVE a rule for a purpose, the override must set it to null explicitly.)
+- **Per-state config** is real: fee_profiles are keyed by jurisdiction_id (+ context + version);
+  AI auto-config populates each jurisdiction's profile; the engine reads whichever applies. No
+  per-state code fork; the profile is generated from config.
+- **Effective-dated config** exists (`effectiveConfig.js` + `scheduled_config_changes` + nightly
+  promotion + `config_history` windows). A scheduled rule change (e.g. removing a max at midnight)
+  promotes to live config automatically; because the profile is GENERATED from live config (not a
+  stored template), the removed rule disappears from every profile/email instantly — nothing to
+  edit.
+
+### REFINEMENT (deferred) — historical estimate faithfulness under a rule change
+The assembly recomputes an estimate from its stored inputs against the CURRENT config (to always
+have a trace). If a rule changes after an estimate was quoted (the midnight scenario), recompute
+would re-explain — and re-total — a historical estimate under the NEW rules, diverging from what
+the requestor was formally told. Fix (Phase 2/3), using tools that already exist:
+- Show the **as-quoted total** from the estimate's immutable `fee_context_json` snapshot (not the
+  recomputed total) as the authoritative quoted figure. (Today the endpoint prefers the recomputed
+  total; change it to prefer the stored total for the "quoted" number.)
+- When recomputing for the explanation trace, recompute against the config **in effect at the
+  estimate's date** via `config_history` (effective_from/effective_to windows), not today's config.
+This keeps a historical estimate faithful while new estimates use the new rules. Not a Phase-1
+blocker (config rarely changes mid-request); belongs with the emails (Phase 2), since an emailed
+estimate is the formal quote that must not silently change.
