@@ -41,6 +41,9 @@ export default function FinancialProfilePanel(props) {
 
   var est = p.estimate, R = est && est.computation && est.computation.requestLevel;
   var ps = p.paymentState;
+  var waived = !!(p.feeWaiver && p.feeWaiver.status === 'granted');
+  var cm = p.computationMethod || { code: 'standard', label: 'Standard' };
+  var mColor = cm.code === 'fee_waiver' ? { bg: '#DEF7EC', fg: '#03543F' } : (cm.code === 'standard' ? { bg: '#F3F4F6', fg: '#6B7280' } : { bg: '#FEF3C7', fg: '#92400E' });
 
   return (
     <div style={{ maxWidth: '820px' }}>
@@ -49,9 +52,18 @@ export default function FinancialProfilePanel(props) {
           <div style={{ fontSize: '12px', color: '#6B7280' }}>Payment status</div>
           <div style={{ fontSize: '18px', fontWeight: 800, color: NAVY }}>{p.paymentStatus.label}</div>
         </div>
-        <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px', background: p.paymentMode === 'erp' ? '#EDE9FE' : '#E0F2FE', color: p.paymentMode === 'erp' ? '#5B21B6' : '#075985' }}>{p.paymentMode === 'erp' ? 'External / ERP payments' : 'Self-contained payments'}</span>
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px', background: mColor.bg, color: mColor.fg }}>Method: {cm.label}</span>
+          <span style={{ fontSize: '11px', fontWeight: 700, padding: '4px 12px', borderRadius: '20px', background: p.paymentMode === 'erp' ? '#EDE9FE' : '#E0F2FE', color: p.paymentMode === 'erp' ? '#5B21B6' : '#075985' }}>{p.paymentMode === 'erp' ? 'External / ERP payments' : 'Self-contained payments'}</span>
+        </div>
       </div>
 
+      {waived ? (
+        <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '12px', padding: '14px 18px', marginBottom: '16px' }}>
+          <div style={{ fontSize: '14px', fontWeight: 700, color: '#166534', marginBottom: '2px' }}>Fees waived for this request</div>
+          <div style={{ fontSize: '12.5px', color: '#374151' }}>The computed cost below is shown for the record; the requestor owes $0.00.{p.feeWaiver.decidedBy ? (' Granted by ' + p.feeWaiver.decidedBy + '.') : ''}</div>
+        </div>
+      ) : null}
       {!est ? <div style={card}>No estimate has been created for this request yet.</div> : (
         <div>
           <div style={card}>
@@ -114,7 +126,9 @@ export default function FinancialProfilePanel(props) {
                 <tr><td style={{ padding: '4px 0', color: '#6B7280' }}>Effective total{ps.adjustments ? (' (after ' + money(ps.adjustments) + ' adjustments)') : ''}</td><td style={{ padding: '4px 0', textAlign: 'right', fontWeight: 600 }}>{money(ps.effectiveTotal)}</td></tr>
                 <tr><td style={{ padding: '4px 0', color: '#6B7280' }}>Deposit paid</td><td style={{ padding: '4px 0', textAlign: 'right' }}>{money(ps.depositPaid)}</td></tr>
                 <tr><td style={{ padding: '4px 0', color: '#6B7280' }}>Final paid</td><td style={{ padding: '4px 0', textAlign: 'right' }}>{money(ps.finalPaid)}</td></tr>
-                <tr><td style={{ padding: '6px 0 0', fontWeight: 700, borderTop: '1px solid #F3F4F6' }}>{ps.paidInFull ? 'Paid in full' : 'Balance due'}</td><td style={{ padding: '6px 0 0', textAlign: 'right', fontWeight: 800, color: ps.paidInFull ? '#03543F' : NAVY, borderTop: '1px solid #F3F4F6' }}>{ps.paidInFull ? money(ps.paid) : money(ps.balanceDue)}</td></tr>
+                {waived
+                  ? <tr><td style={{ padding: '6px 0 0', fontWeight: 700, borderTop: '1px solid #F3F4F6' }}>Payable (fees waived)</td><td style={{ padding: '6px 0 0', textAlign: 'right', fontWeight: 800, color: '#03543F', borderTop: '1px solid #F3F4F6' }}>{money(0)}</td></tr>
+                  : <tr><td style={{ padding: '6px 0 0', fontWeight: 700, borderTop: '1px solid #F3F4F6' }}>{ps.paidInFull ? 'Paid in full' : 'Balance due'}</td><td style={{ padding: '6px 0 0', textAlign: 'right', fontWeight: 800, color: ps.paidInFull ? '#03543F' : NAVY, borderTop: '1px solid #F3F4F6' }}>{ps.paidInFull ? money(ps.paid) : money(ps.balanceDue)}</td></tr>}
               </tbody></table>
             ) : null}
           </div>

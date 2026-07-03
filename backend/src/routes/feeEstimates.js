@@ -415,7 +415,8 @@ router.get('/payments/drawer', requireAuth, async function (req, res) {
 // estimate (and reconciled actual, if any) from stored inputs so the rule trace is always present,
 // then layers payment state, plan, ledger, ERP charges, approved objection credits, and a derived
 // payment status. Renderers (staff screen, requestor view, emails) all consume this. ----
-function deriveFinancialStatus(est, ps, mode) {
+function deriveFinancialStatus(est, ps, mode, waiverStatus) {
+  if (waiverStatus === 'granted') return { current: 'waived', label: 'Fees waived' };
   if (!est || !ps) return { current: 'no_estimate', label: 'No estimate yet' };
   if (ps.effectiveTotal <= 0) return { current: 'no_fee', label: 'No fee due' };
   if (ps.paidInFull) return { current: 'paid_released', label: 'Paid in full \u2014 released' };
@@ -441,7 +442,7 @@ async function computeSnapshot(row, fallbackCfgRow) {
 router.get('/request/:requestId/financial-profile', requireAuth, async function (req, res) {
   try {
     var rid = req.params.requestId;
-    var reqRow = await get("SELECT id, request_number, requestor_name, requestor_email, description FROM requests WHERE id = ?", [rid]);
+    var reqRow = await get("SELECT id, request_number, requestor_name, requestor_email, description, fee_waiver_requested, fee_waiver_status, fee_waiver_decided_by, fee_waiver_decided_at, fee_waiver_reason FROM requests WHERE id = ?", [rid]);
     if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
     var jid = await activeJurisdiction();
     var cfgRow = await pickConfig(jid);
@@ -471,9 +472,21 @@ router.get('/request/:requestId/financial-profile', requireAuth, async function 
     var ledger = await all("SELECT id, target, method, amount, tendered, change_given, reference, clerk, created_at FROM fee_payments WHERE request_id = ? AND COALESCE(voided,0) = 0 ORDER BY created_at", [rid]);
     var erpCharges = paymentMode === 'erp' ? await all("SELECT id, target, amount, reference, erp_charge_id, status, paid_amount, method, sent_at, paid_at FROM erp_charges WHERE request_id = ? ORDER BY created_at", [rid]) : [];
     var credits = await all("SELECT id, resolution_type, resolution_amount, resolution_detail, resolved_at, approved_by FROM objections WHERE request_id = ? AND status = 'resolved' AND approval_status = 'approved' AND resolution_type IN ('reduction','waiver','write_off') ORDER BY resolved_at", [rid]);
-    var status = deriveFinancialStatus(est, payState, paymentMode);
+    var waiverStatus = reqRow.fee_waiver_status || null;
+    var status = deriveFinancialStatus(est, payState, paymentMode, waiverStatus);
+    // Fee computation method: waiver > applied purpose (commercial/inspection/...) > standard.
+    var eRL = (estimateOut && estimateOut.computation && estimateOut.computation.requestLevel) || {};
+    var method = 'standard', methodLabel = 'Standard';
+    if (waiverStatus === 'granted') { method = 'fee_waiver'; methodLabel = 'Fee waiver approved'; }
+    else if (eRL.purposeApplied && eRL.purpose && eRL.purpose !== 'standard') {
+      method = eRL.purpose;
+      methodLabel = eRL.purpose === 'commercial' ? 'Commercial rates' : (eRL.purpose === 'inspection' ? 'Inspection (no fee)' : (String(eRL.purpose).charAt(0).toUpperCase() + String(eRL.purpose).slice(1)));
+    }
+    var feeWaiver = { requested: !!reqRow.fee_waiver_requested, status: waiverStatus, decidedBy: reqRow.fee_waiver_decided_by || null, decidedAt: reqRow.fee_waiver_decided_at || null, reason: reqRow.fee_waiver_reason || null };
 
     res.json({
+      computationMethod: { code: method, label: methodLabel },
+      feeWaiver: feeWaiver,
       request: { id: reqRow.id, requestNumber: reqRow.request_number, requestorName: reqRow.requestor_name, requestorEmail: reqRow.requestor_email, description: reqRow.description },
       paymentMode: paymentMode,
       estimate: estimateOut,
