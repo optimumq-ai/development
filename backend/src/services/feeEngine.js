@@ -237,6 +237,47 @@ function compute(profile, request) {
   if (dep.threshold != null && total > num(dep.threshold) && dep.percent) { depositDue = r2(total * (num(dep.percent) / 100)); depositBasis = num(dep.percent) + '% of $' + total.toFixed(2) + ' (estimate exceeds $' + num(dep.threshold) + ')'; }
   var notify = (rules.estimateNotifyThreshold != null && total > num(rules.estimateNotifyThreshold));
 
+  // ---- explanation trace: every request-level rule, whether configured/applied or not, with a
+  // plain-language line. The Financial Profile renders this so the estimate "shows its work",
+  // including rules that did NOT apply. Generated from the same values used above (never drifts).
+  function te(rule, label, configured, configuredValue, applied, plainLine) {
+    return { rule: rule, label: label, configured: !!configured, configuredValue: (configuredValue === undefined ? null : configuredValue), applied: !!applied, plainLine: plainLine };
+  }
+  var rulesTrace = [];
+  (function () {
+    var fp = num(freePages), fh = num(rules.freeLaborHours), cfg = (fp > 0 || fh > 0);
+    rulesTrace.push(te('free_allowances', 'Free allowances', cfg, { freePages: fp, freeLaborHours: fh }, cfg,
+      cfg ? ('First ' + fp + ' page(s) and ' + fh + ' labor hour(s) are free, applied before charges.') : 'No free allowances configured.'));
+  })();
+  rulesTrace.push(te('surcharge', 'Surcharge', surchargePct > 0, surchargePct, surchargePct > 0,
+    surchargePct > 0 ? (surchargePct + '% surcharge on $' + adjustedSubtotal.toFixed(2) + ' = $' + surcharge.toFixed(2) + '.') : 'No surcharge configured.'));
+  rulesTrace.push(te('min_fee', 'Minimum fee (floor)', minFee > 0, (minFee > 0 ? minFee : null), floorApplied,
+    minFee <= 0 ? 'No minimum fee configured.' : (floorApplied
+      ? ('Subtotal $' + surchargedSubtotal.toFixed(2) + ' was below the $' + minFee.toFixed(2) + ' minimum, raised to $' + minFee.toFixed(2) + '.')
+      : ('Minimum fee $' + minFee.toFixed(2) + ' — subtotal $' + surchargedSubtotal.toFixed(2) + ' met it, no floor adjustment.'))));
+  rulesTrace.push(te('max_fee', 'Maximum fee (ceiling)', maxFee != null, maxFee, ceilingApplied,
+    maxFee == null ? 'No maximum fee configured.' : (ceilingApplied
+      ? ('Subtotal exceeded the $' + maxFee.toFixed(2) + ' maximum, capped at $' + maxFee.toFixed(2) + '.')
+      : ('Maximum fee $' + maxFee.toFixed(2) + ' — not reached (total $' + total.toFixed(2) + ').'))));
+  rulesTrace.push(te('de_minimis', 'De minimis waiver', deMinimis > 0, (deMinimis > 0 ? deMinimis : null), deMinimisWaived,
+    deMinimis <= 0 ? 'No de minimis waiver configured.' : (deMinimisWaived
+      ? ('Total was at or under $' + deMinimis.toFixed(2) + ', waived to $0.00.')
+      : ('De minimis waive at or under $' + deMinimis.toFixed(2) + ' — not triggered (total $' + total.toFixed(2) + ').'))));
+  (function () {
+    var cfg = !!(dep && dep.threshold != null && dep.percent);
+    rulesTrace.push(te('deposit', 'Deposit', cfg, (cfg ? { threshold: num(dep.threshold), percent: num(dep.percent) } : null), depositDue > 0,
+      !cfg ? 'No deposit required for this jurisdiction.' : (depositDue > 0
+        ? ('Deposit required: ' + depositBasis + ' = $' + depositDue.toFixed(2) + '.')
+        : ('Deposit of ' + num(dep.percent) + '% required when the estimate exceeds $' + num(dep.threshold).toFixed(2) + ' — not triggered (total $' + total.toFixed(2) + ').'))));
+  })();
+  (function () {
+    var t = rules.estimateNotifyThreshold, cfg = (t != null);
+    rulesTrace.push(te('estimate_notify', 'Requestor notification threshold', cfg, (cfg ? num(t) : null), notify,
+      !cfg ? 'No notification threshold configured.' : (notify
+        ? ('Estimate exceeds $' + num(t).toFixed(2) + ' — requestor notification / consent required.')
+        : ('Notification threshold $' + num(t).toFixed(2) + ' — not exceeded (total $' + total.toFixed(2) + ').'))));
+  })();
+
   return {
     context: profile.context || 'FR',
     configVersion: (profile.version != null ? profile.version : null),
@@ -258,7 +299,8 @@ function compute(profile, request) {
       floorApplied: floorApplied, ceilingApplied: ceilingApplied, deMinimisWaived: deMinimisWaived,
       total: r2(total),
       depositDue: depositDue, depositBasis: depositBasis,
-      estimateNotifyTriggered: notify
+      estimateNotifyTriggered: notify,
+      rulesTrace: rulesTrace
     },
     generatedAt: new Date().toISOString()
   };
