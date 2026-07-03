@@ -79,6 +79,7 @@ async function deriveCurrent(rid) { return deriveStatus(await computeSituation(r
 async function recordEvent(rid, evt) {
   evt = evt || {};
   var status = await deriveCurrent(rid);
+  await promoteOnRelease(rid);
   try {
     await db.run("INSERT INTO request_payment_events (id, request_id, type, amount, reason, reference, actor, approver, status_current, status_label, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
       ['pe-' + uuidv4().slice(0, 8), rid, evt.type || 'event', (evt.amount != null ? Number(evt.amount) : null), evt.reason || null, evt.reference || null, evt.actor || null, evt.approver || null, status.current, status.label, nowStr()]);
@@ -90,4 +91,20 @@ async function timeline(rid) {
   return await db.all("SELECT id, type, amount, reason, reference, actor, approver, status_current, status_label, created_at FROM request_payment_events WHERE request_id = ? ORDER BY created_at ASC, id ASC", [rid]);
 }
 
-module.exports = { deriveStatus: deriveStatus, computeSituation: computeSituation, deriveCurrent: deriveCurrent, recordEvent: recordEvent, timeline: timeline };
+// Whether the record output must be HELD from the public library (pay-before-release, has a fee,
+// not waived, not yet paid in full). Governs public-ready publication (not just delivery).
+async function publicationHeld(rid) {
+  var s = await computeSituation(rid);
+  return !!(s.hasEstimate && !s.waived && (Number(s.effectiveTotal) || 0) > 0 && s.releaseHeld && ((Number(s.totalPaid) || 0) + 0.005 < (Number(s.effectiveTotal) || 0)));
+}
+// When the release gate opens (paid / waived / net-terms / no-fee), promote this request's held
+// fulfilled_records to 'released' (publish + downloadable). No-op if still held.
+async function promoteOnRelease(rid) {
+  try {
+    if (!(await publicationHeld(rid))) {
+      await db.run("UPDATE fulfilled_records SET status = 'released', released_at = COALESCE(released_at, ?) WHERE request_id = ? AND status = 'held'", [nowStr(), rid]);
+    }
+  } catch (e) { console.error('[promoteOnRelease]', e.message); }
+}
+
+module.exports = { deriveStatus: deriveStatus, computeSituation: computeSituation, deriveCurrent: deriveCurrent, recordEvent: recordEvent, timeline: timeline, publicationHeld: publicationHeld, promoteOnRelease: promoteOnRelease };
