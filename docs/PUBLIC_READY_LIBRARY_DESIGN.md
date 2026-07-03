@@ -285,3 +285,41 @@ same foundation.
 - The map never depends on city GIS; city GIS is an enhancement, with an open-stack fallback.
 - "route" = get a request to a team/queue; "assign" = get a task to a person (carried from workflow).
 - EXTRACTION != EMBEDDING (Section 4).
+
+---
+
+## 13. Phase 1 build log (2026-07-02) — COMPLETE
+
+Discovered on picking this up: items 1, 2, and 4 were already built after this doc was written —
+`fulfilled_records` has title/summary/event_date/keywords; `recordMetaExtract.enrichFulfilledMeta`
+extracts a clean title + 1-2 sentence summary + event_date + keywords from the CLEARED copy and
+re-embeds after every deposit; and `recordSearch.searchPublicReady` already runs keyword + a
+semantic recall pass (pgvector `<=>`, floor 0.45, merged, deduped) wired into `searchAll`. Verified
+live against 42 released records: "building permit" -> exact keyword hits; "property deed" -> five
+property-related records semantically (none containing "deed"). So search-first is done and working.
+
+Built this session — the remaining item 3, the publish-eligibility gate (commits 9421c70 +
+ec8f2f8): a record released to ONE requestor no longer auto-publishes to the open public library.
+- New independent axis: `record_types.auto_publish` (opt-in per type) + `fulfilled_records.published`
+  / published_at / published_by. Publication is SEPARATE from release-to-requestor.
+- At deposit (both redaction paths), `published` is set from the record type's `auto_publish`
+  (default OFF - conservative, avoids the surveillance failure mode the doc warned about).
+- Public DISCOVERY surfaces (portal search keyword + semantic; browse tree + list) filter
+  `published=1`. The direct download endpoint (`/file/:id`) is left serving `released` records so a
+  requestor's own link keeps working - a non-published record is simply undiscoverable, not deleted.
+- Staff control: `POST /redaction-jobs/released/:id/publish` toggle + a Publish/Unpublish button and
+  an "In public library / Not published" badge on the Released Records page; an "Auto-publish to
+  public library" checkbox on the record-type editor.
+- Existing 42 released records backfilled to `published=1` (no demo disruption).
+- Verified 4/4: released-but-unpublished excluded from discovery; auto_publish type publishes at
+  deposit; toggle both ways.
+
+Interaction with Financial Profile phase 3c (payment publication gate): `fulfilled_records` now has
+TWO independent axes - `status` (held vs released; the PAYMENT gate) and `published` (in the open
+library or not; the ELIGIBILITY gate). Public surfaces require released AND published; the requestor
+is governed by release; publication is the librarian's decision. They compose cleanly.
+
+Still deferred (later phases, unchanged): move the deposit trigger from apply -> approval; mass-
+redaction deposit path; browse metadata (geo/address/entities/topic/homogeneous/mappable flags);
+the browse surface; the map; the dedicated no-login Reading Room page; staff-side semantic indexing
+of high-stakes sources.
