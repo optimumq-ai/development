@@ -549,6 +549,7 @@ router.get('/request/:requestId/financial-profile', requireAuth, async function 
     var ledger = await all("SELECT id, target, method, amount, tendered, change_given, reference, clerk, created_at FROM fee_payments WHERE request_id = ? AND COALESCE(voided,0) = 0 ORDER BY created_at", [rid]);
     var erpCharges = paymentMode === 'erp' ? await all("SELECT id, target, amount, reference, erp_charge_id, status, paid_amount, method, sent_at, paid_at FROM erp_charges WHERE request_id = ? ORDER BY created_at", [rid]) : [];
     var credits = await all("SELECT id, resolution_type, resolution_amount, resolution_detail, resolved_at, approved_by FROM objections WHERE request_id = ? AND status = 'resolved' AND approval_status = 'approved' AND resolution_type IN ('reduction','waiver','write_off') ORDER BY resolved_at", [rid]);
+    var manualAdjustments = await all("SELECT id, type, amount, reason, actor, created_at FROM fee_adjustments WHERE request_id = ? AND COALESCE(voided,0) = 0 ORDER BY created_at", [rid]);
     var waiverStatus = reqRow.fee_waiver_status || null;
     var status = await require('../services/paymentStatus').deriveCurrent(rid);
     var paymentTimeline = await require('../services/paymentStatus').timeline(rid);
@@ -574,6 +575,7 @@ router.get('/request/:requestId/financial-profile', requireAuth, async function 
       ledger: ledger || [],
       erpCharges: erpCharges || [],
       objectionCredits: credits || [],
+      adjustments: manualAdjustments || [],
       paymentStatus: status,
       paymentTimeline: paymentTimeline || [],
       generatedAt: new Date().toISOString()
