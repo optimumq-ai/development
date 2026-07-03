@@ -18,6 +18,7 @@ export default function RecordTypeEditor(props) {
     typical_request_reason: init.typical_request_reason || '',
     public_availability: init.public_availability || 'review_required',
     auto_release_eligible: init.auto_release_eligible === 1,
+    auto_publish: init.auto_publish === 1,
     is_structured_data: init.is_structured_data === 1,
     fulfillment_method: init.fulfillment_method || 'electronic_search',
     medium: init.medium || 'electronic',
@@ -65,7 +66,7 @@ export default function RecordTypeEditor(props) {
     var payload = {
       category_id: f.category_id, name: f.name.trim(), intent: f.intent,
       expected_content: f.expected_content, typical_request_reason: f.typical_request_reason,
-      public_availability: f.public_availability, auto_release_eligible: f.auto_release_eligible,
+      public_availability: f.public_availability, auto_release_eligible: f.auto_release_eligible, auto_publish: f.auto_publish,
       is_structured_data: f.is_structured_data, fulfillment_method: f.fulfillment_method, medium: f.medium, synonyms: strToArr(f.synonyms),
       disambiguators: strToArr(f.disambiguators), keywords: strToArr(f.keywords),
       identifying_facets: strToArr(f.identifying_facets), formats: strToArr(f.formats), status: f.status
@@ -153,6 +154,9 @@ export default function RecordTypeEditor(props) {
           </label>
           <label style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
             <input type="checkbox" checked={f.is_structured_data} onChange={function(e){ set('is_structured_data', e.target.checked); }} /> Structured data
+          </label>
+          <label style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
+            <input type="checkbox" checked={f.auto_publish} onChange={function(e){ set('auto_publish', e.target.checked); }} /> Auto-publish to public library
           </label>
         </div>
         <label style={lab}>Fulfillment method</label>

@@ -29,6 +29,13 @@ export default function ReleasedRecordsPage() {
     setBusy(function (b) { var n = Object.assign({}, b); n[r.id] = false; return n; });
   }
 
+  async function togglePublish(r) {
+    try {
+      var resp = await api.post('/redaction-jobs/released/' + r.id + '/publish', { published: !r.published });
+      setRecords(function (rs) { return rs.map(function (x) { return x.id === r.id ? Object.assign({}, x, { published: resp.data.published ? 1 : 0 }) : x; }); });
+    } catch (e) { alert('Could not update publication.'); }
+  }
+
   var shown = records.filter(function (r) {
     if (!q.trim()) return true;
     var s = q.toLowerCase();
@@ -75,11 +82,14 @@ export default function ReleasedRecordsPage() {
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '3px' }}>
                     <span style={{ fontWeight: '700', fontSize: '14.5px', color: '#1F4E79' }}>{r.title}</span>
                     <Pill bg={av.bg} fg={av.fg}>{av.label}</Pill>
+                    {r.published ? <Pill bg="#DEF7EC" fg="#03543F">In public library</Pill> : <Pill bg="#F3F4F6" fg="#6B7280">Not published</Pill>}
                   </div>
                   <div style={{ fontSize: '12px', color: '#9CA3AF' }}>
                     {r.record_type_name ? r.record_type_name + ' \u00b7 ' : ''}{r.department_name ? r.department_name + ' \u00b7 ' : ''}{r.page_count ? r.page_count + ' page' + (r.page_count !== 1 ? 's' : '') + ' \u00b7 ' : ''}{r.released_at ? 'released ' + (r.released_at || '').slice(0, 10) : ''}
                   </div>
                 </div>
+                <button onClick={function () { togglePublish(r); }}
+                  style={{ flexShrink: 0, padding: '8px 14px', borderRadius: '8px', border: '1px solid ' + (r.published ? '#FDE68A' : '#BBF7D0'), background: 'white', color: r.published ? '#92400E' : '#03543F', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{r.published ? 'Unpublish' : 'Publish to library'}</button>
                 <button disabled={!!busy[r.id] || !r.output_file_id} onClick={function () { download(r); }}
                   style={{ flexShrink: 0, padding: '8px 14px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>{busy[r.id] ? 'Downloading...' : 'Download'}</button>
               </div>
