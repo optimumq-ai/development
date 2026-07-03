@@ -411,4 +411,82 @@ router.get('/payments/drawer', requireAuth, async function (req, res) {
   } catch (e) { res.status(500).json({ error: 'Could not load the drawer report.' }); }
 });
 
+// ---- Request Financial Profile: one assembled, explainable object per request. Recomputes the
+// estimate (and reconciled actual, if any) from stored inputs so the rule trace is always present,
+// then layers payment state, plan, ledger, ERP charges, approved objection credits, and a derived
+// payment status. Renderers (staff screen, requestor view, emails) all consume this. ----
+function deriveFinancialStatus(est, ps, mode) {
+  if (!est || !ps) return { current: 'no_estimate', label: 'No estimate yet' };
+  if (ps.effectiveTotal <= 0) return { current: 'no_fee', label: 'No fee due' };
+  if (ps.paidInFull) return { current: 'paid_released', label: 'Paid in full \u2014 released' };
+  var depDue = est.deposit_due != null ? Number(est.deposit_due) : 0;
+  var depPaid = ps.depositPaid || 0;
+  if (depDue > 0 && depPaid + 0.005 < depDue) return { current: 'deposit_due', label: mode === 'erp' ? 'Deposit charge sent \u2014 hold' : 'Deposit invoiced \u2014 hold' };
+  if (depDue > 0 && depPaid + 0.005 >= depDue && ps.balanceDue > 0) return { current: 'deposit_paid_proceed', label: 'Deposit paid \u2014 proceeding' };
+  return { current: 'balance_due', label: mode === 'erp' ? 'Charged \u2014 awaiting ERP payment' : 'Invoiced \u2014 awaiting payment' };
+}
+
+async function computeSnapshot(row, fallbackCfgRow) {
+  // Recompute from stored inputs (fresh trace); fall back to the stored fee_context_json.
+  var profRow = row.config_profile_id ? await get('SELECT id, name, version, config_json FROM fee_profiles WHERE id = ?', [row.config_profile_id]) : fallbackCfgRow;
+  var inputs = null; try { inputs = row.input_json ? JSON.parse(row.input_json) : null; } catch (e) { inputs = null; }
+  if (inputs && profRow) {
+    var profile = {}; try { profile = JSON.parse(profRow.config_json || '{}'); } catch (e) { profile = {}; }
+    return { fc: engine.compute(profile, inputs), profRow: profRow };
+  }
+  var fc = {}; try { fc = JSON.parse(row.fee_context_json || '{}'); } catch (e) { fc = {}; }
+  return { fc: fc, profRow: profRow };
+}
+
+router.get('/request/:requestId/financial-profile', requireAuth, async function (req, res) {
+  try {
+    var rid = req.params.requestId;
+    var reqRow = await get("SELECT id, request_number, requestor_name, requestor_email, description FROM requests WHERE id = ?", [rid]);
+    if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
+    var jid = await activeJurisdiction();
+    var cfgRow = await pickConfig(jid);
+    var paymentMode = 'internal'; try { var _pc = cfgRow ? JSON.parse(cfgRow.config_json || '{}') : {}; if (_pc.payment_mode === 'erp') paymentMode = 'erp'; } catch (e) {}
+
+    var est = await latestEstimate(rid);
+    var estimateOut = null;
+    if (est) {
+      var eSnap = await computeSnapshot(est, cfgRow);
+      var eR = (eSnap.fc && eSnap.fc.requestLevel) || {};
+      estimateOut = { present: true, id: est.id, total: (eR.total != null ? eR.total : Number(est.total) || 0), computation: eSnap.fc, createdAt: est.created_at, notifiedAt: est.notified_at || null,
+        configProfile: eSnap.profRow ? { id: eSnap.profRow.id, name: eSnap.profRow.name, version: eSnap.profRow.version } : null };
+    }
+
+    var recon = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC LIMIT 1", [rid]);
+    var actualOut = null;
+    if (recon) {
+      var rSnap = await computeSnapshot(recon, cfgRow);
+      var rR = (rSnap.fc && rSnap.fc.requestLevel) || {};
+      var actualTotal = (rR.total != null ? rR.total : Number(recon.total) || 0);
+      var estTotal = estimateOut ? estimateOut.total : 0;
+      actualOut = { present: true, id: recon.id, total: actualTotal, computation: rSnap.fc, delta: Math.round((actualTotal - estTotal) * 100) / 100, createdAt: recon.created_at };
+    }
+
+    var payState = await paymentState(rid);
+    var planCtx = est ? await planForSnapshot(est) : null;
+    var ledger = await all("SELECT id, target, method, amount, tendered, change_given, reference, clerk, created_at FROM fee_payments WHERE request_id = ? AND COALESCE(voided,0) = 0 ORDER BY created_at", [rid]);
+    var erpCharges = paymentMode === 'erp' ? await all("SELECT id, target, amount, reference, erp_charge_id, status, paid_amount, method, sent_at, paid_at FROM erp_charges WHERE request_id = ? ORDER BY created_at", [rid]) : [];
+    var credits = await all("SELECT id, resolution_type, resolution_amount, resolution_detail, resolved_at, approved_by FROM objections WHERE request_id = ? AND status = 'resolved' AND approval_status = 'approved' AND resolution_type IN ('reduction','waiver','write_off') ORDER BY resolved_at", [rid]);
+    var status = deriveFinancialStatus(est, payState, paymentMode);
+
+    res.json({
+      request: { id: reqRow.id, requestNumber: reqRow.request_number, requestorName: reqRow.requestor_name, requestorEmail: reqRow.requestor_email, description: reqRow.description },
+      paymentMode: paymentMode,
+      estimate: estimateOut,
+      actual: actualOut,
+      paymentState: payState,
+      paymentTiming: planCtx ? { plan: planCtx.plan, source: planCtx.source } : null,
+      ledger: ledger || [],
+      erpCharges: erpCharges || [],
+      objectionCredits: credits || [],
+      paymentStatus: status,
+      generatedAt: new Date().toISOString()
+    });
+  } catch (e) { res.status(500).json({ error: 'Could not assemble the financial profile: ' + (e && e.message) }); }
+});
+
 module.exports = router;
