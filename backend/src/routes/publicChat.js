@@ -417,6 +417,21 @@ router.get('/browse/records', async function(req, res) {
   } catch(e){ console.error('browse records failed:', e.message); res.status(500).json({ error:'Failed to load records' }); }
 });
 
+// Public library MAP: published + mappable + geocoded records as pins, plus the map anchor. No auth
+// (public reading room). Only records that passed the eligibility gate AND whose type is mappable
+// AND that geocoded appear - the surveillance guardrail is the mappable flag + the publish gate.
+router.get('/library/map', async function(req, res) {
+  try {
+    var geocode = require('../services/geocode');
+    var cfg = await geocode.mapConfig();
+    var rows = await all("SELECT fr.id, fr.title, fr.summary, fr.latitude, fr.longitude, fr.geo_address, fr.event_date, fr.released_at, fr.output_file_id, rt.name AS record_type_name, d.name AS department_name FROM fulfilled_records fr LEFT JOIN record_types rt ON rt.id = fr.record_type_id LEFT JOIN departments d ON d.id = fr.department_id WHERE fr.status = 'released' AND COALESCE(fr.published,0) = 1 AND COALESCE(rt.mappable,1) = 1 AND fr.latitude IS NOT NULL AND fr.longitude IS NOT NULL ORDER BY fr.released_at DESC");
+    res.json({
+      center: { lat: cfg.lat, lng: cfg.lng }, zoom: cfg.zoom, demo: cfg.demo,
+      records: rows.map(function(r){ return { id: r.id, title: r.title, summary: (r.summary || '').slice(0, 240), address: r.geo_address, recordType: r.record_type_name, department: r.department_name, date: (r.event_date || r.released_at || '').slice(0, 10), lat: r.latitude, lng: r.longitude, fileId: r.output_file_id }; })
+    });
+  } catch (e) { res.status(500).json({ error: 'Could not load the map.' }); }
+});
+
 // Download a public-ready record's file. Security: only serves a file that backs a RELEASED record.
 router.get('/file/:id', async function(req, res) {
   try {

@@ -28,6 +28,7 @@ import RedactionWorkspacePage from './pages/RedactionWorkspacePage';
 import RedactionReviewPage from './pages/RedactionReviewPage';
 import StructuredRedactionFieldsPage from './pages/StructuredRedactionFieldsPage';
 import ReleasedRecordsPage from './pages/ReleasedRecordsPage';
+import PublicLibraryMapPage from './pages/PublicLibraryMapPage';
 import MassRedactionPage from './pages/MassRedactionPage';
 import FeeConfigPage from './pages/FeeConfigPage';
 import CashDrawerPage from './pages/CashDrawerPage';
@@ -60,9 +61,11 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/portal" element={<PublicPortalPage />} />
         <Route path="/portal/library" element={<PublicLibraryPage />} />
+        <Route path="/portal/library/map" element={<PublicLibraryMapPage />} />
         <Route path="/" element={<Guard c={<AppLayout />} />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
+          <Route path="library-map" element={<PublicLibraryMapPage />} />
           <Route path="requests" element={<RequestQueuePage />} />
           <Route path="requests/new" element={<NewRequestPage />} />
           <Route path="requests/:id" element={<RequestWorkspacePage />} />
