@@ -457,22 +457,16 @@ router.post('/request/:requestId/adjustment-notice/send', requireAuth, async fun
   } catch (e) { res.status(500).json({ error: 'Could not send the adjustment notice.' }); }
 });
 
+// Payment-status event timeline (the dated film) for a request.
+router.get('/request/:requestId/payment-timeline', requireAuth, async function (req, res) {
+  try { res.json({ events: (await require('../services/paymentStatus').timeline(req.params.requestId)) || [], status: await require('../services/paymentStatus').deriveCurrent(req.params.requestId) }); }
+  catch (e) { res.status(500).json({ error: 'Could not load the payment timeline.' }); }
+});
+
 // ---- Request Financial Profile: one assembled, explainable object per request. Recomputes the
 // estimate (and reconciled actual, if any) from stored inputs so the rule trace is always present,
 // then layers payment state, plan, ledger, ERP charges, approved objection credits, and a derived
 // payment status. Renderers (staff screen, requestor view, emails) all consume this. ----
-function deriveFinancialStatus(est, ps, mode, waiverStatus) {
-  if (waiverStatus === 'granted') return { current: 'waived', label: 'Fees waived' };
-  if (!est || !ps) return { current: 'no_estimate', label: 'No estimate yet' };
-  if (ps.effectiveTotal <= 0) return { current: 'no_fee', label: 'No fee due' };
-  if (ps.paidInFull) return { current: 'paid_released', label: 'Paid in full \u2014 released' };
-  var depDue = est.deposit_due != null ? Number(est.deposit_due) : 0;
-  var depPaid = ps.depositPaid || 0;
-  if (depDue > 0 && depPaid + 0.005 < depDue) return { current: 'deposit_due', label: mode === 'erp' ? 'Deposit charge sent \u2014 hold' : 'Deposit invoiced \u2014 hold' };
-  if (depDue > 0 && depPaid + 0.005 >= depDue && ps.balanceDue > 0) return { current: 'deposit_paid_proceed', label: 'Deposit paid \u2014 proceeding' };
-  return { current: 'balance_due', label: mode === 'erp' ? 'Charged \u2014 awaiting ERP payment' : 'Invoiced \u2014 awaiting payment' };
-}
-
 async function computeSnapshot(row, fallbackCfgRow) {
   // Faithfulness: prefer the IMMUTABLE stored snapshot when it already carries a rule trace, so the
   // profile reflects the estimate AS QUOTED (a later rule change cannot rewrite it). Only older
@@ -524,7 +518,8 @@ router.get('/request/:requestId/financial-profile', requireAuth, async function 
     var erpCharges = paymentMode === 'erp' ? await all("SELECT id, target, amount, reference, erp_charge_id, status, paid_amount, method, sent_at, paid_at FROM erp_charges WHERE request_id = ? ORDER BY created_at", [rid]) : [];
     var credits = await all("SELECT id, resolution_type, resolution_amount, resolution_detail, resolved_at, approved_by FROM objections WHERE request_id = ? AND status = 'resolved' AND approval_status = 'approved' AND resolution_type IN ('reduction','waiver','write_off') ORDER BY resolved_at", [rid]);
     var waiverStatus = reqRow.fee_waiver_status || null;
-    var status = deriveFinancialStatus(est, payState, paymentMode, waiverStatus);
+    var status = await require('../services/paymentStatus').deriveCurrent(rid);
+    var paymentTimeline = await require('../services/paymentStatus').timeline(rid);
     // Fee computation method: waiver > applied purpose (commercial/inspection/...) > standard.
     var eRL = (estimateOut && estimateOut.computation && estimateOut.computation.requestLevel) || {};
     var method = 'standard', methodLabel = 'Standard';
@@ -548,6 +543,7 @@ router.get('/request/:requestId/financial-profile', requireAuth, async function 
       erpCharges: erpCharges || [],
       objectionCredits: credits || [],
       paymentStatus: status,
+      paymentTimeline: paymentTimeline || [],
       generatedAt: new Date().toISOString()
     });
   } catch (e) { res.status(500).json({ error: 'Could not assemble the financial profile: ' + (e && e.message) }); }
