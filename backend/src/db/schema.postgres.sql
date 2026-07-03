@@ -570,6 +570,21 @@ CREATE TABLE IF NOT EXISTS request_payment_events (
   created_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_paymentevents_request ON request_payment_events(request_id);
+
+-- Manual fee adjustments (credit = non-cash reduction of the receivable, with reason; refund = cash
+-- out on overpayment). Corrections are handled as re-estimates, not rows here. Credits reduce the
+-- effective total (like approved objection credits); refunds reduce net cash paid.
+CREATE TABLE IF NOT EXISTS fee_adjustments (
+  id TEXT PRIMARY KEY,
+  request_id TEXT NOT NULL,
+  type TEXT,
+  amount REAL,
+  reason TEXT,
+  actor TEXT,
+  created_at TEXT,
+  voided INTEGER DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_feeadjust_request ON fee_adjustments(request_id);
 CREATE TABLE IF NOT EXISTS tickler_runs (id TEXT PRIMARY KEY, ran_at TEXT, trigger TEXT, scanned INTEGER, flagged INTEGER, summary_json TEXT);
 
 CREATE TABLE IF NOT EXISTS request_clocks (id TEXT PRIMARY KEY, request_id TEXT NOT NULL, clock_type TEXT NOT NULL, label TEXT, basis TEXT NOT NULL DEFAULT 'calendar_days', duration INTEGER NOT NULL, started_at TEXT, status TEXT NOT NULL DEFAULT 'running', satisfied_at TEXT, is_primary INTEGER DEFAULT 0, created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')), updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));

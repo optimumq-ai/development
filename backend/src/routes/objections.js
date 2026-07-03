@@ -170,6 +170,7 @@ router.post('/:id/approve', requireAuth, requireRole('FEE_WAIVER_APPROVER', 'SYS
     if (decision === 'approve') {
       await run("UPDATE objections SET status = 'resolved', approval_status = 'approved', approved_by = ?, approved_at = ?, resolved_by = ?, resolved_at = ?, updated_at = ? WHERE id = ?", [who, now, who, now, now, o.id]);
       await hist(o.request_id, req.user, 'OBJECTION_ADJUSTMENT_APPROVED', 'Approved ' + o.resolution_type + ' of $' + Number(o.resolution_amount || 0).toFixed(2) + ' \u2014 objection resolved and credit applied.');
+      try { await require('../services/paymentStatus').recordEvent(o.request_id, { type: 'credit', amount: Number(o.resolution_amount) || 0, reason: 'objection ' + o.resolution_type + ' approved', approver: who }); } catch (e) {}
     } else {
       await run("UPDATE objections SET status = 'open', approval_status = 'rejected', approved_by = ?, approved_at = ?, updated_at = ? WHERE id = ?", [who, now, now, o.id]);
       await hist(o.request_id, req.user, 'OBJECTION_ADJUSTMENT_REJECTED', 'Rejected the proposed ' + o.resolution_type + ' \u2014 returned to ' + (o.assignee_name || 'the owner') + '.');

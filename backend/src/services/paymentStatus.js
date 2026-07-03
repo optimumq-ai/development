@@ -46,9 +46,12 @@ async function computeSituation(rid) {
   var recon = await db.get("SELECT total FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC LIMIT 1", [rid]);
   var base = (recon && recon.total != null) ? Number(recon.total) : (Number(est.total) || 0);
   var credRow = await db.get("SELECT COALESCE(SUM(resolution_amount),0) AS c FROM objections WHERE request_id = ? AND status = 'resolved' AND approval_status = 'approved' AND resolution_type IN ('reduction','waiver','write_off')", [rid]);
-  var credits = Math.round((Number(credRow && credRow.c) || 0) * 100) / 100;
+  var manualCred = await db.get("SELECT COALESCE(SUM(amount),0) AS c FROM fee_adjustments WHERE request_id = ? AND type = 'credit' AND COALESCE(voided,0) = 0", [rid]);
+  var credits = Math.round(((Number(credRow && credRow.c) || 0) + (Number(manualCred && manualCred.c) || 0)) * 100) / 100;
   var eff = Math.max(0, Math.round((base - credits) * 100) / 100);
-  var totalPaid = (Number(est.deposit_paid_amount) || 0) + (Number(est.final_paid_amount) || 0);
+  var refundRow = await db.get("SELECT COALESCE(SUM(amount),0) AS r FROM fee_adjustments WHERE request_id = ? AND type = 'refund' AND COALESCE(voided,0) = 0", [rid]);
+  var refunds = Math.round((Number(refundRow && refundRow.r) || 0) * 100) / 100;
+  var totalPaid = Math.max(0, Math.round(((Number(est.deposit_paid_amount) || 0) + (Number(est.final_paid_amount) || 0) - refunds) * 100) / 100);
   var prof = est.config_profile_id ? await db.get('SELECT config_json FROM fee_profiles WHERE id = ?', [est.config_profile_id]) : await db.get("SELECT config_json FROM fee_profiles WHERE status = 'active' ORDER BY updated_at DESC LIMIT 1");
   var cfg = {}; try { cfg = JSON.parse((prof && prof.config_json) || '{}'); } catch (e) { cfg = {}; }
   var ptCfg = (cfg.paymentTiming && Object.keys(cfg.paymentTiming).length) ? cfg.paymentTiming : pt.deriveDefaultPaymentTiming(cfg);

@@ -61,6 +61,7 @@ router.post('/payment-applied', async function (req, res) {
       }
     }
     await hist(track.request_id, null, 'ERP_PAYMENT_APPLIED', 'ERP reported a ' + track.target + ' payment of $' + amountApplied.toFixed(2) + ' (' + (b.method || 'ext') + ') applied.');
+    try { await require('../services/paymentStatus').recordEvent(track.request_id, { type: 'payment', amount: amountApplied, reason: 'ERP ' + track.target + ' payment', reference: erpChargeId }); } catch (e) {}
     res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: 'Could not apply the payment: ' + (e && e.message) }); }
 });

@@ -78,9 +78,13 @@ async function paymentState(rid) {
   var recon = await get("SELECT total FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC LIMIT 1", [rid]);
   var base = (recon && recon.total != null) ? Number(recon.total) : (Number(est.total) || 0);
   var credRow = await get("SELECT COALESCE(SUM(resolution_amount),0) AS credits FROM objections WHERE request_id = ? AND status = 'resolved' AND approval_status = 'approved' AND resolution_type IN ('reduction','waiver','write_off')", [rid]);
-  var credits = Math.round((Number(credRow && credRow.credits) || 0) * 100) / 100;
+  var manualCredRow = await get("SELECT COALESCE(SUM(amount),0) AS c FROM fee_adjustments WHERE request_id = ? AND type = 'credit' AND COALESCE(voided,0) = 0", [rid]);
+  var credits = Math.round(((Number(credRow && credRow.credits) || 0) + (Number(manualCredRow && manualCredRow.c) || 0)) * 100) / 100;
   var effectiveTotal = Math.max(0, Math.round((base - credits) * 100) / 100);
-  var bal = pt.computeBalance(effectiveTotal, est.deposit_paid_amount, est.final_paid_amount);
+  var refundRow = await get("SELECT COALESCE(SUM(amount),0) AS r FROM fee_adjustments WHERE request_id = ? AND type = 'refund' AND COALESCE(voided,0) = 0", [rid]);
+  var refunds = Math.round((Number(refundRow && refundRow.r) || 0) * 100) / 100;
+  var netDep = Number(est.deposit_paid_amount) || 0, netFin = Math.max(0, (Number(est.final_paid_amount) || 0) - refunds);
+  var bal = pt.computeBalance(effectiveTotal, netDep, netFin);
   return { effectiveTotal: bal.effectiveTotal, reconciled: !!recon, adjustments: credits, depositPaid: Number(est.deposit_paid_amount) || 0,
     finalPaid: Number(est.final_paid_amount) || 0, paid: bal.paid, balanceDue: bal.balanceDue, paidInFull: bal.paidInFull, estimateId: est.id };
 }
@@ -176,6 +180,7 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
     );
     await run('UPDATE requests SET estimated_fee = ? WHERE id = ?', [R.total, req.params.requestId]);
 
+    await require('../services/paymentStatus').recordEvent(req.params.requestId, { type: 'estimate_issued', amount: R.total, reason: 'estimate calculated', actor: (req.user && req.user.name) || (req.user && req.user.sub) || 'system' });
     res.json({ estimate: { id: id, total: R.total, depositDue: R.depositDue, notify: R.estimateNotifyTriggered, feeContext: feeContext, configProfile: { id: cfgRow.id, name: cfgRow.name } } });
   } catch (e) { res.status(500).json({ error: 'Could not compute estimate: ' + (e && e.message) }); }
 });
@@ -249,6 +254,7 @@ router.post('/request/:requestId/estimate/accept', requireAuth, async function (
   await run("UPDATE requests SET stage = ?, status = 'active', tickler_flag = NULL, tickler_flagged_at = NULL, updated_at = datetime('now') WHERE id = ?", [newStage, rid]);
   await hist(rid, req.user, 'ESTIMATE_ACCEPTED', depositDue > 0 ? ('Deposit of $' + depositDue.toFixed(2) + ' required before work begins.') : 'No deposit required; record search begins.', reqRow.stage, newStage);
   if (newStage === 'record_search') { try { await taskRouting.spawnForStage(rid, 'record_search', req.user && req.user.sub); } catch (e) {} }
+  await require('../services/paymentStatus').recordEvent(req.params.requestId, { type: 'estimate_accepted', reason: 'requestor accepted the estimate', actor: (req.user && req.user.name) || (req.user && req.user.sub) || 'system' });
   res.json({ accepted: true, depositDue: depositDue, stage: newStage });
 });
 
@@ -279,6 +285,7 @@ router.post('/request/:requestId/deposit/record', requireAuth, async function (r
   await run("UPDATE requests SET stage = 'record_search', status = 'active', tickler_flag = NULL, tickler_flagged_at = NULL, updated_at = datetime('now') WHERE id = ?", [rid]);
   await hist(rid, req.user, 'DEPOSIT_RECORDED', 'Deposit of $' + amount.toFixed(2) + ' recorded; record search begins.', reqRow.stage, 'record_search');
   try { await taskRouting.spawnForStage(rid, 'record_search', req.user && req.user.sub); } catch (e) {}
+  await require('../services/paymentStatus').recordEvent(req.params.requestId, { type: 'payment', amount: amount, reason: 'deposit', actor: (req.user && req.user.name) || (req.user && req.user.sub) || 'system' });
   res.json({ recorded: true, amount: amount, stage: 'record_search' });
 });
 
@@ -297,6 +304,7 @@ router.post('/request/:requestId/final-payment/record', requireAuth, async funct
   await run('UPDATE request_fee_estimates SET final_paid_at = ?, final_paid_by = ?, final_paid_amount = ? WHERE id = ?', [nowStr(), actor, newFinal, est.id]);
   var after = await paymentState(rid);
   await hist(rid, req.user, 'FINAL_PAYMENT_RECORDED', 'Payment of $' + amount.toFixed(2) + ' recorded; balance now $' + after.balanceDue.toFixed(2) + (after.paidInFull ? ' (paid in full).' : '.'), null, null);
+  await require('../services/paymentStatus').recordEvent(req.params.requestId, { type: 'payment', amount: amount, reason: 'final payment', actor: (req.user && req.user.name) || (req.user && req.user.sub) || 'system' });
   res.json({ recorded: true, amount: amount, paymentState: after });
 });
 
@@ -340,6 +348,7 @@ router.post('/request/:requestId/reconcile', requireAuth, async function (req, r
       [id, rid, 'reconciliation', cfgRow.id, JSON.stringify(request), JSON.stringify(feeContext), actualTotal, 0, 0, estTotal, variancePct, reNotify ? 1 : 0, (req.user && req.user.name) || (req.user && req.user.sub) || 'system', nowStr()]
     );
     await hist(rid, req.user, 'ESTIMATE_RECONCILED', 'Actual $' + actualTotal.toFixed(2) + (estTotal != null ? (' vs estimate $' + estTotal.toFixed(2) + ' (' + (variancePct >= 0 ? '+' : '') + variancePct + '%)') : '') + (reNotify ? ' \u2014 revised notice required.' : ''), null, null);
+    await require('../services/paymentStatus').recordEvent(req.params.requestId, { type: 'reconciliation', amount: actualTotal, reason: 'actuals reconciled to the estimate', actor: (req.user && req.user.name) || (req.user && req.user.sub) || 'system' });
     res.json({ actualTotal: actualTotal, estimateTotal: estTotal, variancePct: variancePct, reNotifyThreshold: pol, reNotifyRequired: reNotify, feeContext: feeContext, profilesUpdated: updates });
   } catch (e) { res.status(500).json({ error: 'Could not reconcile: ' + (e && e.message) }); }
 });
@@ -398,6 +407,7 @@ router.post('/request/:requestId/payment/record', requireAuth, async function (r
       await hist(rid, req.user, 'FINAL_PAYMENT_RECORDED', 'Payment of $' + amount.toFixed(2) + ' (' + method + ') recorded; balance now $' + afterH.balanceDue.toFixed(2) + (afterH.paidInFull ? ' (paid in full).' : '.'), null, null);
     }
     var after = await paymentState(rid);
+    await require('../services/paymentStatus').recordEvent(req.params.requestId, { type: 'payment', amount: amount, reason: target, reference: b.reference || method, actor: (req.user && req.user.name) || (req.user && req.user.sub) || 'system' });
     res.json({ recorded: true, target: target, amount: amount, method: method, changeGiven: changeGiven, paymentState: after });
   } catch (e) { res.status(500).json({ error: 'Could not record the payment: ' + (e && e.message) }); }
 });
@@ -461,6 +471,28 @@ router.post('/request/:requestId/adjustment-notice/send', requireAuth, async fun
 router.get('/request/:requestId/payment-timeline', requireAuth, async function (req, res) {
   try { res.json({ events: (await require('../services/paymentStatus').timeline(req.params.requestId)) || [], status: await require('../services/paymentStatus').deriveCurrent(req.params.requestId) }); }
   catch (e) { res.status(500).json({ error: 'Could not load the payment timeline.' }); }
+});
+
+// Record a manual fee adjustment: 'credit' (non-cash reduction of the receivable, with reason) or
+// 'refund' (cash out on overpayment). Triggers recompute + a status event. Corrections are handled
+// as re-estimates (re-save the estimate), not here.
+router.post('/request/:requestId/adjustment', requireAuth, async function (req, res) {
+  try {
+    var rid = req.params.requestId;
+    if (!(await get("SELECT id FROM requests WHERE id = ?", [rid]))) return res.status(404).json({ error: 'Request not found.' });
+    var b = req.body || {};
+    var type = b.type === 'refund' ? 'refund' : (b.type === 'credit' ? 'credit' : null);
+    if (!type) return res.status(400).json({ error: "Choose an adjustment type: 'credit' or 'refund'." });
+    var amount = Number(b.amount);
+    if (!(amount > 0)) return res.status(400).json({ error: 'Enter an amount greater than zero.' });
+    var reason = (b.reason || '').trim();
+    if (!reason) return res.status(400).json({ error: 'Enter a reason for the adjustment.' });
+    var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'system';
+    await run("INSERT INTO fee_adjustments (id, request_id, type, amount, reason, actor, created_at) VALUES (?,?,?,?,?,?,?)", ['adj-' + uuidv4().slice(0, 8), rid, type, amount, reason, actor, nowStr()]);
+    var status = await require('../services/paymentStatus').recordEvent(rid, { type: type, amount: amount, reason: reason, actor: actor });
+    var after = await paymentState(rid);
+    res.json({ recorded: true, type: type, amount: amount, paymentStatus: status, paymentState: after });
+  } catch (e) { res.status(500).json({ error: 'Could not record the adjustment: ' + (e && e.message) }); }
 });
 
 // ---- Request Financial Profile: one assembled, explainable object per request. Recomputes the
