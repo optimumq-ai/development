@@ -42,6 +42,9 @@ export default function FeeEstimatePanel(props) {
   var [erpCharges, setErpCharges] = useState([]);
   var [erpBusy, setErpBusy] = useState(false);
   var [erpMsg, setErpMsg] = useState('');
+  var [adjNotice, setAdjNotice] = useState(null);
+  var [adjBusy, setAdjBusy] = useState(false);
+  var [adjMsg, setAdjMsg] = useState('');
 
   useEffect(function () { load(); }, [requestId]);
   async function load() {
@@ -231,6 +234,44 @@ export default function FeeEstimatePanel(props) {
     </div>);
   }
 
+  async function loadAdjNotice() {
+    setAdjBusy(true); setAdjMsg('');
+    try { var r = await api.get('/fee-estimates/request/' + requestId + '/adjustment-notice'); setAdjNotice({ to: r.data.to || '', subject: r.data.subject || '', text: r.data.text || '' }); }
+    catch (e) { setAdjMsg((e.response && e.response.data && e.response.data.error) || 'Could not load the adjustment notice.'); }
+    setAdjBusy(false);
+  }
+  async function sendAdjNotice() {
+    setAdjBusy(true); setAdjMsg('');
+    try { var r = await api.post('/fee-estimates/request/' + requestId + '/adjustment-notice/send', adjNotice); if (r.data && r.data.sent) { setAdjMsg('Sent to ' + r.data.to); setAdjNotice(null); } else setAdjMsg('Could not send.'); }
+    catch (e) { setAdjMsg((e.response && e.response.data && e.response.data.error) || 'Could not send.'); }
+    setAdjBusy(false);
+  }
+  function renderAdjNotice() {
+    var reconciled = (ctx.paymentState && ctx.paymentState.reconciled) || (reconResult && !reconResult.error);
+    if (!reconciled) return null;
+    return (
+      <div style={{ marginTop: '14px', borderTop: '1px dashed #E5E7EB', paddingTop: '12px', maxWidth: '560px' }}>
+        <div style={{ fontSize: '13px', fontWeight: 700, color: '#111', marginBottom: '6px' }}>Adjustment notice to requestor</div>
+        {!adjNotice ? (
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+            <button onClick={loadAdjNotice} disabled={adjBusy} style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>{adjBusy ? 'Loading...' : 'Load estimate-to-actual notice'}</button>
+            {adjMsg ? <span style={{ fontSize: '12px', color: adjMsg.indexOf('Sent') === 0 ? '#03543F' : '#9B1C1C' }}>{adjMsg}</span> : null}
+          </div>
+        ) : (
+          <div>
+            <div style={{ marginBottom: '6px' }}><label style={lbl}>To</label><input type="text" value={adjNotice.to} onChange={function (e) { setAdjNotice(Object.assign({}, adjNotice, { to: e.target.value })); }} style={inp} /></div>
+            <div style={{ marginBottom: '6px' }}><label style={lbl}>Subject</label><input type="text" value={adjNotice.subject} onChange={function (e) { setAdjNotice(Object.assign({}, adjNotice, { subject: e.target.value })); }} style={inp} /></div>
+            <div style={{ marginBottom: '8px' }}><label style={lbl}>Message</label><textarea value={adjNotice.text} onChange={function (e) { setAdjNotice(Object.assign({}, adjNotice, { text: e.target.value })); }} rows={8} style={Object.assign({}, inp, { fontFamily: 'inherit', resize: 'vertical' })} /></div>
+            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+              <button onClick={sendAdjNotice} disabled={adjBusy} style={{ padding: '8px 16px', borderRadius: '8px', border: 'none', background: adjBusy ? '#9CB4CC' : NAVY, color: 'white', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>{adjBusy ? 'Sending...' : 'Send to requestor'}</button>
+              <button onClick={function () { setAdjNotice(null); setAdjMsg(''); }} style={{ padding: '8px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: 700, cursor: 'pointer' }}>Cancel</button>
+              {adjMsg ? <span style={{ fontSize: '12px', color: adjMsg.indexOf('Sent') === 0 ? '#03543F' : '#9B1C1C' }}>{adjMsg}</span> : null}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
   async function reconcile() {
     setReconBusy(true);
     try {
@@ -397,6 +438,7 @@ export default function FeeEstimatePanel(props) {
                       )}
                     </div>
                   ) : null}
+                  {renderAdjNotice()}
                 </div>
               ) : null}
     </div>

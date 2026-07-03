@@ -413,6 +413,50 @@ router.get('/payments/drawer', requireAuth, async function (req, res) {
   } catch (e) { res.status(500).json({ error: 'Could not load the drawer report.' }); }
 });
 
+// Adjustment (estimate -> actual) notice: preview + send. Requires a reconciliation to exist.
+router.get('/request/:requestId/adjustment-notice', requireAuth, async function (req, res) {
+  try {
+    var rid = req.params.requestId;
+    var reqRow = await get('SELECT id, request_number, requestor_name, requestor_email, fee_waiver_status FROM requests WHERE id = ?', [rid]);
+    if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
+    var est = await latestEstimate(rid);
+    var recon = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC LIMIT 1", [rid]);
+    if (!recon) return res.status(400).json({ error: 'No reconciliation yet - record the actuals first.' });
+    var estFc = {}; try { estFc = JSON.parse((est && est.fee_context_json) || '{}'); } catch (e) {}
+    var actFc = {}; try { actFc = JSON.parse(recon.fee_context_json || '{}'); } catch (e) {}
+    var agency = await sysCfg('agency_name', 'the City');
+    var paymentMode = 'internal';
+    if (recon.config_profile_id) { var prof = await get('SELECT config_json FROM fee_profiles WHERE id = ?', [recon.config_profile_id]); if (prof) { try { var cj = JSON.parse(prof.config_json || '{}'); if (cj.payment_mode === 'erp') paymentMode = 'erp'; } catch (e) {} } }
+    var aR = actFc.requestLevel || {};
+    var waiverGranted = reqRow.fee_waiver_status === 'granted';
+    var method = waiverGranted ? 'Fee waiver approved' : ((aR.purposeApplied && aR.purpose && aR.purpose !== 'standard') ? (aR.purpose === 'commercial' ? 'Commercial rates' : (aR.purpose === 'inspection' ? 'Inspection (no fee)' : (String(aR.purpose).charAt(0).toUpperCase() + String(aR.purpose).slice(1)))) : 'Standard');
+    var ps = await paymentState(rid);
+    var notice = feeNotice.buildAdjustmentNotice(reqRow, estFc, actFc, { agencyName: agency, paymentMode: paymentMode, computationMethod: method, feeWaiver: { granted: waiverGranted }, balanceDue: ps ? ps.balanceDue : null });
+    res.json({ to: reqRow.requestor_email || null, requestorName: reqRow.requestor_name || null, subject: notice.subject, text: notice.text, estimateTotal: (estFc.requestLevel && estFc.requestLevel.total) || 0, actualTotal: aR.total || 0 });
+  } catch (e) { res.status(500).json({ error: 'Could not build the adjustment notice.' }); }
+});
+
+router.post('/request/:requestId/adjustment-notice/send', requireAuth, async function (req, res) {
+  try {
+    var rid = req.params.requestId;
+    var reqRow = await get('SELECT id, requestor_email FROM requests WHERE id = ?', [rid]);
+    if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
+    var to = (req.body && req.body.to) || reqRow.requestor_email;
+    if (!to) return res.status(400).json({ error: 'No requestor email address on this request.' });
+    var recon = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC LIMIT 1", [rid]);
+    if (!recon) return res.status(400).json({ error: 'No reconciliation to send.' });
+    var subject = (req.body && req.body.subject) || 'Final cost for your public records request';
+    var text = (req.body && req.body.text) || '';
+    if (!text.trim()) return res.status(400).json({ error: 'The notice body is empty.' });
+    var agencyName = await sysCfg('agency_name', 'Open Records');
+    var html = emailTemplate.wrap({ agencyName: agencyName, contentHtml: emailTemplate.textToHtml(text) });
+    var result = await email.send({ to: to, subject: subject, text: text, html: html });
+    var ok = !!(result && result.sent);
+    if (ok) await run('UPDATE request_fee_estimates SET notified_at = ?, notified_to = ? WHERE id = ?', [nowStr(), to, recon.id]);
+    res.json({ sent: ok, to: to });
+  } catch (e) { res.status(500).json({ error: 'Could not send the adjustment notice.' }); }
+});
+
 // ---- Request Financial Profile: one assembled, explainable object per request. Recomputes the
 // estimate (and reconciled actual, if any) from stored inputs so the rule trace is always present,
 // then layers payment state, plan, ledger, ERP charges, approved objection credits, and a derived

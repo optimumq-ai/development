@@ -59,14 +59,8 @@ function paymentLanguage(pp, moneyFn) {
   return out;
 }
 
-function buildNotice(request, feeContext, opts) {
-  opts = opts || {};
-  var R = (feeContext && feeContext.requestLevel) || {};
-  var agency = opts.agencyName || 'the City';
-  var num = request.request_number || '';
-  var name = request.requestor_name || 'Requestor';
-  var total = (R.total != null ? R.total : 0);
-
+function num(n) { n = Number(n); return isFinite(n) ? n : 0; }
+function buildLines(R) {
   var lines = [];
   (R.labor || []).forEach(function (li) { if (li.amount > 0) lines.push('- ' + (LABOR_LABEL[li.kind] || 'Staff time') + ': ' + hrLabel(li.billableHours) + ' at ' + money(li.rate) + '/hour = ' + money(li.amount)); });
   (R.duplication || []).forEach(function (li) {
@@ -80,10 +74,23 @@ function buildNotice(request, feeContext, opts) {
   else if (R.delivery && R.delivery.needsActual) lines.push('- Delivery (' + R.delivery.method + '): actual cost to be determined');
   if (R.certification && R.certification.amount > 0) lines.push('- Certification: ' + R.certification.count + ' at ' + money(R.certification.rate) + ' = ' + money(R.certification.amount));
   if (R.other && R.other.amount) lines.push('- ' + (R.other.description || 'Other') + ': ' + money(R.other.amount));
+  return lines;
+}
+function relevantTrace(R) { return ((R && R.rulesTrace) || []).filter(function (t) { return ['free_allowances', 'surcharge', 'min_fee', 'max_fee', 'de_minimis'].indexOf(t.rule) >= 0 && (t.applied || t.configured); }); }
+
+function buildNotice(request, feeContext, opts) {
+  opts = opts || {};
+  var R = (feeContext && feeContext.requestLevel) || {};
+  var agency = opts.agencyName || 'the City';
+  var num = request.request_number || '';
+  var name = request.requestor_name || 'Requestor';
+  var total = (R.total != null ? R.total : 0);
+
+  var lines = buildLines(R);
 
   var waiverGranted = !!(opts.feeWaiver && opts.feeWaiver.granted);
   var method = opts.computationMethod || 'Standard';
-  var traceRel = (R.rulesTrace || []).filter(function (t) { return ['free_allowances', 'surcharge', 'min_fee', 'max_fee', 'de_minimis'].indexOf(t.rule) >= 0 && (t.applied || t.configured); });
+  var traceRel = relevantTrace(R);
 
   var subject = (waiverGranted ? 'Your public records request \u2014 fees waived' : 'Cost estimate for your public records request') + (num ? ' ' + num : '');
   var body = '';
@@ -134,4 +141,39 @@ function buildBalanceDueNotice(request, state, opts) {
   return { subject: subject, text: body };
 }
 
-module.exports = { buildNotice: buildNotice, buildBalanceDueNotice: buildBalanceDueNotice, paymentLanguage: paymentLanguage };
+function buildAdjustmentNotice(request, estimateFc, actualFc, opts) {
+  opts = opts || {};
+  var eR = (estimateFc && estimateFc.requestLevel) || {};
+  var aR = (actualFc && actualFc.requestLevel) || {};
+  var estTotal = num(eR.total), actualTotal = num(aR.total);
+  var delta = Math.round((actualTotal - estTotal) * 100) / 100;
+  var numr = request.request_number || '', name = request.requestor_name || 'Requestor', agency = opts.agencyName || 'the City';
+  var waiverGranted = !!(opts.feeWaiver && opts.feeWaiver.granted);
+  var lines = buildLines(aR), traceRel = relevantTrace(aR);
+
+  var subject = 'Final cost for your public records request' + (numr ? ' ' + numr : '');
+  var body = 'Dear ' + name + ',\n\n';
+  body += 'Your public records request' + (numr ? ' (' + numr + ')' : '') + ' has been completed, and we have calculated the final actual cost.\n\n';
+  body += 'Original estimate: ' + money(estTotal) + '\n';
+  body += 'Final actual cost: ' + money(actualTotal) + '\n';
+  body += (delta === 0 ? 'This matches your estimate; there is no change.\n\n' : (delta > 0 ? 'This is an increase of ' + money(delta) + ' from the estimate.\n\n' : 'This is a decrease of ' + money(Math.abs(delta)) + ' from the estimate.\n\n'));
+  if (lines.length) body += 'The final cost is based on:\n' + lines.join('\n') + '\n\n';
+  if (traceRel.length) body += 'How your total was determined:\n' + traceRel.map(function (t) { return '- ' + t.plainLine; }).join('\n') + '\n\n';
+  if (waiverGranted) {
+    body += 'These fees have been waived. No payment is required.\n\n';
+  } else if (opts.paymentMode === 'erp') {
+    body += 'You will receive an updated invoice and payment instructions in a separate communication from our finance office.\n\n';
+  } else {
+    var bal = opts.balanceDue;
+    if (bal != null) {
+      if (bal > 0.005) body += 'Balance now due: ' + money(bal) + '. Please submit payment so we can release your records.\n\n';
+      else if (bal < -0.005) body += 'You have paid ' + money(Math.abs(bal)) + ' more than the final cost; a refund or credit will be arranged.\n\n';
+      else body += 'Your balance is paid in full; your records will be released.\n\n';
+    }
+  }
+  body += 'If you have any questions about this final cost, please reply to this message.\n\n';
+  body += 'Sincerely,\n' + agency + ' - Open Records';
+  return { subject: subject, text: body };
+}
+
+module.exports = { buildNotice: buildNotice, buildBalanceDueNotice: buildBalanceDueNotice, buildAdjustmentNotice: buildAdjustmentNotice, paymentLanguage: paymentLanguage };
