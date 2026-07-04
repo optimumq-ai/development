@@ -65,7 +65,7 @@ async function ensureSetup() {
   var rq = await db.get("SELECT id FROM requests WHERE id = ?", [SYSREQ_ID]);
   if (!rq) {
     await db.run("INSERT INTO requests (id, request_number, requestor_name, requestor_email, description, classification, department_id, record_type_id, stage, status, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,datetime('now'))",
-      [SYSREQ_ID, 'SYS-911-PROACTIVE', 'Proactive Disclosure', 'system@optimumq.ai', 'Standing proactive-disclosure batch for 911 call records.', 'standard', null, RT_ID, 'delivery', 'active']);
+      [SYSREQ_ID, 'SYS-911-PROACTIVE', 'Proactive Disclosure', 'system@optimumq.ai', 'Standing proactive-disclosure batch for 911 call records.', 'standard', 'dept-police', RT_ID, 'delivery', 'active']);
   }
   var fieldMap = EXEMPT.map(function (f) { return { field: f, rule_id: null }; });
   var fingerprint = JSON.stringify({ kind: 'fields', columns: COLUMNS });
