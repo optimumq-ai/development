@@ -336,4 +336,15 @@ is stable enough that the curated fixture won't churn constantly. Not yet schedu
 - Consider an **admin-vs-user knowledge split** (separate corpora / audiences), per the earlier help-agent design note.
 - Dovetails with the planned **documentation work** (the doc outline doubles as a completeness checklist). Optional: deeper answers, answer-with-sources, feedback thumbs.
 
+### R5. Encrypt secrets & credentials at rest (pre-production security)
+- **Now:** connector credentials (`record_repositories.config`) and platform/customer keys entered via the Integrations screen (`system_config`: anthropic_api_key, voyage_api_key, smtp_pass, resend_api_key) are stored **plaintext** in Postgres. Fine for demo; a city IT security review will flag it.
+- **Upgrade:** encrypt these at rest (app-level envelope encryption with a key from env/secrets store, or DB-level). Applies to both the Sources connector configs and the Integrations keys. Pair with masked display (already done in the UI) and audit logging of changes.
+- Category: pre-production hardening (same bucket as the two-stage gatekeeper LLM).
+
+### R6. AI data-egress / in-firewall AI architecture (strategic decision)
+- **The issue:** the product calls **cloud AI APIs** (Anthropic for the LLM, Voyage for embeddings). Even in an on-premise install with customer-provided keys, record data **leaves the customer network** to reach those APIs. A city strict enough to require on-premise (to avoid SaaS/FedRAMP-style certs) may also prohibit data egress - in which case cloud-API AI does not satisfy the very requirement driving the on-prem sale. Especially relevant for police/CJIS-governed records (911, Axon).
+- **Options to evaluate:** (a) cloud AI under zero-retention / data-residency contractual terms (data still transits out - satisfies many but not air-gapped requirements); (b) self-hosted open-weight models (LLM + embeddings) on customer GPU hardware to keep ALL data in-network - a major re-architecture with capability/quality tradeoffs, GPU infra cost, and ops burden; the current Claude dependency is **cloud-only / not self-hostable**, so full in-firewall AI means swapping the model layer. (c) private cloud/VPC deployments of Claude (e.g. via Bedrock/Vertex) that contain data within the customer's own cloud tenancy - verify current options.
+- **Action:** for each prospect, determine the ACTUAL requirement - "data stored on our servers" (on-prem hosting satisfies) vs. "no data may leave our network" (needs self-hosted models). Decide whether to (1) target only the former for now, or (2) build a pluggable model layer that can point at a self-hosted endpoint. Verify current Claude private-deployment options against Anthropic docs before quoting anything to a strict prospect.
+- Surfaced 2026-07-05 while building the Integrations/API-keys screen for the on-premise model.
+
 _Objection My Tasks visibility (standing passive watchers): decided AGAINST 2026-07-01. Single assigned owner, freely reassignable; team-level oversight via dashboard count (R1) once designed._
