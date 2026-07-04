@@ -50,6 +50,29 @@ router.get('/:id', requireAuth, async function (req, res) {
 
 // Demo trigger: generate a fresh batch of 911 records and run the whole pipeline now
 // (generate -> born-redact -> deposit -> publish -> enrich -> geocode -> library + map).
+// 911 incremental-pull endpoints: the CAD system accumulates records; Optimum Q pulls the delta.
+router.get('/911/status', requireAuth, async function (req, res) {
+  try { var d = await require('../services/connectors/nena911').discoverNew(); res.json({ sourceTotal: d.sourceTotal, newSinceLastPull: d.newCount, watermark: d.watermark }); }
+  catch (e) { res.status(500).json({ error: 'status failed' }); }
+});
+router.post('/911/generate', requireAuth, async function (req, res) {
+  try {
+    var n = Math.max(1, Math.min(200, parseInt((req.body && req.body.count) || 20, 10) || 20));
+    var n911 = require('../services/connectors/nena911');
+    await n911.generateIntoSource(n);
+    var d = await n911.discoverNew();
+    res.json({ added: n, sourceTotal: d.sourceTotal, newSinceLastPull: d.newCount });
+  } catch (e) { res.status(500).json({ error: 'Could not log calls: ' + (e && e.message) }); }
+});
+router.post('/911/pull', requireAuth, async function (req, res) {
+  try {
+    var n911 = require('../services/connectors/nena911');
+    var r = await n911.pullAndProcess();
+    var d = await n911.discoverNew();
+    res.json(Object.assign(r, { sourceTotal: d.sourceTotal, newSinceLastPull: d.newCount }));
+  } catch (e) { res.status(500).json({ error: 'Could not pull: ' + (e && e.message) }); }
+});
+
 router.post('/911/run-now', requireAuth, async function (req, res) {
   try {
     var n = Math.max(1, Math.min(50, parseInt((req.body && req.body.count) || 20, 10) || 20));

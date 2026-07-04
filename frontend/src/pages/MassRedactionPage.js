@@ -30,8 +30,9 @@ export default function MassRedactionPage() {
   var [createdJob, setCreatedJob] = useState(null);
   var [cfg, setCfg] = useState(null);
   var [jobsReload, setJobsReload] = useState(0);
-  var [running911, setRunning911] = useState(false);
-  var [run911Result, setRun911Result] = useState('');
+  var [status911, setStatus911] = useState(null);
+  var [busy911, setBusy911] = useState('');
+  var [msg911, setMsg911] = useState('');
   var [viewTpl, setViewTpl] = useState(null);
   var [viewDetail, setViewDetail] = useState(null);
   var [viewSample, setViewSample] = useState(undefined);
@@ -42,6 +43,7 @@ export default function MassRedactionPage() {
 
   useEffect(function () { load(); }, []);
   useEffect(function () { api.get('/mass-jobs/config').then(function (r) { setCfg(r.data); }).catch(function () {}); }, []);
+  useEffect(function () { loadStatus911(); }, []);
   async function load() {
     setLoading(true);
     try { var r = await api.get('/redaction-templates'); setTemplates(r.data.templates || []); } catch (e) { console.error(e); }
@@ -135,15 +137,24 @@ export default function MassRedactionPage() {
     catch (e) { alert('Could not open the sample.'); }
   }
 
-  async function run911() {
-    setRunning911(true); setRun911Result('');
+  async function loadStatus911() {
+    try { var r = await api.get('/mass-jobs/911/status'); setStatus911(r.data); } catch (e) { /* ignore */ }
+  }
+  async function logCalls() {
+    setBusy911('log'); setMsg911('');
+    try { var r = await api.post('/mass-jobs/911/generate', { count: 20 }); setStatus911({ sourceTotal: r.data.sourceTotal, newSinceLastPull: r.data.newSinceLastPull }); setMsg911('The 911 system logged 20 new calls.'); }
+    catch (e) { setMsg911('Could not log calls.'); }
+    setBusy911('');
+  }
+  async function pullProcess() {
+    setBusy911('pull'); setMsg911('');
     try {
-      var r = await api.post('/mass-jobs/911/run-now', { count: 20 });
-      var d = r.data || {};
-      setRun911Result('Generated ' + d.generated + ', born-redacted ' + d.redacted + (d.held ? ', held ' + d.held : '') + ' \u2014 published to the library & map.');
+      var r = await api.post('/mass-jobs/911/pull', {}); var d = r.data || {};
+      setStatus911({ sourceTotal: d.sourceTotal, newSinceLastPull: d.newSinceLastPull });
+      setMsg911(d.pulled ? ('Pulled ' + d.pulled + ', born-redacted ' + d.redacted + ' \u2014 published to the library & map.') : 'Nothing new to pull.');
       setJobsReload(function (x) { return x + 1; });
-    } catch (e) { setRun911Result('Could not run the batch.'); }
-    setRunning911(false);
+    } catch (e) { setMsg911('Could not pull.'); }
+    setBusy911('');
   }
 
   return (
@@ -158,12 +169,18 @@ export default function MassRedactionPage() {
       </div>
 
       <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '10px', padding: '14px 16px', marginBottom: '22px' }}>
-        <div style={{ fontSize: '13px', fontWeight: '700', color: '#92400E', marginBottom: '4px' }}>911 Call Records &mdash; live automation demo</div>
+        <div style={{ fontSize: '13px', fontWeight: '700', color: '#92400E', marginBottom: '4px' }}>911 Call Records &mdash; incremental pull demo</div>
         <div style={{ fontSize: '12.5px', color: '#78350F', lineHeight: 1.5, marginBottom: '10px' }}>
-          The <strong>911 Call Management System (demo)</strong> generates about 20 call records a day. Each is born-redacted &mdash; caller name, phone, and home address withheld &mdash; while the incident type, location, time, and disposition stay public. Cleared records publish to the public-ready library and appear on the map by incident location. Click to run a fresh batch through the entire pipeline right now.
+          The <strong>911 Call Management System (demo)</strong> accumulates call records on its own side. Optimum Q pulls only what&rsquo;s <strong>new since its last checkpoint</strong>, born-redacts each (caller name, phone, and home address withheld) while the incident type, location, and disposition stay public, and publishes to the library + map. Same incremental-pull pattern a real CAD connector or nightly export uses.
         </div>
-        <button onClick={run911} disabled={running911} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: '#B45309', color: 'white', fontSize: '13px', fontWeight: '600', cursor: running911 ? 'default' : 'pointer', opacity: running911 ? 0.7 : 1 }}>{running911 ? 'Running the pipeline\u2026' : 'Generate a 911 batch now'}</button>
-        {run911Result ? <span style={{ marginLeft: '12px', fontSize: '12.5px', color: '#03543F', fontWeight: '600' }}>{run911Result}</span> : null}
+        <div style={{ fontSize: '12.5px', color: '#374151', marginBottom: '10px' }}>
+          {status911 ? (<span>911 system holds <strong>{status911.sourceTotal}</strong> record{status911.sourceTotal !== 1 ? 's' : ''} &middot; <strong style={{ color: status911.newSinceLastPull ? '#B45309' : '#03543F' }}>{status911.newSinceLastPull}</strong> new since last pull</span>) : <span style={{ color: '#9CA3AF' }}>Loading status\u2026</span>}
+        </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+          <button onClick={logCalls} disabled={!!busy911} style={{ padding: '9px 16px', borderRadius: '8px', border: '1px solid #B45309', background: 'white', color: '#B45309', fontSize: '13px', fontWeight: '700', cursor: busy911 ? 'default' : 'pointer', opacity: busy911 ? 0.6 : 1 }}>{busy911 === 'log' ? 'Logging\u2026' : 'Log 20 new calls (simulate dispatch)'}</button>
+          <button onClick={pullProcess} disabled={!!busy911} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: '#B45309', color: 'white', fontSize: '13px', fontWeight: '700', cursor: busy911 ? 'default' : 'pointer', opacity: busy911 ? 0.6 : 1 }}>{busy911 === 'pull' ? 'Pulling & processing\u2026' : ('Pull & process new records' + (status911 && status911.newSinceLastPull ? ' (' + status911.newSinceLastPull + ')' : ''))}</button>
+          {msg911 ? <span style={{ fontSize: '12.5px', color: '#03543F', fontWeight: '600' }}>{msg911}</span> : null}
+        </div>
       </div>
 
       <MassJobsPanel reloadKey={jobsReload} />
