@@ -20,6 +20,7 @@ export default function AppLayout() {
     { to: '/requests', label: 'Request Queue', show: true },
     { to: '/setup', label: 'Setup', show: isElev },
     { to: '/reports', label: 'Reports (ARIA)', show: isElev },
+    { to: '/ai-reporting', label: 'AI Reporting', show: isElev },
     { to: '/staff', label: 'Staff Management', show: isElev },
     { to: '/departments', label: 'City Departments & Teams', show: isElev },
     { to: '/taxonomy', label: 'Taxonomy', show: isElev },

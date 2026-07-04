@@ -58,6 +58,7 @@ app.use('/api/semantic-search', require('./src/routes/semanticSearch'));
 app.use('/api/public', require('./src/routes/publicChat'));
 app.use('/api/agent-rules', require('./src/routes/agentRules'));
 app.use('/api/help', require('./src/routes/help'));
+app.use('/api/reports', require('./src/routes/reports'));
 app.use('/api/taxonomy', require('./src/routes/taxonomy'));
 app.use('/api/redaction', require('./src/routes/redactionRules'));
 app.use('/api/redaction-jobs', require('./src/routes/redactionJobs'));
