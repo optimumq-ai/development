@@ -157,9 +157,54 @@ Keeps the strong claims (no-connector where possible, AI-accelerated, front-load
 
 ---
 
-## 8. Open questions / TODOs
+## 8. Throughput & setup-window sizing (measured)
 
-1. **Single-job size ceiling.** What volume can the mass-redaction pipeline process comfortably in one overnight window? This number decides how much history comes in as one export vs. needing to be chunked, and is the concrete figure behind the whole "process it all during setup" claim. (Estimated loosely before — pin it down.)
-2. **Setup-window length by customer size.** Is ~4 months a headline number, or does it scale with record volume? Stronger pitch: "setup scales with your archive size; here's roughly what to expect."
-3. **Free-text scrutiny in structured records.** Operational plan for narrative/notes fields inside otherwise-structured exports (auto-flag for review vs. AI redaction vs. hold).
-4. **Sources UI: direct vs. export labeling** (product task noted in §7).
+These resolve the two headline open questions. Numbers are from the live pipeline, with caveats stated so they hold up in a real conversation.
+
+### 8.1 Single-job / single-window ceiling — structured records
+
+**Measured:** the full born-redaction pipeline for structured records (drop exempt columns -> render clean PDF -> deposit -> publish -> geocode -> embed/index) runs at **~230 ms/record, single-threaded** = **~260 records/min ~= ~15,000 records/hour**. Over a 12-hour overnight window that is on the order of **~180,000 records/night, single-threaded**, before any parallelism.
+
+**The current policy budget is 500 records/night** (`mass_redaction_nightly_budget`, default 500). That is a **safety throttle, not a hardware limit** — it sits ~100-300x below the measured hardware rate and can be raised freely.
+
+**Honest caveats on the measured number:**
+- It uses the **deterministic demo geocoder** (no network). In production, geocoding depends on the geocoder chosen: public Nominatim is rate-limited (~1 request/second) and would dominate; a commercial or self-hosted geocoder is fast. **Geocoding rate is a deployment choice, and for a large back-catalog it may be the binding constraint — validate with the chosen geocoder.**
+- Embedding (Voyage) is a real external API call and is the main non-trivial cost in the measured figure; it is batchable and parallelizable.
+- The **born-redaction step itself is nearly free** for structured data — the variable cost is the external services (geocode + embed), not the redaction engine.
+
+**Planning takeaway:** for structured/data records, the redaction engine is **not** the bottleneck. Even a large city's multi-year structured history (911 CAD, permitting, ERP — often 1-5M rows) processes in **days, not months**, at hardware rates. The real constraints are (a) how fast the source can export/ingest, and (b) external-service rate limits (geocoder, embeddings) — both addressable with batching, parallelism, and the right service choices. A single job larger than one night's budget simply spans multiple nights (the UI already shows "~N nights").
+
+### 8.2 Documents — a different animal
+
+Not yet measured directly (no page-redaction template exists in the demo to time against; 132 PDF files are on hand but need a template). Reasoned honestly:
+
+- Per-document cost is heavier than a structured record: PDF render, possibly OCR, multi-page, box stamping.
+- For **fixed-layout forms**, this is still machine-fast once a template exists.
+- For **variable-content documents** (exempt content in variable locations), the limiter is **human review, not machine time.**
+
+So document setup time is driven by two human/config factors, not throughput:
+1. **Number of distinct form types** needing a template built (one-time config per type).
+2. **Volume of variable-content documents** needing per-document review.
+
+**TODO:** measure the page-redaction path against a representative multi-page form once a pages template exists, to get a real fixed-layout document rate.
+
+### 8.3 Setup-window length — what actually drives it
+
+**Conclusion: the setup window scales with document diversity and variable-content volume — NOT with structured-record count** (which is fast enough to be a rounding error).
+
+Rough planning bands by customer profile (to refine with real pilots):
+
+- **Data-heavy, few document types** -> short window (on the order of **weeks**). Structured history bulk-exports and processes fast; little template config.
+- **Mixed** -> **1-2 months.** Structured is quick; the time goes to building templates across the common form types and reviewing the variable-content slice.
+- **Document-heavy, many form types, large variable-content archive** -> **~3-4 months.** This is where the headline "~4 months" is justified — it is **template-building + review labor**, not machine throughput.
+
+State it this way to the customer: *"Setup scales with your archive's document diversity, not its size. Your structured records — the bulk of the volume — process in days. The window length is about how many distinct document types we template and how much variable-content review your archive needs."*
+
+---
+
+## 9. Remaining open questions / TODOs
+
+1. **Free-text scrutiny in structured records.** Operational plan for narrative/notes fields inside otherwise-structured exports (auto-flag for review vs. AI redaction vs. hold).
+2. **Sources UI: direct vs. export labeling** (product task noted in §7).
+3. **Document-path rate** (from §8.2): measure fixed-layout page-redaction throughput against a representative form.
+4. **Production geocoder validation** (from §8.1): confirm the geocoding rate under the chosen production geocoder before quoting large back-catalog timelines.
