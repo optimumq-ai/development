@@ -341,3 +341,20 @@ Search battery over the 4 records showed:
 `git log --oneline`; `curl :3001/api/health`; `git status`. For node one-offs, export ONLY `DATABASE_URL`
 and `VOYAGE_API_KEY` via `grep` (NEVER `. ./.env` — that executes the file and leaked a key this session).
 Re-seed the demo corpus: `cd backend && node scripts/seedDemoPermits.js` with those two env vars set.
+
+---
+## Thread 10 addendum (2026-07-03) — count-then-narrow value + build scoping
+The core value of email count-only mode is the COUNT-THEN-NARROW moment: the agent can say
+"your description returned ~9,000 results — if that's more than you expected, let's refine it by
+sender or date range." Two payoffs: (1) in states with a statutory DUTY TO ASSIST / clarify an
+overly broad or vague request, the agent does that clarification up front automatically (a
+compliance + labor win, not just a nicety); (2) even where not legally required, it produces a
+request far more likely to be filled with the emails the requester actually wanted, instead of a
+vague fishing expedition that bounces back. (Pin exact states/statutes when built for real; do not
+fabricate specifics.) BUILD SCOPING (agreed): the emulator is SMALL (smaller than the Axon stub -
+returns only a count, no content). Roll email count-only into the current non-document-format
+enhancement. Build against a synthetic demo_emails emulator ONLY - do NOT integrate real Microsoft
+Graph / Purview / Google Vault credentials before the demo (that auth is where the real complexity
+is). Increment plan: E1 general format recognition (prompt) -> E2 email emulator + count-only mode
+(server-side deterministic routing so email never hits the document path) -> E3 deterministic
+instant_retrieval flag backstop (after demo).
