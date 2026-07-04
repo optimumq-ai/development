@@ -127,6 +127,17 @@ router.get('/:id', requireAuth, async function(req, res) {
   res.json({ template: Object.assign({}, t, { zones: parseZones(t), field_map: parseFieldMap(t) }) });
 });
 
+// GET /:id/sample -> a recently released record produced for this template's record type, so staff
+// can preview what the born-redacted output actually looks like.
+router.get('/:id/sample', requireAuth, async function(req, res) {
+  try {
+    var t = await get('SELECT record_type_id FROM layout_profiles WHERE id = ?', [req.params.id]);
+    if (!t) return res.status(404).json({ error: 'Template not found' });
+    var fr = t.record_type_id ? await get("SELECT id, title, output_file_id FROM fulfilled_records WHERE record_type_id = ? AND status = 'released' AND output_file_id IS NOT NULL ORDER BY released_at DESC LIMIT 1", [t.record_type_id]) : null;
+    res.json({ sample: fr ? { title: fr.title, output_file_id: fr.output_file_id } : null });
+  } catch (e) { res.status(500).json({ error: 'Could not load a sample.' }); }
+});
+
 // PATCH /:id -> update (elevated)
 router.patch('/:id', requireAuth, async function(req, res) {
   if (!isElevated(req)) return res.status(403).json({ error: 'Only a supervisor can edit templates' });

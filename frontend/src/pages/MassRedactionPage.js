@@ -31,6 +31,9 @@ export default function MassRedactionPage() {
   var [jobsReload, setJobsReload] = useState(0);
   var [running911, setRunning911] = useState(false);
   var [run911Result, setRun911Result] = useState('');
+  var [viewTpl, setViewTpl] = useState(null);
+  var [viewDetail, setViewDetail] = useState(null);
+  var [viewSample, setViewSample] = useState(undefined);
 
   useEffect(function () { load(); }, []);
   useEffect(function () { api.get('/mass-jobs/config').then(function (r) { setCfg(r.data); }).catch(function () {}); }, []);
@@ -102,6 +105,17 @@ export default function MassRedactionPage() {
   var estDate = '';
   if (estNights > 0) { var d = new Date(); d.setDate(d.getDate() + estNights); estDate = d.toISOString().slice(0, 10); }
 
+  async function openView(t) {
+    setViewTpl(t); setViewDetail(null); setViewSample(undefined);
+    try { var r = await api.get('/redaction-templates/' + t.id); setViewDetail(r.data.template); } catch (e) { setViewDetail({ error: true }); }
+    try { var sm = await api.get('/redaction-templates/' + t.id + '/sample'); setViewSample(sm.data.sample); } catch (e) { setViewSample(null); }
+  }
+  function closeView() { setViewTpl(null); setViewDetail(null); setViewSample(undefined); }
+  async function downloadSample(fileId) {
+    try { var resp = await api.get('/files/download/' + fileId, { responseType: 'blob' }); var url = URL.createObjectURL(resp.data); window.open(url, '_blank'); setTimeout(function () { URL.revokeObjectURL(url); }, 60000); }
+    catch (e) { alert('Could not open the sample.'); }
+  }
+
   async function run911() {
     setRunning911(true); setRun911Result('');
     try {
@@ -160,6 +174,7 @@ export default function MassRedactionPage() {
                     {t.created_at ? ' \u00b7 ' + (t.created_at || '').slice(0, 10) : ''}
                   </div>
                 </div>
+                <button onClick={function () { openView(t); }} title="See what this template redacts" style={{ flexShrink: 0, padding: '7px 12px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>View</button>
                 <button onClick={function () { scheduleJob(t); }} title="Queue a large batch for overnight processing" style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Schedule job</button>
                 <button onClick={function () { runBatch(t); }} style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Run batch</button>
                 <button onClick={function () { remove(t); }} style={{ flexShrink: 0, padding: '7px 12px', borderRadius: '8px', border: '1px solid #FCA5A5', background: 'white', color: '#DC2626', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Delete</button>
@@ -168,6 +183,58 @@ export default function MassRedactionPage() {
           })}
         </div>
       )}
+
+      {viewTpl ? (
+        <div onClick={closeView} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '20px' }}>
+          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '14px', width: '560px', maxWidth: '100%', maxHeight: '88vh', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ padding: '18px 22px', borderBottom: '1px solid #F3F4F6' }}>
+              <div style={{ fontWeight: '700', fontSize: '16px' }}>{viewTpl.name}</div>
+              <div style={{ fontSize: '12.5px', color: '#6B7280', marginTop: '3px' }}>{viewTpl.kind === 'fields' ? 'Structured / born-redacted (drops exempt columns)' : 'Page redaction (covers zones on the page)'}{viewTpl.record_type_name ? ' \u00b7 ' + viewTpl.record_type_name : ''} \u00b7 safety threshold {viewTpl.safety_threshold != null ? viewTpl.safety_threshold : 80}%</div>
+            </div>
+            <div style={{ flex: 1, overflowY: 'auto', padding: '18px 22px' }}>
+              {!viewDetail ? <div style={{ color: '#9CA3AF', fontSize: '13px' }}>Loading\u2026</div> : viewDetail.error ? <div style={{ color: '#9B1C1C' }}>Could not load template detail.</div> : (
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '8px' }}>{viewTpl.kind === 'fields' ? 'Fields withheld (dropped from every record)' : 'Redaction boxes'}</div>
+                  {viewTpl.kind === 'fields' ? (
+                    (viewDetail.field_map || []).length ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {viewDetail.field_map.map(function (f, i) { return (
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: '#FEF2F2', border: '1px solid #FECACA', borderRadius: '8px' }}>
+                            <span style={{ fontFamily: 'monospace', fontSize: '13px', fontWeight: '700', color: '#991B1B' }}>{f.field}</span>
+                            <span style={{ flex: 1 }} />
+                            <span style={{ fontSize: '11.5px', color: '#9CA3AF' }}>withheld</span>
+                          </div>
+                        ); })}
+                      </div>
+                    ) : <div style={{ color: '#9CA3AF', fontSize: '13px' }}>No fields configured.</div>
+                  ) : (
+                    (viewDetail.zones || []).length ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {viewDetail.zones.map(function (z, i) { return (
+                          <div key={i} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 12px', background: '#F3F4F6', borderRadius: '8px', fontSize: '12.5px' }}>
+                            <span style={{ fontWeight: '700' }}>Box {i + 1}</span>
+                            <span style={{ color: '#6B7280' }}>page {z.page_no || 1}</span>
+                            {z.label ? <span style={{ color: '#6B7280' }}>\u00b7 {z.label}</span> : null}
+                          </div>
+                        ); })}
+                      </div>
+                    ) : <div style={{ color: '#9CA3AF', fontSize: '13px' }}>No boxes configured.</div>
+                  )}
+                  <div style={{ marginTop: '16px', fontSize: '12px', color: '#6B7280', lineHeight: 1.5 }}>
+                    {viewTpl.kind === 'fields' ? 'These columns are dropped before the record is rendered, so their values never appear in the released copy. Everything else stays public.' : 'These boxes are stamped over the matching areas on each document that passes the layout check.'}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div style={{ padding: '16px 22px', borderTop: '1px solid #F3F4F6', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '8px' }}>
+              <div>
+                {viewSample === undefined ? null : viewSample ? <button onClick={function () { downloadSample(viewSample.output_file_id); }} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>View a sample redacted output</button> : <span style={{ fontSize: '12px', color: '#9CA3AF' }}>No processed sample yet</span>}
+              </div>
+              <button onClick={closeView} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>Close</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       {batchTpl ? (
         <div onClick={closeBatch} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '20px' }}>
