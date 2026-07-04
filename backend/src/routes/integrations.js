@@ -1,0 +1,105 @@
+'use strict';
+var express = require('express');
+var router = express.Router();
+var { requireAuth } = require('../middleware/auth');
+var db = require('../db');
+var secrets = require('../services/secrets');
+
+function admin(req, res, next) {
+  var roles = (req.user && req.user.roles) || [];
+  if (roles.indexOf('SYSTEM_ADMIN') < 0) return res.status(403).json({ error: 'Administrator access required.' });
+  next();
+}
+async function cfg(key) { var r = await db.get('SELECT value FROM system_config WHERE key = ?', [key]); return r ? r.value : null; }
+async function setCfg(key, value) { await db.run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = ?", [key, value, value]); }
+function hint(v) { if (!v) return null; var s = String(v); return '\u2022\u2022\u2022\u2022' + s.slice(-4); }
+var MASK = '\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022'; // frontend shows this for a set secret; only overwrite if a real new value arrives
+function isNewSecret(v) { return typeof v === 'string' && v.trim() && v.indexOf('\u2022') < 0; }
+
+// GET current integration status (secrets masked; never returned in clear)
+router.get('/', requireAuth, admin, async function (req, res) {
+  try {
+    var savedAnthropic = await cfg('anthropic_api_key');
+    var savedVoyage = await cfg('voyage_api_key');
+    var resendKey = await cfg('resend_api_key');
+    var provider = (await cfg('email_provider')) || (resendKey ? 'resend' : 'smtp');
+    res.json({
+      ai: {
+        anthropic: { set: !!(savedAnthropic || process.env.ANTHROPIC_API_KEY), fromSaved: !!savedAnthropic, hint: hint(savedAnthropic || process.env.ANTHROPIC_API_KEY) },
+        voyage: { set: !!(savedVoyage || process.env.VOYAGE_API_KEY), fromSaved: !!savedVoyage, hint: hint(savedVoyage || process.env.VOYAGE_API_KEY) }
+      },
+      email: {
+        provider: provider,
+        from_name: (await cfg('agency_name')) || '',
+        smtp_host: (await cfg('smtp_host')) || '',
+        smtp_port: (await cfg('smtp_port')) || '587',
+        smtp_user: (await cfg('smtp_user')) || '',
+        smtp_from: (await cfg('smtp_from')) || '',
+        smtp_pass_set: !!(await cfg('smtp_pass')),
+        resend_from: (await cfg('resend_from')) || '',
+        resend_key_set: !!resendKey
+      }
+    });
+  } catch (e) { console.error('[integrations GET]', e && e.message); res.status(500).json({ error: 'Could not load integration settings.' }); }
+});
+
+// Save integration settings. Secrets only overwritten when a real new value is supplied.
+router.post('/', requireAuth, admin, async function (req, res) {
+  try {
+    var b = req.body || {};
+    // AI keys
+    if (b.ai) {
+      if (isNewSecret(b.ai.anthropic_api_key)) await setCfg('anthropic_api_key', b.ai.anthropic_api_key.trim());
+      if (isNewSecret(b.ai.voyage_api_key)) await setCfg('voyage_api_key', b.ai.voyage_api_key.trim());
+      await secrets.applySecrets(); // push into process.env live
+    }
+    // Email
+    if (b.email) {
+      var e = b.email;
+      if (typeof e.provider === 'string') await setCfg('email_provider', e.provider);
+      if (typeof e.from_name === 'string') await setCfg('agency_name', e.from_name);
+      if (e.provider === 'smtp') {
+        if (typeof e.smtp_host === 'string') await setCfg('smtp_host', e.smtp_host.trim());
+        if (typeof e.smtp_port === 'string') await setCfg('smtp_port', String(e.smtp_port).trim());
+        if (typeof e.smtp_user === 'string') await setCfg('smtp_user', e.smtp_user.trim());
+        if (typeof e.smtp_from === 'string') await setCfg('smtp_from', e.smtp_from.trim());
+        if (isNewSecret(e.smtp_pass)) await setCfg('smtp_pass', e.smtp_pass);
+        await setCfg('resend_api_key', ''); // ensure SMTP path is used (email.js prefers Resend if key present)
+      } else if (e.provider === 'resend') {
+        if (typeof e.resend_from === 'string') await setCfg('resend_from', e.resend_from.trim());
+        if (isNewSecret(e.resend_api_key)) await setCfg('resend_api_key', e.resend_api_key.trim());
+      }
+    }
+    res.json({ ok: true });
+  } catch (e) { console.error('[integrations POST]', e && e.message); res.status(500).json({ error: 'Could not save integration settings.' }); }
+});
+
+// Test a given integration. Accepts an optional key in the body to test before saving.
+router.post('/test/:which', requireAuth, admin, async function (req, res) {
+  var which = req.params.which, b = req.body || {};
+  try {
+    if (which === 'anthropic') {
+      var Anthropic = require('@anthropic-ai/sdk');
+      var key = isNewSecret(b.key) ? b.key.trim() : process.env.ANTHROPIC_API_KEY;
+      if (!key) return res.json({ ok: false, message: 'No Anthropic key configured.' });
+      var c = new Anthropic({ apiKey: key });
+      await c.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 5, messages: [{ role: 'user', content: 'ping' }] });
+      return res.json({ ok: true, message: 'Anthropic key works.' });
+    }
+    if (which === 'voyage') {
+      var prevV = process.env.VOYAGE_API_KEY;
+      if (isNewSecret(b.key)) process.env.VOYAGE_API_KEY = b.key.trim();
+      try { var v = require('../services/voyageEmbed'); var out = await v.embed(['test'], { inputType: 'query' }); return res.json({ ok: !!(out && out[0] && out[0].length), message: 'Voyage key works.' }); }
+      finally { if (isNewSecret(b.key)) process.env.VOYAGE_API_KEY = prevV; }
+    }
+    if (which === 'email') {
+      var to = (b.to || '').trim();
+      if (!to) return res.json({ ok: false, message: 'Enter a test recipient address.' });
+      var email = require('../services/email');
+      var r = await email.send({ to: to, subject: 'Optimum Q email test', text: 'This is a test message confirming your email settings work.', html: '<p>This is a test message confirming your email settings work.</p>' });
+      return res.json({ ok: !!(r && r.sent), message: r && r.sent ? ('Test email sent via ' + (r.provider || 'SMTP') + '.') : 'Send failed - check the settings.' });
+    }
+    res.status(400).json({ ok: false, message: 'Unknown test.' });
+  } catch (e) { res.json({ ok: false, message: (e && e.message) ? e.message.slice(0, 200) : 'Test failed.' }); }
+});
+module.exports = router;
