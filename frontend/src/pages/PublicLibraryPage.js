@@ -14,6 +14,10 @@ export default function PublicLibraryPage() {
   const [records, setRecords] = useState([]);
   const [recLoading, setRecLoading] = useState(false);
   const [record, setRecord] = useState(null);
+  const [query, setQuery] = useState('');
+  const [searching, setSearching] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [searched, setSearched] = useState(false);
 
   useEffect(function () {
     axios.get(API + '/config/public').then(function (r) { setAgencyName((r.data && r.data.agency_name) || 'City'); }).catch(function () {});
@@ -26,8 +30,14 @@ export default function PublicLibraryPage() {
     var q = '?recordType=' + encodeURIComponent(t.id || '') + (dp && dp.id ? '&department=' + encodeURIComponent(dp.id) : '') + (yr ? '&year=' + encodeURIComponent(yr) : '');
     axios.get(API + '/public/browse/records' + q).then(function (r) { setRecords((r.data && r.data.records) || []); setRecLoading(false); }).catch(function () { setRecLoading(false); });
   }
+  function doSearch() {
+    var qq = query.trim(); if (!qq) return;
+    setSearching(true); setSearched(true); setRecord(null); setDept(null); setType(null);
+    axios.get(API + '/public/library/search?q=' + encodeURIComponent(qq)).then(function (r) { setSearchResults((r.data && r.data.records) || []); setSearching(false); }).catch(function () { setSearchResults([]); setSearching(false); });
+  }
+  function clearSearch() { setSearched(false); setSearchResults([]); setQuery(''); setRecord(null); }
   function resetTo(level) {
-    if (level === 'root') { setDept(null); setType(null); setRecord(null); setYearFilter(null); }
+    if (level === 'root') { setDept(null); setType(null); setRecord(null); setYearFilter(null); setSearched(false); setSearchResults([]); setQuery(''); }
     else if (level === 'dept') { setType(null); setRecord(null); setYearFilter(null); }
     else if (level === 'type') { setRecord(null); }
   }
@@ -52,7 +62,28 @@ export default function PublicLibraryPage() {
   }
 
   function body() {
-    if (loading) return <div style={{ color: '#6B7280', padding: '40px 0', textAlign: 'center' }}>Loading the records library…</div>;
+    if (searched && !record) {
+      return (
+        <div>
+          <div style={{ fontSize: '13px', color: '#6B7280', marginBottom: '12px' }}>
+            {searching ? 'Searching\u2026' : (searchResults.length + ' result' + (searchResults.length === 1 ? '' : 's') + ' for \u201c' + query + '\u201d')}
+          </div>
+          {searching ? null : searchResults.length === 0
+            ? <div style={{ color: '#6B7280', padding: '20px 0' }}>No public records match that search. Try different words, or browse the categories below.</div>
+            : searchResults.map(function (r) {
+              return (
+                <div key={r.id} style={sCard} onClick={function () { setRecord({ title: r.title, summary: r.summary, date: r.date, fileId: r.fileId, pageCount: r.pageCount, docType: r.docType }); }}
+                  onMouseEnter={function (e) { e.currentTarget.style.borderColor = BLUE; }} onMouseLeave={function (e) { e.currentTarget.style.borderColor = '#E5E7EB'; }}>
+                  <div style={{ fontSize: '14px', fontWeight: 600, color: BLUE, marginBottom: '3px' }}>{r.title}</div>
+                  <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '6px' }}>{r.docType}{r.department ? ' \u00b7 ' + r.department : ''}{r.date ? ' \u00b7 ' + r.date : ''}{r.semantic ? '  \u00b7 closest match' : ''}</div>
+                  <div style={{ fontSize: '12.5px', color: '#6B7280', lineHeight: 1.5 }}>{(r.summary || '').slice(0, 180)}{(r.summary || '').length > 180 ? '\u2026' : ''}</div>
+                </div>
+              );
+            })}
+        </div>
+      );
+    }
+    if (loading) return <div style={{ color: '#6B7280', padding: '40px 0', textAlign: 'center' }}>Loading the records library\u2026</div>;
     if (!tree.length) return <div style={{ color: '#6B7280', padding: '40px 0', textAlign: 'center' }}>No released records are available to browse yet.</div>;
 
     // Record detail
@@ -60,7 +91,7 @@ export default function PublicLibraryPage() {
       return (
         <div style={{ background: 'white', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '20px 22px' }}>
           <h2 style={{ fontSize: '18px', fontWeight: 700, color: BLUE, margin: '0 0 6px' }}>{record.title}</h2>
-          <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '14px' }}>{type.name}{record.date ? ' · ' + record.date : ''}{record.pageCount ? ' · ' + record.pageCount + ' page' + (record.pageCount > 1 ? 's' : '') : ''}</div>
+          <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '14px' }}>{(type && type.name) || record.docType || 'Record'}{record.date ? ' · ' + record.date : ''}{record.pageCount ? ' · ' + record.pageCount + ' page' + (record.pageCount > 1 ? 's' : '') : ''}</div>
           <p style={{ fontSize: '14px', lineHeight: 1.6, color: '#374151', margin: '0 0 18px' }}>{record.summary}</p>
           {record.fileId
             ? <a href={API + '/public/file/' + record.fileId} style={{ display: 'inline-block', background: BLUE, color: 'white', fontSize: '13px', fontWeight: 600, padding: '9px 18px', borderRadius: '8px', textDecoration: 'none' }}>Download document</a>
@@ -133,9 +164,14 @@ export default function PublicLibraryPage() {
           <div style={{ fontSize: '16px', fontWeight: 700, color: BLUE }}>{agencyName} Records Library</div>
           <div style={{ fontSize: '13px', color: '#4B5563' }}>Browse records already released to the public</div>
         </div>
-        <a href="/portal" style={{ fontSize: '13px', color: BLUE, textDecoration: 'none', fontWeight: 600 }}>Search instead →</a>
+        <a href="/portal/library/map" style={{ fontSize: '13px', color: BLUE, textDecoration: 'none', fontWeight: 600 }}>Map view &rarr;</a>
       </header>
       <div style={sWrap}>
+        <div style={{ display: 'flex', gap: '8px', marginBottom: '16px' }}>
+          <input value={query} onChange={function (e) { setQuery(e.target.value); }} onKeyDown={function (e) { if (e.key === 'Enter') doSearch(); }} placeholder="Search the records library&hellip;" style={{ flex: 1, padding: '11px 14px', borderRadius: '10px', border: '1px solid #D1D5DB', fontSize: '14px', outline: 'none' }} />
+          <button onClick={doSearch} style={{ padding: '11px 20px', borderRadius: '10px', border: 'none', background: BLUE, color: 'white', fontSize: '14px', fontWeight: 600, cursor: 'pointer' }}>Search</button>
+          {searched ? <button onClick={clearSearch} style={{ padding: '11px 16px', borderRadius: '10px', border: '1px solid #D1D5DB', background: 'white', color: '#374151', fontSize: '13px', cursor: 'pointer' }}>Clear</button> : null}
+        </div>
         <Crumbs />
         {body()}
       </div>

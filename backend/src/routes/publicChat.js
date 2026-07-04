@@ -459,6 +459,20 @@ router.get('/browse/records', async function(req, res) {
 // Public library MAP: published + mappable + geocoded records as pins, plus the map anchor. No auth
 // (public reading room). Only records that passed the eligibility gate AND whose type is mappable
 // AND that geocoded appear - the surveillance guardrail is the mappable flag + the publish gate.
+router.get('/library/search', async function(req, res) {
+  try {
+    var q = (req.query.q || '').toString().slice(0, 200).trim();
+    if (!q) return res.json({ query: '', records: [] });
+    var recordSearch = require('../services/recordSearch');
+    var results = await recordSearch.searchPublicReady(q);
+    res.json({ query: q, records: (results || []).map(function (r) {
+      return { id: r.id, title: r.title, summary: r.summary, department: r.department, docType: r.docType,
+        date: r.dateCreated, fileId: r.fileId, pageCount: r.pageCount, matchScore: r.matchScore,
+        semantic: !!r.semantic, relevanceNote: r.relevanceNote };
+    }) });
+  } catch (e) { console.error('[library/search]', e && e.message); res.status(500).json({ error: 'Search is unavailable right now.' }); }
+});
+
 router.get('/library/map', async function(req, res) {
   try {
     var geocode = require('../services/geocode');

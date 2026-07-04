@@ -279,4 +279,4 @@ async function judgeResults(query, results) {
   } catch (e) { console.error('[searchJudge] failed, returning unfiltered:', e && e.message); return results; }
 }
 
-module.exports = { searchAll: searchAll, nativeSearchAll: nativeSearchAll, matchRecordType: matchRecordType, judgeResults: judgeResults };
+module.exports = { searchAll: searchAll, nativeSearchAll: nativeSearchAll, matchRecordType: matchRecordType, judgeResults: judgeResults, searchPublicReady: searchPublicReady };
