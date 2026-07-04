@@ -330,4 +330,10 @@ is stable enough that the curated fixture won't churn constantly. Not yet schedu
 - Revisit the Reports view. Concept: a **conversational AI report agent** (build reports via chat).
 - **User-defined report views** containing a mix of **graphic/chart reports** and **text line-item reports**.
 
+### R4. AI Help agent — upgrade to retrieval-grounded (added 2026-07-05)
+- **Shipped v1** (2026-07-05, commit a0bfea8): top-right **AI Help** button + slide-in chat. Backend `helpAgent` / `POST /api/help/ask`, grounded ONLY in a hand-curated summary of the app's real features + navigation, with anti-hallucination guardrails (no invented features, defers to admin when unsure, guide-not-operator) and current-screen awareness. Accurate but **shallow** — good for "where do I go / what do I click," weak on deep edge cases.
+- **Upgrade:** ground answers in **retrieval over a real documentation corpus** (reuse Voyage/pgvector + the relevance judge) so answers are sourced from actual docs and cover depth/edge cases. Swap the static `APP_CONTEXT` in `helpAgent.js` for retrieved passages.
+- Consider an **admin-vs-user knowledge split** (separate corpora / audiences), per the earlier help-agent design note.
+- Dovetails with the planned **documentation work** (the doc outline doubles as a completeness checklist). Optional: deeper answers, answer-with-sources, feedback thumbs.
+
 _Objection My Tasks visibility (standing passive watchers): decided AGAINST 2026-07-01. Single assigned owner, freely reassignable; team-level oversight via dashboard count (R1) once designed._
