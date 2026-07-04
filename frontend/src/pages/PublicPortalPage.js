@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
 const API = (process.env.REACT_APP_API_URL || '/api');
@@ -17,6 +18,7 @@ export default function PublicPortalPage() {
   const [selectedRecords, setSelectedRecords] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [agencyName, setAgencyName] = useState('');
+  const [view, setView] = useState('landing');
   const [lastSearchQuery, setLastSearchQuery] = useState('');
   const [quickReplies, setQuickReplies] = useState([]);
   const [showContactForm, setShowContactForm] = useState(false);
@@ -30,12 +32,12 @@ export default function PublicPortalPage() {
   const [nativeSourceName, setNativeSourceName] = useState('');
   const scrollRef = useRef(null);
   const searchResultsRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(function() {
     axios.get(API + '/requests/public/config').then(function(r) {
       setAgencyName(r.data.agency_name || 'this Agency');
     }).catch(function(){ setAgencyName('this Agency'); });
-    sendMessage('', true);
   }, []);
 
   useEffect(function() {
@@ -241,10 +243,48 @@ export default function PublicPortalPage() {
     );
   }
 
+  function startRequest() {
+    setView('request');
+    if (messages.length === 0) sendMessage('', true);
+  }
+
+  var portalHeader = (
+    <header style={{background:'white',borderBottom:'1px solid #E5E7EB',padding:'16px 24px'}}>
+      <div style={{maxWidth:'900px',margin:'0 auto',display:'flex',alignItems:'center',gap:'12px'}}>
+        <div style={{width:'40px',height:'40px',background:'#1F4E79',borderRadius:'8px',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'18px',fontWeight:'700'}}>OQ</div>
+        <div>
+          <div style={{fontSize:'15px',fontWeight:'700',color:'#1F4E79'}}>{agencyName}</div>
+          <div style={{fontSize:'13px',color:'#4B5563'}}>Public Records Portal</div>
+        </div>
+      </div>
+    </header>
+  );
+
+  if (view === 'landing') {
+    return (
+      <div style={{minHeight:'100vh',background:'#F9FAFB',display:'flex',flexDirection:'column'}}>
+        {portalHeader}
+        <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'40px 24px'}}>
+          <div style={{maxWidth:'740px',width:'100%',textAlign:'center'}}>
+            <h1 style={{fontSize:'36px',fontWeight:'800',color:'#1F4E79',margin:'0 0 18px',lineHeight:'1.2'}}>Welcome to the {agencyName} Public Records Portal</h1>
+            <p style={{fontSize:'16px',color:'#374151',lineHeight:'1.6',margin:'0 auto 36px',maxWidth:'640px'}}>
+              The portal includes a <strong>Public Ready Records Library</strong> which offers you the ability to browse records that contain no exempt content, or which have been processed so that exempt information has been redacted.
+            </p>
+            <div style={{display:'flex',gap:'16px',justifyContent:'center',flexWrap:'wrap'}}>
+              <button onClick={startRequest} style={{padding:'16px 30px',borderRadius:'10px',border:'none',background:'#1F4E79',color:'white',fontSize:'16px',fontWeight:'700',cursor:'pointer',boxShadow:'0 2px 10px rgba(31,78,121,0.25)'}}>Create an Open Records Request</button>
+              <button onClick={function(){ navigate('/portal/library'); }} style={{padding:'16px 30px',borderRadius:'10px',border:'2px solid #1F4E79',background:'white',color:'#1F4E79',fontSize:'16px',fontWeight:'700',cursor:'pointer'}}>Access Public Ready Records Library</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div style={{height:'100vh',background:'#F9FAFB',display:'flex',flexDirection:'column',overflow:'hidden'}}>
       <header style={{background:'white',borderBottom:'1px solid #E5E7EB',padding:'16px 24px'}}>
         <div style={{maxWidth:'780px',margin:'0 auto',display:'flex',alignItems:'center',gap:'12px'}}>
+          <button onClick={function(){ setView('landing'); }} style={{background:'none',border:'none',color:'#6B7280',cursor:'pointer',fontSize:'13px',padding:'4px 6px',marginRight:'2px'}} title="Portal home">&#8592;</button>
           <div style={{width:'40px',height:'40px',background:'#1F4E79',borderRadius:'8px',display:'flex',alignItems:'center',justifyContent:'center',color:'white',fontSize:'18px',fontWeight:'700'}}>OQ</div>
           <div>
             <div style={{fontSize:'15px',fontWeight:'700',color:'#1F4E79'}}>{agencyName}</div>
