@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
 import MassJobsPanel from '../components/MassJobsPanel';
+import { useNavigate } from 'react-router-dom';
 
 function scoreColor(pass) { return pass === true ? '#03543F' : pass === false ? '#92400E' : '#6B7280'; }
 function scoreBg(pass) { return pass === true ? '#DEF7EC' : pass === false ? '#FEF3C7' : '#F3F4F6'; }
@@ -34,6 +35,10 @@ export default function MassRedactionPage() {
   var [viewTpl, setViewTpl] = useState(null);
   var [viewDetail, setViewDetail] = useState(null);
   var [viewSample, setViewSample] = useState(undefined);
+  var [newTplOpen, setNewTplOpen] = useState(false);
+  var [uploading, setUploading] = useState(false);
+  var [uploadErr, setUploadErr] = useState('');
+  var navigate = useNavigate();
 
   useEffect(function () { load(); }, []);
   useEffect(function () { api.get('/mass-jobs/config').then(function (r) { setCfg(r.data); }).catch(function () {}); }, []);
@@ -105,6 +110,20 @@ export default function MassRedactionPage() {
   var estDate = '';
   if (estNights > 0) { var d = new Date(); d.setDate(d.getDate() + estNights); estDate = d.toISOString().slice(0, 10); }
 
+  async function handleSampleUpload(e) {
+    var file = e.target.files && e.target.files[0];
+    if (!file) return;
+    setUploading(true); setUploadErr('');
+    try {
+      var fd = new FormData(); fd.append('file', file);
+      var r = await api.post('/files/upload/req-template-samples', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      var fid = r.data.fileId;
+      var name = (file.name || '').toLowerCase();
+      if (name.slice(-4) === '.csv' || name.slice(-4) === '.tsv') navigate('/redact-fields/' + fid);
+      else navigate('/redact/' + fid);
+    } catch (err) { setUploadErr('Could not upload the sample. ' + ((err.response && err.response.data && err.response.data.error) || '')); setUploading(false); }
+  }
+
   async function openView(t) {
     setViewTpl(t); setViewDetail(null); setViewSample(undefined);
     try { var r = await api.get('/redaction-templates/' + t.id); setViewDetail(r.data.template); } catch (e) { setViewDetail({ error: true }); }
@@ -149,7 +168,10 @@ export default function MassRedactionPage() {
 
       <MassJobsPanel reloadKey={jobsReload} />
 
-      <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '10px' }}>Templates ({templates.length})</div>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
+        <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151' }}>Templates ({templates.length})</div>
+        <button onClick={function () { setUploadErr(''); setNewTplOpen(true); }} style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>+ New template</button>
+      </div>
       {loading ? (
         <div style={{ padding: '40px', textAlign: 'center', color: '#9CA3AF' }}>Loading templates...</div>
       ) : templates.length === 0 ? (
@@ -183,6 +205,27 @@ export default function MassRedactionPage() {
           })}
         </div>
       )}
+
+      {newTplOpen ? (
+        <div onClick={function () { if (!uploading) setNewTplOpen(false); }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '20px' }}>
+          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '14px', width: '520px', maxWidth: '100%', padding: '24px' }}>
+            <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '6px' }}>New redaction template</div>
+            <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.55, marginBottom: '16px' }}>
+              A template is built from one <strong>sample record</strong>. Upload a sample and we&rsquo;ll open the redaction workspace, where you mark what to redact and save it as a reusable template.
+              <ul style={{ margin: '10px 0 0', paddingLeft: '18px', color: '#6B7280' }}>
+                <li style={{ marginBottom: '4px' }}><strong>CSV export</strong> (structured data like 911 calls) &rarr; mark exempt <em>columns</em>; values are dropped before the record is built (born-redacted).</li>
+                <li><strong>PDF</strong> (a form) &rarr; draw <em>boxes</em> over the areas to cover, and attach a rule to each.</li>
+              </ul>
+            </div>
+            {uploadErr ? <div style={{ fontSize: '12.5px', color: '#9B1C1C', marginBottom: '10px' }}>{uploadErr}</div> : null}
+            <label style={{ display: 'inline-block', padding: '11px 18px', borderRadius: '8px', background: uploading ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: uploading ? 'default' : 'pointer' }}>
+              {uploading ? 'Uploading\u2026' : 'Upload a sample (CSV or PDF)'}
+              <input type="file" accept=".csv,.tsv,.pdf" disabled={uploading} onChange={handleSampleUpload} style={{ display: 'none' }} />
+            </label>
+            <button onClick={function () { if (!uploading) setNewTplOpen(false); }} style={{ marginLeft: '10px', padding: '11px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
+          </div>
+        </div>
+      ) : null}
 
       {viewTpl ? (
         <div onClick={closeView} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '20px' }}>
