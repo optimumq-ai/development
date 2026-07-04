@@ -149,6 +149,7 @@ async function start() {
   app.listen(PORT, function() {
     console.log('Optimum Q API running on port ' + PORT);
     require('./src/services/massJobs').startWorker();
+    require('./src/services/connectors/nena911').ensureSetup().catch(function(e){ console.error('[nena911 setup]', e && e.message); });
     require('./src/services/tickler').startScheduler();
     require('./src/services/configFreshness').startScheduler();
     require('./src/services/effectiveConfig').startPromotionScheduler();
