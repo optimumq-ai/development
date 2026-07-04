@@ -81,15 +81,16 @@ async function runSpec(spec) {
     var buckets = {};
     rows.forEach(function (x) {
       var key = x.k || '(none)';
-      if (!buckets[key]) buckets[key] = { n: 0, days: 0, compliant: 0 };
+      if (!buckets[key]) buckets[key] = { n: 0, days: 0, compliant: 0, dtotal: 0 };
       var c = new Date(x.created_at), u = new Date(x.updated_at);
       var d = (u - c) / 86400000; if (isFinite(d) && d >= 0) { buckets[key].days += d; buckets[key].n++; }
-      if (x.deadline_date) { var met = new Date(x.updated_at) <= new Date(x.deadline_date + 'T23:59:59'); if (met) buckets[key].compliant++; }
+      if (x.deadline_date) { buckets[key].dtotal++; var met = new Date(x.updated_at) <= new Date(x.deadline_date + 'T23:59:59'); if (met) buckets[key].compliant++; }
     });
+    var isNumberViz = !groupBy;
     var out = Object.keys(buckets).map(function (k) {
       var b = buckets[k];
-      var val = metric === 'avg_processing_days' ? (b.n ? Math.round(b.days / b.n * 10) / 10 : 0) : (b.n ? Math.round(b.compliant / b.n * 100) : 0);
-      return { label: k, value: val };
+      var val = metric === 'avg_processing_days' ? (b.n ? Math.round(b.days / b.n * 10) / 10 : 0) : (b.dtotal ? Math.round(b.compliant / b.dtotal * 100) : 0);
+      return { label: k, value: (metric === 'compliance_rate' && isNumberViz) ? (val + '%') : val };
     });
     out.sort(function (a, b) { return b.value - a.value; });
     var unit = metric === 'avg_processing_days' ? ' (days)' : ' (%)';
