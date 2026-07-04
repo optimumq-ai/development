@@ -149,4 +149,25 @@ async function runNow(n) {
   return { generated: batch.count, redacted: jr.redacted || 0, held: jr.held || 0, errors: jr.errors || 0, enriched: enriched, jobId: batch.jobId };
 }
 
-module.exports = { ensureSetup: ensureSetup, generateBatch: generateBatch, search: search, enrich911: enrich911, runNow: runNow, COLUMNS: COLUMNS, EXEMPT: EXEMPT, IDS: { RT_ID: RT_ID, REPO_ID: REPO_ID, SYSREQ_ID: SYSREQ_ID, TMPL_ID: TMPL_ID } };
+var SCHED_STARTED = false;
+// Daily automation: generate ~20 records/day and run them through the pipeline. Toggle via
+// system_config nena911_daily_enabled ('0' to disable). Once-per-day guard survives restarts.
+async function startScheduler() {
+  if (SCHED_STARTED) return; SCHED_STARTED = true;
+  async function check() {
+    try {
+      var en = await db.get("SELECT value FROM system_config WHERE key = 'nena911_daily_enabled'");
+      if (en && en.value === '0') return;
+      var today = new Date().toISOString().slice(0, 10);
+      var last = await db.get("SELECT value FROM system_config WHERE key = 'nena911_last_gen_day'");
+      if (last && last.value === today) return;
+      var r = await runNow(20);
+      await db.run("INSERT INTO system_config (key, value) VALUES ('nena911_last_gen_day', ?) ON CONFLICT (key) DO UPDATE SET value = ?", [today, today]);
+      console.log('[nena911] daily batch:', JSON.stringify(r));
+    } catch (e) { console.error('[nena911 sched]', e && e.message); }
+  }
+  setInterval(check, 60 * 60 * 1000);
+  setTimeout(check, 20000);
+}
+
+module.exports = { ensureSetup: ensureSetup, generateBatch: generateBatch, search: search, enrich911: enrich911, runNow: runNow, startScheduler: startScheduler, COLUMNS: COLUMNS, EXEMPT: EXEMPT, IDS: { RT_ID: RT_ID, REPO_ID: REPO_ID, SYSREQ_ID: SYSREQ_ID, TMPL_ID: TMPL_ID } };

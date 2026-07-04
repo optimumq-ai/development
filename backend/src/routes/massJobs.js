@@ -48,6 +48,16 @@ router.get('/:id', requireAuth, async function (req, res) {
   res.json(withEta(job, budget));
 });
 
+// Demo trigger: generate a fresh batch of 911 records and run the whole pipeline now
+// (generate -> born-redact -> deposit -> publish -> enrich -> geocode -> library + map).
+router.post('/911/run-now', requireAuth, async function (req, res) {
+  try {
+    var n = Math.max(1, Math.min(50, parseInt((req.body && req.body.count) || 20, 10) || 20));
+    var r = await require('../services/connectors/nena911').runNow(n);
+    res.json(r);
+  } catch (e) { res.status(500).json({ error: 'Could not run the 911 batch: ' + (e && e.message) }); }
+});
+
 router.post('/', requireAuth, async function (req, res) {
   var b = req.body || {};
   if (!b.template_id) return res.status(400).json({ error: 'template_id required' });

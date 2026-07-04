@@ -29,6 +29,8 @@ export default function MassRedactionPage() {
   var [createdJob, setCreatedJob] = useState(null);
   var [cfg, setCfg] = useState(null);
   var [jobsReload, setJobsReload] = useState(0);
+  var [running911, setRunning911] = useState(false);
+  var [run911Result, setRun911Result] = useState('');
 
   useEffect(function () { load(); }, []);
   useEffect(function () { api.get('/mass-jobs/config').then(function (r) { setCfg(r.data); }).catch(function () {}); }, []);
@@ -100,6 +102,17 @@ export default function MassRedactionPage() {
   var estDate = '';
   if (estNights > 0) { var d = new Date(); d.setDate(d.getDate() + estNights); estDate = d.toISOString().slice(0, 10); }
 
+  async function run911() {
+    setRunning911(true); setRun911Result('');
+    try {
+      var r = await api.post('/mass-jobs/911/run-now', { count: 20 });
+      var d = r.data || {};
+      setRun911Result('Generated ' + d.generated + ', born-redacted ' + d.redacted + (d.held ? ', held ' + d.held : '') + ' \u2014 published to the library & map.');
+      setJobsReload(function (x) { return x + 1; });
+    } catch (e) { setRun911Result('Could not run the batch.'); }
+    setRunning911(false);
+  }
+
   return (
     <div style={{ padding: '28px 32px', maxWidth: '900px', margin: '0 auto' }}>
       <h1 style={{ fontSize: '22px', fontWeight: '700', margin: '0 0 6px' }}>Mass Redaction</h1>
@@ -109,6 +122,15 @@ export default function MassRedactionPage() {
 
       <div style={{ background: '#EFF6FF', border: '1px solid #BFDBFE', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', fontSize: '13px', color: '#1E40AF', lineHeight: 1.5 }}>
         To create a template: open a sample document in the redaction workspace (the <strong>Redact</strong> button on a PDF in a request's Records tab), place your boxes and attach a rule to each, then choose <strong>Save as Reusable Template</strong>. For a structured CSV record, use <strong>Redact fields</strong> on the record, mark the exempt columns, and choose <strong>Save as reusable template</strong>.
+      </div>
+
+      <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '10px', padding: '14px 16px', marginBottom: '22px' }}>
+        <div style={{ fontSize: '13px', fontWeight: '700', color: '#92400E', marginBottom: '4px' }}>911 Call Records &mdash; live automation demo</div>
+        <div style={{ fontSize: '12.5px', color: '#78350F', lineHeight: 1.5, marginBottom: '10px' }}>
+          The <strong>911 Call Management System (demo)</strong> generates about 20 call records a day. Each is born-redacted &mdash; caller name, phone, and home address withheld &mdash; while the incident type, location, time, and disposition stay public. Cleared records publish to the public-ready library and appear on the map by incident location. Click to run a fresh batch through the entire pipeline right now.
+        </div>
+        <button onClick={run911} disabled={running911} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: '#B45309', color: 'white', fontSize: '13px', fontWeight: '600', cursor: running911 ? 'default' : 'pointer', opacity: running911 ? 0.7 : 1 }}>{running911 ? 'Running the pipeline\u2026' : 'Generate a 911 batch now'}</button>
+        {run911Result ? <span style={{ marginLeft: '12px', fontSize: '12.5px', color: '#03543F', fontWeight: '600' }}>{run911Result}</span> : null}
       </div>
 
       <MassJobsPanel reloadKey={jobsReload} />
