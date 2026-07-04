@@ -168,7 +168,7 @@ These resolve the two headline open questions. Numbers are from the live pipelin
 **The current policy budget is 500 records/night** (`mass_redaction_nightly_budget`, default 500). That is a **safety throttle, not a hardware limit** — it sits ~100-300x below the measured hardware rate and can be raised freely.
 
 **Honest caveats on the measured number:**
-- It uses the **deterministic demo geocoder** (no network). In production, geocoding depends on the geocoder chosen: public Nominatim is rate-limited (~1 request/second) and would dominate; a commercial or self-hosted geocoder is fast. **Geocoding rate is a deployment choice, and for a large back-catalog it may be the binding constraint — validate with the chosen geocoder.**
+- It uses the **deterministic demo geocoder** (no network). **Measured against the real production geocoder (public Nominatim / OpenStreetMap): ~410 ms per call, but the binding limit is the policy cap of ~1 request/second (~3,600/hour), and OSM's usage policy PROHIBITS bulk geocoding on the public endpoint.** At 1/sec, 100k addresses take ~28 hours and 1M take ~11.6 days — and are not policy-permitted anyway. **=> For any real back-catalog, geocoding is the binding constraint on the DEFAULT setup, and production MUST switch the geocoder** to one of: a self-hosted Nominatim (unlimited, sub-second, one-time infra), the US Census batch geocoder (free, bulk-friendly, up to 10k addresses/request, US addresses), or a commercial API (Google/Mapbox, paid). With any of those, geocoding stops being the bottleneck. It also runs off the critical redaction path (geocode after deposit) and is embarrassingly parallel.
 - Embedding (Voyage) is a real external API call and is the main non-trivial cost in the measured figure; it is batchable and parallelizable.
 - The **born-redaction step itself is nearly free** for structured data — the variable cost is the external services (geocode + embed), not the redaction engine.
 
@@ -176,17 +176,17 @@ These resolve the two headline open questions. Numbers are from the live pipelin
 
 ### 8.2 Documents — a different animal
 
-Not yet measured directly (no page-redaction template exists in the demo to time against; 132 PDF files are on hand but need a template). Reasoned honestly:
+**Measured** (page-redaction render = stamp zones -> released copy -> deposit, single-threaded):
+- **Light 1-page forms** (building permits, license apps, ~23KB): **~140 ms/page (~26,000 pages/hour).**
+- **Heavy multi-page documents** (8-page tax returns / IRS forms, 0.3-1.6MB): **~1,200-1,400 ms/page (~2,700 pages/hour)** — roughly **10x slower per page.**
 
-- Per-document cost is heavier than a structured record: PDF render, possibly OCR, multi-page, box stamping.
-- For **fixed-layout forms**, this is still machine-fast once a template exists.
-- For **variable-content documents** (exempt content in variable locations), the limiter is **human review, not machine time.**
+**Key finding: document render cost is NOT constant — it swings ~10x with document complexity** (page density, embedded content, file size), not just page count. A representative archive mix falls between these. Plan on a **range of ~3,000-25,000 pages/hour single-threaded** depending on document weight, and multiply by worker parallelism.
 
-So document setup time is driven by two human/config factors, not throughput:
+Even at the slow end (~2,700 pages/hour), a 12-hour window processes ~32,000 pages/night single-threaded, or ~130k/night with modest (4x) parallelism — so machine render is still not the true bottleneck for reasonable archives. The genuine limiters remain human/config, not throughput:
 1. **Number of distinct form types** needing a template built (one-time config per type).
 2. **Volume of variable-content documents** needing per-document review.
 
-**TODO:** measure the page-redaction path against a representative multi-page form once a pages template exists, to get a real fixed-layout document rate.
+Caveat: this measures the render+deposit only. **Scanned documents additionally need OCR** (a separate, heavier one-time cost per page) before they can be templated or reviewed — relevant for archives of hand-filled/scanned forms.
 
 ### 8.3 Setup-window length — what actually drives it
 
@@ -204,7 +204,9 @@ State it this way to the customer: *"Setup scales with your archive's document d
 
 ## 9. Remaining open questions / TODOs
 
+Resolved this pass: document-path rate (§8.2, measured) and production geocoder validation (§8.1, measured — public Nominatim is not viable for bulk; switch geocoders in production).
+
 1. **Free-text scrutiny in structured records.** Operational plan for narrative/notes fields inside otherwise-structured exports (auto-flag for review vs. AI redaction vs. hold).
 2. **Sources UI: direct vs. export labeling** (product task noted in §7).
-3. **Document-path rate** (from §8.2): measure fixed-layout page-redaction throughput against a representative form.
-4. **Production geocoder validation** (from §8.1): confirm the geocoding rate under the chosen production geocoder before quoting large back-catalog timelines.
+3. **Pick the production geocoder** (from §8.1): decide between self-hosted Nominatim, US Census batch geocoder, or a commercial API — and wire it as a config-selectable backend before real deployments.
+4. **OCR cost for scanned archives** (from §8.2): measure per-page OCR throughput, since scanned/hand-filled form archives incur it before templating/review.
