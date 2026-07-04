@@ -590,6 +590,10 @@ CREATE TABLE IF NOT EXISTS fee_adjustments (
   voided INTEGER DEFAULT 0
 );
 CREATE INDEX IF NOT EXISTS idx_feeadjust_request ON fee_adjustments(request_id);
+
+-- Demo email-system table for the email COUNT-ONLY connector (synthetic; a real deployment swaps
+-- in a live Microsoft Graph/Purview or Google Vault connector). Content is never exposed - only counts.
+CREATE TABLE IF NOT EXISTS demo_emails (id TEXT PRIMARY KEY, sender TEXT, recipients TEXT, subject TEXT, body TEXT, sent_date TEXT);
 CREATE TABLE IF NOT EXISTS tickler_runs (id TEXT PRIMARY KEY, ran_at TEXT, trigger TEXT, scanned INTEGER, flagged INTEGER, summary_json TEXT);
 
 CREATE TABLE IF NOT EXISTS request_clocks (id TEXT PRIMARY KEY, request_id TEXT NOT NULL, clock_type TEXT NOT NULL, label TEXT, basis TEXT NOT NULL DEFAULT 'calendar_days', duration INTEGER NOT NULL, started_at TEXT, status TEXT NOT NULL DEFAULT 'running', satisfied_at TEXT, is_primary INTEGER DEFAULT 0, created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')), updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));

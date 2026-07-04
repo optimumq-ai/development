@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const emailService = require('../services/email');
 const recordSearch = require('../services/recordSearch');
 const classifier = require('../services/classifier');
+const emailConnector = require('../services/connectors/email');
 const workflowEngine = require('../services/workflowEngine');
 const crypto = require('crypto');
 const { all } = require('../db');
@@ -31,6 +32,7 @@ const SYSTEM_PROMPT = [
   'Phase 2.4 - Record format check: From their description, judge the FORMAT of the records they want, and pick one of two paths.',
   'PATH (a) - DOCUMENTS, FORMS, and POLICE VIDEO/FOOTAGE (permits, licenses, applications, reports, forms, body-worn / dash-cam footage): the system can search these and show matches. Proceed to Phase 2.5 Search.',
   'PATH (b) - RECORDS THE OPEN RECORDS TEAM MUST PULL AND PROCESS. Recognize these by their format no matter how the citizen phrases it: EMAIL or text / SMS / instant messages; AUDIO recordings (911 or dispatch calls, phone / call recordings, meeting audio, recorded interviews); PHOTOS / pictures / images; DATABASE or data exports, or hard-drive / phone / device contents; PAPER / archived / physical records. For PATH (b): do NOT run a document search (the library will not contain these). Instead, ONCE and warmly, explain it like this - you can instantly search and show matches for documents and forms, but this request is for [their format], which the Open Records team pulls and processes directly, so you are not able to show instant matches - and that is completely fine. Then keep working with them to build a clear, detailed description that helps the team find exactly what they need: for email or text, ask who was involved (senders / recipients) and a date range; for audio or video, ask the date, location, and any incident or case number; for photos, ask the event, date, and location. Say the explanation ONCE, then continue gathering details. Never sound discouraging - frame it as helping the team find it faster. After you have the details, skip Phase 2.5 Search and continue to Phase 4.',
+  'SPECIAL CASE within PATH (b) - EMAIL or TEXT / SMS get a COUNT-ONLY search (the others do not). Once you have the key terms, the people involved (senders / recipients), and a date range, emit on its own line: [[EMAIL_SEARCH:key terms plus any senders/recipients and the date range]]. The system runs a count-only search - no email content is ever exposed - and tells you approximately how many emails match. Relay ONLY that number to the citizen (never any email content, subject lines, or names), note that all email is reviewed for exempt content before release, and if the number is large, warmly help them narrow by specific senders or a tighter date range, then search again with a refined [[EMAIL_SEARCH:...]]. This count-then-narrow step helps them submit a well-targeted request. The other PATH (b) formats (audio, photos, database, paper) still skip the search and just gather details.',
   '',
   'Phase 2.5 - Search (PATH (a) only - documents, forms, police footage): Once you have a clear description, BEFORE moving to fee waiver, search the agency records to see if any matching documents are already available. Emit on its own line: [[SEARCH_QUERY:short search query summarizing what they want]]',
   '',
@@ -121,6 +123,8 @@ async function buildFulfillmentGuidance() {
   } catch(e) { console.error('[publicChat] fulfillment guidance failed:', e.message); return ''; }
 }
 
+function isEmailRequest(q) { return /\b(e-?mails?|correspondence|text messages?|sms|instant messages?)\b/i.test(String(q || '')); }
+
 router.post('/chat', async function(req, res) {
   var rate = checkRate(req.ip);
   if (!rate.ok) {
@@ -186,7 +190,38 @@ router.post('/chat', async function(req, res) {
     var searchQuery = null;
     var searchResults = null;
     var searchQueryMatch = fullText.match(/\[\[SEARCH_QUERY:([^\]]+)\]\]/);
-    if (searchQueryMatch) {
+    var emailMatch = fullText.match(/\[\[EMAIL_SEARCH:([^\]]+)\]\]/);
+    var isEmail = false, emailQuery = null;
+    if (emailMatch) { isEmail = true; emailQuery = emailMatch[1].trim(); }
+    else if (searchQueryMatch && isEmailRequest(searchQueryMatch[1].trim())) { isEmail = true; emailQuery = searchQueryMatch[1].trim(); }
+
+    if (isEmail) {
+      // EMAIL COUNT-ONLY mode: return a NUMBER, never content/subjects/senders. All email is
+      // reviewed for exempt content before release. No cards, no judge.
+      var emailCfg = {};
+      try { var erepo = await get("SELECT config FROM record_repositories WHERE connector_type = 'email' AND status = 'active' LIMIT 1"); if (erepo && erepo.config) emailCfg = JSON.parse(erepo.config); } catch(e) {}
+      var emailCount = null;
+      try { emailCount = await emailConnector.count(emailQuery, emailCfg); } catch(e) { console.error('[publicChat] email count failed:', e.message); }
+      try {
+        var threshold = Number(emailCfg.threshold) || 150;
+        var n = emailCount ? emailCount.count : 0;
+        var eOutcome;
+        if (n === 0) {
+          eOutcome = 'The email search matched ZERO emails for those terms. Tell the citizen plainly that no emails matched those specific terms, and warmly invite them to broaden the terms or widen the date range - or, if they prefer, you can submit the request for staff to search directly. Never invent email content.';
+        } else {
+          var large = n > threshold;
+          eOutcome = 'The email system matched approximately ' + n + ' emails' + (emailCount && emailCount.dateRange ? ' within the given date range' : '') + '. Relay ONLY this number ("about ' + n + ' emails currently match"). CRITICAL: share only the count - never any email content, subject lines, or sender/recipient names, because these emails are unreviewed and may contain protected information. Then let them know that all email is reviewed for exempt content before release. ' + (large ? 'Because ' + n + ' is a large number, warmly invite them to narrow it - ask for specific senders or recipients (the people whose email to search) and/or a tighter date range - so their request is well targeted before it reaches staff.' : 'This is a manageable number; ask whether they would like to refine further (specific senders or a tighter date range) or proceed to submit the request for staff to pull and review these emails.') + ' Do NOT show any cards or lists.';
+        }
+        var eComposeSys = 'You are the warm, helpful public records assistant for ' + agencyName + '. The citizen is requesting EMAIL records. A count-only email search is COMPLETE for: "' + emailQuery + '".\n' + eOutcome + '\n\nWrite ONLY your next chat message to the citizen - brief, warm, plain text. Share ONLY the count, never email content. Do NOT emit any bracketed markers, except you MAY end with a single [[QUICK_REPLIES:...]] line if you are offering clear choices.';
+        var eCompose = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 600, system: eComposeSys, messages: messages });
+        var eComposed = eCompose.content.map(function(b){ return b.type === 'text' ? b.text : ''; }).join('');
+        if (eComposed && eComposed.trim()) {
+          fullText = eComposed;
+          qrMatch = fullText.match(/\[\[QUICK_REPLIES:([^\]]*)\]\]/);
+          quickReplies = qrMatch ? qrMatch[1].split('|').map(function(x){ return x.trim(); }).filter(function(x){ return x.length > 0; }) : [];
+        }
+      } catch(e) { console.error('[publicChat] email compose failed:', e.message); }
+    } else if (searchQueryMatch) {
       searchQuery = searchQueryMatch[1].trim();
       try {
         searchResults = await recordSearch.searchAll(searchQuery);
@@ -219,7 +254,7 @@ router.post('/chat', async function(req, res) {
     }
     var visibleText = fullText
       .replace(/\[\[SUBMIT_READY\]\][\s\S]*?\[\[END_SUBMIT\]\]/g, '')
-      .replace(/\[\[EMAIL_VERIFY:[^\]]+\]\]/g, '').replace(/\[\[VERIFY_EMAIL:[^\]]+\]\]/g, '').replace(/\[\[VERIFY_SKIPPED:[^\]]+\]\]/g, '').replace(/\[\[SEARCH_QUERY:[^\]]+\]\]/g, '').replace(/\[\[SEARCH_RESULTS[\s\S]*?\]\]/g, '')
+      .replace(/\[\[EMAIL_VERIFY:[^\]]+\]\]/g, '').replace(/\[\[VERIFY_EMAIL:[^\]]+\]\]/g, '').replace(/\[\[VERIFY_SKIPPED:[^\]]+\]\]/g, '').replace(/\[\[SEARCH_QUERY:[^\]]+\]\]/g, '').replace(/\[\[EMAIL_SEARCH:[^\]]+\]\]/g, '').replace(/\[\[SEARCH_RESULTS[\s\S]*?\]\]/g, '')
       .replace(/\[\[FEE_WAIVER_INFO:[^\]]+\]\]/g, '')
       .replace(/\[\[SEARCH_QUERY:[^\]]+\]\]/g, '')
       .replace(/\[\[NON_TRAD_ITEMS:[^\]]+\]\]/g, '')
