@@ -358,4 +358,22 @@ is stable enough that the curated fixture won't churn constantly. Not yet schedu
 - **Revised recommendation:** three deployment profiles - (1) Standard = commercial Claude (most cities); (2) Government = Bedrock GovCloud / Vertex / C4G for FedRAMP-required-but-not-air-gapped (probably most strict prospects) - small code change, no GPU; (3) Air-gapped = local open-weight (rare). Build the model-routing layer to target Claude-commercial OR Claude-via-Bedrock first (easy, high value); local is a later/rare add. Qualify each prospect: "stored on our servers" (Standard) vs "FedRAMP-authorized AI" (Government) vs "nothing leaves our network" (Air-gapped).
 - **See `docs/AI_DATA_TOUCHPOINTS.md`** for the exact per-call-site audit (sensitive vs. safe) - the target list for the hybrid and the answer to "where does your AI see our data?". Core redaction uses NO cloud AI; the sensitive AI surface is small and mostly optional assist features.
 
+### R7. Prompt-injection hardening (public portal agent) — analysis + deferred pass
+Analyzed 2026-07-05. The public chat agent is an **intake assistant**, not a records-access or redaction-control system. It emits text markers (`[[SEARCH_QUERY]]`, `[[EMAIL_SEARCH]]`, `[[SUBMIT_READY]]`, etc.); **code** decides what they do. It only sees what code hands back.
+
+**Two worst-case attacks a prospect will ask about — both architecturally BLOCKED:**
+- *"Trick the agent into skipping redaction on selected documents."* Blocked: the agent has NO mechanism to affect redaction (no marker/tool/path to the redaction pipeline). Redaction is a separate staff/system workflow. Worst case = the agent says something false in chat (trust/UX), documents still get redacted downstream. Redaction is code/workflow-enforced, not agent discretion.
+- *"Trick the agent into revealing exempt content in a document."* Blocked: the agent never RECEIVES exempt content. Search results are filtered to `published = 1` in SQL (already public); selected records inject only title + `[redaction review required]` flag; email is COUNT-ONLY (a number, never content). Can't extract what the model was never given.
+
+**Why safe:** the sensitive decisions (what's public, what's redacted) are enforced in CODE upstream/downstream of the agent, not left to agent discretion — the "code between the agent and sensitive info" pattern.
+
+**Residual risks (lower severity, pre-production hardening — none is a data breach):**
+1. False / off-script statements (trust/UX).
+2. System-prompt / agent-rules leakage (low sensitivity).
+3. Spammy `[[SUBMIT_READY]]` auto-submits — already blunted by per-IP rate limiting.
+4. Indirect injection via record titles/summaries placed in the prompt (surface small — cleared, staff-controlled published records).
+
+**Deferred pass (highest-value first):** output guardrails on the public agent; system-prompt-leak resistance; sandbox untrusted record text in context; consider the two-stage gatekeeper LLM. Not urgent (no breach path today). Pairs with R5 (encrypt-at-rest) as a pre-production security mini-thread.
+**Sales artifact wanted:** a security graphic illustrating the portal agent's reach, the code-enforced safeguards, and a table of likely prompt-injection attempts + how the system defends each (see `docs/PROMPT_INJECTION_DEFENSE.md` / in-app security diagram).
+
 _Objection My Tasks visibility (standing passive watchers): decided AGAINST 2026-07-01. Single assigned owner, freely reassignable; team-level oversight via dashboard count (R1) once designed._
