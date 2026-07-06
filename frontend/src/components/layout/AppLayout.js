@@ -38,6 +38,7 @@ export default function AppLayout() {
     { to: '/rule-updates', label: 'Update Configuration', show: isElev },
     { to: '/jurisdiction-profile', label: 'Jurisdiction Profile', show: isElev },
     { to: '/integrations', label: 'Integrations & API Keys', show: isAdmin },
+    { to: '/ai-data-flow', label: 'AI Data Flow & Compliance', show: isAdmin },
     { to: '/config', label: 'Configuration', show: isAdmin },
   ].filter(x => x.show);
 

@@ -28,6 +28,13 @@ router.get('/', requireAuth, admin, async function (req, res) {
         anthropic: { set: !!(savedAnthropic || process.env.ANTHROPIC_API_KEY), fromSaved: !!savedAnthropic, hint: hint(savedAnthropic || process.env.ANTHROPIC_API_KEY) },
         voyage: { set: !!(savedVoyage || process.env.VOYAGE_API_KEY), fromSaved: !!savedVoyage, hint: hint(savedVoyage || process.env.VOYAGE_API_KEY) }
       },
+      deployment: {
+        profile: (await cfg('ai_deployment_profile')) || 'standard',
+        aws_region: (await cfg('aws_region')) || 'us-gov-west-1',
+        titan_model: (await cfg('titan_embed_model')) || 'amazon.titan-embed-text-v2:0',
+        bedrock_key_set: !!(await cfg('bedrock_access_key_id')),
+        bedrock_secret_set: !!(await cfg('bedrock_secret_key'))
+      },
       email: {
         provider: provider,
         from_name: (await cfg('agency_name')) || '',
@@ -52,6 +59,15 @@ router.post('/', requireAuth, admin, async function (req, res) {
       if (isNewSecret(b.ai.anthropic_api_key)) await setCfg('anthropic_api_key', b.ai.anthropic_api_key.trim());
       if (isNewSecret(b.ai.voyage_api_key)) await setCfg('voyage_api_key', b.ai.voyage_api_key.trim());
       await secrets.applySecrets(); // push into process.env live
+    }
+    // Deployment profile + Government (Bedrock/GovCloud) connection settings
+    if (b.deployment) {
+      var dp = b.deployment;
+      if (typeof dp.profile === 'string') await setCfg('ai_deployment_profile', dp.profile);
+      if (typeof dp.aws_region === 'string') await setCfg('aws_region', dp.aws_region.trim());
+      if (typeof dp.titan_model === 'string') await setCfg('titan_embed_model', dp.titan_model.trim());
+      if (isNewSecret(dp.bedrock_access_key_id)) await setCfg('bedrock_access_key_id', dp.bedrock_access_key_id.trim());
+      if (isNewSecret(dp.bedrock_secret_key)) await setCfg('bedrock_secret_key', dp.bedrock_secret_key.trim());
     }
     // Email
     if (b.email) {
@@ -102,4 +118,32 @@ router.post('/test/:which', requireAuth, admin, async function (req, res) {
     res.status(400).json({ ok: false, message: 'Unknown test.' });
   } catch (e) { res.json({ ok: false, message: (e && e.message) ? e.message.slice(0, 200) : 'Test failed.' }); }
 });
+// Live code excerpts for the AI Data-Flow inspector: reads the REAL source at whitelisted line
+// ranges so the screen shows exactly what is in the running codebase (falsifiable, always current).
+var fs = require('fs');
+var path = require('path');
+var TP_CODE = {
+  'zone-discovery':     { file: 'services/zoneDiscovery.js',        from: 44, to: 53 },
+  'intake-extract':     { file: 'routes/extract.js',               from: 30, to: 40 },
+  'schema-discovery':   { file: 'services/schemaDiscovery.js',      from: 29, to: 47 },
+  'search-judge':       { file: 'services/recordSearch.js',         from: 260, to: 269 },
+  'classify':           { file: 'services/classifier.js',           from: 44, to: 50 },
+  'connector-catalog':  { file: 'services/connectors/laserfiche.js', from: 68, to: 76 },
+  'doc-embeddings':     { file: 'services/embedIndex.js',           from: 38, to: 46 },
+  'meta-extract':       { file: 'services/recordMetaExtract.js',    from: 3, to: 7 },
+  'report-agent':       { file: 'services/reportAgent.js',          from: 30, to: 35 },
+  'help-agent':         { file: 'services/helpAgent.js',            from: 38, to: 44 },
+  'fee-policy':         { file: 'services/feePolicyExtract.js',     from: 45, to: 47 },
+  'public-portal':      { file: 'routes/publicChat.js',            from: 170, to: 176 }
+};
+router.get('/touchpoint-code/:id', requireAuth, admin, function (req, res) {
+  var tp = TP_CODE[req.params.id];
+  if (!tp) return res.status(404).json({ error: 'Unknown touchpoint.' });
+  try {
+    var full = path.join(__dirname, '..', tp.file);
+    var lines = fs.readFileSync(full, 'utf8').split('\n');
+    res.json({ file: 'backend/src/' + tp.file, lines: tp.from + '-' + tp.to, code: lines.slice(tp.from - 1, tp.to).join('\n') });
+  } catch (e) { res.status(500).json({ error: 'Could not read source.' }); }
+});
+
 module.exports = router;

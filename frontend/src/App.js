@@ -25,6 +25,7 @@ import SourcesPage from './pages/SourcesPage';
 import ARIAReportsPage from './pages/ARIAReportsPage';
 import AIReportingPage from './pages/AIReportingPage';
 import IntegrationsPage from './pages/IntegrationsPage';
+import AIDataFlowPage from './pages/AIDataFlowPage';
 import RedactionRulesPage from './pages/RedactionRulesPage';
 import RedactionWorkspacePage from './pages/RedactionWorkspacePage';
 import RedactionReviewPage from './pages/RedactionReviewPage';
@@ -79,6 +80,7 @@ export default function App() {
           <Route path="reports" element={<ARIAReportsPage />} />
           <Route path="ai-reporting" element={<AIReportingPage />} />
           <Route path="integrations" element={<IntegrationsPage />} />
+          <Route path="ai-data-flow" element={<AIDataFlowPage />} />
           <Route path="staff" element={<StaffManagementPage />} />
           <Route path="departments" element={<DepartmentsPage />} />
           <Route path="setup" element={<SetupPage />} />
