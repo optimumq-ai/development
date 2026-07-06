@@ -39,6 +39,7 @@ export default function AppLayout() {
     { to: '/jurisdiction-profile', label: 'Jurisdiction Profile', show: isElev },
     { to: '/integrations', label: 'Integrations & API Keys', show: isAdmin },
     { to: '/ai-data-flow', label: 'AI Data Flow & Compliance', show: isAdmin },
+    { to: '/portal-security', label: 'Portal Agent Security', show: isAdmin },
     { to: '/config', label: 'Configuration', show: isAdmin },
   ].filter(x => x.show);
 
