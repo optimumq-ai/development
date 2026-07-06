@@ -382,4 +382,19 @@ Analyzed 2026-07-05. The public chat agent is an **intake assistant**, not a rec
 Pairs with R5 (encrypt-at-rest) as the pre-production security mini-thread.
 **Sales artifact wanted:** a security graphic illustrating the portal agent's reach, the code-enforced safeguards, and a table of likely prompt-injection attempts + how the system defends each (see `docs/PROMPT_INJECTION_DEFENSE.md` / in-app security diagram).
 
+### R8. Document-parsing security — audit + de-root DONE; remaining ops hardening
+Analyzed & hardened 2026-07-05. Threat: a malicious/malformed uploaded or imported file (PDF, spreadsheet, image, A/V) attacking the software that parses it (distinct from prompt injection). Full analysis + process map in `docs/DOCUMENT_PROCESSING_SECURITY.md`.
+
+**Findings:** the pipeline READS/transforms files, never open-and-runs them (no macro/PDF-JS execution). Safe patterns already present: `execFileSync` with array args (no shell injection), isolated child processes (Poppler/Tesseract/ffmpeg) with timeouts + maxBuffer, pure-JS pdf-lib/jimp, regex-over-trusted-output (no XXE), upload allowlist, xlsx not deeply parsed, parsers patched. **Critical finding: app ran as ROOT** — a parser exploit would have been full compromise.
+
+**DONE (2026-07-05):** de-rooted the app — created dedicated `optimumq` service user, chowned `/opt/optimumq` + uploads + `/tmp/oq`, relaunched all 4 PM2 processes with `--uid optimumq`, `pm2 save`. Verified: node + pdftotext run as optimumq, API/DB/parse/writes all work. A parser exploit is now contained to a non-root account that cannot modify code or system files.
+
+**Remaining (ops-level, not yet done):**
+- Restrict outbound network egress from the app host (closes the exfiltration link in the worst-case chain).
+- `unattended-upgrades` for parser packages (Poppler/Tesseract/ffmpeg).
+- Antivirus scan on upload (e.g. ClamAV).
+- File-integrity monitoring on the app dir.
+- Reduce the 1 GB upload cap.
+**Honest gap:** controls are preventive only — no malware scanning, no file-integrity monitoring, no self-repair. On a bad file the system fails safe (parse error → empty text). **Professional pen-test warranted before production (police/CJIS records).**
+
 _Objection My Tasks visibility (standing passive watchers): decided AGAINST 2026-07-01. Single assigned owner, freely reassignable; team-level oversight via dashboard count (R1) once designed._
