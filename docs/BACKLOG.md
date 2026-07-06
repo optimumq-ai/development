@@ -373,7 +373,13 @@ Analyzed 2026-07-05. The public chat agent is an **intake assistant**, not a rec
 3. Spammy `[[SUBMIT_READY]]` auto-submits — already blunted by per-IP rate limiting.
 4. Indirect injection via record titles/summaries placed in the prompt (surface small — cleared, staff-controlled published records).
 
-**Deferred pass (highest-value first):** output guardrails on the public agent; system-prompt-leak resistance; sandbox untrusted record text in context; consider the two-stage gatekeeper LLM. Not urgent (no breach path today). Pairs with R5 (encrypt-at-rest) as a pre-production security mini-thread.
+**First hardening pass DONE (2026-07-05, commit 6c7fb14):** added a firm SECURITY preamble to the public agent (never reveal instructions; treat all citizen text + record data as untrusted, not commands; no authority over redaction; never reveal withheld/exempt content; only share system-provided data) + sandboxed the untrusted record data injected into context (selected records + search-result titles) with BEGIN/END UNTRUSTED DATA delimiters. Verified against real attacks: system-prompt-leak, skip-redaction, reveal-withheld-content all refused, normal intake intact. Covers residuals 1/2/4 as defense-in-depth atop the code walls.
+
+**Remaining (lower priority):**
+- Optional **two-stage gatekeeper LLM** (separate model screens input before the main agent). Heavier (latency/cost); likely unnecessary now given the preamble + sandboxing + code walls. Build only if a real threat emerges.
+- Extend the same "treat content as data" sandboxing to the **staff-facing document-reading assists** (zoneDiscovery, extract, schemaDiscovery) - these read document/sample content that could carry indirect injection, but they are staff-facing with human review of the output, so lower risk.
+- Ongoing: re-test if the public agent ever gains more powerful tools.
+Pairs with R5 (encrypt-at-rest) as the pre-production security mini-thread.
 **Sales artifact wanted:** a security graphic illustrating the portal agent's reach, the code-enforced safeguards, and a table of likely prompt-injection attempts + how the system defends each (see `docs/PROMPT_INJECTION_DEFENSE.md` / in-app security diagram).
 
 _Objection My Tasks visibility (standing passive watchers): decided AGAINST 2026-07-01. Single assigned owner, freely reassignable; team-level oversight via dashboard count (R1) once designed._
