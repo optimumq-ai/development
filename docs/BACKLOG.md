@@ -1,5 +1,7 @@
 ## Workflow engine BUILT (2026-06-22, commit 7476555) - deterministic rulebook + decision trail + AI plain-English authoring; Routing tab + Workflow admin page. See SESSION_HANDOFF.md. Follow-ons: redaction-stage entry hook for auto-redaction; calibrated 2-stage match; specialization->individual promotion.
 
+> **Security/hardening items (R5, R7, R8 + vector-DB encryption) are consolidated and categorized in `docs/PRE_RELEASE_HARDENING.md`** — split into Category 1 (function-impacting, design carefully) and Category 2 (build after demo, before full release).
+
 # Backlog / Ideas to Consider
 
 Running list of enhancement ideas captured during build sessions. Not yet scheduled.
