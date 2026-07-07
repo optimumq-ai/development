@@ -34,9 +34,10 @@ export default function SourcesConfig() {
   function typeMeta(key){ return catalog.find(function(c){ return c.key === key; }) || { label:key, fields:[], capabilities:[], description:'' }; }
   function setField(k,v){ setEditor(function(ed){ var d=Object.assign({},ed.data); d[k]=v; return Object.assign({},ed,{data:d}); }); }
   function setCfg(k,v){ setEditor(function(ed){ var c=Object.assign({},ed.data.config); c[k]=v; return Object.assign({},ed,{data:Object.assign({},ed.data,{config:c})}); }); }
-  function openCreate(){ var first = catalog[0] || {key:''}; setEditor({ mode:'create', data:{ name:'', connector_type:first.key, status:'active', config:{}, description:'' } }); }
-  function openEdit(s){ setEditor({ mode:'edit', data:{ id:s.id, name:s.name, connector_type:s.connector_type, status:s.status, config:Object.assign({}, s.config||{}), description:s.description||'' } }); }
-  function openCreatePaper(){ setEditor({ mode:'create', data:{ name:'', connector_type:'paper-index', status:'active', config:{}, description:'' } }); }
+  function scrollToEditor(){ setTimeout(function(){ var el=document.getElementById('source-editor'); if(el && el.scrollIntoView) el.scrollIntoView({behavior:'smooth', block:'start'}); }, 60); }
+  function openCreate(){ var first = catalog[0] || {key:''}; setEditor({ mode:'create', data:{ name:'', connector_type:first.key, status:'active', config:{}, description:'' } }); scrollToEditor(); }
+  function openEdit(s){ setEditor({ mode:'edit', data:{ id:s.id, name:s.name, connector_type:s.connector_type, status:s.status, config:Object.assign({}, s.config||{}), description:s.description||'' } }); scrollToEditor(); }
+  function openCreatePaper(){ setEditor({ mode:'create', data:{ name:'', connector_type:'paper-index', status:'active', config:{}, description:'' } }); scrollToEditor(); }
 
   async function save() {
     var d = editor.data;
@@ -55,7 +56,7 @@ export default function SourcesConfig() {
     try { await api.delete('/repositories/' + s.id); await load(); } catch(e){ alert('Delete failed'); }
   }
 
-  function openAi(){ setAi({ description:'', documentation:'', loading:false, error:'' }); }
+  function openAi(){ setAi({ description:'', documentation:'', loading:false, error:'' }); scrollToEditor(); }
   function setAiField(k,v){ setAi(function(a){ var n=Object.assign({},a); n[k]=v; return n; }); }
   async function proposeAi(){
     if (!ai.description.trim()) { setAiField('error','Describe the system first'); return; }
@@ -64,12 +65,12 @@ export default function SourcesConfig() {
       var r = await api.post('/repositories/ai-configure', { description: ai.description, documentation: ai.documentation });
       var p = r.data.proposal;
       setAi(null);
-      setEditor({ mode:'create', data:{ name:p.name||'', connector_type:p.connector_type, status:'active', config:p.config||{}, description:'', _ai:{ reasoning:p.reasoning||'', missing:p.missing||[] } } });
+      setEditor({ mode:'create', data:{ name:p.name||'', connector_type:p.connector_type, status:'active', config:p.config||{}, description:'', _ai:{ reasoning:p.reasoning||'', missing:p.missing||[] } } }); scrollToEditor();
     } catch(e){ setAiField('loading', false); setAiField('error', (e.response&&e.response.data&&e.response.data.error)||'AI configuration failed'); }
   }
 
   function openPaperImport(s){
-    setPaperImport({ sourceId:s.id, name:s.name, csv:'', busy:false, error:'', count:null, imported:null });
+    setPaperImport({ sourceId:s.id, name:s.name, csv:'', busy:false, error:'', count:null, imported:null }); scrollToEditor();
     api.get('/repositories/' + s.id + '/paper-index').then(function(r){ setPaperImport(function(p){ return (p && p.sourceId===s.id) ? Object.assign({},p,{count:r.data.count}) : p; }); }).catch(function(){});
   }
   function setPI(k,v){ setPaperImport(function(p){ if(!p) return p; var n=Object.assign({},p); n[k]=v; return n; }); }
@@ -243,9 +244,11 @@ export default function SourcesConfig() {
         <div style={{ color:'#6B7280', fontSize:'14px' }}>Repositories and systems the platform can search and scan for record types.</div>
         {(!editor && !ai && !paperImport) ? <button onClick={openAi} style={btnGhost}>Configure with AI</button> : null}
       </div>
-      {editor ? renderEditor() : null}
-      {ai ? renderAiPanel() : null}
-      {paperImport ? renderPaperImport() : null}
+      <div id="source-editor">
+        {editor ? renderEditor() : null}
+        {ai ? renderAiPanel() : null}
+        {paperImport ? renderPaperImport() : null}
+      </div>
       {loading ? <div style={{ color:'#9CA3AF', fontSize:'14px' }}>Loading sources...</div> : (
         <div>
           <div style={{ marginBottom:'26px' }}>
