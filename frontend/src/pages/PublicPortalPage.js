@@ -265,14 +265,19 @@ export default function PublicPortalPage() {
       <div style={{minHeight:'100vh',background:'#F9FAFB',display:'flex',flexDirection:'column'}}>
         {portalHeader}
         <div style={{flex:1,display:'flex',alignItems:'center',justifyContent:'center',padding:'40px 24px'}}>
-          <div style={{maxWidth:'740px',width:'100%',textAlign:'center'}}>
-            <h1 style={{fontSize:'36px',fontWeight:'800',color:'#1F4E79',margin:'0 0 18px',lineHeight:'1.2'}}>Welcome to the {agencyName} Public Records Portal</h1>
-            <p style={{fontSize:'16px',color:'#374151',lineHeight:'1.6',margin:'0 auto 36px',maxWidth:'640px'}}>
-              The portal includes a <strong>Public Ready Records Library</strong> which offers you the ability to browse records that contain no exempt content, or which have been processed so that exempt information has been redacted.
-            </p>
-            <div style={{display:'flex',gap:'16px',justifyContent:'center',flexWrap:'wrap'}}>
-              <button onClick={startRequest} style={{padding:'16px 30px',borderRadius:'10px',border:'none',background:'#1F4E79',color:'white',fontSize:'16px',fontWeight:'700',cursor:'pointer',boxShadow:'0 2px 10px rgba(31,78,121,0.25)'}}>Create an Open Records Request</button>
-              <button onClick={function(){ navigate('/portal/library'); }} style={{padding:'16px 30px',borderRadius:'10px',border:'2px solid #1F4E79',background:'white',color:'#1F4E79',fontSize:'16px',fontWeight:'700',cursor:'pointer'}}>Access Public Ready Records Library</button>
+          <div style={{maxWidth:'860px',width:'100%',textAlign:'center'}}>
+            <h1 style={{fontSize:'32px',fontWeight:'800',color:'#1F4E79',margin:'0 0 30px',lineHeight:'1.2',textAlign:'center'}}>Welcome to the {agencyName} Public Records Portal</h1>
+            <div style={{display:'flex',alignItems:'center',gap:'28px',padding:'22px 0',borderTop:'1px solid #E5E7EB',flexWrap:'wrap'}}>
+              <p style={{flex:1,minWidth:'260px',fontSize:'16px',color:'#374151',lineHeight:'1.6',margin:0,textAlign:'left'}}>
+                The <strong>Public Ready Records Library</strong> contains records that have been processed and are ready for immediate download. You can browse records, or use the search tool if you're seeking a specific record.
+              </p>
+              <button onClick={function(){ navigate('/portal/library'); }} style={{flexShrink:0,padding:'16px 26px',borderRadius:'10px',border:'none',background:'#1F4E79',color:'white',fontSize:'15px',fontWeight:'700',cursor:'pointer',whiteSpace:'nowrap',width:'340px',textAlign:'center',marginRight:'-24px',boxShadow:'0 2px 10px rgba(31,78,121,0.25)'}}>Access Public Ready Records Library</button>
+            </div>
+            <div style={{display:'flex',alignItems:'center',gap:'28px',padding:'22px 0',borderTop:'1px solid #E5E7EB',flexWrap:'wrap'}}>
+              <p style={{flex:1,minWidth:'260px',fontSize:'16px',color:'#374151',lineHeight:'1.6',margin:0,textAlign:'left'}}>
+                The <strong>Open Records Request Portal</strong> lets you submit a formal request for records not currently available in the Public Ready Records Library. An AI-powered agent helps refine your description for the best possible match. If you're unable to locate an exact match, you can still submit the request for processing by the Open Records team.
+              </p>
+              <button onClick={startRequest} style={{flexShrink:0,padding:'16px 26px',borderRadius:'10px',border:'none',background:'#1F4E79',color:'white',fontSize:'15px',fontWeight:'700',cursor:'pointer',whiteSpace:'nowrap',width:'340px',textAlign:'center',marginRight:'-24px',boxShadow:'0 2px 10px rgba(31,78,121,0.25)'}}>Create an Open Records Request</button>
             </div>
           </div>
         </div>
