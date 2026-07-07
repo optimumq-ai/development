@@ -638,3 +638,6 @@ INSERT INTO onboarding_progress (phase_key, phase_order, title) VALUES
   ('repositories',4, 'Repositories & Discovery'),
   ('redaction',   5, 'Redaction Readiness')
 ON CONFLICT (phase_key) DO NOTHING;
+
+CREATE TABLE IF NOT EXISTS import_ingest_log (id TEXT PRIMARY KEY, repository_id TEXT NOT NULL, file_key TEXT NOT NULL, original_name TEXT, request_file_id TEXT, status TEXT, detail TEXT, ingested_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
+CREATE UNIQUE INDEX IF NOT EXISTS ux_import_ingest ON import_ingest_log (repository_id, file_key);

@@ -131,4 +131,15 @@ router.get('/:id/paper-index', requireAuth, async function(req, res){
   res.json({ count: cnt ? Number(cnt.n) : 0, items: items });
 });
 
+var importIngest = require('../services/importIngest');
+// Import ingestion (increment 3): run-now + status for Import sources
+router.post('/:id/ingest/run', requireAuth, async function(req, res){
+  try { res.json(await importIngest.runIngest(req.params.id)); }
+  catch(e){ console.error('[ingest/run]', e && e.message); res.status(500).json({ error: 'Ingestion failed to run.' }); }
+});
+router.get('/:id/ingest/status', requireAuth, async function(req, res){
+  try { res.json(await importIngest.status(req.params.id)); }
+  catch(e){ res.status(500).json({ error: 'Could not load ingestion status.' }); }
+});
+
 module.exports = router;
