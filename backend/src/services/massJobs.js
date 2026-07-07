@@ -96,6 +96,21 @@ async function tick(opts) {
         [newProcessed, r.redacted, r.held, r.errors, done ? 'completed' : 'running', mergeErrLog(job.error_log, r.errs), nowStr(), nowStr(), job.id]);
       await addBudget(day, r.processed);
       totalProcessed += r.processed; remaining -= r.processed;
+      if (done) {
+        try {
+          var irj = await get("SELECT * FROM import_review_jobs WHERE job_id = ? AND review_task_id IS NULL", [job.id]);
+          if (irj) {
+            var repoRow = await get("SELECT name FROM record_repositories WHERE id = ?", [irj.repository_id]);
+            var reqIdIr = 'sysimport-' + irj.repository_id;
+            var trIr = require('./taskRouting');
+            var tk = await trIr.createTask({ requestId: reqIdIr, type: 'review_auto_redaction', title: 'Review auto-redaction batch - ' + ((repoRow && repoRow.name) || 'import') + ' (' + job.total_items + ' file(s))', createdBy: 'import' });
+            if (tk && tk.id) {
+              if (irj.review_assignee) { try { await trIr.assign(tk.id, irj.review_assignee, 'manual'); } catch(e){} }
+              await run("UPDATE import_review_jobs SET review_task_id = ? WHERE job_id = ?", [tk.id, job.id]);
+            }
+          }
+        } catch(eR){ console.error('[massJobs review task]', eR && eR.message); }
+      }
       touched.push({ id: job.id, processed: r.processed, redacted: r.redacted, held: r.held, errors: r.errors, done: done });
       if (!force && remaining <= 0) break;
     }

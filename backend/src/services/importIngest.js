@@ -16,6 +16,7 @@ var MIME = { '.pdf': 'application/pdf', '.png': 'image/png', '.jpg': 'image/jpeg
 async function ensureTable() {
   await db.run("CREATE TABLE IF NOT EXISTS import_ingest_log (id TEXT PRIMARY KEY, repository_id TEXT NOT NULL, file_key TEXT NOT NULL, original_name TEXT, request_file_id TEXT, status TEXT, detail TEXT, ingested_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')))");
   await db.run("CREATE UNIQUE INDEX IF NOT EXISTS ux_import_ingest ON import_ingest_log (repository_id, file_key)");
+  await db.run("CREATE TABLE IF NOT EXISTS import_review_jobs (job_id TEXT PRIMARY KEY, repository_id TEXT, review_assignee TEXT, kind TEXT, review_task_id TEXT, created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')))");
 }
 function parseCfg(repo) { try { return repo.config ? (typeof repo.config === 'string' ? JSON.parse(repo.config) : repo.config) : {}; } catch (e) { return {}; } }
 function fileKey(name, st) { return name + ':' + st.size + ':' + Math.floor(st.mtimeMs); }
@@ -54,7 +55,7 @@ async function runIngest(repoId) {
   var disc = await discoverNew(repo);
   if (disc.error) return { error: disc.error };
   var reqId = await ensureIngestRequest(repo);
-  var ingested = 0, errors = 0;
+  var ingested = 0, errors = 0, fids = [];
   for (var i = 0; i < disc.files.length; i++) {
     var f = disc.files[i];
     try {
@@ -67,14 +68,39 @@ async function runIngest(repoId) {
       await docProcessing.processFile(fid); // extract text + auto-index (internal)
       await db.run("INSERT INTO import_ingest_log (id, repository_id, file_key, original_name, request_file_id, status) VALUES (?,?,?,?,?, 'ingested') ON CONFLICT (repository_id, file_key) DO UPDATE SET status='ingested', request_file_id=EXCLUDED.request_file_id, detail=NULL, ingested_at=to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')",
         [uuidv4(), repo.id, f.key, f.name, fid]);
-      ingested++;
+      ingested++; fids.push(fid);
     } catch (e) {
       errors++;
       try { await db.run("INSERT INTO import_ingest_log (id, repository_id, file_key, original_name, status, detail) VALUES (?,?,?,?, 'error', ?) ON CONFLICT (repository_id, file_key) DO UPDATE SET status='error', detail=EXCLUDED.detail", [uuidv4(), repo.id, f.key, f.name, String(e.message).slice(0, 300)]); } catch (ee) { /* ignore */ }
       console.error('[importIngest]', f.name, e.message);
     }
   }
+  try { await routeEndToEnd(repo, parseCfg(repo), reqId, fids); } catch(e){ console.error('[importIngest routeEndToEnd]', e && e.message); }
   return { ingested: ingested, errors: errors, scanned: disc.scanned, newFound: disc.files.length };
+}
+
+// End-to-end routing: after ingest, optionally auto-create a redaction job (if a template is
+// linked) or a one-time 'build template' task (if not). Review happens as a task on completion.
+async function routeEndToEnd(repo, cfg, reqId, fids){
+  if (!cfg || !cfg.end_to_end || !fids || !fids.length) return;
+  var reviewer = cfg.review_assignee || null;
+  if (cfg.template_id) {
+    var tmpl = await db.get("SELECT id, name, kind FROM layout_profiles WHERE id = ?", [cfg.template_id]);
+    if (tmpl) {
+      var jobId = 'mj-imp-' + uuidv4();
+      await db.run("INSERT INTO mass_redaction_jobs (id, name, template_id, kind, file_ids, total_items, chunk_size, window_start, window_end, priority, status, created_by, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?, 'queued', ?, datetime('now'), datetime('now'))",
+        [jobId, 'Import auto-redaction - ' + repo.name + ' - ' + new Date().toISOString().slice(0,10), tmpl.id, tmpl.kind || 'zones', JSON.stringify(fids), fids.length, 100, '00:00', '23:59', 5, reviewer || 'import']);
+      await db.run("INSERT INTO import_review_jobs (job_id, repository_id, review_assignee, kind) VALUES (?,?,?,?) ON CONFLICT (job_id) DO NOTHING", [jobId, repo.id, reviewer, 'review']);
+      return;
+    }
+  }
+  // no template linked -> ensure a one-time build-template task exists
+  var existing = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'build_redaction_template' AND status IN ('open','assigned','in_progress')", [reqId]);
+  if (!existing) {
+    var tr = require('./taskRouting');
+    var t = await tr.createTask({ requestId: reqId, type: 'build_redaction_template', title: 'Build redaction template for import source: ' + repo.name, createdBy: 'import' });
+    if (reviewer && t && t.id) { try { await tr.assign(t.id, reviewer, 'manual'); } catch(e){} }
+  }
 }
 
 async function status(repoId) {
