@@ -4,7 +4,28 @@ const { requireAuth } = require('../middleware/auth');
 const { all, get, run } = require('../db');
 const catalog = require('../services/connectors/registry');
 
+const fs = require('fs');
+const path = require('path');
+const IMPORT_BASE = path.join(__dirname, '../../../imports');
 function nid(){ return 'repo-' + Math.random().toString(36).slice(2, 10); }
+
+// For Import sources: user provides a subdirectory NAME; we prepend a managed base,
+// sanitize (no traversal), create the folder, and set config.path. Push targets this folder.
+function prepImportConfig(connectorType, cfg){
+  if (connectorType !== 'import') return cfg;
+  cfg = cfg || {};
+  var raw = String(cfg.subdir || '').trim();
+  var safe = raw.replace(/[^a-zA-Z0-9 _-]/g, '').trim().replace(/\\s+/g, '-');
+  if (safe) {
+    var full = path.join(IMPORT_BASE, safe);
+    if (full.indexOf(IMPORT_BASE + path.sep) === 0) {
+      try { fs.mkdirSync(full, { recursive: true }); } catch(e){ /* dir create best-effort */ }
+      cfg.path = full;
+      cfg.subdir = safe;
+    }
+  }
+  return cfg;
+}
 
 router.get('/catalog', requireAuth, function(req, res){ res.json({ catalog: catalog }); });
 
@@ -18,7 +39,9 @@ router.post('/', requireAuth, async function(req, res){
   var b = req.body || {};
   if (!b.name || !b.connector_type) return res.status(400).json({ error: 'name and connector_type are required' });
   var id = b.id || nid();
-  var config = typeof b.config === 'string' ? b.config : JSON.stringify(b.config || {});
+  var cfgObj = typeof b.config === 'string' ? (function(){ try { return JSON.parse(b.config||'{}'); } catch(e){ return {}; } })() : (b.config || {});
+  cfgObj = prepImportConfig(b.connector_type, cfgObj);
+  var config = JSON.stringify(cfgObj);
   try {
     await run('INSERT INTO record_repositories (id, name, connector_type, status, config, sort_order, description) VALUES (?,?,?,?,?,?,?)', [id, b.name, b.connector_type, b.status || 'active', config, b.sort_order || 50, b.description || '']);
   } catch(e){ return res.status(400).json({ error: String(e.message || e) }); }
@@ -30,7 +53,13 @@ router.patch('/:id', requireAuth, async function(req, res){
   var b = req.body || {};
   var sets = [], vals = [];
   ['name','connector_type','status','sort_order','description'].forEach(function(f){ if (b.hasOwnProperty(f)) { sets.push(f + ' = ?'); vals.push(b[f]); } });
-  if (b.hasOwnProperty('config')) { sets.push('config = ?'); vals.push(typeof b.config === 'string' ? b.config : JSON.stringify(b.config || {})); }
+  if (b.hasOwnProperty('config')) {
+    var ctype = b.connector_type;
+    if (!ctype) { var exr = await get('SELECT connector_type FROM record_repositories WHERE id = ?', [req.params.id]); ctype = exr && exr.connector_type; }
+    var cfgO = typeof b.config === 'string' ? (function(){ try { return JSON.parse(b.config||'{}'); } catch(e){ return {}; } })() : (b.config || {});
+    cfgO = prepImportConfig(ctype, cfgO);
+    sets.push('config = ?'); vals.push(JSON.stringify(cfgO));
+  }
   if (!sets.length) return res.status(400).json({ error: 'no fields to update' });
   vals.push(req.params.id);
   await run('UPDATE record_repositories SET ' + sets.join(', ') + ' WHERE id = ?', vals);

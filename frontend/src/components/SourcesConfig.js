@@ -173,6 +173,30 @@ export default function SourcesConfig() {
         })}
         {d.connector_type==='import' ? (
           <div style={{ marginBottom:'12px' }}>
+            <label style={lbl}>Delivery method</label>
+            <select style={inp} value={d.config.mode||'push'} onChange={function(e){ setCfg('mode', e.target.value); }}>
+              <option value="push">Push &mdash; the other system drops files into the folder below (recommended; no login for us to hold)</option>
+              <option value="pull">Pull &mdash; we fetch from the other system (requires credentials; not yet available)</option>
+            </select>
+            {d.config.mode==='pull' ? (
+              <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'8px', padding:'9px 12px', marginTop:'8px', fontSize:'12px', color:'#92400E', lineHeight:'1.5' }}>
+                Pull is not yet available &mdash; it requires a per-system connection with stored credentials. For now use <strong>Push</strong>: schedule an export in the source system that writes files to the folder below.
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+        {d.connector_type==='import' ? (function(){ var sub = d.config.subdir!=null ? d.config.subdir : (d.config.path ? String(d.config.path).replace('/opt/optimumq/imports/','') : ''); return (
+          <div style={{ marginBottom:'12px' }}>
+            <label style={lbl}>Import folder</label>
+            <div style={{ display:'flex', alignItems:'stretch' }}>
+              <span style={{ fontSize:'13px', color:'#6B7280', background:'#F3F4F6', border:'1px solid #E5E7EB', borderRight:'none', borderRadius:'8px 0 0 8px', padding:'9px 10px', whiteSpace:'nowrap', display:'flex', alignItems:'center' }}>/opt/optimumq/imports/</span>
+              <input style={Object.assign({},inp,{borderRadius:'0 8px 8px 0'})} value={sub} onChange={function(e){ setCfg('subdir', e.target.value); }} placeholder="payroll-daily" />
+            </div>
+            <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>The folder is created for you when you save. Point the other system's export job at: <strong>/opt/optimumq/imports/{sub || '\u2026'}</strong></div>
+          </div>
+        ); })() : null}
+        {d.connector_type==='import' ? (
+          <div style={{ marginBottom:'12px' }}>
             <label style={lbl}>Ingestion schedule</label>
             <select style={inp} value={d.config.schedule||'manual'} onChange={function(e){ setCfg('schedule', e.target.value); }}>
               <option value="manual">Manual only &mdash; run ingestion by hand (single / on-demand)</option>
