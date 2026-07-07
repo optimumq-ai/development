@@ -41,6 +41,13 @@ export default function PublicPortalPage() {
   }, []);
 
   useEffect(function() {
+    try {
+      var params = new URLSearchParams(window.location.search);
+      if (params.get('start') === 'request') { startRequest(); }
+    } catch (e) {}
+  }, []);
+
+  useEffect(function() {
     var lastMsg = messages[messages.length - 1];
     if (lastMsg && lastMsg.content === '__SEARCH_RESULTS__' && searchResultsRef.current) {
       searchResultsRef.current.scrollIntoView({ behavior: 'smooth', block: 'start' });
