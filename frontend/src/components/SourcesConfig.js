@@ -232,6 +232,7 @@ export default function SourcesConfig() {
             <select style={inp} value={d.config.schedule||'manual'} onChange={function(e){ setCfg('schedule', e.target.value); }}>
               <option value="manual">Manual only &mdash; run ingestion by hand (single / on-demand)</option>
               <option value="daily">Daily &mdash; automatically ingest new files once a day (repetitive)</option>
+              <option value="watch">Watch &mdash; automatically ingest new files as they arrive</option>
             </select>
             {d.config.schedule==='daily' ? (
               <div style={{ marginTop:'8px' }}>
@@ -240,6 +241,17 @@ export default function SourcesConfig() {
                 <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>Runs once daily at this hour (server local time), picking up only new files.</div>
               </div>
             ) : null}
+          </div>
+        ) : null}
+        {d.connector_type==='import' ? (
+          <div style={{ marginBottom:'12px' }}>
+            <label style={lbl}>After ingesting a file</label>
+            <select style={inp} value={d.config.post_ingest||'leave'} onChange={function(e){ setCfg('post_ingest', e.target.value); }}>
+              <option value="leave">Leave it in the drop folder</option>
+              <option value="archive">Move it to a processed/ subfolder (keeps the drop folder clean)</option>
+              <option value="delete">Delete it (the system keeps the canonical copy)</option>
+            </select>
+            <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>The system always keeps its own copy in secure storage. For scheduled or watch jobs, moving to processed/ keeps the drop folder tidy.</div>
           </div>
         ) : null}
         {d.connector_type==='import' ? (

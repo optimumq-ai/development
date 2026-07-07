@@ -31,7 +31,7 @@ async function ensureIngestRequest(repo) {
   return reqId;
 }
 
-async function discoverNew(repo) {
+async function discoverNew(repo, settleMs) {
   await ensureTable();
   var cfg = parseCfg(repo);
   var dir = cfg.path;
@@ -45,16 +45,18 @@ async function discoverNew(repo) {
   var out = [];
   entries.forEach(function (f) {
     var full = path.join(dir, f);
-    try { var st = fs.statSync(full); if (!st.isFile()) return; var key = fileKey(f, st); if (!seenSet[key]) out.push({ full: full, name: f, key: key, size: st.size }); } catch (e) { /* skip */ }
+    try { var st = fs.statSync(full); if (!st.isFile()) return; if (settleMs && (Date.now() - st.mtimeMs) < settleMs) return; var key = fileKey(f, st); if (!seenSet[key]) out.push({ full: full, name: f, key: key, size: st.size }); } catch (e) { /* skip */ }
   });
   return { files: out, scanned: entries.length };
 }
 
-async function runIngest(repoId) {
+async function runIngest(repoId, opts) {
+  opts = opts || {};
   var repo = await db.get("SELECT * FROM record_repositories WHERE id = ?", [repoId]);
   if (!repo) return { error: 'Source not found.' };
   if (repo.connector_type !== 'import') return { error: 'This source is not an Import source.' };
-  var disc = await discoverNew(repo);
+  var cfg = parseCfg(repo);
+  var disc = await discoverNew(repo, opts.settleMs || 0);
   if (disc.error) return { error: disc.error };
   var reqId = await ensureIngestRequest(repo);
   var ingested = 0, errors = 0, fids = [];
@@ -71,15 +73,17 @@ async function runIngest(repoId) {
       await db.run("INSERT INTO import_ingest_log (id, repository_id, file_key, original_name, request_file_id, status) VALUES (?,?,?,?,?, 'ingested') ON CONFLICT (repository_id, file_key) DO UPDATE SET status='ingested', request_file_id=EXCLUDED.request_file_id, detail=NULL, ingested_at=to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')",
         [uuidv4(), repo.id, f.key, f.name, fid]);
       ingested++; fids.push(fid);
+      var _act = cfg.post_ingest || 'leave';
+      if (_act === 'archive') { try { var _pd = path.join(path.dirname(f.full), 'processed'); fs.mkdirSync(_pd, { recursive: true }); fs.renameSync(f.full, path.join(_pd, f.name)); } catch(eA){ console.error('[importIngest archive]', eA && eA.message); } }
+      else if (_act === 'delete') { try { fs.unlinkSync(f.full); } catch(eD){ console.error('[importIngest delete]', eD && eD.message); } }
     } catch (e) {
       errors++;
       try { await db.run("INSERT INTO import_ingest_log (id, repository_id, file_key, original_name, status, detail) VALUES (?,?,?,?, 'error', ?) ON CONFLICT (repository_id, file_key) DO UPDATE SET status='error', detail=EXCLUDED.detail", [uuidv4(), repo.id, f.key, f.name, String(e.message).slice(0, 300)]); } catch (ee) { /* ignore */ }
       console.error('[importIngest]', f.name, e.message);
     }
   }
-  var cfgNow = parseCfg(repo);
-  try { if (cfgNow.record_type_id && fids.length) await enrichRecordType(cfgNow.record_type_id, fids); } catch(e){ console.error('[importIngest enrich call]', e && e.message); }
-  try { await routeEndToEnd(repo, cfgNow, reqId, fids); } catch(e){ console.error('[importIngest routeEndToEnd]', e && e.message); }
+  try { if (cfg.record_type_id && fids.length) await enrichRecordType(cfg.record_type_id, fids); } catch(e){ console.error('[importIngest enrich call]', e && e.message); }
+  try { await routeEndToEnd(repo, cfg, reqId, fids); } catch(e){ console.error('[importIngest routeEndToEnd]', e && e.message); }
   return { ingested: ingested, errors: errors, scanned: disc.scanned, newFound: disc.files.length };
 }
 
@@ -177,9 +181,19 @@ async function tick(){
     } catch(e){ console.error('[importScheduler]', repos[i].name, e && e.message); }
   }
 }
+async function tickWatch(){
+  var repos = await db.all("SELECT * FROM record_repositories WHERE connector_type = 'import' AND status = 'active'");
+  for (var i=0;i<repos.length;i++){
+    var wcfg = parseCfg(repos[i]);
+    if (wcfg.schedule !== 'watch') continue;
+    try { await runIngest(repos[i].id, { settleMs: 15000 }); } catch(e){ console.error('[importWatch]', repos[i].name, e && e.message); }
+  }
+}
 function startScheduler(){
   // hourly tick; a daily import source runs once at its configured hour (server local time)
   setInterval(function(){ tick().catch(function(e){ console.error('[importScheduler tick]', e && e.message); }); }, 3600000);
+  // watch tick every 90s; watch sources ingest settled new files as they arrive (15s settle)
+  setInterval(function(){ tickWatch().catch(function(e){ console.error('[importWatch tick]', e && e.message); }); }, 90000);
   setTimeout(function(){ tick().catch(function(e){ console.error('[importScheduler boot]', e && e.message); }); }, 120000); // catch-up shortly after boot
 }
 
