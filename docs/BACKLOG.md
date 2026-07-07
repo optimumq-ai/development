@@ -400,3 +400,19 @@ Analyzed & hardened 2026-07-05. Threat: a malicious/malformed uploaded or import
 **Honest gap:** controls are preventive only — no malware scanning, no file-integrity monitoring, no self-repair. On a bad file the system fails safe (parse error → empty text). **Professional pen-test warranted before production (police/CJIS records).**
 
 _Objection My Tasks visibility (standing passive watchers): decided AGAINST 2026-07-01. Single assigned owner, freely reassignable; team-level oversight via dashboard count (R1) once designed._
+
+---
+
+## Import taxonomy enrichment + file handling + watch mode (design settled 2026-07-05, deferred — build as one increment)
+
+Deferred at Kevin's call while fresh — design is settled, build in one clean pass.
+
+**1. Taxonomy entry required per import source.** Every import source must have a record type — pick an existing one or **create inline** (human enters the spine: name + plain description of what these records are). On the **first ingestion**, run AI enrichment over the actual sample files to fill in the *vocabulary* (synonyms, keywords, disambiguators). Division of labor: human provides skeleton, AI adds muscle. NOTE: today's auto-discovery *proposes new* types; this needs a small new variant — **enrich a named existing type from sample files** (not propose-new). Closes the "orphan" gap (every import has a record-type home → an index path).
+
+**2. After-ingest file handling (per-source option).** What happens to a file in the drop folder after successful ingestion: *leave it* / *move to a `processed/` archive subfolder* / *delete it*. **Default: archive to `processed/` for scheduled jobs** so the drop folder doesn't grow unbounded (watermark already prevents re-ingestion, but files accumulate). The **canonical original lives in `/opt/optimumq/uploads`** (the system of record — processed, redacted, preserved); the drop folder is a staging/transfer area, its copies redundant post-ingest.
+
+**3. Watch mode (automatic ingestion).** Keep Manual (bulk historical + testing/on-demand) AND add automatic. Schedule field becomes **Manual / Daily (at hour) / Watch**. Watch = **frequent polling with a file-stability/settle check** (ingest only once a file's size has been stable for a few seconds) — NOT raw fs-watch, to avoid grabbing a mid-write/half-transferred push.
+
+**Key architectural clarification (why shared canonical store is fine):** search reads the **per-record index** (extracted text + vectors + record-type metadata in the DB), NOT the folder. Disk location is irrelevant to search once ingested; each record is individually labeled with its file, record type, and source. So a shared uploads folder does NOT degrade search — **correct record-type labeling is what protects search quality**, which is exactly what the taxonomy requirement (#1) enforces. Physical folder separation would give false safety, wouldn't help search, and would multiply what must be secured/backed up/encrypted.
+
+**Clean model:** **one import source per record type / per drop folder** → labeling stays crisp and exact. Mixed-type folder → labeling is only as precise as "came from a source associated with type X"; per-file AI classification-on-ingest is the fix but a bigger feature — **defer until actually needed**.
