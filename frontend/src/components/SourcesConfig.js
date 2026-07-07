@@ -17,6 +17,9 @@ export default function SourcesConfig() {
   const [ai, setAi] = useState(null);
   const [paperImport, setPaperImport] = useState(null);
   const [ingest, setIngest] = useState({});
+  const [templates, setTemplates] = useState([]);
+  const [staff, setStaff] = useState([]);
+  const [me, setMe] = useState(null);
 
   useEffect(function(){ load(); }, []);
 
@@ -25,6 +28,9 @@ export default function SourcesConfig() {
     try {
       var sr = await api.get('/repositories'); setSources(sr.data.repositories);
       var cr = await api.get('/repositories/catalog'); setCatalog(cr.data.catalog);
+      try { var tr = await api.get('/redaction-templates'); setTemplates((tr.data && tr.data.templates) || []); } catch(e){}
+      try { var stf = await api.get('/staff'); setStaff((stf.data && stf.data.staff) || []); } catch(e){}
+      try { var meR = await api.get('/auth/me'); setMe((meR.data && meR.data.user) || null); } catch(e){}
     } catch(e){ console.error(e); }
     setLoading(false);
   }
@@ -207,6 +213,36 @@ export default function SourcesConfig() {
                 <label style={lbl}>Run at hour (0&ndash;23, server time)</label>
                 <input style={inp} type="number" min="0" max="23" value={d.config.hour!=null?d.config.hour:2} onChange={function(e){ setCfg('hour', e.target.value); }} placeholder="2" />
                 <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>Runs once daily at this hour (server local time), picking up only new files.</div>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
+        {d.connector_type==='import' ? (
+          <div style={{ marginBottom:'12px', background:'#F0F9FF', border:'1px solid #BAE6FD', borderRadius:'8px', padding:'12px' }}>
+            <label style={{ display:'flex', alignItems:'center', gap:'8px', cursor:'pointer', fontWeight:'600', fontSize:'13px', color:'#0C4A6E' }}>
+              <input type="checkbox" checked={!!d.config.end_to_end} onChange={function(e){ var on=e.target.checked; setCfg('end_to_end', on); if(on && !d.config.review_assignee && me && me.id) setCfg('review_assignee', me.id); }} />
+              Process end-to-end (import &rarr; auto-redact &rarr; review &rarr; publish)
+            </label>
+            {d.config.end_to_end ? (
+              <div style={{ marginTop:'10px' }}>
+                <label style={lbl}>Redaction template</label>
+                <select style={inp} value={d.config.template_id||''} onChange={function(e){ setCfg('template_id', e.target.value); }}>
+                  <option value="">None yet &mdash; build one from the first imported files</option>
+                  {templates.map(function(t){ return <option key={t.id} value={t.id}>{t.name}</option>; })}
+                </select>
+                {!d.config.template_id ? (
+                  <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'8px', padding:'9px 12px', marginTop:'8px', fontSize:'12px', color:'#92400E', lineHeight:'1.5' }}>
+                    Auto-redaction needs a redaction template, and templates are built from a real sample file. So the first time files arrive, we&rsquo;ll create a setup task for the reviewer to build the template from those files. After that, every import runs end-to-end automatically.
+                  </div>
+                ) : null}
+                <div style={{ marginTop:'10px' }}>
+                  <label style={lbl}>Review assignee <span style={{color:'#6B7280',fontWeight:'400'}}>&mdash; who reviews after auto-redaction</span></label>
+                  <select style={inp} value={d.config.review_assignee||''} onChange={function(e){ setCfg('review_assignee', e.target.value); }}>
+                    <option value="">(Review pool &mdash; anyone on the team can claim)</option>
+                    {staff.map(function(u){ return <option key={u.id} value={u.id}>{u.display_name}{me&&u.id===me.id?' (you)':''}</option>; })}
+                  </select>
+                  <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>Defaults to you. For a scheduled ongoing import, you can assign a different reviewer.</div>
+                </div>
               </div>
             ) : null}
           </div>
