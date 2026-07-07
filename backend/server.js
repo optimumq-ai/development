@@ -159,6 +159,7 @@ async function start() {
     require('./src/services/tickler').startScheduler();
     require('./src/services/configFreshness').startScheduler();
     require('./src/services/effectiveConfig').startPromotionScheduler();
+    require('./src/services/importIngest').startScheduler();
   });
 }
 

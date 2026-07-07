@@ -84,4 +84,31 @@ async function status(repoId) {
   rows.forEach(function (r) { if (r.status === 'ingested') out.ingested = Number(r.c) || 0; if (r.status === 'error') out.errors = Number(r.c) || 0; if (r.last && (!out.lastRun || r.last > out.lastRun)) out.lastRun = r.last; });
   return out;
 }
-module.exports = { runIngest: runIngest, status: status, discoverNew: discoverNew, ensureTable: ensureTable };
+function pad2(n){ return String(n).length<2 ? '0'+n : String(n); }
+async function tick(){
+  var now = new Date();
+  var hour = now.getHours(); // server local time
+  var today = now.getFullYear() + '-' + pad2(now.getMonth()+1) + '-' + pad2(now.getDate());
+  var repos = await db.all("SELECT * FROM record_repositories WHERE connector_type = 'import' AND status = 'active'");
+  for (var i=0;i<repos.length;i++){
+    var cfg = parseCfg(repos[i]);
+    if (cfg.schedule !== 'daily') continue;
+    var schedHour = parseInt(cfg.hour, 10); if (isNaN(schedHour)) schedHour = 2;
+    if (hour !== schedHour) continue;
+    var mkKey = 'import_sched_last_' + repos[i].id;
+    var mk = await db.get("SELECT value FROM system_config WHERE key = ?", [mkKey]);
+    if (mk && mk.value === today) continue; // already ran today
+    try {
+      var r = await runIngest(repos[i].id);
+      await db.run("INSERT INTO system_config (key, value) VALUES (?,?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [mkKey, today]);
+      console.log('[importScheduler] daily ingest "' + repos[i].name + '":', JSON.stringify(r));
+    } catch(e){ console.error('[importScheduler]', repos[i].name, e && e.message); }
+  }
+}
+function startScheduler(){
+  // hourly tick; a daily import source runs once at its configured hour (server local time)
+  setInterval(function(){ tick().catch(function(e){ console.error('[importScheduler tick]', e && e.message); }); }, 3600000);
+  setTimeout(function(){ tick().catch(function(e){ console.error('[importScheduler boot]', e && e.message); }); }, 120000); // catch-up shortly after boot
+}
+
+module.exports = { runIngest: runIngest, status: status, discoverNew: discoverNew, ensureTable: ensureTable, startScheduler: startScheduler };

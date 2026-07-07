@@ -171,6 +171,22 @@ export default function SourcesConfig() {
             </div>
           );
         })}
+        {d.connector_type==='import' ? (
+          <div style={{ marginBottom:'12px' }}>
+            <label style={lbl}>Ingestion schedule</label>
+            <select style={inp} value={d.config.schedule||'manual'} onChange={function(e){ setCfg('schedule', e.target.value); }}>
+              <option value="manual">Manual only &mdash; run ingestion by hand (single / on-demand)</option>
+              <option value="daily">Daily &mdash; automatically ingest new files once a day (repetitive)</option>
+            </select>
+            {d.config.schedule==='daily' ? (
+              <div style={{ marginTop:'8px' }}>
+                <label style={lbl}>Run at hour (0&ndash;23, server time)</label>
+                <input style={inp} type="number" min="0" max="23" value={d.config.hour!=null?d.config.hour:2} onChange={function(e){ setCfg('hour', e.target.value); }} placeholder="2" />
+                <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>Runs once daily at this hour (server local time), picking up only new files.</div>
+              </div>
+            ) : null}
+          </div>
+        ) : null}
         <div style={{ marginBottom:'12px' }}>
           <label style={lbl}>Status</label>
           <select style={inp} value={d.status} onChange={function(e){ setField('status', e.target.value); }}>
@@ -208,6 +224,7 @@ export default function SourcesConfig() {
             <span style={{ fontWeight:'700', fontSize:'14px', color:'#111' }}>{s.name}</span>
             {(meta.capabilities||[]).indexOf('scan')>=0 ? <span style={badge('#ECFDF5','#065F46')}>Scannable</span> : null}
             {(meta.capabilities||[]).indexOf('search')>=0 ? <span style={badge('#EFF6FF','#1E40AF')}>Searchable</span> : null}
+            {s.connector_type==='import' ? ((s.config && s.config.schedule==='daily') ? <span style={badge('#EEF2FF','#4338CA')}>Import &middot; scheduled</span> : <span style={badge('#F3F4F6','#6B7280')}>Import &middot; single</span>) : null}
             {s.status!=='active' ? <span style={badge('#F3F4F6','#6B7280')}>Inactive</span> : null}
           </div>
           <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'2px' }}>{meta.label}</div>
