@@ -67,6 +67,7 @@ router.post('/', requireAuth, async function(req, res){
   var cfgObj = typeof b.config === 'string' ? (function(){ try { return JSON.parse(b.config||'{}'); } catch(e){ return {}; } })() : (b.config || {});
   cfgObj = prepImportConfig(b.connector_type, cfgObj);
   cfgObj = await resolveImportType(b.connector_type, cfgObj);
+  if (b.connector_type === 'import' && cfgObj.end_to_end && !cfgObj.review_assignee && req.user && req.user.sub) cfgObj.review_assignee = req.user.sub; // default reviewer to the saver
   var config = JSON.stringify(cfgObj);
   try {
     await run('INSERT INTO record_repositories (id, name, connector_type, status, config, sort_order, description) VALUES (?,?,?,?,?,?,?)', [id, b.name, b.connector_type, b.status || 'active', config, b.sort_order || 50, b.description || '']);
@@ -86,6 +87,7 @@ router.patch('/:id', requireAuth, async function(req, res){
     var cfgO = typeof b.config === 'string' ? (function(){ try { return JSON.parse(b.config||'{}'); } catch(e){ return {}; } })() : (b.config || {});
     cfgO = prepImportConfig(ctype, cfgO);
     cfgO = await resolveImportType(ctype, cfgO);
+    if (ctype === 'import' && cfgO.end_to_end && !cfgO.review_assignee && req.user && req.user.sub) cfgO.review_assignee = req.user.sub; // default reviewer to the saver
     await linkImportType(req.params.id, ctype, cfgO);
     sets.push('config = ?'); vals.push(JSON.stringify(cfgO));
   }
