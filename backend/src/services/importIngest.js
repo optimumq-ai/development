@@ -8,6 +8,8 @@ var path = require('path');
 var uuidv4 = require('uuid').v4;
 var db = require('../db');
 var docProcessing = require('./docProcessing');
+var embedIndex = require('./embedIndex');
+var Anthropic = require('@anthropic-ai/sdk');
 
 var UPLOAD_DIR = path.join(__dirname, '../../../uploads');
 var ALLOWED = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.jpg', '.jpeg', '.png', '.tiff', '.txt', '.csv'];
@@ -75,8 +77,52 @@ async function runIngest(repoId) {
       console.error('[importIngest]', f.name, e.message);
     }
   }
-  try { await routeEndToEnd(repo, parseCfg(repo), reqId, fids); } catch(e){ console.error('[importIngest routeEndToEnd]', e && e.message); }
+  var cfgNow = parseCfg(repo);
+  try { if (cfgNow.record_type_id && fids.length) await enrichRecordType(cfgNow.record_type_id, fids); } catch(e){ console.error('[importIngest enrich call]', e && e.message); }
+  try { await routeEndToEnd(repo, cfgNow, reqId, fids); } catch(e){ console.error('[importIngest routeEndToEnd]', e && e.message); }
   return { ingested: ingested, errors: errors, scanned: disc.scanned, newFound: disc.files.length };
+}
+
+// AI enrichment: on first import, look at the actual sample files and fill in the record
+// type's vocabulary (synonyms/keywords/disambiguators/intent/expected_content). Human
+// provides name+description (the spine); AI adds the vocabulary (the muscle). Runs once
+// (skipped if the type already has synonyms).
+function packArr(a){ return Array.isArray(a) ? JSON.stringify(a) : '[]'; }
+async function enrichRecordType(typeId, fids){
+  if (!typeId || !fids || !fids.length) return;
+  if (!process.env.ANTHROPIC_API_KEY) return;
+  var t = await db.get("SELECT id, name, description, synonyms FROM record_types WHERE id = ?", [typeId]);
+  if (!t) return;
+  var existing = []; try { existing = JSON.parse(t.synonyms || '[]'); } catch(e){}
+  if (existing && existing.length) return; // already enriched
+  var texts = [];
+  for (var i=0; i<Math.min(fids.length, 3); i++){
+    var pages = await db.all("SELECT text FROM document_pages WHERE file_id = ? AND text IS NOT NULL ORDER BY page_no LIMIT 3", [fids[i]]);
+    pages.forEach(function(pg){ if (pg.text) texts.push(pg.text); });
+  }
+  var sample = texts.join('\n').slice(0, 4000);
+  if (!sample.trim()) return;
+  var prompt = 'You are helping build a public-records taxonomy. A record type has been defined:\n'
+    + 'Name: ' + (t.name||'') + '\nDescription: ' + (t.description||'(none)') + '\n\n'
+    + 'Here are excerpts from actual documents of this type:\n---\n' + sample + '\n---\n\n'
+    + 'Generate vocabulary to improve search matching. Respond ONLY with JSON (no markdown, no preamble):\n'
+    + '{"synonyms": [], "keywords": [], "disambiguators": [], "intent": "", "expected_content": ""}\n'
+    + '- synonyms: alternate names a requester might use for this record type\n'
+    + '- keywords: distinctive terms found in these documents\n'
+    + '- disambiguators: terms that distinguish this from similar record types\n'
+    + '- intent: one sentence on why someone requests these\n'
+    + '- expected_content: one sentence on what these records contain';
+  try {
+    var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+    var msg = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 1200, messages: [{ role: 'user', content: prompt }] });
+    var raw = (msg.content && msg.content[0] && msg.content[0].text) ? msg.content[0].text.trim() : '';
+    raw = raw.replace(/^```json\s*/i,'').replace(/^```\s*/,'').replace(/```\s*$/,'').trim();
+    var r = JSON.parse(raw);
+    await db.run("UPDATE record_types SET synonyms=?, keywords=?, disambiguators=?, intent=COALESCE(NULLIF(intent,''), ?), expected_content=COALESCE(NULLIF(expected_content,''), ?) WHERE id=?",
+      [packArr(r.synonyms), packArr(r.keywords), packArr(r.disambiguators), r.intent||null, r.expected_content||null, typeId]);
+    try { embedIndex.bg(embedIndex.reindexRecordType(typeId), 'rt-enrich ' + typeId); } catch(e){}
+    console.log('[importIngest] enriched record type', typeId, '(' + (t.name||'') + ')');
+  } catch(e){ console.error('[importIngest enrich]', e && e.message); }
 }
 
 // End-to-end routing: after ingest, optionally auto-create a redaction job (if a template is
