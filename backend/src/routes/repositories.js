@@ -27,6 +27,31 @@ function prepImportConfig(connectorType, cfg){
   return cfg;
 }
 
+function slugify(x){ return String(x||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'').slice(0,40); }
+// Create a new record type inline (if requested) and set cfg.record_type_id; clear the new_* fields.
+async function resolveImportType(connectorType, cfg){
+  if (connectorType !== 'import') return cfg;
+  cfg = cfg || {};
+  if (!cfg.record_type_id && cfg.new_record_type_name) {
+    var newId = 'rt-' + Math.random().toString(36).slice(2,10);
+    var code = slugify(cfg.new_record_type_name) + '-' + Math.random().toString(36).slice(2,6);
+    var catId = cfg.new_record_type_category || 'cat-governance';
+    try {
+      await run("INSERT INTO record_types (id, category_id, name, code, description, synonyms, disambiguators, keywords, identifying_facets, formats, is_structured_data, public_availability, auto_release_eligible, status, source, sort_order, fulfillment_method, medium) VALUES (?,?,?,?,?, '[]','[]','[]','[]','[]', 0, 'review_required', 0, 'active', 'import', 100, 'electronic_search', 'electronic')",
+        [newId, catId, String(cfg.new_record_type_name).slice(0,200), code, cfg.new_record_type_description || null]);
+      cfg.record_type_id = newId;
+    } catch(e){ console.error('[import type create]', e && e.message); }
+  }
+  delete cfg.new_record_type_name; delete cfg.new_record_type_description; delete cfg.new_record_type_category;
+  return cfg;
+}
+// Ensure the source<->record-type link exists.
+async function linkImportType(repoId, connectorType, cfg){
+  if (connectorType !== 'import' || !cfg || !cfg.record_type_id || !repoId) return;
+  var ex = await get("SELECT id FROM record_type_repositories WHERE record_type_id = ? AND repository_id = ?", [cfg.record_type_id, repoId]);
+  if (!ex) { try { await run("INSERT INTO record_type_repositories (id, record_type_id, repository_id, format, filter_spec, sort_order) VALUES (?,?,?,?,?,?)", ['rr-' + Math.random().toString(36).slice(2,10), cfg.record_type_id, repoId, null, '{}', 100]); } catch(e){ console.error('[import type link]', e && e.message); } }
+}
+
 router.get('/catalog', requireAuth, function(req, res){ res.json({ catalog: catalog }); });
 
 router.get('/', requireAuth, async function(req, res){
@@ -41,10 +66,12 @@ router.post('/', requireAuth, async function(req, res){
   var id = b.id || nid();
   var cfgObj = typeof b.config === 'string' ? (function(){ try { return JSON.parse(b.config||'{}'); } catch(e){ return {}; } })() : (b.config || {});
   cfgObj = prepImportConfig(b.connector_type, cfgObj);
+  cfgObj = await resolveImportType(b.connector_type, cfgObj);
   var config = JSON.stringify(cfgObj);
   try {
     await run('INSERT INTO record_repositories (id, name, connector_type, status, config, sort_order, description) VALUES (?,?,?,?,?,?,?)', [id, b.name, b.connector_type, b.status || 'active', config, b.sort_order || 50, b.description || '']);
   } catch(e){ return res.status(400).json({ error: String(e.message || e) }); }
+  await linkImportType(id, b.connector_type, cfgObj);
   var row = await get('SELECT * FROM record_repositories WHERE id = ?', [id]);
   res.json({ repository: row });
 });
@@ -58,6 +85,8 @@ router.patch('/:id', requireAuth, async function(req, res){
     if (!ctype) { var exr = await get('SELECT connector_type FROM record_repositories WHERE id = ?', [req.params.id]); ctype = exr && exr.connector_type; }
     var cfgO = typeof b.config === 'string' ? (function(){ try { return JSON.parse(b.config||'{}'); } catch(e){ return {}; } })() : (b.config || {});
     cfgO = prepImportConfig(ctype, cfgO);
+    cfgO = await resolveImportType(ctype, cfgO);
+    await linkImportType(req.params.id, ctype, cfgO);
     sets.push('config = ?'); vals.push(JSON.stringify(cfgO));
   }
   if (!sets.length) return res.status(400).json({ error: 'no fields to update' });

@@ -20,6 +20,8 @@ export default function SourcesConfig() {
   const [templates, setTemplates] = useState([]);
   const [staff, setStaff] = useState([]);
   const [me, setMe] = useState(null);
+  const [recordTypes, setRecordTypes] = useState([]);
+  const [categories, setCategories] = useState([]);
 
   useEffect(function(){ load(); }, []);
 
@@ -31,6 +33,8 @@ export default function SourcesConfig() {
       try { var tr = await api.get('/redaction-templates'); setTemplates((tr.data && tr.data.templates) || []); } catch(e){}
       try { var stf = await api.get('/staff'); setStaff((stf.data && stf.data.staff) || []); } catch(e){}
       try { var meR = await api.get('/auth/me'); setMe((meR.data && meR.data.user) || null); } catch(e){}
+      try { var rtR = await api.get('/taxonomy/record-types'); setRecordTypes((rtR.data && rtR.data.record_types) || []); } catch(e){}
+      try { var catR = await api.get('/taxonomy/categories'); setCategories((catR.data && catR.data.categories) || []); } catch(e){}
     } catch(e){ console.error(e); }
     setLoading(false);
   }
@@ -199,6 +203,27 @@ export default function SourcesConfig() {
               <input style={Object.assign({},inp,{borderRadius:'0 8px 8px 0'})} value={sub} onChange={function(e){ setCfg('subdir', e.target.value); }} placeholder="payroll-daily" />
             </div>
             <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>The folder is created for you when you save. Point the other system's export job at: <strong>/opt/optimumq/imports/{sub || '\u2026'}</strong></div>
+          </div>
+        ); })() : null}
+        {d.connector_type==='import' ? (function(){ var creatingNew = (typeof d.config.new_record_type_name === 'string'); return (
+          <div style={{ marginBottom:'12px' }}>
+            <label style={lbl}>Record type <span style={{color:'#6B7280',fontWeight:'400'}}>&mdash; gives imported records a record type home (required)</span></label>
+            <select style={inp} value={d.config.record_type_id ? d.config.record_type_id : (creatingNew ? '__new__' : '')} onChange={function(e){ var v=e.target.value; if(v==='__new__'){ setCfg('record_type_id',''); setCfg('new_record_type_name', d.config.new_record_type_name || ''); } else { setCfg('record_type_id', v); setCfg('new_record_type_name', null); } }}>
+              <option value="">Select a record type&hellip;</option>
+              {recordTypes.map(function(rt){ return <option key={rt.id} value={rt.id}>{rt.name}</option>; })}
+              <option value="__new__">+ Create a new record type&hellip;</option>
+            </select>
+            {creatingNew ? (
+              <div style={{ marginTop:'8px', paddingLeft:'10px', borderLeft:'2px solid #E5E7EB' }}>
+                <input style={inp} value={d.config.new_record_type_name||''} onChange={function(e){ setCfg('new_record_type_name', e.target.value); }} placeholder="Record type name (e.g. Payroll Records)" />
+                <textarea style={Object.assign({},inp,{marginTop:'6px', minHeight:'48px'})} value={d.config.new_record_type_description||''} onChange={function(e){ setCfg('new_record_type_description', e.target.value); }} placeholder="Plain description of what these records are" />
+                <select style={Object.assign({},inp,{marginTop:'6px'})} value={d.config.new_record_type_category||''} onChange={function(e){ setCfg('new_record_type_category', e.target.value); }}>
+                  <option value="">Select a category&hellip;</option>
+                  {categories.map(function(c){ return <option key={c.id} value={c.id}>{c.name}</option>; })}
+                </select>
+                <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>You provide the name, description, and category. On the first import, AI suggests synonyms and keywords from the actual files.</div>
+              </div>
+            ) : null}
           </div>
         ); })() : null}
         {d.connector_type==='import' ? (
