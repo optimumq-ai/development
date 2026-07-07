@@ -16,6 +16,7 @@ export default function SourcesConfig() {
   const [saving, setSaving] = useState(false);
   const [ai, setAi] = useState(null);
   const [paperImport, setPaperImport] = useState(null);
+  const [ingest, setIngest] = useState({});
 
   useEffect(function(){ load(); }, []);
 
@@ -157,7 +158,7 @@ export default function SourcesConfig() {
           <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>{meta.description}</div>
           {d.connector_type==='import' ? (
             <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'8px', padding:'9px 12px', marginTop:'8px', fontSize:'12px', color:'#92400E', lineHeight:'1.5' }}>
-              <strong>Ingestion pipeline pending.</strong> You can configure this import source now (drop folder / mode). It will begin extracting and indexing files once the import pipeline ships in an upcoming step.
+              <strong>Import source.</strong> Place files in the drop folder, then use <strong>Run ingestion</strong> on this source (in the list) to bring them in &mdash; each file is copied in, its text extracted, and indexed. Re-running picks up only new files; the source folder is never modified.
             </div>
           ) : null}
         </div>
@@ -184,6 +185,19 @@ export default function SourcesConfig() {
     );
   }
 
+  async function loadIngestStatus(id){
+    try { var r = await api.get('/repositories/'+id+'/ingest/status'); setIngest(function(p){ var n=Object.assign({},p); n[id]=Object.assign({}, n[id]||{}, {status:r.data}); return n; }); } catch(e){}
+  }
+  async function runIngestNow(s){
+    setIngest(function(p){ var n=Object.assign({},p); n[s.id]=Object.assign({}, n[s.id]||{}, {busy:true, msg:''}); return n; });
+    try {
+      var r = await api.post('/repositories/'+s.id+'/ingest/run');
+      var d = r.data || {};
+      var msg = d.error ? d.error : (d.ingested+' ingested'+(d.errors?(', '+d.errors+' error(s)'):'')+((d.newFound===0 && !d.error)?' (nothing new)':''));
+      setIngest(function(p){ var n=Object.assign({},p); n[s.id]={busy:false, msg:msg, ok:!d.error}; return n; });
+      loadIngestStatus(s.id);
+    } catch(e){ setIngest(function(p){ var n=Object.assign({},p); n[s.id]={busy:false, msg:'Ingestion failed to run.', ok:false}; return n; }); }
+  }
   function renderSourceRow(s){
     var meta = typeMeta(s.connector_type);
     return (
@@ -199,6 +213,12 @@ export default function SourcesConfig() {
           {s.description ? <div style={{ fontSize:'12px', color:'#6B7280', marginTop:'4px', lineHeight:'1.4' }}>{s.description}</div> : null}
         </div>
         {s.connector_type==='paper-index' ? <button onClick={function(){ openPaperImport(s); }} style={btnGhostSm}>Import index</button> : null}
+        {s.connector_type==='import' ? (function(){ var ig=ingest[s.id]||{}; return (
+          <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'2px' }}>
+            <button onClick={function(){ runIngestNow(s); }} disabled={ig.busy} style={btnGhostSm}>{ig.busy?'Running...':'Run ingestion'}</button>
+            {ig.msg ? <span style={{ fontSize:'11px', color: ig.ok?'#065F46':'#DC2626' }}>{ig.msg}</span> : (ig.status ? <span style={{ fontSize:'11px', color:'#9CA3AF' }}>{ig.status.ingested} ingested{ig.status.lastRun?(' \u00b7 '+String(ig.status.lastRun).slice(0,10)):''}</span> : null)}
+          </div>
+        ); })() : null}
         <button onClick={function(){ openEdit(s); }} style={btnGhostSm}>Edit</button>
         <button onClick={function(){ del(s); }} style={Object.assign({},btnGhostSm,{color:'#DC2626'})}>Delete</button>
       </div>
