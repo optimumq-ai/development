@@ -405,6 +405,8 @@ _Objection My Tasks visibility (standing passive watchers): decided AGAINST 2026
 
 ## Import taxonomy enrichment + file handling + watch mode (design settled 2026-07-05, deferred — build as one increment)
 
+> **[DONE 2026-07-07: Part 1 - taxonomy] built + verified (commits 854e7d6 require+link record type per import source, enrichment in importIngest). Remaining: Part 2 (after-ingest file handling) and Part 3 (watch mode).**
+
 Deferred at Kevin's call while fresh — design is settled, build in one clean pass.
 
 **1. Taxonomy entry required per import source.** Every import source must have a record type — pick an existing one or **create inline** (human enters the spine: name + plain description of what these records are). On the **first ingestion**, run AI enrichment over the actual sample files to fill in the *vocabulary* (synonyms, keywords, disambiguators). Division of labor: human provides skeleton, AI adds muscle. NOTE: today's auto-discovery *proposes new* types; this needs a small new variant — **enrich a named existing type from sample files** (not propose-new). Closes the "orphan" gap (every import has a record-type home → an index path).
