@@ -405,7 +405,7 @@ _Objection My Tasks visibility (standing passive watchers): decided AGAINST 2026
 
 ## Import taxonomy enrichment + file handling + watch mode (design settled 2026-07-05, deferred — build as one increment)
 
-> **[DONE 2026-07-07: Part 1 - taxonomy] built + verified (commits 854e7d6 require+link record type per import source, enrichment in importIngest). Remaining: Part 2 (after-ingest file handling) and Part 3 (watch mode).**
+> **[DONE 2026-07-07: ALL THREE PARTS built + verified] Part 1 taxonomy (854e7d6 require+link record type; 9b362fd AI enrichment from first-import samples). Part 2 after-ingest file handling + Part 3 watch mode (a30a3eb). Verified: inline type create+link+enrich; archive/delete; watch-mode settle skip.**
 
 Deferred at Kevin's call while fresh — design is settled, build in one clean pass.
 
