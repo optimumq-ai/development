@@ -28,6 +28,8 @@ export default function SourcesConfig() {
     setLoading(false);
   }
 
+  var PURPOSE_LABELS = { live:'Live connection to a system or database', storage:'Document file storage', av:'Audio / video storage', import:'Import files (bring records in)', paper:'Paper records index', demo:'Demonstration' };
+  var PURPOSE_ORDER = ['live','storage','av','import','paper','demo'];
   function typeMeta(key){ return catalog.find(function(c){ return c.key === key; }) || { label:key, fields:[], capabilities:[], description:'' }; }
   function setField(k,v){ setEditor(function(ed){ var d=Object.assign({},ed.data); d[k]=v; return Object.assign({},ed,{data:d}); }); }
   function setCfg(k,v){ setEditor(function(ed){ var c=Object.assign({},ed.data.config); c[k]=v; return Object.assign({},ed,{data:Object.assign({},ed.data,{config:c})}); }); }
@@ -130,8 +132,9 @@ export default function SourcesConfig() {
           </div>
         ) : null}
         <div style={{ marginBottom:'12px' }}>
-          <label style={lbl}>Name</label>
-          <input style={inp} value={d.name} onChange={function(e){ setField('name', e.target.value); }} placeholder="e.g. HR Network Drive" />
+          <label style={lbl}>Source name</label>
+          <input style={inp} value={d.name} onChange={function(e){ setField('name', e.target.value); }} placeholder="Call it whatever your staff would - by system, content, or location" />
+          <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>A free-text label for your team (e.g. "Axon Evidence", "Payroll records", "Z Drive files"). It does not affect how records are processed - name it however makes sense.</div>
         </div>
         <div style={{ marginBottom:'12px' }}>
           <label style={lbl}>Public description <span style={{color:'#B45309'}}>(shown to requestors)</span></label>
@@ -141,11 +144,22 @@ export default function SourcesConfig() {
           <textarea style={Object.assign({},inp,{minHeight:'72px',fontFamily:'inherit'})} value={d.description||''} onChange={function(e){ setField('description', e.target.value); }} placeholder="e.g. Building permits, inspection reports, and certificates of occupancy issued by the City." />
         </div>
         <div style={{ marginBottom:'12px' }}>
-          <label style={lbl}>Connector type</label>
+          <label style={lbl}>Access method <span style={{color:'#6B7280',fontWeight:'400'}}>&mdash; how records here become available</span></label>
           <select style={inp} value={d.connector_type} onChange={function(e){ setField('connector_type', e.target.value); }}>
-            {catalog.map(function(c){ return <option key={c.key} value={c.key}>{c.label}</option>; })}
+            {PURPOSE_ORDER.filter(function(pu){ return catalog.some(function(c){ return (c.purpose||'demo')===pu; }); }).map(function(pu){
+              return (
+                <optgroup key={pu} label={PURPOSE_LABELS[pu]}>
+                  {catalog.filter(function(c){ return (c.purpose||'demo')===pu; }).map(function(c){ return <option key={c.key} value={c.key}>{c.label}</option>; })}
+                </optgroup>
+              );
+            })}
           </select>
           <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>{meta.description}</div>
+          {d.connector_type==='import' ? (
+            <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'8px', padding:'9px 12px', marginTop:'8px', fontSize:'12px', color:'#92400E', lineHeight:'1.5' }}>
+              <strong>Ingestion pipeline pending.</strong> You can configure this import source now (drop folder / mode). It will begin extracting and indexing files once the import pipeline ships in an upcoming step.
+            </div>
+          ) : null}
         </div>
         {(meta.fields||[]).map(function(f){
           return (
