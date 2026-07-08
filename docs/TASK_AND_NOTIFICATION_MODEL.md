@@ -110,3 +110,16 @@ Pool/claimable items *(code state: `open`)* are **not** "in a person's box" — 
 - `is_mrr` column exists, separate from commercial (purpose of MRR flag to verify).
 
 **Intent captured:** both fee-waiver-requested and commercial-purpose requests require human approval, surfaced as one combined task in a **Finance** box on My Tasks, listing requests where either is true.
+
+### 11.2 Commercial-rate intake capture — GAP (verified 2026-07-07)
+The fee engine prices commercial correctly, but the citizen-side signal is **never captured at intake**:
+- **Portal chat agent** (`publicChat.js`): no phase asks about commercial purpose and no emit token for it. Phase 4 handles only fee-waiver eligibility (non-commercial public-interest). The chat never records "I am a commercial requester."
+- **Public "Prefer a form" fallback:** no commercial checkbox (verified in UI).
+- **Where `purpose` is actually set:** only by **staff** on the fee-estimate screen (`feeEstimates.js` → `UPDATE requests SET purpose`), or the test sandbox — **never from citizen intake.**
+
+**Implication for §11.1:** as envisioned (requester declares commercial → approval), the task needs a prerequisite build:
+1. Capture commercial self-declaration at intake — a chat phase/emit token AND a form field.
+2. That sets the trigger from intake (distinct from staff-applied `purpose`).
+3. Finance approval gates whether commercial rates apply.
+
+Today commercial is a **staff-applied pricing choice with no intake signal and no approval gate** — the opposite end of the flow from where the trigger should originate.
