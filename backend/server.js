@@ -158,6 +158,7 @@ async function start() {
     require('./src/db').run("INSERT INTO requests (id, request_number, requestor_name, requestor_email, description, classification, department_id, stage, status, created_at) VALUES ('req-template-samples','SYS-TEMPLATE-SAMPLES','Template Samples','system@optimumq.ai','Holding area for sample records used to build redaction templates.','standard',null,'intake','active',datetime('now')) ON CONFLICT (id) DO NOTHING").catch(function(e){ console.error('[template-samples ensure]', e && e.message); });
     require('./src/services/tickler').startScheduler();
     require('./src/services/configFreshness').startScheduler();
+    require('./src/services/taskRouting').startReconciler();
     require('./src/services/effectiveConfig').startPromotionScheduler();
     require('./src/services/importIngest').startScheduler();
   });

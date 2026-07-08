@@ -226,6 +226,28 @@ async function mine(userId) {
   return await all("SELECT * FROM tasks WHERE assigned_to = ? AND status IN ('assigned','in_progress') ORDER BY updated_at DESC", [userId]);
 }
 
+// Self-healing safety net: any request at a task-bearing stage without its task gets one spawned.
+// Covers stranding from seeding, races, or any advance path that skipped the spawn. Idempotent.
+async function reconcileStageTasks() {
+  var rows = await all("SELECT id, stage FROM requests WHERE stage IN ('record_search','redaction_review','redaction') AND status = 'active'");
+  var fixed = 0;
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var ttype = STAGE_TASK[r.stage];
+    if (!ttype) continue;
+    var existing = await get("SELECT id FROM tasks WHERE request_id = ? AND type = ? AND status IN ('open','assigned','in_progress')", [r.id, ttype]);
+    if (!existing) { try { await spawnForStage(r.id, r.stage, 'system-reconciler'); fixed++; } catch (e) { console.error('[reconcileStageTasks]', r.id, e && e.message); } }
+  }
+  if (fixed > 0) console.log('[reconcileStageTasks] spawned ' + fixed + ' missing stage task(s)');
+  return fixed;
+}
+
+// Run once at startup and every 2 minutes thereafter.
+function startReconciler() {
+  reconcileStageTasks().catch(function (e) { console.error('[reconcileStageTasks startup]', e && e.message); });
+  setInterval(function () { reconcileStageTasks().catch(function () {}); }, 120000);
+}
+
 module.exports = {
   TASK_ROLES: TASK_ROLES,
   SMART_ROUTING_FLOOR: SMART_ROUTING_FLOOR,
@@ -243,5 +265,7 @@ module.exports = {
   teamLoadBalancing: teamLoadBalancing,
   workloadCounts: workloadCounts,
   leastLoaded: leastLoaded,
-  spawnForStage: spawnForStage
+  spawnForStage: spawnForStage,
+  reconcileStageTasks: reconcileStageTasks,
+  startReconciler: startReconciler
 };
