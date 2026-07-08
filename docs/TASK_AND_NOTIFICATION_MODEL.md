@@ -141,3 +141,22 @@ This is the missing intake capture (§11.2 step 1) for **both** signals in one s
 - Current chat uses only simple single-tap `[[QUICK_REPLIES:...]]` buttons. This selection (options WITH descriptions + an Enter button) is richer — fits the deferred "Quick Reply widgets" backlog item. Needs a new marker/widget, e.g. `[[FEE_CHOICE:...]]`.
 - Fee Waiver vs. Commercial are effectively mutually exclusive → confirm single-select (pick one) rather than true multi-select. `[open]`
 - Must apply to BOTH the chat AND the "Prefer a form" fallback (form needs the equivalent field).
+
+### 11.4 Phase-4 intake capture — REVISED to default-forward (supersedes 11.3 framing)
+The "pick one / Neither" framing in §11.3 is replaced. Reason: in a chat, a "pick one" prompt with two substantive options implicitly pressures a choice, and a requester to whom neither applies gets stranded (a form has a submit button; a chat prompt does not). Fix: make **standard rates the obvious default**, with the two special cases as optional opt-ins.
+
+**Design:**
+- Assistant message: most requests use **standard rates**; continue unless a special case applies.
+- **Primary action (prominent, solid):** "Continue with standard rates →" — the default path, most visually dominant element.
+- Under a soft "only if one applies to you" divider, two **optional opt-in** cards (secondary/outlined), each with a brief description:
+  - **Request a fee waiver** — "You may qualify to have fees reduced or waived — nonprofit, journalist, researcher, or public-interest use."
+  - **I'm a commercial requester** — "Records requested for commercial use are billed at commercial rates, subject to review."
+- **"You can also just type your answer"** note — tapping is never mandatory; typing "continue"/"none" also advances. This is the escape hatch for anyone who ignores buttons.
+
+**Behavior:**
+- Continue → `purpose='standard'`, no approval task.
+- Fee waiver → short follow-up for reason → sets `fee_waiver_requested` → Finance approval (§11.1), then returns to flow.
+- Commercial → sets commercial declaration; **"subject to review"** = does NOT auto-apply commercial rates; flags for Finance approval (§11.1) before rates apply.
+- Mutual exclusivity is naturally handled (opt into at most one).
+
+**Rationale:** mirrors the fee engine, which already defaults to standard and only deviates for waiver/commercial — UI and logic now tell the same story. Applies to BOTH the chat and the "Prefer a form" fallback. Widget is richer than current `[[QUICK_REPLIES]]` (needs the fee-choice widget / new marker).
