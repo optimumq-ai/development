@@ -228,3 +228,55 @@ Pre-existing multi-record PROCESSING decisions are documented in **`WORKFLOW_DEC
 - **Open knobs:** re-fee per child vs. once at parent level.
 
 **Reconciliation needed:** MRR spec now spans TWO docs (this §7 = management task + code reconciliation; `WORKFLOW_DECISIONS.md` = split/resolution/roll-up/delivery). To avoid the fragmentation pattern, merge or cross-reference into one coherent MRR processing spec.
+
+## 7.6 MRR processing flow — DRAFT from Kevin 2026-07-07 (UNREVIEWED; open questions flagged [Q])
+Captured faithfully to prevent loss; NOT yet finalized.
+
+**Intake / handoff:**
+- Agent uses BOTH guidance methods (item-by-item walk-through AND enter-one-then-ask-more) to elicit ONE description per child request.
+- More than one item at agent->intake handoff -> MRR = true.
+- On MRR=true: request holds for fee-waiver approval; if approved, route to Open Records, assign the MRR-handling role (Request Manager). `[Q1: fee-waiver decision normally needs cost context that doesn't exist until the estimate is assembled — does this gate happen up front or after the estimate? Every MRR, or only when a waiver was requested?]`
+
+**Ownership / routing:**
+- Request Manager (Open Records) owns the PARENT; appears in her "MRR Processing" box.
+- Children NOT auto-routed on acceptance; RM manually selects department per child.
+- Exception: a public-ready record selected via the portal needs no routing/processing.
+
+**Estimate phase (per child):**
+- If an estimate template exists for the child, labor/copies/other costs display in a child-specific screen for the RM. `[Q2: "template" vs "estimate profile" (below) — same concept? = a record-type standard cost profile?]`
+- Else: RM assigns a person on the relevant department team to gather estimate info. NEW task **Multi-Record Request Estimate** — associated to all roles, can appear in any user's My Tasks, RM manually picks the assignee. `[Q3: is the pick scoped to the relevant department team, or truly any user?]`
+  - Screen allows record search + selection; finding the record may auto-populate its estimate profile (labor/pages/costs) -> submit. Or manual hours entry -> submit.
+  - On submit: ownership toggles back to RM; info flows into per-category totals; task -> Complete.
+- When all children Complete -> parent status -> **Create Estimate**.
+- RM calculates the estimate using the SAME engine; child totals generate the request estimate. Same info as any single request, via the MRR RM interface.
+
+**Non-system contributor (unique to MRR):**
+- RM can assign an estimate-gathering task to a NON-system person by email (e.g., IT staff who aren't users).
+- Assign screen: "assign to non-system contributor" -> enter email + message -> send.
+- Recipient opens -> message + link to a web page -> enters estimated labor/costs -> submit -> task Complete.
+- `[Build note: external endpoint — needs secure, expiring, single-use token; no login.]`
+
+**Estimate verification & requestor communication:**
+- Term is **Verify**, NOT "Approve" (deliberate: some states begin processing upon the REQUESTOR's approval of the estimate; reusing "approve" for internal review would confuse two adjacent timeline events).
+- RM verifies -> option to communicate the estimate to the requestor (per email/mail preference).
+- A trigger applying the city's "begin processing" rules advances to fulfillment.
+
+**Fulfillment phase (per child) — mirrors estimate:**
+- If record already selected (by requestor or estimate-gatherer): no search needed.
+- If public-ready or no redaction required -> child auto-Complete.
+- Else -> RM manual assignment. NEW task **Multi-Record Search** — own My Tasks box, applies to all users, screen similar to team's normal search screen; same process as normal requests. On locating the record, if redaction needed, the same auto task-node-change/assignment routine runs.
+
+**Communication constraint (task screens):**
+- Estimate-gathering, search, redaction task screens have NO email/log-call-to-customer button.
+- Instead: an "email Request Manager with questions" button. RM is by default the sole communicator regarding the MRR.
+
+**Completion & release:**
+- On search/redaction submit -> tasks Complete on RM view, records attached per child.
+- Individual children may be Complete, but PARENT is not Complete until ALL children Complete.
+- Default: do NOT release records until parent Complete.
+- Do NOT build fee-allocation logic for partial release against partial payment.
+- DO build: RM can set an acceptable payment (subject to Finance approval) to release specific completed child records early.
+
+**High priority:** RM can check HIGH PRIORITY on an MRR -> enables an AI report monitoring ALL high-priority MRRs.
+
+**Related (deferred):** "time budget" as an input to the health-score calculators (§4) — a component that disappeared from spec/build. Pick up when health scoring is built.
