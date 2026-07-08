@@ -61,3 +61,39 @@ Governed by the **two-layer role model** (see ROLE_MODEL, to be written): **Syst
 - Precisely what the "workspace UI" contains vs. what a per-task processing screen needs.
 - Whether any parent/child management exists at all.
 - Notification model does not exist yet — needs a first-class table independent of `request_id`.
+
+---
+
+## 11. Task / Role / Box catalog (request-path walk-through) — v0.2, IN PROGRESS
+Enumerating every human task across all request paths. Captured incrementally; **not yet complete**. Principle: each task = one owning function role = one labeled box on that owner's My Tasks page. Clicking a request line in a box opens a screen specific to processing that node.
+
+| Node / Box label | Owning role (Kevin's name) | Current code role | Trigger | Next node | Code status |
+|---|---|---|---|---|---|
+| Estimate Creation | Estimate Creation / Review (NEW) | task `estimate` → FEE_MANAGER | first step on a new request | Record Search (or Hold-for-Payment) | task exists, routed to FEE_MANAGER, not a dedicated estimate role |
+| Record Search | Record Clerk | task `record_search` → SEARCH_AND_TRIAGE | after estimate complete (payment satisfied if required) | Redaction | task exists; role rename needed |
+| Redaction | Redaction Clerk | task `redaction` → REDACTION_WORKER | after record search complete | Legal Redaction/Review if sensitive, else Delivery | task exists; role rename needed |
+| Legal Redaction | Legal Redaction (NEW) | — | record type flagged `sensitive = true` | Legal Review / Delivery | not built |
+| Legal Review | Legal Review (NEW) | ATTORNEY_REVIEWER exists | sensitive record needing legal counsel (catch-all) | Delivery | role exists; no task wired to it |
+
+**Notes:**
+- **Hold-for-Payment:** if a request is held for required payment, it shows **Complete** in the Estimate box (the estimate node is done) rather than lingering; Record Search does not begin until payment is satisfied. `[to spec]`
+- **Search-within-estimate** path deferred — Kevin to review current workflow design first.
+
+## 12. Status labels & box behavior
+A per-owner box shows only actionable items, in two visible states:
+- **Queued** — assigned to this person, not yet started. *(code state: `assigned`)*
+- **In Process** — this person has started it. *(code state: `in_progress`)*
+- **Complete** — node finished; **the item simultaneously disappears from the box**. *(code state: `done`/closed)*
+
+Pool/claimable items *(code state: `open`)* are **not** "in a person's box" — they are the claim pool (§3), shown to all eligible people, separate from the owned Queued/In-Process list.
+
+## 13. Supervisor / Manager / System Admin assignment rule
+- **Excluded from automatic assignment** — routing never auto-assigns a task to them.
+- Assumed capable of performing any task of a **lower level in their department**.
+- A task **may be manually assigned/reassigned** to a supervisor or manager; when it is, it appears in a box **labeled with that task type** on their My Tasks page, exactly like any owner.
+`[code: to verify whether auto-routing already excludes supervisor/manager/admin]`
+
+## 14. Open reconciliation questions raised by v0.2
+- **Role naming vs. two-layer model:** are "Record Clerk / Redaction Clerk / Legal Redaction / Legal Review / Estimate Creation" the **System Function Role** names (replacing the abstract COORDINATOR-style names) or **Department Display** names? Settle once the full task list is complete.
+- Does a record-type **`sensitive`** flag exist to drive legal routing? `[to verify]`
+- Reconcile Kevin's role names against the existing `function_roles` + `permission_roles` catalogs (dedup to one set).
