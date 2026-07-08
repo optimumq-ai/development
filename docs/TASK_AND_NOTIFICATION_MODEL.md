@@ -280,3 +280,19 @@ Captured faithfully to prevent loss; NOT yet finalized.
 **High priority:** RM can check HIGH PRIORITY on an MRR -> enables an AI report monitoring ALL high-priority MRRs.
 
 **Related (deferred):** "time budget" as an input to the health-score calculators (§4) — a component that disappeared from spec/build. Pick up when health scoring is built.
+
+## 7.7 Resolutions to §7.6 open questions (2026-07-07)
+
+**[Q1] Fee-waiver timing & denial path — RESOLVED (decision + verified).**
+- **Decision:** fee-waiver is a **first-step gate**, evaluated before any estimate effort (based on requestor characteristics/category, not cost). If granted -> no estimate-gathering. Applies to ALL requests, not just MRR.
+- **Verified (built):** grant/deny endpoint (`/:id/fee-waiver-decision`, gated to SYSTEM_ADMIN/DIRECTOR/SUPERVISOR/FEE_WAIVER_APPROVER). Denial requires a reason from a reusable **`decision_reasons`** library (category `fee_waiver_denial`; new reasons saved back). Denial **sends a mandatory notice**, then (per code comment) the request **"continues like any normal inbound request (it is NOT closed)."**
+- **Verified GAP (confirms suspicion):** statuses are only `active`/`closed`/`completed` — **NO "denial / response-window-active" status** and **no flow** keeping the waiver on the approver's My Tasks until the requestor says continue-without-waiver, provides grounds for approval, or is closed for no response. After the denial notice the request just proceeds to normal fee processing.
+- **Action:** the response-window / requestor-reply flow does NOT exist. **Compare against legal requirements before speccing** — some jurisdictions require giving the requestor a chance to respond first. Legal-research item; NOT MRR-specific.
+
+**[Q2] "Template" vs "estimate profile" — RESOLVED (verified).**
+- Same concept; **"profile"** preferred.
+- **Verified it GENERATES, not copies:** `record_type_estimate_profiles` stores INPUTS (`quantities_json`, `stats_json`, `sample_size`, `has_expert_seed`) per record type; the fee engine computes the estimate from those inputs applying jurisdiction rules (labor hours/rounding/gates, copies, surcharges). Feeds a detailed worksheet and supports **standard OR commercial** recompute — as intended, not a stored total.
+
+**[Q3] MRR task assignment — RESOLVED (decision).**
+- **No MRR-specific roles.** MRR tasks are **role-agnostic**: the Request Manager assigns whoever is best fit — including supervisors/managers for high-visibility/high-risk MRRs (major lawsuits, mayoral attention, legally-sensitive redaction) or someone the RM knows is most familiar with a child record.
+- **General My Tasks rule (ALL boxes, not just MRR — also amends §5):** a task-type box appears on a user's My Tasks **only if** that user has a task of that type assigned, or is in a pool including them. No empty boxes.
