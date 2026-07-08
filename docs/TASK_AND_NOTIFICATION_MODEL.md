@@ -168,3 +168,14 @@ Recalled design vs. what the code actually does:
 - **Auto-routing to the approver — DOES NOT EXIST (the gap).** `fee_waiver_requested` is captured at intake, but nothing checks it at the start of processing to route the request to `FEE_WAIVER_APPROVER` or spawn a fee-waiver-approval task on My Tasks. The grant/deny endpoints exist, but a waiver request is not auto-surfaced to anyone — a human must find it and act. `FEE_WAIVER_APPROVER` is currently wired to OBJECTION approvals (`objections.js`), not to fee-waiver-request routing.
 
 **Net:** waiver decision + fee-effect are built; the intake → auto-route-to-approver → task link is missing. That link is exactly the §11.1 task (Finance box). Until it's wired, fee-waiver approval is manual.
+
+### 11.6 Role rename: FEE_WAIVER_APPROVER -> Finance (decision)
+**Rationale:** the approver role is not limited to fee waivers. Code confirms it already gates **objection-resolution approvals** (`objections.js` `/approve`, `/pending-approval`) and the decision-reasons endpoint — i.e., it is the financial-authority role that signs off on waivers AND objection-based price adjustments (and, if added later, commercial-rate approval). The label `FEE_WAIVER_APPROVER` describes one duty of a broader **Finance** role (a person in a financial/accounting position).
+
+**Scope of the change (NOT just a label):** `FEE_WAIVER_APPROVER` is referenced in code and data. A rename must update every reference, not create a second role:
+- `function_roles` catalog entry.
+- `requireRole('FEE_WAIVER_APPROVER', ...)` gates in `objections.js` and `decisionReasons.js`.
+- Any `user_function_roles` assignments.
+- Reconcile against the parallel `permission_roles` (FEE_MANAGER / FEE_AUTHORITY) per §9 — decide whether Finance absorbs those too, to avoid re-splitting the catalog.
+
+**Finance role owns:** fee-waiver approval, objection price-adjustment approval, and (future, deferred) commercial-rate approval. Its My Tasks box(es) surface these approvals.
