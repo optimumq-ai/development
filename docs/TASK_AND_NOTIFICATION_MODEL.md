@@ -123,3 +123,21 @@ The fee engine prices commercial correctly, but the citizen-side signal is **nev
 3. Finance approval gates whether commercial rates apply.
 
 Today commercial is a **staff-applied pricing choice with no intake signal and no approval gate** — the opposite end of the flow from where the trigger should originate.
+
+### 11.3 Intended Phase-4 intake capture (design — mocked previously, never applied)
+Recovered from Kevin's memory of a mockup that was never applied. Replaces the current yes/no fee-waiver ask with an explicit choice.
+
+**Prompt:** "Select which of the following apply:"
+- **Fee Waiver** — brief description (e.g., "You may qualify to have fees reduced or waived — nonprofit, journalist, researcher, or public-interest use.")
+- **Commercial Rates** — brief description (e.g., "Records requested for commercial use are billed at commercial rates.")
+- **Neither**
+- plus an **Enter** button to confirm.
+
+This is the missing intake capture (§11.2 step 1) for **both** signals in one step:
+- Fee Waiver selected → sets `fee_waiver_requested` (+ follow-up for reason) → Finance approval (§11.1).
+- Commercial Rates selected → sets the commercial declaration (drives `purpose='commercial'`) → Finance approval (§11.1).
+
+**Implementation notes:**
+- Current chat uses only simple single-tap `[[QUICK_REPLIES:...]]` buttons. This selection (options WITH descriptions + an Enter button) is richer — fits the deferred "Quick Reply widgets" backlog item. Needs a new marker/widget, e.g. `[[FEE_CHOICE:...]]`.
+- Fee Waiver vs. Commercial are effectively mutually exclusive → confirm single-select (pick one) rather than true multi-select. `[open]`
+- Must apply to BOTH the chat AND the "Prefer a form" fallback (form needs the equivalent field).
