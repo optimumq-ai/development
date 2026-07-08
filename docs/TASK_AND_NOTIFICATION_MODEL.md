@@ -192,3 +192,13 @@ Recalled design vs. what the code actually does:
 - **Parent -> Open Records -> manager-assigns-children routing — does NOT exist.**
 
 **So §7's vision has a real foundation (schema + read), but needs: (a) the split step that creates component children, (b) the management task, (c) the routing.**
+
+### 7.3 "Always parent, every request a child" — VERIFIED FALSE (2026-07-07)
+Belief (recalled ~2 weeks ago): the model always creates a parent, and every request — even single-item — is a child. **Not built.** Evidence:
+- **Schema:** `master_request_id` is nullable, no default — a request is NOT required to have a parent.
+- **Data:** 118 total requests; **0 have a parent** (`master_request_id` set); all 118 stand alone. Only 2 are `is_mrr` masters, and even those have no children.
+- **Code:** no INSERT ever sets `master_request_id` — nothing creates a parent/child relationship.
+
+Every request today is a flat standalone; the parent/child columns exist but are entirely unused.
+
+**Design note:** "always a parent / every request is a child" is a *sound* convention (uniform handling, avoids single-vs-multi special-casing) — but it is a design to ADOPT and build, not something in place. The column foundation exists; the wrapping/creation logic does not.
