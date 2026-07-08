@@ -217,3 +217,14 @@ Measured cost of adopting "every request is wrapped in a master (even single-ite
 **Untouched (the bulk):** all routing, task, fee, redaction, and processing code that operates on a request BY ID keeps working — a child IS a full request. 2 files (`feeEstimates.js`, `requests.js`) already handle children, so the pattern exists.
 
 **Assessment:** additive and bounded, NOT a teardown. Core work = 5 creation sites (centralize) + migration + reviewing ~17 reads and ~6-8 list views for display. The processing engine does not get rebuilt.
+
+### 7.5 Existing MRR processing spec — where it already lives (2026-07-07)
+Pre-existing multi-record PROCESSING decisions are documented in **`WORKFLOW_DECISIONS.md`** (separate from this doc), status mostly PLANNED:
+- **Detection:** MRR flag — BUILT (flag only).
+- **Split into children:** HUMAN decides, AI proposes the split — PLANNED (matches code: not built).
+- **Per-child record type & routing:** AI proposes per child — PLANNED.
+- **Resolution & roll-up:** each child resolves found/not-found (HUMAN); CODE rolls up; parent -> **PARTIALLY GRANTED** when >=1 child fulfilled and >=1 returns nothing/denied.
+- **Delivery policy:** deliver children as-completed vs. hold for all — config `mrr_delivery`, default `as-completed`.
+- **Open knobs:** re-fee per child vs. once at parent level.
+
+**Reconciliation needed:** MRR spec now spans TWO docs (this §7 = management task + code reconciliation; `WORKFLOW_DECISIONS.md` = split/resolution/roll-up/delivery). To avoid the fragmentation pattern, merge or cross-reference into one coherent MRR processing spec.
