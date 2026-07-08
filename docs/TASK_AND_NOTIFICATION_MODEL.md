@@ -179,3 +179,16 @@ Recalled design vs. what the code actually does:
 - Reconcile against the parallel `permission_roles` (FEE_MANAGER / FEE_AUTHORITY) per §9 — decide whether Finance absorbs those too, to avoid re-splitting the catalog.
 
 **Finance role owns:** fee-waiver approval, objection price-adjustment approval, and (future, deferred) commercial-rate approval. Its My Tasks box(es) surface these approvals.
+
+### 7.1 Parent/child (MRR) — verified reconciliation (2026-07-07)
+**Built (schema + read):**
+- Columns: `is_mrr` (flag), `master_request_id` (component -> master link), `component_label`. Parent/child data model exists.
+- A master (`is_mrr` true, `master_request_id` null) reads its components: `SELECT * FROM requests WHERE master_request_id = ?` — used in the request-detail view (`requests.js`) and MRR-aware fee aggregation (`feeEstimates.js`).
+- Intake/classifier capture `is_mrr` + `mrrChoice` (combined|separate|none); AV detection checks components.
+
+**NOT built (the gaps):**
+- **Child creation / split — does NOT exist.** No code inserts component requests (no INSERT with `master_request_id`, no split logic). **Confirmed by data: 2 requests are MRR masters, 0 components exist in the entire DB.** A multi-record request is flagged but never decomposed into children. The `mrrChoice='separate'` path has no implementation.
+- **MRR management task — does NOT exist.** No task spawns to an Open Records request-manager; no dedicated multi-record management view.
+- **Parent -> Open Records -> manager-assigns-children routing — does NOT exist.**
+
+**So §7's vision has a real foundation (schema + read), but needs: (a) the split step that creates component children, (b) the management task, (c) the routing.**
