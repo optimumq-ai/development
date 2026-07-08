@@ -81,14 +81,26 @@ async function onIntake(requestId, matcherResult){
   var teamRow = teamId ? await db.get("SELECT name FROM departments WHERE id = ?", [teamId]) : null;
   var stage = actions.stage || request.stage || 'intake';
 
-  // Pin the classifier-matched record type onto the request when the match is confident (>= taxonomy threshold).
+  // Pin the classifier-matched record type + owning team onto the request (ROUTING columns only — the
+  // stage is applied below through the central stage-transition function, never a direct UPDATE here).
   // This feeds the estimate profile lookup (Create vs Review auto-fill) and the record-type name on task screens.
   var rtid = (m.recordTypeId && (signals.record_type_confidence || 0) >= 70) ? m.recordTypeId : null;
-  await db.run("UPDATE requests SET stage = ?, department_id = ?, record_type_id = COALESCE(?, record_type_id), updated_at = datetime('now') WHERE id = ?", [stage, teamId, rtid, requestId]);
+  await db.run("UPDATE requests SET department_id = ?, record_type_id = COALESCE(?, record_type_id), updated_at = datetime('now') WHERE id = ?", [teamId, rtid, requestId]);
 
   var reasoning = [m.reasoning, actions.note].filter(Boolean).join(' ');
   await db.run("INSERT INTO workflow_decisions (id, request_id, record_type_id, record_type_name, confidence, classification, rule_id, rule_name, decided_stage, decided_team_id, decided_team_name, reasoning, flags, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'))",
     [uuid.v4(), requestId, m.recordTypeId || null, signals.record_type_name, Math.round(signals.record_type_confidence||0), signals.classification, hit?hit.rule.id:null, hit?hit.rule.name:'(no match)', stage, teamId, teamRow?teamRow.name:null, reasoning, JSON.stringify(signals.flags)]);
+
+  // Apply the decided stage through the ONE central stage-transition function (Architecture item 6):
+  // it writes the request_history advance row (stage_from -> stage_to) AND spawns/updates the stage's task.
+  // Replaces the former direct `UPDATE requests SET stage` above, whose unlogged jump + missing stage task
+  // was the root cause of the reconciler's stranded requests (reproduced on 2026-0039). department_id is
+  // set just above so spawnForStage stamps the task onto the owning team. A no-op when stage is unchanged.
+  try {
+    await require('./taskRouting').applyStageTransition(requestId, stage, {
+      actorId: 'workflow', actorName: 'Workflow Engine', action: 'STAGE_ADVANCED', notes: reasoning, createdBy: 'workflow'
+    });
+  } catch (e) { console.error('[workflowEngine] stage transition failed:', e && e.message); }
 
   // Auto path: a confident match routed to an owning team -> spawn the ESTIMATE task and route it
   // (Smart Routing to a specialist, else into the team's claim pool). Estimate precedes record search.

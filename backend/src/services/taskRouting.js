@@ -222,6 +222,32 @@ async function spawnForStage(requestId, stage, createdBy) {
   return task;
 }
 
+// ONE central stage-transition (Architecture item 6). EVERY stage advance goes through here so it
+// ALWAYS (a) writes the request_history advance row (stage_from -> stage_to) and (b) spawns/updates the
+// stage's task. No caller may `UPDATE requests SET stage` directly. Replaces the scattered raw updates
+// that produced unlogged advances stranding a request at a task-bearing stage with no task.
+//   opts: { actorId, actorName, action, notes, createdBy }
+async function applyStageTransition(requestId, toStage, opts) {
+  opts = opts || {};
+  var reqRow = await get("SELECT stage, department_id FROM requests WHERE id = ?", [requestId]);
+  if (!reqRow) return null;
+  var fromStage = reqRow.stage;
+  if (toStage == null || toStage === fromStage) {
+    // No actual stage change: nothing to log, nothing new to spawn. (spawnForStage is idempotent and
+    // the reconciler covers a missing task for the current stage.)
+    return { fromStage: fromStage, toStage: fromStage, changed: false, task: null };
+  }
+  var newStatus = (toStage === 'closed') ? 'closed' : 'active';
+  await run("UPDATE requests SET stage = ?, status = ?, updated_at = datetime('now') WHERE id = ?",
+    [toStage, newStatus, requestId]);
+  await run(
+    "INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes, stage_from, stage_to, created_at) " +
+    "VALUES (?,?,?,?,?,?,?,?, datetime('now'))",
+    [uuidv4(), requestId, opts.actorId || null, opts.actorName || 'System', opts.action || 'STAGE_ADVANCED', opts.notes || null, fromStage, toStage]);
+  var task = await spawnForStage(requestId, toStage, opts.createdBy || opts.actorId || 'system');
+  return { fromStage: fromStage, toStage: toStage, changed: true, task: task };
+}
+
 async function mine(userId) {
   return await all("SELECT * FROM tasks WHERE assigned_to = ? AND status IN ('assigned','in_progress') ORDER BY updated_at DESC", [userId]);
 }
@@ -266,6 +292,7 @@ module.exports = {
   workloadCounts: workloadCounts,
   leastLoaded: leastLoaded,
   spawnForStage: spawnForStage,
+  applyStageTransition: applyStageTransition,
   reconcileStageTasks: reconcileStageTasks,
   startReconciler: startReconciler
 };

@@ -308,9 +308,12 @@ router.post('/submit', async function(req, res) {
     await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
       [uuidv4(), id, 'public', 'Public Portal', 'RECORDS_SELECTED', 'Requestor selected ' + b.selectedRecords.length + ' record(s) from search results']);
   }
-  // Auto-classify and route the request to the appropriate fulfillment team
+  // Auto-classify and route the request to the appropriate fulfillment team.
+  // cls is declared BEFORE the try so it is always defined at the onIntake call below; if classification
+  // throws, cls stays null and onIntake falls back to its own classification (never receives undefined).
+  var cls = null;
   try {
-    var cls = await classifier.classifyAndRoute(b.description);
+    cls = await classifier.classifyAndRoute(b.description);
     var dl = new Date(); dl.setDate(dl.getDate() + (cls.deadlineDays || 10));
     var dlStr = dl.toISOString().split('T')[0];
     var basisText = cls.routingBasis === 'taxonomy' ? ('matched record type "' + cls.recordTypeName + '" at ' + cls.recordTypeConfidence + '% confidence')
