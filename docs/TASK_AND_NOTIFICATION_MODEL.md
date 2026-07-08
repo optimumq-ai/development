@@ -160,3 +160,11 @@ The "pick one / Neither" framing in §11.3 is replaced. Reason: in a chat, a "pi
 - Mutual exclusivity is naturally handled (opt into at most one).
 
 **Rationale:** mirrors the fee engine, which already defaults to standard and only deviates for waiver/commercial — UI and logic now tell the same story. Applies to BOTH the chat and the "Prefer a form" fallback. Widget is richer than current `[[QUICK_REPLIES]]` (needs the fee-choice widget / new marker).
+
+### 11.5 Fee-waiver processing — verified reconciliation (2026-07-07)
+Recalled design vs. what the code actually does:
+- **Grant/deny approval action — EXISTS.** `requests.js` sets `fee_waiver_status='granted'` (+ decided_by/at) or `='denied'` (+ reason). A staff action decides the waiver.
+- **Effect of a granted waiver — EXISTS; requester owes $0.** The engine still computes the real cost; a granted waiver is applied at presentation/payment: the notice reads "fees waived" / "Computed cost: $X (waived)" (`feeNotice.js`) and `paymentStatus.js` marks `waived: true` (nothing due). Mechanism is "compute then waive," NOT "engine calculates zero." No separate no-estimate path — the estimate/notice simply honors the granted status (i.e., it stays on the normal path).
+- **Auto-routing to the approver — DOES NOT EXIST (the gap).** `fee_waiver_requested` is captured at intake, but nothing checks it at the start of processing to route the request to `FEE_WAIVER_APPROVER` or spawn a fee-waiver-approval task on My Tasks. The grant/deny endpoints exist, but a waiver request is not auto-surfaced to anyone — a human must find it and act. `FEE_WAIVER_APPROVER` is currently wired to OBJECTION approvals (`objections.js`), not to fee-waiver-request routing.
+
+**Net:** waiver decision + fee-effect are built; the intake → auto-route-to-approver → task link is missing. That link is exactly the §11.1 task (Finance box). Until it's wired, fee-waiver approval is manual.
