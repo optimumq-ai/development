@@ -97,3 +97,16 @@ Pool/claimable items *(code state: `open`)* are **not** "in a person's box" — 
 - **Role naming vs. two-layer model:** are "Record Clerk / Redaction Clerk / Legal Redaction / Legal Review / Estimate Creation" the **System Function Role** names (replacing the abstract COORDINATOR-style names) or **Department Display** names? Settle once the full task list is complete.
 - Does a record-type **`sensitive`** flag exist to drive legal routing? `[to verify]`
 - Reconcile Kevin's role names against the existing `function_roles` + `permission_roles` catalogs (dedup to one set).
+
+### 11.1 Fee Waiver / Commercial Rate Approval (added)
+| Node / Box label | Owning role | Trigger | Code status |
+|---|---|---|---|
+| Fee Waiver / Commercial Rate Approval | **Finance** (NEW consolidated role) | `fee_waiver_requested = true` OR `purpose = 'commercial'` | see notes |
+
+**Reconciliation (code-verified 2026-07-07):**
+- **Fee waiver — mostly built.** Columns exist: `fee_waiver_requested`, `fee_waiver_status`, `fee_waiver_reason`, `fee_waiver_decided_by`, `fee_waiver_decided_at`. The portal agent (publicChat Phase 4) captures waiver requests and emits `[[FEE_WAIVER_INFO:yes|reason]]`. Approver role `FEE_WAIVER_APPROVER` exists. **Gap:** the decision is tracked but does not appear to spawn a My-Tasks approval task — wiring needed, not a rebuild.
+- **Commercial rate — built as PRICING, not APPROVAL.** No commercial flag column; commercial is a value of `request.purpose` (`= 'commercial'`). The fee engine applies commercial rates **automatically** via `purposeOverrides.commercial` (labor billable + surcharge). **Design change:** requiring approval for commercial is NEW behavior — today it applies with no human gate. Decide: apply-then-flag-for-approval, or hold pending approval.
+- **Finance role — does not exist by that name.** Closest: `FEE_WAIVER_APPROVER` (function), `FEE_MANAGER` / `FEE_AUTHORITY` (permission). Intent: consolidate fee approvals under one **Finance** role owning this combined task.
+- `is_mrr` column exists, separate from commercial (purpose of MRR flag to verify).
+
+**Intent captured:** both fee-waiver-requested and commercial-purpose requests require human approval, surfaced as one combined task in a **Finance** box on My Tasks, listing requests where either is true.
