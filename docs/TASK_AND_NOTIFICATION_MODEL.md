@@ -202,3 +202,18 @@ Belief (recalled ~2 weeks ago): the model always creates a parent, and every req
 Every request today is a flat standalone; the parent/child columns exist but are entirely unused.
 
 **Design note:** "always a parent / every request is a child" is a *sound* convention (uniform handling, avoids single-vs-multi special-casing) — but it is a design to ADOPT and build, not something in place. The column foundation exists; the wrapping/creation logic does not.
+
+### 7.4 Parent/child adoption — blast-radius measurement (2026-07-07)
+Measured cost of adopting "every request is wrapped in a master (even single-item)":
+
+**Must change (the real work):**
+- **5 request-creation sites** across 4 files (`publicChat.js` x1, `requests.js` x2, `nena911.js` x1, `importIngest.js` x1) — each needs wrap-in-master logic. Best centralized into ONE creation helper so it can't drift.
+- **One-time migration** of the 118 existing standalone requests (wrap each in a master).
+
+**Review (some will change, upper bound):**
+- **~17 of 60 backend `FROM requests` queries** are non-by-id (list/aggregate) and may need master/child awareness. The other **43 are point-lookups by id and are UNAFFECTED** — a child is a full request row fetched by id.
+- **~6-8 of 16 frontend files** are request-LIST surfaces (RequestQueue, Dashboard, MyTasks, Tickler, ARIAReports, CashDrawer) that must decide "show masters" vs "masters + children." The rest are single-request detail/workspace views, largely unaffected.
+
+**Untouched (the bulk):** all routing, task, fee, redaction, and processing code that operates on a request BY ID keeps working — a child IS a full request. 2 files (`feeEstimates.js`, `requests.js`) already handle children, so the pattern exists.
+
+**Assessment:** additive and bounded, NOT a teardown. Core work = 5 creation sites (centralize) + migration + reviewing ~17 reads and ~6-8 list views for display. The processing engine does not get rebuilt.
