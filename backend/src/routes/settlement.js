@@ -58,7 +58,7 @@ router.post('/payment-applied', async function (req, res) {
         if (rr && rr.stage === 'awaiting_payment') {
           await taskRouting.applyStageTransition(track.request_id, 'record_search', {
             actorName: 'ERP', action: 'STAGE_ADVANCED', notes: 'Record search begins (ERP deposit applied).',
-            createdBy: 'system', clearTickler: true });
+            createdBy: 'system' });
         }
       } else {
         await run("UPDATE request_fee_estimates SET final_paid_at = ?, final_paid_by = ?, final_paid_amount = ? WHERE id = ?", [now, 'ERP', (Number(est.final_paid_amount) || 0) + amountApplied, est.id]);

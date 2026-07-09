@@ -222,6 +222,20 @@ async function spawnForStage(requestId, stage, createdBy) {
   return task;
 }
 
+// Canonical forward ordering of the request lifecycle stages ("forward" = later in this list). The
+// pipeline is not strictly linear (AG / exemption are side branches), but this order reflects how a
+// request normally progresses and is the single source of truth for what counts as a forward advance.
+// Keep in sync with the stage values the pipeline uses; an unknown stage is treated as NOT forward.
+var STAGE_ORDER = ['intake', 'fee_review', 'awaiting_payment', 'record_search', 'exemption_review', 'ag_review', 'redaction_review', 'redaction', 'delivery', 'closed'];
+function isForwardStage(fromStage, toStage) {
+  var fi = STAGE_ORDER.indexOf(fromStage), ti = STAGE_ORDER.indexOf(toStage);
+  if (fi === -1 || ti === -1) {
+    console.warn('[applyStageTransition] stage not in STAGE_ORDER (from=' + fromStage + ' to=' + toStage + '); tickler flag left unchanged');
+    return false;
+  }
+  return ti > fi;
+}
+
 // ONE central stage-transition (Architecture item 6). EVERY stage advance goes through here so it
 // ALWAYS (a) writes the request_history advance row (stage_from -> stage_to) and (b) spawns/updates the
 // stage's task. No caller may `UPDATE requests SET stage` directly. Replaces the scattered raw updates
@@ -238,9 +252,10 @@ async function applyStageTransition(requestId, toStage, opts) {
     return { fromStage: fromStage, toStage: fromStage, changed: false, task: null };
   }
   var newStatus = (toStage === 'closed') ? 'closed' : 'active';
-  // opts.clearTickler: reactivation transitions (deposit/acceptance) lift the dormancy flag in the same
-  // write. Kept per-caller rather than universal — see HANDOFF 2026-07-09 open item.
-  var ticklerClear = opts.clearTickler ? ", tickler_flag = NULL, tickler_flagged_at = NULL" : "";
+  // Any FORWARD advance lifts the "waiting/dormant" tickler flag — the awaited event (or a human
+  // standing in for it) has moved the request on, so the wait the flag represented is over
+  // (decision 2026-07-09). Backward / lateral moves leave the flag for the tickler sweep to re-judge.
+  var ticklerClear = isForwardStage(fromStage, toStage) ? ", tickler_flag = NULL, tickler_flagged_at = NULL" : "";
   await run("UPDATE requests SET stage = ?, status = ?" + ticklerClear + ", updated_at = datetime('now') WHERE id = ?",
     [toStage, newStatus, requestId]);
   await run(

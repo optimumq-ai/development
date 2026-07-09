@@ -254,7 +254,7 @@ router.post('/request/:requestId/estimate/accept', requireAuth, async function (
   await taskRouting.applyStageTransition(rid, newStage, {
     actorId: req.user && req.user.sub, actorName: actor, action: 'ESTIMATE_ACCEPTED',
     notes: depositDue > 0 ? ('Deposit of $' + depositDue.toFixed(2) + ' required before work begins.') : 'No deposit required; record search begins.',
-    createdBy: req.user && req.user.sub, clearTickler: true });
+    createdBy: req.user && req.user.sub });
   await require('../services/paymentStatus').recordEvent(req.params.requestId, { type: 'estimate_accepted', reason: 'requestor accepted the estimate', actor: (req.user && req.user.name) || (req.user && req.user.sub) || 'system' });
   res.json({ accepted: true, depositDue: depositDue, stage: newStage });
 });
@@ -286,7 +286,7 @@ router.post('/request/:requestId/deposit/record', requireAuth, async function (r
   await taskRouting.applyStageTransition(rid, 'record_search', {
     actorId: req.user && req.user.sub, actorName: actor, action: 'DEPOSIT_RECORDED',
     notes: 'Deposit of $' + amount.toFixed(2) + ' recorded; record search begins.',
-    createdBy: req.user && req.user.sub, clearTickler: true });
+    createdBy: req.user && req.user.sub });
   await require('../services/paymentStatus').recordEvent(req.params.requestId, { type: 'payment', amount: amount, reason: 'deposit', actor: (req.user && req.user.name) || (req.user && req.user.sub) || 'system' });
   res.json({ recorded: true, amount: amount, stage: 'record_search' });
 });
@@ -399,7 +399,7 @@ router.post('/request/:requestId/payment/record', requireAuth, async function (r
         await taskRouting.applyStageTransition(rid, 'record_search', {
           actorId: req.user && req.user.sub, actorName: actor, action: 'DEPOSIT_RECORDED',
           notes: 'Deposit of $' + amount.toFixed(2) + ' (' + method + ') recorded; record search begins.',
-          createdBy: req.user && req.user.sub, clearTickler: true });
+          createdBy: req.user && req.user.sub });
       } else {
         await hist(rid, req.user, 'DEPOSIT_RECORDED', 'Deposit of $' + amount.toFixed(2) + ' (' + method + ') recorded.', null, null);
       }
