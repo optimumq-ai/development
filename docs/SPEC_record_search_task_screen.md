@@ -109,6 +109,19 @@ Templated outreach requesting detail. **Branches on `delivery_method`** (capture
 
 These map 1:1 onto `deadline_rules.clocks.respond.tollReasons` + a small per-jurisdiction `clarification` policy block.
 
+**Research GATHERED (2026-07-09) → see `docs/CLARIFICATION_POLICY_SURVEY.md`.** 16 jurisdictions surveyed
+across two independent AI passes; the 6 checklist dimensions above are answered there with citations. Key
+outcomes that feed this section: (a) the per-jurisdiction `clarification` policy block is specified as a
+7-field substrate (`clarification_policy`), the crux field being `clarification_clock_effect` — a 6-value enum
+(`no_fixed_clock · runs_no_stop · toll_pause_resume · toll_and_restart · start_gate · operational_hold`) that
+selects the tolling-engine behavior when this "Contact requestor" button fires; (b) dimension 4 (auto-close
+threshold) is split into two fields — `clarification_grace_days` (the requestor's respond-or-close window;
+statutory almost nowhere, WA/FL practice = 30) and an optional `abandonment_grace_days` safety buffer — which
+feed `clarification_response_threshold` / the `clarification-timeout` node above; (c) **no jurisdiction
+requires** contacting the requestor, so the button stays discretionary and the whole policy defaults to
+OFF/safe-manual until the city attests it (AUTO_CONFIG gate). All per-jurisdiction VALUES need counsel
+verification before reliance. Michigan's clock model is a flagged cross-doc conflict (survey §5.1).
+
 ### 5c. Log phone call `[NEW]`
 Free-form entry — who / when / summary / outcome → `request_history` as `CALL_LOGGED`. Pure effort trail.
 
