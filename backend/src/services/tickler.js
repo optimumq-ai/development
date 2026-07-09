@@ -130,6 +130,7 @@ async function runSweep(opts) {
   var scanned = await get("SELECT count(*) AS c FROM requests WHERE status = 'active'");
   var flagged = actions.estimate_lapsed + actions.deposit_overdue + actions.stalled;
   try { var np = await require('./feeNonpayment').sweep(); actions.nonpayment_dunned = np.actions.dunned; actions.nonpayment_closed = np.actions.closed; } catch (e) { console.error('[tickler nonpayment]', e.message); }
+  try { var ct = await require('./clarificationTimeout').sweep(); actions.clarification_timeout_closed = ct.actions.closed; } catch (e) { console.error('[tickler clarification-timeout]', e.message); }
   var summary = { thresholds: T, actions: actions };
   await run("INSERT INTO tickler_runs (id, ran_at, trigger, scanned, flagged, summary_json) VALUES (?,?,?,?,?,?)",
     ['tk-' + uuidv4().slice(0, 8), nowStr(), opts.trigger || 'manual', (scanned ? scanned.c : 0), flagged, JSON.stringify(summary)]);

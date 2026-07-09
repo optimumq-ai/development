@@ -301,3 +301,44 @@ capture** (portal-side) so postal clarification doesn't need an inline address; 
 clock-model conflict (survey §5.1); (e) per-jurisdiction policy storage + precedence (today global in
 `system_config`). Note: the email path did a real Resend send to an `example.com` demo address (undeliverable,
 reserved) — this is the same live-verify pattern as the fee notice; no real person was contacted.
+
+## 2026-07-09 (j) — Auto-close clarification-timeout node (BUILT)
+
+**Slice:** The last backend piece of the clarification workflow — the `clarification-timeout` model node.
+A vague request was sent back, the requestor went silent past the grace window → auto-close as "withdrawn
+(no clarification)". Continues on `spec/task-screens`.
+
+**Built (backend):**
+- `services/clarificationTimeout.js` `[NEW]` — a sweep (sibling of `feeNonpayment.sweep`). Detects OUTSTANDING
+  clarifications from `request_history` (latest `CLARIFICATION_REQUESTED` newer than any `CLARIFICATION_RECEIVED`,
+  request still active). Auto-closes when elapsed ≥ **threshold = `clarification_grace_days` +
+  `abandonment_grace_days`** (requestor window + optional safety buffer). Triple-gated: `automationActive`
+  (policy enabled AND jurisdiction attested — same switch as slices 2/3), a **configured positive grace**
+  (null/statute-silent ⇒ never), AND `abandonment_closure ∈ {allowed, via_denial}` (`not_allowed`/`unspecified`
+  ⇒ never). Closure via the **central** `taskRouting.applyStageTransition(rid,'closed',…)` (history
+  `CLOSED_NO_CLARIFICATION` w/ stage_from→stage_to, tickler-flag clear) + `closure_reason='no_clarification'`.
+  `closure_notice_required` ⇒ the note flags a written notice is owed (auto-send deferred). `opts.now/config/
+  dryRun` for testing.
+- `services/tickler.js` — one-line hook next to the nonpayment sweep; surfaces `clarification_timeout_closed`
+  in the daily run (+ manual `POST /api/tickler/run`).
+- `data/workflowModel.js` — `clarification-timeout` node `status:'planned'` → `'built'`.
+
+**Evidence (live harness on real record_search requests, then fully restored):** (1) sweep with the REAL
+policy (system OFF) → `enabled:false, reason:automation_inactive`, 0 closed (safe default). (2) dry-run w/
+synthetic active config (grace 30) → listed the two 40-day candidates + the 5-day one, EXCLUDED the replied
+one, closed 0. (3) real sweep → closed ONLY the timed-out unreplied requests; verified `stage=closed,
+status=closed, closure_reason=no_clarification`, history `CLOSED_NO_CLARIFICATION` with
+`stage_from=record_search, stage_to=closed`; the 5-day (under-threshold) and replied requests stayed active.
+(4) buffer arithmetic: grace 30 + buffer 7 = threshold 37, a 45-day request closed, note read "grace 30 + 7
+buffer days … A written closure notice is required — please send one." (5) `abandonment_closure=not_allowed`
+→ `enabled:false, reason:closure_not_permitted`, 0 closed. (6) all subjects restored, 0 leftover harness rows.
+No live policy/jurisdiction state was mutated (synthetic config drove the active-path tests). API restarted
+(kill pid → root PM2 respawn, pid 198906, health 200); `POST /api/tickler/run` → 401 (auth-gated). Spec §5b +
+model node updated same-commit.
+
+**Clarification workflow now BUILT end-to-end (backend):** substrate · trigger · extractor · outreach ·
+auto-close. **Remaining (each its own slice):** (a) intake **mailing-address capture** (portal-side) so postal
+clarification needs no inline address; (b) **auto-sent closure notice** when `closure_notice_required`; (c) **UI**
+— the 7-field policy editor + the record-search "Contact requestor" button (design nod pending, UI rule); (d)
+**Michigan** clock-model conflict (survey §5.1); (e) **per-jurisdiction** policy storage + precedence (today
+global in `system_config`).
