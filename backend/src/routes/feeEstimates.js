@@ -251,9 +251,10 @@ router.post('/request/:requestId/estimate/accept', requireAuth, async function (
   var newStage = pt.gateToStage(acceptPlan.gate);
   // Safety: never regress a request that previously required a deposit out of awaiting_payment.
   if (depositDue > 0 && newStage !== 'awaiting_payment') newStage = 'awaiting_payment';
-  await run("UPDATE requests SET stage = ?, status = 'active', tickler_flag = NULL, tickler_flagged_at = NULL, updated_at = datetime('now') WHERE id = ?", [newStage, rid]);
-  await hist(rid, req.user, 'ESTIMATE_ACCEPTED', depositDue > 0 ? ('Deposit of $' + depositDue.toFixed(2) + ' required before work begins.') : 'No deposit required; record search begins.', reqRow.stage, newStage);
-  if (newStage === 'record_search') { try { await taskRouting.spawnForStage(rid, 'record_search', req.user && req.user.sub); } catch (e) {} }
+  await taskRouting.applyStageTransition(rid, newStage, {
+    actorId: req.user && req.user.sub, actorName: actor, action: 'ESTIMATE_ACCEPTED',
+    notes: depositDue > 0 ? ('Deposit of $' + depositDue.toFixed(2) + ' required before work begins.') : 'No deposit required; record search begins.',
+    createdBy: req.user && req.user.sub, clearTickler: true });
   await require('../services/paymentStatus').recordEvent(req.params.requestId, { type: 'estimate_accepted', reason: 'requestor accepted the estimate', actor: (req.user && req.user.name) || (req.user && req.user.sub) || 'system' });
   res.json({ accepted: true, depositDue: depositDue, stage: newStage });
 });
@@ -282,9 +283,10 @@ router.post('/request/:requestId/deposit/record', requireAuth, async function (r
   var amount = (req.body && req.body.amount != null) ? Number(req.body.amount) : (Number(snap.deposit_due) || 0);
   var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'system';
   await run('UPDATE request_fee_estimates SET deposit_paid_at = ?, deposit_paid_by = ?, deposit_paid_amount = ? WHERE id = ?', [nowStr(), actor, amount, snap.id]);
-  await run("UPDATE requests SET stage = 'record_search', status = 'active', tickler_flag = NULL, tickler_flagged_at = NULL, updated_at = datetime('now') WHERE id = ?", [rid]);
-  await hist(rid, req.user, 'DEPOSIT_RECORDED', 'Deposit of $' + amount.toFixed(2) + ' recorded; record search begins.', reqRow.stage, 'record_search');
-  try { await taskRouting.spawnForStage(rid, 'record_search', req.user && req.user.sub); } catch (e) {}
+  await taskRouting.applyStageTransition(rid, 'record_search', {
+    actorId: req.user && req.user.sub, actorName: actor, action: 'DEPOSIT_RECORDED',
+    notes: 'Deposit of $' + amount.toFixed(2) + ' recorded; record search begins.',
+    createdBy: req.user && req.user.sub, clearTickler: true });
   await require('../services/paymentStatus').recordEvent(req.params.requestId, { type: 'payment', amount: amount, reason: 'deposit', actor: (req.user && req.user.name) || (req.user && req.user.sub) || 'system' });
   res.json({ recorded: true, amount: amount, stage: 'record_search' });
 });
@@ -394,9 +396,10 @@ router.post('/request/:requestId/payment/record', requireAuth, async function (r
       var newDep = (Number(est.deposit_paid_amount) || 0) + amount;
       await run('UPDATE request_fee_estimates SET deposit_paid_at = ?, deposit_paid_by = ?, deposit_paid_amount = ? WHERE id = ?', [nowStr(), actor, newDep, est.id]);
       if (reqRow.stage === 'awaiting_payment') {
-        await run("UPDATE requests SET stage = 'record_search', status = 'active', tickler_flag = NULL, tickler_flagged_at = NULL, updated_at = datetime('now') WHERE id = ?", [rid]);
-        await hist(rid, req.user, 'DEPOSIT_RECORDED', 'Deposit of $' + amount.toFixed(2) + ' (' + method + ') recorded; record search begins.', reqRow.stage, 'record_search');
-        try { await taskRouting.spawnForStage(rid, 'record_search', req.user && req.user.sub); } catch (e) {}
+        await taskRouting.applyStageTransition(rid, 'record_search', {
+          actorId: req.user && req.user.sub, actorName: actor, action: 'DEPOSIT_RECORDED',
+          notes: 'Deposit of $' + amount.toFixed(2) + ' (' + method + ') recorded; record search begins.',
+          createdBy: req.user && req.user.sub, clearTickler: true });
       } else {
         await hist(rid, req.user, 'DEPOSIT_RECORDED', 'Deposit of $' + amount.toFixed(2) + ' (' + method + ') recorded.', null, null);
       }

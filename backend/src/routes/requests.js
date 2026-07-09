@@ -106,12 +106,12 @@ router.patch('/:id/stage', requireAuth, async function(req, res) {
       }
     } catch (e) { console.error('[release gate]', e.message); }
   }
-  await run("UPDATE requests SET stage = ?, status = ?, updated_at = datetime('now') WHERE id = ?",
-    [stage, stage === 'closed' ? 'closed' : 'active', req.params.id]);
-  await logHistory(req.params.id, req.user.sub, req.user.name, 'STAGE_ADVANCED', req.body.notes);
-  // Entering record_search / redaction spawns the matching task and routes it (shared path).
-  try { await require('../services/taskRouting').spawnForStage(req.params.id, stage, req.user.sub); }
-  catch (e) { console.error('[stage-task spawn]', e.message); }
+  // One central stage-transition path (Architecture item 6): UPDATE + STAGE_ADVANCED history + stage task.
+  try {
+    await require('../services/taskRouting').applyStageTransition(req.params.id, stage, {
+      actorId: req.user.sub, actorName: req.user.name, action: 'STAGE_ADVANCED', notes: req.body.notes, createdBy: req.user.sub
+    });
+  } catch (e) { console.error('[stage transition]', e.message); }
   res.json({ success: true, stage: stage });
 });
 
@@ -227,12 +227,14 @@ router.post('/:id/assert-exemption', requireAuth, async function(req, res) {
     var openAg = await get("SELECT id FROM request_clocks WHERE request_id = ? AND clock_type = 'ag_ruling' AND status != 'satisfied' ORDER BY created_at DESC LIMIT 1", [request.id]);
     var agId = openAg && openAg.id;
     if (!agId) { try { agId = await T.startClock(request.id, 'ag_ruling', {}); } catch (e) {} }
-    await run("UPDATE requests SET stage = 'ag_review', updated_at = datetime('now') WHERE id = ?", [request.id]);
-    await logHistory(request.id, req.user.sub, actor, 'AG_PRECLEARANCE_SUBMITTED', 'Submitted for Attorney General pre-clearance; response clock tolled.' + (note ? ' ' + note : ''));
+    await require('../services/taskRouting').applyStageTransition(request.id, 'ag_review', {
+      actorId: req.user.sub, actorName: actor, action: 'AG_PRECLEARANCE_SUBMITTED',
+      notes: 'Submitted for Attorney General pre-clearance; response clock tolled.' + (note ? ' ' + note : ''), createdBy: req.user.sub });
     return res.json({ model: model, stage: 'ag_review', tolled: !!primary, agClockId: agId });
   }
-  await run("UPDATE requests SET stage = 'exemption_review', updated_at = datetime('now') WHERE id = ?", [request.id]);
-  await logHistory(request.id, req.user.sub, actor, 'EXEMPTION_ASSERTED', 'Exemption asserted (internal review).' + (note ? ' ' + note : ''));
+  await require('../services/taskRouting').applyStageTransition(request.id, 'exemption_review', {
+    actorId: req.user.sub, actorName: actor, action: 'EXEMPTION_ASSERTED',
+    notes: 'Exemption asserted (internal review).' + (note ? ' ' + note : ''), createdBy: req.user.sub });
   return res.json({ model: model, stage: 'exemption_review', tolled: false });
 });
 
@@ -248,9 +250,11 @@ router.post('/:id/ag-ruling', requireAuth, async function(req, res) {
   var primary = await get("SELECT id FROM request_clocks WHERE request_id = ? AND is_primary = 1 ORDER BY created_at LIMIT 1", [request.id]);
   if (primary) { try { await T.resume(primary.id); } catch (e) {} }
   var nextStage = outcome === 'overruled' ? 'delivery' : 'redaction_review';
-  await run("UPDATE requests SET stage = ?, updated_at = datetime('now') WHERE id = ?", [nextStage, request.id]);
   var label = outcome === 'sustained' ? 'withholding sustained' : outcome === 'overruled' ? 'must release' : 'partial release';
-  await logHistory(request.id, req.user.sub, actor, 'AG_RULING_RECORDED', 'AG ruling recorded (' + label + '); response clock resumed.' + (note ? ' ' + note : ''));
+  // Entering redaction_review spawns the redaction task via the central path (previously left to the reconciler).
+  await require('../services/taskRouting').applyStageTransition(request.id, nextStage, {
+    actorId: req.user.sub, actorName: actor, action: 'AG_RULING_RECORDED',
+    notes: 'AG ruling recorded (' + label + '); response clock resumed.' + (note ? ' ' + note : ''), createdBy: req.user.sub });
   return res.json({ outcome: outcome, stage: nextStage, agSatisfied: !!ag, resumed: !!primary });
 });
 

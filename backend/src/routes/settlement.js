@@ -55,7 +55,11 @@ router.post('/payment-applied', async function (req, res) {
       if (track.target === 'deposit') {
         await run("UPDATE request_fee_estimates SET deposit_paid_at = ?, deposit_paid_by = ?, deposit_paid_amount = ? WHERE id = ?", [now, 'ERP', (Number(est.deposit_paid_amount) || 0) + amountApplied, est.id]);
         var rr = await get("SELECT stage FROM requests WHERE id = ?", [track.request_id]);
-        if (rr && rr.stage === 'awaiting_payment') { await run("UPDATE requests SET stage = 'record_search', status = 'active', tickler_flag = NULL, tickler_flagged_at = NULL, updated_at = datetime('now') WHERE id = ?", [track.request_id]); try { await taskRouting.spawnForStage(track.request_id, 'record_search', 'system'); } catch (e) {} }
+        if (rr && rr.stage === 'awaiting_payment') {
+          await taskRouting.applyStageTransition(track.request_id, 'record_search', {
+            actorName: 'ERP', action: 'STAGE_ADVANCED', notes: 'Record search begins (ERP deposit applied).',
+            createdBy: 'system', clearTickler: true });
+        }
       } else {
         await run("UPDATE request_fee_estimates SET final_paid_at = ?, final_paid_by = ?, final_paid_amount = ? WHERE id = ?", [now, 'ERP', (Number(est.final_paid_amount) || 0) + amountApplied, est.id]);
       }

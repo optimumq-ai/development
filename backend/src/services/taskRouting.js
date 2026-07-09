@@ -238,7 +238,10 @@ async function applyStageTransition(requestId, toStage, opts) {
     return { fromStage: fromStage, toStage: fromStage, changed: false, task: null };
   }
   var newStatus = (toStage === 'closed') ? 'closed' : 'active';
-  await run("UPDATE requests SET stage = ?, status = ?, updated_at = datetime('now') WHERE id = ?",
+  // opts.clearTickler: reactivation transitions (deposit/acceptance) lift the dormancy flag in the same
+  // write. Kept per-caller rather than universal — see HANDOFF 2026-07-09 open item.
+  var ticklerClear = opts.clearTickler ? ", tickler_flag = NULL, tickler_flagged_at = NULL" : "";
+  await run("UPDATE requests SET stage = ?, status = ?" + ticklerClear + ", updated_at = datetime('now') WHERE id = ?",
     [toStage, newStatus, requestId]);
   await run(
     "INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes, stage_from, stage_to, created_at) " +
