@@ -13,8 +13,8 @@ const TASK_TYPES = [
   { key:'fee_waiver', label:'Fee-Waiver Approval' },
   { key:'commercial_rate', label:'Commercial-Rate Approval' },
   { key:'mrr_processing', label:'MRR Processing' },
-  { key:'mrr_estimate', label:'MRR Estimate' },
-  { key:'mrr_search', label:'MRR Search' },
+  // MRR child tasks (mrr_estimate / mrr_search) are intentionally NOT here — the Request Manager
+  // hand-assigns them to any person with no eligibility rules, so they aren't a per-person subset.
 ];
 const TASK_TYPE_LABEL = TASK_TYPES.reduce(function(m,t){ m[t.key]=t.label; return m; }, {});
 const ROLE_COLORS = { SYSTEM_ADMIN:{bg:'#FEF2F2',color:'#991B1B'}, DIRECTOR:{bg:'#EDE9FE',color:'#6D28D9'}, SUPERVISOR:{bg:'#DBEAFE',color:'#1E40AF'}, DEPT_MANAGER:{bg:'#D1FAE5',color:'#065F46'}, COORDINATOR:{bg:'#FEF3C7',color:'#92400E'}, CUSTODIAN:{bg:'#E0E7FF',color:'#3730A3'}, REDACTION_REVIEWER:{bg:'#CCFBF1',color:'#0F766E'}, REDACTION_APPROVER:{bg:'#CCFBF1',color:'#0F766E'}, ATTORNEY_REVIEWER:{bg:'#FEE2E2',color:'#B91C1C'}, FEE_WAIVER_APPROVER:{bg:'#FEF9C3',color:'#854D0E'} };

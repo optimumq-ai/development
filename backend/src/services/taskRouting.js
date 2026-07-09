@@ -25,8 +25,11 @@ var TASK_ROLES = {
 };
 
 // Canonical routable task types (docs/MASTER_task_types_permission_groups.md §A1). These are the keys a
-// person's per-person subset (user_task_types) is drawn from.
-var ROUTABLE_TASK_TYPES = ['estimate', 'record_search', 'redaction', 'legal_redaction', 'legal_review', 'fee_waiver', 'commercial_rate', 'mrr_processing', 'mrr_estimate', 'mrr_search'];
+// person's per-person subset (user_task_types) is drawn from — i.e. work the SYSTEM routes by eligibility.
+// mrr_processing is here because the system routes the MRR parent to an ORO Associate at intake; the MRR
+// CHILD tasks (mrr_estimate / mrr_search) are NOT here — the Request Manager hand-assigns them to any
+// person with no eligibility rules (see §A2), so they never gate through user_task_types.
+var ROUTABLE_TASK_TYPES = ['estimate', 'record_search', 'redaction', 'legal_redaction', 'legal_review', 'fee_waiver', 'commercial_rate', 'mrr_processing'];
 // Reverse of TASK_ROLES: legacy permission-role name -> task type, used to translate existing callers
 // (which pass task.role_required) onto the new task-type model during the cutover.
 var ROLE_TO_TYPE = { FEE_MANAGER: 'estimate', SEARCH_AND_TRIAGE: 'record_search', REDACTION_WORKER: 'redaction', FEE_AUTHORITY: 'fee_waiver' };

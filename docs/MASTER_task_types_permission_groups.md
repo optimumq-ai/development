@@ -26,15 +26,17 @@ A "task type" is one kind of human stop in request processing. Two flavours (des
 
 > Note: wired keys in `taskRouting.js` are `estimate`, `record_search`, `redaction`, `fee_waiver`, plus (2026-07-09) `legal_review` and `legal_redaction`. `STAGE_TASK` now maps `record_search→record_search`, `redaction_review|redaction→redaction` (→ `legal_redaction` when the request is legally flagged), and `exemption_review|ag_review→legal_review`. Legal task types are office-level (team-agnostic) and resolve eligibility via `user_task_types`. Remaining unwired: `commercial_rate` (deferred) and the `mrr_*` set.
 
-### A2. MRR task types (role-agnostic — the Request Manager assigns any best-fit user)
+### A2. MRR task types — two distinct behaviors
 
-| Task type | Display name | Owner | Status |
-|---|---|---|---|
-| `mrr_processing` | MRR Processing (parent management) | Open Records Request Manager (**ORO Associate**) | `[NOT BUILT]` |
-| `mrr_estimate` | Multi-Record Request Estimate | assigned per child (may be a non-user via secure link) | `[NOT BUILT]` |
-| `mrr_search` | Multi-Record Search | assigned per child | `[NOT BUILT]` |
+The MRR parent is **routed by the system**; the MRR children are **hand-assigned by the Request Manager**. This is the key line: only `mrr_processing` is an eligibility-routed (routable) task type in `ROUTABLE_TASK_TYPES` / the per-person subset picker; the child tasks are not.
 
-MRR tasks carry **no MRR-specific role**; they are assigned by the Request Manager (SPEC §7, §12.1).
+| Task type | Display name | Assignment | In per-person subset (`user_task_types`)? | Status |
+|---|---|---|---|---|
+| `mrr_processing` | MRR Processing (parent management) | **System-routed** to an ORO Associate (Request Manager) when intake detects MRR — eligibility applies | **Yes** — it is routable | `[NOT BUILT]` |
+| `mrr_estimate` | Multi-Record Request Estimate | **Hand-assigned** by the RM to any person per child (may be a non-user via secure link) — **no eligibility, no team filter, no smart routing** | **No** | `[NOT BUILT]` |
+| `mrr_search` | Multi-Record Search | **Hand-assigned** by the RM to any person per child — no routing rules | **No** | `[NOT BUILT]` |
+
+Mechanics: a manual `assign(taskId, userId)` sets the assignee with **no eligibility check** (only *claim-from-pool* checks eligibility), so RM hand-assignment of child tasks needs no special machinery — it simply bypasses the eligibility path. (SPEC §7, §12.1.)
 
 ### A3. Non-routable capabilities (gate UI, never routed)
 
