@@ -220,3 +220,43 @@ persistent so a recurrence will be logged). Added a persistent 4 GB swapfile + `
 (`/home/optimumq/harden-swap.sh`). Recommended going forward: run Claude Code inside **tmux** (installed,
 3.2a) so an SSH drop / terminal scramble can't lose the session. Optional `disable-desktop.sh` reclaims the
 Xorg/sddm RAM (headless box).
+
+## 2026-07-09 (h) — Public-submit 500 fix + clarification policy slice 3 (extractor, BUILT)
+
+**Two commits this session after slice 2.**
+
+**(1) Public-submit 500 fix — `0278e42`.** `/api/requests/public` (the `server.js` direct handler)
+computed the next request number from the single newest row by `created_at`. That row is a `DEMO-*` seed
+(`DEMO-2026-5069`) → `parseInt('DEMO')` is NaN → counter reset to 1 → INSERT `2026-0001` → duplicate-key
+23505 → 500, blocking ALL public submissions. Fixed to number within the current-year `'YYYY-%'` series
+ordered by `request_number` (same as `routes/requests.js generateRequestNumber`). Verified: `POST
+/api/requests/public` → 201 with the correct next number. Pre-existing SELECT-then-INSERT race under
+concurrent submits is unchanged — separate follow-up.
+
+**(2) Clarification policy slice 3 — the EXTRACTOR — `<this commit>`.** The `clarification` config-freshness
+adapter now uses a dedicated extractor instead of `genericExtract`.
+- `services/clarificationPolicyExtract.js` `[NEW]` — sibling of `feePolicyExtract`. Prompts with the exact
+  7-field schema + enum vocabularies (built from `clarificationPolicy.FIELDS`/`SOURCES` so it stays in sync),
+  returns `{config, provenance keyed by field (source/citation/confidence), summary}`; `clarificationPolicy.
+  normalize` guarantees a schema-valid, apply-able proposal even on an off-vocabulary enum (human review +
+  strict `validate()` at apply are the real gates). Model/SDK usage matches the codebase (`@anthropic-ai/sdk`,
+  `claude-sonnet-4-5`). AI never in the runtime clock path.
+- `services/configExtractors.js` — `clarification` adapter `extract` rewired to the new module (one-line swap
+  + require). Everything downstream (`stageFromSource` → `config_proposals` → review/attest/apply) already
+  existed and is unchanged.
+
+**Evidence (live LLM extraction on an Illinois FOIA §3(g) excerpt):** proposed `runs_no_stop` +
+`required_before_burden_denial` + `vague_is_denial_ground=false` + `abandonment_closure=allowed`, with 6
+statute-sourced provenance entries (citation + confidence); all enums validated in-vocab; applied via the
+REAL apply path (`effectiveConfig.applyConfig`) with no validate throw; live policy reflected the change;
+then reset to `enabled=false` / un-attested / safe and all test proposal+snapshot rows deleted. API
+restarted (pid 152898, health 200); `POST /api/config-freshness/extract` returns 401 (mounted, new module
+loads). Survey §8.3 → BUILT (same commit).
+
+**Clarification-policy status: all three slices BUILT (substrate · trigger · extractor).** Remaining for a
+production-ready clarification workflow (each its own slice): **outreach mechanics** (email template vs
+printable postal letter on `delivery_method` + the intake mailing-address gap, §5b); **auto-close**
+`clarification-timeout` node using `clarification_grace_days`/`abandonment_grace_days`; **UI editor form** for
+the 7 fields and the record-search "Contact requestor" **button** (both wait on a design nod per the UI rule);
+**Michigan clock-model conflict** (survey §5.1); per-jurisdiction storage + precedence (today global in
+`system_config`, mirrors `deadline_rules`).

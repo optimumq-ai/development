@@ -10,6 +10,7 @@ var crypto = require('crypto');
 var { all, get, run } = require('../db');
 var feePolicyExtract = require('./feePolicyExtract');
 var clarificationPolicy = require('./clarificationPolicy');
+var clarificationPolicyExtract = require('./clarificationPolicyExtract');
 var { v4: uuidv4 } = require('uuid');
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 var REDACTION_CATS = ['privacy', 'law_enforcement', 'health', 'legal', 'personnel', 'commercial', 'security', 'administrative'];
@@ -135,7 +136,7 @@ var ADAPTERS = {
   clarification: {
     label: 'Clarification / vague-request policy', applyTarget: "system_config 'clarification_policy'", applyMode: 'live',
     current: async function (jid) { return await clarificationPolicy.read(jid); },
-    extract: async function (jid, text) { return await genericExtract('clarification / vague-request handling policy (see the field shape in CURRENT CONFIGURATION: clock effect, duty, grace windows, closure)', await jurName(jid), await clarificationPolicy.read(jid), text); },
+    extract: async function (jid, text) { return await clarificationPolicyExtract.extract(text, { jurName: await jurName(jid), currentCfg: await clarificationPolicy.read(jid) }); },
     apply: async function (jid, cfg, actor) { var r = await clarificationPolicy.write(jid, cfg, actor); return { target: r.target }; }
   },
   exemption: {

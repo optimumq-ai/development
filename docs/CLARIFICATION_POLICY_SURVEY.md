@@ -372,4 +372,16 @@ quantitative case for a per-jurisdiction field rather than a hardcoded behavior.
    `clarification-timeout`** node remain separate follow-ups; **UI button** waits on the record-search screen.
 3. **Extractor** — point a config-freshness extractor at an uploaded local policy doc → drafts the §2 fields
    with citations/confidence → existing review/attest UI. (Adapter `extract()` already stubbed via
-   `genericExtract`.)
+   `genericExtract`.) — **BUILT 2026-07-09 (backend).** `services/clarificationPolicyExtract.js` (dedicated
+   sibling of `feePolicyExtract`) replaces the generic extractor on the `clarification` adapter: it prompts
+   with the exact 7-field schema + enum vocabularies (built from `clarificationPolicy.FIELDS`/`SOURCES`, so it
+   stays in sync) and returns `{config, provenance (keyed by field: source/citation/confidence), summary}`,
+   then `clarificationPolicy.normalize` guarantees a schema-valid, apply-able proposal even on an
+   off-vocabulary enum. Rides the existing pipeline unchanged — `POST /api/config-freshness/extract`
+   (or `/sources/:id/check`, `/upload`) → `stageFromSource` → `config_proposals` → review `/proposals/:id`
+   → attest+apply `/proposals/:id/apply`. Verified end-to-end with a live extraction on an Illinois FOIA
+   §3(g) excerpt: proposed `runs_no_stop` + `required_before_burden_denial` + `abandonment_closure=allowed`
+   with 6 statute-sourced provenance entries; all enums valid; applied via the real path without a validate
+   throw; system reset to OFF/safe. **UI:** rides the existing config-freshness review/attest screens — no new
+   screen. Runtime remains double-gated (apply sets the policy; `automationActive` still needs the
+   profile-section attestation before the slice-2 trigger acts).
