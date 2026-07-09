@@ -9,6 +9,7 @@ var Anthropic = require('@anthropic-ai/sdk');
 var crypto = require('crypto');
 var { all, get, run } = require('../db');
 var feePolicyExtract = require('./feePolicyExtract');
+var clarificationPolicy = require('./clarificationPolicy');
 var { v4: uuidv4 } = require('uuid');
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 var REDACTION_CATS = ['privacy', 'law_enforcement', 'health', 'legal', 'personnel', 'commercial', 'security', 'administrative'];
@@ -130,6 +131,12 @@ var ADAPTERS = {
     current: async function () { return await sysJSON('deadline_rules'); },
     extract: async function (jid, text) { return await genericExtract('response-deadline & clock-tolling', await jurName(jid), await sysJSON('deadline_rules'), text); },
     apply: async function (jid, cfg) { await run("INSERT INTO system_config (key, value) VALUES ('deadline_rules', ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [JSON.stringify(cfg || {})]); return { target: 'system_config:deadline_rules' }; }
+  },
+  clarification: {
+    label: 'Clarification / vague-request policy', applyTarget: "system_config 'clarification_policy'", applyMode: 'live',
+    current: async function (jid) { return await clarificationPolicy.read(jid); },
+    extract: async function (jid, text) { return await genericExtract('clarification / vague-request handling policy (see the field shape in CURRENT CONFIGURATION: clock effect, duty, grace windows, closure)', await jurName(jid), await clarificationPolicy.read(jid), text); },
+    apply: async function (jid, cfg, actor) { var r = await clarificationPolicy.write(jid, cfg, actor); return { target: r.target }; }
   },
   exemption: {
     label: 'Exemption model & appeals', applyTarget: 'jurisdiction_profiles.exemption_model', applyMode: 'live',

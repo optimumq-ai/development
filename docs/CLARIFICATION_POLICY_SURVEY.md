@@ -342,8 +342,19 @@ quantitative case for a per-jurisdiction field rather than a hardcoded behavior.
 
 ## 8. Build order implied (per AUTO_CONFIG §1: expressiveness before automation)
 1. **Substrate** — `clarification_policy` config store + area editor (manual + off), the §2 fields with
-   provenance. Un-attested → safe/manual. *(no AI yet)*
+   provenance. Un-attested → safe/manual. *(no AI yet)* — **BUILT 2026-07-09 (backend).**
+   `services/clarificationPolicy.js` owns the 7-field schema, defaults (all off), `enabled` master switch,
+   validation, and read/write to `system_config 'clarification_policy'`. Rides existing rails: a
+   `clarification` adapter in `configExtractors.js` (so `effectiveConfig.applyConfig` gives config-history +
+   profile-sync for free, and the slice-3 extractor is pre-wired), a `clarification` section in
+   `jurisdictionProfile.js` (readiness + attestation gate), and `routes/clarificationPolicy.js`
+   (`GET/POST /api/clarification-policy`, SYSTEM_ADMIN/DIRECTOR). Verified end-to-end: GET defaults →
+   invalid-enum 400 → valid POST persists (coerces, keeps provenance) → profile flips not_configured→
+   configured (version bumps, re-arming attestation) → config_history row → reset to safe default.
+   **UI editor form deferred** (needs a design nod per the UI rule); exercised via API today.
 2. **Trigger** — wire the record-search "Contact requestor" action to the tolling engine via
-   `clarification_clock_effect`; implement the six behaviors incl. restart + start-gate.
+   `clarification_clock_effect`; implement the six behaviors incl. restart + start-gate. Gate on
+   `clarificationPolicy.automationActive(policy, attested)` (enabled AND section attested).
 3. **Extractor** — point a config-freshness extractor at an uploaded local policy doc → drafts the §2 fields
-   with citations/confidence → existing review/attest UI.
+   with citations/confidence → existing review/attest UI. (Adapter `extract()` already stubbed via
+   `genericExtract`.)
