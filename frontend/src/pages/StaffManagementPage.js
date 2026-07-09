@@ -12,6 +12,7 @@ const TASK_TYPES = [
   { key:'legal_review', label:'Legal Review' },
   { key:'fee_waiver', label:'Fee-Waiver Approval' },
   { key:'commercial_rate', label:'Commercial-Rate Approval' },
+  { key:'routing_review', label:'Routing Review' },
   { key:'mrr_processing', label:'MRR Processing' },
   // MRR child tasks (mrr_estimate / mrr_search) are intentionally NOT here — the Request Manager
   // hand-assigns them to any person with no eligibility rules, so they aren't a per-person subset.

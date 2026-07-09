@@ -137,6 +137,21 @@ async function onIntake(requestId, matcherResult){
     } catch (e) { console.error('[workflowEngine] fee-waiver task spawn failed:', e && e.message); }
   }
 
+  // Unroutable at intake: the classifier could not determine a fulfillment team (teamId null). Rather than
+  // leaving the request silently Unassigned — or dumping it on the Open Records fulfillment team — spawn a
+  // team-agnostic ROUTING-REVIEW task so an ORO Associate reviews it and corrects the routing. The task is
+  // closed automatically when the request is re-routed (PATCH /requests/:id/route). Idempotent.
+  if (!teamId) {
+    try {
+      var trr = require('./taskRouting');
+      var existingR = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'routing_review' AND status IN ('open','assigned','in_progress')", [requestId]);
+      if (!existingR) {
+        var rtask = await trr.createTask({ requestId: requestId, type: 'routing_review', title: 'Review & route — team could not be determined', teamId: null, createdBy: 'workflow' });
+        await trr.autoRouteOrPool(rtask.id, request.description, {});
+      }
+    } catch (e) { console.error('[workflowEngine] routing-review task spawn failed:', e && e.message); }
+  }
+
   // Statutory clocks: create the jurisdiction intake clocks (idempotent) + sync primary clock -> deadline_date.
   try { await require('./tolling').startClocksForRequest(requestId); } catch (e) { console.error('[workflowEngine] clock start failed:', e && e.message); }
 

@@ -145,7 +145,10 @@ router.patch('/:id/route', requireAuth, async function(req, res) {
   // (e.g. the request was Unassigned/triage), spawn the first work task on the new team and route it.
   try {
     var tr = require('../services/taskRouting');
-    var openTasks = await all("SELECT id, assigned_to FROM tasks WHERE request_id = ? AND status IN ('open','assigned','in_progress')", [req.params.id]);
+    // The correction itself resolves any open routing-review task (the ORO Associate just did the review).
+    await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE request_id = ? AND type = 'routing_review' AND status IN ('open','assigned','in_progress')", [req.params.id]);
+    // Move/re-route the actual WORK tasks onto the new team (exclude the routing-review task, now closed).
+    var openTasks = await all("SELECT id, assigned_to FROM tasks WHERE request_id = ? AND type != 'routing_review' AND status IN ('open','assigned','in_progress')", [req.params.id]);
     for (var oti = 0; oti < openTasks.length; oti++) {
       var ot = openTasks[oti];
       await run("UPDATE tasks SET team_id = ?, updated_at = datetime('now') WHERE id = ?", [teamId, ot.id]);
