@@ -22,9 +22,10 @@ app.post('/api/requests/public', async function(req, res) {
   var b = req.body;
   if (!b.requestorName || !b.requestorEmail || !b.description) return res.status(400).json({ error: 'Name, email and description are required' });
   var year = new Date().getFullYear();
-  var last = await get('SELECT request_number FROM requests ORDER BY created_at DESC LIMIT 1');
-  var nextNum = 1;
-  if (last) { var parts = last.request_number.split('-'); if (parseInt(parts[0]) == year) nextNum = parseInt(parts[1]) + 1; }
+  // Number within the current-year YYYY-#### series only; ignore DEMO-*/non-conforming numbers so a
+  // seed row that happens to be newest by created_at can't reset the counter and collide (was a 500).
+  var last = await get("SELECT request_number FROM requests WHERE request_number LIKE ? ORDER BY request_number DESC LIMIT 1", [year + '-%']);
+  var nextNum = last ? parseInt(last.request_number.split('-')[1]) + 1 : 1;
   var requestNumber = year + '-' + String(nextNum).padStart(4,'0');
   var days = {simple:5,standard:10,complex:20,redaction_required:30}[b.classification||'standard']||10;
   var deadline = new Date(); deadline.setDate(deadline.getDate()+days);
