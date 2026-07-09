@@ -2,6 +2,21 @@ import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
 
 const FUNCTION_ROLES = ['COORDINATOR','SUPERVISOR','FEE_WAIVER_APPROVER','REDACTION_REVIEWER','REDACTION_APPROVER','ATTORNEY_REVIEWER','CUSTODIAN','DEPT_MANAGER','DIRECTOR','SYSTEM_ADMIN'];
+// Canonical routable task types (docs/MASTER_task_types_permission_groups.md §A1). The per-person subset
+// a staff member can be assigned; this is what task routing resolves eligibility against.
+const TASK_TYPES = [
+  { key:'estimate', label:'Estimate Creation' },
+  { key:'record_search', label:'Record Search' },
+  { key:'redaction', label:'Redaction' },
+  { key:'legal_redaction', label:'Legal Redaction' },
+  { key:'legal_review', label:'Legal Review' },
+  { key:'fee_waiver', label:'Fee-Waiver Approval' },
+  { key:'commercial_rate', label:'Commercial-Rate Approval' },
+  { key:'mrr_processing', label:'MRR Processing' },
+  { key:'mrr_estimate', label:'MRR Estimate' },
+  { key:'mrr_search', label:'MRR Search' },
+];
+const TASK_TYPE_LABEL = TASK_TYPES.reduce(function(m,t){ m[t.key]=t.label; return m; }, {});
 const ROLE_COLORS = { SYSTEM_ADMIN:{bg:'#FEF2F2',color:'#991B1B'}, DIRECTOR:{bg:'#EDE9FE',color:'#6D28D9'}, SUPERVISOR:{bg:'#DBEAFE',color:'#1E40AF'}, DEPT_MANAGER:{bg:'#D1FAE5',color:'#065F46'}, COORDINATOR:{bg:'#FEF3C7',color:'#92400E'}, CUSTODIAN:{bg:'#E0E7FF',color:'#3730A3'}, REDACTION_REVIEWER:{bg:'#CCFBF1',color:'#0F766E'}, REDACTION_APPROVER:{bg:'#CCFBF1',color:'#0F766E'}, ATTORNEY_REVIEWER:{bg:'#FEE2E2',color:'#B91C1C'}, FEE_WAIVER_APPROVER:{bg:'#FEF9C3',color:'#854D0E'} };
 
 export default function StaffManagementPage() {
@@ -16,6 +31,9 @@ export default function StaffManagementPage() {
   const [specFor, setSpecFor] = useState(null);
   const [specText, setSpecText] = useState('');
   const [specSaving, setSpecSaving] = useState(false);
+  const [editFor, setEditFor] = useState(null);
+  const [editForm, setEditForm] = useState({ displayName:'', title:'', departmentId:'', taskTypes:[] });
+  const [editSaving, setEditSaving] = useState(false);
 
   useEffect(function() { load(); }, []);
 
@@ -38,6 +56,34 @@ export default function StaffManagementPage() {
       await load();
     } catch(e) { setErr('Failed to save specialization'); }
     setSpecSaving(false);
+  }
+
+  function openEdit(s) {
+    setEditFor(s);
+    setEditForm({ displayName: s.display_name || '', title: s.title || '', departmentId: s.department_id || '', taskTypes: (s.taskTypes || []).slice() });
+    setErr('');
+  }
+
+  function setEF(k,v){ setEditForm(function(f){ return Object.assign({},f,{[k]:v}); }); }
+
+  function toggleEditTaskType(key) {
+    setEditForm(function(f) {
+      var t = f.taskTypes.includes(key) ? f.taskTypes.filter(function(x){ return x!==key; }) : f.taskTypes.concat(key);
+      return Object.assign({},f,{taskTypes:t});
+    });
+  }
+
+  async function saveEdit() {
+    if (!editFor) return;
+    if (!editForm.displayName.trim()) { setErr('Name is required'); return; }
+    setEditSaving(true);
+    try {
+      await api.patch('/staff/' + editFor.id, { displayName: editForm.displayName, title: editForm.title, departmentId: editForm.departmentId || null });
+      await api.patch('/staff/' + editFor.id + '/task-types', { taskTypes: editForm.taskTypes });
+      setEditFor(null);
+      await load();
+    } catch(e) { setErr(e.response && e.response.data ? e.response.data.error : 'Failed to save changes'); }
+    setEditSaving(false);
   }
 
   function setF(k,v){ setForm(function(f){ return Object.assign({},f,{[k]:v}); }); }
@@ -212,6 +258,11 @@ export default function StaffManagementPage() {
                     </td>
                     <td style={{padding:'14px 16px'}}>
                       <div style={{display:'flex',gap:'8px',justifyContent:'flex-end'}}>
+                        <button onClick={function(){openEdit(s);}}
+                          title="Edit profile, team, and task types"
+                          style={{padding:'5px 12px',background:'white',color:'#1F4E79',border:'1px solid #BFDBFE',borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>
+                          Edit
+                        </button>
                         <button onClick={function(){setSpecFor(s);setSpecText(s.routing_specialization||'');}}
                           title="Routing specialization"
                           style={{padding:'5px 12px',background:s.routing_specialization?'#DBEAFE':'white',color:'#1F4E79',border:'1px solid #BFDBFE',borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>
@@ -230,6 +281,50 @@ export default function StaffManagementPage() {
           </table>
         )}
       </div>
+
+      {editFor && (
+        <div onClick={function(){if(!editSaving)setEditFor(null);}} style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(17,24,39,0.45)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,padding:'20px'}}>
+          <div onClick={function(e){e.stopPropagation();}} style={{background:'white',borderRadius:'12px',padding:'24px',width:'560px',maxWidth:'100%',maxHeight:'90vh',overflowY:'auto',boxShadow:'0 10px 40px rgba(0,0,0,0.2)'}}>
+            <div style={{fontSize:'16px',fontWeight:'700',color:'#1F4E79'}}>Edit staff member</div>
+            <div style={{fontSize:'13px',color:'#374151',marginTop:'2px',marginBottom:'16px'}}>{editFor.email}</div>
+            <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'14px'}}>
+              <div>
+                <label style={lbl}>Full Name <span style={{color:'#DC2626'}}>*</span></label>
+                <input value={editForm.displayName} onChange={function(e){setEF('displayName',e.target.value);}} style={inp}/>
+              </div>
+              <div>
+                <label style={lbl}>Title / Position</label>
+                <input value={editForm.title} onChange={function(e){setEF('title',e.target.value);}} style={inp}/>
+              </div>
+              <div style={{gridColumn:'1 / span 2'}}>
+                <label style={lbl}>Request Fulfillment Team</label>
+                <select value={editForm.departmentId} onChange={function(e){setEF('departmentId',e.target.value);}} style={inp}>
+                  <option value="">— No team assigned —</option>
+                  {departments.filter(function(d){ return d.kind==='team'; }).map(function(d){ return <option key={d.id} value={d.id}>{d.name}</option>; })}
+                </select>
+              </div>
+            </div>
+            <div style={{marginTop:'16px'}}>
+              <label style={lbl}>Task types</label>
+              <div style={{fontSize:'12px',color:'#9CA3AF',margin:'0 0 8px'}}>The request work this person can be assigned within their team. Task routing offers a task only to eligible people who hold its type.</div>
+              <div style={{display:'flex',flexWrap:'wrap',gap:'8px'}}>
+                {TASK_TYPES.map(function(t){
+                  var active = editForm.taskTypes.includes(t.key);
+                  return <button key={t.key} type="button" onClick={function(){toggleEditTaskType(t.key);}}
+                    style={{padding:'6px 14px',borderRadius:'20px',border:'2px solid '+(active?'#1F4E79':'#E5E7EB'),background:active?'#EFF6FF':'white',color:active?'#1F4E79':'#6B7280',fontSize:'12px',fontWeight:active?'700':'500',cursor:'pointer'}}>
+                    {t.label}
+                  </button>;
+                })}
+              </div>
+            </div>
+            {err && <div style={{background:'#FEF2F2',border:'1px solid #FCA5A5',borderRadius:'8px',padding:'12px',fontSize:'14px',color:'#DC2626',marginTop:'14px'}}>{err}</div>}
+            <div style={{display:'flex',justifyContent:'flex-end',gap:'8px',marginTop:'18px'}}>
+              <button onClick={function(){setEditFor(null);}} disabled={editSaving} style={{padding:'9px 16px',background:'white',color:'#6B7280',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>Cancel</button>
+              <button onClick={saveEdit} disabled={editSaving} style={{padding:'9px 18px',background:editSaving?'#9CA3AF':'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:editSaving?'default':'pointer'}}>{editSaving?'Saving...':'Save changes'}</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {specFor && (
         <div onClick={function(){if(!specSaving)setSpecFor(null);}} style={{position:'fixed',top:0,left:0,right:0,bottom:0,background:'rgba(17,24,39,0.45)',display:'flex',alignItems:'center',justifyContent:'center',zIndex:1000,padding:'20px'}}>

@@ -20,6 +20,13 @@ var TASK_ROLES = {
   fee_waiver: 'FEE_AUTHORITY'
 };
 
+// Canonical routable task types (docs/MASTER_task_types_permission_groups.md §A1). These are the keys a
+// person's per-person subset (user_task_types) is drawn from.
+var ROUTABLE_TASK_TYPES = ['estimate', 'record_search', 'redaction', 'legal_redaction', 'legal_review', 'fee_waiver', 'commercial_rate', 'mrr_processing', 'mrr_estimate', 'mrr_search'];
+// Reverse of TASK_ROLES: legacy permission-role name -> task type, used to translate existing callers
+// (which pass task.role_required) onto the new task-type model during the cutover.
+var ROLE_TO_TYPE = { FEE_MANAGER: 'estimate', SEARCH_AND_TRIAGE: 'record_search', REDACTION_WORKER: 'redaction', FEE_AUTHORITY: 'fee_waiver' };
+
 // Smart Routing auto-assigns to the top match only when it is both decent (>= FLOOR) AND clearly ahead of
 // the runner-up (lead >= MARGIN). Otherwise the task stays in the pool to claim. (Absolute cosine on short
 // specialization text runs modest, so a margin test is more robust than a single high cutoff. Tunable; later
@@ -29,9 +36,31 @@ var SMART_ROUTING_MARGIN = 0.06;
 
 function lit(vec) { return '[' + vec.join(',') + ']'; }
 
-// Users on a team who hold the required permission role and are active.
+// Users on a team eligible to be assigned a task.
+// NEW MODEL (v3): eligibility = active + on the team + their per-person task-type subset (user_task_types)
+// includes this task type. The `roleName` arg may be a task type (new callers) or a legacy permission-role
+// name (existing callers, which pass task.role_required); we translate the latter via ROLE_TO_TYPE.
+// Cutover is per task type and safe: we use the new model for a task type only once ANY user has been
+// assigned that type; until then we fall back to the legacy permission-role query so routing never regresses.
 async function eligibleUsers(teamId, roleName) {
   if (!roleName) return [];
+  var taskType = ROUTABLE_TASK_TYPES.indexOf(roleName) !== -1 ? roleName : ROLE_TO_TYPE[roleName];
+  if (taskType) {
+    var seeded = await get("SELECT 1 AS x FROM user_task_types WHERE task_type = ? LIMIT 1", [taskType]);
+    if (seeded) {
+      var p = [taskType];
+      var dc = '';
+      if (teamId) { dc = ' AND u.department_id = ?'; p.push(teamId); }
+      return await all(
+        "SELECT u.id, u.display_name, u.routing_specialization " +
+        "FROM users u " +
+        "JOIN user_task_types utt ON utt.user_id = u.id " +
+        "WHERE utt.task_type = ? AND u.status = 'active'" + dc,
+        p
+      );
+    }
+  }
+  // Legacy fallback: the old permission-role catalog.
   var params = [roleName];
   var deptClause = '';
   if (teamId) { deptClause = ' AND u.department_id = ?'; params.push(teamId); }
@@ -297,6 +326,7 @@ function startReconciler() {
 
 module.exports = {
   TASK_ROLES: TASK_ROLES,
+  ROUTABLE_TASK_TYPES: ROUTABLE_TASK_TYPES,
   SMART_ROUTING_FLOOR: SMART_ROUTING_FLOOR,
   SMART_ROUTING_MARGIN: SMART_ROUTING_MARGIN,
   eligibleUsers: eligibleUsers,
