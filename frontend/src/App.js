@@ -9,6 +9,7 @@ import NewRequestPage from './pages/NewRequestPage';
 import RequestWorkspacePage from './pages/RequestWorkspacePage';
 import StaffManagementPage from './pages/StaffManagementPage';
 import DepartmentsPage from './pages/DepartmentsPage';
+import OrgPage from './pages/OrgPage';
 import SetupPage from './pages/SetupPage';
 import TaxonomyPage from './pages/TaxonomyPage';
 import WorkflowPage from './pages/WorkflowPage';
@@ -73,6 +74,7 @@ export default function App() {
           <Route path="requests" element={<RequestQueuePage />} />
           <Route path="requests/new" element={<NewRequestPage />} />
           <Route path="requests/:id" element={<RequestWorkspacePage />} />
+          <Route path="org" element={<OrgPage />} />
           <Route path="my-tasks" element={<MyTasksPage />} />
           <Route path="estimate/:taskId" element={<EstimateTaskPage />} />
           <Route path="tickler" element={<TicklerPage />} />

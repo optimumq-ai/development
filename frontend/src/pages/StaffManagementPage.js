@@ -19,7 +19,7 @@ const TASK_TYPES = [
 const TASK_TYPE_LABEL = TASK_TYPES.reduce(function(m,t){ m[t.key]=t.label; return m; }, {});
 const ROLE_COLORS = { SYSTEM_ADMIN:{bg:'#FEF2F2',color:'#991B1B'}, DIRECTOR:{bg:'#EDE9FE',color:'#6D28D9'}, SUPERVISOR:{bg:'#DBEAFE',color:'#1E40AF'}, DEPT_MANAGER:{bg:'#D1FAE5',color:'#065F46'}, COORDINATOR:{bg:'#FEF3C7',color:'#92400E'}, CUSTODIAN:{bg:'#E0E7FF',color:'#3730A3'}, REDACTION_REVIEWER:{bg:'#CCFBF1',color:'#0F766E'}, REDACTION_APPROVER:{bg:'#CCFBF1',color:'#0F766E'}, ATTORNEY_REVIEWER:{bg:'#FEE2E2',color:'#B91C1C'}, FEE_WAIVER_APPROVER:{bg:'#FEF9C3',color:'#854D0E'} };
 
-export default function StaffManagementPage() {
+export default function StaffManagementPage({ embedded }) {
   const [staff, setStaff] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -135,12 +135,14 @@ export default function StaffManagementPage() {
   var lbl = { display:'block', fontSize:'13px', fontWeight:'600', color:'#374151', marginBottom:'5px' };
 
   return (
-    <div style={{maxWidth:'1100px',display:'flex',flexDirection:'column',gap:'20px'}}>
-      <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+    <div style={{maxWidth: embedded?'100%':'1100px',display:'flex',flexDirection:'column',gap:'20px'}}>
+      <div style={{display:'flex',alignItems:'center',justifyContent: embedded?'flex-end':'space-between'}}>
+        {!embedded && (
         <div>
           <h1 style={{fontSize:'22px',fontWeight:'700',margin:'0 0 4px'}}>Staff Management</h1>
           <p style={{color:'#9CA3AF',fontSize:'14px',margin:0}}>{staff.length} staff member{staff.length!==1?'s':''} in the system</p>
         </div>
+        )}
         <button onClick={function(){setShowAdd(!showAdd);setErr('');setSuccess('');}} style={{padding:'10px 18px',background:'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}>
           + Add Staff Member
         </button>
