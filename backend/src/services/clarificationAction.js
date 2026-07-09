@@ -9,14 +9,20 @@
 // Otherwise the action is purely a manual effort-trail entry — no clock change. The effort-trail event
 // is ALWAYS written (spec §5b: its immediate value is the effort trail, independent of tolling).
 //
-// This slice does NOT send the email / generate the postal letter — that outreach mechanics is a
-// separate §5b concern. Here we apply the clock effect and record the event.
+// OUTREACH MECHANICS (§5b, BUILT 2026-07-09): send() now also performs the templated outreach —
+// branches on channel (default email; postal on staff opt-in). email → clarificationNotice body wrapped
+// by emailTemplate + email.js send. mail → printable letter HTML (no digital send), requires a mailing
+// address captured inline at send time (no intake address column yet; that fix is flagged portal-side).
+// The clock effect + effort-trail logging are unchanged and independent of the outreach outcome.
 var db = require('../db');
 var get = db.get, run = db.run;
 var uuidv4 = require('uuid').v4;
 var T = require('./tolling');
 var CP = require('./clarificationPolicy');
 var JP = require('./jurisdictionProfile');
+var email = require('./email');
+var emailTemplate = require('./emailTemplate');
+var CN = require('./clarificationNotice');
 
 var TOLL_REASON = 'clarification_pending'; // the declared toll reason on the default respond clock
 
@@ -46,7 +52,53 @@ async function automationState() {
 }
 
 async function findRequest(idOrNumber) {
-  return await get("SELECT id, request_number, delivery_method, stage FROM requests WHERE id = ? OR request_number = ?", [idOrNumber, idOrNumber]);
+  return await get("SELECT id, request_number, delivery_method, stage, requestor_name, requestor_email, description FROM requests WHERE id = ? OR request_number = ?", [idOrNumber, idOrNumber]);
+}
+
+// Resolve the outreach channel: explicit opts.channel wins; otherwise default to email even when the
+// request's delivery_method is 'mail' (§5b: this screen defaults clarification to email because email is
+// always verified at intake and no mailing address is captured — postal is a deliberate staff opt-in).
+function resolveChannel(reqRow, opts) {
+  var c = (opts && opts.channel && String(opts.channel).toLowerCase()) || '';
+  if (c === 'mail' || c === 'email') return c;
+  return 'email';
+}
+
+// Build the draft the record-search "Contact requestor" UI reviews before sending. Read-only.
+async function preview(idOrNumber, opts) {
+  opts = opts || {};
+  var reqRow = await findRequest(idOrNumber);
+  if (!reqRow) throw new Error('Request not found');
+  var st = await automationState();
+  var ctx = await CN.noticeContext(st.policy);
+  var notice = CN.buildNotice(reqRow, ctx);
+  var channel = resolveChannel(reqRow, opts);
+  return {
+    requestId: reqRow.id, requestNumber: reqRow.request_number,
+    requestorName: reqRow.requestor_name || null, deliveryMethod: reqRow.delivery_method || 'email',
+    channel: channel, to: reqRow.requestor_email || null,
+    addressRequired: channel === 'mail', subject: notice.subject, text: notice.text
+  };
+}
+
+// Perform the channel outreach. Returns a plain result object; never throws for a delivery failure
+// (the effort trail is recorded regardless) — EXCEPT a postal letter with no mailing address, which is
+// a caller error (the address gap) surfaced so the UI can prompt for one.
+async function doOutreach(reqRow, channel, ctx, subject, text, opts) {
+  if (channel === 'mail') {
+    var addr = (opts && opts.mailingAddress && String(opts.mailingAddress).trim()) || '';
+    if (!addr) { var err = new Error('Mailing address required for a postal clarification letter'); err.code = 'ADDRESS_REQUIRED'; throw err; }
+    var letterHtml = CN.renderLetterHtml(reqRow, Object.assign({}, ctx, {
+      requestNumber: reqRow.request_number, mailingAddress: addr, dateStr: opts.dateStr || null
+    }), text);
+    return { channel: 'mail', status: 'to_be_mailed', mailingAddress: addr, subject: subject, letterHtml: letterHtml };
+  }
+  // email
+  var to = (opts && opts.to && String(opts.to).trim()) || reqRow.requestor_email || '';
+  if (!to) return { channel: 'email', sent: false, reason: 'no_email' };
+  var html = emailTemplate.wrap({ agencyName: ctx.agencyName, contentHtml: emailTemplate.textToHtml(text) });
+  var r = await email.send({ to: to, subject: subject, text: text, html: html });
+  return { channel: 'email', sent: !!(r && r.sent), to: to, provider: r && r.provider, reason: r && r.reason };
 }
 
 async function activePrimaryClock(requestId) {
@@ -69,6 +121,15 @@ async function send(idOrNumber, opts) {
   var deliveryMethod = reqRow.delivery_method || 'email'; // spec §5b: default to email (mailing-address gap)
   var clock = { action: 'none', effect: effect };
 
+  // --- Outreach mechanics (§5b): render + send/generate the templated request. A postal letter with no
+  // mailing address throws (ADDRESS_REQUIRED) BEFORE any clock/log side effect, so the UI can prompt. ---
+  var channel = resolveChannel(reqRow, opts);
+  var ctx = await CN.noticeContext(st.policy);
+  var draft = CN.buildNotice(reqRow, ctx);
+  var subject = (opts.subject && String(opts.subject).trim()) || draft.subject; // staff may override
+  var body = (opts.text && String(opts.text).trim()) || draft.text;             // staff may edit
+  var outreach = await doOutreach(reqRow, channel, ctx, subject, body, opts);
+
   if (st.active && plan.onSend === 'toll') {
     try { await T.startClocksForRequest(reqRow.id); } catch (e) {} // idempotent — ensure a clock exists
     var primary = await activePrimaryClock(reqRow.id);
@@ -85,7 +146,10 @@ async function send(idOrNumber, opts) {
     clock = { action: 'none', effect: effect, reason: 'automation_inactive_manual' };
   }
 
-  var notes = 'Clarification requested via ' + deliveryMethod
+  var outreachNote = outreach.channel === 'mail'
+    ? 'postal letter generated (to be mailed to ' + outreach.mailingAddress.replace(/\n+/g, ', ') + ')'
+    : (outreach.sent ? 'emailed to ' + outreach.to : 'email not sent (' + (outreach.reason || 'unknown') + ')');
+  var notes = 'Clarification requested — ' + outreachNote
     + '; clock effect: ' + effect + (st.active ? '' : ' (manual — automation off)')
     + (clock.action === 'toll' && clock.tolled ? '; response clock tolled' : '')
     + (opts.vague ? '; flagged vague' : '')
@@ -93,7 +157,7 @@ async function send(idOrNumber, opts) {
   await logHistory(reqRow.id, opts, 'CLARIFICATION_REQUESTED', notes);
 
   return { requestId: reqRow.id, requestNumber: reqRow.request_number, deliveryMethod: deliveryMethod,
-    automationActive: st.active, effect: effect, vague: !!opts.vague, clock: clock };
+    automationActive: st.active, effect: effect, vague: !!opts.vague, clock: clock, outreach: outreach };
 }
 
 // Requestor replied → apply the reply-side clock effect (resume or restart), always log the trail.
@@ -134,4 +198,4 @@ async function resolve(idOrNumber, opts) {
     automationActive: st.active, effect: effect, clock: clock };
 }
 
-module.exports = { send: send, resolve: resolve, effectPlan: effectPlan, automationState: automationState };
+module.exports = { send: send, resolve: resolve, preview: preview, effectPlan: effectPlan, automationState: automationState };

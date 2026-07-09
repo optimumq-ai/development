@@ -339,13 +339,26 @@ router.post('/:id/legal-escalate', requireAuth, async function(req, res) {
 // clarification policy is enabled AND its jurisdiction-profile section is attested (safe-manual
 // otherwise). Always records the effort-trail event. See SPEC_record_search_task_screen.md §5b and
 // CLARIFICATION_POLICY_SURVEY.md §8 (slice 2). Reply side: POST .../clarification/resolve.
+// Draft preview for the "Contact requestor" UI: the templated body + channel/address hints, no side effects.
+router.get('/:id/clarification/preview', requireAuth, async function(req, res) {
+  try {
+    var CA = require('../services/clarificationAction');
+    var out = await CA.preview(req.params.id, { channel: req.query.channel });
+    res.json(out);
+  } catch (e) { res.status(e.message === 'Request not found' ? 404 : 500).json({ error: e.message }); }
+});
 router.post('/:id/clarification', requireAuth, async function(req, res) {
   try {
     var CA = require('../services/clarificationAction');
     var b = req.body || {};
-    var out = await CA.send(req.params.id, { vague: !!b.vague, note: b.note, actorId: req.user && req.user.sub, actorName: (req.user && req.user.name) || 'Staff' });
+    var out = await CA.send(req.params.id, { vague: !!b.vague, note: b.note, channel: b.channel,
+      to: b.to, mailingAddress: b.mailingAddress, subject: b.subject, text: b.text,
+      actorId: req.user && req.user.sub, actorName: (req.user && req.user.name) || 'Staff' });
     res.json(out);
-  } catch (e) { res.status(e.message === 'Request not found' ? 404 : 500).json({ error: e.message }); }
+  } catch (e) {
+    if (e && e.code === 'ADDRESS_REQUIRED') return res.status(400).json({ error: e.message, code: 'ADDRESS_REQUIRED' });
+    res.status(e.message === 'Request not found' ? 404 : 500).json({ error: e.message });
+  }
 });
 router.post('/:id/clarification/resolve', requireAuth, async function(req, res) {
   try {

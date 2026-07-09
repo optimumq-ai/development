@@ -260,3 +260,44 @@ printable postal letter on `delivery_method` + the intake mailing-address gap, �
 the 7 fields and the record-search "Contact requestor" **button** (both wait on a design nod per the UI rule);
 **Michigan clock-model conflict** (survey §5.1); per-jurisdiction storage + precedence (today global in
 `system_config`, mirrors `deadline_rules`).
+
+## 2026-07-09 (i) — Clarification outreach mechanics: email + printable postal letter (BUILT)
+
+**Slice:** The OUTREACH half of the record-search "Contact requestor" action (SPEC_record_search_task_screen.md
+§5b). Slice 2 wired the *clock effect* + effort trail but explicitly did NOT send anything. This slice adds the
+templated outreach that branches on `delivery_method`. Backend only (the button waits on the record-search
+screen). Continues on `spec/task-screens`.
+
+**Built (backend):**
+- `services/clarificationNotice.js` `[NEW]` — deterministic, plain-language builder (mirrors `feeNotice.js`).
+  `buildNotice(reqRow, ctx)` → `{subject, text}` (greets requestor, cites request number, restates the on-file
+  description, asks for specifics, adds a response-window sentence when `clarification_grace_days` is set,
+  agency sign-off). `renderLetterHtml()` → print-friendly postal letter (letterhead, date, recipient +
+  mailing-address block, `Re:` line, body — NO digital send; staff Ctrl+P). `noticeContext(policy)` pulls
+  agency_name/contact_email/contact_phone/grace from `system_config`. No PDF lib (printable HTML by design).
+- `services/clarificationAction.js` — `send()` now performs outreach after building the draft: **email** wraps
+  the body via `emailTemplate` and sends through `email.js` (`{sent, provider}`); **mail** renders the letter,
+  marks `to_be_mailed`. Channel defaults to **email** even when `delivery_method='mail'` (§5b); postal is a
+  staff opt-in that **requires an inline `mailingAddress`** — else throws `ADDRESS_REQUIRED` BEFORE any clock/
+  log side effect (the address-gap enforcement; address recorded in the note, NOT persisted — no column).
+  New read-only `preview()`. Clock effect + always-log unchanged; the note now records channel + outcome.
+- `routes/requests.js` — `GET /api/requests/:id/clarification/preview` (draft for the UI) + `POST …/clarification`
+  now passes through `channel/to/mailingAddress/subject/text` and maps `ADDRESS_REQUIRED` → HTTP 400.
+
+**Evidence (live harness on real request DEMO-2026-5069, then cleaned up):** (1) preview returned the full
+draft (channel=email, addressRequired=false); (2) `mail` with no address → threw `ADDRESS_REQUIRED`; (3) `mail`
++ address → 2177-char printable letter w/ address block + `Re:` line, status `to_be_mailed`, no send; (4)
+`email` → **sent via Resend** (id returned, provider=resend) to the requestor address; (5) both
+`CLARIFICATION_REQUESTED` effort-trail rows written with channel + outcome in the note; (6) harness rows
+deleted, count restored to baseline. Policy left OFF/safe-manual (clock.action=none, automationActive=false
+throughout — outreach is independent of the clock gate). API restarted (kill pid → root PM2 respawn, new pid
+197217, health 200); `GET …/preview` and `POST …/clarification` both return **401** unauth (mounted +
+auth-gated). Spec §5b updated same-commit (outreach block → `[BUILT]`; address gap re-scoped to intake-only).
+
+**Next (clarification workflow, each its own slice):** (a) **auto-close** `clarification-timeout` node using
+`clarification_grace_days` / `abandonment_grace_days` (the last backend piece); (b) **intake mailing-address
+capture** (portal-side) so postal clarification doesn't need an inline address; (c) **UI editor form** for the
+7 policy fields + the record-search "Contact requestor" **button** (design nod pending, UI rule); (d) Michigan
+clock-model conflict (survey §5.1); (e) per-jurisdiction policy storage + precedence (today global in
+`system_config`). Note: the email path did a real Resend send to an `example.com` demo address (undeliverable,
+reserved) — this is the same live-verify pattern as the fee notice; no real person was contacted.
