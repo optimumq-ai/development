@@ -40,13 +40,24 @@ function lit(vec) { return '[' + vec.join(',') + ']'; }
 // NEW MODEL (v3): eligibility = active + on the team + their per-person task-type subset (user_task_types)
 // includes this task type. The `roleName` arg may be a task type (new callers) or a legacy permission-role
 // name (existing callers, which pass task.role_required); we translate the latter via ROLE_TO_TYPE.
-// Cutover is per task type and safe: we use the new model for a task type only once ANY user has been
-// assigned that type; until then we fall back to the legacy permission-role query so routing never regresses.
+// Cutover is safe and incremental — scoped PER (team, task type): a team uses the new model for a task
+// type only once someone ON THAT TEAM has been assigned it; every other team stays on the legacy
+// permission-role query until it is migrated. So assigning one team never affects another's routing.
+// (Team-agnostic tasks — teamId null, e.g. fee_waiver — use a global guard on the task type.)
 async function eligibleUsers(teamId, roleName) {
   if (!roleName) return [];
   var taskType = ROUTABLE_TASK_TYPES.indexOf(roleName) !== -1 ? roleName : ROLE_TO_TYPE[roleName];
   if (taskType) {
-    var seeded = await get("SELECT 1 AS x FROM user_task_types WHERE task_type = ? LIMIT 1", [taskType]);
+    var seeded;
+    if (teamId) {
+      seeded = await get(
+        "SELECT 1 AS x FROM user_task_types utt JOIN users u ON u.id = utt.user_id " +
+        "WHERE utt.task_type = ? AND u.department_id = ? LIMIT 1",
+        [taskType, teamId]
+      );
+    } else {
+      seeded = await get("SELECT 1 AS x FROM user_task_types WHERE task_type = ? LIMIT 1", [taskType]);
+    }
     if (seeded) {
       var p = [taskType];
       var dc = '';
