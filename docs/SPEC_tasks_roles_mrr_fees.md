@@ -36,7 +36,7 @@ Single-record lifecycle (each = one owning role = one My-Tasks box):
 - **Redaction** — role **Redaction Clerk** [code role REDACTION_WORKER]. Task `[BUILT]`, screen `[NOT BUILT]`.
 - **Legal Redaction** — role Legal Redaction [NEW]. Trigger: record type `sensitive=true` (flag to verify). `[NOT BUILT]`
 - **Legal Review** — role Legal Review [code role ATTORNEY_REVIEWER exists, task not wired]. Catch-all legal counsel. `[NOT BUILT]`
-- **Fee Waiver / Commercial Rate Approval** — role **Finance** (see §8). Trigger: `fee_waiver_requested` OR `purpose='commercial'`. `[PARTIAL — see §9-§10]`
+- **Fee Waiver / Commercial Rate Approval** — role **Finance** (see §8); INTERIM code role `FEE_AUTHORITY` pending the Finance rename. Trigger: `fee_waiver_requested`. Task auto-spawned at intake (`onIntake`), team-agnostic (`team_id=NULL`) so it pools to every `FEE_AUTHORITY` holder; resolved by `POST /:id/fee-waiver-decision`, which now authorizes `FEE_AUTHORITY` (perm) + `SYSTEM_ADMIN/DIRECTOR/SUPERVISOR` (function) and marks the task `done`. `[BUILT 2026-07-09 — fee_waiver task + routing + resolution. Commercial-rate (`purpose='commercial'`) trigger still NOT wired; see §9-§10]`
 
 MRR-specific tasks (role-agnostic; Request Manager assigns any best-fit user): **Multi-Record Request Estimate**, **Multi-Record Search**, **MRR Processing** (parent management, Open Records Request Manager). All `[NOT BUILT]`.
 
@@ -50,7 +50,7 @@ MRR tasks are role-agnostic (no MRR-specific roles).
 ## 9. Fee-waiver processing
 **Gate position:** FIRST step in processing (based on requestor category, pre-effort). If granted → no estimate-gathering. Applies to all requests.
 **Built:** grant/deny endpoint; denial requires a reason from a reusable statutory-reason library (`decision_reasons`/`fee_waiver_denial`); denial sends a mandatory notice, then the request continues as normal (not closed); granted → fee computed then marked **waived** (notice "waived", balance $0). `[BUILT]`
-**Gaps:** NO auto-routing of a waiver request to the approver / no fee-waiver task on My Tasks `[NOT BUILT]`. NO "denial / response-window-active" status or requestor-reply flow `[NOT BUILT — compare against jurisdiction law before speccing]`.
+**Gaps:** ~~NO auto-routing of a waiver request to the approver / no fee-waiver task on My Tasks~~ **BUILT 2026-07-09** (interim `FEE_AUTHORITY` routing; §5). NO "denial / response-window-active" status or requestor-reply flow `[NOT BUILT — compare against jurisdiction law before speccing]`.
 
 ## 10. Fee-intake capture (portal Phase 4) — default-forward `[NOT BUILT]`
 Replaces the current yes/no waiver question. **Standard rates are the prominent default** ("Continue with standard rates"); below an "only if one applies" divider, two optional opt-ins: **Request a fee waiver** (desc) and **I'm a commercial requester** (desc, "subject to review"); plus "you can also just type to continue."

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth } = require('../middleware/auth');
 const email = require('../services/email');
 const { all, get, run } = require('../db');
 const { v4: uuidv4 } = require('uuid');
@@ -258,16 +258,25 @@ router.post('/:id/ag-ruling', requireAuth, async function(req, res) {
   return res.json({ outcome: outcome, stage: nextStage, agSatisfied: !!ag, resumed: !!primary });
 });
 
-router.post('/:id/fee-waiver-decision', requireAuth, requireRole('SYSTEM_ADMIN','DIRECTOR','SUPERVISOR','FEE_WAIVER_APPROVER'), async function(req, res) {
+router.post('/:id/fee-waiver-decision', requireAuth, async function(req, res) {
+  // Authorize: managers/admins by function role, OR the FEE_AUTHORITY permission role (the same role the
+  // fee-waiver task routes to — so whoever receives the task can act on it). Interim until the Finance-role
+  // reconciliation (D4 §8); the old requireRole('...FEE_WAIVER_APPROVER') gated a role that does not exist.
+  var fRoles = req.user.roles || [], perms = req.user.perms || [];
+  var canDecide = ['SYSTEM_ADMIN','DIRECTOR','SUPERVISOR'].some(function(r){ return fRoles.indexOf(r) !== -1; }) || perms.indexOf('FEE_AUTHORITY') !== -1;
+  if (!canDecide) return res.status(403).json({ error: 'Insufficient role' });
   var b = req.body || {};
   var decision = b.decision;
   if (decision !== 'grant' && decision !== 'deny') return res.status(400).json({ error: 'decision must be grant or deny' });
   var request = await get('SELECT * FROM requests WHERE id = ? OR request_number = ?', [req.params.id, req.params.id]);
   if (!request) return res.status(404).json({ error: 'Request not found' });
   var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'system';
+  // Resolve the approval task (spawned at intake) whichever way the decision lands.
+  var closeWaiverTask = "UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE request_id = ? AND type = 'fee_waiver' AND status IN ('open','assigned','in_progress')";
 
   if (decision === 'grant') {
     await run("UPDATE requests SET fee_waiver_status='granted', fee_waiver_decided_by=?, fee_waiver_decided_at=datetime('now'), updated_at=datetime('now') WHERE id=?", [actor, request.id]);
+    await run(closeWaiverTask, [request.id]);
     await logHistory(request.id, req.user.sub, actor, 'FEE_WAIVER_GRANTED', 'Fee waiver granted');
     return res.json({ decision: 'granted' });
   }
@@ -285,6 +294,7 @@ router.post('/:id/fee-waiver-decision', requireAuth, requireRole('SYSTEM_ADMIN',
   if (!reasonText) return res.status(400).json({ error: 'A denial reason is required' });
 
   await run("UPDATE requests SET fee_waiver_status='denied', fee_waiver_reason=?, fee_waiver_decided_by=?, fee_waiver_decided_at=datetime('now'), updated_at=datetime('now') WHERE id=?", [reasonText, actor, request.id]);
+  await run(closeWaiverTask, [request.id]);
   await logHistory(request.id, req.user.sub, actor, 'FEE_WAIVER_DENIED', 'Denied: ' + reasonText);
 
   var mail = { sent: false };

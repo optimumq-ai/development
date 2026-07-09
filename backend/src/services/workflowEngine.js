@@ -122,6 +122,21 @@ async function onIntake(requestId, matcherResult){
     } catch (e) { console.error('[workflowEngine] estimate task spawn failed:', e && e.message); }
   }
 
+  // Fee-waiver approval: a requested waiver needs a human financial-authority decision. Spawn a
+  // cross-cutting approval task (team-agnostic, role FEE_AUTHORITY) onto every approver's list. Independent
+  // of the record-type routing above; the estimate still proceeds (a granted waiver zeroes fees at notice
+  // time). Idempotent, and skipped once a decision has been recorded. Resolved by /fee-waiver-decision.
+  if (request.fee_waiver_requested && !request.fee_waiver_status) {
+    try {
+      var trw = require('./taskRouting');
+      var existingW = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'fee_waiver' AND status IN ('open','assigned','in_progress')", [requestId]);
+      if (!existingW) {
+        var wtask = await trw.createTask({ requestId: requestId, type: 'fee_waiver', title: 'Decide fee-waiver request', teamId: null, createdBy: 'workflow' });
+        await trw.autoRouteOrPool(wtask.id, request.description, {});
+      }
+    } catch (e) { console.error('[workflowEngine] fee-waiver task spawn failed:', e && e.message); }
+  }
+
   // Statutory clocks: create the jurisdiction intake clocks (idempotent) + sync primary clock -> deadline_date.
   try { await require('./tolling').startClocksForRequest(requestId); } catch (e) { console.error('[workflowEngine] clock start failed:', e && e.message); }
 

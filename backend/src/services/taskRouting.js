@@ -14,7 +14,10 @@ var uuidv4 = require('uuid').v4;
 var TASK_ROLES = {
   estimate: 'FEE_MANAGER',
   record_search: 'SEARCH_AND_TRIAGE',
-  redaction: 'REDACTION_WORKER'
+  redaction: 'REDACTION_WORKER',
+  // Fee-waiver / commercial-rate approval. INTERIM target: FEE_AUTHORITY (the existing financial-authority
+  // permission role) pending the FEE_WAIVER_APPROVER->Finance rename + catalog reconciliation (D4 §8, item 9).
+  fee_waiver: 'FEE_AUTHORITY'
 };
 
 // Smart Routing auto-assigns to the top match only when it is both decent (>= FLOOR) AND clearly ahead of
