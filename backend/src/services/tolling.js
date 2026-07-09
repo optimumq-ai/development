@@ -31,7 +31,13 @@ function computeStatus(clock, tolls, rules) {
   (tolls || []).forEach(function (t) {
     var until = t.tolled_until || now;
     if (!t.tolled_until) currentlyTolled = true;
-    tolled += calc.basisDaysBetween(t.tolled_from, until, basis, H, W);
+    // Clamp the toll interval to the clock's current epoch: toll time before started_at (e.g. tolls
+    // left over from before a restart()) does not count. Normal tolls occur after start, so this is a
+    // no-op except after a clock restart, where started_at is reset to the reply moment.
+    var from = t.tolled_from;
+    if (from < start) from = start;
+    if (until < from) until = from;
+    tolled += calc.basisDaysBetween(from, until, basis, H, W);
   });
   var consumed = Math.max(0, elapsed - tolled);
   var remaining = dur - consumed;
@@ -119,6 +125,19 @@ async function resume(clockId) {
   return { resumed: true };
 }
 
+// Restart the clock's epoch: close any open toll and reset started_at to now, so the clock gets a
+// clean FULL duration from this moment. Prior toll rows are kept as audit but no longer count
+// (computeStatus clamps toll intervals to >= started_at). Used for the clarification clock effects
+// 'toll_and_restart' and 'start_gate' when the requestor replies.
+async function restart(clockId) {
+  var clk = await get("SELECT * FROM request_clocks WHERE id = ?", [clockId]);
+  if (!clk) throw new Error('Clock not found');
+  await run("UPDATE clock_tolls SET tolled_until = ? WHERE clock_id = ? AND tolled_until IS NULL", [nowStr(), clockId]);
+  await run("UPDATE request_clocks SET started_at = ?, status = 'running', updated_at = ? WHERE id = ?", [nowStr(), nowStr(), clockId]);
+  await writebackDeadline(clk.request_id);
+  return { restarted: true };
+}
+
 async function satisfy(clockId) {
   await run("UPDATE request_clocks SET status = 'satisfied', satisfied_at = ?, updated_at = ? WHERE id = ?", [nowStr(), nowStr(), clockId]);
   return { satisfied: true };
@@ -152,6 +171,6 @@ async function overdue() {
 
 module.exports = {
   loadRules: loadRules, computeStatus: computeStatus, startClocksForRequest: startClocksForRequest,
-  startClock: startClock, toll: toll, resume: resume, satisfy: satisfy,
+  startClock: startClock, toll: toll, resume: resume, restart: restart, satisfy: satisfy,
   statusForRequest: statusForRequest, writebackDeadline: writebackDeadline, overdue: overdue
 };

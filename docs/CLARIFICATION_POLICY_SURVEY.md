@@ -355,6 +355,21 @@ quantitative case for a per-jurisdiction field rather than a hardcoded behavior.
 2. **Trigger** — wire the record-search "Contact requestor" action to the tolling engine via
    `clarification_clock_effect`; implement the six behaviors incl. restart + start-gate. Gate on
    `clarificationPolicy.automationActive(policy, attested)` (enabled AND section attested).
+   — **BUILT 2026-07-09 (backend).** `services/clarificationAction.js` (`send()` / `resolve()`) maps the
+   6 effects onto engine actions — `no_fixed_clock`/`runs_no_stop` → no pause; `toll_pause_resume` /
+   `operational_hold` → toll on send, resume on reply; `toll_and_restart` / `start_gate` → toll on send,
+   **restart** on reply. Fires the previously-unused `clarification_pending` toll reason. Added a `restart()`
+   primitive to `tolling.js` (resets the clock epoch: closes open tolls, resets `started_at` to now; prior
+   toll rows retained as audit but excluded via a new `computeStatus` clamp that ignores toll time before
+   `started_at`) so a restarted clock gets a clean full duration with no due-date inflation. Endpoints:
+   `POST /api/requests/:id/clarification` and `.../clarification/resolve` (`requireAuth`) in `routes/requests.js`.
+   The effort-trail event (`CLARIFICATION_REQUESTED` / `CLARIFICATION_RECEIVED`, with the effect + vague flag)
+   is **always** written, independent of automation; the clock is touched only when `automationActive`.
+   Verified end-to-end (service harness on a real request): OFF path takes no clock action; all six effects
+   produce the expected toll/resume/restart transitions; restarted clock shows consumed 0 / tolled 0 /
+   remaining = full duration; system reset to OFF/safe. HTTP: both endpoints mounted (401 without auth).
+   **Outreach mechanics** (email template vs printable postal letter, §5b) and the **auto-close /
+   `clarification-timeout`** node remain separate follow-ups; **UI button** waits on the record-search screen.
 3. **Extractor** — point a config-freshness extractor at an uploaded local policy doc → drafts the §2 fields
    with citations/confidence → existing review/attest UI. (Adapter `extract()` already stubbed via
    `genericExtract`.)

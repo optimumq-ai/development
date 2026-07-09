@@ -334,5 +334,27 @@ router.post('/:id/legal-escalate', requireAuth, async function(req, res) {
   res.json({ legalFlag: true, alreadyFlagged: false, converted: converted, task: newTask });
 });
 
+// Contact requestor for clarification (record-search task action). Applies the jurisdiction's
+// clarification_clock_effect to the response clock via the tolling engine — but ONLY when the
+// clarification policy is enabled AND its jurisdiction-profile section is attested (safe-manual
+// otherwise). Always records the effort-trail event. See SPEC_record_search_task_screen.md §5b and
+// CLARIFICATION_POLICY_SURVEY.md §8 (slice 2). Reply side: POST .../clarification/resolve.
+router.post('/:id/clarification', requireAuth, async function(req, res) {
+  try {
+    var CA = require('../services/clarificationAction');
+    var b = req.body || {};
+    var out = await CA.send(req.params.id, { vague: !!b.vague, note: b.note, actorId: req.user && req.user.sub, actorName: (req.user && req.user.name) || 'Staff' });
+    res.json(out);
+  } catch (e) { res.status(e.message === 'Request not found' ? 404 : 500).json({ error: e.message }); }
+});
+router.post('/:id/clarification/resolve', requireAuth, async function(req, res) {
+  try {
+    var CA = require('../services/clarificationAction');
+    var b = req.body || {};
+    var out = await CA.resolve(req.params.id, { note: b.note, actorId: req.user && req.user.sub, actorName: (req.user && req.user.name) || 'Staff' });
+    res.json(out);
+  } catch (e) { res.status(e.message === 'Request not found' ? 404 : 500).json({ error: e.message }); }
+});
+
 module.exports = router;
 

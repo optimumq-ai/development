@@ -177,3 +177,46 @@ daemon). Restart by `kill <server.js pid>` — the root daemon auto-respawns wit
 - Survey §5.2 open decisions: single vs per-classification grace days; keep `operational_hold` distinct; state→city precedence.
 - Per-jurisdiction storage: policy is stored GLOBALLY in `system_config` today (mirrors `deadline_rules`);
   per-jid + precedence stack is future Jurisdiction-Profile work.
+
+## 2026-07-09 (g) — Clarification policy slice 2: the tolling TRIGGER (BUILT)
+
+**Slice:** Wire the record-search "Contact requestor" clarification action to the tolling engine, honoring
+all six `clarification_clock_effect` behaviors, gated on `automationActive`. This fires the declared-but-
+unused `clarification_pending` toll for the first time. Backend only (the UI button waits on the
+record-search screen). Continues on `spec/task-screens` where slices 0–1 live.
+
+**Built (backend):**
+- `services/clarificationAction.js` `[NEW]` — `send()` / `resolve()`. Maps the 6 effects → engine actions:
+  `no_fixed_clock` / `runs_no_stop` → no pause; `toll_pause_resume` / `operational_hold` → toll on send,
+  resume on reply; `toll_and_restart` / `start_gate` → toll on send, **restart** on reply. Always writes the
+  effort-trail event (`CLARIFICATION_REQUESTED` / `CLARIFICATION_RECEIVED`, incl. vague flag); touches the
+  clock ONLY when `clarificationPolicy.automationActive(policy, attested)` (policy enabled AND jurisdiction
+  `clarification` section attested). Effect is read from the live policy at both send and reply (stateless).
+- `services/tolling.js` — added `restart(clockId)`: closes open tolls, resets `started_at` to now → clean
+  full duration. Plus a `computeStatus` epoch clamp (ignore toll time before `started_at`) so prior toll
+  rows are **retained as audit** but don't inflate the due date. Clamp is a no-op for normal (post-start)
+  tolls, so existing clocks are unaffected.
+- `routes/requests.js` — `POST /api/requests/:id/clarification` and `.../clarification/resolve` (`requireAuth`).
+
+**Evidence (verified):** service harness on a real intake request drove all six effects end-to-end —
+OFF path (enabled=false) took no clock action (`automation_inactive_manual`); the four pausing effects tolled
+on send; resume vs restart applied correctly on reply; a restarted clock read consumed 0 / tolled 0 /
+remaining = full duration (4 toll rows retained as audit); 13 CLARIFICATION history events written with the
+right effect + vague flag. System reset to enabled=false / un-attested / safe. Test requests cleaned up.
+API restarted (kill pid → root PM2 respawn, new pid 150757, health 200); both new endpoints return **401**
+(mounted + auth-gated), matching the control route. Specs updated same-commit (survey §8.2, spec §5b → BUILT).
+
+**Next (slice 3 + siblings):** (a) config-freshness **extractor** → drafts the 7 fields from an uploaded
+policy doc → review/attest; (b) **outreach mechanics** (§5b) — email template vs printable postal letter on
+`delivery_method` (+ the intake mailing-address gap); (c) **auto-close** `clarification-timeout` node using
+`clarification_grace_days` / `abandonment_grace_days`; (d) **UI editor form** for the 7 fields and the
+"Contact requestor" **button** (both wait on design nods per the UI rule); (e) Michigan clock-model conflict
+(survey §5.1). Note: `/api/requests/public` (server.js direct handler) returned a 500 during testing —
+pre-existing, unrelated to this slice, worth a look separately.
+
+**Infra note (this session):** droplet had **no swap** on 3.8 GB RAM → likely OOM-killed the prior session
+(the "scrambled text then vanished" symptom; not confirmable — dmesg ring buffer empty, but journald is now
+persistent so a recurrence will be logged). Added a persistent 4 GB swapfile + `vm.swappiness=10`
+(`/home/optimumq/harden-swap.sh`). Recommended going forward: run Claude Code inside **tmux** (installed,
+3.2a) so an SSH drop / terminal scramble can't lose the session. Optional `disable-desktop.sh` reclaims the
+Xorg/sddm RAM (headless box).
