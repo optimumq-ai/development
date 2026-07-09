@@ -134,3 +134,46 @@ Newest entries at the bottom. One short block per session: what changed, evidenc
 - Residual research TODOs in §1A: what `public-ready` "partial" already does; build the known-clean registry (skip gate); re-redaction dedup vs existing released job/`fulfilled_record` (none found); whether the canvas already auto-matches.
 
 **Both specs (d + e) are PAUSED awaiting Kevin's markup, then branch off `main` and commit together.** No code changed; `main` still at `d8d6b36`.
+
+## 2026-07-09 (f) — Clarification/vague-request policy: research digest + config substrate (slice 1)
+
+**Slice:** Kevin supplied two AI research passes (vague/insufficient-description rules) → distilled to a digest,
+then built the config SUBSTRATE (slice 1 of 3) so the vagueness-clarification workflow has a slot to hold
+per-jurisdiction rules. Design direction agreed live: AI-drafts / city-reviews / attest / or turn-off / manual
+— which is already the ratified AUTO_CONFIG trust model; this just adds the missing substrate.
+
+**Produced (docs):**
+- `docs/CLARIFICATION_POLICY_SURVEY.md` `[NEW]` — 16-jurisdiction survey, the 7-field `clarification_policy`
+  substrate (crux: 6-value `clarification_clock_effect` enum), engine-action mapping, matrices, cross-doc
+  discrepancies (MICHIGAN clock model is a flagged conflict), open decisions, and the 3-slice build order.
+- `imports/research/{vague_description_rules,claude_vague_description_rules}.pdf` — the two source PDFs (tracked).
+- `SPEC_record_search_task_screen.md` §5b — cross-reference: the tolling research is now GATHERED.
+- Committed: `73ea0a6` (digest) then `4d729a3` (slice-1 code, which also marked §8 slice 1 BUILT).
+
+**Built (backend, commit 4d729a3):**
+- `services/clarificationPolicy.js` — owns schema/defaults(all off)/`enabled` master switch/validation/
+  read+write to `system_config 'clarification_policy'`; `automationActive(policy,attested)` gates slice 2.
+- `configExtractors.js` `clarification` adapter (applyMode live) → writes ride `effectiveConfig` (history +
+  profile sync); slice-3 extractor pre-wired via `genericExtract`.
+- `jurisdictionProfile.js` `clarification` section → readiness + attestation gate (off/un-attested = safe/manual).
+- `routes/clarificationPolicy.js` + server mount → `GET/POST /api/clarification-policy` (SYSTEM_ADMIN|DIRECTOR).
+
+**Evidence (verified live, API pid 134851 on new code):** GET → defaults (enabled:false, all off, 7 fields);
+POST bad enum → HTTP 400 with allowed list; POST valid (toll_and_restart, grace "30"→30, provenance) →
+persisted; jurisdiction profile `clarification` section not_configured → configured, version 0→1 (attestation
+re-arm), source manual-edit; `config_history` clarification row written; reset {enabled:false} → back to safe
+default (version→2). System left OFF/safe-manual.
+
+**Note on restart:** `pm2 restart optimumq-api` fails for the `optimumq` user (process runs under the ROOT PM2
+daemon). Restart by `kill <server.js pid>` — the root daemon auto-respawns with new code (confirmed).
+
+**Open items / next slices:**
+- **Slice 2 (trigger):** wire the record-search "Contact requestor" button to the tolling engine via
+  `clarification_clock_effect` (fires the declared-but-unused `clarification_pending` toll); implement all six
+  behaviors incl. restart + start-gate; gate on `automationActive`.
+- **Slice 3 (extractor):** point a config-freshness source doc at the `clarification` adapter → review/attest UI.
+- **UI editor form** for the 7 fields — DEFERRED pending a design nod (UI rule); backend driven via API today.
+- **Michigan clock-model conflict** (survey §5.1) — resolve before MI ships.
+- Survey §5.2 open decisions: single vs per-classification grace days; keep `operational_hold` distinct; state→city precedence.
+- Per-jurisdiction storage: policy is stored GLOBALLY in `system_config` today (mirrors `deadline_rules`);
+  per-jid + precedence stack is future Jurisdiction-Profile work.
