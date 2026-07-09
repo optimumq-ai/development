@@ -109,6 +109,8 @@ Once a request is **routed to a department**, the next step is **assignment of a
 
 **Compatibility concern:** the new user-type / per-person task-subset model must preserve the "eligible staff for this task type on this team" semantics that Smart Routing depends on (`eligibleUsers(team, taskType)`). Flag this as a spot the redesign could break — verify before build.
 
+**Decided 2026-07-09:** the "smart routing" text box and the per-person **specialization text** that the matcher embeds (`user_spec` embeddings) are **one and the same field** — a single free-form text per staff member, not two. `eligibleUsers` is rewritten to resolve against the task-subset model ("on this team **and** their subset includes this task type") rather than the old `user_permission_roles` join.
+
 ## 9. What this implies (scope — not free)
 
 - **Data migration:** map existing `function_roles` + `permission_roles` assignments onto the new user types. The interim fee-waiver routing (`FEE_AUTHORITY`, built 2026-07-09) becomes **ORO Finance + "Fee-Waiver Approval" task type**. *Kevin is OK skipping automated migration of existing test data* — most current requests are test entries whose descriptions won't match real records; he will recreate requests manually. So v1 migration effort can be minimal.
@@ -122,13 +124,13 @@ Once a request is **routed to a department**, the next step is **assignment of a
 2. **"Finance" vs "ORO Associate"** — **Resolved:** split out. New **ORO Finance** user type owns financial approvals (fee waiver, commercial rate, and the `objections.js` approvals). Removed from ORO Associate.
 3. **Who assigns a person's task subset** — **Resolved:** Sys Admin and ORO Manager **globally**; Fulfillment Manager **for their own team**.
 4. **Commercial-rate approval** — **Resolved:** same path/approver as fee waiver (different trigger `purpose='commercial'`); the approver is **ORO Finance**.
-5. **Task-type master list** — **Still open:** a complete canonical enumeration (routable + capabilities) is still to be written before build.
+5. **Task-type master list** — **Drafted 2026-07-09** in `MASTER_task_types_permission_groups.md` (canonical enumeration: routable task types, MRR tasks, non-routable capabilities, permission groups, and the user-type matrix). Pending review; a few items still open there.
 
 ## 11. Next steps
 
 1. ~~Kevin reviews / edits this doc~~ — done; incorporated into v3.
 2. ~~Resolve §10 open questions~~ — done (item 5 remains).
-3. Write the canonical task-type + permission-group master list (§10.5).
+3. ~~Write the canonical task-type + permission-group master list~~ — drafted in `MASTER_task_types_permission_groups.md`; review + close its open items.
 4. Scope the Departments/Teams/Staff data model + consolidated parent UI (§7).
 5. Audit existing notifications (§9) and Smart Routing (§8) for compatibility.
 6. Only then: data-model + (light) migration + UI plan, ratify into `SPEC_tasks_roles_mrr_fees.md` §8 and `ARCHITECTURE.md`, and build.
