@@ -1,7 +1,7 @@
-# DESIGN — User-Type Role Model (v2 proposal)
+# DESIGN — User-Type Role Model (v3 proposal)
 
 **Status:** DRAFT / proposal, pending ratification. Not yet a contract. If adopted, this replaces the current two-catalog role setup and updates `SPEC_tasks_roles_mrr_fees.md` §8 + the `ARCHITECTURE.md` "one task-routing role catalog" invariant.
-**Authors:** Kevin (concept), Claude (structure/analysis). Started 2026-07-09.
+**Authors:** Kevin (concept), Claude (structure/analysis). Started 2026-07-09; v3 incorporates Kevin's markup (§10 answers resolved, ORO Finance added, Departments/Teams and Smart Routing sections added) 2026-07-09.
 
 ---
 
@@ -31,7 +31,7 @@ A user is assigned one (or more) **user types** describing the kind of work they
 Each answers a different question, so nothing can fall out of sync. Routing **and** the authority to act both derive from the same assignment — that is the reconciliation.
 
 ### 3a. Two flavors of "task type"
-- **Routable work** — estimate, record search, redaction, fee-waiver approval, legal review, MRR tasks. These flow through the workflow engine and land on My-Tasks lists.
+- **Routable work** — estimate, record search, redaction, fee-waiver approval, commercial-rate approval, legal review, MRR tasks. These flow through the workflow engine and land on My-Tasks lists. (Financial approvals — fee waiver and commercial rate — route to **ORO Finance**; see §4.)
 - **Non-routable capabilities** — view dashboards, run reports. Never routed; just gate UI. Same picker, different behavior. (Covers City Management, and the reporting side of every type.)
 
 ### 3b. Per-person subsetting
@@ -44,6 +44,8 @@ A person may hold more than one user type. This handles small cities (one person
 
 Office-level types are **team-agnostic** (cross-cutting). Team-level types are **per fulfillment team** (prefixed with the team name). "Authority" and "Permissions" columns are properties of the type; "Task menu" is the set a person of this type can be assigned a subset of.
 
+> Note on naming: "Associate" / "Finance" etc. are **model terms chosen to keep the model intuitive**, not literal job titles.
+
 ### Office-level
 
 | # | User type | Task menu | Authority | Permission groups |
@@ -54,15 +56,16 @@ Office-level types are **team-agnostic** (cross-cutting). Team-level types are *
 | 4 | **ORO Supervisor** | *(oversight; may act)* | operational — reassign/re-route, escalate | Reporting |
 | 5 | **ORO Senior Legal** (city attorney) | Legal Review, (Legal Redaction) | legal decisions (AG, exemptions) | **Legal Rules (OWNER)**, Reporting |
 | 6 | **ORO Legal Associate** | Legal Redaction (advanced), Legal Review support | none special | Reporting |
-| 7 | **ORO Associate** | Fee-Waiver Approval, MRR (estimate/search/processing coordination) | (MRR request-management) | Reporting |
+| 7 | **ORO Associate** | MRR (estimate/search/processing coordination) | (MRR request-management) | Reporting |
+| 8 | **ORO Finance** *(new — v3)* | Fee-Waiver Approval, Commercial-Rate Approval | financial approvals (fee waiver, commercial rate, objection approvals); may manage multiple record requests when finance-related | Reporting |
 
 ### Team-level (per team)
 
 | # | User type | Task menu | Authority | Permission groups |
 |---|---|---|---|---|
-| 8 | **[Team] Fulfillment Manager** | *(may do team tasks)* | reassign within team; **receives coverage-gap emails**; assigns staff task subsets | *(team-scoped staff assignment; no global config)* |
-| 9 | **[Team] Fulfillment Supervisor** | *(may do team tasks)* | reassign/assist within team | none — **explicitly not Legal Rules** |
-| 10 | **[Team] Fulfillment Staff** | subset of {Estimate Creation, Record Search, Simple Redaction} | none | none |
+| 9 | **[Team] Fulfillment Manager** | *(may do team tasks)* | reassign within team; **receives coverage-gap emails**; assigns staff task subsets | *(team-scoped staff assignment; no global config)* |
+| 10 | **[Team] Fulfillment Supervisor** | *(may do team tasks)* | reassign/assist within team | none — **explicitly not Legal Rules** |
+| 11 | **[Team] Fulfillment Staff** | subset of {Estimate Creation, Record Search, Simple Redaction} | none | none |
 
 ## 5. Permission groups (coarse, to stay legible — not per-button)
 
@@ -75,6 +78,8 @@ Office-level types are **team-agnostic** (cross-cutting). Team-level types are *
 **Decisions locked (2026-07-09):**
 - **Legal Rules** — **Senior Legal owns**, **Director may**, **Sys Admin technical-only** (not the owner of rule content). So a **Team Supervisor can *do* a redaction task but cannot *change the rules* for it** — the core "do the work vs. set the rules" line.
 - **Permissions strictly by user type in v1**; exceptions handled by assigning an additional user type (§3c).
+- **Financial approval is its own authority** — the new **ORO Finance** type (not ORO Associate) owns fee-waiver, commercial-rate, and objection approvals.
+- **Task-subset assignment** — set by **Sys Admin and ORO Manager globally**, and by the **Fulfillment Manager within their own team**.
 
 ## 6. Coverage-gap safety net
 
@@ -82,23 +87,48 @@ There is no monitoring today for "a request needs a task nobody covers" (e.g. it
 
 **Concrete hook:** the central `applyStageTransition` / `spawnForStage` path (built 2026-07-08/09) is exactly the choke point — when it spawns a stage task and `eligibleUsers(team, taskType)` is empty, fire the manager email. A few lines at a spot that already exists.
 
-## 7. What this implies (scope — not free)
+## 7. Departments, fulfillment teams & staff model (UI rework)
 
-- **Data migration:** map existing `function_roles` + `permission_roles` assignments onto the new user types. The interim fee-waiver routing (`FEE_AUTHORITY`, built 2026-07-09) becomes **ORO Associate + "Fee-Waiver Approval" task type**.
-- **UI to build:** an **edit-user** screen (currently there is only add-staff, no edit), and a way to pick a person's task-type subset. Config screens for user types / permission groups.
+The screens that manage City Departments, Fulfillment Teams, and Staff today are weak and are **directly impacted by this change**. Kevin's model:
+
+**City Departments.** Model the city's org-chart entities explicitly (City Clerk's Office, Police, Parks & Recreation, …). The system does not capture the org chart today; the UI must allow entering city departments.
+
+**Where "Open Records" lives.** A city's Open Records function is usually a **sub-unit of the City Clerk's / City Records Office**, not its own department. If an Open Records Department *does* exist on the org chart, it is listed under Departments and the Open Records Office (team) is associated to it via a Departments dropdown during setup. If it does not exist, the parent office (e.g. City Clerk's) is selected instead.
+
+**Fulfillment teams process requests.** Created in the UI; each is associated with **one or more** departments (e.g. an *Open Records Fulfillment Team* serving City Clerk's Office, Parks & Rec, etc.; a *Police Records Fulfillment Team* serving Police). This department↔team association lives in the **taxonomy** and is what maps a request description to the team that processes it.
+
+**Critical distinction — Open Records *Office* vs Open Records *Fulfillment Team*:**
+- The **Open Records Office** = management/administration of all fulfillment. It **does not process requests**, so it must **never appear in the Taxonomy** — nothing routes to it.
+- But for **staff assignment**, the Office must be selectable as a "team" (people belong to it) even though it is **not a fulfillment team**. The system doesn't model this today (only fulfillment teams exist); a **default "Open Records Office" team** should exist for staffing purposes only.
+
+**UI consolidation.** Replace today's overloaded multi-panel layout (each of departments/teams/staff on its own thin panel, with little on-screen guidance) with a **single "parent" screen** that manages city departments, teams, and staff together. On-screen guidance/help text matters — it is heavily relied on in demos.
+
+## 8. Smart routing (assignment within teams)
+
+Once a request is **routed to a department**, the next step is **assignment of a task to eligible staff**. Multiple assignment methods exist; one uses AI. Each staff member has a **free-form "smart routing" text box**; the AI matches the request description against the smart-routing text of the eligible members for that task type and assigns the best match. Today Smart Routing is **limited to fulfillment teams** and applies only to **Record Search** and **Redaction**.
+
+**Compatibility concern:** the new user-type / per-person task-subset model must preserve the "eligible staff for this task type on this team" semantics that Smart Routing depends on (`eligibleUsers(team, taskType)`). Flag this as a spot the redesign could break — verify before build.
+
+## 9. What this implies (scope — not free)
+
+- **Data migration:** map existing `function_roles` + `permission_roles` assignments onto the new user types. The interim fee-waiver routing (`FEE_AUTHORITY`, built 2026-07-09) becomes **ORO Finance + "Fee-Waiver Approval" task type**. *Kevin is OK skipping automated migration of existing test data* — most current requests are test entries whose descriptions won't match real records; he will recreate requests manually. So v1 migration effort can be minimal.
+- **UI to build:** an **edit-user** screen (currently there is only add-staff, no edit) and a way to pick a person's task-type subset; config screens for user types / permission groups; and the consolidated Departments/Teams/Staff parent screen (§7).
 - **Authority + permissions become type properties** in the data model — replacing the second catalog rather than layering on it.
+- **Notifications caution:** system notifications already exist in parts of the app (e.g. reminders to update legislative content for fees, redaction, timing). Some task-related notices might better belong on My-Tasks lists. Before build, **audit existing notification code** so the new structure doesn't collide with or silently break it.
 
-## 8. Open questions
+## 10. Open questions — resolved 2026-07-09
 
-1. **Director vs Sys Admin split** — does Director hold staff/team management (part of System Administration), with only connectors/security reserved to Sys Admin? (Assumed yes above.)
-2. **"Finance" vs "ORO Associate"** — the old spec named a **Finance** role for fee-waiver / commercial-rate / objection approvals. This model folds financial approval into **ORO Associate**. Is that right, or does money need its own authority (Director sign-off)? Note `objections.js` approvals also reference this.
-3. **Who assigns a person's task subset** — Team Manager for their own team, Sys Admin globally, both?
-4. **Commercial-rate approval** — same task type as fee waiver, different trigger (`purpose='commercial'`); confirm it's an ORO Associate task too.
-5. **Task-type master list** — this doc lists the ones in play; a complete canonical enumeration (routable + capabilities) is still to be written before build.
+1. **Director vs Sys Admin split** — **Resolved: yes.** Director holds staff/team management; Sys Admin keeps only connectors/security/auth + technical config.
+2. **"Finance" vs "ORO Associate"** — **Resolved:** split out. New **ORO Finance** user type owns financial approvals (fee waiver, commercial rate, and the `objections.js` approvals). Removed from ORO Associate.
+3. **Who assigns a person's task subset** — **Resolved:** Sys Admin and ORO Manager **globally**; Fulfillment Manager **for their own team**.
+4. **Commercial-rate approval** — **Resolved:** same path/approver as fee waiver (different trigger `purpose='commercial'`); the approver is **ORO Finance**.
+5. **Task-type master list** — **Still open:** a complete canonical enumeration (routable + capabilities) is still to be written before build.
 
-## 9. Next steps
+## 11. Next steps
 
-1. Kevin reviews / edits this doc (push back via the repo).
-2. Resolve §8 open questions.
-3. Write the canonical task-type + permission-group master list.
-4. Only then: data-model + migration + UI plan, ratify into `SPEC_tasks_roles_mrr_fees.md` §8 and `ARCHITECTURE.md`, and build.
+1. ~~Kevin reviews / edits this doc~~ — done; incorporated into v3.
+2. ~~Resolve §10 open questions~~ — done (item 5 remains).
+3. Write the canonical task-type + permission-group master list (§10.5).
+4. Scope the Departments/Teams/Staff data model + consolidated parent UI (§7).
+5. Audit existing notifications (§9) and Smart Routing (§8) for compatibility.
+6. Only then: data-model + (light) migration + UI plan, ratify into `SPEC_tasks_roles_mrr_fees.md` §8 and `ARCHITECTURE.md`, and build.
