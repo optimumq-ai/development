@@ -303,5 +303,33 @@ router.post('/:id/fee-waiver-decision', requireAuth, async function(req, res) {
   res.json({ decision: 'denied', reason: reasonText, emailed: !!mail.sent, emailReason: mail.reason || null });
 });
 
+// Director escalation: flag a request for legal (advanced) redaction. Sets requests.legal_flag so the
+// redaction stage spawns legal_redaction (office-level, routed to legal staff) instead of ordinary
+// redaction. If a plain redaction task is already active, it is superseded and re-spawned as legal.
+router.post('/:id/legal-escalate', requireAuth, async function(req, res) {
+  var fRoles = req.user.roles || [];
+  var canEscalate = ['SYSTEM_ADMIN','DIRECTOR'].some(function(r){ return fRoles.indexOf(r) !== -1; });
+  if (!canEscalate) return res.status(403).json({ error: 'Only a Director can escalate for legal redaction' });
+  var request = await get('SELECT * FROM requests WHERE id = ? OR request_number = ?', [req.params.id, req.params.id]);
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'system';
+  if (Number(request.legal_flag) === 1) return res.json({ legalFlag: true, alreadyFlagged: true, converted: false });
+
+  var flagType = (req.body && req.body.type) || 'DIRECTOR_ESCALATION';
+  var note = (req.body && req.body.note) ? String(req.body.note).slice(0, 500) : '';
+  await run("UPDATE requests SET legal_flag = 1, legal_flag_type = ?, updated_at = datetime('now') WHERE id = ?", [flagType, request.id]);
+  await logHistory(request.id, req.user.sub, actor, 'LEGAL_ESCALATED', 'Escalated for legal (advanced) redaction' + (note ? ': ' + note : ''));
+
+  // If ordinary redaction is already in flight, supersede it and re-spawn as legal_redaction.
+  var converted = false, newTask = null;
+  var openRed = await get("SELECT id FROM tasks WHERE request_id = ? AND type = 'redaction' AND status IN ('open','assigned','in_progress')", [request.id]);
+  if (openRed) {
+    await run("UPDATE tasks SET status = 'superseded', updated_at = datetime('now') WHERE id = ?", [openRed.id]);
+    try { newTask = await require('../services/taskRouting').spawnForStage(request.id, request.stage, req.user.sub); converted = true; }
+    catch (e) { console.error('[legal-escalate respawn]', e && e.message); }
+  }
+  res.json({ legalFlag: true, alreadyFlagged: false, converted: converted, task: newTask });
+});
+
 module.exports = router;
 

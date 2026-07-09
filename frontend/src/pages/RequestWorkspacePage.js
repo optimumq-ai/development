@@ -9,6 +9,7 @@ import AvRedactionPanel from '../components/ui/AvRedactionPanel';
 import DocSearchPanel from '../components/ui/DocSearchPanel';
 import WorkflowDecisionPanel from '../components/ui/WorkflowDecisionPanel';
 import FeeWaiverDecisionPanel from '../components/ui/FeeWaiverDecisionPanel';
+import { useAuthStore } from '../store/authStore';
 
 const STAGES = ['intake','record_search','redaction_review','fee_review','awaiting_payment','custodian_retrieval','delivery'];
 const STAGE_LABELS = { intake:'Intake Review', record_search:'Record Search', redaction_review:'Redaction Review', fee_review:'Fee Review', awaiting_payment:'Awaiting Payment', custodian_retrieval:'Custodian Retrieval', delivery:'Delivery' };
@@ -45,6 +46,9 @@ export default function RequestWorkspacePage() {
   const [agOutcome, setAgOutcome] = useState('partial');
   const [clockBusy, setClockBusy] = useState(false);
   const [reasonByClock, setReasonByClock] = useState({});
+  const [escalating, setEscalating] = useState(false);
+  const user = useAuthStore(function(s){ return s.user; });
+  const isDirector = !!(user && user.functionRoles && (user.functionRoles.indexOf('DIRECTOR') !== -1 || user.functionRoles.indexOf('SYSTEM_ADMIN') !== -1));
 
   useEffect(function() { load(); loadStaff(); loadTeams(); loadRecords(); loadClocks(); }, [id]);
 
@@ -126,6 +130,16 @@ export default function RequestWorkspacePage() {
       await load();
     } catch(e) { setErr('Failed to close request'); }
     setAdvancing(false);
+  }
+
+  async function escalateLegal() {
+    if (!window.confirm('Escalate this request for legal (advanced) redaction? Redaction will route to legal staff, and any active redaction task is reassigned.')) return;
+    setEscalating(true); setErr('');
+    try {
+      await api.post('/requests/' + request.id + '/legal-escalate', {});
+      await load();
+    } catch(e) { setErr((e.response && e.response.data && e.response.data.error) || 'Failed to escalate'); }
+    setEscalating(false);
   }
 
   if (loading) return <div style={{display:'flex',alignItems:'center',justifyContent:'center',height:'256px',color:'#9CA3AF'}}>Loading request...</div>;
@@ -432,6 +446,24 @@ export default function RequestWorkspacePage() {
             </div>
             <div style={{fontSize:'12px',color:'#6B7280',marginTop:'6px'}}>Currently routed to: <strong>{request.department_name||'Unrouted'}</strong>. Changing this moves the request to another team{request.assigned_to_name?' and may clear the current assignment':''}.</div>
           </div>
+          {isDirector&&(
+            <div style={{marginBottom:'16px'}}>
+              <div style={{fontSize:'13px',fontWeight:'600',color:'#374151',marginBottom:'8px'}}>Legal Escalation</div>
+              {request.legal_flag?(
+                <div style={{fontSize:'13px',color:'#B91C1C',background:'#FEF2F2',border:'1px solid #FCA5A5',borderRadius:'8px',padding:'10px 12px'}}>
+                  ⚖ Flagged for legal (advanced) redaction{request.legal_flag_type?' — '+request.legal_flag_type.replace(/_/g,' ').toLowerCase():''}. Redaction on this request routes to legal staff.
+                </div>
+              ):(
+                <div>
+                  <button onClick={escalateLegal} disabled={escalating}
+                    style={{padding:'8px 16px',background:'white',color:'#B91C1C',border:'1px solid #FCA5A5',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:escalating?'default':'pointer'}}>
+                    {escalating?'Escalating…':'⚖ Escalate for Legal Redaction'}
+                  </button>
+                  <div style={{fontSize:'12px',color:'#6B7280',marginTop:'6px'}}>Marks this request as needing legal (advanced) redaction. Any active redaction task is reassigned to legal staff; if redaction hasn't started, it will route to legal when it does.</div>
+                </div>
+              )}
+            </div>
+          )}
           {!isComplete&&(
             <div>
               <div style={{fontSize:'13px',fontWeight:'600',color:'#374151',marginBottom:'8px'}}>Close Request</div>
