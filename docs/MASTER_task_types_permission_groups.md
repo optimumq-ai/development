@@ -19,12 +19,12 @@ A "task type" is one kind of human stop in request processing. Two flavours (des
 | `estimate` | Estimate Creation | `FEE_MANAGER` | [Team] Fulfillment Staff *(Estimate Creation)*; ORO Associate for MRR | stage `fee_review` (estimate step) | task `[BUILT]`, screen `[BUILT]` |
 | `record_search` | Record Search | `SEARCH_AND_TRIAGE` | [Team] Fulfillment Staff *(Record Search)* | stage `record_search` | task `[BUILT]`, screen `[NOT BUILT]` |
 | `redaction` | Redaction (simple) | `REDACTION_WORKER` | [Team] Fulfillment Staff *(Simple Redaction)* | stage `redaction_review` / `redaction` | task `[BUILT]`, screen `[NOT BUILT]` |
-| `legal_redaction` | Legal Redaction (advanced) | *(none — new)* | ORO Legal Associate; ORO Senior Legal | trigger: `SENSITIVE` classifier flag, or Director escalation | `[NOT BUILT]` |
-| `legal_review` | Legal Review | `ATTORNEY_REVIEWER` *(exists, not wired)* | ORO Senior Legal (+ Legal Associate support) | stage `exemption_review` / `ag_review` | `[NOT BUILT]` |
+| `legal_redaction` | Legal Redaction (advanced) | *(new — task-type key)* | ORO Legal Associate; ORO Senior Legal | trigger: `legal_flag` (Director escalation) or `SENSITIVE`/`LEGAL_HOLD` in latest `workflow_decisions.flags`; replaces `redaction` at the redaction stage | routing `[BUILT 2026-07-09]` (team-agnostic, pools to legal staff by subset); dedicated screen `[NOT BUILT]` |
+| `legal_review` | Legal Review | *(new — task-type key)* | ORO Senior Legal (+ Legal Associate support) | stage `exemption_review` / `ag_review` | routing `[BUILT 2026-07-09]` (team-agnostic); dedicated screen `[NOT BUILT]` |
 | `fee_waiver` | Fee-Waiver Approval | `FEE_AUTHORITY` `[INTERIM]` | **ORO Finance** | trigger `fee_waiver_requested`; spawned `onIntake`; team-agnostic (`team_id=NULL`) | task + routing + resolution `[BUILT 2026-07-09]` |
 | `commercial_rate` | Commercial-Rate Approval | `FEE_AUTHORITY` (target) | **ORO Finance** | trigger `purpose='commercial'` | `[DEFERRED — add on customer demand]`; trigger not wired |
 
-> Note: `estimate`, `record_search`, `redaction`, `fee_waiver` are the only keys wired in `taskRouting.js` `TASK_ROLES` today. `STAGE_TASK` maps `record_search→record_search` and `redaction_review|redaction→redaction`. Everything else here is designed, not yet in the routing table.
+> Note: wired keys in `taskRouting.js` are `estimate`, `record_search`, `redaction`, `fee_waiver`, plus (2026-07-09) `legal_review` and `legal_redaction`. `STAGE_TASK` now maps `record_search→record_search`, `redaction_review|redaction→redaction` (→ `legal_redaction` when the request is legally flagged), and `exemption_review|ag_review→legal_review`. Legal task types are office-level (team-agnostic) and resolve eligibility via `user_task_types`. Remaining unwired: `commercial_rate` (deferred) and the `mrr_*` set.
 
 ### A2. MRR task types (role-agnostic — the Request Manager assigns any best-fit user)
 

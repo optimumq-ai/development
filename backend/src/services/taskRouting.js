@@ -17,7 +17,11 @@ var TASK_ROLES = {
   redaction: 'REDACTION_WORKER',
   // Fee-waiver / commercial-rate approval. INTERIM target: FEE_AUTHORITY (the existing financial-authority
   // permission role) pending the FEE_WAIVER_APPROVER->Finance rename + catalog reconciliation (D4 §8, item 9).
-  fee_waiver: 'FEE_AUTHORITY'
+  fee_waiver: 'FEE_AUTHORITY',
+  // Legal task types (v3) have NO legacy permission role — their own task-type key is the eligibility
+  // token, so eligibleUsers resolves them via the per-person subset (user_task_types). Office-level work.
+  legal_review: 'legal_review',
+  legal_redaction: 'legal_redaction'
 };
 
 // Canonical routable task types (docs/MASTER_task_types_permission_groups.md §A1). These are the keys a
@@ -243,24 +247,53 @@ async function poolForUser(userId) {
     "SELECT t.* FROM tasks t " +
     "WHERE t.status = 'open' AND t.assigned_to IS NULL " +
     "AND (t.team_id IS NULL OR t.team_id = (SELECT department_id FROM users WHERE id = ?)) " +
-    "AND (t.role_required IS NULL OR t.role_required IN (" +
-    "  SELECT pr.name FROM user_permission_roles upr JOIN permission_roles pr ON pr.id = upr.permission_role_id WHERE upr.user_id = ?)) " +
+    // Eligible if role_required is null, OR the user holds it as a legacy permission role, OR (v3 model)
+    // it is a task type in the user's per-person subset — the latter is how legal/new task types resolve.
+    "AND (t.role_required IS NULL " +
+    "  OR t.role_required IN (SELECT pr.name FROM user_permission_roles upr JOIN permission_roles pr ON pr.id = upr.permission_role_id WHERE upr.user_id = ?) " +
+    "  OR t.role_required IN (SELECT task_type FROM user_task_types WHERE user_id = ?)) " +
     "ORDER BY t.created_at",
-    [userId, userId]
+    [userId, userId, userId]
   );
 }
 
-// Spawn the task that a workflow STAGE implies (record_search / redaction) and route it. Idempotent.
+// Spawn the task that a workflow STAGE implies and route it. Idempotent.
 // Shared by manual stage changes and by the estimate-acceptance / deposit flow so there is one task-spawn path.
-var STAGE_TASK = { record_search: 'record_search', redaction_review: 'redaction', redaction: 'redaction' };
+//   record_search / redaction  -> team fulfillment work (routed within the request's team)
+//   exemption_review / ag_review -> legal_review  (office-level, team-agnostic — Senior Legal / Legal Associate)
+//   redaction stage on a legally-flagged request -> legal_redaction instead of redaction (office-level)
+var STAGE_TASK = { record_search: 'record_search', redaction_review: 'redaction', redaction: 'redaction', exemption_review: 'legal_review', ag_review: 'legal_review' };
+var REDACTION_STAGES = { redaction_review: 1, redaction: 1 };
+// Legal task types are office-level (v3): they pool to legal staff office-wide, not to the request's team.
+var LEGAL_TYPES = { legal_review: 1, legal_redaction: 1 };
+var LEGAL_FLAG_VALUES = ['SENSITIVE', 'LEGAL_HOLD', 'ONGOING_INVESTIGATION'];
+
+// A request needs legal (advanced) redaction if a director escalated it (legal_flag) or the classifier
+// flagged it sensitive/legal-hold (workflow_decisions.flags, latest decision).
+async function requestNeedsLegalRedaction(requestId, reqRow) {
+  if (reqRow && Number(reqRow.legal_flag) === 1) return true;
+  var d = await get("SELECT flags FROM workflow_decisions WHERE request_id = ? AND flags IS NOT NULL ORDER BY created_at DESC LIMIT 1", [requestId]);
+  if (!d || !d.flags) return false;
+  try { var arr = JSON.parse(d.flags); return Array.isArray(arr) && arr.some(function (f) { return LEGAL_FLAG_VALUES.indexOf(f) !== -1; }); }
+  catch (e) { return false; }
+}
+
 async function spawnForStage(requestId, stage, createdBy) {
   var ttype = STAGE_TASK[stage];
   if (!ttype || stage === 'closed') return null;
-  var existing = await get("SELECT id FROM tasks WHERE request_id = ? AND type = ? AND status IN ('open','assigned','in_progress')", [requestId, ttype]);
-  if (existing) return null;
-  var reqRow = await get('SELECT description, department_id FROM requests WHERE id = ?', [requestId]);
+  var reqRow = await get('SELECT description, department_id, legal_flag FROM requests WHERE id = ?', [requestId]);
   if (!reqRow) return null;
-  var task = await createTask({ requestId: requestId, type: ttype, teamId: reqRow.department_id, createdBy: createdBy || 'system' });
+  // Redaction stage on a legally-flagged request escalates to legal (advanced) redaction.
+  if (REDACTION_STAGES[stage] && await requestNeedsLegalRedaction(requestId, reqRow)) ttype = 'legal_redaction';
+  // Idempotency: never double-spawn. Redaction + legal_redaction are one family (a request gets one or the
+  // other, never both), so an existing task of either blocks a new one for this request.
+  var typeSet = (ttype === 'redaction' || ttype === 'legal_redaction') ? ['redaction', 'legal_redaction'] : [ttype];
+  var ph = typeSet.map(function () { return '?'; }).join(',');
+  var existing = await get("SELECT id FROM tasks WHERE request_id = ? AND type IN (" + ph + ") AND status IN ('open','assigned','in_progress')", [requestId].concat(typeSet));
+  if (existing) return null;
+  // Legal work is office-level (team-agnostic); team fulfillment work stays on the request's team.
+  var teamId = LEGAL_TYPES[ttype] ? null : reqRow.department_id;
+  var task = await createTask({ requestId: requestId, type: ttype, teamId: teamId, createdBy: createdBy || 'system' });
   autoRouteOrPool(task.id, reqRow.description, {}).catch(function (e) { console.error('[spawnForStage route]', e.message); });
   return task;
 }
@@ -316,14 +349,14 @@ async function mine(userId) {
 // Self-healing safety net: any request at a task-bearing stage without its task gets one spawned.
 // Covers stranding from seeding, races, or any advance path that skipped the spawn. Idempotent.
 async function reconcileStageTasks() {
-  var rows = await all("SELECT id, stage FROM requests WHERE stage IN ('record_search','redaction_review','redaction') AND status = 'active'");
+  var rows = await all("SELECT id, stage FROM requests WHERE stage IN ('record_search','redaction_review','redaction','exemption_review','ag_review') AND status = 'active'");
   var fixed = 0;
   for (var i = 0; i < rows.length; i++) {
     var r = rows[i];
-    var ttype = STAGE_TASK[r.stage];
-    if (!ttype) continue;
-    var existing = await get("SELECT id FROM tasks WHERE request_id = ? AND type = ? AND status IN ('open','assigned','in_progress')", [r.id, ttype]);
-    if (!existing) { try { await spawnForStage(r.id, r.stage, 'system-reconciler'); fixed++; } catch (e) { console.error('[reconcileStageTasks]', r.id, e && e.message); } }
+    if (!STAGE_TASK[r.stage]) continue;
+    // spawnForStage is idempotent and owns the legal-branching + redaction-family logic; a non-null
+    // return means it actually spawned a missing task.
+    try { var t = await spawnForStage(r.id, r.stage, 'system-reconciler'); if (t) fixed++; } catch (e) { console.error('[reconcileStageTasks]', r.id, e && e.message); }
   }
   if (fixed > 0) console.log('[reconcileStageTasks] spawned ' + fixed + ' missing stage task(s)');
   return fixed;
