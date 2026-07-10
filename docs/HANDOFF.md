@@ -1037,3 +1037,11 @@ $1.00. Only tightened the labeling so it is never mistaken for a Texas statutory
 - `SPEC_fees_estimates_payments.md` §1 — records the §70.3 finding and that the example's $1.00 is illustrative.
 
 Committed: seed comment, spec, this note. No runtime/DB change.
+
+## 2026-07-10 (w) — Full smoke test re-run — 28/28
+
+Re-ran the on-demand full smoke (`scratchpad/smoke_full.js`) after the (v) cert-rate labeling change (which was
+docs-only, no runtime change). **Result: 28/28 pass, 0 fail; 0 rows left** — unchanged from (q). Confirms the
+full pipeline still green end to end: submit → search/select → route/classify → workflow (1 task + 1 clock) →
+estimate (with the **$1.00 certification line** priced from the intake opt-in, total $17.20) → deliver
+(clarification reads the stored postal address). No code changes — verification only.
