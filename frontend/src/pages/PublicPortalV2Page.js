@@ -178,16 +178,38 @@ var STYLES = `
 .scv .qr button{font:inherit;font-size:12.5px;font-weight:550;color:var(--blue);background:var(--surface);
   border:1px solid color-mix(in srgb,var(--blue) 40%,transparent);padding:7px 13px;border-radius:999px;cursor:pointer;transition:var(--step)}
 .scv .qr button:hover{background:var(--blue-tint)}
-.scv .chat-results{align-self:flex-start;max-width:92%;border:1px solid var(--hair);border-radius:10px;background:var(--surface-2);padding:9px 11px;font-size:12px}
-.scv .cr-head{font-weight:650;color:var(--blue-ink);margin-bottom:6px;font-size:12px}
-.scv .cr-item{padding:5px 0;border-top:1px solid var(--hair);line-height:1.35}
-.scv .cr-item:first-of-type{border-top:none}
-.scv .cr-item .cr-t{font-weight:600}
-.scv .cr-item .cr-m{font-family:var(--font-mono);font-size:10px;color:var(--muted)}
-.scv .cr-tag{font-family:var(--font-mono);font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--green);
-  background:var(--green-tint);border:1px solid color-mix(in srgb,var(--green) 35%,transparent);padding:1px 5px;border-radius:999px;margin-left:6px}
-.scv .cr-note{margin-top:7px;font-size:10.5px;color:var(--muted);font-style:italic}
-.scv .formwrap.inert{opacity:.58;pointer-events:none;filter:saturate(.7)}
+/* ---------- Phase 2 results canvas ---------- */
+.scv .resultsPanel{flex:1;display:flex;flex-direction:column;overflow:hidden;position:relative}
+.scv .results-instr{flex:none;padding:11px 16px;font-size:12.5px;line-height:1.5;color:var(--muted);background:var(--surface-2);border-bottom:1px solid var(--hair)}
+.scv .results-instr b{color:var(--ink);font-weight:600}
+.scv .results-split{flex:1;display:flex;min-height:0;overflow:hidden}
+.scv .results-main{flex:1 1 auto;min-width:0;overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+.scv .results-side{flex:0 0 27%;min-width:180px;border-left:1px solid var(--hair);background:var(--surface-2);display:flex;flex-direction:column;min-height:0}
+.scv .side-head{padding:12px 14px 10px;border-bottom:1px solid var(--hair)}
+.scv .side-head .eyebrow{margin-bottom:2px;display:block}
+.scv .side-head .cnt{font-size:12px;color:var(--muted)}
+.scv .side-list{flex:1;overflow:auto;padding:10px 12px;display:flex;flex-direction:column;gap:7px}
+.scv .side-empty{font-size:11.5px;color:var(--muted);text-align:center;padding:22px 8px;line-height:1.5}
+.scv .side-item{font-size:11px;background:var(--surface);border:1px solid var(--hair);border-radius:7px;padding:7px 9px;display:flex;gap:6px;align-items:flex-start}
+.scv .side-item .si-t{font-weight:600;line-height:1.3}
+.scv .side-item .si-m{font-family:var(--font-mono);font-size:9.5px;color:var(--muted)}
+.scv .side-item .si-x{margin-left:auto;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;padding:0 2px;flex:none;line-height:1}
+.scv .side-item .si-x:hover{color:var(--ink)}
+.scv .side-foot{padding:12px;border-top:1px solid var(--hair)}
+.scv .res-query{font-size:12.5px;color:var(--muted)}
+.scv .res-query b{color:var(--ink)}
+.scv .res-empty{margin:auto;text-align:center;color:var(--muted);font-size:12.5px;padding:50px 16px;line-height:1.6;max-width:34ch}
+.scv .rec{display:flex;gap:12px;padding:13px 14px;border:1px solid var(--hair);border-radius:var(--radius-sm);background:var(--surface);transition:var(--step);cursor:pointer}
+.scv .rec:hover{border-color:var(--hair-strong)}
+.scv .rec.sel{border-color:var(--blue);background:var(--blue-tint)}
+.scv .rec input{margin-top:3px;flex:none;width:16px;height:16px;accent-color:var(--blue)}
+.scv .rec-body{flex:1;min-width:0}
+.scv .rec-title{font-size:14px;font-weight:600;margin:0 0 3px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.scv .rec-meta{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+.scv .rec-desc{font-size:12.5px;color:var(--muted);margin:5px 0 0}
+.scv .tag{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:999px;font-weight:600;white-space:nowrap}
+.scv .tag.green{color:var(--green);background:var(--green-tint);border:1px solid color-mix(in srgb,var(--green) 35%,transparent)}
+.scv .tag.review{color:var(--amber);background:var(--amber-tint);border:1px solid color-mix(in srgb,var(--amber) 30%,transparent)}
 .scv .composer{display:flex;gap:8px;padding:11px 12px;border-top:1px solid var(--hair);background:var(--surface)}
 .scv .composer input{flex:1;font:inherit;font-size:13.5px;padding:10px 13px;border-radius:999px;border:1px solid var(--field-border);
   background:var(--field-bg);color:var(--ink);box-shadow:0 1px 1px rgba(18,35,46,.04)}
@@ -250,10 +272,17 @@ export default function PublicPortalV2Page() {
   const [chatSending, setChatSending] = useState(false);
   const [quickReplies, setQuickReplies] = useState([]);
   const [agencyName, setAgencyName] = useState('');
-  // Latest search results/query — captured here for the results-canvas slice (slice 4) to consume.
-  const [lastResults, setLastResults] = useState(null);
-  const [lastQuery, setLastQuery] = useState('');
   const chatLogRef = useRef(null);
+
+  // ---- Phase 2: results canvas (left panel morphs form -> results on PROCEED) ----
+  // `canvasResults` = the current search's records shown in the interactive grid; `canvasQuery` =
+  // the search query (labels the current record/child). `selected` = records ticked for THIS record,
+  // not yet attached. `children` = attached records per described record — per-child attach-and-clear
+  // (design: one description = one child; on Proceed its selection attaches and both panels clear).
+  const [canvasResults, setCanvasResults] = useState(null);
+  const [canvasQuery, setCanvasQuery] = useState('');
+  const [selected, setSelected] = useState([]);
+  const [children, setChildren] = useState([]);
 
   useEffect(function () {
     axios.get(API + '/requests/public/config')
@@ -264,6 +293,10 @@ export default function PublicPortalV2Page() {
   useEffect(function () {
     if (chatLogRef.current) chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
   }, [messages, chatSending, quickReplies]);
+
+  // Records already attached to the request across every described record — passed to the agent so it
+  // stays aware of what is chosen and does not re-search them.
+  var attachedRecords = children.reduce(function (acc, c) { return acc.concat(c.records); }, []);
 
   const sendMessage = useCallback(async function (text) {
     var t = (text || '').trim();
@@ -276,27 +309,55 @@ export default function PublicPortalV2Page() {
     try {
       // API wants role + content only; `base` is already clean conversation turns.
       var wire = base.map(function (m) { return { role: m.role, content: m.content }; });
-      var r = await axios.post(API + '/public/chat', { mode: 'split_canvas', messages: wire, selectedRecords: [] });
+      var r = await axios.post(API + '/public/chat', { mode: 'split_canvas', messages: wire, selectedRecords: attachedRecords });
       var reply = (r.data && r.data.reply) || '';
       var results = (r.data && Array.isArray(r.data.searchResults)) ? r.data.searchResults : null;
-      var asst = { role: 'assistant', content: reply };
+      setMessages(base.concat([{ role: 'assistant', content: reply }]));
       if (results && results.length) {
-        asst.searchResults = results;
-        asst.searchQuery = (r.data && r.data.searchQuery) || '';
-        setLastResults(results);
-        setLastQuery(asst.searchQuery);
+        // Search results flow to the LEFT results canvas (not the chat). Selection happens there via the
+        // canvas Proceed button, so we suppress this turn's "any match?" quick replies in the chat.
+        setCanvasResults(results);
+        setCanvasQuery((r.data && r.data.searchQuery) || '');
+        setSelected([]);
+        setQuickReplies([]);
+      } else {
+        // No results (zero-match / PATH-b) — the conversation is chat-driven, so show its quick replies.
+        setQuickReplies((r.data && Array.isArray(r.data.quickReplies)) ? r.data.quickReplies : []);
       }
-      setMessages(base.concat([asst]));
-      setQuickReplies((r.data && Array.isArray(r.data.quickReplies)) ? r.data.quickReplies : []);
     } catch (e) {
       setMessages(base.concat([{ role: 'assistant', content: 'I had trouble responding just now. Please try again in a moment.' }]));
     } finally {
       setChatSending(false);
     }
-  }, [messages, chatSending]);
+  }, [messages, chatSending, attachedRecords]);
 
-  // eslint-disable-next-line no-unused-vars
-  var _slice4 = { lastResults: lastResults, lastQuery: lastQuery }; // reserved for the results canvas
+  function recKey(r) { return r.id || r.title; }
+  function isSelected(r) { return selected.some(function (s) { return recKey(s) === recKey(r); }); }
+  function toggleSelect(r) {
+    setSelected(function (cur) {
+      return cur.some(function (s) { return recKey(s) === recKey(r); })
+        ? cur.filter(function (s) { return recKey(s) !== recKey(r); })
+        : cur.concat([r]);
+    });
+  }
+  function removeSelected(r) {
+    setSelected(function (cur) { return cur.filter(function (s) { return recKey(s) !== recKey(r); }); });
+  }
+
+  // Canvas Proceed: attach this record's selection to a child, clear both panels (attach-and-clear),
+  // and hand back to the agent so it asks whether to describe another record.
+  function proceedResults() {
+    if (!canvasResults) return;
+    var picked = selected.slice();
+    setChildren(function (cur) { return cur.concat([{ description: canvasQuery, records: picked }]); });
+    setCanvasResults(null);
+    setCanvasQuery('');
+    setSelected([]);
+    var msg = picked.length
+      ? ('I have selected ' + picked.length + ' record' + (picked.length === 1 ? '' : 's') + ' from those results.')
+      : 'None of those results match what I need.';
+    sendMessage(msg);
+  }
 
   var emailOk = validEmail(email);
   var addrComplete = addr.street1.trim() && addr.city.trim() && addr.state.trim() && addr.zip.trim();
@@ -402,17 +463,18 @@ export default function PublicPortalV2Page() {
       <nav className="stepper" aria-label="Request progress">
         <div className={'step' + (phase === 0 ? ' active' : ' done')}><span className="num">1</span> Your information</div>
         <span className="step-sep" />
-        <div className={'step' + (phase === 1 ? ' active' : '')}><span className="num">2</span> Describe records</div>
+        <div className={'step' + (phase === 1 && !canvasResults ? ' active' : (phase === 1 && (canvasResults || children.length) ? ' done' : ''))}><span className="num">2</span> Describe records</div>
         <span className="step-sep" />
-        <div className="step"><span className="num">3</span> Review results</div>
+        <div className={'step' + (phase === 1 && canvasResults ? ' active' : '')}><span className="num">3</span> Review results</div>
         <span className="step-sep" />
         <div className="step"><span className="num">4</span> Submit</div>
       </nav>
 
       <main className="stage">
-        {/* ============ LEFT CANVAS — Phase 0 form ============ */}
+        {/* ============ LEFT CANVAS — Phase 0 form → Phase 2 results ============ */}
         <section className="canvas">
-          <div className={'panel formwrap' + (phase === 1 ? ' inert' : '')}>
+          {phase === 0 && (
+          <div className="panel formwrap">
             <div className="form-head">
               <h2 className="start-here">START HERE</h2>
               <p>Provide information in the form below. When all information is entered, click <b>PROCEED</b>. This will activate the AI Open Record Agent on the right, and it will guide you through record search.</p>
@@ -544,10 +606,68 @@ export default function PublicPortalV2Page() {
             </div>
 
             <div className="form-foot">
-              <button className="btn-primary" type="button" disabled={!canProceed || phase === 1} onClick={proceed}>PROCEED →</button>
-              <span className="foot-hint">{phase === 1 ? 'The assistant is now active on the right.' : footHint}</span>
+              <button className="btn-primary" type="button" disabled={!canProceed} onClick={proceed}>PROCEED →</button>
+              <span className="foot-hint">{footHint}</span>
             </div>
           </div>
+          )}
+
+          {phase === 1 && (
+          <div className="panel resultsPanel">
+            <div className="results-instr">Review the search results, and check the box to select a record. All records with the selection box checked appear in the right column. When you have completed selection, click <b>Proceed</b> and continue your conversation with the AI Open Record Assistant.</div>
+            <div className="results-split">
+              <div className="results-main">
+                {canvasResults ? (
+                  <>
+                    <div className="res-query">Results for <b>“{canvasQuery}”</b> · {canvasResults.length} in the records library</div>
+                    {canvasResults.map(function (r, ri) {
+                      var sel = isSelected(r);
+                      var meta = [r.docType, r.department, r.dateCreated, r.sourceSystem, r.pageCount ? (r.pageCount + ' pp') : null].filter(Boolean).join(' · ');
+                      var lib = r.publicReady === true;
+                      return (
+                        <div className={'rec' + (sel ? ' sel' : '')} key={recKey(r) || ri} onClick={function () { toggleSelect(r); }}>
+                          <input type="checkbox" checked={sel} readOnly aria-label={'Select ' + (r.title || 'record')} />
+                          <div className="rec-body">
+                            <p className="rec-title">{r.title || r.id || 'Untitled record'}
+                              <span className={'tag ' + (lib ? 'green' : 'review')}>{lib ? 'Available now · Public Records Library' : 'Review needed'}</span>
+                            </p>
+                            {meta ? <div className="rec-meta">{meta}</div> : null}
+                            {r.summary ? <p className="rec-desc">{r.summary}</p> : null}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </>
+                ) : (
+                  <div className="res-empty">Your search results appear here once you describe a record in the chat on the right.</div>
+                )}
+              </div>
+              <div className="results-side">
+                <div className="side-head">
+                  <span className="eyebrow">Selected records</span>
+                  <span className="cnt">{selected.length} selected</span>
+                </div>
+                <div className="side-list">
+                  {selected.length === 0 ? (
+                    <div className="side-empty">Records you select move here.<br />They stay attached to your request across every search.</div>
+                  ) : selected.map(function (r, ri) {
+                    var meta = [r.docType, r.dateCreated, r.sourceSystem].filter(Boolean).join(' · ');
+                    return (
+                      <div className="side-item" key={recKey(r) || ri}>
+                        <div><div className="si-t">{r.title || r.id || 'Untitled record'}</div>{meta ? <div className="si-m">{meta}</div> : null}</div>
+                        <button className="si-x" type="button" aria-label="Remove" onClick={function () { removeSelected(r); }}>×</button>
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="side-foot">
+                  <button className="btn-primary" type="button" style={{ width: '100%', justifyContent: 'center' }}
+                    disabled={!canvasResults || chatSending} onClick={proceedResults}>Proceed →</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          )}
         </section>
 
         {/* ============ RIGHT — chat engine (idle until PROCEED) ============ */}
@@ -571,26 +691,9 @@ export default function PublicPortalV2Page() {
                 <div className="msg bot">Thank you for using the {agencyDisplay} AI Powered Open Record Search. I will work with you to create description content that assures optimal search results. It is important to note that if you are requesting more than one type of record, it is important that the search description for each is entered individually.</div>
                 <div className="msg bot">Please enter a description of a requested record.</div>
                 {messages.map(function (m, i) {
-                  return (
-                    <React.Fragment key={i}>
-                      {m.content ? <div className={'msg ' + (m.role === 'user' ? 'me' : 'bot')}>{m.content}</div> : null}
-                      {m.searchResults && m.searchResults.length ? (
-                        <div className="chat-results">
-                          <div className="cr-head">Found {m.searchResults.length} matching record{m.searchResults.length !== 1 ? 's' : ''}</div>
-                          {m.searchResults.map(function (res, ri) {
-                            return (
-                              <div className="cr-item" key={ri}>
-                                <span className="cr-t">{res.title || res.id || 'Untitled record'}</span>
-                                {res.publicReady ? <span className="cr-tag">Public-ready</span> : null}
-                                {res.docType || res.sourceSystem ? <div className="cr-m">{[res.docType, res.sourceSystem].filter(Boolean).join(' · ')}</div> : null}
-                              </div>
-                            );
-                          })}
-                          <div className="cr-note">Selecting records into your request happens in the results view (next build slice).</div>
-                        </div>
-                      ) : null}
-                    </React.Fragment>
-                  );
+                  return m.content
+                    ? <div key={i} className={'msg ' + (m.role === 'user' ? 'me' : 'bot')}>{m.content}</div>
+                    : null;
                 })}
                 {chatSending ? <div className="typing"><span /><span /><span /></div> : null}
               </>

@@ -573,3 +573,46 @@ attach-and-clear), consuming the `searchResults` this slice already captures; wi
 loop. Then slice 5 (form→`/public/submit`), slice 6 (mobile step-through), cut over `/portal`, and slice 1b
 (clarification reads stored `mailing_*`). `frontend/build` is git-ignored — committed: the route file, the page,
 the spec, this note.
+
+## 2026-07-10 (f) — Split-canvas BUILD slice 4: Phase-2 results canvas (BUILT + verified)
+
+**Slice:** Fourth build slice — the Phase-2 results canvas for `/portal/v2`. On PROCEED the left panel **morphs**
+from the form into the interactive results box; search results (from the slice-3 chat agent) render there for
+selection, with per-child **attach-and-clear** and the "another record?" loop. Frontend only (reuses the slice-3
+backend search unchanged). On `spec/task-screens`.
+
+**Built (`frontend/src/pages/PublicPortalV2Page.js`):**
+- **Form → results morph:** phase 0 renders the Phase-0 form; PROCEED → phase 1 **unmounts** the form and mounts
+  the results panel (component state — name/email/fee/etc. — persists for slice 5). (Replaced slice-3's
+  form-goes-inert stopgap with the proper Phase-2 dissolve.)
+- **Results grid:** a chat response carrying `searchResults` now populates the LEFT canvas (not chat). Each real
+  record renders with a checkbox, title, **tag** (public-ready → **"Available now · Public Records Library"**
+  library tag per locked decision #6; else "Review needed"), a meta line (record type · dept · date · source ·
+  pages), and summary. Full-width instruction banner (agreed copy) above; ~27% **Selected Records** column right.
+- **Selection + Selected column:** ticking a row moves it to the Selected column (smaller font); the column's ×
+  removes it and unticks the row. Count reflects live.
+- **Canvas Proceed = per-child attach-and-clear:** attaches the current record's selection to a child
+  (`children[]`), clears the grid + Selected column, and sends a "selected N records" turn to the agent (with the
+  **cumulative** attached records as `selectedRecords`). The agent then asks "describe another record?" — Yes
+  reopens a fresh canvas for the next description; No hands to submit (slice 5). Search turns' "any match?" quick
+  replies are suppressed in chat (selection is canvas-driven); zero-result / PATH-(b) searches show no grid and
+  stay chat-driven. The superseded "download-now vs submit-all" fork is **not** built (locked decision).
+- Stepper tracks state: Describe records (phase 1, no results) → Review results (results shown).
+
+**Evidence (verified live in the running app — frontend built, nginx serves `build`; backend unchanged from
+slice 3):** full browser drive (`drive4.js`) — **23/23 assertions pass**: PROCEED removes the form + mounts the
+results panel (placeholder) → describe → search → 6-record grid with library/review tags → tick two (Selected
+column shows 2, count "2 selected") → × removes one (grid row unticks) → canvas Proceed clears both panels +
+sends "selected 1 record" + agent offers "Yes, another record / No, that is everything" → "Yes" → describe a
+2nd record → **fresh 3-record grid** (loop) with the Selected column reset (attach-and-clear held). A separate
+run also verified the **zero-result** path (a police-report description returned no public-ready matches → no
+grid, agent stays chat-driven and offers "another record") — both the with-results and zero-results paths work.
+Screens `08` (grid + tags + selected column), `09` (selection), `10` (attach-and-clear + loop), `11` (2nd grid).
+
+**Spec:** `SPEC_public_portal_intake.md §2b` updated — results canvas marked `[BUILT — slice 4]` with the
+attach-and-clear/loop/library-tag behavior and the superseded-fork note.
+
+**Next:** slice 5 = form→`/public/submit` wiring (persist the request + all attached `children`/selected records
+via the slice-1 storage; retire the read-only end state). Then slice 6 (mobile step-through toggle), cut over
+`/portal`, and slice 1b (clarification reads stored `mailing_*`). `frontend/build` git-ignored — committed: the
+page + the spec + this note.
