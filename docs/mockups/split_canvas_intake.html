@@ -296,14 +296,31 @@
   .footnote{padding:8px 20px 16px;font-size:11px;color:var(--muted);text-align:center}
   .footnote code{font-family:var(--font-mono);font-size:10.5px;background:var(--surface-2);padding:1px 5px;border-radius:4px;border:1px solid var(--hair)}
 
+  /* Mobile step-through (decided 2026-07-10): one surface at a time + a Form/Results ↔ Chat toggle,
+     driven by the same phase transitions as desktop. The selected-records column stacks below results. */
+  .mtabs{display:none}
   @media (max-width:860px){
-    .stage{flex-direction:column}
-    .chat{flex:0 0 auto;max-width:none;height:420px}
-    .results-side{flex-basis:34%}
-    .mobile-note{display:block!important}
+    .stage{flex-direction:column;position:relative}
+    .canvas,.chat{max-width:none;width:100%}
+    .canvas{min-height:66vh}
+    .chat{flex:1 1 auto;height:auto;min-height:66vh}
+    /* show exactly one surface at a time */
+    .stage.m-canvas > .chat{display:none}
+    .stage.m-chat > .canvas{display:none}
+    /* selected-records column drops below the results list */
+    .results-split{flex-direction:column}
+    .results-side{flex:0 0 auto;border-left:none;border-top:1px solid var(--hair);max-height:40vh}
+    /* the surface toggle */
+    .mtabs{display:flex;gap:6px;padding:8px 12px;background:var(--surface-2);border-bottom:1px solid var(--hair);
+      position:sticky;top:0;z-index:5}
+    .mtab{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 10px;font:inherit;
+      font-size:13px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--hair);
+      border-radius:8px;cursor:pointer;transition:var(--step)}
+    .mtab.active{color:var(--blue);border-color:var(--blue);background:var(--blue-tint)}
+    .mtab:disabled{opacity:.5;cursor:not-allowed}
+    .mtab .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);display:none;flex:none}
+    .mtab.has-unread .dot{display:inline-block}
   }
-  .mobile-note{display:none;padding:8px 20px;font-size:11.5px;color:var(--amber);background:var(--amber-tint);
-    text-align:center;font-family:var(--font-mono)}
 
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
   :focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
@@ -320,8 +337,6 @@
   <button class="btn-ghost" id="resetBtn" type="button">Restart demo</button>
 </header>
 
-<div class="mobile-note">On a narrow screen the split stacks — canvas above, chat below.</div>
-
 <nav class="stepper" id="stepper" aria-label="Request progress">
   <div class="step active" data-step="0"><span class="num">1</span> Your information</div>
   <span class="step-sep"></span>
@@ -332,7 +347,12 @@
   <div class="step" data-step="3"><span class="num">4</span> Submit</div>
 </nav>
 
-<main class="stage">
+<main class="stage m-canvas" id="stage">
+  <!-- Mobile-only surface toggle (step-through); hidden ≥861px -->
+  <div class="mtabs" id="mtabs">
+    <button class="mtab active" id="mtabCanvas" type="button"><span id="mtabCanvasLabel">Your information</span></button>
+    <button class="mtab" id="mtabChat" type="button" disabled>Assistant <span class="dot" aria-hidden="true"></span></button>
+  </div>
   <!-- ============ LEFT CANVAS ============ -->
   <section class="canvas">
     <!-- PHASE 0: form -->
@@ -503,6 +523,19 @@
   var scrim=$("#scrim"),scrimCard=$("#scrimCard"),instrText=$("#instrText");
   state.emailSent=false;
 
+  /* ---------- mobile step-through: one surface at a time + Form/Results ↔ Chat toggle ---------- */
+  var stage=$("#stage"),mtabCanvas=$("#mtabCanvas"),mtabChat=$("#mtabChat"),mtabCanvasLabel=$("#mtabCanvasLabel");
+  function setMobileView(v){
+    stage.classList.toggle("m-canvas",v==="canvas");
+    stage.classList.toggle("m-chat",v==="chat");
+    mtabCanvas.classList.toggle("active",v==="canvas");
+    mtabChat.classList.toggle("active",v==="chat");
+    if(v==="chat")mtabChat.classList.remove("has-unread"); // opening chat clears the new-message dot
+  }
+  function flagChatUnread(){ if(stage.classList.contains("m-canvas"))mtabChat.classList.add("has-unread"); }
+  mtabCanvas.addEventListener("click",function(){setMobileView("canvas")});
+  mtabChat.addEventListener("click",function(){if(!mtabChat.disabled)setMobileView("chat")});
+
   function setStep(n){
     document.querySelectorAll(".step").forEach(function(el){
       var s=+el.getAttribute("data-step");
@@ -612,7 +645,7 @@
     setTimeout(function(){
       t.remove();
       var m=document.createElement("div");m.className="msg bot";m.textContent=text;
-      chatLog.appendChild(m);scroll();if(cb)cb();
+      chatLog.appendChild(m);scroll();flagChatUnread();if(cb)cb();
     },delay);
   }
   function me(text){var m=document.createElement("div");m.className="msg me";m.textContent=text;chatLog.appendChild(m);scroll()}
@@ -632,6 +665,8 @@
     formToResults();
     setStep(1);
     activateChat();
+    mtabChat.disabled=false;mtabCanvasLabel.textContent="Results";setMobileView("chat"); // assistant is now the active surface
+
     instr('<b>Describe one record at a time.</b> The assistant confirms each request, then searches the library.');
     bot("Thank you for using the Cedar Vale AI-Powered Open Records Search. I'll help you write descriptions that get the best results.",function(){
       bot("If you need more than one type of record, describe each one separately. Please describe a record you're looking for.",function(){
@@ -710,6 +745,7 @@
 
   function renderResults(q){
     var data=datasetFor(q);
+    setMobileView("canvas"); // results are ready — bring the canvas forward to review + select
     resultsMain.innerHTML='<div class="res-query">Results for <b>“'+esc(q)+'”</b> · '+data.length+' in the records library</div>';
     data.forEach(function(r){
       var el=document.createElement("div");el.className="rec";el.setAttribute("data-id",r.id);
@@ -768,6 +804,7 @@
 
   /* ================= finalize + loop ================= */
   function finalizeOptions(){
+    setMobileView("canvas"); // the finalize scrim is absolute within the results panel — keep it on screen
     var greenCount=state.selected.filter(function(s){return s.tag==="green"}).length;
     scrimCard.innerHTML=
       '<h3>How would you like to handle these records?</h3>'+
@@ -784,9 +821,20 @@
   function chosenFinalize(kind){
     scrim.classList.remove("show");
     resultsMain.style.opacity="1";
+    setMobileView("chat"); // the "search for more?" prompt is in chat
     sys(kind==="download"?"You chose: download public-ready now, submit the rest.":"You chose: submit all for processing.");
     state.lastChoice=kind;
     bot("Done. Would you like to search for more records?",function(){
+      quick([
+        {label:"Yes, add another",act:function(){nextRound()}},
+        {label:"No, I'm finished",act:function(){finishRequest()}}
+      ]);
+    });
+  }
+  // No-instant (email / video / etc.) path: nothing to select, so just ask whether to add more or finish.
+  // (Was called at the Format-B branch but never defined — that path threw a ReferenceError.)
+  function askMoreOrReview(){
+    bot("Would you like to search for another record, or are you finished?",function(){
       quick([
         {label:"Yes, add another",act:function(){nextRound()}},
         {label:"No, I'm finished",act:function(){finishRequest()}}
@@ -797,12 +845,14 @@
     state.round++;
     state.selected=[];renderSide();
     setStep(1);
+    setMobileView("chat"); // next record is described in chat
     resultsMain.innerHTML='<div class="side-empty" style="padding:60px 12px">Your next search will appear here.</div>';
     instr('<b>Describe your next record.</b> Each description becomes its own search.');
     bot("Great — please describe the next record you're looking for.",function(){flow=onDescription});
   }
   function finishRequest(){
     setStep(3);
+    setMobileView("canvas"); // the review/submit scrim is absolute within the results panel
     instr('<b>Request ready to submit.</b> Review the summary, then confirm.');
     var deliveryTxt=state.delivery==="mail"?("Postal · "+addrOneLine()):("Email · "+fEmail.value.trim());
     var recRows=state.descriptions.map(function(d,i){return '<div class="rec-line">Record '+(i+1)+'<span class="mono">'+esc(d)+'</span></div>'}).join("");

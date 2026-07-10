@@ -255,6 +255,32 @@ once per request regardless of item count.
 Mockup: `#waiverRow` / `#commercialRow` under a `.fee-choice` block in the Phase-0 form, waiver reveals
 `#waiverReasonBlock`, mutual exclusion + a Fees line in the review summary.
 
+## Mobile / narrow layout `[RESOLVED 2026-07-10]`
+Resolves Open Question #5. On a phone the side-by-side split (canvas left, chat right) can't hold. Decision
+(Kevin): **step-through** — show **one surface at a time**, advanced by the same phase transitions as desktop,
+with a **Form/Results ↔ Chat toggle** for the phases where both are relevant. Chosen over stacking (canvas
+above chat) because the flow is inherently sequential and a stacked results grid + Selected column + chat is a
+long, unfocused scroll where the active surface isn't obvious.
+
+**Behavior (≤860px; prototyped in the mockup):**
+- A sticky **two-button toggle** at the top of the stage: **Form/Results** and **Assistant** (with a
+  new-message **dot**). Hidden ≥861px — desktop keeps the true side-by-side.
+- **Phase 0 (form):** canvas surface shown; the Assistant tab is **disabled** (chat is idle until PROCEED).
+- **PROCEED:** the Assistant tab enables and the view switches to **chat** (describe the record). The canvas
+  toggle relabels **"Results."**
+- **Results ready:** view switches to **canvas** to review + select; the agent's follow-up message lands as an
+  **unread dot** on the Assistant tab (opening chat clears it).
+- **Selected Records** column drops **below** the results list (stacked, own scroll) instead of a 27% side
+  column.
+- **Proceed → "search for more?"** returns to **chat**; the finalize + review/submit scrims force **canvas**
+  (they're absolute within the results panel). Loop repeats.
+- One surface is always the natural focus; the toggle is the manual escape hatch. Reduced-motion + restart
+  (`location.reload()`) paths unaffected.
+
+Mechanics: a `.m-canvas`/`.m-chat` class on `#stage` shows exactly one child (`.stage.m-canvas > .chat{display:none}`
+etc.), all inside the `@media (max-width:860px)` block so desktop is untouched; `setMobileView()` drives it
+from the phase transitions.
+
 ## Certification (certified copies) `[DESIGN — not built]`
 Parent-level option captured at intake; the certified artifact is produced at **release**, by a clerk.
 
@@ -319,8 +345,10 @@ verify route + token, and a spec. **Release-stage slice**; the intake checkbox i
    item under one request; one number, one parent-level fee; NO "combined vs separate" (retired); the only
    ≥2-item choice is delivery timing. Clean model: SPEC_tasks_roles_mrr_fees §12. Staff-side management UI is the
    open follow-on (§12.1: RM workspace hub + estimate + search + early-release).]`
-5. **Mobile / narrow** — a side-by-side split can't hold on a phone. Does the left canvas stack above chat,
-   or become a step-through?
+5. **Mobile / narrow** — `[RESOLVED 2026-07-10 — see "Mobile / narrow layout" below.]` **Step-through** (one
+   surface at a time), not a stack: the side-by-side split collapses to a single surface with a **Form/Results ↔
+   Chat toggle**, driven by the same phase transitions as desktop. Chosen over stacking because the flow is
+   inherently sequential and a stacked results-grid + chat is a long, unfocused scroll.
 6. **Green-tag / public-ready** — needs the released/public-ready tagging surfaced on result cards (ties to the
    redaction "released records" path). `[UPDATED — now an "Available now — Public Records Library" tag; no inline
    download; per-page-or-free fee. See Decisions locked.]`

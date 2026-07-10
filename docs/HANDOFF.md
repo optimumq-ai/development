@@ -426,9 +426,24 @@ Verified code: waiver captured only in chat today; **commercial entirely unbuilt
 prompt once the form owns it. Mockup: `.fee-choice` block, waiver reason reveal, mutual exclusion, Fees line in
 the review summary. Design doc: #3 `[RESOLVED]` + "Fee-choice placement" section.
 
-**Still open on this design:** #5 mobile/narrow (stack vs step-through) — the last design open question. Staff
-follow-on: MRR RM workspace hub (`SPEC_tasks_roles_mrr_fees §12.1`). Whole screen still `[DESIGN — not built]`,
-paused pending Kevin's overall confirmation before any build slice branches.
+**#5 Mobile / narrow layout — RESOLVED (this session, separate commit).** Decision (Kevin): **step-through**
+(one surface at a time) over stacking — the flow is sequential and a stacked results grid + chat is a long
+unfocused scroll. ≤860px: a sticky **Form/Results ↔ Assistant** toggle (new-message dot); Phase 0 canvas
+(Assistant tab disabled until PROCEED) → PROCEED switches to chat → results-ready switches to canvas (agent
+follow-up lands as an unread dot) → Selected column stacks below results → "search more?" back to chat;
+finalize/review scrims force canvas. All behind `@media (max-width:860px)` (`setMobileView()` toggles a
+`.m-canvas`/`.m-chat` class on `#stage`) so desktop side-by-side is untouched. Design doc: #5 `[RESOLVED]` +
+"Mobile / narrow layout" section.
+
+**Pre-existing mockup bug fixed same commit:** `askMoreOrReview()` was **called** in the no-instant
+(email/video, Format-B) path but **never defined** → that path threw a ReferenceError. Defined it to mirror
+the "search for more or finish?" prompt (Yes→nextRound / No→finishRequest).
+
+**All six split-canvas design questions now RESOLVED** (#1 gate · #2 address · #3 fee-choice · #4 MRR · #5
+mobile · #6 library-tag). **Design is decided end-to-end.** Remaining: staff follow-on MRR RM workspace hub
+(`SPEC_tasks_roles_mrr_fees §12.1`). The whole screen is still `[DESIGN — not built]`, **now awaiting Kevin's
+go to branch the first build slice** — the two genuinely new builds are the Phase-0 form panel (address + gate
++ fee-choice + cert) and the results canvas; backend to reuse per the design doc's Build note.
 
 **No app code touched** — `DESIGN_split_canvas_intake.md`, `docs/mockups/split_canvas_intake.html` (JS
 syntax-checked clean, no stray refs), `HANDOFF.md`. The #2 schema + wiring is speced as a turnkey build slice,
