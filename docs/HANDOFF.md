@@ -888,3 +888,28 @@ its pid (root PM2 respawned it, pid 194830). No sudo available for root PM2.
 **Status:** the last open fee follow-up is closed. Remaining pre-existing items: auto-sent closure notice;
 staff-side MRR item-splitting (`SPEC_tasks_roles_mrr_fees §12`); estimate profiles unpopulated (§2 automation
 never fires). `frontend/build` git-ignored — committed: the two source files, the spec, this note.
+
+## 2026-07-10 (p) — TX cert rate set; PR #2 merged; main deploy verified
+
+**Cert rate:** the illustrative TX FR profile (`feeprof-tx-fr-v1`) shipped with `certification.rate=0`, so a
+requested certification priced at $0 even after the (o) wiring. Set to **$1.00 `per_record`** — applied to the
+live `fee_profiles` row via the real `PUT /api/fee-profiles/:id` path and synced into
+`backend/scripts/feeProfile.seed.js` so it survives a reseed. Figure is illustrative, labeled for verification
+against local policy. **Verified live on jur-tx:** a real `/public/submit` with `certificationRequested=true`
+now yields a **$1.00 certification line** (count 1, request total $1.10); GET context surfaces `rate=1`. Test
+rows cleaned up (0 left). Spec §1 parenthetical updated (was "the loaded TX example is 0").
+
+**PR #2 merged:** the certification intake→fee-engine wiring (o) + the TX cert-rate change — opened as
+**PR #2** → `main`, `mergeable_state: clean`, merged (merge commit **`8bf5dbb`**). 3 commits (`dcbf326` wiring ·
+`ea153e7` TX rate · merge). Merged via the GitHub API using the stored push credential (`gh` CLI not installed).
+Branch `fees/certification-intake-wiring` deleted on the remote and locally; local `main` fast-forwarded.
+
+**Deploy verification (running app, on `main` `8bf5dbb`):** working tree clean (no tracked drift); API healthy
+(`/api/health` `200`); nginx serves the built bundle (**served `main.8fa85771` == built**). The backend route
+change was already loaded (API restarted during (o)) and the frontend was rebuilt + served then, so main and the
+running deploy are consistent — no further restart/rebuild needed.
+
+**Status:** certification intake→fee wiring shipped to `main`, priced live on the default jurisdiction, verified
+deploying clean. The last open fee follow-up is closed. Remaining pre-existing items: auto-sent closure notice;
+staff-side MRR item-splitting (`SPEC_tasks_roles_mrr_fees §12`); estimate profiles unpopulated (§2 automation
+never fires).
