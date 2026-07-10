@@ -660,3 +660,40 @@ mobile toggle + cut-over pending]`; staff-side MRR item-splitting stays separate
 then **cut over `/portal`** to the v2 page; plus slice 1b (clarification reads stored `mailing_*`). Cert→fee-engine
 wiring (certification.count) remains a release-stage/fee-domain follow-up. `frontend/build` git-ignored —
 committed: schema (×2), publicChat.js, the page, the spec, this note.
+
+## 2026-07-10 (h) — Split-canvas BUILD slice 6: mobile step-through (BUILT + verified)
+
+**Slice:** Sixth build slice — the ≤860px mobile step-through for `/portal/v2`. One surface at a time with a
+sticky Form/Results ↔ Assistant toggle, driven by the same phase transitions as desktop. Frontend only
+(`PublicPortalV2Page.js`), all behind a media query — desktop side-by-side untouched. On `spec/task-screens`.
+
+**Built:**
+- **CSS** (`@media (max-width:860px)`): `.stage` becomes a column; `.stage.m-canvas > .chat` / `.stage.m-chat >
+  .canvas` hide the inactive surface (`display:none`); the Selected-Records column drops **below** the results
+  list (`results-split` → column, `results-side` bordered-top, own scroll); a sticky `.mtabs` two-button toggle.
+  `.mtabs{display:none}` outside the query keeps desktop clean.
+- **State/logic:** `mobileView` ('canvas'|'chat') stamps `m-<view>` on `<main class="stage">`; `chatUnread`
+  drives the Assistant tab's dot; `setMobileView('chat')` clears the dot. Transitions wired to mirror desktop:
+  **PROCEED → chat** (Assistant tab enables, canvas tab relabels "Results"); **search results → canvas** + flag
+  unread (the accompanying chat reply is now behind the canvas); **canvas Proceed → chat** (the "another record?"
+  prompt); **Review & submit → canvas** (the scrim is absolute within the results panel). The toggle is the
+  manual escape hatch; Assistant tab is disabled in phase 0 (chat idle).
+- **Cleanup:** removed the now-dead intake-payload assembly + `console.log` from `proceed()` (slice 5's
+  `submitRequest` reassembles it); `proceed()` is now just the phase transition + mobile hand-off to chat.
+
+**Evidence (verified live — frontend built + nginx-served):** browser drive (`drive6.js`) at **390×844** —
+**21/21 assertions pass**: phase-0 toggle visible with "Form" tab + disabled Assistant, form shown / chat hidden
+→ PROCEED switches to chat (Assistant enabled+active, tab relabels "Results") → describe → search → view pulls
+to canvas + **Assistant unread dot** + Selected column stacked below → tap Assistant shows chat & clears dot →
+tap Results shows canvas → select → canvas Proceed returns to chat → Review forces canvas scrim. **Desktop
+(1280px) regression:** toggle hidden, both surfaces visible side-by-side after PROCEED. Screens `14` (form) `15`
+(chat) `16` (results + stacked selected column) `17` (review) in scratchpad.
+
+**Spec:** `SPEC_public_portal_intake.md §2b` — mobile marked `[BUILT — slice 6]`; header now `[BUILT end-to-end
+incl. mobile — cut-over pending]`.
+
+**The whole split-canvas portal is now built end to end** (form · gate · chat · search · results canvas ·
+select · loop · review · submit · confirmation · mobile). **Next / remaining:** cut over `/portal` to the v2
+page and retire the chat-first flow (the one open item); plus slice 1b (clarification reads stored `mailing_*`)
+and the release-stage cert→fee-engine wiring. `frontend/build` git-ignored — committed: the page, the spec,
+this note.

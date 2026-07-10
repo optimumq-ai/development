@@ -249,10 +249,31 @@ var STYLES = `
 
 .scv .footnote{padding:8px 20px 16px;font-size:11px;color:var(--muted);text-align:center}
 
+/* Mobile step-through (design §Mobile): one surface at a time + a Form/Results ↔ Assistant toggle,
+   driven by the same phase transitions as desktop. Selected-records column stacks below results.
+   Desktop side-by-side (≥861px) is untouched — every rule here is inside the media query. */
+.scv .mtabs{display:none}
 @media (max-width:860px){
-  .scv .stage{flex-direction:column}
+  .scv .stage{flex-direction:column;position:relative}
   .scv .canvas,.scv .chat{max-width:none;width:100%}
-  .scv .chat{flex:1 1 auto}
+  .scv .canvas{min-height:66vh}
+  .scv .chat{flex:1 1 auto;min-height:66vh}
+  /* show exactly one surface at a time */
+  .scv .stage.m-canvas > .chat{display:none}
+  .scv .stage.m-chat > .canvas{display:none}
+  /* selected-records column drops below the results list */
+  .scv .results-split{flex-direction:column}
+  .scv .results-side{flex:0 0 auto;border-left:none;border-top:1px solid var(--hair);max-height:40vh}
+  /* the surface toggle */
+  .scv .mtabs{display:flex;gap:6px;padding:8px 12px;background:var(--surface-2);border-bottom:1px solid var(--hair);
+    position:sticky;top:0;z-index:6}
+  .scv .mtab{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 10px;font:inherit;
+    font-size:13px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--hair);
+    border-radius:8px;cursor:pointer;transition:var(--step)}
+  .scv .mtab.active{color:var(--blue);border-color:var(--blue);background:var(--blue-tint)}
+  .scv .mtab:disabled{opacity:.5;cursor:not-allowed}
+  .scv .mtab .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);display:none;flex:none}
+  .scv .mtab.has-unread .dot{display:inline-block}
 }
 @media (prefers-reduced-motion:reduce){.scv *{transition:none!important;animation:none!important}}
 .scv :focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
@@ -293,6 +314,14 @@ export default function PublicPortalV2Page() {
 
   // ---- phase (0 form -> 1 chat activated) ----
   const [phase, setPhase] = useState(0);
+
+  // ---- mobile step-through (≤860px): one surface at a time + a Form/Results ↔ Assistant toggle ----
+  const [mobileView, setMobileViewRaw] = useState('canvas'); // 'canvas' (form/results) | 'chat'
+  const [chatUnread, setChatUnread] = useState(false);       // new-message dot on the Assistant tab
+  const setMobileView = useCallback(function (v) {
+    setMobileViewRaw(v);
+    if (v === 'chat') setChatUnread(false); // opening the assistant clears the dot
+  }, []);
 
   // ---- Phase 1: chat conversation engine ----
   // `messages` holds only real user/assistant turns (the static opening greeting is rendered
@@ -366,6 +395,10 @@ export default function PublicPortalV2Page() {
         setCanvasQuery((r.data && r.data.searchQuery) || '');
         setSelected([]);
         setQuickReplies([]);
+        // Mobile: results pull the canvas forward to review + select; the accompanying chat reply is now
+        // behind it, so flag the Assistant tab as unread. (Inert on desktop — the toggle is hidden.)
+        setMobileView('canvas');
+        setChatUnread(true);
       } else {
         // No results (zero-match / PATH-b) — the conversation is chat-driven, so show its quick replies.
         setQuickReplies((r.data && Array.isArray(r.data.quickReplies)) ? r.data.quickReplies : []);
@@ -402,6 +435,7 @@ export default function PublicPortalV2Page() {
     var msg = picked.length
       ? ('I have selected ' + picked.length + ' record' + (picked.length === 1 ? '' : 's') + ' from those results.')
       : 'None of those results match what I need.';
+    setMobileView('chat'); // the "search for more?" prompt comes back in chat
     sendMessage(msg);
   }
 
@@ -502,31 +536,10 @@ export default function PublicPortalV2Page() {
 
   function proceed() {
     if (!canProceed) return;
-    // Phase 0 -> 1 trigger: activate the chat agent. The assembled intake payload is captured here
-    // and carried to the submit path in a later slice (slice 5). Fields the split-canvas /public/submit
-    // already persists (slice 1 backend): requestorType, feeWaiverRequested/Reason, mailing_* .
-    var payload = {
-      requestorName: name.trim(),
-      requestorEmail: email.trim(),
-      requestorPhone: phone.trim(),
-      deliveryMethod: delivery,
-      requestorType: commercial ? 'commercial' : 'individual',
-      feeWaiverRequested: waiver,
-      feeWaiverReason: waiver ? waiverReason.trim() : '',
-      certificationRequested: cert,
-      emailVerificationMethod: verifyMethod,
-      submissionChannel: 'manual_form',
-    };
-    if (delivery === 'mail') {
-      payload.mailingStreet1 = addr.street1.trim();
-      payload.mailingStreet2 = addr.street2.trim();
-      payload.mailingCity = addr.city.trim();
-      payload.mailingState = addr.state.trim().toUpperCase();
-      payload.mailingZip = addr.zip.trim();
-    }
-    // eslint-disable-next-line no-console
-    console.log('[portal/v2] Phase-0 complete — intake payload for later submit slice:', payload);
+    // Phase 0 -> 1 trigger: activate the chat agent (the form fields are read at submit time by
+    // submitRequest). On mobile, hand the citizen to the Assistant to describe their first record.
     setPhase(1);
+    setMobileView('chat');
   }
 
   // foot hint mirrors the mockup's guidance
@@ -564,7 +577,19 @@ export default function PublicPortalV2Page() {
         <div className="step"><span className="num">4</span> Submit</div>
       </nav>
 
-      <main className="stage">
+      <main className={'stage m-' + mobileView}>
+        {/* Mobile-only surface toggle (≤860px); hidden on desktop via CSS */}
+        <div className="mtabs">
+          <button type="button" className={'mtab' + (mobileView === 'canvas' ? ' active' : '')}
+            onClick={function () { setMobileView('canvas'); }}>
+            {phase === 0 ? 'Form' : 'Results'}
+          </button>
+          <button type="button" className={'mtab' + (mobileView === 'chat' ? ' active' : '') + (chatUnread ? ' has-unread' : '')}
+            disabled={phase !== 1} onClick={function () { if (phase === 1) setMobileView('chat'); }}>
+            Assistant <span className="dot" />
+          </button>
+        </div>
+
         {/* ============ LEFT CANVAS — Phase 0 form → Phase 2 results ============ */}
         <section className="canvas">
           {phase === 0 && (
@@ -759,7 +784,7 @@ export default function PublicPortalV2Page() {
                     disabled={!canvasResults || chatSending} onClick={proceedResults}>Proceed →</button>
                   {children.length > 0 && (
                     <button className="btn-review" type="button"
-                      onClick={function () { setSubmitState('idle'); setReviewOpen(true); }}>
+                      onClick={function () { setSubmitState('idle'); setReviewOpen(true); setMobileView('canvas'); }}>
                       Review &amp; submit request ({children.length} record{children.length !== 1 ? 's' : ''})
                     </button>
                   )}
