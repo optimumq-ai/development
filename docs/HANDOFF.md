@@ -844,3 +844,47 @@ daemon (pid 1136, `/root/.pm2` — the real API manager, backed by `pm2-root.ser
 **Status: split-canvas portal shipped to `main` and verified deploying clean.** Remaining are pre-existing,
 out-of-scope follow-ups only (release-stage cert→fee-engine `certification.count`; auto-sent closure notice;
 staff-side MRR item-splitting per `SPEC_tasks_roles_mrr_fees §12`).
+
+## 2026-07-10 (o) — Certification intake→fee-engine wiring (BUILT + verified)
+
+**Slice:** Close the long-standing follow-up "release-stage cert→fee-engine wiring (`certification.count`)".
+The requestor's intake certification opt-in (`requests.certification_requested`, captured by split-canvas
+slice 5) never reached the fee engine — `FeeEstimatePanel` never sent a `certification` block, so a requested
+certification was silently dropped from every estimate. Recovered after a mid-session disconnect (the prior
+agent's WIP was never saved — clean tree, empty scratchpad — so this was built fresh).
+
+**Built (backend `backend/src/routes/feeEstimates.js`):**
+- New `defaultCertification(body, loaded)` — precedence **explicit body block → intake opt-in → none**. When the
+  body omits `certification`, defaults `{ count: <#priced components>, source: 'intake' }` iff
+  `certification_requested=1` (per_record unit → one per component; an MRR master certifies each child). An
+  explicit body block always wins, including `{count:0}` to drop it.
+- Wired into **both** `POST /request/:id` (estimate) and `POST /request/:id/reconcile`.
+- `GET /request/:id` now returns `certification: { requested, suggestedCount, rate, unit }` so the panel can
+  show the opt-in and pre-fill the count.
+
+**Built (frontend `frontend/src/components/ui/FeeEstimatePanel.js`):**
+- New `certification` state, hydrated from the GET context (or the latest snapshot's saved input).
+- A certification control beside Delivery/Purpose (checkbox defaulted from intake + editable count + rate hint),
+  sent on both calculate + reconcile.
+- An itemized "Certification (N records)" line in the estimate result.
+
+**Evidence (verified live — API restarted clean, single healthy process on :3001; frontend rebuilt `Compiled
+successfully`, nginx serving the new bundle `main.8fa85771`):**
+- **Engine** (direct): `certification.count=2 @ rate=5 → $10` line; `count=0`/`null` → no line item.
+- **Route** (real `/public/submit` → auth'd fee-estimate API): request WITH intake cert → `GET` returns
+  `requested=true, suggestedCount=1`; `POST` with **no** override persists input `certification={count:1,
+  source:intake}`; explicit `{count:0}` and `{count:3}` overrides both respected (read back by exact snapshot
+  id); request WITHOUT intake cert → `requested=false, suggestedCount=0`, `POST` defaults to **no** cert. All
+  cert paths pass; every test request + child row cleaned up (**0 left**).
+- NB: the loaded **TX** FR profile has `certification.rate=0`, so the line is $0 there — this wiring feeds the
+  count regardless; pricing appears wherever a profile sets a non-zero cert rate.
+
+**Spec:** `SPEC_fees_estimates_payments.md` §1 — certification intake→engine wiring marked `[BUILT]`.
+
+**Housekeeping:** a `pm2 restart` under the `optimumq` user spawned a stray daemon (no `optimumq-api` there —
+the real API is root-PM2-managed); killed it (`pm2 kill`, scoped to `~/.pm2`) and restarted the API by killing
+its pid (root PM2 respawned it, pid 194830). No sudo available for root PM2.
+
+**Status:** the last open fee follow-up is closed. Remaining pre-existing items: auto-sent closure notice;
+staff-side MRR item-splitting (`SPEC_tasks_roles_mrr_fees §12`); estimate profiles unpopulated (§2 automation
+never fires). `frontend/build` git-ignored — committed: the two source files, the spec, this note.
