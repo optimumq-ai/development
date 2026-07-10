@@ -954,3 +954,26 @@ Housekeeping of long-standing untracked cruft in the working tree.
 **Left intentionally:** `imports/research/` (real content, untouched).
 
 No tracked-code change beyond adding CLAUDE.md; the deletions were all of untracked files.
+
+## 2026-07-10 (s) — main deploy verified clean (post-cleanup)
+
+Full deploy verification from the `main` checkout `ecffe7d` (in sync with `origin/main`, 0 ahead / 0 behind),
+running app.
+
+- **Clean checkout** — on `main`, no tracked drift; only leftover is the known root-owned
+  `frontend/build.stale-root/` (needs `sudo rm -rf`).
+- **Frontend** — fresh build (`rm -rf build` + `CI=false NODE_OPTIONS=--openssl-legacy-provider npm run build`)
+  → `Compiled successfully`; nginx serves the just-built bundle (served `main.8fa85771` == built).
+- **Backend** — restarted from `main` (killed pid → root-PM2 respawn, pid 198523); single healthy listener on
+  :3001; `initDb()` applied the schema clean; health `200`.
+- **Schema** — all merged-slice columns present (`mailing_*`, `certification_requested`,
+  `email_verification_method`, `fee_waiver_reason`, `is_mrr`, `routing_basis`); `fee_profiles` present.
+- **Routes** — `/api/health`, `/portal`, `/portal/request`, `/portal/library`, `/portal/v2` all `200`.
+- **End-to-end round-trip** — `POST /public/submit` → `201`; row persisted + **routed** (department
+  `dept-openrecords`, classification `complex`, deadline, `routing_basis=general`, history `CLASSIFIED`);
+  `is_mrr=1` (fix holds); certification + `email_verification_method` + mailing address stored; onIntake spawned
+  1 task + 1 deadline clock. Test data cleaned up (0 rows left).
+
+**Note:** one probe with a deliberately terse 2-line description was left `department_id=null` — the LLM
+classifier correctly declined to route a near-empty request to a department ("unassigned for triage"), not a
+deploy regression; a real description routes fully (verified). **main deploys clean.**
