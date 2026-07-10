@@ -977,3 +977,36 @@ running app.
 **Note:** one probe with a deliberately terse 2-line description was left `department_id=null` — the LLM
 classifier correctly declined to route a near-empty request to a department ("unassigned for triage"), not a
 deploy regression; a real description routes fully (verified). **main deploys clean.**
+
+## 2026-07-10 (t) — Session summary
+
+Session picked up after a mid-task disconnect (the prior agent was wiring the certification page fee; its WIP
+was never saved — clean tree, empty scratchpad — so the work was rebuilt fresh). Everything below shipped to
+`main` and was verified in the running app.
+
+**Delivered:**
+1. **Certification intake → fee-engine wiring** (o) — the requestor's intake opt-in
+   (`requests.certification_requested`) now defaults `certification.count` on estimate + reconcile
+   (`defaultCertification`, one per priced component; explicit body block including `{count:0}` overrides). GET
+   estimate context surfaces the opt-in; `FeeEstimatePanel` gained a certification control + result line. Closed
+   the last open fee follow-up.
+2. **TX FR certification rate** (p) — set from `0` → `$1.00 per_record` (illustrative) via the real
+   `PUT /api/fee-profiles/:id` path + synced into `feeProfile.seed.js`, so the line prices live on the default
+   jurisdiction.
+3. **PR #2** opened + merged into `main` (merge `8bf5dbb`); branch deleted, `main` fast-forwarded.
+4. **Full smoke test** (q) — 28/28, submit → route → estimate (incl. the $1.00 cert line) → search → deliver.
+5. **Repo cleanup** (r) — removed stray backups (`*.bak`, `build.bak-20260704b2/`) + `imports/testdrop/` PDFs;
+   checked in `CLAUDE.md` (was untracked).
+6. **Deploy verification** (s) — `main` deploys clean (fresh FE build served, BE healthy, schema/routes/round-trip
+   all green).
+
+**Commit trail on `main`:** `dcbf326` (wiring) · `ea153e7` (TX rate) · `8bf5dbb` (PR #2 merge) · `932f111`
+(handoff) · `03588ce` (smoke handoff) · `96ae3fa` (CLAUDE.md) · `ecffe7d` (cleanup handoff) · `a4a5000` (deploy
+handoff).
+
+**Outstanding (carry-over):**
+- `frontend/build.stale-root/` — root-owned, needs `sudo rm -rf /opt/optimumq/frontend/build.stale-root` (no sudo
+  as `optimumq`).
+- The $1.00 TX cert rate is illustrative — replace with the jurisdiction's real certification fee before prod.
+- Pre-existing, out of scope: auto-sent closure notice; staff-side MRR item-splitting
+  (`SPEC_tasks_roles_mrr_fees §12`); estimate profiles unpopulated (`SPEC_fees §2` automation never fires).
