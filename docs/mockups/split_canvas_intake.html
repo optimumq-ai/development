@@ -492,13 +492,23 @@
   });
   gVerify.addEventListener("click",function(){confirmEmail("verify")});
   gVisual.addEventListener("click",function(){confirmEmail("visual")});
+  // Restore the gate to its pristine (locked) state — used when the email is edited
+  // after a send/confirm, so a confirmation can never go stale against a new address.
+  function resetGate(){
+    state.emailConfirmed=false;state.emailSent=false;
+    lockedRegion.classList.add("locked");
+    lockNote.classList.remove("hidden");
+    gate.classList.remove("satisfied");
+    gSend.disabled=false;gSend.classList.remove("sent");gSend.textContent="Send verification email now";
+    gVerify.style.display="";gVerify.classList.remove("done");gVerify.textContent="Email address verified";gVerify.disabled=true;
+    gVisual.style.display="";gVisual.classList.remove("done");gVisual.textContent="Visually verified";gVisual.disabled=false;
+  }
   [fName,fPhone,fAddr].forEach(function(el){el.addEventListener("input",refreshFormState)});
   fEmail.addEventListener("input",function(){
+    // Any edit to a sent-or-confirmed address invalidates it: reset the gate so the
+    // citizen must re-send/re-confirm against the new address (re-locks lower fields).
+    if(state.emailConfirmed || state.emailSent) resetGate();
     refreshFormState();
-    if(!state.emailConfirmed && state.emailSent){ // email edited after sending — reset so it's re-sent to the new address
-      state.emailSent=false;gVerify.disabled=true;
-      gSend.disabled=false;gSend.classList.remove("sent");gSend.textContent="Send verification email now";
-    }
   });
 
   $("#dEmail").addEventListener("click",function(){setDelivery("email")});

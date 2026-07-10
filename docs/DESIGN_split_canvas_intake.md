@@ -136,6 +136,43 @@ Validated interactively in the clickable prototype. These update the Phase 0 / P
 - **Include certification** — a **parent-level checkbox on the Phase 0 form** (see next section). Kept off the
   chat agent by design: reduces misread risk, and anyone who needs certification recognizes the box instantly.
 
+## Email-accuracy gate — state machine `[RESOLVED 2026-07-10]`
+Resolves Open Question #1. Prototyped in `docs/mockups/split_canvas_intake.html`. The gate guards the lower
+form (Phone · delivery · **mailing address** · certification · PROCEED); its whole job is to force an accurate
+email before anything else is usable.
+
+**One flag, two paths.** Gate state is a single boolean `email_confirmed`, set by *either* route — they are NOT
+mutually exclusive choices, just two ways to satisfy the same flag. Whichever fires wins; the other button is
+hidden. The route taken is recorded as `email_verification_method ∈ {attested, visual}` for downstream audit.
+
+**Trust model = self-attest** (decided 2026-07-10, kept as prototyped). "Email address verified" is a citizen
+self-assertion that they received the mail — there is **no backend token/poll**; it only proves the address is
+well-formed + the citizen claims delivery. (Code-entry / link-poll were considered and declined for now; if a
+stronger guarantee is ever wanted, that is a self-contained upgrade to this one button + a verify route.)
+
+**Buttons & enablement:**
+- **Send verification email now** — enabled whenever the Email field is a valid format. On click: fires the real
+  send (reuse `[[VERIFY_EMAIL]]`/Resend), then disables itself ("✓ sent — check your inbox") and **enables
+  "Email address verified."**
+- **Email address verified** — disabled until a send has happened for the current address. On click →
+  `email_confirmed=true`, `method=attested`.
+- **Visually verified** — **always available** (decided 2026-07-10), independent of Send; the escape hatch for a
+  citizen with no immediate inbox access ("carefully review the address you typed, then click"). On click →
+  `email_confirmed=true`, `method=visual`. Consequence, accepted: the email round-trip is effectively optional;
+  the weaker method is simply recorded, not blocked.
+
+**On confirm (either path):** lower region un-dims, lock note hides, gate shows the green/satisfied style, the
+winning button shows its "✓" done state, the other is hidden, both disabled.
+
+**Re-lock rule (decided 2026-07-10 — closes the stale-confirmation hole):** editing the **Email** field after
+the gate is satisfied **resets it to pristine** — `email_confirmed=false`, `method` cleared, lower region
+re-dims, both buttons restored (Verified disabled-until-resend, Visually enabled), Send re-enabled. Guarantees
+the confirmed address always equals the address on file (you can't verify A then submit B). Implemented as
+`resetGate()` in the mockup, fired from the Email `input` handler whenever a send-or-confirm had occurred.
+
+**PROCEED** stays disabled until: Name present · Email valid · `email_confirmed` · (mailing address present when
+delivery = mail). Clicking it activates the chat agent (Phase 1).
+
 ## Certification (certified copies) `[DESIGN — not built]`
 Parent-level option captured at intake; the certified artifact is produced at **release**, by a clerk.
 
@@ -183,9 +220,10 @@ request; the fee engine already prices it. New work = template + generator, per-
 verify route + token, and a spec. **Release-stage slice**; the intake checkbox is the only part on this screen.
 
 ## Open questions (for the working session)
-1. **Verification gate wording/logic** — are "Verification Email Received" and "Visually Reviewed for Accuracy"
-   two mutually-exclusive buttons, and does pressing one disable the other? What re-enables the dimmed section
-   exactly?
+1. **Verification gate wording/logic** — `[RESOLVED 2026-07-10 — see "Email-accuracy gate state machine" below.]`
+   Not two competing toggles: **one `email_confirmed` flag**, satisfied by *either* path; the winner is recorded
+   and the other button is hidden. Trust model = **self-attest** (kept as-is); **Visually verified = always
+   available** (equal escape hatch for no-inbox-access); editing the email after unlock **re-locks the gate**.
 2. **Where does address live in the data model** — new `requests.mailing_address` column (+ structured
    street/city/state/zip?) vs a single freeform block. Postal clarification (§5b) currently takes an inline
    address; this would make it a real persisted field.

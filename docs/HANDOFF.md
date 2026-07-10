@@ -342,3 +342,49 @@ clarification needs no inline address; (b) **auto-sent closure notice** when `cl
 — the 7-field policy editor + the record-search "Contact requestor" button (design nod pending, UI rule); (d)
 **Michigan** clock-model conflict (survey §5.1); (e) **per-jurisdiction** policy storage + precedence (today
 global in `system_config`).
+
+## 2026-07-10 — Split-canvas portal intake design (recovered) + MRR model rewrite (DESIGN ONLY)
+
+**Slice:** A full day of design/spec on the **public portal split-canvas intake**, capped by rewriting the
+MRR (multiple-record-request) fee/item model. **No code touched** — all four commits are docs. Still on
+`spec/task-screens`; working tree clean after; HEAD `20ff869`.
+
+**Context:** Two prior session drops (the DO console + OOM issues) lost a live brainstorm with Kevin. It was
+reconstructed from `imports/.../info_lost_recaptured.pdf` into an authoritative design doc so it can't be lost
+again, then refined interactively via a clickable mockup.
+
+**Produced (docs, in commit order):**
+- `8938c95` — `docs/DESIGN_split_canvas_intake.md` `[NEW]` — recovered design capture. Chat docks far right;
+  the left is a two-phase canvas: **Phase 0** a structured intake *form* (name/email + email-accuracy gate →
+  phone/delivery/**mailing address** [the address-gap fix] → Proceed), **Phase 1/2** the chat builds one record
+  description at a time → results canvas (results area + ~25% Selected Records column) → "another record?" loop.
+- `9a6e936` — **Decisions locked** section + `docs/mockups/split_canvas_intake.html` `[NEW]` clickable prototype.
+  Locked: (1) **app-wide surface standard** — 3-layer greys, *white = active/editable*, panel grounds tinted,
+  page darker; "temperature-match" rule B−R=16 so greys coordinate. (2) START HERE header/copy. (3) email-accuracy
+  gate = inline "Send verification email now" + lower form locked until **Email address verified** (enabled only
+  after send) OR **Visually verified** (always available). (4) **Selected Records = per-child attach-and-clear**
+  (one description = one item; on Proceed it attaches + both panels clear; loop opens fresh canvas). (5)
+  immediate-download records = **tag only** "Available now — Public Records Library" (no inline download;
+  per-page-or-free fee; supersedes the old two-option download fork). (6) **certification** = parent-level
+  checkbox on the Phase-0 form (fee engine/notice already price it; gaps = requestor capture, cert-page
+  generator, verify route+token, spec — a release-stage slice, only the checkbox is on this screen).
+- `f46510c` — Phase-2 results instruction banner copy + PROCEED button; mockup synced.
+- `20ff869` — **MRR model rewrite** (`SPEC_tasks_roles_mrr_fees.md §12`). Retired the "master/child /
+  combined-vs-separate" muddle → clean 3-layer model: **L1 citizen** — one request, one number, one fee, one
+  deadline (the only ≥2-item choice is delivery timing); **L2 processing** — request holds items (one per
+  record), each flows the same engine, Request Manager coordinates, items roll up; **L3 fees** — computed once
+  at request level (per-request minimum/de-minimis/floor-ceiling/deposit/certification apply once = the legal
+  "combine into one request, one fee" rule). §12.1 reframed as the open **staff-UI** surface (4 items) off the
+  RM workspace hub. `SPEC_public_portal_intake.md` §2/Phase-3/5 + `DESIGN_split_canvas_intake.md` #4 updated.
+
+**Status:** `[DESIGN — not built]`, **PAUSED pending Kevin's confirmation** (UI rule — no screen built until the
+direction is agreed; this doc IS that direction). Backend to reuse: `[[VERIFY_EMAIL]]`/Resend, PATH (a)/(b)
+fork, native+library+email-count search modes, selected-records persist-at-submit, released-records surfacing.
+Two genuinely new builds: the **Phase-0 form panel** (address capture + gate) and the **results canvas**.
+
+**Open questions (`DESIGN_split_canvas_intake.md` §Open questions):** #4 MRR `[RESOLVED]`, #6 green-tag
+`[UPDATED→library tag]`. Still open: **#1 verification-gate state machine** (mutual-exclusivity? what re-locks?),
+#2 address in the data model (`requests.mailing_address` column shape), #3 fee-choice in Phase-0 vs chat, #5
+mobile/narrow (stack vs step-through). Staff-side follow-on: MRR RM workspace hub (`§12.1`, 4 UI items).
+
+**Next:** tackling **#1 the verification gate** this session.
