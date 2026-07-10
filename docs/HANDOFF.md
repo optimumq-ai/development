@@ -817,3 +817,30 @@ clarification address · the `is_mrr` fix), the clarification-policy engine + ou
 task-screen / MRR specs. Body includes the full-smoke evidence (UI 15/15, downstream 25/25, PATH-(b) probed).
 Created via the GitHub API using the stored push credential (`gh` CLI not installed on this host). No reviewers
 or labels set yet.
+
+## 2026-07-10 (n) — PR #1 merged; `main` deploy verified clean
+
+**Merge:** PR #1 merged into `main` (merge commit `fa27cac`, `merged_at 2026-07-10T22:50Z`) and closed; branch
+`spec/task-screens` deleted on the remote and locally (tracking ref pruned). All split-canvas work + the
+clarification-policy engine + specs are now on `main`.
+
+**Deploy verification (from the `main` checkout `fa27cac`, running app):**
+- **Clean checkout** — on `main`, no uncommitted tracked changes.
+- **Frontend** — fresh build (`rm -rf build` + `CI=false NODE_OPTIONS=--openssl-legacy-provider npm run build`)
+  → `Compiled successfully`; nginx serves the new bundle (served hash `main.5a77010c` = just-built hash).
+- **Backend** — restarted from `main`; single healthy process (root PM2 respawn, pid 190429 owns :3001),
+  `initDb()` applied the schema clean, all merged-slice columns present (`mailing_*`,
+  `certification_requested`, `email_verification_method`, `fee_waiver_reason`). Health `200`.
+- **Routes** — `/api/health`, `/portal`, `/portal/request`, `/portal/library`, `/portal/v2` all `200`.
+- **End-to-end round-trip** — `POST /public/submit` (2-record, postal + cert + visual verify) → `201`; row
+  persisted + routed correctly (**`is_mrr=1`** — the merged fix holds, department assigned, classification,
+  `certification_requested=1`, `email_verification_method=visual`, address stored). Test data cleaned up
+  (0 rows left). The transient multi-pid readings during restart were PM2 respawn overlap, not a crash loop.
+
+**Housekeeping:** a diagnostic `pm2 list`/`pm2 kill` had spawned a stray PM2 God Daemon under the `optimumq`
+user (`/home/optimumq/.pm2`, managing nothing); killed via `pm2 kill` (scoped to `~/.pm2`). Only the root PM2
+daemon (pid 1136, `/root/.pm2` — the real API manager, backed by `pm2-root.service`) remains; API unaffected.
+
+**Status: split-canvas portal shipped to `main` and verified deploying clean.** Remaining are pre-existing,
+out-of-scope follow-ups only (release-stage cert→fee-engine `certification.count`; auto-sent closure notice;
+staff-side MRR item-splitting per `SPEC_tasks_roles_mrr_fees §12`).
