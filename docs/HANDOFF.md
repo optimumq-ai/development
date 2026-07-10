@@ -935,3 +935,22 @@ records · both records in the description), then verified end to end and cleane
   (slice 1b).
 
 Harness saved at `scratchpad/smoke_full.js` (session ce55a45e). No code changes — verification only.
+
+## 2026-07-10 (r) — Repo cleanup: stray backups + test drops removed; CLAUDE.md checked in
+
+Housekeeping of long-standing untracked cruft in the working tree.
+
+**Deleted:**
+- `docs/FEE_ESTIMATE_VARIABLE_MAP.md.bak-20260701` — stale doc backup (original is tracked + present).
+- `frontend/build.bak-20260704b2/` (~4.2M) — backup of the git-ignored `frontend/build`.
+- `imports/testdrop/` — three test-drop PDFs (`e2e_test_…`, `sample_doc_1/2`) + the now-empty dir.
+
+**Committed:** `CLAUDE.md` — the project-instructions file was untracked; checked into `main` (`96ae3fa`).
+
+**Could NOT delete (needs root):** `frontend/build.stale-root/` — its `static/` subtree (dirs + files) is
+**root-owned**, so removing it requires write access to root-owned directories; no sudo available as the
+`optimumq` user. Left for someone with root: `sudo rm -rf /opt/optimumq/frontend/build.stale-root`.
+
+**Left intentionally:** `imports/research/` (real content, untouched).
+
+No tracked-code change beyond adding CLAUDE.md; the deletions were all of untracked files.
