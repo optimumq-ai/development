@@ -1188,3 +1188,13 @@ tree clean; `main` @ `865ebfd`, in sync with origin.
 **Outstanding:** none in the tree. Pre-existing product follow-ups (out of scope): auto-sent closure notice;
 staff-side MRR item-splitting (`SPEC_tasks_roles_mrr_fees §12`); estimate profiles unpopulated (`SPEC_fees §2`).
 A jurisdiction that charges to certify just sets a non-zero `certification.rate` in its FR profile.
+
+## 2026-07-10 (ad) — TX FR fee profile promoted draft → active
+
+Bumped `feeprof-tx-fr-v1` (the only TX FR profile) from `draft` to **active** via the real
+`PUT /api/fee-profiles/:id` path; synced the status literal in `feeProfile.seed.js` (`'draft'` → `'active'`).
+No config/rate change — cert rate stays 0 (ad is status-only). No competing active FR profile, so no conflict
+with `pickConfig` (active-first).
+
+**Verified live:** `GET /fee-estimates/request/:id` now reports `configProfile.status='active'`; an estimate
+computes against it (test total $15.50). Test row cleaned up (0 left). Committed: seed, this note.

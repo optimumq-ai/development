@@ -25,7 +25,7 @@ var cfg = {
   await db.run('DELETE FROM fee_profiles WHERE id = ?', [ID]);
   await db.run(
     'INSERT INTO fee_profiles (id, jurisdiction_id, context, version, status, name, config_json, created_by, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?)',
-    [ID, 'jur-tx', 'FR', 1, 'draft', 'Texas FR (example - illustrative figures, verify)', JSON.stringify(cfg), 'system', now, now]
+    [ID, 'jur-tx', 'FR', 1, 'active', 'Texas FR (example - illustrative figures, verify)', JSON.stringify(cfg), 'system', now, now]
   );
   var row = await db.get('SELECT * FROM fee_profiles WHERE id = ?', [ID]);
   console.log('Loaded from DB: ' + row.name + ' [' + row.context + ' v' + row.version + ', ' + row.status + ']');
