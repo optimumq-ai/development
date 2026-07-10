@@ -1198,3 +1198,10 @@ with `pickConfig` (active-first).
 
 **Verified live:** `GET /fee-estimates/request/:id` now reports `configProfile.status='active'`; an estimate
 computes against it (test total $15.50). Test row cleaned up (0 left). Committed: seed, this note.
+
+## 2026-07-10 (ae) — Full smoke re-run after profile activation — 28/28
+
+Re-ran the full smoke after (ad) promoted the TX FR profile to active. **Result: 28/28 pass, 0 fail; 0 rows
+left** — unchanged. Full pipeline green against the now-active profile: submit → route → workflow (1 task +
+1 clock) → estimate (opt-in surfaced, no cert line at rate 0 per 1 TAC §70.3, total $16.20) → deliver. Activation
+had no adverse effect. Verification only — no code change.
