@@ -14,9 +14,9 @@ Phased conversation; agent emits bracketed markers the system acts on.
   - **PATH (b) email/text, audio, photos, database exports, paper** → no library search; explain once, warmly; gather targeted details (senders/recipients + date range for email; date/location/incident for AV; event/date/location for photos); skip search.
   - **Email/text special case:** `[[EMAIL_SEARCH:terms]]` runs a **count-only** search (no content exposed); agent relays only the count and helps narrow if large (count-then-narrow).
 - **Phase 2.5 — Library search (PATH a):** `[[SEARCH_QUERY:...]]` → system searches; results injected as UNTRUSTED DATA; result-aware reply asks "any match?" (quick replies). Citizen selections are injected into agent context and **persisted on the request at submit**; agent will not re-search after selection and moves to finalize.
-- **Phase 3 — Multi-record detection:** two+ record types routing to different departments → ask combined vs separate (quick replies); records `mrrChoice`. `[PARTIAL — choice captured; "separate" performs NO split (see MRR spec)]`
+- **Phase 3 — Multi-record handling:** the per-record intake loop produces **one item per described record** under **one request** (one number, one parent-level fee). **No "combined vs separate" question** — combining is the default and the only path (MRR model, `SPEC_tasks_roles_mrr_fees.md` §12). The only ≥2-item choice is **delivery timing** (each-as-ready vs hold-all). `[SUPERSEDES the old "ask combined vs separate / mrrChoice" design — that question is retired]`
 - **Phase 4 — Fee waiver:** yes/no public-interest question → `[[FEE_WAIVER_INFO:yes|reason]]`. `[BUILT — superseded by §5 design]`
-- **Phase 5 — Confirm & submit:** summary → explicit confirmation → `[[SUBMIT_READY]]{json}[[END_SUBMIT]]` with contact, delivery, description, feeWaiver, isMrr, mrrChoice.
+- **Phase 5 — Confirm & submit:** summary → explicit confirmation → `[[SUBMIT_READY]]{json}[[END_SUBMIT]]` with contact, delivery, description, feeWaiver, isMrr. `[mrrChoice retired — combining is the default; delivery-timing (each-as-ready vs hold-all) replaces it, §12]`
 - **Quick replies:** `[[QUICK_REPLIES: A | B]]` tappable buttons; max one per message; only for closed questions; typing always works.
 
 ## 3. Handoff → request `[BUILT]`

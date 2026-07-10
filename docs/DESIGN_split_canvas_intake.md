@@ -191,8 +191,10 @@ verify route + token, and a spec. **Release-stage slice**; the intake checkbox i
    address; this would make it a real persisted field.
 3. **Fee-choice (§5)** — does the "commercial requester / fee waiver" opt-in live in this Phase-0 panel, or
    stay in chat?
-4. **MRR** — the per-description loop is exactly the MRR item-by-item intake (§6). `[PARTLY RESOLVED — one
-   description = one child, per-child attach-and-clear (Decisions locked). "combined vs separate" still open.]`
+4. **MRR** — the per-description loop is the MRR item-by-item intake (§6). `[RESOLVED — one description = one
+   item under one request; one number, one parent-level fee; NO "combined vs separate" (retired); the only
+   ≥2-item choice is delivery timing. Clean model: SPEC_tasks_roles_mrr_fees §12. Staff-side management UI is the
+   open follow-on (§12.1: RM workspace hub + estimate + search + early-release).]`
 5. **Mobile / narrow** — a side-by-side split can't hold on a phone. Does the left canvas stack above chat,
    or become a step-through?
 6. **Green-tag / public-ready** — needs the released/public-ready tagging surfaced on result cards (ties to the
