@@ -726,3 +726,29 @@ header marked `[BACKEND BUILT — chat-first frontend flow RETIRED, superseded b
 delete the retired chat-first render from `PublicPortalPage` (kept as fallback); slice 1b (clarification reads
 stored `mailing_*`); release-stage cert→fee-engine wiring (certification.count). `frontend/build` git-ignored —
 committed: `App.js`, `PublicPortalPage.js`, the spec, this note.
+
+## 2026-07-10 (j) — Remove the retired chat-first portal render (DONE + verified)
+
+**Slice:** Cleanup — delete the now-unreachable chat-first request UI from `PublicPortalPage`. Frontend only.
+On `spec/task-screens`.
+
+**Done:** `frontend/src/pages/PublicPortalPage.js` trimmed **658 → ~72 lines** — now just the landing chooser
+(Welcome + Library button + Create-Request button) plus the config fetch and the `?start=request` deep-link
+(both request entry points navigate to `/portal/request`). Removed all retired chat-first machinery: the chat
+loop (`sendMessage`, messages/quick-replies/typing render), the fallback form (`handleFormSubmit`, formData),
+email-verification polling (`resendVerification`/`skipVerification`/verify effects), the contact-form panel,
+the native-search modal (`runNativeSearch`/`openNativePanel`/`loadNativeSources`/`pickSource`), the submitted
+confirmation view, and their state/refs (`useRef` import dropped). The `/public/chat` backend endpoint +
+default prompt are untouched (retained server-side).
+
+**Evidence (verified live — frontend built clean; nginx-served):** re-ran `drive7.js` — **12/12 pass**: `/portal`
+still shows the Welcome chooser (both buttons, not the form) → Create → `/portal/request` split-canvas form;
+`?start=request` → `/portal/request`; `/portal/v2` → redirect; `/portal/request` direct; Library button →
+`/portal/library`. No behavior change — same routes, less code.
+
+**Spec:** `SPEC_public_portal_intake.md` — §2 now "chat-first frontend flow RETIRED and removed"; §2b cleanup
+line marked `[DONE]`.
+
+**Remaining (optional, non-blocking):** slice 1b (clarification reads stored `mailing_*`); release-stage
+cert→fee-engine wiring (certification.count). `frontend/build` git-ignored — committed: `PublicPortalPage.js`,
+the spec, this note.
