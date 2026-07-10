@@ -807,3 +807,13 @@ declared multiple described records. Re-ran the smoke after restart: `is_mrr=1`,
 
 **Result:** the split-canvas portal passes a full smoke (submit → route → tasks/clocks → deliver) end to end.
 Pre-existing out-of-scope items remain (cert→fee-engine `certification.count`; auto-sent closure notice).
+
+## 2026-07-10 (m) — PR opened for `spec/task-screens`
+
+Opened **PR #1** → `main`: **https://github.com/optimumq-ai/development/pull/1** — "Split-canvas public records
+portal (end-to-end) + clarification policy & task-screen specs". 30 commits (~4.5k insertions / 1.2k
+deletions). Covers the split-canvas portal built slice-by-slice (1→6 · cut-over · retired-render removal · 1b
+clarification address · the `is_mrr` fix), the clarification-policy engine + outreach/auto-close, and the
+task-screen / MRR specs. Body includes the full-smoke evidence (UI 15/15, downstream 25/25, PATH-(b) probed).
+Created via the GitHub API using the stored push credential (`gh` CLI not installed on this host). No reviewers
+or labels set yet.
