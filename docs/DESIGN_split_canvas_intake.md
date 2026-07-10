@@ -5,6 +5,26 @@
 This is the authoritative capture so it is never lost again. Supersedes nothing yet; when built it revises
 `SPEC_public_portal_intake.md` §2 (chat-only intake) and §4/§5 (form fallback / fee-choice).
 
+## Global surface standard `[AGREED 2026-07-10 — via mockup]`
+A three-layer value system, validated interactively in the clickable mockup. Candidate app-wide standard
+(not just this screen). Grounded in a human-factors read: a light-grey box on white reads as *disabled* to
+users conditioned by early software, so **white must mean "active/editable,"** and grounds must be tinted.
+
+| Layer | Role | Light | Dark |
+|---|---|---|---|
+| Page (around panels) | outermost frame | `#D8E0E8` | `#0A1017` |
+| Panel ground (form background + chat message area) | the surface a panel sits on | `#EBF3FB` | `#131E29` |
+| Active surface (text inputs, message bubbles) | anything editable/interactive | `#FFFFFF` | `#1E3040` |
+
+Rules: active = white (raised with a 1px border + whisper of shadow); panel grounds one step tinted; page one
+step darker again for contrast. Chat ground applies **only while the conversation is active**. Bubbles are
+white for BOTH speakers — side (left agent / right requestor) carries identity, not colour.
+
+**Temperature-match rule (why the greys "match"):** perceived warm/cool ≈ **B − R** (blue channel minus red).
+Two greys coordinate when their B−R is equal; a larger B−R is cooler. To lighten a grey **without** warming it,
+add the same amount to all three channels — do NOT pull toward white (that shrinks B−R and secretly warms it).
+Page and panel grounds above are both tuned to **B − R = 16**.
+
 ## Why this exists (problems it solves)
 1. **Postal mail is non-functional** — intake never captures a mailing/home address. Verified 2026-07-10:
    `[[CONTACT_FORM]]` collects Name/Email/Phone only (`publicChat.js:28`); the request INSERT has **no address
@@ -75,7 +95,8 @@ On Proceed, chat activates. Tentative opening script (verbatim from design):
 - Instruction on screen: when selection is done **or** you determine no records match, click **Proceed** at
   the bottom.
 - On Proceed: **screen fades to dark, the results still showing disappear.** A **multi-select with a click
-  button** sits at the bottom of the right column, offering **two options**:
+  button** sits at the bottom of the right column, offering **two options** `[SUPERSEDED — see Decisions locked:
+  replaced by the "Available now — Public Records Library" tag + library fulfillment]`:
   1. **"Download all public-ready records identified by the green tag, then submit remaining records for
      required processing."**
   2. **"Submit all records for required processing."**
@@ -90,6 +111,74 @@ On Proceed, chat activates. Tentative opening script (verbatim from design):
   included immediately in results**, and **the search will be conducted by the Open Records team.** (Reuses the
   existing PATH (a)/(b) fork in `publicChat.js`.)
 
+## Decisions locked — 2026-07-10 mockup session
+Validated interactively in the clickable prototype. These update the Phase 0 / Phase 2 designs above.
+- **Surface standard** — adopted app-wide (see top section).
+- **START HERE** header replaces "Tell us who you are"; instruction reads: "Provide information in the form
+  below. When all information is entered, click PROCEED. This will activate the AI Open Record Agent on the
+  right, and it will guide you through record search."
+- **Email-accuracy gate** — a **"Send verification email now"** button sits inline with the email field; the
+  lower form stays locked until the requestor clicks **Email address verified** (enabled only after send) OR
+  **Visually verified** (always available). No "optional / or" framing.
+- **Single phone box**; **mailing address** unlocks only for postal delivery.
+- **Selected Records = per-child, attach-and-clear** (NOT a running accumulation). One description = one child
+  request. On Proceed, that child's selected records **attach to the child**, and both the results area and the
+  Selected panel **clear**; the "another record?" loop opens a fresh canvas. Rationale: keeps per-record
+  provenance clean for downstream processing / fee / redaction; a single growing pile blurs which record answers
+  which ask. (Backlog #236 provenance-per-record aligns.)
+- **Immediate-download records** — **tag only:** "Available now — Public Records Library." No in-panel download
+  button; at submit these fulfill through the existing released-records / Public Library path. Fee: **per-page
+  copy cost only, or free** — never labor/redaction (there is none). **Supersedes** the Phase-2 "download
+  public-ready now vs submit all" two-option fork above.
+- **Include certification** — a **parent-level checkbox on the Phase 0 form** (see next section). Kept off the
+  chat agent by design: reduces misread risk, and anyone who needs certification recognizes the box instantly.
+
+## Certification (certified copies) `[DESIGN — not built]`
+Parent-level option captured at intake; the certified artifact is produced at **release**, by a clerk.
+
+**What "certified" means here.** A physical certified copy carries a clerk's attestation (name / title, "true
+and correct copy" wording), a hand-embossed seal, often a signature across the seal — either as a stamped block
+on the document or a separate certification page. The design problem is reproducing that trust for a **digital**
+copy in a way that **survives printing** and stands up in front of a judge.
+
+**Already exists (verified in code 2026-07-10):**
+- **Fee engine prices certification** — `feeEngine.js` has a certification line item, **once per request /
+  parent-level**, `count × rate`, unit configurable (`per_record` / per-page); it's in the extracted per-city
+  fee policy (`feePolicyExtract.js`), on the fee notice (`feeNotice.js`), and staff can set a certification
+  count on an estimate (`feeEstimates.js`). "Parent-level application" is the documented intent
+  (`FEE_ESTIMATE_KNOWLEDGE.md`). City certified-copy rates are catalogued in `FEE_ESTIMATE_VARIABLE_MAP.md` /
+  `CITY_FEE_SURVEY.md`.
+- **Separate concept — do not conflate:** a **"no-record-located certification"** (certifying that *no* record
+  exists) is a different, already-flagged gap (`FEE_ESTIMATE_VARIABLE_MAP.md` §8.3).
+
+**Gaps (not built):**
+1. **Requestor-facing capture** — nothing asks the requestor today (staff-only). → the Phase 0 checkbox fills
+   this; it sets `certification.count` (1 when checked), feeding the existing fee engine.
+2. **Certification-page template + generator** — city-specific; not in code or spec.
+3. **Verification route + token** — does not exist.
+4. **Spec section** — none today.
+
+**Digital binding + verification design (recommended):**
+- **Certification page** appended to the same PDF: clerk name / title, attestation wording, date, **page count**,
+  request number, and a **document fingerprint (SHA-256)**.
+- **Every page stamped** with the request number and **"Page X of N."** X-of-N makes page removal / insertion
+  evident — the anti-tamper workhorse.
+- **Online verification** (e.g. `city.gov/records/verify`): enter the code → the system opens the **exact stored
+  certified file** in a viewer for visual comparison and shows the same hash. Judge-facing proof; mirrors how real
+  court / recorder "certified electronic copy" systems work.
+- **Do NOT verify by the raw request number** — it is sequential / guessable; an enumerable URL would expose other
+  requests. Print the request number for humans; make the verify link carry a **separate non-guessable token**.
+  Human reference ≠ access key.
+- **Blockchain: rejected** — irrelevant once printed for a judge; portal-lookup + hash gives the same
+  tamper-evidence without the overhead.
+- **Optional digital-native layer:** PKI-sign the released PDF (Adobe "signed & valid" ribbon) for the digital
+  copy — nice-to-have, not required for the print path.
+
+**Why very buildable:** rides existing infra — the redaction output pipeline already stamps pages and appends a
+generated page (Vaughn index) via `pdf-lib`; the released-records store already ties the output file to the
+request; the fee engine already prices it. New work = template + generator, per-page stamp on certified output,
+verify route + token, and a spec. **Release-stage slice**; the intake checkbox is the only part on this screen.
+
 ## Open questions (for the working session)
 1. **Verification gate wording/logic** — are "Verification Email Received" and "Visually Reviewed for Accuracy"
    two mutually-exclusive buttons, and does pressing one disable the other? What re-enables the dimmed section
@@ -99,12 +188,13 @@ On Proceed, chat activates. Tentative opening script (verbatim from design):
    address; this would make it a real persisted field.
 3. **Fee-choice (§5)** — does the "commercial requester / fee waiver" opt-in live in this Phase-0 panel, or
    stay in chat?
-4. **MRR** — the per-description loop is exactly the MRR item-by-item intake (§6). One description = one child?
-   How is "combined vs separate" decided here?
+4. **MRR** — the per-description loop is exactly the MRR item-by-item intake (§6). `[PARTLY RESOLVED — one
+   description = one child, per-child attach-and-clear (Decisions locked). "combined vs separate" still open.]`
 5. **Mobile / narrow** — a side-by-side split can't hold on a phone. Does the left canvas stack above chat,
    or become a step-through?
-6. **Green-tag / public-ready** — "download all public-ready records identified by the green tag" needs the
-   released/public-ready tagging surfaced on result cards (ties to the redaction "released records" path).
+6. **Green-tag / public-ready** — needs the released/public-ready tagging surfaced on result cards (ties to the
+   redaction "released records" path). `[UPDATED — now an "Available now — Public Records Library" tag; no inline
+   download; per-page-or-free fee. See Decisions locked.]`
 
 ## Build note
 Per the UI rule, this needs an agreed design direction before any screen is built — this doc **is** that
