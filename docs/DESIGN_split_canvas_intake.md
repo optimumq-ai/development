@@ -136,6 +136,11 @@ Validated interactively in the clickable prototype. These update the Phase 0 / P
   public-ready now vs submit all" two-option fork above.
 - **Include certification** — a **parent-level checkbox on the Phase 0 form** (see next section). Kept off the
   chat agent by design: reduces misread risk, and anyone who needs certification recognizes the box instantly.
+  **Discoverability (2026-07-10):** unlike the rest of the lower form (fully dimmed behind the email gate), the
+  certification checkbox is **visible-but-disabled before the gate** — with an "Available once your email is
+  confirmed above" hint — so the option is never missed on first glance. The gate enables it on confirm and
+  re-disables (and unchecks) it on re-lock. (Mockup: the locked region dims its children individually, exempting
+  the `.cert-visible` row, since CSS opacity on the parent would otherwise cap the child.)
 
 ## Email-accuracy gate — state machine `[RESOLVED 2026-07-10]`
 Resolves Open Question #1. Prototyped in `docs/mockups/split_canvas_intake.html`. The gate guards the lower

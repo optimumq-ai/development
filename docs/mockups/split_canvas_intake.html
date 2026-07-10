@@ -146,7 +146,15 @@
   .gate.satisfied .g-lead span,.gate.satisfied .g-lead b{color:color-mix(in srgb,var(--green) 80%,var(--ink))}
 
   .locked-region{position:relative;padding:0 26px 8px;transition:var(--step)}
-  .locked-region.locked{opacity:.4;pointer-events:none;filter:saturate(.6)}
+  /* Dim the locked children individually (not the parent) so an exempt child can stay full-opacity —
+     CSS opacity is multiplicative, so a dimmed parent would otherwise cap its children. */
+  .locked-region.locked{pointer-events:none}
+  .locked-region.locked > *:not(.cert-visible){opacity:.4;filter:saturate(.6)}
+  /* Certification stays visible-but-disabled before the gate so the option is discoverable. */
+  .cert-visible input:disabled{cursor:not-allowed}
+  .cert-visible.check-row:has(input:disabled){opacity:.72}
+  .cert-hint{margin:6px 2px 0;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .cert-hint.hidden{display:none}
   .lock-note{margin:0 26px 18px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
   .lock-note.hidden{display:none}
   .radio-row{display:flex;gap:10px;flex-wrap:wrap}
@@ -384,10 +392,11 @@
             </div>
           </div>
         </div>
-        <label class="check-row" id="certRow">
-          <input type="checkbox" id="fCert">
+        <label class="check-row cert-visible" id="certRow">
+          <input type="checkbox" id="fCert" disabled>
           <span><span class="rc-t">Include certification (certified copy)</span><br><span class="rc-s">Adds an official signed certification page attesting the records are true and correct copies. Applies to the entire request. An additional fee may apply.</span></span>
         </label>
+        <div class="cert-hint cert-visible" id="certHint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Available once your email is confirmed above.</div>
         <div class="fee-choice">
           <div class="fee-lead">Fees <span>— standard rates apply by default</span></div>
           <div class="fee-opts">
@@ -479,7 +488,13 @@
       .filter(function(p){return p&&p!==", "}).join(", ")||"—";
   }
   var gate=$("#gate"),gVerify=$("#gVerify"),gVisual=$("#gVisual"),gSend=$("#gSend");
-  var lockedRegion=$("#lockedRegion"),lockNote=$("#lockNote"),addrBlock=$("#addrBlock");
+  var lockedRegion=$("#lockedRegion"),lockNote=$("#lockNote"),addrBlock=$("#addrBlock"),certHint=$("#certHint");
+  // Certification stays visible-but-disabled before the gate (discoverable); the gate enables/disables it.
+  function setCertEnabled(on){
+    var box=$("#fCert");if(!box)return;
+    box.disabled=!on;certHint.classList.toggle("hidden",on);
+    if(!on){box.checked=false;box.closest(".check-row").classList.remove("sel");}
+  }
   var proceedForm=$("#proceedForm"),footHint=$("#footHint");
   var chat=$("#chat"),chatLog=$("#chatLog"),chatInput=$("#chatInput"),chatSend=$("#chatSend");
   var quickReplies=$("#quickReplies"),livePill=$("#livePill");
@@ -516,6 +531,7 @@
     lockedRegion.classList.remove("locked");
     lockNote.classList.add("hidden");
     gate.classList.add("satisfied");
+    setCertEnabled(true);
     if(mode==="verify"){
       gVerify.textContent="✓ Email address verified";
       gVerify.classList.add("done");gVisual.style.display="none";
@@ -542,6 +558,7 @@
     lockedRegion.classList.add("locked");
     lockNote.classList.remove("hidden");
     gate.classList.remove("satisfied");
+    setCertEnabled(false);
     gSend.disabled=false;gSend.classList.remove("sent");gSend.textContent="Send verification email now";
     gVerify.style.display="";gVerify.classList.remove("done");gVerify.textContent="Email address verified";gVerify.disabled=true;
     gVisual.style.display="";gVisual.classList.remove("done");gVisual.textContent="Visually verified";gVisual.disabled=false;
