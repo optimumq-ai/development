@@ -378,8 +378,11 @@ router.post('/submit', async function(req, res) {
     var dlStr = dl.toISOString().split('T')[0];
     var basisText = cls.routingBasis === 'taxonomy' ? ('matched record type "' + cls.recordTypeName + '" at ' + cls.recordTypeConfidence + '% confidence')
       : (cls.routingBasis === 'general' ? 'general-knowledge department match' : 'no confident match - left Unassigned for triage review');
+    // is_mrr: MRR if the auto-classifier detected multiple record types OR the intake declared multiple
+    // described records (split-canvas one-item-per-record). Don't let a same-type multi-record request
+    // (e.g. two building permits) get downgraded to non-MRR by the type-diversity classifier.
     await run("UPDATE requests SET classification = ?, department_id = ?, deadline_date = ?, is_mrr = ?, record_type_id = ?, classification_confidence = ?, routing_basis = ?, updated_at = datetime('now') WHERE id = ?",
-      [cls.classification, cls.departmentId, dlStr, cls.isMrr ? 1 : 0, cls.recordTypeId, cls.recordTypeConfidence, cls.routingBasis, id]);
+      [cls.classification, cls.departmentId, dlStr, (cls.isMrr || b.isMrr) ? 1 : 0, cls.recordTypeId, cls.recordTypeConfidence, cls.routingBasis, id]);
     await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
       [uuidv4(), id, 'system', 'AI Classification', 'CLASSIFIED', 'Auto-classified as ' + cls.classification + '; ' + basisText + (cls.teamName ? '; routed to ' + cls.teamName : '') + (cls.reasoning ? ' - ' + cls.reasoning : '')]);
   } catch(ce) { console.error('[publicChat] auto-classify failed:', ce.message); }

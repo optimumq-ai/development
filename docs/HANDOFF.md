@@ -783,3 +783,27 @@ updated.
 
 **Remaining (optional, non-blocking):** release-stage cert→fee-engine wiring (certification.count); auto-sent
 closure notice (separate, pre-existing). The split-canvas portal work is complete end to end.
+
+## 2026-07-10 (l) — Full split-canvas smoke test + is_mrr fix (verified)
+
+**Smoke test (end-to-end, running app):** landing → **Create** (cut-over) → Phase-0 form (**attested** email —
+real `/public/request-verification` send — · postal + address · certification · fee waiver + reason) → chat →
+**record 1** PATH-a search + select → **loop** → **record 2** PATH-a search + select (attach-and-clear held) →
+**No, that is everything** → **Review** (2 records, address, waiver, certified) → **Submit → `2026-0044`**. UI
+drive **15/15 pass** (`smoke.js`). Plus a backend probe of the **PATH-(b) email** sub-path: `EMAIL_SEARCH`
+count + `[[RECORD_ADDED]]` fired. Downstream verify (`smoke_verify.js`) **25/25 pass**: all form fields
+persisted (attested method, postal `mailing_*`, `certification_requested=1`, `fee_waiver_requested=1` + reason,
+`requestor_type=individual`, combined `Record 1/Record 2` description, 2 `request_selected_records`); **routing**
+ran (department assigned, classification, deadline, routing_basis; history `CREATED`/`RECORDS_SELECTED`/
+`CLASSIFIED`); **workflow onIntake** spawned **3 tasks + 1 deadline clock**; **deliver** — clarification
+`preview` returns `addressRequired=false` + the on-file address (slice 1b). Test request + all child rows cleaned
+up (0 left).
+
+**Bug found + fixed (`publicChat.js` `/public/submit`):** `is_mrr` was reset to 0 on a 2-record submission —
+the auto-classifier's `UPDATE` overwrote the intake-declared `b.isMrr` with its **type-diversity** verdict
+(`cls.isMrr`), so two same-type records (two building permits) were downgraded to non-MRR. Fixed:
+`is_mrr = (cls.isMrr || b.isMrr) ? 1 : 0` — MRR if the classifier detected multiple types **or** the intake
+declared multiple described records. Re-ran the smoke after restart: `is_mrr=1`, **0 failures**.
+
+**Result:** the split-canvas portal passes a full smoke (submit → route → tasks/clocks → deliver) end to end.
+Pre-existing out-of-scope items remain (cert→fee-engine `certification.count`; auto-sent closure notice).
