@@ -73,7 +73,7 @@ PHASE 0 (intake form)                 PHASE 1/2 (results canvas)
 - Below the gate: **Phone**, **delivery preference**, and — the whole point — **mailing/home address**
   (new; needed for postal + the §5b clarification-by-mail path).
 - Bottom: **"Proceed to AI Search"** button. Clicking it **triggers the chat agent to turn on.**
-- *(Fee-choice §5 — commercial / waiver — is a natural fit for this panel too; open question below.)*
+- **Fee-choice** (§5) also lives in this panel — see "Fee-choice placement" below `[RESOLVED 2026-07-10]`.
 
 ## Trigger → Phase 1 — Chat builds the description (one record at a time)
 On Proceed, chat activates. Tentative opening script (verbatim from design):
@@ -210,6 +210,46 @@ when absent, and only writes it into the effort-trail note — never persisted.
 4. Render: point `clarificationNotice.renderLetterHtml` (and any record-delivery letter) at the structured
    fields for a clean address block.
 
+## Fee-choice placement `[RESOLVED 2026-07-10]`
+Resolves Open Question #3. Decision (Kevin): the fee-choice opt-ins live in the **Phase-0 form**, next to
+certification — not in chat. Consistent with the design thesis (structured facts → form; conversation →
+description only) and it removes the "richer widget than `[[QUICK_REPLIES]]`" problem `SPEC_public_portal_intake`
+§5 flagged for the chat path. Both flags are **request-level / parent-level** (like certification and the fee
+computation itself, per `SPEC_tasks_roles_mrr_fees §12` L3) — captured once on the Phase-0 form, which runs
+once per request regardless of item count.
+
+**Verified current state (code, 2026-07-10):** fee waiver is captured **only in chat** today (Phase 4 →
+`[[FEE_WAIVER_INFO]]` → `fee_waiver_requested`; approval-task routing already built, HANDOFF slice c).
+**Commercial is entirely unbuilt** — §5 wants `purpose='commercial'` but there is **no `purpose` column**;
+`requestor_type` exists (default `individual`) but is hardcoded `'individual'` at the INSERT
+(`publicChat.js:298`). "nothing captures commercial today."
+
+**UX (default-forward, §5):**
+- A **"Fees — standard rates apply by default"** lead; under an **"only if one applies"** divider, two opt-in
+  check-rows:
+  - **Request a fee waiver** — for nonprofit / journalist / researcher / non-commercial public-interest.
+    Checking it **reveals a reason textarea** ("briefly describe the public-interest purpose"). → `fee_waiver_requested=1` (+ reason).
+  - **I'm a commercial requester** — "subject to review; commercial rates may apply." → the commercial flag.
+- **Mutually exclusive** (design inference, override if unwanted): a non-commercial public-interest waiver
+  contradicts declaring commercial use, so checking one clears the other. Prototyped this way.
+- Neither checked ⇒ standard rates (the default path; no friction for the common case).
+
+**Storage / build recipe (turnkey, not built):**
+1. **Waiver** — reuse the existing `fee_waiver_requested` flag + capture the reason (add `fee_waiver_reason`
+   if not already persisted — the chat path passes `feeWaiverReason` in SUBMIT_READY but the INSERT
+   at `publicChat.js:297-298` does **not** store it today; fold it in). Downstream approval task already built.
+2. **Commercial** — set **`requestor_type='commercial'`** at intake (reuse the existing column; no new
+   `purpose` column needed — supersede §5's `purpose` wording). Staff estimate should open on commercial rates
+   when `requestor_type='commercial'`; commercial approval stays `[DEFERRED — on customer demand]` per §5.
+3. **Form submit** — the Phase-0 form (and the split-canvas submit path when built) passes both flags; extend
+   the request writer to persist them. Applies once at request level.
+4. Chat no longer needs the fee-choice widget — Phase 4 fee-waiver prompting can be **retired from the agent
+   script** once the form owns it (leave the agent able to *acknowledge* if a citizen raises fees, but not to
+   capture — the form is canonical).
+
+Mockup: `#waiverRow` / `#commercialRow` under a `.fee-choice` block in the Phase-0 form, waiver reveals
+`#waiverReasonBlock`, mutual exclusion + a Fees line in the review summary.
+
 ## Certification (certified copies) `[DESIGN — not built]`
 Parent-level option captured at intake; the certified artifact is produced at **release**, by a clerk.
 
@@ -266,8 +306,10 @@ verify route + token, and a spec. **Release-stage slice**; the intake checkbox i
    only when `delivery_method='mail'`** (unchanged locked decision). Persisting it lets postal delivery + postal
    clarification (§5b) read a stored address instead of re-asking; the inline `ADDRESS_REQUIRED` path stays as
    the fallback for email-delivery / legacy requests that carry no stored address.
-3. **Fee-choice (§5)** — does the "commercial requester / fee waiver" opt-in live in this Phase-0 panel, or
-   stay in chat?
+3. **Fee-choice (§5)** — `[RESOLVED 2026-07-10 — see "Fee-choice placement" below.]` Lives in the **Phase-0
+   form** (with certification), NOT chat. Default-forward: standard rates by default, an "only if one applies"
+   pair of opt-ins (fee waiver → reason box; commercial requester). Chat stays description-only; removes the
+   "richer widget than QUICK_REPLIES" problem §5 flagged.
 4. **MRR** — the per-description loop is the MRR item-by-item intake (§6). `[RESOLVED — one description = one
    item under one request; one number, one parent-level fee; NO "combined vs separate" (retired); the only
    ≥2-item choice is delivery timing. Clean model: SPEC_tasks_roles_mrr_fees §12. Staff-side management UI is the

@@ -414,9 +414,21 @@ now 5 structured fields (street1/city/state/zip required, street2 optional), sti
 `[RESOLVED]` + new "Mailing address data model" section incl. a turnkey **build recipe** (5 columns · intake
 persist · clarification fallback-to-stored · letter render).
 
-**Still open on this design:** #3 fee-choice placement (Phase-0 vs chat), #5 mobile/narrow (stack vs
-step-through). Staff follow-on: MRR RM workspace hub (`SPEC_tasks_roles_mrr_fees §12.1`). Whole screen still
-`[DESIGN — not built]`, paused pending Kevin's overall confirmation before any build slice branches.
+**#3 Fee-choice placement — RESOLVED (this session, separate commit).** Decision (Kevin): the fee-waiver +
+commercial-requester opt-ins live in the **Phase-0 form** (with certification), not chat — consistent with the
+"structured facts → form" thesis; removes §5's "richer widget than QUICK_REPLIES" chat problem. Default-forward:
+standard rates by default; "only if one applies" → **Request a fee waiver** (reveals a reason box) / **I'm a
+commercial requester**; the two are mutually exclusive (waiver = non-commercial, contradicts commercial).
+Verified code: waiver captured only in chat today; **commercial entirely unbuilt** (no `purpose` column;
+`requestor_type` hardcoded `individual` at `publicChat.js:298`). Build recipe (speced): reuse
+`fee_waiver_requested` (+ persist `fee_waiver_reason`, currently dropped at INSERT), set
+`requestor_type='commercial'` (no new column — supersedes §5's `purpose`), retire the chat Phase-4 waiver
+prompt once the form owns it. Mockup: `.fee-choice` block, waiver reason reveal, mutual exclusion, Fees line in
+the review summary. Design doc: #3 `[RESOLVED]` + "Fee-choice placement" section.
+
+**Still open on this design:** #5 mobile/narrow (stack vs step-through) — the last design open question. Staff
+follow-on: MRR RM workspace hub (`SPEC_tasks_roles_mrr_fees §12.1`). Whole screen still `[DESIGN — not built]`,
+paused pending Kevin's overall confirmation before any build slice branches.
 
 **No app code touched** — `DESIGN_split_canvas_intake.md`, `docs/mockups/split_canvas_intake.html` (JS
 syntax-checked clean, no stray refs), `HANDOFF.md`. The #2 schema + wiring is speced as a turnkey build slice,
