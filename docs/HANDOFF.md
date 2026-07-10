@@ -487,3 +487,46 @@ with `request_id`) deleted; 0 left. JS syntax-checked; both endpoints unbroken.
 **No app code touched** — `DESIGN_split_canvas_intake.md`, `docs/mockups/split_canvas_intake.html` (JS
 syntax-checked clean, no stray refs), `HANDOFF.md`. The #2 schema + wiring is speced as a turnkey build slice,
 not built.
+
+## 2026-07-10 (d) — Split-canvas BUILD slice 2: Phase-0 form panel (BUILT + verified)
+
+**Slice:** Second build slice — the Phase-0 structured intake form, the first frontend surface of the
+split-canvas portal. New page **alongside** the chat-first `/portal` (cut over later), route **`/portal/v2`**.
+Frontend only; reuses slice-1 backend + the existing `/public/request-verification` send. On `spec/task-screens`.
+
+**Built:**
+- `frontend/src/pages/PublicPortalV2Page.js` (new) — split-canvas shell (app bar · 4-step stepper · left
+  canvas + right chat) with the **left = fully-functional Phase-0 form** faithful to
+  `docs/mockups/split_canvas_intake.html`. Plain-JS React + axios (matches `PublicPortalPage.js`); all CSS
+  scoped under a `.scv` root so the mockup's generic class names (`.field`/`.panel`/`.step`/`.btn-primary`)
+  can't leak into other client-side routes. Implements, per `DESIGN_split_canvas_intake.md`:
+  - **Email-accuracy gate state machine** (#1 RESOLVED): one `emailConfirmed` flag, two paths. **Send
+    verification email now** → real POST `/api/public/request-verification` (self-attest: fires the send, no
+    poll), then enables **Email address verified** (attested). **Visually verified** always enabled (escape
+    hatch). Winner shows ✓ + green, loser hides. **Re-lock on email edit** — editing a sent/confirmed address
+    resets the gate (re-dims lower region, unchecks cert, restores buttons) so a confirmation can't go stale.
+  - **Locked lower region** — Phone · delivery radio · **postal-gated structured mailing address**
+    (street1/street2/city/state/zip, required-when-mail, state auto-uppercased) · certification · fee-choice.
+    Dimmed+inert until the gate is satisfied.
+  - **Certification** — parent-level checkbox, **visible-but-disabled before the gate** with the "Available
+    once your email is confirmed above" hint (discoverability rule); enabled on confirm, unchecked on re-lock.
+  - **Fee-choice** (#3 RESOLVED) — default standard rates; **Request a fee waiver** (reveals reason textarea)
+    and **I'm a commercial requester**, **mutually exclusive**.
+  - **PROCEED** — disabled until Name · valid Email · `emailConfirmed` · (address complete when delivery=mail).
+    Click = the **Phase 0→1 trigger**: activates the right chat panel (IDLE→ACTIVE, opening greeting shown) and
+    assembles the intake payload (name/email/phone/delivery/`requestorType`/waiver+reason/cert/method/mailing_*)
+    for the later submit slice (logged now; wired to `/public/submit` in slice 5).
+- `frontend/src/App.js` — registered `<Route path="/portal/v2">` (React Router v6 matches it over `/portal`).
+
+**Evidence (verified live in the running app — `CI=false NODE_OPTIONS=--openssl-legacy-provider npm run build`,
+nginx serves `frontend/build`, `GET /portal/v2` → 200):** drove the whole form in headless Chromium —
+**35/35 behavior assertions pass** (the one apparent "fail" was a test-script substring artifact: the class
+name `locked-region` contains "locked"; the real unlock is proven by lock-note-hidden + cert-enabled + PROCEED
+gating). Screenshots confirm: initial locked/dimmed with cert visible-but-disabled → gate satisfies (green,
+✓ button, loser hidden) → lower region unlocks → postal reveals address + PROCEED gates on it → fee-choice
+mutual exclusion → email edit re-locks → PROCEED activates chat. Screens in scratchpad `01..05`.
+
+**Not touched / deferred:** no backend change (slice-1 storage + the existing verification send cover it); chat
+engine (slice 3), results canvas (slice 4), form→`/public/submit` wiring (slice 5), mobile step-through toggle
+(slice 6 — page currently just stacks ≤860px) all remain follow-on. Plus slice 1b (clarification reads stored
+`mailing_*`). `frontend/build` is git-ignored — only `App.js` + the new page are committed.

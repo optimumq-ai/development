@@ -39,6 +39,7 @@ import FeeConfigPage from './pages/FeeConfigPage';
 import CashDrawerPage from './pages/CashDrawerPage';
 import AvWorkbenchPage from './pages/AvWorkbenchPage';
 import PublicPortalPage from './pages/PublicPortalPage';
+import PublicPortalV2Page from './pages/PublicPortalV2Page';
 import PublicLibraryPage from './pages/PublicLibraryPage';
 
 function Guard({ c }) {
@@ -65,6 +66,7 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/portal" element={<PublicPortalPage />} />
+        <Route path="/portal/v2" element={<PublicPortalV2Page />} />
         <Route path="/portal/library" element={<PublicLibraryPage />} />
         <Route path="/portal/library/map" element={<PublicLibraryMapPage />} />
         <Route path="/" element={<Guard c={<AppLayout />} />}>
