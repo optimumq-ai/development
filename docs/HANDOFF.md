@@ -1081,3 +1081,15 @@ was rebuilt fresh. Everything below shipped to `main` and was verified in the ru
 - Pre-existing, out of scope: auto-sent closure notice; staff-side MRR item-splitting
   (`SPEC_tasks_roles_mrr_fees §12`); estimate profiles unpopulated (`SPEC_fees §2` automation never fires).
 - Nothing left in the working tree; no code changes pending.
+
+## 2026-07-10 (y) — TX cert rate set to 0 (legally accurate per 1 TAC §70.3)
+
+Reversed the (v) demo decision: set the TX FR certification rate **$1.00 → 0**, matching the (v) research
+finding that TX PIA (1 TAC §70.3) authorizes no certification fee. Applied to the live `feeprof-tx-fr-v1` row via
+the real `PUT /api/fee-profiles/:id` path; synced `feeProfile.seed.js` (`rate:0` + comment) and
+`SPEC_fees_estimates_payments.md` §1.
+
+**Verified live:** a cert-requested TX request now surfaces the opt-in (`GET` context `requested:true`) but the
+estimate produces **no certification line** (`cert=null`, subtotal $0) — the intake→engine wiring still feeds
+`certification.count`; it just prices to nothing at rate 0. Test row cleaned up (0 left). Committed: seed, spec,
+this note.

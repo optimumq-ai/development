@@ -12,10 +12,10 @@ var cfg = {
   duplication: { bw: { rate: 0.10 }, color: { rate: 0.50 }, oversized: { rate: 0.50 }, specialty: { rate: 'actual' } },
   media: { cd: 1.00, dvd: 3.00, usb: 'actual' },
   delivery: { email: 0, pickup: 0, mail: 'actual', handling: 0 },
-  // NB: TX PIA cost rules (1 TAC 70.3) authorize NO certification fee - it is not a chargeable category.
-  // This $1.00 is a purely ILLUSTRATIVE demo value (exercises the certification line); it is not a Texas
-  // statutory figure. A real deployment should set this to 0 for TX, or to a specific city's adopted fee.
-  certification: { rate: 1.00, unit: 'per_record' },
+  // TX PIA cost rules (1 TAC 70.3) authorize NO certification fee - it is not a chargeable category, so the
+  // legally-accurate TX rate is 0. (A city that charges to certify specific documents under separate statute
+  // would set its own figure here.)
+  certification: { rate: 0, unit: 'per_record' },
   requestRules: { freePageAllowance: 0, freeLaborHours: 0, deMinimis: 0, minFee: 0, maxFee: null, deposit: { threshold: 100, percent: 50 }, estimateNotifyThreshold: 40 }
 };
 
