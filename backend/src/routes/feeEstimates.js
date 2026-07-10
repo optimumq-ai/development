@@ -112,6 +112,16 @@ async function loadComponents(requestId) {
   return { request: reqRow, components: comps };
 }
 
+// The requestor's intake certification opt-in (requests.certification_requested) feeds the fee engine
+// as certification.count. The configured unit is per_record, so the default count is one per priced
+// component (an MRR master certifies each child). Staff may override by sending an explicit
+// certification block on the request body - including { count: 0 } to drop it; omitting it entirely
+// falls back to the intake opt-in so a requested certification is never silently lost from the estimate.
+function defaultCertification(body, loaded) {
+  if (body.certification !== undefined) return body.certification;
+  return loaded.request.certification_requested ? { count: loaded.components.length, source: 'intake' } : null;
+}
+
 function hydrate(row) {
   if (!row) return null;
   try { row.feeContext = JSON.parse(row.fee_context_json || '{}'); } catch (e) { row.feeContext = {}; }
@@ -138,8 +148,11 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
     var planCtx = latest ? await planForSnapshot(latest) : null;
     var payState = await paymentState(req.params.requestId);
     var paymentMode = 'internal'; try { var _pc = cfg ? JSON.parse(cfg.config_json || '{}') : {}; if (_pc.payment_mode === 'erp') paymentMode = 'erp'; } catch (e) {}
+    var certCfg = {}; try { certCfg = (cfg ? (JSON.parse(cfg.config_json || '{}').certification || {}) : {}); } catch (e) { certCfg = {}; }
+    var certRequested = !!loaded.request.certification_requested;
     res.json({
       request: { id: loaded.request.id, number: loaded.request.request_number, isMrr: !!loaded.request.is_mrr, purpose: loaded.request.purpose || 'standard' },
+      certification: { requested: certRequested, suggestedCount: certRequested ? loaded.components.length : 0, rate: certCfg.rate != null ? certCfg.rate : null, unit: certCfg.unit || 'per_record' },
       components: loaded.components,
       configProfile: cfg ? { id: cfg.id, name: cfg.name, status: cfg.status } : null,
       actualRateDrivers: actualRateDrivers, laborRates: laborRates,
@@ -164,7 +177,7 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
     var request = {
       components: (b.components || []).map(function (c) { return { id: c.id, label: c.label, recordType: c.recordType || null, quantities: c.quantities || {} }; }),
       delivery: b.delivery || { method: 'email' },
-      certification: b.certification || null,
+      certification: defaultCertification(b, loaded),
       other: b.other || null,
       purpose: b.purpose || 'standard',
       rateOverrides: b.rateOverrides || {}
@@ -327,6 +340,7 @@ router.post('/request/:requestId/reconcile', requireAuth, async function (req, r
     var request = {
       components: (b.components || []).map(function (c) { return { id: c.id, label: c.label, recordType: c.recordType || null, quantities: c.quantities || {} }; }),
       delivery: b.delivery || { method: 'email' },
+      certification: defaultCertification(b, loaded),
       other: b.other || null,
       purpose: b.purpose || 'standard',
       rateOverrides: b.rateOverrides || {}
