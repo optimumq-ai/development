@@ -1103,3 +1103,38 @@ asserts the intake opt-in is surfaced (`requested:true`), then — reading the a
 — expects a priced line when rate>0 and **no line when rate 0** (TX per 1 TAC §70.3). **Re-run: 28/28 pass,
 0 fail; 0 rows left.** Full pipeline green end to end (submit → route → workflow 1 task/1 clock → estimate,
 opt-in surfaced + no cert line at rate 0, total $16.20 → deliver). Harness-only change; no product code touched.
+
+## 2026-07-10 (aa) — Session summary (final, updated)
+
+Supersedes the interim summaries (t)/(x). Session resumed after a mid-task disconnect — the prior agent was
+wiring the certification page fee; its WIP was never saved (clean tree, empty scratchpad), so the work was
+rebuilt fresh. Everything below shipped to `main` and was verified in the running app.
+
+**Delivered:**
+1. **Certification intake → fee-engine wiring** (o) — `requests.certification_requested` now defaults
+   `certification.count` on estimate + reconcile (`defaultCertification`: explicit body → intake opt-in → none;
+   one per priced component; `{count:0}` drops it). GET estimate context surfaces the opt-in; `FeeEstimatePanel`
+   gained a certification control + itemized result line. Merged via **PR #2** (merge `8bf5dbb`). Closed the last
+   open fee follow-up.
+2. **TX cert rate — researched to ground truth** — set to $1.00 (p) as a demo value, then **researched against
+   primary sources** (v): TX PIA cost rules **1 TAC §70.3 authorize NO certification fee** (not a chargeable
+   category). Per that finding, **final value set to 0** (y) — legally accurate, no cert line on TX estimates.
+   Applied via the real `PUT /api/fee-profiles/:id` path; seed script + spec kept in sync throughout. The wiring
+   still feeds `certification.count` regardless — any jurisdiction with a non-zero rate prices a line.
+3. **Repo cleanup** (r, u) — removed stray backups (`*.bak`, `build.bak-20260704b2/`), `imports/testdrop/` PDFs,
+   and root-owned `build.stale-root/` (user `sudo`). Checked in `CLAUDE.md` (was untracked). Tree **fully clean**.
+4. **Verification** — full smoke run repeatedly across the session, always green; final harness is **rate-aware**
+   (asserts opt-in surfaced + no cert line at rate 0 / priced line at rate>0) → **28/28** (q, w, z). `main`
+   **deploy verified clean** (s). Slice-level engine + route + rate-0 checks all passed.
+
+**Final state:** TX certification rate **0** (legally accurate); certification intake→engine wiring live and
+rate-driven; working tree clean; `main` in sync with origin.
+
+**Commit trail (this session):** `dcbf326` wiring · `ea153e7` TX $1.00 · `8bf5dbb` PR #2 merge · `96ae3fa`
+CLAUDE.md · `4d4e63e` cert-label · `ca27b67` TX rate 0 · `f29a5da` rate-aware smoke · plus handoff commits
+(`932f111`, `03588ce`, `ecffe7d`, `a4a5000`, `7447c0f`, `9c851e8`, `995500c`, `2d56232`) and this note.
+
+**Outstanding / carry-over:** none in the tree. Product follow-ups (pre-existing, out of scope): auto-sent
+closure notice; staff-side MRR item-splitting (`SPEC_tasks_roles_mrr_fees §12`); estimate profiles unpopulated
+(`SPEC_fees §2` automation never fires). Any jurisdiction that charges a certification fee just needs a non-zero
+`certification.rate` in its FR profile.
