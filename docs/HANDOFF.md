@@ -1093,3 +1093,13 @@ the real `PUT /api/fee-profiles/:id` path; synced `feeProfile.seed.js` (`rate:0`
 estimate produces **no certification line** (`cert=null`, subtotal $0) — the intake→engine wiring still feeds
 `certification.count`; it just prices to nothing at rate 0. Test row cleaned up (0 left). Committed: seed, spec,
 this note.
+
+## 2026-07-10 (z) — Full smoke re-run after cert rate 0 — 28/28 (harness made rate-aware)
+
+Re-ran the full smoke after the (y) TX cert-rate → 0 change. First pass flagged 1 FAIL — a **stale assertion**,
+not a regression: the harness still expected a $1.00 certification line, but TX now correctly prices none at
+rate 0 (`cert=null`). Made the smoke's certification check **rate-aware** (`scratchpad/smoke_full.js`): it always
+asserts the intake opt-in is surfaced (`requested:true`), then — reading the active profile's `certification.rate`
+— expects a priced line when rate>0 and **no line when rate 0** (TX per 1 TAC §70.3). **Re-run: 28/28 pass,
+0 fail; 0 rows left.** Full pipeline green end to end (submit → route → workflow 1 task/1 clock → estimate,
+opt-in surfaced + no cert line at rate 0, total $16.20 → deliver). Harness-only change; no product code touched.
