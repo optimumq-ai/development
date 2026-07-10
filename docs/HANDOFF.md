@@ -1157,3 +1157,34 @@ Full deploy verification from `main` `906d5b4` (in sync with `origin/main`, 0/0)
 **Harness note:** first pass showed 1 FAIL — the same benign case as (s): `deploy_verify.js` used a terse
 description the LLM classifier declines to route (`department_id` null, "unassigned for triage"). Hardened the
 harness with a routable description → 18/18 clean. Not a deploy regression. **main deploys clean.**
+
+## 2026-07-10 (ac) — Session summary (final)
+
+Supersedes interim summaries (t)/(x)/(aa). Session resumed after a mid-task disconnect (prior agent was wiring
+the certification page fee; WIP never saved — clean tree, empty scratchpad — so rebuilt fresh). All shipped to
+`main`, verified in the running app.
+
+**Delivered:**
+1. **Certification intake → fee-engine wiring** (o) — `requests.certification_requested` defaults
+   `certification.count` on estimate + reconcile (`defaultCertification`: explicit body → intake opt-in → none;
+   one per priced component; `{count:0}` drops it). GET context surfaces the opt-in; `FeeEstimatePanel` gained a
+   certification control + result line. Merged via **PR #2** (`8bf5dbb`). Closed the last open fee follow-up.
+2. **TX cert rate → researched to ground truth → 0** — set $1.00 as demo (p), then verified against primary
+   sources (v) that **TX PIA 1 TAC §70.3 authorizes no certification fee**; set the legally-accurate **rate 0**
+   (y) via the real `PUT /api/fee-profiles/:id` path, seed + spec synced. Wiring stays rate-driven — any
+   jurisdiction with a non-zero rate prices a line.
+3. **Repo cleanup** (r, u) — removed stray backups + `imports/testdrop/` PDFs + root-owned `build.stale-root/`
+   (user `sudo`); checked in `CLAUDE.md`. Tree fully clean.
+4. **Verification** — rate-aware full smoke **28/28** (q, w, z); **`main` deploy verified clean twice** (s, ab),
+   18/18 round-trip; engine/route/rate-0 slice checks all green. Hardened `deploy_verify.js` with a routable
+   description (the LLM classifier declines to route terse ones — benign).
+
+**Final state:** TX certification rate **0** (legally accurate); intake→engine wiring live + rate-driven; working
+tree clean; `main` @ `865ebfd`, in sync with origin.
+
+**Key commits:** `dcbf326` wiring · `8bf5dbb` PR #2 merge · `ca27b67` TX rate 0 · `f29a5da` rate-aware smoke
+(+ CLAUDE.md `96ae3fa`, cleanup + deploy + summary handoff commits).
+
+**Outstanding:** none in the tree. Pre-existing product follow-ups (out of scope): auto-sent closure notice;
+staff-side MRR item-splitting (`SPEC_tasks_roles_mrr_fees §12`); estimate profiles unpopulated (`SPEC_fees §2`).
+A jurisdiction that charges to certify just sets a non-zero `certification.rate` in its FR profile.
