@@ -52,7 +52,24 @@ async function automationState() {
 }
 
 async function findRequest(idOrNumber) {
-  return await get("SELECT id, request_number, delivery_method, stage, requestor_name, requestor_email, description FROM requests WHERE id = ? OR request_number = ?", [idOrNumber, idOrNumber]);
+  return await get("SELECT id, request_number, delivery_method, stage, requestor_name, requestor_email, description, mailing_street1, mailing_street2, mailing_city, mailing_state, mailing_zip FROM requests WHERE id = ? OR request_number = ?", [idOrNumber, idOrNumber]);
+}
+
+// Resolve the postal mailing address for a clarification letter. Precedence (spec §5b build recipe):
+// an inline address the caller supplied (staff correction) → the structured address stored on the
+// request at intake (split-canvas slice 1: mailing_* columns) → none (caller throws ADDRESS_REQUIRED).
+// Closes the postal gap: postal-delivery requests now carry an address, so staff aren't re-prompted.
+function resolveMailingAddress(reqRow, opts) {
+  var inline = (opts && opts.mailingAddress && String(opts.mailingAddress).trim()) || '';
+  if (inline) return inline;
+  reqRow = reqRow || {};
+  var s1 = String(reqRow.mailing_street1 || '').trim();
+  var city = String(reqRow.mailing_city || '').trim();
+  if (!s1 && !city) return '';
+  var s2 = String(reqRow.mailing_street2 || '').trim();
+  var stateZip = [String(reqRow.mailing_state || '').trim().toUpperCase(), String(reqRow.mailing_zip || '').trim()].filter(Boolean).join(' ');
+  var cityLine = [city, stateZip].filter(Boolean).join(', ');
+  return [s1, s2, cityLine].filter(function (l) { return l; }).join('\n');
 }
 
 // Resolve the outreach channel: explicit opts.channel wins; otherwise default to email even when the
@@ -73,11 +90,14 @@ async function preview(idOrNumber, opts) {
   var ctx = await CN.noticeContext(st.policy);
   var notice = CN.buildNotice(reqRow, ctx);
   var channel = resolveChannel(reqRow, opts);
+  var storedAddr = resolveMailingAddress(reqRow, {}); // address on file (intake), if any
   return {
     requestId: reqRow.id, requestNumber: reqRow.request_number,
     requestorName: reqRow.requestor_name || null, deliveryMethod: reqRow.delivery_method || 'email',
     channel: channel, to: reqRow.requestor_email || null,
-    addressRequired: channel === 'mail', subject: notice.subject, text: notice.text
+    // Only prompt for an address when mailing AND none is on file — postal requests carry it from intake.
+    addressRequired: channel === 'mail' && !storedAddr, mailingAddress: storedAddr || null,
+    subject: notice.subject, text: notice.text
   };
 }
 
@@ -86,7 +106,7 @@ async function preview(idOrNumber, opts) {
 // a caller error (the address gap) surfaced so the UI can prompt for one.
 async function doOutreach(reqRow, channel, ctx, subject, text, opts) {
   if (channel === 'mail') {
-    var addr = (opts && opts.mailingAddress && String(opts.mailingAddress).trim()) || '';
+    var addr = resolveMailingAddress(reqRow, opts); // inline override → stored intake address → none
     if (!addr) { var err = new Error('Mailing address required for a postal clarification letter'); err.code = 'ADDRESS_REQUIRED'; throw err; }
     var letterHtml = CN.renderLetterHtml(reqRow, Object.assign({}, ctx, {
       requestNumber: reqRow.request_number, mailingAddress: addr, dateStr: opts.dateStr || null

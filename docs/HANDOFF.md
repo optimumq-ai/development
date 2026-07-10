@@ -752,3 +752,34 @@ line marked `[DONE]`.
 **Remaining (optional, non-blocking):** slice 1b (clarification reads stored `mailing_*`); release-stage
 cert→fee-engine wiring (certification.count). `frontend/build` git-ignored — committed: `PublicPortalPage.js`,
 the spec, this note.
+
+## 2026-07-10 (k) — Slice 1b: clarification reads the stored mailing address (BUILT + verified)
+
+**Slice:** Close the postal-clarification gap — point `clarificationAction`/`clarificationNotice` at the stored
+`mailing_*` columns (split-canvas slices 1/5) instead of always re-asking inline. Backend only. On
+`spec/task-screens`.
+
+**Built (`backend/src/services/clarificationAction.js` + `clarificationNotice.js`):**
+- New `resolveMailingAddress(reqRow, opts)` — precedence **inline override → stored `mailing_*` → none**;
+  formats the structured columns into a clean multi-line block (`street1 / street2 / City, ST ZIP`).
+- `findRequest` now SELECTs the five `mailing_*` columns.
+- `doOutreach` (postal branch) uses `resolveMailingAddress`; `ADDRESS_REQUIRED` now throws only when **neither**
+  an inline nor a stored address exists (legacy/email requests) — postal requests are no longer re-prompted.
+- `preview` reports `addressRequired = (channel==='mail' && no stored address)` and returns the on-file
+  `mailingAddress` so the staff UI can show it (was always `true` for mail).
+- `renderLetterHtml` comment updated (the intake column now exists).
+
+**Evidence (verified live — API restarted, single healthy server on :3001; requests created via the real
+`/public/submit` path):** node harness (`verify1b.js`) — **8/8 pass**: (A) postal request WITH a stored address →
+`preview.addressRequired=false`, `mailingAddress` = "88 Birch Lane / Autumn Falls, TX 75001"; `send` generates
+the postal letter using the stored address, no `ADDRESS_REQUIRED`; letter HTML contains the block. (B) request
+with NO stored address → `preview.addressRequired=true`, `mailingAddress=null`; `send` with no inline →
+**throws `ADDRESS_REQUIRED`**; `send` with an inline address → uses the inline block (fallback preserved). Both
+test requests + all child rows cleaned up (0 left).
+
+**Docs:** `DESIGN_split_canvas_intake.md` build recipe items 3/4 marked `[BUILT — slice 1b]`;
+`SPEC_record_search_task_screen.md` "Address gap" `[RESOLVED]`, closure-notice section + capabilities table
+updated.
+
+**Remaining (optional, non-blocking):** release-stage cert→fee-engine wiring (certification.count); auto-sent
+closure notice (separate, pre-existing). The split-canvas portal work is complete end to end.

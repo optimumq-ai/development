@@ -72,8 +72,9 @@ function buildNotice(reqRow, opts) {
 
 // Print-friendly postal letter. Self-contained HTML the caller returns for the browser to print
 // (Ctrl+P). No digital send. `body` is the already-reviewed plain-text notice body (buildNotice.text
-// or a staff edit); it is escaped and paragraph-split here. `mailingAddress` is captured inline at
-// send time (there is no intake mailing-address column yet — that fix is flagged portal-side, §5b).
+// or a staff edit); it is escaped and paragraph-split here. `mailingAddress` is a newline-separated
+// address block resolved by clarificationAction.resolveMailingAddress — the structured intake address
+// (mailing_* columns, split-canvas slice 1) when on file, else an inline address supplied at send time.
 function renderLetterHtml(reqRow, opts, body) {
   reqRow = reqRow || {};
   opts = opts || {};

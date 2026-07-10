@@ -205,15 +205,11 @@ when absent, and only writes it into the effort-trail note — never persisted.
     email-delivery and legacy requests (which have no stored address). No breaking change to that path.
   - **Certification** — certified copies are often mailed; a certified+postal request already carries the address.
 
-**Build recipe (turnkey, for the build slice — not built yet):**
-1. Schema: add the five `mailing_*` columns to `requests` (`schema.postgres.sql` + `schema.sql`); nullable, no
-   backfill.
-2. Intake: the Phase-0 form submits the structured fields when `delivery=mail`; extend the request INSERT/writer
-   (`publicChat.js`, and the split-canvas submit path when built) to persist them.
-3. Clarification: in `clarificationAction.buildContext`/`doOutreach`, fall back to the stored `mailing_*` when
-   no inline `mailingAddress` is supplied; keep `ADDRESS_REQUIRED` only when neither exists.
-4. Render: point `clarificationNotice.renderLetterHtml` (and any record-delivery letter) at the structured
-   fields for a clean address block.
+**Build recipe — `[BUILT]`:**
+1. Schema `[slice 1]`: five `mailing_*` columns on `requests` (`schema.postgres.sql` + `schema.sql`); nullable, no backfill.
+2. Intake `[slices 1 + 5]`: the Phase-0 form submits the structured fields when `delivery=mail`; `/public/submit` persists them.
+3. Clarification `[slice 1b]`: `clarificationAction.resolveMailingAddress(reqRow, opts)` — precedence **inline → stored `mailing_*` → none**; `doOutreach` uses it (only throws `ADDRESS_REQUIRED` when neither exists) and `preview` reports `addressRequired` = mail-and-none + returns the on-file `mailingAddress`. `findRequest` now selects the `mailing_*` columns.
+4. Render `[slice 1b]`: `resolveMailingAddress` formats the structured columns into a clean multi-line block (`street1 / street2 / City, ST ZIP`) that `clarificationNotice.renderLetterHtml` renders under the requestor name.
 
 ## Fee-choice placement `[RESOLVED 2026-07-10]`
 Resolves Open Question #3. Decision (Kevin): the fee-choice opt-ins live in the **Phase-0 form**, next to
