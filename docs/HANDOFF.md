@@ -1250,3 +1250,32 @@ Full deploy verification from `main` `f859bf7` (in sync with `origin/main`, 0/0)
   deadline); **18/18, 0 fail; 0 rows left**. No false failure — the (ab) routable-description harness fix held.
 
 **main deploys clean.**
+
+## 2026-07-10 (ah) — Session summary (final)
+
+Supersedes interim summaries (t)/(x)/(aa)/(ac)/(af). Session resumed after a mid-task disconnect (prior agent was
+wiring the certification page fee; WIP never saved — clean tree, empty scratchpad — so rebuilt fresh). All shipped
+to `main`, verified in the running app.
+
+**Delivered:**
+1. **Certification intake → fee-engine wiring** (o) — `requests.certification_requested` defaults
+   `certification.count` on estimate + reconcile (`defaultCertification`: explicit body → intake opt-in → none;
+   one per priced component; `{count:0}` drops it). GET context surfaces the opt-in; `FeeEstimatePanel` gained a
+   certification control + result line. Merged via **PR #2** (`8bf5dbb`). Closed the last open fee follow-up.
+2. **TX cert rate → researched → 0** — $1.00 demo (p), then verified against primary sources (v) that **TX PIA
+   1 TAC §70.3 authorizes no certification fee**; set legally-accurate **rate 0** (y). Wiring stays rate-driven.
+3. **TX FR fee profile promoted draft → active** (ad) — via the real `PUT /api/fee-profiles/:id`; seed synced.
+4. **Repo cleanup** (r, u) — removed stray backups + `imports/testdrop/` PDFs + root-owned `build.stale-root/`
+   (user `sudo`); checked in `CLAUDE.md`. Tree fully clean.
+5. **Verification** — rate-aware full smoke **28/28** run repeatedly (q, w, z, ae), always green; **`main` deploy
+   verified clean 3× (s, ab, ag)**, 18/18 round-trip. Hardened `deploy_verify.js` with a routable description.
+
+**Final state:** TX FR profile **active**, certification rate **0** (legally accurate), intake→engine wiring live
++ rate-driven; working tree clean; `main` @ `88ca2b6`, in sync with origin.
+
+**Key commits:** `dcbf326` wiring · `8bf5dbb` PR #2 merge · `ca27b67` TX rate 0 · `fbe1e08` profile active
+(+ CLAUDE.md `96ae3fa`, rate-aware smoke `f29a5da`, cleanup/deploy/summary handoff commits).
+
+**Outstanding:** none in the tree. Pre-existing product follow-ups (out of scope): auto-sent closure notice;
+staff-side MRR item-splitting (`SPEC_tasks_roles_mrr_fees §12`); estimate profiles unpopulated (`SPEC_fees §2`).
+A jurisdiction that charges to certify just sets a non-zero `certification.rate` in its FR profile.
