@@ -432,6 +432,15 @@ ALTER TABLE requests ADD COLUMN IF NOT EXISTS fee_waiver_status TEXT;
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS fee_waiver_reason TEXT;
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS fee_waiver_decided_by TEXT;
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS fee_waiver_decided_at TEXT;
+-- Structured mailing address (split-canvas intake, slice 1). Captured only for postal delivery; country implicit US.
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS mailing_street1 TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS mailing_street2 TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS mailing_city    TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS mailing_state   TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS mailing_zip     TEXT;
+-- Certification opt-in + email-accuracy method (split-canvas intake, slice 5). Both captured on the Phase-0 form.
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS certification_requested INTEGER DEFAULT 0;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS email_verification_method TEXT;
 CREATE TABLE IF NOT EXISTS decision_reasons (
   id TEXT PRIMARY KEY, category TEXT NOT NULL, text TEXT NOT NULL,
   is_active INTEGER DEFAULT 1, usage_count INTEGER DEFAULT 0,

@@ -1,0 +1,911 @@
+<title>Split-Canvas Intake — Open Records Portal (prototype)</title>
+<style>
+  :root{
+    --bg:#D8E0E8; --surface:#FFFFFF; --surface-2:#F2F6F9; --ink:#12232E; --muted:#5C6F7C;
+    --hair:#D2DCE3; --hair-strong:#BECAD3;
+    --blue:#1E6091; --blue-strong:#164E78; --blue-tint:#E4EEF6; --blue-ink:#0E3A5C;
+    --green:#1B8A5A; --green-tint:#E1F2E9;
+    --amber:#9A6512; --amber-tint:#F6EBD6;
+    --shadow:0 1px 2px rgba(18,35,46,.06),0 6px 20px rgba(18,35,46,.08);
+    --radius:12px; --radius-sm:8px;
+    --font-ui:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-mono:ui-monospace,"SF Mono","Cascadia Code","Roboto Mono",Menlo,Consolas,monospace;
+    --step:.18s cubic-bezier(.4,0,.2,1);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#0A1017; --surface:#152430; --surface-2:#1B2C3A; --ink:#E7EEF3; --muted:#93A6B4;
+      --hair:#26383F; --hair-strong:#33474F;
+      --blue:#4FA0D2; --blue-strong:#74B7E1; --blue-tint:#153140; --blue-ink:#9CCBEA;
+      --green:#47B885; --green-tint:#123227;
+      --amber:#D4A24C; --amber-tint:#2E2718;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 26px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#D8E0E8; --surface:#FFFFFF; --surface-2:#F2F6F9; --ink:#12232E; --muted:#5C6F7C;
+    --hair:#D2DCE3; --hair-strong:#BECAD3;
+    --blue:#1E6091; --blue-strong:#164E78; --blue-tint:#E4EEF6; --blue-ink:#0E3A5C;
+    --green:#1B8A5A; --green-tint:#E1F2E9; --amber:#9A6512; --amber-tint:#F6EBD6;
+    --shadow:0 1px 2px rgba(18,35,46,.06),0 6px 20px rgba(18,35,46,.08);
+  }
+  :root[data-theme="dark"]{
+    --bg:#0A1017; --surface:#152430; --surface-2:#1B2C3A; --ink:#E7EEF3; --muted:#93A6B4;
+    --hair:#26383F; --hair-strong:#33474F;
+    --blue:#4FA0D2; --blue-strong:#74B7E1; --blue-tint:#153140; --blue-ink:#9CCBEA;
+    --green:#47B885; --green-tint:#123227; --amber:#D4A24C; --amber-tint:#2E2718;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 26px rgba(0,0,0,.45);
+  }
+
+  /* Global surface standard: darker-gray page · light-gray panel grounds · white active surfaces */
+  :root{--field-well:#EBF3FB;--field-bg:#FFFFFF;--field-border:#BCCAD6;--chat-ground:#EBF3FB}
+  @media (prefers-color-scheme:dark){:root{--field-well:#131E29;--field-bg:#1E3040;--field-border:#374C57;--chat-ground:#131E29}}
+  :root[data-theme="light"]{--field-well:#EBF3FB;--field-bg:#FFFFFF;--field-border:#BCCAD6;--chat-ground:#EBF3FB}
+  :root[data-theme="dark"]{--field-well:#131E29;--field-bg:#1E3040;--field-border:#374C57;--chat-ground:#131E29}
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{
+    margin:0;background:var(--bg);color:var(--ink);font-family:var(--font-ui);
+    font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+    display:flex;flex-direction:column;min-height:100vh;
+  }
+  .mono{font-family:var(--font-mono)}
+  .eyebrow{font-family:var(--font-mono);font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+
+  /* ---------- App bar ---------- */
+  .appbar{
+    display:flex;align-items:center;gap:14px;padding:12px 20px;background:var(--surface);
+    border-bottom:1px solid var(--hair);flex-wrap:wrap;
+  }
+  .crest{
+    width:38px;height:38px;border-radius:9px;flex:none;display:grid;place-items:center;
+    background:linear-gradient(150deg,var(--blue),var(--blue-strong));color:#fff;font-weight:700;
+    font-family:var(--font-mono);font-size:16px;letter-spacing:-.02em;
+  }
+  .brand h1{margin:0;font-size:15px;font-weight:650;letter-spacing:-.01em}
+  .brand p{margin:0;font-size:12px;color:var(--muted)}
+  .appbar .spacer{flex:1}
+  .proto-pill{
+    font-family:var(--font-mono);font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;
+    color:var(--amber);background:var(--amber-tint);border:1px solid color-mix(in srgb,var(--amber) 35%,transparent);
+    padding:4px 9px;border-radius:999px;
+  }
+  .btn-ghost{
+    font:inherit;font-size:13px;color:var(--muted);background:transparent;border:1px solid var(--hair-strong);
+    padding:7px 12px;border-radius:8px;cursor:pointer;transition:var(--step);
+  }
+  .btn-ghost:hover{color:var(--ink);border-color:var(--muted)}
+
+  /* ---------- Stepper ---------- */
+  .stepper{display:flex;gap:6px;align-items:center;padding:10px 20px;background:var(--surface);
+    border-bottom:1px solid var(--hair);overflow-x:auto}
+  .step{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 6px;border-radius:999px;
+    border:1px solid transparent;white-space:nowrap;color:var(--muted);font-size:12.5px;transition:var(--step)}
+  .step .num{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;flex:none;
+    font-family:var(--font-mono);font-size:11px;background:var(--surface-2);border:1px solid var(--hair-strong);color:var(--muted)}
+  .step.active{background:var(--blue-tint);border-color:color-mix(in srgb,var(--blue) 30%,transparent);color:var(--blue-ink)}
+  .step.active .num{background:var(--blue);border-color:var(--blue);color:#fff}
+  .step.done .num{background:var(--green);border-color:var(--green);color:#fff}
+  .step-sep{width:14px;height:1px;background:var(--hair-strong);flex:none}
+
+  /* ---------- Stage split ---------- */
+  .stage{flex:1;display:flex;gap:16px;padding:16px 20px 20px;min-height:0;align-items:stretch}
+  .canvas{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:12px}
+  .chat{flex:0 0 360px;max-width:38vw;display:flex;flex-direction:column;background:var(--surface);
+    border:1px solid var(--hair);border-radius:var(--radius);box-shadow:var(--shadow);overflow:hidden;min-height:0}
+
+  .panel{background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .instr-bar{display:flex;align-items:center;gap:10px;padding:11px 16px;background:var(--surface);
+    border:1px solid var(--hair);border-radius:var(--radius);font-size:13px;color:var(--muted)}
+  .instr-bar b{color:var(--ink);font-weight:600}
+  .instr-bar .dot{width:8px;height:8px;border-radius:50%;background:var(--blue);flex:none;
+    box-shadow:0 0 0 4px var(--blue-tint)}
+
+  /* ---------- Phase 0 form ---------- */
+  .formwrap{flex:1;overflow:auto;padding:0;background:var(--field-well)}
+  .form-head{padding:22px 26px 18px;border-bottom:1px solid var(--hair)}
+  .form-head h2{margin:0 0 4px;font-size:19px;letter-spacing:-.01em}
+  .form-head .start-here{font-size:28.5px;font-weight:700;letter-spacing:-.02em;line-height:1.02;margin-bottom:8px}
+  .form-head p{margin:0;color:var(--muted);font-size:13.5px;max-width:60ch}
+  .form-head p b{color:var(--ink);font-weight:650}
+  .email-row{display:flex;gap:8px;align-items:center}
+  .email-row input{flex:1;min-width:0}
+  .send-btn{font:inherit;font-size:13px;font-weight:600;white-space:nowrap;flex:none;padding:10px 14px;border-radius:var(--radius-sm);
+    border:1px solid var(--blue);background:var(--blue-tint);color:var(--blue-ink);cursor:pointer;transition:var(--step)}
+  .send-btn:hover{background:color-mix(in srgb,var(--blue) 16%,var(--surface))}
+  .send-btn.sent{background:var(--green-tint);border-color:color-mix(in srgb,var(--green) 45%,transparent);color:var(--green);cursor:default}
+  @media (max-width:520px){.email-row{flex-wrap:wrap}.email-row input{flex-basis:100%}}
+  .field{display:flex;flex-direction:column;gap:6px;margin-bottom:16px}
+  .field label{font-size:12.5px;font-weight:600;color:var(--ink)}
+  .field label .opt{font-weight:400;color:var(--muted)}
+  .field input[type=text],.field input[type=email],.field textarea{
+    font:inherit;font-size:14.5px;padding:10px 12px;border-radius:var(--radius-sm);
+    border:1px solid var(--field-border);background:var(--field-bg);color:var(--ink);transition:var(--step);
+    box-shadow:0 1px 1px rgba(18,35,46,.04)}
+  .field textarea{resize:vertical;min-height:64px}
+  .field input:focus,.field textarea:focus{outline:none;border-color:var(--blue);
+    box-shadow:0 0 0 3px var(--blue-tint);background:var(--field-bg)}
+  .addr-grid{display:flex;flex-direction:column;gap:8px}
+  .addr-row3{display:grid;grid-template-columns:2fr .8fr 1fr;gap:8px}
+  .field input[type=text]#fState{text-transform:uppercase}
+
+  .gate{margin:0 26px 20px;padding:16px;border:1px solid color-mix(in srgb,var(--amber) 45%,var(--hair));
+    background:var(--amber-tint);border-radius:var(--radius-sm)}
+  .gate .g-lead{display:flex;gap:9px;align-items:flex-start;margin-bottom:12px}
+  .gate .g-lead svg{flex:none;margin-top:1px}
+  .gate .g-lead b{font-size:13px}
+  .gate .g-lead span{font-size:12.5px;color:color-mix(in srgb,var(--amber) 78%,var(--ink))}
+  .gate-actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:16px}
+  .g-btn{font:inherit;font-size:13px;font-weight:550;padding:8px 13px;border-radius:8px;cursor:pointer;
+    border:1px solid var(--amber);background:var(--surface);color:var(--amber);transition:var(--step)}
+  .g-btn:hover{background:var(--surface-2)}
+  .g-btn.done{background:var(--green);border-color:var(--green);color:#fff;cursor:default}
+  .g-or{align-self:center;font-size:11px;color:var(--muted);font-family:var(--font-mono);padding:0 2px}
+  .gate.satisfied{border-color:color-mix(in srgb,var(--green) 45%,var(--hair));background:var(--green-tint)}
+  .gate.satisfied .g-lead span,.gate.satisfied .g-lead b{color:color-mix(in srgb,var(--green) 80%,var(--ink))}
+
+  .locked-region{position:relative;padding:0 26px 8px;transition:var(--step)}
+  /* Dim the locked children individually (not the parent) so an exempt child can stay full-opacity —
+     CSS opacity is multiplicative, so a dimmed parent would otherwise cap its children. */
+  .locked-region.locked{pointer-events:none}
+  .locked-region.locked > *:not(.cert-visible){opacity:.4;filter:saturate(.6)}
+  /* Certification stays visible-but-disabled before the gate so the option is discoverable. */
+  .cert-visible input:disabled{cursor:not-allowed}
+  .cert-visible.check-row:has(input:disabled){opacity:.72}
+  .cert-hint{margin:6px 2px 0;font-size:11px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .cert-hint.hidden{display:none}
+  .lock-note{margin:0 26px 18px;font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
+  .lock-note.hidden{display:none}
+  .radio-row{display:flex;gap:10px;flex-wrap:wrap}
+  .radio-card{flex:1 1 140px;display:flex;gap:9px;align-items:flex-start;padding:11px 13px;border:1px solid var(--field-border);
+    border-radius:var(--radius-sm);cursor:pointer;background:var(--field-bg);transition:var(--step);box-shadow:0 1px 1px rgba(18,35,46,.04)}
+  .radio-card:hover{border-color:var(--muted)}
+  .radio-card.sel{border-color:var(--blue);background:var(--blue-tint)}
+  .radio-card input{margin-top:3px}
+  .radio-card .rc-t{font-size:13px;font-weight:600}
+  .radio-card .rc-s{font-size:11.5px;color:var(--muted)}
+  .check-row{display:flex;gap:10px;align-items:flex-start;padding:12px 13px;border:1px solid var(--field-border);
+    border-radius:var(--radius-sm);background:var(--field-bg);cursor:pointer;transition:var(--step);box-shadow:0 1px 1px rgba(18,35,46,.04)}
+  .check-row:hover{border-color:var(--muted)}
+  .check-row.sel{border-color:var(--blue);background:var(--blue-tint)}
+  .check-row input{margin-top:2px;width:16px;height:16px;accent-color:var(--blue);flex:none}
+  .check-row .rc-t{font-size:13px;font-weight:600}
+  .check-row .rc-s{font-size:11.5px;color:var(--muted)}
+  .fee-choice{margin-top:14px;padding-top:14px;border-top:1px solid var(--hair)}
+  .fee-lead{font-size:12.5px;font-weight:600;color:var(--ink);margin-bottom:10px}
+  .fee-lead span{font-weight:400;color:var(--muted)}
+  .fee-opts{display:flex;flex-direction:column;gap:10px}
+  .waiver-reason{margin:-2px 0 0}
+  .waiver-reason.hidden{display:none}
+  .addr-block{margin-top:4px}
+  .addr-block.hidden{display:none}
+  .form-foot{padding:18px 26px 24px;border-top:1px solid var(--hair);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .btn-primary{font:inherit;font-size:14.5px;font-weight:600;color:#fff;background:var(--blue);border:none;
+    padding:12px 22px;border-radius:var(--radius-sm);cursor:pointer;transition:var(--step);box-shadow:var(--shadow)}
+  .btn-primary:hover{background:var(--blue-strong)}
+  .btn-primary:disabled{background:var(--hair-strong);color:var(--muted);cursor:not-allowed;box-shadow:none}
+  .foot-hint{font-size:12px;color:var(--muted)}
+
+  /* ---------- Phase 2 results ---------- */
+  #resultsPanel{flex-direction:column;overflow:hidden}
+  .results-instr{flex:none;padding:11px 16px;font-size:12.5px;line-height:1.5;color:var(--muted);
+    background:var(--surface-2);border-bottom:1px solid var(--hair)}
+  .results-instr b{color:var(--ink);font-weight:600}
+  .results-split{flex:1;display:flex;min-height:0;overflow:hidden}
+  .results-main{flex:1 1 auto;min-width:0;overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
+  .results-side{flex:0 0 27%;min-width:180px;border-left:1px solid var(--hair);background:var(--surface-2);
+    display:flex;flex-direction:column;min-height:0}
+  .side-head{padding:12px 14px 10px;border-bottom:1px solid var(--hair)}
+  .side-head .eyebrow{margin-bottom:2px;display:block}
+  .side-head .cnt{font-size:12px;color:var(--muted)}
+  .side-list{flex:1;overflow:auto;padding:10px 12px;display:flex;flex-direction:column;gap:7px}
+  .side-empty{font-size:11.5px;color:var(--muted);text-align:center;padding:22px 8px;line-height:1.5}
+  .side-item{font-size:11px;background:var(--surface);border:1px solid var(--hair);border-radius:7px;padding:7px 9px;
+    display:flex;gap:6px;align-items:flex-start}
+  .side-item .si-t{font-weight:600;line-height:1.3}
+  .side-item .si-m{font-family:var(--font-mono);font-size:9.5px;color:var(--muted)}
+  .side-item .si-x{margin-left:auto;border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:13px;padding:0 2px;flex:none}
+  .side-item .si-x:hover{color:var(--ink)}
+  .side-foot{padding:12px;border-top:1px solid var(--hair);display:flex;flex-direction:column;gap:8px}
+
+  .res-query{font-size:12.5px;color:var(--muted)}
+  .res-query b{color:var(--ink)}
+  .rec{display:flex;gap:12px;padding:13px 14px;border:1px solid var(--hair);border-radius:var(--radius-sm);
+    background:var(--surface);transition:var(--step);cursor:pointer}
+  .rec:hover{border-color:var(--hair-strong)}
+  .rec.sel{border-color:var(--blue);background:var(--blue-tint)}
+  .rec input{margin-top:3px;flex:none;width:16px;height:16px;accent-color:var(--blue)}
+  .rec-body{flex:1;min-width:0}
+  .rec-title{font-size:14px;font-weight:600;margin:0 0 3px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .rec-meta{font-family:var(--font-mono);font-size:11px;color:var(--muted)}
+  .rec-desc{font-size:12.5px;color:var(--muted);margin:5px 0 0}
+  .tag{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;
+    padding:2px 7px;border-radius:999px;font-weight:600}
+  .tag.green{color:var(--green);background:var(--green-tint);border:1px solid color-mix(in srgb,var(--green) 35%,transparent)}
+  .tag.review{color:var(--amber);background:var(--amber-tint);border:1px solid color-mix(in srgb,var(--amber) 30%,transparent)}
+  .tag.paper{color:var(--muted);background:var(--surface-2);border:1px solid var(--hair-strong)}
+  .rec-links{display:flex;gap:12px;margin-top:8px}
+  .rec-links a{font-size:12px;color:var(--blue);text-decoration:none;font-weight:550;cursor:pointer}
+  .rec-links a:hover{text-decoration:underline}
+  .noinstant{padding:16px;border:1px dashed var(--hair-strong);border-radius:var(--radius-sm);background:var(--surface-2);
+    font-size:13px;color:var(--muted);line-height:1.55}
+  .noinstant b{color:var(--ink)}
+
+  /* ---------- Chat ---------- */
+  .chat-head{display:flex;align-items:center;gap:10px;padding:12px 15px;border-bottom:1px solid var(--hair);background:var(--surface)}
+  .chat-avatar{width:30px;height:30px;border-radius:8px;background:var(--blue-tint);color:var(--blue-ink);
+    display:grid;place-items:center;flex:none}
+  .chat-head .ch-t{font-size:13px;font-weight:650}
+  .chat-head .ch-s{font-size:11px;color:var(--muted)}
+  .chat-head .live{margin-left:auto;font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;
+    color:var(--muted);display:flex;align-items:center;gap:5px}
+  .chat-head .live::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--hair-strong)}
+  .chat.on .chat-head .live{color:var(--green)}
+  .chat.on .chat-head .live::before{background:var(--green);box-shadow:0 0 0 3px var(--green-tint)}
+
+  .chat-log{flex:1;overflow:auto;padding:16px 15px;display:flex;flex-direction:column;gap:12px;min-height:0}
+  .chat.on .chat-log,.chat.on .qr,.chat.on .composer{background:var(--chat-ground)}
+  .msg{max-width:88%;font-size:13.5px;line-height:1.5;padding:10px 13px;border-radius:14px;
+    background:var(--field-bg);color:var(--ink);border:1px solid var(--hair);box-shadow:0 1px 2px rgba(18,35,46,.06)}
+  .msg.bot{align-self:flex-start;border-bottom-left-radius:5px}
+  .msg.me{align-self:flex-end;border-bottom-right-radius:5px}
+  .msg.sys{align-self:center;font-size:11.5px;color:var(--muted);background:transparent;border:1px dashed var(--hair-strong);box-shadow:none;padding:6px 12px;border-radius:999px}
+  .qr{display:flex;flex-wrap:wrap;gap:7px;padding:0 15px 6px}
+  .qr button{font:inherit;font-size:12.5px;font-weight:550;color:var(--blue);background:var(--surface);
+    border:1px solid color-mix(in srgb,var(--blue) 40%,transparent);padding:7px 13px;border-radius:999px;cursor:pointer;transition:var(--step)}
+  .qr button:hover{background:var(--blue-tint)}
+  .typing{align-self:flex-start;display:flex;gap:4px;padding:11px 14px;background:var(--surface-2);border:1px solid var(--hair);border-radius:14px;border-bottom-left-radius:5px}
+  .typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:bounce 1.2s infinite}
+  .typing span:nth-child(2){animation-delay:.15s}.typing span:nth-child(3){animation-delay:.3s}
+  @keyframes bounce{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+  .composer{display:flex;gap:8px;padding:11px 12px;border-top:1px solid var(--hair);background:var(--surface)}
+  .composer input{flex:1;font:inherit;font-size:13.5px;padding:10px 13px;border-radius:999px;border:1px solid var(--field-border);
+    background:var(--field-bg);color:var(--ink);box-shadow:0 1px 1px rgba(18,35,46,.04)}
+  .composer input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-tint)}
+  .composer input:disabled{opacity:.5}
+  .composer button{width:40px;height:40px;flex:none;border-radius:50%;border:none;background:var(--blue);color:#fff;cursor:pointer;display:grid;place-items:center;transition:var(--step)}
+  .composer button:hover{background:var(--blue-strong)}
+  .composer button:disabled{background:var(--hair-strong);cursor:not-allowed}
+
+  /* ---------- Finalize scrim ---------- */
+  .scrim{position:absolute;inset:0;background:color-mix(in srgb,var(--ink) 78%,transparent);
+    display:none;align-items:center;justify-content:center;padding:24px;z-index:5;border-radius:var(--radius);
+    backdrop-filter:blur(2px)}
+  .scrim.show{display:flex}
+  .scrim-card{background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius);box-shadow:var(--shadow);
+    max-width:560px;width:100%;padding:26px;max-height:100%;overflow:auto}
+  .scrim-card h3{margin:0 0 5px;font-size:18px;letter-spacing:-.01em}
+  .scrim-card>p{margin:0 0 18px;color:var(--muted);font-size:13.5px}
+  .opt{display:flex;gap:12px;padding:15px;border:1px solid var(--hair-strong);border-radius:var(--radius-sm);
+    cursor:pointer;margin-bottom:10px;transition:var(--step);align-items:flex-start;background:var(--surface-2)}
+  .opt:hover{border-color:var(--blue);background:var(--blue-tint)}
+  .opt .o-ico{width:34px;height:34px;border-radius:8px;flex:none;display:grid;place-items:center}
+  .opt.a .o-ico{background:var(--green-tint);color:var(--green)}
+  .opt.b .o-ico{background:var(--blue-tint);color:var(--blue)}
+  .opt .o-t{font-size:14px;font-weight:650;margin:0 0 3px}
+  .opt .o-s{font-size:12.5px;color:var(--muted);margin:0}
+
+  .summary dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0 0 16px;font-size:13px}
+  .summary dt{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+  .summary dd{margin:0}
+  .summary .rec-line{padding:8px 0;border-top:1px solid var(--hair);font-size:13px}
+  .summary .rec-line:first-of-type{border-top:none}
+  .summary .rec-line .mono{font-size:11px;color:var(--muted);display:block}
+
+  .footnote{padding:8px 20px 16px;font-size:11px;color:var(--muted);text-align:center}
+  .footnote code{font-family:var(--font-mono);font-size:10.5px;background:var(--surface-2);padding:1px 5px;border-radius:4px;border:1px solid var(--hair)}
+
+  /* Mobile step-through (decided 2026-07-10): one surface at a time + a Form/Results ↔ Chat toggle,
+     driven by the same phase transitions as desktop. The selected-records column stacks below results. */
+  .mtabs{display:none}
+  @media (max-width:860px){
+    .stage{flex-direction:column;position:relative}
+    .canvas,.chat{max-width:none;width:100%}
+    .canvas{min-height:66vh}
+    .chat{flex:1 1 auto;height:auto;min-height:66vh}
+    /* show exactly one surface at a time */
+    .stage.m-canvas > .chat{display:none}
+    .stage.m-chat > .canvas{display:none}
+    /* selected-records column drops below the results list */
+    .results-split{flex-direction:column}
+    .results-side{flex:0 0 auto;border-left:none;border-top:1px solid var(--hair);max-height:40vh}
+    /* the surface toggle */
+    .mtabs{display:flex;gap:6px;padding:8px 12px;background:var(--surface-2);border-bottom:1px solid var(--hair);
+      position:sticky;top:0;z-index:5}
+    .mtab{flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:9px 10px;font:inherit;
+      font-size:13px;font-weight:600;color:var(--muted);background:var(--surface);border:1px solid var(--hair);
+      border-radius:8px;cursor:pointer;transition:var(--step)}
+    .mtab.active{color:var(--blue);border-color:var(--blue);background:var(--blue-tint)}
+    .mtab:disabled{opacity:.5;cursor:not-allowed}
+    .mtab .dot{width:7px;height:7px;border-radius:50%;background:var(--amber);display:none;flex:none}
+    .mtab.has-unread .dot{display:inline-block}
+  }
+
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  :focus-visible{outline:2px solid var(--blue);outline-offset:2px;border-radius:4px}
+</style>
+
+<header class="appbar">
+  <div class="crest">CV</div>
+  <div class="brand">
+    <h1>City of Cedar Vale</h1>
+    <p>AI-Powered Open Records Search</p>
+  </div>
+  <div class="spacer"></div>
+  <span class="proto-pill">Prototype · not live</span>
+  <button class="btn-ghost" id="resetBtn" type="button">Restart demo</button>
+</header>
+
+<nav class="stepper" id="stepper" aria-label="Request progress">
+  <div class="step active" data-step="0"><span class="num">1</span> Your information</div>
+  <span class="step-sep"></span>
+  <div class="step" data-step="1"><span class="num">2</span> Describe records</div>
+  <span class="step-sep"></span>
+  <div class="step" data-step="2"><span class="num">3</span> Review results</div>
+  <span class="step-sep"></span>
+  <div class="step" data-step="3"><span class="num">4</span> Submit</div>
+</nav>
+
+<main class="stage m-canvas" id="stage">
+  <!-- Mobile-only surface toggle (step-through); hidden ≥861px -->
+  <div class="mtabs" id="mtabs">
+    <button class="mtab active" id="mtabCanvas" type="button"><span id="mtabCanvasLabel">Your information</span></button>
+    <button class="mtab" id="mtabChat" type="button" disabled>Assistant <span class="dot" aria-hidden="true"></span></button>
+  </div>
+  <!-- ============ LEFT CANVAS ============ -->
+  <section class="canvas">
+    <!-- PHASE 0: form -->
+    <div class="panel formwrap" id="formPanel" style="position:relative">
+      <div class="form-head">
+        <h2 class="start-here">START HERE</h2>
+        <p>Provide information in the form below. When all information is entered, click <b>PROCEED</b>. This will activate the AI Open Record Agent on the right, and it will guide you through record search.</p>
+      </div>
+
+      <div style="padding:18px 26px 4px">
+        <div class="field">
+          <label for="fName">Full name</label>
+          <input type="text" id="fName" autocomplete="name" placeholder="Jordan Ellis">
+        </div>
+        <div class="field">
+          <label for="fEmail">Email address</label>
+          <div class="email-row">
+            <input type="email" id="fEmail" autocomplete="email" placeholder="jordan.ellis@example.com">
+            <button class="send-btn" id="gSend" type="button">Send verification email now</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="gate" id="gate">
+        <div class="g-lead">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--amber)"><path d="M22 6l-10 7L2 6"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>
+          <div><b>To proceed</b><br><span>If your verification email has been received, click <b>Email address verified</b>. If you don't have access to email right now, carefully review the email address you provided and click <b>Visually verified</b>.</span></div>
+        </div>
+        <div class="gate-actions">
+          <button class="g-btn" id="gVerify" type="button" disabled>Email address verified</button>
+          <button class="g-btn" id="gVisual" type="button">Visually verified</button>
+        </div>
+      </div>
+
+      <div class="lock-note" id="lockNote"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> The fields below unlock once your email is confirmed.</div>
+
+      <div class="locked-region locked" id="lockedRegion">
+        <div class="field">
+          <input type="text" id="fPhone" autocomplete="tel" aria-label="Phone number (optional)" placeholder="Phone number (optional)">
+        </div>
+        <div class="field">
+          <label>How should we deliver your records &amp; notices?</label>
+          <div class="radio-row">
+            <label class="radio-card sel" id="dEmail"><input type="radio" name="delivery" value="email" checked><span><span class="rc-t">Email</span><br><span class="rc-s">Fastest — digital records and status updates</span></span></label>
+            <label class="radio-card" id="dMail"><input type="radio" name="delivery" value="mail"><span><span class="rc-t">Postal mail</span><br><span class="rc-s">Printed records mailed to your address</span></span></label>
+          </div>
+        </div>
+        <div class="field addr-block hidden" id="addrBlock">
+          <label>Mailing address <span class="opt">(required for postal delivery)</span></label>
+          <div class="addr-grid">
+            <input type="text" id="fStreet1" autocomplete="address-line1" aria-label="Street address" placeholder="Street address">
+            <input type="text" id="fStreet2" autocomplete="address-line2" aria-label="Apt, suite, unit (optional)" placeholder="Apt, suite, unit (optional)">
+            <div class="addr-row3">
+              <input type="text" id="fCity" autocomplete="address-level2" aria-label="City" placeholder="City">
+              <input type="text" id="fState" autocomplete="address-level1" aria-label="State" placeholder="State" maxlength="2">
+              <input type="text" id="fZip" autocomplete="postal-code" aria-label="ZIP code" placeholder="ZIP">
+            </div>
+          </div>
+        </div>
+        <label class="check-row cert-visible" id="certRow">
+          <input type="checkbox" id="fCert" disabled>
+          <span><span class="rc-t">Include certification (certified copy)</span><br><span class="rc-s">Adds an official signed certification page attesting the records are true and correct copies. Applies to the entire request. An additional fee may apply.</span></span>
+        </label>
+        <div class="cert-hint cert-visible" id="certHint"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg> Available once your email is confirmed above.</div>
+        <div class="fee-choice">
+          <div class="fee-lead">Fees <span>— standard rates apply by default</span></div>
+          <div class="fee-opts">
+            <span style="font-size:11.5px;color:var(--muted)">Only if one applies:</span>
+            <label class="check-row" id="waiverRow">
+              <input type="checkbox" id="fWaiver">
+              <span><span class="rc-t">Request a fee waiver</span><br><span class="rc-s">For nonprofit, journalist, researcher, or other non-commercial public-interest requests. Subject to review.</span></span>
+            </label>
+            <div class="field waiver-reason hidden" id="waiverReasonBlock">
+              <textarea id="fWaiverReason" placeholder="Briefly describe the public-interest purpose — this helps the reviewer decide."></textarea>
+            </div>
+            <label class="check-row" id="commercialRow">
+              <input type="checkbox" id="fCommercial">
+              <span><span class="rc-t">I'm a commercial requester</span><br><span class="rc-s">Records requested for commercial use. Subject to review; commercial rates may apply.</span></span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-foot">
+        <button class="btn-primary" id="proceedForm" type="button" disabled>PROCEED →</button>
+        <span class="foot-hint" id="footHint">Complete the fields above to continue.</span>
+      </div>
+    </div>
+
+    <!-- PHASE 2: results (hidden until a search runs) -->
+    <div class="panel" id="resultsPanel" style="display:none;position:relative">
+      <div class="results-instr">Review the search results, and check the box to select a record. All records with the selection box checked appear in the right column. When you have completed selection, click <b>Proceed</b> and continue your conversation with the AI Open Record Assistant.</div>
+      <div class="results-split">
+        <div class="results-main" id="resultsMain"></div>
+        <div class="results-side">
+          <div class="side-head">
+            <span class="eyebrow">Selected records</span>
+            <span class="cnt" id="sideCnt">0 selected</span>
+          </div>
+          <div class="side-list" id="sideList">
+            <div class="side-empty">Records you select move here.<br>They stay attached to your request across every search.</div>
+          </div>
+          <div class="side-foot">
+            <button class="btn-primary" id="proceedResults" type="button" style="width:100%;justify-content:center">Proceed →</button>
+          </div>
+        </div>
+      </div>
+      <div class="scrim" id="scrim">
+        <div class="scrim-card" id="scrimCard"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ RIGHT CHAT ============ -->
+  <aside class="chat" id="chat">
+    <div class="chat-head">
+      <div class="chat-avatar"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a5 5 0 0 1 5 5v1a5 5 0 0 1-10 0V7a5 5 0 0 1 5-5z"/><path d="M4 21c0-3.3 3.6-6 8-6s8 2.7 8 6"/></svg></div>
+      <div><div class="ch-t">Records Assistant</div><div class="ch-s">Cedar Vale · open records</div></div>
+      <div class="live" id="livePill">Idle</div>
+    </div>
+    <div class="chat-log" id="chatLog"></div>
+    <div class="qr" id="quickReplies"></div>
+    <div class="composer">
+      <input type="text" id="chatInput" placeholder="Chat is idle…" disabled>
+      <button id="chatSend" type="button" disabled aria-label="Send">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+      </button>
+    </div>
+  </aside>
+</main>
+
+<div class="footnote">
+  Interactive prototype of the split-canvas intake design · <code>docs/DESIGN_split_canvas_intake.md</code> · the chat is scripted for demonstration, not a live model.
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var $=function(s){return document.querySelector(s)};
+  var reduce=window.matchMedia("(prefers-reduced-motion:reduce)").matches;
+
+  var state={emailConfirmed:false,delivery:"email",descriptions:[],selected:[],round:0};
+
+  /* ---------- element refs ---------- */
+  var fName=$("#fName"),fEmail=$("#fEmail"),fPhone=$("#fPhone");
+  var fStreet1=$("#fStreet1"),fStreet2=$("#fStreet2"),fCity=$("#fCity"),fState=$("#fState"),fZip=$("#fZip");
+  var addrFields=[fStreet1,fStreet2,fCity,fState,fZip];
+  // Structured mailing address (decided 2026-07-10): required fields are street1/city/state/zip; street2 optional.
+  function addrComplete(){return fStreet1.value.trim()&&fCity.value.trim()&&fState.value.trim()&&fZip.value.trim()}
+  function addrOneLine(){
+    var l2=fStreet2.value.trim();
+    return [fStreet1.value.trim(),l2,(fCity.value.trim()+", "+fState.value.trim().toUpperCase()+" "+fZip.value.trim()).trim()]
+      .filter(function(p){return p&&p!==", "}).join(", ")||"—";
+  }
+  var gate=$("#gate"),gVerify=$("#gVerify"),gVisual=$("#gVisual"),gSend=$("#gSend");
+  var lockedRegion=$("#lockedRegion"),lockNote=$("#lockNote"),addrBlock=$("#addrBlock"),certHint=$("#certHint");
+  // Certification stays visible-but-disabled before the gate (discoverable); the gate enables/disables it.
+  function setCertEnabled(on){
+    var box=$("#fCert");if(!box)return;
+    box.disabled=!on;certHint.classList.toggle("hidden",on);
+    if(!on){box.checked=false;box.closest(".check-row").classList.remove("sel");}
+  }
+  var proceedForm=$("#proceedForm"),footHint=$("#footHint");
+  var chat=$("#chat"),chatLog=$("#chatLog"),chatInput=$("#chatInput"),chatSend=$("#chatSend");
+  var quickReplies=$("#quickReplies"),livePill=$("#livePill");
+  var formPanel=$("#formPanel"),resultsPanel=$("#resultsPanel"),resultsMain=$("#resultsMain");
+  var sideList=$("#sideList"),sideCnt=$("#sideCnt"),proceedResults=$("#proceedResults");
+  var scrim=$("#scrim"),scrimCard=$("#scrimCard"),instrText=$("#instrText");
+  state.emailSent=false;
+
+  /* ---------- mobile step-through: one surface at a time + Form/Results ↔ Chat toggle ---------- */
+  var stage=$("#stage"),mtabCanvas=$("#mtabCanvas"),mtabChat=$("#mtabChat"),mtabCanvasLabel=$("#mtabCanvasLabel");
+  function setMobileView(v){
+    stage.classList.toggle("m-canvas",v==="canvas");
+    stage.classList.toggle("m-chat",v==="chat");
+    mtabCanvas.classList.toggle("active",v==="canvas");
+    mtabChat.classList.toggle("active",v==="chat");
+    if(v==="chat")mtabChat.classList.remove("has-unread"); // opening chat clears the new-message dot
+  }
+  function flagChatUnread(){ if(stage.classList.contains("m-canvas"))mtabChat.classList.add("has-unread"); }
+  mtabCanvas.addEventListener("click",function(){setMobileView("canvas")});
+  mtabChat.addEventListener("click",function(){if(!mtabChat.disabled)setMobileView("chat")});
+
+  function setStep(n){
+    document.querySelectorAll(".step").forEach(function(el){
+      var s=+el.getAttribute("data-step");
+      el.classList.toggle("active",s===n);
+      el.classList.toggle("done",s<n);
+    });
+  }
+  function instr(html){if(instrText)instrText.innerHTML=html}
+
+  /* ================= PHASE 0: form ================= */
+  function validEmail(v){return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)}
+  function refreshFormState(){
+    var canProceed=fName.value.trim() && validEmail(fEmail.value.trim()) && state.emailConfirmed;
+    if(state.delivery==="mail" && !addrComplete()) canProceed=false;
+    proceedForm.disabled=!canProceed;
+    if(!state.emailConfirmed) footHint.textContent="Confirm your email to unlock the rest.";
+    else if(state.delivery==="mail" && !addrComplete()) footHint.textContent="Complete the mailing address (street, city, state, ZIP) for postal delivery.";
+    else if(canProceed) footHint.textContent="Looks good — the assistant will help you describe each record.";
+    else footHint.textContent="Complete the fields above to continue.";
+  }
+  function confirmEmail(mode){
+    if(!validEmail(fEmail.value.trim())){
+      footHint.textContent="Enter a valid email address first.";fEmail.focus();return;
+    }
+    state.emailConfirmed=true;
+    lockedRegion.classList.remove("locked");
+    lockNote.classList.add("hidden");
+    gate.classList.add("satisfied");
+    setCertEnabled(true);
+    if(mode==="verify"){
+      gVerify.textContent="✓ Email address verified";
+      gVerify.classList.add("done");gVisual.style.display="none";
+    }else{
+      gVisual.textContent="✓ Visually verified";
+      gVisual.classList.add("done");gVerify.style.display="none";
+    }
+    gVerify.disabled=gVisual.disabled=true;
+    refreshFormState();
+  }
+  gSend.addEventListener("click",function(){
+    if(!validEmail(fEmail.value.trim())){footHint.textContent="Enter a valid email address first.";fEmail.focus();return;}
+    gSend.textContent="✓ Verification email sent — check your inbox";
+    gSend.classList.add("sent");gSend.disabled=true;
+    state.emailSent=true;
+    gVerify.disabled=false;
+  });
+  gVerify.addEventListener("click",function(){confirmEmail("verify")});
+  gVisual.addEventListener("click",function(){confirmEmail("visual")});
+  // Restore the gate to its pristine (locked) state — used when the email is edited
+  // after a send/confirm, so a confirmation can never go stale against a new address.
+  function resetGate(){
+    state.emailConfirmed=false;state.emailSent=false;
+    lockedRegion.classList.add("locked");
+    lockNote.classList.remove("hidden");
+    gate.classList.remove("satisfied");
+    setCertEnabled(false);
+    gSend.disabled=false;gSend.classList.remove("sent");gSend.textContent="Send verification email now";
+    gVerify.style.display="";gVerify.classList.remove("done");gVerify.textContent="Email address verified";gVerify.disabled=true;
+    gVisual.style.display="";gVisual.classList.remove("done");gVisual.textContent="Visually verified";gVisual.disabled=false;
+  }
+  [fName,fPhone].concat(addrFields).forEach(function(el){el.addEventListener("input",refreshFormState)});
+  fEmail.addEventListener("input",function(){
+    // Any edit to a sent-or-confirmed address invalidates it: reset the gate so the
+    // citizen must re-send/re-confirm against the new address (re-locks lower fields).
+    if(state.emailConfirmed || state.emailSent) resetGate();
+    refreshFormState();
+  });
+
+  $("#dEmail").addEventListener("click",function(){setDelivery("email")});
+  $("#dMail").addEventListener("click",function(){setDelivery("mail")});
+  function setDelivery(v){
+    state.delivery=v;
+    $("#dEmail").classList.toggle("sel",v==="email");
+    $("#dMail").classList.toggle("sel",v==="mail");
+    addrBlock.classList.toggle("hidden",v!=="mail");
+    refreshFormState();
+  }
+
+  proceedForm.addEventListener("click",startChat);
+  var fCert=$("#fCert");
+  fCert.addEventListener("change",function(){fCert.closest(".check-row").classList.toggle("sel",fCert.checked)});
+  // Fee-choice (Phase-0 form, decided 2026-07-10): default = standard rates; two opt-ins.
+  // Waiver and commercial are mutually exclusive — a non-commercial public-interest waiver contradicts
+  // declaring commercial use; checking one clears the other. Waiver reveals a reason box.
+  var fWaiver=$("#fWaiver"),fCommercial=$("#fCommercial"),fWaiverReason=$("#fWaiverReason"),waiverReasonBlock=$("#waiverReasonBlock");
+  fWaiver.addEventListener("change",function(){
+    if(fWaiver.checked){fCommercial.checked=false;fCommercial.closest(".check-row").classList.remove("sel");}
+    fWaiver.closest(".check-row").classList.toggle("sel",fWaiver.checked);
+    waiverReasonBlock.classList.toggle("hidden",!fWaiver.checked);
+    if(!fWaiver.checked)fWaiverReason.value="";
+  });
+  fCommercial.addEventListener("change",function(){
+    if(fCommercial.checked){fWaiver.checked=false;fWaiver.closest(".check-row").classList.remove("sel");waiverReasonBlock.classList.add("hidden");fWaiverReason.value="";}
+    fCommercial.closest(".check-row").classList.toggle("sel",fCommercial.checked);
+  });
+
+  /* ================= PHASE 1: chat engine ================= */
+  var flow=null; // current expected input handler
+  function activateChat(){
+    chat.classList.add("on");livePill.textContent="Active";
+    chatInput.disabled=false;chatSend.disabled=false;chatInput.placeholder="Type a message…";
+  }
+  function bot(text,cb){
+    var t=document.createElement("div");t.className="typing";t.innerHTML="<span></span><span></span><span></span>";
+    chatLog.appendChild(t);scroll();
+    var delay=reduce?120:Math.min(1100,420+text.length*7);
+    setTimeout(function(){
+      t.remove();
+      var m=document.createElement("div");m.className="msg bot";m.textContent=text;
+      chatLog.appendChild(m);scroll();flagChatUnread();if(cb)cb();
+    },delay);
+  }
+  function me(text){var m=document.createElement("div");m.className="msg me";m.textContent=text;chatLog.appendChild(m);scroll()}
+  function sys(text){var m=document.createElement("div");m.className="msg sys";m.textContent=text;chatLog.appendChild(m);scroll()}
+  function scroll(){chatLog.scrollTop=chatLog.scrollHeight}
+  function quick(opts){
+    quickReplies.innerHTML="";
+    opts.forEach(function(o){
+      var b=document.createElement("button");b.type="button";b.textContent=o.label;
+      b.addEventListener("click",function(){quickReplies.innerHTML="";me(o.label);o.act()});
+      quickReplies.appendChild(b);
+    });
+  }
+  function clearQuick(){quickReplies.innerHTML=""}
+
+  function startChat(){
+    formToResults();
+    setStep(1);
+    activateChat();
+    mtabChat.disabled=false;mtabCanvasLabel.textContent="Results";setMobileView("chat"); // assistant is now the active surface
+
+    instr('<b>Describe one record at a time.</b> The assistant confirms each request, then searches the library.');
+    bot("Thank you for using the Cedar Vale AI-Powered Open Records Search. I'll help you write descriptions that get the best results.",function(){
+      bot("If you need more than one type of record, describe each one separately. Please describe a record you're looking for.",function(){
+        flow=onDescription;
+      });
+    });
+  }
+
+  var FORMAT_B=/\b(email|e-mail|text|sms|message|video|body ?cam|dash ?cam|footage|audio|911|recording|photo|picture|image|database|export)\b/i;
+  function onDescription(text){
+    var desc=text.trim();if(!desc)return;
+    state.pendingDesc=desc;
+    // one clarifying question, then confirm
+    bot("Got it. To narrow the search — roughly what date range, and which department or location does this involve?",function(){
+      flow=function(det){
+        state.pendingDetail=det.trim();
+        var full=desc+(state.pendingDetail?(" — "+state.pendingDetail):"");
+        bot('Here\'s your request as I understand it:',function(){
+          bot('“'+full+'”  —  does that look right?',function(){
+            flow=null;
+            quick([
+              {label:"Yes, that's right",act:function(){runSearch(full)}},
+              {label:"Let me rewrite it",act:function(){bot("No problem — go ahead and describe it again.",function(){flow=onDescription})}}
+            ]);
+          });
+        });
+      };
+    });
+  }
+
+  function runSearch(full){
+    state.descriptions.push(full);
+    setStep(2);
+    if(FORMAT_B.test(full)){
+      bot("One note: this is a record type — like email, messages, or video — that the Open Records team pulls and processes directly, so I can't show instant matches. I've added it to your request and the team will search for it.",function(){
+        renderNoInstant(full);
+        askMoreOrReview();
+      });
+      return;
+    }
+    bot("Searching the records library for that now…",function(){
+      setTimeout(function(){
+        renderResults(full);
+        bot("Here's what I found — review the results on the left. Anything you select moves to the panel on the right. When you're done (or if nothing matches), click Proceed.",function(){
+          instr('<b>Review search results.</b> Tick the records you want. Selected records collect in the right-hand panel.');
+        });
+      },reduce?150:650);
+    });
+  }
+
+  /* ================= results rendering ================= */
+  function datasetFor(q){
+    var lc=q.toLowerCase();
+    if(/permit|building|zoning|construction|occupancy/.test(lc)){
+      return [
+        {id:rid(),t:"Building Permit BP-2023-0912",m:"142 Oak St · 06/02/2023 · Building Dept",d:"New rear deck; approved plans and permit card.",tag:"green"},
+        {id:rid(),t:"Permit Inspection Record",m:"142 Oak St · 06/20/2023 · Building Dept",d:"Framing and final inspection results tied to BP-2023-0912.",tag:"green"},
+        {id:rid(),t:"Certificate of Occupancy",m:"142 Oak St · 07/05/2023 · Building Dept",d:"Issued CO — contains an owner signature; brief review.",tag:"review"}
+      ];
+    }
+    if(/police|incident|report|arrest|officer|crash|accident/.test(lc)){
+      return [
+        {id:rid(),t:"Incident Report #2023-4471",m:"Oak St · 03/14/2023 · Police Dept",d:"Officer narrative and involved parties for the reported incident.",tag:"green"},
+        {id:rid(),t:"Supplemental Narrative #2023-4471",m:"Oak St · 03/16/2023 · Police Dept",d:"Follow-up narrative; may contain a witness name — brief review.",tag:"review"},
+        {id:rid(),t:"Case File (physical)",m:"Records Center · Box 12 · Shelf B",d:"Original paper case file — retrieved by hand from storage.",tag:"paper"}
+      ];
+    }
+    return [
+      {id:rid(),t:"Council Meeting Minutes",m:"03/2023 · City Clerk",d:"Adopted minutes matching your description.",tag:"green"},
+      {id:rid(),t:"Supporting Agenda Packet",m:"03/2023 · City Clerk",d:"Agenda and staff memos for the same meeting.",tag:"green"},
+      {id:rid(),t:"Draft Resolution",m:"03/2023 · City Clerk",d:"Draft with internal comments — brief review before release.",tag:"review"}
+    ];
+  }
+  var _rid=100;function rid(){return "r"+(++_rid)}
+  function tagLabel(t){return t==="green"?"Public-ready":t==="review"?"Review needed":"Paper — on request"}
+
+  function renderResults(q){
+    var data=datasetFor(q);
+    setMobileView("canvas"); // results are ready — bring the canvas forward to review + select
+    resultsMain.innerHTML='<div class="res-query">Results for <b>“'+esc(q)+'”</b> · '+data.length+' in the records library</div>';
+    data.forEach(function(r){
+      var el=document.createElement("div");el.className="rec";el.setAttribute("data-id",r.id);
+      el.innerHTML=
+        '<input type="checkbox" aria-label="Select '+esc(r.t)+'">'+
+        '<div class="rec-body">'+
+          '<p class="rec-title">'+esc(r.t)+' <span class="tag '+r.tag+'">'+tagLabel(r.tag)+'</span></p>'+
+          '<div class="rec-meta">'+esc(r.m)+'</div>'+
+          '<p class="rec-desc">'+esc(r.d)+'</p>'+
+          '<div class="rec-links">'+(r.tag==="paper"?'<a data-act="loc">View location</a>':'<a data-act="view">View</a>')+'</div>'+
+        '</div>';
+      var cb=el.querySelector("input");
+      function toggle(){cb.checked=!cb.checked;onToggle(r,el,cb)}
+      el.addEventListener("click",function(e){
+        if(e.target.tagName==="A"){e.preventDefault();sys(e.target.getAttribute("data-act")==="loc"?"Location shown: "+r.m:"Opening "+r.t+" (prototype)");return;}
+        if(e.target!==cb)toggle();else onToggle(r,el,cb);
+      });
+      resultsMain.appendChild(el);
+    });
+  }
+  function renderNoInstant(q){
+    resultsMain.innerHTML='<div class="res-query">For <b>“'+esc(q)+'”</b></div>'+
+      '<div class="noinstant"><b>No instant matches for this record type.</b><br>'+
+      'Email, messages, audio and video are pulled and processed directly by the Open Records team, so they don\'t appear in the instant library search. '+
+      'This request has been added to your list — the team will search for it after you submit.</div>';
+  }
+  function onToggle(r,el,cb){
+    el.classList.toggle("sel",cb.checked);
+    if(cb.checked){if(!state.selected.some(function(s){return s.id===r.id}))state.selected.push(r);}
+    else state.selected=state.selected.filter(function(s){return s.id!==r.id});
+    renderSide();
+  }
+  function renderSide(){
+    sideCnt.textContent=state.selected.length+" selected";
+    if(!state.selected.length){sideList.innerHTML='<div class="side-empty">Records you select move here.<br>They stay attached to your request across every search.</div>';return;}
+    sideList.innerHTML="";
+    state.selected.forEach(function(r){
+      var it=document.createElement("div");it.className="side-item";
+      it.innerHTML='<div><div class="si-t">'+esc(r.t)+'</div><div class="si-m">'+esc(r.m)+'</div></div>'+
+        '<button class="si-x" aria-label="Remove" type="button">×</button>';
+      it.querySelector(".si-x").addEventListener("click",function(){
+        state.selected=state.selected.filter(function(s){return s.id!==r.id});
+        var row=resultsMain.querySelector('[data-id="'+r.id+'"]');
+        if(row){row.classList.remove("sel");var c=row.querySelector("input");if(c)c.checked=false;}
+        renderSide();
+      });
+      sideList.appendChild(it);
+    });
+  }
+
+  proceedResults.addEventListener("click",function(){
+    // fade to dark, results disappear
+    resultsMain.style.transition=reduce?"none":"opacity .3s";resultsMain.style.opacity="0";
+    setTimeout(function(){finalizeOptions()},reduce?0:300);
+  });
+
+  /* ================= finalize + loop ================= */
+  function finalizeOptions(){
+    setMobileView("canvas"); // the finalize scrim is absolute within the results panel — keep it on screen
+    var greenCount=state.selected.filter(function(s){return s.tag==="green"}).length;
+    scrimCard.innerHTML=
+      '<h3>How would you like to handle these records?</h3>'+
+      '<p>'+state.selected.length+' record'+(state.selected.length===1?"":"s")+' selected'+(greenCount?' · '+greenCount+' are public-ready (green tag)':'')+'.</p>'+
+      '<div class="opt a" data-opt="download"><div class="o-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12"/><path d="m7 12 5 5 5-5"/><path d="M5 21h14"/></svg></div>'+
+        '<div><p class="o-t">Download public-ready records now</p><p class="o-s">Get the '+(greenCount||"green-tagged")+' public-ready record'+(greenCount===1?"":"s")+' immediately, and submit the rest for required processing.</p></div></div>'+
+      '<div class="opt b" data-opt="submit"><div class="o-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg></div>'+
+        '<div><p class="o-t">Submit all records for processing</p><p class="o-s">Send every selected record to the Open Records team for review and release together.</p></div></div>';
+    scrim.classList.add("show");
+    scrimCard.querySelectorAll(".opt").forEach(function(o){
+      o.addEventListener("click",function(){chosenFinalize(o.getAttribute("data-opt"))});
+    });
+  }
+  function chosenFinalize(kind){
+    scrim.classList.remove("show");
+    resultsMain.style.opacity="1";
+    setMobileView("chat"); // the "search for more?" prompt is in chat
+    sys(kind==="download"?"You chose: download public-ready now, submit the rest.":"You chose: submit all for processing.");
+    state.lastChoice=kind;
+    bot("Done. Would you like to search for more records?",function(){
+      quick([
+        {label:"Yes, add another",act:function(){nextRound()}},
+        {label:"No, I'm finished",act:function(){finishRequest()}}
+      ]);
+    });
+  }
+  // No-instant (email / video / etc.) path: nothing to select, so just ask whether to add more or finish.
+  // (Was called at the Format-B branch but never defined — that path threw a ReferenceError.)
+  function askMoreOrReview(){
+    bot("Would you like to search for another record, or are you finished?",function(){
+      quick([
+        {label:"Yes, add another",act:function(){nextRound()}},
+        {label:"No, I'm finished",act:function(){finishRequest()}}
+      ]);
+    });
+  }
+  function nextRound(){
+    state.round++;
+    state.selected=[];renderSide();
+    setStep(1);
+    setMobileView("chat"); // next record is described in chat
+    resultsMain.innerHTML='<div class="side-empty" style="padding:60px 12px">Your next search will appear here.</div>';
+    instr('<b>Describe your next record.</b> Each description becomes its own search.');
+    bot("Great — please describe the next record you're looking for.",function(){flow=onDescription});
+  }
+  function finishRequest(){
+    setStep(3);
+    setMobileView("canvas"); // the review/submit scrim is absolute within the results panel
+    instr('<b>Request ready to submit.</b> Review the summary, then confirm.');
+    var deliveryTxt=state.delivery==="mail"?("Postal · "+addrOneLine()):("Email · "+fEmail.value.trim());
+    var recRows=state.descriptions.map(function(d,i){return '<div class="rec-line">Record '+(i+1)+'<span class="mono">'+esc(d)+'</span></div>'}).join("");
+    scrimCard.innerHTML=
+      '<h3>Review &amp; submit your request</h3>'+
+      '<p>Cedar Vale open records · one request, '+state.descriptions.length+' record'+(state.descriptions.length===1?"":"s")+'.</p>'+
+      '<div class="summary"><dl>'+
+        '<dt>Name</dt><dd>'+esc(fName.value.trim()||"—")+'</dd>'+
+        '<dt>Email</dt><dd>'+esc(fEmail.value.trim())+' <span class="mono" style="color:var(--green)">✓ confirmed</span></dd>'+
+        (fPhone.value.trim()?'<dt>Phone</dt><dd>'+esc(fPhone.value.trim())+'</dd>':'')+
+        '<dt>Delivery</dt><dd>'+esc(deliveryTxt)+'</dd>'+
+        '<dt>Certified</dt><dd>'+(fCert.checked?'Yes — certification page requested (applies to whole request)':'No')+'</dd>'+
+        '<dt>Fees</dt><dd>'+(fWaiver.checked?('Fee waiver requested (subject to review)'+(fWaiverReason.value.trim()?' — '+esc(fWaiverReason.value.trim()):'')):fCommercial.checked?'Commercial requester (subject to review)':'Standard rates')+'</dd>'+
+      '</dl>'+recRows+'</div>'+
+      '<button class="btn-primary" id="finalSubmit" type="button" style="width:100%;justify-content:center;margin-top:6px">Submit request</button>';
+    scrim.classList.add("show");
+    $("#finalSubmit").addEventListener("click",function(){
+      scrimCard.innerHTML='<div style="text-align:center;padding:20px 8px">'+
+        '<div style="width:56px;height:56px;border-radius:50%;background:var(--green-tint);color:var(--green);display:grid;place-items:center;margin:0 auto 16px"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg></div>'+
+        '<h3>Request submitted</h3>'+
+        '<p style="margin-bottom:18px">A confirmation is on its way to '+esc(fEmail.value.trim())+'. You can track status any time from that email.</p>'+
+        '<button class="btn-ghost" type="button" onclick="location.reload()">Run the demo again</button></div>';
+      livePill.textContent="Complete";
+      sys("Request submitted — confirmation sent.");
+    });
+  }
+
+  /* ---------- form → results morph ---------- */
+  function formToResults(){
+    if(reduce){formPanel.style.display="none";resultsPanel.style.display="flex";return;}
+    formPanel.style.transition="opacity .28s, transform .28s";
+    formPanel.style.opacity="0";formPanel.style.transform="translateY(-6px)";
+    setTimeout(function(){
+      formPanel.style.display="none";
+      resultsPanel.style.display="flex";resultsPanel.style.opacity="0";
+      resultsMain.innerHTML='<div class="side-empty" style="padding:60px 12px">Your search results will appear here once you describe a record in the chat.</div>';
+      resultsPanel.style.transition="opacity .3s";
+      requestAnimationFrame(function(){resultsPanel.style.opacity="1"});
+    },280);
+  }
+
+  /* ---------- chat input ---------- */
+  function send(){
+    var v=chatInput.value.trim();if(!v||!flow)return;
+    me(v);chatInput.value="";
+    var f=flow;flow=null;f(v);
+  }
+  chatSend.addEventListener("click",send);
+  chatInput.addEventListener("keydown",function(e){if(e.key==="Enter")send()});
+
+  $("#resetBtn").addEventListener("click",function(){location.reload()});
+
+  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+  refreshFormState();
+})();
+</script>

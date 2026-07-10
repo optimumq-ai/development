@@ -22,16 +22,19 @@ app.post('/api/requests/public', async function(req, res) {
   var b = req.body;
   if (!b.requestorName || !b.requestorEmail || !b.description) return res.status(400).json({ error: 'Name, email and description are required' });
   var year = new Date().getFullYear();
-  var last = await get('SELECT request_number FROM requests ORDER BY created_at DESC LIMIT 1');
-  var nextNum = 1;
-  if (last) { var parts = last.request_number.split('-'); if (parseInt(parts[0]) == year) nextNum = parseInt(parts[1]) + 1; }
+  // Number within the current-year YYYY-#### series only; ignore DEMO-*/non-conforming numbers so a
+  // seed row that happens to be newest by created_at can't reset the counter and collide (was a 500).
+  var last = await get("SELECT request_number FROM requests WHERE request_number LIKE ? ORDER BY request_number DESC LIMIT 1", [year + '-%']);
+  var nextNum = last ? parseInt(last.request_number.split('-')[1]) + 1 : 1;
   var requestNumber = year + '-' + String(nextNum).padStart(4,'0');
   var days = {simple:5,standard:10,complex:20,redaction_required:30}[b.classification||'standard']||10;
   var deadline = new Date(); deadline.setDate(deadline.getDate()+days);
   var deadlineStr = deadline.toISOString().split('T')[0];
   var id = uuidv4();
-  await run("INSERT INTO requests (id,request_number,requestor_name,requestor_email,requestor_phone,requestor_type,delivery_method,description,classification,department_id,fee_waiver_requested,is_mrr,submission_channel,stage,status,deadline_date,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'))",
-    [id,requestNumber,b.requestorName,b.requestorEmail,b.requestorPhone||'',b.requestorType||'individual',b.deliveryMethod||'email',b.description,b.classification||'standard',b.departmentId||null,b.feeWaiverRequested?1:0,b.isMrr?1:0,'portal','intake','active',deadlineStr]);
+  // Structured intake fields (split-canvas slice 1) persisted here too, for parity with /api/public/submit.
+  var requestorType = b.requestorType === 'commercial' ? 'commercial' : 'individual';
+  await run("INSERT INTO requests (id,request_number,requestor_name,requestor_email,requestor_phone,requestor_type,delivery_method,description,classification,department_id,fee_waiver_requested,fee_waiver_reason,mailing_street1,mailing_street2,mailing_city,mailing_state,mailing_zip,is_mrr,submission_channel,stage,status,deadline_date,created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'))",
+    [id,requestNumber,b.requestorName,b.requestorEmail,b.requestorPhone||'',requestorType,b.deliveryMethod||'email',b.description,b.classification||'standard',b.departmentId||null,b.feeWaiverRequested?1:0,b.feeWaiverReason||null,b.mailingStreet1||null,b.mailingStreet2||null,b.mailingCity||null,b.mailingState||null,b.mailingZip||null,b.isMrr?1:0,'portal','intake','active',deadlineStr]);
   await run("INSERT INTO request_history (id,request_id,actor_id,actor_name,action,notes) VALUES (?,?,?,?,?,?)",
     [uuidv4(),id,'public','Public Portal','CREATED','Request submitted via public portal']);
   res.status(201).json({ success: true, requestNumber: requestNumber, requestId: id });
@@ -70,6 +73,7 @@ app.use('/api/fee-profiles', require('./src/routes/feeProfiles'));
 app.use('/api/fee-estimates', require('./src/routes/feeEstimates'));
 app.use('/api/config-freshness', require('./src/routes/configFreshness'));
 app.use('/api/jurisdiction-profile', require('./src/routes/jurisdictionProfile'));
+app.use('/api/clarification-policy', require('./src/routes/clarificationPolicy'));
 app.use('/api/onboarding', require('./src/routes/onboarding'));
 app.use('/api/fee-sandbox', require('./src/routes/feeSandbox'));
 app.use('/api/objections', require('./src/routes/objections'));
