@@ -1018,3 +1018,22 @@ via `sudo rm -rf` and confirmed gone. Working tree is now **fully clean** — `g
 or untracked; on `main` @ `7447c0f`, 0 ahead / 0 behind `origin/main`. (A transient
 `.claude/settings.local.json.tmp.*` seen mid-check was just the harness's atomic write of `settings.local.json`
 and cleared itself.) No stray backups, build dirs, or test drops remain.
+
+## 2026-07-10 (v) — Researched the "real" TX certification fee: none exists (kept $1.00 as demo)
+
+Asked to replace the illustrative $1.00 TX cert rate with the real jurisdiction fee. **Researched it against
+primary sources** (TX AG public-information cost rules **1 TAC §70.3** via Cornell LII + the Texas state fee
+schedule): certification of copies is **not a chargeable category** under the Texas PIA — the rule enumerates
+copies ($0.10/pg), labor ($15/hr), programming ($28.50/hr), 20% overhead, media, postage, credit-card fees, but
+**no certification fee**. So there is no "real" TX statutory certification figure to look up; the legally-accurate
+TX value is **$0 / no charge** (individual bodies may charge to certify vital/court records under separate
+statutes — not PIA).
+
+**Decision (Kevin):** keep **$1.00 `per_record`** as an explicit *illustrative demo value* so the certification
+line stays exercised on the default jurisdiction. **No config change** — the live `feeprof-tx-fr-v1` row stays at
+$1.00. Only tightened the labeling so it is never mistaken for a Texas statutory fee:
+- `backend/scripts/feeProfile.seed.js` — comment noting 1 TAC §70.3 authorizes no cert fee; $1.00 is demo-only;
+  real TX deployment should use 0 or a specific city's adopted fee.
+- `SPEC_fees_estimates_payments.md` §1 — records the §70.3 finding and that the example's $1.00 is illustrative.
+
+Committed: seed comment, spec, this note. No runtime/DB change.
