@@ -530,3 +530,46 @@ mutual exclusion → email edit re-locks → PROCEED activates chat. Screens in 
 engine (slice 3), results canvas (slice 4), form→`/public/submit` wiring (slice 5), mobile step-through toggle
 (slice 6 — page currently just stacks ≤860px) all remain follow-on. Plus slice 1b (clarification reads stored
 `mailing_*`). `frontend/build` is git-ignored — only `App.js` + the new page are committed.
+
+## 2026-07-10 (e) — Split-canvas BUILD slice 3: Phase-1 chat conversation engine (BUILT + verified)
+
+**Slice:** Third build slice — the Phase-1 chat engine for `/portal/v2`. A real, backend-driven agent scoped
+to record **descriptions + search + the one-record-at-a-time (MRR) loop** only; the Phase-0 form owns
+identity/verify/delivery/fee/cert. Backend + frontend. On `spec/task-screens`.
+
+**Built:**
+- `backend/src/routes/publicChat.js` — new `SYSTEM_PROMPT_SPLIT_CANVAS` v2 agent prompt + a `mode:"split_canvas"`
+  branch on `POST /public/chat`. The v2 agent **never** asks for contact info, email verification, delivery,
+  or fees, and **never** emits `[[CONTACT_FORM]]`/`[[VERIFY_EMAIL]]`/`[[FEE_WAIVER_INFO]]`/`[[SUBMIT_READY]]`
+  (barred — the form owns them). It reuses the **entire existing search stack** unchanged: `[[SEARCH_QUERY]]`
+  → library search + AI relevance judge, `[[EMAIL_SEARCH]]` count-only for email/text, PATH (a)/(b) format
+  fork, the result-aware second-pass reply, and `[[QUICK_REPLIES]]`. Result-aware / no-result reply text is
+  **mode-aware** (points at "the results view" not chat cards; never re-asks delivery). Default (chat-first)
+  `/portal` flow is byte-for-byte unchanged.
+- `frontend/src/pages/PublicPortalV2Page.js` — replaced the chat placeholder with a live engine: PROCEED
+  activates the panel and dims the form to inert; the verbatim design **opening greeting is seeded client-side**
+  (display-only, so it's never sent to the API — Messages API needs a user-first turn); real user/assistant
+  bubbles, a typing indicator, tappable quick replies, and a **read-only** in-chat rendering of returned records
+  (with a "selecting happens in the results view — next slice" note). Latest `searchResults`/`searchQuery` are
+  captured in state for slice 4. App bar + greeting now use the **real agency name** (`/requests/public/config`),
+  with a derived crest (e.g. "City of Autumn Falls" → "AF").
+- `docs/SPEC_public_portal_intake.md` — new **§2b "Split-canvas v2 intake agent"** documenting the model split,
+  the `mode:"split_canvas"` backend flow, the client-seeded greeting, barred markers, and the slice map
+  (results canvas / submit / mobile pending). (Design change → spec updated in the same commit, per CLAUDE.md.)
+
+**Evidence (verified live — API restarted via PM2 respawn kill 168297 → pid 174626, health 200; frontend built
++ served by nginx):** (1) Backend probes: v2 mode responds to a description **without** asking for contact,
+clarifies one question at a time, offers quick replies; confirms the description ("Your request is as follows…
+Is that right?") then on "yes" fires `[[SEARCH_QUERY]]` → **6 real records**; PATH (b) email gathers
+senders/recipients (no contact ask). (2) Full browser drive (`drive3.js`) — **14/14 assertions pass**:
+form → PROCEED → chat active + greeting → composer enabled + form inert → describe → typing indicator → agent
+reply (no contact ask) → confirm → search → 6-record read-only list in chat → match quick-replies. Screens
+`06`, `07` in scratchpad. (3) Regression: default `/portal` (no `mode`) still emits `[[CONTACT_FORM]]` and
+collects contact — unchanged.
+
+**Boundary / next:** the chat engine is the **right panel** only. Slice 4 = **results canvas** — morph the left
+panel from the (inert) form into the interactive results grid + Selected-Records column (per-child
+attach-and-clear), consuming the `searchResults` this slice already captures; wire the visual "another record?"
+loop. Then slice 5 (form→`/public/submit`), slice 6 (mobile step-through), cut over `/portal`, and slice 1b
+(clarification reads stored `mailing_*`). `frontend/build` is git-ignored — committed: the route file, the page,
+the spec, this note.

@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 // Split-Canvas Portal Intake — v2, build slice 2: the Phase-0 structured intake form.
@@ -167,8 +167,27 @@ var STYLES = `
 .scv .msg{max-width:88%;font-size:13.5px;line-height:1.5;padding:10px 13px;border-radius:14px;
   background:var(--field-bg);color:var(--ink);border:1px solid var(--hair);box-shadow:0 1px 2px rgba(18,35,46,.06)}
 .scv .msg.bot{align-self:flex-start;border-bottom-left-radius:5px}
+.scv .msg.me{align-self:flex-end;border-bottom-right-radius:5px;background:var(--blue-tint);border-color:color-mix(in srgb,var(--blue) 30%,transparent);color:var(--blue-ink)}
 .scv .msg.sys{align-self:center;font-size:11.5px;color:var(--muted);background:transparent;border:1px dashed var(--hair-strong);box-shadow:none;padding:6px 12px;border-radius:999px}
 .scv .chat-idle{margin:auto;text-align:center;color:var(--muted);font-size:12.5px;padding:20px;line-height:1.6}
+.scv .typing{align-self:flex-start;display:flex;gap:4px;padding:11px 14px;background:var(--field-bg);border:1px solid var(--hair);border-radius:14px;border-bottom-left-radius:5px}
+.scv .typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);animation:scvbounce 1.2s infinite}
+.scv .typing span:nth-child(2){animation-delay:.15s}.scv .typing span:nth-child(3){animation-delay:.3s}
+@keyframes scvbounce{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+.scv .qr{display:flex;flex-wrap:wrap;gap:7px;padding:0 15px 8px}
+.scv .qr button{font:inherit;font-size:12.5px;font-weight:550;color:var(--blue);background:var(--surface);
+  border:1px solid color-mix(in srgb,var(--blue) 40%,transparent);padding:7px 13px;border-radius:999px;cursor:pointer;transition:var(--step)}
+.scv .qr button:hover{background:var(--blue-tint)}
+.scv .chat-results{align-self:flex-start;max-width:92%;border:1px solid var(--hair);border-radius:10px;background:var(--surface-2);padding:9px 11px;font-size:12px}
+.scv .cr-head{font-weight:650;color:var(--blue-ink);margin-bottom:6px;font-size:12px}
+.scv .cr-item{padding:5px 0;border-top:1px solid var(--hair);line-height:1.35}
+.scv .cr-item:first-of-type{border-top:none}
+.scv .cr-item .cr-t{font-weight:600}
+.scv .cr-item .cr-m{font-family:var(--font-mono);font-size:10px;color:var(--muted)}
+.scv .cr-tag{font-family:var(--font-mono);font-size:9px;letter-spacing:.04em;text-transform:uppercase;color:var(--green);
+  background:var(--green-tint);border:1px solid color-mix(in srgb,var(--green) 35%,transparent);padding:1px 5px;border-radius:999px;margin-left:6px}
+.scv .cr-note{margin-top:7px;font-size:10.5px;color:var(--muted);font-style:italic}
+.scv .formwrap.inert{opacity:.58;pointer-events:none;filter:saturate(.7)}
 .scv .composer{display:flex;gap:8px;padding:11px 12px;border-top:1px solid var(--hair);background:var(--surface)}
 .scv .composer input{flex:1;font:inherit;font-size:13.5px;padding:10px 13px;border-radius:999px;border:1px solid var(--field-border);
   background:var(--field-bg);color:var(--ink);box-shadow:0 1px 1px rgba(18,35,46,.04)}
@@ -222,6 +241,62 @@ export default function PublicPortalV2Page() {
 
   // ---- phase (0 form -> 1 chat activated) ----
   const [phase, setPhase] = useState(0);
+
+  // ---- Phase 1: chat conversation engine ----
+  // `messages` holds only real user/assistant turns (the static opening greeting is rendered
+  // separately, so it is never sent to the API — the Anthropic Messages API needs a user-first turn).
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState('');
+  const [chatSending, setChatSending] = useState(false);
+  const [quickReplies, setQuickReplies] = useState([]);
+  const [agencyName, setAgencyName] = useState('');
+  // Latest search results/query — captured here for the results-canvas slice (slice 4) to consume.
+  const [lastResults, setLastResults] = useState(null);
+  const [lastQuery, setLastQuery] = useState('');
+  const chatLogRef = useRef(null);
+
+  useEffect(function () {
+    axios.get(API + '/requests/public/config')
+      .then(function (r) { setAgencyName((r.data && r.data.agency_name) || ''); })
+      .catch(function () { setAgencyName(''); });
+  }, []);
+
+  useEffect(function () {
+    if (chatLogRef.current) chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
+  }, [messages, chatSending, quickReplies]);
+
+  const sendMessage = useCallback(async function (text) {
+    var t = (text || '').trim();
+    if (!t || chatSending) return;
+    var base = messages.concat([{ role: 'user', content: t }]);
+    setMessages(base);
+    setInput('');
+    setQuickReplies([]);
+    setChatSending(true);
+    try {
+      // API wants role + content only; `base` is already clean conversation turns.
+      var wire = base.map(function (m) { return { role: m.role, content: m.content }; });
+      var r = await axios.post(API + '/public/chat', { mode: 'split_canvas', messages: wire, selectedRecords: [] });
+      var reply = (r.data && r.data.reply) || '';
+      var results = (r.data && Array.isArray(r.data.searchResults)) ? r.data.searchResults : null;
+      var asst = { role: 'assistant', content: reply };
+      if (results && results.length) {
+        asst.searchResults = results;
+        asst.searchQuery = (r.data && r.data.searchQuery) || '';
+        setLastResults(results);
+        setLastQuery(asst.searchQuery);
+      }
+      setMessages(base.concat([asst]));
+      setQuickReplies((r.data && Array.isArray(r.data.quickReplies)) ? r.data.quickReplies : []);
+    } catch (e) {
+      setMessages(base.concat([{ role: 'assistant', content: 'I had trouble responding just now. Please try again in a moment.' }]));
+    } finally {
+      setChatSending(false);
+    }
+  }, [messages, chatSending]);
+
+  // eslint-disable-next-line no-unused-vars
+  var _slice4 = { lastResults: lastResults, lastQuery: lastQuery }; // reserved for the results canvas
 
   var emailOk = validEmail(email);
   var addrComplete = addr.street1.trim() && addr.city.trim() && addr.state.trim() && addr.zip.trim();
@@ -306,15 +381,19 @@ export default function PublicPortalV2Page() {
   else if (canProceed) footHint = 'Looks good — the assistant will help you describe each record.';
 
   var certDim = !emailConfirmed;
+  var agencyDisplay = agencyName || 'City of Cedar Vale';
+  var crestInitials = (agencyName || 'Cedar Vale')
+    .replace(/\b(city|town|county|of|the)\b/gi, ' ').replace(/\s+/g, ' ').trim()
+    .split(' ').filter(Boolean).map(function (w) { return w[0]; }).join('').slice(0, 2).toUpperCase() || 'OR';
 
   return (
     <div className="scv">
       <style>{STYLES}</style>
 
       <header className="appbar">
-        <div className="crest">CV</div>
+        <div className="crest">{crestInitials}</div>
         <div className="brand">
-          <h1>City of Cedar Vale</h1>
+          <h1>{agencyDisplay}</h1>
           <p>AI-Powered Open Records Search</p>
         </div>
         <div className="spacer" />
@@ -333,7 +412,7 @@ export default function PublicPortalV2Page() {
       <main className="stage">
         {/* ============ LEFT CANVAS — Phase 0 form ============ */}
         <section className="canvas">
-          <div className="panel formwrap">
+          <div className={'panel formwrap' + (phase === 1 ? ' inert' : '')}>
             <div className="form-head">
               <h2 className="start-here">START HERE</h2>
               <p>Provide information in the form below. When all information is entered, click <b>PROCEED</b>. This will activate the AI Open Record Agent on the right, and it will guide you through record search.</p>
@@ -471,7 +550,7 @@ export default function PublicPortalV2Page() {
           </div>
         </section>
 
-        {/* ============ RIGHT — chat (idle until PROCEED) ============ */}
+        {/* ============ RIGHT — chat engine (idle until PROCEED) ============ */}
         <aside className={'chat' + (phase === 1 ? ' on' : '')}>
           <div className="chat-head">
             <div className="chat-avatar"><Icon name="bot" size={18} /></div>
@@ -481,22 +560,58 @@ export default function PublicPortalV2Page() {
             </div>
             <div className="live">{phase === 1 ? 'Active' : 'Idle'}</div>
           </div>
-          <div className="chat-log">
+          <div className="chat-log" ref={chatLogRef}>
             {phase === 0 ? (
               <div className="chat-idle">
                 The assistant activates once you complete the form and click <b>PROCEED</b>.
               </div>
             ) : (
               <>
-                <div className="msg bot">Thank you for using the City of Cedar Vale AI Powered Open Record Search. I will work with you to create description content that assures optimal search results. It is important to note that if you are requesting more than one type of record, it is important that the search description for each is entered individually.</div>
+                {/* Verbatim opening script (design Phase 1) — display-only, never sent to the API */}
+                <div className="msg bot">Thank you for using the {agencyDisplay} AI Powered Open Record Search. I will work with you to create description content that assures optimal search results. It is important to note that if you are requesting more than one type of record, it is important that the search description for each is entered individually.</div>
                 <div className="msg bot">Please enter a description of a requested record.</div>
-                <div className="msg sys">Conversation engine arrives in the next build slice.</div>
+                {messages.map(function (m, i) {
+                  return (
+                    <React.Fragment key={i}>
+                      {m.content ? <div className={'msg ' + (m.role === 'user' ? 'me' : 'bot')}>{m.content}</div> : null}
+                      {m.searchResults && m.searchResults.length ? (
+                        <div className="chat-results">
+                          <div className="cr-head">Found {m.searchResults.length} matching record{m.searchResults.length !== 1 ? 's' : ''}</div>
+                          {m.searchResults.map(function (res, ri) {
+                            return (
+                              <div className="cr-item" key={ri}>
+                                <span className="cr-t">{res.title || res.id || 'Untitled record'}</span>
+                                {res.publicReady ? <span className="cr-tag">Public-ready</span> : null}
+                                {res.docType || res.sourceSystem ? <div className="cr-m">{[res.docType, res.sourceSystem].filter(Boolean).join(' · ')}</div> : null}
+                              </div>
+                            );
+                          })}
+                          <div className="cr-note">Selecting records into your request happens in the results view (next build slice).</div>
+                        </div>
+                      ) : null}
+                    </React.Fragment>
+                  );
+                })}
+                {chatSending ? <div className="typing"><span /><span /><span /></div> : null}
               </>
             )}
           </div>
+          {phase === 1 && quickReplies.length > 0 && !chatSending ? (
+            <div className="qr">
+              {quickReplies.map(function (qr, qi) {
+                return <button key={qi} type="button" onClick={function () { sendMessage(qr); }}>{qr}</button>;
+              })}
+            </div>
+          ) : null}
           <div className="composer">
-            <input type="text" placeholder={phase === 1 ? 'Type a message…' : 'Complete the form to begin'} disabled />
-            <button type="button" disabled aria-label="Send"><Icon name="send" size={17} /></button>
+            <input type="text"
+              placeholder={phase === 1 ? 'Describe a record…' : 'Complete the form to begin'}
+              value={input}
+              disabled={phase !== 1 || chatSending}
+              onChange={function (e) { setInput(e.target.value); }}
+              onKeyDown={function (e) { if (e.key === 'Enter') { e.preventDefault(); sendMessage(input); } }} />
+            <button type="button" aria-label="Send" disabled={phase !== 1 || chatSending || !input.trim()}
+              onClick={function () { sendMessage(input); }}><Icon name="send" size={17} /></button>
           </div>
         </aside>
       </main>
