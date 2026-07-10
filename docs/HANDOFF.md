@@ -1045,3 +1045,39 @@ docs-only, no runtime change). **Result: 28/28 pass, 0 fail; 0 rows left** — u
 full pipeline still green end to end: submit → search/select → route/classify → workflow (1 task + 1 clock) →
 estimate (with the **$1.00 certification line** priced from the intake opt-in, total $17.20) → deliver
 (clarification reads the stored postal address). No code changes — verification only.
+
+## 2026-07-10 (x) — Session summary (final)
+
+Full session arc (supersedes the interim summary (t)). Session resumed after a mid-task disconnect — the prior
+agent was wiring the certification page fee; its WIP was never saved (clean tree, empty scratchpad), so the work
+was rebuilt fresh. Everything below shipped to `main` and was verified in the running app.
+
+**Delivered:**
+1. **Certification intake → fee-engine wiring** (o) — `requests.certification_requested` now defaults
+   `certification.count` on estimate + reconcile (`defaultCertification`: explicit body → intake opt-in → none;
+   one per priced component; `{count:0}` override drops it). GET estimate context surfaces the opt-in;
+   `FeeEstimatePanel` gained a certification control + itemized result line. Closed the last open fee follow-up.
+2. **TX FR certification rate** (p) — set `0 → $1.00 per_record` via the real `PUT /api/fee-profiles/:id` path +
+   synced into `feeProfile.seed.js`, so the line prices live on the default jurisdiction.
+3. **PR #2** opened + merged into `main` (merge `8bf5dbb`); branch deleted, `main` fast-forwarded.
+4. **Full smoke test** — 28/28 (submit → route → estimate incl. the $1.00 cert line → search → deliver); run
+   three times across the session (q, w), all green.
+5. **Repo cleanup** (r, u) — removed stray backups (`*.bak`, `build.bak-20260704b2/`), `imports/testdrop/` PDFs,
+   and the root-owned `build.stale-root/` (via user `sudo`). Checked in `CLAUDE.md` (was untracked). Working tree
+   now **fully clean**.
+6. **Deploy verification** (s) — `main` deploys clean (fresh FE build served, BE healthy, schema/routes/round-trip
+   all green).
+7. **TX cert-fee research** (v) — verified against primary sources that **TX PIA (1 TAC §70.3) authorizes no
+   certification fee**; there is no statutory figure. Kept $1.00 as an explicit *illustrative demo value*
+   (Kevin's call) and labeled it as such in seed + spec so it is never mistaken for a Texas statutory fee.
+
+**Commit trail on `main` (this session):** `dcbf326` wiring · `ea153e7` TX rate · `8bf5dbb` PR #2 merge ·
+`932f111` · `03588ce` · `96ae3fa` CLAUDE.md · `ecffe7d` · `a4a5000` · `7447c0f` · `9c851e8` · `4d4e63e` cert-label
+· `995500c` (+ this note). All pushed; `main` in sync with origin, tree clean.
+
+**Outstanding / carry-over:**
+- The $1.00 TX cert rate is illustrative only — a real deployment sets 0 for TX (per §70.3) or a specific city's
+  adopted certified-copy fee.
+- Pre-existing, out of scope: auto-sent closure notice; staff-side MRR item-splitting
+  (`SPEC_tasks_roles_mrr_fees §12`); estimate profiles unpopulated (`SPEC_fees §2` automation never fires).
+- Nothing left in the working tree; no code changes pending.
