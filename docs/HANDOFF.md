@@ -1010,3 +1010,11 @@ handoff).
 - The $1.00 TX cert rate is illustrative — replace with the jurisdiction's real certification fee before prod.
 - Pre-existing, out of scope: auto-sent closure notice; staff-side MRR item-splitting
   (`SPEC_tasks_roles_mrr_fees §12`); estimate profiles unpopulated (`SPEC_fees §2` automation never fires).
+
+## 2026-07-10 (u) — Cleanup complete; working tree fully clean
+
+The one carry-over from (r)/(t) is resolved: `frontend/build.stale-root/` (root-owned) was removed by the user
+via `sudo rm -rf` and confirmed gone. Working tree is now **fully clean** — `git status` shows nothing tracked
+or untracked; on `main` @ `7447c0f`, 0 ahead / 0 behind `origin/main`. (A transient
+`.claude/settings.local.json.tmp.*` seen mid-check was just the harness's atomic write of `settings.local.json`
+and cleared itself.) No stray backups, build dirs, or test drops remain.
