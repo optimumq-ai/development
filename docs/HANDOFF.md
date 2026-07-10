@@ -1236,3 +1236,17 @@ to `main`, verified in the running app.
 **Outstanding:** none in the tree. Pre-existing product follow-ups (out of scope): auto-sent closure notice;
 staff-side MRR item-splitting (`SPEC_tasks_roles_mrr_fees §12`); estimate profiles unpopulated (`SPEC_fees §2`).
 A jurisdiction that charges to certify just sets a non-zero `certification.rate` in its FR profile.
+
+## 2026-07-10 (ag) — main deploy verified clean (post profile-activation)
+
+Full deploy verification from `main` `f859bf7` (in sync with `origin/main`, 0/0), running app.
+- **Clean checkout** — no tracked drift, no untracked files.
+- **Frontend** — fresh build → `Compiled successfully`; nginx serves the just-built bundle (`main.8fa85771`
+  served == built).
+- **Backend** — restarted from `main` (pid 202831); single healthy listener on :3001; health `200`.
+- **Schema** — all merged-slice columns + `fee_profiles` present.
+- **Routes** — `/api/health`, `/portal`, `/portal/request`, `/portal/library`, `/portal/v2` all `200`.
+- **End-to-end round-trip** — `POST /public/submit` → `201`; row persisted + routed (department, classification,
+  deadline); **18/18, 0 fail; 0 rows left**. No false failure — the (ab) routable-description harness fix held.
+
+**main deploys clean.**
