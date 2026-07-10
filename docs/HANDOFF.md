@@ -913,3 +913,25 @@ running deploy are consistent — no further restart/rebuild needed.
 deploying clean. The last open fee follow-up is closed. Remaining pre-existing items: auto-sent closure notice;
 staff-side MRR item-splitting (`SPEC_tasks_roles_mrr_fees §12`); estimate profiles unpopulated (§2 automation
 never fires).
+
+## 2026-07-10 (q) — Full smoke test (submit → route → estimate → search → deliver) — 28/28
+
+**On-demand smoke** (backend, real endpoints, running app on `main` `932f111`). One MRR request created via the
+real `POST /public/submit` (mail + address · certification · fee waiver + reason · attested email · 2 selected
+records · both records in the description), then verified end to end and cleaned up.
+
+**Result: 28/28 pass, 0 fail; 0 rows left.** Coverage:
+- **Submit** — 201 + request number (`2026-0044`); all intake fields persisted (delivery=mail + `mailing_*`,
+  `certification_requested=1`, `fee_waiver_requested=1` + reason, `email_verification_method=attested`,
+  `requestor_type=individual`, `Record 1:/Record 2:` in description).
+- **Search/select** — 2 `request_selected_records` persisted.
+- **Route/classify** (synchronous in /submit) — department assigned, classification, deadline, routing_basis,
+  `is_mrr=1`; history `CREATED` / `RECORDS_SELECTED` / `CLASSIFIED`.
+- **Workflow onIntake** (backgrounded) — 1 task + 1 deadline clock spawned.
+- **Estimate** (auth'd fee-estimate API) — context loads + surfaces the cert opt-in (`requested:true, rate:1`);
+  estimate computed + persisted with a **$1.00 certification line priced from the intake opt-in** (total $17.20).
+  Confirms the (o)/(p) certification wiring works inside the full pipeline, not just in isolation.
+- **Deliver** — clarification `preview(channel:mail)` → `addressRequired=false` + the on-file postal address
+  (slice 1b).
+
+Harness saved at `scratchpad/smoke_full.js` (session ce55a45e). No code changes — verification only.
