@@ -445,6 +445,10 @@ mobile · #6 library-tag). **Design is decided end-to-end.** Remaining: staff fo
 go to branch the first build slice** — the two genuinely new builds are the Phase-0 form panel (address + gate
 + fee-choice + cert) and the results canvas; backend to reuse per the design doc's Build note.
 
+**Pushed 2026-07-10:** `spec/task-screens` → `origin` (`20ff869..22ca5bc`), all five session commits (#1 gate,
+#2 address, cert-visible, #3 fee-choice, #5 mobile). Branch in sync with `origin/spec/task-screens`; remote is
+`github.com/optimumq-ai/development`. No PR opened yet — still design-only, awaiting the go to branch a build slice.
+
 **No app code touched** — `DESIGN_split_canvas_intake.md`, `docs/mockups/split_canvas_intake.html` (JS
 syntax-checked clean, no stray refs), `HANDOFF.md`. The #2 schema + wiring is speced as a turnkey build slice,
 not built.
