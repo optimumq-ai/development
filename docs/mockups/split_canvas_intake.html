@@ -126,6 +126,9 @@
   .field textarea{resize:vertical;min-height:64px}
   .field input:focus,.field textarea:focus{outline:none;border-color:var(--blue);
     box-shadow:0 0 0 3px var(--blue-tint);background:var(--field-bg)}
+  .addr-grid{display:flex;flex-direction:column;gap:8px}
+  .addr-row3{display:grid;grid-template-columns:2fr .8fr 1fr;gap:8px}
+  .field input[type=text]#fState{text-transform:uppercase}
 
   .gate{margin:0 26px 20px;padding:16px;border:1px solid color-mix(in srgb,var(--amber) 45%,var(--hair));
     background:var(--amber-tint);border-radius:var(--radius-sm)}
@@ -364,8 +367,16 @@
           </div>
         </div>
         <div class="field addr-block hidden" id="addrBlock">
-          <label for="fAddr">Mailing address <span class="opt">(required for postal delivery)</span></label>
-          <textarea id="fAddr" autocomplete="street-address" placeholder="Street, City, State ZIP"></textarea>
+          <label>Mailing address <span class="opt">(required for postal delivery)</span></label>
+          <div class="addr-grid">
+            <input type="text" id="fStreet1" autocomplete="address-line1" aria-label="Street address" placeholder="Street address">
+            <input type="text" id="fStreet2" autocomplete="address-line2" aria-label="Apt, suite, unit (optional)" placeholder="Apt, suite, unit (optional)">
+            <div class="addr-row3">
+              <input type="text" id="fCity" autocomplete="address-level2" aria-label="City" placeholder="City">
+              <input type="text" id="fState" autocomplete="address-level1" aria-label="State" placeholder="State" maxlength="2">
+              <input type="text" id="fZip" autocomplete="postal-code" aria-label="ZIP code" placeholder="ZIP">
+            </div>
+          </div>
         </div>
         <label class="check-row" id="certRow">
           <input type="checkbox" id="fCert">
@@ -434,7 +445,16 @@
   var state={emailConfirmed:false,delivery:"email",descriptions:[],selected:[],round:0};
 
   /* ---------- element refs ---------- */
-  var fName=$("#fName"),fEmail=$("#fEmail"),fPhone=$("#fPhone"),fAddr=$("#fAddr");
+  var fName=$("#fName"),fEmail=$("#fEmail"),fPhone=$("#fPhone");
+  var fStreet1=$("#fStreet1"),fStreet2=$("#fStreet2"),fCity=$("#fCity"),fState=$("#fState"),fZip=$("#fZip");
+  var addrFields=[fStreet1,fStreet2,fCity,fState,fZip];
+  // Structured mailing address (decided 2026-07-10): required fields are street1/city/state/zip; street2 optional.
+  function addrComplete(){return fStreet1.value.trim()&&fCity.value.trim()&&fState.value.trim()&&fZip.value.trim()}
+  function addrOneLine(){
+    var l2=fStreet2.value.trim();
+    return [fStreet1.value.trim(),l2,(fCity.value.trim()+", "+fState.value.trim().toUpperCase()+" "+fZip.value.trim()).trim()]
+      .filter(function(p){return p&&p!==", "}).join(", ")||"—";
+  }
   var gate=$("#gate"),gVerify=$("#gVerify"),gVisual=$("#gVisual"),gSend=$("#gSend");
   var lockedRegion=$("#lockedRegion"),lockNote=$("#lockNote"),addrBlock=$("#addrBlock");
   var proceedForm=$("#proceedForm"),footHint=$("#footHint");
@@ -458,10 +478,10 @@
   function validEmail(v){return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(v)}
   function refreshFormState(){
     var canProceed=fName.value.trim() && validEmail(fEmail.value.trim()) && state.emailConfirmed;
-    if(state.delivery==="mail" && !fAddr.value.trim()) canProceed=false;
+    if(state.delivery==="mail" && !addrComplete()) canProceed=false;
     proceedForm.disabled=!canProceed;
     if(!state.emailConfirmed) footHint.textContent="Confirm your email to unlock the rest.";
-    else if(state.delivery==="mail" && !fAddr.value.trim()) footHint.textContent="A mailing address is required for postal delivery.";
+    else if(state.delivery==="mail" && !addrComplete()) footHint.textContent="Complete the mailing address (street, city, state, ZIP) for postal delivery.";
     else if(canProceed) footHint.textContent="Looks good — the assistant will help you describe each record.";
     else footHint.textContent="Complete the fields above to continue.";
   }
@@ -503,7 +523,7 @@
     gVerify.style.display="";gVerify.classList.remove("done");gVerify.textContent="Email address verified";gVerify.disabled=true;
     gVisual.style.display="";gVisual.classList.remove("done");gVisual.textContent="Visually verified";gVisual.disabled=false;
   }
-  [fName,fPhone,fAddr].forEach(function(el){el.addEventListener("input",refreshFormState)});
+  [fName,fPhone].concat(addrFields).forEach(function(el){el.addEventListener("input",refreshFormState)});
   fEmail.addEventListener("input",function(){
     // Any edit to a sent-or-confirmed address invalidates it: reset the gate so the
     // citizen must re-send/re-confirm against the new address (re-locks lower fields).
@@ -730,7 +750,7 @@
   function finishRequest(){
     setStep(3);
     instr('<b>Request ready to submit.</b> Review the summary, then confirm.');
-    var deliveryTxt=state.delivery==="mail"?("Postal · "+(fAddr.value.trim()||"—")):("Email · "+fEmail.value.trim());
+    var deliveryTxt=state.delivery==="mail"?("Postal · "+addrOneLine()):("Email · "+fEmail.value.trim());
     var recRows=state.descriptions.map(function(d,i){return '<div class="rec-line">Record '+(i+1)+'<span class="mono">'+esc(d)+'</span></div>'}).join("");
     scrimCard.innerHTML=
       '<h3>Review &amp; submit your request</h3>'+

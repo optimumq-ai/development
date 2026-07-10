@@ -388,3 +388,36 @@ Two genuinely new builds: the **Phase-0 form panel** (address capture + gate) an
 mobile/narrow (stack vs step-through). Staff-side follow-on: MRR RM workspace hub (`§12.1`, 4 UI items).
 
 **Next:** tackling **#1 the verification gate** this session.
+
+## 2026-07-10 (b) — Split-canvas open questions #1 (email gate) + #2 (address model) resolved (DESIGN)
+
+**Slice:** Resume after a DO-console drop; folded the missing Jul-10 design day into this log (above), then
+resolved two open questions on `DESIGN_split_canvas_intake.md`. Design + mockup only, no app code. On
+`spec/task-screens`.
+
+**#1 Email-accuracy gate — RESOLVED (commit `dc021a4`).** Decisions (Kevin): **self-attest** trust model (kept
+as prototyped — "Email address verified" is a citizen self-assertion, no backend token); **Visually verified =
+always available** (equal escape hatch, email round-trip effectively optional); **editing the email after
+unlock re-locks the gate.** One `email_confirmed` flag, two paths (records `method ∈ {attested,visual}`), the
+winner's button shows ✓ and the other hides. Fixed a real hole in the mockup: editing the email after confirm
+did nothing, so a confirmation could go stale against a new address — added `resetGate()` fired from the Email
+`input` handler. Design doc: #1 `[RESOLVED]` + new "Email-accuracy gate — state machine" section.
+
+**#2 Mailing address data model — RESOLVED (this commit).** Decisions (Kevin): **structured** columns
+`mailing_street1/street2/city/state/zip` (country implicit US) over a freeform block — for validation, clean
+letter/envelope rendering, future residency/fee logic; **captured only when `delivery_method='mail'`** (kept
+the locked scope). Persisting closes the postal gap (HANDOFF slice i / §5b): postal delivery + postal
+clarification read the stored address instead of re-asking; the inline `ADDRESS_REQUIRED` fallback stays for
+email/legacy requests. Verified current code: `requests` has no address column; intake collects name/email/
+phone only; `clarificationAction.js:87-94` takes the address inline and never persists it. Mockup: `#addrBlock`
+now 5 structured fields (street1/city/state/zip required, street2 optional), still postal-gated. Design doc: #2
+`[RESOLVED]` + new "Mailing address data model" section incl. a turnkey **build recipe** (5 columns · intake
+persist · clarification fallback-to-stored · letter render).
+
+**Still open on this design:** #3 fee-choice placement (Phase-0 vs chat), #5 mobile/narrow (stack vs
+step-through). Staff follow-on: MRR RM workspace hub (`SPEC_tasks_roles_mrr_fees §12.1`). Whole screen still
+`[DESIGN — not built]`, paused pending Kevin's overall confirmation before any build slice branches.
+
+**No app code touched** — `DESIGN_split_canvas_intake.md`, `docs/mockups/split_canvas_intake.html` (JS
+syntax-checked clean, no stray refs), `HANDOFF.md`. The #2 schema + wiring is speced as a turnkey build slice,
+not built.

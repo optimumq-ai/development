@@ -123,7 +123,8 @@ Validated interactively in the clickable prototype. These update the Phase 0 / P
 - **Email-accuracy gate** — a **"Send verification email now"** button sits inline with the email field; the
   lower form stays locked until the requestor clicks **Email address verified** (enabled only after send) OR
   **Visually verified** (always available). No "optional / or" framing.
-- **Single phone box**; **mailing address** unlocks only for postal delivery.
+- **Single phone box**; **mailing address** (structured street1/street2/city/state/zip — see "Mailing address
+  data model") unlocks only for postal delivery.
 - **Selected Records = per-child, attach-and-clear** (NOT a running accumulation). One description = one child
   request. On Proceed, that child's selected records **attach to the child**, and both the results area and the
   Selected panel **clear**; the "another record?" loop opens a fresh canvas. Rationale: keeps per-record
@@ -172,6 +173,42 @@ the confirmed address always equals the address on file (you can't verify A then
 
 **PROCEED** stays disabled until: Name present · Email valid · `email_confirmed` · (mailing address present when
 delivery = mail). Clicking it activates the chat agent (Phase 1).
+
+## Mailing address data model `[RESOLVED 2026-07-10]`
+Resolves Open Question #2. Closes the postal gap tracked since HANDOFF slice (i) and `SPEC_public_portal_intake`
+§5b: intake never captured an address, so `delivery_method='mail'` had nowhere to mail and every postal
+clarification re-asked inline.
+
+**Verified current state (code, 2026-07-10):** `requests` has `requestor_name/_email/_phone/_type` +
+`delivery_method` (default `email`) and **no address column** (`schema.postgres.sql`). Intake `[[CONTACT_FORM]]`
+collects Name/Email/Phone only; the INSERT (`publicChat.js:297`) has no address. Postal clarification
+(`clarificationAction.js:87-94`) takes an **inline `mailingAddress`** at send time, throws `ADDRESS_REQUIRED`
+when absent, and only writes it into the effort-trail note — never persisted.
+
+**Decision — structured, postal-gated:**
+- **Storage:** five nullable columns on `requests` — `mailing_street1`, `mailing_street2`, `mailing_city`,
+  `mailing_state`, `mailing_zip`. Country implicit US for now (add `mailing_country` only when a non-US need
+  is real). Chose structured over a freeform block for format validation, clean letter + envelope rendering,
+  and future residency/fee logic — cheap to add now, painful to retrofit later.
+- **Capture scope (kept as locked):** the address sub-form is shown/required **only when `delivery_method='mail'`.**
+  Email-delivery requests capture no address. Required fields = street1 · city · state · zip (street2 optional);
+  PROCEED blocks on `delivery=mail` + incomplete address. Mockup: 5 fields in `#addrBlock`, gated by `setDelivery`.
+- **Consumers:**
+  - **Postal record delivery** — reads the stored columns; no more dead-end.
+  - **Postal clarification (§5b)** — `clarificationAction`/`clarificationNotice` should prefer the stored address
+    when present; the inline `mailingAddress` opt + `ADDRESS_REQUIRED` throw **stay** as the fallback for
+    email-delivery and legacy requests (which have no stored address). No breaking change to that path.
+  - **Certification** — certified copies are often mailed; a certified+postal request already carries the address.
+
+**Build recipe (turnkey, for the build slice — not built yet):**
+1. Schema: add the five `mailing_*` columns to `requests` (`schema.postgres.sql` + `schema.sql`); nullable, no
+   backfill.
+2. Intake: the Phase-0 form submits the structured fields when `delivery=mail`; extend the request INSERT/writer
+   (`publicChat.js`, and the split-canvas submit path when built) to persist them.
+3. Clarification: in `clarificationAction.buildContext`/`doOutreach`, fall back to the stored `mailing_*` when
+   no inline `mailingAddress` is supplied; keep `ADDRESS_REQUIRED` only when neither exists.
+4. Render: point `clarificationNotice.renderLetterHtml` (and any record-delivery letter) at the structured
+   fields for a clean address block.
 
 ## Certification (certified copies) `[DESIGN — not built]`
 Parent-level option captured at intake; the certified artifact is produced at **release**, by a clerk.
@@ -224,9 +261,11 @@ verify route + token, and a spec. **Release-stage slice**; the intake checkbox i
    Not two competing toggles: **one `email_confirmed` flag**, satisfied by *either* path; the winner is recorded
    and the other button is hidden. Trust model = **self-attest** (kept as-is); **Visually verified = always
    available** (equal escape hatch for no-inbox-access); editing the email after unlock **re-locks the gate**.
-2. **Where does address live in the data model** — new `requests.mailing_address` column (+ structured
-   street/city/state/zip?) vs a single freeform block. Postal clarification (§5b) currently takes an inline
-   address; this would make it a real persisted field.
+2. **Where does address live in the data model** — `[RESOLVED 2026-07-10 — see "Mailing address data model"
+   below.]` **Structured** columns (`mailing_street1/street2/city/state/zip`, country implicit US), **captured
+   only when `delivery_method='mail'`** (unchanged locked decision). Persisting it lets postal delivery + postal
+   clarification (§5b) read a stored address instead of re-asking; the inline `ADDRESS_REQUIRED` path stays as
+   the fallback for email-delivery / legacy requests that carry no stored address.
 3. **Fee-choice (§5)** — does the "commercial requester / fee waiver" opt-in live in this Phase-0 panel, or
    stay in chat?
 4. **MRR** — the per-description loop is the MRR item-by-item intake (§6). `[RESOLVED — one description = one
