@@ -171,6 +171,10 @@
   .foot-hint{font-size:12px;color:var(--muted)}
 
   /* ---------- Phase 2 results ---------- */
+  #resultsPanel{flex-direction:column;overflow:hidden}
+  .results-instr{flex:none;padding:11px 16px;font-size:12.5px;line-height:1.5;color:var(--muted);
+    background:var(--surface-2);border-bottom:1px solid var(--hair)}
+  .results-instr b{color:var(--ink);font-weight:600}
   .results-split{flex:1;display:flex;min-height:0;overflow:hidden}
   .results-main{flex:1 1 auto;min-width:0;overflow:auto;padding:16px 18px;display:flex;flex-direction:column;gap:10px}
   .results-side{flex:0 0 27%;min-width:180px;border-left:1px solid var(--hair);background:var(--surface-2);
@@ -370,24 +374,27 @@
       </div>
 
       <div class="form-foot">
-        <button class="btn-primary" id="proceedForm" type="button" disabled>Proceed to AI Search →</button>
+        <button class="btn-primary" id="proceedForm" type="button" disabled>PROCEED →</button>
         <span class="foot-hint" id="footHint">Complete the fields above to continue.</span>
       </div>
     </div>
 
     <!-- PHASE 2: results (hidden until a search runs) -->
-    <div class="panel results-split" id="resultsPanel" style="display:none;position:relative">
-      <div class="results-main" id="resultsMain"></div>
-      <div class="results-side">
-        <div class="side-head">
-          <span class="eyebrow">Selected records</span>
-          <span class="cnt" id="sideCnt">0 selected</span>
-        </div>
-        <div class="side-list" id="sideList">
-          <div class="side-empty">Records you select move here.<br>They stay attached to your request across every search.</div>
-        </div>
-        <div class="side-foot">
-          <button class="btn-primary" id="proceedResults" type="button" style="width:100%;justify-content:center">Proceed →</button>
+    <div class="panel" id="resultsPanel" style="display:none;position:relative">
+      <div class="results-instr">Review the search results, and check the box to select a record. All records with the selection box checked appear in the right column. When you have completed selection, click <b>Proceed</b> and continue your conversation with the AI Open Record Assistant.</div>
+      <div class="results-split">
+        <div class="results-main" id="resultsMain"></div>
+        <div class="results-side">
+          <div class="side-head">
+            <span class="eyebrow">Selected records</span>
+            <span class="cnt" id="sideCnt">0 selected</span>
+          </div>
+          <div class="side-list" id="sideList">
+            <div class="side-empty">Records you select move here.<br>They stay attached to your request across every search.</div>
+          </div>
+          <div class="side-foot">
+            <button class="btn-primary" id="proceedResults" type="button" style="width:100%;justify-content:center">Proceed →</button>
+          </div>
         </div>
       </div>
       <div class="scrim" id="scrim">

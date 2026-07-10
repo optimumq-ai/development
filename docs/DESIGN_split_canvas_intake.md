@@ -89,7 +89,10 @@ On Proceed, chat activates. Tentative opening script (verbatim from design):
 
 ## Phase 2 — Left panel morphs to the results canvas
 - On Proceed from the form, the form **dissolves** and a **large results box slides in** filling the area.
-- **Top:** thin instructions bar.
+- **Top:** persistent instruction banner spanning the full width of the search box (agreed copy 2026-07-10):
+  > "Review the search results, and check the box to select a record. All records with the selection box checked
+  > appear in the right column. When you have completed selection, click **Proceed** and continue your
+  > conversation with the AI Open Record Assistant."
 - **Right sub-column (~25% width):** a **Selected Records** column; selected items render in **much smaller
   fonts** than the results. Agent: "Review Search results. Selected records will move to the panel on the right."
 - Instruction on screen: when selection is done **or** you determine no records match, click **Proceed** at
