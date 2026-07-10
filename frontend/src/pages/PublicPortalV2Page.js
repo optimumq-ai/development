@@ -210,6 +210,36 @@ var STYLES = `
 .scv .tag{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;padding:2px 7px;border-radius:999px;font-weight:600;white-space:nowrap}
 .scv .tag.green{color:var(--green);background:var(--green-tint);border:1px solid color-mix(in srgb,var(--green) 35%,transparent)}
 .scv .tag.review{color:var(--amber);background:var(--amber-tint);border:1px solid color-mix(in srgb,var(--amber) 30%,transparent)}
+.scv .btn-review{margin-top:8px;width:100%;font:inherit;font-size:13px;font-weight:600;color:var(--blue-ink);background:var(--surface);
+  border:1px solid var(--blue);border-radius:var(--radius-sm);padding:10px 12px;cursor:pointer;transition:var(--step)}
+.scv .btn-review:hover{background:var(--blue-tint)}
+.scv .btn-ghost{font:inherit;font-size:13px;color:var(--muted);background:transparent;border:1px solid var(--hair-strong);
+  padding:9px 16px;border-radius:var(--radius-sm);cursor:pointer;transition:var(--step)}
+.scv .btn-ghost:hover{color:var(--ink);border-color:var(--muted)}
+.scv .btn-ghost:disabled{opacity:.5;cursor:not-allowed}
+
+/* ---------- Phase 3 review/submit scrim ---------- */
+.scv .scrim{position:absolute;inset:0;background:color-mix(in srgb,var(--ink) 78%,transparent);display:none;
+  align-items:center;justify-content:center;padding:24px;z-index:5;border-radius:var(--radius);backdrop-filter:blur(2px)}
+.scv .scrim.show{display:flex}
+.scv .scrim-card{background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius);box-shadow:var(--shadow);
+  max-width:560px;width:100%;padding:26px;max-height:100%;overflow:auto}
+.scv .scrim-card h3{margin:0 0 5px;font-size:18px;letter-spacing:-.01em}
+.scv .scrim-card>p{margin:0 0 18px;color:var(--muted);font-size:13.5px}
+.scv .summary dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0 0 16px;font-size:13px}
+.scv .summary dt{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);padding-top:2px}
+.scv .summary dd{margin:0}
+.scv .summary .mono{font-family:var(--font-mono)}
+.scv .summary .rec-line{padding:8px 0;border-top:1px solid var(--hair);font-size:13px}
+.scv .summary .rec-line:first-of-type{border-top:none}
+.scv .summary .rec-line .mono{font-size:11px;color:var(--muted);display:block;font-family:var(--font-mono)}
+.scv .scrim-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:6px}
+.scv .submit-err{font-size:12.5px;color:var(--amber);background:var(--amber-tint);border:1px solid color-mix(in srgb,var(--amber) 30%,transparent);
+  padding:9px 12px;border-radius:var(--radius-sm);margin-bottom:12px}
+.scv .submit-ok{text-align:center;padding:12px 8px}
+.scv .submit-ok .ok-check{width:56px;height:56px;border-radius:50%;background:var(--green-tint);color:var(--green);display:grid;place-items:center;margin:0 auto 16px}
+.scv .submit-ok h3{margin:0 0 8px}
+.scv .submit-ok p{margin:0 0 18px;color:var(--muted);font-size:13.5px}
 .scv .composer{display:flex;gap:8px;padding:11px 12px;border-top:1px solid var(--hair);background:var(--surface)}
 .scv .composer input{flex:1;font:inherit;font-size:13.5px;padding:10px 13px;border-radius:999px;border:1px solid var(--field-border);
   background:var(--field-bg);color:var(--ink);box-shadow:0 1px 1px rgba(18,35,46,.04)}
@@ -284,6 +314,11 @@ export default function PublicPortalV2Page() {
   const [selected, setSelected] = useState([]);
   const [children, setChildren] = useState([]);
 
+  // ---- Phase 3: review & submit ----
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [submitState, setSubmitState] = useState('idle'); // idle | submitting | done | error
+  const [submitResult, setSubmitResult] = useState(null); // request number on success
+
   useEffect(function () {
     axios.get(API + '/requests/public/config')
       .then(function (r) { setAgencyName((r.data && r.data.agency_name) || ''); })
@@ -313,6 +348,17 @@ export default function PublicPortalV2Page() {
       var reply = (r.data && r.data.reply) || '';
       var results = (r.data && Array.isArray(r.data.searchResults)) ? r.data.searchResults : null;
       setMessages(base.concat([{ role: 'assistant', content: reply }]));
+      // A record the citizen could NOT pick from results (zero-match or a PATH-(b) format) — the agent
+      // flags it so it still lands in the request. Records with selectable results are captured at
+      // canvas Proceed instead. Dedup by description so an occasional stray marker can't double it.
+      var added = (r.data && r.data.recordAdded) ? String(r.data.recordAdded).trim() : '';
+      if (added) {
+        setChildren(function (cur) {
+          var norm = added.toLowerCase();
+          return cur.some(function (c) { return (c.description || '').trim().toLowerCase() === norm; })
+            ? cur : cur.concat([{ description: added, records: [] }]);
+        });
+      }
       if (results && results.length) {
         // Search results flow to the LEFT results canvas (not the chat). Selection happens there via the
         // canvas Proceed button, so we suppress this turn's "any match?" quick replies in the chat.
@@ -357,6 +403,54 @@ export default function PublicPortalV2Page() {
       ? ('I have selected ' + picked.length + ' record' + (picked.length === 1 ? '' : 's') + ' from those results.')
       : 'None of those results match what I need.';
     sendMessage(msg);
+  }
+
+  function addrOneLine() {
+    var l2 = addr.street2.trim();
+    var cityLine = (addr.city.trim() + ', ' + addr.state.trim().toUpperCase() + ' ' + addr.zip.trim()).trim();
+    return [addr.street1.trim(), l2, cityLine].filter(function (p) { return p && p !== ','; }).join(', ');
+  }
+
+  // Assemble the whole request — Phase-0 form fields + every described record (with its selected library
+  // records) — and POST to /public/submit (the slice-1 writer). Multiple records => one request, is_mrr.
+  async function submitRequest() {
+    if (!children.length || submitState === 'submitting') return;
+    setSubmitState('submitting');
+    var descText = children.map(function (c, i) {
+      return children.length > 1 ? ('Record ' + (i + 1) + ': ' + c.description) : c.description;
+    }).join('\n\n');
+    var sel = children.reduce(function (a, c) { return a.concat(c.records); }, []).map(function (r) {
+      return { id: r.id, title: r.title, sourceSystem: r.sourceSystem, publicAvailability: r.publicAvailability };
+    });
+    var payload = {
+      requestorName: name.trim(),
+      requestorEmail: email.trim(),
+      requestorPhone: phone.trim(),
+      deliveryMethod: delivery,
+      requestorType: commercial ? 'commercial' : 'individual',
+      feeWaiverRequested: waiver,
+      feeWaiverReason: waiver ? waiverReason.trim() : '',
+      certificationRequested: cert,
+      emailVerificationMethod: verifyMethod,
+      description: descText,
+      selectedRecords: sel,
+      isMrr: children.length > 1,
+      submissionChannel: 'manual_form',
+    };
+    if (delivery === 'mail') {
+      payload.mailingStreet1 = addr.street1.trim();
+      payload.mailingStreet2 = addr.street2.trim();
+      payload.mailingCity = addr.city.trim();
+      payload.mailingState = addr.state.trim().toUpperCase();
+      payload.mailingZip = addr.zip.trim();
+    }
+    try {
+      var r = await axios.post(API + '/public/submit', payload);
+      setSubmitResult((r.data && r.data.requestNumber) || '');
+      setSubmitState('done');
+    } catch (e) {
+      setSubmitState('error');
+    }
   }
 
   var emailOk = validEmail(email);
@@ -663,9 +757,58 @@ export default function PublicPortalV2Page() {
                 <div className="side-foot">
                   <button className="btn-primary" type="button" style={{ width: '100%', justifyContent: 'center' }}
                     disabled={!canvasResults || chatSending} onClick={proceedResults}>Proceed →</button>
+                  {children.length > 0 && (
+                    <button className="btn-review" type="button"
+                      onClick={function () { setSubmitState('idle'); setReviewOpen(true); }}>
+                      Review &amp; submit request ({children.length} record{children.length !== 1 ? 's' : ''})
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
+
+            {/* Phase 3 — review & submit (overlays the results panel) */}
+            {reviewOpen && (
+              <div className="scrim show">
+                <div className="scrim-card">
+                  {submitState === 'done' ? (
+                    <div className="submit-ok">
+                      <div className="ok-check"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M20 6 9 17l-5-5" /></svg></div>
+                      <h3>Request submitted</h3>
+                      <p>Your request number is <b>{submitResult || '—'}</b>. A confirmation is on its way to {email.trim()} — you can track its status from that email.</p>
+                      <button className="btn-ghost" type="button" onClick={function () { window.location.reload(); }}>Start a new request</button>
+                    </div>
+                  ) : (
+                    <>
+                      <h3>Review &amp; submit your request</h3>
+                      <p>{agencyDisplay} open records · one request, {children.length} record{children.length !== 1 ? 's' : ''}.</p>
+                      <div className="summary">
+                        <dl>
+                          <dt>Name</dt><dd>{name.trim() || '—'}</dd>
+                          <dt>Email</dt><dd>{email.trim()} <span className="mono" style={{ color: 'var(--green)' }}>✓ {verifyMethod === 'attested' ? 'verified' : 'visually verified'}</span></dd>
+                          {phone.trim() ? <><dt>Phone</dt><dd>{phone.trim()}</dd></> : null}
+                          <dt>Delivery</dt><dd>{delivery === 'mail' ? ('Postal · ' + addrOneLine()) : ('Email · ' + email.trim())}</dd>
+                          <dt>Certified</dt><dd>{cert ? 'Yes — certification page requested (applies to the whole request)' : 'No'}</dd>
+                          <dt>Fees</dt><dd>{waiver ? ('Fee waiver requested (subject to review)' + (waiverReason.trim() ? ' — ' + waiverReason.trim() : '')) : commercial ? 'Commercial requester (subject to review)' : 'Standard rates'}</dd>
+                        </dl>
+                        {children.map(function (c, i) {
+                          return (
+                            <div className="rec-line" key={i}>Record {i + 1}
+                              <span className="mono">{c.description}{c.records.length ? (' · ' + c.records.length + ' library record' + (c.records.length !== 1 ? 's' : '') + ' selected') : ''}</span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      {submitState === 'error' ? <div className="submit-err">Something went wrong submitting your request. Please try again.</div> : null}
+                      <div className="scrim-actions">
+                        <button className="btn-ghost" type="button" disabled={submitState === 'submitting'} onClick={function () { setReviewOpen(false); }}>Back</button>
+                        <button className="btn-primary" type="button" disabled={submitState === 'submitting' || !children.length} onClick={submitRequest}>{submitState === 'submitting' ? 'Submitting…' : 'Submit request'}</button>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            )}
           </div>
           )}
         </section>

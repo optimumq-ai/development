@@ -616,3 +616,47 @@ attach-and-clear/loop/library-tag behavior and the superseded-fork note.
 via the slice-1 storage; retire the read-only end state). Then slice 6 (mobile step-through toggle), cut over
 `/portal`, and slice 1b (clarification reads stored `mailing_*`). `frontend/build` git-ignored — committed: the
 page + the spec + this note.
+
+## 2026-07-10 (g) — Split-canvas BUILD slice 5: form → submit wiring (BUILT + verified)
+
+**Slice:** Fifth build slice — finalize the `/portal/v2` request: assemble the Phase-0 form data + every
+described/selected record and POST to `/public/submit`, with a review scrim + confirmation. Backend (schema +
+submit + one new agent marker) and frontend. On `spec/task-screens`.
+
+**Built:**
+- **Schema** (`schema.postgres.sql` idempotent ALTERs + `schema.sql` reference): two new `requests` columns —
+  `certification_requested INTEGER DEFAULT 0` and `email_verification_method TEXT` (attested|visual). Applied on
+  boot by `initDb()`; verified present.
+- **`/public/submit`** (`publicChat.js`): the INSERT now persists `certification_requested` and (whitelisted)
+  `email_verification_method` alongside the slice-1 fields. Other flows unaffected.
+- **v2 agent** (`SYSTEM_PROMPT_SPLIT_CANVAS` + `/chat`): added a `[[RECORD_ADDED:desc]]` marker the agent emits
+  for any finalized record the citizen could NOT pick from results (zero-match search or a PATH-(b) format —
+  email/audio/photo/paper), so those records still land in the request. Parsed → returned as `recordAdded`,
+  stripped from the visible reply. (Records with selectable results are captured at canvas Proceed instead.)
+- **Frontend** (`PublicPortalV2Page.js`): `recordAdded` responses append a `{description, records:[]}` child
+  (dedup by description). A **"Review & submit request (N records)"** button appears in the results side-panel
+  once ≥1 record exists → opens a **review scrim** (name · email + verify method · phone · delivery/address ·
+  certified · fees · per-record list w/ selection counts). **Submit** assembles the payload — `description` =
+  records joined (`Record N: …` when >1), `selectedRecords` = every child's picks, `isMrr` = >1, plus all Phase-0
+  fields (requestorType/waiver/reason/cert/verify-method/mailing) — POSTs `/public/submit`, then shows a
+  **confirmation** with the request number (+ "Start a new request"). Error + submitting states handled.
+
+**Evidence (verified live — API restarted via PM2 respawn, new columns confirmed; frontend built + nginx-served):**
+(1) Backend probe: a finalized PATH-(b) email conversation returns `recordAdded:"Emails between Mayor Chen and
+City Manager Rodriguez…"` + the "another record?" quick replies, marker stripped from the reply. (2) Full browser
+drive (`drive5.js`) — **8/8 assertions pass**: Phase-0 (visual verify · postal + address · commercial ·
+certification) → PROCEED → describe → search → select 1 → canvas Proceed → **Review & submit** button → review
+scrim (summary correct) → **Submit → confirmation `2026-0044`**. Screens `12` (review scrim) `13` (submitted).
+(3) **DB row verified**: `requestor_type=commercial`, `delivery_method=mail`, `mailing_* = 88 Birch Lane /
+Autumn Falls / TX / 75001`, `certification_requested=1`, `email_verification_method=visual`,
+`fee_waiver_requested=0`, `is_mrr=0`, `submission_channel=manual_form`, `description="building permit 221 Oak
+Creek Drive"`, 1 `request_selected_records` row. (4) **Cleanup:** the test request + all dependent rows deleted
+across 16 request_id tables — 0 request rows, 0 orphans left.
+
+**Spec:** `SPEC_public_portal_intake.md §2b` — submit marked `[BUILT — slice 5]`; header now `[BUILT end-to-end —
+mobile toggle + cut-over pending]`; staff-side MRR item-splitting stays separate (§12).
+
+**Next:** slice 6 = **mobile step-through** toggle (≤860px: Form/Results ↔ Assistant, per `DESIGN §Mobile`);
+then **cut over `/portal`** to the v2 page; plus slice 1b (clarification reads stored `mailing_*`). Cert→fee-engine
+wiring (certification.count) remains a release-stage/fee-domain follow-up. `frontend/build` git-ignored —
+committed: schema (×2), publicChat.js, the page, the spec, this note.

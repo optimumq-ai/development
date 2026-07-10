@@ -108,7 +108,9 @@ const SYSTEM_PROMPT_SPLIT_CANVAS = [
   '  PATH (b) - EMAIL or text / SMS, AUDIO recordings, PHOTOS / images, DATABASE or data exports / device contents, PAPER / archived / physical records: the Open Records team pulls and processes these directly - not instantly searchable. Explain that ONCE and warmly (you can instantly search documents and forms, but this request is for [their format], which the team pulls and processes directly, so you cannot show instant matches - and that is completely fine), then gather targeted details: email/text -> who was involved (senders / recipients) + a date range; audio/video -> date, location, incident or case number; photos -> event, date, location. Do NOT run a document search for PATH (b).',
   '- EMAIL or TEXT special case (count-only): once you have the key terms, the people involved (senders / recipients), and a date range, emit on its own line: [[EMAIL_SEARCH:key terms plus senders/recipients and the date range]]. The system runs a count-only search (no email content, subjects, or names are ever exposed) and returns an approximate NUMBER. Relay ONLY that number, note that all email is reviewed for exempt content before release, and if it is large, warmly help them narrow (specific senders or a tighter date range) then search again with a refined [[EMAIL_SEARCH:...]].',
   '- After a search: the matching records are shown to the citizen in the results view. Briefly say about how many matches you found and ask whether any of them match what they need. End with, on its own line: [[QUICK_REPLIES: Yes, one of these matches | No, none match]].',
-  '- Another record: once the current record is handled (matches reviewed for PATH (a), or details gathered for PATH (b)), warmly ask whether they would like to describe another record. End with, on its own line: [[QUICK_REPLIES: Yes, another record | No, that is everything]]. If yes, invite the next description. If no, let them know they can review and submit their request from the form when ready - do NOT emit any submit marker yourself.',
+  '- Another record: once the current record is handled (matches reviewed for PATH (a), or details gathered for PATH (b)), warmly ask whether they would like to describe another record. End with, on its own line: [[QUICK_REPLIES: Yes, another record | No, that is everything]]. If yes, invite the next description. If no, let them know they can review and submit their request from the Review and submit button on the left when ready - do NOT emit any submit marker yourself.',
+  '',
+  'RECORD TRACKING: The request can hold several records. For any record you FINALIZE that the citizen could NOT pick from the results view - that is, a PATH (a) search that returned NO matches, or ANY PATH (b) record (email/text, audio, photos, database/export, paper) - emit on its own line, right before you ask whether they want another record: [[RECORD_ADDED: a concise one-line description of that record]]. Do NOT emit [[RECORD_ADDED]] for a record where you showed library results the citizen can select (those are captured when they pick from the results view). One [[RECORD_ADDED]] per finalized non-selectable record. Never mention or explain this marker.',
   '',
   'MARKER RULES:',
   '- Hidden markers ([[...]]) must appear on their own lines and are stripped from what the user sees. Never explain markers.',
@@ -240,6 +242,11 @@ router.post('/chat', async function(req, res) {
       quickReplies = qrMatch[1].split('|').map(function(s){ return s.trim(); }).filter(function(s){ return s.length > 0; });
     }
     var contactForm = /\[\[CONTACT_FORM\]\]/.test(fullText);
+    // Split-canvas record tracking: a finalized record the citizen could not pick from results
+    // (zero-match search or a PATH-(b) format). Captured client-side for the eventual submit.
+    var recordAdded = null;
+    var recordAddedMatch = fullText.match(/\[\[RECORD_ADDED:([^\]]+)\]\]/);
+    if (recordAddedMatch) recordAdded = recordAddedMatch[1].trim();
     var searchQuery = null;
     var searchResults = null;
     var searchQueryMatch = fullText.match(/\[\[SEARCH_QUERY:([^\]]+)\]\]/);
@@ -314,12 +321,13 @@ router.post('/chat', async function(req, res) {
       .replace(/\[\[FEE_WAIVER_INFO:[^\]]+\]\]/g, '')
       .replace(/\[\[SEARCH_QUERY:[^\]]+\]\]/g, '')
       .replace(/\[\[NON_TRAD_ITEMS:[^\]]+\]\]/g, '')
+      .replace(/\[\[RECORD_ADDED:[^\]]+\]\]/g, '')
       .replace(/\[\[QUICK_REPLIES:[^\]]*\]\]/g, '')
       .replace(/\[\[CONTACT_FORM\]\]/g, '')
       .replace(/\*\*([^*]+)\*\*/g, '$1')
       .replace(/__([^_]+)__/g, '$1')
       .trim();
-    res.json({ reply: visibleText, submission: submission, verifyEmail: verifyEmail, searchQuery: searchQuery, searchResults: searchResults, quickReplies: quickReplies, contactForm: contactForm });
+    res.json({ reply: visibleText, submission: submission, verifyEmail: verifyEmail, searchQuery: searchQuery, searchResults: searchResults, quickReplies: quickReplies, contactForm: contactForm, recordAdded: recordAdded });
   } catch(e) {
     console.error('Chat error:', e.message);
     res.status(500).json({ error: 'Chat unavailable', details: e.message });
@@ -343,9 +351,11 @@ router.post('/submit', async function(req, res) {
   var id = uuidv4();
   // Structured intake fields (split-canvas slice 1): commercial requester, fee-waiver reason, and the
   // postal mailing address (only sent by the form when delivery_method === 'mail'; null otherwise).
+  // Slice 5 adds certification opt-in + the email-accuracy method (attested|visual) from the Phase-0 form.
   var requestorType = b.requestorType === 'commercial' ? 'commercial' : 'individual';
-  await run('INSERT INTO requests (id, request_number, requestor_name, requestor_email, requestor_phone, requestor_type, delivery_method, description, classification, department_id, fee_waiver_requested, fee_waiver_reason, mailing_street1, mailing_street2, mailing_city, mailing_state, mailing_zip, is_mrr, submission_channel, stage, status, deadline_date, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime(\'now\'))',
-    [id, requestNumber, b.requestorName, b.requestorEmail, b.requestorPhone || '', requestorType, b.deliveryMethod || 'email', b.description, classification, null, b.feeWaiverRequested ? 1 : 0, b.feeWaiverReason || null, b.mailingStreet1 || null, b.mailingStreet2 || null, b.mailingCity || null, b.mailingState || null, b.mailingZip || null, b.isMrr ? 1 : 0, b.submissionChannel || 'chat_agent', 'intake', 'active', deadlineStr]);
+  var verifyMethod = (b.emailVerificationMethod === 'attested' || b.emailVerificationMethod === 'visual') ? b.emailVerificationMethod : null;
+  await run('INSERT INTO requests (id, request_number, requestor_name, requestor_email, requestor_phone, requestor_type, delivery_method, description, classification, department_id, fee_waiver_requested, fee_waiver_reason, mailing_street1, mailing_street2, mailing_city, mailing_state, mailing_zip, certification_requested, email_verification_method, is_mrr, submission_channel, stage, status, deadline_date, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime(\'now\'))',
+    [id, requestNumber, b.requestorName, b.requestorEmail, b.requestorPhone || '', requestorType, b.deliveryMethod || 'email', b.description, classification, null, b.feeWaiverRequested ? 1 : 0, b.feeWaiverReason || null, b.mailingStreet1 || null, b.mailingStreet2 || null, b.mailingCity || null, b.mailingState || null, b.mailingZip || null, b.certificationRequested ? 1 : 0, verifyMethod, b.isMrr ? 1 : 0, b.submissionChannel || 'chat_agent', 'intake', 'active', deadlineStr]);
   await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
     [uuidv4(), id, 'public', b.submissionChannel === 'manual_form' ? 'Public Portal (Form)' : 'Public Portal (Chat Agent)', 'CREATED', b.submissionChannel === 'manual_form' ? 'Submitted via public portal form' : 'Submitted via AI chat agent']);
 
