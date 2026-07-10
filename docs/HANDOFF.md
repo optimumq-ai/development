@@ -697,3 +697,32 @@ select · loop · review · submit · confirmation · mobile). **Next / remainin
 page and retire the chat-first flow (the one open item); plus slice 1b (clarification reads stored `mailing_*`)
 and the release-stage cert→fee-engine wiring. `frontend/build` git-ignored — committed: the page, the spec,
 this note.
+
+## 2026-07-10 (i) — Split-canvas cut-over: /portal → split-canvas intake (DONE + verified)
+
+**Slice:** Cut over the live public portal to the split-canvas flow. Decision (Kevin): **keep the `/portal`
+landing chooser**; its "Create an Open Records Request" now opens the new flow (Library entry preserved); retire
+the chat-first request UI. Frontend routing only. On `spec/task-screens`.
+
+**Done:**
+- `App.js` — `/portal/request` → `PublicPortalV2Page` (canonical); `/portal/v2` → `<Navigate to="/portal/request"
+  replace/>`. `/portal` unchanged (still the landing chooser).
+- `PublicPortalPage.js` — `startRequest()` now `navigate('/portal/request')` instead of `setView('request')`
+  + kicking off the in-page chat. Both entry points (the landing "Create" button and the `?start=request`
+  deep-link) funnel through it, so both now open the split-canvas flow. The chat-first `view==='request'` render
+  stays in the file as a **reversible fallback** but is unreachable (retired).
+
+**Evidence (verified live — frontend built + nginx-served):** browser drive (`drive7.js`) — **12/12 pass**:
+`/portal` still shows the Welcome chooser with both buttons and NOT the v2 form; **Create → `/portal/request` →
+the split-canvas "START HERE" form**; `/portal?start=request` → `/portal/request` form; **`/portal/v2` redirects
+to `/portal/request`**; `/portal/request` loads directly; the Library button still → `/portal/library`. Screens
+`18` (landing) `19` (create→v2) in scratchpad.
+
+**Spec:** `SPEC_public_portal_intake.md` — §1 notes the Create button/deep-link now open `/portal/request`; §2
+header marked `[BACKEND BUILT — chat-first frontend flow RETIRED, superseded by §2b]`; §2b renamed to
+`/portal/request` `[LIVE — the default request flow]`, cut-over `[DONE]`.
+
+**The split-canvas portal is now the live public request flow.** Remaining follow-ups (all optional, non-blocking):
+delete the retired chat-first render from `PublicPortalPage` (kept as fallback); slice 1b (clarification reads
+stored `mailing_*`); release-stage cert→fee-engine wiring (certification.count). `frontend/build` git-ignored —
+committed: `App.js`, `PublicPortalPage.js`, the spec, this note.

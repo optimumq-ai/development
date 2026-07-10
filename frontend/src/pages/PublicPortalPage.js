@@ -251,8 +251,10 @@ export default function PublicPortalPage() {
   }
 
   function startRequest() {
-    setView('request');
-    if (messages.length === 0) sendMessage('', true);
+    // Cut-over (2026-07-10): "Create an Open Records Request" now opens the split-canvas intake
+    // (/portal/request). The in-page chat-first request flow below is retired (kept as a reversible
+    // fallback), so setView('request') is no longer reached from the landing or the ?start=request link.
+    navigate('/portal/request');
   }
 
   var portalHeader = (
