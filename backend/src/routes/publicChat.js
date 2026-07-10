@@ -294,8 +294,11 @@ router.post('/submit', async function(req, res) {
   var deadline = new Date(); deadline.setDate(deadline.getDate() + days);
   var deadlineStr = deadline.toISOString().split('T')[0];
   var id = uuidv4();
-  await run('INSERT INTO requests (id, request_number, requestor_name, requestor_email, requestor_phone, requestor_type, delivery_method, description, classification, department_id, fee_waiver_requested, is_mrr, submission_channel, stage, status, deadline_date, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime(\'now\'))',
-    [id, requestNumber, b.requestorName, b.requestorEmail, b.requestorPhone || '', 'individual', b.deliveryMethod || 'email', b.description, classification, null, b.feeWaiverRequested ? 1 : 0, b.isMrr ? 1 : 0, b.submissionChannel || 'chat_agent', 'intake', 'active', deadlineStr]);
+  // Structured intake fields (split-canvas slice 1): commercial requester, fee-waiver reason, and the
+  // postal mailing address (only sent by the form when delivery_method === 'mail'; null otherwise).
+  var requestorType = b.requestorType === 'commercial' ? 'commercial' : 'individual';
+  await run('INSERT INTO requests (id, request_number, requestor_name, requestor_email, requestor_phone, requestor_type, delivery_method, description, classification, department_id, fee_waiver_requested, fee_waiver_reason, mailing_street1, mailing_street2, mailing_city, mailing_state, mailing_zip, is_mrr, submission_channel, stage, status, deadline_date, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime(\'now\'))',
+    [id, requestNumber, b.requestorName, b.requestorEmail, b.requestorPhone || '', requestorType, b.deliveryMethod || 'email', b.description, classification, null, b.feeWaiverRequested ? 1 : 0, b.feeWaiverReason || null, b.mailingStreet1 || null, b.mailingStreet2 || null, b.mailingCity || null, b.mailingState || null, b.mailingZip || null, b.isMrr ? 1 : 0, b.submissionChannel || 'chat_agent', 'intake', 'active', deadlineStr]);
   await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
     [uuidv4(), id, 'public', b.submissionChannel === 'manual_form' ? 'Public Portal (Form)' : 'Public Portal (Chat Agent)', 'CREATED', b.submissionChannel === 'manual_form' ? 'Submitted via public portal form' : 'Submitted via AI chat agent']);
 

@@ -449,6 +449,41 @@ go to branch the first build slice** — the two genuinely new builds are the Ph
 #2 address, cert-visible, #3 fee-choice, #5 mobile). Branch in sync with `origin/spec/task-screens`; remote is
 `github.com/optimumq-ai/development`. No PR opened yet — still design-only, awaiting the go to branch a build slice.
 
+## 2026-07-10 (c) — Split-canvas BUILD slice 1: backend foundation (BUILT + verified)
+
+**Slice:** First build slice of the split-canvas intake — persist the structured fields the Phase-0 form will
+collect (address #2, fee-choice #3), so every frontend slice has real storage and the postal-clarification
+address gap closes. Strategy (Kevin): **new page alongside** (`/portal/v2` → cut over later); **backend first.**
+Continues on `spec/task-screens`. Backend only, no UI.
+
+**Built:**
+- `backend/src/db/schema.postgres.sql` — 5 idempotent `ALTER TABLE requests ADD COLUMN IF NOT EXISTS
+  mailing_street1/street2/city/state/zip TEXT` (country implicit US; nullable). Applied on boot by
+  `initDb()` (`db/index.js:20-23` runs the whole file; the IF-NOT-EXISTS adds are safe every start).
+- `backend/src/db/schema.sql` (sqlite reference) — same 5 columns **+ `fee_waiver_reason`** on the `requests`
+  CREATE TABLE, fixing pre-existing drift (postgres had it via ALTER, this file didn't).
+- `backend/src/routes/publicChat.js` `/public/submit` (the endpoint the v2 page will call) — INSERT now
+  persists `mailing_*` + `fee_waiver_reason`; `requestor_type` whitelisted (`=== 'commercial' ? 'commercial'
+  : 'individual'`) instead of hardcoded `'individual'`. Commercial capture (§3) + waiver reason now land.
+- `backend/server.js` `/api/requests/public` (slice-h direct handler) — mirrored the same INSERT additions
+  for parity.
+
+**Deferred to slice 1b:** point `clarificationAction`/`clarificationNotice` at the stored `mailing_*` instead
+of the inline address (capture had to exist first; small verifiable follow-up — fully closes the postal gap).
+
+**Evidence (verified live, API restarted kill 1200 → root PM2 respawn pid 168297, health 200, new schema
+applied):** (1) `POST /api/public/submit` with commercial + waiver reason + full postal address → 201
+(`2026-0044`); row read back shows `requestor_type=commercial`, `fee_waiver_reason` set, all five `mailing_*`
+populated. (2) Bare legacy-shape submit (no new fields) → 201 (`2026-0045`), `requestor_type=individual`, new
+fields NULL — no regression. (3) Invalid `requestorType:"hacker"` → 201 (`2026-0046`), whitelisted back to
+`individual`. All three test requests + every dependent row (across tasks/history/clocks/… — 16 child tables
+with `request_id`) deleted; 0 left. JS syntax-checked; both endpoints unbroken.
+
+**Next (frontend slices, on `/portal/v2`):** 2 Phase-0 form panel → 3 chat integration → 4 results canvas →
+5 finalize+submit → 6 mobile step-through → cut over `/portal`, retire the chat-first page. Reuse the existing
+`/api/public/*` surface (`submit`, `request-verification`, `verify-status/:token`, `chat`, `native-search`,
+`sources`). Plus slice 1b (clarification reads stored address).
+
 **No app code touched** — `DESIGN_split_canvas_intake.md`, `docs/mockups/split_canvas_intake.html` (JS
 syntax-checked clean, no stray refs), `HANDOFF.md`. The #2 schema + wiring is speced as a turnkey build slice,
 not built.
