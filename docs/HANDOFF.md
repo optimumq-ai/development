@@ -1138,3 +1138,22 @@ CLAUDE.md · `4d4e63e` cert-label · `ca27b67` TX rate 0 · `f29a5da` rate-aware
 closure notice; staff-side MRR item-splitting (`SPEC_tasks_roles_mrr_fees §12`); estimate profiles unpopulated
 (`SPEC_fees §2` automation never fires). Any jurisdiction that charges a certification fee just needs a non-zero
 `certification.rate` in its FR profile.
+
+## 2026-07-10 (ab) — main deploy verified clean (post cert-rate-0)
+
+Full deploy verification from `main` `906d5b4` (in sync with `origin/main`, 0/0), running app.
+
+- **Clean checkout** — on `main`, no tracked drift, **no untracked files** (tree fully clean).
+- **Frontend** — fresh build (`rm -rf build` + `CI=false NODE_OPTIONS=--openssl-legacy-provider npm run build`)
+  → `Compiled successfully`; nginx serves the just-built bundle (served `main.8fa85771` == built).
+- **Backend** — restarted from `main` (killed pid → root-PM2 respawn, pid 201597); single healthy listener on
+  :3001; `initDb()` schema clean; health `200`.
+- **Schema** — all merged-slice columns present; `fee_profiles` present.
+- **Routes** — `/api/health`, `/portal`, `/portal/request`, `/portal/library`, `/portal/v2` all `200`.
+- **End-to-end round-trip** — `POST /public/submit` → `201`; row persisted + routed (department, classification,
+  deadline, `routing_basis`); `is_mrr=1`; certification + `email_verification_method` + mailing address stored;
+  onIntake spawned tasks + deadline clock. **18/18, 0 fail; 0 rows left.**
+
+**Harness note:** first pass showed 1 FAIL — the same benign case as (s): `deploy_verify.js` used a terse
+description the LLM classifier declines to route (`department_id` null, "unassigned for triage"). Hardened the
+harness with a routable description → 18/18 clean. Not a deploy regression. **main deploys clean.**
