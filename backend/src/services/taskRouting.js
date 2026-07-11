@@ -365,6 +365,14 @@ async function applyStageTransition(requestId, toStage, opts) {
     "VALUES (?,?,?,?,?,?,?,?, datetime('now'))",
     [uuidv4(), requestId, opts.actorId || null, opts.actorName || 'System', opts.action || 'STAGE_ADVANCED', opts.notes || null, fromStage, toStage]);
   var task = await spawnForStage(requestId, toStage, opts.createdBy || opts.actorId || 'system');
+  // Redaction automation slice 3b: on ENTERING a redaction stage (once, not on reconciler sweeps of
+  // spawnForStage), kick the read-based triage in the BACKGROUND so the AI read's latency/failure never
+  // blocks this transition. It reads + persists a disposition per un-triaged responsive file, bypasses
+  // record-type-clean files, and advances/cancels the task if everything clears.
+  if (REDACTION_STAGES[toStage]) {
+    try { require('./embedIndex').bg(require('./redactionTriage').triageReadForRequest(requestId, {}), 'redaction-triage ' + requestId); }
+    catch (e) { console.error('[applyStageTransition triage]', e && e.message); }
+  }
   return { fromStage: fromStage, toStage: toStage, changed: true, task: task };
 }
 
@@ -413,6 +421,7 @@ module.exports = {
   workloadCounts: workloadCounts,
   leastLoaded: leastLoaded,
   spawnForStage: spawnForStage,
+  requestNeedsLegalRedaction: requestNeedsLegalRedaction,
   applyStageTransition: applyStageTransition,
   reconcileStageTasks: reconcileStageTasks,
   startReconciler: startReconciler

@@ -82,7 +82,7 @@ async function recordBypass(file, basis, reuse, ctx) {
   if (file.request_id) {
     await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
       [uuidv4(), file.request_id, ctx.actorId || null, ctx.actorName || 'System', 'REDACTION_BYPASSED',
-       'No redaction required for ' + (file.original_name || file.id) + ' — reused a previously released copy (' + ((basis && basis.rule) || 'dedup') + ').']);
+       'No redaction required for ' + (file.original_name || file.id) + ' (' + ((basis && basis.rule) || 'clean') + ').']);
   }
   return { jobId: jobId, disposition: 'bypass', basis: basis, outputFileId: reuse.outputFileId };
 }
@@ -98,6 +98,23 @@ async function bypassIdentityFile(file, ctx) {
   var rec = await recordBypass(file, d.basis, reuse, ctx);
   if (rec.skipped) return { bypassed: false, alreadyReleased: true };
   return { bypassed: true, basis: d.basis, jobId: rec.jobId, outputFileId: rec.outputFileId };
+}
+
+// Record-type-clean bypass (§2 case c): the record type is auto_release_eligible AND a clean read found
+// nothing to redact, so release the ORIGINAL file as-is (output = the file itself). Reuses recordBypass;
+// published follows the record type's auto_publish. ctx: { actorId, actorName }.
+async function recordCleanBypass(file, basis, ctx) {
+  var req = file.request_id ? await get('SELECT record_type_id, description FROM requests WHERE id = ?', [file.request_id]) : null;
+  var autoPub = 0, rtName = '';
+  if (req && req.record_type_id) {
+    var rt = await get('SELECT name, auto_publish FROM record_types WHERE id = ?', [req.record_type_id]);
+    if (rt) { autoPub = rt.auto_publish ? 1 : 0; rtName = rt.name || ''; }
+  }
+  var title = (rtName ? rtName + ' — ' : '') + (file.original_name || 'Released record').replace(/\.[a-z0-9]+$/i, '');
+  return await recordBypass(file, basis, {
+    outputFileId: file.id, published: autoPub, title: title,
+    summary: (req && req.description) || title, recordTypeId: req && req.record_type_id, pageCount: null
+  }, ctx);
 }
 
 // Auto-bypass every provably-clean responsive file for a request (identity cases a/b).
@@ -152,6 +169,7 @@ module.exports = {
   findReusableRelease: findReusableRelease,
   fileAlreadyReleased: fileAlreadyReleased,
   recordBypass: recordBypass,
+  recordCleanBypass: recordCleanBypass,
   bypassIdentityFile: bypassIdentityFile,
   bypassIdentityForRequest: bypassIdentityForRequest,
   responsiveFiles: responsiveFiles,
