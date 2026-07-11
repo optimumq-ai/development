@@ -36,6 +36,7 @@ Staff-side search across repositories/connectors, semantic search, record select
 ## 8. ✅ Redaction
 Manual workspace, templates/profiles, rules & exemption library, structured redaction, AV/video redaction, mass redaction jobs, zone discovery, review/approval.
 `redactionJobs.js, redactionRules.js, redactionTemplates.js, structuredRedaction.js, avRedaction.js, massJobs.js; redactionApply, avRedactionApply, structuredRedaction, zoneDiscovery, massJobs, ruleDiscovery` · Pages: RedactionWorkspacePage, RedactionReviewPage, RedactionRulesPage, MassRedactionPage, AvWorkbenchPage, StructuredRedactionFieldsPage
+**Built-vs-designed reality:** `REDACTION_GROUND_TRUTH.md` (2026-07-11) — engine (AI read, template match, burn/release, legal escalation) is real; complexity tiers, reviewer assignment, and clean-record bypass are designed-only/absent. Trust it over the SPEC_redaction docs for "what runs today."
 
 ## 9. ✅ Sources, Imports & Connectors
 Record Sources model, import ingestion (drop-folder/watermark/scheduler), connector registry (11: axon, tyler, laserfiche, nena911, email, filestore, keyword, paperindex, structured, demo, registry), document processing/extraction.
