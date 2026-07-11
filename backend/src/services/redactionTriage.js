@@ -84,6 +84,19 @@ async function computeAndPersistDisposition(file, ctx) {
   var job = await ensureJob(file, ctx);
   await run("UPDATE redaction_jobs SET disposition = ?, disposition_basis = ?, updated_at = datetime('now') WHERE id = ?",
     [d.disposition, JSON.stringify(d.basis || {}), job.id]);
+  // Slice 5: a legal disposition from the document read escalates the whole request's redaction to legal
+  // staff (mirrors the Director escalation). Idempotent — no-op if the request is already legally flagged
+  // (e.g. disposition came from an intake flag). Escalation reroutes the redaction task to legal_redaction.
+  if (d.disposition === 'legal' && file.request_id) {
+    try {
+      var taskRouting = require('./taskRouting');
+      await taskRouting.escalateToLegal(file.request_id, {
+        flagType: 'CONTENT_LEGAL',
+        note: 'redaction content flagged ' + ((d.basis && d.basis.category) || 'a legal exemption'),
+        actorName: 'Redaction Triage'
+      });
+    } catch (e) { console.error('[redactionTriage escalateToLegal]', e && e.message); }
+  }
   return d;
 }
 

@@ -376,6 +376,31 @@ async function applyStageTransition(requestId, toStage, opts) {
   return { fromStage: fromStage, toStage: toStage, changed: true, task: task };
 }
 
+// Escalate a request to legal (advanced) redaction. Sets legal_flag (so the redaction stage spawns
+// legal_redaction), logs LEGAL_ESCALATED, and if an ordinary redaction task is already open it is superseded
+// and re-spawned as legal_redaction. Idempotent (no-op if already flagged). Shared by the Director endpoint
+// and by the read-triage's legal-category trigger (SPEC_redaction_automation.md slice 5).
+//   opts: { flagType, note, actorId, actorName }
+async function escalateToLegal(requestId, opts) {
+  opts = opts || {};
+  var request = await get('SELECT id, stage, legal_flag FROM requests WHERE id = ?', [requestId]);
+  if (!request) return { escalated: false, reason: 'not_found' };
+  if (Number(request.legal_flag) === 1) return { escalated: false, alreadyFlagged: true, converted: false, task: null };
+  await run("UPDATE requests SET legal_flag = 1, legal_flag_type = ?, updated_at = datetime('now') WHERE id = ?",
+    [opts.flagType || 'CONTENT_ESCALATION', requestId]);
+  await run("INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)",
+    [uuidv4(), requestId, opts.actorId || null, opts.actorName || 'System', 'LEGAL_ESCALATED',
+     'Escalated for legal (advanced) redaction' + (opts.note ? ': ' + opts.note : '')]);
+  var converted = false, newTask = null;
+  var openRed = await get("SELECT id FROM tasks WHERE request_id = ? AND type = 'redaction' AND status IN ('open','assigned','in_progress')", [requestId]);
+  if (openRed) {
+    await run("UPDATE tasks SET status = 'superseded', updated_at = datetime('now') WHERE id = ?", [openRed.id]);
+    try { newTask = await spawnForStage(requestId, request.stage, opts.actorId || 'system'); converted = true; }
+    catch (e) { console.error('[escalateToLegal respawn]', e && e.message); }
+  }
+  return { escalated: true, alreadyFlagged: false, converted: converted, task: newTask };
+}
+
 async function mine(userId) {
   return await all("SELECT * FROM tasks WHERE assigned_to = ? AND status IN ('assigned','in_progress') ORDER BY updated_at DESC", [userId]);
 }
@@ -422,6 +447,7 @@ module.exports = {
   leastLoaded: leastLoaded,
   spawnForStage: spawnForStage,
   requestNeedsLegalRedaction: requestNeedsLegalRedaction,
+  escalateToLegal: escalateToLegal,
   applyStageTransition: applyStageTransition,
   reconcileStageTasks: reconcileStageTasks,
   startReconciler: startReconciler

@@ -320,18 +320,10 @@ router.post('/:id/legal-escalate', requireAuth, async function(req, res) {
 
   var flagType = (req.body && req.body.type) || 'DIRECTOR_ESCALATION';
   var note = (req.body && req.body.note) ? String(req.body.note).slice(0, 500) : '';
-  await run("UPDATE requests SET legal_flag = 1, legal_flag_type = ?, updated_at = datetime('now') WHERE id = ?", [flagType, request.id]);
-  await logHistory(request.id, req.user.sub, actor, 'LEGAL_ESCALATED', 'Escalated for legal (advanced) redaction' + (note ? ': ' + note : ''));
-
-  // If ordinary redaction is already in flight, supersede it and re-spawn as legal_redaction.
-  var converted = false, newTask = null;
-  var openRed = await get("SELECT id FROM tasks WHERE request_id = ? AND type = 'redaction' AND status IN ('open','assigned','in_progress')", [request.id]);
-  if (openRed) {
-    await run("UPDATE tasks SET status = 'superseded', updated_at = datetime('now') WHERE id = ?", [openRed.id]);
-    try { newTask = await require('../services/taskRouting').spawnForStage(request.id, request.stage, req.user.sub); converted = true; }
-    catch (e) { console.error('[legal-escalate respawn]', e && e.message); }
-  }
-  res.json({ legalFlag: true, alreadyFlagged: false, converted: converted, task: newTask });
+  // One shared escalation path (SPEC_redaction_automation.md slice 5): sets legal_flag, logs LEGAL_ESCALATED,
+  // and supersedes/respawns any open redaction task as legal_redaction.
+  var r = await require('../services/taskRouting').escalateToLegal(request.id, { flagType: flagType, note: note, actorId: req.user.sub, actorName: actor });
+  res.json({ legalFlag: true, alreadyFlagged: false, converted: r.converted, task: r.task });
 });
 
 // Contact requestor for clarification (record-search task action). Applies the jurisdiction's
