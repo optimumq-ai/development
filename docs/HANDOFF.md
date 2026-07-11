@@ -1279,3 +1279,23 @@ to `main`, verified in the running app.
 **Outstanding:** none in the tree. Pre-existing product follow-ups (out of scope): auto-sent closure notice;
 staff-side MRR item-splitting (`SPEC_tasks_roles_mrr_fees §12`); estimate profiles unpopulated (`SPEC_fees §2`).
 A jurisdiction that charges to certify just sets a non-zero `certification.rate` in its FR profile.
+
+## 2026-07-11 (ai) — Next-slice pick (fee-waiver approval routing) found already BUILT + verified
+
+Picked Tier-1 #4 "Fee-waiver approval task routing" as the next slice. On investigation it was already built
+(spec `SPEC_tasks_roles_mrr_fees` §5/§9 `[BUILT 2026-07-09]`); the `BUILD_PRIORITY_SUMMARY.md` doc (compiled
+07-08) predated the build and still listed it as NOT BUILT.
+
+**Verified live end-to-end (11/11 pass, `scratchpad/verify_feewaiver.js`):** real `/public/submit` with
+`feeWaiverRequested=true` → `onIntake` spawns a `fee_waiver` task with **`role_required='FEE_AUTHORITY'`,
+`team_id=NULL`** (team-agnostic pool), status open; **an FEE_AUTHORITY holder (u-finance-super) sees it in
+`GET /tasks/pool`, a non-approver (u-legal-staff) does NOT** (pool scopes by `role_required IN user's perms`);
+`POST /requests/:id/fee-waiver-decision {decision:'grant'}` → `fee_waiver_status='granted'`, the task marked
+**done**, history `FEE_WAIVER_GRANTED`. Test request + child rows cleaned up (0 left).
+
+**Doc corrected:** `BUILD_PRIORITY_SUMMARY.md` item 4 marked `[BUILT 2026-07-09, verified 2026-07-11]`. No code
+change — verification + doc only. Interim role stays `FEE_AUTHORITY` pending the Finance rename (item 9).
+
+**Next real slice pending Kevin's pick** (genuine NOT-BUILT Tier-1/2): #3 populate estimate profiles (data),
+#2 redaction task→workspace wiring, #5 explicit found/not-found resolution states, or #9 FEE_WAIVER_APPROVER→
+Finance rename (decided, touches objections.js/decisionReasons.js/catalog/assignments).

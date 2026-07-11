@@ -5,7 +5,7 @@ Compiled 2026-07-08 from the verified domain specs. Ranked for a time-constraine
 1. **Record-search task screen** (D7) — engine fully exists; demo-minimal screen = request context + layered search + select + mark found/complete. *Medium.*
 2. **Redaction task → workspace wiring** (D8/D4) — workspace exists; minimally, a redaction task click should open the job/workspace, not generic request detail. *Small.*
 3. **Populate estimate profiles** for the top ~10 record types (D6) — DATA task, no code; lights up the already-built automated-estimate path. *Small, high leverage.*
-4. **Fee-waiver approval task routing** (D4) — decision endpoints + role exist; wire intake flag → task on approver's list. *Small.*
+4. ~~**Fee-waiver approval task routing** (D4)~~ **[BUILT 2026-07-09, verified 2026-07-11]** — intake `fee_waiver_requested` → `onIntake` spawns a team-agnostic `fee_waiver` task scoped to `FEE_AUTHORITY`; visible in an approver's pool (not a non-approver's); resolved by `POST /:id/fee-waiver-decision` (grant/deny → task done + history). Interim role `FEE_AUTHORITY` pending the Finance rename (item 9). *(This doc predates the 07-09 build.)*
 5. **Explicit found/not-found resolution states** (D7) — small now; hard prerequisite for MRR roll-up later. *Small.*
 
 ## Tier 2 — High-value, pre-sales-polish
