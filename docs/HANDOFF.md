@@ -1323,3 +1323,53 @@ NOT-BUILT candidates, Kevin to choose:
 Verification harnesses live in scratchpad (session ce55a45e): `smoke_full.js` (rate-aware, 28/28),
 `deploy_verify.js` (routable-description, 18/18), `verify_feewaiver.js` (11/11). New session gets a new
 scratchpad — re-create as needed from these patterns.
+
+## 2026-07-11 (ak) — Redaction: ground-truth doc, automation model spec, disposition fn (slice 1 BUILT)
+
+**Context:** Kevin picked the redaction task→workspace slice, then pivoted (via a PDF design brief,
+`imports`/GitHub `uploads/redaction UI content for discussion.pdf`) to a full **single Redaction UI**
+redesign — and flagged he had zero confidence in what redaction automation is actually built. So the
+session became: establish ground truth → design the automation model → start building it. All docs +
+backend; **no UI built** (screen still needs the mockup pass, UI rule).
+
+**Produced (3 commits):**
+- `4d10886` — `docs/REDACTION_GROUND_TRUTH.md` `[NEW]` — what redaction ACTUALLY runs today, from 3
+  read-only code investigations (file:line evidence). Headlines: the **engine is real** (AI content read
+  `zoneDiscovery` = live claude-sonnet-4-5 over OCR → box+rule+reason, ephemeral/manual-trigger; template
+  match = deterministic token-overlap, not AI; zone→burn→release; legal escalation). The **automation layer
+  is greenfield**: no redaction complexity tier exists; `review_stage` is a bare status field (no reviewer
+  task, no assignment, `apply` ignores it → review is bypassable); **clean-record bypass is designed-only
+  and entirely unwired** (public_availability/auto_release_eligible/fulfilled_records/source_file_id index
+  all populated but consumed by nothing). Both AI steps are lazy at canvas-open, never at selection. Indexed
+  from `DOMAIN_MAP.md` Domain 8.
+- `50f4c44` — `docs/SPEC_redaction_automation.md` `[NEW]` — the decided model. Kevin's 4 locked choices:
+  **(Q1)** derive the tier from read-time signals, not an intake guess; **(Q2)** mandatory 2nd-person review
+  for **elevated + legal only** (simple/standard self-release); **(Q3)** **broad auto-bypass** — provable-
+  identity (published public copy / previously-released dedup) PLUS record-type-clean (`auto_release_eligible`
+  + zero-span clean read) — the only no-human release path, guarded so a failed read never bypasses;
+  **(Q4)** simple keeps one human confirm. One disposition per responsive file
+  (bypass/simple/standard/elevated/legal), computed **eagerly at redaction-stage entry** so bypass records
+  never reach a redactor. §7 has the 7-slice build order.
+- `c549567` — **slice 1 BUILT** — `backend/src/services/redactionDisposition.js`: pure
+  `computeDisposition(signals, config) → { disposition, basis }`, first-match-wins ladder. Defaults seeded
+  from the `redaction_rules` category vocab (`law_enforcement`/`legal`→legal; `health`/`personnel`/
+  `commercial`/`security`→elevated; **`privacy` stays self-release** — ordinary PII is not "sensitive").
+  Idempotent `redaction_jobs.disposition` / `disposition_basis` audit columns. **Nothing wires it yet.**
+
+**Evidence:** `scratchpad/verify_disposition.js` — **25/25** synthetic cases (every disposition, every ladder
+rule, both guardrails, precedence, config tunability). Columns confirmed live via the real `initDb` boot path
+(`scratchpad/verify_columns.js`, run with `NODE_PATH=backend/node_modules`). API restarted (kill 202831 →
+root PM2 respawn **pid 260459**, health 200, schema applied).
+
+**Next slices (SPEC_redaction_automation §7):** 2 bypass (identity dedup on `source_file_id` + public-copy
+detection + record-type-clean; all-bypass auto-advances via `applyStageTransition`); 3 eager disposition at
+stage entry (invoke per responsive file from the redaction orchestrator, suppress task spawn when all bypass);
+4 `redaction_qa` reviewer task + `apply` gating for elevated/legal; 5 legal-category trigger; 6 config
+(thresholds/categories → `system_config`); 7 the **redaction screen** (full-bleed, 3-box accordion, auto-run-
+on-open, informational side-by-side, renamed doc-search) — consumes dispositions; **design a mockup FIRST
+per the UI rule** (brief captured in the discussion PDF). §8 lists residual tunables (defaults set).
+
+**State:** `main` @ `c549567`, working tree clean. NOTE: the earlier picked "task→workspace routing" micro-slice
+(TaskPoolSection redaction link → `?tab=records`, + `RequestWorkspacePage` tab deep-link) was **NOT** done —
+superseded by this full redaction-UI direction; it's obsoleted by slice 7 (the task will open the new screen,
+not the old workspace tab).
