@@ -1299,3 +1299,27 @@ change — verification + doc only. Interim role stays `FEE_AUTHORITY` pending t
 **Next real slice pending Kevin's pick** (genuine NOT-BUILT Tier-1/2): #3 populate estimate profiles (data),
 #2 redaction task→workspace wiring, #5 explicit found/not-found resolution states, or #9 FEE_WAIVER_APPROVER→
 Finance rename (decided, touches objections.js/decisionReasons.js/catalog/assignments).
+
+## 2026-07-11 (aj) — ⭐ RESUME HERE (session paused, clean stopping point)
+
+**State:** `main` @ everything shipped + pushed, `origin` in sync (0/0), working tree fully clean (no tracked or
+untracked changes). App healthy. Nothing half-finished — safe to start a fresh session.
+
+**What shipped this session:** certification intake→fee-engine wiring (PR #2 merged); TX cert rate researched to
+ground truth and set to 0 (1 TAC §70.3 authorizes none); TX FR fee profile promoted draft→active; rate-aware
+full smoke 28/28; `main` deploy verified clean; repo cleanup; permission allowlist tuned; and Tier-1 #4
+fee-waiver approval routing confirmed already-built + verified live (11/11) with the build-priority doc corrected.
+
+**➡ NEXT ACTION (start of new session):** pick the next slice. Fee-waiver routing (#4) is DONE. Genuinely
+NOT-BUILT candidates, Kevin to choose:
+- **#2 Redaction task → workspace wiring** (Small) — task click opens the redaction job/workspace, not generic
+  request detail. Clean bounded routing slice, no new-screen design fork.
+- **#9 FEE_WAIVER_APPROVER → Finance rename** (Small-med) — retires the interim FEE_AUTHORITY role; touches
+  objections.js, decisionReasons.js, the role catalog, user assignments.
+- **#5 Found/not-found resolution states** (Small) — prerequisite for MRR roll-up.
+- **#3 Populate estimate profiles** (Small, data) — needs input on which record types / seed figures.
+(#1 Record-search task screen is the top priority but is a NEW screen — agree design direction first.)
+
+Verification harnesses live in scratchpad (session ce55a45e): `smoke_full.js` (rate-aware, 28/28),
+`deploy_verify.js` (routable-description, 18/18), `verify_feewaiver.js` (11/11). New session gets a new
+scratchpad — re-create as needed from these patterns.
