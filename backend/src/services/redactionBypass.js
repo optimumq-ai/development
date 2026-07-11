@@ -100,6 +100,19 @@ async function bypassIdentityFile(file, ctx) {
   return { bypassed: true, basis: d.basis, jobId: rec.jobId, outputFileId: rec.outputFileId };
 }
 
+// Auto-bypass every provably-clean responsive file for a request (identity cases a/b).
+// Read-independent — safe to call synchronously in the stage-transition path (no LLM/OCR).
+// returns { total, bypassed, allReleased }.
+async function bypassIdentityForRequest(requestId, ctx) {
+  var files = await responsiveFiles(requestId);
+  var bypassed = 0;
+  for (var i = 0; i < files.length; i++) {
+    var r = await bypassIdentityFile(files[i], ctx);
+    if (r.bypassed) bypassed++;
+  }
+  return { total: files.length, bypassed: bypassed, allReleased: await allResponsiveReleased(requestId) };
+}
+
 // ---- completion / advance helpers (used by slice 3's orchestrator; reusable now) ----
 
 async function responsiveFiles(requestId) {
@@ -140,6 +153,7 @@ module.exports = {
   fileAlreadyReleased: fileAlreadyReleased,
   recordBypass: recordBypass,
   bypassIdentityFile: bypassIdentityFile,
+  bypassIdentityForRequest: bypassIdentityForRequest,
   responsiveFiles: responsiveFiles,
   allResponsiveReleased: allResponsiveReleased,
   advanceIfAllReleased: advanceIfAllReleased

@@ -289,8 +289,25 @@ async function spawnForStage(requestId, stage, createdBy) {
   if (!ttype || stage === 'closed') return null;
   var reqRow = await get('SELECT description, department_id, legal_flag FROM requests WHERE id = ?', [requestId]);
   if (!reqRow) return null;
-  // Redaction stage on a legally-flagged request escalates to legal (advanced) redaction.
-  if (REDACTION_STAGES[stage] && await requestNeedsLegalRedaction(requestId, reqRow)) ttype = 'legal_redaction';
+  if (REDACTION_STAGES[stage]) {
+    // Redaction automation (SPEC_redaction_automation.md, slice 3a): auto-bypass provably-clean
+    // responsive files (identity — public-ready copy / previously released). If EVERY responsive file
+    // is thereby released, redaction is skipped entirely: advance past it and spawn no task.
+    // Read-independent (no LLM/OCR), so it is safe here in the transition path.
+    try {
+      var rb = require('./redactionBypass'); // lazy require avoids a load-order cycle
+      var triage = await rb.bypassIdentityForRequest(requestId, { actorName: 'Redaction Triage' });
+      if (triage.total > 0 && triage.allReleased) {
+        await applyStageTransition(requestId, 'delivery', {
+          actorName: 'Redaction Triage', action: 'STAGE_ADVANCED',
+          notes: 'All responsive records already released (public-ready or previously released) — redaction bypassed.'
+        });
+        return null; // no redaction task — nothing left to redact
+      }
+    } catch (e) { console.error('[spawnForStage bypass]', e && e.message); }
+    // Redaction stage on a legally-flagged request escalates to legal (advanced) redaction.
+    if (await requestNeedsLegalRedaction(requestId, reqRow)) ttype = 'legal_redaction';
+  }
   // Idempotency: never double-spawn. Redaction + legal_redaction are one family (a request gets one or the
   // other, never both), so an existing task of either blocks a new one for this request.
   var typeSet = (ttype === 'redaction' || ttype === 'legal_redaction') ? ['redaction', 'legal_redaction'] : [ttype];
