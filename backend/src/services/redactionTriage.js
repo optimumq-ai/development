@@ -39,20 +39,41 @@ async function runRead(file) {
   }
 }
 
+// Best active page-template whose layout matches this file (>= its safety threshold), or {} for none.
+// Faithful replica of routes/redactionTemplates POST /match, reusing the exported engine (safetyScore/parseZones).
+// A confident match lets a span-bearing doc settle to Standard/Simple instead of defaulting to Elevated.
+async function templateMatch(file) {
+  if (!DOC_MIME.test(file.mimetype || '')) return {};
+  try {
+    var pc = await get('SELECT count(*) AS c FROM document_pages WHERE file_id = ?', [file.id]);
+    if (!pc || !Number(pc.c)) return {}; // no OCR'd pages -> no signal (runRead ensures OCR for real docs)
+    var eng = require('../routes/redactionTemplates').engine;
+    var tpls = await all("SELECT * FROM layout_profiles WHERE status = 'active' AND (kind = 'pages' OR kind IS NULL)");
+    var best = null;
+    for (var i = 0; i < tpls.length; i++) {
+      if (!eng.parseZones(tpls[i]).length) continue;
+      var s = await eng.safetyScore(tpls[i], file.id);
+      var thr = tpls[i].safety_threshold != null ? tpls[i].safety_threshold : 80;
+      if (s && s.score != null && s.score >= thr && (!best || s.score > best.score)) best = { score: s.score, threshold: thr };
+    }
+    return best ? { templateMatched: true, templateScore: best.score, safetyThreshold: best.threshold } : {};
+  } catch (e) { console.error('[redactionTriage templateMatch]', e && e.message); return {}; }
+}
+
 async function assembleSignals(file, ctx) {
   var reqRow = file.request_id ? await get('SELECT record_type_id, legal_flag FROM requests WHERE id = ?', [file.request_id]) : null;
   var rt = (reqRow && reqRow.record_type_id) ? await get('SELECT auto_release_eligible, public_availability FROM record_types WHERE id = ?', [reqRow.record_type_id]) : null;
   var taskRouting = require('./taskRouting'); // lazy require avoids a load-order cycle
   var legalFlag = file.request_id ? await taskRouting.requestNeedsLegalRedaction(file.request_id, reqRow) : false;
   var read = ctx && ctx.readOverride ? ctx.readOverride : await runRead(file);
-  return {
+  var tpl = (ctx && ctx.templateOverride) ? ctx.templateOverride : await templateMatch(file);
+  return Object.assign({
     autoReleaseEligible: rt ? !!rt.auto_release_eligible : false,
     publicAvailability: rt ? rt.public_availability : null,
     legalFlag: !!legalFlag,
     readOk: !!read.readOk,
     spans: read.spans || []
-    // templateMatched intentionally omitted (not yet wired) -> span-bearing docs default to Elevated.
-  };
+  }, tpl); // templateMatched / templateScore / safetyThreshold when a template covers the form
 }
 
 // Ensure a non-released draft job for the file (to hold the persisted disposition).
@@ -127,6 +148,7 @@ async function triageReadForRequest(requestId, ctx) {
 
 module.exports = {
   runRead: runRead,
+  templateMatch: templateMatch,
   assembleSignals: assembleSignals,
   computeAndPersistDisposition: computeAndPersistDisposition,
   triageReadForRequest: triageReadForRequest
