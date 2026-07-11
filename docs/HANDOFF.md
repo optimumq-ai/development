@@ -1437,3 +1437,29 @@ code** (kill 260459 → root PM2 respawn **pid 266292**, health 200, submit 201)
 **3a (bypass wired, LIVE)** BUILT. **Next: slice 3b** (async AI read + case (c) + per-file disposition
 pre-compute), then 4 (`redaction_qa` reviewer task + `apply` gating), 5 (legal-category trigger), 6 (config),
 7 (the screen — mockup `docs/mockups/redaction_screen.html` pending Kevin's markup).
+
+## 2026-07-11 (an) — Automation slice 4: reviewer task + release gating (BUILT)
+
+`services/redactionReview.js` wired into `routes/redactionJobs.js` — the review-routing half of the model
+(Q2: mandatory second-person review for **Elevated + Legal only**).
+- **`gateApply(job, applier)`** — the hard rule closing today's hole (`apply` ignored `review_stage`): an
+  Elevated/Legal job cannot be released via `/apply` unless it was submitted for review (`review_stage ≠
+  editing`, else **409**) AND the applier ≠ author/`submitted_by` (else **403**). `null`/`simple`/`standard`
+  pass through unchanged → **inert / no regression** until dispositions are populated (slice 3b).
+- **`/submit`** spawns a pooled `redaction_qa` task (Elevated → `REDACTION_WORKER` on the request team;
+  Legal → `legal_redaction`, office-level), idempotent. **`/apply`** success → `completeReviewTask` (done);
+  **`/return`** → `closeReviewTask` (cancelled). Added `redaction_qa` to `TASK_ROLES`.
+- Author-exclusion is enforced HARD at the gate; pool-level author-exclusion is a noted refinement (§8).
+
+**Evidence — 18/18 live** (`scratchpad/verify_slice4.js`): `gateApply` unit ×6 + real HTTP with **minted
+author/reviewer tokens** (`auth.signAccessToken`) — submit spawns task + idempotent; author-apply → 403;
+unsubmitted-apply → 409; return → editing + task cancelled; legal submit → office-level `legal_redaction`
+review task; `completeReviewTask` → done; standard/null ungated. 0 rows left. Server restarted on new code
+(kill 266292 → root PM2 respawn **pid 267640**, health 200); route mount `/api/redaction-jobs`.
+
+**State:** `main` @ `d909f81`, tree clean. Redaction automation BUILT: 1 (disposition) · 2 (identity bypass) ·
+3a (bypass wired, live) · **4 (reviewer task + gating, live)**. Gate is inert until dispositions are set —
+which is **slice 3b** (async AI read + case (c) + per-file disposition pre-compute), the natural next slice
+(it activates both 3b's triage AND slice 4's gate). Then 5 (legal-category trigger), 6 (config), 7 (screen —
+mockup pending Kevin's markup). Harnesses in scratchpad: `verify_disposition.js` 25/25 · `verify_bypass.js`
+18/18 · `verify_slice3.js` 12/12 · `verify_slice4.js` 18/18.
