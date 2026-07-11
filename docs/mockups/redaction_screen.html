@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Redaction Workstation — mockup</title>
+<style>*{margin:0}</style>
+</head>
+<body>
+<style>
+  :root{
+    --ui: ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+    --ground:#E7ECF2; --panel:#fff; --panel-2:#F3F6F9; --panel-3:#EAEFF4;
+    --ink:#14181D; --ink-2:#48535F; --ink-3:#8792A0; --line:#D9E0E8;
+    --primary:#1F4E79; --primary-ink:#fff; --primary-soft:#EAF1F8;
+    --chrome:#141D28; --chrome-2:#1D2A38; --chrome-ink:#E9EEF4; --chrome-ink-2:#93A2B4; --chrome-line:#2A3A4C;
+    --ai:#D9821A; --ai-fill:rgba(224,140,32,.30); --ai-line:rgba(200,120,20,.95); --ai-soft:#FBF0E1;
+    --applied:#10151B;
+    --ok:#177A54; --ok-bg:#E4F3EC; --info:#1F4E79; --info-bg:#E7EFF7; --warn:#B4690E; --warn-bg:#FBEEDD; --crit:#B02A37; --crit-bg:#F8E7E8; --legal:#6D3BB5; --legal-bg:#EEE7F8;
+    --shadow:0 1px 2px rgba(20,30,45,.08),0 8px 24px rgba(20,30,45,.10);
+    --radius:10px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ground:#0C1219; --panel:#151E28; --panel-2:#1C2733; --panel-3:#22303D;
+      --ink:#E8EDF3; --ink-2:#A6B2BF; --ink-3:#697585; --line:#2A3744;
+      --primary:#5A93CE; --primary-ink:#0C1219; --primary-soft:#17293A;
+      --ai:#E79A3C; --ai-fill:rgba(224,140,32,.32); --ai-line:rgba(231,154,60,.95); --ai-soft:#2A2113;
+      --ok:#3FBB8A; --ok-bg:#12271F; --info:#6AA0D8; --info-bg:#14263A; --warn:#E0A24A; --warn-bg:#2A2012; --crit:#E4808B; --crit-bg:#2C1518; --legal:#B593E6; --legal-bg:#1F1730;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="light"]{
+    --ground:#E7ECF2; --panel:#fff; --panel-2:#F3F6F9; --panel-3:#EAEFF4; --ink:#14181D; --ink-2:#48535F; --ink-3:#8792A0; --line:#D9E0E8; --primary:#1F4E79; --primary-ink:#fff; --primary-soft:#EAF1F8; --ai:#D9821A; --ai-fill:rgba(224,140,32,.30); --ai-line:rgba(200,120,20,.95); --ai-soft:#FBF0E1; --applied:#10151B; --ok:#177A54; --ok-bg:#E4F3EC; --info:#1F4E79; --info-bg:#E7EFF7; --warn:#B4690E; --warn-bg:#FBEEDD; --crit:#B02A37; --crit-bg:#F8E7E8; --legal:#6D3BB5; --legal-bg:#EEE7F8; --shadow:0 1px 2px rgba(20,30,45,.08),0 8px 24px rgba(20,30,45,.10);
+  }
+  :root[data-theme="dark"]{
+    --ground:#0C1219; --panel:#151E28; --panel-2:#1C2733; --panel-3:#22303D; --ink:#E8EDF3; --ink-2:#A6B2BF; --ink-3:#697585; --line:#2A3744; --primary:#5A93CE; --primary-ink:#0C1219; --primary-soft:#17293A; --ai:#E79A3C; --ai-fill:rgba(224,140,32,.32); --ai-line:rgba(231,154,60,.95); --ai-soft:#2A2113; --applied:#10151B; --ok:#3FBB8A; --ok-bg:#12271F; --info:#6AA0D8; --info-bg:#14263A; --warn:#E0A24A; --warn-bg:#2A2012; --crit:#E4808B; --crit-bg:#2C1518; --legal:#B593E6; --legal-bg:#1F1730; --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.45);
+  }
+
+  *{box-sizing:border-box}
+  html,body{height:100%}
+  body{margin:0;font-family:var(--ui);background:var(--ground);color:var(--ink);
+    -webkit-font-smoothing:antialiased;height:100vh;display:flex;flex-direction:column;overflow:hidden;font-size:14px;line-height:1.45}
+  button{font-family:inherit;cursor:pointer}
+  .lbl{font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);font-weight:700}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+
+  /* ---------- command bar ---------- */
+  .bar{height:54px;flex:0 0 auto;background:var(--chrome);color:var(--chrome-ink);display:flex;align-items:center;
+    justify-content:space-between;gap:14px;padding:0 14px;border-bottom:1px solid #0a121b;z-index:20}
+  .bar .grp{display:flex;align-items:center;gap:10px;min-width:0}
+  .backbtn{display:flex;align-items:center;gap:7px;color:var(--chrome-ink-2);background:transparent;border:none;font-size:13px;font-weight:600;padding:6px 8px;border-radius:8px}
+  .backbtn:hover{background:var(--chrome-2);color:var(--chrome-ink)}
+  .reqid{font-family:var(--mono);font-weight:700;font-size:14px;color:#fff;letter-spacing:.02em}
+  .filepick{display:flex;align-items:center;gap:8px;background:var(--chrome-2);border:1px solid var(--chrome-line);color:var(--chrome-ink);
+    padding:5px 10px;border-radius:8px;font-size:12.5px;font-weight:600;max-width:230px}
+  .filepick .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .filepick .of{color:var(--chrome-ink-2);font-weight:600;font-size:11px;white-space:nowrap}
+  .filepick .chev{color:var(--chrome-ink-2)}
+
+  .seg{display:flex;background:var(--chrome-2);border:1px solid var(--chrome-line);border-radius:9px;padding:3px}
+  .seg button{background:transparent;border:none;color:var(--chrome-ink-2);font-size:12.5px;font-weight:650;padding:6px 14px;border-radius:6px;display:flex;align-items:center;gap:6px}
+  .seg button[aria-pressed="true"]{background:var(--primary);color:#fff}
+
+  .iconbtn{display:flex;align-items:center;gap:7px;background:var(--chrome-2);border:1px solid var(--chrome-line);color:var(--chrome-ink);
+    font-size:12.5px;font-weight:600;padding:7px 11px;border-radius:8px}
+  .iconbtn:hover{border-color:#3a4d63}
+  .pager{display:flex;align-items:center;gap:4px}
+  .pager button{width:30px;height:30px;display:grid;place-items:center;background:var(--chrome-2);border:1px solid var(--chrome-line);color:var(--chrome-ink);border-radius:7px;font-size:15px}
+  .pager button:disabled{opacity:.4}
+  .pager .pg{font-family:var(--mono);font-size:12.5px;color:var(--chrome-ink-2);min-width:52px;text-align:center}
+
+  /* ---------- disposition strip ---------- */
+  .strip{flex:0 0 auto;display:flex;align-items:center;gap:12px;padding:8px 16px;background:var(--panel);
+    border-bottom:1px solid var(--line);font-size:13px}
+  .badge{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:750;padding:4px 11px;border-radius:999px;letter-spacing:.01em}
+  .badge .dot{width:8px;height:8px;border-radius:50%}
+  .badge.simple{background:var(--ok-bg);color:var(--ok)} .badge.simple .dot{background:var(--ok)}
+  .badge.standard{background:var(--info-bg);color:var(--info)} .badge.standard .dot{background:var(--info)}
+  .badge.elevated{background:var(--warn-bg);color:var(--warn)} .badge.elevated .dot{background:var(--warn)}
+  .badge.legal{background:var(--legal-bg);color:var(--legal)} .badge.legal .dot{background:var(--legal)}
+  .badge.bypass{background:var(--ok-bg);color:var(--ok)} .badge.bypass .dot{background:var(--ok)}
+  .strip .msg{color:var(--ink-2)}
+  .strip .msg b{color:var(--ink);font-weight:700}
+  .strip .spacer{flex:1}
+  .demo{display:flex;align-items:center;gap:8px}
+  .demo .lbl{color:var(--ink-3)}
+  .demo select{font-family:var(--ui);font-size:12.5px;font-weight:600;color:var(--ink);background:var(--panel-2);
+    border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+
+  /* ---------- stage ---------- */
+  .stage{flex:1 1 auto;display:flex;min-height:0}
+  .canvas{flex:1 1 auto;overflow:auto;padding:26px;display:flex;justify-content:center;align-items:flex-start;gap:26px}
+  .canvas.sxs{padding-top:14px;flex-direction:column;align-items:center}
+  .sxs-top{display:none}
+  .canvas.sxs .sxs-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+  .sxs-note{font-size:12.5px;color:var(--ink-2)}
+  .sxs-cols{display:none}
+  .canvas.sxs .sxs-cols{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap;justify-content:center}
+  .canvas.sxs .doc-single{display:none}
+  .col-head{text-align:center;font-size:10.5px;letter-spacing:.09em;text-transform:uppercase;font-weight:700;color:var(--ink-3);margin-bottom:8px}
+
+  /* ---------- paper document ---------- */
+  .doc{background:#fff;color:#1a1f26;width:660px;max-width:100%;box-shadow:var(--shadow);border-radius:4px;
+    padding:34px 40px;position:relative;border:1px solid rgba(0,0,0,.06)}
+  .doc.mini{width:360px;padding:22px 24px;transform-origin:top center}
+  .doc .formhead{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid #1a1f26;padding-bottom:8px;margin-bottom:14px}
+  .doc .formhead .t{font-weight:800;font-size:17px}
+  .doc .formhead .yr{font-family:var(--mono);font-weight:800;font-size:20px}
+  .doc .frow{display:flex;gap:14px;margin-bottom:11px}
+  .doc .fld{flex:1;min-width:0}
+  .doc .fld .k{font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:#6b7686;font-weight:700;margin-bottom:2px}
+  .doc .fld .v{font-size:13.5px;color:#1a1f26;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .doc .sec{margin-top:16px;padding-top:12px;border-top:1px solid #e2e6ec}
+  .doc .fine{font-size:10.5px;color:#8a929e;line-height:1.5;margin-top:14px}
+  .doc .scanline{position:absolute;left:0;right:0;top:0;height:100%;pointer-events:none;overflow:hidden;border-radius:4px}
+  .doc .scanline::after{content:"";position:absolute;left:0;right:0;height:40%;top:-40%;
+    background:linear-gradient(180deg,transparent,rgba(217,130,26,.16),transparent);animation:scan 1s ease-in-out 1}
+  @keyframes scan{to{top:120%}}
+
+  /* redaction marks over values */
+  .rd{position:relative;border-radius:2px;padding:0 2px}
+  .rd.proposed{background:var(--ai-fill);box-shadow:inset 0 0 0 1.5px var(--ai-line);color:#5a3a10}
+  .rd.applied{background:var(--applied);color:transparent;box-shadow:none}
+  .rd.applied::selection{background:transparent}
+  .doc:not(.revealed) .rd.proposed{background:transparent;box-shadow:none;color:#1a1f26}
+
+  /* ---------- rail ---------- */
+  .rail{flex:0 0 380px;width:380px;background:var(--panel);border-left:1px solid var(--line);display:flex;flex-direction:column;overflow:hidden}
+  .stage.sxs-on .rail{display:none}
+  .acc{display:flex;flex-direction:column;min-height:0;flex:1}
+  .box{border-bottom:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+  .box.open{flex:1 1 auto}
+  .head{display:flex;align-items:center;gap:10px;padding:13px 16px;background:var(--panel);border:none;width:100%;text-align:left;color:var(--ink)}
+  .head:hover{background:var(--panel-2)}
+  .box.open .head{background:var(--panel-2);border-bottom:1px solid var(--line)}
+  .head .tw{flex:1;min-width:0}
+  .head .ttl{font-size:13.5px;font-weight:750;display:flex;align-items:center;gap:8px}
+  .head .sub{font-size:11.5px;color:var(--ink-3);margin-top:1px}
+  .head .caret{color:var(--ink-3);transition:transform .18s;font-size:12px}
+  .box.open .head .caret{transform:rotate(90deg)}
+  .count{font-family:var(--mono);font-size:11px;font-weight:700;background:var(--ai-soft);color:var(--ai);padding:1px 7px;border-radius:999px}
+  .body{display:none;flex-direction:column;min-height:0;overflow:hidden}
+  .box.open .body{display:flex}
+
+  /* AI box */
+  .aisub{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid var(--line);background:var(--panel)}
+  .selall{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--ink-2);font-weight:600}
+  .aisub .spacer{flex:1}
+  .btn{font-size:12.5px;font-weight:700;border-radius:8px;padding:7px 12px;border:1px solid transparent;display:inline-flex;align-items:center;gap:7px;justify-content:center}
+  .btn.sm{padding:6px 10px;font-size:12px}
+  .btn.primary{background:var(--primary);color:var(--primary-ink);border-color:var(--primary)}
+  .btn.primary:hover{filter:brightness(1.06)}
+  .btn.primary:disabled{opacity:.45;cursor:not-allowed}
+  .btn.ghost{background:var(--panel);color:var(--primary);border-color:var(--line)}
+  .btn.ghost:hover{border-color:var(--primary)}
+  .btn.warn{background:var(--legal);color:#fff;border-color:var(--legal)}
+  .btn.block{width:100%}
+  .btn.applied{background:var(--ok-bg);color:var(--ok);border-color:transparent;cursor:default}
+
+  .ailist{overflow:auto;padding:6px 10px 12px;flex:1}
+  .item{display:flex;gap:10px;padding:10px;border:1px solid var(--line);border-radius:9px;margin-top:8px;background:var(--panel);align-items:flex-start}
+  .item.checked{border-color:var(--ai);background:var(--ai-soft)}
+  .item.done{opacity:.62}
+  .item.done .txt{text-decoration:line-through}
+  .item input[type=checkbox]{margin-top:2px}
+  .item .c{flex:1;min-width:0}
+  .item .txt{display:block;font-family:var(--mono);font-size:13px;font-weight:650;color:var(--ink)}
+  .item .why{display:block;font-size:11.5px;color:var(--ink-2);margin-top:3px}
+  .item .rule{font-size:11px;color:var(--ink-3);margin-top:3px;display:flex;align-items:center;gap:6px}
+  .item .rule .cat{font-size:9.5px;letter-spacing:.05em;text-transform:uppercase;font-weight:700;background:var(--panel-3);color:var(--ink-2);padding:1px 6px;border-radius:5px}
+  .item .donetag{font-size:10.5px;font-weight:700;color:var(--ok);white-space:nowrap}
+  .scanning{padding:26px 18px;text-align:center;color:var(--ink-2);font-size:13px}
+  .spin{width:26px;height:26px;border:3px solid var(--panel-3);border-top-color:var(--ai);border-radius:50%;margin:0 auto 12px;animation:sp .7s linear infinite}
+  @keyframes sp{to{transform:rotate(360deg)}}
+  .rerun{margin-top:10px;text-align:center}
+  .linkbtn{background:none;border:none;color:var(--primary);font-size:12px;font-weight:700}
+
+  /* Manual box */
+  .pad{padding:14px 16px;display:flex;flex-direction:column;gap:12px;overflow:auto}
+  .hint{font-size:12.5px;color:var(--ink-2);line-height:1.5}
+  .drawzone{border:1.5px dashed var(--line);border-radius:10px;padding:16px;text-align:center;color:var(--ink-3);font-size:12.5px;background:var(--panel-2)}
+  .rulepick{border:1px solid var(--ai-line);background:var(--ai-soft);border-radius:10px;padding:12px;display:none}
+  .rulepick.show{display:block}
+  .rulepick .lbl{color:var(--warn);margin-bottom:7px;display:block}
+  select.rule{width:100%;font-family:var(--ui);font-size:12.5px;font-weight:600;color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:8px}
+  .manualcount{font-size:12px;color:var(--ink-3)}
+
+  /* Finalize box */
+  .finban{font-size:12.5px;line-height:1.5;padding:11px 12px;border-radius:9px}
+  .finban.simple,.finban.standard{background:var(--info-bg);color:var(--info)}
+  .finban.elevated{background:var(--warn-bg);color:var(--warn)}
+  .finban.legal{background:var(--legal-bg);color:var(--legal)}
+  .finban b{font-weight:800}
+  .divider{height:1px;background:var(--line);margin:2px 0}
+
+  /* modal */
+  .scrim{position:fixed;inset:0;background:rgba(10,16,24,.55);display:none;align-items:center;justify-content:center;z-index:40;padding:20px}
+  .scrim.show{display:flex}
+  .modal{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);width:560px;max-width:100%;max-height:80vh;display:flex;flex-direction:column;overflow:hidden}
+  .modal .mhead{display:flex;align-items:center;justify-content:space-between;padding:15px 18px;border-bottom:1px solid var(--line)}
+  .modal .mhead h3{margin:0;font-size:15px}
+  .modal .mhead p{margin:2px 0 0;font-size:12px;color:var(--ink-3)}
+  .modal .x{background:var(--panel-2);border:1px solid var(--line);width:30px;height:30px;border-radius:8px;color:var(--ink-2);font-size:16px}
+  .searchrow{display:flex;gap:8px;padding:14px 18px;border-bottom:1px solid var(--line)}
+  .searchrow input{flex:1;font-family:var(--ui);font-size:13.5px;padding:9px 12px;border:1px solid var(--line);border-radius:9px;background:var(--panel-2);color:var(--ink)}
+  .results{overflow:auto;padding:8px 18px 16px}
+  .res{padding:11px 0;border-bottom:1px solid var(--line)}
+  .res:last-child{border-bottom:none}
+  .res .rp{font-size:11px;color:var(--primary);font-weight:700;font-family:var(--mono)}
+  .res .rt{font-size:13px;color:var(--ink);margin-top:3px}
+  .res .rt mark{background:var(--ai-fill);color:inherit;padding:0 2px;border-radius:2px}
+
+  :focus-visible{outline:2px solid var(--ai);outline-offset:2px}
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+  @media (max-width:920px){ .rail{flex-basis:320px;width:320px} .doc{width:100%} }
+</style>
+
+<div class="bar">
+  <div class="grp">
+    <button class="backbtn" onclick="alert('Returns to My Tasks (mockup)')">‹ My Tasks</button>
+    <span class="reqid">2026-0003</span>
+    <div class="filepick" title="Switch responsive file">
+      <span class="nm">2018_TaxReturn.pdf</span><span class="of">· file 1 of 3</span><span class="chev">▾</span>
+    </div>
+  </div>
+  <div class="grp">
+    <div class="seg" role="group" aria-label="Document view">
+      <button id="vSingle" aria-pressed="true" onclick="setView('single')">▭ Single page</button>
+      <button id="vSxs" aria-pressed="false" onclick="setView('sxs')">▥ Side by side</button>
+    </div>
+  </div>
+  <div class="grp">
+    <button class="iconbtn" onclick="openSearch()">⌕ Search inside document</button>
+    <div class="pager">
+      <button id="pgPrev" onclick="page(-1)" aria-label="Previous page">‹</button>
+      <span class="pg" id="pgLabel">Page 1 / 6</span>
+      <button id="pgNext" onclick="page(1)" aria-label="Next page">›</button>
+    </div>
+  </div>
+</div>
+
+<div class="strip">
+  <span class="badge standard" id="dispBadge"><span class="dot"></span><span id="dispName">Standard</span></span>
+  <span class="msg" id="dispMsg"><b>5 items</b> found by AI · redact and release; a second review is optional.</span>
+  <span class="spacer"></span>
+  <div class="demo">
+    <span class="lbl">Preview as</span>
+    <select id="dispSel" onchange="setDisposition(this.value)" aria-label="Preview disposition">
+      <option value="simple">Simple</option>
+      <option value="standard" selected>Standard</option>
+      <option value="elevated">Elevated</option>
+      <option value="legal">Legal</option>
+      <option value="bypass">Bypass</option>
+    </select>
+  </div>
+</div>
+
+<div class="stage" id="stage">
+  <div class="canvas" id="canvas">
+
+    <!-- single-page view -->
+    <div class="sxs-top">
+      <button class="btn primary" onclick="setView('single')">‹ Return to single page view</button>
+      <span class="sxs-note">Side-by-side is read-only — original at left, proposed release at right. Return to single page to edit.</span>
+    </div>
+    <div class="sxs-cols">
+      <div><div class="col-head">Original</div><div class="doc mini" id="docOrig"></div></div>
+      <div><div class="col-head">Proposed release</div><div class="doc mini revealed" id="docProp"></div></div>
+    </div>
+
+    <div class="doc doc-single" id="doc">
+      <div class="scanline" id="scanline"></div>
+      <div class="formhead"><div class="t">Form 1040 · U.S. Individual Income Tax Return</div><div class="yr">2018</div></div>
+      <div class="frow">
+        <div class="fld"><div class="k">Taxpayer name</div><div class="v"><span class="rd proposed" data-id="name">Marcus D. Hargrove</span></div></div>
+        <div class="fld"><div class="k">Social Security number</div><div class="v"><span class="rd proposed" data-id="ssn">521-83-6252</span></div></div>
+      </div>
+      <div class="frow">
+        <div class="fld" style="flex:2"><div class="k">Home address</div><div class="v"><span class="rd proposed" data-id="addr">418 Redbud Ct, Austin, TX 78701</span></div></div>
+        <div class="fld"><div class="k">Daytime phone</div><div class="v"><span class="rd proposed" data-id="phone">(512) 555-0148</span></div></div>
+      </div>
+      <div class="sec">
+        <div class="frow">
+          <div class="fld"><div class="k">Filing status</div><div class="v">Married filing jointly</div></div>
+          <div class="fld"><div class="k">Dependents</div><div class="v">2</div></div>
+          <div class="fld"><div class="k">Driver license</div><div class="v"><span class="rd proposed" data-id="dl">TX-10293857</span></div></div>
+        </div>
+        <div class="frow">
+          <div class="fld"><div class="k">Refund direct deposit — account</div><div class="v"><span class="rd proposed" data-id="acct">Routing 114000093 · Acct ••••8842</span></div></div>
+          <div class="fld"><div class="k">Adjusted gross income</div><div class="v">$92,540</div></div>
+        </div>
+      </div>
+      <div class="fine">Under penalties of perjury, I declare that I have examined this return and accompanying schedules and statements, and to the best of my knowledge and belief, they are true, correct, and complete.</div>
+    </div>
+  </div>
+
+  <!-- operations rail: 3-box accordion -->
+  <aside class="rail" aria-label="Redaction tools">
+    <div class="acc">
+
+      <!-- 1. AI Redaction -->
+      <section class="box open" id="boxAI">
+        <button class="head" onclick="toggle('boxAI')">
+          <span class="caret">▸</span>
+          <span class="tw"><span class="ttl">AI Redaction <span class="count" id="aiCount">6</span></span>
+          <span class="sub">Exempt content the AI proposes to redact</span></span>
+        </button>
+        <div class="body">
+          <div class="aisub" id="aiSub" style="display:none">
+            <label class="selall"><input type="checkbox" id="selAll" onchange="toggleAll(this.checked)"> Select all</label>
+            <span class="spacer"></span>
+            <button class="btn primary sm" id="applySel" onclick="applySelected()" disabled>Apply selected (0)</button>
+          </div>
+          <div class="ailist" id="aiList">
+            <div class="scanning" id="scanning"><div class="spin"></div>Scanning document for exempt content…<div style="font-size:11.5px;color:var(--ink-3);margin-top:6px">AI · runs automatically on open</div></div>
+          </div>
+          <div class="rerun" id="rerun" style="display:none"><button class="linkbtn" onclick="rerun()">↻ Re-run AI detection</button></div>
+        </div>
+      </section>
+
+      <!-- 2. Manual Redaction -->
+      <section class="box" id="boxManual">
+        <button class="head" onclick="toggle('boxManual')">
+          <span class="caret">▸</span>
+          <span class="tw"><span class="ttl">Manual Redaction</span>
+          <span class="sub">Draw or select on the page to add a redaction</span></span>
+        </button>
+        <div class="body"><div class="pad">
+          <div class="hint">Draw a box on the page, or select text, to add a redaction the AI didn’t catch.</div>
+          <div class="drawzone" onclick="simulateSelect()">Click here to simulate selecting <b>text on the page</b></div>
+          <div class="rulepick" id="rulepick">
+            <span class="lbl">Rule for this redaction</span>
+            <select class="rule">
+              <option>Social Security Numbers — Tex. Gov’t Code §552.147</option>
+              <option>Motor Vehicle Record Information — §552.130</option>
+              <option>Card &amp; Access Device Numbers — §552.136</option>
+              <option>Personal Information of Officials &amp; Employees — §552.117</option>
+              <option>Medical &amp; Health Information — §552.101 / HIPAA</option>
+              <option>Attorney-Client Privileged — §552.107</option>
+            </select>
+          </div>
+          <div class="manualcount" id="manualCount">0 manual redactions added.</div>
+          <button class="btn primary block" id="applyManual" onclick="applyManual()" disabled>Apply manual redactions (0)</button>
+        </div></div>
+      </section>
+
+      <!-- 3. Finalize & Release -->
+      <section class="box" id="boxFin">
+        <button class="head" onclick="toggle('boxFin')">
+          <span class="caret">▸</span>
+          <span class="tw"><span class="ttl">Finalize &amp; Release</span>
+          <span class="sub">Template, review, and release</span></span>
+        </button>
+        <div class="body"><div class="pad">
+          <div class="finban standard" id="finBan"><b>Standard.</b> Redact and release; a second review is optional.</div>
+          <button class="btn ghost block" onclick="alert('Saves these boxes + rules as a reusable template (mockup)')">⧉ Generate reusable template</button>
+          <div class="divider"></div>
+          <button class="btn primary block" id="finPrimary" onclick="alert('Primary action (mockup)')">Approve &amp; release</button>
+          <button class="btn warn block" id="finLegal" onclick="alert('Routes to legal staff (mockup)')">Send for legal review</button>
+        </div></div>
+      </section>
+
+    </div>
+  </aside>
+</div>
+
+<!-- search modal -->
+<div class="scrim" id="scrim" onclick="if(event.target===this)closeSearch()">
+  <div class="modal" role="dialog" aria-label="Search inside document">
+    <div class="mhead">
+      <div><h3>Search inside this document</h3><p>Ask in plain language — finds the most relevant pages by meaning, not exact words.</p></div>
+      <button class="x" onclick="closeSearch()" aria-label="Close">✕</button>
+    </div>
+    <div class="searchrow"><input id="searchInput" placeholder='e.g. "bank account or routing number" or "dependents"' value="account or routing number"><button class="btn primary" onclick="return false">Search</button></div>
+    <div class="results">
+      <div class="res"><div class="rp">Page 1 · 96% match</div><div class="rt">Refund direct deposit — Routing <mark>114000093</mark> · Account ••••8842</div></div>
+      <div class="res"><div class="rp">Page 4 · 71% match</div><div class="rt">Schedule B — interest from <mark>account</mark> ending 8842, First Republic</div></div>
+      <div class="res"><div class="rp">Page 6 · 58% match</div><div class="rt">Estimated tax payments drawn from the same <mark>routing number</mark>.</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  var AI = [
+    {id:'ssn', txt:'521-83-6252', why:'Social Security number of a living person.', rule:"Social Security Numbers · §552.147", cat:'privacy'},
+    {id:'name', txt:'Marcus D. Hargrove', why:'Taxpayer name paired with SSN and financial data.', rule:"Personal Information · §552.101", cat:'privacy'},
+    {id:'addr', txt:'418 Redbud Ct, Austin, TX 78701', why:'Home address of a private individual.', rule:"Personal Information · §552.117", cat:'privacy'},
+    {id:'phone', txt:'(512) 555-0148', why:'Personal phone number.', rule:"Personal Information · §552.117", cat:'privacy'},
+    {id:'dl', txt:'TX-10293857', why:"Texas driver's license number.", rule:"Motor Vehicle Records · §552.130", cat:'privacy'},
+    {id:'acct', txt:'Routing 114000093 · Acct ••••8842', why:'Bank routing and account number.', rule:"Card & Access Device Numbers · §552.136", cat:'privacy'}
+  ];
+  var manual = 0;
+
+  function renderList(){
+    var el = document.getElementById('aiList');
+    document.getElementById('aiCount').textContent = AI.length;
+    if(!AI.length){ el.innerHTML = '<div class="scanning" style="color:var(--ok)">✓ All AI-proposed redactions applied.</div>'; return; }
+    el.innerHTML = AI.map(function(a){
+      return '<label class="item" data-id="'+a.id+'"><input type="checkbox" onchange="onCheck(this)">'
+        +'<span class="c"><span class="txt">'+a.txt+'</span>'
+        +'<span class="why">'+a.why+'</span>'
+        +'<span class="rule"><span class="cat">'+a.cat+'</span>'+a.rule+'</span></span></label>';
+    }).join('');
+    syncApply();
+  }
+  function checkedIds(){ return [].slice.call(document.querySelectorAll('#aiList .item input:checked')).map(function(i){return i.closest('.item').dataset.id;}); }
+  function onCheck(cb){ cb.closest('.item').classList.toggle('checked', cb.checked); syncApply(); }
+  function toggleAll(on){ [].slice.call(document.querySelectorAll('#aiList .item input')).forEach(function(i){ i.checked=on; i.closest('.item').classList.toggle('checked',on); }); syncApply(); }
+  function syncApply(){
+    var n = checkedIds().length, btn=document.getElementById('applySel');
+    btn.textContent='Apply selected ('+n+')'; btn.disabled = n===0;
+    var boxes=document.querySelectorAll('#aiList .item').length, sa=document.getElementById('selAll');
+    sa.checked = boxes>0 && n===boxes;
+  }
+  function applySelected(){
+    var ids = checkedIds();
+    ids.forEach(function(id){
+      var span=document.querySelector('.rd[data-id="'+id+'"]'); if(span){ span.classList.remove('proposed'); span.classList.add('applied'); }
+      AI = AI.filter(function(a){return a.id!==id;});
+    });
+    document.getElementById('aiCount').textContent = AI.length;
+    renderList();
+    if(!AI.length){ document.getElementById('aiSub').style.display='none'; }
+  }
+  function rerun(){ startScan(); }
+
+  function startScan(){
+    document.getElementById('aiSub').style.display='none';
+    document.getElementById('rerun').style.display='none';
+    var doc=document.getElementById('doc'); doc.classList.remove('revealed');
+    var list=document.getElementById('aiList');
+    list.innerHTML='<div class="scanning" id="scanning"><div class="spin"></div>Scanning document for exempt content…<div style="font-size:11.5px;color:var(--ink-3);margin-top:6px">AI · runs automatically on open</div></div>';
+    setTimeout(function(){
+      doc.classList.add('revealed');
+      document.getElementById('aiSub').style.display = AI.length? 'flex':'none';
+      document.getElementById('rerun').style.display='block';
+      renderList();
+    }, 950);
+  }
+
+  // accordion
+  function toggle(id){
+    var box=document.getElementById(id), wasOpen=box.classList.contains('open');
+    ['boxAI','boxManual','boxFin'].forEach(function(b){document.getElementById(b).classList.remove('open');});
+    if(!wasOpen) box.classList.add('open');
+  }
+
+  // manual
+  function simulateSelect(){ document.getElementById('rulepick').classList.add('show'); document.getElementById('applyManual').disabled=false; document.getElementById('applyManual').textContent='Apply manual redactions (1)'; }
+  function applyManual(){ manual++; document.getElementById('manualCount').textContent=manual+' manual redaction'+(manual>1?'s':'')+' added.'; document.getElementById('rulepick').classList.remove('show'); document.getElementById('applyManual').disabled=true; document.getElementById('applyManual').textContent='Apply manual redactions (0)'; }
+
+  // view
+  function setView(v){
+    var stage=document.getElementById('stage'), canvas=document.getElementById('canvas');
+    var single=v==='single';
+    document.getElementById('vSingle').setAttribute('aria-pressed', single);
+    document.getElementById('vSxs').setAttribute('aria-pressed', !single);
+    canvas.classList.toggle('sxs', !single);
+    stage.classList.toggle('sxs-on', !single);
+    if(!single) buildSxs();
+  }
+  function buildSxs(){
+    var body = document.getElementById('doc').innerHTML.replace('<div class="scanline" id="scanline"></div>','');
+    document.getElementById('docProp').innerHTML = body;
+    // original = strip redaction styling
+    var tmp=document.createElement('div'); tmp.innerHTML=body;
+    [].slice.call(tmp.querySelectorAll('.rd')).forEach(function(s){s.className='';});
+    document.getElementById('docOrig').innerHTML = tmp.innerHTML;
+  }
+
+  // pager
+  var pg=1; function page(d){ pg=Math.max(1,Math.min(6,pg+d)); document.getElementById('pgLabel').textContent='Page '+pg+' / 6'; document.getElementById('pgPrev').disabled=pg===1; document.getElementById('pgNext').disabled=pg===6; }
+
+  // search
+  function openSearch(){ document.getElementById('scrim').classList.add('show'); document.getElementById('searchInput').focus(); }
+  function closeSearch(){ document.getElementById('scrim').classList.remove('show'); }
+  document.addEventListener('keydown',function(e){ if(e.key==='Escape') closeSearch(); });
+
+  // disposition
+  var DISP = {
+    simple:{name:'Simple', msg:'<b>1 item</b> found · a quick check, then release. No second review.', ban:'<b>Simple.</b> Glance at the AI result, apply, and release.', banClass:'simple', primary:{label:'Approve & release', show:true, disabled:false}, legal:true},
+    standard:{name:'Standard', msg:'<b>6 items</b> found by AI · redact and release; a second review is optional.', ban:'<b>Standard.</b> Redact and release; a second review is optional.', banClass:'standard', primary:{label:'Approve & release', show:true, disabled:false}, legal:true},
+    elevated:{name:'Elevated', msg:'<b>Sensitive content</b> · a second reviewer must approve before release.', ban:'<b>Elevated.</b> A different reviewer must approve this before it can be released.', banClass:'elevated', primary:{label:'Submit for review →', show:true, disabled:false}, legal:true, gateRelease:true},
+    legal:{name:'Legal', msg:'<b>Legal hold</b> · this record is handled by legal (advanced) redaction staff.', ban:'<b>Legal.</b> This record routes to legal staff; release requires legal sign-off.', banClass:'legal', primary:{label:'Approve & release', show:false}, legal:true},
+    bypass:{name:'Bypass', msg:'<b>No redaction required</b> · released automatically (public-ready / previously released).', ban:'<b>Bypass.</b> This record needed no redaction and was released without staff work.', banClass:'standard', primary:{label:'Approve & release', show:false}, legal:false, readonly:true}
+  };
+  function setDisposition(key){
+    var d=DISP[key];
+    var badge=document.getElementById('dispBadge'); badge.className='badge '+key;
+    document.getElementById('dispName').textContent=d.name;
+    document.getElementById('dispMsg').innerHTML=d.msg;
+    var ban=document.getElementById('finBan'); ban.className='finban '+d.banClass; ban.innerHTML=d.ban;
+    var prim=document.getElementById('finPrimary');
+    if(d.primary.show){ prim.style.display=''; prim.textContent=d.primary.label; prim.disabled=!!d.primary.disabled; }
+    else { prim.style.display='none'; }
+    document.getElementById('finLegal').style.display = d.legal? '' : 'none';
+    // bypass: dim the working tools
+    var readonly = !!d.readonly;
+    document.getElementById('boxAI').style.opacity = readonly? .5:1;
+    document.getElementById('boxManual').style.opacity = readonly? .5:1;
+    document.getElementById('boxAI').style.pointerEvents = readonly? 'none':'';
+    document.getElementById('boxManual').style.pointerEvents = readonly? 'none':'';
+  }
+
+  // boot: auto-run AI on open
+  setDisposition('standard');
+  startScan();
+  page(0);
+</script>
+</body>
+</html>

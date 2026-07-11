@@ -103,7 +103,7 @@ To let Bypass records **never burden a redactor**, disposition is computed **whe
 4. **Reviewer task + gating** `[NEW]` — `redaction_qa` task type, routing (author-excluded), `apply` gate for Elevated/Legal, approve/return flow onto the central transition.
 5. **Legal category trigger** `[NEW]` — extend the built legal path to also fire on `LEGAL_CATEGORIES` from the read (not just intake flags).
 6. **Config** `[TUNABLE]` — thresholds + category sets in `system_config`, defaults seeded from the rule catalog.
-7. **UI** — the redaction task screen (`SPEC_redaction_task_screen.md`) consumes dispositions (badges, review-required state, auto-run-on-open). Design agreed separately per the UI rule.
+7. **UI** — the redaction task screen (`SPEC_redaction_task_screen.md`) consumes dispositions (badges, review-required state, auto-run-on-open). **Design direction mocked up 2026-07-11: `docs/mockups/redaction_screen.html`** (from Kevin's discussion PDF) — full-bleed workstation (no left nav), auto-run AI on open, 3-box accordion (AI Redaction with checkbox-select + apply-selected · Manual Redaction with rule-for-new-boxes · Finalize & Release), informational side-by-side (Original vs Proposed, read-only), renamed "Search inside document" modal, and a disposition badge whose Finalize primary action adapts (Simple/Standard → Approve & Release · Elevated → Submit for Review · Legal → Send for Legal Review). Pending Kevin's markup before build.
 
 ---
 
