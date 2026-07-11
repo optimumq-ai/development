@@ -1580,3 +1580,40 @@ The ONLY remaining piece of the feature is **slice 7 — the redaction screen** 
 before build). It consumes the dispositions (badge + review-required state + auto-run-on-open) this backend now
 produces. Harnesses in scratchpad: disposition 25/25 · bypass 18/18 · slice3 12/12 · slice3b 19/19 · slice4 18/18
 · slice5 13/13 · slice6 18/18 · template 7/7.
+
+## 2026-07-11 (as) — main deploy verified clean + origin reconciled/pushed; then slice 7 (redaction screen) BUILT
+
+**(1) Deploy verify + origin sync.** Verified `main` deploys clean (22/22 `scratchpad/deploy_verify.js`: clean
+tree, fresh FE build served by nginx byte-identical, single healthy :3001 listener, schema incl. disposition
+columns, portal + `/api` + new redaction-config/clarification-policy/redaction-jobs routes, submit→route→persist
+round-trip, 0 rows left). Origin had diverged (local 19 ahead / 1 behind — `581a221 "Add files via upload"`, the
+redaction PDF); **rebased onto `581a221` (clean, no conflicts) and pushed** — local + `origin/main` now in sync.
+
+**(2) Slice 7 — the redaction task screen — BUILT (`8616fe6`).** `frontend/src/pages/RedactionTaskPage.js`,
+route **`/redaction/:taskId`** (full-bleed, auth-gated, **outside AppLayout** so it covers the nav).
+`TaskPoolSection` now routes `redaction`/`legal_redaction` tasks here (not generic `/requests/:id`); added
+`legal_redaction`/`redaction_qa` labels. Implements the agreed mockup on the LIVE engine: task + responsive-file
+worklist (top-bar switcher) · per-file reuse of the proven canvas engine (job/pages/zones/discover/apply/
+template/draw+rule) · **AI read auto-runs on open** · **disposition badge** (from `redaction_jobs.disposition`) ·
+**3-box accordion** (AI Redaction with per-item checkbox + select-all + Apply-selected; Manual Redaction;
+Finalize & Release) · **disposition-adaptive Finalize** (elevated/legal → *Submit for review* → `/jobs/:id/submit`;
+simple/standard → *Approve & release* → `/jobs/:id/apply`, protected by the slice-4 server gate) · informational
+read-only **side-by-side** · renamed **Search inside document** modal (`/semantic-search/documents`).
+
+**Evidence — 9/9** (`scratchpad/verify_slice7.js`, Playwright, screenshot `slice7_screen.png`): a real scaffolded
+redaction task loads full-bleed (minted token in `localStorage.oq_token`); command bar shows the request number;
+file worklist shows the responsive file; **Elevated** badge; all 3 accordion boxes; Finalize adapts to *Submit
+for review*; search control present; **zero runtime errors**; cleaned up. FE **Compiled successfully**, nginx
+serves the fresh bundle (`main.ebf1d77e`). `frontend/build` git-ignored — committed source only (page, App.js
+route, TaskPoolSection).
+
+**Follow-ups (noted in spec §7):** the canvas **page-image render + zone-draw/apply** reuse the proven
+`RedactionWorkspacePage` primitives but need a **real processed PDF** to fully drive (the smoke used text-only
+pages → "Loading page…"); the **`redaction_qa` reviewer task** still opens the generic page — a reviewer-mode of
+this screen (approve/return controls, not Submit) is a follow-up; the AI-scan **spinner** references an undefined
+`spin` keyframe (static, cosmetic); **Kevin's mockup markup** still pending for visual refinements.
+
+**State:** `main` @ `8616fe6` (unpushed — 1 commit ahead of origin after the earlier sync), tree clean, app
+healthy. **Redaction automation feature COMPLETE end-to-end (backend model 1–6 + template refinement + the
+screen).** Harnesses in scratchpad: disposition 25/25 · bypass 18/18 · slice3 12/12 · slice3b 19/19 · slice4
+18/18 · slice5 13/13 · slice6 18/18 · template 7/7 · deploy 22/22 · slice7 9/9.
