@@ -1502,3 +1502,29 @@ category sets to `system_config`, currently `redactionDisposition.DEFAULT_CONFIG
 (mockup `docs/mockups/redaction_screen.html` + Artifact, **pending Kevin's markup** before build) · template-match
 refinement in triage. Harnesses in scratchpad: disposition 25/25 · bypass 18/18 · slice3 12/12 · slice4 18/18 ·
 slice3b 19/19.
+
+## 2026-07-11 (ap) — Automation slice 5: legal-category trigger (BUILT)
+
+Extracted the legal escalation into **`taskRouting.escalateToLegal(requestId, opts)`** (sets `legal_flag`, logs
+`LEGAL_ESCALATED`, supersedes any open `redaction` task → re-spawns `legal_redaction`; idempotent no-op if
+already flagged). The Director endpoint `POST /requests/:id/legal-escalate` now calls it (DRY refactor, unchanged
+behavior), and **`redactionTriage` fires it whenever a file's disposition resolves to `legal`** — so a legal
+exemption found in the *document read* (not just an intake flag) escalates the whole request's redaction to
+legal staff (`flag_type=CONTENT_LEGAL`). Closes the gap where a read-detected legal category only added a
+legal *review* task but left the redaction itself on a regular REDACTION_WORKER.
+
+**Evidence — 13/13 live** (`scratchpad/verify_slice5.js`): read law_enforcement category → disposition legal +
+escalation (legal_flag=1/CONTENT_LEGAL, LEGAL_ESCALATED history, ordinary redaction task superseded,
+legal_redaction task active); idempotent (one legal_redaction task; escalateToLegal no-op when already flagged);
+an elevated (non-legal) doc does NOT escalate; Director endpoint 401 unauth / 403 non-director / 200 with a real
+minted director token + request flagged. **Regressions clean:** 3a 12/12 · 3b 19/19 · 4 18/18. Server restarted
+(kill 270000 → root PM2 respawn **pid 271039**, health 200).
+
+**State:** `main` @ `d121078`, tree clean. Redaction automation slices **1·2·3a·3b·4·5 all BUILT + live**. The
+model is complete: clean records auto-release; the document read sets simple/standard/elevated/legal; elevated
+needs a 2nd reviewer; legal (by intake flag OR document content) routes the whole redaction to legal staff and
+gates release. **Remaining:** **6 config** (thresholds + LEGAL/SENSITIVE category sets → `system_config`, an
+editor/attest surface like the clarification policy; currently `redactionDisposition.DEFAULT_CONFIG`) ·
+**7 the redaction screen** (mockup pending Kevin's markup) · template-match refinement in triage (§8, span-bearing
+docs → Elevated until wired). Harnesses: disposition 25/25 · bypass 18/18 · slice3 12/12 · slice3b 19/19 ·
+slice4 18/18 · slice5 13/13.
