@@ -1556,3 +1556,27 @@ dispositions this backend now produces) · **template-match refinement** in tria
 `redactionTemplates.engine.safetyScore` so template-covered docs settle to Standard/Simple instead of Elevated).
 Harnesses in scratchpad: disposition 25/25 · bypass 18/18 · slice3 12/12 · slice3b 19/19 · slice4 18/18 ·
 slice5 13/13 · slice6 18/18.
+
+## 2026-07-11 (ar) — Template-match refinement wired into triage (BUILT)
+
+`redactionTriage.templateMatch(file)` — faithful replica of `POST /match` reusing
+`redactionTemplates.engine.safetyScore`/`parseZones` (best active page-template with score ≥ its
+`safety_threshold`) — now feeds `templateMatched`/`templateScore`/`safetyThreshold` into `assembleSignals`. A
+confident template match lets a span-bearing doc settle to **Standard/Simple** instead of defaulting to Elevated,
+so Elevated is reserved for genuinely harder work (many spans / sensitive category / restricted type / no
+confident template). `templateMatch` supports `ctx.templateOverride` for tests; runs only for document mimetypes
+with OCR'd pages.
+
+**Evidence — 7/7 live** (`scratchpad/verify_template.js`): template signal flips a 2-privacy-span doc
+Elevated→Simple (`trusted_template_few_spans`) and 5-span→Standard; control (no template) stays Elevated; a real
+crafted active `layout_profiles` row matches ≥ threshold, an unrelated doc doesn't; end-to-end real match
+downgrades a span-bearing doc off Elevated; template row + rows cleaned up. **Regressions clean across ALL 7
+automation harnesses** (disposition 25/25 · bypass 18/18 · slice3 12/12 · slice3b 19/19 · slice4 18/18 ·
+slice5 13/13 · slice6 18/18). Server restarted (kill 272261 → root PM2 respawn **pid 273438**, health 200).
+
+**State:** `main` @ `599735a`, tree clean. **Redaction automation model fully complete + tuned (backend).**
+The ONLY remaining piece of the feature is **slice 7 — the redaction screen** (`docs/mockups/redaction_screen.html`
++ Artifact https://claude.ai/code/artifact/c085d7eb-14a0-46eb-b4a3-af1b363bb707, **pending Kevin's markup**
+before build). It consumes the dispositions (badge + review-required state + auto-run-on-open) this backend now
+produces. Harnesses in scratchpad: disposition 25/25 · bypass 18/18 · slice3 12/12 · slice3b 19/19 · slice4 18/18
+· slice5 13/13 · slice6 18/18 · template 7/7.
