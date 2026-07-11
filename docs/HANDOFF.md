@@ -1373,3 +1373,42 @@ per the UI rule** (brief captured in the discussion PDF). §8 lists residual tun
 (TaskPoolSection redaction link → `?tab=records`, + `RequestWorkspacePage` tab deep-link) was **NOT** done —
 superseded by this full redaction-UI direction; it's obsoleted by slice 7 (the task will open the new screen,
 not the old workspace tab).
+
+## 2026-07-11 (al) — Redaction screen mockup + automation slice 2 (identity bypass)
+
+**Two commits after (ak).**
+
+**(1) Redaction screen mockup — `dbdd302`.** Built the clickable design-direction prototype from Kevin's
+discussion PDF (`uploads/redaction UI content for discussion.pdf`). `docs/mockups/redaction_screen.html`
+(standalone) + published as an **Artifact** (https://claude.ai/code/artifact/c085d7eb-14a0-46eb-b4a3-af1b363bb707).
+Full-bleed workstation (no left nav) · AI content-read **auto-runs on open** (amber = proposed, black =
+committed) · right-rail **3-box accordion** (AI Redaction: per-item checkbox + select-all + Apply-selected,
+replacing Accept/Dismiss · Manual Redaction: draw/select → rule-for-new-boxes → Apply · **Finalize & Release**:
+Generate template / Approve & release / Send for legal review) · **informational read-only side-by-side**
+(Original vs Proposed, only control = Return to single page) · renamed **"Search inside document"** modal ·
+**disposition badge** whose Finalize primary action adapts (Simple/Standard→Approve & release ·
+Elevated→Submit for review · Legal→Send for legal review · Bypass→read-only), with a "Preview as" demo selector.
+Verified: light renders clean, all interactions work (Playwright, 0 JS errors); dark tokens verified via
+getComputedStyle (headless-shell paints light but computed rail=rgb(21,30,40) — real browsers/Artifact render
+dark). **Design calls to confirm:** box-3 name "Finalize & Release"; amber-proposed/black-committed;
+paper stays white in dark mode. **PENDING Kevin's markup before build (slice 7).**
+
+**(2) Automation slice 2 — identity bypass — `a61e0e1`.** `services/redactionBypass.js` (new, unwired — same
+safe pattern as slice 1). The read-independent half of §2 bypass: `findReusableRelease(file)` matches a
+responsive file to a released `fulfilled_records` by **`original_name+size+mimetype`** (request_files has NO
+content hash — resolved the §8 precision open item; `published=1` match ⇒ `published_public_copy`, else
+`previously_released_dedup`), reusing the prior `output_file_id`. `recordBypass` writes the uniform artifact
+(`redaction_jobs` row `disposition=bypass`/`review_stage=released` + a request-owned `fulfilled_records`
+reusing the output, `published` carried over, + `REDACTION_BYPASSED` history); idempotent. Completion helpers
+`allResponsiveReleased` + `advanceIfAllReleased` advance redaction→delivery via the **central**
+`applyStageTransition`. Refined the slice 2/3 boundary in the spec: **slice 2 = identity (a/b); slice 3 = eager
+stage-entry trigger + record-type-clean (c) read.** Verified **18/18 live** (`scratchpad/verify_bypass.js`:
+both cases, negative, idempotency, all-released auto-advance + history, non-redaction-stage no-op; real
+`/api/public/submit` for request creation, file/release rows scaffolded then fully cleaned up — 0 left).
+
+**State:** `main` @ `a61e0e1`, working tree clean. Slice 1 (disposition fn) + slice 2 (identity bypass) BUILT,
+both unwired. **Next: slice 3** — eager disposition at redaction-stage entry (invoke bypass, else ensure job +
+run AI read + computeDisposition per responsive file; case (c); suppress task spawn + auto-advance when all
+bypass). Then slice 4 (`redaction_qa` reviewer task + `apply` gating), 5 (legal-category trigger), 6 (config),
+7 (the screen — mockup pending Kevin's markup). Harnesses in scratchpad: `verify_disposition.js` (25/25),
+`verify_bypass.js` (18/18), `verify_columns.js`; mockup shots `shot_0*.png`.
