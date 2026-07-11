@@ -1528,3 +1528,31 @@ editor/attest surface like the clarification policy; currently `redactionDisposi
 **7 the redaction screen** (mockup pending Kevin's markup) · template-match refinement in triage (§8, span-bearing
 docs → Elevated until wired). Harnesses: disposition 25/25 · bypass 18/18 · slice3 12/12 · slice3b 19/19 ·
 slice4 18/18 · slice5 13/13.
+
+## 2026-07-11 (aq) — Automation slice 6: tunable config + master switch (BUILT). Backend model COMPLETE.
+
+`services/redactionConfig.js` + `routes/redactionConfig.js` (`GET/POST/POST reset /api/redaction-config`,
+`SYSTEM_ADMIN`/`DIRECTOR`). Stores `{ enabled, elevatedSpanThreshold, simpleSpanMax, legalCategories,
+sensitiveCategories, restrictedAvailability }` in `system_config` (global key `redaction_disposition_config`),
+normalized over `redactionDisposition.DEFAULT_CONFIG`. `redactionTriage` reads it once per request and passes it
+to `computeDisposition` — a jurisdiction retunes the model without a code change. Added an **`enabled` master
+switch** (default **on**): off disables the two automation hooks (`spawnForStage` identity bypass + the
+`applyStageTransition` read-triage kick) → fully manual redaction. Legal escalation / `requestNeedsLegalRedaction`
+stay **ungated** (pre-existing path); the slice-4 release gate is unaffected.
+
+**Evidence — 18/18 live** (`scratchpad/verify_slice6.js`): service CRUD + `validate`→400 + normalize/lowercase +
+keep-other-defaults; stored `elevatedSpanThreshold=1` flows into a disposition (basis `span_count` vs the default
+`spans_without_confident_template`); **master switch** OFF → request stays at redaction + clean file NOT bypassed
++ redaction task spawned, ON → auto-advance to delivery + file bypassed; endpoint 401 unauth / 403 non-admin /
+200 admin GET+POST + 400 invalid + reset. **Global config snapshotted + restored** (harness leaves no trace).
+**Regressions clean:** 3a 12/12 · 3b 19/19 · 4 18/18 · 5 13/13. Server restarted (kill 271039 → root PM2 respawn
+**pid 272261**, health 200).
+
+**State:** `main` @ `99cec79`, tree clean. **REDACTION AUTOMATION MODEL COMPLETE (backend), all live:**
+1 disposition · 2 identity bypass · 3a bypass-wired · 3b read-triage+case-c · 4 reviewer-task+gating ·
+5 legal-category trigger · 6 config+master-switch. **Remaining for the feature:** **7 the redaction screen**
+(`docs/mockups/redaction_screen.html` + Artifact — **pending Kevin's markup** before build; it consumes the
+dispositions this backend now produces) · **template-match refinement** in triage (§8 — wire
+`redactionTemplates.engine.safetyScore` so template-covered docs settle to Standard/Simple instead of Elevated).
+Harnesses in scratchpad: disposition 25/25 · bypass 18/18 · slice3 12/12 · slice3b 19/19 · slice4 18/18 ·
+slice5 13/13 · slice6 18/18.
