@@ -75,7 +75,8 @@ async function computeAndPersistDisposition(file, ctx) {
   if (current && current.disposition) return { disposition: current.disposition, basis: safeParse(current.disposition_basis), cached: true };
 
   var signals = await assembleSignals(file, ctx);
-  var d = disposition.computeDisposition(signals, ctx.config);
+  var cfg = ctx.config || await require('./redactionConfig').read(); // stored thresholds/categories (slice 6)
+  var d = disposition.computeDisposition(signals, cfg);
 
   if (d.disposition === 'bypass') {
     await bypass.recordCleanBypass(file, d.basis, { actorName: (ctx.actorName || 'Redaction Triage') });
@@ -108,6 +109,9 @@ async function cancelRedactionTask(requestId) {
 // the remainder, advance to delivery and cancel the (now unneeded) redaction task. Returns a summary.
 async function triageReadForRequest(requestId, ctx) {
   ctx = ctx || {};
+  var config = require('./redactionConfig');
+  if (!ctx.config) ctx.config = await config.read(); // load once; reused per file
+  if (ctx.config.enabled === false) return { files: [], advanced: false, disabled: true };
   var files = await bypass.responsiveFiles(requestId);
   var results = [];
   for (var i = 0; i < files.length; i++) {

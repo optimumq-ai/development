@@ -298,8 +298,10 @@ async function spawnForStage(requestId, stage, createdBy) {
     // is thereby released, redaction is skipped entirely: advance past it and spawn no task.
     // Read-independent (no LLM/OCR), so it is safe here in the transition path.
     try {
+      // Master switch (slice 6): a jurisdiction can disable the automation and fall back to manual redaction.
+      var autoOn = await require('./redactionConfig').enabled();
       var rb = require('./redactionBypass'); // lazy require avoids a load-order cycle
-      var triage = await rb.bypassIdentityForRequest(requestId, { actorName: 'Redaction Triage' });
+      var triage = autoOn ? await rb.bypassIdentityForRequest(requestId, { actorName: 'Redaction Triage' }) : { total: 0, allReleased: false };
       if (triage.total > 0 && triage.allReleased) {
         await applyStageTransition(requestId, 'delivery', {
           actorName: 'Redaction Triage', action: 'STAGE_ADVANCED',
@@ -370,8 +372,11 @@ async function applyStageTransition(requestId, toStage, opts) {
   // blocks this transition. It reads + persists a disposition per un-triaged responsive file, bypasses
   // record-type-clean files, and advances/cancels the task if everything clears.
   if (REDACTION_STAGES[toStage]) {
-    try { require('./embedIndex').bg(require('./redactionTriage').triageReadForRequest(requestId, {}), 'redaction-triage ' + requestId); }
-    catch (e) { console.error('[applyStageTransition triage]', e && e.message); }
+    try {
+      if (await require('./redactionConfig').enabled()) {
+        require('./embedIndex').bg(require('./redactionTriage').triageReadForRequest(requestId, {}), 'redaction-triage ' + requestId);
+      }
+    } catch (e) { console.error('[applyStageTransition triage]', e && e.message); }
   }
   return { fromStage: fromStage, toStage: toStage, changed: true, task: task };
 }
