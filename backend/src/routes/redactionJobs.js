@@ -6,6 +6,7 @@ const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const docProcessing = require('../services/docProcessing');
 const redactionApply = require('../services/redactionApply');
+const redactionReview = require('../services/redactionReview');
 
 async function activeJurisdiction() {
   var row = await get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'");
@@ -98,9 +99,13 @@ router.post('/file/:fileId/discover', requireAuth, async function(req, res) {
 router.post('/jobs/:jobId/apply', requireAuth, async function(req, res) {
   var job = await get('SELECT * FROM redaction_jobs WHERE id = ?', [req.params.jobId]);
   if (!job) return res.status(404).json({ error: 'Job not found' });
+  // Slice 4: Elevated/Legal jobs require a second-person review before release (author cannot self-release).
+  var gate = redactionReview.gateApply(job, req.user.name || req.user.sub);
+  if (!gate.allowed) return res.status(gate.code).json({ error: gate.reason });
   try {
     var result = await redactionApply.applyRedaction(req.params.jobId, req.user.name || 'Staff');
     await run("UPDATE redaction_jobs SET review_stage = 'released', reviewed_by = ?, reviewed_at = datetime('now'), updated_at = datetime('now') WHERE id = ?", [req.user.name || req.user.sub, req.params.jobId]);
+    await redactionReview.completeReviewTask(job.request_id); // reviewer approved & released -> close the review task
     res.json(Object.assign({ success: true }, result));
   } catch (e) {
     console.error('[redaction apply]', e.message);
@@ -113,7 +118,9 @@ router.post('/jobs/:jobId/submit', requireAuth, async function(req, res) {
   var job = await get('SELECT * FROM redaction_jobs WHERE id = ?', [req.params.jobId]);
   if (!job) return res.status(404).json({ error: 'Job not found' });
   await run("UPDATE redaction_jobs SET review_stage = 'pending_review', submitted_by = ?, submitted_at = datetime('now'), updated_at = datetime('now') WHERE id = ?", [req.user.name || req.user.sub, req.params.jobId]);
-  res.json({ success: true, review_stage: 'pending_review' });
+  // Slice 4: for an Elevated/Legal job, spawn a routed redaction_qa task so a different reviewer is tasked.
+  var reviewTask = await redactionReview.spawnReviewTask(Object.assign({}, job, { submitted_by: req.user.name || req.user.sub }), { actor: req.user.name || req.user.sub });
+  res.json({ success: true, review_stage: 'pending_review', reviewTask: reviewTask ? reviewTask.id : null });
 });
 
 // Begin review (reviewer opens a submitted doc -> moves Awaiting review to Review in process).
@@ -132,6 +139,7 @@ router.post('/jobs/:jobId/return', requireAuth, async function(req, res) {
   var job = await get('SELECT * FROM redaction_jobs WHERE id = ?', [req.params.jobId]);
   if (!job) return res.status(404).json({ error: 'Job not found' });
   await run("UPDATE redaction_jobs SET review_stage = 'editing', updated_at = datetime('now') WHERE id = ?", [req.params.jobId]);
+  await redactionReview.closeReviewTask(job.request_id); // reviewer returned it -> cancel the review task
   res.json({ success: true, review_stage: 'editing' });
 });
 

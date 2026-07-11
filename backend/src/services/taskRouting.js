@@ -15,6 +15,9 @@ var TASK_ROLES = {
   estimate: 'FEE_MANAGER',
   record_search: 'SEARCH_AND_TRIAGE',
   redaction: 'REDACTION_WORKER',
+  // Second-person redaction review (SPEC_redaction_automation.md slice 4). Default reviewer role is a
+  // REDACTION_WORKER (Elevated); Legal reviews pass roleRequired:'legal_redaction' explicitly at spawn.
+  redaction_qa: 'REDACTION_WORKER',
   // Fee-waiver / commercial-rate approval. INTERIM target: FEE_AUTHORITY (the existing financial-authority
   // permission role) pending the FEE_WAIVER_APPROVER->Finance rename + catalog reconciliation (D4 §8, item 9).
   fee_waiver: 'FEE_AUTHORITY',
