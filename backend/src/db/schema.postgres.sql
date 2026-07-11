@@ -246,6 +246,10 @@ CREATE TABLE IF NOT EXISTS redaction_jobs (
   updated_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
 );
 CREATE INDEX IF NOT EXISTS idx_redaction_jobs_file ON redaction_jobs(file_id);
+-- Redaction automation model (SPEC_redaction_automation.md): per-file disposition + its basis (audit).
+-- disposition ∈ bypass|simple|standard|elevated|legal; disposition_basis = JSON snapshot of the deciding signals.
+ALTER TABLE redaction_jobs ADD COLUMN IF NOT EXISTS disposition TEXT;
+ALTER TABLE redaction_jobs ADD COLUMN IF NOT EXISTS disposition_basis TEXT;
 
 -- A single redaction box. Coords normalized 0-1, top-left origin (same frame as document_pages.words).
 CREATE TABLE IF NOT EXISTS redaction_zones (

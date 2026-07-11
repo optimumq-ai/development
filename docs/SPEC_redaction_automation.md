@@ -97,7 +97,7 @@ To let Bypass records **never burden a redactor**, disposition is computed **whe
 
 ## 7. Build slices (proposed order)
 
-1. **Disposition function** `[NEW]` `services/redactionDisposition.js` + `redaction_jobs.disposition` / `disposition_basis` columns; unit-drive over synthetic signal sets. (Pure logic, no UI.)
+1. **Disposition function** `[BUILT 2026-07-11]` `services/redactionDisposition.js` (pure `computeDisposition(signals, config) → { disposition, basis }`, first-match-wins ladder) + idempotent `redaction_jobs.disposition` / `disposition_basis` columns. Verified: 25/25 synthetic cases (every disposition, every ladder rule, both guardrails, precedence, config tunability); columns confirmed live via the real `initDb` boot path. Nothing wires it yet — slices 2–3 assemble the signals and persist the result.
 2. **Bypass** `[NEW]` — identity checks (a/b) at job creation (dedup on `source_file_id`; public-copy detection) + record-type-clean (c) after read; write the uniform bypass job + `fulfilled_record`; all-bypass → auto-advance via `applyStageTransition`.
 3. **Eager computation at stage entry** `[NEW]` — invoke disposition per responsive file from the redaction orchestrator; suppress task spawn when all bypass.
 4. **Reviewer task + gating** `[NEW]` — `redaction_qa` task type, routing (author-excluded), `apply` gate for Elevated/Legal, approve/return flow onto the central transition.
@@ -109,7 +109,7 @@ To let Bypass records **never burden a redactor**, disposition is computed **whe
 
 ## 8. Open / residual (defaults set, retune on review)
 
-- **Numeric defaults** — `ELEVATED_SPAN_THRESHOLD=8`; exact `LEGAL_CATEGORIES` / `SENSITIVE_CATEGORIES` membership — to be proposed from the seeded `redaction_rules` catalog at build, then Kevin-tuned.
+- **Numeric + category defaults (proposed from the seeded `redaction_rules` catalog, live in `redactionDisposition.DEFAULT_CONFIG`, Kevin to retune):** `elevatedSpanThreshold=8`; `simpleSpanMax=3`; `legalCategories=[law_enforcement, legal]`; `sensitiveCategories=[health, personnel, commercial, security]`; `restrictedAvailability=[restricted, confidential]`. The seeded category vocabulary is `privacy | personnel | law_enforcement | health | legal | commercial | security` — note **`privacy` (SSN/cards/addresses/emails) is intentionally NOT sensitive**, so ordinary PII lands in the self-release band, not Elevated.
 - **Reviewer eligibility** — any other role-holder (default) vs. lead/supervisor only.
 - **Standard review policy** — off by default; expose the supervisor "require review on Standard" switch?
 - **Async vs. sync reads at stage entry** — sync per-file (simple) vs. queued (scales for many-file requests). Start sync; revisit if latency bites.
