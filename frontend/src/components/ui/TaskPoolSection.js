@@ -2,11 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../../lib/api';
 
-var TYPE_LABEL = { estimate: 'Estimate', record_search: 'Record Search', redaction: 'Redaction' };
+var TYPE_LABEL = { estimate: 'Estimate', record_search: 'Record Search', redaction: 'Redaction', legal_redaction: 'Legal Redaction', redaction_qa: 'Redaction Review' };
 var TYPE_COLOR = {
   estimate: { bg: '#D1FAE5', color: '#065F46' },
   record_search: { bg: '#EDE9FE', color: '#6D28D9' },
-  redaction: { bg: '#FEF3C7', color: '#92400E' }
+  redaction: { bg: '#FEF3C7', color: '#92400E' },
+  legal_redaction: { bg: '#EEE7F8', color: '#6D3BB5' },
+  redaction_qa: { bg: '#FBEEDD', color: '#B4690E' }
 };
 
 function typeBadge(t) {
@@ -67,7 +69,7 @@ export default function TaskPoolSection() {
             {busy === t.id ? 'Claiming...' : 'Claim'}
           </button>
         ) : (
-          <Link to={t.type === 'estimate' ? ('/estimate/' + t.id) : ('/requests/' + t.request_id)} style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#1F4E79', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>Open</Link>
+          <Link to={t.type === 'estimate' ? ('/estimate/' + t.id) : (t.type === 'redaction' || t.type === 'legal_redaction') ? ('/redaction/' + t.id) : ('/requests/' + t.request_id)} style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#1F4E79', fontSize: '13px', fontWeight: '600', textDecoration: 'none' }}>Open</Link>
         )}
       </div>
     );

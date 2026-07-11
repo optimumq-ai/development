@@ -30,6 +30,7 @@ import AIDataFlowPage from './pages/AIDataFlowPage';
 import SecurityPage from './pages/SecurityPage';
 import RedactionRulesPage from './pages/RedactionRulesPage';
 import RedactionWorkspacePage from './pages/RedactionWorkspacePage';
+import RedactionTaskPage from './pages/RedactionTaskPage';
 import RedactionReviewPage from './pages/RedactionReviewPage';
 import StructuredRedactionFieldsPage from './pages/StructuredRedactionFieldsPage';
 import ReleasedRecordsPage from './pages/ReleasedRecordsPage';
@@ -71,6 +72,8 @@ export default function App() {
         <Route path="/portal/v2" element={<Navigate to="/portal/request" replace />} />
         <Route path="/portal/library" element={<PublicLibraryPage />} />
         <Route path="/portal/library/map" element={<PublicLibraryMapPage />} />
+        {/* Redaction task screen — full-bleed (no app nav) but auth-gated; a redaction task opens here. */}
+        <Route path="/redaction/:taskId" element={<Guard c={<RedactionTaskPage />} />} />
         <Route path="/" element={<Guard c={<AppLayout />} />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />
