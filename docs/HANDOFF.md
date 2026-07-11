@@ -1412,3 +1412,28 @@ run AI read + computeDisposition per responsive file; case (c); suppress task sp
 bypass). Then slice 4 (`redaction_qa` reviewer task + `apply` gating), 5 (legal-category trigger), 6 (config),
 7 (the screen — mockup pending Kevin's markup). Harnesses in scratchpad: `verify_disposition.js` (25/25),
 `verify_bypass.js` (18/18), `verify_columns.js`; mockup shots `shot_0*.png`.
+
+## 2026-07-11 (am) — Automation slice 3a: identity bypass wired at stage entry (BUILT, first live-path slice)
+
+**First slice with runtime effect.** `taskRouting.spawnForStage` now, on entering a redaction stage
+(`redaction_review`/`redaction`), runs `redactionBypass.bypassIdentityForRequest` **before** spawning: clean
+responsive files (public-ready / previously released) auto-bypass; if EVERY responsive file is thereby
+released, the request advances to `delivery` via the central `applyStageTransition` and **no redaction task
+spawns**. Read-independent — no LLM/OCR in the transition path. Legal escalation + normal spawn preserved
+otherwise. Added `redactionBypass.bypassIdentityForRequest` (loops responsive files).
+
+**Slice split (spec updated):** the original slice 3 became **3a** (this — identity bypass, synchronous, safe)
++ **3b** (the AI-read case (c) + per-file disposition pre-compute — deferred to its own slice, run OUT of the
+sync transition path so LLM latency/failure never blocks a stage advance).
+
+**Evidence — 12/12 live** (`scratchpad/verify_slice3.js`, real `applyStageTransition`): all-clean →
+auto-advance to delivery + no task + REDACTION_BYPASSED & STAGE_ADVANCED history; mixed (one clean, one not) →
+clean bypassed, task spawned, stays at redaction; no-bypass → unchanged routing (no regression); 0 rows left.
+(Harness gotcha fixed: `/api/public/submit` runs `onIntake` async on the server and clobbers the stage — the
+harness now `waitIntake`s on a `workflow_decisions` row before moving the stage.) **Server restarted on new
+code** (kill 260459 → root PM2 respawn **pid 266292**, health 200, submit 201); smoke request cleaned up.
+
+**State:** `main` @ `6c0291b`, tree clean. Redaction automation: slice 1 (disposition) · 2 (identity bypass) ·
+**3a (bypass wired, LIVE)** BUILT. **Next: slice 3b** (async AI read + case (c) + per-file disposition
+pre-compute), then 4 (`redaction_qa` reviewer task + `apply` gating), 5 (legal-category trigger), 6 (config),
+7 (the screen — mockup `docs/mockups/redaction_screen.html` pending Kevin's markup).
