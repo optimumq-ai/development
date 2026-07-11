@@ -1463,3 +1463,42 @@ which is **slice 3b** (async AI read + case (c) + per-file disposition pre-compu
 (it activates both 3b's triage AND slice 4's gate). Then 5 (legal-category trigger), 6 (config), 7 (screen —
 mockup pending Kevin's markup). Harnesses in scratchpad: `verify_disposition.js` 25/25 · `verify_bypass.js`
 18/18 · `verify_slice3.js` 12/12 · `verify_slice4.js` 18/18.
+
+## 2026-07-11 (ao) — Automation slice 3b: eager read-triage + record-type-clean bypass (BUILT) — model complete (backend)
+
+`services/redactionTriage.js`, kicked in the **background from `applyStageTransition`** on entering a redaction
+stage (once — not on reconciler sweeps, to avoid repeated LLM cost). Per responsive non-identity-bypassed file:
+`runRead` (ensure OCR → `zoneDiscovery.discoverZones`; spanCount = `max(located, found)`) → `assembleSignals`
+(record-type `auto_release_eligible`/`public_availability` + intake `legalFlag` + read) → `computeDisposition`
+→ **persists** `disposition`/`disposition_basis` on the job (screen opens pre-triaged). Case **(c)**
+(`auto_release_eligible` + real clean read) → `recordCleanBypass` (releases the original as-is, `published` per
+`auto_publish`). Idempotent (disposed file not re-read). After triage → `advanceIfAllReleased` + cancel the
+redaction task if all cleared. Added `redactionBypass.recordCleanBypass`; exported
+`taskRouting.requestNeedsLegalRedaction`. **This activates slice 4's gate** (elevated/legal dispositions now set).
+
+**Correctness bug found + fixed during verify:** original `runRead` treated a file with **no OCR'd pages** (or a
+non-document mimetype) as a *successful clean read* (`readOk:true, 0 spans`) → would have **falsely auto-bypassed
+an un-read `auto_release_eligible` document**. Fixed: no readable pages / non-document → `readOk:false` → Simple,
+**never** auto-bypassed. (A stale slice-3a harness assertion — "no job for the unique file" — was corrected to
+"no *bypass* job", since 3b now legitimately persists a 'simple' disposition/job per file.)
+
+**Template match still deferred** (spec §8): triage omits the template signal, so span-bearing docs default to
+**Elevated** (safe: more review, never less). Wiring `redactionTemplates.engine.safetyScore` would let
+template-covered docs settle to Standard/Simple — follow-up refinement.
+
+**Evidence — 19/19 live** (`scratchpad/verify_slice3b.js`): injected-read core (case-c bypass released-as-is +
+fulfilled_record; failed-read guardrail → simple; elevated/legal by category; legal by intake flag; idempotent
+cache); `triageReadForRequest` all-clean → advance + both bypassed + task cancelled; **two real
+`claude-sonnet-4-5` reads** (PII text → found≥1; clean agenda → 0); **async hook end-to-end**
+(`applyStageTransition` → bg read of a clean auto-eligible doc → case-c bypass → advanced to delivery → task
+cancelled). **Regressions clean:** slice 2 18/18 · 3a 12/12 · 4 18/18. Server restarted on new code
+(kill 267640 → root PM2 respawn **pid 270000**, health 200).
+
+**State:** `main` @ `31684d3`, tree clean. **Redaction automation model now BUILT end-to-end (backend):**
+1 disposition · 2 identity bypass · 3a bypass-wired · 3b read-triage+case-c · 4 reviewer-task+gating — all live
+and mutually activating. **Remaining:** 5 (legal-category trigger — extend legal disposition to also fire the
+existing legal-escalation task path, mostly done via disposition='legal'; small) · 6 (config — thresholds +
+category sets to `system_config`, currently `redactionDisposition.DEFAULT_CONFIG`) · **7 the redaction screen**
+(mockup `docs/mockups/redaction_screen.html` + Artifact, **pending Kevin's markup** before build) · template-match
+refinement in triage. Harnesses in scratchpad: disposition 25/25 · bypass 18/18 · slice3 12/12 · slice4 18/18 ·
+slice3b 19/19.
