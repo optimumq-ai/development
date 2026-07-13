@@ -1617,3 +1617,50 @@ this screen (approve/return controls, not Submit) is a follow-up; the AI-scan **
 healthy. **Redaction automation feature COMPLETE end-to-end (backend model 1–6 + template refinement + the
 screen).** Harnesses in scratchpad: disposition 25/25 · bypass 18/18 · slice3 12/12 · slice3b 19/19 · slice4
 18/18 · slice5 13/13 · slice6 18/18 · template 7/7 · deploy 22/22 · slice7 9/9.
+
+## 2026-07-13 (at) — Slice 7 verified on a REAL PDF; side-by-side release-preview bug found + FIXED
+
+**(1) Backlog capture (`2ef1b0b`).** Kevin: the redesigned split-canvas portal lets a requestor *select* records
+from search results but gives them **no way to say what the selection means** — (a) "nothing matches, but file my
+request anyway" and (b) "these match, but keep looking, there should be more" are both inexpressible, so an empty
+selection reads as abandonment and a partial selection is indistinguishable from a complete one (a request the
+requestor considers open can be fulfilled from the selected set and closed). Captured as **BACKLOG R9** + an
+"Open gap" section in `DESIGN_split_canvas_intake.md`. Direction: an explicit per-child **intent**
+(complete · partial-search-more · no-match-search) captured on Proceed. **Undesigned — discuss before building.**
+**Sequenced AFTER the redaction UI** (Kevin).
+
+**(2) Slice 7 closed the "needs a real processed PDF" follow-up — 17/17** (`scratchpad/verify_slice7_realpdf.js`,
+`make_pdf.js` generates a synthetic 2-page Dallas PD incident report with real PII). Whole chain via real paths:
+`/api/public/submit` → `/api/files/upload` (multipart) → `PATCH /:id/status` responsive → `POST /:id/process`
+(docProcessing: pdftoppm page PNGs + pdftotext 109/218 word boxes) → **central `applyStageTransition(→ redaction)`**
+(spawns the task + kicks read-triage). Result: **the canvas renders both real page images** (the thing that had
+never been driven — prior smoke used text-only pages → "Loading page…"); the AI read found **17 spans and boxed
+them accurately on free-text NARRATIVE PROSE**, not just labelled form fields (the case no template can cover);
+the read-triage's **`legal`** disposition (basis `intake_legal_flag`) drove the badge + second-reviewer banner +
+*Submit for review* Finalize end-to-end. 0 runtime errors; request cleaned up (0 rows left).
+
+**(3) Real bug the real document exposed — side-by-side FIXED (`06ea128`).** The "Proposed release" pane blacked
+out only **applied** zones. With 17 AI proposals pending and none applied, it rendered **byte-identical to the
+original** — complainant's SSN / DOB / home address / phone in the clear, under a heading reading PROPOSED
+RELEASE. Technically honest (nothing applied → that IS what release would produce) but an operator can read it as
+*"the AI found nothing, this document is clean"* and ship it. **Kevin's call: preview pending proposals as black
+boxes.** `docImg(page, imgUrls, zones, pending)` now blacks out applied zones AND pending proposals; pending carry
+a **dashed amber edge** (committed still distinguishable from proposed) and the caption states exactly what is
+shown — incl. the honest empty case ("nothing is redacted on this page, so the release would be identical").
+**Verified 10/10** (`scratchpad/verify_sxs.js`: original pane 0 boxes · proposed pane blacks out all 12 pending,
+all dashed · caption asserts not-applied · apply one → 1 solid + 11 dashed + caption re-counts · 0 errors).
+FE rebuilt (`NODE_OPTIONS=--openssl-legacy-provider npm run build` — required on Node 20), nginx serving fresh
+bundle `main.9d5563cd`. Spec updated in the same commit.
+
+**Review artifact for Kevin** (real screenshots + findings):
+https://claude.ai/code/artifact/47a546a2-823c-47ee-9576-5c90d01f57d5
+
+**State:** `main` @ `06ea128`, tree clean, app healthy. **Redaction feature complete + now verified on real
+documents.** Open follow-ups on the screen: **(a) `redaction_qa` reviewer mode** — the reviewer task the slice-4
+gate REQUIRES still opens the generic request page, so the mandatory second reviewer for Elevated/Legal has no
+proper screen (Kevin asked; awaiting his call on approve/return mode of this same screen). **(b) AI proposal list
+has no page anchor** — document-wide, no page number, no click-to-jump; fine at 2 pages, unusable at 50.
+**(c)** spinner `spin` keyframe undefined (cosmetic). **(d)** Kevin's further markup on the screenshots.
+Then **BACKLOG R9** (portal search-completeness intent). Harnesses: slice7-realpdf 17/17 · sxs 10/10 · plus the
+7 automation harnesses (disposition 25/25 · bypass 18/18 · slice3 12/12 · slice3b 19/19 · slice4 18/18 ·
+slice5 13/13 · slice6 18/18 · template 7/7).
