@@ -2252,3 +2252,36 @@ stages 23/23 · stage bypass 24/24 · extend 30/30 · deposit clock 31/31 · sur
 **State:** `main`, tree clean, app healthy. **The parent/child migration is now a DATA-ONLY change** — the
 schema columns exist, the creation helper is the single wrap point, and every query already knows which side it
 wants. It still needs Kevin's spec §9 answers and the §11.1 decisions above.
+
+## 2026-07-13 (pg) — The citizen-facing request number resolves through the parent (15/15)
+
+**Closes the last item of §11.1's display-join work.** Tasks, objections and worklists all hang off the WORK
+row, but `request_number` is a **PARENT** field — it is the number the citizen was given and quotes on the
+phone. After the migration a child's own number carries a component suffix (`2026-0045-1`); showing that in a
+task list would confront staff with a number **the citizen has never seen**.
+
+**Same tautology trick as the scope predicates.** `requestScope.numberJoin()` / `numberExpr()` resolve the
+number through the parent — `COALESCE(_p.request_number, r.request_number)` over
+`LEFT JOIN requests _p ON _p.id = r.master_request_id`. Today `master_request_id` is NULL, so `_p` is NULL and
+it falls back to the row's own number: **a provable no-op**. After the migration it resolves to the parent's
+number automatically. Applied to `routes/tasks.js` `withReq()` (both worklists) + the task-detail query, and
+all **7** `objections.js` display joins.
+
+**A regression I caught before shipping:** `COALESCE(...)` with no alias returns a column literally named
+`coalesce`, not `request_number` — which would have silently blanked the number in every task and objection
+list. Aliased; asserted against the live API that rows still carry `request_number` and no `coalesce` column.
+
+**Verified 15/15** (`verify_scope.js`, extended) — including the one that matters: with a parent+child present,
+**a task on the CHILD resolves to the PARENT's number** ("SCOPE-P", not "SCOPE-P-1"), while the child row still
+carries its own component number for the record. Plus 6/6 against the **live API**: `/tasks/pool`,
+`/tasks/mine`, `/tasks/:id`, `/objections/mine`, `/objections/pending-approval` all 200, numbers unchanged
+(`2026-0002`).
+
+**FULL SUITE GREEN — 229 assertions, 0 failures.**
+
+**State:** `main`, tree clean, app healthy. **Migration prep is COMPLETE on the query layer**: scope predicates,
+the citizen-number resolution, the one creation helper (the single wrap point), and the schema columns all
+exist. Remaining before the migration can run: **Kevin's spec §9 answers**, the **§11.1 decisions** still open
+(a PARENT metric grouped by a CHILD field needs a join; the tickler estimate joins; `clarificationTimeout`'s
+auto-close), and the **UI design direction** for the parent/child queue treatment (UI rule: agree before
+building).

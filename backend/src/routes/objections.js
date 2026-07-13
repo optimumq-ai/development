@@ -6,6 +6,7 @@
 const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
+const scope = require('../services/requestScope');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 
@@ -86,7 +87,7 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
     await run('INSERT INTO objections (id, request_id, status, source_type, evidence_file_id, recap_text, reason, assignee_id, assignee_name, raised_by, raised_by_name, raised_at, clock_frozen, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
       [id, rid, 'open', sourceType, evidenceFileId, recapText, reason, assignee.id, assignee.display_name, req.user.sub, req.user.name || req.user.sub, now, frozen, now, now]);
     await hist(rid, req.user, 'OBJECTION_RAISED', 'Objection raised (' + sourceType + '), assigned to ' + assignee.display_name + (frozen ? '; clock frozen.' : '.'));
-    var row = await get("SELECT o.*, r.request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id WHERE o.id = ?", [id]);
+    var row = await get("SELECT o.*, " + scope.numberExpr('r') + " AS request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id" + scope.numberJoin('r') + " WHERE o.id = ?", [id]);
     res.json({ objection: shape(row) });
   } catch (e) { res.status(500).json({ error: 'Could not raise the objection: ' + (e && e.message) }); }
 });
@@ -94,7 +95,7 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
 // List objections on a request (most recent first).
 router.get('/request/:requestId', requireAuth, async function (req, res) {
   try {
-    var rows = await all("SELECT o.*, r.request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id WHERE o.request_id = ? ORDER BY o.created_at DESC", [req.params.requestId]);
+    var rows = await all("SELECT o.*, " + scope.numberExpr('r') + " AS request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id" + scope.numberJoin('r') + " WHERE o.request_id = ? ORDER BY o.created_at DESC", [req.params.requestId]);
     res.json({ objections: (rows || []).map(shape) });
   } catch (e) { res.status(500).json({ error: 'Could not load objections.' }); }
 });
@@ -112,7 +113,7 @@ router.post('/:id/assign', requireAuth, async function (req, res) {
     else return res.status(400).json({ error: 'Choose a person to assign to, or escalate to a supervisor.' });
     await run("UPDATE objections SET assignee_id = ?, assignee_name = ?, updated_at = ? WHERE id = ?", [assignee.id, assignee.display_name, nowStr(), req.params.id]);
     await hist(o.request_id, req.user, 'OBJECTION_REASSIGNED', 'Objection reassigned to ' + assignee.display_name + '.');
-    var row = await get("SELECT o.*, r.request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id WHERE o.id = ?", [req.params.id]);
+    var row = await get("SELECT o.*, " + scope.numberExpr('r') + " AS request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id" + scope.numberJoin('r') + " WHERE o.id = ?", [req.params.id]);
     res.json({ objection: shape(row) });
   } catch (e) { res.status(500).json({ error: 'Could not reassign the objection.' }); }
 });
@@ -120,7 +121,7 @@ router.post('/:id/assign', requireAuth, async function (req, res) {
 // Objections currently assigned to me (for the "Fee Estimate Objections" My Tasks box).
 router.get('/mine', requireAuth, async function (req, res) {
   try {
-    var rows = await all("SELECT o.*, r.request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id WHERE o.assignee_id = ? AND o.status IN ('open','tentative') ORDER BY o.created_at DESC", [req.user.sub]);
+    var rows = await all("SELECT o.*, " + scope.numberExpr('r') + " AS request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id" + scope.numberJoin('r') + " WHERE o.assignee_id = ? AND o.status IN ('open','tentative') ORDER BY o.created_at DESC", [req.user.sub]);
     res.json({ objections: (rows || []).map(shape) });
   } catch (e) { res.status(500).json({ error: 'Could not load your objections.' }); }
 });
@@ -153,7 +154,7 @@ router.post('/:id/resolve', requireAuth, async function (req, res) {
     } else {
       return res.status(400).json({ error: 'Choose a valid resolution outcome.' });
     }
-    var row = await get("SELECT o.*, r.request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id WHERE o.id = ?", [o.id]);
+    var row = await get("SELECT o.*, " + scope.numberExpr('r') + " AS request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id" + scope.numberJoin('r') + " WHERE o.id = ?", [o.id]);
     res.json({ objection: shape(row) });
   } catch (e) { res.status(500).json({ error: 'Could not resolve the objection: ' + (e && e.message) }); }
 });
@@ -175,7 +176,7 @@ router.post('/:id/approve', requireAuth, requireRole('FEE_WAIVER_APPROVER', 'SYS
       await run("UPDATE objections SET status = 'open', approval_status = 'rejected', approved_by = ?, approved_at = ?, updated_at = ? WHERE id = ?", [who, now, now, o.id]);
       await hist(o.request_id, req.user, 'OBJECTION_ADJUSTMENT_REJECTED', 'Rejected the proposed ' + o.resolution_type + ' \u2014 returned to ' + (o.assignee_name || 'the owner') + '.');
     }
-    var row = await get("SELECT o.*, r.request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id WHERE o.id = ?", [o.id]);
+    var row = await get("SELECT o.*, " + scope.numberExpr('r') + " AS request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id" + scope.numberJoin('r') + " WHERE o.id = ?", [o.id]);
     res.json({ objection: shape(row) });
   } catch (e) { res.status(500).json({ error: 'Could not record the decision.' }); }
 });
@@ -183,7 +184,7 @@ router.post('/:id/approve', requireAuth, requireRole('FEE_WAIVER_APPROVER', 'SYS
 // Pending financial resolutions awaiting a Fee Authorizer (their approval queue).
 router.get('/pending-approval', requireAuth, requireRole('FEE_WAIVER_APPROVER', 'SYSTEM_ADMIN', 'DIRECTOR'), async function (req, res) {
   try {
-    var rows = await all("SELECT o.*, r.request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id WHERE o.approval_status = 'pending' AND o.status = 'tentative' ORDER BY o.updated_at DESC");
+    var rows = await all("SELECT o.*, " + scope.numberExpr('r') + " AS request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id" + scope.numberJoin('r') + " WHERE o.approval_status = 'pending' AND o.status = 'tentative' ORDER BY o.updated_at DESC");
     res.json({ objections: (rows || []).map(shape) });
   } catch (e) { res.status(500).json({ error: 'Could not load the approval queue.' }); }
 });

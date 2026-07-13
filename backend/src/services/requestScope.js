@@ -43,4 +43,29 @@ function leaf(alias) {
 function andParent(alias) { return ' AND ' + parent(alias); }
 function andLeaf(alias) { return ' AND ' + leaf(alias); }
 
-module.exports = { parent: parent, leaf: leaf, andParent: andParent, andLeaf: andLeaf };
+// ---------------------------------------------------------------------------------------------------
+// THE CITIZEN-FACING REQUEST NUMBER.
+//
+// Tasks, objections, files and worklists all hang off the WORK row (the child). But `request_number` is a
+// PARENT field — it is the number the citizen was given and quotes on the phone. After the migration a
+// child's own number carries a component suffix (`2026-0045-1`); showing that in a task list would confront
+// staff with a number the citizen has never seen.
+//
+// Same trick as the scope predicates: resolve the number THROUGH the parent, which today IS the row itself.
+//   numberJoin('r')  -> LEFT JOIN requests _p ON _p.id = r.master_request_id
+//   numberExpr('r')  -> COALESCE(_p.request_number, r.request_number) AS request_number
+// Today `master_request_id` is NULL, so `_p` is NULL and COALESCE falls back to the row's own number — a
+// provable no-op. After the migration it resolves to the parent's number automatically.
+function numberJoin(alias) {
+  var a = alias || 'r';
+  return ' LEFT JOIN requests _p ON _p.id = ' + a + '.master_request_id';
+}
+function numberExpr(alias) {
+  var a = alias || 'r';
+  return 'COALESCE(_p.request_number, ' + a + '.request_number)';
+}
+
+module.exports = {
+  parent: parent, leaf: leaf, andParent: andParent, andLeaf: andLeaf,
+  numberJoin: numberJoin, numberExpr: numberExpr
+};
