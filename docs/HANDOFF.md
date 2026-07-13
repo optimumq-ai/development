@@ -1664,3 +1664,45 @@ has no page anchor** — document-wide, no page number, no click-to-jump; fine a
 Then **BACKLOG R9** (portal search-completeness intent). Harnesses: slice7-realpdf 17/17 · sxs 10/10 · plus the
 7 automation harnesses (disposition 25/25 · bypass 18/18 · slice3 12/12 · slice3b 19/19 · slice4 18/18 ·
 slice5 13/13 · slice6 18/18 · template 7/7).
+
+## 2026-07-13 (bt) — Slice 8: reviewer mode (`redaction_qa`) — the mandatory second review finally has a screen
+
+**Kevin's call:** reviewer mode as a **variant of the redaction screen**, not a separate screen.
+
+**What shipped (`c7c6920`).** A `redaction_qa` task (the review the slice-4 gate *requires* for Elevated/Legal,
+which until now opened the generic request page) routes to the same `/redaction/:taskId`. `RedactionTaskPage`
+renders in reviewer shape: same canvas, file picker, side-by-side, in-document search; the right rail swaps
+AI/Manual/Finalize for **Proposed redactions** (every zone the author submitted, **page-anchored, click to
+jump**, rule cited; explicit warning when the author proposed *none* — approving that releases the document
+unchanged) · **Second-pass AI check** (`/discover`, **not** auto-run — the author already made that call;
+the reviewer asks deliberately and can add what was missed) · **Decision**. Opening the task calls
+`/begin-review` (`pending_review → in_review`). **Approve & release** → `/apply` (slice-4 gate is the hard
+rule; the UI also disables it for the author, with the reason). **Return for rework** → `/return`, which now
+**requires a reason** (400 without one) — the author has nothing else to work from — written to
+`request_history` as `REDACTION_RETURNED`, naming reviewer, author and file.
+
+**Two bugs the slice exposed + fixed.** (a) `completeReviewTask` closed the per-request `redaction_qa` task on
+the **first** file's release — with two gated files, approving file 1 **stranded file 2 with no reviewer
+tasked**. Now it closes only when no gated job on the request is still `pending_review`/`in_review`.
+(b) `apply()` never advanced the local job row, so after a successful release the rail stayed on the
+pre-release state (**author mode too**). Also closed the cosmetic `spin`-keyframe follow-up.
+
+**Verified 31/31** (`scratchpad/verify_slice8_reviewer.js`) on the real 2-page incident-report PDF, **two**
+responsive files, **two real users**, whole chain through real creation paths: submit → upload ×2 → responsive
+→ process → central `applyStageTransition(→ redaction)` → triage (`legal`, `legal`) → author submits → pooled
+`redaction_qa` spawns → **author self-release 403** → reviewer's browser shows the review rail (author rail
+gone), names the submitter, claims the job → reasonless return blocked in UI **and** API → returned with a
+reason → history row + task cancelled → author re-submits (fresh task) → reviewer approves → **released,
+credited to the reviewer**, `fulfilled_records` written → review task **stays open** while file 2 is pending,
+**completes only when both are released**. 0 runtime errors; 0 rows left. FE rebuilt (`main.7688e831`).
+
+**State:** `main` @ `c7c6920` (unpushed), tree clean, app healthy. **Redaction feature complete: author +
+reviewer, verified on real documents.** Remaining follow-ups: **(a)** the **author**-mode AI proposal list still
+has no page anchor (reviewer mode's list does — port the same treatment; matters at 50 pages). **(b)** Kevin's
+further markup on the screenshots. Then **BACKLOG R9** (portal search-completeness intent — undesigned,
+discuss first). Harnesses: slice8-reviewer 31/31 · slice7-realpdf 17/17 · sxs 10/10 · disposition 25/25 ·
+bypass 18/18 · slice3 12/12 · slice3b 19/19 · slice4 18/18 · slice5 13/13 · slice6 18/18 · template 7/7.
+
+**Note for next session:** the API is **not** under pm2 in this environment (`pm2 restart optimumq-api` →
+"Process not found"). It runs as a bare `node /opt/optimumq/backend/server.js`; restart = kill the pid and
+relaunch with `setsid nohup node /opt/optimumq/backend/server.js &`.
