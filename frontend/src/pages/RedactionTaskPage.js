@@ -120,6 +120,15 @@ export default function RedactionTaskPage() {
   var numById = {}; zones.slice().sort(sortReading).forEach(function (z, i) { numById[z.id] = i + 1; });
   var pageZones = zones.filter(function (z) { return page && z.page_no === page.page_no; }).sort(sortReading);
   var pageSuggestions = suggestions.filter(function (s) { return page && s.page_no === page.page_no; });
+  // The side-by-side caption must never let an un-redacted page read as a clean one: it states
+  // exactly what the right pane is showing, and flags proposals as previewed-but-not-applied.
+  var sxsCaption = pageSuggestions.length
+    ? 'Preview — the right pane shows ' + (pageZones.length ? pageZones.length + ' applied and ' : '')
+      + pageSuggestions.length + ' proposed (dashed) redaction' + (pageSuggestions.length === 1 && !pageZones.length ? '' : 's')
+      + '. The proposed boxes are not applied yet — approve them under AI Redaction to commit them.'
+    : pageZones.length
+      ? 'Read-only — original at left, the redacted release at right. ' + pageZones.length + ' applied redaction' + (pageZones.length === 1 ? '' : 's') + ' on this page.'
+      : 'Read-only — nothing is redacted on this page, so the release would be identical to the original.';
   function ruleOf(id) { return rules.filter(function (r) { return r.id === id; })[0]; }
   function catColor(id) { var r = ruleOf(id); return (r && CAT_COLORS[r.category]) || '#374151'; }
 
@@ -239,11 +248,11 @@ export default function RedactionTaskPage() {
             <div style={{ width: '100%' }}>
               <div style={{ textAlign: 'center', marginBottom: '14px' }}>
                 <button style={sty.returnBtn} onClick={function () { setSxs(false); }}>‹ Return to single page view</button>
-                <div style={{ fontSize: '12.5px', color: '#48535F', marginTop: '6px' }}>Read-only — original at left, the redacted release at right.</div>
+                <div style={{ fontSize: '12.5px', color: '#48535F', marginTop: '6px' }}>{sxsCaption}</div>
               </div>
               <div style={{ display: 'flex', gap: '22px', justifyContent: 'center', flexWrap: 'wrap' }}>
-                <div><div style={sty.colHead}>Original</div>{docImg(page, imgUrls, null)}</div>
-                <div><div style={sty.colHead}>Proposed release</div>{docImg(page, imgUrls, pageZones)}</div>
+                <div><div style={sty.colHead}>Original</div>{docImg(page, imgUrls, null, null)}</div>
+                <div><div style={sty.colHead}>Proposed release</div>{docImg(page, imgUrls, pageZones, pageSuggestions)}</div>
               </div>
             </div>
           ) : page ? (
@@ -385,12 +394,17 @@ function AccBox(props) {
 }
 
 // ---- side-by-side page render (read-only) ----
-function docImg(page, imgUrls, zones) {
+// `zones` are applied redactions; `pending` are AI proposals not yet applied. Both black out the
+// content, because the pane answers "what would release look like" — a proposal left un-previewed
+// makes an unredacted page look like a clean one. Pending boxes carry a dashed edge so the operator
+// can still tell what is committed from what is only proposed.
+function docImg(page, imgUrls, zones, pending) {
   if (!page) return <div style={{ width: '340px', height: '440px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8792A0', boxShadow: '0 1px 8px rgba(20,30,45,.12)' }}>No page</div>;
   return (
     <div style={{ position: 'relative', width: '360px', maxWidth: '100%', background: 'white', boxShadow: '0 1px 8px rgba(20,30,45,.12)' }}>
       {imgUrls[page.id] ? <img src={imgUrls[page.id]} alt="" draggable={false} style={{ width: '100%', display: 'block' }} /> : <div style={{ width: '100%', aspectRatio: '8.5/11', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#8792A0' }}>Loading…</div>}
       {(zones || []).map(function (z) { return <div key={z.id} style={{ position: 'absolute', left: pct(z.x), top: pct(z.y), width: pct(z.w), height: pct(z.h), background: '#10151B' }} />; })}
+      {(pending || []).map(function (s) { return <div key={s._k} style={{ position: 'absolute', left: pct(s.x), top: pct(s.y), width: pct(s.w), height: pct(s.h), background: '#10151B', border: '1.5px dashed #E08C20', boxSizing: 'border-box' }} />; })}
     </div>
   );
 }
