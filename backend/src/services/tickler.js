@@ -7,6 +7,8 @@ var db = require('../db');
 var all = db.all, get = db.get, run = db.run;
 var uuidv4 = require('uuid').v4;
 var pt = require('./paymentTiming');
+var PCP = require('./paymentClockPolicy');
+var depositAction = require('./depositAction');
 
 var DEFAULTS = { requesterResponseDays: 10, depositDueDays: 10, stallDays: 21, autoWithdrawOnLapse: false };
 var TERMINAL_STAGES = ['delivery', 'closed'];
@@ -65,7 +67,7 @@ async function runSweep(opts) {
   opts = opts || {};
   _cfgCache = {};
   var T = await thresholds();
-  var actions = { estimate_lapsed: 0, deposit_overdue: 0, stalled: 0, withdrawn: 0 };
+  var actions = { estimate_lapsed: 0, deposit_overdue: 0, deposit_withdrawn: 0, stalled: 0, withdrawn: 0 };
 
   // (1) Estimate-response lapse: latest sent estimate not accepted/declined, past ITS band's acceptance
   // window (per-jurisdiction plan window; falls back to the flat default when the plan carries none).
@@ -109,9 +111,27 @@ async function runSweep(opts) {
     var drCfg = await cfgForEstimate(dr);
     if (drCfg && drCfg.payment_mode === 'erp') continue; // ERP owns dunning; suppress our deposit reminder
     var dw = windowFromPlan(await planForEstimate(dr), T.depositDueDays);
-    if (!overdue(dr.accepted_at, dw.days, dw.unit, nowMs)) continue;
+    // A jurisdiction may set its own grace window (TX: 10 business days, § 552.263(f)); otherwise the
+    // fee profile's payment band window stands, exactly as before.
+    var depPolicy = await PCP.read(null);
+    if (depPolicy.deposit_grace_days != null) dw = { days: depPolicy.deposit_grace_days, unit: dw.unit };
+    // A grace of 0 is a legitimate setting ("no grace — due on acceptance"), but overdue() treats a falsy
+    // day count as "no window" and would never fire. Zero means immediately overdue, not never.
+    var isOverdue = (Number(dw.days) === 0) ? !!dr.accepted_at : overdue(dr.accepted_at, dw.days, dw.unit, nowMs);
+    if (!isOverdue) continue;
+    var windowDesc = dw.days + ' ' + dw.unit + ' days after acceptance';
+
+    // The jurisdiction's lapse rule. `withdraw` closes the request through the CENTRAL stage transition
+    // (never a raw UPDATE), and only when the policy is enabled AND attested. Default is flag_only —
+    // today's behaviour, unchanged.
+    var lapse = { withdrawn: false };
+    try { lapse = await depositAction.onDepositLapsed(dr.rid, { actorName: 'system', windowDesc: windowDesc }); } catch (e) {}
+    if (lapse.withdrawn) {
+      actions.deposit_withdrawn = (actions.deposit_withdrawn || 0) + 1;
+      continue; // the request is closed; a tickler flag on a closed request is noise
+    }
     await flagRequest(dr.rid, 'deposit_overdue');
-    await hist(dr.rid, 'DEPOSIT_OVERDUE', 'Deposit unpaid more than ' + dw.days + ' ' + dw.unit + ' days after acceptance.', null, null);
+    await hist(dr.rid, 'DEPOSIT_OVERDUE', 'Deposit unpaid more than ' + windowDesc + '.', null, null);
     actions.deposit_overdue += 1;
   }
 

@@ -12,6 +12,7 @@ var feePolicyExtract = require('./feePolicyExtract');
 var clarificationPolicy = require('./clarificationPolicy');
 var clarificationPolicyExtract = require('./clarificationPolicyExtract');
 var jurisdictionRules = require('./jurisdictionRules');
+var paymentClockPolicy = require('./paymentClockPolicy');
 var { v4: uuidv4 } = require('uuid');
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 var REDACTION_CATS = ['privacy', 'law_enforcement', 'health', 'legal', 'personnel', 'commercial', 'security', 'administrative'];
@@ -139,6 +140,12 @@ var ADAPTERS = {
     current: async function (jid) { return await clarificationPolicy.read(jid); },
     extract: async function (jid, text) { return await clarificationPolicyExtract.extract(text, { jurName: await jurName(jid), currentCfg: await clarificationPolicy.read(jid) }); },
     apply: async function (jid, cfg, actor) { var r = await clarificationPolicy.write(jid, cfg, actor); return { target: r.target }; }
+  },
+  payment: {
+    label: 'Deposit & payment clock', applyTarget: "jurisdiction_rules 'payment'", applyMode: 'live',
+    current: async function (jid) { return await paymentClockPolicy.read(jid); },
+    extract: async function (jid, text) { return await genericExtract("deposit/prepayment effect on the statutory response clock — deposit_clock_effect (runs_no_stop | toll_pause_resume | toll_and_restart | operational_hold), deposit_grace_days, deposit_lapse_action (flag_only | withdraw)", await jurName(jid), await paymentClockPolicy.read(jid), text); },
+    apply: async function (jid, cfg, actor) { var r = await paymentClockPolicy.write(jid, cfg, actor); return { target: r.target }; }
   },
   exemption: {
     label: 'Exemption model & appeals', applyTarget: 'jurisdiction_profiles.exemption_model', applyMode: 'live',

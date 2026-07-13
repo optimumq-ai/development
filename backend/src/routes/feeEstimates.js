@@ -15,6 +15,7 @@ const feeNotice = require('../services/feeNotice');
 const pt = require('../services/paymentTiming');
 const emailTemplate = require('../services/emailTemplate');
 const enforcement = require('../services/enforcement');
+const depositAction = require('../services/depositAction');
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 var taskRouting = require('../services/taskRouting');
@@ -268,6 +269,11 @@ router.post('/request/:requestId/estimate/accept', requireAuth, async function (
     actorId: req.user && req.user.sub, actorName: actor, action: 'ESTIMATE_ACCEPTED',
     notes: depositDue > 0 ? ('Deposit of $' + depositDue.toFixed(2) + ' required before work begins.') : 'No deposit required; record search begins.',
     createdBy: req.user && req.user.sub });
+  // The wait on the requestor begins: apply the jurisdiction's deposit clock effect (no-op unless the
+  // city has enabled AND attested the payment policy).
+  if (depositDue > 0) {
+    try { await depositAction.onDepositDue(rid, { actorId: req.user && req.user.sub, actorName: actor, amount: depositDue }); } catch (e) {}
+  }
   await require('../services/paymentStatus').recordEvent(req.params.requestId, { type: 'estimate_accepted', reason: 'requestor accepted the estimate', actor: (req.user && req.user.name) || (req.user && req.user.sub) || 'system' });
   res.json({ accepted: true, depositDue: depositDue, stage: newStage });
 });
@@ -300,6 +306,7 @@ router.post('/request/:requestId/deposit/record', requireAuth, async function (r
     actorId: req.user && req.user.sub, actorName: actor, action: 'DEPOSIT_RECORDED',
     notes: 'Deposit of $' + amount.toFixed(2) + ' recorded; record search begins.',
     createdBy: req.user && req.user.sub });
+  try { await depositAction.onDepositPaid(rid, { actorId: req.user && req.user.sub, actorName: actor, amount: amount }); } catch (e) {}
   await require('../services/paymentStatus').recordEvent(req.params.requestId, { type: 'payment', amount: amount, reason: 'deposit', actor: (req.user && req.user.name) || (req.user && req.user.sub) || 'system' });
   res.json({ recorded: true, amount: amount, stage: 'record_search' });
 });
@@ -417,6 +424,7 @@ router.post('/request/:requestId/payment/record', requireAuth, async function (r
       } else {
         await hist(rid, req.user, 'DEPOSIT_RECORDED', 'Deposit of $' + amount.toFixed(2) + ' (' + method + ') recorded.', null, null);
       }
+      try { await depositAction.onDepositPaid(rid, { actorId: req.user && req.user.sub, actorName: actor, amount: amount }); } catch (e) {}
     } else {
       var newFinal = (Number(est.final_paid_amount) || 0) + amount;
       await run('UPDATE request_fee_estimates SET final_paid_at = ?, final_paid_by = ?, final_paid_amount = ? WHERE id = ?', [nowStr(), actor, newFinal, est.id]);

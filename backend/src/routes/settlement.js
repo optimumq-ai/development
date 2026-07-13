@@ -8,6 +8,7 @@ const { run, get } = require('../db');
 const uuidv4 = require('uuid').v4;
 const erp = require('../services/erpSettlement');
 var taskRouting = require('../services/taskRouting');
+var depositAction = require('../services/depositAction');
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 async function hist(rid, actor, action, details) {
   try { await run("INSERT INTO request_history (id, request_id, actor_id, actor_name, action, details, created_at) VALUES (?,?,?,?,?,?,?)", ['rh-' + uuidv4().slice(0, 8), rid, actor && actor.sub, (actor && actor.name) || 'system', action, details || null, nowStr()]); } catch (e) {}
@@ -60,6 +61,9 @@ router.post('/payment-applied', async function (req, res) {
             actorName: 'ERP', action: 'STAGE_ADVANCED', notes: 'Record search begins (ERP deposit applied).',
             createdBy: 'system' });
         }
+        // Same deposit clock effect as the counter/manual paths — the money arriving is the money arriving,
+        // whatever channel reported it.
+        try { await depositAction.onDepositPaid(track.request_id, { actorName: 'ERP', amount: amountApplied }); } catch (e) {}
       } else {
         await run("UPDATE request_fee_estimates SET final_paid_at = ?, final_paid_by = ?, final_paid_amount = ? WHERE id = ?", [now, 'ERP', (Number(est.final_paid_amount) || 0) + amountApplied, est.id]);
       }

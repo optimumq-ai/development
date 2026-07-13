@@ -367,6 +367,13 @@ async function applyStageTransition(requestId, toStage, opts) {
     "VALUES (?,?,?,?,?,?,?,?, datetime('now'))",
     [uuidv4(), requestId, opts.actorId || null, opts.actorName || 'System', opts.action || 'STAGE_ADVANCED', opts.notes || null, fromStage, toStage]);
   var task = await spawnForStage(requestId, toStage, opts.createdBy || opts.actorId || 'system');
+  // A CLOSED request must not leave claimable work behind. Without this, closing a request (delivery,
+  // tickler lapse, nonpayment, deposit withdrawal) left its open tasks sitting in the pools — a staffer
+  // could claim and work a task for a request that is already closed. Found 2026-07-13 by the deposit-clock
+  // harness; it was never specific to that path.
+  if (toStage === 'closed') {
+    await run("UPDATE tasks SET status = 'cancelled', updated_at = datetime('now') WHERE request_id = ? AND status IN ('open','assigned','in_progress')", [requestId]);
+  }
   // Redaction automation slice 3b: on ENTERING a redaction stage (once, not on reconciler sweeps of
   // spawnForStage), kick the read-based triage in the BACKGROUND so the AI read's latency/failure never
   // blocks this transition. It reads + persists a disposition per un-triaged responsive file, bypasses

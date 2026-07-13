@@ -1902,3 +1902,61 @@ Then step 4: `extend()` for statutory volume extensions.
 
 **State:** `main`, tree clean, app healthy. 18 jurisdiction profiles, 18 clarification policies (all drafts),
 0 attested. Parent/child migration still blocked on Kevin's spec §9 answers.
+
+## 2026-07-13 (hz) — Deposit clock policy: `payment_pending` finally has a caller — 31/31
+
+**Spec §10.4 step 3.** THE BUG: a request parked on an unpaid deposit **kept burning its statutory clock**.
+`payment_pending` had been declared as a toll reason since the clock engine was built and had **ZERO callers**;
+`feeNonpayment` / `paymentTiming` / `paymentStatus` / `tickler` never even imported the tolling engine. The city
+looked delinquent for the *requestor's* inaction.
+
+**Shipped.** `services/paymentClockPolicy.js` (per-jurisdiction substrate — `deposit_clock_effect` ·
+`deposit_grace_days` · `deposit_lapse_action`, same shape/vocabulary as `clarificationPolicy` because "waiting on
+the requestor" is one concept whether the wait is for words or for money) + `services/depositAction.js` (the
+effect mapper, a deliberate sibling of `clarificationAction`). Wired into **all four real moments**: deposit owed
+(`feeEstimates` accept), deposit paid (**three** paths — manual log, counter payment, ERP settlement), and lapse
+(`tickler`). Registered as a `payment` domain in `configExtractors` + a `payment` section in
+`jurisdictionProfile`, so it inherits AI statute-extraction, config history, and the attestation gate for free.
+
+**TX seeded `toll_and_restart` / grace 10 / `withdraw`** (`seed_payment_clock_policies.js`) from
+§ 552.263(e) — a deposit **RE-RECEIVES** the request ("considered to have been received … on the date the
+governmental body receives the deposit"), so the clock **restarts from the payment date** rather than merely
+resuming — and § 552.263(f) (10 business days, else withdrawn). **The other 17 jurisdictions are deliberately
+left at defaults** (`runs_no_stop` + `flag_only` = exactly today's behaviour): deposit rules were not researched
+to statute outside TX, and a guessed clock rule is a legal exposure, not a bug.
+
+**Verified 31/31** (`verify_deposit_clock.js`), four scenarios on real paths (submit → estimate → accept →
+deposit/record → real tickler sweep):
+- **A (regression, policy OFF):** 0 tolls, clock still running, effort trail still written. **Shipping this
+  changes NOTHING until a city opts in** — proven, not asserted.
+- **B (TX, on + attested):** clock **tolled** with reason `payment_pending`; on payment the request is
+  **RE-RECEIVED** — `started_at` reset, consumed 0, remaining = the full window, prior tolls closed but retained
+  as audit.
+- **C (`runs_no_stop`):** policy ON but the clock correctly never stops — the effect is honoured per
+  jurisdiction, not hardcoded.
+- **D (lapse = withdraw):** the real tickler sweep closed the request through the **central** stage transition —
+  `REQUEST_WITHDRAWN` history row, `closure_reason = deposit_unpaid`, **no open tasks left claimable**.
+
+**TWO REAL BUGS THE HARNESS FOUND (both pre-existing, both fixed):**
+1. **`applyStageTransition` never cancelled open tasks when a request closed** (`taskRouting.js`). ANY close —
+   delivery, tickler lapse, nonpayment, deposit withdrawal — left its tasks sitting **claimable in the pools**;
+   a staffer could pick up and work a task for an already-closed request. Not specific to this slice. Now a
+   close cancels them. *(This is half of the bug pair the spec flags at §8; the raw-`UPDATE` bypasses in
+   `feeNonpayment.js:39` / `tickler.js:88` are still outstanding.)*
+2. **`overdue()` treats a 0-day window as "no window"** (`tickler.js:21`, `if (!days) return false`), so a
+   jurisdiction configuring **zero grace** would never lapse. Zero now means *immediately overdue*, not never.
+
+**Harness deviation, stated plainly:** `POST /notice/send` fires **real outbound email** (Resend is configured
+here, no suppression switch). A harness must not mail bounce addresses, so it stamps `notified_at` directly.
+Everything *under test* — accept, deposit/record, the tickler sweep — runs through the real endpoints.
+
+**Regressions green:** jurisdiction_rules 24/24 · survey seed 35/35.
+
+**Next (spec §10.4 step 4):** `extend(clockId, days, reason)` — the one genuinely new engine primitive.
+`toll()` moves the due date by *elapsed wall time* and **cannot** express "+10 statutory days for unusual
+volume" (IL § 3(e), CA § 7922.535(b)). Then step 5: make `tollReasons` load-bearing (declared per clock, never
+validated — `toll()` accepts any string).
+
+**State:** `main`, tree clean, app healthy (PM2 restarted with the new code). 18 jurisdictions · 18 clarification
+policies + 1 payment policy · **all drafts, 0 attested**. Parent/child migration still blocked on Kevin's §9
+answers.
