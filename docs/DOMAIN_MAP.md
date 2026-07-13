@@ -21,6 +21,8 @@ Task lifecycle, routing (smart/pool/load-balance), roles, My Tasks, notification
 `tasks.js, staff.js; taskRouting` · Pages: MyTasksPage, EstimateTaskPage, StaffManagementPage
 
 ## 5. ✅ Request Lifecycle & Workflow Engine
+**Parent/child model + lifecycle vocabulary (DESIGNED 2026-07-13, NOT BUILT):** `SPEC_parent_child_lifecycle.md` — always-wrap parent/child with an asymmetric field split; the five axes (Stage · Task state · Outcome · Hold · Clock); **record-hold (child) vs clock-hold (parent)**; per-record withholding log; additive migration. Reconciles `ARCHITECTURE.md` item 1 with `SPEC_tasks_roles_mrr_fees.md` §12, which contradicted each other. Read it before touching stages, clocks, holds, or closure.
+
 Stages, workflow rules/nodes, triage, assignment, history, clocks/deadlines/tolling, tickler.
 `requests.js, workflow.js, workflowModel.js, clocks.js, tickler.js; workflowEngine, deadlineCalc, tolling, tickler` · Pages: RequestQueuePage, RequestWorkspacePage, NewRequestPage, WorkflowPage, WorkflowMapPage, WorkflowSimulatorPage, TicklerPage, DashboardPage
 

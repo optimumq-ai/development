@@ -1723,3 +1723,54 @@ moves the canvas to page 2 **with the page-2 image painted** · Apply-selected s
 **State:** `main` @ `e06f5f8` (unpushed), tree clean, app healthy. Redaction feature (author + reviewer) is
 complete and verified on real documents. Remaining: **Kevin's markup** on the screenshots, then **BACKLOG R9**
 (portal search-completeness intent — undesigned, discuss before building).
+
+## 2026-07-13 (dv) — Parent/child model DESIGNED (`SPEC_parent_child_lifecycle.md`) — no code
+
+**Design session, no build.** Kevin drove a parent/child (MRR) redesign, then paused it to research state law;
+two research passes ran in parallel (Texas PIA ch. 552; then FL/CA/IL/WA/NY/CT). He uploaded a status-vocabulary
+draft — `uploads/parentchildrecordprocessingstatus.xlsx` (commit `1068b62`, via GitHub) — which is now the
+skeleton of the spec.
+
+**The finding that shaped the design.** All seven jurisdictions agree, without exception: **exemptions, denials,
+redactions, record-holds and appeals are RECORD-level; the statutory clock, the deadline, fees, and everything
+that pauses the clock are REQUEST-level.** Consequence: Kevin's original placement of "AG hold" and "dispute" at
+the parent is **wrong and dangerous** — Tex. ORD-664 (2000) holds the 10-business-day AG window "is not a grace
+period," so undisputed records must still be produced while disputed ones sit at the AG. A request-level AG
+freeze would make a city unlawfully withhold records it was obligated to release. Record-holds therefore mark the
+child and **never** stop the parent clock or block a sibling.
+
+**What Kevin got right on his own:** the parent carries the statutory **Due Date**; each child workstream carries
+a **Budgeted** due date + days ahead/behind. That split dissolves the Illinois problem (one request-level answer
+date, no installment safe harbor) and is the load-bearing idea in the spec. He also ruled (this session):
+**child tolling is the BUDGET clock, not the statutory clock** — column named `budget_clock`, never `tolling`.
+
+**Shipped (docs only).** `SPEC_parent_child_lifecycle.md` — the five axes (Stage · Task state · Outcome · Hold ·
+Clock), parent + child field lists with Kevin's value lists corrected, roll-up rules, record-hold vs clock-hold,
+**three things his sheet was missing that the law requires** (per-record withholding log with statutory citation;
+child disposition + delivery/installments; child appeal state distinct from the parent's fee dispute), the
+additive migration, 5 open questions, and a cited legal appendix. Cross-refs updated in the same commit:
+`ARCHITECTURE.md` item 1 (**amended** — "a child IS a full request row" retired), `SPEC_tasks_roles_mrr_fees.md`
+§12 (**superseded in part** — Layers 1 & 3 stand; the `request_items` storage fork is reversed), `DOMAIN_MAP.md`
+D5, `BUILD_PRIORITY_SUMMARY.md` item 11.
+
+**Migration shape (measured, not guessed).** 125 requests, `is_mrr`/`master_request_id`/`component_label` written
+by **zero** lines of code, **0 children ever created** → clean backfill. The existing `requests` row becomes the
+**CHILD and keeps its id**, so the 8 work-level FK tables (tasks, request_files, redaction_jobs,
+av_redaction_tasks, document_pages, fulfilled_records, request_selected_records, workflow_decisions) and every
+existing deep link keep working untouched; the 7 money/clock tables (request_clocks, request_fee_estimates,
+fee_payments, fee_adjustments, erp_charges, request_payment_events, objections) repoint to a new parent row.
+
+**Two live bugs the migration forces us to fix FIRST:** (a) the frontend drives stage advances through a legacy
+stage order containing a **ghost stage `custodian_retrieval`** that exists nowhere in the backend;
+(b) `feeNonpayment.js:39` and `tickler.js:88` bypass `applyStageTransition` with a raw
+`UPDATE requests SET stage='closed'` — no history row, open tasks left claimable (violates ARCHITECTURE item 6;
+would silently corrupt roll-up).
+
+**Open (Kevin's call, in spec §9):** parent `Processed` vs `Delivered`/`Closed` · should nonpayment toll (TX
+§552.263(e) is stronger — a **re-receipt**, not a toll) · clarification as re-receipt not toll (TX §552.222 +
+*City of Dallas v. Abbott*) — `tolling.js` today has **no RE_RECEIPT event type**, only tolls · `delivery_mode`
+Hold-All vs As-Ready as a real mode (WA RCW 42.56.080(2) makes installments an entitlement; TX §552.306(c)(2)(B)
+requires batch notices).
+
+**State:** `main`, tree clean, app healthy, no code touched. **Nothing is built from this spec — it is the
+contract, awaiting Kevin's answers to §9 before any migration or code.**

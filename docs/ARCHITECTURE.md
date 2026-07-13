@@ -1,8 +1,10 @@
 # Optimum Q — Architecture Contract (v2 foundational decisions)
 **Status: DRAFT — pending Kevin's ratification.** Drafted 2026-07-08 from the verified domain specs and the root-cause analysis of the v1 structural failures. Every build (human or AI) conforms to this document. Item 1 is the only open judgment call; items 2–7 are direct fixes for diagnosed v1 bugs.
 
-## 1. Every request is wrapped in a parent (ADOPTED — Kevin may veto)
-Every request — even single-item — is a **master with one or more child records**. A child IS a full request row; all by-id processing works on children unchanged. Uniform handling eliminates single-vs-multi special-casing and is required by the MRR design (D4 §11). Measured v1 adoption cost was bounded (5 creation sites + migration); in v2 it costs nothing extra if built this way from day one.
+## 1. Every request is wrapped in a parent (ADOPTED — amended 2026-07-13; see `SPEC_parent_child_lifecycle.md`)
+Every request — even single-record — is a **parent with one or more children**. Uniform handling eliminates single-vs-multi special-casing: filters, worklists and reports run over **child** rows, so "everything in redaction" lists single-record and multi-record children in one shape.
+
+**Amendment (2026-07-13):** the original clause "a child IS a full request row" is **wrong and is retired**. Parent and child carry **different fields**, because the law assigns different things to the request and to the record: exemptions, denials, redactions, record-holds and appeals are **record**-level; the statutory clock, the deadline, fees and everything that pauses the clock are **request**-level. Most consequentially, a record-hold (AG ruling, litigation, active investigation) **must never stop the parent clock or block a sibling** — Tex. ORD-664 holds the 10-day AG window "is not a grace period," so undisputed records must still go out. The field-by-field split, roll-up rules, and migration are specified in **`SPEC_parent_child_lifecycle.md`**, which also reconciles this item with `SPEC_tasks_roles_mrr_fees.md` §12.
 
 ## 2. Tasks are first-class, with a NULLABLE request link
 `tasks.request_id` is nullable. A task may attach to a request, a source, an import batch, or nothing. **Rationale:** v1's NOT NULL constraint forced the SYS-IMPORT pseudo-request hack — a fake request manufactured to hang import tasks on, producing the incomprehensible task-open experience.

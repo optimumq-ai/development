@@ -64,7 +64,13 @@ Applies to BOTH the chat AND the "Prefer a form" fallback. Needs a richer widget
 "**Profile**" (canonical term). Stores generating INPUTS per record type (quantities/stats/sample/expert-seed); the fee engine computes the estimate from them (standard OR commercial) into a detailed worksheet — not a stored total. `[engine BUILT; profiles table EMPTY — 0 populated]`
 **Known gap (taxonomy, open):** record types can be "buckets" with variants (e.g., building-permit sub-types), but the taxonomy has no level below `record_type` and profiles/redaction attach 1-per-type, so variants can't get distinct profiles. A variant-level / auto-discovery design is an OPEN taxonomy decision (held by Kevin, intentionally not captured here).
 
-## 12. Multi-record model — one request, many items `[MODEL AGREED 2026-07-10 — supersedes the prior "master/child / MRR" framing]`
+## 12. Multi-record model — one request, many items `[SUPERSEDED IN PART 2026-07-13 → see SPEC_parent_child_lifecycle.md]`
+> **Status (2026-07-13).** **Layer 1 (citizen) and Layer 3 (fees) below stand unchanged and are correct** — one request, one number, one fee, one deadline; no "combined vs separate"; fees computed once at the request level with per-request thresholds applied once.
+>
+> **Layer 2 (processing) and the storage fork are superseded.** This section's move to retire the parent row in favour of a `request_items` side table is **reversed**: a single-record request and a multi-record component must be the **same row shape**, or every query, worklist and report unions two shapes forever (Kevin's requirement: "a report of all requests in redaction should include single-request child records as well as MRR child records"). The model is **always-wrap: one parent, 1..n children**, with an **asymmetric field split** — the child is the unit of work; the parent is the unit of citizen relationship, money and the statutory clock. Read "item" below as "child."
+>
+> The binding document is **`SPEC_parent_child_lifecycle.md`** (field lists, the five-axis vocabulary, roll-up rules, record-hold vs clock-hold, the withholding log, and the additive migration).
+
 The prior framing ("every request wrapped in a parent master + child," "combined vs separate," "a child is a full request") is **retired** — it braided three separate layers together and manufactured a false fee risk. Clean model, answered by layer:
 
 **Core:** *A request has one or more items. The citizen sees one request, one number, one fee. Items are internal work-units that route and finish independently and roll up. Fees are computed once, at the request level. "Combined" is the default and the only path — there is no "combined vs separate."*
