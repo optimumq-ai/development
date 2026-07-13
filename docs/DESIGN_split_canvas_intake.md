@@ -142,18 +142,91 @@ Validated interactively in the clickable prototype. These update the Phase 0 / P
   re-disables (and unchecks) it on re-lock. (Mockup: the locked region dims its children individually, exempting
   the `.cert-visible` row, since CSS opacity on the parent would otherwise cap the child.)
 
-## Open gap — requestor's search-completeness intent `[CAPTURED 2026-07-13 — deferred, see BACKLOG R9]`
-Phase 2 captures **which records the requestor selected** and nothing about **what the selection means**. Two
-requestor intents have no expression today: **"nothing here matches, but file my request anyway"** (empty
-selection reads as abandonment, not as an instruction to the team to search) and **"these match, but keep
-looking — there should be more"** (a partial selection is indistinguishable from a complete one, so a request
-the requestor considers open can be fulfilled from the selected set and closed). Selection is currently doing
-double duty as an implicit completeness claim.
+## Search-completeness intent + refine-and-search-again `[DESIGNED 2026-07-13 with Kevin — ready to build; BACKLOG R9]`
 
-Direction: an explicit per-child **intent** captured on Proceed (complete · partial-search-more · no-match-search),
-persisted with that child's selected records and surfaced to the record-search task. Option set, agent copy,
-persistence, and the interaction with the PATH (b) team-search fork are **undesigned — discuss before building**.
-Sequenced after the redaction UI (Kevin, 2026-07-13).
+**The gap this closes.** Phase 2 captured **which records were selected** and nothing about **what the selection
+meant**. Selection was doing double duty as an implicit completeness claim, so two requestor intents had no
+expression: *"nothing here matches, but file my request anyway"* (an empty selection read as abandonment, not as
+an instruction to search) and *"these match, but keep looking — there should be more"* (a partial selection was
+indistinguishable from a complete one, so a request the requestor considered open could be fulfilled from the
+selected set and closed).
+
+### 1. The refine loop — one description, many searches `[NEW]`
+A description is no longer one-shot. The results canvas carries the **query that produced these results in an
+editable field** at the top ("Searching for: …") with a **Search again** button, and a **"Tried already:"** line
+listing the earlier queries for this description. Re-searching **replaces the results**; the **Selected Records
+column keeps everything already picked** and new picks **add** to it (dedup by record id; each stays removable).
+
+This moves the attach-and-clear boundary: **clear on Proceed, not on each search.** Within one description the
+requestor may search → select → re-describe → search again → select more, accumulating into one Selected panel.
+Only **Proceed** closes that description out and asks what the selection means. (The locked per-child
+attach-and-clear decision of 2026-07-10 is unchanged in intent — the child is still one description with its own
+selections; refining just means the child can be built from several searches.)
+
+The agent narrates each re-run in chat ("I re-ran that — 3 new results"); it does not own the control.
+
+### 2. Intent capture — conditional, at Proceed `[NEW]`
+**With ≥1 record selected** — Proceed **fades the results dark** (the fade already in the Phase-2 design) and
+raises a small window with **two buttons**:
+- **"These are all the records I want for this description"** → intent **`complete`**
+- **"Also have the Open Records team search for more"** → intent **`search_more`**
+- plus a quiet **‹ Keep refining** escape back to the canvas (the requestor realizes mid-decision they want another search).
+
+**With 0 records selected** — there is **no popup**. The Proceed button *itself* becomes the answer:
+**"Submit to Open Records team for search"** → intent **`no_match_search`**. Nothing was selected, so there is no
+choice to offer; asking would be ceremony.
+
+**PATH (b) descriptions** (email/text, audio, photos, data exports, paper) are **never searched** — no results are
+ever shown, so the requestor is never asked. Their child is recorded automatically with intent **`not_searchable`**.
+Kept distinct from `no_match_search` because the searcher needs to know whether the portal already searched and came
+up empty, or never searched at all.
+
+### 3. Persistence `[NEW]` — the per-description row the DB never had
+Today the client's `children[]` are flattened at submit: descriptions concatenated into one `description` string,
+selections flattened into one undifferentiated `request_selected_records` list. Intent is a property **of a
+description**, so it needs the per-description row to exist. This slice creates it — and in doing so restores the
+per-child provenance the 2026-07-10 decision wanted:
+
+- **`request_search_intents`** `[NEW table]` — one row per described record: `id · request_id · seq · description ·
+  intent ('complete' | 'search_more' | 'no_match_search' | 'not_searchable') · queries_tried (JSON array, in order) ·
+  created_at`.
+- **`request_selected_records.intent_id`** `[NEW nullable column]` → the description its selection answers.
+  Nullable; pre-existing rows stay NULL and render ungrouped.
+
+`queries_tried` is not bookkeeping — it tells the searcher **what the portal already searched**, so they don't
+repeat it.
+
+**Forward-compat with MRR:** when real parent/child splitting lands (`SPEC_tasks_roles_mrr_fees` §12,
+`BUILD_PRIORITY` item 11), each `request_search_intents` row **is** a child request — the row carries the child's
+description, its selections and its intent. This table is the shape that migration wants, not an obstacle to it.
+
+### 4. Surfacing to staff `[NEW]`
+`RequestWorkspacePage`'s existing "Records the Requestor Selected from Search Results" panel **groups by
+description** instead of listing one flat pile. Each group is headed by its description, an **intent chip**, and
+the queries already tried:
+
+| Intent | Chip | What the searcher must understand |
+|---|---|---|
+| `complete` | neutral — "Requestor: this is everything" | The selection answers the ask. |
+| `search_more` | **amber, loud** — "Requestor asked us to search for MORE" | **Fulfilling from the selection alone closes a request the requestor considers open.** |
+| `no_match_search` | **amber** — "No match in the portal results — team search required" | The portal searched and found nothing they wanted. Not abandonment. |
+| `not_searchable` | blue — "Not portal-searchable — team must pull" | Email/AV/photos/data/paper. Never searched. |
+
+When the **record-search task screen** is built (`SPEC_record_search_task_screen.md`), these become that task's
+instruction block — the first thing the searcher reads. Until then, the request workspace is the surface.
+
+### 5. Explicitly NOT in this slice (decided 2026-07-13)
+- **No mechanical gate.** A `search_more` / `no_match_search` intent is **captured and surfaced, not enforced** —
+  nothing blocks fulfillment off the selected records. A block needs an un-block (a searcher must be able to say
+  *"I searched; there is nothing more"*), and that is the **explicit found/not-found resolution state** already
+  queued as `BUILD_PRIORITY` **item 5** (D7). Building a half-gate here would be redone there. **When item 5 lands,
+  an unresolved `search_more` / `no_match_search` intent is exactly what it should block delivery on** — noted in
+  that item.
+- **No routing change.** Whether a `complete` selection should shorten or skip record search (the built-but-unwired
+  `request_selected_records` → `workflowEngine` gap, `SPEC_record_search_task_screen` §1) stays out. Intent makes
+  that decision *possible*; it is not this slice.
+- **No fee/estimate change.** A `search_more` request cannot have a final estimate until the team searches; the
+  estimate flow is untouched here.
 
 ## Email-accuracy gate — state machine `[RESOLVED 2026-07-10]`
 Resolves Open Question #1. Prototyped in `docs/mockups/split_canvas_intake.html`. The gate guards the lower
