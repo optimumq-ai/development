@@ -142,6 +142,19 @@ Validated interactively in the clickable prototype. These update the Phase 0 / P
   re-disables (and unchecks) it on re-lock. (Mockup: the locked region dims its children individually, exempting
   the `.cert-visible` row, since CSS opacity on the parent would otherwise cap the child.)
 
+## Open gap — requestor's search-completeness intent `[CAPTURED 2026-07-13 — deferred, see BACKLOG R9]`
+Phase 2 captures **which records the requestor selected** and nothing about **what the selection means**. Two
+requestor intents have no expression today: **"nothing here matches, but file my request anyway"** (empty
+selection reads as abandonment, not as an instruction to the team to search) and **"these match, but keep
+looking — there should be more"** (a partial selection is indistinguishable from a complete one, so a request
+the requestor considers open can be fulfilled from the selected set and closed). Selection is currently doing
+double duty as an implicit completeness claim.
+
+Direction: an explicit per-child **intent** captured on Proceed (complete · partial-search-more · no-match-search),
+persisted with that child's selected records and surfaced to the record-search task. Option set, agent copy,
+persistence, and the interaction with the PATH (b) team-search fork are **undesigned — discuss before building**.
+Sequenced after the redaction UI (Kevin, 2026-07-13).
+
 ## Email-accuracy gate — state machine `[RESOLVED 2026-07-10]`
 Resolves Open Question #1. Prototyped in `docs/mockups/split_canvas_intake.html`. The gate guards the lower
 form (Phone · delivery · **mailing address** · certification · PROCEED); its whole job is to force an accurate

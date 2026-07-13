@@ -399,6 +399,17 @@ Analyzed & hardened 2026-07-05. Threat: a malicious/malformed uploaded or import
 - Reduce the 1 GB upload cap.
 **Honest gap:** controls are preventive only — no malware scanning, no file-integrity monitoring, no self-repair. On a bad file the system fails safe (parse error → empty text). **Professional pen-test warranted before production (police/CJIS records).**
 
+### R9. Portal results canvas — requestor's "search completeness" intent (captured 2026-07-13, Kevin)
+**The gap.** The redesigned split-canvas intake (`docs/DESIGN_split_canvas_intake.md`, Phase 2) lets the requestor check boxes to **select** records from the search results and then click **Proceed**. That is the only signal it captures. It has **no way for the requestor to say what the selection actually means**, and the two missing cases are the ones the Open Records team most needs to know about:
+- **(a) No match, but submit anyway** — nothing in the results answers the ask, yet the requestor still wants the request filed so the team searches the sources the portal can't reach. Today an empty selection + Proceed is indistinguishable from "found nothing and gave up," and carries no instruction to the team.
+- **(b) Matched some, but keep looking** — the requestor selected one or more records as genuine matches **and** believes more exist. Today this looks identical to "this selection is complete," so the request can be fulfilled from the selected set alone and the team never knows more searching was wanted.
+
+**Why it matters.** Selection currently doubles as an implicit completeness claim. Downstream (record-search task, fee estimate, fulfillment) can't distinguish *"this is everything I want"* from *"this is a start — go find the rest,"* so a partial selection can silently close out a request the requestor considered open. It also interacts with the per-child attach-and-clear model (Decisions locked, 2026-07-10): the intent is a property **of the child request**, alongside its selected records.
+
+**Direction (not yet designed — discuss first).** On Proceed from the results canvas, capture an explicit requestor **intent/disposition** per child description — roughly: *selection is complete* · *selection is partial, please search for more* · *no match, please search*. Open questions for the design session: the exact option set + agent copy (the agent script must ask this naturally, not as a raw form control); where it persists (child request field vs. a structured intake note); how it surfaces to the team (record-search task instruction, request detail, queue marker); and whether "no match, please search" should shift the request onto the PATH (b) team-search fork.
+
+**Sequenced AFTER the redaction UI** (Kevin, 2026-07-13). Design doc gets the update in the same commit as the build.
+
 _Objection My Tasks visibility (standing passive watchers): decided AGAINST 2026-07-01. Single assigned owner, freely reassignable; team-level oversight via dashboard count (R1) once designed._
 
 ---
