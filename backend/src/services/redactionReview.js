@@ -53,9 +53,16 @@ async function spawnReviewTask(job, ctx) {
   });
 }
 
-// Reviewer approved & released -> close the open review task(s) for the request.
+// Reviewer approved & released -> close the open review task(s) for the request, but ONLY when no other
+// gated job on the request is still awaiting review. The qa task is per-request while jobs are per-file:
+// closing it on the first release would strand a second Elevated/Legal file with no reviewer tasked.
 async function completeReviewTask(requestId) {
+  var pending = await get(
+    "SELECT id FROM redaction_jobs WHERE request_id = ? AND disposition IN ('elevated','legal') " +
+    "AND review_stage IN ('pending_review','in_review') LIMIT 1", [requestId]);
+  if (pending) return { closed: false, pendingJobId: pending.id };
   await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE request_id = ? AND type = 'redaction_qa' AND status IN ('open','assigned','in_progress')", [requestId]);
+  return { closed: true };
 }
 
 // Reviewer sent it back to the author -> cancel the review task; a fresh one spawns when the author re-submits.

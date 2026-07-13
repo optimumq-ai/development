@@ -134,13 +134,21 @@ router.post('/jobs/:jobId/begin-review', requireAuth, async function(req, res) {
   res.json({ success: true, review_stage: job.review_stage });
 });
 
-// Send a job back to editing (reviewer returns it to the redactor).
+// Send a job back to editing (reviewer returns it to the redactor). A reason is required: the author
+// only learns what to fix from it, so it is recorded on the request's history.
 router.post('/jobs/:jobId/return', requireAuth, async function(req, res) {
   var job = await get('SELECT * FROM redaction_jobs WHERE id = ?', [req.params.jobId]);
   if (!job) return res.status(404).json({ error: 'Job not found' });
+  var note = (req.body && req.body.note ? String(req.body.note) : '').trim();
+  if (!note) return res.status(400).json({ error: 'Say what needs to change before returning this redaction to the author.' });
+  var reviewer = req.user.name || req.user.sub;
   await run("UPDATE redaction_jobs SET review_stage = 'editing', updated_at = datetime('now') WHERE id = ?", [req.params.jobId]);
+  var file = await get('SELECT original_name FROM request_files WHERE id = ?', [job.file_id]);
+  await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+    [uuidv4(), job.request_id, req.user.sub || null, reviewer, 'REDACTION_RETURNED',
+     'Returned to ' + (job.submitted_by || 'the author') + ' for rework — ' + ((file && file.original_name) || 'document') + ': ' + note]);
   await redactionReview.closeReviewTask(job.request_id); // reviewer returned it -> cancel the review task
-  res.json({ success: true, review_stage: 'editing' });
+  res.json({ success: true, review_stage: 'editing', note: note });
 });
 
 // GET /released -> the Fulfilled Request Index (Released Records Library)

@@ -1,12 +1,19 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
+import { useAuthStore } from '../store/authStore';
 
 // Redaction task screen (SPEC_redaction_automation.md slice 7 / SPEC_redaction_task_screen.md).
 // Full-bleed workstation a redaction/legal_redaction task opens into (not the generic request page).
 // Reuses the proven redaction canvas engine (job/pages/zones/discover/apply/template) and adds: a
 // responsive-file worklist, the per-file disposition badge, a 3-box accordion (AI / Manual / Finalize),
 // an informational side-by-side, and an in-document semantic search modal.
+//
+// REVIEWER MODE (slice 8): a `redaction_qa` task — the mandatory second review the slice-4 gate requires
+// for Elevated/Legal dispositions — opens this SAME screen with the same canvas, file picker and
+// side-by-side, but the right rail becomes review-shaped: the author's proposed redactions (page-anchored,
+// click to jump), an optional second-pass AI check for anything they missed, and an approve/return
+// decision instead of Finalize. The author can never approve their own work (backend gate + UI).
 
 var CAT_COLORS = {
   privacy: '#1E40AF', law_enforcement: '#991B1B', health: '#065F46', legal: '#5B21B6',
@@ -49,8 +56,11 @@ export default function RedactionTaskPage() {
   var [sxs, setSxs] = useState(false);              // side-by-side
   var [searchOpen, setSearchOpen] = useState(false);
   var [busy, setBusy] = useState('');
+  var [returnNote, setReturnNote] = useState('');
   var wrapRef = useRef(null);
   var dragRef = useRef(null);
+  var me = useAuthStore(function (s) { return s.user; });
+  var reviewMode = !!(task && task.type === 'redaction_qa');
 
   // ---- load task + its responsive files ----
   useEffect(function () { loadTask(); }, [taskId]);
@@ -71,18 +81,30 @@ export default function RedactionTaskPage() {
   // ---- open a file for redaction (ensure job, pages, zones; auto-run AI) ----
   useEffect(function () { if (fileId) openFile(fileId); }, [fileId]);
   async function openFile(fid) {
-    setError(''); setJob(null); setPages([]); setZones([]); setSuggestions([]); setSelected({}); setResult(null); setPageIdx(0); setMatchTpl(null);
+    setError(''); setJob(null); setPages([]); setZones([]); setSuggestions([]); setSelected({}); setResult(null); setPageIdx(0); setMatchTpl(null); setReturnNote('');
+    var isReview = !!(task && task.type === 'redaction_qa');
     try {
       var jr = await api.post('/redaction-jobs/file/' + fid + '/job');
-      setJob(jr.data.job); setPages(jr.data.pages); setZones(jr.data.zones || []);
+      var j = jr.data.job;
+      setPages(jr.data.pages); setZones(jr.data.zones || []);
       var rr = await api.get('/redaction/rules');
       var active = rr.data.rules.filter(function (r) { return r.approval_status === 'approved' && r.is_active; });
       setRules(active); if (active[0]) setRuleId(active[0].id);
       if (jr.data.pages[0]) loadImg(jr.data.pages[0]);
-      if (jr.data.job && jr.data.job.review_stage !== 'released') {
+      if (isReview) {
+        // Reviewer opens a submitted document: claim it (pending_review -> in_review) and show the author's
+        // work as-is. No auto AI scan and no template prompt — the author already made those calls; the
+        // reviewer asks for a second pass deliberately.
+        setOpen('proposed');
+        if (j && j.review_stage === 'pending_review') {
+          try { var br = await api.post('/redaction-jobs/jobs/' + j.id + '/begin-review'); j = Object.assign({}, j, { review_stage: br.data.review_stage }); } catch (e) {}
+        }
+      } else if (j && j.review_stage !== 'released') {
+        setOpen('ai');
         if (!(jr.data.zones || []).length) checkMatch(fid);
         discover(fid);   // auto-run the AI read on open
       }
+      setJob(j);
     } catch (e) { setError('Could not open this document. ' + msg(e)); }
   }
 
@@ -171,10 +193,25 @@ export default function RedactionTaskPage() {
   function toggleSel(k) { setSelected(function (m) { var n = Object.assign({}, m); if (n[k]) delete n[k]; else n[k] = true; return n; }); }
   function toggleSelAll(on) { var n = {}; if (on) suggestions.forEach(function (s) { n[s._k] = true; }); setSelected(n); }
 
+  // Reviewer sends it back. The reason is required (backend enforces it too) — it is the only thing the
+  // author gets to work from, and it lands on the request's history.
+  async function returnToAuthor() {
+    var note = returnNote.trim();
+    if (!note) { setError('Say what needs to change before returning this redaction to the author.'); return; }
+    setBusy('return');
+    try {
+      await api.post('/redaction-jobs/jobs/' + job.id + '/return', { note: note });
+      nav('/my-tasks');
+    } catch (e) { setError('Could not return this redaction. ' + msg(e)); }
+    setBusy('');
+  }
+
   async function apply() {
     if (!window.confirm('Approve and release ' + zones.length + ' redaction(s)? The redacted content is permanently removed from the released copy.')) return;
     setApplying(true);
-    try { var r = await api.post('/redaction-jobs/jobs/' + job.id + '/apply'); setResult(r.data); }
+    // The job row drives the rail's released state, so advance it here — the server has already
+    // moved it to `released` and a stale job leaves the operator on the pre-release rail.
+    try { var r = await api.post('/redaction-jobs/jobs/' + job.id + '/apply'); setResult(r.data); setJob(function (j) { return Object.assign({}, j, { review_stage: 'released' }); }); }
     catch (e) { setError((e.response && e.response.status === 403 ? 'Blocked: ' : e.response && e.response.status === 409 ? 'Not ready: ' : 'Release failed. ') + (msg(e) || '')); }
     setApplying(false);
   }
@@ -189,11 +226,17 @@ export default function RedactionTaskPage() {
   var dispo = job && job.disposition ? DISPO[job.disposition] : null;
   var reviewGated = job && (job.disposition === 'elevated' || job.disposition === 'legal');
   var released = job && job.review_stage === 'released';
+  // Reviewer-mode state: is this document actually awaiting me, and am I its author (who may never
+  // self-approve — the backend gate returns 403; the UI says so before they try).
+  var awaitingReview = job && (job.review_stage === 'pending_review' || job.review_stage === 'in_review');
+  var iAmAuthor = !!(job && job.submitted_by && me && String(job.submitted_by) === String(me.name || me.email));
+  var allZones = zones.slice().sort(sortReading);
 
   if (loading) return <div style={sty.center}>Opening redaction task…</div>;
 
   return (
     <div style={sty.root}>
+      <style>{'@keyframes spin{to{transform:rotate(360deg)}}'}</style>
       {/* command bar */}
       <div style={sty.bar}>
         <div style={sty.grp}>
@@ -226,9 +269,14 @@ export default function RedactionTaskPage() {
       {/* disposition strip */}
       <div style={sty.strip}>
         {dispo ? <span style={badge(dispo)}><span style={dot(dispo)} />{dispo.label}</span> : <span style={{ fontSize: '12px', color: '#8792A0' }}>Triaging…</span>}
+        {reviewMode ? <span style={sty.revTag}>Second review</span> : null}
         <span style={{ fontSize: '13px', color: '#48535F' }}>
-          {task && task.type === 'legal_redaction' ? 'Legal (advanced) redaction · ' : ''}
-          {reviewGated ? 'A second reviewer must approve before release.' : released ? 'Released.' : 'Review the AI suggestions, redact, and release.'}
+          {reviewMode
+            ? (released ? 'Released.'
+              : job && job.submitted_by ? 'Submitted by ' + job.submitted_by + ' for review. Approve to release, or return it to them.'
+                : 'Approve this redaction for release, or return it to the author.')
+            : (task && task.type === 'legal_redaction' ? 'Legal (advanced) redaction · ' : '') +
+              (reviewGated ? 'A second reviewer must approve before release.' : released ? 'Released.' : 'Review the AI suggestions, redact, and release.')}
         </span>
       </div>
 
@@ -281,7 +329,98 @@ export default function RedactionTaskPage() {
             {released ? (
               <div style={{ padding: '18px' }}>
                 <div style={sty.releasedBox}>✓ Released. {result ? 'A redacted copy + documentation sheet were generated.' : 'This document has been released.'}</div>
+                {reviewMode && files.length > 1 ? <div style={{ fontSize: '12.5px', color: '#48535F', marginBottom: '12px' }}>Use the file picker above to review the other documents on this request.</div> : null}
                 <button style={sty.railGhost} onClick={function () { nav('/my-tasks'); }}>Back to My Tasks</button>
+              </div>
+            ) : reviewMode ? (
+              <div style={sty.acc}>
+                {/* What the author proposes to redact — page-anchored, click to jump */}
+                <AccBox id="proposed" open={open} setOpen={setOpen} title="Proposed redactions" count={allZones.length} sub="What the author is asking to black out">
+                  <div style={sty.ailist}>
+                    {allZones.length === 0 ? (
+                      <div style={sty.warnBox}>The author proposed <b>no redactions at all</b>. Releasing now publishes this document unchanged — read every page before you approve.</div>
+                    ) : allZones.map(function (z) {
+                      var pi = pages.map(function (p) { return p.page_no; }).indexOf(z.page_no);
+                      var r = ruleOf(z.rule_id);
+                      return (
+                        <div key={z.id} style={Object.assign({}, sty.item, { cursor: 'pointer' })} onClick={function () { if (pi >= 0) gotoPage(pi); }}>
+                          <span style={Object.assign({}, sty.znumList, { background: catColor(z.rule_id) })}>{numById[z.id]}</span>
+                          <span style={{ flex: 1, minWidth: 0 }}>
+                            <span style={sty.itemTxt}>{r ? r.title : 'No rule cited'}</span>
+                            <span style={sty.itemWhy}>{r ? r.category_label || r.category : 'Ask the author which exemption this claims — an uncited box has no legal basis on the documentation sheet.'}</span>
+                          </span>
+                          <span style={sty.pgchip}>p. {z.page_no}</span>
+                          <button style={sty.remove} onClick={function (e) { e.stopPropagation(); delZone(z.id); }}>Remove</button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div style={sty.pad}>
+                    <div style={sty.divider} />
+                    <div style={{ fontSize: '12.5px', color: '#48535F', lineHeight: 1.5 }}>Spotted something the author missed? Pick a rule, then draw a box on the page — it joins the release you approve.</div>
+                    <select value={ruleId} onChange={function (e) { setRuleId(e.target.value); }} style={sty.select}>
+                      <option value="">(No rule / manual)</option>
+                      {rules.map(function (r) { return <option key={r.id} value={r.id}>{r.title} ({r.category_label})</option>; })}
+                    </select>
+                  </div>
+                </AccBox>
+
+                {/* Optional second-pass AI check — not auto-run; the reviewer asks for it */}
+                <AccBox id="ai" open={open} setOpen={setOpen} title="Second-pass AI check" count={suggestions.length} sub="Ask the AI what the author may have missed">
+                  <div style={sty.aisub}>
+                    <label style={sty.selall}><input type="checkbox" checked={suggestions.length > 0 && selCount === suggestions.length} onChange={function (e) { toggleSelAll(e.target.checked); }} /> Select all</label>
+                    <span style={{ flex: 1 }} />
+                    <button style={btnPrimary(suggestions.length === 0)} disabled={suggestions.length === 0} onClick={applySelected}>Add selected ({selCount})</button>
+                  </div>
+                  <div style={sty.ailist}>
+                    {discovering ? <div style={sty.scan}><div style={sty.spin} />Re-scanning the document…</div>
+                      : suggestions.length === 0 ? (
+                        <div style={sty.pad}>
+                          <div style={{ fontSize: '12.5px', color: '#48535F', lineHeight: 1.5 }}>Run the detector again to see whether anything exempt is still in the clear. Anything already redacted by the author won’t come back.</div>
+                          <button style={sty.railGhost} onClick={function () { discover(); }}>↻ Run AI check</button>
+                        </div>
+                      ) : suggestions.map(function (s) {
+                        return (
+                          <label key={s._k} style={Object.assign({}, sty.item, selected[s._k] ? sty.itemOn : null)}>
+                            <input type="checkbox" checked={!!selected[s._k]} onChange={function () { toggleSel(s._k); }} style={{ marginTop: '2px' }} />
+                            <span style={{ flex: 1, minWidth: 0 }}>
+                              <span style={sty.itemTxt}>{s.text}</span>
+                              {s.reason ? <span style={sty.itemWhy}>{s.reason}</span> : null}
+                              <span style={sty.itemRule}>{s.category ? <span style={sty.cat}>{s.category}</span> : null}{s.rule_title || 'No standing rule — pick one after adding'}</span>
+                            </span>
+                            <span style={sty.pgchip}>p. {s.page_no}</span>
+                          </label>
+                        );
+                      })}
+                  </div>
+                </AccBox>
+
+                {/* The decision */}
+                <AccBox id="decision" open={open} setOpen={setOpen} title="Decision" sub="Approve for release, or return it to the author">
+                  <div style={sty.pad}>
+                    {iAmAuthor ? (
+                      <div style={sty.warnBox}>You submitted this redaction, so you cannot approve it. A different reviewer has to. You can still return it to yourself for rework.</div>
+                    ) : !awaitingReview ? (
+                      <div style={sty.finban}>This document is not awaiting review right now (status: {(job && job.review_stage) || 'editing'}). Nothing to approve.</div>
+                    ) : (
+                      <div style={Object.assign({}, sty.finban, { background: '#FBEEDD', color: '#B4690E' })}>
+                        <b>{job && job.disposition === 'legal' ? 'Legal.' : 'Elevated.'}</b> You are the second reviewer. Approving releases the document — the black boxes are burned in permanently and a documentation sheet is generated.
+                      </div>
+                    )}
+                    <button style={btnPrimary(applying || iAmAuthor || !awaitingReview || zones.length === 0)}
+                      disabled={applying || iAmAuthor || !awaitingReview || zones.length === 0}
+                      onClick={apply}>{applying ? 'Releasing…' : 'Approve & release (' + zones.length + ')'}</button>
+                    <div style={sty.divider} />
+                    <div style={sty.lbl}>Return to the author</div>
+                    <textarea value={returnNote} onChange={function (e) { setReturnNote(e.target.value); }} rows={3}
+                      placeholder="What has to change? e.g. “The complainant’s DOB on page 2 is still in the clear, and box 4 cites no rule.”"
+                      style={sty.textarea} />
+                    <button style={Object.assign({}, sty.returnToAuthor, (busy === 'return' || !returnNote.trim()) ? { background: '#F3F6F9', color: '#8792A0', borderColor: '#D9E0E8', cursor: 'default' } : null)}
+                      disabled={busy === 'return' || !returnNote.trim()} onClick={returnToAuthor}>
+                      {busy === 'return' ? 'Returning…' : '↩ Return for rework'}
+                    </button>
+                  </div>
+                </AccBox>
               </div>
             ) : (
               <div style={sty.acc}>
@@ -499,6 +638,12 @@ var sty = {
   select: { width: '100%', fontSize: '12.5px', fontWeight: 600, color: '#14181D', background: '#fff', border: '1px solid #D9E0E8', borderRadius: '8px', padding: '8px', boxSizing: 'border-box' },
   zrow: { display: 'flex', alignItems: 'center', gap: '8px' },
   remove: { border: 'none', background: 'transparent', color: '#B02A37', cursor: 'pointer', fontSize: '12px', fontWeight: 600 },
+  revTag: { fontSize: '10.5px', letterSpacing: '.07em', textTransform: 'uppercase', fontWeight: 750, background: '#141D28', color: '#fff', padding: '3px 9px', borderRadius: '6px' },
+  znumList: { display: 'flex', alignItems: 'center', justifyContent: 'center', width: '19px', height: '19px', minWidth: '19px', borderRadius: '50%', color: '#fff', fontSize: '10.5px', fontWeight: 700, marginTop: '1px' },
+  pgchip: { fontFamily: 'ui-monospace,Menlo,monospace', fontSize: '10.5px', fontWeight: 700, color: '#48535F', background: '#EAEFF4', padding: '2px 6px', borderRadius: '5px', whiteSpace: 'nowrap', alignSelf: 'center' },
+  warnBox: { background: '#F8E7E8', border: '1px solid #E3B6BA', color: '#B02A37', borderRadius: '9px', padding: '11px 12px', fontSize: '12.5px', lineHeight: 1.5, margin: '8px 0' },
+  textarea: { width: '100%', boxSizing: 'border-box', fontSize: '12.5px', fontFamily: 'inherit', color: '#14181D', background: '#fff', border: '1px solid #D9E0E8', borderRadius: '8px', padding: '9px', resize: 'vertical' },
+  returnToAuthor: { width: '100%', background: '#fff', color: '#B02A37', border: '1px solid #E3B6BA', borderRadius: '8px', padding: '9px', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer' },
   finban: { fontSize: '12.5px', lineHeight: 1.5, padding: '11px 12px', borderRadius: '9px' },
   divider: { height: '1px', background: '#D9E0E8' },
   railGhost: { width: '100%', background: '#fff', color: '#1F4E79', border: '1px solid #D9E0E8', borderRadius: '8px', padding: '9px', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer' },

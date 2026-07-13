@@ -104,7 +104,9 @@ The hub decides the destination from `request_files.mimetype` (+ record-type str
 
 ## 5. Review workflow surfaced `[BUILT ops, NEW visibility]`
 
-The job review lifecycle already exists (`begin-review` → `submit` → `return` → `apply`/`released`). The hub should make it legible per file: who has it, what stage (`editing`/`review`/`released`), and the reviewer. Whether redaction + review are the **same** person/task or a **separate reviewer task** is an open decision (§8) — today `review_stage` lives on the job, not as its own routed task.
+The job review lifecycle already exists (`begin-review` → `submit` → `return` → `apply`/`released`). The hub should make it legible per file: who has it, what stage (`editing`/`review`/`released`), and the reviewer.
+
+**RESOLVED `[BUILT 2026-07-13]` (answers §9.1): a separate routed reviewer task, on the same screen.** A second person is mandatory for the **Elevated/Legal** dispositions only (Simple/Standard self-release); `submit` spawns a pooled **`redaction_qa`** task (`services/redactionReview.js`, slice 4), and the author can never release their own work (`gateApply` → 403). That task opens **`/redaction/:taskId` in reviewer mode** — the same `RedactionTaskPage`, same canvas and file picker, with the right rail swapped for **Proposed redactions** (page-anchored, click-to-jump) · **Second-pass AI check** (opt-in, not auto-run) · **Decision** (*Approve & release* → `/apply`, or *Return for rework* → `/return`, which requires a reason that lands on `request_history` as `REDACTION_RETURNED`). See `SPEC_redaction_automation.md` §7 slice 8.
 
 ---
 
@@ -142,7 +144,7 @@ The job review lifecycle already exists (`begin-review` → `submit` → `return
 
 ## 9. Open decisions / to confirm
 
-1. **Redaction vs. review — one task or two?** Today `review_stage` is a field on the job (same worker can edit then release). Do we want a separate routed **reviewer** task (second person), or keep single-worker with an in-screen review step? (Affects §5 and whether a `redaction_review` *task type* is needed vs. the current stage name.)
+1. ~~**Redaction vs. review — one task or two?**~~ **RESOLVED** — two, but on one screen: a routed `redaction_qa` task for Elevated/Legal only, opening this same screen in reviewer mode (§5).
 2. **Which files are in scope for the task?** All `responsive` files, or only files at/after record search selected as responsive? Confirm the worklist source query.
 3. **Structured-data detection** — is `is_structured_data` / `layout_profile.kind` reliably set at this point, or does the hub need a mimetype fallback?
 4. **Stage-order reconciliation** (§6) — confirm the canonical path redaction advances into (`redaction → delivery`) and schedule the workspace/`STAGE_ORDER` reconciliation as its own slice.
