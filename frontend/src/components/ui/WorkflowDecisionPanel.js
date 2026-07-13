@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../lib/api';
+import { STAGE_LABELS as STAGE_LABEL } from '../../lib/stages';
 
-var STAGE_LABEL = { intake:'Intake', record_search:'Record Search', redaction_review:'Redaction Review', fee_review:'Fee Review', awaiting_payment:'Awaiting Payment', custodian_retrieval:'Custodian Retrieval', delivery:'Delivery' };
 
 export default function WorkflowDecisionPanel({ requestId }) {
   var [d, setD] = useState(null);

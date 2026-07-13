@@ -3,9 +3,8 @@ import { Link } from 'react-router-dom';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
 import TaskPoolSection from '../components/ui/TaskPoolSection';
+import { STAGE_LABELS as STAGES, STAGE_COLORS as SC } from '../lib/stages';
 
-const STAGES = { intake:'Intake Review', record_search:'Record Search', redaction_review:'Redaction Review', fee_review:'Fee Review', awaiting_payment:'Awaiting Payment', custodian_retrieval:'Custodian Retrieval', delivery:'Delivery' };
-const SC = { intake:{bg:'#DBEAFE',color:'#1E40AF'}, record_search:{bg:'#EDE9FE',color:'#6D28D9'}, redaction_review:{bg:'#FEF3C7',color:'#92400E'}, fee_review:{bg:'#D1FAE5',color:'#065F46'}, awaiting_payment:{bg:'#FFEDD5',color:'#9A3412'}, custodian_retrieval:{bg:'#CCFBF1',color:'#0F766E'}, delivery:{bg:'#E0E7FF',color:'#3730A3'} };
 
 export default function MyTasksPage() {
   const store = useAuthStore();

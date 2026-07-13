@@ -10,12 +10,11 @@ import DocSearchPanel from '../components/ui/DocSearchPanel';
 import WorkflowDecisionPanel from '../components/ui/WorkflowDecisionPanel';
 import FeeWaiverDecisionPanel from '../components/ui/FeeWaiverDecisionPanel';
 import { useAuthStore } from '../store/authStore';
-
-const STAGES = ['intake','record_search','redaction_review','fee_review','awaiting_payment','custodian_retrieval','delivery'];
-const STAGE_LABELS = { intake:'Intake Review', record_search:'Record Search', redaction_review:'Redaction Review', fee_review:'Fee Review', awaiting_payment:'Awaiting Payment', custodian_retrieval:'Custodian Retrieval', delivery:'Delivery' };
-const STAGE_COLORS = { intake:{bg:'#DBEAFE',color:'#1E40AF'}, record_search:{bg:'#EDE9FE',color:'#6D28D9'}, redaction_review:{bg:'#FEF3C7',color:'#92400E'}, fee_review:{bg:'#D1FAE5',color:'#065F46'}, awaiting_payment:{bg:'#FFEDD5',color:'#9A3412'}, custodian_retrieval:{bg:'#CCFBF1',color:'#0F766E'}, delivery:{bg:'#E0E7FF',color:'#3730A3'} };
-const NEXT_STAGE = { intake:'record_search', record_search:'redaction_review', redaction_review:'fee_review', fee_review:'awaiting_payment', awaiting_payment:'delivery', custodian_retrieval:'redaction_review', delivery:'closed' };
-const NEXT_LABEL = { intake:'Advance to Record Search', record_search:'Advance to Redaction Review', redaction_review:'Advance to Fee Review', fee_review:'Advance to Awaiting Payment', awaiting_payment:'Confirm Payment & Advance', custodian_retrieval:'Advance to Redaction Review', delivery:'Mark as Fulfilled' };
+// ONE canonical stage vocabulary, mirroring backend/src/services/stages.js. The list that used to live here
+// was in a different order from the backend, omitted exemption_review / ag_review / redaction, and contained
+// a ghost stage (custodian_retrieval) that exists nowhere in the backend — and the Advance button below drove
+// LIVE stage writes off it.
+import { STAGE_ORDER as STAGES, STAGE_LABELS, STAGE_COLORS, nextStage, nextStageLabel } from '../lib/stages';
 
 
 function prettyChannel(ch) {
@@ -94,7 +93,7 @@ export default function RequestWorkspacePage() {
   async function advanceStage() {
     if (!request || !canAdvance) return;
     setAdvancing(true);
-    var next = NEXT_STAGE[request.stage];
+    var next = nextStage(request.stage);
     try {
       await api.patch('/requests/' + request.id + '/stage', { stage: next, notes: stageNote });
       setStageNote(''); setShowAdvance(false);
@@ -168,12 +167,12 @@ export default function RequestWorkspacePage() {
             <p style={{color:'#9CA3AF',fontSize:'13px',margin:'4px 0 0'}}>Submitted {new Date(request.created_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})} · {prettyChannel(request.submission_channel)}</p>
           </div>
         </div>
-        {!isComplete&&NEXT_STAGE[request.stage]&&(
+        {!isComplete&&nextStage(request.stage)&&(
           <div style={{display:'flex',flexDirection:'column',alignItems:'flex-end',gap:'6px'}}>
             <button onClick={function(){if(canAdvance)setShowAdvance(!showAdvance);}}
               disabled={!canAdvance}
               style={{padding:'10px 20px',background:canAdvance?'#1F4E79':'#9CA3AF',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:canAdvance?'pointer':'not-allowed',whiteSpace:'nowrap'}}>
-              {NEXT_LABEL[request.stage]||'Advance Stage'} →
+              {nextStageLabel(request.stage)||'Advance Stage'} →
             </button>
             {!canAdvance&&request.stage==='record_search'&&(
               <div style={{fontSize:'11px',color:'#D97706',textAlign:'right'}}>Attach and mark at least one Responsive record first</div>
@@ -184,7 +183,7 @@ export default function RequestWorkspacePage() {
 
       {showAdvance&&(
         <div style={{background:'#EBF3FB',border:'2px solid #1F4E79',borderRadius:'12px',padding:'20px'}}>
-          <h3 style={{margin:'0 0 12px',fontSize:'15px',fontWeight:'700',color:'#1F4E79'}}>Advance to: {STAGE_LABELS[NEXT_STAGE[request.stage]]||'Closed'}</h3>
+          <h3 style={{margin:'0 0 12px',fontSize:'15px',fontWeight:'700',color:'#1F4E79'}}>Advance to: {STAGE_LABELS[nextStage(request.stage)]||'Closed'}</h3>
           <textarea value={stageNote} onChange={function(e){setStageNote(e.target.value);}}
             placeholder="Optional notes for the audit log..."
             style={{width:'100%',padding:'10px 12px',border:'1px solid #D6E4F0',borderRadius:'8px',fontSize:'14px',outline:'none',minHeight:'80px',resize:'vertical',boxSizing:'border-box',fontFamily:'inherit',marginBottom:'12px'}}/>

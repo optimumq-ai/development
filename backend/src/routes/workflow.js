@@ -19,7 +19,10 @@ const VOCAB = {
     flags: 'array of strings, any of: LEGAL_HOLD, ONGOING_INVESTIGATION, SENSITIVE'
   },
   ops: ['gte','gt','lte','lt','eq','neq','in','contains','contains_any','is_true','is_false'],
-  stages: ['intake','record_search','redaction_review','fee_review'],
+  // The AI rule builder was previously handed a 4-stage vocabulary, so it could only ever emit a quarter of
+  // the pipeline (no exemption_review, ag_review, redaction, awaiting_payment...). One canonical list now.
+  // 'closed' is excluded: a workflow RULE routes work, it does not close a request — that is a decision.
+  stages: require('../services/stages').ORDER.filter(function (s) { return s !== 'closed'; }),
   teams: ['matched (the team that owns the matched record type)','open_records (the Open Records team)']
 };
 

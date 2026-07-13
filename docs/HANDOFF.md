@@ -2064,3 +2064,44 @@ survey seed 35/35 · stage bypass 24/24 · jurisdiction_rules 24/24.
 **State:** `main`, tree clean, app healthy. **Spec §8's bug pair is now fully closed** (the ghost
 `custodian_retrieval` stage in the frontend's legacy stage order is the one item left from that pair — frontend,
 untouched). **The parent/child migration is the next real work and remains blocked on Kevin's spec §9 answers.**
+
+## 2026-07-13 (lc) — ONE stage vocabulary. The ghost is gone, and it was hiding a worse bug — 23/23
+
+**Kevin: "fix the ghost custodian_retrieval stage in the frontend."** The ghost was a symptom. There were
+**THREE divergent stage vocabularies**, and the frontend's drove **live stage writes**.
+
+| Where | What it said |
+|---|---|
+| `taskRouting.STAGE_ORDER` (canonical) | intake · fee_review · awaiting_payment · record_search · exemption_review · ag_review · redaction_review · redaction · delivery · closed |
+| **6 frontend files** (each its own copy) | intake → **record_search** → redaction_review → **fee_review** → awaiting_payment → delivery, **+ ghost `custodian_retrieval`**, and **no** exemption_review / ag_review / redaction |
+| `routes/workflow.js` VOCAB (AI rule builder) | 4 stages: intake, record_search, redaction_review, fee_review |
+
+**The real bug the ghost was hiding:** `RequestWorkspacePage`'s Advance button wrote stages from the frontend
+list. So an operator advancing a request walked a pipeline **the backend does not have** — it went to
+record_search *before* fee_review (skipping the money), and **could never reach `redaction`,
+`exemption_review` or `ag_review` at all.** Separately, the AI workflow-rule builder was handed a 4-stage
+vocabulary, so it could only ever emit a quarter of the pipeline.
+
+**Shipped.** `backend/src/services/stages.js` — ONE definition (order + labels + `next()`), which
+`taskRouting` and `routes/workflow.js` now both consume. `GET /api/stages` serves it.
+`frontend/src/lib/stages.js` is a static mirror (labels + colours + `nextStage()`); all **6** frontend files
+import it and **none keeps a private copy**. The three stages the UI never knew about got badge colours in the
+existing palette's idiom (exemption_review slate · ag_review rose — it is the one stage that hands control to
+an outside authority · redaction in the amber family with redaction_review). `nextStage()` of an unknown stage
+returns **null**, so the Advance button simply does not render rather than guessing a destination.
+
+**Verified 23/23** (`verify_stages.js`, Playwright on the real app): the ghost appears in **no** frontend or
+backend code (comments explaining it are allowed; code references are not) · **FRONTEND↔BACKEND PARITY** — the
+mirror is compared to `GET /api/stages`, so a future edit to one and not the other **fails a test instead of
+rotting** · all 10 stages have a label and a colour · no page keeps a private copy · the workflow VOCAB is
+canonical · `next(intake) = fee_review` (not record_search) · redaction is reachable · the **live UI** offers
+"Advance to Fee Review", renders the full 10-stage pipeline, shows no Custodian Retrieval, throws no runtime
+errors · the advance succeeds through the real endpoint and history records `intake → fee_review`.
+Screenshot: `stages_workspace.png`. FE rebuilt (`main.908f1d35`), nginx serving it.
+
+**FULL SUITE GREEN — 167 assertions, 0 failures:** stages 23/23 · stage bypass 24/24 · extend 30/30 ·
+deposit clock 31/31 · survey seed 35/35 · jurisdiction_rules 24/24.
+
+**State:** `main`, tree clean, app healthy. **Spec §8's bug pair is now FULLY closed** (both the raw-`UPDATE`
+bypasses and the ghost stage). **The parent/child migration is the next real work and remains blocked on
+Kevin's spec §9 answers.**

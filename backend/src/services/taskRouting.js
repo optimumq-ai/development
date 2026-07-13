@@ -330,7 +330,7 @@ async function spawnForStage(requestId, stage, createdBy) {
 // pipeline is not strictly linear (AG / exemption are side branches), but this order reflects how a
 // request normally progresses and is the single source of truth for what counts as a forward advance.
 // Keep in sync with the stage values the pipeline uses; an unknown stage is treated as NOT forward.
-var STAGE_ORDER = ['intake', 'fee_review', 'awaiting_payment', 'record_search', 'exemption_review', 'ag_review', 'redaction_review', 'redaction', 'delivery', 'closed'];
+var STAGE_ORDER = require('./stages').ORDER; // ONE canonical vocabulary — see services/stages.js
 function isForwardStage(fromStage, toStage) {
   var fi = STAGE_ORDER.indexOf(fromStage), ti = STAGE_ORDER.indexOf(toStage);
   if (fi === -1 || ti === -1) {

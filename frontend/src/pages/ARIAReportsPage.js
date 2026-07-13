@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
+import { STAGE_LABELS as STAGES } from '../lib/stages';
 
-const STAGES = { intake:'Intake Review', record_search:'Record Search', redaction_review:'Redaction Review', fee_review:'Fee Review', awaiting_payment:'Awaiting Payment', custodian_retrieval:'Custodian Retrieval', delivery:'Delivery' };
 const COLORS = ['#1F4E79','#2E75B6','#5B9BD5','#843C0C','#375623','#7030A0','#1F3864','#7F6000'];
 
 export default function ARIAReportsPage() {
