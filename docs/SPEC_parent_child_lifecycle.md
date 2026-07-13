@@ -79,12 +79,16 @@ Kevin's sheet, corrected and extended. (The sheet's last three payment values la
 | `tolled_days` | Kevin's "Tolling {N} Days" — the accumulated suspension, already computed by the built `tolling.js` derived clock. |
 | `budget_variance` | Kevin's "Budget Date +/-" — days ahead/late, **calculated from child data** (see §6.3). Management signal, not legal. |
 
-**Two kinds of clock event, and we currently model only one.** `tolling.js` supports a *toll* (suspend, then resume). Texas requires a second kind — a **re-receipt / restart**:
-- §552.222 clarification: the 10-day clock is *measured from the date the request is clarified* (*City of Dallas v. Abbott*, 304 S.W.3d 380 (Tex. 2010)). That is a **reset of `submit_date`**, not a pause.
-- §552.263(e) deposit: the request is "considered to have been received … on the date the governmental body receives the deposit." Also a **reset**.
+**Two kinds of clock event — and both primitives already exist.** (Corrected 2026-07-13 after the audit in §10; an earlier draft of this section wrongly said the reset primitive was missing.)
+- **Toll** — suspend, then resume. `tolling.js:108` `toll()` / `:119` `resume()`.
+- **Re-receipt / restart** — reset the clock's epoch so it runs a clean full duration from now. **`tolling.js:132` `restart()` is BUILT** (closes any open toll, resets `started_at`, and `computeStatus`'s clamp at `:37` prevents pre-restart toll time from inflating the new due date). One caller today (`clarificationAction.js:200`); no route, no UI.
+
+Texas needs the second kind in three places:
+- §552.222 clarification: the 10-day clock is *measured from the date the request is clarified* (*City of Dallas v. Abbott*, 304 S.W.3d 380 (Tex. 2010)) — a **reset**, not a pause. Already expressible: the `clarification_clock_effect` enum value `toll_and_restart` maps to exactly this (`clarificationAction.js:32-42`).
+- §552.263(e) deposit: the request is "considered … received on the date the governmental body receives the deposit" — a **reset**. **No rule slot exists** (§10).
 - §552.2325 catastrophe suspension is the *only true toll* in the Texas Act (max 14 days).
 
-→ **Required change:** `clock_events` needs an event type of `RE_RECEIPT` alongside `TOLL_START` / `TOLL_END`. Modeling a clarification as a toll under-counts the city's remaining time and will report false lateness.
+**A third primitive is genuinely absent: `extend()`.** `toll()` pushes the due date out by *elapsed wall time*, which cannot express "+10 statutory days for unusual volume" (IL §3(e), CA §7922.535(b)). See §10.
 
 ### 4.3 Money
 | Field | Values |
@@ -261,10 +265,49 @@ Backfill per existing request: create parent, copy the citizen/money/clock colum
 ## 9. Open questions for Kevin
 
 1. **Parent `Processed` vs `Delivered`.** Your sheet's parent Stage ends at `Processed`. I've added `Delivered` and `Closed` because nothing otherwise records that records went out. Confirm, or tell me `Processed` already meant "delivered."
-2. **Should nonpayment toll the statutory clock?** Today it does not (`payment_pending` is declared in `tolling.js` and never invoked), so a request sitting unpaid runs late on paper. Texas is stronger than a toll: an unpaid deposit **re-receipts** the request (§552.263(e)) and can withdraw it (§552.263(f); §552.221(e) 60-day). Recommend: yes — implement as a `RE_RECEIPT`, not a toll.
-3. **Clarification: reset, not pause.** Confirm we implement §552.222 / *City of Dallas v. Abbott* as a re-receipt (resets `submit_date`) rather than a toll. This changes reported lateness on live requests.
+2. **Should nonpayment stop the statutory clock?** Today it does not — `payment_pending` is declared in `tolling.js` and has **zero callers**, so a request sitting on an unpaid deposit runs late on paper. Texas is stronger than a toll: an unpaid deposit **re-receipts** the request (§552.263(e)) and can withdraw it (§552.263(f); §552.221(e) 60-day). Recommend: add `deposit_nonpayment_effect: pause | reset | withdraw | flag_only` and set TX = `reset` (§10.4 step 3). The `restart()` primitive it needs is already built.
+3. **Clarification: reset, not pause.** Confirm we implement §552.222 / *City of Dallas v. Abbott* as a reset rather than a toll. **This is already expressible** — set `clarification_clock_effect = toll_and_restart` for TX (`clarificationAction.js:32-42`). It is not set today: the policy is at all-defaults (`no_fixed_clock`, `enabled: false`) and nothing is attested, so the automation has never fired. Turning it on **changes reported lateness on live requests**.
 4. **`delivery_mode` = `Hold-All` (default) | `As-Ready`.** Confirm you want As-Ready as a real mode rather than an MRR-only override (§5.8).
 5. **Routing for MRR stays purely manual** for now (your call, 2026-07-13): parent assigned to an MRR manager who assigns children by hand. Intake review is bypassed for MRR because the parent is already with an Open Records team member. Confirmed — recorded here, no action.
+
+---
+
+## 10. Jurisdiction rule configuration — what exists, what is missing
+*Audited 2026-07-13 against the running code and the live DB. Kevin's question: "do we have code that automatically configures where state laws require re-receipt for unpaid deposit, resetting the clock vs pause?" Answer: **the engine exists, the per-state rule slot does not.***
+
+### 10.1 BUILT — and better than the docs claim
+| Capability | Where |
+|---|---|
+| Multi-clock engine, business/calendar basis, holiday set, derived due date, toll ledger | `tolling.js`, `deadlineCalc.js`; tables `request_clocks`, `clock_tolls` |
+| Clock **pause / resume** | `tolling.js:108` `toll()`, `:119` `resume()` |
+| Clock **reset / re-receipt** | `tolling.js:132` `restart()` — **BUILT** (1 caller, no route, no UI) |
+| Per-classification durations (simple/standard/complex/redaction_required) | `system_config['deadline_rules']`, populated |
+| **Clarification → clock effect: the working template for all of this** | `clarificationPolicy.js:29` validated 6-value enum + `clarificationAction.js:32-42` effect→action mapper: `toll_pause_resume` · `toll_and_restart` · `start_gate` · `runs_no_stop` · `operational_hold` · `no_fixed_clock` |
+| Clarification grace → auto-close | `clarificationTimeout.js` |
+| AI extraction of deadline/clarification rules from statute text, staged as reviewable proposals | `configExtractors.js:130-141`, `clarificationPolicyExtract.js` |
+| Attestation gate + drift re-arm | `jurisdictionProfile.js:112-128`, `enforcement.js` |
+
+**`clarificationAction.js` is the pattern to copy for every other clock rule.** Config enum → effect plan → engine primitive → history → attestation gate. It is already end-to-end.
+
+### 10.2 ABSENT — the four gaps
+1. **No per-jurisdiction rules row — the structural gap under everything else.** `jurisdiction_profiles` is a 7-column identity table (`code, name, statute_name, statute_citation, status, exemption_model`) with **nowhere to put a rule**. `deadline_rules` and `clarification_policy` are **global singletons in `system_config`**. `clarificationPolicy.read(jid)` accepts a jurisdiction id and **discards it** (`clarificationPolicy.js:122`, comment: *"jid accepted for interface parity; storage is global today"*). Every per-state story requires fixing this first.
+2. **No deposit → clock rule.** `'payment_pending'` is declared as a toll reason (`tolling.js:16`) and has **zero callers**; `feeNonpayment.js`, `paymentTiming.js`, `paymentStatus.js` and `tickler.js` do not import `tolling` at all. An overdue deposit only sets a flag (`tickler.js:113`), so **the statutory clock keeps running on an unpaid request** — false lateness (spec §9, open question 2).
+3. **No volume extension, and no primitive that could express one.** `'extension'` exists only as an unread string in `tollReasons` and an `<option>` in `RequestWorkspacePage.js:266`. `toll()` moves the due date by *elapsed wall time*; it cannot do "+10 statutory days" (IL §3(e), CA §7922.535(b)). Needs a new `extend(clockId, days, reason)` writing to `request_clocks.duration` with an audit row.
+4. **`tollReasons` is inert.** Declared per clock in config, **never read** — `toll()` accepts any string unvalidated (`tolling.js:108`).
+
+### 10.3 The data that exists — and where it isn't
+- **`CLARIFICATION_POLICY_SURVEY.md` holds 17 jurisdictions** (AL, AR, OK, NC, GA, PA, MI, ID, FL, AZ, CA, WA, NJ, RI, IL, KS, MS) with `clock_effect`, `grace_days`, `abandonment_closure`, `notice_required` and citations — **already in the exact shape `clarificationPolicy.js` validates**. It is **markdown, not data**: 0 rows in the DB.
+- **`jurisdiction_profiles` has ONE row — Texas.** `clock_tolls` has **0 rows**: no clock has ever been tolled in production. All 7 profile sections have `attested_by = NULL`, so every automation gate is closed and the clarification automation has never fired.
+- **Two docs are false and are corrected in this commit:** `SPEC_jurisdiction_configuration.md` claimed "three state profiles loaded" (there is one); `CONFIG_FRESHNESS_DESIGN.md` claimed four TX config sources are seeded (`config_sources` has zero rows).
+
+### 10.4 Build order (do this before, or alongside, the parent/child migration)
+1. **`jurisdiction_rules(jurisdiction_id, domain, config_json)`** — move `deadline_rules` and `clarification_policy` off `system_config` onto a jurisdiction-scoped store. Small migration; the extractor adapters already take the `jid` they currently throw away.
+2. **Load the 17 surveyed states** as data. They are already in the validated shape.
+3. **Deposit rule slot** — one enum `deposit_nonpayment_effect: pause | reset | withdraw | flag_only`, one `effectPlan`-style switch wired into the tickler's deposit branch. ~60 lines, a direct copy of `clarificationAction.js`. TX = `reset` (§552.263(e)) with withdrawal on lapse (§552.263(f), §552.221(e)).
+4. **`extend(clockId, days, reason)`** — the one genuinely new engine primitive, for statutory volume extensions.
+5. **Make `tollReasons` load-bearing** — validate `toll()` against the clock's configured reasons.
+
+**Relationship to the parent/child model:** all of this lives on the **parent** (the clock is parent-level, §2). None of it touches the child. The two workstreams are therefore independent and can be built in either order — but the roll-up rules in §6 assume the parent clock is trustworthy, so a request whose clock runs while a deposit is unpaid will report false lateness on every child beneath it.
 
 ---
 

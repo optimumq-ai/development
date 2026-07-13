@@ -21,6 +21,10 @@ Tables:
 - config_sources(id, jurisdiction_id, domain, label, url, active, last_checked_at, last_change_at,
   last_version_hash, notes, created_at) - per-jurisdiction registry of WHERE each domain's governing text lives.
   Seeded 4 TX sources (redaction, fee, deadline, exemption) pointing at the TPIA / OAG cost rules.
+  > **Correction 2026-07-13 (audited against the live DB): the seed never landed. `config_sources` has ZERO rows**
+  > — as do `config_proposals`, `config_source_snapshots` and `scheduled_config_changes`. The extraction pipeline
+  > (`configExtractors.js`) is real and works, but **no proposal has ever been staged**. See
+  > `SPEC_parent_child_lifecycle.md` §10.
 - config_proposals(id, jurisdiction_id, domain, status[pending|applied|dismissed], summary, proposed_json,
   source_ref, created_by, created_at, reviewed_by, reviewed_at) - GENERIC staging for domains without a native
   pending store. Redaction uses its OWN native staging (redaction_rules.approval_status='pending_review').

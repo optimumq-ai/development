@@ -1774,3 +1774,41 @@ requires batch notices).
 
 **State:** `main`, tree clean, app healthy, no code touched. **Nothing is built from this spec — it is the
 contract, awaiting Kevin's answers to §9 before any migration or code.**
+
+## 2026-07-13 (ew) — Jurisdiction rule-config audit folded into the spec (§10) — no code
+
+**Kevin's question:** "do we have code that automatically configures where state laws require re-receipt for unpaid
+deposit, resetting the clock vs pause? I recall gathering info for several states." **Answered by audit, on paper.**
+
+**The engine exists; the per-state rule SLOT does not.**
+- **BUILT and better than the docs said:** `tolling.js:132` **`restart()` — a true clock reset/re-receipt** (closes
+  open tolls, resets `started_at`, clamped so pre-restart toll time can't inflate the new due date). **The (dv) spec
+  draft wrongly said this was missing — corrected in §4.2.** Also built: the whole **clarification** path, which is
+  *the template for every other clock rule* — a validated 6-value enum (`clarificationPolicy.js:29`) → an
+  effect→action mapper (`clarificationAction.js:32-42`: `toll_pause_resume` · `toll_and_restart` · `start_gate` ·
+  `runs_no_stop` · `operational_hold` · `no_fixed_clock`) → engine primitive → history → attestation gate. Plus a
+  real AI statute-extraction pipeline (`configExtractors.js`).
+- **ABSENT (4 gaps):** (1) **no per-jurisdiction rules row** — `jurisdiction_profiles` is 7 columns of identity with
+  nowhere to put a rule; `deadline_rules` and `clarification_policy` are **global `system_config` singletons**, and
+  `clarificationPolicy.read(jid)` *accepts a jurisdiction id and discards it* (`:122`). (2) **no deposit→clock rule**
+  — `payment_pending` declared, **zero callers**; the fee/tickler modules don't even import `tolling`, so the
+  statutory clock **runs on an unpaid request** (false lateness). (3) **no volume extension, and no primitive that
+  could express one** — `toll()` moves the due date by *elapsed wall time*, not "+10 statutory days"; needs
+  `extend(clockId, days, reason)`. (4) `tollReasons` is **inert** — declared per clock, never read.
+
+**Live DB reality:** `jurisdiction_profiles` = **1 row (TX)**. `clock_tolls` = **0 rows — no clock has ever been
+tolled in production**. All 7 profile sections `attested_by = NULL` → every automation gate closed. Kevin's
+**17-state `CLARIFICATION_POLICY_SURVEY.md`** (AL AR OK NC GA PA MI ID FL AZ CA WA NJ RI IL KS MS, with
+`clock_effect` / `grace_days` / `abandonment_closure` / citations) is **already in the exact shape the code
+validates — but it is markdown, not data.**
+
+**Two false doc claims corrected in this commit:** `SPEC_jurisdiction_configuration.md` said "three state profiles
+loaded" (**one**); `CONFIG_FRESHNESS_DESIGN.md` said 4 TX config sources were seeded (**`config_sources` = 0 rows**).
+
+**Build order now on paper (spec §10.4):** (1) `jurisdiction_rules(jurisdiction_id, domain, config_json)` — small
+migration, the extractor adapters already take the `jid` they throw away; (2) load the 17 surveyed states as data;
+(3) `deposit_nonpayment_effect: pause|reset|withdraw|flag_only` + an `effectPlan` switch in the tickler's deposit
+branch (~60 lines, a direct copy of `clarificationAction.js`; TX = `reset`); (4) `extend()`; (5) make `tollReasons`
+load-bearing. **All parent-level — independent of the parent/child migration, buildable in either order.**
+
+**State:** `main` @ tree clean, app healthy, **no code touched**. Still awaiting Kevin's answers to spec §9.
