@@ -136,6 +136,20 @@ export default function RedactionTaskPage() {
     try { var r = await api.get('/files/page-image/' + page.id, { responseType: 'blob' }); var url = URL.createObjectURL(r.data); setImgUrls(function (m) { var n = Object.assign({}, m); n[page.id] = url; return n; }); } catch (e) {}
   }
   function gotoPage(i) { if (i < 0 || i >= pages.length) return; setPageIdx(i); loadImg(pages[i]); }
+  // Every rail list is document-wide, so each entry carries the page it lives on and jumps the canvas
+  // there. Without it a proposal on page 37 is a line of text with nowhere to go.
+  function jumpToPageNo(pageNo) {
+    var i = pages.map(function (p) { return p.page_no; }).indexOf(pageNo);
+    if (i >= 0) gotoPage(i);
+  }
+  function PageChip(props) {
+    return (
+      <button type="button" title={'Go to page ' + props.pageNo} style={sty.pgchip}
+        onClick={function (e) { e.preventDefault(); e.stopPropagation(); jumpToPageNo(props.pageNo); }}>
+        p. {props.pageNo}
+      </button>
+    );
+  }
 
   var page = pages[pageIdx];
   function sortReading(a, b) { if (a.page_no !== b.page_no) return a.page_no - b.page_no; if (Math.abs(a.y - b.y) > 0.02) return a.y - b.y; return a.x - b.x; }
@@ -231,6 +245,7 @@ export default function RedactionTaskPage() {
   var awaitingReview = job && (job.review_stage === 'pending_review' || job.review_stage === 'in_review');
   var iAmAuthor = !!(job && job.submitted_by && me && String(job.submitted_by) === String(me.name || me.email));
   var allZones = zones.slice().sort(sortReading);
+  var allSuggestions = suggestions.slice().sort(sortReading);   // reading order, so the list tracks the document
 
   if (loading) return <div style={sty.center}>Opening redaction task…</div>;
 
@@ -349,7 +364,7 @@ export default function RedactionTaskPage() {
                             <span style={sty.itemTxt}>{r ? r.title : 'No rule cited'}</span>
                             <span style={sty.itemWhy}>{r ? r.category_label || r.category : 'Ask the author which exemption this claims — an uncited box has no legal basis on the documentation sheet.'}</span>
                           </span>
-                          <span style={sty.pgchip}>p. {z.page_no}</span>
+                          <PageChip pageNo={z.page_no} />
                           <button style={sty.remove} onClick={function (e) { e.stopPropagation(); delZone(z.id); }}>Remove</button>
                         </div>
                       );
@@ -379,7 +394,7 @@ export default function RedactionTaskPage() {
                           <div style={{ fontSize: '12.5px', color: '#48535F', lineHeight: 1.5 }}>Run the detector again to see whether anything exempt is still in the clear. Anything already redacted by the author won’t come back.</div>
                           <button style={sty.railGhost} onClick={function () { discover(); }}>↻ Run AI check</button>
                         </div>
-                      ) : suggestions.map(function (s) {
+                      ) : allSuggestions.map(function (s) {
                         return (
                           <label key={s._k} style={Object.assign({}, sty.item, selected[s._k] ? sty.itemOn : null)}>
                             <input type="checkbox" checked={!!selected[s._k]} onChange={function () { toggleSel(s._k); }} style={{ marginTop: '2px' }} />
@@ -388,7 +403,7 @@ export default function RedactionTaskPage() {
                               {s.reason ? <span style={sty.itemWhy}>{s.reason}</span> : null}
                               <span style={sty.itemRule}>{s.category ? <span style={sty.cat}>{s.category}</span> : null}{s.rule_title || 'No standing rule — pick one after adding'}</span>
                             </span>
-                            <span style={sty.pgchip}>p. {s.page_no}</span>
+                            <PageChip pageNo={s.page_no} />
                           </label>
                         );
                       })}
@@ -434,7 +449,7 @@ export default function RedactionTaskPage() {
                   <div style={sty.ailist}>
                     {discovering ? <div style={sty.scan}><div style={sty.spin} />Scanning document for exempt content…<div style={{ fontSize: '11.5px', color: '#8792A0', marginTop: '6px' }}>AI · runs automatically on open</div></div>
                       : suggestions.length === 0 ? <div style={{ fontSize: '13px', color: '#8792A0', padding: '10px 2px' }}>No AI suggestions{zones.length ? ' remaining' : ''}. Draw boxes manually if needed.</div>
-                        : suggestions.map(function (s) {
+                        : allSuggestions.map(function (s) {
                           return (
                             <label key={s._k} style={Object.assign({}, sty.item, selected[s._k] ? sty.itemOn : null)}>
                               <input type="checkbox" checked={!!selected[s._k]} onChange={function () { toggleSel(s._k); }} style={{ marginTop: '2px' }} />
@@ -443,6 +458,7 @@ export default function RedactionTaskPage() {
                                 {s.reason ? <span style={sty.itemWhy}>{s.reason}</span> : null}
                                 <span style={sty.itemRule}>{s.category ? <span style={sty.cat}>{s.category}</span> : null}{s.rule_title || 'No standing rule — pick one after adding'}</span>
                               </span>
+                              <PageChip pageNo={s.page_no} />
                             </label>
                           );
                         })}
@@ -640,7 +656,7 @@ var sty = {
   remove: { border: 'none', background: 'transparent', color: '#B02A37', cursor: 'pointer', fontSize: '12px', fontWeight: 600 },
   revTag: { fontSize: '10.5px', letterSpacing: '.07em', textTransform: 'uppercase', fontWeight: 750, background: '#141D28', color: '#fff', padding: '3px 9px', borderRadius: '6px' },
   znumList: { display: 'flex', alignItems: 'center', justifyContent: 'center', width: '19px', height: '19px', minWidth: '19px', borderRadius: '50%', color: '#fff', fontSize: '10.5px', fontWeight: 700, marginTop: '1px' },
-  pgchip: { fontFamily: 'ui-monospace,Menlo,monospace', fontSize: '10.5px', fontWeight: 700, color: '#48535F', background: '#EAEFF4', padding: '2px 6px', borderRadius: '5px', whiteSpace: 'nowrap', alignSelf: 'center' },
+  pgchip: { fontFamily: 'ui-monospace,Menlo,monospace', fontSize: '10.5px', fontWeight: 700, color: '#1F4E79', background: '#EAEFF4', border: '1px solid #D9E0E8', padding: '3px 7px', borderRadius: '6px', whiteSpace: 'nowrap', alignSelf: 'center', cursor: 'pointer' },
   warnBox: { background: '#F8E7E8', border: '1px solid #E3B6BA', color: '#B02A37', borderRadius: '9px', padding: '11px 12px', fontSize: '12.5px', lineHeight: 1.5, margin: '8px 0' },
   textarea: { width: '100%', boxSizing: 'border-box', fontSize: '12.5px', fontFamily: 'inherit', color: '#14181D', background: '#fff', border: '1px solid #D9E0E8', borderRadius: '8px', padding: '9px', resize: 'vertical' },
   returnToAuthor: { width: '100%', background: '#fff', color: '#B02A37', border: '1px solid #E3B6BA', borderRadius: '8px', padding: '9px', fontSize: '12.5px', fontWeight: 700, cursor: 'pointer' },
