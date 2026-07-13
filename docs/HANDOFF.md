@@ -1812,3 +1812,44 @@ branch (~60 lines, a direct copy of `clarificationAction.js`; TX = `reset`); (4)
 load-bearing. **All parent-level — independent of the parent/child migration, buildable in either order.**
 
 **State:** `main` @ tree clean, app healthy, **no code touched**. Still awaiting Kevin's answers to spec §9.
+
+## 2026-07-13 (fx) — `jurisdiction_rules`: the per-jurisdiction rule slot — BUILT, 24/24
+
+**The structural gap under every per-state story, closed.** Until now `deadline_rules` and
+`clarification_policy` were **global singletons in `system_config`**, and `clarificationPolicy.read(jid)`
+*accepted a jurisdiction id and discarded it* (its own comment said so). There was literally nowhere to put a
+second state's rules.
+
+**Shipped.** New table `jurisdiction_rules (jurisdiction_id, domain, config_json)` + `services/jurisdictionRules.js`
+(read / readActive / write / activeJid). Domain names match the `configExtractors` adapter keys (`deadline`,
+`clarification`), so the AI statute-extraction pipeline, config history, and jurisdiction-profile section hashing
+all became **per-jurisdiction for free** — the adapters already took a `jid` they were throwing away. Three read
+sites rewired: `tolling.js:loadRules()`, `clarificationPolicy.read/write`, `configExtractors.deadline`.
+**Read fallback** to the legacy global key, so an un-backfilled install cannot silently lose its clock. Backfill is
+an idempotent `INSERT … ON CONFLICT DO NOTHING` in `schema.postgres.sql` (which runs at every boot).
+
+**Verified 24/24** (`verify_jurrules.js` in the job scratchpad). The proofs that matter:
+- **THE JID IS LOAD-BEARING** — TX = `toll_and_restart` (clarification RESETS the clock, *City of Dallas v.
+  Abbott*) and a second test jurisdiction = `toll_pause_resume`, **held simultaneously, read back distinctly**.
+  Impossible before this slice. Per-jurisdiction grace days differ too (61 vs 30).
+- **The jurisdiction row WINS over the global key** — set the jurisdiction row to `standard=77` and the legacy
+  global key to a `999` decoy: the clock engine returns 77.
+- **Fallback works** — a jurisdiction with no row still inherits the legacy global (no silent clock loss).
+- **Writes no longer touch `system_config`** — the legacy key still holds the old disabled default.
+- **End to end through the real path** — `POST /api/public/submit` → the new request's primary clock took its
+  duration from the **jurisdiction** config, not the decoy.
+- Cleanup: 0 test requests, 0 test jurisdictions, live TX config byte-identical to before the run.
+
+**ENVIRONMENT CORRECTION (the (bt) note was wrong).** The API **IS** under PM2 — it runs under **root's** PM2
+daemon (`/root/.pm2`), which is why `pm2 list` / `pm2 restart optimumq-api` as the `optimumq` user shows nothing
+("Process not found"). Killing the pid works only because **PM2 restarts it**. ⚠️ **Do NOT `pkill -f "node .*server.js"`**
+— that pattern also matches the three connector stubs (tyler/laserfiche/axon) and kills them (I did this; PM2
+brought them back). Use `pkill -f "optimumq/backend/server.js"`.
+
+**Next (spec §10.4 step 2):** load Kevin's **17 surveyed states** from `CLARIFICATION_POLICY_SURVEY.md` as data —
+now a pure data task, since the slot exists. Then step 3: `deposit_nonpayment_effect` (pause|reset|withdraw|
+flag_only) wired into the tickler's deposit branch, ~60 lines copying `clarificationAction.js`; TX = `reset`.
+Then step 4: `extend()` for statutory volume extensions.
+
+**State:** `main`, tree clean, app healthy (API restarted by PM2 with the new schema; table created + backfilled
+at boot). Parent/child migration still blocked on Kevin's §9 answers.

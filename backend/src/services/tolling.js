@@ -1,10 +1,12 @@
 'use strict';
-// Statutory clock + tolling engine. Config-driven (system_config 'deadline_rules'; later the Jurisdiction
-// Profile). Due dates are DERIVED from (start, duration, basis, holidays, toll ledger) - never store-and-mutate.
-// See docs/DEADLINE_TOLLING_DESIGN.md.
+// Statutory clock + tolling engine. Config-driven: the rules now come from the ACTIVE JURISDICTION
+// (jurisdiction_rules, domain 'deadline'), falling back to the legacy global system_config key and then
+// to DEFAULT_RULES. Due dates are DERIVED from (start, duration, basis, holidays, toll ledger) - never
+// store-and-mutate. See docs/DEADLINE_TOLLING_DESIGN.md and SPEC_parent_child_lifecycle.md §10.
 var db = require('../db');
 var all = db.all, get = db.get, run = db.run;
 var calc = require('./deadlineCalc');
+var JR = require('./jurisdictionRules');
 var uuidv4 = require('uuid').v4;
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
@@ -16,8 +18,13 @@ var DEFAULT_RULES = {
   clocks: { respond: { label: 'Respond / produce', basis: 'calendar_days', durationByClassification: { simple: 5, standard: 10, complex: 20, redaction_required: 30 }, default: 10, startOn: 'intake', primary: true, tollReasons: ['clarification_pending', 'payment_pending', 'extension'] } }
 };
 
+// Rules for the active jurisdiction. A config with no clocks is not usable — fall through to the
+// defaults rather than silently running every request on a zero-clock config.
 async function loadRules() {
-  try { var row = await get("SELECT value FROM system_config WHERE key = 'deadline_rules'"); if (row && row.value) return JSON.parse(row.value); } catch (e) {}
+  try {
+    var cfg = await JR.readActive('deadline');
+    if (cfg && cfg.clocks && Object.keys(cfg.clocks).length) return cfg;
+  } catch (e) {}
   return DEFAULT_RULES;
 }
 

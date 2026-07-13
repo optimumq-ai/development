@@ -656,3 +656,36 @@ ON CONFLICT (phase_key) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS import_ingest_log (id TEXT PRIMARY KEY, repository_id TEXT NOT NULL, file_key TEXT NOT NULL, original_name TEXT, request_file_id TEXT, status TEXT, detail TEXT, ingested_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
 CREATE UNIQUE INDEX IF NOT EXISTS ux_import_ingest ON import_ingest_log (repository_id, file_key);
+
+-- Per-jurisdiction rule store. Until 2026-07-13 the two clock-relevant configs ('deadline_rules' and
+-- 'clarification_policy') lived as GLOBAL singletons in system_config, so there was no way to hold a
+-- second state's rules — clarificationPolicy.read(jid) literally discarded its jurisdiction argument.
+-- This is the slot a rule lives in. One row per (jurisdiction, domain); domain names match the
+-- configExtractors adapters ('deadline', 'clarification', ...) so the AI extraction + config-history +
+-- attestation plumbing works unchanged. See docs/SPEC_parent_child_lifecycle.md §10.
+CREATE TABLE IF NOT EXISTS jurisdiction_rules (
+  id TEXT PRIMARY KEY,
+  jurisdiction_id TEXT NOT NULL,
+  domain TEXT NOT NULL,
+  config_json TEXT NOT NULL,
+  updated_by TEXT,
+  updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_jurisdiction_rules ON jurisdiction_rules (jurisdiction_id, domain);
+
+-- One-time, idempotent backfill: lift the two global blobs onto the ACTIVE jurisdiction. Reads (below)
+-- fall back to the legacy system_config key when a row is absent, so this is safe to re-run and safe if
+-- it finds nothing.
+INSERT INTO jurisdiction_rules (id, jurisdiction_id, domain, config_json, updated_by)
+SELECT 'jr-' || j.id || '-deadline', j.id, 'deadline', sc.value, 'backfill'
+  FROM jurisdiction_profiles j
+  JOIN system_config sc ON sc.key = 'deadline_rules'
+ WHERE j.id = (SELECT value FROM system_config WHERE key = 'jurisdiction_profile')
+ON CONFLICT (jurisdiction_id, domain) DO NOTHING;
+
+INSERT INTO jurisdiction_rules (id, jurisdiction_id, domain, config_json, updated_by)
+SELECT 'jr-' || j.id || '-clarification', j.id, 'clarification', sc.value, 'backfill'
+  FROM jurisdiction_profiles j
+  JOIN system_config sc ON sc.key = 'clarification_policy'
+ WHERE j.id = (SELECT value FROM system_config WHERE key = 'jurisdiction_profile')
+ON CONFLICT (jurisdiction_id, domain) DO NOTHING;

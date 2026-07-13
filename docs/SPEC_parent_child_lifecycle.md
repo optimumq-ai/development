@@ -289,8 +289,8 @@ Backfill per existing request: create parent, copy the citizen/money/clock colum
 
 **`clarificationAction.js` is the pattern to copy for every other clock rule.** Config enum → effect plan → engine primitive → history → attestation gate. It is already end-to-end.
 
-### 10.2 ABSENT — the four gaps
-1. **No per-jurisdiction rules row — the structural gap under everything else.** `jurisdiction_profiles` is a 7-column identity table (`code, name, statute_name, statute_citation, status, exemption_model`) with **nowhere to put a rule**. `deadline_rules` and `clarification_policy` are **global singletons in `system_config`**. `clarificationPolicy.read(jid)` accepts a jurisdiction id and **discards it** (`clarificationPolicy.js:122`, comment: *"jid accepted for interface parity; storage is global today"*). Every per-state story requires fixing this first.
+### 10.2 The gaps
+1. ~~**No per-jurisdiction rules row.**~~ **BUILT 2026-07-13 — `jurisdiction_rules(jurisdiction_id, domain, config_json)`**, verified 24/24. `deadline_rules` and `clarification_policy` are off `system_config` and scoped to a jurisdiction; `services/jurisdictionRules.js` owns read/write with a fallback to the legacy global key so an un-backfilled install cannot silently lose its clock. **The `jid` is finally load-bearing** — two jurisdictions now hold different clarification rules simultaneously (the harness proves it), where `clarificationPolicy.read(jid)` previously discarded the argument. The `configExtractors` adapters are jurisdiction-scoped, which makes the AI statute-extraction pipeline, config history, and profile-section hashing per-jurisdiction for free. *Still absent: the state → city precedence stack (one active jurisdiction today).*
 2. **No deposit → clock rule.** `'payment_pending'` is declared as a toll reason (`tolling.js:16`) and has **zero callers**; `feeNonpayment.js`, `paymentTiming.js`, `paymentStatus.js` and `tickler.js` do not import `tolling` at all. An overdue deposit only sets a flag (`tickler.js:113`), so **the statutory clock keeps running on an unpaid request** — false lateness (spec §9, open question 2).
 3. **No volume extension, and no primitive that could express one.** `'extension'` exists only as an unread string in `tollReasons` and an `<option>` in `RequestWorkspacePage.js:266`. `toll()` moves the due date by *elapsed wall time*; it cannot do "+10 statutory days" (IL §3(e), CA §7922.535(b)). Needs a new `extend(clockId, days, reason)` writing to `request_clocks.duration` with an audit row.
 4. **`tollReasons` is inert.** Declared per clock in config, **never read** — `toll()` accepts any string unvalidated (`tolling.js:108`).
@@ -301,8 +301,8 @@ Backfill per existing request: create parent, copy the citizen/money/clock colum
 - **Two docs are false and are corrected in this commit:** `SPEC_jurisdiction_configuration.md` claimed "three state profiles loaded" (there is one); `CONFIG_FRESHNESS_DESIGN.md` claimed four TX config sources are seeded (`config_sources` has zero rows).
 
 ### 10.4 Build order (do this before, or alongside, the parent/child migration)
-1. **`jurisdiction_rules(jurisdiction_id, domain, config_json)`** — move `deadline_rules` and `clarification_policy` off `system_config` onto a jurisdiction-scoped store. Small migration; the extractor adapters already take the `jid` they currently throw away.
-2. **Load the 17 surveyed states** as data. They are already in the validated shape.
+1. ~~**`jurisdiction_rules(jurisdiction_id, domain, config_json)`**~~ — **BUILT + verified 2026-07-13 (24/24).**
+2. **Load the 17 surveyed states** as data. They are already in the validated shape — this is now a pure data task, since the slot exists. **← next**
 3. **Deposit rule slot** — one enum `deposit_nonpayment_effect: pause | reset | withdraw | flag_only`, one `effectPlan`-style switch wired into the tickler's deposit branch. ~60 lines, a direct copy of `clarificationAction.js`. TX = `reset` (§552.263(e)) with withdrawal on lapse (§552.263(f), §552.221(e)).
 4. **`extend(clockId, days, reason)`** — the one genuinely new engine primitive, for statutory volume extensions.
 5. **Make `tollReasons` load-bearing** — validate `toll()` against the clock's configured reasons.

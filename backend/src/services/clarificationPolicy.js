@@ -15,8 +15,10 @@
 // NO automated action — matching AUTO_CONFIG §2.3 (un-attested area = safe/manual) and Kevin's explicit
 // "turn the model off" requirement.
 var { get, run } = require('../db');
+var JR = require('./jurisdictionRules');
 
-var STORE_KEY = 'clarification_policy'; // system_config key (global, mirrors 'deadline_rules')
+var DOMAIN = 'clarification';           // jurisdiction_rules domain (matches the configExtractors adapter key)
+var STORE_KEY = 'clarification_policy'; // legacy global system_config key — read-fallback only, no longer written
 
 // The crux variable: what the statutory response clock does when a clarification is sent. See survey §2.1.
 var CLOCK_EFFECTS = ['no_fixed_clock', 'runs_no_stop', 'toll_pause_resume', 'toll_and_restart', 'start_gate', 'operational_hold'];
@@ -112,20 +114,20 @@ function validate(raw) {
   return out;
 }
 
-async function readStore() {
-  var r = await get("SELECT value FROM system_config WHERE key = ?", [STORE_KEY]);
-  if (!r || !r.value) return {};
-  try { return JSON.parse(r.value); } catch (e) { return {}; }
+// The effective policy for a jurisdiction (stored over defaults). Storage is now PER-JURISDICTION
+// (jurisdiction_rules), with a fallback to the legacy global key for installs not yet backfilled.
+// The jid is finally load-bearing — it used to be accepted and discarded.
+async function read(jid) {
+  if (!jid) jid = await JR.activeJid();
+  return normalize(await JR.read(jid, DOMAIN) || {});
 }
 
-// The effective policy (stored over defaults). jid accepted for interface parity; storage is global today.
-async function read(jid) { return normalize(await readStore()); }
-
-// Persist a validated policy to the live store. Returns the store target (for effectiveConfig history).
+// Persist a validated policy for a jurisdiction. Returns the store target (for effectiveConfig history).
 async function write(jid, cfg, actor) {
   var clean = validate(cfg);
-  await run("INSERT INTO system_config (key, value) VALUES (?, ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [STORE_KEY, JSON.stringify(clean)]);
-  return { target: 'system_config:' + STORE_KEY, policy: clean };
+  if (!jid) jid = await JR.activeJid();
+  var r = await JR.write(jid, DOMAIN, clean, actor);
+  return { target: r.target, policy: clean };
 }
 
 // Configured = the city has switched the model on. An off policy behaves identically to unconfigured
