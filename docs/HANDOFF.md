@@ -2204,3 +2204,51 @@ must be given a `-N` suffix — children cannot inherit NULL.
 
 **State:** `main`, tree clean, app healthy (PM2 restarted 23:34 with the new code). **The parent/child migration
 remains the next real work and is still blocked on Kevin's spec §9 answers.**
+
+## 2026-07-13 (of) — The query layer is parent/child-aware BEFORE the migration — a PROVEN no-op (13/13)
+
+**The migration's real danger was the query layer, not the schema.** 27 LIST/COUNT queries would double-count
+the moment parent rows exist — and three destructively: **duplicate dunning emails to real citizens**
+(`feeNonpayment` loops every active request), `clarificationTimeout` **auto-closing** a parent, and the stall
+sweep flagging **every parent as stalled forever**.
+
+**The trick that made this safe: predicates that are true BOTH before and after.** `services/requestScope.js`:
+- **PARENT** = a ROOT row (`master_request_id IS NULL`) — the citizen's request: number, requestor, money,
+  clock, deadline.
+- **LEAF/CHILD** = a row with nothing beneath it (`NOT EXISTS (… c.master_request_id = r.id)`) — the unit of
+  work: description, stage, routing, tasks, files, redaction.
+
+Today a request **IS its own parent and its own child**, so both are tautologies — **125 roots, 125 leaves,
+125 rows** — which makes adopting them a **PROVABLE NO-OP**, not an asserted one. I snapshotted every list,
+count, report and sweep-candidate set BEFORE the change and diffed after: dashboard counters (36/31), the
+queue's 39 rows, all 7 reports, stall/nonpayment/reconciler candidate sets — **byte-identical, 14/14**. The
+migration now flips them automatically, with **no query to rewrite under pressure**.
+
+**Scoped:** dashboard counters (PARENT) + by-stage (LEAF) · request queue (LEAF) · all 4 `reportEngine`
+queries · tickler stall sweep (LEAF) + scanned count (PARENT) · **the nonpayment dunning sweep (PARENT — the
+duplicate-email bug)** · task reconciler (LEAF) · flagged worklist (LEAF). Index on `master_request_id`.
+
+**A pre-existing bug the equivalence diff exposed:** the queue ordered by `created_at DESC` with **no
+tiebreaker**, and reports ordered by `value DESC` with none — so rows with equal timestamps/counts **swapped
+places between reloads**. It looked like data churn in a report that had not changed. Deterministic tiebreakers
+added (`r.id`, `k`); two consecutive runs are now identical.
+
+**Verified 13/13** (`verify_scope.js`): both predicates are tautologies today · both **discriminate** the moment
+a child exists (parent excluded from work lists, child excluded from money/volume) · **the stall sweep does not
+see the parent** · **the dunning sweep does not see the child** but does see the parent · `request_count` counts
+each citizen request once, not once per child · reports are deterministic.
+
+**⚠️ WHAT I DID NOT GUESS (spec §11.1):** a PARENT metric grouped by a CHILD field (`fee_revenue by
+department`) needs a parent↔child JOIN — money is on the parent, department on the child. The tickler's
+estimate/deposit joins straddle the split and cannot be scoped until the migration decides which side
+`request_fee_estimates` repoints to. `clarificationTimeout` is **left unscoped on purpose**: it auto-closes, and
+the law is genuinely split — the clarification is logged on the CHILD but an unanswered one withdraws the WHOLE
+request (Tex. Gov't Code § 552.222(d)). That is a roll-up decision (§6), not a scoping one.
+
+**FULL SUITE GREEN — 227 assertions, 0 failures:** scope 13/13 · request-create 22/22 · deadline rules 25/25 ·
+stages 23/23 · stage bypass 24/24 · extend 30/30 · deposit clock 31/31 · survey seed 35/35 · jurisdiction_rules
+24/24.
+
+**State:** `main`, tree clean, app healthy. **The parent/child migration is now a DATA-ONLY change** — the
+schema columns exist, the creation helper is the single wrap point, and every query already knows which side it
+wants. It still needs Kevin's spec §9 answers and the §11.1 decisions above.

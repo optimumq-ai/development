@@ -3,6 +3,7 @@ const router = express.Router();
 const { all, get } = require('../db');
 const { requireAuth, requireRole } = require('../middleware/auth');
 const tickler = require('../services/tickler');
+const scope = require('../services/requestScope');
 
 // Manually run the sweep (admin/elevated).
 router.post('/run', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER'), async function (req, res) {
@@ -15,7 +16,7 @@ router.get('/status', requireAuth, async function (req, res) {
   var last = await get("SELECT * FROM tickler_runs ORDER BY ran_at DESC LIMIT 1");
   var flagged = await all(
     "SELECT id, request_number, requestor_name, stage, tickler_flag, tickler_flagged_at " +
-    "FROM requests WHERE tickler_flag IS NOT NULL ORDER BY tickler_flagged_at DESC LIMIT 100");
+    "FROM requests r WHERE r.tickler_flag IS NOT NULL" + scope.andLeaf('r') + " ORDER BY r.tickler_flagged_at DESC LIMIT 100");
   var lastOut = null;
   if (last) { var sum = {}; try { sum = JSON.parse(last.summary_json || '{}'); } catch (e) {} lastOut = { ranAt: last.ran_at, trigger: last.trigger, scanned: last.scanned, flagged: last.flagged, summary: sum }; }
   res.json({ lastRun: lastOut, flagged: flagged });

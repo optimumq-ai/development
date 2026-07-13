@@ -10,6 +10,7 @@ var pt = require('./paymentTiming');
 var PCP = require('./paymentClockPolicy');
 var depositAction = require('./depositAction');
 var taskRouting = require('./taskRouting');
+var scope = require('./requestScope');
 
 var DEFAULTS = { requesterResponseDays: 10, depositDueDays: 10, stallDays: 21, autoWithdrawOnLapse: false };
 var TERMINAL_STAGES = ['delivery', 'closed'];
@@ -147,8 +148,10 @@ async function runSweep(opts) {
   // (3) General stall: active, non-terminal, untouched longer than the stall window, not already flagged.
   var stallCut = daysAgoStr(T.stallDays);
   var ph = TERMINAL_STAGES.map(function () { return '?'; }).join(',');
+  // LEAF: the stall sweep is about WORK that has gone quiet. A parent has no stage, so an unscoped sweep
+  // would see NULL, pass `stage NOT IN (terminal)`, and flag EVERY parent as stalled on every run, forever.
   var stalledRows = await all(
-    "SELECT id FROM requests WHERE status = 'active' AND stage NOT IN (" + ph + ") AND updated_at < ? AND COALESCE(tickler_flag, '') = '' AND NOT EXISTS (SELECT 1 FROM objections o WHERE o.request_id = requests.id AND o.status IN ('open','tentative') AND o.clock_frozen = 1)",
+    "SELECT r.id FROM requests r WHERE r.status = 'active' AND r.stage NOT IN (" + ph + ") AND r.updated_at < ? AND COALESCE(r.tickler_flag, '') = '' AND NOT EXISTS (SELECT 1 FROM objections o WHERE o.request_id = r.id AND o.status IN ('open','tentative') AND o.clock_frozen = 1)" + scope.andLeaf('r'),
     TERMINAL_STAGES.concat([stallCut]));
   for (var s = 0; s < stalledRows.length; s++) {
     await flagRequest(stalledRows[s].id, 'stalled');
@@ -156,7 +159,8 @@ async function runSweep(opts) {
     actions.stalled += 1;
   }
 
-  var scanned = await get("SELECT count(*) AS c FROM requests WHERE status = 'active'");
+  // PARENT: "requests scanned" is a citizen-facing count — one per request, not one per work item.
+  var scanned = await get("SELECT count(*) AS c FROM requests r WHERE r.status = 'active'" + scope.andParent('r'));
   var flagged = actions.estimate_lapsed + actions.deposit_overdue + actions.stalled;
   try { var np = await require('./feeNonpayment').sweep(); actions.nonpayment_dunned = np.actions.dunned; actions.nonpayment_closed = np.actions.closed; } catch (e) { console.error('[tickler nonpayment]', e.message); }
   try { var ct = await require('./clarificationTimeout').sweep(); actions.clarification_timeout_closed = ct.actions.closed; } catch (e) { console.error('[tickler clarification-timeout]', e.message); }

@@ -9,6 +9,7 @@ var ps = require('./paymentStatus');
 var feeNotice = require('./feeNotice');
 var email = require('./email');
 var uuidv4 = require('uuid').v4;
+var scope = require('./requestScope');
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 function parseTs(s) { return s ? new Date(String(s).replace(' ', 'T') + (/[zZ]|[+\-]\d\d:?\d\d$/.test(s) ? '' : 'Z')) : null; }
 function daysSince(s, now) { var d = parseTs(s); return d ? Math.floor((now.getTime() - d.getTime()) / 86400000) : null; }
@@ -70,7 +71,9 @@ async function sweep(opts) {
   var actions = { dunned: 0, closed: 0 };
   if (!cfg.enabled) return { enabled: false, actions: actions };
   var now = opts.now ? new Date(opts.now) : new Date();
-  var rows = await db.all("SELECT id FROM requests WHERE status = 'active' AND request_number != 'LIBRARY'");
+  // PARENT: money is parent-level. Unscoped, this loop would run once per CHILD and once per PARENT —
+  // sending the citizen DUPLICATE DUNNING EMAILS. The most user-visible failure in the whole migration.
+  var rows = await db.all("SELECT r.id FROM requests r WHERE r.status = 'active' AND r.request_number != 'LIBRARY'" + scope.andParent('r'));
   for (var i = 0; i < rows.length; i++) {
     var rid = rows[i].id;
     var sit = await ps.computeSituation(rid);

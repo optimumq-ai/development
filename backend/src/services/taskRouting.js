@@ -331,6 +331,7 @@ async function spawnForStage(requestId, stage, createdBy) {
 // request normally progresses and is the single source of truth for what counts as a forward advance.
 // Keep in sync with the stage values the pipeline uses; an unknown stage is treated as NOT forward.
 var STAGE_ORDER = require('./stages').ORDER; // ONE canonical vocabulary — see services/stages.js
+var scope = require('./requestScope');
 function isForwardStage(fromStage, toStage) {
   var fi = STAGE_ORDER.indexOf(fromStage), ti = STAGE_ORDER.indexOf(toStage);
   if (fi === -1 || ti === -1) {
@@ -420,7 +421,8 @@ async function mine(userId) {
 // Self-healing safety net: any request at a task-bearing stage without its task gets one spawned.
 // Covers stranding from seeding, races, or any advance path that skipped the spawn. Idempotent.
 async function reconcileStageTasks() {
-  var rows = await all("SELECT id, stage FROM requests WHERE stage IN ('record_search','redaction_review','redaction','exemption_review','ag_review') AND status = 'active'");
+  // LEAF: the reconciler spawns the STAGE's task, and only a work row has a stage.
+  var rows = await all("SELECT r.id, r.stage FROM requests r WHERE r.stage IN ('record_search','redaction_review','redaction','exemption_review','ag_review') AND r.status = 'active'" + scope.andLeaf('r'));
   var fixed = 0;
   for (var i = 0; i < rows.length; i++) {
     var r = rows[i];

@@ -6,6 +6,7 @@ const { all, get, run } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const workflowEngine = require('../services/workflowEngine');
 const requestCreate = require('../services/requestCreate');
+const scope = require('../services/requestScope');
 async function activeExemptionModel() {
   try {
     var jrow = await get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'");
@@ -26,9 +27,11 @@ router.get('/stats/dashboard', requireAuth, async function(req, res) {
   let where = "status = 'active'";
   const params = [];
   if (!isElevated) { where += ' AND (department_id = ? OR assigned_to = ?)'; params.push(req.user.dept, req.user.sub); }
-  const total = await get('SELECT COUNT(*) as count FROM requests WHERE ' + where, params);
-  const overdue = await get("SELECT COUNT(*) as count FROM requests WHERE " + where + " AND deadline_date < date('now')", params);
-  const byStage = await all('SELECT stage, COUNT(*) as count FROM requests WHERE ' + where + ' GROUP BY stage', params);
+  // total + overdue count what the CITIZEN filed (one per request) -> PARENT rows; the deadline lives there.
+  // by-stage counts WORK -> LEAF rows; a parent has no stage. See services/requestScope.js.
+  const total = await get('SELECT COUNT(*) as count FROM requests r WHERE ' + where.replace(/\b(status|department_id|assigned_to|deadline_date)\b/g, 'r.$1') + scope.andParent('r'), params);
+  const overdue = await get("SELECT COUNT(*) as count FROM requests r WHERE " + where.replace(/\b(status|department_id|assigned_to|deadline_date)\b/g, 'r.$1') + " AND r.deadline_date < date('now')" + scope.andParent('r'), params);
+  const byStage = await all('SELECT r.stage, COUNT(*) as count FROM requests r WHERE ' + where.replace(/\b(status|department_id|assigned_to|deadline_date)\b/g, 'r.$1') + scope.andLeaf('r') + ' GROUP BY r.stage', params);
   const stageMap = {};
   byStage.forEach(function(r) { stageMap[r.stage] = r.count; });
   res.json({ total: total ? total.count : 0, overdue: overdue ? overdue.count : 0, byStage: stageMap });
@@ -37,7 +40,7 @@ router.get('/stats/dashboard', requireAuth, async function(req, res) {
 router.get('/', requireAuth, async function(req, res) {
   const userRoles = req.user.roles || [];
   const isElevated = ['SUPERVISOR','DIRECTOR','SYSTEM_ADMIN','DEPT_MANAGER','ATTORNEY_REVIEWER'].some(function(r) { return userRoles.indexOf(r) !== -1; });
-  let sql = "SELECT r.*, d.name as department_name, d.color as department_color, u.display_name as assigned_to_name, (SELECT t.status FROM tasks t WHERE t.request_id = r.id AND t.status IN ('open','assigned','in_progress') ORDER BY t.updated_at DESC LIMIT 1) AS active_task_status, (SELECT tu.display_name FROM tasks t2 LEFT JOIN users tu ON tu.id = t2.assigned_to WHERE t2.request_id = r.id AND t2.status IN ('assigned','in_progress') ORDER BY t2.updated_at DESC LIMIT 1) AS active_task_assignee, (SELECT COUNT(*) FROM objections o WHERE o.request_id = r.id AND o.status IN ('open','tentative')) AS open_objections FROM requests r LEFT JOIN departments d ON d.id = r.department_id LEFT JOIN users u ON u.id = r.assigned_to WHERE 1=1 AND r.request_number != 'LIBRARY'";
+  let sql = "SELECT r.*, d.name as department_name, d.color as department_color, u.display_name as assigned_to_name, (SELECT t.status FROM tasks t WHERE t.request_id = r.id AND t.status IN ('open','assigned','in_progress') ORDER BY t.updated_at DESC LIMIT 1) AS active_task_status, (SELECT tu.display_name FROM tasks t2 LEFT JOIN users tu ON tu.id = t2.assigned_to WHERE t2.request_id = r.id AND t2.status IN ('assigned','in_progress') ORDER BY t2.updated_at DESC LIMIT 1) AS active_task_assignee, (SELECT COUNT(*) FROM objections o WHERE o.request_id = r.id AND o.status IN ('open','tentative')) AS open_objections FROM requests r LEFT JOIN departments d ON d.id = r.department_id LEFT JOIN users u ON u.id = r.assigned_to WHERE 1=1 AND r.request_number != 'LIBRARY'" + scope.andLeaf('r');
   const params = [];
   if (!isElevated) {
     var orTeam = await get("SELECT id FROM departments WHERE kind='team' AND is_open_records=1 ORDER BY sort_order LIMIT 1");
@@ -55,7 +58,7 @@ router.get('/', requireAuth, async function(req, res) {
     const s = '%' + req.query.search + '%';
     params.push(s, s, s);
   }
-  sql += ' ORDER BY r.created_at DESC LIMIT 200';
+  sql += ' ORDER BY r.created_at DESC, r.id DESC LIMIT 200'; // r.id: deterministic tiebreaker — created_at ties were shuffling the queue between reloads
   res.json({ requests: await all(sql, params) });
 });
 

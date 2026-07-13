@@ -13,6 +13,25 @@ var TIME_PRESETS = ['all', 'ytd', 'this_month', 'last_month', 'last_7d', 'last_3
 // exclude system/pseudo requests from all request-based metrics
 var BASE_EXCL = "r.request_number NOT LIKE 'SYS-%' AND r.request_number <> 'LIBRARY'";
 
+var scope = require('./requestScope');
+// PARENT/CHILD SCOPE for reports. Once parent rows exist, an unscoped `FROM requests` double-counts every
+// metric — volume, revenue, compliance, all of it. The right side depends on what is being measured:
+//
+//   PARENT (default) — VOLUME and MONEY and DEADLINES are properties of the citizen's request:
+//                      request_count by month, fee_revenue, overdue_count, compliance_rate,
+//                      avg_processing_days, self_service_rate.
+//   LEAF             — grouping by a field that only a WORK row has (department, classification).
+//                      "Requests by department" is really "work by department", and that is the child.
+//
+// KNOWN LIMIT, recorded in SPEC_parent_child_lifecycle §10.6: a PARENT-level metric grouped by a CHILD field
+// (e.g. fee_revenue by department) needs a parent<->child JOIN, because the money is on the parent and the
+// department is on the child. Today both predicates are tautologies (every row is its own parent AND its own
+// leaf), so this is a no-op; the join is migration-time work and must not be guessed here.
+function scopeFor(metric, groupBy) {
+  var childGrouped = (groupBy === 'department' || groupBy === 'classification');
+  return childGrouped ? scope.leaf('r') : scope.parent('r');
+}
+
 function today() { return new Date().toISOString().slice(0, 10); }
 function ymd(dt) { return dt.toISOString().slice(0, 10); }
 function timeRange(tr) {
@@ -41,8 +60,9 @@ function groupExpr(g) {
     default: return null;
   }
 }
-function whereFrom(spec, extra) {
+function whereFrom(spec, extra, scopeSql) {
   var w = [BASE_EXCL], p = [];
+  if (scopeSql) w.push(scopeSql);
   var tr = timeRange(spec.time_range);
   if (tr.from) { w.push("r.created_at >= ?"); p.push(tr.from); }
   if (tr.to) { w.push("r.created_at < ?"); p.push(tr.to); }
@@ -64,7 +84,7 @@ async function runSpec(spec) {
   // --- self_service_rate: library (published) vs submitted requests ---
   if (metric === 'self_service_rate') {
     var lib = await db.get("SELECT COUNT(*) AS c FROM fulfilled_records WHERE status='released' AND COALESCE(published,0)=1");
-    var w0 = whereFrom(spec);
+    var w0 = whereFrom(spec, null, scopeFor('self_service_rate', null));
     var sub = await db.get("SELECT COUNT(*) AS c FROM requests r" + w0.sql, w0.params);
     var L = Number(lib.c) || 0, S = Number(sub.c) || 0, denom = L + S;
     return { title: 'Self-service rate', viz: 'number', columns: ['Metric', 'Value'],
@@ -75,7 +95,7 @@ async function runSpec(spec) {
   // --- avg_processing_days & compliance_rate: computed in JS from closed requests ---
   if (metric === 'avg_processing_days' || metric === 'compliance_rate') {
     var g = groupBy ? groupExpr(groupBy) : null;
-    var wc = whereFrom(spec, "r.status = 'closed'");
+    var wc = whereFrom(spec, "r.status = 'closed'", scopeFor(metric, groupBy));
     var sel = "SELECT " + (g ? g.sql + " AS k, " : "'All' AS k, ") + "r.created_at, r.updated_at, r.deadline_date FROM requests r" + (g ? g.join : '') + wc.sql;
     var rows = await db.all(sel, wc.params);
     var buckets = {};
@@ -102,10 +122,12 @@ async function runSpec(spec) {
   // --- count/revenue/overdue: SQL aggregate, optional group ---
   var valueExpr = metric === 'fee_revenue' ? 'COALESCE(SUM(r.amount_paid),0)' : 'COUNT(*)';
   var extra = metric === 'overdue_count' ? ("r.deadline_date < '" + today() + "' AND r.status = 'active'") : null;
-  var w = whereFrom(spec, extra);
+  var w = whereFrom(spec, extra, scopeFor(metric, groupBy));
   if (groupBy) {
     var ge = groupExpr(groupBy);
-    var order = (spec.sort === 'desc') ? 'v DESC' : (spec.sort === 'asc' ? 'v ASC' : ge.order);
+    // ', k' is a deterministic tiebreaker: two departments with the same count were swapping places
+    // between runs, which reads as data churn in a report that has not changed.
+    var order = ((spec.sort === 'desc') ? 'v DESC' : (spec.sort === 'asc' ? 'v ASC' : ge.order)) + ', k';
     var sql = "SELECT " + ge.sql + " AS k, " + valueExpr + " AS v FROM requests r" + ge.join + w.sql + " GROUP BY " + ge.sql + " ORDER BY " + order + (limit ? " LIMIT " + limit : "");
     var rr = await db.all(sql, w.params);
     var rowsOut = metric === 'fee_revenue' ? moneyRows(rr) : rr.map(function (x) { return { label: x.k, value: Number(x.v) || 0 }; });

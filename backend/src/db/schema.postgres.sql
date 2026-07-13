@@ -705,3 +705,7 @@ CREATE TABLE IF NOT EXISTS clock_extensions (
   created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
 );
 CREATE INDEX IF NOT EXISTS ix_clock_extensions_clock ON clock_extensions (clock_id);
+
+-- Parent/child: every scope predicate filters on master_request_id (see services/requestScope.js), so it
+-- needs an index or every list query degrades to a sequential scan once children exist.
+CREATE INDEX IF NOT EXISTS ix_requests_master ON requests (master_request_id);

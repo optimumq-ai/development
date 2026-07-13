@@ -362,3 +362,26 @@ Modelling any of these as a `respond`/produce clock would report **false latenes
 > Give the child a **budget** due date that may fall before or after the parent's statutory deadline. Then enforce: **any child not released by the parent's statutory deadline must carry an explicit disposition — an extension, a denial with citation, or a stated date certain.**
 
 That single rule satisfies TX §552.221, IL §3, NY §89(3)(a), CT §1-206(a), CA §7922.535 and WA §42.56.520 simultaneously.
+
+---
+
+## 11. Migration readiness — the query layer is already parent/child-aware `[BUILT 2026-07-13, 13/13]`
+
+The migration's danger was never the schema — it was the **27 LIST/COUNT queries** that would double-count the moment parent rows exist, three of them **destructively** (duplicate dunning emails to citizens; `clarificationTimeout` auto-closing a parent; the stall sweep flagging every parent forever).
+
+**Solved by choosing predicates that are true BOTH before and after the migration** (`services/requestScope.js`):
+
+| Predicate | SQL | Today | After migration |
+|---|---|---|---|
+| **PARENT** — the citizen's request (number, requestor, money, clock, deadline) | `r.master_request_id IS NULL` (a **root**) | every row | only parents |
+| **LEAF / CHILD** — the unit of work (description, stage, routing, tasks, files, redaction) | `NOT EXISTS (SELECT 1 FROM requests c WHERE c.master_request_id = r.id)` | every row | only children |
+
+Today a request **is its own parent and its own child**, so both are tautologies — **125 roots, 125 leaves, 125 rows** — and adopting them is a **provable no-op**: dashboard counters, the queue's 39 rows, all 7 reports, and every sweep-candidate set are byte-identical before and after. The migration then flips them automatically, with **no query to rewrite under pressure.**
+
+**Scoped:** dashboard counters (PARENT) + by-stage (LEAF) · the request queue (LEAF) · all 4 `reportEngine` queries · the tickler stall sweep (LEAF) and scanned count (PARENT) · the nonpayment dunning sweep (**PARENT** — the duplicate-email bug) · the task reconciler (LEAF) · the flagged worklist (LEAF). Index added on `master_request_id`.
+
+### 11.1 STILL OPEN — deliberately not guessed
+- **A PARENT-level metric grouped by a CHILD field** (e.g. `fee_revenue by department`) needs a parent↔child **JOIN**: the money is on the parent, the department on the child. Today both predicates coincide so it is correct; after the migration it needs the join. `reportEngine.scopeFor()` currently resolves child-grouped metrics to LEAF, which is right for volume and wrong for revenue.
+- **The estimate/deposit joins in `tickler.js`** straddle the split (`r.stage` is CHILD, the estimate will hang off the PARENT). They cannot be scoped until the migration decides which side `request_fee_estimates` repoints to.
+- **`clarificationTimeout`** is not yet scoped. It **auto-closes**, and the law is genuinely split: the clarification event is logged on the CHILD, but an unanswered clarification withdraws the **whole request** (Tex. Gov't Code § 552.222(d)). This is a roll-up decision (§6), not a scoping one.
+- **`routes/tasks.js` `withReq()`** and the 7 `objections.js` joins select `request_number` from the work row; after the migration the number lives on the PARENT, so they need a second join. Harmless today.
