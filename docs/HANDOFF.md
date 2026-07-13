@@ -1853,3 +1853,52 @@ Then step 4: `extend()` for statutory volume extensions.
 
 **State:** `main`, tree clean, app healthy (API restarted by PM2 with the new schema; table created + backfilled
 at boot). Parent/child migration still blocked on Kevin's §9 answers.
+
+## 2026-07-13 (gy) — The 17-state survey is DATA now, not markdown — 35/35
+
+**Spec §10.4 step 2.** `CLARIFICATION_POLICY_SURVEY.md` had held 17 jurisdictions' researched clock rules since
+2026-07-09 that **no machine could read** — because until `jurisdiction_rules` landed this morning there was
+nowhere to put them. Loaded via `backend/src/db/seed_clarification_policies.js` (idempotent), which writes
+through the **real config path** (`effectiveConfig.applyConfig`), so each jurisdiction gets config history + a
+synced profile section exactly like a human edit or an AI extraction.
+
+**18 jurisdictions now hold a clarification policy:** AL AR AZ CA FL GA ID IL KS MI MS NC NJ OK PA RI **TX** WA.
+TX is not in the survey — it comes from the 2026-07-13 legal research (`toll_and_restart`, 61-day grace,
+Tex. Gov't Code § 552.222 + *City of Dallas v. Abbott*, 304 S.W.3d 380 (Tex. 2010)).
+
+**All six clock effects are represented in real data** — `runs_no_stop` 7 · `no_fixed_clock` 4 ·
+`toll_pause_resume` 3 · `toll_and_restart` 2 · `start_gate` 1 · `operational_hold` 1. **No single effect covers a
+majority**, which is the quantitative case for the field existing at all. Four states now hold four *different*
+clock behaviours simultaneously (TX restart / WA pause-resume / IL never-stops / MI start-gate) — read back
+distinctly through the real path.
+
+**SAFETY — this changed NO live behaviour, and that is verified, not asserted.** Every policy is seeded
+`enabled: false` (a DRAFT). Runtime is double-gated: `automationActive()` needs `enabled === true` **AND** an
+attested profile section. Nothing is attested. The harness asserts `automationActive(TX) === false` *and* that it
+would still be false even if attested. This honours the survey's own provenance caveat (values "MUST be verified
+… by counsel licensed there before a customer relies on them") and the AUTO_CONFIG trust model
+(research/AI drafts → city reviews → city attests → live).
+
+**Provenance survives the round trip** — every field carries `source` / `citation` / `confidence`.
+**Michigan is seeded at confidence 0.4, the lowest in the set**, because the survey's two research passes
+disagree (§5.1: `start_gate` vs `runs_no_stop` + `vague_is_denial_ground`). **Verify against MCL 15.235 before
+Michigan ships.** Other low-confidence rows: AR 0.45 (tolling legally unsettled), NJ 0.5 (GRC practice, not
+statute, and shifting under litigation).
+
+**Decisions I made under standing approval:** (a) seeded the survey's *city* rows (Birmingham, Tulsa, Miami,
+Dearborn…) as their **STATE** profiles, because the state→city precedence stack is not built — Tulsa's EO and
+SF's Sunshine Ordinance are city overlays ON TOP of silent/looser state law and are recorded as notes, not as
+data; (b) `status = 'library'` for the 17 (a research library — the deployed jurisdiction is still `jur-tx`,
+chosen by `system_config['jurisdiction_profile']`; nothing in the code filters on status); (c) seeded TX itself
+from the legal research rather than leaving it at defaults.
+
+**Verified 35/35** (`verify_survey_seed.js`, job scratchpad).
+
+**Next (spec §10.4 step 3):** `deposit_nonpayment_effect` (`pause | reset | withdraw | flag_only`) wired into the
+tickler's deposit branch — ~60 lines copying `clarificationAction.js`. **This is the one that stops the statutory
+clock running on unpaid requests** (today `payment_pending` has zero callers, so an unpaid request reports false
+lateness). TX = `reset` (§ 552.263(e): the request is "considered received" on the date the deposit arrives).
+Then step 4: `extend()` for statutory volume extensions.
+
+**State:** `main`, tree clean, app healthy. 18 jurisdiction profiles, 18 clarification policies (all drafts),
+0 attested. Parent/child migration still blocked on Kevin's spec §9 answers.

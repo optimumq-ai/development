@@ -302,7 +302,7 @@ Backfill per existing request: create parent, copy the citizen/money/clock colum
 
 ### 10.4 Build order (do this before, or alongside, the parent/child migration)
 1. ~~**`jurisdiction_rules(jurisdiction_id, domain, config_json)`**~~ — **BUILT + verified 2026-07-13 (24/24).**
-2. **Load the 17 surveyed states** as data. They are already in the validated shape — this is now a pure data task, since the slot exists. **← next**
+2. ~~**Load the 17 surveyed states** as data.~~ **BUILT + verified 2026-07-13 (35/35).** `backend/src/db/seed_clarification_policies.js` — 17 surveyed jurisdictions + TX, written through the real config path (`effectiveConfig.applyConfig` → config history + profile section). All six clock effects are now represented in real data (`runs_no_stop` 7 · `no_fixed_clock` 4 · `toll_pause_resume` 3 · `toll_and_restart` 2 · `start_gate` 1 · `operational_hold` 1 — no single effect covers a majority, which is the quantitative case for the field existing at all). **All seeded `enabled: false`** — drafts pending city review + attestation; live behaviour unchanged.
 3. **Deposit rule slot** — one enum `deposit_nonpayment_effect: pause | reset | withdraw | flag_only`, one `effectPlan`-style switch wired into the tickler's deposit branch. ~60 lines, a direct copy of `clarificationAction.js`. TX = `reset` (§552.263(e)) with withdrawal on lapse (§552.263(f), §552.221(e)).
 4. **`extend(clockId, days, reason)`** — the one genuinely new engine primitive, for statutory volume extensions.
 5. **Make `tollReasons` load-bearing** — validate `toll()` against the clock's configured reasons.

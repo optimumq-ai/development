@@ -266,6 +266,20 @@ window, or abandonment/closure provision specified — silent on each.
 
 ## 4. Summary matrices
 
+> **LOADED AS DATA 2026-07-13 (35/35).** §4.1 is no longer just a table — all 17 jurisdictions (plus **TX**, from
+> the 2026-07-13 legal research: `toll_and_restart`, 61-day grace, *City of Dallas v. Abbott*) are seeded into
+> **`jurisdiction_rules`** (domain `clarification`) by `backend/src/db/seed_clarification_policies.js`, which writes
+> through the real config path (`effectiveConfig.applyConfig`) so each gets config history + a profile section.
+> The rule slot they needed — a per-jurisdiction store — landed the same day (`jurisdiction_rules`, spec
+> `SPEC_parent_child_lifecycle.md` §10); before it, `clarificationPolicy.read(jid)` discarded its jurisdiction id
+> and there was physically nowhere to put a second state's rules.
+>
+> **Every policy is seeded `enabled: false` — a DRAFT, not a live rule.** That honours this document's own
+> provenance caveat (values "MUST be verified…by counsel licensed there before a customer relies on them") and the
+> AUTO_CONFIG trust model. Runtime is double-gated: `automationActive()` needs `enabled === true` **and** an
+> attested profile section; nothing is attested, so **seeding changed no live request behaviour** (verified).
+> Michigan is seeded at **confidence 0.4 — the lowest in the set** — because §5.1's two research passes disagree.
+
 ### 4.1 Clock effect + grace, by jurisdiction
 | Jurisdiction | Governing law | clock_effect | vague=denial? | grace_days (requester) | abandonment_closure | notice req'd |
 | --- | --- | --- | --- | --- | --- | --- |
