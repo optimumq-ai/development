@@ -410,6 +410,22 @@ Analyzed & hardened 2026-07-05. Threat: a malicious/malformed uploaded or import
 
 **Sequenced AFTER the redaction UI** (Kevin, 2026-07-13). Design doc gets the update in the same commit as the build.
 
+### R10. Returned-for-rework surfacing in My Tasks — "URGENT CORRECTIONS REQUIRED" (captured 2026-07-13, Kevin) — **do at the My Tasks restructure** (`BUILD_PRIORITY_SUMMARY` item 8)
+
+**Settled model (Kevin, 2026-07-13) — the reviewer half is BUILT (slice 8); only the My Tasks surface is open.** A document redacted by one person goes to a second person for review; **the reviewer gets the same UI**, can **correct the redaction themselves** (add/remove boxes, run a second-pass AI check) **or return it with notes**. Both halves are built and verified — reviewer mode on `/redaction/:taskId`, and `POST /redaction-jobs/jobs/:id/return` requiring a reason, written to `request_history` as `REDACTION_RETURNED` (reviewer, author, file, note).
+
+**The gap — the author is never told it came back.** On return, the job drops to `editing` and the `redaction_qa` task is cancelled; the author's **original redaction task was never closed at submit, so it is still sitting in their My Tasks, looking exactly as it did before they submitted it**. Nothing marks it as returned and nothing carries the reviewer's reason — the author has to think to open the request's history to find out why. A returned redaction is the most time-critical item a redactor can have (a deadline is running and a release is blocked), and it is currently the least visible.
+
+**Kevin's direction.** The returned work goes back to **the same task name** in My Tasks, carrying a banner/button on that row reading **URGENT CORRECTIONS REQUIRED**, which opens the redaction screen with the reviewer's notes shown.
+
+**Why it waits.** The row treatment, the urgency affordance, and where a "returned" state lives in the task model are all My Tasks-restructure decisions (per-role boxes, Queued/In-Process labels, pool + claim). Building a bespoke banner now would be designed twice. **Left as-is for now (Kevin, 2026-07-13).**
+
+**When it's picked up, decide:**
+- **Task state vs. new task** — does the author's existing `redaction` task gain a `returned` state (and does `submit` stop leaving it plain-open), or does return spawn a fresh, distinctly-typed task? Note the invariant: passive/heads-up items are **Notifications, never fake tasks**; a return is real work, so it belongs on a task.
+- **Where the reviewer's note renders** — the My Tasks row, the redaction screen on open (an author-side "Returned by X — <reason>" banner, cheap and already backed by the `REDACTION_RETURNED` history row), or both.
+- **Push vs. pull** — everything above is pull (the author must look). **There is no notifications table in the system at all** (verified 2026-07-13). A real staff-notification primitive is its own slice; redaction returns would be its first customer, and the architecture invariant already reserves Notifications for exactly this.
+- **Same pattern, other returns** — fee-estimate objections and clarification rework have the same shape; whatever is built here should be the general "your work came back" treatment, not a redaction one-off.
+
 _Objection My Tasks visibility (standing passive watchers): decided AGAINST 2026-07-01. Single assigned owner, freely reassignable; team-level oversight via dashboard count (R1) once designed._
 
 ---
