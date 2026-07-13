@@ -307,7 +307,18 @@ Backfill per existing request: create parent, copy the citizen/money/clock colum
 4. ~~**`extend(clockId, days, reason)`**~~ **BUILT + verified 2026-07-13 (30/30).**
 5. ~~**Make `tollReasons` load-bearing.**~~ **BUILT + verified 2026-07-13.**
 
-**§10 is complete.** The clock subsystem now has all three primitives (toll · restart · extend), a per-jurisdiction rule store, a validated toll vocabulary, and 18 jurisdictions of real rule data. Remaining in this area, none blocking: the **state → city precedence stack** (Tulsa's EO and SF's Sunshine Ordinance are city overlays on looser state law — recorded as notes, not data), deadline configs for the other 17 jurisdictions (only TX has one; the rest fall back), and a **UI editor** for the policy areas (API-only today).
+**§10 is complete.** The clock subsystem now has all three primitives (toll · restart · extend), a per-jurisdiction rule store, a validated toll vocabulary, and 18 jurisdictions of real rule data. **Deadline rules are seeded for TX, IL and CA** — verified 25/25 that the *same action produces different law*: IL caps an extension at one grant of 5 business days (5 ILCS 140/3(e)), CA at one of 14 calendar days (§ 7922.535(b)), TX has no cap because the TPIA grants no unusual-circumstances extension.
+
+### 10.5 OPEN — the acknowledge-vs-produce clock (do NOT guess this)
+**FL, WA, NY and CT are deliberately NOT seeded with deadline rules.** Their short statutory clock is **not a production deadline**:
+- **FL** — *no statutory clock at all*; only "reasonable custodial delay" per record (*Tribune Co. v. Cannella*, 458 So. 2d 1075 (Fla. 1984)).
+- **WA** — RCW 42.56.520: 5 business days to **respond** (produce · link · acknowledge with a reasonable estimate · seek clarification · deny). No final production deadline; the estimate is revised per installment.
+- **NY** — Pub. Off. Law § 89(3)(a): 5 business days to **acknowledge**, then a "date certain within a reasonable period."
+- **CT** — Conn. Gen. Stat. § 1-206(a): the 4 business days is the deadline for a **denial**, not for production.
+
+Modelling any of these as a `respond`/produce clock would report **false lateness** — the same bug class as an unpaid deposit burning the statutory clock (§10.2 gap 2). The engine already supports a second, non-primary **`acknowledge`** clock as pure config (clock types are arbitrary keys), so no code is needed. **The product decision is:** when a jurisdiction has *no* production deadline, should the request show a **blank `deadline_date`** (legally honest) or an **internal service target** (operationally useful, but not law)? That fork is Kevin's, and it is why these four states are unseeded rather than guessed.
+
+**Also remaining, none blocking:** the **state → city precedence stack** (Tulsa's EO and SF's Sunshine Ordinance are city overlays on looser state law — recorded as notes, not data), and a **UI editor** for the policy areas (API-only today; blocked on the UI rule — design direction must be agreed first).
 
 **Relationship to the parent/child model:** all of this lives on the **parent** (the clock is parent-level, §2). None of it touches the child. The two workstreams are therefore independent and can be built in either order — but the roll-up rules in §6 assume the parent clock is trustworthy, so a request whose clock runs while a deposit is unpaid will report false lateness on every child beneath it.
 

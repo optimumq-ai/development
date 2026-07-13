@@ -2105,3 +2105,44 @@ deposit clock 31/31 · survey seed 35/35 · jurisdiction_rules 24/24.
 **State:** `main`, tree clean, app healthy. **Spec §8's bug pair is now FULLY closed** (both the raw-`UPDATE`
 bypasses and the ghost stage). **The parent/child migration is the next real work and remains blocked on
 Kevin's spec §9 answers.**
+
+## 2026-07-13 (md) — Deadline rules for IL + CA: the same action, different law — 25/25
+
+**The multi-jurisdiction story is now real, not theoretical.** `tolling.extend()` shipped with per-jurisdiction
+caps but only TX had deadline rules, so the caps had nothing to bind to. Seeded **Illinois and California**
+from the 2026-07-13 legal research (`src/db/seed_deadline_rules.js`, idempotent).
+
+**The assertion that matters:** the SAME action produces DIFFERENT law.
+- **IL** — 5 **business**-day clock (5 ILCS 140/3(d)); extension capped at **one grant of 5 days** on seven
+  statutory grounds (§ 3(e)). A second extension is refused. An invented ground is refused.
+- **CA** — 10 **calendar**-day clock (§ 7922.535(a)), labelled **"Determine & notify"** — because the CPRA's
+  10 days is a *determination* deadline, not production (§ 7922.530(a) is separately "promptly available").
+  The label is what an operator reads, so it must not misstate the duty. Extension capped at **one grant of
+  14 days** (§ 7922.535(b)); a 15-day grant is refused, 14 is allowed. `cyberattack` is a valid CA ground and
+  would be refused in IL.
+- **TX** — unchanged, and **no cap**: the TPIA grants no unusual-circumstances extension, so an extension there
+  is uncapped-but-recorded.
+
+**Verified 25/25** (`verify_deadline_rules.js`) by making each jurisdiction ACTIVE in turn and watching a real
+request's clock change shape: IL → 5 business_days, CA → 10 calendar_days, TX → its by-classification
+durations. The active jurisdiction is a global switch, so the harness restores it and asserts the restore.
+
+**⚠️ WHAT I REFUSED TO SEED, AND WHY — new spec §10.5 (Kevin's call).** **FL, WA, NY and CT are deliberately
+NOT seeded.** Their short statutory clock is **not a production deadline**: FL has *no* clock at all (only
+"reasonable custodial delay" per record, *Tribune Co. v. Cannella*); WA's 5 business days is a duty to
+*respond* (RCW 42.56.520) with no final production deadline; NY's 5 is to *acknowledge* (§ 89(3)(a)); CT's 4 is
+the deadline for a *denial* (§ 1-206(a)). **Modelling any of them as a produce clock would report FALSE
+LATENESS — the exact bug class we fixed this session** (an unpaid deposit burning the statutory clock).
+
+The engine already supports a non-primary **`acknowledge`** clock as pure config (clock types are arbitrary
+keys), so no code is needed. **The open PRODUCT question:** when a jurisdiction has no production deadline,
+does the request show a **blank deadline_date** (legally honest) or an **internal service target**
+(operationally useful, not law)? That is a Kevin decision, and it is why those four are unseeded rather than
+guessed.
+
+**FULL SUITE GREEN — 192 assertions, 0 failures:** deadline rules 25/25 · stages 23/23 · stage bypass 24/24 ·
+extend 30/30 · deposit clock 31/31 · survey seed 35/35 · jurisdiction_rules 24/24.
+
+**State:** `main`, tree clean, app healthy, active jurisdiction still `jur-tx`. 20 jurisdiction profiles ·
+18 clarification policies · 3 deadline rule sets · 1 payment policy. **The parent/child migration is the next
+real work and remains blocked on Kevin's spec §9 answers.**
