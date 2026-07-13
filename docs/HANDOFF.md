@@ -1706,3 +1706,20 @@ bypass 18/18 · slice3 12/12 · slice3b 19/19 · slice4 18/18 · slice5 13/13 ·
 **Note for next session:** the API is **not** under pm2 in this environment (`pm2 restart optimumq-api` →
 "Process not found"). It runs as a bare `node /opt/optimumq/backend/server.js`; restart = kill the pid and
 relaunch with `setsid nohup node /opt/optimumq/backend/server.js &`.
+
+## 2026-07-13 (cu) — Page anchors on every proposal list (`e06f5f8`)
+
+Closed the last functional follow-up on the redaction screen. The rail lists are **document-wide**, so an entry
+with no page number was a line of text with nowhere to go — fine at 2 pages, unusable at 50. All three lists
+(author **AI Redaction**, reviewer **Proposed redactions**, reviewer **Second-pass AI check**) now sort in
+**reading order** (page → y → x) and carry a clickable **`p. N` anchor** that jumps the canvas to that page
+(shared `PageChip`; the click is swallowed so jumping never ticks the proposal's checkbox).
+
+**Verified 12/12** (`scratchpad/verify_pageanchor.js`, real 2-page incident report through the real chain):
+17 proposals ↔ 17 chips · reading order (1×12 then 2×5) · list spans both pages · clicking a `p. 2` anchor
+moves the canvas to page 2 **with the page-2 image painted** · Apply-selected still (0) · 0 runtime errors.
+**Reviewer regression 31/31.** FE rebuilt.
+
+**State:** `main` @ `e06f5f8` (unpushed), tree clean, app healthy. Redaction feature (author + reviewer) is
+complete and verified on real documents. Remaining: **Kevin's markup** on the screenshots, then **BACKLOG R9**
+(portal search-completeness intent — undesigned, discuss before building).
