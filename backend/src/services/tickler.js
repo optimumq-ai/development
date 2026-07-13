@@ -9,6 +9,7 @@ var uuidv4 = require('uuid').v4;
 var pt = require('./paymentTiming');
 var PCP = require('./paymentClockPolicy');
 var depositAction = require('./depositAction');
+var taskRouting = require('./taskRouting');
 
 var DEFAULTS = { requesterResponseDays: 10, depositDueDays: 10, stallDays: 21, autoWithdrawOnLapse: false };
 var TERMINAL_STAGES = ['delivery', 'closed'];
@@ -87,8 +88,16 @@ async function runSweep(opts) {
     await run("UPDATE request_fee_estimates SET lapsed_at = ? WHERE id = ?", [nowStr(), lr.est_id]);
     if (T.autoWithdrawOnLapse) {
       var reason = lw.onExpiry === 'abandoned' ? 'abandoned' : 'estimate_lapsed';
-      await run("UPDATE requests SET stage = 'closed', status = 'closed', closure_reason = ?, tickler_flag = ?, tickler_flagged_at = ?, updated_at = datetime('now') WHERE id = ?", [reason, reason, nowStr(), lr.rid]);
-      await hist(lr.rid, 'ESTIMATE_LAPSED', 'No response within ' + ldue + '; request auto-' + (lw.onExpiry === 'abandoned' ? 'abandoned' : 'withdrawn') + '.', lr.stage, 'closed');
+      // ARCHITECTURE item 6: through the ONE central transition — it writes history (stage_from/stage_to)
+      // AND cancels the request's open tasks. The raw `UPDATE requests SET stage = 'closed'` this replaces
+      // did neither, so a closed request kept a claimable task sitting in the pools.
+      await taskRouting.applyStageTransition(lr.rid, 'closed', {
+        actorName: 'System', action: 'ESTIMATE_LAPSED',
+        notes: 'No response within ' + ldue + '; request auto-' + (lw.onExpiry === 'abandoned' ? 'abandoned' : 'withdrawn') + '.'
+      });
+      // The transition clears the tickler flag on a forward advance; re-stamp it, because the lapse reason
+      // is what the queue displays on a lapsed request.
+      await run("UPDATE requests SET closure_reason = ?, tickler_flag = ?, tickler_flagged_at = ?, updated_at = datetime('now') WHERE id = ?", [reason, reason, nowStr(), lr.rid]);
       actions.withdrawn += 1;
     } else {
       await flagRequest(lr.rid, 'estimate_response_overdue');

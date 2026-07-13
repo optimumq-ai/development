@@ -34,20 +34,32 @@ async function sendDunning(rid, req, sit, cfg) {
   await ps.recordEvent(rid, { type: 'dunning', reason: 'payment reminder sent', actor: 'system' });
 }
 
+// ARCHITECTURE item 6: every stage change goes through the ONE central transition, which ALWAYS writes
+// request_history (with stage_from/stage_to) and spawns/cancels the stage's task. These two functions used
+// to write `UPDATE requests SET stage = 'closed'` directly — an unlogged jump that left the request's open
+// tasks CLAIMABLE in the pools. Fixed 2026-07-13.
 async function closeForNonpayment(rid, cfg) {
   cfg = cfg || await nonpaymentConfig();
-  await db.run("UPDATE requests SET status = 'closed', stage = 'closed', closure_reason = 'nonpayment', updated_at = ? WHERE id = ?", [nowStr(), rid]);
+  await require('./taskRouting').applyStageTransition(rid, 'closed', {
+    actorName: 'System', action: 'CLOSED_NONPAYMENT',
+    notes: 'Closed for nonpayment after a dunning reminder and the configured window. Re-openable.'
+  });
+  await db.run("UPDATE requests SET closure_reason = 'nonpayment', updated_at = ? WHERE id = ?", [nowStr(), rid]);
   if (cfg.publishOnClose) { try { await db.run("UPDATE fulfilled_records SET status = 'released', released_at = COALESCE(released_at, ?) WHERE request_id = ? AND status = 'held'", [nowStr(), rid]); } catch (e) {} }
   await ps.recordEvent(rid, { type: 'closed', reason: 'closed for nonpayment', actor: 'system' });
-  try { await db.run("INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)", [uuidv4(), rid, null, 'System', 'CLOSED_NONPAYMENT', 'Closed for nonpayment after a dunning reminder and the configured window. Re-openable.']); } catch (e) {}
 }
 
 async function reopen(rid, actor) {
   var r = await db.get("SELECT status, closure_reason FROM requests WHERE id = ?", [rid]);
   if (!r || r.status !== 'closed' || !/nonpayment/i.test(r.closure_reason || '')) throw new Error('This request is not closed for nonpayment.');
-  await db.run("UPDATE requests SET status = 'active', stage = 'awaiting_payment', closure_reason = NULL, nonpayment_dunning_at = NULL, updated_at = ? WHERE id = ?", [nowStr(), rid]);
+  // The raw UPDATE this replaces was the worse half of the bug: a reopened request landed back in
+  // awaiting_payment with NO stage task, so it was live again but invisible to every worklist.
+  await db.run("UPDATE requests SET closure_reason = NULL, nonpayment_dunning_at = NULL WHERE id = ?", [rid]);
+  await require('./taskRouting').applyStageTransition(rid, 'awaiting_payment', {
+    actorName: actor || 'Staff', action: 'REOPENED_NONPAYMENT',
+    notes: 'Reopened after closure for nonpayment.'
+  });
   await ps.recordEvent(rid, { type: 'reopened', reason: 'reopened for late payment', actor: actor || 'staff' });
-  try { await db.run("INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)", [uuidv4(), rid, null, actor || 'Staff', 'REOPENED_NONPAYMENT', 'Reopened after closure for nonpayment.']); } catch (e) {}
   return { reopened: true };
 }
 

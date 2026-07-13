@@ -2016,3 +2016,51 @@ areas (API-only today); and the still-outstanding raw-`UPDATE` bypasses in `feeN
 
 **State:** `main`, tree clean, app healthy. **The parent/child migration is the next real body of work and is
 still blocked on Kevin's answers to spec §9.**
+
+## 2026-07-13 (kb) — The raw `UPDATE requests SET stage` bypasses are GONE — 24/24. ARCHITECTURE item 6 holds.
+
+**Kevin: "fix the raw UPDATE bypasses in feeNonpayment and tickler."** Done — and there were **three** sites, not
+the two the audit found.
+
+ARCHITECTURE item 6 says: *one* central stage-transition function; every stage advance writes `request_history`
+AND spawns/updates the stage task; **no direct `UPDATE requests SET stage` anywhere else.** Three places broke it:
+
+1. **`feeNonpayment.closeForNonpayment`** — the nonpayment auto-close.
+2. **`feeNonpayment.reopen`** — *missed by the audit.* Closed → `awaiting_payment` with a raw UPDATE.
+3. **`tickler`** estimate-lapse auto-withdraw.
+
+All three now go through `taskRouting.applyStageTransition`. **Zero raw stage writes remain outside
+taskRouting** — asserted at the SOURCE level in the harness (a regex over both files), so a future one fails a
+test rather than rotting quietly.
+
+**What the fix actually buys** (harness-verified on real paths): every close now writes a history row **carrying
+`stage_from` → `stage_to`** (the raw UPDATE recorded neither), and — via the `applyStageTransition` fix from the
+(hz) slice — **cancels the request's open tasks**, so a closed request no longer leaves work claimable in the
+pools. The tickler's lapse flag and `closure_reason` are preserved (the transition clears `tickler_flag` on a
+forward advance, so it is deliberately re-stamped: the lapse reason is what the queue displays).
+
+**A CLAIM I MADE THAT WAS WRONG, corrected here.** I said the `reopen` bypass was "the worst of the three —
+a reopened request landed back in awaiting_payment with NO task, live but invisible to every worklist."
+**That is false.** `awaiting_payment` is deliberately **not** in `taskRouting.STAGE_TASK` — it is a
+WAIT-ON-THE-REQUESTOR state, owned by the tickler + deposit sweeps, not by a staff task. A reopened request
+correctly has **no** task and is correctly visible to the sweeps that own that stage. The real defect in
+`reopen` was only the missing history row. The harness now asserts the true invariant (no task, but matches the
+sweep candidate shape) instead of a fictional one.
+
+**Verified 24/24** (`verify_stage_bypass.js`): source-level check that no raw stage write survives · nonpayment
+close writes CLOSED_NONPAYMENT with `intake → closed` and cancels 1 open task · reopen writes
+REOPENED_NONPAYMENT with `closed → awaiting_payment`, clears `closure_reason`, and is sweep-visible · the real
+tickler sweep's estimate-lapse withdraw writes ESTIMATE_LAPSED with `intake → closed`, preserves
+`closure_reason` + `tickler_flag`, and cancels its open task · fee profile restored byte-for-byte.
+
+**The `jurisdiction_rules` flake is FIXED — and it was a TEST bug, not a product bug.** It asserted
+`updated_by === 'backfill'` on the TX deadline row; any later write through the real path (a harness restore, an
+AI apply, a staff edit) legitimately re-stamps that column, so the test failed **only when another harness had
+run first**. It now asserts the row exists and holds real config, which is what actually matters.
+
+**FULL SUITE GREEN, CHAINED BACK-TO-BACK — 144 assertions, 0 failures:** extend 30/30 · deposit clock 31/31 ·
+survey seed 35/35 · stage bypass 24/24 · jurisdiction_rules 24/24.
+
+**State:** `main`, tree clean, app healthy. **Spec §8's bug pair is now fully closed** (the ghost
+`custodian_retrieval` stage in the frontend's legacy stage order is the one item left from that pair — frontend,
+untouched). **The parent/child migration is the next real work and remains blocked on Kevin's spec §9 answers.**
