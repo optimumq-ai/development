@@ -1960,3 +1960,59 @@ validated — `toll()` accepts any string).
 **State:** `main`, tree clean, app healthy (PM2 restarted with the new code). 18 jurisdictions · 18 clarification
 policies + 1 payment policy · **all drafts, 0 attested**. Parent/child migration still blocked on Kevin's §9
 answers.
+
+## 2026-07-13 (ja) — Clock `extend()` + `tollReasons` validation — 30/30. **§10 of the spec is COMPLETE.**
+
+**Spec §10.4 steps 4 & 5, the last two.**
+
+**(1) `extend()` — the third clock primitive.** A toll suspends a clock and moves the due date by *elapsed
+wall time*. That is structurally the wrong shape for a **statutory extension**, which adds a FIXED number of
+days no matter how long anyone waited (5 ILCS 140/3(e): one 5-business-day extension; Cal. Gov't Code
+§ 7922.535(b): one, max 14 days). `tolling.extend(clockId, days, reason, opts)` lengthens
+`request_clocks.duration`; `computeStatus` derives the rest, so no due date is stored-and-mutated. New
+`clock_extensions` ledger + `POST /api/clocks/:clockId/extend` + `GET /:clockId/extensions`.
+
+**Caps are the jurisdiction's statute talking, and the ledger enforces them.** Config per clock:
+`extension: { maxDays, maxCount, grounds }`. **`maxDays` caps the TOTAL across the clock's life, not each
+grant** — otherwise "one extension of not more than 14 days" is evaded by granting 14 twice (asserted:
+3 days then 3 more is refused at a 5-day cap, but the remaining 2 ARE grantable). A **reason is mandatory** —
+it is the statutory ground — and an undeclared ground is refused. **No cap is seeded for TX on purpose:** the
+TPIA has **no** unusual-circumstances extension (§ 552.221(a) — volume extends what is "reasonable" but grants
+no extra statutory days), so an extension there is *uncapped-but-recorded* — if a TX city grants itself extra
+days, that belongs in the ledger, not silently blocked and not silently allowed.
+
+**(2) `tollReasons` is finally load-bearing.** Declared per clock in config since day one and **never read** —
+`toll()` accepted any string, so a typo silently became a new toll reason and no city could constrain what may
+stop its clock. Now validated, with an error that names the allowed set.
+
+**⚠️ This nearly broke the AG hold, and that is the finding worth remembering.** `routes/requests.js` has
+tolled the **respond** clock with `ag_ruling_pending` since the AG flow was built — but `ag_ruling_pending` was
+**NOT** in the seeded `tollReasons` (`[clarification_pending, payment_pending, extension]`). Switching
+validation on without backfilling would have silently killed the AG hold. Backfilled by
+`src/db/seed_deadline_toll_reasons.js` (idempotent) + added to `DEFAULT_RULES`; the regression is now an
+explicit assertion.
+
+**Verified 30/30** (`verify_extend.js`) on real paths: undeclared toll reason rejected with nothing written to
+the ledger · **AG hold still tolls** · extension grows duration by exactly N and the due date with it, clock
+stays RUNNING with 0 tolled days (extension ≠ pause) · remaining grows by N, not by wall-clock · ledger records
+the ground and the actor · `requests.deadline_date` written back · zero-day and reason-less extensions refused
+400 · maxCount, maxDays-total, and grounds caps all bind · a clock can be extended AND tolled, and the
+extension survives the resume.
+
+**Regressions green:** deposit clock 31/31 · survey seed 35/35 · jurisdiction_rules 24/24. *(jurisdiction_rules
+intermittently reports 23/24 when run back-to-back with other harnesses — it waits ≤15s for the AI
+classification to land on a freshly-submitted request and occasionally times out under load. Harness timing
+sensitivity, NOT a product defect; passes clean on every isolated run.)*
+
+**§10 IS COMPLETE.** The clock subsystem now has all three primitives (**toll · restart · extend**), a
+per-jurisdiction rule store, a validated toll vocabulary, and 18 jurisdictions of real rule data — where this
+morning it had a global singleton config, one jurisdiction, an unused reset, and zero tolls ever recorded.
+
+**Left in this area (none blocking):** the **state → city precedence stack** (Tulsa's EO / SF's Sunshine
+Ordinance are city overlays on looser state law — recorded as notes, not data); deadline configs for the other
+17 jurisdictions (only TX has one — the rest fall back to the global default); a **UI editor** for the policy
+areas (API-only today); and the still-outstanding raw-`UPDATE` bypasses in `feeNonpayment.js:39` /
+`tickler.js:88` (spec §8).
+
+**State:** `main`, tree clean, app healthy. **The parent/child migration is the next real body of work and is
+still blocked on Kevin's answers to spec §9.**

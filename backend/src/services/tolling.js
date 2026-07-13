@@ -15,7 +15,7 @@ function tid() { return 'tl-' + uuidv4().slice(0, 8); }
 
 var DEFAULT_RULES = {
   version: 0, weekend: [0, 6], holidays: [],
-  clocks: { respond: { label: 'Respond / produce', basis: 'calendar_days', durationByClassification: { simple: 5, standard: 10, complex: 20, redaction_required: 30 }, default: 10, startOn: 'intake', primary: true, tollReasons: ['clarification_pending', 'payment_pending', 'extension'] } }
+  clocks: { respond: { label: 'Respond / produce', basis: 'calendar_days', durationByClassification: { simple: 5, standard: 10, complex: 20, redaction_required: 30 }, default: 10, startOn: 'intake', primary: true, tollReasons: ['clarification_pending', 'payment_pending', 'ag_ruling_pending', 'extension'] } }
 };
 
 // Rules for the active jurisdiction. A config with no clocks is not usable — fall through to the
@@ -112,9 +112,23 @@ async function startClock(requestId, type, opts) {
   return id;
 }
 
+// The clock's rule definition, or null if the config does not describe this clock type.
+async function defFor(clock, rules) {
+  rules = rules || await loadRules();
+  return (rules.clocks && rules.clocks[clock.clock_type]) || null;
+}
+
 async function toll(clockId, reason, note) {
   var clk = await get("SELECT * FROM request_clocks WHERE id = ?", [clockId]);
   if (!clk) throw new Error('Clock not found');
+  // `tollReasons` has been declared per clock in config since day one and NEVER read — toll() accepted any
+  // string, so a typo silently became a new toll reason and no jurisdiction could constrain what may stop
+  // its clock. It is load-bearing now: a reason the jurisdiction has not declared is rejected.
+  var def = await defFor(clk);
+  if (def && Array.isArray(def.tollReasons) && def.tollReasons.length && def.tollReasons.indexOf(reason) < 0) {
+    throw new Error('"' + reason + '" is not a toll reason this jurisdiction allows for the ' + clk.clock_type +
+      ' clock. Allowed: ' + def.tollReasons.join(', ') + '.');
+  }
   var open = await get("SELECT id FROM clock_tolls WHERE clock_id = ? AND tolled_until IS NULL", [clockId]);
   if (open) return { alreadyTolled: true };
   await run("INSERT INTO clock_tolls (id, clock_id, reason, tolled_from, note, created_at) VALUES (?,?,?,?,?,?)", [tid(), clockId, reason || 'other', nowStr(), note || null, nowStr()]);
@@ -176,8 +190,69 @@ async function overdue() {
   return out;
 }
 
+// EXTEND — the third clock primitive, and the only one that can express a STATUTORY extension.
+//
+// A toll suspends the clock and pushes the due date out by ELAPSED WALL TIME. That is the wrong shape for
+// "the agency may take 5 more business days for an unduly voluminous request" (5 ILCS 140/3(e)) or "one
+// extension, not more than 14 days" (Cal. Gov't Code § 7922.535(b)) — those add a FIXED number of days
+// regardless of how long anyone waited. extend() lengthens the clock's duration; computeStatus() then
+// derives everything else, so no due date is stored and mutated.
+//
+// Statutes CAP extensions, so the ledger is the enforcement. Config (per clock, in the jurisdiction's
+// deadline rules):
+//   extension: { maxDays: 5, maxCount: 1, grounds: ['voluminous', ...] }
+// A clock with no `extension` config is uncapped — a deliberate staff action with a reason, which is what
+// a jurisdiction that has no statutory extension (e.g. TX) would still want recorded if it ever happens.
+async function extend(clockId, days, reason, opts) {
+  opts = opts || {};
+  var n = Math.floor(Number(days));
+  if (!isFinite(n) || n <= 0) throw new Error('An extension must be a positive number of days.');
+  if (!reason || !String(reason).trim()) throw new Error('An extension needs a reason — it is the statutory ground for the extra time.');
+  var clk = await get("SELECT * FROM request_clocks WHERE id = ?", [clockId]);
+  if (!clk) throw new Error('Clock not found');
+  if (clk.status === 'satisfied') throw new Error('This clock is already satisfied; it cannot be extended.');
+
+  var rules = await loadRules();
+  var def = await defFor(clk, rules);
+  var ext = (def && def.extension) || {};
+
+  if (Array.isArray(ext.grounds) && ext.grounds.length && ext.grounds.indexOf(reason) < 0) {
+    throw new Error('"' + reason + '" is not a ground this jurisdiction allows for extending the ' +
+      clk.clock_type + ' clock. Allowed: ' + ext.grounds.join(', ') + '.');
+  }
+  var prior = await all("SELECT days FROM clock_extensions WHERE clock_id = ?", [clockId]);
+  if (ext.maxCount != null && prior.length >= Number(ext.maxCount)) {
+    throw new Error('This jurisdiction allows ' + ext.maxCount + ' extension' + (Number(ext.maxCount) === 1 ? '' : 's') +
+      ' on the ' + clk.clock_type + ' clock; ' + prior.length + ' already recorded.');
+  }
+  if (ext.maxDays != null) {
+    var already = prior.reduce(function (s, r) { return s + Number(r.days); }, 0);
+    // maxDays caps the TOTAL extension across the clock's life, not each grant — otherwise "one extension
+    // of not more than 14 days" could be evaded by granting 14 days twice.
+    if (already + n > Number(ext.maxDays)) {
+      throw new Error('This jurisdiction allows at most ' + ext.maxDays + ' extension days on the ' + clk.clock_type +
+        ' clock (' + already + ' already used; ' + n + ' more requested).');
+    }
+  }
+
+  await run("INSERT INTO clock_extensions (id, clock_id, days, reason, note, actor, created_at) VALUES (?,?,?,?,?,?,?)",
+    ['ext-' + uuidv4().slice(0, 8), clockId, n, reason, opts.note || null, opts.actor || 'system', nowStr()]);
+  await run("UPDATE request_clocks SET duration = duration + ?, updated_at = ? WHERE id = ?", [n, nowStr(), clockId]);
+  await writebackDeadline(clk.request_id, rules);
+
+  var after = await get("SELECT duration FROM request_clocks WHERE id = ?", [clockId]);
+  return { extended: true, clockId: clockId, days: n, reason: reason, duration: Number(after.duration),
+    extensionCount: prior.length + 1 };
+}
+
+// The extension ledger for a clock (audit / display).
+async function extensionsFor(clockId) {
+  return await all("SELECT * FROM clock_extensions WHERE clock_id = ? ORDER BY created_at", [clockId]);
+}
+
 module.exports = {
   loadRules: loadRules, computeStatus: computeStatus, startClocksForRequest: startClocksForRequest,
   startClock: startClock, toll: toll, resume: resume, restart: restart, satisfy: satisfy,
+  extend: extend, extensionsFor: extensionsFor,
   statusForRequest: statusForRequest, writebackDeadline: writebackDeadline, overdue: overdue
 };

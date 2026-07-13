@@ -21,6 +21,19 @@ router.post('/:clockId/toll', requireAuth, async function (req, res) {
 router.post('/:clockId/resume', requireAuth, async function (req, res) {
   try { res.json(await T.resume(req.params.clockId)); } catch (e) { res.status(500).json({ error: e.message }); }
 });
+// A STATUTORY extension: add a fixed number of days to the clock (IL 5 ILCS 140/3(e); CA § 7922.535(b)).
+// Not a toll — see tolling.extend(). Caps come from the jurisdiction's rules, so a 400 here is the city's
+// own statute talking, not a system error.
+router.post('/:clockId/extend', requireAuth, async function (req, res) {
+  try {
+    var b = req.body || {};
+    var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'staff';
+    res.json(await T.extend(req.params.clockId, b.days, b.reason, { note: b.note, actor: actor }));
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+router.get('/:clockId/extensions', requireAuth, async function (req, res) {
+  try { res.json({ extensions: await T.extensionsFor(req.params.clockId) }); } catch (e) { res.status(500).json({ error: e.message }); }
+});
 router.post('/:clockId/satisfy', requireAuth, async function (req, res) {
   try { res.json(await T.satisfy(req.params.clockId)); } catch (e) { res.status(500).json({ error: e.message }); }
 });

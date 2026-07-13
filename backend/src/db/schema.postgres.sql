@@ -689,3 +689,19 @@ SELECT 'jr-' || j.id || '-clarification', j.id, 'clarification', sc.value, 'back
   JOIN system_config sc ON sc.key = 'clarification_policy'
  WHERE j.id = (SELECT value FROM system_config WHERE key = 'jurisdiction_profile')
 ON CONFLICT (jurisdiction_id, domain) DO NOTHING;
+
+-- Statutory clock EXTENSIONS. Distinct from a toll: a toll suspends the clock and pushes the due date out
+-- by ELAPSED WALL TIME, which structurally cannot express "+10 statutory days for unusual volume"
+-- (5 ILCS 140/3(e); Cal. Gov't Code § 7922.535(b)). An extension LENGTHENS the clock's duration by a fixed
+-- number of days. Statutes cap these (IL: one 5-business-day extension; CA: one, max 14 days), so the
+-- ledger is what enforces the cap. See docs/SPEC_parent_child_lifecycle.md §10.4 step 4.
+CREATE TABLE IF NOT EXISTS clock_extensions (
+  id TEXT PRIMARY KEY,
+  clock_id TEXT NOT NULL,
+  days INTEGER NOT NULL,
+  reason TEXT,
+  note TEXT,
+  actor TEXT,
+  created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+CREATE INDEX IF NOT EXISTS ix_clock_extensions_clock ON clock_extensions (clock_id);
