@@ -2146,3 +2146,61 @@ extend 30/30 · deposit clock 31/31 · survey seed 35/35 · jurisdiction_rules 2
 **State:** `main`, tree clean, app healthy, active jurisdiction still `jur-tx`. 20 jurisdiction profiles ·
 18 clarification policies · 3 deadline rule sets · 1 payment policy. **The parent/child migration is the next
 real work and remains blocked on Kevin's spec §9 answers.**
+
+## 2026-07-13 (ne) — ONE request-creation helper + a LIVE intake bug that was already firing — 22/22
+
+**I did NOT start the parent/child migration.** An audit of every `requests` query first (27 LIST/COUNT queries)
+showed it is **not safe as one slice**, and three of the failure modes are **destructive**: `feeNonpayment` loops
+every active request and would **send duplicate dunning emails to real citizens**; `clarificationTimeout`
+**auto-closes** and a parent match is a false positive that closes a live request; the tickler stall sweep would
+flag every parent as "stalled" forever. That migration needs its own session with the query rewrite done first.
+
+**What the audit DID find is a bug that is live right now.** ARCHITECTURE item 5 ("one request-creation helper")
+was **not true**: 5 INSERT sites, **3 different request-numbering algorithms**, and **5 hardcoded deadline
+computations**.
+
+| Path | Numbering | Verdict |
+|---|---|---|
+| staff create | `MAX(request_number) + 1` | correct |
+| `/public` | last row **BY created_at**, +1 | **BROKEN** — the newest row is `DEMO-2026-5069`, whose prefix isn't the year, so it restarts at **`2026-0001`** — a number that already exists. **This route could not create a request at all.** |
+| **the live portal** (`/api/public/submit`) | **`COUNT(*) + 1`** | **BROKEN** — delete ANY request below the max and COUNT+1 mints an existing number → UNIQUE violation → **intake 500s**. It worked only by coincidence: COUNT (44) == MAX (44). |
+
+**The harness reproduced the live bug against the running server before the fix landed** (the API was still on
+old code): submit → submit → delete the first → third submit returned **500**. Cities purge requests. This was a
+landmine.
+
+**Shipped.** `services/requestCreate.js` — ONE helper: one numbering algorithm (`MAX + 1` over well-formed
+`YYYY-NNNN` only, so `DEMO-`/`SYS-`/`LIBRARY` rows can't corrupt it), **retried on unique collision** so
+concurrent submissions can't mint the same number, one INSERT, one CREATED history row. All three intake paths
+now call it; **neither route inserts into `requests` directly any more**. This is also where **wrap-in-parent**
+will live when the migration comes — one place instead of three.
+
+**The deadline is now the jurisdiction's, not a hardcoded table.** All three paths carried their own
+`{simple:5, standard:10, complex:20, redaction_required:30}` **calendar**-day map, and the classifier then
+**overwrote** `deadline_date` with `today + cls.deadlineDays` — a **fifth** source. That silently ignored the
+jurisdiction: wrong in IL (which counts **business** days) and in CA (whose clock is a *determination*
+deadline). Gone. The helper starts the clocks and `tolling.writebackDeadline()` derives the date; new
+`tolling.applyClassification()` re-derives the duration from the jurisdiction's `durationByClassification` when
+the AI classifier lands — and **refuses to touch a clock that has been extended**, so a granted statutory
+extension can never be silently erased.
+
+**Verified 22/22** (`verify_request_create.js`): both broken algorithms demonstrated against the real DB · no
+private numbering or raw INSERT left in either route · the hardcoded deadline table gone · **after a deletion,
+intake still succeeds** (`2026-0047` where the old code 500'd) · **5 concurrent submissions → 5 distinct
+numbers** · the clock duration comes from the jurisdiction's table · `requests.deadline_date` equals the derived
+due date (one source of truth) · exactly one CREATED history row.
+
+**FULL SUITE GREEN — 214 assertions, 0 failures:** request-create 22/22 · deadline rules 25/25 · stages 23/23 ·
+stage bypass 24/24 · extend 30/30 · deposit clock 31/31 · survey seed 35/35 · jurisdiction_rules 24/24.
+
+**⚠️ NOTE FOR THE NEXT SESSION — the parent/child migration audit is done and is the map.** 27 LIST/COUNT
+queries need a parent/child filter before any rows are migrated. Ranked by risk: `routes/requests.js` (queue +
+all 3 dashboard counts), `services/reportEngine.js` (backs EVERY report; `BASE_EXCL` is the hook),
+`services/tickler.js` (stall sweep would flag every parent forever), `routes/feeEstimates.js` (14 queries,
+nearly all parent-side money), `services/feeNonpayment.js` (**duplicate dunning emails to citizens**),
+`services/clarificationTimeout.js` (**destructive — auto-closes**), `routes/tasks.js` (`withReq()` needs a
+second join to the parent for `request_number`). Also: `request_number` is `UNIQUE NOT NULL`, so every child
+must be given a `-N` suffix — children cannot inherit NULL.
+
+**State:** `main`, tree clean, app healthy (PM2 restarted 23:34 with the new code). **The parent/child migration
+remains the next real work and is still blocked on Kevin's spec §9 answers.**

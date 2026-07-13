@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const emailService = require('../services/email');
 const recordSearch = require('../services/recordSearch');
 const classifier = require('../services/classifier');
+const requestCreate = require('../services/requestCreate');
 const emailConnector = require('../services/connectors/email');
 const workflowEngine = require('../services/workflowEngine');
 const crypto = require('crypto');
@@ -339,25 +340,27 @@ router.post('/submit', async function(req, res) {
   if (!b.requestorName || !b.requestorEmail || !b.description) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
-  var year = new Date().getFullYear();
-  var countRow = await get('SELECT COUNT(*) as n FROM requests WHERE request_number LIKE ?', [year + '-%']);
-  var nextNum = (countRow ? countRow.n : 0) + 1;
-  var requestNumber = year + '-' + String(nextNum).padStart(Math.max(4, String(nextNum).length), '0');
-  var deadlineDays = { simple: 5, standard: 10, complex: 20, redaction_required: 30 };
-  var classification = b.classification || 'standard';
-  var days = deadlineDays[classification] || 10;
-  var deadline = new Date(); deadline.setDate(deadline.getDate() + days);
-  var deadlineStr = deadline.toISOString().split('T')[0];
-  var id = uuidv4();
-  // Structured intake fields (split-canvas slice 1): commercial requester, fee-waiver reason, and the
-  // postal mailing address (only sent by the form when delivery_method === 'mail'; null otherwise).
-  // Slice 5 adds certification opt-in + the email-accuracy method (attested|visual) from the Phase-0 form.
-  var requestorType = b.requestorType === 'commercial' ? 'commercial' : 'individual';
-  var verifyMethod = (b.emailVerificationMethod === 'attested' || b.emailVerificationMethod === 'visual') ? b.emailVerificationMethod : null;
-  await run('INSERT INTO requests (id, request_number, requestor_name, requestor_email, requestor_phone, requestor_type, delivery_method, description, classification, department_id, fee_waiver_requested, fee_waiver_reason, mailing_street1, mailing_street2, mailing_city, mailing_state, mailing_zip, certification_requested, email_verification_method, is_mrr, submission_channel, stage, status, deadline_date, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime(\'now\'))',
-    [id, requestNumber, b.requestorName, b.requestorEmail, b.requestorPhone || '', requestorType, b.deliveryMethod || 'email', b.description, classification, null, b.feeWaiverRequested ? 1 : 0, b.feeWaiverReason || null, b.mailingStreet1 || null, b.mailingStreet2 || null, b.mailingCity || null, b.mailingState || null, b.mailingZip || null, b.certificationRequested ? 1 : 0, verifyMethod, b.isMrr ? 1 : 0, b.submissionChannel || 'chat_agent', 'intake', 'active', deadlineStr]);
-  await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
-    [uuidv4(), id, 'public', b.submissionChannel === 'manual_form' ? 'Public Portal (Form)' : 'Public Portal (Chat Agent)', 'CREATED', b.submissionChannel === 'manual_form' ? 'Submitted via public portal form' : 'Submitted via AI chat agent']);
+  // ONE creation helper (ARCHITECTURE item 5). This path used to mint its number with COUNT(*) + 1, which
+  // collides with an existing request the moment any request below the maximum is deleted, and carried its
+  // own copy of the hardcoded deadline table (which ignored the jurisdiction's rules). Both are gone.
+  var isForm = b.submissionChannel === 'manual_form';
+  var made = await requestCreate.createRequest({
+    requestorName: b.requestorName, requestorEmail: b.requestorEmail, requestorPhone: b.requestorPhone,
+    requestorType: b.requestorType, deliveryMethod: b.deliveryMethod, description: b.description,
+    classification: b.classification, feeWaiverRequested: b.feeWaiverRequested, feeWaiverReason: b.feeWaiverReason,
+    mailingStreet1: b.mailingStreet1, mailingStreet2: b.mailingStreet2, mailingCity: b.mailingCity,
+    mailingState: b.mailingState, mailingZip: b.mailingZip,
+    certificationRequested: b.certificationRequested, emailVerificationMethod: b.emailVerificationMethod,
+    isMrr: b.isMrr, submissionChannel: b.submissionChannel || 'chat_agent'
+  }, {
+    actorId: 'public',
+    actorName: isForm ? 'Public Portal (Form)' : 'Public Portal (Chat Agent)',
+    historyAction: 'CREATED',
+    historyNote: isForm ? 'Submitted via public portal form' : 'Submitted via AI chat agent',
+    kickIntake: false // this route kicks onIntake itself below, after its own extra wiring
+  });
+  var id = made.id;
+  var requestNumber = made.requestNumber;
 
   // Persist any records the citizen selected from search results
   if (Array.isArray(b.selectedRecords) && b.selectedRecords.length > 0) {
@@ -374,15 +377,19 @@ router.post('/submit', async function(req, res) {
   var cls = null;
   try {
     cls = await classifier.classifyAndRoute(b.description);
-    var dl = new Date(); dl.setDate(dl.getDate() + (cls.deadlineDays || 10));
-    var dlStr = dl.toISOString().split('T')[0];
     var basisText = cls.routingBasis === 'taxonomy' ? ('matched record type "' + cls.recordTypeName + '" at ' + cls.recordTypeConfidence + '% confidence')
       : (cls.routingBasis === 'general' ? 'general-knowledge department match' : 'no confident match - left Unassigned for triage review');
     // is_mrr: MRR if the auto-classifier detected multiple record types OR the intake declared multiple
     // described records (split-canvas one-item-per-record). Don't let a same-type multi-record request
     // (e.g. two building permits) get downgraded to non-MRR by the type-diversity classifier.
-    await run("UPDATE requests SET classification = ?, department_id = ?, deadline_date = ?, is_mrr = ?, record_type_id = ?, classification_confidence = ?, routing_basis = ?, updated_at = datetime('now') WHERE id = ?",
-      [cls.classification, cls.departmentId, dlStr, (cls.isMrr || b.isMrr) ? 1 : 0, cls.recordTypeId, cls.recordTypeConfidence, cls.routingBasis, id]);
+    //
+    // NOTE: deadline_date is NOT written here any more. It used to be `today + cls.deadlineDays` — a flat
+    // calendar-day add that ignored the jurisdiction entirely (wrong in IL, which counts BUSINESS days, and
+    // in CA, whose clock is a determination deadline). Classification now selects a duration from the
+    // jurisdiction's own table and the due date is DERIVED, like every other date in the system.
+    await run("UPDATE requests SET classification = ?, department_id = ?, is_mrr = ?, record_type_id = ?, classification_confidence = ?, routing_basis = ?, updated_at = datetime('now') WHERE id = ?",
+      [cls.classification, cls.departmentId, (cls.isMrr || b.isMrr) ? 1 : 0, cls.recordTypeId, cls.recordTypeConfidence, cls.routingBasis, id]);
+    try { await require('../services/tolling').applyClassification(id); } catch (e) { console.error('[publicChat] clock reclassify failed:', e && e.message); }
     await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
       [uuidv4(), id, 'system', 'AI Classification', 'CLASSIFIED', 'Auto-classified as ' + cls.classification + '; ' + basisText + (cls.teamName ? '; routed to ' + cls.teamName : '') + (cls.reasoning ? ' - ' + cls.reasoning : '')]);
   } catch(ce) { console.error('[publicChat] auto-classify failed:', ce.message); }

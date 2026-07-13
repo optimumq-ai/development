@@ -5,6 +5,7 @@ const email = require('../services/email');
 const { all, get, run } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const workflowEngine = require('../services/workflowEngine');
+const requestCreate = require('../services/requestCreate');
 async function activeExemptionModel() {
   try {
     var jrow = await get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'");
@@ -12,14 +13,6 @@ async function activeExemptionModel() {
     var jp = await get('SELECT exemption_model FROM jurisdiction_profiles WHERE id = ?', [jid]);
     return (jp && jp.exemption_model) || 'self_court';
   } catch (e) { return 'self_court'; }
-}
-
-async function generateRequestNumber() {
-  const year = new Date().getFullYear();
-  const existing = await all("SELECT request_number FROM requests WHERE request_number LIKE '" + year + "-%' ORDER BY request_number DESC LIMIT 1");
-  let seq = 1;
-  if (existing.length > 0) seq = parseInt(existing[0].request_number.split('-')[1]) + 1;
-  return year + '-' + String(seq).padStart(4, '0');
 }
 
 async function logHistory(requestId, actorId, actorName, action, notes) {
@@ -81,16 +74,13 @@ router.get('/:id', requireAuth, async function(req, res) {
 router.post('/', requireAuth, async function(req, res) {
   const b = req.body;
   if (!b.requestorName || !b.requestorEmail || !b.description) return res.status(400).json({ error: 'Name, email, and description required' });
-  const requestId = uuidv4();
-  const requestNumber = await generateRequestNumber();
-  const deadline = new Date();
-  const days = b.classification === 'complex' ? 20 : b.classification === 'redaction_required' ? 30 : b.classification === 'simple' ? 5 : 10;
-  deadline.setDate(deadline.getDate() + days);
-  await run('INSERT INTO requests (id, request_number, requestor_name, requestor_email, requestor_phone, requestor_type, delivery_method, description, record_types, classification, fee_waiver_requested, submission_channel, is_mrr, deadline_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-    [requestId, requestNumber, b.requestorName, b.requestorEmail, b.requestorPhone || null, b.requestorType || 'individual', b.deliveryMethod || 'email', b.description, JSON.stringify(b.recordTypes || []), b.classification || 'standard', b.feeWaiverRequested ? 1 : 0, b.submissionChannel || 'portal', b.isMrr ? 1 : 0, deadline.toISOString().split('T')[0]]);
-  await logHistory(requestId, req.user.sub, req.user.name, 'REQUEST_CREATED');
-  workflowEngine.bg(workflowEngine.onIntake(requestId), 'intake ' + requestId);
-  res.status(201).json({ requestId: requestId, requestNumber: requestNumber, success: true });
+  // ONE creation helper (ARCHITECTURE item 5) — numbering, defaults and the jurisdiction-derived deadline
+  // live there once, instead of being re-implemented at every intake path.
+  var made = await requestCreate.createRequest(b, {
+    actorId: req.user.sub, actorName: req.user.name,
+    historyAction: 'REQUEST_CREATED', historyNote: 'Request created by staff.'
+  });
+  res.status(201).json({ requestId: made.id, requestNumber: made.requestNumber, success: true });
 });
 
 router.patch('/:id/stage', requireAuth, async function(req, res) {
@@ -195,21 +185,15 @@ router.post('/public', async function(req, res) {
   var { v4: uuidv4 } = require('uuid');
   var b = req.body;
   if (!b.requestorName || !b.requestorEmail || !b.description) return res.status(400).json({ error: 'Name, email and description are required' });
-  var year = new Date().getFullYear();
-  var last = await get('SELECT request_number FROM requests ORDER BY created_at DESC LIMIT 1');
-  var nextNum = 1;
-  if (last) { var parts = last.request_number.split('-'); if (parts[0] == year) nextNum = parseInt(parts[1]) + 1; }
-  var requestNumber = year + '-' + String(nextNum).padStart(4,'0');
-  var deadlineDays = { simple:5, standard:10, complex:20, redaction_required:30 };
-  var days = deadlineDays[b.classification||'standard'] || 10;
-  var deadline = new Date(); deadline.setDate(deadline.getDate() + days);
-  var deadlineStr = deadline.toISOString().split('T')[0];
-  var id = uuidv4();
-  await run('INSERT INTO requests (id, request_number, requestor_name, requestor_email, requestor_phone, requestor_type, delivery_method, description, classification, department_id, fee_waiver_requested, is_mrr, submission_channel, stage, status, deadline_date, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,datetime(\'now\'))',
-    [id, requestNumber, b.requestorName, b.requestorEmail, b.requestorPhone||'', b.requestorType||'individual', b.deliveryMethod||'email', b.description, b.classification||'standard', b.departmentId||null, b.feeWaiverRequested?1:0, b.isMrr?1:0, 'portal', 'intake', 'active', deadlineStr]);
-  await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
-    [uuidv4(), id, 'public', 'Public Portal', 'CREATED', 'Request submitted via public portal']);
-  workflowEngine.bg(workflowEngine.onIntake(id), 'intake ' + id);
+  // ONE creation helper (ARCHITECTURE item 5). This path's old numbering read the LAST row by created_at and
+  // incremented it — which restarts at 0001 whenever the newest row carries a non-standard number (e.g.
+  // 'DEMO-2026-5069'), colliding with an existing request.
+  var made = await requestCreate.createRequest(Object.assign({}, b, { submissionChannel: 'portal' }), {
+    actorId: 'public', actorName: 'Public Portal',
+    historyAction: 'CREATED', historyNote: 'Request submitted via public portal'
+  });
+  var id = made.id;
+  var requestNumber = made.requestNumber;
   res.status(201).json({ success: true, requestNumber: requestNumber, requestId: id });
 });
 

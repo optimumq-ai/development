@@ -250,9 +250,41 @@ async function extensionsFor(clockId) {
   return await all("SELECT * FROM clock_extensions WHERE clock_id = ? ORDER BY created_at", [clockId]);
 }
 
+// Re-derive a request's clock durations from its (newly determined) classification, using the JURISDICTION's
+// duration table. Called after the AI classifier lands at intake.
+//
+// This replaces the hardcoded `deadline_date = today + cls.deadlineDays` write that the intake paths used to
+// do: a flat calendar-day add that ignored the jurisdiction entirely (wrong in IL, which counts BUSINESS
+// days, and in CA, whose clock is a determination deadline). Classification now selects a duration from the
+// jurisdiction's own durationByClassification table, and the due date is derived as it is everywhere else.
+//
+// SAFETY: a clock that has been EXTENDED is left alone. `duration` carries base + granted extension days, so
+// recomputing the base would silently erase a statutory extension. Classification lands seconds after intake,
+// long before any extension exists, so this costs nothing in practice and protects the ledger.
+async function applyClassification(requestId) {
+  var rules = await loadRules();
+  var req = await get("SELECT classification FROM requests WHERE id = ?", [requestId]);
+  if (!req) return { updated: 0 };
+  var clocks = await all("SELECT * FROM request_clocks WHERE request_id = ?", [requestId]);
+  var updated = 0;
+  for (var i = 0; i < clocks.length; i++) {
+    var clk = clocks[i];
+    var def = (rules.clocks && rules.clocks[clk.clock_type]) || null;
+    if (!def || !def.durationByClassification) continue;
+    var ext = await get("SELECT COUNT(*) AS n FROM clock_extensions WHERE clock_id = ?", [clk.id]);
+    if (Number(ext.n) > 0) continue; // never clobber a granted extension
+    var dur = durationFor(def, req.classification || 'standard');
+    if (Number(dur) === Number(clk.duration)) continue;
+    await run("UPDATE request_clocks SET duration = ?, updated_at = ? WHERE id = ?", [dur, nowStr(), clk.id]);
+    updated++;
+  }
+  if (updated) await writebackDeadline(requestId, rules);
+  return { updated: updated };
+}
+
 module.exports = {
   loadRules: loadRules, computeStatus: computeStatus, startClocksForRequest: startClocksForRequest,
   startClock: startClock, toll: toll, resume: resume, restart: restart, satisfy: satisfy,
-  extend: extend, extensionsFor: extensionsFor,
+  extend: extend, extensionsFor: extensionsFor, applyClassification: applyClassification,
   statusForRequest: statusForRequest, writebackDeadline: writebackDeadline, overdue: overdue
 };
