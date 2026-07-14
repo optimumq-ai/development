@@ -198,6 +198,31 @@ var STYLES = `
 .scv .side-foot{padding:12px;border-top:1px solid var(--hair)}
 .scv .res-query{font-size:12.5px;color:var(--muted)}
 .scv .res-query b{color:var(--ink)}
+
+/* ---------- R9: the refine loop ---------- */
+.scv .refine{flex:none;background:var(--surface-2);border:1px solid var(--hair);border-radius:10px;
+  padding:10px 12px;margin-bottom:2px}
+.scv .refine-lbl{display:block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;
+  color:var(--muted);margin-bottom:6px}
+.scv .refine-row{display:flex;gap:8px;align-items:center}
+.scv .refine-in{flex:1;min-width:0;background:var(--field-bg);border:1px solid var(--field-border);
+  border-radius:8px;padding:8px 10px;font:inherit;font-size:13.5px;color:var(--ink)}
+.scv .refine-in:focus{outline:2px solid var(--blue);outline-offset:1px;border-color:var(--blue)}
+.scv .refine-tried{margin-top:7px;font-size:12px;color:var(--muted)}
+.scv .refine-tried .tq{display:inline-block;background:var(--surface);border:1px solid var(--hair);
+  border-radius:999px;padding:1px 8px;margin:2px 4px 0 0;color:var(--muted)}
+
+/* ---------- R9: the intent window (Proceed, with >=1 selected) ---------- */
+.scv .intent-scrim{position:absolute;inset:0;z-index:5;display:grid;place-items:center;padding:20px;
+  background:color-mix(in srgb,var(--ink) 55%,transparent);backdrop-filter:blur(2px)}
+.scv .intent-box{background:var(--surface);border:1px solid var(--hair);border-radius:14px;
+  box-shadow:var(--shadow);padding:20px;max-width:420px;width:100%;text-align:center}
+.scv .intent-box h3{margin:0 0 4px;font-size:16px;font-weight:650}
+.scv .intent-box p{margin:0 0 14px;color:var(--muted);font-size:13.5px}
+.scv .intent-b{width:100%;justify-content:center;margin-bottom:8px}
+.scv .intent-back{background:none;border:0;color:var(--muted);font:inherit;font-size:12.5px;
+  cursor:pointer;padding:4px;text-decoration:underline}
+.scv .intent-back:hover{color:var(--ink)}
 .scv .res-empty{margin:auto;text-align:center;color:var(--muted);font-size:12.5px;padding:50px 16px;line-height:1.6;max-width:34ch}
 .scv .rec{display:flex;gap:12px;padding:13px 14px;border:1px solid var(--hair);border-radius:var(--radius-sm);background:var(--surface);transition:var(--step);cursor:pointer}
 .scv .rec:hover{border-color:var(--hair-strong)}
@@ -343,6 +368,22 @@ export default function PublicPortalV2Page() {
   const [selected, setSelected] = useState([]);
   const [children, setChildren] = useState([]);
 
+  // ---- R9: the refine loop (DESIGN_split_canvas_intake §R9) --------------------------------------
+  // A description is no longer one-shot. Within ONE description the requestor may search -> select ->
+  // re-describe -> search again -> select more. THE ATTACH-AND-CLEAR BOUNDARY MOVED: clear on Proceed,
+  // NOT on each search. So `selected` accumulates across re-runs, and two more things accumulate with it:
+  //
+  //   queriesTried — every query run for THIS description, in order. Not bookkeeping: it tells the
+  //                  searcher what the portal ALREADY ran so they don't repeat a query the requestor
+  //                  has already rejected.
+  //   passedOver   — every record the requestor was SHOWN and did NOT take. INVISIBLE TO THEM, forever.
+  //                  It exists so the searcher never re-surfaces a record they already declined.
+  const [queryDraft, setQueryDraft] = useState('');   // the editable "Searching for:" field
+  const [queriesTried, setQueriesTried] = useState([]);
+  const [passedOver, setPassedOver] = useState([]);
+  const [refining, setRefining] = useState(false);    // a Search again is in flight
+  const [intentAsk, setIntentAsk] = useState(false);  // the Proceed intent window (§R9.2)
+
   // ---- Phase 3: review & submit ----
   const [reviewOpen, setReviewOpen] = useState(false);
   const [submitState, setSubmitState] = useState('idle'); // idle | submitting | done | error
@@ -384,16 +425,32 @@ export default function PublicPortalV2Page() {
       if (added) {
         setChildren(function (cur) {
           var norm = added.toLowerCase();
+          // R9 — intent `not_searchable`. The portal NEVER searched this one (email/audio/photos/data/paper),
+          // so the requestor was never shown results and is never asked what their selection meant. Kept
+          // DISTINCT from `no_match_search`: the searcher has to know whether the portal searched and came
+          // up empty, or never searched at all. Those lead to different work.
           return cur.some(function (c) { return (c.description || '').trim().toLowerCase() === norm; })
-            ? cur : cur.concat([{ description: added, records: [] }]);
+            ? cur : cur.concat([{ description: added, records: [], intent: 'not_searchable', queriesTried: [], passedOver: [] }]);
         });
       }
       if (results && results.length) {
         // Search results flow to the LEFT results canvas (not the chat). Selection happens there via the
         // canvas Proceed button, so we suppress this turn's "any match?" quick replies in the chat.
+        var q = (r.data && r.data.searchQuery) || '';
+        // R9 — the agent can re-run a search too (it narrates the re-run; it does not own the control).
+        // If the canvas is ALREADY OPEN this is a REFINEMENT of the description in progress, not a new one:
+        // bank the displaced unpicked results and KEEP the selections. Only a closed canvas means a fresh
+        // description. Resetting `selected` here (as this did pre-R9) is exactly the "clear on every search"
+        // behaviour R9 exists to remove — it silently threw away picks the requestor had already made.
+        if (canvasResults) {
+          harvestPassedOver(canvasResults, selected, canvasQuery);
+        } else {
+          setSelected([]); setPassedOver([]); setQueriesTried([]);
+        }
         setCanvasResults(results);
-        setCanvasQuery((r.data && r.data.searchQuery) || '');
-        setSelected([]);
+        setCanvasQuery(q);
+        setQueryDraft(q);
+        if (q) setQueriesTried(function (cur) { return cur.indexOf(q) >= 0 ? cur : cur.concat([q]); });
         setQuickReplies([]);
         // Mobile: results pull the canvas forward to review + select; the accompanying chat reply is now
         // behind it, so flag the Assistant tab as unread. (Inert on desktop — the toggle is hidden.)
@@ -408,7 +465,7 @@ export default function PublicPortalV2Page() {
     } finally {
       setChatSending(false);
     }
-  }, [messages, chatSending, attachedRecords]);
+  }, [messages, chatSending, attachedRecords, canvasResults, selected, canvasQuery]);
 
   function recKey(r) { return r.id || r.title; }
   function isSelected(r) { return selected.some(function (s) { return recKey(s) === recKey(r); }); }
@@ -423,20 +480,90 @@ export default function PublicPortalV2Page() {
     setSelected(function (cur) { return cur.filter(function (s) { return recKey(s) !== recKey(r); }); });
   }
 
-  // Canvas Proceed: attach this record's selection to a child, clear both panels (attach-and-clear),
-  // and hand back to the agent so it asks whether to describe another record.
-  function proceedResults() {
+  // R9 — harvest the records currently ON SCREEN that the requestor did NOT take, and fold them into
+  // `passedOver`. Called at EVERY results-clear: each Search again AND the final Proceed.
+  //
+  // `sel` is passed in rather than read from state because both callers already hold the authoritative
+  // selection, and React state is stale inside the same tick.
+  function harvestPassedOver(results, sel, shownInQuery) {
+    if (!results || !results.length) return;
+    setPassedOver(function (cur) {
+      var seen = {};
+      cur.forEach(function (p) { seen[recKey(p)] = true; });
+      var add = results.filter(function (r) {
+        if (seen[recKey(r)]) return false;                                    // shown by an earlier query too
+        return !sel.some(function (s) { return recKey(s) === recKey(r); });   // and not taken
+      }).map(function (r) { return Object.assign({}, r, { shownInQuery: shownInQuery || '' }); });
+      return cur.concat(add);
+    });
+  }
+
+  // R9 — "Search again". Re-running REPLACES the results; the Selected column KEEPS everything already
+  // picked, and new picks ADD to it. The displaced, unpicked results go to `passedOver`.
+  const searchAgain = useCallback(async function () {
+    var q = (queryDraft || '').trim();
+    if (!q || refining) return;
+    setRefining(true);
+    try {
+      var r = await axios.post(API + '/public/refine-search', { query: q });
+      var results = (r.data && Array.isArray(r.data.searchResults)) ? r.data.searchResults : [];
+      harvestPassedOver(canvasResults, selected, canvasQuery);   // clear-point: bank what they skipped
+      setCanvasResults(results);
+      setCanvasQuery(q);
+      setQueriesTried(function (cur) { return cur.indexOf(q) >= 0 ? cur : cur.concat([q]); });
+      // NOTE: `selected` is deliberately NOT reset. That is the whole point of the refine loop.
+      setMessages(function (cur) {
+        return cur.concat([{ role: 'assistant', content: results.length
+          ? ('I re-ran that — ' + results.length + ' result' + (results.length === 1 ? '' : 's') + '. Anything you have already picked is still in your list.')
+          : 'I re-ran that and found nothing. You can adjust the wording and try again, or have our team search for you.' }]);
+      });
+    } catch (e) {
+      setMessages(function (cur) {
+        return cur.concat([{ role: 'assistant', content: 'That search did not go through. Please try again in a moment.' }]);
+      });
+    } finally { setRefining(false); }
+  }, [queryDraft, refining, canvasResults, selected, canvasQuery]);
+
+  // R9 — close the description out. `intent` says what the selection MEANT (§R9.2), which selection alone
+  // could never express: an empty pile used to read as abandonment, and a partial pile was indistinguishable
+  // from a complete one — so a request the requestor considered OPEN could be fulfilled and closed.
+  function closeDescription(intent) {
     if (!canvasResults) return;
     var picked = selected.slice();
-    setChildren(function (cur) { return cur.concat([{ description: canvasQuery, records: picked }]); });
-    setCanvasResults(null);
-    setCanvasQuery('');
-    setSelected([]);
+    // The final clear-point. Whatever is still on screen and unpicked was ALSO shown and passed over.
+    var seen = {};
+    passedOver.forEach(function (p) { seen[recKey(p)] = true; });
+    var tail = (canvasResults || []).filter(function (r) {
+      if (seen[recKey(r)]) return false;
+      return !picked.some(function (s) { return recKey(s) === recKey(r); });
+    }).map(function (r) { return Object.assign({}, r, { shownInQuery: canvasQuery }); });
+
+    setChildren(function (cur) {
+      return cur.concat([{
+        description: canvasQuery,
+        records: picked,
+        intent: intent,
+        queriesTried: queriesTried.slice(),
+        passedOver: passedOver.concat(tail)
+      }]);
+    });
+    setCanvasResults(null); setCanvasQuery(''); setQueryDraft('');
+    setSelected([]); setQueriesTried([]); setPassedOver([]); setIntentAsk(false);
+
     var msg = picked.length
-      ? ('I have selected ' + picked.length + ' record' + (picked.length === 1 ? '' : 's') + ' from those results.')
-      : 'None of those results match what I need.';
-    setMobileView('chat'); // the "search for more?" prompt comes back in chat
+      ? ('I have selected ' + picked.length + ' record' + (picked.length === 1 ? '' : 's') + ' from those results.'
+         + (intent === 'search_more' ? ' Please also have the Open Records team search for more.' : ''))
+      : 'None of those results match what I need — please have the Open Records team search.';
+    setMobileView('chat'); // the "describe another record?" prompt comes back in chat
     sendMessage(msg);
+  }
+
+  // Canvas Proceed. With ≥1 selected we must ask what the selection MEANT. With 0 selected there is no
+  // choice to offer — nothing was picked, so the button IS the answer and asking would be ceremony.
+  function proceedResults() {
+    if (!canvasResults) return;
+    if (selected.length > 0) setIntentAsk(true);
+    else closeDescription('no_match_search');
   }
 
   function addrOneLine() {
@@ -456,6 +583,25 @@ export default function PublicPortalV2Page() {
     var sel = children.reduce(function (a, c) { return a.concat(c.records); }, []).map(function (r) {
       return { id: r.id, title: r.title, sourceSystem: r.sourceSystem, publicAvailability: r.publicAvailability };
     });
+    // R9 — one entry per DESCRIBED RECORD, carrying what the selection MEANT, every query the portal ran,
+    // and the records the requestor was shown and passed over. The backend (services/searchIntents) is the
+    // one insert site; it re-does the dedup server-side because /public/submit is unauthenticated and nothing
+    // arriving there may be trusted.
+    var searchIntents = children.map(function (c, i) {
+      return {
+        seq: i,
+        description: c.description,
+        intent: c.intent || 'no_match_search',
+        queriesTried: c.queriesTried || [],
+        selected: (c.records || []).map(function (r) {
+          return { id: r.id, title: r.title, sourceSystem: r.sourceSystem, publicAvailability: r.publicAvailability };
+        }),
+        notSelected: (c.passedOver || []).map(function (r) {
+          return { id: r.id, title: r.title, sourceSystem: r.sourceSystem,
+                   publicAvailability: r.publicAvailability, shownInQuery: r.shownInQuery || '' };
+        })
+      };
+    });
     var payload = {
       requestorName: name.trim(),
       requestorEmail: email.trim(),
@@ -467,7 +613,8 @@ export default function PublicPortalV2Page() {
       certificationRequested: cert,
       emailVerificationMethod: verifyMethod,
       description: descText,
-      selectedRecords: sel,
+      selectedRecords: sel,     // kept: the pre-R9 shape, still read by anything that has not moved over
+      searchIntents: searchIntents,
       isMrr: children.length > 1,
       submissionChannel: 'manual_form',
     };
@@ -733,12 +880,57 @@ export default function PublicPortalV2Page() {
 
           {phase === 1 && (
           <div className="panel resultsPanel">
-            <div className="results-instr">Review the search results, and check the box to select a record. All records with the selection box checked appear in the right column. When you have completed selection, click <b>Proceed</b> and continue your conversation with the AI Open Record Assistant.</div>
+            {/* R9 §2 — intent capture. Selection alone could never say what it MEANT: a partial pile was
+                indistinguishable from a complete one, so a request the requestor still considered OPEN could
+                be fulfilled from the selection and closed. This is the one question that prevents that. */}
+            {intentAsk && (
+              <div className="intent-scrim" role="dialog" aria-modal="true" aria-label="What should we do next?">
+                <div className="intent-box">
+                  <h3>You selected {selected.length} record{selected.length !== 1 ? 's' : ''}.</h3>
+                  <p>Is that everything for this description?</p>
+                  <button className="btn-primary intent-b" type="button"
+                    onClick={function () { closeDescription('complete'); }}>
+                    These are all the records I want for this description
+                  </button>
+                  <button className="btn-ghost intent-b" type="button"
+                    onClick={function () { closeDescription('search_more'); }}>
+                    Also have the Open Records team search for more
+                  </button>
+                  <button className="intent-back" type="button" onClick={function () { setIntentAsk(false); }}>
+                    ‹ Keep refining
+                  </button>
+                </div>
+              </div>
+            )}
+            <div className="results-instr">Review the search results, and check the box to select a record. All records with the selection box checked appear in the right column. You can reword your search and run it again — <b>anything you have already selected stays in your list.</b> When you are done, click <b>Proceed</b>.</div>
             <div className="results-split">
               <div className="results-main">
                 {canvasResults ? (
                   <>
-                    <div className="res-query">Results for <b>“{canvasQuery}”</b> · {canvasResults.length} in the records library</div>
+                    {/* R9 — the refine loop. The query that produced these results is EDITABLE, and
+                        Search again re-runs it. Re-running replaces the results; the Selected column
+                        keeps everything already picked. */}
+                    <div className="refine">
+                      <label className="refine-lbl" htmlFor="refineQ">Searching for</label>
+                      <div className="refine-row">
+                        <input id="refineQ" className="refine-in" value={queryDraft}
+                          onChange={function (e) { setQueryDraft(e.target.value); }}
+                          onKeyDown={function (e) { if (e.key === 'Enter') searchAgain(); }}
+                          placeholder="Describe the record in your own words" />
+                        <button className="btn-ghost" type="button" onClick={searchAgain}
+                          disabled={refining || !queryDraft.trim() || queryDraft.trim() === canvasQuery}>
+                          {refining ? 'Searching…' : 'Search again'}
+                        </button>
+                      </div>
+                      {queriesTried.length > 1 && (
+                        <div className="refine-tried">Tried already: {queriesTried.map(function (q, i) {
+                          return <span className="tq" key={i}>“{q}”</span>;
+                        })}</div>
+                      )}
+                    </div>
+                    <div className="res-query">{canvasResults.length} in the records library
+                      {selected.length > 0 ? <> · <b>{selected.length} already selected</b>, kept across every search</> : null}
+                    </div>
                     {canvasResults.map(function (r, ri) {
                       var sel = isSelected(r);
                       var meta = [r.docType, r.department, r.dateCreated, r.sourceSystem, r.pageCount ? (r.pageCount + ' pp') : null].filter(Boolean).join(' · ');
@@ -780,8 +972,13 @@ export default function PublicPortalV2Page() {
                   })}
                 </div>
                 <div className="side-foot">
+                  {/* R9 §2 — with 0 selected there is NO popup. Nothing was picked, so there is no choice to
+                      offer and asking would be ceremony: the button ITSELF becomes the answer, and it says
+                      plainly that this is an instruction to search, not abandonment. */}
                   <button className="btn-primary" type="button" style={{ width: '100%', justifyContent: 'center' }}
-                    disabled={!canvasResults || chatSending} onClick={proceedResults}>Proceed →</button>
+                    disabled={!canvasResults || chatSending} onClick={proceedResults}>
+                    {selected.length === 0 && canvasResults ? 'Submit to Open Records team for search →' : 'Proceed →'}
+                  </button>
                   {children.length > 0 && (
                     <button className="btn-review" type="button"
                       onClick={function () { setSubmitState('idle'); setReviewOpen(true); setMobileView('canvas'); }}>
