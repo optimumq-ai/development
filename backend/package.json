@@ -3,7 +3,9 @@
   "version": "1.0.0",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node tests/run_suite.js",
+    "test:db:reset": "node tests/reset_test_db.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",

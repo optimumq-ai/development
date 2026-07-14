@@ -1,0 +1,170 @@
+'use strict';
+// THE ONE REQUEST-CREATION HELPER (ARCHITECTURE item 5), and the live numbering bug it fixes.
+//
+// Before: THREE intake paths, THREE numbering algorithms, FIVE hardcoded deadline computations.
+//   A. staff create      — MAX + 1                     (correct)
+//   B. /public           — last row BY created_at, +1   (restarts at 0001 when the newest row carries a
+//                                                        non-standard number like 'DEMO-2026-5069')
+//   C. the live portal   — COUNT(*) + 1                (mints an EXISTING number the moment any request
+//                                                        below the max is deleted → UNIQUE violation → 500)
+// This harness DEMONSTRATES both broken algorithms against the real database, then proves the helper is
+// immune — including under concurrency, which none of the three ever handled.
+process.chdir('/opt/optimumq/backend');
+require('/opt/optimumq/backend/node_modules/dotenv').config({ path: '/opt/optimumq/backend/.env' });
+require(__dirname + '/testEnv').enforce(); // refuses to run against a non-test DB
+var http = require('http');
+var fs = require('fs');
+var db = require('/opt/optimumq/backend/src/db');
+var auth = require('/opt/optimumq/backend/src/services/auth');
+var RC = require('/opt/optimumq/backend/src/services/requestCreate');
+
+var TAG = 'RCREATE-' + Date.now();
+var pass = 0, fail = 0, TOKEN = null, created = [];
+function ok(l, c) { (c ? pass++ : fail++); console.log((c ? '  PASS  ' : '  FAIL  ') + l); }
+function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
+function submit(d, extra) {
+  return new Promise(function (res, rej) {
+    var b = JSON.stringify(Object.assign({ description: d, requestorName: 'RC Test', requestorEmail: 'rc@example.com' }, extra || {}));
+    var r = http.request({ host: 'localhost', port: (Number(process.env.API_PORT) || 3101), path: '/api/public/submit', method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Content-Length': Buffer.byteLength(b) } },
+      function (resp) { var body = ''; resp.on('data', function (c) { body += c; }); resp.on('end', function () { res({ status: resp.statusCode, body: body }); }); });
+    r.on('error', rej); r.write(b); r.end();
+  });
+}
+async function findByTag(t) {
+  var r = null;
+  for (var i = 0; i < 60 && !r; i++) { r = await db.get('SELECT id, request_number FROM requests WHERE description LIKE ?', ['%' + t + '%']); await sleep(250); }
+  if (r) created.push(r.id);
+  return r;
+}
+var year = new Date().getFullYear();
+
+(async function () {
+  await db.initDb();
+  try {
+    var user = await db.get("SELECT id, email, display_name, department_id FROM users WHERE status='active' AND display_name IS NOT NULL LIMIT 1");
+    TOKEN = await auth.signAccessToken(user);
+
+    // =====================================================================================
+    // 0. SOURCE: the drift is gone. One helper, no private numbering, no hardcoded deadlines.
+    // =====================================================================================
+    var reqSrc = fs.readFileSync('/opt/optimumq/backend/src/routes/requests.js', 'utf8');
+    var chatSrc = fs.readFileSync('/opt/optimumq/backend/src/routes/publicChat.js', 'utf8');
+    ok('routes/requests.js has NO private numbering function left', !/generateRequestNumber/.test(reqSrc));
+    ok('routes/publicChat.js no longer mints numbers with COUNT(*) + 1', !/COUNT\(\*\) as n FROM requests WHERE request_number LIKE/.test(chatSrc));
+    var inserts = (reqSrc + chatSrc).match(/INSERT INTO requests\s*\(/g) || [];
+    ok('NEITHER intake route inserts into `requests` directly any more (' + inserts.length + ' raw inserts)', inserts.length === 0);
+    var hardDeadlines = ((reqSrc + chatSrc).match(/simple:\s*5,\s*standard:\s*10/g) || []).length;
+    ok('the hardcoded {simple:5, standard:10, complex:20, redaction_required:30} deadline table is gone from both routes (' + hardDeadlines + ' left)', hardDeadlines === 0);
+    ok('deadline_date is no longer hand-written by the classifier path', !/deadline_date = \?[^]*cls\.deadlineDays/.test(chatSrc) && !/dl\.setDate\(dl\.getDate\(\) \+ \(cls\.deadlineDays/.test(chatSrc));
+
+    // =====================================================================================
+    // 1. THE BUG IS REAL — demonstrate BOTH broken algorithms against the live database.
+    // =====================================================================================
+    var maxRow = await db.get("SELECT request_number FROM requests WHERE request_number ~ ('^' || ? || '-[0-9]{4}$') ORDER BY request_number DESC LIMIT 1", [String(year)]);
+    var countRow = await db.get("SELECT COUNT(*) AS n FROM requests WHERE request_number LIKE ?", [year + '-%']);
+    var maxSeq = parseInt(maxRow.request_number.split('-')[1], 10);
+    var countSeq = Number(countRow.n);
+
+    // Algorithm C (COUNT+1) is only safe while COUNT == MAX. Delete one request below the max and it
+    // immediately mints a number that already exists. Simulate the arithmetic on the REAL data.
+    var afterOneDeletion = countSeq - 1 + 1; // COUNT drops by one; C mints COUNT+1
+    var wouldCollide = await db.get('SELECT id FROM requests WHERE request_number = ?', [year + '-' + String(afterOneDeletion).padStart(4, '0')]);
+    ok('ALGORITHM C IS BROKEN: after deleting any request below the max, COUNT+1 = ' + year + '-' +
+       String(afterOneDeletion).padStart(4, '0') + ' — a number that ALREADY EXISTS (UNIQUE violation → intake 500s)',
+       !!wouldCollide);
+
+    // Algorithm B (last row by created_at) restarts at 0001 when the newest row has a non-standard number.
+    var lastByCreated = await db.get('SELECT request_number FROM requests ORDER BY created_at DESC LIMIT 1');
+    var parts = String(lastByCreated.request_number).split('-');
+    var bWould = (parts[0] == year) ? (parseInt(parts[1], 10) + 1) : 1;
+    var bCollides = await db.get('SELECT id FROM requests WHERE request_number = ?', [year + '-' + String(bWould).padStart(4, '0')]);
+    ok('ALGORITHM B IS BROKEN: the newest row is "' + lastByCreated.request_number + '", so B would mint ' +
+       year + '-' + String(bWould).padStart(4, '0') + ' — which ALREADY EXISTS', !!bCollides);
+
+    // The helper's algorithm ignores non-standard numbers entirely and takes the true max.
+    var next = await RC.nextRequestNumber();
+    ok('the helper mints ' + next + ' — MAX(' + maxRow.request_number + ') + 1, ignoring DEMO-/SYS-/LIBRARY rows',
+      next === year + '-' + String(maxSeq + 1).padStart(4, '0'));
+    var clash = await db.get('SELECT id FROM requests WHERE request_number = ?', [next]);
+    ok('...and that number does NOT already exist', !clash);
+
+    // =====================================================================================
+    // 2. THE HELPER SURVIVES WHAT BROKE ALGORITHM C: create, delete below the max, create again.
+    // =====================================================================================
+    var r1 = await submit('helper first ' + TAG);
+    var q1 = await findByTag('helper first ' + TAG);
+    ok('intake #1 through the real portal path succeeds (' + q1.request_number + ')', r1.status === 201 && !!q1);
+
+    var r2 = await submit('helper second ' + TAG);
+    var q2 = await findByTag('helper second ' + TAG);
+    ok('intake #2 succeeds and does NOT reuse the number (' + q1.request_number + ' → ' + q2.request_number + ')',
+      r2.status === 201 && q2.request_number !== q1.request_number);
+
+    // delete the FIRST one — this is the exact move that breaks COUNT-based numbering
+    await db.run('DELETE FROM request_history WHERE request_id = ?', [q1.id]);
+    await db.run('DELETE FROM request_clocks WHERE request_id = ?', [q1.id]);
+    await db.run('DELETE FROM requests WHERE id = ?', [q1.id]);
+    created = created.filter(function (c) { return c !== q1.id; });
+
+    var r3 = await submit('helper third ' + TAG);
+    if (r3.status !== 201) console.log('    intake #3 response: ' + r3.status + ' ' + r3.body.slice(0, 200));
+    var q3 = await findByTag('helper third ' + TAG);
+    ok('AFTER A DELETION, intake #3 still succeeds — the bug that would have 500\'d the old portal (' +
+      (q3 ? q3.request_number : 'NOT CREATED — ' + r3.status) + ')', r3.status === 201 && !!q3);
+    if (!q3) throw new Error('intake #3 did not create a request: ' + r3.status + ' ' + r3.body.slice(0, 300));
+    ok('...and it did NOT reuse the surviving request\'s number', q3.request_number !== q2.request_number);
+
+    // =====================================================================================
+    // 3. CONCURRENCY — two simultaneous submissions. No algorithm here ever handled this.
+    // =====================================================================================
+    var burst = await Promise.all([
+      submit('burst A ' + TAG), submit('burst B ' + TAG), submit('burst C ' + TAG),
+      submit('burst D ' + TAG), submit('burst E ' + TAG)
+    ]);
+    ok('5 CONCURRENT submissions all returned 201 (the retry-on-collision path held)',
+      burst.every(function (b) { return b.status === 201; }));
+    await sleep(1500);
+    var burstRows = await db.all("SELECT id, request_number FROM requests WHERE description LIKE ?", ['%burst%' + TAG + '%']);
+    burstRows.forEach(function (r) { created.push(r.id); });
+    ok('all 5 were created (' + burstRows.length + ')', burstRows.length === 5);
+    var nums = burstRows.map(function (r) { return r.request_number; });
+    ok('all 5 numbers are DISTINCT — no duplicate minted under concurrency: ' + nums.sort().join(' '),
+      new Set(nums).size === 5);
+
+    // =====================================================================================
+    // 4. THE DEADLINE NOW COMES FROM THE JURISDICTION, not a hardcoded table.
+    // =====================================================================================
+    var q3full = await db.get('SELECT deadline_date, classification FROM requests WHERE id = ?', [q3.id]);
+    ok('the new request has a deadline_date', !!q3full.deadline_date);
+    var clk = await db.get("SELECT duration, basis FROM request_clocks WHERE request_id = ? AND is_primary = 1", [q3.id]);
+    ok('a primary clock was started by the helper (' + clk.duration + ' ' + clk.basis + ')', !!clk);
+    var T = require('/opt/optimumq/backend/src/services/tolling');
+    var rules = await T.loadRules();
+    var expected = rules.clocks.respond.durationByClassification[q3full.classification || 'standard'];
+    ok('the clock duration came from the JURISDICTION\'s durationByClassification (' + q3full.classification + ' → ' + expected + ')',
+      Number(clk.duration) === Number(expected));
+    var st = (await T.statusForRequest(q3.id)).filter(function (c) { return c.isPrimary; })[0];
+    ok('requests.deadline_date equals the DERIVED due date — one source of truth', q3full.deadline_date === st.dueDate);
+
+    // =====================================================================================
+    // 5. HISTORY: exactly one CREATED row per request, from the one helper.
+    // =====================================================================================
+    var hist = await db.all("SELECT action FROM request_history WHERE request_id = ? AND action IN ('CREATED','REQUEST_CREATED')", [q3.id]);
+    ok('exactly one creation history row was written (' + hist.length + ')', hist.length === 1);
+
+  } catch (e) { console.error('ERR', (e && e.stack) || e); fail++; }
+  finally {
+    try {
+      var tabs = await db.all("SELECT table_name FROM information_schema.columns WHERE column_name='request_id'");
+      for (var t = 0; t < tabs.length; t++) for (var c = 0; c < created.length; c++) {
+        try { await db.run('DELETE FROM ' + tabs[t].table_name + ' WHERE request_id=?', [created[c]]); } catch (e) {}
+      }
+      for (var c2 = 0; c2 < created.length; c2++) { try { await db.run('DELETE FROM requests WHERE id=?', [created[c2]]); } catch (e) {} }
+      var left = await db.get('SELECT COUNT(*) AS n FROM requests WHERE description LIKE ?', ['%' + TAG + '%']);
+      ok('cleanup: 0 test requests remain', Number(left.n) === 0);
+    } catch (e) { console.error('CLEANUP ERR', e.message); fail++; }
+  }
+  console.log('\n' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
+  process.exit(fail ? 1 : 0);
+})();

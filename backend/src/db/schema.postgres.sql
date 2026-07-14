@@ -30,10 +30,11 @@ CREATE INDEX IF NOT EXISTS idx_files_request ON request_files(request_id);
 CREATE INDEX IF NOT EXISTS idx_requests_dept ON requests(department_id);
 CREATE INDEX IF NOT EXISTS idx_requests_stage ON requests(stage);
 CREATE INDEX IF NOT EXISTS idx_requests_status ON requests(status);
-ALTER TABLE record_types ADD COLUMN IF NOT EXISTS auto_publish INTEGER DEFAULT 0;
-ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS published INTEGER DEFAULT 0;
-ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS published_at TEXT;
-ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS published_by TEXT;
+-- (The record_types / fulfilled_records ALTERs that used to sit here have moved DOWN to just after their own
+--  CREATE TABLE. They ran BEFORE those tables existed, which is a no-op against a database that already has
+--  them -- i.e. against live -- but hard-fails on an EMPTY one. That made this file unable to create a fresh
+--  database at all: `ALTER TABLE record_types ... relation "record_types" does not exist`. Found 2026-07-14
+--  while standing up the test database; it would have hit the first new city install the same way.)
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS nonpayment_dunning_at TEXT;
 CREATE INDEX IF NOT EXISTS idx_rules_enabled ON agent_rules(enabled, sort_order);
 CREATE INDEX IF NOT EXISTS idx_selected_request ON request_selected_records(request_id);
@@ -80,6 +81,7 @@ CREATE TABLE IF NOT EXISTS record_types (
   created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')),
   updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
 );
+ALTER TABLE record_types ADD COLUMN IF NOT EXISTS auto_publish INTEGER DEFAULT 0;
 
 -- 3. Record type <-> department links (owner vs fulfiller). Feeds Smart Routing.
 CREATE TABLE IF NOT EXISTS record_type_departments (
@@ -311,6 +313,9 @@ CREATE TABLE IF NOT EXISTS fulfilled_records (
   status TEXT DEFAULT 'released',
   created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS')
 );
+ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS published INTEGER DEFAULT 0;
+ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS published_at TEXT;
+ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS published_by TEXT;
 CREATE INDEX IF NOT EXISTS idx_fulfilled_source ON fulfilled_records(source_file_id);
 
 -- Mass redaction job queue: durable, resumable, chunked batch jobs processed by a background
@@ -821,3 +826,41 @@ DROP TRIGGER IF EXISTS trg_block_delete_of_paid_request ON requests;
 CREATE TRIGGER trg_block_delete_of_paid_request
   BEFORE DELETE ON requests
   FOR EACH ROW EXECUTE FUNCTION block_delete_of_paid_request();
+
+-- ============================================================================================
+-- SCHEMA DRIFT REPAIR (2026-07-14)
+--
+-- These objects existed in the LIVE database but NOT in this file. Live had been ALTERed directly and this
+-- schema was never updated to match, so it had quietly stopped describing the database it supposedly defines.
+--
+-- Nobody noticed because every existing environment ALREADY had them, and this file only ever ran against
+-- those environments. The victim would have been THE FIRST NEW CITY INSTALL: it would have come up missing an
+-- entire table and 20 columns, and the code uses all of them -- mapping (latitude/longitude/geo_address),
+-- import review (import_review_jobs), and onboarding review/test tracking. Broken on day one, in features
+-- nobody would think to re-test on a "fresh" deploy.
+--
+-- Found by standing up the test database, which is the first thing that ever built this schema from EMPTY.
+-- That is the point of a test database.
+-- ============================================================================================
+CREATE TABLE IF NOT EXISTS import_review_jobs (
+  job_id TEXT PRIMARY KEY,
+  repository_id TEXT,
+  review_assignee TEXT,
+  kind TEXT,
+  review_task_id TEXT,
+  created_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'::text), 'YYYY-MM-DD HH24:MI:SS'::text)
+);
+ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS latitude REAL;
+ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS longitude REAL;
+ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS geo_address TEXT;
+ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS geocoded_at TEXT;
+ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS geocode_source TEXT;
+ALTER TABLE record_types ADD COLUMN IF NOT EXISTS mappable INTEGER DEFAULT 1;
+ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS test_notes TEXT;
+ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS test_by TEXT;
+ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS test_status TEXT;
+ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS test_at TEXT;
+ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS test_config_ref TEXT;
+ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS requires_review BOOLEAN DEFAULT false;
+ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS review_requested_at TEXT;
+ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS reviewer_id TEXT;
