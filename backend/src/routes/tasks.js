@@ -87,4 +87,76 @@ router.post('/:id/complete', requireAuth, async function (req, res) {
   res.json({ task: await tr.getTask(req.params.id) });
 });
 
+// ============================================================================================
+// RESOLVE A RECORD-SEARCH TASK (SPEC_record_search_task_screen §5d).
+//
+// Two ways out, and they are not symmetrical.
+//
+//   found      — at least one record is marked Include in Response. This is the gate the workflow model
+//                already DECLARES ("enough-to-advance: at least one record marked Include in Response")
+//                and which nothing enforced. Enforce it here: advancing an empty search would hand
+//                redaction a request with nothing in it.
+//
+//   no_records — the request is CLOSED. This is a legal act, not a shrug. It must be EVIDENCED: the
+//                effort trail (systems searched, calls logged, clarifications sent) is what the city
+//                shows when someone asks whether the search was diligent. And per the BWC research, up
+//                to 40% of dispatches that should have body-cam video HAVE NONE -- "no responsive
+//                records" is a MODAL outcome, not a failure state. So we refuse to close on NOTHING:
+//                a closure with an empty effort trail is indistinguishable from never having looked.
+//
+// The stage move goes through applyStageTransition -- the ONE central transition (ARCHITECTURE item 6).
+// No direct `UPDATE requests SET stage` anywhere.
+// ============================================================================================
+router.post('/:id/resolve', requireAuth, async function (req, res) {
+  try {
+    var t = await get('SELECT * FROM tasks WHERE id = ?', [req.params.id]);
+    if (!t) return res.status(404).json({ error: 'Task not found' });
+    if (t.type !== 'record_search') return res.status(400).json({ error: 'Not a record-search task' });
+
+    var outcome = String((req.body && req.body.outcome) || '');
+    var notes = String((req.body && req.body.notes) || '').trim();
+    var rid = t.request_id;
+    var actor = { actorId: req.user && req.user.sub, actorName: (req.user && req.user.name) || 'Staff' };
+
+    if (outcome === 'found') {
+      var inc = await get('SELECT count(*)::int AS n FROM request_files WHERE request_id = ? AND responsive = 1', [rid]);
+      if (!inc || inc.n < 1) {
+        return res.status(422).json({ error: 'Mark at least one record "Include in Response" before completing the search.', code: 'NOTHING_INCLUDED' });
+      }
+      await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [req.params.id]);
+      await tr.applyStageTransition(rid, 'exemption_review', Object.assign({
+        action: 'SEARCH_COMPLETE',
+        notes: 'Record search complete — ' + inc.n + ' record(s) marked Include in Response.' + (notes ? ' ' + notes : '')
+      }, actor));
+      return res.json({ ok: true, outcome: 'found', included: inc.n });
+    }
+
+    if (outcome === 'no_records') {
+      // The effort trail IS the evidence. Refuse to close on an empty one -- not bureaucracy: a closure
+      // with no recorded effort cannot be defended, and the searcher would never know until it was.
+      var eff = await get(
+        "SELECT count(*)::int AS n FROM request_history WHERE request_id = ? AND action IN " +
+        "('CONSULT_REQUESTED','CALL_LOGGED','CLARIFICATION_REQUESTED','RECORD_ATTACHED','SEARCH_RUN')", [rid]);
+      if (!eff || eff.n < 1) {
+        return res.status(422).json({
+          error: 'Nothing has been logged on this request. A no-records closure has to be evidenced — run a search, log a call, or confer first.',
+          code: 'NO_EFFORT_TRAIL'
+        });
+      }
+      await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [req.params.id]);
+      await run("UPDATE requests SET closure_reason = 'no_records' WHERE id = ?", [rid]);
+      await tr.applyStageTransition(rid, 'closed', Object.assign({
+        action: 'CLOSED_NO_RECORDS',
+        notes: 'Closed — no responsive records. Diligent search evidenced by ' + eff.n + ' logged action(s).' + (notes ? ' ' + notes : '')
+      }, actor));
+      return res.json({ ok: true, outcome: 'no_records', effortEntries: eff.n });
+    }
+
+    return res.status(400).json({ error: 'Unknown outcome' });
+  } catch (e) {
+    console.error('resolve failed:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = router;

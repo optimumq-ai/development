@@ -46,6 +46,79 @@ router.post('/upload/:requestId', requireAuth, upload.single('file'), async func
   res.json({ success: true, fileId: fileId, filename: req.file.originalname, size: req.file.size });
 });
 
+// ============================================================================================
+// THE RECORD-SEARCH SURFACE (SPEC_record_search_task_screen §4a).
+//
+// Until now there was NO staff path to search the source systems and attach what you find. The public
+// portal could search; the searcher — whose entire job this is — could not. DocSearchPanel searches
+// INSIDE documents already attached to a request, which is a different thing entirely.
+//
+// Deliberately the SAME engine the portal uses (searchAll -> judgeResults). If the searcher's ranking
+// differed from the one the requestor saw, the "queries the portal already ran" panel would be a lie —
+// re-running a portal query here would produce a different answer for the same words.
+// ============================================================================================
+router.post('/search/records', requireAuth, async function (req, res) {
+  var query = String((req.body && req.body.query) || '').trim();
+  if (!query) return res.status(400).json({ error: 'Empty query' });
+  try {
+    var recordSearch = require('../services/recordSearch');
+    var results = await recordSearch.searchAll(query);
+    results = await recordSearch.judgeResults(query, results);
+    res.json({ query: query, results: results || [] });
+  } catch (e) {
+    console.error('staff record search failed:', e.message);
+    res.status(500).json({ error: 'Search failed' });
+  }
+});
+
+// Attach a found source-system record to the request, optionally marking it Include in Response.
+//
+// THE BLOB IS COPIED, NOT SHARED. It is tempting to point the new request_files row at the SAME
+// `filename` on disk — one row, no I/O. That is a landmine: DELETE /files/:fileId UNLINKS THE FILE FROM
+// DISK, so removing the record from one request would silently destroy it inside the other, which is a
+// released record in someone else's fulfilled request. Two rows, two blobs.
+router.post('/attach/:requestId', requireAuth, async function (req, res) {
+  try {
+    var requestId = req.params.requestId;
+    var rec = (req.body && req.body.record) || {};
+    var request = await get('SELECT id FROM requests WHERE id = ?', [requestId]);
+    if (!request) return res.status(404).json({ error: 'Request not found' });
+
+    // A record with no underlying file cannot be attached — it has to be PULLED from the source system,
+    // and the connectors that would do that are stubs. Say so plainly rather than attaching an empty row
+    // that looks like a record and contains nothing.
+    if (!rec.fileId) {
+      return res.status(422).json({
+        error: 'This record has no retrievable file. It must be pulled from ' + (rec.sourceSystem || 'its source system') + '.',
+        code: 'RETRIEVAL_REQUIRED'
+      });
+    }
+    var src = await get('SELECT * FROM request_files WHERE id = ?', [rec.fileId]);
+    if (!src) return res.status(404).json({ error: 'Source file not found' });
+
+    var srcPath = path.join(UPLOAD_DIR, src.filename);
+    if (!fs.existsSync(srcPath)) return res.status(404).json({ error: 'Source file is missing from storage' });
+
+    var ext = path.extname(src.filename);
+    var newName = uuidv4() + ext;
+    fs.copyFileSync(srcPath, path.join(UPLOAD_DIR, newName));
+
+    var fileId = uuidv4();
+    var include = req.body.includeInResponse ? 1 : 0;
+    await run('INSERT INTO request_files (id, request_id, filename, original_name, mimetype, size, responsive, uploaded_by) VALUES (?,?,?,?,?,?,?,?)',
+      [fileId, requestId, newName, src.original_name, src.mimetype, src.size, include, req.user.sub]);
+    await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+      [uuidv4(), requestId, req.user.sub, req.user.name || 'Staff', 'RECORD_ATTACHED',
+       'Attached from ' + (rec.sourceSystem || 'source system') + ': ' + src.original_name
+       + (include ? ' — marked Include in Response' : '')]);
+
+    res.json({ success: true, fileId: fileId, originalName: src.original_name, includeInResponse: !!include });
+  } catch (e) {
+    console.error('attach failed:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 router.get('/:requestId', requireAuth, async function(req, res) {
   var files = await all('SELECT * FROM request_files WHERE request_id = ? ORDER BY uploaded_at DESC', [req.params.requestId]);
   res.json({ files: files });

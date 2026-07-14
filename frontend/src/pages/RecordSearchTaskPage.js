@@ -78,10 +78,19 @@ export default function RecordSearchTaskPage() {
   var [busy, setBusy] = useState('');
   var [flash, setFlash] = useState(null);
 
+  var [q, setQ] = useState('');
+  var [results, setResults] = useState(null);
+  var [searching, setSearching] = useState(false);
+  var [attached, setAttached] = useState([]);
+  var [resolved, setResolved] = useState(null);
+
   function loadTrail(rid) {
     return api.get('/requests/' + rid).then(function (r) {
       setTrail((r.data.history || []).slice().reverse());
     }).catch(function () {});
+  }
+  function loadAttached(rid) {
+    return api.get('/files/' + rid).then(function (r) { setAttached(r.data.files || []); }).catch(function () {});
   }
 
   useEffect(function () {
@@ -96,6 +105,7 @@ export default function RecordSearchTaskPage() {
         api.get('/clarification-policy')
           .then(function (x) { if (alive) setPolicy(x.data.policy); }).catch(function () {});
         loadTrail(rid);
+        loadAttached(rid);
       })
       .catch(function () { if (alive) setErr('Could not load this task.'); });
     return function () { alive = false; };
@@ -131,6 +141,51 @@ export default function RecordSearchTaskPage() {
       .catch(function (e) {
         var msg = (e.response && e.response.data && e.response.data.error) || 'That did not go through.';
         setFlash({ tone: 'crit', text: msg });
+      })
+      .then(function () { setBusy(''); });
+  }
+
+  // --- the search surface (§4a) ---------------------------------------------------------------------
+  function runSearch() {
+    var query = q.trim();
+    if (!query || searching) return;
+    setSearching(true); setResults(null);
+    api.post('/files/search/records', { query: query })
+      .then(function (r) { setResults(r.data.results || []); })
+      .catch(function () { setFlash({ tone: 'crit', text: 'Search failed.' }); })
+      .then(function () { setSearching(false); });
+  }
+
+  function attach(rec) {
+    setBusy(rec.id);
+    api.post('/files/attach/' + task.request_id, { record: rec, includeInResponse: true })
+      .then(function (r) {
+        setFlash({ tone: 'ok', text: 'Included in Response: ' + r.data.originalName });
+        return Promise.all([loadAttached(task.request_id), loadTrail(task.request_id)]);
+      })
+      .catch(function (e) {
+        var d = e.response && e.response.data;
+        // A record with no retrievable file cannot be attached. Say WHY rather than failing silently —
+        // the connectors that would pull it are stubs, and the searcher needs to know that, not guess.
+        setFlash({ tone: 'crit', text: (d && d.error) || 'Could not attach that record.' });
+      })
+      .then(function () { setBusy(''); });
+  }
+
+  // --- resolution (§5d) -----------------------------------------------------------------------------
+  function resolve(outcome) {
+    setBusy(outcome);
+    api.post('/tasks/' + taskId + '/resolve', { outcome: outcome })
+      .then(function (r) {
+        setResolved(r.data);
+        setFlash({ tone: 'ok', text: outcome === 'found'
+          ? ('Search complete — ' + r.data.included + ' record(s) handed to Exemption Review.')
+          : ('Closed — no responsive records. Diligence evidenced by ' + r.data.effortEntries + ' logged action(s).') });
+        return loadTrail(task.request_id);
+      })
+      .catch(function (e) {
+        var d = e.response && e.response.data;
+        setFlash({ tone: 'crit', text: (d && d.error) || 'Could not resolve the task.' });
       })
       .then(function () { setBusy(''); });
   }
@@ -210,6 +265,7 @@ export default function RecordSearchTaskPage() {
   var duty = policy && policy.clarification_duty;
   var effect = policy && policy.clarification_clock_effect;
   var conferenceOwed = duty === 'required_before_burden_denial';
+  var includedCount = attached.filter(function (f) { return f.responsive; }).length;
   var clockStops = effect === 'toll_pause_resume' || effect === 'toll_and_restart'
                 || effect === 'start_gate' || effect === 'operational_hold';
 
@@ -332,12 +388,94 @@ export default function RecordSearchTaskPage() {
           </div>
         </section>
 
-        {/* The search surface (§4) is the next slice. Saying so beats a screen that silently does half its job. */}
-        <div style={{ marginTop: 16, background: C.surface, border: '1px dashed ' + C.hairStrong,
-          borderRadius: 10, padding: 16, fontSize: 13, color: C.muted }}>
-          <b style={{ color: C.ink }}>Next on this screen:</b> the search surface — digital · audio/video · paper ·
-          other — and the Found / No responsive records resolution. <span style={{ color: C.faint }}>Spec §4, §5d.</span>
-        </div>
+        {/* ---------------- ZONE 2 — THE SEARCH SURFACE (§4a) ---------------- */}
+        <section style={{ background: C.surface, border: '1px solid ' + C.hair, borderRadius: 10, marginTop: 16 }}>
+          <div style={{ padding: '12px 18px', borderBottom: '1px solid ' + C.hair, display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ fontSize: 12.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em', color: C.muted }}>
+              Find the records
+            </span>
+            {includedCount > 0 && (
+              <span style={{ marginLeft: 'auto', fontSize: 12, fontWeight: 700, borderRadius: 999, padding: '2px 9px',
+                background: C.greenTint, color: C.green }}>{includedCount} to include</span>
+            )}
+          </div>
+          <div style={{ padding: 18 }}>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <input value={q} onChange={function (e) { setQ(e.target.value); }}
+                onKeyDown={function (e) { if (e.key === 'Enter') runSearch(); }}
+                placeholder="Search the connected record systems…"
+                style={{ flex: 1, minWidth: 0, background: C.surface, border: '1px solid ' + C.hairStrong,
+                  borderRadius: 8, padding: '9px 12px', fontSize: 14, color: C.ink }} />
+              <button type="button" onClick={runSearch} disabled={searching || !q.trim()}
+                style={{ cursor: searching ? 'wait' : 'pointer', background: C.blue, color: '#fff',
+                  border: '1px solid ' + C.blue, borderRadius: 8, padding: '9px 18px', fontSize: 13.5, fontWeight: 650,
+                  opacity: (searching || !q.trim()) ? 0.55 : 1 }}>
+                {searching ? 'Searching…' : 'Search'}
+              </button>
+            </div>
+
+            {results && results.length === 0 && (
+              <div style={{ marginTop: 14, fontSize: 13, color: C.muted, background: C.surface2,
+                border: '1px solid ' + C.hair, borderRadius: 8, padding: '12px 14px' }}>
+                <b style={{ color: C.ink }}>No matches.</b> That is a real, common outcome — not a failure. Log the
+                effort, then close with <b>No responsive records</b> when you are satisfied the search was diligent.
+              </div>
+            )}
+
+            {results && results.map(function (r) {
+              var lib = r.publicReady === true;
+              return (
+                <div key={r.id} style={{ display: 'flex', gap: 12, alignItems: 'flex-start', marginTop: 10,
+                  background: C.surface2, border: '1px solid ' + C.hair, borderRadius: 9, padding: '11px 13px' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 14, fontWeight: 650 }}>{r.title}</div>
+                    <div style={{ fontSize: 12, color: C.faint, marginTop: 3 }}>
+                      {[r.docType, r.department, r.dateCreated, r.sourceSystem, r.pageCount ? r.pageCount + ' pp' : null]
+                        .filter(Boolean).join(' · ')}
+                    </div>
+                    {r.summary && <div style={{ fontSize: 12.5, color: C.muted, marginTop: 5, lineHeight: 1.45 }}>{r.summary}</div>}
+                    {lib && (
+                      <span style={{ display: 'inline-block', marginTop: 6, fontSize: 11, fontWeight: 700,
+                        borderRadius: 999, padding: '2px 8px', background: C.greenTint, color: C.green }}>
+                        Already released · Public Records Library
+                      </span>
+                    )}
+                  </div>
+                  <button type="button" disabled={!!busy} onClick={function () { attach(r); }}
+                    style={{ flex: 'none', cursor: busy ? 'not-allowed' : 'pointer', background: C.blueTint,
+                      color: C.blue, border: '1px solid ' + C.blue, borderRadius: 8, padding: '8px 12px',
+                      fontSize: 13, fontWeight: 650, opacity: busy && busy !== r.id ? 0.55 : 1 }}>
+                    {busy === r.id ? 'Adding…' : 'Include in Response'}
+                  </button>
+                </div>
+              );
+            })}
+
+            {attached.length > 0 && (
+              <div style={{ marginTop: 18, borderTop: '1px dashed ' + C.hair, paddingTop: 14 }}>
+                <div style={{ fontSize: 12.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em',
+                  color: C.muted, marginBottom: 8 }}>On this request ({attached.length})</div>
+                {attached.slice(0, 12).map(function (f) {
+                  return (
+                    <div key={f.id} style={{ display: 'flex', gap: 10, alignItems: 'center', marginTop: 6,
+                      background: C.surface, border: '1px solid ' + C.hair, borderRadius: 8, padding: '8px 11px' }}>
+                      <span style={{ fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '2px 8px',
+                        background: f.responsive ? C.greenTint : C.surface2, color: f.responsive ? C.green : C.faint }}>
+                        {f.responsive ? 'Include in Response' : 'Attached'}
+                      </span>
+                      <span style={{ fontSize: 13, color: C.ink, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {f.original_name}
+                      </span>
+                    </div>
+                  );
+                })}
+                {attached.length > 12 && (
+                  <div style={{ fontSize: 12, color: C.faint, marginTop: 6 }}>…and {attached.length - 12} more.</div>
+                )}
+              </div>
+            )}
+          </div>
+        </section>
        </div>
 
        {/* ---------------- ZONE 3 — ACTIONS & DEFECT RAIL ---------------- */}
@@ -434,6 +572,43 @@ export default function RecordSearchTaskPage() {
                   {busy === 'overly_broad' ? 'Sending…' : (conferenceOwed ? 'Offer the conference' : 'Send clarification request')}
                 </button>
               </div>
+            )}
+          </div>
+        </section>
+
+        {/* ===== RESOLUTION (§5d) — two ways out, and they are NOT symmetrical ===== */}
+        <section style={{ background: C.surface, border: '1px solid ' + C.hair, borderRadius: 10, marginBottom: 16 }}>
+          <div style={{ padding: '12px 14px', borderBottom: '1px solid ' + C.hair, fontSize: 12.5, fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '.05em', color: C.muted }}>Resolve</div>
+          <div style={{ padding: 14 }}>
+            {resolved ? (
+              <div style={{ fontSize: 13, fontWeight: 650, color: resolved.outcome === 'found' ? C.green : C.crit }}>
+                {resolved.outcome === 'found'
+                  ? '✓ Search complete — handed to Exemption Review.'
+                  : '✓ Closed — no responsive records.'}
+              </div>
+            ) : (
+              <>
+                <button type="button" disabled={!!busy || includedCount < 1} onClick={function () { resolve('found'); }}
+                  title={includedCount < 1 ? 'Include at least one record in the response first.' : ''}
+                  style={{ width: '100%', cursor: (busy || includedCount < 1) ? 'not-allowed' : 'pointer',
+                    background: includedCount < 1 ? C.surface2 : C.green, color: includedCount < 1 ? C.faint : '#fff',
+                    border: '1px solid ' + (includedCount < 1 ? C.hair : C.green), borderRadius: 9,
+                    padding: '10px 12px', fontSize: 13.5, fontWeight: 650, marginBottom: 8 }}>
+                  {busy === 'found' ? 'Completing…' : 'Found — ' + includedCount + ' to include →'}
+                </button>
+                <button type="button" disabled={!!busy} onClick={function () { resolve('no_records'); }}
+                  style={{ width: '100%', cursor: busy ? 'not-allowed' : 'pointer', background: C.surface,
+                    color: C.muted, border: '1px solid ' + C.hairStrong, borderRadius: 9,
+                    padding: '10px 12px', fontSize: 13.5, fontWeight: 650 }}>
+                  {busy === 'no_records' ? 'Closing…' : 'No responsive records'}
+                </button>
+                <div style={{ fontSize: 11.5, color: C.faint, marginTop: 8, lineHeight: 1.5 }}>
+                  {includedCount < 1
+                    ? 'Include at least one record to finish. Closing with no records is a legal act — it must be evidenced by the effort trail below.'
+                    : 'Closing with no records is a legal act — it must be evidenced by the effort trail below.'}
+                </div>
+              </>
             )}
           </div>
         </section>
