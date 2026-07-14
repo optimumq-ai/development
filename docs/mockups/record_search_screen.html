@@ -7,28 +7,37 @@
 </head>
 <body>
 <style>
-  /* Tokens inherited verbatim from mockups/redaction_screen.html so the two task
-     screens read as one system. Do not fork the palette here. */
+  /* ---------------------------------------------------------------------------
+     PALETTE — Kevin's direction, 2026-07-14. Values now come from the PORTAL token
+     set (frontend/src/pages/PublicPortalV2Page.js:20), not the redaction screen:
+       --ground  #D8E0E8  "the shade of gray in the background"
+       --panel-2 #F2F6F9  "the lighter shade of gray in boxes"
+       --panel   #FFFFFF  "entry fields or data display fields as white"
+       --primary #1E6091  "a little stronger and more blue" -> the DEFAULT for ALL buttons
+     Token NAMES are unchanged so nothing structural forks; only the values moved.
+     The shipped redaction workstation still runs the darker set, so the two staff
+     screens diverge until the color is settled. Accepted + temporary (SPEC §9).
+     --------------------------------------------------------------------------- */
   :root{
     --ui: ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
     --mono: ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
-    --ground:#E7ECF2; --panel:#fff; --panel-2:#F3F6F9; --panel-3:#EAEFF4;
-    --ink:#14181D; --ink-2:#48535F; --ink-3:#8792A0; --line:#D9E0E8;
-    --primary:#1F4E79; --primary-ink:#fff; --primary-soft:#EAF1F8;
-    --chrome:#141D28; --chrome-2:#1D2A38; --chrome-ink:#E9EEF4; --chrome-ink-2:#93A2B4; --chrome-line:#2A3A4C;
-    --ai:#D9821A; --ai-soft:#FBF0E1;
-    --ok:#177A54; --ok-bg:#E4F3EC; --info:#1F4E79; --info-bg:#E7EFF7;
-    --warn:#B4690E; --warn-bg:#FBEEDD; --crit:#B02A37; --crit-bg:#F8E7E8;
+    --ground:#D8E0E8; --panel:#FFFFFF; --panel-2:#F2F6F9; --panel-3:#EBF3FB;
+    --ink:#12232E; --ink-2:#5C6F7C; --ink-3:#8296A4; --line:#D2DCE3; --line-strong:#BECAD3;
+    --primary:#1E6091; --primary-ink:#fff; --primary-soft:#E4EEF6; --primary-strong:#164E78;
+    --chrome:#12232E; --chrome-2:#1B3446; --chrome-ink:#E7EEF3; --chrome-ink-2:#93A6B4; --chrome-line:#2A4356;
+    --ai:#9A6512; --ai-soft:#F6EBD6;
+    --ok:#1B8A5A; --ok-bg:#E1F2E9; --info:#1E6091; --info-bg:#E4EEF6;
+    --warn:#9A6512; --warn-bg:#F6EBD6; --crit:#B02A37; --crit-bg:#F8E7E8;
     --legal:#6D3BB5; --legal-bg:#EEE7F8;
-    --shadow:0 1px 2px rgba(20,30,45,.08),0 8px 24px rgba(20,30,45,.10);
+    --shadow:0 1px 2px rgba(18,35,46,.06),0 6px 20px rgba(18,35,46,.08);
     --radius:10px;
   }
   @media (prefers-color-scheme:dark){
     :root{
-      --ground:#0C1219; --panel:#151E28; --panel-2:#1C2733; --panel-3:#22303D;
-      --ink:#E8EDF3; --ink-2:#A6B2BF; --ink-3:#697585; --line:#2A3744;
-      --primary:#5A93CE; --primary-ink:#0C1219; --primary-soft:#17293A;
-      --ai:#E79A3C; --ai-soft:#2A2113;
+      --ground:#0A1017; --panel:#152430; --panel-2:#1B2C3A; --panel-3:#22374A;
+      --ink:#E7EEF3; --ink-2:#93A6B4; --ink-3:#6B8092; --line:#26383F; --line-strong:#33474F;
+      --primary:#4FA0D2; --primary-ink:#0A1017; --primary-soft:#153140; --primary-strong:#74B7E1;
+      --ai:#E0A24A; --ai-soft:#2A2012;
       --ok:#3FBB8A; --ok-bg:#12271F; --info:#6AA0D8; --info-bg:#14263A;
       --warn:#E0A24A; --warn-bg:#2A2012; --crit:#E4808B; --crit-bg:#2C1518;
       --legal:#B593E6; --legal-bg:#1F1730;
@@ -36,29 +45,29 @@
     }
   }
   :root[data-theme="dark"]{
-    --ground:#0C1219; --panel:#151E28; --panel-2:#1C2733; --panel-3:#22303D;
-    --ink:#E8EDF3; --ink-2:#A6B2BF; --ink-3:#697585; --line:#2A3744;
-    --primary:#5A93CE; --primary-ink:#0C1219; --primary-soft:#17293A;
-    --ai:#E79A3C; --ai-soft:#2A2113;
+    --ground:#0A1017; --panel:#152430; --panel-2:#1B2C3A; --panel-3:#22374A;
+    --ink:#E7EEF3; --ink-2:#93A6B4; --ink-3:#6B8092; --line:#26383F; --line-strong:#33474F;
+    --primary:#4FA0D2; --primary-ink:#0A1017; --primary-soft:#153140; --primary-strong:#74B7E1;
+    --ai:#E0A24A; --ai-soft:#2A2012;
     --ok:#3FBB8A; --ok-bg:#12271F; --info:#6AA0D8; --info-bg:#14263A;
     --warn:#E0A24A; --warn-bg:#2A2012; --crit:#E4808B; --crit-bg:#2C1518;
     --legal:#B593E6; --legal-bg:#1F1730;
     --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.45);
   }
   :root[data-theme="light"]{
-    --ground:#E7ECF2; --panel:#fff; --panel-2:#F3F6F9; --panel-3:#EAEFF4;
-    --ink:#14181D; --ink-2:#48535F; --ink-3:#8792A0; --line:#D9E0E8;
-    --primary:#1F4E79; --primary-ink:#fff; --primary-soft:#EAF1F8;
-    --ai:#D9821A; --ai-soft:#FBF0E1;
-    --ok:#177A54; --ok-bg:#E4F3EC; --info:#1F4E79; --info-bg:#E7EFF7;
-    --warn:#B4690E; --warn-bg:#FBEEDD; --crit:#B02A37; --crit-bg:#F8E7E8;
+    --ground:#D8E0E8; --panel:#FFFFFF; --panel-2:#F2F6F9; --panel-3:#EBF3FB;
+    --ink:#12232E; --ink-2:#5C6F7C; --ink-3:#8296A4; --line:#D2DCE3; --line-strong:#BECAD3;
+    --primary:#1E6091; --primary-ink:#fff; --primary-soft:#E4EEF6; --primary-strong:#164E78;
+    --ai:#9A6512; --ai-soft:#F6EBD6;
+    --ok:#1B8A5A; --ok-bg:#E1F2E9; --info:#1E6091; --info-bg:#E4EEF6;
+    --warn:#9A6512; --warn-bg:#F6EBD6; --crit:#B02A37; --crit-bg:#F8E7E8;
     --legal:#6D3BB5; --legal-bg:#EEE7F8;
-    --shadow:0 1px 2px rgba(20,30,45,.08),0 8px 24px rgba(20,30,45,.10);
+    --shadow:0 1px 2px rgba(18,35,46,.06),0 6px 20px rgba(18,35,46,.08);
   }
 
   *{box-sizing:border-box}
   body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--ui);
-       font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+       font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased}
   button{font:inherit;color:inherit;cursor:pointer}
   :focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:4px}
   @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
@@ -67,12 +76,12 @@
   /* ---- chrome bar ---------------------------------------------------- */
   .chrome{background:var(--chrome);color:var(--chrome-ink);display:flex;align-items:center;
           gap:16px;padding:0 18px;height:52px;border-bottom:1px solid var(--chrome-line)}
-  .chrome a{color:var(--chrome-ink-2);text-decoration:none;font-size:13px}
+  .chrome a{color:var(--chrome-ink-2);text-decoration:none;font-size:14px}
   .chrome a:hover{color:var(--chrome-ink)}
   .chrome .num{font-family:var(--mono);font-weight:700;letter-spacing:.02em}
   .spacer{flex:1}
   .theme-btn{background:var(--chrome-2);border:1px solid var(--chrome-line);color:var(--chrome-ink-2);
-             border-radius:8px;padding:6px 12px;font-size:12px}
+             border-radius:8px;padding:6px 12px;font-size:13px}
 
   /* ---- shell --------------------------------------------------------- */
   .shell{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;padding:16px;
@@ -83,38 +92,69 @@
         box-shadow:var(--shadow)}
   .card + .card{margin-top:16px}
   .card-hd{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
-  .card-hd h2{margin:0;font-size:13px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+  .card-hd h2{margin:0;font-size:14px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
               color:var(--ink-2)}
   .card-bd{padding:16px}
 
   .pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px;
-        font-size:11px;font-weight:700;letter-spacing:.02em}
+        font-size:12px;font-weight:700;letter-spacing:.02em}
   .pill.ok{background:var(--ok-bg);color:var(--ok)}
   .pill.info{background:var(--info-bg);color:var(--info)}
   .pill.warn{background:var(--warn-bg);color:var(--warn)}
   .pill.crit{background:var(--crit-bg);color:var(--crit)}
   .pill.ai{background:var(--ai-soft);color:var(--ai)}
   .pill.mute{background:var(--panel-3);color:var(--ink-3)}
+  .pill.legal{background:var(--legal-bg);color:var(--legal)}
 
   /* ---- zone 1: context ------------------------------------------------ */
   .req-line{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px;margin-bottom:8px}
-  .req-num{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--primary);
+  .req-num{font-family:var(--mono);font-size:20px;font-weight:700;color:var(--primary);
            font-variant-numeric:tabular-nums}
   .req-desc{color:var(--ink);margin:2px 0 14px;max-width:70ch}
-  .meta{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:12.5px;color:var(--ink-3)}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:13.5px;color:var(--ink-3)}
   .meta b{color:var(--ink-2);font-weight:600}
   .meta .due{color:var(--crit);font-weight:700}
 
+  /* ---- request-defect rail: Vague vs Overly Broad (Kevin's mark-up) ---- */
+  .act.defect{border-color:var(--line)}
+  .act.defect.on{border-color:var(--legal);background:var(--legal-bg)}
+  .defect-note{display:none;font-size:13px;line-height:1.5;color:var(--ink-2);
+               background:var(--panel-2);border:1px solid var(--line);border-radius:8px;
+               padding:10px 12px;margin:-2px 0 10px}
+  .defect-note.show{display:block}
+  .defect-note code{font-family:var(--mono);font-size:12px;background:var(--panel-3);
+                    padding:1px 5px;border-radius:4px}
+  .crit-note{border-color:var(--crit);background:var(--crit-bg);color:var(--ink)}
+  .forfeit{margin-top:9px;border-top:1px solid color-mix(in srgb,var(--crit) 35%,transparent);
+           padding-top:8px;font-size:12.5px;color:var(--ink)}
+  .forfeit-h{display:block;font-weight:700;color:var(--crit);margin-bottom:3px}
+  .forfeit-due{display:block;margin-top:7px;font-family:var(--mono);font-size:12px;
+               color:var(--crit);font-weight:700}
+
+  /* ---- Self Service Portal Search Results bar (Kevin's mark-up, decision #2) ---- */
+  .ssbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px;
+         background:var(--panel-2);border:1px solid var(--line);border-radius:9px;padding:9px 12px}
+  .ssbar-t{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;
+           color:var(--ink-2);margin-right:2px}
+  .ssbar-note{font-size:13px;color:var(--ink-3);margin-left:auto}
+  .btn.ss{padding:6px 10px;font-size:13px;display:inline-flex;align-items:center;gap:7px}
+  .btn.ss.on{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
+  .btn.ss .cnt{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;
+               border-radius:999px;background:var(--primary);color:var(--primary-ink);
+               font-family:var(--mono);font-size:12px;font-weight:700}
+  .btn.ss.on .cnt{background:var(--primary-ink);color:var(--primary)}
+  .sslist{margin-top:4px}
+
   /* carried-forward intake context */
   .carried{margin-top:16px;border-top:1px dashed var(--line);padding-top:14px}
-  .carried h3{margin:0 0 4px;font-size:12px;font-weight:700;text-transform:uppercase;
+  .carried h3{margin:0 0 4px;font-size:13px;font-weight:700;text-transform:uppercase;
               letter-spacing:.04em;color:var(--ink-2)}
-  .carried p.sub{margin:0 0 10px;font-size:12.5px;color:var(--ink-3);max-width:68ch}
+  .carried p.sub{margin:0 0 10px;font-size:13.5px;color:var(--ink-3);max-width:68ch}
   .rec{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);
        border-radius:8px;background:var(--panel-2);margin-bottom:6px}
   .rec .t{flex:1;min-width:0}
-  .rec .t .name{font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .rec .t .src{font-size:11.5px;color:var(--ink-3)}
+  .rec .t .name{font-weight:600;font-size:14px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rec .t .src{font-size:12.5px;color:var(--ink-3)}
   .rec.excluded{opacity:.72}
   .rec.excluded .name{text-decoration:line-through;text-decoration-color:var(--ink-3)}
 
@@ -122,7 +162,7 @@
   .toggle{display:flex;gap:4px;background:var(--panel-2);border:1px solid var(--line);
           border-radius:10px;padding:4px}
   .toggle button{flex:1;border:0;background:transparent;border-radius:7px;padding:9px 10px;
-                 font-size:13px;font-weight:600;color:var(--ink-2);transition:background .12s,color .12s}
+                 font-size:14px;font-weight:600;color:var(--ink-2);transition:background .12s,color .12s}
   .toggle button[aria-selected="true"]{background:var(--primary);color:var(--primary-ink)}
   .toggle button:hover:not([aria-selected="true"]){background:var(--panel-3);color:var(--ink)}
 
@@ -134,11 +174,21 @@
     width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;
     padding:9px 11px;color:var(--ink);font:inherit}
   textarea{resize:vertical;min-height:74px}
-  .btn{border:1px solid var(--line);background:var(--panel-2);border-radius:8px;padding:9px 14px;
-       font-size:13px;font-weight:600;white-space:nowrap}
-  .btn:hover{background:var(--panel-3)}
+  /* ONE BUTTON COLOR (Kevin, 2026-07-14): "I want all buttons to use the same color as a
+     default." Every button is now the SAME hue (--primary). Weight, not hue, carries the
+     hierarchy: .primary = solid fill, default .btn = tinted + blue text/border. A screen of
+     six solid-blue buttons is unreadable, so "same color" is applied as one color FAMILY.
+     Overrule freely — the color itself is provisional ("we can settle on the right color").
+     The two semantic exceptions are .found (green) and .none (destructive) below: those
+     encode an outcome, not a rank, and going blue would erase the meaning. */
+  .btn{border:1px solid var(--primary);background:var(--primary-soft);color:var(--primary);
+       border-radius:8px;padding:9px 14px;font-size:14px;font-weight:600;white-space:nowrap}
+  .btn:hover{background:color-mix(in srgb,var(--primary) 14%,transparent)}
   .btn.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
   .btn.primary:hover{filter:brightness(1.08)}
+  /* Quiet/neutral escape hatch for anything that must NOT read as an action. */
+  .btn.quiet{border-color:var(--line);background:var(--panel-2);color:var(--ink-2)}
+  .btn.quiet:hover{background:var(--panel-3)}
   /* NOT display:flex — the count span is inline, and flex would eat the spaces around it
      ("Found —1responsive"). Block + centred text keeps the sentence intact. */
   .btn.wide{width:100%;display:block;text-align:center}
@@ -146,58 +196,58 @@
 
   .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
   .chip{border:1px solid var(--line);background:var(--panel-2);border-radius:999px;
-        padding:4px 11px;font-size:12px;color:var(--ink-2)}
+        padding:4px 11px;font-size:13px;color:var(--ink-2)}
   .chip[aria-pressed="true"]{background:var(--primary-soft);border-color:var(--primary);color:var(--primary);font-weight:600}
 
   .hit{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);
        border-radius:9px;margin-bottom:8px;background:var(--panel)}
   .hit:hover{border-color:var(--primary)}
   .hit .body{flex:1;min-width:0}
-  .hit .name{font-weight:650;font-size:13.5px}
-  .hit .snip{font-size:12.5px;color:var(--ink-3);margin-top:3px;max-width:76ch}
-  .hit .facts{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:7px;font-size:11.5px;color:var(--ink-3)}
+  .hit .name{font-weight:650;font-size:14.5px}
+  .hit .snip{font-size:13.5px;color:var(--ink-3);margin-top:3px;max-width:76ch}
+  .hit .facts{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:7px;font-size:12.5px;color:var(--ink-3)}
   .hit.attached{border-color:var(--ok);background:var(--ok-bg)}
 
   .asset{display:flex;gap:12px;padding:12px;border:1px solid var(--line);border-radius:9px;
          margin-bottom:8px;background:var(--panel)}
   .asset .thumb{width:104px;height:66px;border-radius:6px;background:var(--chrome);
                 display:flex;align-items:center;justify-content:center;color:var(--chrome-ink-2);
-                font-family:var(--mono);font-size:11px;flex:none}
+                font-family:var(--mono);font-size:12px;flex:none}
   .asset.attached{border-color:var(--ok);background:var(--ok-bg)}
   .scope{margin-top:9px;padding:9px;border:1px dashed var(--ai);border-radius:7px;background:var(--ai-soft)}
-  .scope label{display:block;font-size:11.5px;font-weight:700;color:var(--ai);margin-bottom:5px}
-  .scope .hint{font-size:11.5px;color:var(--ink-3);margin-top:5px}
+  .scope label{display:block;font-size:12.5px;font-weight:700;color:var(--ai);margin-bottom:5px}
+  .scope .hint{font-size:12.5px;color:var(--ink-3);margin-top:5px}
 
   .loc{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);
        border-radius:9px;margin-bottom:8px;background:var(--panel)}
-  .loc .where{font-family:var(--mono);font-size:12.5px;background:var(--panel-3);
+  .loc .where{font-family:var(--mono);font-size:13.5px;background:var(--panel-3);
               border-radius:6px;padding:6px 9px;color:var(--ink-2);flex:none}
   .scanned{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
   .pg{width:52px;height:66px;border:1px solid var(--line);border-radius:4px;background:var(--panel-2);
-      display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--ink-3)}
+      display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--ink-3)}
 
   .drop{border:2px dashed var(--line);border-radius:10px;padding:26px;text-align:center;
         color:var(--ink-3);background:var(--panel-2);margin-top:10px}
 
-  .empty{padding:30px;text-align:center;color:var(--ink-3);font-size:13px}
+  .empty{padding:30px;text-align:center;color:var(--ink-3);font-size:14px}
 
   /* ---- zone 3: rail --------------------------------------------------- */
   .rail{position:sticky;top:16px}
   .act{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1px solid var(--line);
-       background:var(--panel);border-radius:9px;padding:11px 12px;margin-bottom:8px;font-weight:600;font-size:13px}
+       background:var(--panel);border-radius:9px;padding:11px 12px;margin-bottom:8px;font-weight:600;font-size:14px}
   .act:hover{border-color:var(--primary);background:var(--primary-soft)}
-  .act .k{font-size:11.5px;color:var(--ink-3);font-weight:500;display:block;margin-top:1px}
+  .act .k{font-size:12.5px;color:var(--ink-3);font-weight:500;display:block;margin-top:1px}
 
   .trail{list-style:none;margin:0;padding:0}
-  .trail li{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+  .trail li{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--line);font-size:13.5px}
   .trail li:last-child{border-bottom:0}
-  .trail .when{font-family:var(--mono);color:var(--ink-3);font-size:11.5px;flex:none;padding-top:1px}
-  .trail .what b{display:block;font-weight:700;font-size:12px;letter-spacing:.02em}
+  .trail .when{font-family:var(--mono);color:var(--ink-3);font-size:12.5px;flex:none;padding-top:1px}
+  .trail .what b{display:block;font-weight:700;font-size:13px;letter-spacing:.02em}
   .trail .what span{color:var(--ink-3)}
-  .trail-empty{font-size:12.5px;color:var(--ink-3);padding:6px 0}
+  .trail-empty{font-size:13.5px;color:var(--ink-3);padding:6px 0}
 
   .resolve{border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
-  .resolve .why{font-size:11.5px;color:var(--ink-3);margin-top:8px;line-height:1.45}
+  .resolve .why{font-size:12.5px;color:var(--ink-3);margin-top:8px;line-height:1.45}
   .btn.found{background:var(--ok);border-color:var(--ok);color:#fff}
   .btn.none{background:var(--panel-2);border-color:var(--line);color:var(--ink-2)}
   .btn.none:hover:not(:disabled){border-color:var(--crit);color:var(--crit)}
@@ -206,24 +256,24 @@
   dialog{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);
          padding:0;box-shadow:var(--shadow);width:min(560px,calc(100vw - 32px))}
   dialog::backdrop{background:rgba(10,16,24,.55)}
-  dialog h3{margin:0;font-size:15px}
+  dialog h3{margin:0;font-size:16px}
   .m-hd{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
   .m-bd{padding:16px;display:flex;flex-direction:column;gap:12px}
   .m-ft{padding:12px 16px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
-  .f label{display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:5px}
+  .f label{display:block;font-size:13px;font-weight:700;color:var(--ink-2);margin-bottom:5px}
   .f + .f{margin-top:2px}
   .check{display:flex;gap:9px;align-items:flex-start;padding:10px;border:1px solid var(--line);
          border-radius:8px;background:var(--panel-2)}
-  .check .cap{font-size:12px;color:var(--ink-3);margin-top:3px;line-height:1.45}
-  .note{font-size:12px;color:var(--ink-2);background:var(--info-bg);border-radius:7px;padding:9px 11px}
+  .check .cap{font-size:13px;color:var(--ink-3);margin-top:3px;line-height:1.45}
+  .note{font-size:13px;color:var(--ink-2);background:var(--info-bg);border-radius:7px;padding:9px 11px}
 
   /* ---- open-decision markers ------------------------------------------ */
   .q{display:inline-flex;align-items:center;gap:4px;background:var(--legal-bg);color:var(--legal);
-     border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700;cursor:help;
+     border-radius:999px;padding:1px 8px;font-size:12px;font-weight:700;cursor:help;
      border:1px solid transparent}
   .q:hover{border-color:var(--legal)}
   .legend{max-width:1560px;margin:0 auto;padding:0 16px 28px}
-  .legend .card-bd{font-size:12.5px;color:var(--ink-2)}
+  .legend .card-bd{font-size:13.5px;color:var(--ink-2)}
   .legend ul{margin:8px 0 0;padding-left:18px}
   .legend li{margin-bottom:7px}
   .legend b{color:var(--ink)}
@@ -259,37 +309,66 @@
           <span class="due"><b>Statutory due</b> 2026-07-19 &middot; 5 days</span>
         </div>
 
-        <!-- carried-forward intake context -->
+        <!-- ===== SELF SERVICE PORTAL SEARCH RESULTS BAR — Kevin's mark-up, decision #2 =====
+             Two accumulating sets, not one. Both carry with the request across the portal's
+             refine loop (search -> select -> re-describe -> search again). The NOT-SELECTED set
+             is INVISIBLE TO THE REQUESTOR and exists solely so the searcher never re-surfaces a
+             record the requestor already passed over.
+             DATA SOURCE: portal R9 (DESIGN_split_canvas_intake §4b) — DESIGNED, NOT BUILT.
+             Until R9 ships, "Records Not Selected" is EMPTY for every request. -->
         <div class="carried">
-          <h3>What the requestor already saw at intake
-            <span class="q" title="Open decision #2 — shown-but-unselected candidates are NOT persisted today. Build the persistence with this screen, or ship on selected-records-only and fast-follow?">? #2</span>
-          </h3>
-          <p class="sub">So you don&rsquo;t re-surface what they already declined &mdash; and so the record shows they saw it.</p>
+          <div class="ssbar">
+            <span class="ssbar-t">Self Service Portal Search Results</span>
+            <button class="btn ss" id="btnSelected">Selected Records <span class="cnt">2</span></button>
+            <button class="btn ss" id="btnNotSelected">Records Not Selected <span class="cnt">12</span></button>
+            <span class="ssbar-note">The portal showed them <b>14</b>; they took <b>2</b>.</span>
+          </div>
+          <p class="sub">Both sets accumulate across every re-search and carry with the request. The
+            not-selected set is <b>never shown back to the requestor</b> &mdash; it is here so you don&rsquo;t
+            re-surface what they already declined, and so the record shows they saw it.</p>
 
-          <div class="rec">
-            <span class="pill ok">Selected</span>
-            <div class="t">
-              <div class="name">Incident report 2025-CR-04471 &mdash; redacted release</div>
-              <div class="src">Public library &middot; already released</div>
+          <!-- SELECTED list -->
+          <div class="sslist" id="listSelected">
+            <div class="rec">
+              <span class="pill ok">Selected</span>
+              <div class="t">
+                <div class="name">Incident report 2025-CR-04471 &mdash; redacted release</div>
+                <div class="src">Public library &middot; already released</div>
+              </div>
+              <span class="pill mute">Carried forward</span>
             </div>
-            <span class="pill mute">Carried forward</span>
+            <div class="rec">
+              <span class="pill ok">Selected</span>
+              <div class="t">
+                <div class="name">Arrest report 2025-CR-04471-A</div>
+                <div class="src">Tyler Munis &middot; picked on the 3rd search</div>
+              </div>
+              <span class="pill mute">Carried forward</span>
+            </div>
           </div>
 
-          <div class="rec excluded">
-            <span class="pill mute">Shown</span>
-            <div class="t">
-              <div class="name">Dash camera footage, Unit 12 &mdash; Dec 3 2025</div>
-              <div class="src">Axon Evidence &middot; shown at intake, not picked</div>
+          <!-- NOT-SELECTED list — hidden until asked for -->
+          <div class="sslist" id="listNotSelected" hidden>
+            <p class="sub" style="margin-top:0"><b>Shown to the requestor and passed over.</b> Queries the portal
+              already ran: <code>&ldquo;7-eleven main street&rdquo;</code> &middot; <code>&ldquo;officer confrontation dec 3&rdquo;</code>
+              &middot; <code>&ldquo;100 main st incident&rdquo;</code> &mdash; don&rsquo;t repeat them.</p>
+            <div class="rec excluded">
+              <span class="pill mute">Shown</span>
+              <div class="t">
+                <div class="name">Dash camera footage, Unit 12 &mdash; Dec 3 2025</div>
+                <div class="src">Axon Evidence &middot; shown, not picked</div>
+              </div>
+              <span class="pill mute">Excluded</span>
             </div>
-            <span class="pill mute">Excluded</span>
-          </div>
-          <div class="rec excluded">
-            <span class="pill mute">Shown</span>
-            <div class="t">
-              <div class="name">Traffic citation 2025-TC-88120</div>
-              <div class="src">Tyler Munis &middot; shown at intake, not picked</div>
+            <div class="rec excluded">
+              <span class="pill mute">Shown</span>
+              <div class="t">
+                <div class="name">Traffic citation 2025-TC-88120</div>
+                <div class="src">Tyler Munis &middot; shown, not picked</div>
+              </div>
+              <span class="pill mute">Excluded</span>
             </div>
-            <span class="pill mute">Excluded</span>
+            <p class="sub" style="margin-bottom:0">&hellip;and 10 more.</p>
           </div>
         </div>
       </div>
@@ -330,7 +409,7 @@
                 W Lamar St&hellip;</div>
               <div class="facts"><span>Laserfiche</span><span>PDF &middot; 6 pages</span><span>Relevance 94%</span></div>
             </div>
-            <button class="btn" type="button" data-attach-btn>Mark responsive</button>
+            <button class="btn" type="button" data-attach-btn>Include in Response</button>
           </div>
           <div class="hit" data-attach>
             <div class="body">
@@ -338,13 +417,13 @@
               <div class="snip">Citation issued 2025-12-03 16:41 &mdash; officer badge 4471&hellip;</div>
               <div class="facts"><span>Tyler Munis</span><span>PDF &middot; 1 page</span><span>Relevance 71%</span></div>
             </div>
-            <button class="btn" type="button" data-attach-btn>Mark responsive</button>
+            <button class="btn" type="button" data-attach-btn>Include in Response</button>
           </div>
         </div>
 
         <!-- AUDIO / VIDEO -->
         <div class="view on" id="v-av" role="tabpanel">
-          <p class="sub" style="margin:0 0 12px;color:var(--ink-3);font-size:12.5px;max-width:70ch">
+          <p class="sub" style="margin:0 0 12px;color:var(--ink-3);font-size:13.5px;max-width:70ch">
             Locate the asset &mdash; you are finding the <b>file</b>, not searching inside the footage.
             Query by case, time window, location, or unit.
           </p>
@@ -363,37 +442,46 @@
             <div class="thumb">BWC&nbsp;4471</div>
             <div class="body" style="flex:1;min-width:0">
               <div class="name" style="font-weight:650">Axon Body 3 &mdash; Smith, badge 4471</div>
-              <div class="facts" style="display:flex;gap:5px 12px;flex-wrap:wrap;margin-top:6px;font-size:11.5px;color:var(--ink-3)">
+              <div class="facts" style="display:flex;gap:5px 12px;flex-wrap:wrap;margin-top:6px;font-size:12.5px;color:var(--ink-3)">
                 <span>2025-12-03 16:09&ndash;16:52</span><span>43 min</span><span>W Lamar St</span>
               </div>
               <div class="scope">
                 <label for="scopeNote">Scope note for the redactor
-                  <span class="q" title="Open decision #3 — does the searcher scope the clip (time range / event) and hand that to redaction, or stay purely at 'find the file' and leave all scoping to the redactor?">? #3</span>
+                  <span class="pill ok" style="font-size:11px">KEPT &mdash; #3</span>
                 </label>
                 <input id="scopeNote" type="text" placeholder="e.g. 10:14–10:22, the traffic stop">
                 <div class="hint">Travels to the AV redaction workbench. You hand off <i>where</i> the relevant
-                  part is; the redactor does the in-video work.</div>
+                  part is; the redactor does the in-video work. <b>If you uploaded a clip cut from a longer
+                  file, this is also what describes what was clipped.</b></div>
+              </div>
+              <div class="hint" style="margin-top:8px;padding:8px 10px;border:1px dashed var(--crit);
+                   border-radius:8px;color:var(--crit);background:var(--crit-bg)">
+                <b>⚠ STILL OPEN &mdash; do not build this view yet.</b> How the located video actually
+                <i>arrives</i> is unresolved: upload a clip · link the full asset · pull it through a connector.
+                It hinges on a question we cannot answer from here &mdash; <b>is the searcher even the same person
+                as the redactor?</b> If they only have <i>view</i> rights in Axon, "the searcher clips the video"
+                is incoherent and a link is all that is possible. Research commissioned 2026-07-14.
               </div>
             </div>
-            <button class="btn" type="button" data-attach-btn style="align-self:flex-start">Mark responsive</button>
+            <button class="btn" type="button" data-attach-btn style="align-self:flex-start">Include in Response</button>
           </div>
 
           <div class="asset" data-attach>
             <div class="thumb">CAR&nbsp;12</div>
             <div class="body" style="flex:1;min-width:0">
               <div class="name" style="font-weight:650">In-car camera &mdash; Unit 12</div>
-              <div class="facts" style="display:flex;gap:5px 12px;flex-wrap:wrap;margin-top:6px;font-size:11.5px;color:var(--ink-3)">
+              <div class="facts" style="display:flex;gap:5px 12px;flex-wrap:wrap;margin-top:6px;font-size:12.5px;color:var(--ink-3)">
                 <span>2025-12-03 16:05&ndash;17:20</span><span>75 min</span><span>W Lamar St</span>
                 <span class="pill mute">Shown at intake &middot; not picked</span>
               </div>
             </div>
-            <button class="btn" type="button" data-attach-btn style="align-self:flex-start">Mark responsive</button>
+            <button class="btn" type="button" data-attach-btn style="align-self:flex-start">Include in Response</button>
           </div>
         </div>
 
         <!-- PAPER -->
         <div class="view" id="v-paper" role="tabpanel">
-          <p class="sub" style="margin:0 0 12px;color:var(--ink-3);font-size:12.5px;max-width:70ch">
+          <p class="sub" style="margin:0 0 12px;color:var(--ink-3);font-size:13.5px;max-width:70ch">
             The archive index returns a <b>storage location</b>, not a file. Retrieve the records, then scan
             them straight into the request.
           </p>
@@ -405,8 +493,8 @@
           <div class="loc">
             <span class="where">Row 12 &middot; Shelf C &middot; Box 2025-11</span>
             <div class="t" style="flex:1">
-              <div class="name" style="font-weight:650;font-size:13.5px">Traffic enforcement reports &mdash; Dec 2025</div>
-              <div class="src" style="font-size:11.5px;color:var(--ink-3)">Paper archive index &middot; approx. 40 pages</div>
+              <div class="name" style="font-weight:650;font-size:14.5px">Traffic enforcement reports &mdash; Dec 2025</div>
+              <div class="src" style="font-size:12.5px;color:var(--ink-3)">Paper archive index &middot; approx. 40 pages</div>
             </div>
             <button class="btn" type="button" id="scanBtn">Scan into request</button>
           </div>
@@ -418,7 +506,7 @@
 
         <!-- OTHER -->
         <div class="view" id="v-other" role="tabpanel">
-          <p class="sub" style="margin:0 0 12px;color:var(--ink-3);font-size:12.5px;max-width:70ch">
+          <p class="sub" style="margin:0 0 12px;color:var(--ink-3);font-size:13.5px;max-width:70ch">
             No search here &mdash; you are documenting and attaching an artifact you produced by hand
             (drive image, phone extraction, screenshots).
           </p>
@@ -449,6 +537,48 @@
       </div>
     </section>
 
+    <!-- ===== REQUEST DEFECT — Kevin's mark-up 2026-07-14 =====
+         "There should be a way to mark the description as Vague or Overly Broad, and force the
+          process associated with clarification specific to that state/city to begin. I think it's
+          important for those selection options to be VISIBLE."
+         These are TWO legal defects, not one. The system today has ONE boolean (`vague`).
+         Illinois: vagueness -> the Act does NOT compel the body to interpret meaning.
+                   overbreadth -> the body SHALL confer before a burden denial, the clock does NOT
+                   stop, and failing to respond on time forfeits the burden defense ENTIRELY.
+         See SPEC_record_search_task_screen §5b-2. -->
+    <section class="card">
+      <div class="card-hd">
+        <h2>Is the request defective?</h2>
+        <span class="spacer"></span>
+        <span class="pill legal" title="The jurisdiction's own clarification rules drive what each of these does. Illinois is seeded with a mandatory-conference duty.">Illinois</span>
+      </div>
+      <div class="card-bd" style="padding-bottom:12px">
+        <button class="act defect" type="button" id="vagueBtn">
+          <span>Mark <b>Vague</b><span class="k">Unclear <i>what</i> is being asked</span></span>
+        </button>
+        <div class="defect-note" id="vagueNote">
+          Illinois is <b>silent</b> on vagueness &mdash; 5 ILCS 140 &sect;&nbsp;3.3 says the Act does not compel
+          the agency to interpret or advise on meaning. Clarifying is <b>discretionary</b>. The clock
+          <b>keeps running</b> (<code>runs_no_stop</code>).
+        </div>
+
+        <button class="act defect" type="button" id="broadBtn">
+          <span>Mark <b>Overly Broad</b><span class="k">Clear, but unduly burdensome</span></span>
+        </button>
+        <div class="defect-note crit-note" id="broadNote">
+          <b>Illinois requires a conference.</b> Before this request can be denied as unduly burdensome,
+          the agency <b>shall</b> offer the requestor an opportunity to confer and reduce it to manageable
+          proportions.
+          <div class="forfeit">
+            <span class="forfeit-h">⚠ The clock does not stop for the conference.</span>
+            A body that fails to respond on time <b>may not treat the request as unduly burdensome at all.</b>
+            Waiting silently for a reply <b>forfeits the burden defense.</b>
+            <span class="forfeit-due">Response due <b>2026-07-19</b> &middot; 5 days left</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <section class="card">
       <div class="card-hd">
         <h2>Effort trail</h2>
@@ -456,7 +586,7 @@
         <span class="pill mute" id="trailCount">0</span>
       </div>
       <div class="card-bd">
-        <p style="margin:0 0 10px;font-size:12px;color:var(--ink-3);line-height:1.45">
+        <p style="margin:0 0 10px;font-size:13px;color:var(--ink-3);line-height:1.45">
           Every action lands here. If you end up closing this with <b>no responsive records</b>, this trail is
           the evidence for it.
         </p>
@@ -465,12 +595,12 @@
 
         <div class="resolve">
           <button class="btn found wide" type="button" id="foundBtn" disabled>
-            Found &mdash; <span id="foundCount">0</span> responsive
+            Found &mdash; <span id="foundCount">0</span> to include
           </button>
           <button class="btn none wide" type="button" id="noneBtn" disabled style="margin-top:8px">
             No responsive records
           </button>
-          <p class="why" id="whyNone">Mark a record responsive to finish, or log at least one action before
+          <p class="why" id="whyNone">Include at least one record to finish, or log at least one action before
             closing with none.</p>
         </div>
       </div>
@@ -480,21 +610,48 @@
 
 <div class="legend">
   <section class="card">
-    <div class="card-hd"><h2>Mark-up notes &mdash; the decisions still open</h2></div>
+    <div class="card-hd"><h2>Kevin&rsquo;s mark-up &mdash; folded in 2026-07-14</h2></div>
     <div class="card-bd">
-      <p style="margin:0">Two questions from the 2026-07-09 design session are still unanswered. They are
-        marked <span class="q">? #2</span> and <span class="q">? #3</span> in place above &mdash; hover them.</p>
+      <p style="margin:0 0 10px">Everything below is now in <code>SPEC_record_search_task_screen.md</code>. This
+        page shows it.</p>
       <ul>
-        <li><b>#2 &mdash; Carried-forward intake results.</b> Records the requestor <i>selected</i> are stored
-          today. The candidates they were <i>shown and passed on</i> are stored nowhere. The panel at the top of
-          this screen needs them. Build that persistence with this screen, or ship on selected-only and
-          fast-follow?</li>
-        <li><b>#3 &mdash; Video scoping.</b> Does the searcher add a time-range / event note that travels to the
-          redaction workbench (shown here, on the AV asset), or does the searcher stop at &ldquo;here is the
-          file&rdquo; and leave all scoping to the redactor?</li>
-        <li><b>Resolved since the session:</b> gating (selection skips search &mdash; recipe in spec &sect;1),
-          build order (the redaction screen shipped 2026-07-11), and clarification tolling (your 17-state survey
-          is seeded; the &ldquo;Contact requestor&rdquo; action is the trigger the engine has been waiting for).</li>
+        <li><b>#2 &mdash; Carried-forward results. RESOLVED: build the persistence.</b> Two accumulating sets.
+          Selected records stay in the right column; records <i>shown and passed over</i> accumulate
+          <b>invisible to the requestor</b> and carry with the request. Written on <b>every results-clear</b>
+          &mdash; each re-search <i>and</i> Proceed &mdash; because the portal&rsquo;s refine loop lets one
+          description be searched several times. Selection wins on dedup.
+          <br><b style="color:var(--crit)">Sequencing:</b> this data lives in <b>portal R9</b>, which is designed
+          but <b>NOT built</b>. Until it ships, &ldquo;Records Not Selected&rdquo; is empty for every request.
+          R9 is now a <b>prerequisite</b> of this screen.</li>
+
+        <li><b>#3 &mdash; Video. PARTIALLY resolved.</b> The scope/description box <b>stays</b>. How the located
+          video <i>arrives</i> is <b>still open</b> and is not being guessed at &mdash; it turns on whether the
+          searcher and the redactor are the same person. Research commissioned. <b>The AV view is blocked; the
+          rest of the screen is not.</b></li>
+
+        <li><b>NEW &mdash; Vague vs Overly Broad</b> (right rail). You asked for both to be visible. They are
+          <b>two different legal defects</b>, and the system today has <b>one</b> boolean. Your own 17-state survey
+          says why that&rsquo;s dangerous: in Illinois, vagueness carries <b>no duty</b>, but overbreadth carries a
+          <b>mandatory conference</b>, the clock <b>does not stop</b>, and a body that fails to respond on time
+          <b>&ldquo;may not treat the request as unduly burdensome at all.&rdquo;</b> Marking an overly-broad
+          request &ldquo;vague&rdquo; and waiting <b>forfeits the burden defense.</b> The substrate already models
+          the duty (<code>clarification_duty</code>, seeded for IL) &mdash; <b>nothing has ever read it.</b> This
+          rail is its first caller.</li>
+
+        <li><b>&ldquo;Responsive&rdquo; &rarr; &ldquo;Include in Response&rdquo;</b> &mdash; done on this page.
+          <b>One judgment call for you:</b> the closure notice is still <b>&ldquo;No responsive records.&rdquo;</b>
+          That is a <b>statutory term of art</b> &mdash; the notice is named that in the law. Renaming it would
+          misquote the statute. Say the word and I&rsquo;ll change it anyway.</li>
+
+        <li><b>Color &amp; type</b> &mdash; this page now runs your <b>portal</b> palette
+          (<code>#D8E0E8</code> ground / <code>#F2F6F9</code> boxes / white fields / <code>#1E6091</code> blue),
+          every button is one color family, and every type step is <b>+1px</b>. The <b>shipped redaction
+          workstation still runs the old darker palette</b>, so the two screens diverge until you settle the
+          color. Also logged: the portal&rsquo;s own <b>&ldquo;Send verification now&rdquo;</b> button is
+          un-styled and needs the same default.</li>
+
+        <li><b>Resolved earlier:</b> gating (selection skips search &mdash; recipe in spec &sect;1), build order
+          (the redaction screen shipped 2026-07-11), clarification tolling (your 17-state survey is seeded).</li>
       </ul>
     </div>
   </section>
@@ -654,11 +811,11 @@ If you can tell us the approximate time, or the vehicle or people involved, we c
       var card = btn.closest('[data-attach]');
       var name = card.querySelector('.name').textContent.trim();
       var on = card.classList.toggle('attached');
-      btn.textContent = on ? 'Responsive ✓' : 'Mark responsive';
+      btn.textContent = on ? 'Included in Response ✓' : 'Include in Response';
       found += on ? 1 : -1;
       foundCount.textContent = found;
       foundBtn.disabled = found === 0;
-      if (on) logIt('Marked responsive', name);
+      if (on) logIt('Included in Response', name);
     });
   });
 
@@ -682,11 +839,56 @@ If you can tell us the approximate time, or the vehicle or people involved, we c
   });
   wire('contactBtn','dlgContact', function(){
     var vague = document.getElementById('vague').checked;
+    // NOTE: the clock effect is PER JURISDICTION (clarification_clock_effect). This demo is
+    // Illinois = runs_no_stop, so sending a clarification does NOT pause anything. The old copy
+    // here claimed "clock paused, restarts on reply" — that is Texas's rule, not Illinois's, and
+    // showing it in an IL deployment would be a lie the searcher acts on.
     logIt('Clarification sent', 'Emailed the requestor' +
-      (vague ? ' · flagged vague — clock paused, restarts on reply' : ''));
+      (vague ? ' · flagged vague — IL: clock keeps running (runs_no_stop)' : ''));
   });
   wire('callBtn','dlgCall', function(){
     logIt('Call logged', document.getElementById('callWho').value || 'Phone call');
+  });
+
+  /* ---- Self Service Portal Search Results bar (decision #2) ---- */
+  var btnSel = document.getElementById('btnSelected');
+  var btnNot = document.getElementById('btnNotSelected');
+  var lstSel = document.getElementById('listSelected');
+  var lstNot = document.getElementById('listNotSelected');
+  function showSet(which){
+    var sel = which === 'sel';
+    lstSel.hidden = !sel; lstNot.hidden = sel;
+    btnSel.classList.toggle('on', sel);
+    btnNot.classList.toggle('on', !sel);
+  }
+  btnSel.addEventListener('click', function(){ showSet('sel'); });
+  btnNot.addEventListener('click', function(){ showSet('not'); });
+  showSet('sel');
+
+  /* ---- Vague vs Overly Broad — mutually exclusive, both VISIBLE ---- */
+  var vagueBtn = document.getElementById('vagueBtn');
+  var broadBtn = document.getElementById('broadBtn');
+  var vagueNote = document.getElementById('vagueNote');
+  var broadNote = document.getElementById('broadNote');
+  function setDefect(kind){
+    var isVague = kind === 'vague', isBroad = kind === 'broad';
+    vagueBtn.classList.toggle('on', isVague);
+    broadBtn.classList.toggle('on', isBroad);
+    vagueNote.classList.toggle('show', isVague);
+    broadNote.classList.toggle('show', isBroad);
+  }
+  vagueBtn.addEventListener('click', function(){
+    var on = !vagueBtn.classList.contains('on');
+    setDefect(on ? 'vague' : null);
+    if (on) logIt('Marked vague', 'IL: clarification discretionary — the Act does not compel interpretation');
+  });
+  broadBtn.addEventListener('click', function(){
+    var on = !broadBtn.classList.contains('on');
+    setDefect(on ? 'broad' : null);
+    // The IL conference duty is NOT optional and does NOT toll. This is the whole point of
+    // separating overbreadth from vagueness: reason 'overly_broad', duty
+    // 'required_before_burden_denial'. Silence here forfeits the burden defense.
+    if (on) logIt('Marked overly broad', 'IL: CONFERENCE REQUIRED before any burden denial — clock still running');
   });
 
   /* resolution */
@@ -703,7 +905,7 @@ If you can tell us the approximate time, or the vehicle or people involved, we c
     }
   });
   foundBtn.addEventListener('click', function(){
-    document.getElementById('taskState').textContent = 'Complete · ' + found + ' responsive → Redaction';
+    document.getElementById('taskState').textContent = 'Complete · ' + found + ' to include → Redaction';
     document.getElementById('taskState').className = 'pill ok';
   });
 })();
