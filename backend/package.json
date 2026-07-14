@@ -5,7 +5,8 @@
   "scripts": {
     "start": "node server.js",
     "test": "node tests/run_suite.js",
-    "test:db:reset": "node tests/reset_test_db.js"
+    "test:db:reset": "node tests/reset_test_db.js",
+    "db:fixture": "node src/db/gen_fixture_seed.js"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.98.0",

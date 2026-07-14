@@ -59,10 +59,24 @@ var year = new Date().getFullYear();
     ok('deadline_date is no longer hand-written by the classifier path', !/deadline_date = \?[^]*cls\.deadlineDays/.test(chatSrc) && !/dl\.setDate\(dl\.getDate\(\) \+ \(cls\.deadlineDays/.test(chatSrc));
 
     // =====================================================================================
-    // 1. THE BUG IS REAL — demonstrate BOTH broken algorithms against the live database.
+    // 1. THE BUG IS REAL — demonstrate BOTH broken algorithms against real numbered requests.
     // =====================================================================================
+    // This used to read whatever requests HAPPENED to be in the live database, which meant the test was
+    // silently borrowing state it did not create — and it crashed outright on an empty database (the fixture),
+    // because `maxRow` came back null. A test must build the state it depends on. Create the baseline through
+    // the REAL creation path if the numbering space for this year is empty.
+    var haveRow = await db.get("SELECT COUNT(*) AS n FROM requests WHERE request_number LIKE ?", [year + '-%']);
+    if (Number(haveRow.n) === 0) {
+      // findByTag (not submit) is what REGISTERS the row for cleanup — submit only returns an HTTP status.
+      for (var s = 0; s < 3; s++) {
+        await submit('Numbering baseline ' + TAG + ' #' + s);
+        await findByTag(TAG + ' #' + s);
+      }
+    }
+
     var maxRow = await db.get("SELECT request_number FROM requests WHERE request_number ~ ('^' || ? || '-[0-9]{4}$') ORDER BY request_number DESC LIMIT 1", [String(year)]);
     var countRow = await db.get("SELECT COUNT(*) AS n FROM requests WHERE request_number LIKE ?", [year + '-%']);
+    ok('a numbering baseline exists to test against (' + countRow.n + ' requests this year)', !!maxRow);
     var maxSeq = parseInt(maxRow.request_number.split('-')[1], 10);
     var countSeq = Number(countRow.n);
 
@@ -75,6 +89,20 @@ var year = new Date().getFullYear();
        !!wouldCollide);
 
     // Algorithm B (last row by created_at) restarts at 0001 when the newest row has a non-standard number.
+    //
+    // That pathological condition used to be BORROWED from the live database, which happened to contain
+    // DEMO-/SYS-/LIBRARY- rows. On a clean fixture it does not exist, and the demonstration silently stopped
+    // demonstrating anything (B would mint the next free number and the assertion failed). A test must
+    // CONSTRUCT the state its bug needs. So: plant a non-standard-numbered row as the NEWEST request — the
+    // library/demo shape that broke B in the first place — instead of hoping production still has one.
+    var legacyId = require('uuid').v4();
+    await db.run(
+      "INSERT INTO requests (id, request_number, requestor_name, requestor_email, description) VALUES (?,?,?,?,?)",
+      [legacyId, 'LIBRARY-' + TAG, 'Library Import', 'library@fixture.test',
+       'A non-standard-numbered row (public library import), newest by created_at — this is what broke algorithm B.']
+    );
+    created.push(legacyId);
+
     var lastByCreated = await db.get('SELECT request_number FROM requests ORDER BY created_at DESC LIMIT 1');
     var parts = String(lastByCreated.request_number).split('-');
     var bWould = (parts[0] == year) ? (parseInt(parts[1], 10) + 1) : 1;
