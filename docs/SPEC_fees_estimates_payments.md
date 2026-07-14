@@ -51,11 +51,24 @@ overcharge** across the ten most common record types, emitting it under a *"Revi
 label that implies a human validated it. Locked by **`verify_fee_labor_gate` (20)** — the **config** is now
 the thing under test, so a reseed from an old script or a copied config for a new city goes RED, not live.
 
-**⚠ `paperOnly` — UNVERIFIED, and LOAD-BEARING (Kevin's call, 2026-07-14).** § 552.261(a) says *"pages of
-**paper** records"* and *"photocopied"*, so the bar is scoped to paper deliveries (`mail`/`pickup`/`paper`).
-**The demo's default delivery is `email`, so the bar does NOT fire on most requests** — that same 8-page report
-still prices at $12.05 by email. Test **D** pins this exactly so it stays visible. **Needs counsel.** If
-§ 552.261(a) is read to reach electronic copies, it is a **one-value flip** (`paperOnly: false`).
+**THE BAR APPLIES TO EVERY DELIVERY METHOD — `paperOnly: false`** (Kevin, 2026-07-14, reversing the same day's
+initial paper-only reading). § 552.261(a) reads *"pages of **paper** records … photocopied"*, and scoping the
+bar to paper is the literal construction — **but it would have left the overcharge live on the path nearly every
+request takes**, since the portal's default delivery is `email`. **The email case was the real one.** A
+50-page-or-fewer request is precisely the small routine request the bar exists to protect; charging $11.25 of
+labor on it *because we emailed the PDF rather than photocopying it* inverts the statute to the city's benefit.
+**Where the reading is genuinely uncertain, the doubt is not resolved in favour of the government's own
+revenue.** The `paperOnly` mechanism remains in the engine — another jurisdiction may need that scoping — and
+counsel should still confirm.
+
+**⚠ A PAGE BAR CANNOT BITE ON A REQUEST WITH NO PAGES** `[the trap the flip opened]`. Audio and video requests
+have **zero** pages, and zero is *"50 or fewer"* — so the bar would have zeroed out labor on **the most
+expensive records a city holds**, handing body-worn video (redaction runs *slower than real time*) over for
+**free**. Caught the moment `paperOnly` flipped: the seeded profiles put **BWC at $67.50 and 911 audio at
+$18.75, and both fell to $0.00.** § 552.261(a) exempts a request *"for 50 or fewer **pages** of paper records"* —
+a body-cam request is not a request for pages at all, and Texas prices electronic records under separate rules
+that **do** allow personnel time. **No pages, no page-bar** (`feeEngine.laborGate`; tests **G1–G4**). One page of
+paper brings the bar straight back.
 
 **⚠ Two things deliberately NOT encoded** (flagged, not guessed): the statute's **two exceptions** (records in
 2+ unconnected buildings, or a remote storage facility, restore the labor charge) — asserting the condition

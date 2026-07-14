@@ -19,23 +19,27 @@ var ID = 'feeprof-tx-fr-v1';
 // finding. Populating the estimate profiles would have AUTOMATED that overcharge across the ten most
 // common record types, which is how it was caught.
 //
-// ⚠ TWO THINGS DELIBERATELY NOT ENCODED, both flagged rather than guessed:
-//   1. paperOnly (UNVERIFIED — Kevin's call 2026-07-14). § 552.261(a) says "pages of PAPER records" and
-//      "photocopied", so the bar is scoped to paper deliveries. LOAD-BEARING: the demo default delivery is
-//      `email`, so this means the bar does NOT fire on most requests and labor stays chargeable there.
-//      Needs counsel. It is a one-value flip (`paperOnly: false`) if § 552.261(a) reaches electronic copies.
-//   2. THE STATUTE'S TWO EXCEPTIONS are UNCONFIGURED: records in two or more unconnected buildings, or in a
-//      remote storage facility, restore the labor charge. Left off deliberately -- under-charging is
-//      recoverable, unlawful over-charging is not. Asserting the condition per request is a design question.
+// paperOnly: FALSE — the bar applies to EVERY delivery method (Kevin's call, 2026-07-14, reversing the
+// same day's initial paper-only reading). The literal text of § 552.261(a) is paper-shaped ("pages of PAPER
+// records ... photocopied"), but scoping the bar to paper would have left the overcharge LIVE on the path
+// almost every request actually takes: the portal's default delivery is `email`. A 50-page-or-fewer request
+// is the small routine request the legislature was protecting; charging $11.25 of labor on it because we
+// emailed the PDF instead of photocopying it inverts the statute's purpose to the city's benefit. Where the
+// reading is genuinely uncertain, do not resolve the doubt in favour of the government's own revenue.
+//
+// ⚠ ONE THING DELIBERATELY NOT ENCODED: THE STATUTE'S TWO EXCEPTIONS -- records in two or more unconnected
+// buildings, or in a remote storage facility, restore the labor charge. Left off deliberately: under-charging
+// is recoverable, unlawful over-charging is not. Asserting the condition per request is a design question.
 //
 // NOT SET: `labor.overheadPct`. The spec mentions a TX +20% overhead surcharge; that figure is NOT in the
 // verified-TX section of FEE_ESTIMATE_KNOWLEDGE.md, and inventing an overhead % would over-charge. Unseeded
 // until researched -- an unresearched charge is the same exposure as an unresearched clock rule.
 var LABOR_BAR = {
   mode: 'all_or_nothing', trigger: 'pages', threshold: 50,
-  paperOnly: true, paperMethods: ['mail', 'pickup', 'paper'],
+  paperOnly: false,
   _statute: "Tex. Gov't Code § 552.261(a)",
-  _verified: 'threshold + bar: VERIFIED against statute text. paperOnly scope: UNVERIFIED — counsel.'
+  _verified: 'threshold + bar: VERIFIED against statute text. Scope: applied to ALL delivery methods — the ' +
+             'statute reads "paper", but the protective reading governs (Kevin, 2026-07-14). Counsel to confirm.'
 };
 
 var cfg = {
