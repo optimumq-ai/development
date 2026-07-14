@@ -33,7 +33,7 @@ Requestor objection to fees: filed per request with **source** (letter/email/pho
 ## 8. Fee sandbox `[BUILT]`
 Onboarding Fees phase: preset scenarios + custom inputs; Issues/Confirmed paths; **hard gate** — phase approval requires a confirmed test on record.
 
-## 8b. THE 50-PAGE LABOR BAR — § 552.261(a) `[FIXED 2026-07-14]`
+## 8b. THE 50-PAGE LABOR BAR + OVERHEAD — § 552.261(a), 1 TAC § 70.3(e) `[FIXED + VERIFIED 2026-07-14]`
 
 **The engine always had the gate. The config never set it.** `feeEngine.laborGate` has carried an
 all-or-nothing labor trigger since it was written — its own comment names Texas — and **`billableWhen`
@@ -48,18 +48,33 @@ A typical **8-page incident report priced at $12.05 where the statute allows $0.
 common request a city receives. **A reader with no config: the mirror of the "seeded but never read" class,
 and just as silent.** Found only because **populating the estimate profiles (§2) would have AUTOMATED the
 overcharge** across the ten most common record types, emitting it under a *"Review auto-generated estimate"*
-label that implies a human validated it. Locked by **`verify_fee_labor_gate` (20)** — the **config** is now
+label that implies a human validated it. Locked by **`verify_fee_labor_gate` (29)** — the **config** is now
 the thing under test, so a reseed from an old script or a copied config for a new city goes RED, not live.
 
-**THE BAR APPLIES TO EVERY DELIVERY METHOD — `paperOnly: false`** (Kevin, 2026-07-14, reversing the same day's
-initial paper-only reading). § 552.261(a) reads *"pages of **paper** records … photocopied"*, and scoping the
-bar to paper is the literal construction — **but it would have left the overcharge live on the path nearly every
-request takes**, since the portal's default delivery is `email`. **The email case was the real one.** A
-50-page-or-fewer request is precisely the small routine request the bar exists to protect; charging $11.25 of
-labor on it *because we emailed the PDF rather than photocopying it* inverts the statute to the city's benefit.
-**Where the reading is genuinely uncertain, the doubt is not resolved in favour of the government's own
-revenue.** The `paperOnly` mechanism remains in the engine — another jurisdiction may need that scoping — and
-counsel should still confirm.
+### Primary-source verification — deep-research pass, 2026-07-14
+
+Every value below was verified **3-0** against primary sources (1 TAC § 70.3, Tex. Gov't Code Ch. 552, the AG
+Public Information Handbook) by an adversarial 3-verifier-per-claim research pass. **Rates confirmed current**
+(1 TAC § 70.3, last amended eff. 2007-02-22, no later amendment): **$0.10**/page, **$15/hr** general labor
+(§ 70.3(d)(1) — locate/compile/manipulate/reproduce), **$28.50/hr** for **programming services only**
+(§ 70.3(c)(1) — *do not bill general IT time at this rate*). The statute itself sets **no** dollar figures
+(§ 552.262 delegates them to the AG); a city may charge **less**, may not exceed **125%** of the AG amount
+absent exemption, and may never exceed **actual cost** (§ 552.262).
+
+**THE BAR APPLIES TO EVERY DELIVERY METHOD — `paperOnly: false`** (Kevin, 2026-07-14).
+
+> **⚠ The research MOVED this, it did not merely confirm it.** The AG's *actual* position is that the 50-page
+> bar is **paper-only**: the AG copies flow-chart routes electronic records straight to *"labor and overhead +
+> cost of the medium"* with **no page-count gate**, and the AG's own worked examples charge $15/hr + 20% overhead
+> on emailed/electronic requests. So `paperOnly: false` is **more protective than Texas practice requires** — for
+> an electronic request the AG would allow labor and we decline it under 50 pages. The one place the research
+> *supports* the protective reading is the **genuinely unsettled** case: a **small emailed PDF with no media
+> (CD/DVD) cost** is squarely answered by no source (every AG electronic example delivers on physical media), and
+> the research's own instruction was *do not resolve that doubt for city revenue.* **Net: `paperOnly: false`
+> stands as a deliberate, documented policy choice — protective, and defensible for the no-media email case, but
+> a real divergence from AG practice for electronic-with-media requests. This is a live decision for Kevin +
+> counsel, not a settled reading.** The `paperOnly` mechanism stays in the engine for a jurisdiction that wants
+> the literal scope.
 
 **⚠ A PAGE BAR CANNOT BITE ON A REQUEST WITH NO PAGES** `[the trap the flip opened]`. Audio and video requests
 have **zero** pages, and zero is *"50 or fewer"* — so the bar would have zeroed out labor on **the most
@@ -70,15 +85,44 @@ a body-cam request is not a request for pages at all, and Texas prices electroni
 that **do** allow personnel time. **No pages, no page-bar** (`feeEngine.laborGate`; tests **G1–G4**). One page of
 paper brings the bar straight back.
 
-**⚠ Two things deliberately NOT encoded** (flagged, not guessed): the statute's **two exceptions** (records in
-2+ unconnected buildings, or a remote storage facility, restore the labor charge) — asserting the condition
-per request is a design question, and **under-charging is recoverable while unlawful over-charging is not**;
-and **`labor.overheadPct`**, which this spec's §1 mentions as a TX +20% surcharge but which is **NOT in the
-verified-TX section** of `FEE_ESTIMATE_KNOWLEDGE.md`. **An unresearched charge is the same exposure as an
-unresearched clock rule.** Both remain unseeded.
+### Overhead — VERIFIED and now SEEDED (`labor.overheadPct: 20`)
+
+**§ 70.3(e)(3): overhead is 20% of the LABOR charge alone — never 20% of the total bill.** The engine already
+computes it on the labor subtotal, so seeding the value was all that was needed. Two properties make it safe
+(tests **H1–H5**):
+- **§ 70.3(e)(2): no labor → no overhead.** Overhead *"shall not be made for requests for copies of 50 or fewer
+  pages of standard paper records unless the request also qualifies for a labor charge."* Because the engine's
+  overhead rides on the **gated** labor subtotal, the 50-page bar zeroes labor and overhead **together** — a 20%
+  surcharge on a copies-only bill cannot happen by construction. A ≤50-page request pays **$0** overhead.
+- **Opt-in (§ 70.3(e)(1)).** Seeding `20` asserts *this city recovers overhead* — an agency-policy posture, like
+  the 50% deposit. A city that waives it sets `overheadPct: 0`. When elected, § 70.3 fixes it **at** 20% (not a
+  dial-down ceiling; the authority to charge less lives in § 552.262).
+
+Effect on the seeded profiles: audio/video and >50-page requests now carry overhead on their labor (**BWC
+$67.50 → $81.00**, 911 audio **$18.75 → $22.50**); every copies-only request is unchanged at $0 labor / $0
+overhead.
+
+### The two exceptions — RESEARCHED, still UNBUILT (need a per-request assertion)
+
+Now documented precisely; still not encoded, because each is a **per-request factual assertion with a recorded
+basis**, not a config value — a design question. When either applies, the **full labor + overhead** charge
+returns (both § 70.3(d) and § 70.3(e)(2) cross-reference § 552.261(a)(1)-(2)).
+- **(1) "two or more separate buildings not physically connected"** — § 552.261(c) supplies only a **negative**
+  test: a covered/open sidewalk, or an elevated/underground passageway, does **not** make buildings separate.
+  **Burden is on the agency**, which the AG requires to furnish *"a simple map showing the location of the
+  buildings"* (§ 552.269 cost-complaint process; **treble damages** for a bad-faith overcharge).
+- **(2) "remote storage facility"** — § 70.3(g): with a commercial storage company, recover **only** the
+  company's locate/retrieve/deliver/return fee; **no** added labor for the company's retrieval. Own-staff search
+  **after** delivery gets ordinary $15/hr.
+
+*(`_verified` stamps on the config record the same provenance.)*
 
 ## 9. Known gaps
-- **The `paperOnly` scope + the two § 552.261(a) exceptions + `labor.overheadPct`** — see §8b. Counsel.
+- **`paperOnly: false` diverges from AG practice** (§8b) — the AG charges labor on electronic; we don't under 50
+  pages. A deliberate protective choice, **live for Kevin + counsel**, defensible for the no-media-email case.
+- **The two § 552.261(a) exceptions are researched but UNBUILT** (§8b) — each needs a per-request assertion with
+  a recorded basis (the AG demands a building map for exception 1). Design work, not a config value.
+- **Overhead** (§8b) — **RESOLVED**: verified 20%-of-labor, seeded, safe on ≤50-page requests by construction.
 - Commercial intake capture `[NOT BUILT]` + approval `[DEFERRED]` — Domain 1 spec §5.
 - Fee-waiver approval task routing `[NOT BUILT]` — Tasks spec §11.1.
 - Variant-level profiles blocked on taxonomy decision (Domain 3 §5).

@@ -27,13 +27,29 @@ var ID = 'feeprof-tx-fr-v1';
 // emailed the PDF instead of photocopying it inverts the statute's purpose to the city's benefit. Where the
 // reading is genuinely uncertain, do not resolve the doubt in favour of the government's own revenue.
 //
-// ⚠ ONE THING DELIBERATELY NOT ENCODED: THE STATUTE'S TWO EXCEPTIONS -- records in two or more unconnected
-// buildings, or in a remote storage facility, restore the labor charge. Left off deliberately: under-charging
-// is recoverable, unlawful over-charging is not. Asserting the condition per request is a design question.
+// OVERHEAD = 20% OF THE LABOR CHARGE (1 TAC § 70.3(e)) — VERIFIED 3-0 against primary sources, 2026-07-14
+// (deep-research pass; see SPEC §8b). Every prior "unresearched charge" caveat is now RESOLVED:
+//   - § 70.3(e)(3): "The overhead charge shall be computed at 20% of the charge made to cover any labor
+//     costs" -- so the base is LABOR ALONE, never the total bill. The engine already computes it that way
+//     (feeEngine: laborSubtotal * overheadPct / 100) and zeroes it when labor is non-billable.
+//   - § 70.3(e)(2): "An overhead charge shall not be made for requests for copies of 50 or fewer pages of
+//     standard paper records unless the request also qualifies for a labor charge." NO LABOR => NO OVERHEAD.
+//     Because the engine's overhead rides on the GATED labor subtotal, the 50-page bar zeroes labor AND
+//     overhead together -- the § 70.3(e)(2) coupling is satisfied structurally, not by a second rule.
+//   - Opt-in: § 70.3(e)(1) is permissive ("may include ... if a governmental body chooses to recover such
+//     costs"). Seeding 20 asserts THIS city recovers overhead -- an agency-policy posture, like the 50%
+//     deposit. A city that waives overhead sets `overheadPct: 0`. When elected, § 70.3 fixes it AT 20% (not
+//     a dial-down ceiling); the authority to charge less lives in the STATUTE (§ 552.262), not this rule.
 //
-// NOT SET: `labor.overheadPct`. The spec mentions a TX +20% overhead surcharge; that figure is NOT in the
-// verified-TX section of FEE_ESTIMATE_KNOWLEDGE.md, and inventing an overhead % would over-charge. Unseeded
-// until researched -- an unresearched charge is the same exposure as an unresearched clock rule.
+// ⚠ THE STATUTE'S TWO EXCEPTIONS remain UNCONFIGURED -- now researched, still unbuilt (they need a per-request
+// assertion with a recorded basis, which is a design question, not a config value). Verified tests (SPEC §8b):
+//   (1) "two or more separate buildings not physically connected" -- § 552.261(c) gives only a NEGATIVE test
+//       (a covered/open sidewalk or passageway does NOT make buildings separate); burden is on the AGENCY,
+//       which the AG requires to furnish "a simple map showing the location of the buildings" (§ 552.269
+//       cost-complaint process; treble damages for bad-faith overcharge).
+//   (2) "remote storage facility" -- § 70.3(g): with a commercial storage company, recover ONLY the company's
+//       locate/retrieve/deliver/return fee; NO added labor for the company's retrieval. Own-staff search AFTER
+//       delivery gets ordinary $15/hr. When either exception applies, the FULL labor+overhead charge returns.
 var LABOR_BAR = {
   mode: 'all_or_nothing', trigger: 'pages', threshold: 50,
   paperOnly: false,
@@ -45,6 +61,10 @@ var LABOR_BAR = {
 var cfg = {
   context: 'FR', version: 1,
   labor: {
+    // Rates VERIFIED current, 1 TAC § 70.3 (last amended eff. 2007-02-22; no later amendment): $15/hr general
+    // labor (§ 70.3(d)(1) — locate/compile/MANIPULATE/reproduce), $28.50/hr for PROGRAMMING SERVICES ONLY
+    // (§ 70.3(c)(1) — do NOT bill general IT time at this rate). $0.10/page is `duplication.bw.rate` below.
+    overheadPct: 20,   // § 70.3(e)(3): 20% of labor. See the block above for why this is safe on ≤50-page reqs.
     search: { rate: 15, increment: 0.25, rounding: 'up', billableWhen: LABOR_BAR },
     review: { rate: 15, increment: 0.25, rounding: 'up', billableWhen: LABOR_BAR },
     programming: { rate: 28.5, increment: 0.25, rounding: 'up', billableWhen: LABOR_BAR }

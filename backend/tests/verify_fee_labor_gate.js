@@ -57,8 +57,8 @@ function price(cfg, quantities, deliveryMethod) {
     ok('A2 labor.' + k + ' declares the 50-page bar (§ 552.261(a))',
       !!bw && bw.mode === 'all_or_nothing' && bw.trigger === 'pages' && Number(bw.threshold) === 50);
   });
-  ok('A3 no overhead % is invented — unseeded until researched',
-    !cfg.labor || !cfg.labor.overheadPct);
+  // Overhead is now SEEDED and verified: 1 TAC § 70.3(e)(3) = 20% of the labor charge (research 2026-07-14).
+  ok('A3 overhead is 20% of LABOR (§ 70.3(e)(3)) — verified, seeded', Number(cfg.labor.overheadPct) === 20);
 
   console.log('\n=== B. PAPER, AT OR UNDER 50 PAGES → COPIES ONLY. NO LABOR. ===');
   var p8 = price(cfg, INCIDENT, 'mail');
@@ -76,7 +76,9 @@ function price(cfg, quantities, deliveryMethod) {
   var p51 = price(cfg, { searchHours: 1, reviewHours: 0, bwPages: 51 }, 'mail');
   ok('C1 51 pages crosses the bar and labor is charged', Number(p51.laborSubtotal) > 0);
   ok('C2 …at the configured $15/hr → $15.00 labor', Number(p51.laborSubtotal).toFixed(2) === '15.00');
-  ok('C3 …plus 51 × $0.10 in copies → $20.10 total', Number(p51.total).toFixed(2) === '20.10');
+  // $15 labor + 20% overhead ($3.00) + 51 × $0.10 copies ($5.10) = $23.10. Overhead rides on the labor the
+  // moment the bar is crossed -- the same coupling section H proves, seen from the charged side.
+  ok('C3 …+ 20% overhead ($3.00) + 51 × $0.10 copies ($5.10) → $23.10 total', Number(p51.total).toFixed(2) === '23.10');
 
   console.log('\n=== D. THE BAR APPLIES TO EVERY DELIVERY METHOD — INCLUDING EMAIL ===');
   // Kevin, 2026-07-14 (reversing the same day's initial paper-only reading): § 552.261(a) reads "pages of
@@ -103,12 +105,31 @@ function price(cfg, quantities, deliveryMethod) {
   var bwcQ = { searchHours: 0.5, reviewHours: 4.0, bwPages: 0 };   // the real rt-police-video seed
   var pBwc = price(cfg, bwcQ, 'email');
   ok('G1 a body-worn-camera request (0 pages) still charges labor', Number(pBwc.laborSubtotal) > 0);
-  ok('G2 …4.5 hours at $15 = $67.50, not $0.00', Number(pBwc.total).toFixed(2) === '67.50');
+  ok('G2 …4.5h × $15 = $67.50 labor, + 20% overhead $13.50 = $81.00 total', Number(pBwc.total).toFixed(2) === '81.00');
   var p911 = price(cfg, { searchHours: 0.25, reviewHours: 1.0, bwPages: 0 }, 'email');
-  ok('G3 a 911-audio request (0 pages) likewise charges labor', Number(p911.total).toFixed(2) === '18.75');
+  ok('G3 a 911-audio request (0 pages) likewise charges labor + overhead → $22.50', Number(p911.total).toFixed(2) === '22.50');
   // And the bar still bites the moment there IS paper.
   ok('G4 …but ONE page of paper brings the bar straight back',
     Number(price(cfg, { searchHours: 4, reviewHours: 0, bwPages: 1 }, 'email').laborSubtotal) === 0);
+
+  console.log('\n=== H. OVERHEAD — 20% OF LABOR, AND ONLY WHEN LABOR IS CHARGED (§ 70.3(e)) ===');
+  // The whole point of the coupling: § 70.3(e)(2) bars overhead on a ≤50-page request "unless the request
+  // also qualifies for a labor charge." Because the engine's overhead rides on the GATED labor subtotal, the
+  // page bar zeroes labor AND overhead together -- a 20% surcharge on a copies-only bill is unlawful, and
+  // cannot happen here by construction.
+  var pOvh = price(cfg, bwcQ, 'email');
+  ok('H1 overhead is exactly 20% of the labor charge', Number(pOvh.laborOverhead).toFixed(2) === (Number(pOvh.laborSubtotal) * 0.20).toFixed(2));
+  ok('H2 …NOT 20% of the total bill (the base is labor alone, § 70.3(e)(3))',
+    Number(pOvh.laborOverhead) < Number(pOvh.total) * 0.20 + 0.001 && Number(pOvh.laborOverhead) === Number(pOvh.laborSubtotal) * 0.20);
+  var pBar = price(cfg, INCIDENT, 'mail');
+  ok('H3 a ≤50-page request pays ZERO overhead — because it pays zero labor (§ 70.3(e)(2))',
+    Number(pBar.laborOverhead || 0) === 0 && Number(pBar.laborSubtotal) === 0);
+  var pBig = price(cfg, { searchHours: 2, reviewHours: 2, bwPages: 120 }, 'mail');
+  ok('H4 a >50-page request pays overhead on its labor', Number(pBig.laborOverhead) > 0);
+  ok('H5 a city may waive overhead — overheadPct:0 removes it entirely (§ 70.3(e)(1) is opt-in)', (function () {
+    var waived = JSON.parse(JSON.stringify(cfg)); waived.labor.overheadPct = 0;
+    return Number(price(waived, bwcQ, 'email').laborOverhead || 0) === 0;
+  })());
 
   console.log('\n=== E. THE GATE IS ADDITIVE — a config without it is unchanged ===');
   // Every other jurisdiction's profile has no billableWhen. Those must keep charging labor normally: a gate
