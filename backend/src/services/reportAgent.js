@@ -19,6 +19,7 @@ var SPEC_SCHEMA = [
   '- Pick the single best metric. "how many requests" -> request_count. "fee/revenue/money collected" -> fee_revenue. "overdue/late/past deadline" -> overdue_count. "how long/processing time/turnaround" -> avg_processing_days. "compliance/on time/met deadline" -> compliance_rate. "self-service/library/portal downloads vs requests" -> self_service_rate.',
   '- "by month" / "over time" / "trend" -> group_by month, viz line.',
   '- "by department", "by category" -> group_by department or classification (category maps to classification). viz bar.',
+  '- HARD CONSTRAINT: fee_revenue can NEVER be grouped by department or classification. A fee is charged ONCE per request, but a department belongs to the individual records inside it — a request whose records span two departments has one payment and two departments, so any split would be an invented allocation and the columns would not sum to the total. If the user asks for revenue by department or by category, instead return metric fee_revenue with group_by month (or requestor/status), and the system will explain why the requested cut is not available. Request COUNTS by department are exact and always fine.',
   '- "top requestors / who submitted the most" -> metric request_count, group_by requestor, sort desc, limit (default 10), viz table.',
   '- "this month vs last month" -> compare this_vs_last_month.',
   '- Map time phrases to the nearest preset (e.g. "past 60 days" -> last_60d, "year to date" -> ytd, "this month" -> this_month).',

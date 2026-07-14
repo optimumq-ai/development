@@ -119,6 +119,26 @@ async function runSpec(spec) {
       note: metric === 'compliance_rate' ? 'Share of closed requests completed on or before their statutory deadline.' : 'Average calendar days from intake to close, for closed requests.' };
   }
 
+  // --- REFUSED: a MONETARY metric grouped by a CHILD field is UNDEFINED, not merely unjoined. ---
+  // (Kevin's decision, 2026-07-14.) Revenue is ONE number on the parent (the citizen pays once for the
+  // request). A parent with two children in two departments has ONE revenue figure and TWO departments — a
+  // join would double-count it into both, and the columns would not sum to the total. Attributing it needs
+  // an ALLOCATION rule, and the law is silent on allocation (SPEC_parent_child_lifecycle §5.10).
+  //
+  // A wrong revenue-by-department number is worse than no revenue-by-department number, so we refuse it and
+  // say why. COUNTS are fine and still offered: each child is counted once, so nothing double-counts.
+  if (metric === 'fee_revenue' && (groupBy === 'department' || groupBy === 'classification')) {
+    return {
+      title: 'Fee revenue by ' + GROUPS[groupBy].toLowerCase() + ' — not available',
+      viz: 'number', columns: ['Metric', 'Value'], rows: [],
+      unavailable: true,
+      note: 'Revenue is charged once per request, but a department is a property of the individual records ' +
+            'within it. A request whose records span two departments has one payment and two departments, so ' +
+            'any split between them would be an invented allocation — the figures would not sum to the total. ' +
+            'Use fee revenue by month, requestor or status; or request COUNTS by department, which are exact.'
+    };
+  }
+
   // --- count/revenue/overdue: SQL aggregate, optional group ---
   var valueExpr = metric === 'fee_revenue' ? 'COALESCE(SUM(r.amount_paid),0)' : 'COUNT(*)';
   var extra = metric === 'overdue_count' ? ("r.deadline_date < '" + today() + "' AND r.status = 'active'") : null;

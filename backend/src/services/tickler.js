@@ -107,12 +107,22 @@ async function runSweep(opts) {
     actions.estimate_lapsed += 1;
   }
 
-  // (2) Deposit overdue: accepted, in awaiting_payment, unpaid past ITS band's deposit window
-  // (per-jurisdiction; falls back to the flat default). Flag only, no auto-close (unchanged behavior).
+  // (2) Deposit overdue: a deposit is OWED and unpaid past ITS band's window.
+  //
+  // PARENT/CHILD (Kevin's decision, 2026-07-14): this sweep is driven by the MONEY AXIS, not by the stage.
+  // It used to require `r.stage = 'awaiting_payment'` — but after the migration the ESTIMATE hangs off the
+  // PARENT while the STAGE lives on the CHILD, so that join would match nothing and the deposit sweep would
+  // SILENTLY STOP RUNNING: no dunning, no lapse, no withdrawal, and no error to tell you.
+  //
+  // The stage predicate was always redundant with the money one. What actually defines "a deposit is
+  // overdue" is: an accepted estimate, a deposit that was REQUIRED (deposit_due > 0), and no payment.
+  // `deposit_due > 0` is load-bearing — without it, a request that accepted an estimate needing NO deposit
+  // has `deposit_paid_at` NULL forever and would be flagged overdue for a deposit it never owed.
   var depCandidates = await all(
     "SELECT r.id AS rid, e.config_profile_id, e.total, e.accepted_at FROM requests r JOIN request_fee_estimates e ON e.request_id = r.id " +
-    "WHERE r.stage = 'awaiting_payment' AND r.status = 'active' AND e.kind = 'estimate' " +
+    "WHERE r.status = 'active' AND e.kind = 'estimate' " +
     "AND e.accepted_at IS NOT NULL AND e.deposit_paid_at IS NULL " +
+    "AND COALESCE(e.deposit_due, 0) > 0 " +
     "AND COALESCE(r.tickler_flag, '') <> 'deposit_overdue' " +
     "AND NOT EXISTS (SELECT 1 FROM objections o WHERE o.request_id = r.id AND o.status IN ('open','tentative') AND o.clock_frozen = 1) " +
     "AND e.id = (SELECT id FROM request_fee_estimates WHERE request_id = r.id AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1)");
