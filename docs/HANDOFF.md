@@ -2513,3 +2513,64 @@ the AI classifier succeeding, so they FAIL while credits are out. **They are pre
 every assertion about the behaviour under test passes. Re-run them once credits are restored.
 
 **State:** `main`, tree clean, config integrity CLEAN.
+
+---
+
+# SESSION CLOSE — 2026-07-14. START HERE NEXT TIME.
+
+## ⚠️ DO THIS FIRST, BEFORE ANY WORK
+**The Anthropic API credit balance is EXHAUSTED.** `400 — "Your credit balance is too low to access the
+Anthropic API."` **Every AI feature is down**: intake classification · the redaction AI read · the help agent ·
+the report agent · the config extractors. Top up credits, then:
+1. Re-run the suite. **Two `verify_stage_bypass` assertions ("has an open task before the close") depend on the
+   classifier succeeding and FAIL while credits are out.** They are preconditions, not regressions — every
+   assertion about the behaviour under test passes.
+2. **23 active intake requests have no routing basis.** They were submitted while classification was failing.
+   The new fallback (a99e9b3) means *future* ones raise a `routing_review` task, but **these 23 predate it and
+   are still invisible.** Sweep them: `SELECT id FROM requests WHERE routing_basis IS NULL AND stage='intake'
+   AND status='active'` → spawn a routing_review task for each, or re-run classification.
+
+## WHERE THE PARENT/CHILD MIGRATION STANDS
+**It is now a DATA-ONLY change.** Everything mechanical is done and every step is a *proven* no-op today:
+- Schema columns exist (`master_request_id`, `component_label`, `is_mrr`) + an index on `master_request_id`.
+- **`services/requestCreate.js` is the single wrap point** — all 3 intake paths go through it.
+- **Every list/count/sweep query is parent/child-aware** (`services/requestScope.js`), verified byte-identical
+  before/after (dashboard, the queue's 39 rows, all 7 reports, every sweep candidate set).
+- The **citizen-facing request number resolves through the parent**.
+- The **destructive auto-close sweep** (`clarificationTimeout`) closes the PARENT, not the work row.
+- The **deposit sweep runs on the money axis**, so it survives the estimate moving to the parent.
+
+**Still needed before the migration runs:**
+- **UI design direction** for the parent/child queue treatment (parent line, children indented). The UI rule
+  says agree the design BEFORE building. **This is the only true blocker.**
+- The migration script itself: create a parent per request, make the existing row the child (it keeps its id),
+  repoint the 7 money/clock tables to the parent.
+
+## WHAT SHIPPED TODAY (all pushed; `main` == `origin/main` == `a99e9b3`)
+Config layer: `jurisdiction_rules` (the per-jurisdiction rule slot) · 18 clarification policies · deadline rules
+for TX/IL/CA · the deposit clock policy · the **fee-waiver substrate + the Illinois fee-forfeiture guardrail** ·
+the **"send again" gate** · **config integrity checking**.
+Clock engine: `extend()` · validated `tollReasons` · `applyClassification()`.
+Fixes: the ghost `custodian_retrieval` stage + ONE canonical stage vocabulary · every raw
+`UPDATE requests SET stage` routed through `applyStageTransition` · the **request-numbering collision** (two of
+three algorithms were broken; the live portal 500'd after any deletion) · the silent-orphan intake bug.
+
+## THE SUITE
+13 harnesses in the job scratchpad (`verify_*.js`), ~305 assertions. Run them **chained** — that is what
+surfaces contamination. Then run `node backend/src/db/check_config_integrity.js` — **it must report CLEAN.**
+
+## OPEN DECISIONS FOR KEVIN (nothing else is blocked on me)
+- **Where does the payment gate live on the parent?** `parent_state` has no payment value (spec §11.1).
+  *(The deposit sweep no longer depends on this — but the parent still needs somewhere to show "awaiting
+  payment".)*
+- **Turn on the TX clock rules?** Clarification-restart and deposit-restart are both **built, seeded, and
+  disabled**. Switching them on **changes reported lateness on live requests** — requests now shown as overdue
+  will stop being overdue. Deliberate act, not a side effect.
+- The **`second_notice_required`** slots exist but are **unseeded** — an unresearched notice duty is the same
+  legal exposure as an unresearched clock rule.
+
+## STATE
+`main` @ `a99e9b3`, tree clean, pushed. API + nginx + the 3 connector stubs all healthy. Config integrity
+**CLEAN**. Active jurisdiction `jur-tx` with a **repaired** config (a test had left a 77-day standard clock and
+an enabled-but-unattested clarification policy in production; both fixed, and the checker now prevents the
+class).
