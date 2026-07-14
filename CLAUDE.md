@@ -15,6 +15,15 @@ On-premise open-records platform for cities. Node/Express backend (`backend/`, P
 - Seed/demo data ONLY through real creation paths (e.g. POST /api/public/submit) — never direct inserts into mid-pipeline states.
 - Smoke test on demand: submit → route → estimate → search → deliver. If it breaks, say so the same day.
 
+## Tests (never against live)
+- Run the suite with `cd backend && npm test` — that is the ONLY supported way. It rebuilds `optimumq_test`
+  as a clone of live, boots a test API on :3101 against it, runs all 12 harnesses, and then **censuses the live
+  DB before and after and fails if a single row moved**.
+- NEVER run a `verify_*.js` harness bare. `tests/testEnv.js` will refuse and exit — tests must not touch live
+  data. (They used to. It cost us 15 orphan tasks in real worklists and a 77-day statutory clock in production
+  config.)
+- New tests go in `backend/tests/` and require `testEnv.enforce()` before touching the DB.
+
 ## UI rule
 - NEVER use the v1 UI (existing pages, layouts, styling, component structure) as a design reference — it is considered poor and is being replaced.
 - Backend patterns, routes, services, and data access MAY be reused freely.

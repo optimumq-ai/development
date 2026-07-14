@@ -2662,6 +2662,49 @@ reconciling before anything relies on standalone tasks.
 
 ---
 
+## 2026-07-14 (xr) — THE SUITE HAS ITS OWN DATABASE. Building it from empty found TWO RELEASE BLOCKERS.
+
+**`cd backend && npm test`** — the only supported way to run the suite. It rebuilds `optimumq_test` as a
+faithful clone of live, boots a **second API on :3101** wired to it, runs all 12 harnesses, then **censuses the
+LIVE database before and after and FAILS THE RUN IF A SINGLE ROW MOVED.** That census is the point; everything
+else is plumbing. **309/309, live untouched.**
+
+`tests/testEnv.js` **refuses** to run a harness against a non-test database — it does not warn, it exits. *A
+test that CAN touch production eventually WILL.* The 12 harnesses now live in **`backend/tests/` (in the repo)**;
+the old untracked, unguarded copies in `~/.claude/jobs/` are **deleted**. The second API instance is not
+optional: without it the harnesses would drive the **live** API on :3001 while asserting against the test DB.
+
+The full-stack UI assertion in `verify_stages` is **preserved, not skipped** — Playwright now proxies the
+page's `/api` calls to the API under test, so the real frontend bundle renders test data.
+
+### 🚨 TWO RELEASE BLOCKERS — both found because this is the FIRST TIME THE SCHEMA WAS EVER BUILT FROM EMPTY
+
+That is precisely what a new city install does. Nothing had ever done it before. Both would have hit the **first
+customer**, not us.
+
+1. **`schema.postgres.sql` COULD NOT CREATE A FRESH DATABASE.** It `ALTER`ed `record_types` and
+   `fulfilled_records` **before those tables existed** — a harmless no-op against any database that already had
+   them (i.e. every environment we own), a **hard failure on an empty one**:
+   `ALTER TABLE record_types ... relation "record_types" does not exist`. **A brand-new install died on step
+   one.** Statements re-homed after their `CREATE`.
+2. **THE SCHEMA HAD DRIFTED FROM LIVE.** An **entire table (`import_review_jobs`) and 20 columns** existed in
+   production but **not in the file** — mapping (`latitude`/`longitude`/`geo_address`), import review,
+   onboarding review/test tracking. **The code uses all of them.** A fresh install would have come up **missing
+   a table and 20 columns** and broken on day one, in features nobody would think to re-test on a "fresh"
+   deploy. Schema now matches reality; every addition is `IF NOT EXISTS`, so **live is untouched**.
+
+**The lesson: a schema file that only ever runs against databases that already satisfy it is not a schema file,
+it is a no-op.** The test DB is the first thing that ever held it to account.
+
+**Verified:** 309/309 against the test DB · live census clean (not one row moved across 12 tables) · live config
+integrity CLEAN · live API healthy. **State:** `main` @ `42fe74b`, tree clean.
+
+**Follow-on worth doing:** the fixture is a *clone of live*, which is pragmatic but means the tests inherit
+whatever is in production today. A seeded, deterministic fixture would be better — but note there is **no seed
+runner** and the `seed_*` files have drifted, which is its own (smaller) version of blocker #2.
+
+---
+
 # SESSION CLOSE — 2026-07-14. START HERE NEXT TIME.
 
 ## ⚠️ DO THIS FIRST, BEFORE ANY WORK
