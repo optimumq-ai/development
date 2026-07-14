@@ -735,3 +735,89 @@ CREATE INDEX IF NOT EXISTS ix_clock_extensions_clock ON clock_extensions (clock_
 -- Parent/child: every scope predicate filters on master_request_id (see services/requestScope.js), so it
 -- needs an index or every list query degrades to a sequential scan once children exist.
 CREATE INDEX IF NOT EXISTS ix_requests_master ON requests (master_request_id);
+
+-- ============================================================================================
+-- REFERENTIAL INTEGRITY FOR requests(id)  +  THE PAYMENT-HISTORY DELETE GUARD
+--
+-- Sixteen tables referenced requests(id) and NOT ONE had a foreign key. Deleting a request left
+-- its children behind pointing at nothing: 15 orphan tasks sat OPEN in real worklists, plus 36
+-- more orphaned rows across clocks, payment events, and workflow decisions (found 2026-07-14).
+--
+-- Two rules, and they are deliberately different:
+--
+--   1. ORDINARY CHILDREN CASCADE. A clock, a task, a history row, a file for a request that no
+--      longer exists is not data — it is litter. It goes when the request goes.
+--
+--   2. A REQUEST WITH PAYMENT HISTORY CANNOT BE DELETED AT ALL. (Kevin's call, 2026-07-14.)
+--      CASCADE is exactly WRONG here: it would silently erase the record that money changed
+--      hands. If a citizen paid us, that fact outlives any convenience of deleting the row, and
+--      the database — not the application — is where that guarantee belongs.
+--
+-- Why a TRIGGER and not ON DELETE RESTRICT: `request_payment_events` is a MIXED ledger with a
+-- free-text `type` (paymentStatus.recordEvent writes `evt.type || 'event'`). Most rows in it are
+-- `estimate_issued` — an estimate being CALCULATED, which is not a payment. RESTRICT on that
+-- table would block deleting any request that ever got an estimate, which is broader than the
+-- rule. The trigger asks the precise question instead: DID MONEY ACTUALLY MOVE?
+-- ============================================================================================
+
+DO $$
+DECLARE
+  t TEXT;
+  child_tables TEXT[] := ARRAY[
+    'av_redaction_tasks','document_pages','erp_charges','fee_adjustments','fee_payments',
+    'fulfilled_records','objections','redaction_jobs','request_clocks','request_fee_estimates',
+    'request_files','request_history','request_payment_events','request_selected_records',
+    'workflow_decisions'
+  ];
+BEGIN
+  FOREACH t IN ARRAY child_tables LOOP
+    IF to_regclass('public.' || t) IS NOT NULL
+       AND NOT EXISTS (
+         SELECT 1 FROM pg_constraint
+         WHERE conrelid = t::regclass AND conname = 'fk_' || t || '_request_id'
+       ) THEN
+      EXECUTE format(
+        'ALTER TABLE %I ADD CONSTRAINT %I FOREIGN KEY (request_id) REFERENCES requests(id) ON DELETE CASCADE',
+        t, 'fk_' || t || '_request_id'
+      );
+    END IF;
+  END LOOP;
+END $$;
+
+-- The guard. Money received is recorded in three places; any one of them makes the request permanent.
+-- Note this asks whether money was RECEIVED, not merely OWED: an unpaid estimate or an unpaid ERP
+-- charge is not payment history, and such a request stays deletable.
+CREATE OR REPLACE FUNCTION block_delete_of_paid_request() RETURNS TRIGGER AS $$
+DECLARE
+  what TEXT;
+BEGIN
+  SELECT x INTO what FROM (
+    SELECT 'a counter payment (fee_payments)' AS x
+      WHERE EXISTS (SELECT 1 FROM fee_payments WHERE request_id = OLD.id)
+    UNION ALL
+    SELECT 'a fee adjustment or refund (fee_adjustments)'
+      WHERE EXISTS (SELECT 1 FROM fee_adjustments WHERE request_id = OLD.id)
+    UNION ALL
+    SELECT 'a PAID ERP charge (erp_charges)'
+      WHERE EXISTS (SELECT 1 FROM erp_charges WHERE request_id = OLD.id
+                    AND (paid_at IS NOT NULL OR COALESCE(paid_amount, 0) > 0))
+    UNION ALL
+    SELECT 'a paid deposit or final payment (request_fee_estimates)'
+      WHERE EXISTS (SELECT 1 FROM request_fee_estimates WHERE request_id = OLD.id
+                    AND (deposit_paid_at IS NOT NULL OR final_paid_at IS NOT NULL))
+  ) s LIMIT 1;
+
+  IF what IS NOT NULL THEN
+    RAISE EXCEPTION
+      'Refusing to delete request % (%): it has PAYMENT HISTORY — %. A request that took money cannot be deleted; the payment record must outlive it. Close or withdraw the request instead.',
+      OLD.request_number, OLD.id, what
+      USING ERRCODE = 'restrict_violation';
+  END IF;
+  RETURN OLD;
+END;
+$$ LANGUAGE plpgsql;
+
+DROP TRIGGER IF EXISTS trg_block_delete_of_paid_request ON requests;
+CREATE TRIGGER trg_block_delete_of_paid_request
+  BEFORE DELETE ON requests
+  FOR EACH ROW EXECUTE FUNCTION block_delete_of_paid_request();
