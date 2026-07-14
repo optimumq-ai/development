@@ -2516,6 +2516,55 @@ every assertion about the behaviour under test passes. Re-run them once credits 
 
 ---
 
+## 2026-07-14 (vp) — The orphan sweep was a FALSE ALARM. The fix it was based on is REAL and now PROVEN live.
+
+Picked up the handoff's two "do this first" items. One is still blocking. The other **was wrong, and running it
+would have polluted a live worklist.**
+
+**1. Credits are STILL exhausted.** Confirmed with a live call: `400 invalid_request_error — "Your credit
+balance is too low."` Every AI feature remains down. **This is billing and it is still Kevin's action** — no
+code can clear it. It is the only thing blocking the suite's two `verify_stage_bypass` preconditions.
+
+**2. ❌ THE "23 SILENT ORPHANS" DO NOT EXIST. The prescribed sweep was a trap.** The handoff said 23 active
+intake requests were "submitted while classification was failing" and told the next session to spawn a
+`routing_review` task for each. Every part of that is false, and the dates alone disprove it:
+
+- **The diagnostic query measures the wrong thing.** `routing_basis` was **first populated 2026-06-09**. Rows
+  created before that are NULL *by construction* — **112 of 126 requests are NULL**, back to 2026-01-10. NULL
+  means "predates the column," **not** "classification failed."
+- **The 23 are May demo rows — dated 2026-05-24 → 2026-06-04 — six weeks BEFORE the July 13 outage.** They
+  cannot be casualties of it. And **all 23 are already classified** (every one has a `classification`).
+- **One of them is `SYS-TEMPLATE-SAMPLES`** — a system row (`system@optimumq.ai`, "Holding area for sample
+  records used to build redaction templates"). Spawning a human task on it is exactly the **pseudo-request the
+  ARCHITECTURE invariant forbids** ("Passive/heads-up items are Notifications, never fake tasks or
+  pseudo-requests").
+- **The TRUE silent-orphan signal returns ZERO**: `status='active' AND stage='intake' AND classification IS
+  NULL` with no open task → **0 rows**. Nothing is orphaned. Nothing needs sweeping.
+
+Had the sweep run, it would have injected **23 bogus tasks** into a real queue — 22 on already-classified demo
+rows and 1 on a system row. **No code depends on the bad query** (grepped); it lived only in the handoff, and
+it is now struck out above.
+
+**3. ✅ THE a99e9b3 FIX IS REAL — and I proved it against the ACTUAL outage, not a simulation.** The DB showed
+zero `CLASSIFICATION_UNAVAILABLE` rows and all 14 existing `routing_review` tasks were `created_by='workflow'`
+(the *old* engine fallback), never `'system'` — so the new path looked like dead code. It isn't. A real submit
+through the real creation path, with credits genuinely out:
+
+> `POST /api/public/submit` → **`HTTP 201`** (`2026-0046`) → history **`CREATED` → `CLASSIFICATION_UNAVAILABLE`**
+> → **an open `[system] routing_review` task**, titled "Review & route — automatic classification was unavailable."
+
+**An AI outage degrades to human work, exactly as designed.** The earlier absence of markers was simply that
+*no request had been submitted since the fix landed* — not a defect. Probe row deleted afterward (no test
+residue); **config integrity re-checked: CLEAN.**
+
+**The lesson worth keeping:** the previous session inferred a data catastrophe from a query it never validated
+against the column's own history, and wrote the remediation into the handoff as a command. **A NULL is not a
+failure until you know when the column started being written.**
+
+**State:** `main`, tree clean, config integrity CLEAN. No code changed — this session corrected the record.
+
+---
+
 # SESSION CLOSE — 2026-07-14. START HERE NEXT TIME.
 
 ## ⚠️ DO THIS FIRST, BEFORE ANY WORK
@@ -2525,10 +2574,14 @@ the report agent · the config extractors. Top up credits, then:
 1. Re-run the suite. **Two `verify_stage_bypass` assertions ("has an open task before the close") depend on the
    classifier succeeding and FAIL while credits are out.** They are preconditions, not regressions — every
    assertion about the behaviour under test passes.
-2. **23 active intake requests have no routing basis.** They were submitted while classification was failing.
-   The new fallback (a99e9b3) means *future* ones raise a `routing_review` task, but **these 23 predate it and
-   are still invisible.** Sweep them: `SELECT id FROM requests WHERE routing_basis IS NULL AND stage='intake'
-   AND status='active'` → spawn a routing_review task for each, or re-run classification.
+2. ~~**23 active intake requests have no routing basis.** Sweep them: `SELECT id FROM requests WHERE
+   routing_basis IS NULL AND stage='intake' AND status='active'` → spawn a routing_review task for each.~~
+   **❌ RETRACTED 2026-07-14 (vp) — DO NOT RUN THIS SWEEP. It was a false alarm, and it would have done
+   damage.** `routing_basis IS NULL` is **not** a failure signal — the column was only first populated on
+   **2026-06-09**, so every row created before it is NULL by construction (112 of 126 requests). The "23" are
+   **May demo rows that are already classified**, plus **`SYS-TEMPLATE-SAMPLES`, a system holding row** — the
+   sweep would have spawned 23 bogus human tasks, one of them a pseudo-request task on a system row, in direct
+   violation of the ARCHITECTURE invariant. **The true silent-orphan count is ZERO.** See the (vp) entry below.
 
 ## WHERE THE PARENT/CHILD MIGRATION STANDS
 **It is now a DATA-ONLY change.** Everything mechanical is done and every step is a *proven* no-op today:
