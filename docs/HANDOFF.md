@@ -2705,6 +2705,54 @@ runner** and the `seed_*` files have drifted, which is its own (smaller) version
 
 ---
 
+## 2026-07-14 (yt) — A DETERMINISTIC fixture replaces the live clone. It caught 3 tests that were faking it.
+
+The test DB was cloned from live at run time (xr). That isolated the tests but left them asserting against
+whatever happened to be in production that morning — **no file to review, no diff when config moved, and hidden
+dependencies on ambient live state.** The fixture is now a **generated, version-controlled file**.
+
+| file | role |
+|---|---|
+| **`src/db/seed_fixture.sql`** | the config layer as data — generated, checked in |
+| **`src/db/gen_fixture_seed.js`** | regenerates it (`npm run db:fixture`) |
+| **`src/db/SEEDS.md`** | what is authoritative, and why the old seeds are not |
+
+**`schema.postgres.sql` + `seed_fixture.sql` = a working system from an EMPTY database.** That is also **the
+install path a new city needs, which never existed**: there was no seed runner, and the **30 `seed_*` files had
+been applied by hand in an order nobody wrote down, then drifted from live.** They are now marked **LEGACY**,
+not deleted (they hold authoring provenance). `record_types_seed.tsv` remains the authoring source for the
+taxonomy.
+
+**Regeneration is deterministic** — same config in, **byte-identical file out** — so a diff in
+`seed_fixture.sql` always means the config *really changed*. Review it like code.
+
+### 🔍 BUILDING FROM EMPTY EXPOSED 3 TESTS THAT WERE BORROWING LIVE STATE
+
+Each had been **passing for the wrong reason**, and would have gone on doing so forever against a live clone:
+
+1. **`verify_request_create` read the highest EXISTING request number** to demonstrate the numbering-collision
+   bug. On an empty DB it crashed on null. It now **creates its own baseline through the real path**.
+2. **...and its "ALGORITHM B IS BROKEN" demonstration silently depended on live containing `DEMO-`/`SYS-`/
+   `LIBRARY-` rows.** On clean data **the bug could not be demonstrated at all** — the test proved nothing. It
+   now **CONSTRUCTS the pathological row** instead of hoping production still has one. *This is the one worth
+   remembering: a test that borrows the bug's precondition from production stops being a test the moment
+   production is tidied.*
+3. **`verify_survey_seed`** asserted `config_history` proved the 18 clarification policies arrived through the
+   real config path. That **provenance now travels WITH the config** in the fixture, so the anti-cheat check
+   still means something.
+
+**Verified:** **310/310** (309 + the new baseline assertion) against a fixture built **from EMPTY** · suite
+**repeatable** across consecutive runs · fixture **byte-stable** across regenerations · **live census clean**
+(not one row moved) · live config integrity **CLEAN** · live API healthy.
+
+**No secrets in the fixture.** Password hashes, MFA secrets, and credential-shaped `system_config` values are
+redacted (the key survives, the value is blanked, so an installer knows the slot exists). **Verified by scan** —
+the only `sk-` hit was `rd-insurance-ri**sk-**…`, a record-type id.
+
+**State:** `main` @ `0daa355`, tree clean.
+
+---
+
 # SESSION CLOSE — 2026-07-14. START HERE NEXT TIME.
 
 ## ⚠️ DO THIS FIRST, BEFORE ANY WORK
