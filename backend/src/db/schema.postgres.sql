@@ -478,6 +478,32 @@ CREATE INDEX IF NOT EXISTS idx_tasks_pool ON tasks(team_id, role_required, statu
 CREATE INDEX IF NOT EXISTS idx_tasks_assignee ON tasks(assigned_to, status);
 CREATE INDEX IF NOT EXISTS idx_tasks_request ON tasks(request_id);
 
+-- tasks.request_id was an UNENFORCED reference: no FK, so deleting a request left its tasks behind as
+-- OPEN rows in a real worklist, pointing at nothing. 15 such orphans were found live on 2026-07-14.
+-- Two things produced them, and the second is the nasty one:
+--   1. Nothing deleted a request's tasks when the request went away.
+--   2. workflowEngine.bg() is fire-and-forget. A caller could DELETE a request while onIntake was still
+--      in flight, and the in-flight insert would then create a task for a request that no longer existed.
+--      The verify suite hit this on EVERY run, leaking one open routing_review task into the live DB.
+-- The FK closes both: CASCADE takes the tasks with the request, and the racing insert now fails loudly
+-- (caught by bg's handler) instead of silently manufacturing an orphan. A task for a deleted request is
+-- not work anyone can do.
+-- NOTE: this is deliberately scoped to `tasks`. Fifteen OTHER tables reference requests(id) with no FK,
+-- including money/audit tables (request_payment_events, request_clocks, workflow_decisions). Whether a
+-- request deletion should CASCADE away its payment trail is a POLICY question, not a mechanical one --
+-- see the (wq) handoff entry. Do not blanket-apply this without deciding that.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'tasks'::regclass AND conname = 'fk_tasks_request_id'
+  ) THEN
+    ALTER TABLE tasks
+      ADD CONSTRAINT fk_tasks_request_id
+      FOREIGN KEY (request_id) REFERENCES requests(id) ON DELETE CASCADE;
+  END IF;
+END $$;
+
 ALTER TABLE departments ADD COLUMN IF NOT EXISTS auto_load_balancing INTEGER DEFAULT 0;
 
 ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS accepted_at TEXT;
