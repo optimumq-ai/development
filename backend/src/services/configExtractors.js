@@ -13,6 +13,7 @@ var clarificationPolicy = require('./clarificationPolicy');
 var clarificationPolicyExtract = require('./clarificationPolicyExtract');
 var jurisdictionRules = require('./jurisdictionRules');
 var paymentClockPolicy = require('./paymentClockPolicy');
+var feeWaiverPolicy = require('./feeWaiverPolicy');
 var { v4: uuidv4 } = require('uuid');
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 var REDACTION_CATS = ['privacy', 'law_enforcement', 'health', 'legal', 'personnel', 'commercial', 'security', 'administrative'];
@@ -146,6 +147,12 @@ var ADAPTERS = {
     current: async function (jid) { return await paymentClockPolicy.read(jid); },
     extract: async function (jid, text) { return await genericExtract("deposit/prepayment effect on the statutory response clock — deposit_clock_effect (runs_no_stop | toll_pause_resume | toll_and_restart | operational_hold), deposit_grace_days, deposit_lapse_action (flag_only | withdraw)", await jurName(jid), await paymentClockPolicy.read(jid), text); },
     apply: async function (jid, cfg, actor) { var r = await paymentClockPolicy.write(jid, cfg, actor); return { target: r.target }; }
+  },
+  fee_waiver: {
+    label: 'Fee-waiver policy', applyTarget: "jurisdiction_rules 'fee_waiver'", applyMode: 'live',
+    current: async function (jid) { return await feeWaiverPolicy.read(jid); },
+    extract: async function (jid, text) { return await genericExtract("fee-waiver policy — grounds (public_interest | indigency | news_media | exempt_records | elected_official | public_defender | cost_exceeds_collection | agency_discretion), whether the waiver is mandatory or discretionary, the pay-or-abandon window and WHAT EVENT STARTS IT (waiver_denial | cost_estimate_sent | deposit_demanded), the appeal forum and whether that forum can actually ORDER a waiver, and whether a late response FORFEITS the fee", await jurName(jid), await feeWaiverPolicy.read(jid), text); },
+    apply: async function (jid, cfg, actor) { var r = await feeWaiverPolicy.write(jid, cfg, actor); return { target: r.target }; }
   },
   exemption: {
     label: 'Exemption model & appeals', applyTarget: 'jurisdiction_profiles.exemption_model', applyMode: 'live',

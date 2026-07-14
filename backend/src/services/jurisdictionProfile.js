@@ -26,6 +26,7 @@ var SECTIONS = [
   { key: 'deadlines', label: 'Response deadlines & tolling',     editor: '/tickler' },
   { key: 'clarification', label: 'Clarification / vague-request policy', editor: '/clarification-policy' },
   { key: 'payment',   label: 'Deposit & payment clock',            editor: '/fee-config' },
+  { key: 'fee_waiver', label: 'Fee-waiver policy',                 editor: '/fee-config' },
   { key: 'exemption', label: 'Exemption model & appeals',        editor: '/config' },
   { key: 'redaction', label: 'Redaction / exemption rules',      editor: '/redaction-rules' },
   { key: 'taxonomy',  label: 'Record types & taxonomy',          editor: '/taxonomy' }
@@ -38,6 +39,7 @@ async function signature(jid, section) {
   if (section === 'deadlines') { try { return await CE.adapter('deadline').current(jid); } catch (e) { return {}; } }
   if (section === 'clarification') { try { return await CE.adapter('clarification').current(jid); } catch (e) { return {}; } }
   if (section === 'payment') { try { return await CE.adapter('payment').current(jid); } catch (e) { return {}; } }
+  if (section === 'fee_waiver') { try { return await CE.adapter('fee_waiver').current(jid); } catch (e) { return {}; } }
   if (section === 'exemption') { try { return await CE.adapter('exemption').current(jid); } catch (e) { return {}; } }
   if (section === 'redaction') {
     var rows = await all("SELECT id, approval_status, is_active, COALESCE(updated_at, created_at) AS u FROM redaction_rules WHERE jurisdiction_id = ? ORDER BY id", [jid]);
@@ -57,6 +59,7 @@ function isConfigured(section, sig) {
   if (section === 'deadlines') return !!(sig.clocks && Object.keys(sig.clocks).length);
   if (section === 'clarification') return sig && sig.enabled === true;
   if (section === 'payment') return sig && sig.enabled === true;
+  if (section === 'fee_waiver') return sig && sig.enabled === true;
   if (section === 'exemption') return !!sig.exemption_model;
   if (section === 'redaction') return (sig.count || 0) > 0;
   if (section === 'taxonomy') return (sig.count || 0) > 0;

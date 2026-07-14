@@ -2285,3 +2285,60 @@ exist. Remaining before the migration can run: **Kevin's spec §9 answers**, the
 (a PARENT metric grouped by a CHILD field needs a join; the tickler estimate joins; `clarificationTimeout`'s
 auto-close), and the **UI design direction** for the parent/child queue treatment (UI rule: agree before
 building).
+
+## 2026-07-14 (qh) — Fee-waiver substrate + THE ILLINOIS FEE-FORFEITURE GUARDRAIL — 37/37
+
+**Kevin: "build the fee-waiver substrate with the Illinois guardrail."** Built, seeded for 7 states, verified.
+
+**THE GUARDRAIL IS THE POINT.** 5 ILCS 140/3(d): a public body that answers late "**may not impose a fee for
+such copies**." A request parked in "awaiting fee-waiver decision" — a hold state any system would model —
+keeps aging against IL's 5-business-day clock, and **deciding a waiver is NOT one of the seven § 3(e)
+extension grounds**. On day 6 the city has constructively denied the request AND **permanently lost its right
+to charge**. The deliberation destroys the fee.
+
+`services/feeForfeiture.js` therefore **REFUSES** — it does not warn. Both doors to charging
+(`POST /fee-estimates/request/:id` and `POST /notice/send`) return **409 `FEE_FORFEITED`** with the § 3(d)
+citation, and **no estimate row is written**. A warning would let a clerk click past it and bill unlawfully.
+There is also a **risk()** warning that fires *before* the block, and names the trap by name.
+
+**⚠️ A DELIBERATE FAIL-SAFE INVERSION — read before "fixing" it.** Every other policy is gated on
+`enabled === true AND attested` (AUTO_CONFIG safe-manual default). **This guardrail is armed by the FLAG
+ALONE**, without `enabled` or attestation, because the failure directions are asymmetric: blocking an invoice
+the city was never entitled to send costs it **nothing** (the law already says it may not charge), while
+*failing* to block means it bills unlawfully and loses the fee anyway. **The safe failure is to block.** The
+flag is false everywhere except IL, so **nothing changed for TX** (the active jurisdiction) — asserted.
+
+**THE TEXAS TRIGGER — the field that stops us auto-closing live requests.** The obvious design (start the
+pay-or-abandon clock on the waiver denial) is **wrong for Texas**. A TX waiver denial does *nothing*
+procedurally; the 10-business-day deemed-withdrawal hangs off the **money documents** — the itemized estimate
+(§ 552.2615(b)) and the deposit demand (§ 552.263(f)). `response_window_trigger` is an explicit enum and TX is
+seeded `cost_estimate_sent`, **not** `waiver_denial`.
+
+**Two invariants a city CANNOT configure around** (`validate()` throws): `deemed_granted_on_silence` (no state
+has one — silence is a deemed DENIAL everywhere), and a waiver-pending **toll** in a jurisdiction whose
+extension grounds are a closed list (that IS the IL trap).
+
+**Seeded 7 states, all DRAFTS (`enabled: false`):** TX · IL · CT · WA · NY · CA · FL. CT and NY got new
+jurisdiction profiles (the 17-state clarification survey never covered them). **The pay-or-abandon clock is
+STATUTORY IN ONLY ONE OF SEVEN STATES.** WA's 30 days is a **model rule**; FL's is **pure agency policy**; CA,
+IL, NY and CT have none. `provenance.source` is therefore **load-bearing, not cosmetic** — only TX may tell a
+requestor "the law gives you 10 business days." A UI that renders every timer as "the legal deadline"
+**misleads requestors in four of seven states**.
+
+**The sleeper field — `appeal_can_order_waiver`.** IL's PAC will open a fee-waiver file and then tell the
+requestor it was **never empowered to grant one** (2017 PAC 47258). TX's AG reviews the **amount**, not the
+§ 552.267 call. **CT's FOIC is the only forum in the set that can actually order a waiver.** Never route a
+requestor to a forum that cannot grant what they came for.
+
+**Verified 37/37** (`verify_fee_waiver.js`) — incl. the guardrail firing on a blown IL clock, both doors
+refusing with the citation, zero estimate rows written, the at-risk warning naming the trap, and **a TOLLED
+clock correctly NOT counting as blown**.
+
+**Two harness bugs fixed (not product bugs):** `verify_survey_seed` hardcoded "18 jurisdiction profiles" and
+iterated *every* profile — both broke when CT/NY arrived. It now asserts the invariant (every clarification
+policy has a profile) instead of a frozen count.
+
+**FULL SUITE GREEN — 266 assertions, 0 failures** across 10 harnesses.
+
+**State:** `main`, tree clean, app healthy, active jurisdiction still `jur-tx`. 20 jurisdiction profiles ·
+18 clarification · 3 deadline · 1 payment · 7 fee-waiver policies — **all drafts, 0 attested**.

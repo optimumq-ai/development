@@ -16,6 +16,7 @@ const pt = require('../services/paymentTiming');
 const emailTemplate = require('../services/emailTemplate');
 const enforcement = require('../services/enforcement');
 const depositAction = require('../services/depositAction');
+const feeForfeiture = require('../services/feeForfeiture');
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 var taskRouting = require('../services/taskRouting');
@@ -136,6 +137,11 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
   try {
     var loaded = await loadComponents(req.params.requestId);
     if (!loaded) return res.status(404).json({ error: 'Request not found.' });
+    // THE ILLINOIS FEE-FORFEITURE GUARDRAIL (5 ILCS 140/3(d)). If the statutory response clock is blown in a
+    // forfeiture jurisdiction, the city MAY NOT charge for these copies — so we refuse to build an estimate.
+    // This is a refusal, not a warning: a warning would let a clerk click past it and bill unlawfully.
+    var ff = await feeForfeiture.check(req.params.requestId);
+    if (ff.blocked) return res.status(409).json({ error: ff.reason, code: 'FEE_FORFEITED', citation: ff.citation, clock: ff.clock });
     var jid = await activeJurisdiction();
     var cfg = await pickConfig(jid);
     var latest = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [req.params.requestId]);
@@ -169,6 +175,11 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
   try {
     var loaded = await loadComponents(req.params.requestId);
     if (!loaded) return res.status(404).json({ error: 'Request not found.' });
+    // THE ILLINOIS FEE-FORFEITURE GUARDRAIL (5 ILCS 140/3(d)). If the statutory response clock is blown in a
+    // forfeiture jurisdiction, the city MAY NOT charge for these copies — so we refuse to build an estimate.
+    // This is a refusal, not a warning: a warning would let a clerk click past it and bill unlawfully.
+    var ff = await feeForfeiture.check(req.params.requestId);
+    if (ff.blocked) return res.status(409).json({ error: ff.reason, code: 'FEE_FORFEITED', citation: ff.citation, clock: ff.clock });
     var jid = await activeJurisdiction();
     var cfgRow = await pickConfig(jid);
     if (!cfgRow) return res.status(400).json({ error: 'No fee configuration exists for the active jurisdiction. Set one up under Fee Configuration first.' });
@@ -224,6 +235,10 @@ router.post('/request/:requestId/notice/send', requireAuth, async function (req,
   try {
     var reqRow = await get('SELECT id, requestor_email FROM requests WHERE id = ?', [req.params.requestId]);
     if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
+    // The forfeiture guardrail runs FIRST in the charging path — before the estimate lookup, before the
+    // attestation gate. If the city may not lawfully charge, nothing else about this request matters.
+    var ffSend = await feeForfeiture.check(req.params.requestId);
+    if (ffSend.blocked) return res.status(409).json({ error: ffSend.reason, code: 'FEE_FORFEITED', citation: ffSend.citation, clock: ffSend.clock });
     var to = (req.body && req.body.to) || reqRow.requestor_email;
     if (!to) return res.status(400).json({ error: 'No requestor email address on this request.' });
     var snap = await latestEstimate(req.params.requestId);
