@@ -58,10 +58,26 @@ var LABOR_ORDER = ['search', 'review', 'programming']; // order free hours are c
 // Per-driver labor billability: a hard non-billable flag (CA/NY/OH forbid labor charges) OR an all-or-nothing
 // trigger (TX: no labor until total pages exceed 50; FL/NY: no labor until total labor time exceeds a threshold).
 // Purely additive: a driver with no billable/billableWhen config charges normally (unchanged behavior).
-function laborGate(lcfg, totalPages, totalLaborHours) {
+// `deliveryMethod` is the request's chosen delivery. Some statutes scope the labor bar to PAPER copies:
+// Tex. Gov't Code § 552.261(a) bars materials/labor/overhead on "50 or fewer pages of PAPER records" and
+// limits the charge to "each page of the paper record that is photocopied". So a config may declare
+// `paperOnly: true` + the delivery methods that COUNT as paper (`paperMethods`). An electronic delivery
+// then falls outside the bar and labor is chargeable.
+//
+// ⚠ THE paperOnly READING IS UNVERIFIED (Kevin's call, 2026-07-14) and it is LOAD-BEARING: the demo's
+// default delivery is `email`, so paperOnly:true means the 50-page bar does NOT fire on most requests.
+// It is a ONE-VALUE flip if counsel reads § 552.261(a) as reaching electronic delivery. Do not bury it.
+function laborGate(lcfg, totalPages, totalLaborHours, deliveryMethod) {
   if (lcfg && lcfg.billable === false) return { charge: false, reason: 'Not chargeable in this jurisdiction.' };
   var bw = lcfg && lcfg.billableWhen;
   if (bw && bw.mode === 'all_or_nothing' && bw.trigger && bw.trigger !== 'none') {
+    // Scope check first: if the bar is paper-only and this is not a paper delivery, the bar does not apply.
+    if (bw.paperOnly) {
+      var paperMethods = bw.paperMethods || ['mail', 'pickup', 'paper'];
+      if (deliveryMethod && paperMethods.indexOf(deliveryMethod) < 0) {
+        return { charge: true, reason: null };
+      }
+    }
     var q = bw.trigger === 'pages' ? totalPages : (bw.trigger === 'hours' ? totalLaborHours : 0);
     var thr = num(bw.threshold);
     if (q <= thr) return { charge: false, reason: 'Not chargeable until ' + bw.trigger + ' exceed ' + thr + ' (currently ' + q + ').' };
@@ -154,12 +170,15 @@ function compute(profile, request) {
   }
   var totalPages = num(agg.bw) + num(agg.color) + num(agg.oversized);
   var totalLaborHours = num(agg.search) + num(agg.review) + num(agg.programming);
+  // Delivery drives the labor gate's paper-only scope (§ 552.261(a)), so it must be known BEFORE labor is
+  // priced -- not just at the delivery line below.
+  var deliveryMethod = (request && request.delivery && request.delivery.method) || null;
   var laborItems = [], laborSubtotal = 0;
   for (i = 0; i < LABOR_ORDER.length; i++) {
     k = LABOR_ORDER[i]; var lcfg = labor[k];
     if (!lcfg || agg[k] <= 0) continue;
     var bh = roundHours(billable[k], lcfg.increment, lcfg.rounding);
-    var gate = laborGate(lcfg, totalPages, totalLaborHours);
+    var gate = laborGate(lcfg, totalPages, totalLaborHours, deliveryMethod);
     var lrate = laborRate(k);
     var amt = gate.charge ? r2(bh * lrate) : 0;
     laborItems.push({ kind: k + '_labor', aggregateHours: r4(agg[k]), billableHours: bh, rate: lrate, amount: amt, nonBillable: !gate.charge, billabilityNote: gate.reason });
@@ -200,7 +219,7 @@ function compute(profile, request) {
 
   // ---- delivery (once per request) ----
   var deliveryItem = null, deliverySubtotal = 0;
-  var dmethod = (request && request.delivery && request.delivery.method) || null;
+  var dmethod = deliveryMethod;
   if (dmethod && delivery[dmethod] != null) {
     var dr = delivery[dmethod];
     if (dr === 'actual') deliveryItem = { kind: 'delivery', method: dmethod, rate: 'actual', amount: 0, needsActual: true };

@@ -27,8 +27,39 @@ Requestor objection to fees: filed per request with **source** (letter/email/pho
 ## 8. Fee sandbox `[BUILT]`
 Onboarding Fees phase: preset scenarios + custom inputs; Issues/Confirmed paths; **hard gate** — phase approval requires a confirmed test on record.
 
+## 8b. THE 50-PAGE LABOR BAR — § 552.261(a) `[FIXED 2026-07-14]`
+
+**The engine always had the gate. The config never set it.** `feeEngine.laborGate` has carried an
+all-or-nothing labor trigger since it was written — its own comment names Texas — and **`billableWhen`
+appeared in ZERO seeded fee profiles.** So the mechanism sat there, correct and unreachable, while **every
+Texas estimate charged labor**:
+
+> **Tex. Gov't Code § 552.261(a):** *"If a request is for 50 or fewer pages of paper records, the charge …
+> **may not include costs of materials, labor, or overhead**, but shall be limited to the charge for each page
+> of the paper record that is photocopied."* (The per-page rate is 1 TAC § 70.3 = `duplication.bw.rate`, $0.10.)
+
+A typical **8-page incident report priced at $12.05 where the statute allows $0.80** — ~15× over, on the most
+common request a city receives. **A reader with no config: the mirror of the "seeded but never read" class,
+and just as silent.** Found only because **populating the estimate profiles (§2) would have AUTOMATED the
+overcharge** across the ten most common record types, emitting it under a *"Review auto-generated estimate"*
+label that implies a human validated it. Locked by **`verify_fee_labor_gate` (20)** — the **config** is now
+the thing under test, so a reseed from an old script or a copied config for a new city goes RED, not live.
+
+**⚠ `paperOnly` — UNVERIFIED, and LOAD-BEARING (Kevin's call, 2026-07-14).** § 552.261(a) says *"pages of
+**paper** records"* and *"photocopied"*, so the bar is scoped to paper deliveries (`mail`/`pickup`/`paper`).
+**The demo's default delivery is `email`, so the bar does NOT fire on most requests** — that same 8-page report
+still prices at $12.05 by email. Test **D** pins this exactly so it stays visible. **Needs counsel.** If
+§ 552.261(a) is read to reach electronic copies, it is a **one-value flip** (`paperOnly: false`).
+
+**⚠ Two things deliberately NOT encoded** (flagged, not guessed): the statute's **two exceptions** (records in
+2+ unconnected buildings, or a remote storage facility, restore the labor charge) — asserting the condition
+per request is a design question, and **under-charging is recoverable while unlawful over-charging is not**;
+and **`labor.overheadPct`**, which this spec's §1 mentions as a TX +20% surcharge but which is **NOT in the
+verified-TX section** of `FEE_ESTIMATE_KNOWLEDGE.md`. **An unresearched charge is the same exposure as an
+unresearched clock rule.** Both remain unseeded.
+
 ## 9. Known gaps
-- Estimate profiles unpopulated (see §2) — automation path exists but never fires.
+- **The `paperOnly` scope + the two § 552.261(a) exceptions + `labor.overheadPct`** — see §8b. Counsel.
 - Commercial intake capture `[NOT BUILT]` + approval `[DEFERRED]` — Domain 1 spec §5.
 - Fee-waiver approval task routing `[NOT BUILT]` — Tasks spec §11.1.
 - Variant-level profiles blocked on taxonomy decision (Domain 3 §5).

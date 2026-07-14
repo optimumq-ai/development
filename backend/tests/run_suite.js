@@ -25,7 +25,7 @@ const ALL = [
   'verify_deposit_clock', 'verify_scope', 'verify_extend', 'verify_reissue',
   'verify_survey_seed', 'verify_fee_waiver', 'verify_jurrules', 'verify_deadline_rules',
   'verify_search_intents', 'verify_request_defect', 'verify_search_resolve',
-  'verify_search_intent_gate',
+  'verify_search_intent_gate', 'verify_fee_labor_gate',
 ];
 
 const args = process.argv.slice(2);
