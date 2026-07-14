@@ -2601,24 +2601,57 @@ by `bg`'s handler) instead of silently minting an orphan. **A task for a deleted
 do.** Proven: the bogus insert is rejected · delete cascades · **suite run TWICE → 0 orphans leaked** (was 1 per
 run) · 309/309 still green · integrity CLEAN. The 15 orphans purged (backed up to the job scratchpad first).
 
-### ❗ DECISION FOR KEVIN — the same hole is in 15 OTHER tables, and some of them hold MONEY
+### ✅ DECIDED + SHIPPED (ad0e97f) — "If there is a payment history, we should not allow a request to be deleted"
 
-**Sixteen tables reference `requests(id)`. NOT ONE had a foreign key.** I fixed `tasks` only. Four are
-**already dangling right now**:
+**Kevin's call, made and enforced the same session.** CASCADE is exactly WRONG on the money tables: it would
+silently erase the record that money changed hands. Two rules now, deliberately different:
 
-| table | dangling rows |
-|---|---|
-| `workflow_decisions` | 22 |
-| `request_payment_events` | 7 |
-| `request_clocks` | 5 |
-| ~~`tasks`~~ | ~~15~~ → **fixed** |
+1. **Ordinary children CASCADE.** A clock, task, history row, or file belonging to a request that no longer
+   exists is not data — it is litter. It goes when the request goes. **All 16 tables now have an FK.**
+2. **A request that TOOK MONEY cannot be deleted at all.** A `BEFORE DELETE` trigger on `requests`
+   (`trg_block_delete_of_paid_request`) raises `restrict_violation` and **names the record that blocks it**.
+   *If a citizen paid us, that fact outlives the convenience of deleting the row — and the DATABASE, not the
+   application, is where that guarantee belongs.*
 
-I **deliberately did not blanket-apply CASCADE**, because on the money and audit tables it is *not* a mechanical
-choice: **should deleting a request destroy its payment trail?** Those dangling `request_payment_events` rows
-may be the only surviving record that money changed hands. CASCADE would erase that class of evidence
-permanently, and `request_history` is the audit log. **This needs a policy call, not a migration.** Note also
-that the parent/child migration repoints 7 money/clock tables to the parent — so decide this *with* that in
-mind, not before it.
+**Why a trigger and not `ON DELETE RESTRICT`:** `request_payment_events` is a **mixed ledger with a free-text
+`type`** (`recordEvent` writes `evt.type || 'event'`), and **nearly every row in it is `estimate_issued`** — an
+estimate being *calculated*, which is **not a payment**. RESTRICT there would block deleting any request that
+ever got an estimate — broader than the rule. The trigger asks the precise question: **did money actually
+MOVE?** It checks `fee_payments`, `fee_adjustments`, **paid** `erp_charges`, and estimates with
+`deposit_paid_at` / `final_paid_at`.
+
+**Verified:**
+- **Unpaid request** (estimate issued, deposit **due but unpaid**) → **still deletes**, children cascade away.
+  **Owing money is not payment history** — this is the over-blocking case, and it is explicitly constructed.
+- **Paid deposit** → **REFUSED**, request still present.
+- **Counter payment** (`fee_payments`) → **REFUSED**.
+- **Suite 309/309, counts before == after** → no residue, no harness trips the guard.
+- All 16 tables: **0 dangling, 0 without an FK.** Config integrity CLEAN.
+
+**It was safe to land now precisely because there is ZERO money in the DB today** (`fee_payments`,
+`erp_charges`, `fee_adjustments` all empty; no estimate paid) — the rule cannot strand existing data. **This
+window closes the moment a real payment lands.** Purged 36 orphaned rows first (clocks 5, payment events 7,
+workflow_decisions 24 — all test residue, all `estimate_issued`, no money); backed up to the job scratchpad.
+
+### ⚠️ THE ROOT DISEASE, STILL UNADDRESSED: THE TEST SUITE RUNS AGAINST THE LIVE DATABASE
+
+Everything above is a *symptom*. The 15 orphan tasks, the 36 dangling rows, the config residue that
+`check_config_integrity` was built to catch, the 77-day clock a test left in production config — **all of it
+comes from one fact: the `verify_*` harnesses create, mutate, and delete real rows in the LIVE database.** The
+FKs and the guard now make that *safe*, and the harnesses clean up fully today. But they are one swallowed
+`catch` away from doing it again, **and they are not even in the repo** (they live in
+`~/.claude/jobs/605a0134/tmp/`, untracked, unreviewed, unversioned).
+
+**The real fix is a test database.** Until then, every hardening is a fence around a problem that should not
+exist. Recommend this as a near-term slice.
+
+### 📋 Also noted, not fixed
+
+**The parent/child migration repoints 7 money/clock tables to the parent.** The new FKs point at
+`requests(id)`, and the migration keeps the existing row's id (it becomes the child), so the constraints
+survive — **but the delete guard will then be asking about the CHILD's payments while the estimate hangs off
+the PARENT.** Re-check the guard's four EXISTS clauses against the post-migration shape before running it;
+that is the one place this work and the migration can collide.
 
 **Also noticed (not fixed, not my slice):** live `tasks.request_id` is **`NOT NULL`**, but the ARCHITECTURE
 invariant says *"Tasks have a NULLABLE request link."* The schema and the invariant disagree. Worth
