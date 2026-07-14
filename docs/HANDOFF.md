@@ -3109,3 +3109,77 @@ toggle is unbuilt and the screen is **digital-only** today.
   through this build enough to see requests process correctly."*
 - **`BRIEF_av_detection_sidecar.md`** — the GPU project, for Kevin's home box. Deliberately scoped as the
   **commodity** half; the Vaughn layer is the moat and needs no GPU.
+
+---
+
+## 2026-07-14 (ad) — THE R9 GATE. Attaching is not searching. Tier 1 #5 closes. 440/440.
+
+**One commit,** `ef69f53`. Suite **440/440** (new harness `verify_search_intent_gate`, 37), live census clean,
+verified end-to-end in the running app against a real live request.
+
+### THE HOLE — and it was open in production this morning
+
+R9 recorded what the requestor MEANT per description; the screen showed it in amber. **Nothing enforced it.**
+And the only gate `found` had — *"at least one record marked Include in Response"* — **was already satisfied by
+the requestor's OWN PORTAL PICKS**, which sit on the request before the searcher does anything at all.
+
+So a request whose requestor explicitly said *"these match, but ALSO search for more"* could be advanced to
+redaction, fulfilled, and **closed as COMPLETE — while the requestor still considered it OPEN.** The intent
+column said so the whole time. Nothing read it. **Attaching is not searching.**
+
+**Proven on live `2026-000046`** (not asserted): 1 record already Included — the requestor's own pick — so the
+OLD gate was *already green*. `POST /tasks/:id/resolve {found}` → **422 `UNRESOLVED_SEARCH_INTENT`**, naming the
+description; **stage unchanged.** Before today that call would have advanced it.
+
+### THE UN-GATE IS A SENTENCE: "I searched; there is nothing more."
+
+- **The duty is intent-derived.** `search_more` · `no_match_search` (an instruction to search, NOT abandonment) ·
+  `not_searchable` (the portal never searched it) **carry a duty**. **`complete` does not** — the requestor
+  already said the selection is everything.
+- Per open description the searcher records **`records_added`** (the attached records answer this) or
+  **`nothing_further`** — which **REQUIRES A NOTE**, because that is the assertion that closes a description the
+  requestor considers open, and unevidenced it is indistinguishable from never having looked.
+- 4 additive columns on `request_search_intents` (`searcher_outcome` / `resolution_note` / `resolved_by` /
+  `resolved_at`). NULL = unresolved. Live DB migrated.
+
+### ⚠️ THE TWO GATES MUST NOT FEED EACH OTHER
+
+`SEARCH_INTENT_RESOLVED` is **deliberately NOT** in the no-records effort-trail action list. A claim that nothing
+exists is **not evidence of a search** — if it counted as effort it would **evidence ITSELF**, and a searcher
+could answer *"nothing more"* and use that very answer to clear the **no-records** gate too, **closing a request
+having run no search at all.** Test **E** exists solely to hold this line. (Breaking it → 3 red.)
+
+A **no-records closure ANSWERS every open description** (the blanket form of the same sentence), so the ledger is
+never left half-written. A request with **no intake provenance is unaffected** — a gate that blocks work it has
+nothing to say about is just an outage (test G).
+
+### THE TESTS BITE — five deliberate breaks, each went red on exactly its guard
+
+gate removed → **6 fail** · note not required → **3** · **the claim evidences itself → 3** · no-records leaves the
+ledger half-written → **2** · `complete` treated as a duty → **5**. All restored; 440/440.
+
+### VERIFIED IN THE RUNNING APP (screenshots + DOM, not a chat assertion)
+
+The screen renders **"Found — 1 to include →" GREYED OUT** — *with a record to include* — above an amber block:
+*"One description is still open… fulfilling from their own selection alone would close a request they consider
+OPEN."* Clicking **"I searched — nothing more"** with an empty note is refused **in the UI** with the evidence
+sentence; with the note it lands, the amber clears, and **Found goes live**. Ledger row + `SEARCH_INTENT_RESOLVED`
+history row both written. `2026-000046` **left in `record_search` deliberately** — the gate was the point.
+
+### ⚠️ GOTCHA THAT COST ME THE WORK ONCE
+
+**`git checkout -- src/` to undo a break-test wipes every UNCOMMITTED source change with it.** I lost the whole
+feature mid-session and rewrote it. **Commit the green state BEFORE break-testing**, then restore per-file.
+(Also: `run_suite` parses `N/N pass, N fail` — any other summary format reads as "harness did not complete".)
+
+### STATE
+`main` @ **`ef69f53`** + this note. Suite **440/440**. API restarted, healthy. Frontend rebuilt and serving.
+**Still open on the screen:** §4b audio/video (needs `ExternalEvidenceReference`), §4c paper/scanner, §4d other —
+the format toggle is unbuilt and the screen is **digital-only**.
+
+### NEXT
+1. **Kevin's open calls are unchanged** (closure-notice wording · button color · exemption log in Axon · the
+   unsurveyed **overly-burdensome** topic).
+2. The natural next slice is the **format toggle / §4b AV path** — but Kevin **parked** it deliberately *"until I
+   work through this build enough to see requests process correctly."* **It needs un-parking explicitly.**
+3. Tier 1 item 3 — **populate estimate profiles** for the top ~10 record types. Data task, no code, high leverage.
