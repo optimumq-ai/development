@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Record Search Task Screen — mockup</title>
+</head>
+<body>
+<style>
+  /* Tokens inherited verbatim from mockups/redaction_screen.html so the two task
+     screens read as one system. Do not fork the palette here. */
+  :root{
+    --ui: ui-sans-serif,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --mono: ui-monospace,"SF Mono","Cascadia Code",Menlo,Consolas,monospace;
+    --ground:#E7ECF2; --panel:#fff; --panel-2:#F3F6F9; --panel-3:#EAEFF4;
+    --ink:#14181D; --ink-2:#48535F; --ink-3:#8792A0; --line:#D9E0E8;
+    --primary:#1F4E79; --primary-ink:#fff; --primary-soft:#EAF1F8;
+    --chrome:#141D28; --chrome-2:#1D2A38; --chrome-ink:#E9EEF4; --chrome-ink-2:#93A2B4; --chrome-line:#2A3A4C;
+    --ai:#D9821A; --ai-soft:#FBF0E1;
+    --ok:#177A54; --ok-bg:#E4F3EC; --info:#1F4E79; --info-bg:#E7EFF7;
+    --warn:#B4690E; --warn-bg:#FBEEDD; --crit:#B02A37; --crit-bg:#F8E7E8;
+    --legal:#6D3BB5; --legal-bg:#EEE7F8;
+    --shadow:0 1px 2px rgba(20,30,45,.08),0 8px 24px rgba(20,30,45,.10);
+    --radius:10px;
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --ground:#0C1219; --panel:#151E28; --panel-2:#1C2733; --panel-3:#22303D;
+      --ink:#E8EDF3; --ink-2:#A6B2BF; --ink-3:#697585; --line:#2A3744;
+      --primary:#5A93CE; --primary-ink:#0C1219; --primary-soft:#17293A;
+      --ai:#E79A3C; --ai-soft:#2A2113;
+      --ok:#3FBB8A; --ok-bg:#12271F; --info:#6AA0D8; --info-bg:#14263A;
+      --warn:#E0A24A; --warn-bg:#2A2012; --crit:#E4808B; --crit-bg:#2C1518;
+      --legal:#B593E6; --legal-bg:#1F1730;
+      --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.45);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0C1219; --panel:#151E28; --panel-2:#1C2733; --panel-3:#22303D;
+    --ink:#E8EDF3; --ink-2:#A6B2BF; --ink-3:#697585; --line:#2A3744;
+    --primary:#5A93CE; --primary-ink:#0C1219; --primary-soft:#17293A;
+    --ai:#E79A3C; --ai-soft:#2A2113;
+    --ok:#3FBB8A; --ok-bg:#12271F; --info:#6AA0D8; --info-bg:#14263A;
+    --warn:#E0A24A; --warn-bg:#2A2012; --crit:#E4808B; --crit-bg:#2C1518;
+    --legal:#B593E6; --legal-bg:#1F1730;
+    --shadow:0 1px 2px rgba(0,0,0,.4),0 8px 24px rgba(0,0,0,.45);
+  }
+  :root[data-theme="light"]{
+    --ground:#E7ECF2; --panel:#fff; --panel-2:#F3F6F9; --panel-3:#EAEFF4;
+    --ink:#14181D; --ink-2:#48535F; --ink-3:#8792A0; --line:#D9E0E8;
+    --primary:#1F4E79; --primary-ink:#fff; --primary-soft:#EAF1F8;
+    --ai:#D9821A; --ai-soft:#FBF0E1;
+    --ok:#177A54; --ok-bg:#E4F3EC; --info:#1F4E79; --info-bg:#E7EFF7;
+    --warn:#B4690E; --warn-bg:#FBEEDD; --crit:#B02A37; --crit-bg:#F8E7E8;
+    --legal:#6D3BB5; --legal-bg:#EEE7F8;
+    --shadow:0 1px 2px rgba(20,30,45,.08),0 8px 24px rgba(20,30,45,.10);
+  }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--ui);
+       font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  button{font:inherit;color:inherit;cursor:pointer}
+  :focus-visible{outline:2px solid var(--primary);outline-offset:2px;border-radius:4px}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+  .mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+
+  /* ---- chrome bar ---------------------------------------------------- */
+  .chrome{background:var(--chrome);color:var(--chrome-ink);display:flex;align-items:center;
+          gap:16px;padding:0 18px;height:52px;border-bottom:1px solid var(--chrome-line)}
+  .chrome a{color:var(--chrome-ink-2);text-decoration:none;font-size:13px}
+  .chrome a:hover{color:var(--chrome-ink)}
+  .chrome .num{font-family:var(--mono);font-weight:700;letter-spacing:.02em}
+  .spacer{flex:1}
+  .theme-btn{background:var(--chrome-2);border:1px solid var(--chrome-line);color:var(--chrome-ink-2);
+             border-radius:8px;padding:6px 12px;font-size:12px}
+
+  /* ---- shell --------------------------------------------------------- */
+  .shell{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;padding:16px;
+         align-items:start;max-width:1560px;margin:0 auto}
+  @media (max-width:1080px){.shell{grid-template-columns:minmax(0,1fr)}}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);
+        box-shadow:var(--shadow)}
+  .card + .card{margin-top:16px}
+  .card-hd{display:flex;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line)}
+  .card-hd h2{margin:0;font-size:13px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;
+              color:var(--ink-2)}
+  .card-bd{padding:16px}
+
+  .pill{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:2px 9px;
+        font-size:11px;font-weight:700;letter-spacing:.02em}
+  .pill.ok{background:var(--ok-bg);color:var(--ok)}
+  .pill.info{background:var(--info-bg);color:var(--info)}
+  .pill.warn{background:var(--warn-bg);color:var(--warn)}
+  .pill.crit{background:var(--crit-bg);color:var(--crit)}
+  .pill.ai{background:var(--ai-soft);color:var(--ai)}
+  .pill.mute{background:var(--panel-3);color:var(--ink-3)}
+
+  /* ---- zone 1: context ------------------------------------------------ */
+  .req-line{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px 14px;margin-bottom:8px}
+  .req-num{font-family:var(--mono);font-size:19px;font-weight:700;color:var(--primary);
+           font-variant-numeric:tabular-nums}
+  .req-desc{color:var(--ink);margin:2px 0 14px;max-width:70ch}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 20px;font-size:12.5px;color:var(--ink-3)}
+  .meta b{color:var(--ink-2);font-weight:600}
+  .meta .due{color:var(--crit);font-weight:700}
+
+  /* carried-forward intake context */
+  .carried{margin-top:16px;border-top:1px dashed var(--line);padding-top:14px}
+  .carried h3{margin:0 0 4px;font-size:12px;font-weight:700;text-transform:uppercase;
+              letter-spacing:.04em;color:var(--ink-2)}
+  .carried p.sub{margin:0 0 10px;font-size:12.5px;color:var(--ink-3);max-width:68ch}
+  .rec{display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);
+       border-radius:8px;background:var(--panel-2);margin-bottom:6px}
+  .rec .t{flex:1;min-width:0}
+  .rec .t .name{font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .rec .t .src{font-size:11.5px;color:var(--ink-3)}
+  .rec.excluded{opacity:.72}
+  .rec.excluded .name{text-decoration:line-through;text-decoration-color:var(--ink-3)}
+
+  /* ---- zone 2: format toggle + views ---------------------------------- */
+  .toggle{display:flex;gap:4px;background:var(--panel-2);border:1px solid var(--line);
+          border-radius:10px;padding:4px}
+  .toggle button{flex:1;border:0;background:transparent;border-radius:7px;padding:9px 10px;
+                 font-size:13px;font-weight:600;color:var(--ink-2);transition:background .12s,color .12s}
+  .toggle button[aria-selected="true"]{background:var(--primary);color:var(--primary-ink)}
+  .toggle button:hover:not([aria-selected="true"]){background:var(--panel-3);color:var(--ink)}
+
+  .view{display:none;padding-top:16px}
+  .view.on{display:block}
+
+  .searchbar{display:flex;gap:8px;margin-bottom:10px}
+  input[type=text],input[type=search],textarea,select{
+    width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    padding:9px 11px;color:var(--ink);font:inherit}
+  textarea{resize:vertical;min-height:74px}
+  .btn{border:1px solid var(--line);background:var(--panel-2);border-radius:8px;padding:9px 14px;
+       font-size:13px;font-weight:600;white-space:nowrap}
+  .btn:hover{background:var(--panel-3)}
+  .btn.primary{background:var(--primary);border-color:var(--primary);color:var(--primary-ink)}
+  .btn.primary:hover{filter:brightness(1.08)}
+  /* NOT display:flex — the count span is inline, and flex would eat the spaces around it
+     ("Found —1responsive"). Block + centred text keeps the sentence intact. */
+  .btn.wide{width:100%;display:block;text-align:center}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+  .chip{border:1px solid var(--line);background:var(--panel-2);border-radius:999px;
+        padding:4px 11px;font-size:12px;color:var(--ink-2)}
+  .chip[aria-pressed="true"]{background:var(--primary-soft);border-color:var(--primary);color:var(--primary);font-weight:600}
+
+  .hit{display:flex;gap:12px;align-items:flex-start;padding:12px;border:1px solid var(--line);
+       border-radius:9px;margin-bottom:8px;background:var(--panel)}
+  .hit:hover{border-color:var(--primary)}
+  .hit .body{flex:1;min-width:0}
+  .hit .name{font-weight:650;font-size:13.5px}
+  .hit .snip{font-size:12.5px;color:var(--ink-3);margin-top:3px;max-width:76ch}
+  .hit .facts{display:flex;flex-wrap:wrap;gap:5px 12px;margin-top:7px;font-size:11.5px;color:var(--ink-3)}
+  .hit.attached{border-color:var(--ok);background:var(--ok-bg)}
+
+  .asset{display:flex;gap:12px;padding:12px;border:1px solid var(--line);border-radius:9px;
+         margin-bottom:8px;background:var(--panel)}
+  .asset .thumb{width:104px;height:66px;border-radius:6px;background:var(--chrome);
+                display:flex;align-items:center;justify-content:center;color:var(--chrome-ink-2);
+                font-family:var(--mono);font-size:11px;flex:none}
+  .asset.attached{border-color:var(--ok);background:var(--ok-bg)}
+  .scope{margin-top:9px;padding:9px;border:1px dashed var(--ai);border-radius:7px;background:var(--ai-soft)}
+  .scope label{display:block;font-size:11.5px;font-weight:700;color:var(--ai);margin-bottom:5px}
+  .scope .hint{font-size:11.5px;color:var(--ink-3);margin-top:5px}
+
+  .loc{display:flex;gap:12px;align-items:center;padding:12px;border:1px solid var(--line);
+       border-radius:9px;margin-bottom:8px;background:var(--panel)}
+  .loc .where{font-family:var(--mono);font-size:12.5px;background:var(--panel-3);
+              border-radius:6px;padding:6px 9px;color:var(--ink-2);flex:none}
+  .scanned{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .pg{width:52px;height:66px;border:1px solid var(--line);border-radius:4px;background:var(--panel-2);
+      display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--ink-3)}
+
+  .drop{border:2px dashed var(--line);border-radius:10px;padding:26px;text-align:center;
+        color:var(--ink-3);background:var(--panel-2);margin-top:10px}
+
+  .empty{padding:30px;text-align:center;color:var(--ink-3);font-size:13px}
+
+  /* ---- zone 3: rail --------------------------------------------------- */
+  .rail{position:sticky;top:16px}
+  .act{display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:1px solid var(--line);
+       background:var(--panel);border-radius:9px;padding:11px 12px;margin-bottom:8px;font-weight:600;font-size:13px}
+  .act:hover{border-color:var(--primary);background:var(--primary-soft)}
+  .act .k{font-size:11.5px;color:var(--ink-3);font-weight:500;display:block;margin-top:1px}
+
+  .trail{list-style:none;margin:0;padding:0}
+  .trail li{display:flex;gap:9px;padding:9px 0;border-bottom:1px solid var(--line);font-size:12.5px}
+  .trail li:last-child{border-bottom:0}
+  .trail .when{font-family:var(--mono);color:var(--ink-3);font-size:11.5px;flex:none;padding-top:1px}
+  .trail .what b{display:block;font-weight:700;font-size:12px;letter-spacing:.02em}
+  .trail .what span{color:var(--ink-3)}
+  .trail-empty{font-size:12.5px;color:var(--ink-3);padding:6px 0}
+
+  .resolve{border-top:1px solid var(--line);padding-top:12px;margin-top:4px}
+  .resolve .why{font-size:11.5px;color:var(--ink-3);margin-top:8px;line-height:1.45}
+  .btn.found{background:var(--ok);border-color:var(--ok);color:#fff}
+  .btn.none{background:var(--panel-2);border-color:var(--line);color:var(--ink-2)}
+  .btn.none:hover:not(:disabled){border-color:var(--crit);color:var(--crit)}
+
+  /* ---- modal ---------------------------------------------------------- */
+  dialog{border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--ink);
+         padding:0;box-shadow:var(--shadow);width:min(560px,calc(100vw - 32px))}
+  dialog::backdrop{background:rgba(10,16,24,.55)}
+  dialog h3{margin:0;font-size:15px}
+  .m-hd{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:10px}
+  .m-bd{padding:16px;display:flex;flex-direction:column;gap:12px}
+  .m-ft{padding:12px 16px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+  .f label{display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:5px}
+  .f + .f{margin-top:2px}
+  .check{display:flex;gap:9px;align-items:flex-start;padding:10px;border:1px solid var(--line);
+         border-radius:8px;background:var(--panel-2)}
+  .check .cap{font-size:12px;color:var(--ink-3);margin-top:3px;line-height:1.45}
+  .note{font-size:12px;color:var(--ink-2);background:var(--info-bg);border-radius:7px;padding:9px 11px}
+
+  /* ---- open-decision markers ------------------------------------------ */
+  .q{display:inline-flex;align-items:center;gap:4px;background:var(--legal-bg);color:var(--legal);
+     border-radius:999px;padding:1px 8px;font-size:11px;font-weight:700;cursor:help;
+     border:1px solid transparent}
+  .q:hover{border-color:var(--legal)}
+  .legend{max-width:1560px;margin:0 auto;padding:0 16px 28px}
+  .legend .card-bd{font-size:12.5px;color:var(--ink-2)}
+  .legend ul{margin:8px 0 0;padding-left:18px}
+  .legend li{margin-bottom:7px}
+  .legend b{color:var(--ink)}
+</style>
+
+<div class="chrome">
+  <a href="#">&lsaquo; My Tasks</a>
+  <span class="num">2026-000042</span>
+  <span class="pill info">Record Search</span>
+  <span class="pill mute" id="taskState">Claimed &middot; you</span>
+  <span class="spacer"></span>
+  <button class="theme-btn" id="themeBtn" type="button">Toggle theme</button>
+</div>
+
+<div class="shell">
+  <!-- ================= main column ================= -->
+  <div>
+    <!-- ZONE 1 — CONTEXT -->
+    <section class="card">
+      <div class="card-hd"><h2>Request</h2></div>
+      <div class="card-bd">
+        <div class="req-line">
+          <span class="req-num">2026-000042</span>
+          <span class="pill ai">AI matched &middot; Police body-worn video</span>
+          <span class="pill warn">Redaction likely</span>
+        </div>
+        <p class="req-desc">Body camera footage for Officer Smith, badge 4471, from the traffic stop on
+          December 3 2025 between 4:00pm and 6:00pm on West Lamar Street.</p>
+        <div class="meta">
+          <span><b>Requestor</b> Elvis Presley &middot; ep@elvis.com</span>
+          <span><b>Delivery</b> Email</span>
+          <span><b>Team</b> Police Records</span>
+          <span class="due"><b>Statutory due</b> 2026-07-19 &middot; 5 days</span>
+        </div>
+
+        <!-- carried-forward intake context -->
+        <div class="carried">
+          <h3>What the requestor already saw at intake
+            <span class="q" title="Open decision #2 — shown-but-unselected candidates are NOT persisted today. Build the persistence with this screen, or ship on selected-records-only and fast-follow?">? #2</span>
+          </h3>
+          <p class="sub">So you don&rsquo;t re-surface what they already declined &mdash; and so the record shows they saw it.</p>
+
+          <div class="rec">
+            <span class="pill ok">Selected</span>
+            <div class="t">
+              <div class="name">Incident report 2025-CR-04471 &mdash; redacted release</div>
+              <div class="src">Public library &middot; already released</div>
+            </div>
+            <span class="pill mute">Carried forward</span>
+          </div>
+
+          <div class="rec excluded">
+            <span class="pill mute">Shown</span>
+            <div class="t">
+              <div class="name">Dash camera footage, Unit 12 &mdash; Dec 3 2025</div>
+              <div class="src">Axon Evidence &middot; shown at intake, not picked</div>
+            </div>
+            <span class="pill mute">Excluded</span>
+          </div>
+          <div class="rec excluded">
+            <span class="pill mute">Shown</span>
+            <div class="t">
+              <div class="name">Traffic citation 2025-TC-88120</div>
+              <div class="src">Tyler Munis &middot; shown at intake, not picked</div>
+            </div>
+            <span class="pill mute">Excluded</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ZONE 2 — SEARCH SURFACE -->
+    <section class="card">
+      <div class="card-hd">
+        <h2>Find the records</h2>
+        <span class="spacer"></span>
+        <span class="pill ai" id="fmtHint">Format from record type: Audio / Video</span>
+      </div>
+      <div class="card-bd">
+        <div class="toggle" role="tablist" aria-label="Record format">
+          <button role="tab" aria-selected="false" data-view="digital" type="button">Digital</button>
+          <button role="tab" aria-selected="true"  data-view="av"      type="button">Audio / Video</button>
+          <button role="tab" aria-selected="false" data-view="paper"   type="button">Paper</button>
+          <button role="tab" aria-selected="false" data-view="other"   type="button">Other</button>
+        </div>
+
+        <!-- DIGITAL -->
+        <div class="view" id="v-digital" role="tabpanel">
+          <div class="searchbar">
+            <input type="search" value="body camera Smith 4471 December 3" aria-label="Search connected systems">
+            <button class="btn primary" type="button">Search</button>
+          </div>
+          <div class="chips">
+            <button class="chip" aria-pressed="true" type="button">Laserfiche</button>
+            <button class="chip" aria-pressed="true" type="button">Tyler Munis</button>
+            <button class="chip" aria-pressed="false" type="button">Paper archive index</button>
+            <button class="chip" aria-pressed="true" type="button">Semantic match</button>
+          </div>
+
+          <div class="hit" data-attach>
+            <div class="body">
+              <div class="name">Incident narrative &mdash; 2025-CR-04471.pdf</div>
+              <div class="snip">&hellip;responding officer <b>Smith (4471)</b> initiated a traffic stop at 16:14 on
+                W Lamar St&hellip;</div>
+              <div class="facts"><span>Laserfiche</span><span>PDF &middot; 6 pages</span><span>Relevance 94%</span></div>
+            </div>
+            <button class="btn" type="button" data-attach-btn>Mark responsive</button>
+          </div>
+          <div class="hit" data-attach>
+            <div class="body">
+              <div class="name">Traffic citation 2025-TC-88120.pdf</div>
+              <div class="snip">Citation issued 2025-12-03 16:41 &mdash; officer badge 4471&hellip;</div>
+              <div class="facts"><span>Tyler Munis</span><span>PDF &middot; 1 page</span><span>Relevance 71%</span></div>
+            </div>
+            <button class="btn" type="button" data-attach-btn>Mark responsive</button>
+          </div>
+        </div>
+
+        <!-- AUDIO / VIDEO -->
+        <div class="view on" id="v-av" role="tabpanel">
+          <p class="sub" style="margin:0 0 12px;color:var(--ink-3);font-size:12.5px;max-width:70ch">
+            Locate the asset &mdash; you are finding the <b>file</b>, not searching inside the footage.
+            Query by case, time window, location, or unit.
+          </p>
+          <div class="searchbar">
+            <input type="text" value="2025-CR-04471" aria-label="Case number">
+            <input type="text" value="2025-12-03 16:00 – 18:00" aria-label="Date and time window">
+            <button class="btn primary" type="button">Search</button>
+          </div>
+          <div class="chips">
+            <button class="chip" aria-pressed="true" type="button">Axon Evidence</button>
+            <button class="chip" aria-pressed="true" type="button">Body-worn</button>
+            <button class="chip" aria-pressed="false" type="button">In-car</button>
+          </div>
+
+          <div class="asset" data-attach>
+            <div class="thumb">BWC&nbsp;4471</div>
+            <div class="body" style="flex:1;min-width:0">
+              <div class="name" style="font-weight:650">Axon Body 3 &mdash; Smith, badge 4471</div>
+              <div class="facts" style="display:flex;gap:5px 12px;flex-wrap:wrap;margin-top:6px;font-size:11.5px;color:var(--ink-3)">
+                <span>2025-12-03 16:09&ndash;16:52</span><span>43 min</span><span>W Lamar St</span>
+              </div>
+              <div class="scope">
+                <label for="scopeNote">Scope note for the redactor
+                  <span class="q" title="Open decision #3 — does the searcher scope the clip (time range / event) and hand that to redaction, or stay purely at 'find the file' and leave all scoping to the redactor?">? #3</span>
+                </label>
+                <input id="scopeNote" type="text" placeholder="e.g. 10:14–10:22, the traffic stop">
+                <div class="hint">Travels to the AV redaction workbench. You hand off <i>where</i> the relevant
+                  part is; the redactor does the in-video work.</div>
+              </div>
+            </div>
+            <button class="btn" type="button" data-attach-btn style="align-self:flex-start">Mark responsive</button>
+          </div>
+
+          <div class="asset" data-attach>
+            <div class="thumb">CAR&nbsp;12</div>
+            <div class="body" style="flex:1;min-width:0">
+              <div class="name" style="font-weight:650">In-car camera &mdash; Unit 12</div>
+              <div class="facts" style="display:flex;gap:5px 12px;flex-wrap:wrap;margin-top:6px;font-size:11.5px;color:var(--ink-3)">
+                <span>2025-12-03 16:05&ndash;17:20</span><span>75 min</span><span>W Lamar St</span>
+                <span class="pill mute">Shown at intake &middot; not picked</span>
+              </div>
+            </div>
+            <button class="btn" type="button" data-attach-btn style="align-self:flex-start">Mark responsive</button>
+          </div>
+        </div>
+
+        <!-- PAPER -->
+        <div class="view" id="v-paper" role="tabpanel">
+          <p class="sub" style="margin:0 0 12px;color:var(--ink-3);font-size:12.5px;max-width:70ch">
+            The archive index returns a <b>storage location</b>, not a file. Retrieve the records, then scan
+            them straight into the request.
+          </p>
+          <div class="searchbar">
+            <input type="search" value="traffic stop reports December 2025" aria-label="Search the paper archive index">
+            <button class="btn primary" type="button">Search index</button>
+          </div>
+
+          <div class="loc">
+            <span class="where">Row 12 &middot; Shelf C &middot; Box 2025-11</span>
+            <div class="t" style="flex:1">
+              <div class="name" style="font-weight:650;font-size:13.5px">Traffic enforcement reports &mdash; Dec 2025</div>
+              <div class="src" style="font-size:11.5px;color:var(--ink-3)">Paper archive index &middot; approx. 40 pages</div>
+            </div>
+            <button class="btn" type="button" id="scanBtn">Scan into request</button>
+          </div>
+          <div class="scanned" id="scanOut" hidden>
+            <div class="pg">p1</div><div class="pg">p2</div><div class="pg">p3</div>
+            <div class="pg">p4</div><div class="pg">p5</div><div class="pg">p6</div>
+          </div>
+        </div>
+
+        <!-- OTHER -->
+        <div class="view" id="v-other" role="tabpanel">
+          <p class="sub" style="margin:0 0 12px;color:var(--ink-3);font-size:12.5px;max-width:70ch">
+            No search here &mdash; you are documenting and attaching an artifact you produced by hand
+            (drive image, phone extraction, screenshots).
+          </p>
+          <div class="f">
+            <label for="otherDesc">What is this record, and how was it produced?</label>
+            <textarea id="otherDesc" placeholder="e.g. Forensic image of the device seized on 2025-12-03, produced by Digital Forensics on 2026-01-08."></textarea>
+          </div>
+          <div class="drop">Drop a file, or <b>link a file already in storage</b></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ================= zone 3: rail ================= -->
+  <div class="rail">
+    <section class="card">
+      <div class="card-hd"><h2>Actions</h2></div>
+      <div class="card-bd" style="padding-bottom:8px">
+        <button class="act" type="button" id="conferBtn">
+          <span>Confer with supervisor<span class="k">Send this task and a note</span></span>
+        </button>
+        <button class="act" type="button" id="contactBtn">
+          <span>Contact requestor<span class="k">Ask for the detail you need</span></span>
+        </button>
+        <button class="act" type="button" id="callBtn">
+          <span>Log a phone call<span class="k">Who, when, what came of it</span></span>
+        </button>
+      </div>
+    </section>
+
+    <section class="card">
+      <div class="card-hd">
+        <h2>Effort trail</h2>
+        <span class="spacer"></span>
+        <span class="pill mute" id="trailCount">0</span>
+      </div>
+      <div class="card-bd">
+        <p style="margin:0 0 10px;font-size:12px;color:var(--ink-3);line-height:1.45">
+          Every action lands here. If you end up closing this with <b>no responsive records</b>, this trail is
+          the evidence for it.
+        </p>
+        <ul class="trail" id="trail"></ul>
+        <div class="trail-empty" id="trailEmpty">Nothing logged yet.</div>
+
+        <div class="resolve">
+          <button class="btn found wide" type="button" id="foundBtn" disabled>
+            Found &mdash; <span id="foundCount">0</span> responsive
+          </button>
+          <button class="btn none wide" type="button" id="noneBtn" disabled style="margin-top:8px">
+            No responsive records
+          </button>
+          <p class="why" id="whyNone">Mark a record responsive to finish, or log at least one action before
+            closing with none.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<div class="legend">
+  <section class="card">
+    <div class="card-hd"><h2>Mark-up notes &mdash; the decisions still open</h2></div>
+    <div class="card-bd">
+      <p style="margin:0">Two questions from the 2026-07-09 design session are still unanswered. They are
+        marked <span class="q">? #2</span> and <span class="q">? #3</span> in place above &mdash; hover them.</p>
+      <ul>
+        <li><b>#2 &mdash; Carried-forward intake results.</b> Records the requestor <i>selected</i> are stored
+          today. The candidates they were <i>shown and passed on</i> are stored nowhere. The panel at the top of
+          this screen needs them. Build that persistence with this screen, or ship on selected-only and
+          fast-follow?</li>
+        <li><b>#3 &mdash; Video scoping.</b> Does the searcher add a time-range / event note that travels to the
+          redaction workbench (shown here, on the AV asset), or does the searcher stop at &ldquo;here is the
+          file&rdquo; and leave all scoping to the redactor?</li>
+        <li><b>Resolved since the session:</b> gating (selection skips search &mdash; recipe in spec &sect;1),
+          build order (the redaction screen shipped 2026-07-11), and clarification tolling (your 17-state survey
+          is seeded; the &ldquo;Contact requestor&rdquo; action is the trigger the engine has been waiting for).</li>
+      </ul>
+    </div>
+  </section>
+</div>
+
+<!-- ---------------- dialogs ---------------- -->
+<dialog id="dlgConfer">
+  <form method="dialog">
+    <div class="m-hd"><h3>Confer with supervisor</h3></div>
+    <div class="m-bd">
+      <div class="f">
+        <label for="conferTo">Supervisor</label>
+        <select id="conferTo">
+          <option>Dana Whitfield &mdash; Police Records supervisor</option>
+          <option>Marcus Reed &mdash; Open Records officer</option>
+        </select>
+      </div>
+      <div class="f">
+        <label for="conferNote">What do you need from them?</label>
+        <textarea id="conferNote" placeholder="The request names a time window that doesn't match any footage we hold. Do we release the adjacent clip or go back to the requestor?"></textarea>
+      </div>
+      <p class="note">They&rsquo;ll get this task and everything you&rsquo;ve searched so far. It stays read-only
+        for them unless they act on it.</p>
+    </div>
+    <div class="m-ft">
+      <button class="btn" value="cancel" type="submit">Cancel</button>
+      <button class="btn primary" value="send" type="submit">Send</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgContact">
+  <form method="dialog">
+    <div class="m-hd"><h3>Contact requestor</h3><span class="pill info">Email</span></div>
+    <div class="m-bd">
+      <p class="note">Sending by <b>email</b> &mdash; that&rsquo;s how this requestor asked to be reached. Had
+        they chosen post, this would render a printable letter instead.</p>
+      <div class="f">
+        <label for="cSubj">Subject</label>
+        <input id="cSubj" type="text" value="More detail needed on your request 2026-000042">
+      </div>
+      <div class="f">
+        <label for="cBody">Message</label>
+        <textarea id="cBody" style="min-height:120px">Dear Mr. Presley,
+
+We received your request for body camera footage from December 3, 2025. To locate the right recording, we need one more detail: the footage we hold for that afternoon spans several stops on West Lamar Street.
+
+If you can tell us the approximate time, or the vehicle or people involved, we can go straight to the correct recording.</textarea>
+      </div>
+      <div class="check">
+        <input type="checkbox" id="vague" style="width:auto;margin-top:2px">
+        <div>
+          <label for="vague" style="margin:0">The request is too vague to search</label>
+          <div class="cap">Always recorded on the effort trail. Whether it also <b>pauses the statutory clock</b>
+            depends on this jurisdiction&rsquo;s rule &mdash; Texas is set to <b>pause and restart on reply</b>.</div>
+        </div>
+      </div>
+    </div>
+    <div class="m-ft">
+      <button class="btn" value="cancel" type="submit">Cancel</button>
+      <button class="btn primary" value="send" type="submit">Send</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgCall">
+  <form method="dialog">
+    <div class="m-hd"><h3>Log a phone call</h3></div>
+    <div class="m-bd">
+      <div class="f"><label for="callWho">Who did you speak with?</label>
+        <input id="callWho" type="text" value="Elvis Presley (requestor)"></div>
+      <div class="f"><label for="callWhen">When</label>
+        <input id="callWhen" type="text" value="2026-07-14, 10:40am"></div>
+      <div class="f"><label for="callSum">What came of it?</label>
+        <textarea id="callSum" placeholder="He narrowed the window to roughly 4:15pm and confirmed the stop was on the eastbound side."></textarea></div>
+    </div>
+    <div class="m-ft">
+      <button class="btn" value="cancel" type="submit">Cancel</button>
+      <button class="btn primary" value="log" type="submit">Log it</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="dlgNone">
+  <form method="dialog">
+    <div class="m-hd"><h3>Close with no responsive records</h3><span class="pill crit">Final</span></div>
+    <div class="m-bd">
+      <p style="margin:0">The requestor is told this city holds no records answering their request. Your effort
+        trail is what supports that:</p>
+      <ul class="trail" id="trailEcho" style="border:1px solid var(--line);border-radius:8px;padding:6px 12px"></ul>
+      <div class="f">
+        <label for="noneWhy">Anything to add for the record?</label>
+        <textarea id="noneWhy" placeholder="Searched Axon for the full afternoon window; the only footage on W Lamar St is from a different unit and a different stop."></textarea>
+      </div>
+    </div>
+    <div class="m-ft">
+      <button class="btn" value="cancel" type="submit">Back</button>
+      <button class="btn primary" value="close" type="submit" style="background:var(--crit);border-color:var(--crit)">Close the request</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+(function(){
+  var root = document.documentElement;
+  document.getElementById('themeBtn').addEventListener('click', function(){
+    var dark = root.getAttribute('data-theme') === 'dark'
+      || (!root.hasAttribute('data-theme') && matchMedia('(prefers-color-scheme:dark)').matches);
+    root.setAttribute('data-theme', dark ? 'light' : 'dark');
+  });
+
+  /* format toggle */
+  var tabs = document.querySelectorAll('.toggle button');
+  var hint = document.getElementById('fmtHint');
+  tabs.forEach(function(b){
+    b.addEventListener('click', function(){
+      tabs.forEach(function(x){ x.setAttribute('aria-selected','false'); });
+      b.setAttribute('aria-selected','true');
+      document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('on'); });
+      document.getElementById('v-' + b.dataset.view).classList.add('on');
+      hint.textContent = (b.dataset.view === 'av')
+        ? 'Format from record type: Audio / Video'
+        : 'Format overridden by you: ' + b.textContent.trim();
+    });
+  });
+
+  /* effort trail */
+  var trail = document.getElementById('trail');
+  var empty = document.getElementById('trailEmpty');
+  var count = document.getElementById('trailCount');
+  var noneBtn = document.getElementById('noneBtn');
+  var why = document.getElementById('whyNone');
+  var entries = 0;
+
+  function logIt(kind, detail){
+    entries++;
+    empty.hidden = true;
+    count.textContent = entries;
+    var li = document.createElement('li');
+    var t = new Date();
+    var hh = String(t.getHours()).padStart(2,'0') + ':' + String(t.getMinutes()).padStart(2,'0');
+    li.innerHTML = '<span class="when">' + hh + '</span><span class="what"><b></b><span></span></span>';
+    li.querySelector('b').textContent = kind;
+    li.querySelector('.what span').textContent = detail;
+    trail.appendChild(li);
+    noneBtn.disabled = false;
+    why.textContent = 'You can close with none — the ' + entries + ' action' + (entries>1?'s':'') +
+      ' above will be attached as the evidence.';
+  }
+
+  /* attach / mark responsive */
+  var found = 0;
+  var foundBtn = document.getElementById('foundBtn');
+  var foundCount = document.getElementById('foundCount');
+  document.querySelectorAll('[data-attach-btn]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var card = btn.closest('[data-attach]');
+      var name = card.querySelector('.name').textContent.trim();
+      var on = card.classList.toggle('attached');
+      btn.textContent = on ? 'Responsive ✓' : 'Mark responsive';
+      found += on ? 1 : -1;
+      foundCount.textContent = found;
+      foundBtn.disabled = found === 0;
+      if (on) logIt('Marked responsive', name);
+    });
+  });
+
+  /* paper scan */
+  var scanBtn = document.getElementById('scanBtn');
+  scanBtn.addEventListener('click', function(){
+    document.getElementById('scanOut').hidden = false;
+    scanBtn.textContent = 'Scanned — 6 pages';
+    scanBtn.disabled = true;
+    logIt('Scanned', '6 pages from Row 12 · Shelf C · Box 2025-11');
+  });
+
+  /* dialogs */
+  function wire(btnId, dlgId, onOk){
+    var dlg = document.getElementById(dlgId);
+    document.getElementById(btnId).addEventListener('click', function(){ dlg.showModal(); });
+    dlg.addEventListener('close', function(){ if (dlg.returnValue && dlg.returnValue !== 'cancel') onOk(); });
+  }
+  wire('conferBtn','dlgConfer', function(){
+    logIt('Conferred', 'Sent to Dana Whitfield, Police Records supervisor');
+  });
+  wire('contactBtn','dlgContact', function(){
+    var vague = document.getElementById('vague').checked;
+    logIt('Clarification sent', 'Emailed the requestor' +
+      (vague ? ' · flagged vague — clock paused, restarts on reply' : ''));
+  });
+  wire('callBtn','dlgCall', function(){
+    logIt('Call logged', document.getElementById('callWho').value || 'Phone call');
+  });
+
+  /* resolution */
+  var dlgNone = document.getElementById('dlgNone');
+  noneBtn.addEventListener('click', function(){
+    var echo = document.getElementById('trailEcho');
+    echo.innerHTML = trail.innerHTML;
+    dlgNone.showModal();
+  });
+  dlgNone.addEventListener('close', function(){
+    if (dlgNone.returnValue === 'close') {
+      document.getElementById('taskState').textContent = 'Closed · no responsive records';
+      document.getElementById('taskState').className = 'pill crit';
+    }
+  });
+  foundBtn.addEventListener('click', function(){
+    document.getElementById('taskState').textContent = 'Complete · ' + found + ' responsive → Redaction';
+    document.getElementById('taskState').className = 'pill ok';
+  });
+})();
+</script>
+</body>
+</html>
