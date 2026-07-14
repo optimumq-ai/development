@@ -3264,3 +3264,62 @@ off-by-one at exactly 50 pages → **2**.
 2. Tier 1 is now **CLOSED** (screen · redaction wiring · profiles · fee-waiver routing · found/not-found gate).
    **Tier 2 opens:** fee-choice intake · notification model · My Tasks restructure · role-catalog reconciliation.
 3. Still parked (Kevin): the **§4b AV path** / format toggle — needs explicit un-parking.
+
+---
+
+## 2026-07-14 (af) — Primary-source research folded in: overhead SEEDED, exceptions documented, one finding that MOVED a decision. 484/484.
+
+**One commit,** `0f089f2` (research fold-in). Suite **484/484**, live census clean. `verify_fee_labor_gate` 20→29.
+
+### The research
+A deep-research pass (adversarial **3-verifier-per-claim**, ~90 agents, every surviving claim **3-0** against
+1 TAC § 70.3 / Tex. Gov't Code Ch. 552 / AG Public Information Handbook). **Honest cost note:** this was the
+wrong-sized tool — three narrow known-source legal values didn't need a 90-agent fan-out; targeted WebFetch of
+the statute + 1 TAC § 70.3 + the AG Handbook would have done it. Recorded in memory. It was ~95% done when the
+cost surfaced, so I let it finish rather than waste it.
+
+### Overhead — was held back as "unresearched"; NOW VERIFIED + SEEDED (`labor.overheadPct: 20`)
+- **§ 70.3(e)(3): 20% of the LABOR charge, never the total.** Engine already computed it on the labor subtotal,
+  so seeding the value was the whole change.
+- **§ 70.3(e)(2): no labor → no overhead.** Overhead rides on the **gated** labor subtotal, so the 50-page bar
+  zeroes labor and overhead **together** — a 20% surcharge on a copies-only bill **cannot happen by
+  construction**. Tests **H1–H5** lock it; breaking the coupling → 6 red.
+- **Opt-in** (§ 70.3(e)(1)): a city waives with `overheadPct: 0`.
+- **Effect:** BWC **$67.50 → $81.00**, 911 audio **$18.75 → $22.50**; every copies-only request unchanged.
+
+### Rates CONFIRMED current (1 TAC § 70.3, last amended 2007, no later change)
+$0.10/page · $15/hr labor · **$28.50/hr PROGRAMMING ONLY** (not general IT time). Statute sets no figures;
+a city may charge less, never over 125% of AG amount or actual cost (§ 552.262). Engine's hardcoded values
+all check out.
+
+### The two exceptions — researched, still UNBUILT (each is a per-request assertion, not a config value)
+1. **"separate buildings"** — § 552.261(c) gives only a NEGATIVE test (a sidewalk/passageway does NOT make
+   buildings separate); **burden on the agency**, AG demands *a building map*, **treble damages** for bad-faith
+   overcharge (§ 552.269).
+2. **"remote storage"** — § 70.3(g): recover only the storage company's fee, **no** added labor for their
+   retrieval; own-staff search after delivery gets $15/hr.
+
+### ⚠️ THE ONE THING THE RESEARCH *MOVED*, NOT CONFIRMED — `paperOnly` (KEVIN, PLEASE READ)
+When we flipped `paperOnly: false` earlier today, the story was *"the literal reading is paper-only and we
+chose the protective principle."* **The research changed that story.** The AG's *actual* position is that the
+50-page bar **is paper-only**: its copies flow-chart sends electronic records straight to *labor + overhead +
+media* with **no page gate**, and its worked examples **charge $15/hr + 20% overhead on emailed requests.** So
+`paperOnly: false` is **more protective than Texas practice** — for an electronic request the AG allows labor
+and we decline it under 50 pages.
+
+The research **supports** the protective reading in exactly one spot: the **genuinely unsettled** case of a
+**small emailed PDF with no media cost** (every AG electronic example ships on a CD; no source blesses charging
+labor with no media), where the instruction is *don't resolve doubt for city revenue.* **Net: the flip stands
+as a documented policy choice, defensible for no-media email, but a real divergence from AG practice for
+electronic-with-media. It is now a LIVE decision for you + counsel, not a settled reading.** No code changed on
+this — it is flagged in SPEC §8b and §9, not hidden. The `paperOnly` mechanism stays in the engine for the
+literal scope.
+
+### STATE
+`main` @ `0f089f2` + this note. Suite **484/484**. API + nginx healthy. Config reseeded, fixture regenerated.
+
+### NEXT
+1. **Kevin's `paperOnly` call** — the one decision the research reframed (above).
+2. The two exceptions are researched but need a **per-request assertion UI** (with a recorded basis / building
+   map) to build — deferred until there's a reason.
+3. Tier 1 CLOSED. **Tier 2 open:** fee-choice intake · notification model · My Tasks restructure · role catalog.
