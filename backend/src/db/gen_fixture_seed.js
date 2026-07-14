@@ -53,6 +53,11 @@ const REFERENCE_TABLES = [
   'redaction_categories',
   'redaction_rules',
   'fee_profiles',
+  // The expert seeds that turn an estimate from MANUAL into AUTOMATED (Tier 1 #3). They are CONFIG, not
+  // transactions -- a city calibrates a record type once and every future request of that type prices from
+  // it -- so a system built from schema + fixture must come up with its estimate automation already on.
+  // (Historical actuals fold into the SAME rows later; the fixture carries the seeded baseline.)
+  'record_type_estimate_profiles',
   'fee_matrix',
   'workflow_rules',
   'agent_rules',

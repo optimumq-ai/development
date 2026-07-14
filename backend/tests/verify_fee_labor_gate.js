@@ -100,7 +100,9 @@ function price(cfg, quantities, deliveryMethod) {
   // § 552.261(a) restores the labor charge when the records sit in 2+ unconnected buildings or in remote
   // storage. Encoding that needs a way for the city to ASSERT the condition per request, which is a design
   // question, not a data one. Under-charging is recoverable; unlawful over-charging is not.
-  var bwCfg = cfg.labor.search.billableWhen;
+  // Guarded: if the bar has been dropped entirely (the original bug), this must read as a clean FAIL on the
+  // assertions above — not a TypeError that masks them.
+  var bwCfg = (cfg.labor && cfg.labor.search && cfg.labor.search.billableWhen) || {};
   ok('F1 no building/remote-storage exception is encoded (flagged, not guessed)',
     !bwCfg.exceptions && !bwCfg.remoteStorage && !bwCfg.separateBuildings);
 
