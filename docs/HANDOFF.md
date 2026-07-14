@@ -3018,3 +3018,94 @@ connector stubs healthy. Suite **314/314**. Frontend rebuilt and serving.
 3. **Kevin's open calls:** the closure-notice wording · the button color · whether the exemption log should live
    in Axon (**a real product fork** — do we *author* the exemption trail or *ingest* it?) · and the unsurveyed
    **overly-burdensome** topic, which the Overly-Broad marker is the reason to go research.
+
+---
+
+## 2026-07-14 (ac) — R9 SHIPPED, and the RECORD-SEARCH SCREEN IS BUILT. Tier 1 loop closes. 403/403.
+
+**Six commits.** `61a9ded` R9 backend · `8be8cb2` R9 portal · `d8be72a` screen slice 1 · `aa5d47d` the two
+defects · `86fc244` the rail · `2a5e013` search surface + resolution. Suite **403/403**, live census clean.
+
+### R9 — the refine loop (the prerequisite)
+**The accumulation boundary moved: clear on Proceed, not on every search.** Pre-R9 the portal ran
+`setSelected([])` on every new result set — **silently throwing away picks the requestor had already made.**
+Now a description can be searched several times; the Selected column keeps everything, and two things
+accumulate with it: **`queriesTried`** (what the portal already ran — so the searcher doesn't repeat a query the
+requestor already rejected) and **`passedOver`** (every record shown and NOT taken — **invisible to the
+requestor, forever**, so the searcher never re-surfaces something they declined).
+
+**Intent capture at Proceed.** With records selected, one question: *is this everything?* Because selection
+alone could never say what it MEANT — a partial pile was indistinguishable from a complete one, so **a request
+the requestor still considered OPEN could be fulfilled from the selection and closed.** With **zero** selected
+there is **no popup**: the button itself becomes *"Submit to Open Records team for search"* — an empty selection
+is **an instruction to search, not abandonment**.
+
+**SELECTION WINS** across the whole request: a record passed over under description 1 and *selected* under
+description 3 is selected **only**. Otherwise the searcher reads *"the requestor declined this"* about a record
+they actually asked for — the precise failure the table exists to prevent.
+
+**Verified end to end through the real portal with the real LLM agent** → live request **2026-000046**:
+`search_more` · 2 queries recorded in order · 2 selected · 8 passed over · **overlap between the two sets: 0**.
+
+### The record-search screen
+`record-search/:taskId`. **My Tasks now routes by task type** — it lists *requests*, so "Open →" had been
+dumping every one of them into the generic workspace regardless of the work actually waiting, **including
+redaction tasks that already had their own screen**.
+
+- **The bar** (Kevin's mark-up): `Selected Records (2)` / `Records Not Selected (8)` · *"the portal showed them
+  10; they took 2."*
+- **The intent block**, in amber: *"Requestor asked us to search for MORE — fulfilling from the selection alone
+  CLOSES a request the requestor considers OPEN."*
+- **The search surface** — **the first staff path to search the source systems at all.** The portal could
+  search; the searcher, whose whole job this is, could not.
+- **Found / No responsive records**, both through the central stage transition.
+
+### ⚠️ VAGUE ≠ OVERLY BROAD — the first reader of a seeded, never-read duty
+The system had **one boolean** (`vague`). Kevin's own 17-state survey says why that is dangerous:
+
+> **Illinois.** *Vagueness* → the Act does **not** compel the body to interpret meaning. *Overbreadth* → the body
+> **shall** confer before invoking the unduly-burdensome exemption, **the clock does NOT stop**, and *"a body that
+> fails to respond on time **may not treat the request as unduly burdensome AT ALL**."*
+
+So marking an overly-broad Chicago request "vague", sending a clarification and waiting **silently forfeits the
+burden defense.** `clarification_duty = 'required_before_burden_denial'` was **seeded for IL and never read by
+anything.** The rail is its first reader. It **adapts to the jurisdiction** — Texas (live) shows *no conference
+duty*; Illinois shows the conference, the running deadline, and the forfeiture warning.
+
+### THREE LANDMINES DEFUSED (each fails SILENTLY)
+1. **Attach shared the blob.** `DELETE /files/:fileId` **unlinks the file from disk** — so removing an attached
+   record from one request would have **silently destroyed the released record inside a citizen's already-fulfilled
+   request.** The blob is now **copied**. Test C9 proves it.
+2. **`found` advanced an EMPTY search.** `workflowModel` has *declared* the gate all along
+   ("enough-to-advance: at least one record marked Include in Response") and **nothing enforced it.**
+3. **`no_records` closed on NOTHING.** That closure is a legal act. Per the BWC research **up to 40% of
+   dispatches that should have body-cam video HAVE NONE** — it is a **modal outcome**, which is exactly why it
+   must be **evidenced**. A closure with an empty effort trail is indistinguishable from never having looked.
+
+### THE TESTS BITE — proven, not assumed
+All three new harnesses went green on the **first run**, which this project has taught us to distrust. Each was
+**deliberately broken** and the suite went red on exactly the guarding assertions: disable selection-wins → 3
+fail · collapse `overly_broad` into `vague` → 8 fail · share the blob instead of copying → 6 fail (**including
+"THE SOURCE RECORD SURVIVED"**). All restored.
+
+### ⚠️ TWO GOTCHAS
+1. **`auth.signAccessToken` is ASYNC.** Forget the `await` and you store `[object Promise]`, the API 401s, and
+   you land on `/login` with no useful error. Cost three failed runs.
+2. **`npm test --keep` leaves a test API on :3101 that POISONS the next run** — 9 phantom failures against a
+   stale DB. Kill it before re-running.
+
+### STATE
+`main` @ **`2a5e013`** + docs. Suite **403/403**. App healthy. **Still open on the screen:** §4b audio/video
+(needs the `ExternalEvidenceReference` table from the BWC research), §4c paper/scanner, §4d other — the format
+toggle is unbuilt and the screen is **digital-only** today.
+
+### PARKED, DELIBERATELY (Kevin)
+- **`DESIGN_delegated_av_fulfillment.md`** — the offload toggle. **Position A (full offload) is DEAD:** no DEMS
+  emits a completion signal and none exposes its exemption metadata to an external system. Reality forces
+  Position B.
+- **`DESIGN_av_vaughn_index.md`** — **we have the defect we accused GovQA of.** Document zones cite a statute
+  (`redaction_zones.rule_id` → `redaction_rules` → `legal_sources`); **AV zones cite nothing.** WAC 44-14-04004
+  requires the basis for each redaction with **no video carve-out**. Specified, not built — *"until I work
+  through this build enough to see requests process correctly."*
+- **`BRIEF_av_detection_sidecar.md`** — the GPU project, for Kevin's home box. Deliberately scoped as the
+  **commodity** half; the Vaughn layer is the moat and needs no GPU.

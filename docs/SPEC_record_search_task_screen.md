@@ -2,9 +2,20 @@
 
 **Status:** DRAFT for build. Drafted 2026-07-09 from a design session with Kevin. **Kevin's mark-up of the clickable mockup folded in 2026-07-14** — §2 (carried-forward, decision #2), §4b (video, decision #3 — *partially open, research pending*), §5b-2 (Vague vs Overly Broad `[NEW]`), §8 (terminology), §9 (design language). Companion to `SPEC_record_search_fulfillment.md` (Domain 7 §3, the `[NOT BUILT]` task screen) and `MASTER_task_types_permission_groups.md` (task type `record_search`, screen `[NOT BUILT]`).
 
-> **BUILD ORDER — read §2.2 first.** The carried-forward panel is gated on **portal-side R9**
-> (`DESIGN_split_canvas_intake.md`), which is designed but **not built**. **Everything else, including the AV
-> view (§4b), is buildable now** — the BWC research returned 2026-07-14 and settled it.
+> ## ✅ BUILT 2026-07-14 — `RecordSearchTaskPage.js` + `record-search/:taskId`
+>
+> **R9 shipped first** (its prerequisite — §2.2), then the screen. What is live:
+> - **§2 · the carried-forward panel + the Self Service Portal Search Results bar** — reading real R9 data.
+> - **§4a · the search surface** — the first staff path to search the source systems and attach what you find.
+> - **§5a/§5c · Confer · Log a call · the effort trail.**
+> - **§5b-2 · Mark Vague / Mark Overly Broad** — the first caller of the seeded-but-unread `clarification_duty`.
+> - **§5d · Found / No responsive records** — both through the central stage transition.
+> - **My Tasks routes by task type** (`Search →` / `Redact →` / `Estimate →`).
+>
+> **Still open:** §4b (audio/video — designed, needs the `ExternalEvidenceReference` table), §4c (paper /
+> scanner), §4d (other). The format toggle is not built; the screen is digital-only today.
+>
+> Tests: `verify_search_intents` (29) · `verify_request_defect` (28) · `verify_search_resolve` (32).
 Legend: `[BUILT]` · `[PARTIAL]` · `[NOT BUILT]` · `[NEW]` (introduced by this spec).
 
 **Scope.** The dedicated screen a Fulfillment Staff (Record Search) member sees when they click a `record_search` task in **My Tasks**. Single-record only — the MRR Multi-Record Search task (`mrr_search`) is a separate, hand-assigned flow (`MASTER` A2) and out of scope here. Mirrors the proven `EstimateTaskPage.js` pattern: load task via `GET /tasks/:taskId`, header + request context, one focused work surface, action drives completion.
