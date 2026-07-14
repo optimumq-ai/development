@@ -2835,66 +2835,79 @@ app before planning from it.
 
 ---
 
-# SESSION CLOSE — 2026-07-14. START HERE NEXT TIME.
+# SESSION CLOSE — 2026-07-14 (evening). START HERE NEXT TIME.
 
-## ⚠️ DO THIS FIRST, BEFORE ANY WORK
-1. ~~**The Anthropic API credit balance is EXHAUSTED.** Every AI feature is down. Top up credits, then re-run
-   the suite — two `verify_stage_bypass` assertions FAIL while credits are out.~~
-   **✅ RESOLVED 2026-07-14 (wq). AI is back; the suite is GREEN at 309/309** and `verify_stage_bypass` is
-   24/24. The credits were in a **different org** than the API key bills to — the key was always correct, the
-   wallet was empty. **If AI features ever 400 with "credit balance too low" again, CHECK THE ORG FIRST:** the
-   key bills to org `5ab34385-e479-4c20-8b25-9d47a1e0e16b`, and subscription credit (what the desktop app
-   shows) **cannot** be spent by an API key. Buying credits in the wrong org fixes nothing.
-2. ~~**23 active intake requests have no routing basis.** Sweep them: `SELECT id FROM requests WHERE
-   routing_basis IS NULL AND stage='intake' AND status='active'` → spawn a routing_review task for each.~~
-   **❌ RETRACTED 2026-07-14 (vp) — DO NOT RUN THIS SWEEP. It was a false alarm, and it would have done
-   damage.** `routing_basis IS NULL` is **not** a failure signal — the column was only first populated on
-   **2026-06-09**, so every row created before it is NULL by construction (112 of 126 requests). The "23" are
-   **May demo rows that are already classified**, plus **`SYS-TEMPLATE-SAMPLES`, a system holding row** — the
-   sweep would have spawned 23 bogus human tasks, one of them a pseudo-request task on a system row, in direct
-   violation of the ARCHITECTURE invariant. **The true silent-orphan count is ZERO.** See the (vp) entry below.
+## THE ONE THING WAITING ON KEVIN
 
-## WHERE THE PARENT/CHILD MIGRATION STANDS
-**It is now a DATA-ONLY change.** Everything mechanical is done and every step is a *proven* no-op today:
-- Schema columns exist (`master_request_id`, `component_label`, `is_mrr`) + an index on `master_request_id`.
-- **`services/requestCreate.js` is the single wrap point** — all 3 intake paths go through it.
-- **Every list/count/sweep query is parent/child-aware** (`services/requestScope.js`), verified byte-identical
-  before/after (dashboard, the queue's 39 rows, all 7 reports, every sweep candidate set).
-- The **citizen-facing request number resolves through the parent**.
-- The **destructive auto-close sweep** (`clarificationTimeout`) closes the PARENT, not the work row.
-- The **deposit sweep runs on the money axis**, so it survives the estimate moving to the parent.
+**The record-search task screen — the last missing piece of the Tier 1 demo loop — has a clickable mockup
+awaiting your mark-up.**
 
-**Still needed before the migration runs:**
-- **UI design direction** for the parent/child queue treatment (parent line, children indented). The UI rule
-  says agree the design BEFORE building. **This is the only true blocker.**
-- The migration script itself: create a parent per request, make the existing row the child (it keeps its id),
-  repoint the 7 money/clock tables to the parent.
+- In repo: **`docs/mockups/record_search_screen.html`** (sibling of `redaction_screen.html` and
+  `split_canvas_intake.html`; inherits the redaction token set verbatim, so the task screens read as one system).
+- Clickable: **https://claude.ai/code/artifact/62e2e9c2-420b-4f72-92cf-53e2e06ed4e9**
 
-## WHAT SHIPPED TODAY (all pushed; `main` == `origin/main` == `a99e9b3`)
-Config layer: `jurisdiction_rules` (the per-jurisdiction rule slot) · 18 clarification policies · deadline rules
-for TX/IL/CA · the deposit clock policy · the **fee-waiver substrate + the Illinois fee-forfeiture guardrail** ·
-the **"send again" gate** · **config integrity checking**.
-Clock engine: `extend()` · validated `tollReasons` · `applyClassification()`.
-Fixes: the ghost `custodian_retrieval` stage + ONE canonical stage vocabulary · every raw
-`UPDATE requests SET stage` routed through `applyStageTransition` · the **request-numbering collision** (two of
-three algorithms were broken; the live portal 500'd after any deletion) · the silent-orphan intake bug.
+**Two decisions are marked in place on the page (hover the `? #2` / `? #3` chips):**
+- **#2 — carried-forward intake results.** Records the requestor *selected* persist today; the ones they were
+  **shown and passed on persist NOWHERE**. The screen's top panel needs them. Build that persistence *with* the
+  screen, or ship on selected-only and fast-follow?
+- **#3 — video scoping.** Does the searcher add a time-range/event note that travels to the AV redaction
+  workbench, or stop at "here is the file" and leave all scoping to the redactor?
+
+**Three of the spec's five open items answered themselves since 2026-07-09:** gating (recipe written, spec §1),
+build order (**the redaction screen shipped 2026-07-11**), and clarification tolling (**Kevin's 17-state survey
+is seeded** — which makes the screen's "Contact requestor" action *the first real caller the clarification
+engine has been waiting for*).
+
+**Order of work when it resumes:** fold the mark-up into `SPEC_record_search_task_screen.md` **first** (the spec
+is the contract), *then* build `RecordSearchTaskPage.js` + the `record-search/:taskId` route.
+
+## WHAT SHIPPED TODAY (all pushed; `main` == `origin/main` == `4b9e0c9`)
+
+| | |
+|---|---|
+| **AI restored** | Credits were in a **different org** than the API key bills to — the key was always right, the wallet was empty. Subscription credit **cannot** be spent by an API key. Billing org: `5ab34385-…`. |
+| **`tasks.request_id` FK** | 15 orphan tasks sat **OPEN in real worklists** pointing at nothing. FK + `ON DELETE CASCADE`. |
+| **Payment-history delete guard** | **A request that took money cannot be deleted** (Kevin's call). A trigger, not `RESTRICT` — the payment ledger is a mixed free-text table where most rows are `estimate_issued`, which is *not* a payment. |
+| **The suite has its own DATABASE** | `npm test` → rebuilds `optimumq_test`, boots a test API on :3101, runs 12 harnesses, then **censuses live before/after and fails if one row moved.** The tests had been **silently contaminating live data**, one orphan per run. |
+| **Deterministic fixture** | `seed_fixture.sql` (generated, checked in) replaces the run-time clone of live. `schema + fixture` = a working system **from empty**. |
+| **Request numbering** | **A hard ceiling at 10,000/year — intake 500s past it.** Now 6 digits (999,999/yr) from **one constant** driving both the pad and the lookup pattern. 45 live numbers renumbered; width uniform. |
+
+**Found only because the fixture builds from EMPTY** (the first thing that ever did): `schema.postgres.sql`
+**could not create a fresh database**, and it had **drifted from live by an entire table and 20 columns the code
+uses**. Both would have hit **the first new city install**, not us.
 
 ## THE SUITE
-13 harnesses in the job scratchpad (`verify_*.js`), ~305 assertions. Run them **chained** — that is what
-surfaces contamination. Then run `node backend/src/db/check_config_integrity.js` — **it must report CLEAN.**
+**`cd backend && npm test`** — the ONLY supported way. **314/314.** Never run a `verify_*.js` bare; `testEnv.js`
+refuses. Then `node src/db/check_config_integrity.js` — must report **CLEAN**.
 
-## OPEN DECISIONS FOR KEVIN (nothing else is blocked on me)
-- **Where does the payment gate live on the parent?** `parent_state` has no payment value (spec §11.1).
-  *(The deposit sweep no longer depends on this — but the parent still needs somewhere to show "awaiting
-  payment".)*
-- **Turn on the TX clock rules?** Clarification-restart and deposit-restart are both **built, seeded, and
-  disabled**. Switching them on **changes reported lateness on live requests** — requests now shown as overdue
-  will stop being overdue. Deliberate act, not a side effect.
-- The **`second_notice_required`** slots exist but are **unseeded** — an unresearched notice duty is the same
-  legal exposure as an unresearched clock rule.
+## OPEN DECISIONS FOR KEVIN (nothing is blocked on me)
+- **The two mockup questions above (#2, #3).**
+- **FKs on the OTHER 15 request-child tables.** `tasks` is done. The rest have no FK. **Should deleting a
+  request CASCADE away its payment trail?** That is a policy call, and it wants deciding *with* the
+  parent/child migration (which repoints 7 money/clock tables to the parent).
+- **Turn on the TX clock rules?** Clarification-restart and deposit-restart are **built, seeded, and disabled**.
+  Switching them on **changes reported lateness on live requests**. Deliberate act, not a side effect.
+- **`second_notice_required`** slots exist but are **unseeded** — an unresearched notice duty is the same legal
+  exposure as an unresearched clock rule.
+- **The v2 dashboard** Kevin described (widgets, no request list) + the **health-scoring model** — captured, not
+  built, nothing depends on them. **`requests.amount_paid` is a stale denormalized copy** — pick the payment
+  tables + estimate paid-stamps as the money source of truth, or the dashboard will disagree with the guard.
+
+## ⚠️ TWO THINGS THAT WILL BITE THE NEXT SESSION
+1. **`BUILD_PRIORITY_SUMMARY.md` (2026-07-08) IS STALE.** It says the redaction task screen is unbuilt. **It is
+   built and reachable** — I claimed otherwise twice today on the word of a subagent grep that missed a
+   concatenated route path, and a screenshot disproved me. **Open the running app before believing an audit.**
+2. **DEPLOY ORDER for any numbering change:** ship code → **restart** → *then* renumber. Renumbering while the
+   old code is resident makes it **restart the sequence at 1** (its narrow pattern sees no rows).
 
 ## STATE
-`main` @ `a99e9b3`, tree clean, pushed. API + nginx + the 3 connector stubs all healthy. Config integrity
-**CLEAN**. Active jurisdiction `jur-tx` with a **repaired** config (a test had left a 77-day standard clock and
-an enabled-but-unattested clarification policy in production; both fixed, and the checker now prevents the
-class).
+`main` @ **`4b9e0c9`**, tree clean, pushed. API + nginx + the 3 connector stubs healthy. Suite **314/314**.
+Config integrity **CLEAN**. 126 requests, **0 dangling rows**, every citizen number a uniform 6 digits.
+
+## THE PARENT/CHILD MIGRATION (parked, deliberately)
+Tier 3 in Kevin's own build order. **Not blocked by the UI** — after it, every request has exactly one child and
+the queue is a visual no-op. **The real pre-migration task is backend:** `routes/requests.js:43` selects `r.*`
+off the **leaf** row, and `deadline_date` / `estimated_fee` / `amount_paid` all become **parent-owned**. Left
+alone, the queue would quietly show a deadline and a balance that **stop tracking the parent** — the worst kind
+of failure, because it looks fine. The request number already resolves through the parent; the money and the
+clock do not.
