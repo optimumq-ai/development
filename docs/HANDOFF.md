@@ -2911,3 +2911,110 @@ off the **leaf** row, and `deadline_date` / `estimated_fee` / `amount_paid` all 
 alone, the queue would quietly show a deadline and a balance that **stop tracking the parent** — the worst kind
 of failure, because it looks fine. The request number already resolves through the parent; the money and the
 clock do not.
+
+---
+
+## 2026-07-14 (ab) — Kevin's mark-up folded in. Vague ≠ Overly Broad, and the BWC research says: build the ledger, not the viewer.
+
+**No new screen code.** This session turned Kevin's mark-up into contract, and answered the one question he asked
+me to research. Four commits: `e0090fe` (spec) · `d4adf56` (mockup) · `17f3018` (the rename, verified live) ·
+`081ede3` (research folded in). Suite **314/314**, live census clean.
+
+### THE BIGGEST THING: "Vague" and "Overly Broad" are NOT one checkbox
+
+Kevin asked for a way to mark a description **Vague or Overly Broad**. The system today has **one boolean**
+(`vague`, `routes/requests.js:333`). **His own 17-state survey already documents why that is dangerous:**
+
+> **Illinois.** *Vagueness* → the Act does **not** compel the body to interpret meaning (5 ILCS 140 §3.3).
+> *Overbreadth* → the body **shall** offer a conference before invoking the unduly-burdensome exemption, the
+> clock **does not stop**, and **"a body that fails to respond on time may not treat the request as unduly
+> burdensome AT ALL."**
+
+So marking an overly-broad Chicago request "vague," sending a clarification, and waiting **silently forfeits the
+burden defense.** Same class of trap as the Illinois fee-forfeiture guardrail. **The substrate already models the
+duty** — `clarification_duty = 'required_before_burden_denial'`, **seeded for IL** — and, exactly like
+`clarification_pending` before it, **nothing has ever read it.** This rail is its first caller. Spec §5b-2.
+
+**Two gaps flagged, NOT assumed:** there is no `overbroad_is_denial_ground` sibling to `vague_is_denial_ground`,
+and **the overly-burdensome topic is entirely unsurveyed** (the clarification survey names it as shared machinery
+it did not cover). Both ship **default-OFF and unseeded**. An unresearched denial ground is the same legal
+exposure as an unresearched clock rule.
+
+### Decision #2 — RESOLVED, and it moves the build order
+
+Two accumulating sets, not one: **selected** (visible, right column) and **shown-but-passed-over** (**invisible to
+the requestor**, carried with the request so the searcher never re-surfaces a rejected record). Written on **every
+results-clear** — each re-search *and* Proceed — because the portal's refine loop lets one description be searched
+several times. Selection wins on dedup. New bar: **"Self Service Portal Search Results"** → `Selected (n)` /
+`Not Selected (n)`.
+
+> **⚠ SEQUENCING: this data lives in portal R9 (`DESIGN_split_canvas_intake.md` §4b), which is DESIGNED but NOT
+> BUILT. R9 is now a PREREQUISITE of the record-search screen, not a parallel track.** Ship the screen first and
+> its top panel renders empty for every request. **R9 → screen.**
+
+### Decision #3 — RESOLVED by research. Half of Kevin's model was right; half was backwards.
+
+5 research tracks, ~50 sources (vendor docs, agency SOPs, city class specs, procurement PDFs, cost studies).
+
+**Right:** search and redaction really are often different jobs, and **the split grows with agency size** — a
+<50-sworn department fuses them into one clerk; Seattle PD hands redaction to the **Legal Unit** by written
+policy. **The IACP model policy is SILENT on who does what.** We cannot hardcode either answer.
+
+**Backwards — the anxiety about having no viewer and no clipper. NOBODY HAS ONE.** Not GovQA, NextRequest,
+JustFOIA, FOIAXpress, Laserfiche, GovPilot or Accela. **The video never leaves the evidence system** — redaction
+happens *inside* Axon and mints a derivative, and **Axon sells that as the feature.** We will never hold the raw.
+
+**The finding that reframes the product:** **Axon has NO request-intake product.** No clock, no requester
+correspondence, no fee ledger, no exemption tracking. And **no open-records platform has ever integrated with a
+DEMS** — searched from both sides, found nothing. *The request lives in one system, the video in another, and the
+clerk is the integration.* **That gap is us.**
+
+**Decided (spec §4b):** the responsive AV item is an **`ExternalEvidenceReference`, not a file** (nullable file) ·
+the searcher outputs a **TIME RANGE, not a clip** — **Kevin's scope box is vindicated**, the research calls it
+*"the highest-leverage field on the whole screen"* · **search and redaction are separate tasks that DEFAULT to the
+same person** · **"no responsive video" becomes an EVIDENCED disposition** (San Diego's auditor: **up to 40% of
+dispatches requiring video HAVE NONE** — a modal outcome, not a failure).
+
+**Two traps, both the forfeiture class:** an **Axon share link expires in 3 DAYS by default — shorter than most
+statutory response and appeal windows** (emailing one ships a link dead before the requestor clicks it; host the
+derivative ourselves). And **Axon Case IDs are NOT unique** — never key off Case ID alone.
+
+**Honest gaps, recorded not papered over:** Axon's API is not publicly documented (**zero endpoints read**);
+**whether it can CREATE A SHARE LINK is the single most important unknown**; and **no citable blanket ban** on us
+storing video was found — the constraint looks practical/contractual, **the strong version is UNPROVEN. Do not
+repeat it.**
+
+### "Responsive" → "Include in Response" — SHIPPED and verified live
+
+Renamed what a **user reads** (RecordsPanel buttons, counts, the record-search gate, the redaction error,
+workflowModel labels). **Deliberately NOT renamed:** `request_files.responsive` (a DB column), workflowModel node
+ids (stable keys in seeded rules), and **`MARKED_RESPONSIVE` / `MARKED_NOT_RESPONSIVE` history event codes —
+already written into existing `request_history` rows; renaming them would orphan the audit trail on every past
+request.**
+
+**One judgment call for Kevin:** the closure notice is still **"No responsive records."** That is the **statutory
+name of the notice** — renaming it would misquote the law. Say the word and it changes.
+
+**Verified in the RUNNING app**, not asserted: signed in, opened the Records tab, read the rendered DOM —
+"Include in Response" present, zero stray "Responsive" labels, counts read *"482 records · 0 to include."*
+(Gotcha for next time: **`auth.signAccessToken` is ASYNC** — forgetting to `await` it mints `[object Promise]` and
+you get bounced to /login with no useful error.)
+
+### Mockup — updated, same URL
+`docs/mockups/record_search_screen.html` → https://claude.ai/code/artifact/62e2e9c2-420b-4f72-92cf-53e2e06ed4e9
+Portal palette (`#D8E0E8` ground / `#F2F6F9` boxes / white fields / `#1E6091` blue), one button color family,
+type +1px at every step. **Scope decision: mockup ONLY — the shipped redaction workstation keeps its darker
+palette, so the two staff screens DIVERGE until Kevin settles the color.** Also fixed a lie already in the
+mockup: the vague checkbox claimed *"clock paused, restarts on reply"* — **that is Texas's rule; the demo is
+Illinois = `runs_no_stop`.**
+
+### STATE
+`main` @ **`081ede3`**, tree clean, **NOT pushed** (4 commits ahead of `origin/main`). API + nginx + the 3
+connector stubs healthy. Suite **314/314**. Frontend rebuilt and serving.
+
+### NEXT
+1. **Portal R9** (`DESIGN_split_canvas_intake.md` §4b) — the refine loop + `request_intake_results`. **Prerequisite.**
+2. **Then** `RecordSearchTaskPage.js` + the `record-search/:taskId` route.
+3. **Kevin's open calls:** the closure-notice wording · the button color · whether the exemption log should live
+   in Axon (**a real product fork** — do we *author* the exemption trail or *ingest* it?) · and the unsurveyed
+   **overly-burdensome** topic, which the Overly-Broad marker is the reason to go research.
