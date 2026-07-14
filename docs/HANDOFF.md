@@ -2434,3 +2434,41 @@ The tests no longer damage the data they test.
 **FULL SUITE GREEN — 305 assertions, 0 failures** across 12 harnesses.
 
 **State:** `main`, tree clean, app healthy, `jur-tx` active with verified-clean config.
+
+## 2026-07-14 (tm) — clarificationTimeout scoped (the most destructive query in the migration) + two DECISIONS surfaced
+
+**One of the three open §11.1 items was decidable once Kevin answered §6.2. The other two are NOT — and I am
+not guessing them. They are design gaps in the spec, not work items.**
+
+**DONE — `clarificationTimeout`.** It **AUTO-CLOSES**, so unscoped it was the single most destructive query in
+the migration. Kevin's §6.2 answer settles it: two different rows are involved.
+- The clarification **EVENT** is logged on the **CHILD** — that record's description was the vague one.
+- The **CLOSURE** is a **PARENT-level terminal event that CASCADES DOWN**. Tex. Gov't Code § 552.222(d)
+  withdraws "**the underlying request**," not one record of it. Closing the child would leave the citizen's
+  request half-alive.
+
+The sweep now searches LEAF rows and closes `COALESCE(master_request_id, id)`. **Verified no-op today:**
+`close_target === id` on all 125 rows.
+
+**⚠️ TWO ITEMS ARE BLOCKED ON A DECISION (spec §11.1). I previously mis-described both as join problems.**
+
+**(a) Where does the PAYMENT GATE live on the parent?** Spec §5.2 says `fee_review`/`awaiting_payment` "move
+off the child — they are parent gates." **But the parent has no `stage`** — it has `parent_state`
+(Intake · In Process · Processed · Delivered · Closed), and **none of those is a payment gate.** So awaiting-
+payment has nowhere to live. **Concrete consequence:** `tickler.js`'s deposit sweep joins
+`requests.stage = 'awaiting_payment'` to `request_fee_estimates`. After the migration the **estimate hangs off
+the parent** and the **stage off the child** — the join matches nothing and **the deposit sweep silently stops
+running**: no dunning, no lapse, no withdrawal. *Recommend: drive the sweep off the parent's `payment_status`
+(§4.3) and drop the stage predicate — the money axis already exists on the parent.*
+
+**(b) `fee_revenue by department` is UNDEFINED, not unjoined.** I called this a join problem. **It is not.**
+Revenue is ONE number on the parent; a parent with two children in two departments has **one revenue figure and
+two departments**. A join would double-count it into both. Attributing it needs an **allocation rule** — the
+same allocation **the law is silent on** (§5.10). *Recommend: report revenue only by parent-level groupings
+(month, requestor, status) and refuse the child-grouped cut. A wrong revenue-by-department number is worse than
+none, and nothing depends on it yet.*
+
+**Suite green; config integrity CLEAN after the run.**
+
+**State:** `main`, tree clean. **Migration prep is complete except for those two decisions**, which are
+Kevin's — they cannot be resolved from the code.
