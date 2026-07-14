@@ -130,6 +130,27 @@ async function logHistory(requestId, opts, action, notes) {
     [uuidv4(), requestId, (opts && opts.actorId) || 'system', (opts && opts.actorName) || 'Staff', action, notes]);
 }
 
+// THE REQUEST DEFECT (SPEC_record_search_task_screen §5b-2). Two defects, NOT one.
+//
+//   vague        — unclear WHAT is being asked.
+//   overly_broad — perfectly clear, but unduly burdensome.
+//
+// They are not interchangeable, and in at least one seeded jurisdiction treating them as one is DANGEROUS.
+// Illinois: for vagueness the Act does NOT compel the body to interpret meaning (5 ILCS 140 §3.3). For
+// OVERBREADTH the body SHALL offer a conference before invoking the unduly-burdensome exemption, the clock
+// does NOT stop for it, and -- the trap -- "a body that fails to respond on time may not treat the request as
+// unduly burdensome AT ALL." So marking an overly-broad request "vague", sending a clarification and waiting
+// SILENTLY FORFEITS THE BURDEN DEFENSE.
+//
+// The duty is already modelled and SEEDED (clarificationPolicy DUTIES, 'required_before_burden_denial' for
+// IL) and, like the clarification toll reason before it, NOTHING HAS EVER READ IT. This is its first caller.
+var REASONS = ['vague', 'overly_broad'];
+function resolveReason(opts) {
+  if (opts && REASONS.indexOf(opts.reason) >= 0) return opts.reason;
+  if (opts && opts.vague) return 'vague';   // pre-existing callers pass the bool; keep them working
+  return null;
+}
+
 // Send a clarification request → apply the send-side clock effect (pause), always log the effort trail.
 async function send(idOrNumber, opts) {
   opts = opts || {};
@@ -140,6 +161,14 @@ async function send(idOrNumber, opts) {
   var plan = effectPlan(effect);
   var deliveryMethod = reqRow.delivery_method || 'email'; // spec §5b: default to email (mailing-address gap)
   var clock = { action: 'none', effect: effect };
+
+  var reason = resolveReason(opts);
+  var duty = st.policy.clarification_duty;
+  // A conference is OWED (not offered) only when the defect is overbreadth AND the jurisdiction imposes the
+  // duty. Note it is keyed on the DEFECT, not on the clock: the duty and the toll are independent, and in IL
+  // the conference is mandatory while the clock keeps running -- which is precisely why they must not be
+  // collapsed into one flag.
+  var conferenceRequired = (reason === 'overly_broad' && duty === 'required_before_burden_denial');
 
   // --- Outreach mechanics (§5b): render + send/generate the templated request. A postal letter with no
   // mailing address throws (ADDRESS_REQUIRED) BEFORE any clock/log side effect, so the UI can prompt. ---
@@ -154,7 +183,7 @@ async function send(idOrNumber, opts) {
     try { await T.startClocksForRequest(reqRow.id); } catch (e) {} // idempotent — ensure a clock exists
     var primary = await activePrimaryClock(reqRow.id);
     if (primary) {
-      var note = 'Clarification requested (' + effect + (plan.statutory ? '' : ', operational') + ')' + (opts.vague ? ' [vague]' : '');
+      var note = 'Clarification requested (' + effect + (plan.statutory ? '' : ', operational') + ')' + (reason ? ' [' + reason + ']' : '');
       var r = await T.toll(primary.id, TOLL_REASON, note);
       clock = { action: 'toll', clockId: primary.id, effect: effect, tolled: !!r.tolled, alreadyTolled: !!r.alreadyTolled };
     } else {
@@ -172,12 +201,25 @@ async function send(idOrNumber, opts) {
   var notes = 'Clarification requested — ' + outreachNote
     + '; clock effect: ' + effect + (st.active ? '' : ' (manual — automation off)')
     + (clock.action === 'toll' && clock.tolled ? '; response clock tolled' : '')
-    + (opts.vague ? '; flagged vague' : '')
+    + (reason === 'vague' ? '; flagged vague' : '')
+    + (reason === 'overly_broad' ? '; flagged OVERLY BROAD' : '')
+    // The effort trail is the evidence a city relies on later. If a conference is legally OWED and the clock
+    // is still running, the trail must SAY so — the whole failure mode here is that nothing looks wrong.
+    + (conferenceRequired
+        ? '; CONFERENCE REQUIRED before any unduly-burdensome denial (duty=' + duty + '). The response clock is'
+          + (clock.action === 'toll' && clock.tolled ? ' TOLLED' : ' STILL RUNNING')
+          + ' — missing the deadline forfeits the burden defense entirely.'
+        : '')
     + (opts.note ? '. ' + opts.note : '');
   await logHistory(reqRow.id, opts, 'CLARIFICATION_REQUESTED', notes);
 
   return { requestId: reqRow.id, requestNumber: reqRow.request_number, deliveryMethod: deliveryMethod,
-    automationActive: st.active, effect: effect, vague: !!opts.vague, clock: clock, outreach: outreach };
+    automationActive: st.active, effect: effect,
+    reason: reason, vague: reason === 'vague',   // `vague` kept for pre-existing callers
+    duty: duty, conferenceRequired: conferenceRequired,
+    // The UI must be able to say "the clock did NOT stop" without re-deriving it.
+    clockStillRunning: !(clock.action === 'toll' && clock.tolled),
+    clock: clock, outreach: outreach };
 }
 
 // Requestor replied → apply the reply-side clock effect (resume or restart), always log the trail.

@@ -343,7 +343,9 @@ router.post('/:id/clarification', requireAuth, async function(req, res) {
   try {
     var CA = require('../services/clarificationAction');
     var b = req.body || {};
-    var out = await CA.send(req.params.id, { vague: !!b.vague, note: b.note, channel: b.channel,
+    // `reason` ('vague' | 'overly_broad') supersedes the old `vague` bool — but the bool is still accepted so
+    // existing callers keep working. See clarificationAction: these are two DIFFERENT legal defects.
+    var out = await CA.send(req.params.id, { reason: b.reason, vague: !!b.vague, note: b.note, channel: b.channel,
       to: b.to, mailingAddress: b.mailingAddress, subject: b.subject, text: b.text,
       actorId: req.user && req.user.sub, actorName: (req.user && req.user.name) || 'Staff' });
     res.json(out);
