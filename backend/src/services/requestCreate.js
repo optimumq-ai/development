@@ -32,17 +32,47 @@ var db = require('../db');
 var get = db.get, run = db.run;
 var uuidv4 = require('uuid').v4;
 
-// Only well-formed YYYY-NNNN numbers take part in sequencing. This deliberately excludes the system and demo
+// THE CITIZEN-FACING REQUEST NUMBER: YYYY-NNNNNN (fixed width).
+//
+// SEQ_DIGITS is the ONE place the width is defined. It drives BOTH the zero-padding and the pattern that finds
+// the highest number so far — and that is the whole point. They used to be two separate literals (`padStart(4)`
+// and a hardcoded `[0-9]{4}` regex), and a city that took 10,000 requests in one year hit this:
+//
+//   at 9,999 requests -> the helper mints 2026-10000, and the INSERT succeeds (padStart does not truncate).
+//   ...but the `[0-9]{4}` pattern CANNOT SEE a 5-digit number, so the "highest so far" still reads 9,999
+//   -> the helper mints 2026-10000 a SECOND time -> UNIQUE violation -> INTAKE 500s.
+//   The city cannot accept another request for the rest of the year.
+//
+// 6 digits (999,999/yr) is Kevin's call — a large city can exceed 100,000 requests in a year.
+//
+// THE WIDTH MUST BE FIXED, not grow-as-needed. `ORDER BY request_number DESC` is a LEXICAL sort, and with
+// mixed widths '2026-9999' sorts ABOVE '2026-010000' — which reintroduces exactly the collision above. Uniform
+// width is what makes the "highest number" sort correct by construction, so this is a correctness property,
+// not a cosmetic one. Changing SEQ_DIGITS means renumbering the existing rows to match (see
+// db/renumber_request_numbers.js) — never leave two widths in the table.
+var SEQ_DIGITS = 6;
+
+// Only well-formed YYYY-NNNNNN numbers take part in sequencing. This deliberately excludes the system and demo
 // rows ('SYS-IMPORT-…', 'DEMO-2026-5069', 'LIBRARY') that broke algorithm B.
 async function nextRequestNumber(year) {
   year = year || new Date().getFullYear();
   var row = await get(
-    "SELECT request_number FROM requests WHERE request_number ~ ('^' || ? || '-[0-9]{4}$') ORDER BY request_number DESC LIMIT 1",
+    "SELECT request_number FROM requests WHERE request_number ~ ('^' || ? || '-[0-9]{" + SEQ_DIGITS + "}$') " +
+    'ORDER BY request_number DESC LIMIT 1',
     [String(year)]
   );
   var seq = 1;
   if (row && row.request_number) seq = parseInt(row.request_number.split('-')[1], 10) + 1;
-  return year + '-' + String(seq).padStart(4, '0');
+
+  // The ceiling is now explicit and LOUD rather than a silent duplicate-key 500 at the front door. If a city
+  // ever genuinely reaches it, widen SEQ_DIGITS and renumber — do not let it mint an over-wide number.
+  if (String(seq).length > SEQ_DIGITS) {
+    throw new Error(
+      'Request numbering exhausted for ' + year + ': sequence ' + seq + ' exceeds ' + SEQ_DIGITS +
+      ' digits. Widen SEQ_DIGITS in services/requestCreate.js and renumber existing rows.'
+    );
+  }
+  return year + '-' + String(seq).padStart(SEQ_DIGITS, '0');
 }
 
 var COLUMNS = [
@@ -139,4 +169,9 @@ async function createRequest(fields, opts) {
   return { id: id, requestNumber: requestNumber };
 }
 
-module.exports = { createRequest: createRequest, nextRequestNumber: nextRequestNumber, COLUMNS: COLUMNS };
+module.exports = {
+  createRequest: createRequest,
+  nextRequestNumber: nextRequestNumber,
+  COLUMNS: COLUMNS,
+  SEQ_DIGITS: SEQ_DIGITS, // exported so the renumber script and the suite cannot drift from the helper
+};

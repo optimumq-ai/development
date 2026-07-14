@@ -74,7 +74,7 @@ var year = new Date().getFullYear();
       }
     }
 
-    var maxRow = await db.get("SELECT request_number FROM requests WHERE request_number ~ ('^' || ? || '-[0-9]{4}$') ORDER BY request_number DESC LIMIT 1", [String(year)]);
+    var maxRow = await db.get("SELECT request_number FROM requests WHERE request_number ~ ('^' || ? || '-[0-9]{" + RC.SEQ_DIGITS + "}$') ORDER BY request_number DESC LIMIT 1", [String(year)]);
     var countRow = await db.get("SELECT COUNT(*) AS n FROM requests WHERE request_number LIKE ?", [year + '-%']);
     ok('a numbering baseline exists to test against (' + countRow.n + ' requests this year)', !!maxRow);
     var maxSeq = parseInt(maxRow.request_number.split('-')[1], 10);
@@ -83,9 +83,9 @@ var year = new Date().getFullYear();
     // Algorithm C (COUNT+1) is only safe while COUNT == MAX. Delete one request below the max and it
     // immediately mints a number that already exists. Simulate the arithmetic on the REAL data.
     var afterOneDeletion = countSeq - 1 + 1; // COUNT drops by one; C mints COUNT+1
-    var wouldCollide = await db.get('SELECT id FROM requests WHERE request_number = ?', [year + '-' + String(afterOneDeletion).padStart(4, '0')]);
+    var wouldCollide = await db.get('SELECT id FROM requests WHERE request_number = ?', [year + '-' + String(afterOneDeletion).padStart(RC.SEQ_DIGITS, '0')]);
     ok('ALGORITHM C IS BROKEN: after deleting any request below the max, COUNT+1 = ' + year + '-' +
-       String(afterOneDeletion).padStart(4, '0') + ' — a number that ALREADY EXISTS (UNIQUE violation → intake 500s)',
+       String(afterOneDeletion).padStart(RC.SEQ_DIGITS, '0') + ' — a number that ALREADY EXISTS (UNIQUE violation → intake 500s)',
        !!wouldCollide);
 
     // Algorithm B (last row by created_at) restarts at 0001 when the newest row has a non-standard number.
@@ -106,16 +106,53 @@ var year = new Date().getFullYear();
     var lastByCreated = await db.get('SELECT request_number FROM requests ORDER BY created_at DESC LIMIT 1');
     var parts = String(lastByCreated.request_number).split('-');
     var bWould = (parts[0] == year) ? (parseInt(parts[1], 10) + 1) : 1;
-    var bCollides = await db.get('SELECT id FROM requests WHERE request_number = ?', [year + '-' + String(bWould).padStart(4, '0')]);
+    var bCollides = await db.get('SELECT id FROM requests WHERE request_number = ?', [year + '-' + String(bWould).padStart(RC.SEQ_DIGITS, '0')]);
     ok('ALGORITHM B IS BROKEN: the newest row is "' + lastByCreated.request_number + '", so B would mint ' +
-       year + '-' + String(bWould).padStart(4, '0') + ' — which ALREADY EXISTS', !!bCollides);
+       year + '-' + String(bWould).padStart(RC.SEQ_DIGITS, '0') + ' — which ALREADY EXISTS', !!bCollides);
 
     // The helper's algorithm ignores non-standard numbers entirely and takes the true max.
     var next = await RC.nextRequestNumber();
     ok('the helper mints ' + next + ' — MAX(' + maxRow.request_number + ') + 1, ignoring DEMO-/SYS-/LIBRARY rows',
-      next === year + '-' + String(maxSeq + 1).padStart(4, '0'));
+      next === year + '-' + String(maxSeq + 1).padStart(RC.SEQ_DIGITS, '0'));
     var clash = await db.get('SELECT id FROM requests WHERE request_number = ?', [next]);
     ok('...and that number does NOT already exist', !clash);
+
+    // =====================================================================================
+    // 1b. THE 10,000-REQUEST CEILING — the failure a large city would have hit in production.
+    // =====================================================================================
+    // The width used to be TWO separate literals: `padStart(4)` and a hardcoded `[0-9]{4}` lookup pattern. At
+    // 9,999 requests the helper minted 2026-10000 and the INSERT succeeded (padStart does not truncate) — but
+    // the 4-digit pattern COULD NOT SEE the 5-digit number, so "the highest so far" still read 9,999 and the
+    // helper minted 2026-10000 a SECOND time. UNIQUE violation -> INTAKE 500s -> the city could not accept
+    // another request for the rest of the year. Width now comes from ONE constant (RC.SEQ_DIGITS) so the pad
+    // and the pattern cannot drift apart again. Construct the boundary; never borrow it.
+    var CEIL = 'CEILTEST-' + Date.now();
+    var atLimit = Math.pow(10, RC.SEQ_DIGITS - 2) - 1; // 9,999 when SEQ_DIGITS = 6
+    var nines = require('uuid').v4();
+    await db.run("INSERT INTO requests (id, request_number, requestor_name, requestor_email, description) VALUES (?,?,?,?,?)",
+      [nines, year + '-' + String(atLimit).padStart(RC.SEQ_DIGITS, '0'), 'Scale', 'scale@fixture.test',
+       'the ' + atLimit + 'th request of the year ' + CEIL]);
+    created.push(nines);
+
+    var over1 = await RC.nextRequestNumber();
+    var overId = require('uuid').v4();
+    await db.run("INSERT INTO requests (id, request_number, requestor_name, requestor_email, description) VALUES (?,?,?,?,?)",
+      [overId, over1, 'Scale', 'scale@fixture.test', 'the request that crosses the old ceiling ' + CEIL]);
+    created.push(overId);
+    ok('crossing ' + atLimit + ': the helper mints ' + over1 + ' (' + RC.SEQ_DIGITS + '-digit, fixed width)',
+      over1 === year + '-' + String(atLimit + 1).padStart(RC.SEQ_DIGITS, '0'));
+
+    var over2 = await RC.nextRequestNumber();
+    ok('THE OLD KILLER IS DEAD: the NEXT number is ' + over2 + ', not a repeat of ' + over1 +
+       ' (the old code re-minted it and intake 500d on a UNIQUE violation)', over2 !== over1);
+
+    var stillMax = await db.get("SELECT request_number FROM requests WHERE request_number ~ ('^' || ? || '-[0-9]{" + RC.SEQ_DIGITS + "}$') ORDER BY request_number DESC LIMIT 1", [String(year)]);
+    ok('the LEXICAL max sort still returns the true highest (' + stillMax.request_number + ') across the ' +
+       'boundary — this is WHY the width is fixed, not grow-as-needed', stillMax.request_number === over1);
+
+    var widths = await db.all("SELECT DISTINCT length(request_number) AS n FROM requests WHERE request_number ~ '^[0-9]{4}-[0-9]+$'");
+    ok('EVERY citizen number in the table is one uniform width (' + widths.map(function (w) { return w.n; }).join(', ') + ' chars)',
+      widths.length === 1 && Number(widths[0].n) === 5 + RC.SEQ_DIGITS);
 
     // =====================================================================================
     // 2. THE HELPER SURVIVES WHAT BROKE ALGORITHM C: create, delete below the max, create again.
