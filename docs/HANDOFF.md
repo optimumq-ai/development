@@ -2753,6 +2753,88 @@ the only `sk-` hit was `rd-insurance-ri**sk-**…`, a record-type id.
 
 ---
 
+## 2026-07-14 (zu) — The request number had a HARD CEILING at 10,000/year. It was never widened.
+
+Kevin asked whether a prior agent had widened the citizen request number "so the extra digits would be
+invisible unless used." **It never did.** What existed was a 4-digit number that **fails at exactly the scale
+he was worried about** — and he was right to ask.
+
+### 🚨 THE BUG — intake 500s for the rest of the year at 10,000 requests
+
+The width lived in **two separate literals**: `padStart(4, '0')` and a hardcoded `[0-9]{4}` lookup pattern. At
+9,999 requests in a year:
+
+1. the helper mints `2026-10000`, and **the INSERT SUCCEEDS** (`padStart` does not truncate);
+2. but the `[0-9]{4}` pattern **cannot see a 5-digit number**, so "the highest so far" still reads **9,999**;
+3. so the helper mints `2026-10000` **a second time** → **UNIQUE violation → INTAKE 500s**.
+
+**The city cannot accept another request for the rest of the year.** Constructed and proven in the test DB
+*before* the fix; **4 new suite assertions** now hold the boundary so it cannot come back.
+
+### THE FIX — one constant, fixed width
+
+**`SEQ_DIGITS = 6`** (999,999/yr — **Kevin's call**; a large city can exceed 100,000/yr). It drives **both** the
+pad and the pattern, so they **can never drift apart again**. The ceiling is now a **loud throw naming the
+remedy**, not a silent duplicate-key 500 at the front door.
+
+**FIXED WIDTH IS A CORRECTNESS PROPERTY, NOT A COSMETIC ONE.** `nextRequestNumber` takes the max with
+`ORDER BY request_number DESC` — a **LEXICAL** sort. With mixed widths **`2026-9999` sorts ABOVE
+`2026-010000`**, which re-introduces the identical collision. Uniform width is what makes that sort correct *by
+construction*. So "grow the digits only when needed" was never a safe design, and the **45 existing rows had to
+be renumbered**, not left alongside.
+
+`db/renumber_request_numbers.js` — dry-run by default, **refuses on any collision**, touches only well-formed
+`YYYY-NNNNNN` citizen numbers (`DEMO-`/`SYS-`/`LIBRARY-` are not citizen numbers and are left alone), verifies
+uniformity after. **Safe now because every number is demo data; that window closes the day a real citizen holds
+one.**
+
+### ⚠️ DEPLOY ORDER MATTERS — found the hard way
+
+Renumbering while the **old code was still resident** made it mint `2026-0001` **again**: its 4-digit pattern
+saw no 4-digit rows left and **restarted the sequence at 1**. **Deploy the code → restart → THEN renumber.**
+(Caught on a live probe and cleaned up; no damage.)
+
+**Verified:** suite **314/314** (310 + 4 ceiling assertions), live untouched by tests · 45 live numbers
+renumbered, **zero collisions, width uniform** · live intake mints **`2026-000046`**, classified and routed ·
+the queue renders uniform-width numbers · config integrity **CLEAN**.
+
+---
+
+## 2026-07-14 (yv) — CORRECTION: the redaction workstation is NOT dark. I was wrong, twice.
+
+**I told Kevin the 678-line `RedactionTaskPage` was unreachable dead code and that wiring it was the highest
+value change in the repo. That was false.** A screenshot of the running app disproves it: **My Tasks → task pool
+→ the Redaction row → Open → the workstation renders** (page canvas, AI Redaction rail, Manual Redaction,
+Finalize & Release, side-by-side, document search), **zero page errors**.
+
+**Where the false claim came from:** a subagent audit grepped for a literal `/redaction/<taskId>` and missed
+that `components/ui/TaskPoolSection.js:72` **builds the path by concatenation** (`'/redaction/' + t.id`). I
+repeated its confident verdict **without opening the page**. *Second time in one session that an audit's
+confident claim did not survive contact with the running system — open the app before believing the grep.*
+
+**So `BUILD_PRIORITY_SUMMARY` item 2 ("a redaction task click should open the workspace") is ALREADY DONE** —
+that doc is from 2026-07-08 and predates the work.
+
+**What the workstation actually shows** is the correct gate: *"This request has no responsive records yet. Mark
+records responsive in Record Search first."* The loop is **not broken by a missing link** — it is **gated on the
+upstream step**, exactly as designed.
+
+**The one genuinely missing Tier 1 piece is the RECORD SEARCH task screen** (that part of the audit holds):
+**no page, no route** — a `record_search` task falls through to the generic request workspace, where staff use
+the **v1 `RecordsPanel`** (upload, Responsive/Not-Responsive toggle). That is why Kevin has never seen a record
+search UI: **there isn't one.** It is a **NEW SCREEN**, so the UI rule applies — **agree the design before
+building.** `SPEC_record_search_task_screen.md` drafts one (DRAFT status; Kevin has not seen it).
+
+**Also confirmed NOT built:** portal **R9** (`search_more` / `no_match_search` appear in **zero source files** —
+the copy Kevin wants to revise exists only as *proposed* text in `DESIGN_split_canvas_intake.md:171-176`, so
+revising it is a doc edit) and **R10** (returned-for-rework surfacing — the reviewer can return work with a
+note; the author's task row never says so).
+
+**Standing lesson: `BUILD_PRIORITY_SUMMARY.md` (2026-07-08) is STALE.** Verify each item against the running
+app before planning from it.
+
+---
+
 # SESSION CLOSE — 2026-07-14. START HERE NEXT TIME.
 
 ## ⚠️ DO THIS FIRST, BEFORE ANY WORK
