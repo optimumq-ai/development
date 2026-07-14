@@ -19,7 +19,25 @@ var { v4: uuidv4 } = require('uuid');
 
 var INTENTS = ['complete', 'search_more', 'no_match_search', 'not_searchable'];
 
+// THE SEARCH DUTY. Three of the four intents are an instruction to the team; one is not.
+//
+//   search_more     -> "these match, but ALSO search for more"   -- the request is OPEN
+//   no_match_search -> the portal searched and nothing matched   -- an instruction to search, NOT abandonment
+//   not_searchable  -> the portal never searched this at all     -- the team must pull it
+//   complete        -> "this selection is everything I want"     -- NO duty; the requestor already answered it
+//
+// A description carrying a duty must be ANSWERED by the searcher before the search can be called complete.
+// Without that, the requestor's own picks are enough to advance the request -- and a request the requestor
+// considers OPEN gets fulfilled and closed. This set is what the gate reads.
+var DUTY_INTENTS = ['search_more', 'no_match_search', 'not_searchable'];
+
+// The searcher's two ways to answer. `nothing_further` is the load-bearing one: it is the sentence
+// "I searched; there is nothing more," and it is the ONLY thing that can close an open description.
+var OUTCOMES = ['records_added', 'nothing_further'];
+
 function isIntent(v) { return INTENTS.indexOf(v) >= 0; }
+function hasDuty(intent) { return DUTY_INTENTS.indexOf(intent) >= 0; }
+function isOutcome(v) { return OUTCOMES.indexOf(v) >= 0; }
 
 // The portal is a PUBLIC, unauthenticated surface. Everything off it is hostile until proven otherwise:
 // a bad intent string would otherwise sit in the DB and be read by the searcher as if it meant something.
@@ -107,6 +125,65 @@ async function persist(requestId, rawEntries) {
   return counts;
 }
 
+// THE UN-GATE. The searcher answers one description.
+//
+// Returns the updated row. Throws with a `.code` the route turns into a 4xx -- the established shape
+// (plain sentence + SCREAMING_SNAKE code) that the task screen renders verbatim.
+async function resolve(intentId, opts) {
+  opts = opts || {};
+  var row = await get('SELECT * FROM request_search_intents WHERE id = ?', [intentId]);
+  if (!row) throw tagged('That description is not on this request.', 'INTENT_NOT_FOUND', 404);
+
+  var outcome = String(opts.outcome || '');
+  if (!isOutcome(outcome)) throw tagged('Unknown resolution.', 'BAD_OUTCOME', 400);
+
+  var note = String(opts.note == null ? '' : opts.note).trim();
+
+  // "There is nothing more" is an assertion about the world, made on behalf of the city, that closes a
+  // description the requestor still considers open. Unevidenced, it is indistinguishable from never
+  // having looked -- the same reason a no-records closure refuses an empty effort trail. Say what you did.
+  if (outcome === 'nothing_further' && !note) {
+    throw tagged(
+      'Say what you searched. "There is nothing more" closes a description the requestor considers open — it has to be evidenced.',
+      'NOTE_REQUIRED', 422);
+  }
+
+  // Not an error: re-answering a description is how a searcher corrects themselves. Last answer wins,
+  // and the history trail keeps every one of them.
+  await run(
+    "UPDATE request_search_intents SET searcher_outcome = ?, resolution_note = ?, resolved_by = ?, " +
+    "resolved_at = to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS') WHERE id = ?",
+    [outcome, note || null, opts.actorName || 'Staff', intentId]);
+
+  return await get('SELECT * FROM request_search_intents WHERE id = ?', [intentId]);
+}
+
+function tagged(msg, code, status) {
+  var e = new Error(msg); e.code = code; e.status = status; return e;
+}
+
+// What the gate reads: the descriptions that carry a search duty and have NOT been answered.
+async function openIntents(requestId) {
+  var rows = await all(
+    'SELECT * FROM request_search_intents WHERE request_id = ? ORDER BY seq ASC', [requestId]);
+  return rows.filter(function (r) { return hasDuty(r.intent) && !r.searcher_outcome; });
+}
+
+// A no-records closure is the blanket form of "I searched; there is nothing more" -- it asserts it about
+// the whole request at once. Rather than making the searcher answer each description and THEN close on
+// nothing, the closure answers them, so the per-description ledger is never left half-written.
+async function resolveAllOpen(requestId, opts) {
+  opts = opts || {};
+  var open = await openIntents(requestId);
+  for (var i of open) {
+    await run(
+      "UPDATE request_search_intents SET searcher_outcome = 'nothing_further', resolution_note = ?, " +
+      "resolved_by = ?, resolved_at = to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS') WHERE id = ?",
+      [opts.note || 'Closed with the request: no responsive records found.', opts.actorName || 'Staff', i.id]);
+  }
+  return open.length;
+}
+
 // What the searcher reads. Grouped by description, because a flat pile is what R9 exists to kill.
 async function forRequest(requestId) {
   var intents = await all(
@@ -121,6 +198,13 @@ async function forRequest(requestId) {
     try { q = JSON.parse(i.queries_tried || '[]'); } catch (err) { q = []; }
     return {
       id: i.id, seq: i.seq, description: i.description, intent: i.intent, queriesTried: q,
+      // Does this description oblige the team to search, and has the searcher answered it yet?
+      hasDuty: hasDuty(i.intent),
+      open: hasDuty(i.intent) && !i.searcher_outcome,
+      searcherOutcome: i.searcher_outcome || null,
+      resolutionNote: i.resolution_note || null,
+      resolvedBy: i.resolved_by || null,
+      resolvedAt: i.resolved_at || null,
       selected: selected.filter(function (s) { return s.intent_id === i.id; }),
       notSelected: notSelected.filter(function (n) { return n.intent_id === i.id; })
     };
@@ -133,6 +217,8 @@ async function forRequest(requestId) {
   return {
     groups: groups,
     ungroupedSelected: ungrouped,
+    // The gate, precomputed for the screen so the Found button can refuse BEFORE the round trip and say why.
+    openCount: groups.filter(function (g) { return g.open; }).length,
     totals: {
       selected: selected.length,
       notSelected: notSelected.length,
@@ -142,4 +228,7 @@ async function forRequest(requestId) {
   };
 }
 
-module.exports = { persist, forRequest, normalize, INTENTS };
+module.exports = {
+  persist, forRequest, normalize, resolve, resolveAllOpen, openIntents,
+  INTENTS, DUTY_INTENTS, OUTCOMES, hasDuty
+};

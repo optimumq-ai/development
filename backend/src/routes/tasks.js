@@ -4,6 +4,7 @@ const { all, get, run } = require('../db');
 const { requireAuth, requireRole } = require('../middleware/auth');
 const tr = require('../services/taskRouting');
 const scope = require('../services/requestScope');
+const SI = require('../services/searchIntents');
 
 function withReq(sql) {
   // A task hangs off the WORK row, but request_number is a PARENT field — the number the citizen quotes.
@@ -123,6 +124,25 @@ router.post('/:id/resolve', requireAuth, async function (req, res) {
       if (!inc || inc.n < 1) {
         return res.status(422).json({ error: 'Mark at least one record "Include in Response" before completing the search.', code: 'NOTHING_INCLUDED' });
       }
+
+      // THE R9 GATE (Tier 1 #5). The requestor's intent is not a suggestion.
+      //
+      // Attaching records is NOT the same as having searched. The records the requestor picked in the
+      // portal are already sitting on the request -- so without this, a description whose intent says
+      // "these match, but ALSO search for MORE" would be satisfied by the requestor's OWN PICKS, and the
+      // request would advance to redaction and be fulfilled. We would close, as complete, a request the
+      // requestor still considers OPEN. R9 has been able to SAY this since it shipped; nothing acted on it.
+      var open = await SI.openIntents(rid);
+      if (open.length) {
+        return res.status(422).json({
+          error: open.length === 1
+            ? 'The requestor asked the team to search for “' + open[0].description + '”. Answer that description — record what you found, or that there is nothing more — before completing the search.'
+            : open.length + ' descriptions still need an answer from you — record what you found, or that there is nothing more — before completing the search.',
+          code: 'UNRESOLVED_SEARCH_INTENT',
+          openIntents: open.map(function (i) { return { id: i.id, description: i.description, intent: i.intent }; })
+        });
+      }
+
       await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [req.params.id]);
       await tr.applyStageTransition(rid, 'exemption_review', Object.assign({
         action: 'SEARCH_COMPLETE',
@@ -143,13 +163,22 @@ router.post('/:id/resolve', requireAuth, async function (req, res) {
           code: 'NO_EFFORT_TRAIL'
         });
       }
+      // A no-records closure IS "I searched; there is nothing more" -- asserted about the whole request at
+      // once. It does not need the gate (the effort trail above is its evidence), but it must not leave the
+      // per-description ledger half-written: every open description is answered BY this closure, and the
+      // audit trail should say so rather than showing descriptions that were never dispositioned.
+      var closedOut = await SI.resolveAllOpen(rid, {
+        actorName: actor.actorName,
+        note: 'Closed with the request: no responsive records found.' + (notes ? ' ' + notes : '')
+      });
+
       await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [req.params.id]);
       await run("UPDATE requests SET closure_reason = 'no_records' WHERE id = ?", [rid]);
       await tr.applyStageTransition(rid, 'closed', Object.assign({
         action: 'CLOSED_NO_RECORDS',
         notes: 'Closed — no responsive records. Diligent search evidenced by ' + eff.n + ' logged action(s).' + (notes ? ' ' + notes : '')
       }, actor));
-      return res.json({ ok: true, outcome: 'no_records', effortEntries: eff.n });
+      return res.json({ ok: true, outcome: 'no_records', effortEntries: eff.n, intentsClosed: closedOut });
     }
 
     return res.status(400).json({ error: 'Unknown outcome' });

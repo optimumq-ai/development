@@ -358,6 +358,39 @@ router.get('/:id/search-intents', requireAuth, async function(req, res) {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// THE UN-GATE (Tier 1 #5). The searcher answers ONE description: "the records I attached answer this"
+// (records_added) or "I searched; there is nothing more" (nothing_further, note required).
+//
+// Until every duty-carrying description is answered, POST /tasks/:id/resolve refuses `found` -- see the
+// gate in routes/tasks.js. The answer is written to the intent row AND to request_history, because the
+// per-description ledger is the thing the city shows when asked whether the search was diligent.
+//
+// SEARCH_INTENT_RESOLVED is deliberately NOT in the no-records effort-trail action list: an assertion that
+// there is nothing more is a CLAIM, not evidence of a search. Letting it evidence itself would be circular
+// -- it would mean a searcher could clear both gates having run no search at all.
+router.post('/:id/search-intents/:intentId/resolve', requireAuth, async function(req, res) {
+  try {
+    var SI = require('../services/searchIntents');
+    var b = req.body || {};
+    var actorName = (req.user && req.user.name) || 'Staff';
+
+    var row = await SI.resolve(req.params.intentId, {
+      outcome: b.outcome, note: b.note, actorName: actorName
+    });
+
+    var verb = row.searcher_outcome === 'nothing_further'
+      ? 'Searched — nothing further responsive'
+      : 'Searched — responsive records attached';
+    await logHistory(req.params.id, req.user && req.user.sub, actorName, 'SEARCH_INTENT_RESOLVED',
+      verb + ' — "' + row.description + '"' + (row.resolution_note ? ': ' + row.resolution_note : ''));
+
+    res.json({ ok: true, intent: row, openCount: (await SI.openIntents(req.params.id)).length });
+  } catch (e) {
+    if (e.status) return res.status(e.status).json({ error: e.message, code: e.code });
+    res.status(500).json({ error: e.message });
+  }
+});
+
 // Draft preview for the "Contact requestor" UI: the templated body + channel/address hints, no side effects.
 router.get('/:id/clarification/preview', requireAuth, async function(req, res) {
   try {

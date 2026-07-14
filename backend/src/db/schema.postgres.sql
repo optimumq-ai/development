@@ -62,6 +62,26 @@ CREATE TABLE IF NOT EXISTS request_search_intents (
 );
 CREATE INDEX IF NOT EXISTS idx_search_intents_request ON request_search_intents(request_id);
 
+-- THE SEARCHER'S ANSWER TO THE DESCRIPTION (Tier 1 #5 -- the enforcement half of R9).
+--
+-- R9 captured what the requestor MEANT and the screen showed it in amber. Nothing enforced it, so a
+-- request whose requestor explicitly asked us to SEARCH FOR MORE could be fulfilled from their own
+-- selection alone and advanced -- closing, in fact, a request they consider OPEN. That is the precise
+-- failure the intent column exists to name.
+--
+-- A gate needs an un-gate, and this is it: the sentence "I searched; there is nothing more."
+--   records_added   : the records I attached answer this description.
+--   nothing_further : I searched and there is nothing more responsive to it. Requires a NOTE -- this is
+--                     the assertion that closes a description the requestor still considers open, and an
+--                     unevidenced version of it is indistinguishable from never having looked (the same
+--                     reasoning that makes a no-records closure refuse an empty effort trail).
+-- NULL = unresolved. Only intents that carry a SEARCH DUTY (search_more / no_match_search /
+-- not_searchable) must be resolved; `complete` means the requestor said the selection is everything.
+ALTER TABLE request_search_intents ADD COLUMN IF NOT EXISTS searcher_outcome TEXT;
+ALTER TABLE request_search_intents ADD COLUMN IF NOT EXISTS resolution_note TEXT;
+ALTER TABLE request_search_intents ADD COLUMN IF NOT EXISTS resolved_by TEXT;
+ALTER TABLE request_search_intents ADD COLUMN IF NOT EXISTS resolved_at TEXT;
+
 -- The records the requestor was SHOWN and did NOT take. Written on EVERY results-clear -- each
 -- re-search AND the final Proceed -- because one description may be searched several times.
 -- INVISIBLE TO THE REQUESTOR, forever. It exists so the searcher never re-surfaces a rejected record.

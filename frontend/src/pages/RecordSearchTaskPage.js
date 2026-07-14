@@ -83,6 +83,7 @@ export default function RecordSearchTaskPage() {
   var [searching, setSearching] = useState(false);
   var [attached, setAttached] = useState([]);
   var [resolved, setResolved] = useState(null);
+  var [notes, setNotes] = useState({});       // per-description: what the searcher actually searched
 
   function loadTrail(rid) {
     return api.get('/requests/' + rid).then(function (r) {
@@ -91,6 +92,10 @@ export default function RecordSearchTaskPage() {
   }
   function loadAttached(rid) {
     return api.get('/files/' + rid).then(function (r) { setAttached(r.data.files || []); }).catch(function () {});
+  }
+  function loadIntake(rid) {
+    return api.get('/requests/' + rid + '/search-intents')
+      .then(function (x) { setIntake(x.data); }).catch(function () {});
   }
 
   useEffect(function () {
@@ -168,6 +173,28 @@ export default function RecordSearchTaskPage() {
         // A record with no retrievable file cannot be attached. Say WHY rather than failing silently —
         // the connectors that would pull it are stubs, and the searcher needs to know that, not guess.
         setFlash({ tone: 'crit', text: (d && d.error) || 'Could not attach that record.' });
+      })
+      .then(function () { setBusy(''); });
+  }
+
+  // --- answering a description (§5d — the UN-GATE) ---------------------------------------------------
+  // The searcher's answer to what the requestor asked for. Until every duty-carrying description has one,
+  // the backend refuses `found` — otherwise the requestor's OWN portal picks would be enough to advance a
+  // request they explicitly asked us to search further, and it would be fulfilled and closed as complete.
+  function answerIntent(intentId, outcome) {
+    setBusy(intentId);
+    return api.post('/requests/' + task.request_id + '/search-intents/' + intentId + '/resolve',
+      { outcome: outcome, note: (notes[intentId] || '').trim() })
+      .then(function (r) {
+        setFlash({ tone: 'ok', text: outcome === 'nothing_further'
+          ? 'Recorded: searched, nothing further responsive.'
+          : 'Recorded: the attached records answer this description.' });
+        setNotes(function (n) { var c = Object.assign({}, n); delete c[intentId]; return c; });
+        return Promise.all([loadIntake(task.request_id), loadTrail(task.request_id)]);
+      })
+      .catch(function (e) {
+        var d = e.response && e.response.data;
+        setFlash({ tone: 'crit', text: (d && d.error) || 'Could not record that.' });
       })
       .then(function () { setBusy(''); });
   }
@@ -266,6 +293,11 @@ export default function RecordSearchTaskPage() {
   var effect = policy && policy.clarification_clock_effect;
   var conferenceOwed = duty === 'required_before_burden_denial';
   var includedCount = attached.filter(function (f) { return f.responsive; }).length;
+
+  // The descriptions the requestor asked us to SEARCH and the searcher has not answered yet. This is the
+  // gate, mirrored client-side so the button can refuse before the round trip — but the backend is the one
+  // that actually enforces it (routes/tasks.js, 422 UNRESOLVED_SEARCH_INTENT).
+  var openIntents = groups.filter(function (g) { return g.open; });
   var clockStops = effect === 'toll_pause_resume' || effect === 'toll_and_restart'
                 || effect === 'start_gate' || effect === 'operational_hold';
 
@@ -360,6 +392,53 @@ export default function RecordSearchTaskPage() {
                           Nothing selected for this description.
                         </div>
                       )}
+
+                      {/* THE UN-GATE (§5d). A description the requestor asked us to search stays OPEN until the
+                          searcher answers it. Answering is what releases the Found button — nothing else does. */}
+                      {g.searcherOutcome ? (
+                        <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid ' + C.hair,
+                          fontSize: 12.5, color: C.green, lineHeight: 1.5 }}>
+                          <b>✓ {g.searcherOutcome === 'nothing_further'
+                            ? 'Searched — nothing further responsive.'
+                            : 'Searched — the attached records answer this.'}</b>
+                          {g.resolutionNote && <span style={{ color: C.muted }}> — “{g.resolutionNote}”</span>}
+                          <span style={{ color: C.faint }}> ({g.resolvedBy})</span>
+                        </div>
+                      ) : g.open ? (
+                        <div style={{ marginTop: 10, paddingTop: 10, borderTop: '1px solid ' + C.hair }}>
+                          <div style={{ fontSize: 12.5, fontWeight: 650, marginBottom: 6 }}>
+                            Your answer to this description
+                          </div>
+                          <input
+                            value={notes[g.id] || ''}
+                            onChange={function (e) {
+                              var v = e.target.value;
+                              setNotes(function (n) { var c = Object.assign({}, n); c[g.id] = v; return c; });
+                            }}
+                            placeholder="What did you search? (systems, date ranges, terms)"
+                            style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', fontSize: 13,
+                              borderRadius: 8, border: '1px solid ' + C.hairStrong, background: C.field, marginBottom: 8 }} />
+                          <div style={{ display: 'flex', gap: 8 }}>
+                            <button type="button" disabled={!!busy}
+                              onClick={function () { answerIntent(g.id, 'records_added'); }}
+                              style={{ flex: 1, cursor: busy ? 'not-allowed' : 'pointer', background: C.surface,
+                                color: C.ink, border: '1px solid ' + C.hairStrong, borderRadius: 8,
+                                padding: '8px 10px', fontSize: 12.5, fontWeight: 650 }}>
+                              {busy === g.id ? '…' : 'The attached records answer this'}
+                            </button>
+                            <button type="button" disabled={!!busy}
+                              onClick={function () { answerIntent(g.id, 'nothing_further'); }}
+                              style={{ flex: 1, cursor: busy ? 'not-allowed' : 'pointer', background: C.surface,
+                                color: C.ink, border: '1px solid ' + C.hairStrong, borderRadius: 8,
+                                padding: '8px 10px', fontSize: 12.5, fontWeight: 650 }}>
+                              {busy === g.id ? '…' : 'I searched — nothing more'}
+                            </button>
+                          </div>
+                          <div style={{ fontSize: 11.5, color: C.faint, marginTop: 6, lineHeight: 1.5 }}>
+                            “Nothing more” closes a description the requestor considers open — it needs the note.
+                          </div>
+                        </div>
+                      ) : null}
                     </div>
                   );
                 })}
@@ -589,14 +668,29 @@ export default function RecordSearchTaskPage() {
               </div>
             ) : (
               <>
-                <button type="button" disabled={!!busy || includedCount < 1} onClick={function () { resolve('found'); }}
-                  title={includedCount < 1 ? 'Include at least one record in the response first.' : ''}
-                  style={{ width: '100%', cursor: (busy || includedCount < 1) ? 'not-allowed' : 'pointer',
-                    background: includedCount < 1 ? C.surface2 : C.green, color: includedCount < 1 ? C.faint : '#fff',
-                    border: '1px solid ' + (includedCount < 1 ? C.hair : C.green), borderRadius: 9,
+                {/* Blocked by EITHER an empty response (nothing to hand on) or an unanswered description
+                    (the requestor asked us to search and we have not said what we found). */}
+                <button type="button" disabled={!!busy || includedCount < 1 || openIntents.length > 0}
+                  onClick={function () { resolve('found'); }}
+                  title={openIntents.length > 0
+                    ? 'Answer the description(s) the requestor asked you to search first.'
+                    : (includedCount < 1 ? 'Include at least one record in the response first.' : '')}
+                  style={{ width: '100%', cursor: (busy || includedCount < 1 || openIntents.length > 0) ? 'not-allowed' : 'pointer',
+                    background: (includedCount < 1 || openIntents.length > 0) ? C.surface2 : C.green,
+                    color: (includedCount < 1 || openIntents.length > 0) ? C.faint : '#fff',
+                    border: '1px solid ' + ((includedCount < 1 || openIntents.length > 0) ? C.hair : C.green), borderRadius: 9,
                     padding: '10px 12px', fontSize: 13.5, fontWeight: 650, marginBottom: 8 }}>
                   {busy === 'found' ? 'Completing…' : 'Found — ' + includedCount + ' to include →'}
                 </button>
+
+                {openIntents.length > 0 && (
+                  <div style={{ fontSize: 12, color: C.amber, background: C.amberTint, border: '1px solid ' + C.amber,
+                    borderRadius: 8, padding: '8px 10px', marginBottom: 8, lineHeight: 1.5 }}>
+                    <b>{openIntents.length === 1 ? 'One description is still open.' : openIntents.length + ' descriptions are still open.'}</b>{' '}
+                    The requestor asked the team to search. Answer {openIntents.length === 1 ? 'it' : 'them'} above —
+                    fulfilling from their own selection alone would close a request they consider OPEN.
+                  </div>
+                )}
                 <button type="button" disabled={!!busy} onClick={function () { resolve('no_records'); }}
                   style={{ width: '100%', cursor: busy ? 'not-allowed' : 'pointer', background: C.surface,
                     color: C.muted, border: '1px solid ' + C.hairStrong, borderRadius: 9,

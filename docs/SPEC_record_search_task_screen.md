@@ -15,7 +15,8 @@
 > **Still open:** §4b (audio/video — designed, needs the `ExternalEvidenceReference` table), §4c (paper /
 > scanner), §4d (other). The format toggle is not built; the screen is digital-only today.
 >
-> Tests: `verify_search_intents` (29) · `verify_request_defect` (28) · `verify_search_resolve` (32).
+> Tests: `verify_search_intents` (29) · `verify_request_defect` (28) · `verify_search_resolve` (32) ·
+> `verify_search_intent_gate` (37).
 Legend: `[BUILT]` · `[PARTIAL]` · `[NOT BUILT]` · `[NEW]` (introduced by this spec).
 
 **Scope.** The dedicated screen a Fulfillment Staff (Record Search) member sees when they click a `record_search` task in **My Tasks**. Single-record only — the MRR Multi-Record Search task (`mrr_search`) is a separate, hand-assigned flow (`MASTER` A2) and out of scope here. Mirrors the proven `EstimateTaskPage.js` pattern: load task via `GET /tasks/:taskId`, header + request context, one focused work surface, action drives completion.
@@ -399,10 +400,51 @@ verification before reliance. Michigan's clock model is a flagged cross-doc conf
 ### 5c. Log phone call `[NEW]`
 Free-form entry — who / when / summary / outcome → `request_history` as `CALL_LOGGED`. Pure effort trail.
 
-### 5d. Resolution `[NOT BUILT — folds in Tier 1 #5]`
+### 5d. Resolution `[BUILT 2026-07-14 — Tier 1 #5 closed]`
 - **Found** → attach the responsive record(s) → mark task complete → hand off to redaction/delivery per stage.
 - **No responsive records** → close with reason; the screen surfaces the accumulated **effort trail** (systems searched, calls logged, clarifications sent) as the closure evidence.
 - Explicit per-record found/not-found states are the prerequisite for the later MRR Partially-Granted roll-up (fulfillment spec §4).
+
+#### 5d-1. THE R9 GATE — the searcher answers the description `[BUILT 2026-07-14]`
+
+**The hole this closes.** R9 recorded what the requestor *meant* per description, and this screen showed it in
+amber. **Nothing enforced it** — and the one gate `found` did have ("at least one record marked Include in
+Response") **was already satisfied by the requestor's OWN PORTAL PICKS**, which sit on the request before the
+searcher does anything. So a request whose requestor explicitly said *"these match, but ALSO search for more"*
+could be advanced to redaction, fulfilled, and **closed as complete — while the requestor still considered it
+OPEN.** The intent column said so the entire time; nothing read it. **Attaching is not searching.**
+
+**The duty is intent-derived.** `search_more` · `no_match_search` (an instruction to search, *not* abandonment) ·
+`not_searchable` (the portal never searched it) **carry a search duty**. **`complete` does not** — the requestor
+already said the selection is everything.
+
+**The un-gate is a sentence.** Per open description the searcher records one of:
+
+| Outcome | Means | Note |
+|---|---|---|
+| `records_added` | *"The records I attached answer this description."* | optional — the records are the evidence |
+| `nothing_further` | *"I searched; there is nothing more responsive."* | **REQUIRED** |
+
+`nothing_further` demands a note because it is **the assertion that closes a description the requestor considers
+open**. Unevidenced, it is indistinguishable from never having looked — the same reasoning that makes a
+no-records closure refuse an empty effort trail.
+
+**The gate.** `POST /api/tasks/:id/resolve` `{outcome:'found'}` → **422 `UNRESOLVED_SEARCH_INTENT`** (naming the
+description) while any duty-carrying intent is unanswered. The Found button mirrors it client-side and says why.
+Un-gate: `POST /api/requests/:id/search-intents/:intentId/resolve` `{outcome, note}` → writes the per-description
+ledger **and** a `SEARCH_INTENT_RESOLVED` history row. Re-answering is allowed (a searcher correcting themselves);
+last answer wins, history keeps them all.
+
+> **⚠ THE TWO GATES MUST NOT FEED EACH OTHER.** `SEARCH_INTENT_RESOLVED` is deliberately **NOT** in the
+> no-records effort-trail action list. An assertion that nothing exists is a **claim, not evidence of a search** —
+> if it counted as effort it would **evidence itself**, and a searcher could answer *"nothing more"* and use that
+> very answer to satisfy the no-records evidence gate, **closing a request having run no search at all.** Test E
+> exists solely to hold this line.
+
+**A no-records closure answers every open description** (the blanket form of the same sentence), so the ledger is
+never left half-written — but it still needs its own real effort trail. **A request with no intake provenance**
+(pre-R9, or any request that never touched the portal) **is unaffected**: a gate that blocks work it has nothing
+to say about is just an outage.
 
 ---
 
@@ -426,6 +468,8 @@ Free-form entry — who / when / summary / outcome → `request_history` as `CAL
 | `MyTasksPage` routes by task type | `MyTasksPage.js` | `[NEW]` |
 | Persist shown-but-unselected intake candidates | `publicChat.js` — write on **every results-clear** (re-search *and* Proceed) → `request_intake_results` `[NEW table]` | `[NEW]` — **belongs to portal R9, not this screen** (§2.2) |
 | "Self Service Portal Search Results" bar (Selected `n` / Not Selected `n`) | this screen, §2.3 | `[NEW]` |
+| **The searcher's answer to a description** (`searcher_outcome` / `resolution_note` / `resolved_by` / `resolved_at`) | `request_search_intents` — 4 additive columns | `[BUILT 2026-07-14]` — §5d-1. The **un-gate**; NULL = unresolved |
+| **The R9 gate** — `found` refused while a duty description is unanswered | `routes/tasks.js` (422 `UNRESOLVED_SEARCH_INTENT`) | `[BUILT 2026-07-14]` — §5d-1. Tier 1 #5 |
 | **`ExternalEvidenceReference`** — the responsive AV item is a REFERENCE, not a file (nullable file) | `[NEW table]` — §4b | `[NEW]` — cheap now, brutally expensive to retrofit |
 | AV **responsive time range** (`responsive_start`/`responsive_end`) carried to redaction | search attach → `av_redaction_tasks` / handoff | `[NEW]` — **the highest-leverage field on the screen** |
 | **Redaction task defaults its assignee to the searcher** (separate task, same person by default) | `taskRouting.js` | `[NEW]` — §4b; WA meters search vs redaction separately |
