@@ -2392,3 +2392,45 @@ the reconciliation?", and the harness could re-send inside the same second, whic
 
 **State:** `main`, tree clean, app healthy, active jurisdiction `jur-tx` with a **repaired** config
 (standard=10, clarification a draft with provenance).
+
+## 2026-07-14 (sk) — Config integrity: the corruption class can no longer sit silently — 12/12
+
+**Yesterday's finding needed a systemic answer, not just a repair.** The live TX deadline config had held
+`standard = 77` days (real requests on a 77-day statutory clock) and a `__probe` marker; the live TX
+clarification policy had been `enabled: true` with no provenance — a policy switched ON in production by a
+crashed test. Both persisted **silently for an unknown time**, and both were **cemented** by the harness's own
+restore, which trusted whatever snapshot it read.
+
+**Nothing in the system could see it.** The attestation-drift check compares `content_hash` to `attested_hash`
+— and nothing is attested, so it had nothing to compare against.
+
+**Shipped.** `services/configIntegrity.js` + `GET /api/config-integrity` + `node src/db/check_config_integrity.js`
+(exits non-zero on error, so it can gate a deploy). Five invariants that hold **regardless of attestation**:
+1. **No live rule may be stamped by a test** (`updated_by ~ harness|probe|test`).
+2. **No config may carry a key its schema does not define** — this is how `__probe` survived.
+3. **An ENABLED policy must carry provenance** — a rule a city actually adopted has a citation; one that
+   doesn't is a test write.
+4. **Clock base durations must be plausible** (1..45 days).
+5. The active jurisdiction must have a usable primary clock.
+
+**⚠️ THE CHECK ALMOST MISSED THE BUG IT WAS WRITTEN TO CATCH.** My first plausibility bound was **1..90 days**
+— and **77 sits inside it**. The harness caught that immediately. Tightened to **1..45** (the longest base
+deadline anywhere in the researched set is TX `redaction_required` at 30). *A bound has to be tight enough to
+catch a plausible-looking wrong number, not just an absurd one.*
+
+**The harnesses are fixed at the root, not patched.** Three of them (`verify_deadline_rules`, `verify_reissue`,
+`verify_deposit_clock`) restored live config while stamping themselves `harness-restore` — a test fingerprint on
+production data, which the new checker flagged on its very first run. They now **capture and restore the
+original `updated_by`**, so the row goes back *exactly* as found. `verify_jurrules` additionally **refuses to
+run against a dirty config** rather than laundering it.
+
+**Verified 12/12** (`verify_config_integrity.js`) by INJECTING each contamination class and proving it is
+caught: the 77-day clock · the `__probe` key · a `harness-restore` stamp · an enabled-with-no-provenance policy
+· an invalid clock basis. Every finding carries a `fix` line.
+
+**THE PROOF THAT MATTERS: after the ENTIRE 12-harness suite runs, `check_config_integrity` reports CLEAN.**
+The tests no longer damage the data they test.
+
+**FULL SUITE GREEN — 305 assertions, 0 failures** across 12 harnesses.
+
+**State:** `main`, tree clean, app healthy, `jur-tx` active with verified-clean config.
