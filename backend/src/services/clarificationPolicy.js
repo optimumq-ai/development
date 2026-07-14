@@ -41,7 +41,17 @@ var FIELDS = [
   { key: 'abandonment_closure', type: 'enum', values: CLOSURES, default: 'unspecified',
     label: 'Closure on non-response', help: 'Whether / how a non-responding request may be closed.' },
   { key: 'closure_notice_required', type: 'bool', default: false,
-    label: 'Written closure notice required', help: 'Whether a written denial/closure notice must be sent when a vague request is closed.' }
+    label: 'Written closure notice required', help: 'Whether a written denial/closure notice must be sent when a vague request is closed.' },
+
+  // ---- THE "SEND AGAIN" RULE (Kevin, 2026-07-14), clarification half: must the agency ASK A SECOND TIME
+  // before it may treat silence as abandonment? Values are NOT seeded per state — an unresearched notice
+  // obligation is the same class of legal exposure as an unresearched clock rule. Default off.
+  { key: 'second_notice_required', type: 'bool', default: false,
+    label: 'A second clarification request must be sent before closure',
+    help: 'Whether the agency must ask again before treating silence as abandonment. NOT SEEDED per state — needs research before any jurisdiction turns it on.' },
+  { key: 'second_notice_days', type: 'int_or_null', default: null,
+    label: 'Send the second request this many days before the grace period lapses',
+    help: 'Blank = send it immediately when the grace window would otherwise expire.' }
 ];
 
 function defaults() {

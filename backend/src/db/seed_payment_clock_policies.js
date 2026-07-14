@@ -27,10 +27,20 @@ var TX = {
   deposit_clock_effect: 'toll_and_restart',
   deposit_grace_days: 10,
   deposit_lapse_action: 'withdraw',
+  // THE "SEND AGAIN" RULE. § 552.2615(c): if the actual charges will exceed the itemized estimate by more
+  // than 20%, the body "shall send to the requestor an updated itemized statement," and the requestor gets a
+  // fresh 10-business-day window. § 552.2615(b): a body that does not provide the required statement "may
+  // not collect more than $40" — the statement is a PRECONDITION to the money.
+  reissue_required_on_variance: true,
+  reissue_blocks_collection: true,
+  reissue_restarts_response_window: true,
   provenance: {
     deposit_clock_effect: { source: 'statute', citation: CITE, confidence: 0.85 },
     deposit_grace_days: { source: 'statute', citation: "Tex. Gov't Code § 552.263(f)", confidence: 0.85 },
-    deposit_lapse_action: { source: 'statute', citation: "Tex. Gov't Code § 552.263(f); § 552.221(e)", confidence: 0.8 }
+    deposit_lapse_action: { source: 'statute', citation: "Tex. Gov't Code § 552.263(f); § 552.221(e)", confidence: 0.8 },
+    reissue_required_on_variance: { source: 'statute', citation: "Tex. Gov't Code § 552.2615(c) (updated itemized statement required when actual charges exceed the estimate by more than 20%)", confidence: 0.85 },
+    reissue_blocks_collection: { source: 'statute', citation: "Tex. Gov't Code § 552.2615(b) (no required itemized statement => may not collect more than $40)", confidence: 0.85 },
+    reissue_restarts_response_window: { source: 'statute', citation: "Tex. Gov't Code § 552.2615(c) (fresh 10 business days to respond to the updated statement)", confidence: 0.85 }
   }
 };
 

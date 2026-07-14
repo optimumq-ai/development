@@ -17,6 +17,7 @@ const emailTemplate = require('../services/emailTemplate');
 const enforcement = require('../services/enforcement');
 const depositAction = require('../services/depositAction');
 const feeForfeiture = require('../services/feeForfeiture');
+const feeReissue = require('../services/feeReissue');
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 var taskRouting = require('../services/taskRouting');
@@ -328,6 +329,8 @@ router.post('/request/:requestId/deposit/record', requireAuth, async function (r
 
 // Record a FINAL (balance) payment on a request's estimate (4e); used before release for pay-in-full bands.
 router.post('/request/:requestId/final-payment/record', requireAuth, async function (req, res) {
+  var _ri = await feeReissue.checkCollection(req.params.requestId, (req.body && req.body.amount) || 0);
+  if (_ri.blocked) return res.status(409).json({ error: _ri.reason, code: 'REVISED_ESTIMATE_REQUIRED', citation: _ri.citation, ceiling: _ri.ceiling, paid: _ri.paid });
   var rid = req.params.requestId;
   var reqRow = await get('SELECT id, stage FROM requests WHERE id = ?', [rid]);
   if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
@@ -422,6 +425,11 @@ router.post('/request/:requestId/payment/record', requireAuth, async function (r
     var method = String(b.method || 'cash');
     var amount = Number(b.amount);
     if (!(amount > 0)) return res.status(400).json({ error: 'Enter a payment amount greater than zero.' });
+    // THE "SEND AGAIN" GATE. If the cost overran the accepted estimate past the jurisdiction's variance
+    // threshold and the REVISED itemized statement has not been sent, the requestor never agreed to the
+    // higher number — and in TX the city has no right to it yet (§ 552.2615(b)-(c)). Refuse the overage.
+    var ri = await feeReissue.checkCollection(rid, amount);
+    if (ri.blocked) return res.status(409).json({ error: ri.reason, code: 'REVISED_ESTIMATE_REQUIRED', citation: ri.citation, ceiling: ri.ceiling, paid: ri.paid });
     var tendered = (b.tendered != null && b.tendered !== '') ? Number(b.tendered) : null;
     var changeGiven = (method === 'cash' && tendered != null) ? pt.computeChange(tendered, amount) : 0;
     var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'system';

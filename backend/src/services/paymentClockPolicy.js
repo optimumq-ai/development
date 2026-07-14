@@ -37,7 +37,19 @@ var FIELDS = [
     help: 'Days the requestor has to pay before the request may lapse. Blank = fall back to the fee profile\'s payment band window (existing behaviour). TX = 10 business days (§ 552.263(f)).' },
   { key: 'deposit_lapse_action', type: 'enum', values: LAPSE_ACTIONS, default: 'flag_only',
     label: 'On lapse',
-    help: 'What happens when the grace window passes unpaid. flag_only = today\'s behaviour (raise a tickler flag). withdraw = the request is considered withdrawn (TX § 552.263(f) / § 552.221(e)).' }
+    help: 'What happens when the grace window passes unpaid. flag_only = today\'s behaviour (raise a tickler flag). withdraw = the request is considered withdrawn (TX § 552.263(f) / § 552.221(e)).' },
+
+  // ---- THE "SEND AGAIN" RULE (Kevin, 2026-07-14). When the cost rises past the variance threshold, does
+  // the jurisdiction REQUIRE a fresh itemized statement before the city may collect the higher amount?
+  { key: 'reissue_required_on_variance', type: 'bool', default: false,
+    label: 'A cost overrun requires a REVISED estimate to be re-sent',
+    help: 'TX § 552.2615(c): if actual charges will exceed the itemized estimate by more than 20%, the body "shall send to the requestor an updated itemized statement," and the requestor gets a fresh response window.' },
+  { key: 'reissue_blocks_collection', type: 'bool', default: false,
+    label: 'Until it is re-sent, the city may not collect the overrun',
+    help: 'TX § 552.2615(b): a body that does not provide the required itemized statement "may not collect more than $40." The statement is a PRECONDITION to the money — so the system refuses payment above the amount the requestor was last actually told about.' },
+  { key: 'reissue_restarts_response_window', type: 'bool', default: false,
+    label: 'Re-sending restarts the requestor response window',
+    help: 'TX: the updated statement gives the requestor a fresh 10 business days to accept, narrow, or complain — or the request is withdrawn (§ 552.2615(c)).' }
 ];
 
 function defaults() {

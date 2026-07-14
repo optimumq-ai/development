@@ -2342,3 +2342,53 @@ policy has a profile) instead of a frozen count.
 
 **State:** `main`, tree clean, app healthy, active jurisdiction still `jur-tx`. 20 jurisdiction profiles ·
 18 clarification · 3 deadline · 1 payment · 7 fee-waiver policies — **all drafts, 0 attested**.
+
+## 2026-07-14 (rj) — The "send again" gate + TWO CONFIG-CORRUPTION BUGS the suite exposed — 24/24
+
+**Kevin (2026-07-14): "the rules configuration needs to be able to know when 'send again' is required, for
+either re-invoice or a second request for clarification."** Built the re-invoice half; slotted the
+clarification half.
+
+**THE GAP.** The 20% variance rule was **already computed** — `reconcile()` sets `renotify_required` when
+actuals overrun the accepted estimate. **But it was a flag and nothing else. Nobody read it.** The harness
+proves the bug on the live system: a **$40 estimate, $390 in actuals (+875%), "revised notice required"
+flagged — and the full $390 collected, status 200.** TX § 552.2615(b)-(c): the updated itemized statement is a
+**PRECONDITION to the money** ("a body that does not provide the required itemized statement may not collect
+more than $40").
+
+**Shipped.** `services/feeReissue.js` + 3 fields on `paymentClockPolicy` (`reissue_required_on_variance` ·
+`reissue_blocks_collection` · `reissue_restarts_response_window`, seeded for TX from § 552.2615). Both money
+doors (`/payment/record`, `/final-payment/record`) return **409 `REVISED_ESTIMATE_REQUIRED`** with the
+citation, and **no payment row is written**. The **ceiling is what the requestor was LAST TOLD** — collecting
+up to the accepted estimate is still allowed; only the *overage* is refused. Sending the revised statement
+**cures** it. Clarification half: `second_notice_required` / `second_notice_days` slots exist but are
+**deliberately NOT seeded per state** — an unresearched notice duty is the same legal exposure as an
+unresearched clock rule.
+
+**⚠️ THIS GATE IS *NOT* FAIL-SAFE-INVERTED, AND THE DIFFERENCE FROM `feeForfeiture` IS DELIBERATE.**
+feeForfeiture is armed by its flag alone because in IL the fee is **already lost by law** — blocking costs the
+city nothing it still had. Here the fee is **not** lost; the city cures it by sending the statement. Blocking
+prematurely would stop a **legitimate** payment with a clerk standing there. So this gate respects the normal
+`enabled` gate. **Caught before shipping:** TX is the ACTIVE jurisdiction and I had seeded
+`reissue_blocks_collection = true` — flag-only arming would have started blocking payments at the live counter
+immediately. *Block for free; never block at a cost the city did not agree to.*
+
+**TWO CONFIG-CORRUPTION BUGS THE SUITE EXPOSED — both were LIVE data damage, not test noise:**
+1. **The live TX deadline config held `standard = 77` and a leftover `__probe` marker.** `verify_jurrples`
+   mutates the live TX config and restores from whatever it read *at start* — so once an early crashed run
+   left the probe value behind, every later "restore" **cemented the corruption**. TX requests were being
+   given a **77-day** standard clock.
+2. **The live TX clarification policy was `enabled: true` with NO provenance** — same laundering trap, same
+   harness, different field. It had been switched ON in production data by a crashed test.
+
+**Both repaired** (re-ran the seeds) and the harness now has a **PRE-FLIGHT GUARD that refuses to run against
+a dirty config** rather than laundering it, plus a cleanup assertion that no probe marker survives. This is the
+lesson: *a harness that mutates live config must validate the snapshot it is about to trust.*
+
+**Also fixed:** a timestamp-granularity race in the reissue harness (`pending()` asks "was a notice sent AFTER
+the reconciliation?", and the harness could re-send inside the same second, which a human never can).
+
+**FULL SUITE GREEN — 293 assertions, 0 failures** across 11 harnesses.
+
+**State:** `main`, tree clean, app healthy, active jurisdiction `jur-tx` with a **repaired** config
+(standard=10, clarification a draft with provenance).
