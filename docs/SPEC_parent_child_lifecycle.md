@@ -449,3 +449,56 @@ Today a request **is its own parent and its own child**, so both are tautologies
 - **The estimate/deposit joins in `tickler.js`** straddle the split (`r.stage` is CHILD, the estimate will hang off the PARENT). They cannot be scoped until the migration decides which side `request_fee_estimates` repoints to.
 - **`clarificationTimeout`** is not yet scoped. It **auto-closes**, and the law is genuinely split: the clarification event is logged on the CHILD, but an unanswered clarification withdraws the **whole request** (Tex. Gov't Code § 552.222(d)). This is a roll-up decision (§6), not a scoping one.
 - ~~**`routes/tasks.js` `withReq()`** and the 7 `objections.js` joins select `request_number` from the work row.~~ **DONE 2026-07-13 (15/15).** `requestScope.numberJoin()` / `numberExpr()` resolve the **citizen-facing number through the parent** — `COALESCE(_p.request_number, r.request_number)`. Today `master_request_id` is NULL so it falls back to the row's own number (a no-op, verified on the live API); after the migration a task on a child shows the parent's `2026-0045`, never the child's `2026-0045-1`. Staff must never be shown a number the citizen has never seen.
+
+---
+
+## 12. Fee-waiver policy — research 2026-07-14 `[NOT BUILT — substrate designed, values researched]`
+
+Kevin: *"we need to make sure that fee waiver denial follows the different rules required by different states."* Researched across TX · CA · IL · WA · FL · NY · CT. **Two findings are landmines.**
+
+### 12.1 ⚠️ THE ILLINOIS FEE-FORFEITURE TRAP — a hold state that destroys the fee
+5 ILCS 140/3(d): a body must comply with or deny within **5 business days**, extendable by 5 only on **seven enumerated grounds** (§3(e)) — **and deciding a fee waiver is NOT one of them.** Then:
+
+> "*A public body that fails to respond to a request within the requisite periods in this Section but thereafter provides the requester with copies of the requested public records **may not impose a fee for such copies**.*"
+
+**A request parked in "awaiting fee-waiver decision" keeps aging against the 5-day clock.** On day 6 the body has (a) constructively **denied** the request and (b) **permanently lost its right to charge anything** for those copies. The deliberation destroys the fee. Illinois is the only state in the set where the agency's own delay extinguishes the charge.
+
+**What the system MUST do (IL):**
+1. **Never let a waiver request pause the IL response clock** — `tolls_on_waiver_request = false`, non-overridable.
+2. **Do not offer a §3(e) extension for waiver deliberation** — restrict the extension-reason picker to the seven statutory grounds (the `extend()` `grounds` cap already does this — §10.4 step 4).
+3. **Warn at business-day 4**, block at 5, on any IL request in a waiver-pending state.
+4. **If the clock is blown, HARD-DISABLE fee assessment** — the system must *refuse to generate an invoice*, not merely warn, citing §3(d).
+5. **Log the deemed-denial** at day 6 so the requestor's 60-day PAC window (§9.5(a)) starts from a real recorded date.
+
+### 12.2 ⚠️ TEXAS — the abandonment clock does NOT hang off the waiver denial
+The obvious design (start the pay-or-abandon clock when the waiver is denied) is **wrong for Texas and would auto-close live requests.** In TX a waiver denial by itself does nothing procedurally. The 10-business-day deemed-withdrawal hangs off the **money documents**:
+- **§ 552.2615(b)** — itemized estimate (required >$40): withdrawn if the requestor does not respond in writing within **10 business days** (accept · narrow · file an AG overcharge complaint).
+- **§ 552.263(f)** — deposit (>$100 / >$50): withdrawn if not posted by the **10th business day**.
+
+→ `response_window.trigger_event` must be `cost_estimate_sent` / `deposit_demanded`, **never** `waiver_denial`.
+
+**TX *does* have a public-interest waiver** — § 552.267(a): the body "**shall** provide a copy … without charge … if the governmental body **determines** that waiver … is in the public interest because providing the copy **primarily benefits the general public**." **The "shall" is illusory** — it triggers only on the body's own determination, with no standard, no burden, and no review. Functionally discretionary. TX has **no indigency waiver and no news-media waiver** (SILENT — do not invent them).
+
+### 12.3 Three uniform findings across all seven states
+- **No state has a "deemed granted" rule.** Every state that addresses agency silence makes it a **deemed DENIAL**.
+- **No state requires a fee-waiver denial to be in writing with reasons.** Written-reasons duties attach to *exemption/records* denials only. A uniform statutory gap — we ship written reasons anyway as policy; no state forbids it.
+- **No state tolls the response clock for a pending waiver request or appeal.** TX is the only one with any clock movement, and it is a **restart on deposit receipt** (§ 552.263(e)), not a toll.
+
+### 12.4 The pay-or-abandon clock is STATUTORY IN ONLY ONE OF SEVEN STATES
+| | Waiver grounds | Binding | **Source** | Window | Trigger | Appeal forum | Forum can ORDER a waiver? |
+|---|---|---|---|---|---|---|---|
+| **TX** | public_interest · cost_exceeds_collection | discretionary | **statute** | 10 bd | `cost_estimate_sent` / `deposit_demanded` | AG **overcharge** only (10 bd) | **NO** |
+| **CA** | *none* | none | none | — | — | court only | no |
+| **IL** | public_interest | discretionary | **statute** | *SILENT* | — | PAC (60 cd) | **NO** ← *see 12.5* |
+| **WA** | agency_discretion | discretionary | **agency_policy** | 30 cd | — | court (1 yr) | no |
+| **FL** | *none* | none | none | *SILENT* | — | court + voluntary AG mediation | no |
+| **NY** | agency_discretion | discretionary | **regulation** (21 NYCRR 1401.8) | *SILENT* | — | internal (30 cd) → Art. 78 | no |
+| **CT** | indigency · exempt_records · public_interest · elected_official · public_defender | **MANDATORY** | **statute** | *SILENT* | — | FOIC (30 cd) | **YES** (except the "general welfare" prong) |
+
+**`provenance.source` is LOAD-BEARING, not cosmetic.** Only TX may tell a requestor "the law gives you 10 business days." WA must say "**our rules** give you 30 days"; FL must say "**our policy** is to close after 30 days." **Four of seven states have no legal clock at all.** A UI that renders every timer as "the legal deadline" **misleads requestors in four of seven states.**
+
+### 12.5 The sleeper field: `appeal.can_order_waiver`
+Illinois' PAC **will open a fee-waiver file and then tell the requestor it was never empowered to grant one** — 2017 PAC 47258: "*the Public Access Counselor does not have authority to direct the City to grant … a fee waiver.*" Texas' AG complaint reviews the **amount** against the cost rules, not the § 552.267 discretionary call. **Never route a requestor to a forum that cannot grant what they came for.** CT's FOIC is the only forum in the set that can actually order a waiver.
+
+### 12.6 Substrate (to build — mirrors `clarificationPolicy` / `paymentClockPolicy`)
+`enabled` (default false) · `grounds` (multi-enum) · `binding` (mandatory|discretionary|none) · `requestor_must_state_purpose` (IL: true) · `denial_requires_written_reasons` · `deemed_granted_on_silence` (false everywhere) · `response_window {days, unit, trigger_event, expiry_effect}` · `clock {tolls_on_waiver_request, tolls_on_waiver_appeal, restarts_on_deposit_receipt}` · `appeal {forum, window_days, can_order_waiver, reaches_fee_amount}` · `thresholds {estimate_required_above, deposit_allowed_above, deposit_cap_pct}` · `guardrails {fee_forfeiture_on_late_response, extension_grounds_closed_list}` — each with `{source, citation, confidence}` provenance and a validated enum.
