@@ -3,8 +3,8 @@
 **Status:** DRAFT for build. Drafted 2026-07-09 from a design session with Kevin. **Kevin's mark-up of the clickable mockup folded in 2026-07-14** — §2 (carried-forward, decision #2), §4b (video, decision #3 — *partially open, research pending*), §5b-2 (Vague vs Overly Broad `[NEW]`), §8 (terminology), §9 (design language). Companion to `SPEC_record_search_fulfillment.md` (Domain 7 §3, the `[NOT BUILT]` task screen) and `MASTER_task_types_permission_groups.md` (task type `record_search`, screen `[NOT BUILT]`).
 
 > **BUILD ORDER — read §2.2 first.** The carried-forward panel is gated on **portal-side R9**
-> (`DESIGN_split_canvas_intake.md`), which is designed but **not built**. The AV view (§4b) is gated on
-> **research that has not returned**. Everything else is buildable now.
+> (`DESIGN_split_canvas_intake.md`), which is designed but **not built**. **Everything else, including the AV
+> view (§4b), is buildable now** — the BWC research returned 2026-07-14 and settled it.
 Legend: `[BUILT]` · `[PARTIAL]` · `[NOT BUILT]` · `[NEW]` (introduced by this spec).
 
 **Scope.** The dedicated screen a Fulfillment Staff (Record Search) member sees when they click a `record_search` task in **My Tasks**. Single-record only — the MRR Multi-Record Search task (`mrr_search`) is a separate, hand-assigned flow (`MASTER` A2) and out of scope here. Mirrors the proven `EstimateTaskPage.js` pattern: load task via `GET /tasks/:taskId`, header + request context, one focused work surface, action drives completion.
@@ -132,37 +132,135 @@ Three things this scenario establishes, none of which the current design handled
    should be included, and if what is uploaded is a clip from a larger video file, it serves the purpose of
    describing what was clipped."* `[RESOLVED — decision #3, partial]`
 
-#### `[OPEN — research commissioned 2026-07-14]` How does the located video actually ARRIVE?
+#### `[RESOLVED 2026-07-14 — research returned]` How does the located video actually ARRIVE?
 
-Kevin flagged, with unusual candor, that his own model may not survive contact with reality:
+Kevin flagged, with unusual candor, that his own model might not survive contact with reality:
 
 > *"What I described above about creating a clip might be totally disconnected from reality — if the search person
-> is not the redactor for police video, perhaps he only views video, so your note idea is very important, but the
-> concept of adding a clip to the record becomes a problem. Adding a link to the full video might be the only thing
-> that can be accomplished. I don't know — lack of knowledge is a problem on my part."*
+> is not the redactor for police video, perhaps he only views video… Adding a link to the full video might be the
+> only thing that can be accomplished. I don't know — lack of knowledge is a problem on my part."*
 
-**Unresolved, and NOT to be guessed at:**
-- **Is the searcher the redactor?** If they are different people, "the searcher clips the video" is incoherent —
-  the searcher may only have *view* rights in the evidence system. **This single question determines the whole
-  handoff design.**
-- **Clip or full asset?** If a clip: how does it enter — an **upload button**? A pull from a **network share** where
-  the evidence system drops exports? If no clip: a **link** into the evidence system may be all that is possible.
-- **If the Axon connector gets built**, can it select an *exported clip*, or does that still require a manual upload?
-- **Does redaction even happen here?** If agencies typically redact **inside** Axon and export a finished file,
-  OptimumQ may only ever need to receive a **finished redacted file + a link** — which would collapse most of this
-  design.
-- **The click cost.** If one person does both jobs, they upload the original *and* the redacted video (or link both) —
-  Kevin: *"quite a few clicks… I'm not sure how to optimize the design."*
+**Research done 2026-07-14** (5 parallel tracks, ~50 sources: vendor help docs, agency SOPs, city class specs,
+procurement PDFs, cost studies, statutes; cross-corroborated). **Half his worry was right and half was
+backwards.**
 
-**Kevin's own framing of the way out:** *"I am not ruling out building a viewer that allows creation of clips in the
-system, and finishing development of the video redaction feature so the process can be streamlined, but for now
-let's just try to do what makes the most sense as is."* He also expects to *"revise this area significantly after
-discussions with prospects."*
+##### The three findings that reframe the problem
 
-**→ Research commissioned 2026-07-14:** what city open-records deployments actually do for BWC/dashcam
-search + redaction (role split, clip-vs-link, evidence-system integration patterns, what GovQA / NextRequest /
-JustFOIA / FOIAXpress actually support). **Do not build the AV view until it returns.** The rest of the screen
-(§4a digital, §4c paper, §4d other, §5 rail) is **not blocked** by this.
+**1. NO open-records platform on the market has a video viewer or a clipper. Not one.** GovQA, NextRequest,
+JustFOIA, FOIAXpress, Laserfiche, GovPilot, OpenGov, Accela — all document workflow engines. Where video
+redaction exists (GovQA, FOIAXpress) it is **the same OEM, Veritone**, bolted on via a round-trip.
+**→ Not having a viewer does not put us behind. It puts us exactly where every competitor is.** Kevin's anxiety
+about the missing clipper was misplaced.
+
+**2. The video never moves — and Axon sells that as the feature.** Redaction happens **inside** the evidence
+system and mints a **new derivative evidence file**; the original is never altered (Axon Redaction Studio:
+*"Extracting a redacted video from a redaction creates a new video evidence file… The original video evidence
+file is never altered."*). Genetec Clearance uses the identical derivative model. Axon's own sole-source pitch
+sells sharing *"without creating copies or requiring the data to leave your agency's domain of control."*
+**→ We will never hold the raw video. Designing to hold it is designing for a workflow that does not exist.**
+
+**3. Axon has NO request-intake product.** Axon Community Request is *inbound* (public → police); Axon Justice is
+prosecutor discovery. **No clock, no requester correspondence, no fee ledger, no exemption tracking.**
+**→ That gap is exactly where OptimumQ sits. We are not competing with Axon — we are the missing half.**
+
+> **The market shape: the request lives in one system, the video lives in another, and the clerk is the
+> integration. Nobody has closed that.** The right question was never *"how do we build a viewer"* — it is
+> **"how do we be the best possible ledger and clock around a video we will never hold."**
+
+##### Kevin's Q1, answered: is the searcher the redactor? **It depends on agency size — and the seam is not where he drew it.**
+
+The real workflow has **four** steps: **locate → determine exemptions → apply redactions → release**. Steps 1+2
+travel together (they need judgment and case context). **Step 3 is what splits off first**, because it is the
+expensive, low-judgment bottleneck.
+
+| Agency size | Searcher | Redactor |
+|---|---|---|
+| **Small (<50 sworn)** | Same person — records clerk or an officer wearing the hat | Same person |
+| **Small–mid (~50–200)** | **One fused role.** Springfield OR *"Police Digital Evidence Technician: **retrieves, reviews, and redacts** body worn camera… for the public"*; Greeley CO fuses it in the title: *"Body Worn Camera **Records & Redaction** Specialist."* | Same fused role |
+| **Mid (~200–500)** | Public disclosure staff | **Split off** — Tacoma created a standalone *"Public Disclosure Video Redaction Analyst"* |
+| **Large (1000+)** | Custodian unit gathers | **Separate by policy.** Seattle PD 12.080: *"Relevant Unit: gathers all relevant records… provides records to Legal Unit. **Legal Unit: makes any and all necessary redactions.**"* |
+
+**The IACP Model Policy is entirely SILENT on who searches and who redacts.** So is the BJA/FOP model policy.
+**That is why the roles vary so wildly — and why we cannot hardcode either answer.**
+
+##### `[DECIDED]` The design — build the LEDGER, not the viewer
+
+1. **The responsive item is an `ExternalEvidenceReference`, NOT a file.** `[NEW]`
+   `system` (axon|motorola|genetec|other) · `evidence_id` · `case_id` · `deep_link_url` · `officer` ·
+   `device_serial` · `recorded_start`/`recorded_end` · **`responsive_start`/`responsive_end`** ·
+   `is_derivative` (bool) · `parent_evidence_id`. **The file is NULLABLE.** Cheap now, brutally expensive to
+   retrofit. Works for every observed pattern and needs **no connector**.
+   **Guardrail: the original evidence ID must never leak into a release — only the derivative.**
+
+2. **The searcher's output is a TIME RANGE, not a clip.** `[Kevin's box — VINDICATED]` They cannot clip in our
+   system and **should not have to.** But they *can* type *"responsive segment: 20:14:30–20:17:05"* — and that
+   single field is the **entire handoff**: it lets the redactor open Axon, scrub straight to the right 2.5
+   minutes, and skip the review step Mesa PD measured at **two hours before redaction even starts.**
+   > **The research's verdict on Kevin's scope note: *"the highest-leverage field on the whole screen, and it
+   > costs nothing to build."*** It stays, exactly as he asked.
+
+3. **Search and redact are SEPARATE assignable tasks on the same request — that CAN be assigned to the same
+   person.** `[NON-NEGOTIABLE — this is the direct answer to Q1]` Washington law forces the two to be metered
+   separately (**redaction time is chargeable; search time is not** — RCW 42.56.240(14)); DEMS search is an
+   audited, purpose-logged act a redaction contractor may not be authorized to perform; and the same product must
+   **collapse both onto one clerk in a 40-sworn agency and fan them across three units in Seattle.** A single
+   "process this request" task fits neither end. **Default the redaction task's assignee to the searcher; let
+   larger agencies reassign.**
+
+4. **"No responsive video" is a first-class, EVIDENCED disposition** — with a field for the CAD call number that
+   proves an officer was dispatched. San Diego's City Auditor matched dispatch records to video and found **up to
+   40% of dispatches that required BWC video had none**; **29%** of arrest incidents had no video.
+   **This is a modal outcome, not a failure state — and the system must *prove* it, not merely assert it.**
+
+5. **The Axon connector is a METADATA connector, not a file connector — and it does not get a date.** The partner
+   API is real and now default-on for all agencies, but `developers.axon.com` is login-gated: **not one endpoint
+   or payload could be read.** Its job, when it lands, is to *populate the reference above* — never to move video.
+
+6. **⚠ Do NOT forward an Axon share link to a requestor.** The unauthenticated download link defaults to a
+   **3-day expiry** — *shorter than most statutory response and appeal windows.* A records system that emails an
+   Axon link is **shipping a link that will be dead before many requestors click it.** Download the redacted
+   derivative, host the release artifact ourselves, keep custody of the clock. `[GUARDRAIL]`
+
+##### The four workflow patterns the design must survive
+- **A — All inside Axon** (dominant): search → add to Axon Case → redact in Redaction Studio → release the derivative.
+- **B — Export to an outside redaction tool** (Veritone / CaseGuard): raw video leaves, finished file comes back. *We need an upload path for the finished file and must not expect to hold the raw.*
+- **C — Vendor as a pipeline stage, requestor pays the vendor directly** (Colorado Springs PD, live): needs an **external-party stage with its own payment leg that is NOT our fee ledger.**
+- **D — Inspection only, no file ever exists** (NC G.S. 132-1.4A; DC MPD: *"video may only be viewed at an MPD location; copies will not be provided"*): needs **"fulfilled by supervised in-person viewing"** as a disposition, with an appointment date. **Not a file at all.**
+
+##### The search form is effectively legislated
+RCW 42.56.240(14)(d) — a BWC request must identify **a person** *or* **a case number** *or* **date+time+location**
+*or* **an officer**. Disjunctive. **That is the four-lane lookup.** Kevin's 7-Eleven scenario is lane 3 — and it
+must resolve **against CAD first**, then Axon. (Axon map search accepts an address but pins only the recording's
+**starting** GPS point: a stop that began three blocks away pins three blocks away.) Axon also exposes
+**transcript keyword search** — full-text inside the audio — which is underrated for exactly this scenario.
+**Caveat: Axon Case IDs are NOT unique** (collisions permitted with a warning). Never key off Case ID alone.
+
+##### The numbers to build around
+- **10 minutes of staff time per 1 minute of footage — *per redacted subject*.** Seattle and Thurston County
+  stopwatch-verified this independently. Two bystanders = 20 min of work per minute of video.
+- **~9 videos per incident** (3 body cams + front/rear squad + cage). **The request is an incident; the work is
+  per-clip.** One Wisconsin agency: *"18 hours for one request."*
+- **Phoenix PD has ~40,000 pending records requests**; one requestor was quoted a **six-year** wait.
+
+##### Still unknown — do not let anyone claim otherwise
+- **Axon's API shape is not publicly documented.** Verified it exists and is default-on; **zero endpoints read.**
+- **Whether the Axon API can CREATE A SHARE LINK is the single most important open question.** If it can,
+  OptimumQ could fulfill end-to-end. If it cannot, a human must always finish in the Evidence.com UI. No evidence
+  either way.
+- **How Veritone actually gets files out of Evidence.com** — "integrates seamlessly" is marketing with no stated
+  mechanism. Matters for Pattern B.
+- **No documented open-records-platform ↔ DEMS integration exists anywhere** (searched NextRequest+Axon,
+  GovQA+Axon, Granicus+BWC, JustFOIA+Axon — nothing, from either side). *Absence of evidence, not proof of
+  absence* — but **arguably the most commercially interesting finding in the report.**
+- **No citable blanket ban** on a non-CJIS records platform storing BWC video was found. The constraint looks
+  **practical/contractual, not statutory.** The strong version of that claim is **unproven** — do not repeat it.
+- Every primary agency source naming a vendor named **Axon**. **Do not assume the Axon-shaped workflow
+  generalizes** to Genetec/Motorola.
+
+##### The one real product fork `[FOR KEVIN]`
+If agencies genuinely want **the exemption log to live in Axon** (it is auto-generated there and welded to the
+file), then OptimumQ **ingesting** rather than **authoring** the exemption trail is a real fork.
+**That is a product decision, not a technical one.**
 
 ### 4c. Paper `[NEW]`
 - Archive-index search (`paper_index_items`, paperindex connector) returns a **storage location**, not a file.
@@ -317,8 +415,11 @@ Free-form entry — who / when / summary / outcome → `request_history` as `CAL
 | `MyTasksPage` routes by task type | `MyTasksPage.js` | `[NEW]` |
 | Persist shown-but-unselected intake candidates | `publicChat.js` — write on **every results-clear** (re-search *and* Proceed) → `request_intake_results` `[NEW table]` | `[NEW]` — **belongs to portal R9, not this screen** (§2.2) |
 | "Self Service Portal Search Results" bar (Selected `n` / Not Selected `n`) | this screen, §2.3 | `[NEW]` |
-| AV scope/description note carried to redaction | search attach → `av_redaction_tasks` / handoff | `[NEW]` — **kept** (Kevin, decision #3) |
-| How the located video ARRIVES (upload clip / link asset / connector-pull) | §4b | `[OPEN — research pending]` |
+| **`ExternalEvidenceReference`** — the responsive AV item is a REFERENCE, not a file (nullable file) | `[NEW table]` — §4b | `[NEW]` — cheap now, brutally expensive to retrofit |
+| AV **responsive time range** (`responsive_start`/`responsive_end`) carried to redaction | search attach → `av_redaction_tasks` / handoff | `[NEW]` — **the highest-leverage field on the screen** |
+| **Redaction task defaults its assignee to the searcher** (separate task, same person by default) | `taskRouting.js` | `[NEW]` — §4b; WA meters search vs redaction separately |
+| **"No responsive video" as an EVIDENCED disposition** (+ CAD call number proving dispatch) | §5d resolution | `[NEW]` — a **modal** outcome (~40%), not an exception |
+| **Never forward an Axon share link** (3-day expiry < statutory window) — host the derivative | delivery | `[GUARDRAIL]` — §4b |
 | Scanner "scan source" abstraction (paper) | new connector/stub | `[NEW]` |
 | Postal address capture (clarification + delivery) | portal intake + `requests.mailing_*` columns | `[BUILT]` — slices 1/5 (capture) + 1b (clarification reads it) |
 | Vague-request toll setting | jurisdiction config + `clock_tolls` | `[NEW]`, defaults no-toll |
@@ -381,12 +482,13 @@ system-wide.
 2. **Intake-results persistence** — **RESOLVED 2026-07-14 (Kevin, decision #2).** Build it. Both sets accumulate
    across the refine loop; the not-selected set is invisible to the requestor and carries with the request. Spec
    in §2. Lands in **R9 on the portal**, not in this screen.
-3. **Video scoping** — **PARTIALLY RESOLVED 2026-07-14 (Kevin, decision #3).** The scope/description box **stays
-   — Kevin: "a good idea and should be included."** What remains open is *how the located video physically
-   arrives* (upload a clip / link the full asset / connector-pull) and *whether the searcher and the redactor are
-   even the same person*. Kevin explicitly flagged his own model may be *"totally disconnected from reality"* and
-   asked for research into what other city open-records systems actually do for BWC/dashcam. **Research
-   commissioned 2026-07-14 — see §4b.** Do not build the AV view until it lands.
+3. **Video scoping** — **RESOLVED 2026-07-14 (Kevin's decision #3 + research).** The scope box **stays** and the
+   research calls it *"the highest-leverage field on the whole screen."* **The searcher outputs a TIME RANGE, not
+   a clip** — no viewer, no clipper (**no competitor has one either**). The responsive item is an
+   **`ExternalEvidenceReference`, not a file**. **Search and redaction are separate assignable tasks that default
+   to the same person** — which is the real answer to "is the searcher the redactor?" (**it depends on agency
+   size; the model policies are silent; we cannot hardcode either**). Full findings + guardrails in §4b.
+   **§4b is now buildable.**
 4. **Selected → skip-search gating** — **RESOLVED 2026-07-09 (verified unbuilt).** Selection has zero effect on routing today; `request_selected_records` is written at submit but read by no service. Build recipe (two `buildSignals` fields + two `workflow_rules` rows, no engine change) documented in §1. Public-library picks → skip search+redaction via `wfr-selected-public`; private picks → skip search via `wfr-selected-private`; release gate at delivery still enforces balances.
 5. **Tolling on vagueness** — **RESOLVED.** `CLARIFICATION_POLICY_SURVEY.md` (16 jurisdictions, 2026-07-09) answers
    it; `clarification_clock_effect` drives it per jurisdiction; defaults off until the city attests.

@@ -454,13 +454,18 @@
                   part is; the redactor does the in-video work. <b>If you uploaded a clip cut from a longer
                   file, this is also what describes what was clipped.</b></div>
               </div>
-              <div class="hint" style="margin-top:8px;padding:8px 10px;border:1px dashed var(--crit);
-                   border-radius:8px;color:var(--crit);background:var(--crit-bg)">
-                <b>⚠ STILL OPEN &mdash; do not build this view yet.</b> How the located video actually
-                <i>arrives</i> is unresolved: upload a clip · link the full asset · pull it through a connector.
-                It hinges on a question we cannot answer from here &mdash; <b>is the searcher even the same person
-                as the redactor?</b> If they only have <i>view</i> rights in Axon, "the searcher clips the video"
-                is incoherent and a link is all that is possible. Research commissioned 2026-07-14.
+              <div class="hint" style="margin-top:8px;padding:9px 11px;border:1px solid var(--ok);
+                   border-radius:8px;color:var(--ink);background:var(--ok-bg)">
+                <b>✓ RESOLVED &mdash; research returned 2026-07-14.</b> Your scope box is
+                <b>the highest-leverage field on this screen</b>, and it costs nothing to build. Three findings:
+                <b>no open-records platform has a viewer or a clipper</b> (not GovQA, NextRequest, JustFOIA or
+                FOIAXpress &mdash; we are not behind); <b>the video never moves</b> (redaction happens
+                <i>inside</i> Axon and mints a derivative &mdash; we will never hold the raw); and <b>Axon has no
+                request-intake product at all</b> &mdash; which is exactly where we sit. So the searcher outputs a
+                <b>time range, not a clip</b>, and the responsive item is an <b>evidence reference, not a file</b>.
+                Is the searcher the redactor? <b>Depends on agency size &mdash; and the model policies are silent.
+                We can't hardcode either.</b> Search and redaction become <b>separate tasks that default to the
+                same person.</b>
               </div>
             </div>
             <button class="btn" type="button" data-attach-btn style="align-self:flex-start">Include in Response</button>
@@ -624,10 +629,29 @@
           but <b>NOT built</b>. Until it ships, &ldquo;Records Not Selected&rdquo; is empty for every request.
           R9 is now a <b>prerequisite</b> of this screen.</li>
 
-        <li><b>#3 &mdash; Video. PARTIALLY resolved.</b> The scope/description box <b>stays</b>. How the located
-          video <i>arrives</i> is <b>still open</b> and is not being guessed at &mdash; it turns on whether the
-          searcher and the redactor are the same person. Research commissioned. <b>The AV view is blocked; the
-          rest of the screen is not.</b></li>
+        <li><b>#3 &mdash; Video. RESOLVED</b> (research came back same day). <b>Half your worry was right and half
+          was backwards.</b> Right: search and redaction really are often different jobs &mdash; and the split
+          <b>grows with agency size</b> (a 40-sworn department fuses them into one clerk; Seattle PD has the
+          <i>Legal Unit</i> do the redacting). The IACP model policy is <b>silent</b> on who does what, which is
+          why it varies so wildly &mdash; so we <b>cannot hardcode either answer.</b> Backwards: <b>the anxiety
+          about having no viewer and no clipper.</b> <b>Nobody has one.</b> Not GovQA, NextRequest, JustFOIA,
+          FOIAXpress, Laserfiche or Accela. The clipper lives in Axon and always will &mdash; the video
+          <b>never leaves the evidence system</b>, and Axon <i>sells that as the feature</i>.
+          <br><b>So: your scope box is vindicated</b> &mdash; the research calls it <i>&ldquo;the highest-leverage
+          field on the whole screen, and it costs nothing to build.&rdquo;</i> The searcher types a <b>time
+          range</b>, not a clip. The responsive item becomes an <b>evidence reference, not a file.</b>
+          <br><b>The commercially interesting part:</b> Axon has <b>no request-intake product</b> &mdash; no clock,
+          no requester correspondence, no fee ledger, no exemption tracking. And <b>no open-records platform has
+          ever integrated with a DEMS.</b> The request lives in one system, the video in another, and <b>the clerk
+          is the integration.</b> Nobody has closed that gap. <b>That gap is us.</b></li>
+
+        <li><b>⚠ Two traps the research found</b> &mdash; both the same class as your Illinois fee-forfeiture bug.
+          <b>(1)</b> An Axon share link expires in <b>3 days by default</b> &mdash; <i>shorter than most statutory
+          response and appeal windows.</i> A records system that emails one is shipping a link that will be
+          <b>dead before the requestor clicks it.</b> We host the file. <b>(2)</b> Up to <b>40% of dispatches that
+          required body-cam video have none</b> (San Diego City Auditor, matching dispatch to footage).
+          &ldquo;No responsive video&rdquo; is a <b>modal outcome, not a failure</b> &mdash; and the system has to
+          <b>prove</b> it, not just assert it.</li>
 
         <li><b>NEW &mdash; Vague vs Overly Broad</b> (right rail). You asked for both to be visible. They are
           <b>two different legal defects</b>, and the system today has <b>one</b> boolean. Your own 17-state survey
