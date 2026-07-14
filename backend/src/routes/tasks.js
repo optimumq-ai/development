@@ -67,9 +67,14 @@ router.post('/', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISO
 
 // Task detail (with request + record-type context) for the work screen.
 router.get('/:id', requireAuth, async function (req, res) {
+  // deadline_date / stage / requestor contact are here for the RECORD-SEARCH task screen
+  // (SPEC_record_search_task_screen §6). The deadline is not decoration on that screen: the Overly-Broad
+  // marker has to show the RUNNING clock, because in Illinois the burden-denial conference does NOT toll it
+  // and letting the deadline pass forfeits the exemption outright.
   var t = await get(
-    "SELECT t.*, " + scope.numberExpr('r') + " AS request_number, r.requestor_name, r.description AS request_description, r.record_type_id, " +
-    "rt.name AS record_type_name, d.name AS team_name " +
+    "SELECT t.*, " + scope.numberExpr('r') + " AS request_number, r.requestor_name, r.requestor_email, " +
+    "r.description AS request_description, r.record_type_id, r.stage, r.deadline_date, r.delivery_method, " +
+    "rt.name AS record_type_name, rt.formats AS record_type_formats, d.name AS team_name " +
     "FROM tasks t LEFT JOIN requests r ON r.id = t.request_id" + scope.numberJoin('r') + " LEFT JOIN record_types rt ON rt.id = r.record_type_id " +
     "LEFT JOIN departments d ON d.id = t.team_id WHERE t.id = ?", [req.params.id]);
   if (!t) return res.status(404).json({ error: 'Task not found' });

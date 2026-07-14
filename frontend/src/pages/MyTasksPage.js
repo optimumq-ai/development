@@ -14,6 +14,7 @@ export default function MyTasksPage() {
   const [filter, setFilter] = useState('all');
   const [myObjs, setMyObjs] = useState([]);
   const [pendingObjs, setPendingObjs] = useState([]);
+  const [taskByRequest, setTaskByRequest] = useState({});
   const canApprove = store.hasAnyRole('FEE_WAIVER_APPROVER', 'SYSTEM_ADMIN', 'DIRECTOR');
 
   useEffect(function() { load(); }, []);
@@ -23,10 +24,39 @@ export default function MyTasksPage() {
     try {
       var r = await api.get('/requests');
       setRequests(r.data.requests);
+      // This list is REQUESTS, so "Open →" used to dump every one of them into the generic workspace no
+      // matter what work was actually waiting. Pull the open task for each and route BY TASK TYPE, so a
+      // record-search task opens the record-search screen and a redaction task opens the workstation.
+      try {
+        var t = await api.get('/tasks/mine');
+        var map = {};
+        (t.data.tasks || []).forEach(function (x) { if (x.request_id && !map[x.request_id]) map[x.request_id] = x; });
+        setTaskByRequest(map);
+      } catch (e1) {}
       try { var mo = await api.get('/objections/mine'); setMyObjs(mo.data.objections || []); } catch (e2) {}
       if (store.hasAnyRole('FEE_WAIVER_APPROVER', 'SYSTEM_ADMIN', 'DIRECTOR')) { try { var pa = await api.get('/objections/pending-approval'); setPendingObjs(pa.data.objections || []); } catch (e3) {} }
     } catch(e) { console.error(e); }
     setLoading(false);
+  }
+
+  // The ONE place a task type turns into a screen. Anything without a dedicated screen falls back to the
+  // generic request workspace, which is exactly what it is for.
+  var TASK_SCREEN = {
+    record_search: function (t) { return '/record-search/' + t.id; },
+    estimate:      function (t) { return '/estimate/' + t.id; },
+    redaction:     function (t) { return '/redaction/' + t.id; }
+  };
+  function openLink(requestId) {
+    var t = taskByRequest[requestId];
+    var f = t && TASK_SCREEN[t.type];
+    return f ? f(t) : ('/requests/' + requestId);
+  }
+  function openLabel(requestId) {
+    var t = taskByRequest[requestId];
+    if (t && t.type === 'record_search') return 'Search →';
+    if (t && t.type === 'redaction') return 'Redact →';
+    if (t && t.type === 'estimate') return 'Estimate →';
+    return 'Open →';
   }
 
   var myRequests = requests.filter(function(r) {
@@ -158,7 +188,7 @@ export default function MyTasksPage() {
                           <span style={{fontSize:'13px',color:od?'#DC2626':'#6B7280',fontWeight:od?'700':'400'}}>{r.deadline_date||'—'}</span>
                         </td>
                         <td style={{padding:'12px 16px'}}>
-                          <Link to={'/requests/'+r.id} style={{fontSize:'13px',color:'#1F4E79',textDecoration:'none',fontWeight:'600',padding:'6px 12px',background:'#EBF3FB',borderRadius:'6px'}}>Open →</Link>
+                          <Link to={openLink(r.id)} style={{fontSize:'13px',color:'#1F4E79',textDecoration:'none',fontWeight:'600',padding:'6px 12px',background:'#EBF3FB',borderRadius:'6px'}}>{openLabel(r.id)}</Link>
                         </td>
                       </tr>
                     );
