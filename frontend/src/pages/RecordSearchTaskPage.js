@@ -70,8 +70,19 @@ export default function RecordSearchTaskPage() {
 
   var [task, setTask] = useState(null);
   var [intake, setIntake] = useState(null);
+  var [policy, setPolicy] = useState(null);   // the jurisdiction's clarification rules — drives the rail
+  var [trail, setTrail] = useState([]);
   var [err, setErr] = useState('');
   var [view, setView] = useState('selected'); // which side of the bar is open
+  var [defect, setDefect] = useState(null);   // 'vague' | 'overly_broad' — which marker is open
+  var [busy, setBusy] = useState('');
+  var [flash, setFlash] = useState(null);
+
+  function loadTrail(rid) {
+    return api.get('/requests/' + rid).then(function (r) {
+      setTrail((r.data.history || []).slice().reverse());
+    }).catch(function () {});
+  }
 
   useEffect(function () {
     var alive = true;
@@ -79,12 +90,50 @@ export default function RecordSearchTaskPage() {
       .then(function (r) {
         if (!alive) return;
         setTask(r.data.task);
-        return api.get('/requests/' + r.data.task.request_id + '/search-intents');
+        var rid = r.data.task.request_id;
+        api.get('/requests/' + rid + '/search-intents')
+          .then(function (x) { if (alive) setIntake(x.data); }).catch(function () {});
+        api.get('/clarification-policy')
+          .then(function (x) { if (alive) setPolicy(x.data.policy); }).catch(function () {});
+        loadTrail(rid);
       })
-      .then(function (r) { if (alive && r) setIntake(r.data); })
       .catch(function () { if (alive) setErr('Could not load this task.'); });
     return function () { alive = false; };
   }, [taskId]);
+
+  // --- actions -------------------------------------------------------------------------------------
+  function effort(action, notes) {
+    setBusy(action);
+    return api.post('/requests/' + task.request_id + '/effort', { action: action, notes: notes })
+      .then(function () { setFlash({ tone: 'ok', text: notes }); return loadTrail(task.request_id); })
+      .catch(function () { setFlash({ tone: 'crit', text: 'That did not go through.' }); })
+      .then(function () { setBusy(''); });
+  }
+
+  // Marking a defect is NOT a note — it sends the clarification and lets the jurisdiction's own rules decide
+  // what happens to the clock. The reason travels ('vague' | 'overly_broad') because the two are different
+  // legal defects; see clarificationAction.
+  function markDefect(reason) {
+    setBusy(reason);
+    return api.post('/requests/' + task.request_id + '/clarification', { reason: reason })
+      .then(function (r) {
+        var d = r.data;
+        setFlash({
+          tone: d.conferenceRequired ? 'crit' : 'ok',
+          text: d.conferenceRequired
+            ? 'Conference offered. THE CLOCK DID NOT STOP — missing the deadline forfeits the burden defense.'
+            : ('Clarification sent' + (d.clockStillRunning ? ' — the clock keeps running (' + d.effect + ').'
+                                                           : ' — the response clock was tolled.'))
+        });
+        setDefect(null);
+        return loadTrail(task.request_id);
+      })
+      .catch(function (e) {
+        var msg = (e.response && e.response.data && e.response.data.error) || 'That did not go through.';
+        setFlash({ tone: 'crit', text: msg });
+      })
+      .then(function () { setBusy(''); });
+  }
 
   if (err) return <div style={{ padding: 32, color: C.crit }}>{err}</div>;
   if (!task) return <div style={{ padding: 32, color: C.muted }}>Loading…</div>;
@@ -156,9 +205,30 @@ export default function RecordSearchTaskPage() {
     );
   }
 
+  // The conference duty is the JURISDICTION'S, not the word's. If this city does not impose it, marking a
+  // request Overly Broad records the defect and owes no conference — and the screen must not pretend otherwise.
+  var duty = policy && policy.clarification_duty;
+  var effect = policy && policy.clarification_clock_effect;
+  var conferenceOwed = duty === 'required_before_burden_denial';
+  var clockStops = effect === 'toll_pause_resume' || effect === 'toll_and_restart'
+                || effect === 'start_gate' || effect === 'operational_hold';
+
+  function Act(props) {
+    return (
+      <button type="button" disabled={!!busy} onClick={props.onClick}
+        style={{ display: 'block', width: '100%', textAlign: 'left', cursor: busy ? 'not-allowed' : 'pointer',
+          background: props.on ? C.blueTint : C.surface, border: '1px solid ' + (props.on ? C.blue : C.hair),
+          borderRadius: 9, padding: '10px 12px', marginBottom: 8, opacity: busy && busy !== props.k ? 0.55 : 1 }}>
+        <div style={{ fontSize: 13.5, fontWeight: 650, color: C.ink }}>{props.title}</div>
+        <div style={{ fontSize: 12, color: C.faint, marginTop: 2 }}>{props.sub}</div>
+      </button>
+    );
+  }
+
   return (
     <div style={{ background: C.ground, minHeight: '100%', padding: 20, color: C.ink }}>
-      <div style={{ maxWidth: 1100, margin: '0 auto' }}>
+      <div style={{ maxWidth: 1360, margin: '0 auto', display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 340px', gap: 16, alignItems: 'start' }}>
+       <div style={{ minWidth: 0 }}>
 
         <Link to="/my-tasks" style={{ fontSize: 13, color: C.blue, textDecoration: 'none', fontWeight: 600 }}>‹ My Tasks</Link>
 
@@ -262,14 +332,138 @@ export default function RecordSearchTaskPage() {
           </div>
         </section>
 
-        {/* The search surface (§4) and the actions / resolution rail (§5 — incl. Vague vs Overly Broad)
-            are the next slices. Saying so on the page beats a screen that silently does half its job. */}
+        {/* The search surface (§4) is the next slice. Saying so beats a screen that silently does half its job. */}
         <div style={{ marginTop: 16, background: C.surface, border: '1px dashed ' + C.hairStrong,
           borderRadius: 10, padding: 16, fontSize: 13, color: C.muted }}>
-          <b style={{ color: C.ink }}>Next on this screen:</b> the search surface (digital · audio/video · paper · other)
-          and the actions rail — Confer · Contact requestor · Log a call · <b>Mark Vague</b> / <b>Mark Overly Broad</b> ·
-          Found / No responsive records. <span style={{ color: C.faint }}>Spec §4–§5.</span>
+          <b style={{ color: C.ink }}>Next on this screen:</b> the search surface — digital · audio/video · paper ·
+          other — and the Found / No responsive records resolution. <span style={{ color: C.faint }}>Spec §4, §5d.</span>
         </div>
+       </div>
+
+       {/* ---------------- ZONE 3 — ACTIONS & DEFECT RAIL ---------------- */}
+       <div style={{ minWidth: 0 }}>
+
+        {flash && (
+          <div style={{ marginBottom: 12, fontSize: 12.5, lineHeight: 1.5, borderRadius: 9, padding: '10px 12px',
+            background: flash.tone === 'crit' ? C.critTint : C.greenTint,
+            color: flash.tone === 'crit' ? C.crit : C.green,
+            border: '1px solid ' + (flash.tone === 'crit' ? C.crit : C.green), fontWeight: 600 }}>
+            {flash.text}
+          </div>
+        )}
+
+        <section style={{ background: C.surface, border: '1px solid ' + C.hair, borderRadius: 10, marginBottom: 16 }}>
+          <div style={{ padding: '12px 14px', borderBottom: '1px solid ' + C.hair, fontSize: 12.5, fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '.05em', color: C.muted }}>Actions</div>
+          <div style={{ padding: 14, paddingBottom: 6 }}>
+            <Act k="CONSULT_REQUESTED" title="Confer with supervisor" sub="Send this task and a note"
+              onClick={function () { effort('CONSULT_REQUESTED', 'Conferred with a supervisor on this search.'); }} />
+            <Act k="CALL_LOGGED" title="Log a phone call" sub="Who, when, what came of it"
+              onClick={function () { effort('CALL_LOGGED', 'Phone call logged during record search.'); }} />
+          </div>
+        </section>
+
+        {/* ===== IS THE REQUEST DEFECTIVE? (spec §5b-2) =====
+            Two defects, VISIBLE, never one checkbox. What each one DOES is decided by the jurisdiction's
+            own clarification rules — which is the entire reason they cannot be collapsed. */}
+        <section style={{ background: C.surface, border: '1px solid ' + C.hair, borderRadius: 10, marginBottom: 16 }}>
+          <div style={{ padding: '12px 14px', borderBottom: '1px solid ' + C.hair, display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 12.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em', color: C.muted }}>
+              Is the request defective?
+            </span>
+            {policy && !policy.enabled && (
+              <span title="The jurisdiction's clarification policy is off or un-attested, so marking a defect records the effort trail but changes no clock."
+                style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '2px 8px',
+                  background: C.surface2, color: C.faint }}>policy off</span>
+            )}
+          </div>
+          <div style={{ padding: 14, paddingBottom: 8 }}>
+
+            <Act k="vague" title="Mark Vague" sub="Unclear WHAT is being asked" on={defect === 'vague'}
+              onClick={function () { setDefect(defect === 'vague' ? null : 'vague'); }} />
+            {defect === 'vague' && (
+              <div style={{ fontSize: 12.5, lineHeight: 1.5, color: C.muted, background: C.surface2,
+                border: '1px solid ' + C.hair, borderRadius: 8, padding: '10px 12px', margin: '-2px 0 10px' }}>
+                Sends a clarification request. This jurisdiction’s clock rule is <code style={{ fontFamily: C.mono }}>{effect || '—'}</code>
+                {clockStops ? ' — the response clock will PAUSE.' : ' — the response clock KEEPS RUNNING.'}
+                <button type="button" disabled={!!busy} onClick={function () { markDefect('vague'); }}
+                  style={{ marginTop: 9, width: '100%', cursor: 'pointer', background: C.blue, color: '#fff',
+                    border: '1px solid ' + C.blue, borderRadius: 8, padding: '8px 10px', fontSize: 13, fontWeight: 650 }}>
+                  {busy === 'vague' ? 'Sending…' : 'Send clarification request'}
+                </button>
+              </div>
+            )}
+
+            <Act k="overly_broad" title="Mark Overly Broad" sub="Clear, but unduly burdensome" on={defect === 'overly_broad'}
+              onClick={function () { setDefect(defect === 'overly_broad' ? null : 'overly_broad'); }} />
+            {defect === 'overly_broad' && (
+              <div style={{ fontSize: 12.5, lineHeight: 1.5, borderRadius: 8, padding: '10px 12px', margin: '-2px 0 10px',
+                background: conferenceOwed ? C.critTint : C.surface2,
+                border: '1px solid ' + (conferenceOwed ? C.crit : C.hair), color: C.ink }}>
+                {conferenceOwed ? (
+                  <>
+                    <b>This jurisdiction requires a conference.</b> Before this request can be denied as unduly
+                    burdensome, the agency <b>shall</b> offer the requestor an opportunity to confer and reduce it to
+                    manageable proportions.
+                    <div style={{ marginTop: 9, paddingTop: 8, borderTop: '1px solid ' + C.crit }}>
+                      <span style={{ display: 'block', fontWeight: 700, color: C.crit, marginBottom: 3 }}>
+                        ⚠ The clock does not stop for the conference.
+                      </span>
+                      Failing to respond on time means the request <b>may not be treated as unduly burdensome at all</b>.
+                      Waiting silently <b>forfeits the burden defense</b>.
+                      {task.deadline_date && (
+                        <span style={{ display: 'block', marginTop: 7, fontFamily: C.mono, fontSize: 12,
+                          color: C.crit, fontWeight: 700 }}>
+                          Response due {task.deadline_date}{dLeft !== null ? ' · ' + (overdue ? Math.abs(dLeft) + ' days OVERDUE' : dLeft + ' days left') : ''}
+                        </span>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    Records the request as <b>overly broad</b> and sends a clarification. <b>This jurisdiction imposes no
+                    conference duty</b> (<code style={{ fontFamily: C.mono }}>duty={duty || 'none'}</code>), so conferring
+                    is discretionary here.
+                  </>
+                )}
+                <button type="button" disabled={!!busy} onClick={function () { markDefect('overly_broad'); }}
+                  style={{ marginTop: 9, width: '100%', cursor: 'pointer', color: '#fff',
+                    background: conferenceOwed ? C.crit : C.blue,
+                    border: '1px solid ' + (conferenceOwed ? C.crit : C.blue),
+                    borderRadius: 8, padding: '8px 10px', fontSize: 13, fontWeight: 650 }}>
+                  {busy === 'overly_broad' ? 'Sending…' : (conferenceOwed ? 'Offer the conference' : 'Send clarification request')}
+                </button>
+              </div>
+            )}
+          </div>
+        </section>
+
+        {/* The effort trail. Not decoration — it is the evidence that supports a "no responsive records"
+            closure, and the place a city looks when someone asks what it actually DID. */}
+        <section style={{ background: C.surface, border: '1px solid ' + C.hair, borderRadius: 10 }}>
+          <div style={{ padding: '12px 14px', borderBottom: '1px solid ' + C.hair, display: 'flex', alignItems: 'center' }}>
+            <span style={{ fontSize: 12.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em', color: C.muted }}>
+              Effort trail
+            </span>
+            <span style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '2px 8px',
+              background: C.surface2, color: C.faint, fontFamily: C.mono }}>{trail.length}</span>
+          </div>
+          <div style={{ padding: 14, maxHeight: 380, overflowY: 'auto' }}>
+            {trail.length === 0 && <div style={{ fontSize: 12.5, color: C.faint }}>Nothing logged yet.</div>}
+            {trail.slice(0, 25).map(function (h) {
+              var loud = /CLARIFICATION|OVERLY BROAD|forfeit/i.test((h.action || '') + ' ' + (h.notes || ''));
+              return (
+                <div key={h.id} style={{ paddingBottom: 10, marginBottom: 10, borderBottom: '1px solid ' + C.hair }}>
+                  <div style={{ fontSize: 11.5, fontWeight: 700, fontFamily: C.mono,
+                    color: loud ? C.crit : C.blue }}>{h.action}</div>
+                  <div style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.45, marginTop: 2 }}>{h.notes}</div>
+                  <div style={{ fontSize: 11, color: C.faint, marginTop: 3 }}>{h.actor_name} · {h.created_at}</div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+       </div>
       </div>
     </div>
   );

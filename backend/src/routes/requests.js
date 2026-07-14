@@ -318,6 +318,33 @@ router.post('/:id/legal-escalate', requireAuth, async function(req, res) {
 // clarification policy is enabled AND its jurisdiction-profile section is attested (safe-manual
 // otherwise). Always records the effort-trail event. See SPEC_record_search_task_screen.md §5b and
 // CLARIFICATION_POLICY_SURVEY.md §8 (slice 2). Reply side: POST .../clarification/resolve.
+// THE EFFORT TRAIL (SPEC_record_search_task_screen §5a/§5c). The searcher's non-clarification actions —
+// conferring with a supervisor, logging a phone call — are pure history entries. They are not decoration:
+// they are the evidence that supports a "no responsive records" closure later, when someone asks what the
+// city actually DID.
+//
+// The action is WHITELISTED, and that is deliberate. `request_history.action` is READ by other services —
+// clarificationTimeout keys its auto-close sweep off CLARIFICATION_REQUESTED, and the stage machinery writes
+// its own rows. An endpoint that accepted an arbitrary action string would let any authenticated caller forge
+// a clarification, a stage transition, or a closure into the audit trail. Only these two are writable here.
+var EFFORT_ACTIONS = {
+  CONSULT_REQUESTED: 'Conferred with a supervisor',
+  CALL_LOGGED: 'Logged a phone call'
+};
+router.post('/:id/effort', requireAuth, async function (req, res) {
+  try {
+    var b = req.body || {};
+    var action = String(b.action || '');
+    if (!EFFORT_ACTIONS[action]) return res.status(400).json({ error: 'Unsupported effort action' });
+    var r = await get('SELECT id FROM requests WHERE id = ?', [req.params.id]);
+    if (!r) return res.status(404).json({ error: 'Request not found' });
+    var notes = String(b.notes || '').trim() || EFFORT_ACTIONS[action];
+    await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+      [uuidv4(), req.params.id, req.user && req.user.sub, (req.user && req.user.name) || 'Staff', action, notes]);
+    res.json({ ok: true, action: action, notes: notes });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // R9 — what the portal already searched, grouped by description. The instruction block the record-search
 // task screen opens with, and the data behind its "Self Service Portal Search Results" bar
 // (SPEC_record_search_task_screen.md §2.3).
