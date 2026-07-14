@@ -2565,15 +2565,80 @@ failure until you know when the column started being written.**
 
 ---
 
+## 2026-07-14 (wq) — Credits restored, suite GREEN (309/309) — and the tests were CONTAMINATING LIVE DATA
+
+**AI is back.** The credit balance was in a **different org** than the API key billed to (key → org
+`5ab34385…`, sitting at **-$0.06**; the $199.80 Kevin was looking at was subscription-side money an API key
+cannot spend). Topped up the correct org. **No key change, no `.env` edit** — the backend was pointed at the
+right place all along, the wallet was just empty.
+
+**Verified live, end to end:** `POST /api/public/submit` → **classified** (standard, confidence 100) → matched
+`rt-council-minutes` → **routed on `taxonomy` basis** to `team-clerk-archives` → auto-advanced to
+`record_search` → spawned `estimate` + `record_search` tasks → deadline 2026-07-24. History reads
+`CREATED → CLASSIFIED → STAGE_ADVANCED`, and **no `CLASSIFICATION_UNAVAILABLE` fallback fired** — the degraded
+path is correctly dormant now that the AI is healthy.
+
+**THE SUITE IS GREEN: 309/309, 0 failures**, all 12 harnesses chained. `verify_stage_bypass` is **24/24** — the
+two assertions the (un) handoff flagged were preconditions waiting on the classifier, exactly as predicted, not
+regressions. Config integrity **CLEAN**.
+
+### ⚠️ THE REAL FIND: `tasks.request_id` had NO FOREIGN KEY — and the SUITE was leaking orphans into LIVE DATA
+
+Cleaning up my own test rows surfaced **15 tasks sitting OPEN in real worklists, pointing at requests that no
+longer exist.** Two mechanisms, and the second one is the one that matters:
+
+1. Nothing deleted a request's tasks when the request went away — `tasks.request_id` was **completely
+   unenforced**.
+2. **`workflowEngine.bg()` is fire-and-forget.** A caller can `DELETE` a request while `onIntake` is still in
+   flight, and the in-flight insert then manufactures a task for a request that **no longer exists**. **The
+   verify suite tripped this on EVERY run** — it creates a request, asserts, deletes the request, and the
+   racing `onIntake` leaves one open `routing_review` task behind. **I watched it happen twice, once per run.**
+   *The tests were silently contaminating the live database, one orphan at a time.*
+
+**Fixed (27e3436):** FK `fk_tasks_request_id → requests(id) ON DELETE CASCADE`, added idempotently (the schema
+re-runs on every boot). CASCADE takes the tasks with the request; the racing insert now **fails loudly** (caught
+by `bg`'s handler) instead of silently minting an orphan. **A task for a deleted request is not work anyone can
+do.** Proven: the bogus insert is rejected · delete cascades · **suite run TWICE → 0 orphans leaked** (was 1 per
+run) · 309/309 still green · integrity CLEAN. The 15 orphans purged (backed up to the job scratchpad first).
+
+### ❗ DECISION FOR KEVIN — the same hole is in 15 OTHER tables, and some of them hold MONEY
+
+**Sixteen tables reference `requests(id)`. NOT ONE had a foreign key.** I fixed `tasks` only. Four are
+**already dangling right now**:
+
+| table | dangling rows |
+|---|---|
+| `workflow_decisions` | 22 |
+| `request_payment_events` | 7 |
+| `request_clocks` | 5 |
+| ~~`tasks`~~ | ~~15~~ → **fixed** |
+
+I **deliberately did not blanket-apply CASCADE**, because on the money and audit tables it is *not* a mechanical
+choice: **should deleting a request destroy its payment trail?** Those dangling `request_payment_events` rows
+may be the only surviving record that money changed hands. CASCADE would erase that class of evidence
+permanently, and `request_history` is the audit log. **This needs a policy call, not a migration.** Note also
+that the parent/child migration repoints 7 money/clock tables to the parent — so decide this *with* that in
+mind, not before it.
+
+**Also noticed (not fixed, not my slice):** live `tasks.request_id` is **`NOT NULL`**, but the ARCHITECTURE
+invariant says *"Tasks have a NULLABLE request link."* The schema and the invariant disagree. Worth
+reconciling before anything relies on standalone tasks.
+
+**State:** `main` @ `27e3436`, tree clean. API healthy (auto-restarted, booted clean on the new schema). Suite
+309/309. Config integrity CLEAN. No test residue.
+
+---
+
 # SESSION CLOSE — 2026-07-14. START HERE NEXT TIME.
 
 ## ⚠️ DO THIS FIRST, BEFORE ANY WORK
-**The Anthropic API credit balance is EXHAUSTED.** `400 — "Your credit balance is too low to access the
-Anthropic API."` **Every AI feature is down**: intake classification · the redaction AI read · the help agent ·
-the report agent · the config extractors. Top up credits, then:
-1. Re-run the suite. **Two `verify_stage_bypass` assertions ("has an open task before the close") depend on the
-   classifier succeeding and FAIL while credits are out.** They are preconditions, not regressions — every
-   assertion about the behaviour under test passes.
+1. ~~**The Anthropic API credit balance is EXHAUSTED.** Every AI feature is down. Top up credits, then re-run
+   the suite — two `verify_stage_bypass` assertions FAIL while credits are out.~~
+   **✅ RESOLVED 2026-07-14 (wq). AI is back; the suite is GREEN at 309/309** and `verify_stage_bypass` is
+   24/24. The credits were in a **different org** than the API key bills to — the key was always correct, the
+   wallet was empty. **If AI features ever 400 with "credit balance too low" again, CHECK THE ORG FIRST:** the
+   key bills to org `5ab34385-e479-4c20-8b25-9d47a1e0e16b`, and subscription credit (what the desktop app
+   shows) **cannot** be spent by an API key. Buying credits in the wrong org fixes nothing.
 2. ~~**23 active intake requests have no routing basis.** Sweep them: `SELECT id FROM requests WHERE
    routing_basis IS NULL AND stage='intake' AND status='active'` → spawn a routing_review task for each.~~
    **❌ RETRACTED 2026-07-14 (vp) — DO NOT RUN THIS SWEEP. It was a false alarm, and it would have done
