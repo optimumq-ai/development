@@ -7,6 +7,7 @@ const emailService = require('../services/email');
 const recordSearch = require('../services/recordSearch');
 const classifier = require('../services/classifier');
 const requestCreate = require('../services/requestCreate');
+const searchIntents = require('../services/searchIntents');
 const emailConnector = require('../services/connectors/email');
 const workflowEngine = require('../services/workflowEngine');
 const crypto = require('crypto');
@@ -362,8 +363,31 @@ router.post('/submit', async function(req, res) {
   var id = made.id;
   var requestNumber = made.requestNumber;
 
-  // Persist any records the citizen selected from search results
-  if (Array.isArray(b.selectedRecords) && b.selectedRecords.length > 0) {
+  // ---- intake search provenance (R9) -------------------------------------------------------------
+  // PREFERRED: searchIntents[] — one entry per DESCRIBED RECORD, carrying its intent, every query the
+  // portal tried, the records the requestor took, AND the records they were shown and passed over.
+  // Persistence lives in ONE place (services/searchIntents), never inline here.
+  //
+  // FALLBACK: the flat selectedRecords[] the portal sent before R9. Kept because the manual form and any
+  // older client still post that shape — dropping it would silently lose selections on a live path. Those
+  // rows get intent_id = NULL and render ungrouped, which is exactly what they are: a selection with no
+  // recorded meaning.
+  var prov = { intents: 0, selected: 0, notSelected: 0 };
+  if (Array.isArray(b.searchIntents) && b.searchIntents.length > 0) {
+    prov = await searchIntents.persist(id, b.searchIntents);
+    if (prov.selected > 0) {
+      await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+        [uuidv4(), id, 'public', 'Public Portal', 'RECORDS_SELECTED',
+         'Requestor selected ' + prov.selected + ' record(s) across ' + prov.intents + ' description(s)']);
+    }
+    // The not-selected set is deliberately NOT announced to the requestor anywhere. It is recorded for the
+    // searcher only. Logging it here keeps the effort trail honest about what the portal actually showed.
+    if (prov.notSelected > 0) {
+      await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+        [uuidv4(), id, 'public', 'Public Portal', 'INTAKE_RESULTS_SHOWN',
+         'Portal showed ' + (prov.selected + prov.notSelected) + ' candidate(s); requestor passed over ' + prov.notSelected]);
+    }
+  } else if (Array.isArray(b.selectedRecords) && b.selectedRecords.length > 0) {
     for (var sr of b.selectedRecords) {
       await run('INSERT INTO request_selected_records (id, request_id, record_id, title, source_system, public_availability) VALUES (?,?,?,?,?,?)',
         [uuidv4(), id, sr.id || '', sr.title || '', sr.sourceSystem || '', sr.publicAvailability || '']);

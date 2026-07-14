@@ -24,6 +24,66 @@ CREATE TABLE IF NOT EXISTS demo_documents (id TEXT PRIMARY KEY, title TEXT NOT N
 CREATE TABLE IF NOT EXISTS email_verifications (token TEXT PRIMARY KEY, email TEXT NOT NULL, created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')), verified_at TEXT, expires_at TEXT NOT NULL);
 CREATE TABLE IF NOT EXISTS record_repositories (id TEXT PRIMARY KEY, name TEXT NOT NULL, connector_type TEXT NOT NULL, status TEXT DEFAULT 'active', config TEXT DEFAULT '{}', sort_order INTEGER DEFAULT 100, created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
 CREATE TABLE IF NOT EXISTS request_selected_records (id TEXT PRIMARY KEY, request_id TEXT NOT NULL, record_id TEXT NOT NULL, title TEXT, source_system TEXT, public_availability TEXT, created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
+
+-- ============================================================================================
+-- R9 — SEARCH-COMPLETENESS INTENT + THE REFINE LOOP  (DESIGN_split_canvas_intake.md §R9 + §4b)
+--
+-- The portal used to flatten intake: every described record's text was concatenated into one
+-- `description` string and every selection into one undifferentiated pile. Two things were lost.
+--
+--   1. WHAT THE SELECTION MEANT. An empty selection read as abandonment rather than "nothing here
+--      matches, search for me"; a partial selection was indistinguishable from a complete one, so a
+--      request the requestor considered OPEN could be fulfilled from the selected set and closed.
+--
+--   2. WHAT THE REQUESTOR WAS SHOWN AND PASSED OVER. Those candidates existed only in the chat and
+--      died with the session -- so the searcher re-surfaced records the requestor had already
+--      rejected, with no way to know.
+--
+-- One row per DESCRIBED RECORD, not per request. When real parent/child splitting lands
+-- (SPEC_tasks_roles_mrr_fees §12), each of these rows IS a child request -- it already carries the
+-- child's description, its selections and its intent. This table is the shape that migration wants.
+-- ============================================================================================
+CREATE TABLE IF NOT EXISTS request_search_intents (
+  id TEXT PRIMARY KEY,
+  request_id TEXT NOT NULL,
+  seq INTEGER NOT NULL,                 -- order the requestor described them in
+  description TEXT NOT NULL,
+  -- complete       : "these are all the records I want for this description"
+  -- search_more    : "these match, but ALSO have the team search for more"  <- fulfilling from the
+  --                  selection alone closes a request the requestor considers OPEN
+  -- no_match_search: the portal searched and NOTHING matched -- this is an instruction to search,
+  --                  NOT abandonment
+  -- not_searchable : PATH (b) -- email/audio/photos/data/paper. The portal NEVER searched. Kept
+  --                  distinct from no_match_search: the searcher must know which happened.
+  intent TEXT NOT NULL,
+  queries_tried TEXT DEFAULT '[]',      -- JSON array, in order. NOT bookkeeping: it tells the
+                                        -- searcher what the portal ALREADY ran, so they don't repeat it.
+  created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+CREATE INDEX IF NOT EXISTS idx_search_intents_request ON request_search_intents(request_id);
+
+-- The records the requestor was SHOWN and did NOT take. Written on EVERY results-clear -- each
+-- re-search AND the final Proceed -- because one description may be searched several times.
+-- INVISIBLE TO THE REQUESTOR, forever. It exists so the searcher never re-surfaces a rejected record.
+CREATE TABLE IF NOT EXISTS request_intake_results (
+  id TEXT PRIMARY KEY,
+  request_id TEXT NOT NULL,
+  intent_id TEXT,                       -- the description it was shown under (nullable: legacy rows)
+  record_id TEXT NOT NULL,
+  title TEXT,
+  source_system TEXT,
+  public_availability TEXT,
+  shown_in_query TEXT,                  -- which of the queries_tried surfaced it
+  created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+CREATE INDEX IF NOT EXISTS idx_intake_results_request ON request_intake_results(request_id);
+-- SELECTION WINS. A record passed over in search 1 and SELECTED in search 3 is selected ONLY -- it
+-- must never appear to the searcher as "the requestor declined this" when they in fact took it.
+-- Enforced in code (publicChat submit) AND here: one row per (request, record) in the not-selected set.
+CREATE UNIQUE INDEX IF NOT EXISTS ux_intake_results_record ON request_intake_results(request_id, record_id);
+
+-- Which description a selection answers. Nullable: pre-R9 rows stay NULL and render ungrouped.
+ALTER TABLE request_selected_records ADD COLUMN IF NOT EXISTS intent_id TEXT;
 CREATE INDEX IF NOT EXISTS idx_demodocs_title ON demo_documents(title);
 CREATE INDEX IF NOT EXISTS idx_emailverif_email ON email_verifications(email);
 CREATE INDEX IF NOT EXISTS idx_files_request ON request_files(request_id);
@@ -772,6 +832,10 @@ DECLARE
     'av_redaction_tasks','document_pages','erp_charges','fee_adjustments','fee_payments',
     'fulfilled_records','objections','redaction_jobs','request_clocks','request_fee_estimates',
     'request_files','request_history','request_payment_events','request_selected_records',
+    -- R9: intake provenance. Pure children of a request -- meaningless without it, so CASCADE is
+    -- correct. (The payment-history delete guard still blocks deleting any request that took money,
+    -- so this cannot cascade away a financial trail.)
+    'request_search_intents','request_intake_results',
     'workflow_decisions'
   ];
 BEGIN

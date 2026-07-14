@@ -318,6 +318,19 @@ router.post('/:id/legal-escalate', requireAuth, async function(req, res) {
 // clarification policy is enabled AND its jurisdiction-profile section is attested (safe-manual
 // otherwise). Always records the effort-trail event. See SPEC_record_search_task_screen.md §5b and
 // CLARIFICATION_POLICY_SURVEY.md §8 (slice 2). Reply side: POST .../clarification/resolve.
+// R9 — what the portal already searched, grouped by description. The instruction block the record-search
+// task screen opens with, and the data behind its "Self Service Portal Search Results" bar
+// (SPEC_record_search_task_screen.md §2.3).
+//
+// requireAuth is NOT incidental here. `notSelected` is the set of records the requestor was shown and
+// passed over -- it is invisible to them BY DESIGN and must never be reachable from the public portal.
+router.get('/:id/search-intents', requireAuth, async function(req, res) {
+  try {
+    var SI = require('../services/searchIntents');
+    res.json(await SI.forRequest(req.params.id));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // Draft preview for the "Contact requestor" UI: the templated body + channel/address hints, no side effects.
 router.get('/:id/clarification/preview', requireAuth, async function(req, res) {
   try {
