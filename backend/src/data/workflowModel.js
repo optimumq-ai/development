@@ -17,7 +17,7 @@ var phases = [
   { id:'routing',   name:'Routing (the engine)' },
   { id:'scoping',   name:'Scoping / multi-record' },
   { id:'fees',      name:'Fees, estimate & deposit' },
-  { id:'search',    name:'Record search & responsiveness' },
+  { id:'search',    name:'Record search & inclusion' },
   { id:'readiness', name:'Public-readiness & exemptions' },
   { id:'redaction', name:'Redaction' },
   { id:'review',    name:'Review, delivery & compliance' },
@@ -60,10 +60,14 @@ N({id:'work-can-begin',phase:'fees',label:'Can work begin? (deposit paid OR none
 N({id:'reconcile',phase:'fees',label:'Estimate vs. final reconciliation',decider:'code',status:'planned',note:'Natural hook to write ACTUAL quantities back into the estimate profile.'});
 
 // ---- search ----
-N({id:'responsiveness',phase:'search',label:'Which records are responsive?',decider:'human',status:'built',criteria:['Staff mark records responsive / not','AI suggests likely-responsive documents']});
-N({id:'ai-suggest-docs',phase:'search',label:'AI-suggested responsive documents',decider:'ai',status:'built'});
-N({id:'any-responsive',phase:'search',label:'Are there any responsive records at all?',decider:'human',status:'partial',outcomes:[{label:'Yes -> continue'},{label:'None -> no-records exit',to:'no-records-exit'}]});
-N({id:'enough-to-advance',phase:'search',label:'Enough found to advance?',decider:'code',status:'built',criteria:['Gate: at least one record marked responsive']});
+// NOTE (2026-07-14, Kevin): user-facing text says "Include in Response", not "responsive".
+// The node `id`s are STABLE KEYS referenced by seeded rules — they keep the old word on purpose.
+// The statutory notice "No responsive records" (t-norecords / no-records-exit) also keeps it: that
+// is the name the law gives the notice, and renaming it would misquote the statute.
+N({id:'responsiveness',phase:'search',label:'Which records go in the response?',decider:'human',status:'built',criteria:['Staff mark records Include / Exclude','AI suggests likely inclusions']});
+N({id:'ai-suggest-docs',phase:'search',label:'AI-suggested records to include',decider:'ai',status:'built'});
+N({id:'any-responsive',phase:'search',label:'Are there any records to include at all?',decider:'human',status:'partial',outcomes:[{label:'Yes -> continue'},{label:'None -> no-records exit',to:'no-records-exit'}]});
+N({id:'enough-to-advance',phase:'search',label:'Enough found to advance?',decider:'code',status:'built',criteria:['Gate: at least one record marked Include in Response']});
 
 // ---- readiness ----
 N({id:'public-ready',phase:'readiness',label:'Is the record releasable as-is (public-ready)?',decider:'hybrid',status:'partial',criteria:['Code reads public_availability + redaction flag','Human confirms']});
@@ -95,7 +99,7 @@ N({id:'await-approval-timeout',phase:'stalls',label:'Requestor silent on a revis
 N({id:'requestor-refuses',phase:'stalls',label:'Requestor refuses the increase?',decider:'human',status:'planned',outcomes:[{label:'Deliver what the deposit covers (partial)',to:'t-partial'},{label:'Narrow scope -> re-estimate'},{label:'Withdraw',to:'t-withdrawn-requestor'}]});
 N({id:'clarification-timeout',phase:'stalls',label:'Requestor does not clarify a vague request past threshold?',decider:'code',status:'built',trigger:'time',outcomes:[{label:'Yes -> close: withdrawn (no clarification)'}]});
 N({id:'custodian-escalate',phase:'stalls',label:'Internal custodian has not returned records in time?',decider:'code',status:'planned',trigger:'time',outcomes:[{label:'Nudge -> escalate to manager'}]});
-N({id:'no-records-exit',phase:'stalls',label:'Zero responsive records found?',decider:'hybrid',status:'partial',outcomes:[{label:'-> NO RESPONSIVE RECORDS + notice',to:'t-norecords'}]});
+N({id:'no-records-exit',phase:'stalls',label:'Nothing to include in the response?',decider:'hybrid',status:'partial',outcomes:[{label:'-> NO RESPONSIVE RECORDS + notice',to:'t-norecords'}]});
 N({id:'mrr-partial',phase:'stalls',label:'Some children empty / withheld?',decider:'hybrid',status:'planned',outcomes:[{label:'-> roll up to PARTIALLY GRANTED',to:'t-partial'}]});
 
 // ---- cross-cutting ----
@@ -152,10 +156,10 @@ var descriptions = {
 "deposit-paid":"Watches for the deposit to actually arrive. Because it depends on the requestor doing something, it is checked over time rather than at a single moment.",
 "work-can-begin":"The gate that lets fulfillment start - satisfied when the deposit is paid, or no deposit was required, or a waiver was granted. Until then the request waits.",
 "reconcile":"At the end, compares the final actual cost to the estimate and applies the city's over/under policy (refund, bill the difference, or absorb it). This is also where real actuals get fed back to make future estimates smarter.",
-"responsiveness":"Staff decide which located records actually answer the request (responsive) versus those that do not. The AI surfaces likely matches, but the call is a human's.",
-"ai-suggest-docs":"The AI searches inside the gathered documents by meaning and suggests which pages are likely responsive, to speed up the human review.",
-"any-responsive":"Determines whether any responsive records exist at all. If none do, the request branches to a formal no-records response.",
-"enough-to-advance":"A simple gate that only lets the request move forward once at least one responsive record has been identified.",
+"responsiveness":"Staff decide which located records actually answer the request and should be included in the response, versus those that should not. The AI surfaces likely matches, but the call is a human's.",
+"ai-suggest-docs":"The AI searches inside the gathered documents by meaning and suggests which pages are likely to belong in the response, to speed up the human review.",
+"any-responsive":"Determines whether there is anything to include in the response at all. If there is not, the request branches to a formal no-records response.",
+"enough-to-advance":"A simple gate that only lets the request move forward once at least one record has been marked Include in Response.",
 "public-ready":"Decides whether a record can be released exactly as-is, or whether something must be withheld or redacted first. The system reads the record type's flags; a person confirms.",
 "exemptions":"Identifies which legal exemptions justify withholding or redacting specific content, with the statute citations that will appear in the response.",
 "known-clean":"Recognizes record types that are reliably safe to release without redaction, letting them skip the redaction stage entirely.",
@@ -179,7 +183,7 @@ var descriptions = {
 "requestor-refuses":"If the requestor declines a cost increase, policy decides what happens - deliver only what their deposit already covers, narrow the request to fit, or withdraw it - and how any unused deposit is handled.",
 "clarification-timeout":"If a vague request is sent back for clarification and the requestor goes silent past the limit, it is closed for lack of clarification.",
 "custodian-escalate":"If an internal department sits on requested records too long, the system nudges and then escalates to a manager, so internal delays do not stall the response.",
-"no-records-exit":"When a diligent search turns up nothing responsive, the request is closed with a formal no-records notice.",
+"no-records-exit":"When a diligent search turns up nothing to include, the request is closed with a formal no-records notice.",
 "mrr-partial":"When a split request has some children fulfilled and others empty or withheld, the parent is closed as partially granted, with the basis spelled out.",
 "permissions":"Continuously enforces who is allowed to see and act on a request at each stage, based on roles and assignments.",
 "assignment":"Who is currently responsible for the request - set by hand today, with team-claim and auto-assignment planned."

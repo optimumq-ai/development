@@ -118,8 +118,8 @@ export default function RecordsPanel({ requestId, stage, onChange }) {
         <div>
           <h3 style={{fontSize:'15px',fontWeight:'700',margin:'0 0 2px'}}>Records</h3>
           <p style={{fontSize:'12px',color:'#9CA3AF',margin:0}}>
-            {loading ? 'Loading...' : records.length===0 ? 'No records attached yet' : records.length+' record'+(records.length!==1?'s':'')+' · '+responsiveCount+' responsive'}
-            {stage==='record_search'&&!canAdvance&&records.length>0?' — mark at least one Responsive to advance':''}
+            {loading ? 'Loading...' : records.length===0 ? 'No records attached yet' : records.length+' record'+(records.length!==1?'s':'')+' · '+responsiveCount+' to include'}
+            {stage==='record_search'&&!canAdvance&&records.length>0?' — include at least one record in the response to advance':''}
           </p>
         </div>
         <button onClick={function(){setShowAdd(!showAdd);}} style={{padding:'8px 14px',background:'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>
@@ -131,7 +131,7 @@ export default function RecordsPanel({ requestId, stage, onChange }) {
         <div style={{display:'flex',gap:'10px',padding:'12px',background:canAdvance?'#F0FDF4':'#FFFBEB',borderRadius:'8px',border:'1px solid '+(canAdvance?'#86EFAC':'#FDE68A')}}>
           <div style={{fontSize:'20px'}}>{canAdvance?'✅':'⚠️'}</div>
           <div style={{fontSize:'13px',color:canAdvance?'#166534':'#92400E'}}>
-            {canAdvance?responsiveCount+' responsive record'+(responsiveCount!==1?'s':'')+' — ready to advance':'Attach records and mark at least one Responsive before advancing'}
+            {canAdvance?responsiveCount+' record'+(responsiveCount!==1?'s':'')+' to include — ready to advance':'Attach records and include at least one in the response before advancing'}
           </div>
         </div>
       )}
@@ -214,10 +214,10 @@ export default function RecordsPanel({ requestId, stage, onChange }) {
                 </div>
                 <div style={{display:'flex',gap:'6px',flexShrink:0,alignItems:'center'}}>
                   <button onClick={function(){updateStatus(r.id, true);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid '+(isR?'#16A34A':'#D1D5DB'),background:isR?'#F0FDF4':'white',color:isR?'#16A34A':'#6B7280',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>
-                    {isR?'✓ Responsive':'Responsive'}
+                    {isR?'✓ Included in Response':'Include in Response'}
                   </button>
                   <button onClick={function(){updateStatus(r.id, false);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid '+(isNR?'#DC2626':'#D1D5DB'),background:isNR?'#FEF2F2':'white',color:isNR?'#DC2626':'#6B7280',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>
-                    {isNR?'✗ Not Responsive':'Not Responsive'}
+                    {isNR?'✗ Excluded':'Exclude from Response'}
                   </button>
                   {(r.mimetype && r.mimetype.indexOf('pdf') >= 0) ? <button onClick={function(){nav('/redact/' + r.id);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid #1F4E79',background:(matches[r.id]&&matches[r.id].matched)?'#1F4E79':'white',color:(matches[r.id]&&matches[r.id].matched)?'white':'#1F4E79',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>{(matches[r.id]&&matches[r.id].matched)?'Auto-redact':'Redact'}</button> : null}
                   {((r.mimetype && r.mimetype.indexOf('csv') >= 0) || (r.title && /\.csv$/i.test(r.title))) ? <button onClick={function(){nav('/redact-fields/' + r.id);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid #1F4E79',background:'white',color:'#1F4E79',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>Redact fields</button> : null}

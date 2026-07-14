@@ -73,7 +73,7 @@ export default function RedactionTaskPage() {
       var resp = (fr.data.files || []).filter(function (f) { return f.responsive; });
       setFiles(resp);
       if (resp.length) setFileId(resp[0].id);
-      else setError('This request has no responsive records yet. Mark records responsive in Record Search first.');
+      else setError('This request has no records marked for inclusion yet. Mark records "Include in Response" in Record Search first.');
     } catch (e) { setError('Could not open the redaction task. ' + msg(e)); }
     setLoading(false);
   }
@@ -258,7 +258,7 @@ export default function RedactionTaskPage() {
           <button style={sty.back} onClick={function () { nav('/my-tasks'); }}>‹ My Tasks</button>
           <span style={sty.reqid}>{task && task.request_number}</span>
           {files.length ? (
-            <select value={fileId || ''} onChange={function (e) { setFileId(e.target.value); }} style={sty.filepick} title="Responsive files">
+            <select value={fileId || ''} onChange={function (e) { setFileId(e.target.value); }} style={sty.filepick} title="Records included in the response">
               {files.map(function (f, i) { return <option key={f.id} value={f.id}>{f.original_name} · file {i + 1} of {files.length}</option>; })}
             </select>
           ) : null}

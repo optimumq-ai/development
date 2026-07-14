@@ -175,7 +175,7 @@ export default function RequestWorkspacePage() {
               {nextStageLabel(request.stage)||'Advance Stage'} →
             </button>
             {!canAdvance&&request.stage==='record_search'&&(
-              <div style={{fontSize:'11px',color:'#D97706',textAlign:'right'}}>Attach and mark at least one Responsive record first</div>
+              <div style={{fontSize:'11px',color:'#D97706',textAlign:'right'}}>Attach a record and include at least one in the response first</div>
             )}
           </div>
         )}
