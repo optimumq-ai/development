@@ -3183,3 +3183,84 @@ the format toggle is unbuilt and the screen is **digital-only**.
 2. The natural next slice is the **format toggle / §4b AV path** — but Kevin **parked** it deliberately *"until I
    work through this build enough to see requests process correctly."* **It needs un-parking explicitly.**
 3. Tier 1 item 3 — **populate estimate profiles** for the top ~10 record types. Data task, no code, high leverage.
+
+---
+
+## 2026-07-14 (ae) — Tier 1 #3 seeded — and the task EXPOSED A ~15x UNLAWFUL OVERCHARGE. 475/475.
+
+**Three commits.** `f8a297e` the labor bar · `ed44060` the ten seeds · (+ test hardening). Suite **475/475**,
+live census clean. Two new harnesses: `verify_fee_labor_gate` (20) · `verify_estimate_profiles` (15).
+
+### THE BUG THE DATA TASK FOUND — this is the headline, not the seeds
+
+Populating the profiles is what flips a record type from **manual** to **AUTOMATED**. Dry-running the ten
+candidate seeds through the real engine before writing anything showed a typical **8-page incident report
+pricing at $12.05 — $11.25 of it LABOR.**
+
+> **Tex. Gov't Code § 552.261(a):** *"If a request is for 50 or fewer pages of paper records, the charge …
+> **may not include costs of materials, labor, or overhead**, but shall be limited to the charge for each page
+> of the paper record that is photocopied."*
+
+**That report may lawfully cost $0.80.** We were charging ~15× over, on the most common request a city
+receives — and had been since the fee engine shipped.
+
+**THE ENGINE ALWAYS HAD THE GATE.** `feeEngine.laborGate`'s own comment names Texas. **No seeded fee profile
+ever set `billableWhen`. Zero.** A *reader with no config* — the exact mirror of the "seeded but never read"
+bugs this project keeps finding (`clarification_duty`, `clarification_pending`), and just as silent.
+
+**Seeding was STOPPED until it was fixed.** Automating the profiles would have turned an overcharge a clerk
+might catch into a systematic one — emitted at scale under a *"Review auto-generated estimate"* label that
+implies somebody validated it. **The config is now the thing under test:** a reseed from an old script, or a
+config copied for a new city, goes RED instead of shipping the overcharge.
+
+### ⚠️ THREE THINGS KEVIN OWNS (all flagged, none guessed)
+
+1. **`paperOnly` — UNVERIFIED and LOAD-BEARING (Kevin's call).** § 552.261(a) says *"pages of **paper**
+   records … photocopied"*, so the bar is scoped to `mail`/`pickup`/`paper`. **The demo default delivery is
+   `email`, so the bar does NOT fire on most requests** — that same report still prices **$12.05** by email.
+   Test **D** pins this exactly so it stays visible. **Needs counsel. One-value flip** (`paperOnly:false`).
+2. **The statute's two exceptions are UNCONFIGURED** — records in 2+ unconnected buildings, or remote storage,
+   restore the labor charge. **Under-charging is recoverable; unlawful over-charging is not.**
+3. **`labor.overheadPct` is UNSEEDED.** The spec mentions a TX **+20%** surcharge; that figure is **NOT in the
+   verified-TX research.** **An unresearched charge is the same exposure as an unresearched clock rule.**
+
+### THE TEN SEEDS (Tier 1 #3 — DONE)
+
+Seeded through the **real** `PUT /api/estimate-profiles/:id` path (never a direct insert). Police block first
+— incident · crash · arrest/booking · citations · CAD · 911 audio · body-worn video — then **building permits
+(Kevin's own §7d worked example)** · council minutes · official email. **All ten assess AUTOMATED.** They now
+travel in `seed_fixture.sql`, so a system built from **schema + fixture comes up with estimate automation ON**.
+
+**Verified end-to-end on LIVE `2026-000048`:** a real public submission for a building permit spawned an
+estimate task titled **"Review auto-generated estimate."** *(The first attempt — an incident report — correctly
+did NOT auto-route: **`wfr-sensitive` outranks `wfr-confident`** and holds investigative material at intake for
+a human. Not a bug; the rule working.)*
+
+> **⚠ THE SEEDS ARE PROVISIONAL.** `seedProfile` stamps `source='human-expert'`. **THE EXPERT WAS NOT A RECORDS
+> CLERK.** They are plausible defaults; **every profile's `notes` says so verbatim**, and `verify_estimate_profiles`
+> **test D holds that admission in place** — re-seed them as clerk-confirmed without a clerk and it goes red.
+> **A city's clerk should confirm them: ten numbers, reviewed once.** `recordActuals` corrects them over time
+> regardless, and a profile stays a **DEFAULT** — overridable per request, reconciled at delivery.
+
+### THE TESTS BITE — six deliberate breaks
+
+**Labor bar:** drop `billableWhen` (**the original bug**) → **10 red** · engine ignores `paperOnly` → **2** ·
+off-by-one at exactly 50 pages → **2**.
+**Seeds:** seeds vanish → **9** · provenance re-labelled "clerk-confirmed" → **1** · $200 bound disabled → **2**.
+
+### NOTED, NOT FIXED (out of slice)
+- **`assess()` hardcodes `delivery:{method:'email'}`** when pricing (`estimateProfile.js:139`). With `paperOnly`
+  that means its preview total is always the **worst case** (labor charged), so the $200 bound stays
+  conservative. The real per-request estimate uses the request's actual delivery. Fine, but know it.
+- **The `record_search` task spawns with a NULL title** (visible on 2026-000048). Cosmetic, pre-existing.
+
+### STATE
+`main` @ `ed44060` + hardening + this note. Suite **475/475**. API + nginx healthy. Live: **2 new requests**
+(`2026-000047` intake, `2026-000048` record_search) from the end-to-end verification.
+
+### NEXT
+1. **Kevin's three fee calls above** — `paperOnly` is the one that matters; it decides whether most requests
+   are lawfully priced.
+2. Tier 1 is now **CLOSED** (screen · redaction wiring · profiles · fee-waiver routing · found/not-found gate).
+   **Tier 2 opens:** fee-choice intake · notification model · My Tasks restructure · role-catalog reconciliation.
+3. Still parked (Kevin): the **§4b AV path** / format toggle — needs explicit un-parking.

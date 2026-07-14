@@ -61,26 +61,31 @@ var SEEDED = [
   ok('B5 …and says why', /No estimation profile|No expert seed/.test((un.reasons || []).join(' ')));
 
   console.log('\n=== C. THE QUANTITIES ARE SANE, AND THEY ARE QUANTITIES — NOT DOLLARS ===');
-  var incident = rows.filter(function (r) { return r.record_type_id === 'rt-incident-reports'; })[0];
-  var q = JSON.parse(incident.quantities_json || '{}');
+  // Guarded: if the seeds have been wiped, C and D must read as clean FAILs naming the missing profile —
+  // not a TypeError that masks every assertion after it.
+  function seedOf(id) {
+    var r = rows.filter(function (x) { return x.record_type_id === id; })[0];
+    return r ? JSON.parse(r.quantities_json || '{}') : null;
+  }
+  var q = seedOf('rt-incident-reports') || {};
   ok('C1 the incident-report seed stores QUANTITIES (§7e), never a dollar figure',
     q.bwPages > 0 && q.searchHours > 0 && !('total' in q) && !('amount' in q) && !('dollars' in q));
 
   // Council minutes are ALREADY PUBLIC. Seeding review hours against them would bill a citizen for redacting
   // a record that has nothing to redact — the kind of quiet, plausible overcharge nobody audits.
-  var minutes = JSON.parse(rows.filter(function (r) { return r.record_type_id === 'rt-council-minutes'; })[0].quantities_json);
+  var minutes = seedOf('rt-council-minutes');
   ok('C2 council minutes carry ZERO review hours — already-public material has nothing to redact',
-    !Number(minutes.reviewHours));
+    !!minutes && !Number(minutes.reviewHours));
 
   // Body-worn camera is review-dominated: video redaction runs slower than real time.
-  var bwc = JSON.parse(rows.filter(function (r) { return r.record_type_id === 'rt-police-video'; })[0].quantities_json);
+  var bwc = seedOf('rt-police-video');
   ok('C3 body-worn camera is REVIEW-dominated (redaction, not lookup, is the cost)',
-    Number(bwc.reviewHours) > Number(bwc.searchHours));
+    !!bwc && Number(bwc.reviewHours) > Number(bwc.searchHours));
 
   console.log('\n=== D. THE PROVENANCE ADMISSION IS ON THE RECORD ===');
+  var seededRows = rows.filter(function (r) { return SEEDED.indexOf(r.record_type_id) >= 0; });
   ok('D1 every seed is stamped PROVISIONAL — not confirmed by a records clerk',
-    rows.filter(function (r) { return SEEDED.indexOf(r.record_type_id) >= 0; })
-        .every(function (r) { return /PROVISIONAL/i.test(r.notes || ''); }));
+    seededRows.length === SEEDED.length && seededRows.every(function (r) { return /PROVISIONAL/i.test(r.notes || ''); }));
 
   console.log('\n=== E. THE $200 HUMAN-REVIEW BOUND STILL BITES ===');
   // A confident profile is NOT a blank cheque: assess() routes anything over $200 to a human regardless.
