@@ -215,6 +215,46 @@ the queries already tried:
 When the **record-search task screen** is built (`SPEC_record_search_task_screen.md`), these become that task's
 instruction block — the first thing the searcher reads. Until then, the request workspace is the surface.
 
+### 4b. The NOT-SELECTED set must persist too `[NEW — Kevin's mark-up 2026-07-14, decision #2]`
+
+R9 as designed (2026-07-13) accumulates the **Selected** column across re-searches and clears on Proceed. It says
+nothing about the records the requestor was **shown and passed over** — and today those persist **nowhere**. They
+are ephemeral in the chat. That is the gap Kevin's mark-up closes:
+
+> *"At any point where the existing files in the search result window clear, save those with the record. All
+> cleared files for a request should accumulate **invisible to the requestor** and carry with the request."*
+
+**`request_intake_results`** `[NEW table]` — one row per candidate the portal **showed and the requestor did not
+take**: `id · request_id · intent_id` (→ `request_search_intents`, the description it was shown under) ·
+`record_id · title · source_system · public_availability · shown_in_query` (which of the `queries_tried` surfaced
+it) · `created_at`.
+
+**Write points — every results-clear, not just Proceed:**
+
+| Event | Selected column | Results canvas | Write |
+|---|---|---|---|
+| **Search again** (re-run within one description) | keeps everything picked | **replaced** | the displaced, unpicked results → `request_intake_results` |
+| **Proceed** (closes the description out) | flushed to `request_selected_records` | **cleared** | the remaining unpicked results → `request_intake_results` |
+
+**Dedup rules:**
+- Dedup both sets by `record_id` **within a request**.
+- **Selection wins.** A record passed over in search 1 and *selected* in search 3 is **selected only** — it moves
+  out of `request_intake_results` rather than existing in both. The searcher must never see a record listed as
+  "requestor declined this" when the requestor in fact took it.
+
+**Invisible to the requestor.** This set is never rendered back into the portal. It exists solely so the
+**record-search task screen** (`SPEC_record_search_task_screen.md` §2.3) can tell the searcher *"the portal already
+showed them these 12 and they took 2"* — and so the searcher does not re-surface a record the requestor already
+rejected.
+
+**The bar `[NEW]`** — near the top of the search UI, **"Self Service Portal Search Results"** with two buttons:
+`Selected Records (n)` · `Records Not Selected (n)`, each opening its list. Specified in
+`SPEC_record_search_task_screen.md` §2.3; noted here because **this table is its data source** and R9 is what
+creates it.
+
+> **Sequencing:** the record-search task screen's carried-forward panel **cannot show real data until this ships.**
+> R9 is now a **prerequisite** of that screen, not a parallel track.
+
 ### 5. Explicitly NOT in this slice (decided 2026-07-13)
 - **No mechanical gate.** A `search_more` / `no_match_search` intent is **captured and surfaced, not enforced** —
   nothing blocks fulfillment off the selected records. A block needs an un-block (a searcher must be able to say
