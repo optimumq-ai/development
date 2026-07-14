@@ -2472,3 +2472,44 @@ none, and nothing depends on it yet.*
 
 **State:** `main`, tree clean. **Migration prep is complete except for those two decisions**, which are
 Kevin's — they cannot be resolved from the code.
+
+## 2026-07-14 (un) — ⚠️ ANTHROPIC CREDITS EXHAUSTED + the silent-orphan bug it exposed
+
+**FIRST, THE OPERATIONAL FACT (Kevin's action):** the Anthropic API credit balance is **exhausted**.
+`400 invalid_request_error — "Your credit balance is too low to access the Anthropic API."` **Every AI feature
+is down**: intake classification, the redaction AI read, the help agent, the report agent, and the config
+extractors all call the same API. This is billing, not code.
+
+**THE BUG IT EXPOSED — a SILENT ORPHAN at intake.** `publicChat` wrapped `classifier.classifyAndRoute()` in a
+bare `try/catch` that only logged. So on an AI failure the request was still **created and returned 201 to the
+citizen** — but never classified, given no record type, and left at `intake`. And the existing "unroutable"
+fallback in `workflowEngine` **did not save it**: that fallback only fires when `teamId` is **null**, and the
+rulebook still assigns a DEFAULT team (Open Records). So `teamId` came back non-null, **no routing-review task
+spawned**, and the request sat there *looking routed* — in nobody's worklist, with no flag, no alert, and no
+error anywhere. **23 active intake requests currently have no routing basis.**
+
+**Fixed.** The catch now spawns a **`routing_review` task** (team-agnostic, pooled) and writes a
+`CLASSIFICATION_UNAVAILABLE` history row naming the failure. **An AI outage must degrade to HUMAN WORK, not to
+silence.**
+
+**Verified against the REAL outage** (credits are actually out, so this is not a simulated failure):
+submit → `HTTP 201` → history `CREATED -> CLASSIFICATION_UNAVAILABLE` → **an open `routing_review` task**.
+
+**Also shipped (a68df67), Kevin's two §11.1 decisions:**
+- **Deposit sweep on the MONEY AXIS.** It required `r.stage = 'awaiting_payment'`; after the migration the
+  estimate hangs off the parent and the stage off the child, so that join would match nothing and **the deposit
+  sweep would silently stop running** — no dunning, no lapse, no withdrawal, no error. Now keyed off
+  `accepted + deposit_due > 0 + unpaid`. **`deposit_due > 0` is load-bearing** — without it, a request that
+  accepted an estimate owing NO deposit has `deposit_paid_at` NULL forever and would be flagged overdue for a
+  deposit it never owed. That false-positive case is now **constructed and asserted**, not hoped for (35/35).
+- **`fee_revenue by department` DROPPED, not joined.** Revenue is ONE number on the parent; a parent whose
+  records span two departments has one payment and two departments, so any split is an invented allocation —
+  and **the law is silent on allocation** (§5.10). A join would double-count it into both columns. The engine
+  now refuses the cut and explains why; **counts by department stay exact and are still offered**. The AI
+  report agent is taught the constraint so it cannot generate the impossible spec.
+
+**⚠️ NOTE ON THE SUITE:** two harness assertions (`stage_bypass` "has an open task before the close") depend on
+the AI classifier succeeding, so they FAIL while credits are out. **They are preconditions, not regressions** —
+every assertion about the behaviour under test passes. Re-run them once credits are restored.
+
+**State:** `main`, tree clean, config integrity CLEAN.

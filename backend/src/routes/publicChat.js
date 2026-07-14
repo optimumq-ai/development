@@ -392,7 +392,31 @@ router.post('/submit', async function(req, res) {
     try { await require('../services/tolling').applyClassification(id); } catch (e) { console.error('[publicChat] clock reclassify failed:', e && e.message); }
     await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
       [uuidv4(), id, 'system', 'AI Classification', 'CLASSIFIED', 'Auto-classified as ' + cls.classification + '; ' + basisText + (cls.teamName ? '; routed to ' + cls.teamName : '') + (cls.reasoning ? ' - ' + cls.reasoning : '')]);
-  } catch(ce) { console.error('[publicChat] auto-classify failed:', ce.message); }
+  } catch(ce) {
+    // AI CLASSIFICATION FAILED (an API outage, a rate limit, an exhausted credit balance...).
+    //
+    // This used to be a bare console.error, and the consequence was a SILENT ORPHAN: the request was created
+    // and returned 201 to the citizen, but it was never classified, never given a record type, and — because
+    // the rulebook still assigns a DEFAULT team — `teamId` came back non-null, so onIntake's existing
+    // "unroutable" fallback (which only fires when teamId IS null) never spawned a routing-review task.
+    // The request sat at intake, looking routed, in nobody's worklist, with no error anywhere. Found
+    // 2026-07-14 when the Anthropic credit balance ran out and 23 requests were sitting unclassified.
+    //
+    // An AI outage must degrade to HUMAN WORK, not to silence.
+    console.error('[publicChat] auto-classify failed:', ce.message);
+    try {
+      var trc = require('../services/taskRouting');
+      var openRt = await get("SELECT id FROM tasks WHERE request_id = ? AND type = 'routing_review' AND status IN ('open','assigned','in_progress')", [id]);
+      if (!openRt) {
+        var rt = await trc.createTask({ requestId: id, type: 'routing_review',
+          title: 'Review & route — automatic classification was unavailable', teamId: null, createdBy: 'system' });
+        await trc.autoRouteOrPool(rt.id, b.description, {});
+      }
+      await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+        [uuidv4(), id, 'system', 'System', 'CLASSIFICATION_UNAVAILABLE',
+         'Automatic classification could not run (' + String(ce.message).slice(0, 160) + '). Routed to a person for review so the request is not left unattended.']);
+    } catch (e2) { console.error('[publicChat] routing-review fallback failed:', e2 && e2.message); }
+  }
 
   workflowEngine.bg(workflowEngine.onIntake(id, cls), 'intake ' + id);
 
