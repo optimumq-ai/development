@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../lib/api';
 import FeeEstimatePanel from '../components/ui/FeeEstimatePanel';
+import { useWorkTimer, WorkTimerBadge } from '../components/ui/WorkTimer';
 
 export default function EstimateTaskPage() {
   var params = useParams();
   var taskId = params.taskId;
   var [task, setTask] = useState(null);
   var [err, setErr] = useState('');
+  var timer = useWorkTimer(taskId);
 
   useEffect(function () {
     api.get('/tasks/' + taskId)
@@ -28,6 +30,7 @@ export default function EstimateTaskPage() {
         <h1 style={{ fontSize: '22px', fontWeight: '700', margin: 0 }}>Estimate</h1>
         <span style={{ background: review ? '#FEF3C7' : '#DBEAFE', color: review ? '#92400E' : '#1E40AF', fontSize: '11px', fontWeight: '700', padding: '3px 10px', borderRadius: '20px' }}>{review ? 'REVIEW — auto-generated' : 'CREATE'}</span>
         {done ? <span style={{ background: '#DEF7EC', color: '#03543F', fontSize: '11px', fontWeight: '700', padding: '3px 10px', borderRadius: '20px' }}>TASK COMPLETE</span> : null}
+        {done ? null : <WorkTimerBadge timer={timer} />}
       </div>
       <p style={{ color: '#6B7280', fontSize: '14px', margin: '0 0 6px' }}>
         {task.request_number ? task.request_number + ' · ' : ''}{task.requestor_name ? 'for ' + task.requestor_name : ''}{task.record_type_name ? ' · ' + task.record_type_name : ''}

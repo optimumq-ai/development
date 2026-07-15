@@ -3739,5 +3739,39 @@ The whole timing arc is now done: **Slice A** (bookmark trail + entry contract +
 ### NEXT
 - **Slice I** (budget "brain") — best-guess per-record-type profiles + AI best-fit + supervisor override→template
   + feedback loop — REPLACES the generic file. Deferred (Kevin).
-- **D** (per-task work timer / actual labor) · **E** (estimate→actual reconciliation) · conveyor & batch ·
-  #13 org-wide bottleneck dashboard.
+- ~~**D** (per-task work timer / actual labor)~~ BUILT 2026-07-15 · **E** (estimate→actual reconciliation) ·
+  conveyor & batch · #13 org-wide bottleneck dashboard.
+
+---
+
+## 2026-07-15 · Slice D — actual-labor work timer (BUILT)
+
+**What changed.** A third, independent time layer — actual hands-on-keyboard labor per task — separate from
+the calendar bookmark trail (Slice A/B) and the legal deadline clock. Four `tasks` columns
+(`work_seconds` accumulating actual · `work_measured_seconds` raw reading kept even when adjusted ·
+`work_adjust_reason` · `work_finalized`). `frontend/src/components/ui/WorkTimer.js` — `useWorkTimer` hook
+(active-time only: pauses on blur + 5-min idle, resumes on focus; 30s heartbeats), `WorkTimerBadge` (live
+header pill), `WorkTimerCompleteModal` (accept-measured / adjust-with-required-reason). Backend
+`POST /tasks/:id/work` (monotonic `GREATEST` heartbeat) + `POST /tasks/:id/work/finalize` (owner-gated;
+adjust requires a reason; freezes `work_finalized=1`, later beats ignored). Wired: **redaction /
+redaction-review** (badge + finalize on submit/apply) and **record-search** (badge + finalize on resolve).
+**Estimate** screen carries the badge only (labor captured via heartbeat) — see open item.
+
+**Evidence.**
+- Suite: `node tests/run_suite.js` → **582 passed, 0 failed, LIVE UNTOUCHED**. New harness `verify_work_timer`
+  (10/10): heartbeat monotonicity (stale beat can't lower it), accept-finalize freezes + ignores later beats,
+  adjust requires a reason (400 without), measurement retained alongside adjusted actual, owner-gating (403).
+- Live: schema ALTERs applied to live DB (4 `work_*` columns present); frontend rebuilt (`Compiled
+  successfully.`); API restarted (health 200). Playwright screenshots of the **record-search** screen with
+  **all mutating POSTs aborted at the network layer** — live-ticking badge (`⏱ 7s`) in the header and the
+  completion popup rendered with real task context ("Record search · 2026-000001", hero active-work time,
+  "Log time & close"). Post-shot check: the screenshotted task `t-0f15b043` still `assigned`,
+  `work_seconds=0`, `in_progress_at=null` — **zero live writes**.
+
+**Open items.**
+- **Estimate finalize ceremony (fast-follow).** The estimate screen has the badge but no completion modal:
+  its "complete" action is spread across `FeeEstimatePanel`'s several send paths (ERP charge, payment,
+  notice send, adjustment notice) with no single interceptable action. Wire the modal once that completion
+  action is consolidated. Labor is still captured meanwhile via heartbeat.
+- Next: **Slice E** (estimate→actual reconciliation, consumes `work_seconds`), Slice I budget brain, conveyor
+  & batch processing, #13 org-wide bottleneck dashboard.

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../lib/api';
+import { useWorkTimer, WorkTimerBadge, WorkTimerCompleteModal } from '../components/ui/WorkTimer';
 
 // RECORD-SEARCH TASK SCREEN — SPEC_record_search_task_screen.md
 //
@@ -83,6 +84,8 @@ export default function RecordSearchTaskPage() {
   var [searching, setSearching] = useState(false);
   var [attached, setAttached] = useState([]);
   var [resolved, setResolved] = useState(null);
+  var timer = useWorkTimer(taskId);
+  var [laborModal, setLaborModal] = useState(null);
   var [notes, setNotes] = useState({});       // per-description: what the searcher actually searched
 
   function loadTrail(rid) {
@@ -201,6 +204,9 @@ export default function RecordSearchTaskPage() {
   }
 
   // --- resolution (§5d) -----------------------------------------------------------------------------
+  // Completing the search first logs the actual labor (Slice D): flush the timer, then the popup finalizes
+  // (accept or adjust-with-reason) and runs resolve() on confirm.
+  function requestComplete(outcome) { timer.flush(); setLaborModal({ outcome: outcome }); }
   function resolve(outcome) {
     setBusy(outcome);
     api.post('/tasks/' + taskId + '/resolve', { outcome: outcome })
@@ -333,6 +339,7 @@ export default function RecordSearchTaskPage() {
                 {task.record_type_name}
               </span>
             )}
+            {resolved ? null : <WorkTimerBadge timer={timer} />}
             <span style={{ marginLeft: 'auto', fontSize: 13, color: overdue ? C.crit : C.muted, fontWeight: overdue ? 700 : 400 }}>
               {task.deadline_date
                 ? <><b>Statutory due</b> {task.deadline_date}{dLeft !== null ? ' · ' + (overdue ? Math.abs(dLeft) + ' days OVERDUE' : dLeft + ' days') : ''}</>
@@ -672,7 +679,7 @@ export default function RecordSearchTaskPage() {
                 {/* Blocked by EITHER an empty response (nothing to hand on) or an unanswered description
                     (the requestor asked us to search and we have not said what we found). */}
                 <button type="button" disabled={!!busy || includedCount < 1 || openIntents.length > 0}
-                  onClick={function () { resolve('found'); }}
+                  onClick={function () { requestComplete('found'); }}
                   title={openIntents.length > 0
                     ? 'Answer the description(s) the requestor asked you to search first.'
                     : (includedCount < 1 ? 'Include at least one record in the response first.' : '')}
@@ -692,7 +699,7 @@ export default function RecordSearchTaskPage() {
                     fulfilling from their own selection alone would close a request they consider OPEN.
                   </div>
                 )}
-                <button type="button" disabled={!!busy} onClick={function () { resolve('no_records'); }}
+                <button type="button" disabled={!!busy} onClick={function () { requestComplete('no_records'); }}
                   style={{ width: '100%', cursor: busy ? 'not-allowed' : 'pointer', background: C.surface,
                     color: C.muted, border: '1px solid ' + C.hairStrong, borderRadius: 9,
                     padding: '10px 12px', fontSize: 13.5, fontWeight: 650 }}>
@@ -735,6 +742,11 @@ export default function RecordSearchTaskPage() {
         </section>
        </div>
       </div>
+      {laborModal ? <WorkTimerCompleteModal open taskId={taskId} seconds={timer.seconds}
+        contextLabel={'Record search · ' + (task.request_number || '')}
+        confirmLabel={laborModal.outcome === 'found' ? 'Log time & hand off' : 'Log time & close'}
+        onConfirm={function () { timer.markFinalized(); resolve(laborModal.outcome); setLaborModal(null); }}
+        onClose={function () { setLaborModal(null); }} /> : null}
     </div>
   );
 }

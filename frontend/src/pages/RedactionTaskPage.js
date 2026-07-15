@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
+import { useWorkTimer, WorkTimerBadge, WorkTimerCompleteModal } from '../components/ui/WorkTimer';
 
 // Redaction task screen (SPEC_redaction_automation.md slice 7 / SPEC_redaction_task_screen.md).
 // Full-bleed workstation a redaction/legal_redaction task opens into (not the generic request page).
@@ -31,6 +32,9 @@ export default function RedactionTaskPage() {
   var params = useParams();
   var nav = useNavigate();
   var taskId = params.taskId;
+  var timer = useWorkTimer(taskId);            // actual-labor work timer (Slice D)
+  var [laborModal, setLaborModal] = useState(null); // {action:'submit'|'apply'} while the completion popup is open
+  function requestComplete(action) { timer.flush(); setLaborModal({ action: action }); }
 
   var [task, setTask] = useState(null);
   var [files, setFiles] = useState([]);
@@ -261,6 +265,7 @@ export default function RedactionTaskPage() {
         <div style={sty.grp}>
           <button style={sty.back} onClick={function () { nav('/my-tasks'); }}>‹ My Tasks</button>
           <span style={sty.reqid}>{task && task.request_number}</span>
+          <WorkTimerBadge timer={timer} />
           {files.length ? (
             <select value={fileId || ''} onChange={function (e) { setFileId(e.target.value); }} style={sty.filepick} title="Records included in the response">
               {files.map(function (f, i) { return <option key={f.id} value={f.id}>{f.original_name} · file {i + 1} of {files.length}</option>; })}
@@ -515,11 +520,11 @@ export default function RedactionTaskPage() {
                     <button style={sty.railGhost} disabled={zones.length === 0} onClick={function () { saveTpl(); }}>⧉ Generate reusable template</button>
                     <div style={sty.divider} />
                     {reviewGated ? (
-                      <button style={btnPrimary(busy === 'submit')} disabled={busy === 'submit'} onClick={submitForReview}>{busy === 'submit' ? 'Submitting…' : 'Submit for review →'}</button>
+                      <button style={btnPrimary(busy === 'submit')} disabled={busy === 'submit'} onClick={function () { requestComplete('submit'); }}>{busy === 'submit' ? 'Submitting…' : 'Submit for review →'}</button>
                     ) : (
-                      <button style={btnPrimary(applying || zones.length === 0)} disabled={applying || zones.length === 0} onClick={apply}>{applying ? 'Releasing…' : 'Approve & release (' + zones.length + ')'}</button>
+                      <button style={btnPrimary(applying || zones.length === 0)} disabled={applying || zones.length === 0} onClick={function () { requestComplete('apply'); }}>{applying ? 'Releasing…' : 'Approve & release (' + zones.length + ')'}</button>
                     )}
-                    {job && job.disposition !== 'legal' ? <button style={sty.legalBtn} onClick={submitForReview} disabled={busy === 'submit'}>Send for legal review</button> : null}
+                    {job && job.disposition !== 'legal' ? <button style={sty.legalBtn} onClick={function () { requestComplete('submit'); }} disabled={busy === 'submit'}>Send for legal review</button> : null}
                   </div>
                 </AccBox>
               </div>
@@ -529,6 +534,11 @@ export default function RedactionTaskPage() {
       </div>
 
       {searchOpen ? <SearchModal requestId={task && task.request_id} onClose={function () { setSearchOpen(false); }} /> : null}
+      {laborModal ? <WorkTimerCompleteModal open taskId={taskId} seconds={timer.seconds}
+        contextLabel={(reviewMode ? 'Redaction review' : 'Redaction') + ' · ' + ((task && task.request_number) || '')}
+        confirmLabel={laborModal.action === 'apply' ? 'Log time & release' : 'Log time & submit'}
+        onConfirm={async function () { timer.markFinalized(); if (laborModal.action === 'apply') { await apply(); } else { await submitForReview(); } setLaborModal(null); }}
+        onClose={function () { setLaborModal(null); }} /> : null}
     </div>
   );
 

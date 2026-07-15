@@ -96,6 +96,39 @@ router.post('/:id/begin', requireAuth, async function (req, res) {
   res.json({ task: t });
 });
 
+// Work-timer heartbeat (Slice D): the active-work timer posts its running total; store it monotonically so a
+// stale/racey beat can never lower it. Ignored once the labor is finalized.
+router.post('/:id/work', requireAuth, async function (req, res) {
+  var secs = Math.max(0, Math.floor(Number(req.body && req.body.seconds) || 0));
+  var t = await get('SELECT work_seconds, work_finalized FROM tasks WHERE id = ?', [req.params.id]);
+  if (!t) return res.status(404).json({ error: 'Task not found' });
+  if (t.work_finalized) return res.json({ work_seconds: t.work_seconds, finalized: true });
+  await run("UPDATE tasks SET work_seconds = GREATEST(COALESCE(work_seconds,0), ?), updated_at = datetime('now') WHERE id = ? AND COALESCE(work_finalized,0) = 0", [secs, req.params.id]);
+  res.json({ work_seconds: Math.max(t.work_seconds || 0, secs) });
+});
+
+// Finalize the labor at completion (Slice D): accept the measured time, or adjust it (a reason is REQUIRED).
+// The raw measurement is kept in work_measured_seconds for defensibility.
+router.post('/:id/work/finalize', requireAuth, async function (req, res) {
+  var t = await get('SELECT assigned_to, work_seconds, work_finalized FROM tasks WHERE id = ?', [req.params.id]);
+  if (!t) return res.status(404).json({ error: 'Task not found' });
+  var roles = req.user.roles || [];
+  var elevated = roles.indexOf('SYSTEM_ADMIN') !== -1 || roles.indexOf('DIRECTOR') !== -1 || roles.indexOf('SUPERVISOR') !== -1;
+  if (t.assigned_to && t.assigned_to !== req.user.sub && !elevated) return res.status(403).json({ error: 'Only the assignee can log time on this task.' });
+  var measured = Math.max(0, Math.floor(Number(req.body && req.body.seconds != null ? req.body.seconds : t.work_seconds) || 0));
+  var b = req.body || {};
+  var adjusted = b.adjustedSeconds != null && Math.floor(Number(b.adjustedSeconds)) !== measured;
+  if (adjusted) {
+    var reason = (b.reason || '').trim();
+    if (!reason) return res.status(400).json({ error: 'A short reason is required to adjust the measured time.' });
+    await run("UPDATE tasks SET work_measured_seconds = ?, work_seconds = ?, work_adjust_reason = ?, work_finalized = 1, updated_at = datetime('now') WHERE id = ?",
+      [measured, Math.max(0, Math.floor(Number(b.adjustedSeconds))), reason, req.params.id]);
+  } else {
+    await run("UPDATE tasks SET work_measured_seconds = ?, work_seconds = ?, work_finalized = 1, updated_at = datetime('now') WHERE id = ?", [measured, measured, req.params.id]);
+  }
+  res.json({ task: await tr.getTask(req.params.id) });
+});
+
 // Mark a task complete.
 router.post('/:id/complete', requireAuth, async function (req, res) {
   await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [req.params.id]);

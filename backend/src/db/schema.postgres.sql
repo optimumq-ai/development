@@ -1063,3 +1063,11 @@ INSERT INTO time_budgets (id, record_type_id, task_type, budget_days, source) VA
   ('tb-fee_waiver', NULL, 'fee_waiver', 1, 'generic'),
   ('tb-routing_review', NULL, 'routing_review', 1, 'generic')
 ON CONFLICT (id) DO NOTHING;
+
+-- WORK TIMER / actual labor capture (Slice D). The per-task active-work timer heartbeats its running total into
+-- work_seconds; on completion it is finalized (accepted or adjusted-with-reason). This is ACTUAL LABOR — a
+-- separate number from the calendar clocks — feeding estimate→actual reconciliation and profile self-correction.
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS work_seconds INTEGER DEFAULT 0;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS work_measured_seconds INTEGER;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS work_adjust_reason TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS work_finalized INTEGER DEFAULT 0;
