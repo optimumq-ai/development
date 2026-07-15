@@ -23,8 +23,10 @@ Supervisors, managers, system admins: **excluded from automatic assignment**; ma
 ## 4. Workload health scoring `[NOT BUILT]`
 Per-role R/Y/G from a formula of late-task count with an **exponential penalty per additional day late**. Composite score at top of My Tasks. Feeds AI reporting + a management dashboard (health per task node per team). A per-task **"time budget"** is an input (reintroduce — dropped from an earlier spec).
 
-## 5. My Tasks page structure `[NOT BUILT — current page lists assigned requests]`
-One box per role the user holds. A box appears **only if** the user has a task of that type (assigned, or in a pool including them) — no empty boxes. Each box lists its Queued/In-Process items + a health score. Composite health at top. Notifications in a separate area.
+## 5. My Tasks page structure `[BUILT 2026-07-15 (slice 8a) — task-centric MyTasksPage; verified live]`
+One box **per task type** the user holds work in — a box appears **only if** the user has a task of that type (no empty boxes). Each box lists **Queued** (`assigned`) then **In Process** (`in_progress`) items; a **claim pool** section and a **notifications area** (same `/api/notifications` as the header bell) sit below. Sourced from `/tasks/mine` + `/tasks/pool` (not `/requests`), so request-independent tasks (null `request_id`, e.g. `review_auto_redaction`) now appear. Summary tiles are **deadline-derived** (Assigned / Overdue / Due ≤3d).
+- **Health scores are DEFERRED to #13** (the exponential-lateness formula + composite + management dashboard); the tiles stand in for now.
+- **Returned-for-rework ("URGENT CORRECTIONS REQUIRED") is slice 8b** (`BACKLOG` R10) — a task `returned` state + wiring the redaction-return flow + a push notification, as the general "your work came back" pattern (redaction/objection/clarification). Not built in 8a.
 
 ## 6. Task completion screens (per type) `[PARTIAL]`
 Each task type has its own screen; default shared across teams, team variants allowed (e.g., Police video redaction). **Estimate screen `[BUILT]`.** Record search / redaction / review / etc. `[NOT BUILT as dedicated screens]` — some functionality exists in the "workspace UI" (not the intended per-task processing UI); clicking a task currently opens the generic request-detail view.

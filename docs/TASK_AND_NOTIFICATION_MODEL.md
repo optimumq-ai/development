@@ -34,7 +34,7 @@ Order of operations:
 - Each role box **lists that role's task assignments** and shows that **role's health score**.
 - **Composite health score at the top.**
 - **Notifications** appear in their **own area**, separate from task-assignment boxes.
-`[code: not built — current page lists assigned requests; no per-role boxes, no health scores, no notification area]`
+`[code: BUILT 2026-07-15 (slice 8a) — task-centric MyTasksPage: one box per task TYPE (no empty boxes), Queued/In-Process, claim pool, notifications area, null-request tasks visible; verified live. Health scores DEFERRED to #13 (deadline-derived tiles stand in). Returned-for-rework is slice 8b.]`
 
 ## 6. Task completion screens (per type)
 - **Each task type has its own completion screen**, opened by clicking a task line in a box.

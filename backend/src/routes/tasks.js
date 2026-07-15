@@ -9,8 +9,10 @@ const SI = require('../services/searchIntents');
 function withReq(sql) {
   // A task hangs off the WORK row, but request_number is a PARENT field — the number the citizen quotes.
   // Resolved through the parent (today that IS the row itself, so this is a no-op). See requestScope.js.
-  return "SELECT t.*, " + scope.numberExpr('r') + " AS request_number, r.description AS request_description, d.name AS team_name " +
-    "FROM tasks t LEFT JOIN requests r ON r.id = t.request_id" + scope.numberJoin('r') + " LEFT JOIN departments d ON d.id = t.team_id " + sql;
+  return "SELECT t.*, " + scope.numberExpr('r') + " AS request_number, r.description AS request_description, " +
+    "r.requestor_name, r.deadline_date, r.stage, rt.name AS record_type_name, d.name AS team_name " +
+    "FROM tasks t LEFT JOIN requests r ON r.id = t.request_id" + scope.numberJoin('r') +
+    " LEFT JOIN record_types rt ON rt.id = r.record_type_id LEFT JOIN departments d ON d.id = t.team_id " + sql;
 }
 
 // Open tasks the current user can claim (their team + a role they hold).

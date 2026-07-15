@@ -103,13 +103,18 @@ async function api(method, path, body) {
 
     // ---- 4. no page keeps a private copy of the vocabulary any more
     var dupes = [];
-    ['pages/DashboardPage.js', 'pages/ARIAReportsPage.js', 'pages/MyTasksPage.js', 'pages/RequestQueuePage.js',
+    // MyTasksPage is intentionally NOT here: the task-centric restructure (#8) shows task STATE (Queued/In
+    // Process), not request stage, so it no longer imports the stage vocabulary. It also keeps no private copy.
+    ['pages/DashboardPage.js', 'pages/ARIAReportsPage.js', 'pages/RequestQueuePage.js',
      'pages/RequestWorkspacePage.js', 'components/ui/WorkflowDecisionPanel.js'].forEach(function (f) {
       var s = fs.readFileSync(FE + '/' + f, 'utf8');
       if (/^(const|var)\s+(STAGES|SC|STAGE_LABELS?|STAGE_COLORS|NEXT_STAGE|NEXT_LABEL)\s*=\s*[[{]/m.test(s)) dupes.push(f);
       if (!/from '\.\.?\/?\.*\/?lib\/stages'/.test(s) && !/lib\/stages/.test(s)) dupes.push(f + ' (no import)');
     });
-    ok('all 6 files import the shared vocabulary; none keeps a private copy' + (dupes.length ? ' — ' + dupes.join(', ') : ''), dupes.length === 0);
+    ok('all 5 files import the shared vocabulary; none keeps a private copy' + (dupes.length ? ' — ' + dupes.join(', ') : ''), dupes.length === 0);
+    // And MyTasksPage keeps NO private stage vocabulary (it dropped stages entirely, not copied them).
+    ok('MyTasksPage keeps no private stage vocabulary (task-centric, uses task state not stage)',
+      !/^(const|var)\s+(STAGES|SC|STAGE_LABELS?|STAGE_COLORS|NEXT_STAGE|NEXT_LABEL)\s*=\s*[[{]/m.test(fs.readFileSync(FE + '/pages/MyTasksPage.js', 'utf8')));
 
     // ---- 5. THE LIVE BEHAVIOUR: advancing follows the BACKEND pipeline now.
     // Old frontend said intake → record_search. The backend pipeline says intake → fee_review.

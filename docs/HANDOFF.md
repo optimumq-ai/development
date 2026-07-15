@@ -3480,3 +3480,49 @@ rebuilt + deployed, connectors untouched.
 ### NEXT (Tier 2 remaining)
 - #6 Fee-choice intake (default-forward) · #8 My Tasks restructure (+ BACKLOG R10 returned-for-rework;
   folds in notifications + null-request tasks) · #10 Legal Review / Legal Redaction task wiring.
+
+---
+
+## 2026-07-15 (pm) — Tier 2 #8a: My Tasks restructure (task-centric). Design-signed-off + verified live. 518/518.
+
+**Scoped → mockup → sign-off → built.** Per the UI rule, produced a visual mockup artifact for Kevin's design
+sign-off BEFORE writing screen code; Kevin approved, then I built it. Three decisions Kevin owned: per-**task-type**
+boxes (not per-role), R10 returned-for-rework as a **separate fast-follow (8b)**, and a **dedicated notifications
+area** on the page (not just the header bell).
+
+### The gap
+The old MyTasksPage was **request-centric**: it listed `/requests` where `assigned_to = you` as a flat table,
+used request *stage*, bolted on objection sections + a pool, and **silently dropped null-request tasks**
+(filtered on `request_id`) — so #7's `review_auto_redaction` tasks would never show.
+
+### What shipped (8a)
+- **Rewrote `MyTasksPage.js`** task-centric: sourced from `/tasks/mine` + `/tasks/pool` (+ `/notifications`,
+  objections). One box **per task type** the user holds work in (no empty boxes), **Queued** (assigned) then
+  **In Process** (in_progress); count + state chips (queued / in process / overdue). Claim pool section
+  (green-dot rows + Claim). A **notifications area** (same `/api/notifications` as the bell) with dismiss.
+  Deadline-derived summary tiles (Assigned / Overdue / Due ≤3d). Task→screen routing kept; null-request tasks
+  route to a sensible home. Fee-objection sections retained (objections aren't tasks).
+- **Backend:** enriched `tasks.js` `withReq` to also return `requestor_name, deadline_date, stage,
+  record_type_name` (via a `record_types` LEFT JOIN) — benefits `/mine` and `/pool`. No schema change.
+- **Deferred, as agreed:** health scores → #13 (tiles stand in); returned-for-rework → 8b.
+
+### Evidence
+- Suite **518/518**. One test correctly updated: `verify_stages`' "no private stage vocabulary" guard listed
+  MyTasksPage — but the task-centric page shows task STATE not request stage, so it no longer imports
+  `lib/stages`; dropped it from the guard's list + added an assertion that it keeps no private copy.
+- **Verified live (screenshots):** logged in as Kevin Hargrove (3 assigned tasks + the import notification),
+  the page renders the Record Search box (2, 2 overdue), Redaction box (1, 1 overdue) with Queued rows, the
+  claim pool, and the Notifications area showing the real "Import source needs a redaction template" note.
+  Matches the signed-off mockup. (`shot.js` in scratch; see memory ui-visual-inspection.)
+- Mockup artifact (design sign-off): the approved layout.
+
+### STATE
+`main` + this note. Suite **518/518**. Live API restarted (loads enriched `withReq`), frontend rebuilt +
+deployed, connectors untouched.
+
+### NEXT (Tier 2 remaining)
+- **#8b — R10 returned-for-rework** (the natural next slice): task `returned` state + wire
+  `POST /redaction-jobs/jobs/:id/return` to set it + emit a push notification (now that #7 exists) + the
+  "URGENT CORRECTIONS REQUIRED" row treatment, built as the general pattern (redaction/objection/clarification).
+- #6 Fee-choice intake (default-forward) · #10 Legal Review / Legal Redaction task wiring.
+- #13 (Tier 3) Workload health scoring — folds the R/Y/G scores into the boxes/tiles built here.

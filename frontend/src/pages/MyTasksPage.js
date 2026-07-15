@@ -2,203 +2,270 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
-import TaskPoolSection from '../components/ui/TaskPoolSection';
-import { STAGE_LABELS as STAGES, STAGE_COLORS as SC } from '../lib/stages';
 
+// Task-centric My Tasks (Tasks spec §5; SPEC_tasks_roles_mrr_fees §5). One box per task TYPE the user holds
+// work in (no empty boxes), Queued (assigned) then In Process (in_progress). A claim pool + a notifications
+// area sit below. Health scores are deferred (#13); the summary tiles are deadline-derived. Returned-for-rework
+// ("URGENT CORRECTIONS REQUIRED") is slice 8b — not built here.
+
+var TYPE_LABEL = {
+  record_search: 'Record Search', redaction: 'Redaction', legal_redaction: 'Legal Redaction',
+  redaction_qa: 'Redaction Review', review_auto_redaction: 'Auto-Redaction Review',
+  estimate: 'Estimate', fee_waiver: 'Fee Waiver', legal_review: 'Legal Review', routing_review: 'Routing Review'
+};
+// Order boxes appear in: front-line fulfillment first, then approvals/office work.
+var TYPE_ORDER = ['record_search', 'redaction', 'legal_redaction', 'redaction_qa', 'review_auto_redaction',
+  'estimate', 'fee_waiver', 'legal_review', 'routing_review'];
+
+// The ONE place a task type becomes a screen; anything else falls back to the request (or a sensible home
+// for request-independent work).
+var TASK_SCREEN = {
+  record_search: function (t) { return '/record-search/' + t.id; },
+  estimate: function (t) { return '/estimate/' + t.id; },
+  redaction: function (t) { return '/redaction/' + t.id; },
+  legal_redaction: function (t) { return '/redaction/' + t.id; },
+  redaction_qa: function (t) { return '/redaction/' + t.id; },
+  review_auto_redaction: function () { return '/mass-redaction'; }
+};
+function screenFor(t) { var f = TASK_SCREEN[t.type]; return f ? f(t) : (t.request_id ? '/requests/' + t.request_id : '/mass-redaction'); }
+function actionLabel(t) {
+  return t.type === 'record_search' ? 'Search →' : t.type === 'redaction' || t.type === 'legal_redaction' ? 'Redact →'
+    : t.type === 'estimate' ? 'Estimate →' : t.type === 'redaction_qa' || t.type === 'review_auto_redaction' ? 'Review →'
+    : t.status === 'in_progress' ? 'Continue →' : 'Open →';
+}
+
+function dayDiff(d) { if (!d) return null; return (new Date(d) - new Date()) / (1000 * 60 * 60 * 24); }
+function deadlineState(d) { var x = dayDiff(d); if (x === null) return null; if (x < 0) return 'over'; if (x <= 3) return 'soon'; return null; }
+function deadlineLabel(d) {
+  if (!d) return '—';
+  var x = dayDiff(d);
+  if (x < 0) { var n = Math.ceil(-x); return 'Overdue ' + n + 'd'; }
+  if (x < 1) return 'Today';
+  if (x <= 3) return 'in ' + Math.ceil(x) + ' days';
+  return String(d).slice(0, 10);
+}
+
+var C = {
+  card: { background: 'white', border: '1px solid #E5E7EB', borderRadius: '12px', boxShadow: '0 1px 2px rgba(16,26,42,.04),0 1px 3px rgba(16,26,42,.06)', overflow: 'hidden' },
+  accent: '#1F4E79', accentSoft: '#EAF1F8', muted: '#66717F', faint: '#98A2B0',
+  good: '#17803D', goodSoft: '#E8F4EC', warn: '#B45309', warnSoft: '#FBF1E1', crit: '#C22B2B', critSoft: '#FBEBEB'
+};
+function chip(text, kind) {
+  var s = { q: { bg: '#FAFBFC', fg: C.muted, bd: '1px solid #E5E7EB' }, p: { bg: C.accentSoft, fg: '#1B4067' },
+    crit: { bg: C.critSoft, fg: C.crit }, warn: { bg: C.warnSoft, fg: C.warn } }[kind] || { bg: '#F3F4F6', fg: C.muted };
+  return <span style={{ fontSize: '11.5px', fontWeight: 600, padding: '2px 9px', borderRadius: '999px', background: s.bg, color: s.fg, border: s.bd || 'none', whiteSpace: 'nowrap' }}>{text}</span>;
+}
 
 export default function MyTasksPage() {
-  const store = useAuthStore();
-  const user = store.user;
-  const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [filter, setFilter] = useState('all');
-  const [myObjs, setMyObjs] = useState([]);
-  const [pendingObjs, setPendingObjs] = useState([]);
-  const [taskByRequest, setTaskByRequest] = useState({});
-  const canApprove = store.hasAnyRole('SYSTEM_ADMIN', 'DIRECTOR') || store.hasAnyPerm('FINANCE');
+  var store = useAuthStore();
+  var canApprove = store.hasAnyRole('SYSTEM_ADMIN', 'DIRECTOR') || store.hasAnyPerm('FINANCE');
+  var [mine, setMine] = useState([]);
+  var [pool, setPool] = useState([]);
+  var [notes, setNotes] = useState([]);
+  var [myObjs, setMyObjs] = useState([]);
+  var [pendingObjs, setPendingObjs] = useState([]);
+  var [loading, setLoading] = useState(true);
+  var [busy, setBusy] = useState(null);
+  var [msg, setMsg] = useState('');
 
-  useEffect(function() { load(); }, []);
-
+  useEffect(function () { load(); }, []);
   async function load() {
     setLoading(true);
     try {
-      var r = await api.get('/requests');
-      setRequests(r.data.requests);
-      // This list is REQUESTS, so "Open →" used to dump every one of them into the generic workspace no
-      // matter what work was actually waiting. Pull the open task for each and route BY TASK TYPE, so a
-      // record-search task opens the record-search screen and a redaction task opens the workstation.
-      try {
-        var t = await api.get('/tasks/mine');
-        var map = {};
-        (t.data.tasks || []).forEach(function (x) { if (x.request_id && !map[x.request_id]) map[x.request_id] = x; });
-        setTaskByRequest(map);
-      } catch (e1) {}
-      try { var mo = await api.get('/objections/mine'); setMyObjs(mo.data.objections || []); } catch (e2) {}
-      if (store.hasAnyRole('SYSTEM_ADMIN', 'DIRECTOR') || store.hasAnyPerm('FINANCE')) { try { var pa = await api.get('/objections/pending-approval'); setPendingObjs(pa.data.objections || []); } catch (e3) {} }
-    } catch(e) { console.error(e); }
+      var m = await api.get('/tasks/mine'); setMine(m.data.tasks || []);
+      var p = await api.get('/tasks/pool'); setPool(p.data.tasks || []);
+      try { var n = await api.get('/notifications'); setNotes(n.data.notifications || []); } catch (e0) {}
+      try { var mo = await api.get('/objections/mine'); setMyObjs(mo.data.objections || []); } catch (e1) {}
+      if (canApprove) { try { var pa = await api.get('/objections/pending-approval'); setPendingObjs(pa.data.objections || []); } catch (e2) {} }
+    } catch (e) { console.error(e); }
     setLoading(false);
   }
+  async function claim(id) {
+    setBusy(id); setMsg('');
+    try { await api.post('/tasks/' + id + '/claim'); await load(); }
+    catch (e) { setMsg((e.response && e.response.data && e.response.data.error) || 'Could not claim the task.'); await load(); }
+    setBusy(null);
+  }
+  async function dismiss(id) { try { await api.post('/notifications/' + id + '/dismiss'); } catch (e) {} setNotes(function (l) { return l.filter(function (x) { return x.id !== id; }); }); }
 
-  // The ONE place a task type turns into a screen. Anything without a dedicated screen falls back to the
-  // generic request workspace, which is exactly what it is for.
-  var TASK_SCREEN = {
-    record_search: function (t) { return '/record-search/' + t.id; },
-    estimate:      function (t) { return '/estimate/' + t.id; },
-    redaction:     function (t) { return '/redaction/' + t.id; }
+  var assigned = mine.length;
+  var overdue = mine.filter(function (t) { return deadlineState(t.deadline_date) === 'over'; }).length;
+  var soon = mine.filter(function (t) { return deadlineState(t.deadline_date) === 'soon'; }).length;
+
+  // group my tasks by type
+  var byType = {};
+  mine.forEach(function (t) { (byType[t.type] = byType[t.type] || []).push(t); });
+  var boxTypes = TYPE_ORDER.filter(function (ty) { return byType[ty]; })
+    .concat(Object.keys(byType).filter(function (ty) { return TYPE_ORDER.indexOf(ty) < 0; }));
+
+  function taskRow(t) {
+    var ds = deadlineState(t.deadline_date);
+    var dot = t.status === 'in_progress' ? C.accent : C.faint;
+    return (
+      <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '9px 16px', borderTop: '1px solid #F3F4F6' }}>
+        <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: dot, flexShrink: 0 }} />
+        <div style={{ minWidth: '128px' }}>
+          <div style={{ fontFamily: 'monospace', fontWeight: 700, color: C.accent, fontSize: '12.5px' }}>{t.request_number || '—'}</div>
+          <div style={{ fontSize: '11.5px', color: C.muted, marginTop: '1px' }}>{t.requestor_name || (t.request_id ? '' : 'no request')}</div>
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ fontSize: '13px', color: '#1A2230', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.record_type_name || t.request_description || t.title || TYPE_LABEL[t.type] || t.type}</div>
+          <div style={{ fontSize: '11.5px', color: C.faint }}>{t.team_name || ''}</div>
+        </div>
+        <div style={{ fontSize: '12.5px', textAlign: 'right', minWidth: '92px', color: ds === 'over' ? C.crit : ds === 'soon' ? C.warn : C.muted, fontWeight: ds ? 700 : 400 }}>{deadlineLabel(t.deadline_date)}</div>
+        <Link to={screenFor(t)} style={{ fontSize: '12.5px', fontWeight: 600, color: C.accent, background: C.accentSoft, border: '1px solid #E5E7EB', borderRadius: '7px', padding: '5px 11px', textDecoration: 'none', whiteSpace: 'nowrap' }}>{actionLabel(t)}</Link>
+      </div>
+    );
+  }
+
+  function box(ty) {
+    var tasks = byType[ty];
+    var queued = tasks.filter(function (t) { return t.status === 'assigned'; });
+    var inProc = tasks.filter(function (t) { return t.status === 'in_progress'; });
+    var od = tasks.filter(function (t) { return deadlineState(t.deadline_date) === 'over'; }).length;
+    var sn = tasks.filter(function (t) { return deadlineState(t.deadline_date) === 'soon'; }).length;
+    return (
+      <section key={ty} style={C.card}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '11px', padding: '13px 16px', borderBottom: '1px solid #E5E7EB' }}>
+          <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: C.accentSoft, color: C.accent, display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: '13px', flexShrink: 0 }}>{(TYPE_LABEL[ty] || ty).slice(0, 1)}</div>
+          <span style={{ fontSize: '14.5px', fontWeight: 700 }}>{TYPE_LABEL[ty] || ty}</span>
+          <span style={{ fontSize: '12px', fontWeight: 700, color: C.accent, background: C.accentSoft, borderRadius: '999px', padding: '1px 9px' }}>{tasks.length}</span>
+          <div style={{ marginLeft: 'auto', display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+            {queued.length ? chip(queued.length + ' queued', 'q') : null}
+            {inProc.length ? chip(inProc.length + ' in process', 'p') : null}
+            {od ? chip(od + ' overdue', 'crit') : null}
+            {!od && sn ? chip(sn + ' due soon', 'warn') : null}
+          </div>
+        </div>
+        {queued.length ? <div style={{ padding: '5px 0' }}><div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: C.faint, padding: '6px 16px 2px' }}>Queued</div>{queued.map(taskRow)}</div> : null}
+        {inProc.length ? <div style={{ padding: '5px 0', borderTop: queued.length ? '1px solid #E5E7EB' : 'none' }}><div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: C.faint, padding: '6px 16px 2px' }}>In Process</div>{inProc.map(taskRow)}</div> : null}
+      </section>
+    );
+  }
+
+  function sectionHead(text) {
+    return <div style={{ display: 'flex', alignItems: 'center', gap: '9px', margin: '4px 2px -4px' }}><span style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '.06em', textTransform: 'uppercase', color: C.muted }}>{text}</span><span style={{ flex: 1, height: '1px', background: '#E5E7EB' }} /></div>;
+  }
+
+  var stat = function (k, v, kind) {
+    var col = kind === 'crit' ? C.crit : kind === 'warn' ? C.warn : kind === 'accent' ? C.accent : '#1A2230';
+    var rail = kind === 'crit' ? C.crit : kind === 'warn' ? C.warn : kind === 'accent' ? C.accent : C.good;
+    return (
+      <div style={Object.assign({}, C.card, { padding: '13px 15px', position: 'relative' })}>
+        <span style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: '3px', background: rail }} />
+        <div style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '.05em', textTransform: 'uppercase', color: C.muted }}>{k}</div>
+        <div style={{ fontSize: '26px', fontWeight: 800, marginTop: '3px', lineHeight: 1, color: col, fontVariantNumeric: 'tabular-nums' }}>{v}</div>
+      </div>
+    );
   };
-  function openLink(requestId) {
-    var t = taskByRequest[requestId];
-    var f = t && TASK_SCREEN[t.type];
-    return f ? f(t) : ('/requests/' + requestId);
-  }
-  function openLabel(requestId) {
-    var t = taskByRequest[requestId];
-    if (t && t.type === 'record_search') return 'Search →';
-    if (t && t.type === 'redaction') return 'Redact →';
-    if (t && t.type === 'estimate') return 'Estimate →';
-    return 'Open →';
-  }
-
-  var myRequests = requests.filter(function(r) {
-    return r.assigned_to === (user && user.id);
-  });
-
-  var overdue = myRequests.filter(function(r) {
-    return r.deadline_date && new Date(r.deadline_date) < new Date();
-  });
-
-  var dueSoon = myRequests.filter(function(r) {
-    if (!r.deadline_date) return false;
-    var d = new Date(r.deadline_date);
-    var now = new Date();
-    var diff = (d - now) / (1000 * 60 * 60 * 24);
-    return diff >= 0 && diff <= 3;
-  });
-
-  var filtered = filter === 'overdue' ? overdue : filter === 'due_soon' ? dueSoon : myRequests;
 
   return (
-    <div style={{maxWidth:'1100px',display:'flex',flexDirection:'column',gap:'20px'}}>
+    <div style={{ maxWidth: '1080px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
       <div>
-        <h1 style={{fontSize:'22px',fontWeight:'700',margin:'0 0 4px'}}>My Tasks</h1>
-        <p style={{color:'#9CA3AF',fontSize:'14px',margin:0}}>
-          Requests assigned to you — {myRequests.length} active{overdue.length>0?' · '+overdue.length+' overdue':''}
+        <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, letterSpacing: '-.01em' }}>My Tasks</h1>
+        <p style={{ color: C.muted, fontSize: '13.5px', margin: '3px 0 0' }}>
+          Work assigned to you, grouped by type{overdue ? ' · ' : ''}{overdue ? <span style={{ color: C.crit, fontWeight: 600 }}>{overdue} overdue</span> : null}{soon ? ' · ' + soon + ' due within 3 days' : ''}.
         </p>
       </div>
+
+      {msg ? <div style={{ fontSize: '13px', color: '#9B1C1C', background: '#FDE8E8', border: '1px solid #FBD5D5', borderRadius: '8px', padding: '9px 12px' }}>{msg}</div> : null}
+
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px' }}>
+        {stat('Assigned to you', assigned, 'accent')}
+        {stat('Overdue', overdue, overdue ? 'crit' : 'ok')}
+        {stat('Due ≤ 3 days', soon, soon ? 'warn' : 'ok')}
+      </div>
+
+      {loading ? <div style={Object.assign({}, C.card, { padding: '48px', textAlign: 'center', color: C.faint })}>Loading…</div> : null}
+
+      {/* Fee objections — real work items that aren't tasks; kept as their own boxes. */}
       {myObjs.length ? (
-        <div style={{background:'white',border:'1px solid #FDE68A',borderRadius:'12px',padding:'16px 18px'}}>
-          <div style={{fontSize:'14px',fontWeight:700,color:'#92400E',marginBottom:'8px'}}>Fee Estimate Objections <span style={{fontSize:'12px',fontWeight:600,color:'#B45309'}}>({myObjs.length})</span></div>
-          {myObjs.map(function(o){ return (
-            <div key={o.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderTop:'1px solid #F3F4F6'}}>
-              <div style={{fontSize:'13px',color:'#374151'}}><strong>{o.reason}</strong> <span style={{color:'#9CA3AF'}}>&middot; {o.requestNumber||o.requestId} &middot; {o.status==='tentative'?'pending approval':'open'}</span></div>
-              <Link to={'/requests/'+o.requestId} style={{fontSize:'12.5px',color:'#1F4E79',textDecoration:'none',fontWeight:700}}>Open &rarr; Fees</Link>
+        <section style={Object.assign({}, C.card, { border: '1px solid #FDE68A' })}>
+          <div style={{ fontSize: '14px', fontWeight: 700, color: '#92400E', padding: '13px 16px', borderBottom: '1px solid #F3F4F6' }}>Fee estimate objections <span style={{ color: '#B45309' }}>({myObjs.length})</span></div>
+          {myObjs.map(function (o) { return (
+            <div key={o.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 16px', borderTop: '1px solid #F3F4F6' }}>
+              <div style={{ fontSize: '13px', color: '#374151' }}><strong>{o.reason}</strong> <span style={{ color: C.faint }}>· {o.requestNumber || o.requestId} · {o.status === 'tentative' ? 'pending approval' : 'open'}</span></div>
+              <Link to={'/requests/' + o.requestId} style={{ fontSize: '12.5px', color: C.accent, textDecoration: 'none', fontWeight: 700 }}>Open → Fees</Link>
             </div>
           ); })}
-        </div>
+        </section>
       ) : null}
       {canApprove && pendingObjs.length ? (
-        <div style={{background:'white',border:'1px solid #FCA5A5',borderRadius:'12px',padding:'16px 18px'}}>
-          <div style={{fontSize:'14px',fontWeight:700,color:'#9B1C1C',marginBottom:'8px'}}>Fee resolutions awaiting your approval <span style={{fontSize:'12px',fontWeight:600}}>({pendingObjs.length})</span></div>
-          {pendingObjs.map(function(o){ return (
-            <div key={o.id} style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'8px 0',borderTop:'1px solid #F3F4F6'}}>
-              <div style={{fontSize:'13px',color:'#374151'}}>{o.resolutionType} of <strong>${(Number(o.resolutionAmount)||0).toFixed(2)}</strong> <span style={{color:'#9CA3AF'}}>&middot; {o.requestNumber||o.requestId} &middot; proposed by {o.assigneeName}</span></div>
-              <Link to={'/requests/'+o.requestId} style={{fontSize:'12.5px',color:'#1F4E79',textDecoration:'none',fontWeight:700}}>Review &rarr; Fees</Link>
+        <section style={Object.assign({}, C.card, { border: '1px solid #FCA5A5' })}>
+          <div style={{ fontSize: '14px', fontWeight: 700, color: '#9B1C1C', padding: '13px 16px', borderBottom: '1px solid #F3F4F6' }}>Fee resolutions awaiting your approval <span>({pendingObjs.length})</span></div>
+          {pendingObjs.map(function (o) { return (
+            <div key={o.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 16px', borderTop: '1px solid #F3F4F6' }}>
+              <div style={{ fontSize: '13px', color: '#374151' }}>{o.resolutionType} of <strong>${(Number(o.resolutionAmount) || 0).toFixed(2)}</strong> <span style={{ color: C.faint }}>· {o.requestNumber || o.requestId} · proposed by {o.assigneeName}</span></div>
+              <Link to={'/requests/' + o.requestId} style={{ fontSize: '12.5px', color: C.accent, textDecoration: 'none', fontWeight: 700 }}>Review → Fees</Link>
             </div>
           ); })}
+        </section>
+      ) : null}
+
+      {!loading && boxTypes.length ? sectionHead('Your work') : null}
+      {boxTypes.map(box)}
+
+      {!loading && !boxTypes.length && !myObjs.length ? (
+        <div style={Object.assign({}, C.card, { padding: '56px', textAlign: 'center' })}>
+          <div style={{ fontSize: '40px', marginBottom: '10px' }}>✅</div>
+          <div style={{ fontSize: '17px', fontWeight: 600, color: '#4B5563' }}>No tasks assigned to you</div>
+          <div style={{ fontSize: '13px', color: C.faint, marginTop: '6px' }}>Claim work from the pool below, or it will be routed to you.</div>
         </div>
       ) : null}
 
-      <TaskPoolSection />
-
-      {myRequests.length === 0 && !loading && (
-        <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'64px',textAlign:'center'}}>
-          <div style={{fontSize:'48px',marginBottom:'16px'}}>✅</div>
-          <div style={{fontSize:'18px',fontWeight:'600',color:'#4B5563',marginBottom:'8px'}}>No tasks assigned to you</div>
-          <div style={{fontSize:'14px',color:'#9CA3AF',marginBottom:'24px'}}>Requests assigned to you will appear here</div>
-          <Link to="/requests" style={{display:'inline-flex',padding:'10px 20px',background:'#1F4E79',color:'white',borderRadius:'8px',textDecoration:'none',fontSize:'14px',fontWeight:'600'}}>
-            View Request Queue
-          </Link>
-        </div>
-      )}
-
-      {myRequests.length > 0 && (
+      {/* Claim pool */}
+      {pool.length ? (
         <>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:'12px'}}>
-            {[
-              {key:'all',label:'All My Tasks',value:myRequests.length,bg:'#EBF3FB',color:'#1F4E79'},
-              {key:'overdue',label:'Overdue',value:overdue.length,bg:overdue.length>0?'#FEF2F2':'#F9FAFB',color:overdue.length>0?'#DC2626':'#9CA3AF'},
-              {key:'due_soon',label:'Due Within 3 Days',value:dueSoon.length,bg:dueSoon.length>0?'#FFFBEB':'#F9FAFB',color:dueSoon.length>0?'#D97706':'#9CA3AF'},
-            ].map(function(item){
-              var active = filter === item.key;
+          {sectionHead("Claim pool · work you're eligible for")}
+          <section style={C.card}>
+            {pool.map(function (t, i) {
               return (
-                <button key={item.key} onClick={function(){setFilter(item.key);}}
-                  style={{display:'flex',alignItems:'center',gap:'14px',padding:'16px',background:'white',borderRadius:'12px',border:'2px solid '+(active?item.color:'#E5E7EB'),cursor:'pointer',textAlign:'left',transition:'border-color .15s'}}>
-                  <div style={{width:'44px',height:'44px',borderRadius:'10px',background:item.bg,display:'flex',alignItems:'center',justifyContent:'center',fontSize:'20px',fontWeight:'700',color:item.color,flexShrink:0}}>
-                    {item.value}
+                <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '10px 16px', borderTop: i ? '1px solid #F3F4F6' : 'none' }}>
+                  <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: C.good, flexShrink: 0 }} />
+                  <div style={{ minWidth: '128px' }}>
+                    <div style={{ fontFamily: 'monospace', fontWeight: 700, fontSize: '12.5px' }}>{t.request_number || '—'}</div>
+                    <div style={{ fontSize: '11.5px', color: C.muted, marginTop: '1px' }}>{t.requestor_name || ''}</div>
                   </div>
-                  <div style={{fontSize:'13px',color:active?item.color:'#6B7280',fontWeight:active?'700':'500'}}>{item.label}</div>
-                </button>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '13px' }}>{TYPE_LABEL[t.type] || t.type}{t.record_type_name ? ' · ' + t.record_type_name : (t.request_description ? ' · ' + t.request_description : '')}</div>
+                    <div style={{ fontSize: '11.5px', color: C.faint }}>Unclaimed{t.team_name ? ' · ' + t.team_name : ' · team-agnostic'}</div>
+                  </div>
+                  <div style={{ fontSize: '12.5px', textAlign: 'right', minWidth: '92px', color: deadlineState(t.deadline_date) === 'over' ? C.crit : deadlineState(t.deadline_date) === 'soon' ? C.warn : C.muted }}>{deadlineLabel(t.deadline_date)}</div>
+                  <button onClick={function () { claim(t.id); }} disabled={busy === t.id} style={{ fontSize: '12.5px', fontWeight: 600, color: C.good, background: C.goodSoft, border: 'none', borderRadius: '7px', padding: '6px 13px', cursor: 'pointer', opacity: busy === t.id ? 0.6 : 1 }}>{busy === t.id ? 'Claiming…' : 'Claim'}</button>
+                </div>
               );
             })}
-          </div>
-
-          <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',overflow:'hidden'}}>
-            {loading ? (
-              <div style={{padding:'48px',textAlign:'center',color:'#9CA3AF'}}>Loading...</div>
-            ) : filtered.length === 0 ? (
-              <div style={{padding:'48px',textAlign:'center',color:'#9CA3AF'}}>
-                <div style={{fontSize:'32px',marginBottom:'12px'}}>👍</div>
-                <div style={{fontSize:'15px',fontWeight:'600',color:'#4B5563'}}>No {filter === 'overdue' ? 'overdue' : 'upcoming'} tasks</div>
-              </div>
-            ) : (
-              <table style={{width:'100%',borderCollapse:'collapse'}}>
-                <thead>
-                  <tr style={{background:'#F9FAFB'}}>
-                    {['Request #','Requestor','Stage','Request Fulfillment Team','Deadline',''].map(function(h){
-                      return <th key={h} style={{textAlign:'left',fontSize:'11px',fontWeight:'600',color:'#6B7280',textTransform:'uppercase',letterSpacing:'.05em',padding:'10px 16px'}}>{h}</th>;
-                    })}
-                  </tr>
-                </thead>
-                <tbody>
-                  {filtered.map(function(r){
-                    var od = r.deadline_date && new Date(r.deadline_date) < new Date();
-                    var sc = SC[r.stage];
-                    return (
-                      <tr key={r.id} style={{borderTop:'1px solid #F3F4F6'}}
-                        onMouseOver={function(e){e.currentTarget.style.background='#F9FAFB';}}
-                        onMouseOut={function(e){e.currentTarget.style.background='white';}}>
-                        <td style={{padding:'12px 16px'}}>
-                          <div style={{fontFamily:'monospace',fontWeight:'700',color:'#1F4E79',fontSize:'13px'}}>{r.request_number}</div>
-                          {od && <div style={{fontSize:'11px',color:'#DC2626',fontWeight:'700',marginTop:'2px'}}>⚠ OVERDUE</div>}
-                        </td>
-                        <td style={{padding:'12px 16px'}}>
-                          <div style={{fontWeight:'500',fontSize:'14px'}}>{r.requestor_name}</div>
-                          <div style={{fontSize:'12px',color:'#9CA3AF'}}>{r.requestor_email}</div>
-                        </td>
-                        <td style={{padding:'12px 16px'}}>
-                          {sc ? <span style={{background:sc.bg,color:sc.color,fontSize:'12px',fontWeight:'500',padding:'3px 10px',borderRadius:'20px'}}>{STAGES[r.stage]}</span> : <span style={{fontSize:'12px',color:'#6B7280'}}>{r.stage}</span>}
-                        </td>
-                        <td style={{padding:'12px 16px'}}>
-                          <div style={{display:'flex',alignItems:'center',gap:'6px'}}>
-                            <div style={{width:'8px',height:'8px',borderRadius:'50%',background:r.department_color||'#9CA3AF'}}/>
-                            <span style={{fontSize:'13px'}}>{r.department_name||'—'}</span>
-                          </div>
-                        </td>
-                        <td style={{padding:'12px 16px'}}>
-                          <span style={{fontSize:'13px',color:od?'#DC2626':'#6B7280',fontWeight:od?'700':'400'}}>{r.deadline_date||'—'}</span>
-                        </td>
-                        <td style={{padding:'12px 16px'}}>
-                          <Link to={openLink(r.id)} style={{fontSize:'13px',color:'#1F4E79',textDecoration:'none',fontWeight:'600',padding:'6px 12px',background:'#EBF3FB',borderRadius:'6px'}}>{openLabel(r.id)}</Link>
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            )}
-          </div>
+          </section>
         </>
-      )}
+      ) : null}
+
+      {/* Notifications area (same data as the header bell) */}
+      {notes.length ? (
+        <>
+          {sectionHead('Notifications')}
+          <section style={C.card}>
+            {notes.map(function (n, i) {
+              return (
+                <div key={n.id} style={{ display: 'flex', alignItems: 'flex-start', gap: '11px', padding: '11px 16px', borderTop: i ? '1px solid #F3F4F6' : 'none', opacity: n.read_at ? 0.72 : 1 }}>
+                  <span style={{ marginTop: '5px', width: '7px', height: '7px', borderRadius: '50%', background: n.read_at ? 'transparent' : C.accent, border: n.read_at ? '1px solid #D3DAE4' : 'none', flexShrink: 0 }} />
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: '13px', fontWeight: 600 }}>{n.link ? <Link to={n.link} style={{ color: '#1A2230', textDecoration: 'none' }}>{n.title}</Link> : n.title}</div>
+                    {n.body ? <div style={{ fontSize: '12px', color: C.muted, marginTop: '1px' }}>{n.body}</div> : null}
+                    <div style={{ fontSize: '11px', color: C.faint, marginTop: '2px' }}>{(n.created_at || '').replace('T', ' ').slice(0, 16)}</div>
+                  </div>
+                  <span onClick={function () { dismiss(n.id); }} title="Dismiss" style={{ color: C.faint, cursor: 'pointer', fontSize: '16px', lineHeight: 1, padding: '0 3px' }}>×</span>
+                </div>
+              );
+            })}
+          </section>
+        </>
+      ) : null}
+
+      {!loading && boxTypes.length ? (
+        <p style={{ fontSize: '11.5px', color: C.faint, textAlign: 'center', margin: '2px 0 8px' }}>
+          A box appears only when you hold a task of that type — no empty boxes.
+        </p>
+      ) : null}
     </div>
   );
 }
