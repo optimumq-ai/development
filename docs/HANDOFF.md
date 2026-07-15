@@ -3420,3 +3420,63 @@ connectors untouched. Config/fixture in sync with live.
 - #6 Fee-choice intake (default-forward) · #7 Notification model + nullable task-request link · #8 My Tasks
   restructure (+ BACKLOG R10 returned-for-rework surfacing) · #10 Legal Review / Legal Redaction task wiring.
 - Role-model follow-ons above when v3 user-types get built.
+
+---
+
+## 2026-07-15 (pm) — Tier 2 #7: Notification model + nullable task/file link. SYS-IMPORT pseudo-request ELIMINATED. 517/517.
+
+**Scoped then built (Kevin: "build this now"), with two decisions Kevin owned:** (1) the import "no template yet"
+prompt becomes a **Notification** (not a task); (2) **full elimination** of the `sysimport` row — not just
+decoupling — which grew the slice to also make `request_files` nullable and re-anchor import files by repository.
+
+### The wart (was live)
+Ingestion hung files + a `build_redaction_template` task on a standing fake request `sysimport-<repo>`
+("File Import", stage delivery) because `tasks.request_id` AND `request_files.request_id` were `NOT NULL`. A
+task click landed on a fake request's pipeline; the row also leaked into the staff request **queue** (only
+report *metrics* excluded `SYS-%`). Root cause: passive heads-ups modeled as tasks-on-a-request.
+
+### The build
+- **Schema:** `tasks.request_id` and `request_files.request_id` → **nullable**; `request_files.repository_id`
+  added + indexed; new **`notifications`** table (per-user, title/body/link, read/dismiss, optional context for
+  dedupe). Canonical schema is `schema.postgres.sql` (SQLite `schema.sql` is legacy/unused — it doesn't even
+  define `tasks`).
+- **Model:** `services/notifications.js` (emit/list/unreadCount/markRead/dismiss, dedupe per user+kind+context)
+  + `routes/notifications.js` (ownership-scoped) + mounted at `/api/notifications`.
+- **Import rework:** `importIngest.js` stops creating the pseudo-request; files insert with `repository_id` +
+  NULL request_id; no template → **Notification** to the source reviewer (or admins) linking to `/mass-redaction`.
+  `massJobs.js` review_auto_redaction task keeps being a task but with **NULL** request_id. `taskRouting.createTask`
+  made null-safe. `requests.js` queue now filters `SYS-%` (consistent with report metrics).
+- **Frontend:** a header **bell** (`NotificationBell.js`) — unread badge, dropdown list, mark-read/dismiss,
+  `hasAnyPerm`-free; `authStore` already had permissionRoles. Minimal surface; full My-Tasks area is #8.
+- **Live migration** `scripts/migrate_notifications_deanchor.js` (idempotent, committed): backfilled
+  `repository_id` on 13 import files, converted the standing build-template task → a notification to its
+  reviewer, nulled request_id on files/tasks/doc_pages/fulfilled_records, **deleted the `sysimport-*` rows**.
+
+### Scope corrections made mid-build (flagged honestly)
+- The `reportEngine`/`requestCreate`/`renumber` SYS-exclusions cover **LIBRARY + other SYS- rows too** — NOT
+  removed (my scope was wrong); instead aligned the request-queue exclusion.
+- `review_auto_redaction` is real QA work with a screen → stayed a **task** (null request_id), not a notification;
+  only `build_redaction_template` became a notification. This is what exercises the nullable task link.
+
+### Evidence
+- Suite **517/517** (new `verify_notifications` **18/18**), schema builds from EMPTY, live census clean.
+- **Live (API restarted, then migrated):** 0 sysimport requests; the standing task converted to a notification
+  for its reviewer (Kevin Hargrove → `/mass-redaction`); live `GET /api/notifications` as that user returns it
+  (unread=1); another user does not see it (ownership-scoped). Frontend rebuilt + deployed (bell in bundle).
+- An id-based map (subagent) confirmed the redaction→library pipeline is entirely file-id/job-based, never
+  request-based, so nulling import files' request_id is safe; all import-reachable readers are LEFT JOIN/id-scoped.
+- Fixture regen produced one unrelated line (a TX fees config-section version/hash bump from an earlier
+  config-freshness recompute) — kept, since the fixture must match live.
+
+### Follow-on / notes
+- `build_redaction_template` task type is now unused (retired in favor of the notification); harmless if left.
+- **#8 (My Tasks restructure)** folds the notifications area + null-request tasks into per-role boxes.
+- Sequenced correctly this time: restarted the API (new code + schema) BEFORE migrating live data.
+
+### STATE
+`main` + this note. Suite **517/517**. Live API restarted (new pid, healthy), migration applied, frontend
+rebuilt + deployed, connectors untouched.
+
+### NEXT (Tier 2 remaining)
+- #6 Fee-choice intake (default-forward) · #8 My Tasks restructure (+ BACKLOG R10 returned-for-rework;
+  folds in notifications + null-request tasks) · #10 Legal Review / Legal Redaction task wiring.

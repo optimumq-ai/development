@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS requests (id TEXT PRIMARY KEY, request_number TEXT UN
  fee_waiver_requested INTEGER DEFAULT 0, estimated_fee DOUBLE PRECISION DEFAULT 0, actual_fee DOUBLE PRECISION DEFAULT 0, amount_paid DOUBLE PRECISION DEFAULT 0, legal_flag INTEGER DEFAULT 0, legal_flag_type TEXT, deadline_date TEXT, submission_channel TEXT DEFAULT 'portal', created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')), updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
 CREATE TABLE IF NOT EXISTS request_history (id TEXT PRIMARY KEY, request_id TEXT NOT NULL, actor_id TEXT, actor_name TEXT NOT NULL, action TEXT NOT NULL, details TEXT, notes TEXT, stage_from TEXT, stage_to TEXT, created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
 CREATE TABLE IF NOT EXISTS fee_matrix (id TEXT PRIMARY KEY, category TEXT NOT NULL, description TEXT, rate DOUBLE PRECISION NOT NULL, unit TEXT NOT NULL, is_active INTEGER DEFAULT 1, sort_order INTEGER DEFAULT 0);
-CREATE TABLE IF NOT EXISTS request_files (id TEXT PRIMARY KEY, request_id TEXT NOT NULL, filename TEXT NOT NULL, original_name TEXT NOT NULL, mimetype TEXT, size INTEGER, status TEXT DEFAULT 'attached', responsive INTEGER DEFAULT 0, uploaded_by TEXT, uploaded_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
+CREATE TABLE IF NOT EXISTS request_files (id TEXT PRIMARY KEY, request_id TEXT, repository_id TEXT, filename TEXT NOT NULL, original_name TEXT NOT NULL, mimetype TEXT, size INTEGER, status TEXT DEFAULT 'attached', responsive INTEGER DEFAULT 0, uploaded_by TEXT, uploaded_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
 CREATE TABLE IF NOT EXISTS agent_rules (id TEXT PRIMARY KEY, rule_text TEXT NOT NULL, enabled INTEGER DEFAULT 1, sort_order INTEGER DEFAULT 100, created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')), created_by TEXT);
 CREATE TABLE IF NOT EXISTS demo_911_calls (seq BIGSERIAL PRIMARY KEY, call_id TEXT, call_type TEXT, priority TEXT, received_at TEXT, caller_name TEXT, caller_phone TEXT, caller_address TEXT, incident_location TEXT, responding_units TEXT, disposition TEXT, narrative TEXT, created_at TEXT, pulled INTEGER DEFAULT 0);
 CREATE TABLE IF NOT EXISTS demo_documents (id TEXT PRIMARY KEY, title TEXT NOT NULL, summary TEXT, body TEXT, department TEXT, doc_type TEXT, date_created TEXT, page_count INTEGER, public_availability TEXT DEFAULT 'available', tags TEXT);
@@ -545,7 +545,7 @@ ON CONFLICT (id) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS tasks (
   id TEXT PRIMARY KEY,
-  request_id TEXT NOT NULL,
+  request_id TEXT,
   type TEXT NOT NULL,
   title TEXT,
   team_id TEXT,
@@ -948,3 +948,28 @@ ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS test_config_ref TEXT;
 ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS requires_review BOOLEAN DEFAULT false;
 ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS review_requested_at TEXT;
 ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS reviewer_id TEXT;
+
+-- Notification model + nullable task/file request link (Tasks spec §1-2; Sources spec §4). A task is a
+-- request-processing stop; a NOTIFICATION is an ad-hoc heads-up (description + link, no completion UI) that
+-- must NOT depend on a request_id. Making tasks.request_id and request_files.request_id nullable removes the
+-- structural trap that forced the SYS-IMPORT pseudo-request. Idempotent; converge existing DBs on boot.
+ALTER TABLE tasks ALTER COLUMN request_id DROP NOT NULL;
+ALTER TABLE request_files ALTER COLUMN request_id DROP NOT NULL;
+ALTER TABLE request_files ADD COLUMN IF NOT EXISTS repository_id TEXT;
+CREATE INDEX IF NOT EXISTS idx_files_repository ON request_files(repository_id);
+
+CREATE TABLE IF NOT EXISTS notifications (
+  id TEXT PRIMARY KEY,
+  user_id TEXT NOT NULL,               -- recipient
+  kind TEXT,                           -- category, e.g. 'import_template', 'import_processed'
+  title TEXT NOT NULL,
+  body TEXT,
+  link TEXT,                           -- hyperlink target (a screen); NOT a request dependency
+  context_type TEXT,                   -- optional grouping/dedupe, e.g. 'repository'
+  context_id TEXT,                     -- optional entity id; the notification does not DEPEND on it
+  read_at TEXT,
+  dismissed_at TEXT,
+  created_by TEXT,
+  created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);

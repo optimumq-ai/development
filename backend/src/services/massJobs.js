@@ -101,9 +101,11 @@ async function tick(opts) {
           var irj = await get("SELECT * FROM import_review_jobs WHERE job_id = ? AND review_task_id IS NULL", [job.id]);
           if (irj) {
             var repoRow = await get("SELECT name FROM record_repositories WHERE id = ?", [irj.repository_id]);
-            var reqIdIr = 'sysimport-' + irj.repository_id;
+            // Request-independent QA task: reviewing an import auto-redaction batch is real work with a review
+            // screen (reached via import_review_jobs.review_task_id → the job), so it stays a TASK — but with a
+            // NULL request_id, not a fake sysimport request (Tasks spec §2.2; nullable task link, D4/D9).
             var trIr = require('./taskRouting');
-            var tk = await trIr.createTask({ requestId: reqIdIr, type: 'review_auto_redaction', title: 'Review auto-redaction batch - ' + ((repoRow && repoRow.name) || 'import') + ' (' + job.total_items + ' file(s))', createdBy: 'import' });
+            var tk = await trIr.createTask({ requestId: null, type: 'review_auto_redaction', title: 'Review auto-redaction batch - ' + ((repoRow && repoRow.name) || 'import') + ' (' + job.total_items + ' file(s))', createdBy: 'import' });
             if (tk && tk.id) {
               if (irj.review_assignee) { try { await trIr.assign(tk.id, irj.review_assignee, 'manual'); } catch(e){} }
               await run("UPDATE import_review_jobs SET review_task_id = ? WHERE job_id = ?", [tk.id, job.id]);

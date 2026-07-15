@@ -7,6 +7,7 @@ var fs = require('fs');
 var path = require('path');
 var uuidv4 = require('uuid').v4;
 var db = require('../db');
+var notifications = require('./notifications');
 var docProcessing = require('./docProcessing');
 var embedIndex = require('./embedIndex');
 var Anthropic = require('@anthropic-ai/sdk');
@@ -23,12 +24,15 @@ async function ensureTable() {
 function parseCfg(repo) { try { return repo.config ? (typeof repo.config === 'string' ? JSON.parse(repo.config) : repo.config) : {}; } catch (e) { return {}; } }
 function fileKey(name, st) { return name + ':' + st.size + ':' + Math.floor(st.mtimeMs); }
 
-async function ensureIngestRequest(repo) {
-  var reqId = 'sysimport-' + repo.id;
-  var rq = await db.get("SELECT id FROM requests WHERE id = ?", [reqId]);
-  if (!rq) await db.run("INSERT INTO requests (id, request_number, requestor_name, requestor_email, description, classification, stage, status, created_at) VALUES (?,?,?,?,?,?,?,?,datetime('now'))",
-    [reqId, 'SYS-IMPORT-' + String(repo.id).slice(0, 10), 'File Import', 'system@optimumq.ai', 'Standing file-import batch for source: ' + repo.name, 'standard', 'delivery', 'active']);
-  return reqId;
+// Who to notify about an import source. The configured reviewer if set; otherwise management (admins/directors)
+// so a "no template yet" heads-up is never lost. Imports no longer manufacture a pseudo-request — files anchor
+// to their source repository and passive prompts become Notifications (Tasks spec §1-2; Sources spec §4).
+async function notifyRecipients(cfg) {
+  if (cfg && cfg.review_assignee) return [cfg.review_assignee];
+  var rows = await db.all(
+    "SELECT DISTINCT u.id FROM users u JOIN user_function_roles ufr ON ufr.user_id = u.id " +
+    "JOIN function_roles fr ON fr.id = ufr.function_role_id WHERE fr.name IN ('SYSTEM_ADMIN','DIRECTOR') AND u.status <> 'inactive'");
+  return (rows || []).map(function (r) { return r.id; });
 }
 
 async function discoverNew(repo, settleMs) {
@@ -58,7 +62,6 @@ async function runIngest(repoId, opts) {
   var cfg = parseCfg(repo);
   var disc = await discoverNew(repo, opts.settleMs || 0);
   if (disc.error) return { error: disc.error };
-  var reqId = await ensureIngestRequest(repo);
   var ingested = 0, errors = 0, fids = [];
   for (var i = 0; i < disc.files.length; i++) {
     var f = disc.files[i];
@@ -67,8 +70,8 @@ async function runIngest(repoId, opts) {
       var fid = 'imp-' + uuidv4();
       var destName = fid + ext;
       fs.copyFileSync(f.full, path.join(UPLOAD_DIR, destName)); // COPY - source untouched
-      await db.run("INSERT INTO request_files (id, request_id, filename, original_name, mimetype, size, status, uploaded_by, uploaded_at) VALUES (?,?,?,?,?,?,?,?,datetime('now'))",
-        [fid, reqId, destName, f.name, MIME[ext] || 'application/octet-stream', f.size, 'imported', 'Import: ' + repo.name]);
+      await db.run("INSERT INTO request_files (id, request_id, repository_id, filename, original_name, mimetype, size, status, uploaded_by, uploaded_at) VALUES (?,NULL,?,?,?,?,?,?,?,datetime('now'))",
+        [fid, repo.id, destName, f.name, MIME[ext] || 'application/octet-stream', f.size, 'imported', 'Import: ' + repo.name]);
       await docProcessing.processFile(fid); // extract text + auto-index (internal)
       await db.run("INSERT INTO import_ingest_log (id, repository_id, file_key, original_name, request_file_id, status) VALUES (?,?,?,?,?, 'ingested') ON CONFLICT (repository_id, file_key) DO UPDATE SET status='ingested', request_file_id=EXCLUDED.request_file_id, detail=NULL, ingested_at=to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')",
         [uuidv4(), repo.id, f.key, f.name, fid]);
@@ -83,7 +86,7 @@ async function runIngest(repoId, opts) {
     }
   }
   try { if (cfg.record_type_id && fids.length) await enrichRecordType(cfg.record_type_id, fids); } catch(e){ console.error('[importIngest enrich call]', e && e.message); }
-  try { await routeEndToEnd(repo, cfg, reqId, fids); } catch(e){ console.error('[importIngest routeEndToEnd]', e && e.message); }
+  try { await routeEndToEnd(repo, cfg, fids); } catch(e){ console.error('[importIngest routeEndToEnd]', e && e.message); }
   return { ingested: ingested, errors: errors, scanned: disc.scanned, newFound: disc.files.length };
 }
 
@@ -131,7 +134,7 @@ async function enrichRecordType(typeId, fids){
 
 // End-to-end routing: after ingest, optionally auto-create a redaction job (if a template is
 // linked) or a one-time 'build template' task (if not). Review happens as a task on completion.
-async function routeEndToEnd(repo, cfg, reqId, fids){
+async function routeEndToEnd(repo, cfg, fids){
   if (!cfg || !cfg.end_to_end || !fids || !fids.length) return;
   var reviewer = cfg.review_assignee || null;
   if (cfg.template_id) {
@@ -144,12 +147,19 @@ async function routeEndToEnd(repo, cfg, reqId, fids){
       return;
     }
   }
-  // no template linked -> ensure a one-time build-template task exists
-  var existing = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'build_redaction_template' AND status IN ('open','assigned','in_progress')", [reqId]);
-  if (!existing) {
-    var tr = require('./taskRouting');
-    var t = await tr.createTask({ requestId: reqId, type: 'build_redaction_template', title: 'Build redaction template for import source: ' + repo.name, createdBy: 'import' });
-    if (reviewer && t && t.id) { try { await tr.assign(t.id, reviewer, 'manual'); } catch(e){} }
+  // No template linked -> this is a passive "go set one up" prompt, not a request-processing stop, so it is a
+  // NOTIFICATION (Tasks spec §2.2 — its canonical example), NOT a task on a fake request. De-duped per source,
+  // so a nightly run refreshes the one heads-up instead of stacking. Links to the mass-redaction/template UI.
+  var recipients = await notifyRecipients(cfg);
+  for (var ri = 0; ri < recipients.length; ri++) {
+    try {
+      await notifications.emit({
+        userId: recipients[ri], kind: 'import_template', contextType: 'repository', contextId: repo.id,
+        title: 'Import source needs a redaction template',
+        body: fids.length + ' file(s) imported from "' + repo.name + '" with no matching template — set one up to auto-redact.',
+        link: '/mass-redaction', createdBy: 'import'
+      });
+    } catch (e) { console.error('[importIngest notify]', e && e.message); }
   }
 }
 
@@ -197,4 +207,4 @@ function startScheduler(){
   setTimeout(function(){ tick().catch(function(e){ console.error('[importScheduler boot]', e && e.message); }); }, 120000); // catch-up shortly after boot
 }
 
-module.exports = { runIngest: runIngest, status: status, discoverNew: discoverNew, ensureTable: ensureTable, startScheduler: startScheduler };
+module.exports = { runIngest: runIngest, status: status, discoverNew: discoverNew, ensureTable: ensureTable, startScheduler: startScheduler, routeEndToEnd: routeEndToEnd };

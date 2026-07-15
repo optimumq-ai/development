@@ -9,7 +9,7 @@
 
 ## 1. Two item types on My Tasks
 - **Task Assignment** — a human "stop" in request processing, with its own completion screen; carries type, owning role, request/record context, lifecycle state, assignee, health contribution. `[PARTIAL — task records + routing built; per-type screens mostly NOT built, see §6]`
-- **Notification** — ad-hoc item: a description + hyperlink to a screen, no completion UI; for heads-ups and passive/monitor items; independent of request_id. `[NOT BUILT]`
+- **Notification** — ad-hoc item: a description + hyperlink to a screen, no completion UI; for heads-ups and passive/monitor items; **independent of request_id**. `[BUILT 2026-07-15, D4/D9 #7 — `notifications` table + service (`notifications.js`) + routes + a header bell (list/read/dismiss); `verify_notifications` 18/18]`. `tasks.request_id` and `request_files.request_id` are now **nullable**, so request-independent work needs no fake request. This is what let the **SYS-IMPORT pseudo-request be eliminated** (Sources spec §4): imports emit a Notification (no template yet) and anchor files by `repository_id`; the passive-item-as-fake-task anti-pattern is gone. The full My-Tasks notifications *area* is item #8; this shipped the model + a minimal surface.
 
 ## 2. Task lifecycle & status
 Internal: `open` (pool, no owner) → `assigned` → `in_progress` → `done`. `[BUILT]`

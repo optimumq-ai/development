@@ -11,7 +11,7 @@ Authoritative definition of how work reaches a person on the **My Tasks** page: 
 Any **"stop" directly in the flow of processing a request that must be executed by a human.** Structured work with a defined completion screen. Carries: type, owning role, request/record context, lifecycle state, assignee, and a health contribution.
 
 ### 2.2 Notification
-An **ad-hoc item that appears on My Tasks but is NOT a request-processing stop.** It informs and points — a description plus a hyperlink to a relevant screen — rather than presenting a purpose-built completion UI. Used for heads-ups and passive "monitor/observe" items (e.g., "an imported file has arrived — set up a redaction profile"). **Must not depend on a request_id.** `[code: not built]`
+An **ad-hoc item that appears on My Tasks but is NOT a request-processing stop.** It informs and points — a description plus a hyperlink to a relevant screen — rather than presenting a purpose-built completion UI. Used for heads-ups and passive "monitor/observe" items (e.g., "an imported file has arrived — set up a redaction profile"). **Must not depend on a request_id.** `[code: BUILT 2026-07-15 — `notifications` table + `services/notifications.js` (emit/list/read/dismiss, per-user, optional context for dedupe) + `routes/notifications.js` + a header bell. The import "no template yet" prompt is now exactly this notification, replacing the pseudo-request task. `tasks.request_id`/`request_files.request_id` are nullable. `verify_notifications` 18/18.]`
 
 ## 3. Task-assignment routing (after a request is routed to a team)
 Order of operations:

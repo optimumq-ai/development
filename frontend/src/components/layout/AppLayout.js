@@ -3,6 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import api from '../../lib/api';
 import HelpAssistant from '../HelpAssistant';
+import NotificationBell from '../ui/NotificationBell';
 
 export default function AppLayout() {
   const store = useAuthStore();
@@ -108,6 +109,7 @@ export default function AppLayout() {
               My Tasks
               {taskCount > 0 ? <span style={{ minWidth: '18px', height: '18px', padding: '0 5px', borderRadius: '999px', fontSize: '11px', fontWeight: '700', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', color: 'white', background: overdueCount > 0 ? '#DC2626' : '#1F4E79' }}>{taskCount}</span> : null}
             </NavLink>
+            <NotificationBell />
             <HelpAssistant />
             <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{user?.display_name}</div>
           </div>

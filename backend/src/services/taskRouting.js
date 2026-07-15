@@ -157,7 +157,7 @@ async function createTask(opts) {
   await run(
     "INSERT INTO tasks (id, request_id, type, title, team_id, role_required, status, created_by) " +
     "VALUES (?,?,?,?,?,?, 'open', ?)",
-    [id, opts.requestId, opts.type, opts.title || null, opts.teamId || null, role, opts.createdBy || null]
+    [id, opts.requestId || null, opts.type, opts.title || null, opts.teamId || null, role, opts.createdBy || null]
   );
   return await getTask(id);
 }
