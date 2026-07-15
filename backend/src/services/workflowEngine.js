@@ -107,7 +107,7 @@ async function onIntake(requestId, matcherResult){
   if (hit && hit.rule && hit.rule.id === 'wfr-confident' && teamId) {
     try {
       var tr = require('./taskRouting');
-      var existing = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'estimate' AND status IN ('open','assigned','in_progress')", [requestId]);
+      var existing = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'estimate' AND status IN ('open','assigned','in_progress','returned')", [requestId]);
       if (!existing) {
         var etitle = 'Create estimate';
         try {
@@ -129,7 +129,7 @@ async function onIntake(requestId, matcherResult){
   if (request.fee_waiver_requested && !request.fee_waiver_status) {
     try {
       var trw = require('./taskRouting');
-      var existingW = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'fee_waiver' AND status IN ('open','assigned','in_progress')", [requestId]);
+      var existingW = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'fee_waiver' AND status IN ('open','assigned','in_progress','returned')", [requestId]);
       if (!existingW) {
         var wtask = await trw.createTask({ requestId: requestId, type: 'fee_waiver', title: 'Decide fee-waiver request', teamId: null, createdBy: 'workflow' });
         await trw.autoRouteOrPool(wtask.id, request.description, {});
@@ -144,7 +144,7 @@ async function onIntake(requestId, matcherResult){
   if (!teamId) {
     try {
       var trr = require('./taskRouting');
-      var existingR = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'routing_review' AND status IN ('open','assigned','in_progress')", [requestId]);
+      var existingR = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'routing_review' AND status IN ('open','assigned','in_progress','returned')", [requestId]);
       if (!existingR) {
         var rtask = await trr.createTask({ requestId: requestId, type: 'routing_review', title: 'Review & route — team could not be determined', teamId: null, createdBy: 'workflow' });
         await trr.autoRouteOrPool(rtask.id, request.description, {});

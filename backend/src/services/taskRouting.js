@@ -204,7 +204,7 @@ async function workloadCounts(userIds) {
   var ph = userIds.map(function () { return '?'; }).join(',');
   var rows = await all(
     "SELECT assigned_to AS uid, COUNT(*) AS n FROM tasks " +
-    "WHERE status IN ('assigned','in_progress') AND assigned_to IN (" + ph + ") GROUP BY assigned_to", userIds);
+    "WHERE status IN ('assigned','in_progress','returned') AND assigned_to IN (" + ph + ") GROUP BY assigned_to", userIds);
   rows.forEach(function (r) { map[r.uid] = Number(r.n); });
   return map;
 }
@@ -317,7 +317,7 @@ async function spawnForStage(requestId, stage, createdBy) {
   // other, never both), so an existing task of either blocks a new one for this request.
   var typeSet = (ttype === 'redaction' || ttype === 'legal_redaction') ? ['redaction', 'legal_redaction'] : [ttype];
   var ph = typeSet.map(function () { return '?'; }).join(',');
-  var existing = await get("SELECT id FROM tasks WHERE request_id = ? AND type IN (" + ph + ") AND status IN ('open','assigned','in_progress')", [requestId].concat(typeSet));
+  var existing = await get("SELECT id FROM tasks WHERE request_id = ? AND type IN (" + ph + ") AND status IN ('open','assigned','in_progress','returned')", [requestId].concat(typeSet));
   if (existing) return null;
   // Legal work is office-level (team-agnostic); team fulfillment work stays on the request's team.
   var teamId = LEGAL_TYPES[ttype] ? null : reqRow.department_id;
@@ -373,7 +373,7 @@ async function applyStageTransition(requestId, toStage, opts) {
   // could claim and work a task for a request that is already closed. Found 2026-07-13 by the deposit-clock
   // harness; it was never specific to that path.
   if (toStage === 'closed') {
-    await run("UPDATE tasks SET status = 'cancelled', updated_at = datetime('now') WHERE request_id = ? AND status IN ('open','assigned','in_progress')", [requestId]);
+    await run("UPDATE tasks SET status = 'cancelled', updated_at = datetime('now') WHERE request_id = ? AND status IN ('open','assigned','in_progress','returned')", [requestId]);
   }
   // Redaction automation slice 3b: on ENTERING a redaction stage (once, not on reconciler sweeps of
   // spawnForStage), kick the read-based triage in the BACKGROUND so the AI read's latency/failure never
@@ -405,7 +405,7 @@ async function escalateToLegal(requestId, opts) {
     [uuidv4(), requestId, opts.actorId || null, opts.actorName || 'System', 'LEGAL_ESCALATED',
      'Escalated for legal (advanced) redaction' + (opts.note ? ': ' + opts.note : '')]);
   var converted = false, newTask = null;
-  var openRed = await get("SELECT id FROM tasks WHERE request_id = ? AND type = 'redaction' AND status IN ('open','assigned','in_progress')", [requestId]);
+  var openRed = await get("SELECT id FROM tasks WHERE request_id = ? AND type = 'redaction' AND status IN ('open','assigned','in_progress','returned')", [requestId]);
   if (openRed) {
     await run("UPDATE tasks SET status = 'superseded', updated_at = datetime('now') WHERE id = ?", [openRed.id]);
     try { newTask = await spawnForStage(requestId, request.stage, opts.actorId || 'system'); converted = true; }
@@ -415,7 +415,7 @@ async function escalateToLegal(requestId, opts) {
 }
 
 async function mine(userId) {
-  return await all("SELECT * FROM tasks WHERE assigned_to = ? AND status IN ('assigned','in_progress') ORDER BY updated_at DESC", [userId]);
+  return await all("SELECT * FROM tasks WHERE assigned_to = ? AND status IN ('assigned','in_progress','returned') ORDER BY updated_at DESC", [userId]);
 }
 
 // Self-healing safety net: any request at a task-bearing stage without its task gets one spawned.
@@ -467,7 +467,7 @@ async function markTaskReturned(taskId, opts) {
   opts = opts || {};
   var t = await get("SELECT id, type, assigned_to, request_id FROM tasks WHERE id = ?", [taskId]);
   if (!t) return null;
-  await run("UPDATE tasks SET return_reason = ?, returned_by = ?, returned_at = datetime('now'), updated_at = datetime('now') WHERE id = ?",
+  await run("UPDATE tasks SET status = 'returned', return_reason = ?, returned_by = ?, returned_at = datetime('now'), updated_at = datetime('now') WHERE id = ? AND status NOT IN ('done','cancelled','superseded')",
     [opts.reason || null, opts.by || null, taskId]);
   if (t.assigned_to) {
     try {
@@ -484,7 +484,8 @@ async function markTaskReturned(taskId, opts) {
 }
 // Clear the returned flag (the author re-submitted the corrected work).
 async function clearReturned(taskId) {
-  await run("UPDATE tasks SET return_reason = NULL, returned_by = NULL, returned_at = NULL, updated_at = datetime('now') WHERE id = ?", [taskId]);
+  // Author re-submitted the corrected work: leave the 'returned' state (back to in_progress) and wipe the reason.
+  await run("UPDATE tasks SET status = CASE WHEN status = 'returned' THEN 'in_progress' ELSE status END, return_reason = NULL, returned_by = NULL, returned_at = NULL, updated_at = datetime('now') WHERE id = ?", [taskId]);
 }
 
 module.exports = {

@@ -123,7 +123,7 @@ async function computeAndPersistDisposition(file, ctx) {
 }
 
 async function cancelRedactionTask(requestId) {
-  await run("UPDATE tasks SET status = 'cancelled', updated_at = datetime('now') WHERE request_id = ? AND type IN ('redaction','legal_redaction') AND status IN ('open','assigned','in_progress')", [requestId]);
+  await run("UPDATE tasks SET status = 'cancelled', updated_at = datetime('now') WHERE request_id = ? AND type IN ('redaction','legal_redaction') AND status IN ('open','assigned','in_progress','returned')", [requestId]);
 }
 
 // Triage every responsive, not-yet-released file for a request; then, if record-type-clean bypasses cleared

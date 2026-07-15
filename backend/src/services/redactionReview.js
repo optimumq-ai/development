@@ -39,7 +39,7 @@ function gateApply(job, applier) {
 async function spawnReviewTask(job, ctx) {
   ctx = ctx || {};
   if (!GATED[job && job.disposition]) return null;
-  var existing = await get("SELECT id FROM tasks WHERE request_id = ? AND type = 'redaction_qa' AND status IN ('open','assigned','in_progress')", [job.request_id]);
+  var existing = await get("SELECT id FROM tasks WHERE request_id = ? AND type = 'redaction_qa' AND status IN ('open','assigned','in_progress','returned')", [job.request_id]);
   if (existing) return null;
   var reqRow = await get('SELECT department_id FROM requests WHERE id = ?', [job.request_id]);
   var isLegal = job.disposition === 'legal';
@@ -61,13 +61,13 @@ async function completeReviewTask(requestId) {
     "SELECT id FROM redaction_jobs WHERE request_id = ? AND disposition IN ('elevated','legal') " +
     "AND review_stage IN ('pending_review','in_review') LIMIT 1", [requestId]);
   if (pending) return { closed: false, pendingJobId: pending.id };
-  await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE request_id = ? AND type = 'redaction_qa' AND status IN ('open','assigned','in_progress')", [requestId]);
+  await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE request_id = ? AND type = 'redaction_qa' AND status IN ('open','assigned','in_progress','returned')", [requestId]);
   return { closed: true };
 }
 
 // Reviewer sent it back to the author -> cancel the review task; a fresh one spawns when the author re-submits.
 async function closeReviewTask(requestId) {
-  await run("UPDATE tasks SET status = 'cancelled', updated_at = datetime('now') WHERE request_id = ? AND type = 'redaction_qa' AND status IN ('open','assigned','in_progress')", [requestId]);
+  await run("UPDATE tasks SET status = 'cancelled', updated_at = datetime('now') WHERE request_id = ? AND type = 'redaction_qa' AND status IN ('open','assigned','in_progress','returned')", [requestId]);
 }
 
 module.exports = { gateApply: gateApply, spawnReviewTask: spawnReviewTask, completeReviewTask: completeReviewTask, closeReviewTask: closeReviewTask, GATED: GATED };

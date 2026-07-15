@@ -28,7 +28,7 @@ router.get('/pool', requireAuth, async function (req, res) {
 
 // Tasks assigned to the current user.
 router.get('/mine', requireAuth, async function (req, res) {
-  var rows = await all(withReq("WHERE t.assigned_to = ? AND t.status IN ('assigned','in_progress') ORDER BY t.updated_at DESC"), [req.user.sub]);
+  var rows = await all(withReq("WHERE t.assigned_to = ? AND t.status IN ('assigned','in_progress','returned') ORDER BY t.updated_at DESC"), [req.user.sub]);
   res.json({ tasks: rows });
 });
 

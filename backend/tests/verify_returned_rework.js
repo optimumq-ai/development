@@ -44,7 +44,7 @@ async function mkTask(id, reqId, assignedTo) {
   await mkTask(T, 'req-' + TAG + '-a', U);
   await tr.markTaskReturned(T, { by: 'Sam Park', reason: 'Mask the minor at 04:12', link: '/redaction/' + T, title: 'A redaction you submitted was returned' });
   var row = await db.get('SELECT return_reason, returned_by, returned_at, status FROM tasks WHERE id = ?', [T]);
-  ok('A1 the task is FLAGGED returned (reason + who + when), status unchanged', row && row.return_reason === 'Mask the minor at 04:12' && row.returned_by === 'Sam Park' && !!row.returned_at && row.status === 'assigned');
+  ok('A1 the task moves to the RETURNED status carrying reason + who + when', row && row.return_reason === 'Mask the minor at 04:12' && row.returned_by === 'Sam Park' && !!row.returned_at && row.status === 'returned');
   ok('A2 a work_returned notification was pushed to the owner', !!(await noteFor(U, T)));
   var mineU = await api('GET', '/tasks/mine', await token(U));
   ok('A3 the flagged task still appears in the owner’s My Tasks, carrying the reason',

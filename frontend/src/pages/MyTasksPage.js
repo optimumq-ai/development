@@ -141,7 +141,8 @@ export default function MyTasksPage() {
   function box(ty) {
     var tasks = byType[ty];
     // Returned tasks are 'assigned' (flag, not status), so they live in Queued — sort them to the very top.
-    var queued = tasks.filter(function (t) { return t.status === 'assigned'; })
+    // Queued = not-yet-started work: 'assigned' plus 'returned' (a correction is queued work), returned first.
+    var queued = tasks.filter(function (t) { return t.status === 'assigned' || t.status === 'returned'; })
       .sort(function (a, b) { return (b.return_reason ? 1 : 0) - (a.return_reason ? 1 : 0); });
     var inProc = tasks.filter(function (t) { return t.status === 'in_progress'; });
     var rtn = tasks.filter(function (t) { return t.return_reason; }).length;

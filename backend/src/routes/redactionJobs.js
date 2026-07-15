@@ -125,7 +125,7 @@ router.post('/jobs/:jobId/submit', requireAuth, async function(req, res) {
   // Re-submitting corrected work clears any "returned for corrections" flag on the author's task (R10, 8b).
   try {
     var tr = require('../services/taskRouting');
-    var authTask = await get("SELECT id FROM tasks WHERE request_id = ? AND type IN ('redaction','legal_redaction') AND status IN ('open','assigned','in_progress') AND return_reason IS NOT NULL ORDER BY updated_at DESC LIMIT 1", [job.request_id]);
+    var authTask = await get("SELECT id FROM tasks WHERE request_id = ? AND type IN ('redaction','legal_redaction') AND status IN ('open','assigned','in_progress','returned') AND return_reason IS NOT NULL ORDER BY updated_at DESC LIMIT 1", [job.request_id]);
     if (authTask) await tr.clearReturned(authTask.id);
   } catch (e) { console.error('[redaction submit -> clearReturned]', e && e.message); }
   res.json({ success: true, review_stage: 'pending_review', reviewTask: reviewTask ? reviewTask.id : null });
@@ -160,7 +160,7 @@ router.post('/jobs/:jobId/return', requireAuth, async function(req, res) {
   // REQUIRED" + push a notification, so they aren't left staring at a task that looks unchanged.
   try {
     var tr = require('../services/taskRouting');
-    var authTask = await get("SELECT id FROM tasks WHERE request_id = ? AND type IN ('redaction','legal_redaction') AND status IN ('open','assigned','in_progress') ORDER BY updated_at DESC LIMIT 1", [job.request_id]);
+    var authTask = await get("SELECT id FROM tasks WHERE request_id = ? AND type IN ('redaction','legal_redaction') AND status IN ('open','assigned','in_progress','returned') ORDER BY updated_at DESC LIMIT 1", [job.request_id]);
     if (authTask) await tr.markTaskReturned(authTask.id, { by: reviewer, reason: note, link: '/redaction/' + authTask.id, title: 'A redaction you submitted was returned' });
   } catch (e) { console.error('[redaction return -> markTaskReturned]', e && e.message); }
   res.json({ success: true, review_stage: 'editing', note: note });
