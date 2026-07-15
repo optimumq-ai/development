@@ -3614,3 +3614,35 @@ frontend deployed, connectors untouched.
 1. **Slice A checkpoint 3** (awaiting-review) — small, interactively-verifiable.
 2. **Slice B** — display the clocks (days-in-queue/process per item, bottleneck view) off the `task_events` trail.
 3. Then the rest of the timing/actuals plan: D (work timer) · E (est→actual reconciliation) · conveyor & batch.
+
+---
+
+## 2026-07-15 (pm) — Slice A checkpoint 3: awaiting-review status (clean processing vs review clocks). 545/545.
+
+The refinement deferred from the unattended build, now done with live verification. **Review is NOT forced** —
+the change rides the existing disposition gate (only Elevated/Legal redactions require review; simple/standard
+self-release; provably-clean bypasses redaction entirely).
+
+- **New `awaiting_review` status.** At redaction submit, IF a reviewer is actually tasked (gated), the author's
+  task moves `in_progress → awaiting_review`, stopping their **processing** clock while it sits with the reviewer.
+  Send-back → `returned` → `in_progress`; the `redaction_qa` task carries the independent **review** clock. So
+  processing vs review are two clean, separately-locatable numbers (the whole point of the bookmark trail).
+- **Made a peer of the active statuses** across ~15 "is-there-an-active-task" filters (uniform sed, same as
+  `returned`) so it can't cause a duplicate spawn and inherits every existing cleanup/terminal path. Deliberately
+  NOT added to `enterTask` (an awaiting-review task is with the reviewer — the author can't re-start it).
+- **My Tasks** renders it as a passive "Submitted · in review" line (no action) — properly fixing the old
+  "looks unchanged during review" complaint.
+
+### Evidence
+- Suite **545/545** (verify_returned_rework §D: gated submit → awaiting_review + bookmark `in_progress →
+  awaiting_review`; send-back → returned). Live census clean.
+- **Live-verified** end-to-end on a throwaway: gated submit → `reviewTask spawned: true`, author task →
+  `awaiting_review`, trail `∅→open→assigned→in_progress→awaiting_review`; deleted, no residue. Frontend rebuilt.
+
+### STATE
+`main` + this commit. Suite **545/545**. Live API restarted, frontend deployed, connectors untouched.
+**Slice A is now complete** (bookmark trail · entry contract · returned status · awaiting-review clocks).
+
+### NEXT
+- **Slice B** — put the numbers on screen: days-in-queue / in-process / in-review per item, off the `task_events`
+  trail; a bottleneck view. Then D (work timer) · E (est→actual reconciliation) · conveyor & batch.

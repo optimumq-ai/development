@@ -122,12 +122,21 @@ router.post('/jobs/:jobId/submit', requireAuth, async function(req, res) {
   await run("UPDATE redaction_jobs SET review_stage = 'pending_review', submitted_by = ?, submitted_at = datetime('now'), updated_at = datetime('now') WHERE id = ?", [req.user.name || req.user.sub, req.params.jobId]);
   // Slice 4: for an Elevated/Legal job, spawn a routed redaction_qa task so a different reviewer is tasked.
   var reviewTask = await redactionReview.spawnReviewTask(Object.assign({}, job, { submitted_by: req.user.name || req.user.sub }), { actor: req.user.name || req.user.sub });
-  // Re-submitting corrected work clears any "returned for corrections" flag on the author's task (R10, 8b).
+  // Hand-off (Slice A). If a reviewer was actually tasked (gated Elevated/Legal only — spawnReviewTask returns
+  // null for self-releasing simple/standard redactions), the author's task moves to 'awaiting_review', which
+  // STOPS their processing clock while it sits with the reviewer. No reviewer -> nothing changes (no forced
+  // review). Either way, a re-submit clears any prior "returned for corrections" flag.
   try {
     var tr = require('../services/taskRouting');
-    var authTask = await get("SELECT id FROM tasks WHERE request_id = ? AND type IN ('redaction','legal_redaction') AND status IN ('open','assigned','in_progress','returned') AND return_reason IS NOT NULL ORDER BY updated_at DESC LIMIT 1", [job.request_id]);
-    if (authTask) await tr.clearReturned(authTask.id);
-  } catch (e) { console.error('[redaction submit -> clearReturned]', e && e.message); }
+    var authTask = await get("SELECT id, status FROM tasks WHERE request_id = ? AND type IN ('redaction','legal_redaction') AND status IN ('open','assigned','in_progress','returned','awaiting_review') ORDER BY updated_at DESC LIMIT 1", [job.request_id]);
+    if (authTask) {
+      if (reviewTask) {
+        await run("UPDATE tasks SET status = 'awaiting_review', return_reason = NULL, returned_by = NULL, returned_at = NULL, updated_at = datetime('now') WHERE id = ?", [authTask.id]);
+      } else if (authTask.status === 'returned') {
+        await tr.clearReturned(authTask.id);
+      }
+    }
+  } catch (e) { console.error('[redaction submit -> author task]', e && e.message); }
   res.json({ success: true, review_stage: 'pending_review', reviewTask: reviewTask ? reviewTask.id : null });
 });
 
@@ -160,7 +169,7 @@ router.post('/jobs/:jobId/return', requireAuth, async function(req, res) {
   // REQUIRED" + push a notification, so they aren't left staring at a task that looks unchanged.
   try {
     var tr = require('../services/taskRouting');
-    var authTask = await get("SELECT id FROM tasks WHERE request_id = ? AND type IN ('redaction','legal_redaction') AND status IN ('open','assigned','in_progress','returned') ORDER BY updated_at DESC LIMIT 1", [job.request_id]);
+    var authTask = await get("SELECT id FROM tasks WHERE request_id = ? AND type IN ('redaction','legal_redaction') AND status IN ('open','assigned','in_progress','returned','awaiting_review') ORDER BY updated_at DESC LIMIT 1", [job.request_id]);
     if (authTask) await tr.markTaskReturned(authTask.id, { by: reviewer, reason: note, link: '/redaction/' + authTask.id, title: 'A redaction you submitted was returned' });
   } catch (e) { console.error('[redaction return -> markTaskReturned]', e && e.message); }
   res.json({ success: true, review_stage: 'editing', note: note });

@@ -430,7 +430,7 @@ router.post('/submit', async function(req, res) {
     console.error('[publicChat] auto-classify failed:', ce.message);
     try {
       var trc = require('../services/taskRouting');
-      var openRt = await get("SELECT id FROM tasks WHERE request_id = ? AND type = 'routing_review' AND status IN ('open','assigned','in_progress','returned')", [id]);
+      var openRt = await get("SELECT id FROM tasks WHERE request_id = ? AND type = 'routing_review' AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [id]);
       if (!openRt) {
         var rt = await trc.createTask({ requestId: id, type: 'routing_review',
           title: 'Review & route — automatic classification was unavailable', teamId: null, createdBy: 'system' });

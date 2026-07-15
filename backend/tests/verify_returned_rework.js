@@ -81,6 +81,23 @@ async function mkTask(id, reqId, assignedTo) {
   ok('C2 the objection owner got a work_returned notification (push only — objections aren’t tasks)', !!(await noteFor(U, O)));
   ok('C3 …of the objection kind', (await noteFor(U, O)).context_type === 'objection');
 
+  console.log('\n=== D. HAND-OFF: submit -> awaiting_review (only when a reviewer is actually tasked) ===');
+  var reqD = 'req-' + TAG + '-d', TD = 't-' + TAG + '-d', JD = 'job-' + TAG + '-d';
+  await mkTask(TD, reqD, U);           // a redaction task assigned to the author U
+  await tr.enterTask(TD, U);           // U begins work -> in_progress
+  await db.run("INSERT INTO redaction_jobs (id, file_id, request_id, disposition, review_stage, status) VALUES (?,?,?,?,?, 'draft')",
+    [JD, 'file-' + TAG + '-d', reqD, 'elevated', 'in_review']);
+  var sub = await api('POST', '/redaction-jobs/jobs/' + JD + '/submit', await token(U));
+  ok('D1 a gated (elevated) submit tasks a reviewer', sub.status === 200 && !!sub.body.reviewTask);
+  var td = await db.get('SELECT status, in_progress_at FROM tasks WHERE id = ?', [TD]);
+  ok('D2 the author task moves to awaiting_review — its PROCESSING clock stops at hand-off', td.status === 'awaiting_review' && !!td.in_progress_at);
+  var evD = await db.all("SELECT from_status, to_status FROM task_events WHERE task_id = ? ORDER BY id", [TD]);
+  ok('D3 the bookmark trail records in_progress -> awaiting_review (the processing stretch is bounded)',
+    evD.some(function (e) { return e.from_status === 'in_progress' && e.to_status === 'awaiting_review'; }));
+  var retD = await api('POST', '/redaction-jobs/jobs/' + JD + '/return', await token(REV), { note: 'One more pass on page 2' });
+  ok('D4 a reviewer send-back moves it awaiting_review -> returned (correction round)',
+    retD.status === 200 && (await db.get('SELECT status FROM tasks WHERE id = ?', [TD])).status === 'returned');
+
   console.log('\n  ' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
   process.exit(fail ? 1 : 0);
 })().catch(function (e) { console.error('HARNESS ERROR:', e); process.exit(1); });

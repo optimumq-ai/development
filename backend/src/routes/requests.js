@@ -40,7 +40,7 @@ router.get('/stats/dashboard', requireAuth, async function(req, res) {
 router.get('/', requireAuth, async function(req, res) {
   const userRoles = req.user.roles || [];
   const isElevated = ['SUPERVISOR','DIRECTOR','SYSTEM_ADMIN','DEPT_MANAGER','ATTORNEY_REVIEWER'].some(function(r) { return userRoles.indexOf(r) !== -1; });
-  let sql = "SELECT r.*, d.name as department_name, d.color as department_color, u.display_name as assigned_to_name, (SELECT t.status FROM tasks t WHERE t.request_id = r.id AND t.status IN ('open','assigned','in_progress','returned') ORDER BY t.updated_at DESC LIMIT 1) AS active_task_status, (SELECT tu.display_name FROM tasks t2 LEFT JOIN users tu ON tu.id = t2.assigned_to WHERE t2.request_id = r.id AND t2.status IN ('assigned','in_progress','returned') ORDER BY t2.updated_at DESC LIMIT 1) AS active_task_assignee, (SELECT COUNT(*) FROM objections o WHERE o.request_id = r.id AND o.status IN ('open','tentative')) AS open_objections FROM requests r LEFT JOIN departments d ON d.id = r.department_id LEFT JOIN users u ON u.id = r.assigned_to WHERE 1=1 AND r.request_number != 'LIBRARY' AND r.request_number NOT LIKE 'SYS-%'" + scope.andLeaf('r');
+  let sql = "SELECT r.*, d.name as department_name, d.color as department_color, u.display_name as assigned_to_name, (SELECT t.status FROM tasks t WHERE t.request_id = r.id AND t.status IN ('open','assigned','in_progress','returned','awaiting_review') ORDER BY t.updated_at DESC LIMIT 1) AS active_task_status, (SELECT tu.display_name FROM tasks t2 LEFT JOIN users tu ON tu.id = t2.assigned_to WHERE t2.request_id = r.id AND t2.status IN ('assigned','in_progress','returned','awaiting_review') ORDER BY t2.updated_at DESC LIMIT 1) AS active_task_assignee, (SELECT COUNT(*) FROM objections o WHERE o.request_id = r.id AND o.status IN ('open','tentative')) AS open_objections FROM requests r LEFT JOIN departments d ON d.id = r.department_id LEFT JOIN users u ON u.id = r.assigned_to WHERE 1=1 AND r.request_number != 'LIBRARY' AND r.request_number NOT LIKE 'SYS-%'" + scope.andLeaf('r');
   const params = [];
   if (!isElevated) {
     var orTeam = await get("SELECT id FROM departments WHERE kind='team' AND is_open_records=1 ORDER BY sort_order LIMIT 1");
@@ -139,9 +139,9 @@ router.patch('/:id/route', requireAuth, async function(req, res) {
   try {
     var tr = require('../services/taskRouting');
     // The correction itself resolves any open routing-review task (the ORO Associate just did the review).
-    await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE request_id = ? AND type = 'routing_review' AND status IN ('open','assigned','in_progress','returned')", [req.params.id]);
+    await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE request_id = ? AND type = 'routing_review' AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [req.params.id]);
     // Move/re-route the actual WORK tasks onto the new team (exclude the routing-review task, now closed).
-    var openTasks = await all("SELECT id, assigned_to FROM tasks WHERE request_id = ? AND type != 'routing_review' AND status IN ('open','assigned','in_progress','returned')", [req.params.id]);
+    var openTasks = await all("SELECT id, assigned_to FROM tasks WHERE request_id = ? AND type != 'routing_review' AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [req.params.id]);
     for (var oti = 0; oti < openTasks.length; oti++) {
       var ot = openTasks[oti];
       await run("UPDATE tasks SET team_id = ?, updated_at = datetime('now') WHERE id = ?", [teamId, ot.id]);
@@ -262,7 +262,7 @@ router.post('/:id/fee-waiver-decision', requireAuth, async function(req, res) {
   if (!request) return res.status(404).json({ error: 'Request not found' });
   var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'system';
   // Resolve the approval task (spawned at intake) whichever way the decision lands.
-  var closeWaiverTask = "UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE request_id = ? AND type = 'fee_waiver' AND status IN ('open','assigned','in_progress','returned')";
+  var closeWaiverTask = "UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE request_id = ? AND type = 'fee_waiver' AND status IN ('open','assigned','in_progress','returned','awaiting_review')";
 
   if (decision === 'grant') {
     await run("UPDATE requests SET fee_waiver_status='granted', fee_waiver_decided_by=?, fee_waiver_decided_at=datetime('now'), updated_at=datetime('now') WHERE id=?", [actor, request.id]);

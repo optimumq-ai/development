@@ -145,6 +145,8 @@ export default function MyTasksPage() {
     var queued = tasks.filter(function (t) { return t.status === 'assigned' || t.status === 'returned'; })
       .sort(function (a, b) { return (b.return_reason ? 1 : 0) - (a.return_reason ? 1 : 0); });
     var inProc = tasks.filter(function (t) { return t.status === 'in_progress'; });
+    // Submitted & handed off to a reviewer — passive, no action; their processing clock has stopped.
+    var inReview = tasks.filter(function (t) { return t.status === 'awaiting_review'; });
     var rtn = tasks.filter(function (t) { return t.return_reason; }).length;
     var od = tasks.filter(function (t) { return deadlineState(t.deadline_date) === 'over'; }).length;
     var sn = tasks.filter(function (t) { return deadlineState(t.deadline_date) === 'soon'; }).length;
@@ -158,12 +160,32 @@ export default function MyTasksPage() {
             {rtn ? chip(rtn + ' returned', 'crit') : null}
             {queued.length ? chip(queued.length + ' queued', 'q') : null}
             {inProc.length ? chip(inProc.length + ' in process', 'p') : null}
+            {inReview.length ? chip(inReview.length + ' in review', 'q') : null}
             {od ? chip(od + ' overdue', 'crit') : null}
             {!od && sn ? chip(sn + ' due soon', 'warn') : null}
           </div>
         </div>
         {queued.length ? <div style={{ padding: '5px 0' }}><div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: C.faint, padding: '6px 16px 2px' }}>Queued</div>{queued.map(taskRow)}</div> : null}
         {inProc.length ? <div style={{ padding: '5px 0', borderTop: queued.length ? '1px solid #E5E7EB' : 'none' }}><div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: C.faint, padding: '6px 16px 2px' }}>In Process</div>{inProc.map(taskRow)}</div> : null}
+        {inReview.length ? <div style={{ padding: '5px 0', borderTop: (queued.length || inProc.length) ? '1px solid #E5E7EB' : 'none' }}>
+          <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '.07em', textTransform: 'uppercase', color: C.faint, padding: '6px 16px 2px' }}>Submitted · in review</div>
+          {inReview.map(function (t) {
+            return (
+              <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '9px 16px', borderTop: '1px solid #F3F4F6', opacity: 0.72 }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: C.faint, flexShrink: 0 }} />
+                <div style={{ minWidth: '128px' }}>
+                  <div style={{ fontFamily: 'monospace', fontWeight: 700, color: C.accent, fontSize: '12.5px' }}>{t.request_number || '—'}</div>
+                  <div style={{ fontSize: '11.5px', color: C.muted, marginTop: '1px' }}>{t.requestor_name || ''}</div>
+                </div>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: '13px', color: '#1A2230' }}>{t.record_type_name || t.request_description || t.title || TYPE_LABEL[t.type] || t.type}</div>
+                  <div style={{ fontSize: '11.5px', color: C.faint }}>With the reviewer — no action needed</div>
+                </div>
+                <span style={{ fontSize: '12px', color: C.muted, fontWeight: 600 }}>In review</span>
+              </div>
+            );
+          })}
+        </div> : null}
       </section>
     );
   }
