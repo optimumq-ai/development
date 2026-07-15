@@ -3897,3 +3897,63 @@ task UI, via a config panel. The deep-research harness I had queued was cancelle
      screen (UI rule).
   4. `verify_estimate_reconcile.js` harness → register in run_suite ALL → full suite green (LIVE UNTOUCHED) →
      live-verify → commit.
+
+---
+
+## 2026-07-15 · Slice E — measured-labor → estimate reconciliation wiring (BOTH forks closed → BUILT). 614/614.
+
+Both Slice E forks were resolved last session (Fork 1 built as the city-owned time-capture toggle;
+Fork 2 = auto-draft on last-billable-task finalize, human-gated send). This session built the reconcile
+wiring itself — the bridge from Slice D's measured labor into the EXISTING reconciliation machinery.
+Committed `c57c4c9`.
+
+**Built.**
+- **`backend/src/services/laborActuals.js`** (new) — the bridge:
+  - `rollup(requestId)`: sums FINALIZED `work_seconds` across a request's billable work tasks, maps
+    task type → fee labor driver (`record_search`→search; `redaction`/`legal_redaction`/`redaction_qa`/
+    `legal_review`→review; nothing maps to programming — no routed task type produces it), converts to
+    hours. **Request-level** (per-component/MRR-child attribution DEFERRED to #11: aggregate lands on the
+    first component; request-total stays correct since the engine re-aggregates labor there). **Tolerates
+    NULL `work_seconds`** (off/skipped under Fork 1): those tasks are `excluded`, never billed as zero;
+    `hasActuals=false` ⇒ caller falls back to manual, never reconciles fabricated zeros.
+  - `maybeAutoDraftOnFinalize()` / `autoDraftReconcile()` — Fork 2 trigger: fires only when the finalizing
+    task is a billable type AND it's the last one still in flight (`remainingBillableCount()==0`), AND a
+    prior estimate + measured actuals exist. Overlays measured labor on the estimate's quoted input (page
+    counts carried forward), computes via `feeEngine`, writes a `kind='reconciliation'` DRAFT. **SEND stays
+    human-gated** (created_by `(auto-draft)`, `notified_at` NULL, NO Welford write-back — that's the
+    staff-confirmed manual path). Wired non-fatally into BOTH branches of `POST /tasks/:id/work/finalize`
+    (skip + accept/adjust), guarded so it never fires on re-finalize or a non-billable task.
+  - `writeReconciliation()` — ONE shared snapshot writer + variance/renotify math, adopted by BOTH the
+    manual `/reconcile` route AND the auto-draft, so the two paths can't drift.
+- **`routes/feeEstimates.js`** — manual `/reconcile` now delegates snapshot+variance to the shared writer
+  (still does Welford `recordActuals` + history + payment event itself). `GET /request/:id` returns a new
+  **`laborActuals`** block: measured vs estimated hours per driver, counted/excluded tasks, and an
+  `autoDraft` flag when a draft awaits review.
+- **`routes/tasks.js`** — finalize fetches `type`+`request_id`, fires the trigger.
+- **`FeeEstimatePanel.js`** — a **Measured labor** readout in the reconcile section (est vs actual hrs per
+  driver + Δ, an auto-draft banner, a **Use measured hours** button that drops the rollup into the
+  reconcile inputs). No new screen (UI rule).
+
+**Evidence.**
+- New harness **`verify_estimate_reconcile` 20/20**: rollup mapping + NULL/skip tolerance + non-billable
+  exclusion; auto-draft fires on the LAST billable finalize, NOT before (other billable task still open),
+  NOT without an estimate, NOT with no measured actuals, NEVER sends (notified_at NULL); draft carries
+  measured labor + carried-forward page counts; exactly one snapshot (no early dup); manual reconcile
+  regression through the shared writer. Registered in `run_suite` ALL.
+- **Full suite 614/614, LIVE UNTOUCHED.** Frontend rebuilt (`Compiled successfully`, +564 B). API restarted
+  (root PM2 respawns `backend/server.js` on kill; health 200, new pid).
+- **Live-verified read-only:** deployed `GET /fee-estimates/request/:id` returns the `laborActuals` block
+  against a REAL request — its real `record_search` task correctly `excluded` as "not finalized", the real
+  estimate's quoted `searchHours:1` surfaced, `hasActuals:false`, `autoDraft:null`. **Zero writes.**
+
+**Open / next.**
+- **Estimate finalize ceremony (still the Slice-D fast-follow, unchanged).** The estimate screen has the
+  timer badge but no completion modal; its "always/discretion" modal enforcement waits on consolidating the
+  estimate-complete action (spread across FeeEstimatePanel's send paths).
+- **Per-component / MRR-child labor attribution — deferred to #11** (parent roll-up). Today the rollup is
+  request-level; multi-component requests get the aggregate on component[0] (request-total correct, per-
+  component split not yet meaningful).
+- **Legal hours in the estimate (Fork 1 spillover)** — still OPEN DESIGN (SPEC_tasks_roles_mrr_fees §14):
+  ORO intake review; MRR→manual assign/plug; single-child→fulfillment spawns a legal-estimate task.
+- Next slices: **Slice I budget brain** (consumes the same measured labor), conveyor & batch processing,
+  #13 org-wide bottleneck dashboard.
