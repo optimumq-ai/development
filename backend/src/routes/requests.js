@@ -62,6 +62,15 @@ router.get('/', requireAuth, async function(req, res) {
   res.json({ requests: await all(sql, params) });
 });
 
+// Per-request timeline / bottleneck breakdown (Slice B): where the request's time went, as gap-free phase
+// segments (stage backbone + task queue/process/review), submit-anchored. Feeds the request-detail panel.
+router.get('/:id/timeline', requireAuth, async function(req, res) {
+  const request = await get('SELECT id FROM requests WHERE id = ? OR request_number = ?', [req.params.id, req.params.id]);
+  if (!request) return res.status(404).json({ error: 'Request not found' });
+  try { res.json(await require('../services/requestTimeline').build(request.id) || { segments: [] }); }
+  catch (e) { res.status(500).json({ error: 'Could not build the timeline.' }); }
+});
+
 router.get('/:id', requireAuth, async function(req, res) {
   const request = await get('SELECT r.*, d.name as department_name, d.color as department_color FROM requests r LEFT JOIN departments d ON d.id = r.department_id WHERE r.id = ? OR r.request_number = ?', [req.params.id, req.params.id]);
   if (!request) return res.status(404).json({ error: 'Request not found' });

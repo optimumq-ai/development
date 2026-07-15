@@ -8,6 +8,7 @@ import FinancialProfilePanel from '../components/ui/FinancialProfilePanel';
 import AvRedactionPanel from '../components/ui/AvRedactionPanel';
 import DocSearchPanel from '../components/ui/DocSearchPanel';
 import WorkflowDecisionPanel from '../components/ui/WorkflowDecisionPanel';
+import RequestTimelinePanel from '../components/ui/RequestTimelinePanel';
 import FeeWaiverDecisionPanel from '../components/ui/FeeWaiverDecisionPanel';
 import { useAuthStore } from '../store/authStore';
 // ONE canonical stage vocabulary, mirroring backend/src/services/stages.js. The list that used to live here
@@ -382,7 +383,8 @@ export default function RequestWorkspacePage() {
         </div>
       )}
 
-      {tab==='history'&&(
+      {tab==='history'&&(<>
+        <RequestTimelinePanel requestId={request.id} />
         <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',overflow:'hidden'}}>
           {history.length===0?<div style={{padding:'48px',textAlign:'center',color:'#9CA3AF'}}>No history yet</div>:(
             <div style={{display:'flex',flexDirection:'column'}}>
@@ -405,7 +407,7 @@ export default function RequestWorkspacePage() {
             </div>
           )}
         </div>
-      )}
+      </>)}
 
       {tab==='actions'&&(
         <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',display:'flex',flexDirection:'column',gap:'16px'}}>

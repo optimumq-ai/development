@@ -3678,3 +3678,33 @@ Reads the Slice-A bookmark trail and puts the numbers on screen (Kevin: calendar
 ### NEXT
 - **B-breakdown** (bottleneck view, mockup first) · **Slice C** (budget overlay) · then D (work timer) ·
   E (est→actual reconciliation) · conveyor & batch.
+
+---
+
+## 2026-07-15 (pm) — Slice B-breakdown: per-request bottleneck timeline. 561/561.
+
+Design-signed-off via a mockup (dataviz-validated phase palette), then built to it.
+
+- **`requestTimeline.js`** stitches ONE gap-free, submit-anchored phase timeline: the **stage backbone** from
+  `request_history` (work stages + holds like awaiting_payment + detours like AG review), with the
+  **queue/process/review split** inside each work stage from the Slice-A `task_events` trail. Work stretches are
+  gap-filled (uncovered time = "sitting/queue"); holds → a single hold segment; the **bottleneck = the longest
+  ACTIONABLE stretch** (holds are the requester's payment/tolled — excluded).
+- **`GET /requests/:id/timeline`** feeds **`RequestTimelinePanel`** on the request detail page (Audit History
+  tab): a phase-coloured horizontal bar (waiting vs working vs review vs hold), stage brackets, a bottleneck
+  callout, legend, and a precise breakdown table.
+
+### Evidence
+- Suite **561/561** (new `verify_request_timeline` 8/8: `coverStretch` gap-fills; `build()` stitches stages +
+  task phases + a hold gap-free, sums to total, and names the review bottleneck while excluding the hold). Live clean.
+- **Live-verified**: `/timeline` on a real request returns the segments; screenshot of the Audit History tab shows
+  "6d 14h since submitted · 100% waiting", a big hatched on-hold bar, and the callout correctly naming the 18m
+  actionable bottleneck while excluding the 6d 14h payment hold. Matches the mockup.
+
+### STATE
+`main` + this commit. Suite **561/561**. Live API restarted, frontend deployed, connectors untouched.
+**Slice B complete** (B-core live clocks on My Tasks + B-breakdown per-request bottleneck view).
+
+### NEXT
+- **Slice C** — budgeted-vs-actual overlay (generic budget file first) → turns "2d in review" into "1d over budget".
+- Then D (work timer) · E (est→actual reconciliation) · conveyor & batch · #13 org-wide bottleneck dashboard.
