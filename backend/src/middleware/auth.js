@@ -16,4 +16,22 @@ function requireRole() {
     next();
   };
 }
-module.exports = { requireAuth, requireRole };
+// Authorize by EITHER a function (job) role OR a permission (capability) role. The financial-authority gate
+// (fee-waiver decisions, fee-objection approvals) is a CAPABILITY — FINANCE, a permission role — not a job
+// title, and it is the same role the fee_waiver task routes to, so whoever receives the task can act on it.
+// SYSTEM_ADMIN always passes, mirroring requireRole. (D4 §8 role reconciliation; replaces the orphan
+// FEE_WAIVER_APPROVER function-role gate that no one held.)
+function requireRoleOrPerm(roles, perms) {
+  roles = roles || []; perms = perms || [];
+  return function(req, res, next) {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    const userRoles = req.user.roles || [];
+    const userPerms = req.user.perms || [];
+    if (userRoles.indexOf('SYSTEM_ADMIN') !== -1) return next();
+    const ok = roles.some(function(r) { return userRoles.indexOf(r) !== -1; }) ||
+               perms.some(function(p) { return userPerms.indexOf(p) !== -1; });
+    if (!ok) return res.status(403).json({ error: 'Insufficient role' });
+    next();
+  };
+}
+module.exports = { requireAuth, requireRole, requireRoleOrPerm };

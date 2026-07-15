@@ -123,7 +123,7 @@ async function onIntake(requestId, matcherResult){
   }
 
   // Fee-waiver approval: a requested waiver needs a human financial-authority decision. Spawn a
-  // cross-cutting approval task (team-agnostic, role FEE_AUTHORITY) onto every approver's list. Independent
+  // cross-cutting approval task (team-agnostic, role FINANCE) onto every approver's list. Independent
   // of the record-type routing above; the estimate still proceeds (a granted waiver zeroes fees at notice
   // time). Idempotent, and skipped once a decision has been recorded. Resolved by /fee-waiver-decision.
   if (request.fee_waiver_requested && !request.fee_waiver_status) {

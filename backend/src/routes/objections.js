@@ -5,7 +5,7 @@
 // via a Fee Authorizer) is a later increment. See FEE_ESTIMATE_OBJECTION_DESIGN.md.
 const express = require('express');
 const router = express.Router();
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requireRole, requireRoleOrPerm } = require('../middleware/auth');
 const scope = require('../services/requestScope');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
@@ -159,9 +159,10 @@ router.post('/:id/resolve', requireAuth, async function (req, res) {
   } catch (e) { res.status(500).json({ error: 'Could not resolve the objection: ' + (e && e.message) }); }
 });
 
-// Fee Authorizer decision on a tentative financial resolution. Approve -> applies the credit and
-// resolves; reject -> returns the objection to the owner. Uses the existing fee-waiver authority.
-router.post('/:id/approve', requireAuth, requireRole('FEE_WAIVER_APPROVER', 'SYSTEM_ADMIN', 'DIRECTOR'), async function (req, res) {
+// Finance decision on a tentative financial resolution. Approve -> applies the credit and resolves;
+// reject -> returns the objection to the owner. Gated on the FINANCE capability (the same role the
+// fee_waiver task routes to) or a Director; SYSTEM_ADMIN always passes.
+router.post('/:id/approve', requireAuth, requireRoleOrPerm(['DIRECTOR'], ['FINANCE']), async function (req, res) {
   try {
     var o = await get('SELECT * FROM objections WHERE id = ?', [req.params.id]);
     if (!o) return res.status(404).json({ error: 'Objection not found.' });
@@ -181,8 +182,8 @@ router.post('/:id/approve', requireAuth, requireRole('FEE_WAIVER_APPROVER', 'SYS
   } catch (e) { res.status(500).json({ error: 'Could not record the decision.' }); }
 });
 
-// Pending financial resolutions awaiting a Fee Authorizer (their approval queue).
-router.get('/pending-approval', requireAuth, requireRole('FEE_WAIVER_APPROVER', 'SYSTEM_ADMIN', 'DIRECTOR'), async function (req, res) {
+// Pending financial resolutions awaiting Finance (their approval queue).
+router.get('/pending-approval', requireAuth, requireRoleOrPerm(['DIRECTOR'], ['FINANCE']), async function (req, res) {
   try {
     var rows = await all("SELECT o.*, " + scope.numberExpr('r') + " AS request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id" + scope.numberJoin('r') + " WHERE o.approval_status = 'pending' AND o.status = 'tentative' ORDER BY o.updated_at DESC");
     res.json({ objections: (rows || []).map(shape) });

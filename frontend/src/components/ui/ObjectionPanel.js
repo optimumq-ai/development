@@ -20,7 +20,7 @@ function btn(primary) { return { padding: '7px 13px', borderRadius: '8px', borde
 export default function ObjectionPanel(props) {
   var requestId = props.requestId;
   var store = useAuthStore();
-  var canApprove = store.hasAnyRole('FEE_WAIVER_APPROVER', 'SYSTEM_ADMIN', 'DIRECTOR');
+  var canApprove = store.hasAnyRole('SYSTEM_ADMIN', 'DIRECTOR') || store.hasAnyPerm('FINANCE');
 
   var [objs, setObjs] = useState([]);
   var [staff, setStaff] = useState([]);

@@ -15,7 +15,7 @@ export default function MyTasksPage() {
   const [myObjs, setMyObjs] = useState([]);
   const [pendingObjs, setPendingObjs] = useState([]);
   const [taskByRequest, setTaskByRequest] = useState({});
-  const canApprove = store.hasAnyRole('FEE_WAIVER_APPROVER', 'SYSTEM_ADMIN', 'DIRECTOR');
+  const canApprove = store.hasAnyRole('SYSTEM_ADMIN', 'DIRECTOR') || store.hasAnyPerm('FINANCE');
 
   useEffect(function() { load(); }, []);
 
@@ -34,7 +34,7 @@ export default function MyTasksPage() {
         setTaskByRequest(map);
       } catch (e1) {}
       try { var mo = await api.get('/objections/mine'); setMyObjs(mo.data.objections || []); } catch (e2) {}
-      if (store.hasAnyRole('FEE_WAIVER_APPROVER', 'SYSTEM_ADMIN', 'DIRECTOR')) { try { var pa = await api.get('/objections/pending-approval'); setPendingObjs(pa.data.objections || []); } catch (e3) {} }
+      if (store.hasAnyRole('SYSTEM_ADMIN', 'DIRECTOR') || store.hasAnyPerm('FINANCE')) { try { var pa = await api.get('/objections/pending-approval'); setPendingObjs(pa.data.objections || []); } catch (e3) {} }
     } catch(e) { console.error(e); }
     setLoading(false);
   }

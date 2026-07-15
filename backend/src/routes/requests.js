@@ -249,11 +249,11 @@ router.post('/:id/ag-ruling', requireAuth, async function(req, res) {
 });
 
 router.post('/:id/fee-waiver-decision', requireAuth, async function(req, res) {
-  // Authorize: managers/admins by function role, OR the FEE_AUTHORITY permission role (the same role the
-  // fee-waiver task routes to — so whoever receives the task can act on it). Interim until the Finance-role
-  // reconciliation (D4 §8); the old requireRole('...FEE_WAIVER_APPROVER') gated a role that does not exist.
+  // Authorize: managers/admins by function role, OR the FINANCE permission role (the same role the
+  // fee-waiver task routes to — so whoever receives the task can act on it). FINANCE is the reconciled
+  // financial-authority capability (D4 §8; renamed from FEE_AUTHORITY, retiring the orphan FEE_WAIVER_APPROVER).
   var fRoles = req.user.roles || [], perms = req.user.perms || [];
-  var canDecide = ['SYSTEM_ADMIN','DIRECTOR','SUPERVISOR'].some(function(r){ return fRoles.indexOf(r) !== -1; }) || perms.indexOf('FEE_AUTHORITY') !== -1;
+  var canDecide = ['SYSTEM_ADMIN','DIRECTOR','SUPERVISOR'].some(function(r){ return fRoles.indexOf(r) !== -1; }) || perms.indexOf('FINANCE') !== -1;
   if (!canDecide) return res.status(403).json({ error: 'Insufficient role' });
   var b = req.body || {};
   var decision = b.decision;

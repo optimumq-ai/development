@@ -42,6 +42,6 @@ CROSS JOIN (VALUES ('pr-searchtriage'),('pr-reqmgr'),('pr-clarify'),('pr-deliver
 INSERT INTO user_permission_roles (user_id, permission_role_id)
 SELECT u.id, p.id
 FROM (VALUES ('u-police-super'),('u-finance-super'),('u-legal-super'),('u-it-super'),('u-clerk-super'),('u-hr-super'),('u-fire-super')) AS u(id)
-CROSS JOIN (VALUES ('pr-searchtriage'),('pr-reqmgr'),('pr-clarify'),('pr-delivery'),('pr-redworker'),('pr-feemgr'),('pr-feeauth'),('pr-escalation'),('pr-redauth'),('pr-reopen')) AS p(id);
+CROSS JOIN (VALUES ('pr-searchtriage'),('pr-reqmgr'),('pr-clarify'),('pr-delivery'),('pr-redworker'),('pr-feemgr'),('pr-finance'),('pr-escalation'),('pr-redauth'),('pr-reopen')) AS p(id);
 -- 4c) Legal supervisor: denial/legal authority
 INSERT INTO user_permission_roles (user_id, permission_role_id) VALUES ('u-legal-super','pr-denial');

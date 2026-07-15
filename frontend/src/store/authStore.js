@@ -54,6 +54,17 @@ export const useAuthStore = create(function(set, get) {
         if (u.functionRoles.indexOf(roles[i]) !== -1) return true;
       }
       return false;
+    },
+    // Capability (permission-role) check, e.g. FINANCE. /auth/me already returns user.permissionRoles;
+    // this lets the UI gate on a capability, not just a job title (financial-authority reconciliation, D4 §8).
+    hasAnyPerm: function() {
+      var perms = Array.prototype.slice.call(arguments);
+      var u = get().user;
+      if (!u || !u.permissionRoles) return false;
+      for (var i = 0; i < perms.length; i++) {
+        if (u.permissionRoles.indexOf(perms[i]) !== -1) return true;
+      }
+      return false;
     }
   };
 });

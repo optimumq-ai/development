@@ -13,4 +13,4 @@ INSERT INTO user_function_roles (user_id, function_role_id) VALUES ('u-kruss','f
 
 INSERT INTO user_permission_roles (user_id, permission_role_id)
 SELECT u.id, p.id FROM (VALUES ('u-kruss'),('u-sruss')) AS u(id)
-CROSS JOIN (VALUES ('pr-clarify'),('pr-delivery'),('pr-denial'),('pr-escalation'),('pr-feeauth'),('pr-feemgr'),('pr-redauth'),('pr-redworker'),('pr-reqmgr'),('pr-reopen'),('pr-searchtriage')) AS p(id);
+CROSS JOIN (VALUES ('pr-clarify'),('pr-delivery'),('pr-denial'),('pr-escalation'),('pr-finance'),('pr-feemgr'),('pr-redauth'),('pr-redworker'),('pr-reqmgr'),('pr-reopen'),('pr-searchtriage')) AS p(id);

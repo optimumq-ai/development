@@ -18,9 +18,9 @@ var TASK_ROLES = {
   // Second-person redaction review (SPEC_redaction_automation.md slice 4). Default reviewer role is a
   // REDACTION_WORKER (Elevated); Legal reviews pass roleRequired:'legal_redaction' explicitly at spawn.
   redaction_qa: 'REDACTION_WORKER',
-  // Fee-waiver / commercial-rate approval. INTERIM target: FEE_AUTHORITY (the existing financial-authority
-  // permission role) pending the FEE_WAIVER_APPROVER->Finance rename + catalog reconciliation (D4 §8, item 9).
-  fee_waiver: 'FEE_AUTHORITY',
+  // Fee-waiver / commercial-rate approval routes to FINANCE — the reconciled financial-authority permission
+  // role (D4 §8, item 9; renamed from FEE_AUTHORITY, and the orphan FEE_WAIVER_APPROVER function role retired).
+  fee_waiver: 'FINANCE',
   // Legal task types (v3) have NO legacy permission role — their own task-type key is the eligibility
   // token, so eligibleUsers resolves them via the per-person subset (user_task_types). Office-level work.
   legal_review: 'legal_review',
@@ -38,7 +38,7 @@ var TASK_ROLES = {
 var ROUTABLE_TASK_TYPES = ['estimate', 'record_search', 'redaction', 'legal_redaction', 'legal_review', 'fee_waiver', 'commercial_rate', 'mrr_processing', 'routing_review'];
 // Reverse of TASK_ROLES: legacy permission-role name -> task type, used to translate existing callers
 // (which pass task.role_required) onto the new task-type model during the cutover.
-var ROLE_TO_TYPE = { FEE_MANAGER: 'estimate', SEARCH_AND_TRIAGE: 'record_search', REDACTION_WORKER: 'redaction', FEE_AUTHORITY: 'fee_waiver' };
+var ROLE_TO_TYPE = { FEE_MANAGER: 'estimate', SEARCH_AND_TRIAGE: 'record_search', REDACTION_WORKER: 'redaction', FINANCE: 'fee_waiver' };
 
 // Smart Routing auto-assigns to the top match only when it is both decent (>= FLOOR) AND clearly ahead of
 // the runner-up (lead >= MARGIN). Otherwise the task stays in the pool to claim. (Absolute cosine on short

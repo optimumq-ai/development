@@ -26,6 +26,7 @@ const ALL = [
   'verify_survey_seed', 'verify_fee_waiver', 'verify_jurrules', 'verify_deadline_rules',
   'verify_search_intents', 'verify_request_defect', 'verify_search_resolve',
   'verify_search_intent_gate', 'verify_fee_labor_gate', 'verify_estimate_profiles',
+  'verify_role_reconciliation',
 ];
 
 const args = process.argv.slice(2);

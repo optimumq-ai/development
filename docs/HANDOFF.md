@@ -3366,3 +3366,57 @@ statutory exceptions researched, still unbuilt pending a per-request assertion U
 2. The two § 552.261(a) exceptions (separate buildings / remote storage) — researched, need a per-request
    assertion UI with a recorded basis (AG demands a building map for #1). Deferred until there's a reason.
 3. Tier 1 CLOSED. **Tier 2 open:** fee-choice intake · notification model · My Tasks restructure · role catalog.
+
+---
+
+## 2026-07-15 (pm) — Tier 2 #9: financial-authority role reconciliation. FINANCE unified, a live auth bug fixed. 499/499.
+
+**Scoped then built (Kevin: "build this now").** Tier 2 item 9 (`SPEC_tasks_roles_mrr_fees.md` §8, MASTER doc).
+The chosen model (Kevin): **FINANCE as a single permission/capability** — Option A.
+
+### The bug this closed (was LIVE)
+The financial-authority concept was split across BOTH role catalogs under two names. Routing + `/fee-waiver-decision`
+used permission-role **`FEE_AUTHORITY`**; fee-objection approval (`objections.js`) + the reason library
+(`decisionReasons.js`) gated on function-role **`FEE_WAIVER_APPROVER`** — which **no seeded user held** (one in
+live, Tom Jones). So the 15 `FEE_AUTHORITY` holders who receive the fee-waiver task **could not approve a fee
+objection or see the approval queue** unless they also held DIRECTOR/SYSTEM_ADMIN. `requests.js:254` had already
+fixed its half and left a comment naming this exact reconciliation; `objections.js`/`decisionReasons.js` were the
+unfinished half.
+
+### The fix (one canonical role)
+- **`FEE_AUTHORITY` → `FINANCE`** (permission role `pr-feeauth`→`pr-finance`), gating BOTH routing and every
+  financial gate. Orphan function-role **`FEE_WAIVER_APPROVER` retired**.
+- New `requireRoleOrPerm(roles, perms)` middleware (auth by function role OR capability; SYSTEM_ADMIN auto).
+  `objections.js` ×2 + `decisionReasons.js` now gate on `FINANCE`; `requests.js` perm string → `FINANCE`.
+- Routing: `taskRouting.js` `TASK_ROLES.fee_waiver`/`ROLE_TO_TYPE` → `FINANCE`; `workflowEngine.js` comment.
+- Catalog/seeds: `schema.sql` (drop orphan, rename perm), `seed_test_staff.sql`, `seed_testers.sql`.
+- **Live migration** `scripts/migrate_finance_role.js` (idempotent, committed): renamed the perm + repointed
+  15 assignments, carried `tasks.role_required`, dropped the orphan function role + Tom Jones's assignment
+  (he keeps authority via FINANCE). Ran on live; fixture regenerated.
+- **Frontend** (kept coherent, not a redesign): `authStore` gains `hasAnyPerm` (`/auth/me` already returned
+  `permissionRoles`); `ObjectionPanel`/`MyTasksPage` gate the approve button on the `FINANCE` capability;
+  `StaffManagementPage` drops the retired function role from its picker. Rebuilt + deployed (nginx serves `build/`).
+
+### Evidence
+- Suite **499/499** (new `verify_role_reconciliation` **15/15**), live census clean.
+- **Live API (restarted) verified end-to-end:** Robert Cho (`u-finance-super`, holds FINANCE but only
+  DEPT_MANAGER) → **200** on `/objections/pending-approval` (**was 403** before) and **404** on approve-with-fake-id
+  (gate passed); Marcus Bell (no FINANCE) → **403**. The 15 FINANCE holders can now do the financial work they're
+  assigned.
+- **Note:** live DATA was migrated before the API restart, briefly leaving old code reading the old role names;
+  resolved by restarting the API (killed `backend/server.js` pid → root PM2 God Daemon respawned it in ~1s with
+  new code). Sequence code+data together next time.
+
+### Out of scope (named follow-on slices, in MASTER Decision 2/4)
+Collapsing the two catalog TABLES into one; the `eligibleUsers` v3 task-type cutover; the parallel **redaction**
+cross-catalog split (`REDACTION_REVIEWER/APPROVER` vs `REDACTION_WORKER/AUTHORITY`) — real, no known bug;
+`user_types`; `commercial_rate` wiring (deferred).
+
+### STATE
+`main` + this note. Suite **499/499**. Live API restarted (new pid, healthy), frontend rebuilt + deployed,
+connectors untouched. Config/fixture in sync with live.
+
+### NEXT (Tier 2 remaining)
+- #6 Fee-choice intake (default-forward) · #7 Notification model + nullable task-request link · #8 My Tasks
+  restructure (+ BACKLOG R10 returned-for-rework surfacing) · #10 Legal Review / Legal Redaction task wiring.
+- Role-model follow-ons above when v3 user-types get built.
