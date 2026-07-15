@@ -3564,3 +3564,53 @@ rebuilt + deployed, connectors untouched, live restored after the visual check.
 - #6 Fee-choice intake (default-forward) · #10 Legal Review / Legal Redaction task wiring.
 - Future returned-for-rework customer: **clarification rework** (needs a task-return flow first).
 - #13 (Tier 3) Workload health scoring — folds R/Y/G into the 8a boxes/tiles.
+
+---
+
+## 2026-07-15 (pm) — Slice A: task timing bookmark trail + begin-work entry contract. 541/541. (Built unattended per Kevin's 1-hr authorization.)
+
+**The foundation for all task timing.** Kevin's model: bookmark system time at every status change, anchored at
+submit, never stop the clock — every stretch between two bookmarks is "time in that status." Built in two green,
+committed checkpoints; checkpoint 3 (awaiting-review) deliberately deferred (see below).
+
+### Built (checkpoints 1 + 2, commits 050231b, d2d1f5c)
+- **`task_events` bookmark trail** — one immutable row per status change (`task_id, request_id, task_type,
+  from_status, to_status, at`), written by a DB trigger. Source of truth for elapsed-between-bookmarks. A second
+  BEFORE trigger stamps denormalized `assigned_at / in_progress_at / done_at` (in_progress_at once = first start).
+- **Begin-work entry contract** — `taskRouting.enterTask()` + `POST /tasks/:id/begin`: owner-gated, idempotent,
+  `assigned`/`returned` → `in_progress`. The 3 task screens (record-search, redaction, estimate) call it on open.
+  **`in_progress` is finally reachable** — before Slice A it was NEVER set (tasks jumped assigned→done), so no
+  queue/process duration could be computed at all.
+- **Redaction auto-discover gated** to first entry (`redaction_jobs.discovered_at` + zero-zones) — re-open /
+  conveyor-next never re-scans or clobbers committed work (the "does re-entry overwrite my redaction?" concern —
+  answer was no, but discover DID re-run wastefully; now gated).
+- **`returned` promoted to a first-class status** (was an 8b flag). Widened ~20 "active task" status filters to
+  include it so a returned task never vanishes from My Tasks / workload / dedup / cancel / request readouts.
+- Anchored to the request's submit time (`requests.created_at`); tolling/resets stay on the legal clock
+  (`request_clocks`) — the raw trail is pure and immutable, so any "statutory time in a step" is derived, never
+  baked in. (This is the toll/reset concern Kevin raised — resolved by keeping the two layers separate.)
+
+### Evidence
+- Suite **541/541** (new `verify_task_lifecycle` 10/10 — the trail is a gap-free chain; begin is owner-gated +
+  idempotent; a correction round keeps the original first-start stamp). Live census clean.
+- **Live-verified**: restarted the API (schema + triggers applied), ran the idempotent backfill (seeded 31
+  bookmarks + stamped existing tasks), and drove a throwaway task open→assigned→in_progress→done live — got the
+  full chain `∅→open→assigned→in_progress→done` with all three timestamps, then deleted it (no residue).
+  Frontend rebuilt + deployed (the `/begin` call is in the bundle).
+
+### DEFERRED — checkpoint 3 (do next, interactively)
+The **awaiting-review** refinement: at redaction submit, move the author's task to a distinct `awaiting_review`
+status so its *processing* clock stops (excluding review-wait), reactivating to `returned` on send-back and to
+`done` on release. Deferred because it restructures the redaction review round-trip + the task reconciler
+(re-spawn risk), which shouldn't be done unattended. **Without it, the separate clocks still largely work** —
+the `redaction_qa` task carries a clean review clock; only the author task's processing stretch is coarse
+(includes review-wait) until this lands.
+
+### STATE
+`main` @ d2d1f5c + this docs commit. Suite **541/541**. Live API restarted (triggers live), backfill applied,
+frontend deployed, connectors untouched.
+
+### NEXT
+1. **Slice A checkpoint 3** (awaiting-review) — small, interactively-verifiable.
+2. **Slice B** — display the clocks (days-in-queue/process per item, bottleneck view) off the `task_events` trail.
+3. Then the rest of the timing/actuals plan: D (work timer) · E (est→actual reconciliation) · conveyor & batch.
