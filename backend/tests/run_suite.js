@@ -27,6 +27,7 @@ const ALL = [
   'verify_search_intents', 'verify_request_defect', 'verify_search_resolve',
   'verify_search_intent_gate', 'verify_fee_labor_gate', 'verify_estimate_profiles',
   'verify_role_reconciliation', 'verify_notifications', 'verify_returned_rework', 'verify_task_lifecycle',
+  'verify_task_timing',
 ];
 
 const args = process.argv.slice(2);

@@ -34,6 +34,22 @@ function actionLabel(t) {
     : t.status === 'in_progress' ? 'Continue →' : 'Open →';
 }
 
+// Humanize a duration (ms) adaptively: 4h · 3d 2h · 5d · <1m. (Slice B: raw calendar elapsed.)
+function humanDur(ms) {
+  if (ms == null) return '';
+  var s = Math.floor(ms / 1000), d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60);
+  if (d >= 1) return d + 'd' + (h ? ' ' + h + 'h' : '');
+  if (h >= 1) return h + 'h';
+  if (m >= 1) return m + 'm';
+  return '<1m';
+}
+var CLOCK_LABEL = { open: 'In queue', assigned: 'In queue', in_progress: 'In process', awaiting_review: 'In review', returned: 'Returned' };
+// The live "how long in the current state" clock for a task row.
+function clockLabel(t) {
+  var tm = t.timing; if (!tm || !tm.currentStatus) return '';
+  return (CLOCK_LABEL[tm.currentStatus] || tm.currentStatus) + ' ' + humanDur(tm.currentSinceMs);
+}
+
 function dayDiff(d) { if (!d) return null; return (new Date(d) - new Date()) / (1000 * 60 * 60 * 24); }
 function deadlineState(d) { var x = dayDiff(d); if (x === null) return null; if (x < 0) return 'over'; if (x <= 3) return 'soon'; return null; }
 function deadlineLabel(d) {
@@ -130,7 +146,7 @@ export default function MyTasksPage() {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: '13px', color: '#1A2230', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.record_type_name || t.request_description || t.title || TYPE_LABEL[t.type] || t.type}</div>
-          <div style={{ fontSize: '11.5px', color: C.faint }}>{t.team_name || ''}</div>
+          <div style={{ fontSize: '11.5px', color: C.muted }}>{clockLabel(t)}{t.team_name ? ' · ' + t.team_name : ''}</div>
         </div>
         <div style={{ fontSize: '12.5px', textAlign: 'right', minWidth: '92px', color: ds === 'over' ? C.crit : ds === 'soon' ? C.warn : C.muted, fontWeight: ds ? 700 : 400 }}>{deadlineLabel(t.deadline_date)}</div>
         <Link to={screenFor(t)} style={{ fontSize: '12.5px', fontWeight: 600, color: C.accent, background: C.accentSoft, border: '1px solid #E5E7EB', borderRadius: '7px', padding: '5px 11px', textDecoration: 'none', whiteSpace: 'nowrap' }}>{actionLabel(t)}</Link>
@@ -181,7 +197,7 @@ export default function MyTasksPage() {
                   <div style={{ fontSize: '13px', color: '#1A2230' }}>{t.record_type_name || t.request_description || t.title || TYPE_LABEL[t.type] || t.type}</div>
                   <div style={{ fontSize: '11.5px', color: C.faint }}>With the reviewer — no action needed</div>
                 </div>
-                <span style={{ fontSize: '12px', color: C.muted, fontWeight: 600 }}>In review</span>
+                <span style={{ fontSize: '12px', color: C.muted, fontWeight: 600 }}>{humanDur((t.timing && t.timing.inReviewMs) || (t.timing && t.timing.currentSinceMs)) || 'In review'}</span>
               </div>
             );
           })}

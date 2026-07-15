@@ -3646,3 +3646,35 @@ self-release; provably-clean bypasses redaction entirely).
 ### NEXT
 - **Slice B** — put the numbers on screen: days-in-queue / in-process / in-review per item, off the `task_events`
   trail; a bottleneck view. Then D (work timer) · E (est→actual reconciliation) · conveyor & batch.
+
+---
+
+## 2026-07-15 (pm) — Slice B-core: live queue/process/review clocks on My Tasks. 553/553.
+
+Reads the Slice-A bookmark trail and puts the numbers on screen (Kevin: calendar days, B-core first).
+
+- **`taskTiming.js`** — pure compute over `task_events`: elapsed time per state (the stretch between two
+  bookmarks belongs to the status it was in; the current state runs to now; correction rounds SUM), rolled up
+  into phases (in-queue = open+assigned · in-process · in-review = awaiting_review · returned) + age-since-submit.
+- **`/tasks/mine`** carries a `timing` object per task (one events query for the whole list; `withReq` now also
+  selects `request_created_at` as the submit anchor).
+- **My Tasks** shows a live clock on each row — "In queue 7d 5h · Open Records", "In process 4h" — and the
+  passive in-review line shows its review wait. Adaptive format (4h · 3d 2h · 5d).
+
+### Evidence
+- Suite **553/553** (new `verify_task_timing` 8/8: the math is exact on synthetic events — stretches, terminal
+  states, summed rework rounds, current-state-to-now; `/tasks/mine` carries live timing). Live census clean.
+- **Live-verified**: `/tasks/mine` for a real user returns queue/process/age; screenshot of My Tasks shows
+  "In queue 7d 5h" under each row (the 7d reflects Slice-A backfill; going-forward bookmarks are exact).
+
+### Deferred (as planned)
+- **B-breakdown** — the per-request bottleneck view (horizontal timeline of where an item's time went, stitching
+  `task_events` + `request_history`) — a new visualization, needs a mockup + sign-off.
+- **Slice C** — budgeted-vs-actual overlay (needs the generic budget file). B shows RAW elapsed only.
+
+### STATE
+`main` + this commit. Suite **553/553**. Live API restarted, frontend deployed, connectors untouched.
+
+### NEXT
+- **B-breakdown** (bottleneck view, mockup first) · **Slice C** (budget overlay) · then D (work timer) ·
+  E (est→actual reconciliation) · conveyor & batch.
