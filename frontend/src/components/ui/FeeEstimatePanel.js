@@ -298,6 +298,23 @@ export default function FeeEstimatePanel(props) {
     } catch (e) { setReconResult({ error: (e.response && e.response.data && e.response.data.error) || 'Reconcile failed.' }); }
     setReconBusy(false);
   }
+  // Slice E — drop the MEASURED labor hours (rolled up from finalized work tasks) into the reconcile inputs. Applied
+  // request-level: all hours land on the first component (matching the server's aggregation), others zeroed. Staff
+  // still review and press Reconcile — same accept/adjust ethos as the per-task timer.
+  function useMeasuredHours() {
+    var la = ctx.laborActuals; if (!la || !la.measured) return;
+    var comps = ctx.components || []; if (!comps.length) return;
+    var m = la.measured;
+    setQty(function (p) {
+      var n = Object.assign({}, p);
+      comps.forEach(function (c, i) {
+        n[c.id] = Object.assign({}, n[c.id]);
+        n[c.id].searchHours = (i === 0) ? (m.searchHours || 0) : 0;
+        n[c.id].reviewHours = (i === 0) ? (m.reviewHours || 0) : 0;
+      });
+      return n;
+    });
+  }
   var R = result && result.requestLevel;
   return (
     <div>
@@ -444,6 +461,36 @@ export default function FeeEstimatePanel(props) {
                 <div style={{ marginTop: '18px', borderTop: '1px solid #E5E7EB', paddingTop: '16px' }}>
                   <div style={{ fontSize: '14px', fontWeight: 700, color: '#111', marginBottom: '4px' }}>Reconcile actuals</div>
                   <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '10px' }}>After the work is done, set the quantities above to the ACTUAL amounts, then record the reconciliation. This compares actuals to the estimate, flags whether a revised notice is required, and sharpens future auto-estimates for this record type.</div>
+                  {ctx.laborActuals ? (
+                    <div style={{ border: '1px solid #E5E7EB', borderRadius: '10px', padding: '12px 14px', marginBottom: '12px', background: '#F9FAFB', maxWidth: '520px' }}>
+                      <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#111', marginBottom: '8px' }}>Measured labor <span style={{ fontWeight: 400, color: '#9CA3AF' }}>(from the work timer)</span></div>
+                      {ctx.laborActuals.autoDraft ? (
+                        <div style={{ fontSize: '11.5px', color: '#1F4E79', background: '#EFF6FF', border: '1px solid #DBEAFE', borderRadius: '6px', padding: '6px 10px', marginBottom: '9px' }}>
+                          A draft reconciliation was auto-computed from measured labor{ctx.laborActuals.autoDraft.variancePct != null ? ' (' + (ctx.laborActuals.autoDraft.variancePct >= 0 ? '+' : '') + ctx.laborActuals.autoDraft.variancePct + '% vs estimate)' : ''} and is awaiting your review{ctx.laborActuals.autoDraft.reNotifyRequired ? ' — a revised notice is required before delivery' : ''}. Confirm or adjust the quantities, then record it below.
+                        </div>
+                      ) : null}
+                      {[['searchHours', 'Search'], ['reviewHours', 'Review/redaction'], ['programmingHours', 'Programming']].map(function (d) {
+                        var est = (ctx.laborActuals.estimated || {})[d[0]] || 0;
+                        var act = (ctx.laborActuals.measured || {})[d[0]] || 0;
+                        if (!est && !act) return null;
+                        var delta = Math.round((act - est) * 100) / 100;
+                        return (
+                          <div key={d[0]} style={{ display: 'grid', gridTemplateColumns: '1.4fr 1fr 1fr 1fr', gap: '6px', fontSize: '12px', color: '#374151', padding: '2px 0' }}>
+                            <span style={{ color: '#6B7280' }}>{d[1]}</span>
+                            <span style={{ textAlign: 'right' }}>est {est} h</span>
+                            <span style={{ textAlign: 'right', fontWeight: 700 }}>actual {act} h</span>
+                            <span style={{ textAlign: 'right', color: delta > 0 ? '#9B1C1C' : (delta < 0 ? '#03543F' : '#9CA3AF') }}>{delta > 0 ? '+' : ''}{delta} h</span>
+                          </div>
+                        );
+                      })}
+                      <div style={{ marginTop: '9px' }}>
+                        {ctx.laborActuals.hasActuals
+                          ? <button onClick={useMeasuredHours} style={{ padding: '5px 12px', borderRadius: '6px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '11.5px', fontWeight: 700, cursor: 'pointer' }}>Use measured hours</button>
+                          : <span style={{ fontSize: '11.5px', color: '#9CA3AF' }}>No measured labor captured (timer off or skipped) &mdash; enter actual hours manually.</span>}
+                        {ctx.laborActuals.excluded && ctx.laborActuals.excluded.length ? <span style={{ fontSize: '11px', color: '#9CA3AF', marginLeft: '10px' }}>{ctx.laborActuals.excluded.length} task(s) not counted</span> : null}
+                      </div>
+                    </div>
+                  ) : null}
                   <button onClick={reconcile} disabled={reconBusy} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: reconBusy ? '#9CB4CC' : NAVY, color: 'white', fontSize: '13px', fontWeight: 700, cursor: reconBusy ? 'default' : 'pointer' }}>{reconBusy ? 'Recording...' : 'Record actuals & reconcile'}</button>
                   {reconResult && reconResult.error ? <div style={{ marginTop: '10px', fontSize: '12.5px', color: '#9B1C1C' }}>{reconResult.error}</div> : null}
                   {reconResult && !reconResult.error ? (

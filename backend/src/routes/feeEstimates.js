@@ -18,6 +18,7 @@ const enforcement = require('../services/enforcement');
 const depositAction = require('../services/depositAction');
 const feeForfeiture = require('../services/feeForfeiture');
 const feeReissue = require('../services/feeReissue');
+const laborActuals = require('../services/laborActuals');
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 var taskRouting = require('../services/taskRouting');
@@ -158,6 +159,17 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
     var paymentMode = 'internal'; try { var _pc = cfg ? JSON.parse(cfg.config_json || '{}') : {}; if (_pc.payment_mode === 'erp') paymentMode = 'erp'; } catch (e) {}
     var certCfg = {}; try { certCfg = (cfg ? (JSON.parse(cfg.config_json || '{}').certification || {}) : {}); } catch (e) { certCfg = {}; }
     var certRequested = !!loaded.request.certification_requested;
+    // Labor estimate-vs-actual (Slice E): measured hours rolled up from finalized work tasks vs the hours quoted in
+    // the latest estimate, plus a flag if a reconciliation draft was already auto-computed and awaits staff review.
+    var laborOut = null;
+    try {
+      var roll = await laborActuals.rollup(req.params.requestId);
+      var estInput = {}; try { estInput = latest ? JSON.parse(latest.input_json || '{}') : {}; } catch (e) { estInput = {}; }
+      var estHours = laborActuals.estimatedHoursFromInput(estInput);
+      var recon = await get("SELECT id, created_by, variance_pct, renotify_required, notified_at, created_at FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC LIMIT 1", [req.params.requestId]);
+      var autoDraft = (recon && /auto-draft/i.test(recon.created_by || '') && !recon.notified_at) ? { id: recon.id, variancePct: recon.variance_pct, reNotifyRequired: !!recon.renotify_required, createdAt: recon.created_at } : null;
+      laborOut = { hasActuals: roll.hasActuals, measured: roll.hours, estimated: estHours, counted: roll.counted, excluded: roll.excluded, autoDraft: autoDraft };
+    } catch (e) { laborOut = null; }
     res.json({
       request: { id: loaded.request.id, number: loaded.request.request_number, isMrr: !!loaded.request.is_mrr, purpose: loaded.request.purpose || 'standard' },
       certification: { requested: certRequested, suggestedCount: certRequested ? loaded.components.length : 0, rate: certCfg.rate != null ? certCfg.rate : null, unit: certCfg.unit || 'per_record' },
@@ -166,7 +178,7 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
       actualRateDrivers: actualRateDrivers, laborRates: laborRates,
       latest: hydrate(latest),
       paymentPlan: planCtx ? planCtx.plan : null, paymentTimingSource: planCtx ? planCtx.source : null,
-      paymentState: payState, paymentMode: paymentMode
+      paymentState: payState, paymentMode: paymentMode, laborActuals: laborOut
     });
   } catch (e) { res.status(500).json({ error: 'Could not load estimate context.' }); }
 });
@@ -372,22 +384,24 @@ router.post('/request/:requestId/reconcile', requireAuth, async function (req, r
     };
     if (b.purpose) { try { await run("UPDATE requests SET purpose = ? WHERE id = ?", [b.purpose, rid]); } catch (e) {} }
     var feeContext = engine.compute(config, request);
-    var actualTotal = Number(feeContext.requestLevel.total) || 0;
     var base = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [rid]);
     var estTotal = base ? (Number(base.total) || 0) : null;
     var pol = (config.estimatePolicy && typeof config.estimatePolicy.revisionNotifyPercent === 'number') ? config.estimatePolicy.revisionNotifyPercent : 20;
-    var variancePct = (estTotal != null && estTotal > 0) ? Math.round(((actualTotal - estTotal) / estTotal) * 1000) / 10 : null;
-    var reNotify = (variancePct != null && variancePct > pol);
+    // The staff-confirmed manual path DOES fold actuals into the record-type profiles (Welford) \u2014 the auto-draft
+    // deliberately does not, since these are the numbers a human reviewed and committed to.
     var updates = [];
     for (var i = 0; i < request.components.length; i++) {
       var c = request.components[i];
       if (c.recordType) { try { await ep.recordActuals(c.recordType, c.quantities); updates.push(c.recordType); } catch (e) {} }
     }
-    var id = 'feerec-' + uuidv4().slice(0, 8);
-    await run(
-      'INSERT INTO request_fee_estimates (id, request_id, kind, config_profile_id, input_json, fee_context_json, total, deposit_due, notify_flag, baseline_total, variance_pct, renotify_required, created_by, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)',
-      [id, rid, 'reconciliation', cfgRow.id, JSON.stringify(request), JSON.stringify(feeContext), actualTotal, 0, 0, estTotal, variancePct, reNotify ? 1 : 0, (req.user && req.user.name) || (req.user && req.user.sub) || 'system', nowStr()]
-    );
+    // Snapshot + variance go through the one shared writer (also used by the auto-draft trigger) so the row shape
+    // and the variance/renotify math never drift between the manual and automatic reconciliation paths.
+    var w = await laborActuals.writeReconciliation({
+      rid: rid, configProfileId: cfgRow.id, input: request, feeContext: feeContext,
+      estTotal: estTotal, revisionNotifyPercent: pol,
+      createdBy: (req.user && req.user.name) || (req.user && req.user.sub) || 'system',
+    });
+    var actualTotal = w.actualTotal, variancePct = w.variancePct, reNotify = w.reNotifyRequired;
     await hist(rid, req.user, 'ESTIMATE_RECONCILED', 'Actual $' + actualTotal.toFixed(2) + (estTotal != null ? (' vs estimate $' + estTotal.toFixed(2) + ' (' + (variancePct >= 0 ? '+' : '') + variancePct + '%)') : '') + (reNotify ? ' \u2014 revised notice required.' : ''), null, null);
     await require('../services/paymentStatus').recordEvent(req.params.requestId, { type: 'reconciliation', amount: actualTotal, reason: 'actuals reconciled to the estimate', actor: (req.user && req.user.name) || (req.user && req.user.sub) || 'system' });
     res.json({ actualTotal: actualTotal, estimateTotal: estTotal, variancePct: variancePct, reNotifyThreshold: pol, reNotifyRequired: reNotify, feeContext: feeContext, profilesUpdated: updates });

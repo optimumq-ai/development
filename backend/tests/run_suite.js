@@ -28,7 +28,7 @@ const ALL = [
   'verify_search_intent_gate', 'verify_fee_labor_gate', 'verify_estimate_profiles',
   'verify_role_reconciliation', 'verify_notifications', 'verify_returned_rework', 'verify_task_lifecycle',
   'verify_task_timing', 'verify_request_timeline', 'verify_time_budget', 'verify_work_timer',
-  'verify_timecapture_config',
+  'verify_timecapture_config', 'verify_estimate_reconcile',
 ];
 
 const args = process.argv.slice(2);

@@ -5,6 +5,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const tr = require('../services/taskRouting');
 const scope = require('../services/requestScope');
 const SI = require('../services/searchIntents');
+const laborActuals = require('../services/laborActuals');
 
 function withReq(sql) {
   // A task hangs off the WORK row, but request_number is a PARENT field — the number the citizen quotes.
@@ -110,19 +111,26 @@ router.post('/:id/work', requireAuth, async function (req, res) {
 // Finalize the labor at completion (Slice D): accept the measured time, or adjust it (a reason is REQUIRED).
 // The raw measurement is kept in work_measured_seconds for defensibility.
 router.post('/:id/work/finalize', requireAuth, async function (req, res) {
-  var t = await get('SELECT assigned_to, work_seconds, work_finalized FROM tasks WHERE id = ?', [req.params.id]);
+  var t = await get('SELECT assigned_to, request_id, type, work_seconds, work_finalized FROM tasks WHERE id = ?', [req.params.id]);
   if (!t) return res.status(404).json({ error: 'Task not found' });
   var roles = req.user.roles || [];
   var elevated = roles.indexOf('SYSTEM_ADMIN') !== -1 || roles.indexOf('DIRECTOR') !== -1 || roles.indexOf('SUPERVISOR') !== -1;
   if (t.assigned_to && t.assigned_to !== req.user.sub && !elevated) return res.status(403).json({ error: 'Only the assignee can log time on this task.' });
   var measured = Math.max(0, Math.floor(Number(req.body && req.body.seconds != null ? req.body.seconds : t.work_seconds) || 0));
   var b = req.body || {};
+  var wasFinalized = !!t.work_finalized;
+  var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'staff';
+  // Slice E · Fork 2 — auto-draft reconciliation when this finalize completes the LAST billable work task on the
+  // request. Non-fatal by construction (never throws), and a no-op unless a prior estimate + measured labor exist,
+  // so an ordinary finalize on an un-estimated task writes nothing. The revised-notice SEND stays human-gated.
+  async function fireAutoDraft() { try { await laborActuals.maybeAutoDraftOnFinalize(t.request_id, req.params.id, t.type, actor, wasFinalized); } catch (e) {} }
   // SKIP (user-discretion mode, Slice E): the assignee chose not to log billable time. Keep the raw measurement
   // for defensibility, but leave work_seconds NULL so no billable actual flows to reconciliation. Finalized so the
   // heartbeat stops and the modal never re-fires.
   if (b.skipped) {
     await run("UPDATE tasks SET work_measured_seconds = ?, work_seconds = NULL, work_adjust_reason = ?, work_finalized = 1, updated_at = datetime('now') WHERE id = ?",
       [measured, 'skipped (user discretion)', req.params.id]);
+    await fireAutoDraft();
     return res.json({ task: await tr.getTask(req.params.id), skipped: true });
   }
   var adjusted = b.adjustedSeconds != null && Math.floor(Number(b.adjustedSeconds)) !== measured;
@@ -134,6 +142,7 @@ router.post('/:id/work/finalize', requireAuth, async function (req, res) {
   } else {
     await run("UPDATE tasks SET work_measured_seconds = ?, work_seconds = ?, work_finalized = 1, updated_at = datetime('now') WHERE id = ?", [measured, measured, req.params.id]);
   }
+  await fireAutoDraft();
   res.json({ task: await tr.getTask(req.params.id) });
 });
 
