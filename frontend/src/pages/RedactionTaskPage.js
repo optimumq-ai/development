@@ -69,6 +69,7 @@ export default function RedactionTaskPage() {
     try {
       var tr = await api.get('/tasks/' + taskId);
       var t = tr.data.task; setTask(t);
+      api.post('/tasks/' + taskId + '/begin').catch(function () {}); // begin-work: owner-gated server-side (Slice A)
       var fr = await api.get('/files/' + t.request_id);
       var resp = (fr.data.files || []).filter(function (f) { return f.responsive; });
       setFiles(resp);
@@ -102,7 +103,10 @@ export default function RedactionTaskPage() {
       } else if (j && j.review_stage !== 'released') {
         setOpen('ai');
         if (!(jr.data.zones || []).length) checkMatch(fid);
-        discover(fid);   // auto-run the AI read on open
+        // Entry contract (Slice A): auto-run the AI read ONCE — never re-scan a record that already has work or
+        // that was discovered before. Prevents re-entry / conveyor-next from re-spending the call or re-surfacing
+        // dismissed suggestions. (checkMatch above is likewise gated to zero-zones.)
+        if (!j.discovered_at && !(jr.data.zones || []).length) discover(fid);
       }
       setJob(j);
     } catch (e) { setError('Could not open this document. ' + msg(e)); }

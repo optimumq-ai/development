@@ -441,6 +441,24 @@ function startReconciler() {
   setInterval(function () { reconcileStageTasks().catch(function () {}); }, 120000);
 }
 
+// TASK ENTRY CONTRACT (Slice A). "Begin work" is one canonical, idempotent event: transition assigned -> in
+// process (the DB trigger bookmarks the time) + run the task type's on-entry automation (non-destructive,
+// gated). EVERY entry path calls this — opening a task screen now, batch/conveyor later — so none can bypass
+// automation and none double-runs it. Only the OWNER begins work (a supervisor peeking must not start the
+// clock). On-entry automation for redaction (auto AI discovery) is gated frontend-side by redaction_jobs
+// .discovered_at, so it fires once and never re-scans committed work.
+async function enterTask(taskId, userId, opts) {
+  opts = opts || {};
+  var t = await get("SELECT id, type, assigned_to, status FROM tasks WHERE id = ?", [taskId]);
+  if (!t) return null;
+  var isOwner = t.assigned_to && t.assigned_to === userId;
+  if (!isOwner && !opts.force) return t; // viewing, not beginning — no transition
+  if (t.status === 'assigned' || t.status === 'returned') {
+    await run("UPDATE tasks SET status = 'in_progress', updated_at = datetime('now') WHERE id = ? AND status IN ('assigned','returned')", [taskId]);
+  }
+  return await getTask(taskId);
+}
+
 // RETURNED-FOR-REWORK (BACKLOG R10, slice 8b). The general "your work came back" primitive. A reviewer sends
 // work back: we FLAG the owner's task (it keeps its status, so it stays put in My Tasks and renders the
 // "URGENT CORRECTIONS REQUIRED" treatment) AND push a notification. Any return flow (redaction, and future
@@ -470,6 +488,7 @@ async function clearReturned(taskId) {
 }
 
 module.exports = {
+  enterTask: enterTask,
   markTaskReturned: markTaskReturned,
   clearReturned: clearReturned,
   TASK_ROLES: TASK_ROLES,

@@ -980,3 +980,62 @@ CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS return_reason TEXT;
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS returned_by TEXT;
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS returned_at TEXT;
+
+-- ============================================================================================
+-- TASK TIMING / BOOKMARK TRAIL (Slice A). Every task status change drops a bookmark (task_events row) so any
+-- "elapsed time between bookmarks" is derivable — days in queue, in process, in review, etc. Immutable history:
+-- never edited. Tolling/resets live on the legal deadline clock (request_clocks), NOT here. The request's own
+-- created_at is the submit anchor. See docs/SPEC_tasks_roles_mrr_fees.md §2.
+-- ============================================================================================
+CREATE TABLE IF NOT EXISTS task_events (
+  id BIGSERIAL PRIMARY KEY,
+  task_id TEXT NOT NULL,
+  request_id TEXT,
+  task_type TEXT,
+  from_status TEXT,
+  to_status TEXT NOT NULL,
+  at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+CREATE INDEX IF NOT EXISTS idx_task_events_task ON task_events(task_id);
+CREATE INDEX IF NOT EXISTS idx_task_events_request ON task_events(request_id);
+
+-- Denormalized convenience stamps (latest of each) for cheap current-state reads; the log is the source of truth.
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS assigned_at TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS in_progress_at TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS done_at TEXT;
+
+-- BEFORE: stamp the denormalized timestamps on transition. in_progress_at is stamped ONCE (first work-start),
+-- so a correction round (returned -> in_progress) does not reset "when work first started".
+CREATE OR REPLACE FUNCTION tasks_stamp_transition() RETURNS trigger AS $$
+BEGIN
+  IF NEW.status = 'assigned' AND (TG_OP = 'INSERT' OR OLD.status IS DISTINCT FROM 'assigned' OR NEW.assigned_to IS DISTINCT FROM OLD.assigned_to) THEN
+    NEW.assigned_at := to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS');
+  END IF;
+  IF NEW.status = 'in_progress' AND NEW.in_progress_at IS NULL THEN
+    NEW.in_progress_at := to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS');
+  END IF;
+  IF NEW.status = 'done' THEN
+    NEW.done_at := to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS');
+  END IF;
+  RETURN NEW;
+END; $$ LANGUAGE plpgsql;
+DROP TRIGGER IF EXISTS trg_tasks_stamp ON tasks;
+CREATE TRIGGER trg_tasks_stamp BEFORE INSERT OR UPDATE ON tasks FOR EACH ROW EXECUTE FUNCTION tasks_stamp_transition();
+
+-- AFTER: write a bookmark row on the initial insert and on every status change.
+CREATE OR REPLACE FUNCTION tasks_log_event() RETURNS trigger AS $$
+BEGIN
+  IF TG_OP = 'INSERT' THEN
+    INSERT INTO task_events (task_id, request_id, task_type, from_status, to_status)
+      VALUES (NEW.id, NEW.request_id, NEW.type, NULL, NEW.status);
+  ELSIF NEW.status IS DISTINCT FROM OLD.status THEN
+    INSERT INTO task_events (task_id, request_id, task_type, from_status, to_status)
+      VALUES (NEW.id, NEW.request_id, NEW.type, OLD.status, NEW.status);
+  END IF;
+  RETURN NEW;
+END; $$ LANGUAGE plpgsql;
+DROP TRIGGER IF EXISTS trg_tasks_log ON tasks;
+CREATE TRIGGER trg_tasks_log AFTER INSERT OR UPDATE ON tasks FOR EACH ROW EXECUTE FUNCTION tasks_log_event();
+
+-- Redaction on-entry automation gate: discovery runs ONCE per job (first entry), never re-run on re-open.
+ALTER TABLE redaction_jobs ADD COLUMN IF NOT EXISTS discovered_at TEXT;

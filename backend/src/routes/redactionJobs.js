@@ -91,6 +91,8 @@ router.post('/file/:fileId/discover', requireAuth, async function(req, res) {
     if (!pc || !pc.c) await docProcessing.processFile(req.params.fileId);
     var zoneDiscovery = require('../services/zoneDiscovery');
     var r = await zoneDiscovery.discoverZones(req.params.fileId);
+    // Mark discovery as run for this job so the entry-contract gate never auto-re-scans (Slice A).
+    try { await run("UPDATE redaction_jobs SET discovered_at = datetime('now') WHERE file_id = ? AND status = 'draft' AND discovered_at IS NULL", [req.params.fileId]); } catch (e2) {}
     res.json(Object.assign({ success: true }, r));
   } catch (e) { console.error('[zone discover]', e.message); res.status(500).json({ error: e.message }); }
 });

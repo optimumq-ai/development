@@ -11,7 +11,7 @@ export default function EstimateTaskPage() {
 
   useEffect(function () {
     api.get('/tasks/' + taskId)
-      .then(function (r) { setTask(r.data.task); })
+      .then(function (r) { setTask(r.data.task); api.post('/tasks/' + taskId + '/begin').catch(function () {}); }) // begin-work: owner-gated (Slice A)
       .catch(function () { setErr('Could not load this task.'); });
   }, [taskId]);
 

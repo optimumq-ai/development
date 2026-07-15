@@ -104,6 +104,7 @@ export default function RecordSearchTaskPage() {
       .then(function (r) {
         if (!alive) return;
         setTask(r.data.task);
+        api.post('/tasks/' + taskId + '/begin').catch(function () {}); // begin-work: owner-gated server-side (Slice A)
         var rid = r.data.task.request_id;
         api.get('/requests/' + rid + '/search-intents')
           .then(function (x) { if (alive) setIntake(x.data); }).catch(function () {});

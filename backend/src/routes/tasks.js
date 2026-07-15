@@ -84,6 +84,14 @@ router.get('/:id', requireAuth, async function (req, res) {
   res.json({ task: t });
 });
 
+// Begin work on a task (the task-entry contract, Slice A): the owner opening it transitions assigned/returned
+// -> in_progress, which the DB trigger bookmarks. Idempotent; a non-owner viewing does not start the clock.
+router.post('/:id/begin', requireAuth, async function (req, res) {
+  var t = await tr.enterTask(req.params.id, req.user.sub);
+  if (!t) return res.status(404).json({ error: 'Task not found' });
+  res.json({ task: t });
+});
+
 // Mark a task complete.
 router.post('/:id/complete', requireAuth, async function (req, res) {
   await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [req.params.id]);
