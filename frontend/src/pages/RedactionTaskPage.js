@@ -296,6 +296,14 @@ export default function RedactionTaskPage() {
       </div>
 
       {error ? <div style={sty.err}>{error}</div> : null}
+      {/* Author-side returned-for-rework banner (R10, 8b): the reviewer sent this back — show why, up top. */}
+      {!reviewMode && task && task.return_reason ? (
+        <div style={{ margin: '10px 16px 0', background: '#FBEBEB', border: '1px solid #F0B4B4', borderLeft: '4px solid #C22B2B', borderRadius: '8px', padding: '11px 14px' }}>
+          <div style={{ fontSize: '11.5px', fontWeight: 800, letterSpacing: '.04em', color: '#C22B2B' }}>⚠ RETURNED FOR CORRECTIONS</div>
+          <div style={{ fontSize: '13px', color: '#7A1F1F', marginTop: '3px' }}>{task.returned_by ? task.returned_by + ' returned this — ' : ''}“{task.return_reason}”</div>
+          <div style={{ fontSize: '11px', color: '#9A5A5A', marginTop: '2px' }}>Make the fixes below, then re-submit for review.</div>
+        </div>
+      ) : null}
       {matchTpl && !sxs ? (
         <div style={sty.tplbar}>
           <span style={{ flex: 1 }}>Template <strong>{matchTpl.name}</strong> matches this form ({matchTpl.score}%). Apply it to pre-place its boxes for review.</span>

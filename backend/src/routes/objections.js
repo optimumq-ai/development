@@ -176,6 +176,18 @@ router.post('/:id/approve', requireAuth, requireRoleOrPerm(['DIRECTOR'], ['FINAN
     } else {
       await run("UPDATE objections SET status = 'open', approval_status = 'rejected', approved_by = ?, approved_at = ?, updated_at = ? WHERE id = ?", [who, now, now, o.id]);
       await hist(o.request_id, req.user, 'OBJECTION_ADJUSTMENT_REJECTED', 'Rejected the proposed ' + o.resolution_type + ' \u2014 returned to ' + (o.assignee_name || 'the owner') + '.');
+      // R10 (8b) \u2014 the general "your work came back" treatment. An objection isn't a task, so the owner gets
+      // the push notification alone (no task flag). Surfaces on their bell + My Tasks notifications area.
+      if (o.assignee_id) {
+        try {
+          await require('../services/notifications').emit({
+            userId: o.assignee_id, kind: 'work_returned', contextType: 'objection', contextId: o.id,
+            title: 'A fee resolution you proposed was returned',
+            body: (who ? who + ' rejected' : 'Rejected') + ' your proposed ' + o.resolution_type + ' \u2014 revise and resubmit.',
+            link: '/requests/' + o.request_id, createdBy: 'system'
+          });
+        } catch (e) { console.error('[objection reject notify]', e && e.message); }
+      }
     }
     var row = await get("SELECT o.*, " + scope.numberExpr('r') + " AS request_number FROM objections o LEFT JOIN requests r ON r.id = o.request_id" + scope.numberJoin('r') + " WHERE o.id = ?", [o.id]);
     res.json({ objection: shape(row) });

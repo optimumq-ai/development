@@ -973,3 +973,10 @@ CREATE TABLE IF NOT EXISTS notifications (
   created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
 );
 CREATE INDEX IF NOT EXISTS idx_notifications_user ON notifications(user_id);
+
+-- Returned-for-rework flag (BACKLOG R10, slice 8b). A task KEEPS its status and its place in the owner's My
+-- Tasks list, but is flagged as returned by a reviewer with the reason. taskRouting.markTaskReturned() sets
+-- these + pushes a notification; clearReturned() clears them when the author re-submits. Idempotent.
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS return_reason TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS returned_by TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS returned_at TEXT;

@@ -120,6 +120,12 @@ router.post('/jobs/:jobId/submit', requireAuth, async function(req, res) {
   await run("UPDATE redaction_jobs SET review_stage = 'pending_review', submitted_by = ?, submitted_at = datetime('now'), updated_at = datetime('now') WHERE id = ?", [req.user.name || req.user.sub, req.params.jobId]);
   // Slice 4: for an Elevated/Legal job, spawn a routed redaction_qa task so a different reviewer is tasked.
   var reviewTask = await redactionReview.spawnReviewTask(Object.assign({}, job, { submitted_by: req.user.name || req.user.sub }), { actor: req.user.name || req.user.sub });
+  // Re-submitting corrected work clears any "returned for corrections" flag on the author's task (R10, 8b).
+  try {
+    var tr = require('../services/taskRouting');
+    var authTask = await get("SELECT id FROM tasks WHERE request_id = ? AND type IN ('redaction','legal_redaction') AND status IN ('open','assigned','in_progress') AND return_reason IS NOT NULL ORDER BY updated_at DESC LIMIT 1", [job.request_id]);
+    if (authTask) await tr.clearReturned(authTask.id);
+  } catch (e) { console.error('[redaction submit -> clearReturned]', e && e.message); }
   res.json({ success: true, review_stage: 'pending_review', reviewTask: reviewTask ? reviewTask.id : null });
 });
 
@@ -148,6 +154,13 @@ router.post('/jobs/:jobId/return', requireAuth, async function(req, res) {
     [uuidv4(), job.request_id, req.user.sub || null, reviewer, 'REDACTION_RETURNED',
      'Returned to ' + (job.submitted_by || 'the author') + ' for rework — ' + ((file && file.original_name) || 'document') + ': ' + note]);
   await redactionReview.closeReviewTask(job.request_id); // reviewer returned it -> cancel the review task
+  // Surface the return to the AUTHOR (R10, 8b): flag their still-open redaction task "URGENT CORRECTIONS
+  // REQUIRED" + push a notification, so they aren't left staring at a task that looks unchanged.
+  try {
+    var tr = require('../services/taskRouting');
+    var authTask = await get("SELECT id FROM tasks WHERE request_id = ? AND type IN ('redaction','legal_redaction') AND status IN ('open','assigned','in_progress') ORDER BY updated_at DESC LIMIT 1", [job.request_id]);
+    if (authTask) await tr.markTaskReturned(authTask.id, { by: reviewer, reason: note, link: '/redaction/' + authTask.id, title: 'A redaction you submitted was returned' });
+  } catch (e) { console.error('[redaction return -> markTaskReturned]', e && e.message); }
   res.json({ success: true, review_stage: 'editing', note: note });
 });
 

@@ -415,7 +415,17 @@ Analyzed & hardened 2026-07-05. Threat: a malicious/malformed uploaded or import
 3. **Persistence** — new **`request_search_intents`** table (one row per described record: `seq`, `description`, `intent`, `queries_tried`) + **`request_selected_records.intent_id`**. This finally gives the DB the per-description row the client's `children[]` only ever had in memory, and it is the exact shape real parent/child MRR splitting will migrate into (item 11).
 4. **Capture and surface, do not enforce.** The searcher sees the intent as a loud chip (grouped by description, with the queries the portal already tried) on the request workspace, and later as the record-search task's instruction block. **No mechanical gate** — a block needs an un-block, and that is `BUILD_PRIORITY` **item 5** (explicit found/not-found resolution states). When item 5 lands, an unresolved `search_more` / `no_match_search` is what it should block delivery on.
 
-### R10. Returned-for-rework surfacing in My Tasks — "URGENT CORRECTIONS REQUIRED" (captured 2026-07-13, Kevin) — **do at the My Tasks restructure** (`BUILD_PRIORITY_SUMMARY` item 8)
+### R10. Returned-for-rework surfacing in My Tasks — "URGENT CORRECTIONS REQUIRED" (captured 2026-07-13, Kevin) — **✅ RESOLVED 2026-07-15 (slice 8b)**
+
+> **RESOLVED.** A general task `returned` FLAG — `taskRouting.markTaskReturned(taskId,{by,reason,link})` sets
+> `return_reason`/`returned_by`/`returned_at` (the task keeps its status, so it stays in My Tasks and renders the
+> red "URGENT CORRECTIONS REQUIRED" row at the top of its box) AND pushes a `work_returned` notification (item 7);
+> `clearReturned` wipes it on re-submit. Wired: **redaction** returns (`/redaction-jobs/jobs/:id/return` → flag +
+> author-side banner on the redaction screen; `/submit` → clear) and **fee-objection** rejections (push only —
+> objections aren't tasks). The two decisions below resolved as: (1) existing task gains a `returned` flag (not a
+> new task; not a status, so it stays visible); (2) note renders on both the My Tasks row and the redaction screen;
+> (3) both push (notification) and pull (row); (4) general treatment, redaction + objection wired, clarification
+> deferred. `verify_returned_rework` 13/13; verified live. Original write-up below.
 
 **Settled model (Kevin, 2026-07-13) — the reviewer half is BUILT (slice 8); only the My Tasks surface is open.** A document redacted by one person goes to a second person for review; **the reviewer gets the same UI**, can **correct the redaction themselves** (add/remove boxes, run a second-pass AI check) **or return it with notes**. Both halves are built and verified — reviewer mode on `/redaction/:taskId`, and `POST /redaction-jobs/jobs/:id/return` requiring a reason, written to `request_history` as `REDACTION_RETURNED` (reviewer, author, file, note).
 

@@ -441,7 +441,37 @@ function startReconciler() {
   setInterval(function () { reconcileStageTasks().catch(function () {}); }, 120000);
 }
 
+// RETURNED-FOR-REWORK (BACKLOG R10, slice 8b). The general "your work came back" primitive. A reviewer sends
+// work back: we FLAG the owner's task (it keeps its status, so it stays put in My Tasks and renders the
+// "URGENT CORRECTIONS REQUIRED" treatment) AND push a notification. Any return flow (redaction, and future
+// clarification) is a customer; objection rejections use the notification alone (they aren't tasks).
+async function markTaskReturned(taskId, opts) {
+  opts = opts || {};
+  var t = await get("SELECT id, type, assigned_to, request_id FROM tasks WHERE id = ?", [taskId]);
+  if (!t) return null;
+  await run("UPDATE tasks SET return_reason = ?, returned_by = ?, returned_at = datetime('now'), updated_at = datetime('now') WHERE id = ?",
+    [opts.reason || null, opts.by || null, taskId]);
+  if (t.assigned_to) {
+    try {
+      var N = require('./notifications');
+      await N.emit({
+        userId: t.assigned_to, kind: 'work_returned', contextType: 'task', contextId: taskId,
+        title: opts.title || 'Your work was returned for corrections',
+        body: (opts.by ? opts.by + ' returned it' : 'Returned') + (opts.reason ? ' — ' + opts.reason : '.'),
+        link: opts.link || (t.request_id ? '/requests/' + t.request_id : null), createdBy: 'system'
+      });
+    } catch (e) { console.error('[markTaskReturned notify]', e && e.message); }
+  }
+  return t.assigned_to;
+}
+// Clear the returned flag (the author re-submitted the corrected work).
+async function clearReturned(taskId) {
+  await run("UPDATE tasks SET return_reason = NULL, returned_by = NULL, returned_at = NULL, updated_at = datetime('now') WHERE id = ?", [taskId]);
+}
+
 module.exports = {
+  markTaskReturned: markTaskReturned,
+  clearReturned: clearReturned,
   TASK_ROLES: TASK_ROLES,
   ROUTABLE_TASK_TYPES: ROUTABLE_TASK_TYPES,
   SMART_ROUTING_FLOOR: SMART_ROUTING_FLOOR,

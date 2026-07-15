@@ -3526,3 +3526,41 @@ deployed, connectors untouched.
   "URGENT CORRECTIONS REQUIRED" row treatment, built as the general pattern (redaction/objection/clarification).
 - #6 Fee-choice intake (default-forward) · #10 Legal Review / Legal Redaction task wiring.
 - #13 (Tier 3) Workload health scoring — folds the R/Y/G scores into the boxes/tiles built here.
+
+---
+
+## 2026-07-15 (pm) — Tier 2 #8b: returned-for-rework ("your work came back"). R10 RESOLVED. 531/531.
+
+**Scoped (decisions locked) → built.** Design was pre-approved in the 8a mockup (the red "URGENT CORRECTIONS
+REQUIRED" row was drawn there as an 8b preview), so no new mockup. Kevin's call: build the general mechanism +
+wire **redaction** AND **fee-objection rejection**; clarification deferred.
+
+### The gap (R10)
+A reviewer returns a redaction, but the AUTHOR is never told — their `redaction` task (never closed at submit)
+sits in My Tasks looking unchanged, reviewer's reason buried in history. Most time-critical item a redactor
+holds; was the least visible.
+
+### The build
+- **General primitive:** `tasks.return_reason/returned_by/returned_at` (nullable flag). `taskRouting.markTaskReturned(id,{by,reason,link})` sets the flag (task KEEPS its status → stays in My Tasks) **and** emits a `work_returned` notification to the owner; `clearReturned(id)` on re-submit. Flag, not status — because `/tasks/mine` filters `status IN ('assigned','in_progress')`, so a `returned` status would HIDE it (exactly wrong).
+- **Redaction wired:** `/redaction-jobs/jobs/:id/return` → finds the author's active redaction task → `markTaskReturned`; `/submit` → `clearReturned`. Author-side "Returned by X — <reason>" banner on the redaction screen (`RedactionTaskPage`).
+- **Fee-objection rejection (2nd customer):** `objections.js` reject → `work_returned` notification to `assignee_id` (objections aren't tasks → push only).
+- **My Tasks (8a):** returned tasks render the red urgent row (sorted to top of their box) + a "Needs corrections" summary tile + a "N returned" box chip. `/tasks/mine` already returns `t.*`, so no query change.
+
+### Evidence
+- Suite **531/531** (new `verify_returned_rework` **13/13** — general primitive, redaction return flow end-to-end, objection-reject push). Live census clean.
+- **Verified live (screenshot):** marked Kevin's real redaction task returned via the service → My Tasks showed the "Needs corrections" tile, the "1 returned" chip, and the red "⚠ URGENT CORRECTIONS REQUIRED" row with the reviewer note + red "Fix →"; the bell incremented (pushed notification). **Then restored** live (cleared the flag + deleted the verification notification) — the task wasn't really returned.
+
+### Gotcha found + handled
+`tasks.request_id` has a **nullable FK to requests** (`fk_tasks_request_id`) — the earlier "no FK" note (Explore
+agent, notifications slice) was stale. The notifications migration happened to null tasks before deleting requests,
+so it worked; here the test harness had to create real request rows for its fixtures. Worth remembering for any
+future task/request data work.
+
+### STATE
+`main` + this note. Suite **531/531**. Live API restarted (return columns applied, 8b code loaded), frontend
+rebuilt + deployed, connectors untouched, live restored after the visual check.
+
+### NEXT (Tier 2 remaining)
+- #6 Fee-choice intake (default-forward) · #10 Legal Review / Legal Redaction task wiring.
+- Future returned-for-rework customer: **clarification rework** (needs a task-return flow first).
+- #13 (Tier 3) Workload health scoring — folds R/Y/G into the 8a boxes/tiles.

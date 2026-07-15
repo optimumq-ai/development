@@ -91,6 +91,7 @@ export default function MyTasksPage() {
   var assigned = mine.length;
   var overdue = mine.filter(function (t) { return deadlineState(t.deadline_date) === 'over'; }).length;
   var soon = mine.filter(function (t) { return deadlineState(t.deadline_date) === 'soon'; }).length;
+  var returned = mine.filter(function (t) { return t.return_reason; }).length;
 
   // group my tasks by type
   var byType = {};
@@ -99,6 +100,25 @@ export default function MyTasksPage() {
     .concat(Object.keys(byType).filter(function (ty) { return TYPE_ORDER.indexOf(ty) < 0; }));
 
   function taskRow(t) {
+    // Returned-for-rework (R10, 8b): the most time-critical thing a person can hold — a deadline is running and
+    // a release is blocked. Render it URGENT: red row, a banner, the reviewer's note, a red Fix action.
+    if (t.return_reason) {
+      return (
+        <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '10px 16px', borderTop: '1px solid #F3F4F6', background: C.critSoft }}>
+          <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: C.crit, flexShrink: 0 }} />
+          <div style={{ minWidth: '128px' }}>
+            <div style={{ fontFamily: 'monospace', fontWeight: 700, color: C.accent, fontSize: '12.5px' }}>{t.request_number || '—'}</div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', marginTop: '2px', fontSize: '11px', fontWeight: 800, letterSpacing: '.04em', color: C.crit }}>⚠ URGENT CORRECTIONS REQUIRED</div>
+          </div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: '13px', color: '#1A2230' }}>{t.record_type_name || t.request_description || t.title || TYPE_LABEL[t.type] || t.type}</div>
+            <div style={{ fontSize: '11.5px', color: C.crit, fontStyle: 'italic', marginTop: '2px' }}>{t.returned_by ? 'Returned by ' + t.returned_by + ' — ' : 'Returned — '}“{t.return_reason}”</div>
+          </div>
+          <div style={{ fontSize: '12.5px', textAlign: 'right', minWidth: '92px', color: deadlineState(t.deadline_date) === 'over' ? C.crit : C.muted, fontWeight: deadlineState(t.deadline_date) === 'over' ? 700 : 400 }}>{deadlineLabel(t.deadline_date)}</div>
+          <Link to={screenFor(t)} style={{ fontSize: '12.5px', fontWeight: 700, color: 'white', background: C.crit, borderRadius: '7px', padding: '5px 13px', textDecoration: 'none', whiteSpace: 'nowrap' }}>Fix →</Link>
+        </div>
+      );
+    }
     var ds = deadlineState(t.deadline_date);
     var dot = t.status === 'in_progress' ? C.accent : C.faint;
     return (
@@ -120,8 +140,11 @@ export default function MyTasksPage() {
 
   function box(ty) {
     var tasks = byType[ty];
-    var queued = tasks.filter(function (t) { return t.status === 'assigned'; });
+    // Returned tasks are 'assigned' (flag, not status), so they live in Queued — sort them to the very top.
+    var queued = tasks.filter(function (t) { return t.status === 'assigned'; })
+      .sort(function (a, b) { return (b.return_reason ? 1 : 0) - (a.return_reason ? 1 : 0); });
     var inProc = tasks.filter(function (t) { return t.status === 'in_progress'; });
+    var rtn = tasks.filter(function (t) { return t.return_reason; }).length;
     var od = tasks.filter(function (t) { return deadlineState(t.deadline_date) === 'over'; }).length;
     var sn = tasks.filter(function (t) { return deadlineState(t.deadline_date) === 'soon'; }).length;
     return (
@@ -131,6 +154,7 @@ export default function MyTasksPage() {
           <span style={{ fontSize: '14.5px', fontWeight: 700 }}>{TYPE_LABEL[ty] || ty}</span>
           <span style={{ fontSize: '12px', fontWeight: 700, color: C.accent, background: C.accentSoft, borderRadius: '999px', padding: '1px 9px' }}>{tasks.length}</span>
           <div style={{ marginLeft: 'auto', display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+            {rtn ? chip(rtn + ' returned', 'crit') : null}
             {queued.length ? chip(queued.length + ' queued', 'q') : null}
             {inProc.length ? chip(inProc.length + ' in process', 'p') : null}
             {od ? chip(od + ' overdue', 'crit') : null}
@@ -164,14 +188,15 @@ export default function MyTasksPage() {
       <div>
         <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, letterSpacing: '-.01em' }}>My Tasks</h1>
         <p style={{ color: C.muted, fontSize: '13.5px', margin: '3px 0 0' }}>
-          Work assigned to you, grouped by type{overdue ? ' · ' : ''}{overdue ? <span style={{ color: C.crit, fontWeight: 600 }}>{overdue} overdue</span> : null}{soon ? ' · ' + soon + ' due within 3 days' : ''}.
+          Work assigned to you, grouped by type{returned ? ' · ' : ''}{returned ? <span style={{ color: C.crit, fontWeight: 600 }}>{returned} needs corrections</span> : null}{overdue ? ' · ' : ''}{overdue ? <span style={{ color: C.crit, fontWeight: 600 }}>{overdue} overdue</span> : null}{soon ? ' · ' + soon + ' due within 3 days' : ''}.
         </p>
       </div>
 
       {msg ? <div style={{ fontSize: '13px', color: '#9B1C1C', background: '#FDE8E8', border: '1px solid #FBD5D5', borderRadius: '8px', padding: '9px 12px' }}>{msg}</div> : null}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(' + (returned ? 4 : 3) + ',1fr)', gap: '12px' }}>
         {stat('Assigned to you', assigned, 'accent')}
+        {returned ? stat('Needs corrections', returned, 'crit') : null}
         {stat('Overdue', overdue, overdue ? 'crit' : 'ok')}
         {stat('Due ≤ 3 days', soon, soon ? 'warn' : 'ok')}
       </div>
