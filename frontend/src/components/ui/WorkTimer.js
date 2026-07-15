@@ -15,6 +15,25 @@ export function fmtDur(s) {
   return sec + 's';
 }
 
+// TIME-CAPTURE VISIBILITY (Slice E). Fetch the city's per-UI mode for a task screen: 'off' | 'discretion' |
+// 'always'. The heartbeat runs regardless (raw time is always captured); this only decides whether the timer is
+// shown and how the Complete flow behaves. Defaults to 'off' until loaded and if the fetch fails — the safe,
+// nothing-appears default. `loaded` lets callers avoid acting on the placeholder before the real value arrives.
+export function useTimeCaptureMode(uiKey) {
+  var [s, setS] = useState({ mode: 'off', loaded: false });
+  useEffect(function () {
+    var alive = true;
+    api.get('/config/time-capture').then(function (r) {
+      if (!alive) return;
+      var cfg = (r.data && r.data.config) || {};
+      var m = cfg[uiKey];
+      setS({ mode: (m === 'discretion' || m === 'always') ? m : 'off', loaded: true });
+    }).catch(function () { if (alive) setS({ mode: 'off', loaded: true }); });
+    return function () { alive = false; };
+  }, [uiKey]);
+  return s;
+}
+
 export function useWorkTimer(taskId, enabled) {
   var [state, setState] = useState({ seconds: 0, paused: false, idle: false });
   var R = useRef({ seconds: 0, lastActivity: Date.now(), visible: true, finalized: false, sinceBeat: 0 });
@@ -59,7 +78,15 @@ export function useWorkTimer(taskId, enabled) {
     };
   }, [taskId, enabled, flush]);
 
-  return { seconds: state.seconds, paused: state.paused, idle: state.idle, flush: flush, markFinalized: function () { R.current.finalized = true; } };
+  // Finalize with no billable actual (off mode, or the user's Skip in discretion mode). Keeps the raw measurement
+  // for audit (work_measured_seconds) but leaves work_seconds NULL. Stops the heartbeat.
+  var skip = useCallback(function () {
+    R.current.finalized = true;
+    if (!taskId) return Promise.resolve();
+    return api.post('/tasks/' + taskId + '/work/finalize', { skipped: true, seconds: R.current.seconds }).catch(function () {});
+  }, [taskId]);
+
+  return { seconds: state.seconds, paused: state.paused, idle: state.idle, flush: flush, skip: skip, markFinalized: function () { R.current.finalized = true; } };
 }
 
 // The live badge for the task-screen header.
@@ -90,6 +117,7 @@ export function WorkTimerCompleteModal(props) {
     catch (e) { setErr((e.response && e.response.data && e.response.data.error) || 'Could not save your time.'); setBusy(false); }
   }
   function accept() { finalize({ seconds: seconds }); }
+  function skipLog() { finalize({ skipped: true, seconds: seconds }); }   // discretion mode: don't log billable time
   function save() { if (!reason.trim()) { setErr('A short reason is required to adjust the time.'); return; } finalize({ seconds: seconds, adjustedSeconds: (Number(h) || 0) * 3600 + (Number(m) || 0) * 60, reason: reason.trim() }); }
 
   var ov = { position: 'fixed', inset: 0, background: 'rgba(16,26,42,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 };
@@ -131,6 +159,7 @@ export function WorkTimerCompleteModal(props) {
             <>
               <span style={Object.assign({}, btn, { background: '#1F4E79', color: '#fff', opacity: busy ? .6 : 1 })} onClick={function () { if (!busy) accept(); }}>{busy ? 'Saving…' : (props.confirmLabel || 'Accept & submit')}</span>
               <span style={Object.assign({}, btn, { background: 'white', color: '#1F4E79', borderColor: '#E5E7EB' })} onClick={function () { setMode('adjust'); }}>Adjust time</span>
+              {props.allowSkip ? <span style={Object.assign({}, btn, { flex: '0 0 auto', background: 'white', color: '#66717F', borderColor: '#E5E7EB' })} title="Complete without logging billable time" onClick={function () { if (!busy) skipLog(); }}>Skip</span> : null}
             </>
           ) : (
             <>

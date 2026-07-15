@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../lib/api';
-import { useWorkTimer, WorkTimerBadge, WorkTimerCompleteModal } from '../components/ui/WorkTimer';
+import { useWorkTimer, WorkTimerBadge, WorkTimerCompleteModal, useTimeCaptureMode } from '../components/ui/WorkTimer';
 
 // RECORD-SEARCH TASK SCREEN — SPEC_record_search_task_screen.md
 //
@@ -85,6 +85,7 @@ export default function RecordSearchTaskPage() {
   var [attached, setAttached] = useState([]);
   var [resolved, setResolved] = useState(null);
   var timer = useWorkTimer(taskId);
+  var tcm = useTimeCaptureMode('search');   // city's per-UI capture mode (Slice E): off|discretion|always
   var [laborModal, setLaborModal] = useState(null);
   var [notes, setNotes] = useState({});       // per-description: what the searcher actually searched
 
@@ -206,7 +207,12 @@ export default function RecordSearchTaskPage() {
   // --- resolution (§5d) -----------------------------------------------------------------------------
   // Completing the search first logs the actual labor (Slice D): flush the timer, then the popup finalizes
   // (accept or adjust-with-reason) and runs resolve() on confirm.
-  function requestComplete(outcome) { timer.flush(); setLaborModal({ outcome: outcome }); }
+  async function requestComplete(outcome) {
+    timer.flush();
+    // off: no log window — finalize with no billable time and resolve straight through. else: the log window.
+    if (tcm.mode === 'off') { await timer.skip(); timer.markFinalized(); await resolve(outcome); return; }
+    setLaborModal({ outcome: outcome });
+  }
   function resolve(outcome) {
     setBusy(outcome);
     api.post('/tasks/' + taskId + '/resolve', { outcome: outcome })
@@ -339,7 +345,7 @@ export default function RecordSearchTaskPage() {
                 {task.record_type_name}
               </span>
             )}
-            {resolved ? null : <WorkTimerBadge timer={timer} />}
+            {resolved || tcm.mode === 'off' ? null : <WorkTimerBadge timer={timer} />}
             <span style={{ marginLeft: 'auto', fontSize: 13, color: overdue ? C.crit : C.muted, fontWeight: overdue ? 700 : 400 }}>
               {task.deadline_date
                 ? <><b>Statutory due</b> {task.deadline_date}{dLeft !== null ? ' · ' + (overdue ? Math.abs(dLeft) + ' days OVERDUE' : dLeft + ' days') : ''}</>
@@ -742,7 +748,7 @@ export default function RecordSearchTaskPage() {
         </section>
        </div>
       </div>
-      {laborModal ? <WorkTimerCompleteModal open taskId={taskId} seconds={timer.seconds}
+      {laborModal ? <WorkTimerCompleteModal open taskId={taskId} seconds={timer.seconds} allowSkip={tcm.mode === 'discretion'}
         contextLabel={'Record search · ' + (task.request_number || '')}
         confirmLabel={laborModal.outcome === 'found' ? 'Log time & hand off' : 'Log time & close'}
         onConfirm={function () { timer.markFinalized(); resolve(laborModal.outcome); setLaborModal(null); }}

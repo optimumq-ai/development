@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const { requireAuth, requireRole } = require('../middleware/auth');
 const { all, get, run } = require('../db');
+const timeCapture = require('../services/timeCaptureConfig');
+const db = { get: get, run: run };
 
 router.get('/', requireAuth, async function(req, res) {
   var rows = await all('SELECT key, value FROM system_config');
@@ -24,6 +26,22 @@ router.post('/', requireAuth, requireRole('SYSTEM_ADMIN'), async function(req, r
     }
   }
   res.json({ success: true });
+});
+
+// TIME-CAPTURE VISIBILITY (Slice E · Fork 1). City-owned, per task UI. See services/timeCaptureConfig.js.
+// GET is readable by any authenticated user — task screens fetch it to decide whether to show the timer and how
+// the Complete flow behaves. PUT is limited to admins/directors who own agency configuration.
+router.get('/time-capture', requireAuth, async function (req, res) {
+  try {
+    res.json({ config: await timeCapture.get(db), uis: timeCapture.UIS, modes: timeCapture.MODES });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.put('/time-capture', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR'), async function (req, res) {
+  try {
+    var next = await timeCapture.set(db, (req.body && req.body.config) || req.body || {});
+    res.json({ config: next, uis: timeCapture.UIS, modes: timeCapture.MODES });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 module.exports = router;

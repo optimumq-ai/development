@@ -117,6 +117,14 @@ router.post('/:id/work/finalize', requireAuth, async function (req, res) {
   if (t.assigned_to && t.assigned_to !== req.user.sub && !elevated) return res.status(403).json({ error: 'Only the assignee can log time on this task.' });
   var measured = Math.max(0, Math.floor(Number(req.body && req.body.seconds != null ? req.body.seconds : t.work_seconds) || 0));
   var b = req.body || {};
+  // SKIP (user-discretion mode, Slice E): the assignee chose not to log billable time. Keep the raw measurement
+  // for defensibility, but leave work_seconds NULL so no billable actual flows to reconciliation. Finalized so the
+  // heartbeat stops and the modal never re-fires.
+  if (b.skipped) {
+    await run("UPDATE tasks SET work_measured_seconds = ?, work_seconds = NULL, work_adjust_reason = ?, work_finalized = 1, updated_at = datetime('now') WHERE id = ?",
+      [measured, 'skipped (user discretion)', req.params.id]);
+    return res.json({ task: await tr.getTask(req.params.id), skipped: true });
+  }
   var adjusted = b.adjustedSeconds != null && Math.floor(Number(b.adjustedSeconds)) !== measured;
   if (adjusted) {
     var reason = (b.reason || '').trim();

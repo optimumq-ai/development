@@ -12,6 +12,21 @@ export default function ConfigurationPage() {
   const [newRuleText, setNewRuleText] = useState('');
   const [editingRuleId, setEditingRuleId] = useState(null);
   const [editingText, setEditingText] = useState('');
+  // Time-capture visibility (Slice E) — saved via its own /config/time-capture endpoint, not the generic /config.
+  const [tc, setTc] = useState(null);
+  const [tcUis, setTcUis] = useState([]);
+  const [tcSaving, setTcSaving] = useState(false);
+  const [tcMsg, setTcMsg] = useState('');
+  React.useEffect(function(){
+    api.get('/config/time-capture').then(function(r){ setTc((r.data && r.data.config) || {}); setTcUis((r.data && r.data.uis) || []); }).catch(function(){});
+  }, []);
+  function setTcMode(key, mode) { setTc(function(c){ return Object.assign({}, c || {}, { [key]: mode }); }); }
+  async function saveTc() {
+    setTcSaving(true); setTcMsg('');
+    try { var r = await api.put('/config/time-capture', { config: tc }); setTc(r.data.config); setTcMsg('Time-tracking settings saved.'); }
+    catch(e){ setTcMsg((e.response && e.response.data && e.response.data.error) || 'Failed to save.'); }
+    setTcSaving(false);
+  }
   function loadRules() {
     api.get('/agent-rules')
       .then(function(r){ if (Array.isArray(r.data)) setRules(r.data); })
@@ -73,6 +88,7 @@ export default function ConfigurationPage() {
     { key:'notifications', label:'Notifications' },
     { key:'email', label:'Email' },
     { key:'redaction', label:'Redaction' },
+    { key:'timecapture', label:'Time Tracking' },
     { key:'agent', label:'Agent Rules' },
   ];
 
@@ -327,6 +343,49 @@ export default function ConfigurationPage() {
             </div>
           </div>
         )}
+        {activeTab === 'timecapture' && (
+          <div style={section}>
+            <div style={sectionTitle}>Staff Time Tracking</div>
+            <p style={{fontSize:'13px',color:'#6B7280',margin:'0 0 4px',lineHeight:'1.5'}}>
+              Whether staff log actual time spent on each task type — the measured hours that can feed fee reconciliation.
+              Because states differ (and often disagree) on which labor is chargeable to a requester, this is your city's call, per screen.
+              Time is always measured quietly in the background; these settings only control whether staff SEE the timer and are asked to confirm their time when they finish a task.
+            </p>
+            {tcMsg && <div style={{background: tcMsg.indexOf('saved')>=0 ? '#F0FDF4':'#FEF2F2', border:'1px solid '+(tcMsg.indexOf('saved')>=0 ? '#86EFAC':'#FCA5A5'), borderRadius:'8px', padding:'10px 12px', fontSize:'13px', color: tcMsg.indexOf('saved')>=0 ? '#166534':'#DC2626'}}>{tcMsg}</div>}
+            {(tcUis||[]).map(function(u){
+              var cur = (tc && tc[u.key]) || 'off';
+              var modes = [['off','Off'],['discretion','User discretion'],['always','Always']];
+              return (
+                <div key={u.key} style={{opacity: u.available ? 1 : 0.55, borderBottom:'1px solid #F3F4F6', paddingBottom:'16px'}}>
+                  <div style={{display:'flex',alignItems:'center',gap:'8px',marginBottom:'2px'}}>
+                    <label style={{fontSize:'13px',fontWeight:'600',color:'#374151'}}>{u.label}</label>
+                    {!u.available && <span style={{fontSize:'11px',fontWeight:600,color:'#9CA3AF',background:'#F3F4F6',borderRadius:'20px',padding:'2px 8px'}}>Not yet available</span>}
+                  </div>
+                  <div style={{display:'flex',gap:'8px',marginTop:'8px'}}>
+                    {modes.map(function(m){
+                      var active = cur === m[0];
+                      return <button key={m[0]} type="button" disabled={!u.available}
+                        onClick={function(){ if (u.available) setTcMode(u.key, m[0]); }}
+                        style={{padding:'8px 16px',borderRadius:'8px',border:'2px solid '+(active?'#1F4E79':'#E5E7EB'),background:active?'#EBF3FB':'white',color:active?'#1F4E79':'#6B7280',fontSize:'13px',fontWeight:active?'700':'500',cursor: u.available?'pointer':'not-allowed'}}>
+                        {m[1]}
+                      </button>;
+                    })}
+                  </div>
+                </div>
+              );
+            })}
+            <div style={{fontSize:'12px',color:'#9CA3AF',lineHeight:'1.5'}}>
+              <strong>Off</strong> — no timer shown; finishing a task moves straight on. &nbsp;
+              <strong>User discretion</strong> — the timer shows and, on finish, staff confirm their time or Skip it. &nbsp;
+              <strong>Always</strong> — the timer shows and staff always confirm their time on finish.
+            </div>
+            <div style={{display:'flex',justifyContent:'flex-end'}}>
+              <button type="button" onClick={saveTc} disabled={tcSaving} style={{padding:'11px 32px',background:'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}>
+                {tcSaving ? 'Saving…' : 'Save Time-Tracking Settings'}
+              </button>
+            </div>
+          </div>
+        )}
         {activeTab === 'agent' && (
           <div style={section}>
             <div style={sectionTitle}>Agent Behavior Rules</div>
@@ -378,11 +437,13 @@ export default function ConfigurationPage() {
             </div>
           </div>
         )}
-        <div style={{display:'flex',justifyContent:'flex-end',marginTop:'8px'}}>
-          <button type="submit" disabled={saving} style={{padding:'11px 32px',background:'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}>
-            {saving ? 'Saving...' : 'Save Configuration'}
-          </button>
-        </div>
+        {activeTab !== 'timecapture' && (
+          <div style={{display:'flex',justifyContent:'flex-end',marginTop:'8px'}}>
+            <button type="submit" disabled={saving} style={{padding:'11px 32px',background:'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}>
+              {saving ? 'Saving...' : 'Save Configuration'}
+            </button>
+          </div>
+        )}
       </form>
     </div>
   );

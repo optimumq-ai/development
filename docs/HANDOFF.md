@@ -3849,3 +3849,42 @@ So this is now a RESEARCH + DESIGN sub-task, not a one-line default:
 3. Resolve Fork 2 (trigger) with Kevin.
 4. Then build: laborActuals rollup → reconcile pre-fill → labor variance readout in FeeEstimatePanel → harness →
    full suite green (`cd backend && node tests/run_suite.js`, must stay LIVE UNTOUCHED) → live-verify → commit.
+
+---
+
+## 2026-07-15 · Slice E · Fork 1 RESOLVED + BUILT — time-capture visibility config (city-owned toggle). 594/594.
+
+**Kevin killed the statute-research path.** After reviewing 12 states himself he found labor billability too
+ambiguous to encode (no consistent "review" concept; vague "reasonable cost"; several states allow legal-dept
+labor only "in certain circumstances"). So Fork 1 is NOT a per-jurisdiction table — the **city decides**, per
+task UI, via a config panel. The deep-research harness I had queued was cancelled before running.
+
+**Built this session (bounded slice, greenlit):**
+- **Config model** — `services/timeCaptureConfig.js`: one global `system_config` JSON key
+  `time_capture_visibility = { search, estimate, legal_redaction, mrr, legal }`, each `off|discretion|always`,
+  default all **off**; defaults-merge + sanitize-to-off on junk. Endpoints in `routes/config.js`:
+  `GET /config/time-capture` (any authed user) + `PUT` (SYSTEM_ADMIN/DIRECTOR).
+- **Skip finalize** — new `{skipped:true}` branch of `POST /tasks/:id/work/finalize` (`routes/tasks.js`): raw kept
+  in `work_measured_seconds`, **`work_seconds` NULL** (nothing billable), `work_finalized=1`.
+- **Frontend** — `WorkTimer.js` gains `useTimeCaptureMode(uiKey)` + `timer.skip()` + a **Skip** button in the
+  modal (discretion). Heartbeat ALWAYS runs (raw always captured); mode gates only visibility + finish flow.
+  **off** = no badge, Complete forwards; **discretion** = badge + modal w/ Skip; **always** = badge + modal.
+  Wired fully on **record-search** (`'search'`) and **redaction** (`'legal_redaction'`); **estimate** honors
+  off/always for **badge visibility** only (full modal enforcement waits on the estimate finalize-ceremony
+  consolidation — unchanged Slice-D fast-follow). Panel = a **Time Tracking** tab on ConfigurationPage; MRR + Legal
+  rows shown **disabled / "Not yet available"** (screens not built).
+- **Harness** `verify_timecapture_config.js` (default-off, sanitize/merge, role gate, skip semantics) — 12/12.
+  Registered in run_suite ALL. **Full suite 594/594, live untouched.** Frontend compiles (+1.07 KB).
+- **Verified live:** API respawned (root PM2), route mounted (401 not 404), authed GET returns all-off + correct
+  availability/modes; **panel screenshotted** rendering correctly (Off selected, MRR/Legal greyed).
+- **Spec** updated same-commit: `SPEC_tasks_roles_mrr_fees.md` §2.1 (new Slice-E·Fork1 paragraph) + §14 parks the
+  **legal-hours-in-estimate / intake-routing** open-design item (Kevin's sketch: ORO intake review; MRR→manual
+  assign legal or plug hours; single-child→fulfillment team spawns a legal-estimate task).
+
+**Slice E remainder still open** (the reconcile WIRING itself — this session did Fork 1 only):
+- **Fork 2 (trigger) — STILL UNANSWERED.** When measured-labor reconciliation fires. Rec: auto-COMPUTE a draft on
+  last-billable-task finalize; revised-notice SEND stays human-gated. Needs Kevin's confirm.
+- Then the original Slice E build: `laborActuals.js` rollup (sum finalized `work_seconds` per request, task-type →
+  fee driver) → pre-fill `POST /fee-estimates/request/:id/reconcile` → labor estimate-vs-actual readout in
+  `FeeEstimatePanel` → harness → suite green → commit. Note: with capture now **optional per city**, the rollup
+  must tolerate tasks with NULL `work_seconds` (skipped/off) — fall back to manual entry, don't assume actuals exist.

@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
-import { useWorkTimer, WorkTimerBadge, WorkTimerCompleteModal } from '../components/ui/WorkTimer';
+import { useWorkTimer, WorkTimerBadge, WorkTimerCompleteModal, useTimeCaptureMode } from '../components/ui/WorkTimer';
 
 // Redaction task screen (SPEC_redaction_automation.md slice 7 / SPEC_redaction_task_screen.md).
 // Full-bleed workstation a redaction/legal_redaction task opens into (not the generic request page).
@@ -32,9 +32,16 @@ export default function RedactionTaskPage() {
   var params = useParams();
   var nav = useNavigate();
   var taskId = params.taskId;
-  var timer = useWorkTimer(taskId);            // actual-labor work timer (Slice D)
+  var timer = useWorkTimer(taskId);            // actual-labor work timer (Slice D) — heartbeat always runs
+  var tcm = useTimeCaptureMode('legal_redaction'); // city's per-UI capture mode (Slice E): off|discretion|always
   var [laborModal, setLaborModal] = useState(null); // {action:'submit'|'apply'} while the completion popup is open
-  function requestComplete(action) { timer.flush(); setLaborModal({ action: action }); }
+  async function doComplete(action) { timer.markFinalized(); if (action === 'apply') { await apply(); } else { await submitForReview(); } }
+  async function requestComplete(action) {
+    timer.flush();
+    // off: no log window — finalize with no billable time and complete straight through. else: the log window.
+    if (tcm.mode === 'off') { await timer.skip(); await doComplete(action); return; }
+    setLaborModal({ action: action });
+  }
 
   var [task, setTask] = useState(null);
   var [files, setFiles] = useState([]);
@@ -265,7 +272,7 @@ export default function RedactionTaskPage() {
         <div style={sty.grp}>
           <button style={sty.back} onClick={function () { nav('/my-tasks'); }}>‹ My Tasks</button>
           <span style={sty.reqid}>{task && task.request_number}</span>
-          <WorkTimerBadge timer={timer} />
+          {tcm.mode !== 'off' ? <WorkTimerBadge timer={timer} /> : null}
           {files.length ? (
             <select value={fileId || ''} onChange={function (e) { setFileId(e.target.value); }} style={sty.filepick} title="Records included in the response">
               {files.map(function (f, i) { return <option key={f.id} value={f.id}>{f.original_name} · file {i + 1} of {files.length}</option>; })}
@@ -534,10 +541,10 @@ export default function RedactionTaskPage() {
       </div>
 
       {searchOpen ? <SearchModal requestId={task && task.request_id} onClose={function () { setSearchOpen(false); }} /> : null}
-      {laborModal ? <WorkTimerCompleteModal open taskId={taskId} seconds={timer.seconds}
+      {laborModal ? <WorkTimerCompleteModal open taskId={taskId} seconds={timer.seconds} allowSkip={tcm.mode === 'discretion'}
         contextLabel={(reviewMode ? 'Redaction review' : 'Redaction') + ' · ' + ((task && task.request_number) || '')}
         confirmLabel={laborModal.action === 'apply' ? 'Log time & release' : 'Log time & submit'}
-        onConfirm={async function () { timer.markFinalized(); if (laborModal.action === 'apply') { await apply(); } else { await submitForReview(); } setLaborModal(null); }}
+        onConfirm={async function () { await doComplete(laborModal.action); setLaborModal(null); }}
         onClose={function () { setLaborModal(null); }} /> : null}
     </div>
   );
