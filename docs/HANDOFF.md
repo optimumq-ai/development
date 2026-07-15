@@ -3882,9 +3882,18 @@ task UI, via a config panel. The deep-research harness I had queued was cancelle
   assign legal or plug hours; single-child→fulfillment team spawns a legal-estimate task).
 
 **Slice E remainder still open** (the reconcile WIRING itself — this session did Fork 1 only):
-- **Fork 2 (trigger) — STILL UNANSWERED.** When measured-labor reconciliation fires. Rec: auto-COMPUTE a draft on
-  last-billable-task finalize; revised-notice SEND stays human-gated. Needs Kevin's confirm.
-- Then the original Slice E build: `laborActuals.js` rollup (sum finalized `work_seconds` per request, task-type →
-  fee driver) → pre-fill `POST /fee-estimates/request/:id/reconcile` → labor estimate-vs-actual readout in
-  `FeeEstimatePanel` → harness → suite green → commit. Note: with capture now **optional per city**, the rollup
-  must tolerate tasks with NULL `work_seconds` (skipped/off) — fall back to manual entry, don't assume actuals exist.
+- **Fork 2 (trigger) — RESOLVED 2026-07-15 (Kevin):** **auto-draft on last-billable-task finalize; human-gated
+  send.** When a request's last billable work task finalizes, auto-COMPUTE a *draft* reconciliation
+  (`kind='reconciliation'` snapshot). The revised-notice SEND stays human-gated exactly as it already is via
+  `feeReissue.js` — the auto step only computes/stages, never notifies the requestor on its own.
+- **BOTH FORKS NOW CLOSED — Slice E reconcile wiring is build-ready (its own bounded slice, next session):**
+  1. `services/laborActuals.js` rollup — sum FINALIZED `work_seconds` across a request's billable work tasks,
+     map task-type → fee labor driver (search/review/programming), convert to hours. Request-level (parent
+     roll-up waits for #11). **Must tolerate NULL `work_seconds`** (skipped/off under the new Fork-1 config) —
+     fall back to manual entry, never assume actuals exist.
+  2. Trigger per Fork 2: on the last billable task's finalize, auto-compute the draft reconciliation via the
+     EXISTING `POST /fee-estimates/request/:id/reconcile` machinery (pre-fill actual hours from the rollup).
+  3. Labor estimate-vs-actual readout (hours + variance, not just $) in the EXISTING `FeeEstimatePanel` — no new
+     screen (UI rule).
+  4. `verify_estimate_reconcile.js` harness → register in run_suite ALL → full suite green (LIVE UNTOUCHED) →
+     live-verify → commit.
