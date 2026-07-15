@@ -3775,3 +3775,77 @@ redaction-review** (badge + finalize on submit/apply) and **record-search** (bad
   action is consolidated. Labor is still captured meanwhile via heartbeat.
 - Next: **Slice E** (estimate→actual reconciliation, consumes `work_seconds`), Slice I budget brain, conveyor
   & batch processing, #13 org-wide bottleneck dashboard.
+
+---
+
+## 2026-07-15 · Slice E — estimate→actual reconciliation (SCOPED, NOT BUILT — paused mid-scoping)
+
+Session paused before build (Kevin changing locations). Slice D is done + committed (`30bb4b2`).
+This block is the full scoping state so a fresh session resumes without re-deriving it.
+
+### What Slice E is
+Bridge Slice D's **measured** actual labor (`tasks.work_seconds`, per task) into the **existing** fee
+reconciliation machinery. It is a focused wiring job, NOT a rebuild — most of the reconcile path already exists.
+
+### What ALREADY EXISTS (do NOT rebuild — verified this session)
+- `POST /fee-estimates/request/:requestId/reconcile` (`backend/src/routes/feeEstimates.js:355`) already:
+  recomputes the fee from ACTUAL quantities in the request body, computes `variance_pct`, flags a revised
+  notice when cost rose past the jurisdiction's `estimatePolicy.revisionNotifyPercent` (default 20%), writes a
+  `kind='reconciliation'` snapshot into `request_fee_estimates`, and writes actuals back into the record-type
+  estimate profiles via `estimateProfile.recordActuals()` (Welford running mean — sharpens future auto-estimates).
+- `feeReissue.js` already tracks "revised notice outstanding" (newest reconciliation flagged `renotify_required`
+  and no estimate notice sent since).
+- `feeEngine.js` already runs in two modes — ESTIMATE (projected) and FINAL (actual) — via the same
+  `compute(config, request)` with different quantities (see feeEngine.js:14). Labor drivers are
+  `search / review / programming` (`LABOR_ORDER`, feeEngine.js:56). It already handles billing-increment
+  rounding, free-hour allowances, and labor billability gates (hard non-billable states CA/NY/OH; all-or-nothing
+  triggers TX>50pp, FL/NY hour thresholds; the paper-only 50-page bar).
+- `request_fee_estimates` already has `baseline_total`, `variance_pct`, `renotify_required`, `kind`.
+
+### The GAP Slice E closes
+The ACTUAL labor hours fed to `/reconcile` are currently TYPED BY HAND. Slice D now measures them
+(`work_seconds`), but nothing connects the two. Slice E:
+1. **Rollup service** (new, e.g. `backend/src/services/laborActuals.js`): sum finalized `work_seconds` across a
+   request's billable work tasks, map task type → fee labor driver, convert to hours. Roll up at the REQUEST
+   level (per-component / MRR attribution DEFERRED — parent roll-up waits for #11, consistent with Slice B/C).
+2. **Pre-fill** the reconcile inputs from that rollup; staff still confirm/override (same accept/adjust ethos
+   as Slice D). Use the FINALIZED `work_seconds` (incl. any clerk adjustment) as the billable number;
+   `work_measured_seconds` (raw) retained for audit.
+3. **Surface labor estimate-vs-actual** (estimated hours vs measured hours + variance, not just dollars) in the
+   EXISTING `frontend/src/components/ui/FeeEstimatePanel.js` — NO new screen (UI rule: a dedicated
+   reconciliation screen would need a separate design-direction step first).
+4. `backend/tests/verify_estimate_reconcile.js` harness; register in `tests/run_suite.js` ALL array.
+
+### OPEN FORKS — needed before build
+
+**Fork 1 — task-type → labor-driver mapping + billability.** ⚠️ Kevin gave a NEW DIRECTION here, not a pick:
+> "perhaps you can review documentation for different jurisdictions to determine what different types of
+> labor/tasks are billable. And if it's not always the same across states, make the time-capture toggle
+> visible/not-visible depending on the statutes for the state."
+So this is now a RESEARCH + DESIGN sub-task, not a one-line default:
+  - Research per-jurisdiction: which task/labor types are billable to the requestor (search vs review/redaction
+    vs programming), since it varies by state (some states bar labor entirely; some bar redaction/review time
+    specifically; some allow all). Use the research approach in [[research-tool-sizing]] — likely the deep
+    harness given breadth. Anchor to the states already profiled (TX/FL/NY/CA/OH seen in feeEngine gates).
+  - The measured-labor timer's VISIBILITY (and whether that task's time is billable) should be GATED PER
+    JURISDICTION STATUTE — a config-driven toggle, not hardcoded. This likely extends the fee profile / jurisdiction
+    config (billable-labor-type flags per driver) rather than a code constant. Note the interaction with the
+    existing feeEngine `laborGate` (which already zeroes non-billable labor at pricing time) — visibility gating is
+    the UPSTREAM twin of that downstream gate.
+  - My proposed default mapping (for reference, pending the research): record_search→search;
+    redaction+legal_redaction+redaction_qa+legal_review→review; estimate+routing_review+fee_waiver→non-billable.
+
+**Fork 2 — reconcile trigger (UNANSWERED).** When does measured-labor reconciliation fire?
+  - (Recommended) Auto-COMPUTE a DRAFT reconciliation when the request's last billable work task finalizes; the
+    revised-notice SEND stays human-gated (as it already is via feeReissue). Kevin earlier said "auto-reconcile
+    on completion with threshold/waiver bypass," which points here.
+  - vs. Manual — pre-fill only when staff open the reconcile action.
+
+### RESUME CHECKLIST for a fresh session
+1. Re-read this block + `docs/SPEC_fees_estimates_payments.md` (reconcile/variance §) + `SPEC_tasks_roles_mrr_fees.md`
+   §2.1 (Slice A–D timing layers).
+2. Resolve Fork 1 via the per-jurisdiction billability RESEARCH Kevin asked for; propose the config-driven
+   billable-labor + timer-visibility model; get Kevin's sign-off (product/legal fork).
+3. Resolve Fork 2 (trigger) with Kevin.
+4. Then build: laborActuals rollup → reconcile pre-fill → labor variance readout in FeeEstimatePanel → harness →
+   full suite green (`cd backend && node tests/run_suite.js`, must stay LIVE UNTOUCHED) → live-verify → commit.
