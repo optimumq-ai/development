@@ -37,7 +37,8 @@ export default function RequestTimelinePanel(props) {
   var total = tl.segments.reduce(function (a, s) { return a + s.durationMs; }, 0) || tl.totalMs || 1;
   // stage brackets = consecutive segments sharing a stage
   var groups = [];
-  tl.segments.forEach(function (s) { var l = groups[groups.length - 1]; if (l && l.label === s.stageLabel) l.dur += s.durationMs; else groups.push({ label: s.stageLabel, dur: s.durationMs }); });
+  tl.segments.forEach(function (s) { var l = groups[groups.length - 1]; if (l && l.stage === s.stage) l.dur += s.durationMs; else groups.push({ stage: s.stage, label: s.stageLabel, dur: s.durationMs }); });
+  var stageBudgets = tl.stageBudgets || {};
   // bottleneck = longest actionable segment (index)
   var bnIdx = -1, bnDur = -1;
   tl.segments.forEach(function (s, i) { if (s.phase !== 'hold' && s.phase !== 'done' && s.durationMs > bnDur) { bnDur = s.durationMs; bnIdx = i; } });
@@ -55,9 +56,11 @@ export default function RequestTimelinePanel(props) {
       {/* stage brackets */}
       <div style={{ display: 'flex', height: '22px', gap: '2px', marginTop: '14px', marginBottom: '4px' }}>
         {groups.map(function (g, i) {
+          var bd = stageBudgets[g.stage];
+          var over = bd != null && g.dur > bd * 86400000;
           return <div key={i} style={{ flex: g.dur, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
-            <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '.03em', color: '#66717F', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '0 2px' }}>{g.label}</div>
-            <div style={{ height: '4px', borderTop: '1.5px solid #D3DAE4', borderLeft: '1.5px solid #D3DAE4', borderRight: '1.5px solid #D3DAE4', borderRadius: '4px 4px 0 0', marginTop: '2px' }} />
+            <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '.03em', color: over ? '#C22B2B' : '#66717F', textTransform: 'uppercase', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', padding: '0 2px' }} title={bd != null ? 'budget ' + bd + 'd' : ''}>{g.label}{bd != null ? ' · ' + bd + 'd' + (over ? ' ⚠' : '') : ''}</div>
+            <div style={{ height: '4px', borderTop: '1.5px solid ' + (over ? '#C22B2B' : '#D3DAE4'), borderLeft: '1.5px solid ' + (over ? '#C22B2B' : '#D3DAE4'), borderRight: '1.5px solid ' + (over ? '#C22B2B' : '#D3DAE4'), borderRadius: '4px 4px 0 0', marginTop: '2px' }} />
           </div>;
         })}
       </div>

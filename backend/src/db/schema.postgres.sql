@@ -1039,3 +1039,27 @@ CREATE TRIGGER trg_tasks_log AFTER INSERT OR UPDATE ON tasks FOR EACH ROW EXECUT
 
 -- Redaction on-entry automation gate: discovery runs ONCE per job (first entry), never re-run on re-open.
 ALTER TABLE redaction_jobs ADD COLUMN IF NOT EXISTS discovered_at TEXT;
+
+-- TIME BUDGETS (Slice C). Best-guess calendar-days budget per step, keyed by (record_type_id, task_type);
+-- record_type_id NULL is the GENERIC default for that task type. Mirrors the estimate-profile pattern so the
+-- future budget "brain" (AI best-fit + supervisor override) slots in the same way. Compared against the
+-- Slice-B actual elapsed to yield "budgeted days remaining / over budget". Seeded values are PROVISIONAL.
+CREATE TABLE IF NOT EXISTS time_budgets (
+  id TEXT PRIMARY KEY,
+  record_type_id TEXT,
+  task_type TEXT NOT NULL,
+  budget_days REAL NOT NULL,
+  source TEXT DEFAULT 'generic',
+  updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_time_budgets ON time_budgets (COALESCE(record_type_id,''), task_type);
+INSERT INTO time_budgets (id, record_type_id, task_type, budget_days, source) VALUES
+  ('tb-estimate', NULL, 'estimate', 2, 'generic'),
+  ('tb-record_search', NULL, 'record_search', 3, 'generic'),
+  ('tb-redaction', NULL, 'redaction', 4, 'generic'),
+  ('tb-legal_redaction', NULL, 'legal_redaction', 6, 'generic'),
+  ('tb-legal_review', NULL, 'legal_review', 4, 'generic'),
+  ('tb-redaction_qa', NULL, 'redaction_qa', 2, 'generic'),
+  ('tb-fee_waiver', NULL, 'fee_waiver', 1, 'generic'),
+  ('tb-routing_review', NULL, 'routing_review', 1, 'generic')
+ON CONFLICT (id) DO NOTHING;

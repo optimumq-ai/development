@@ -50,6 +50,14 @@ function clockLabel(t) {
   return (CLOCK_LABEL[tm.currentStatus] || tm.currentStatus) + ' ' + humanDur(tm.currentSinceMs);
 }
 
+// Budget status for a row (Slice C): over / due-soon / on-track vs the step's budget.
+function budgetInfo(t) {
+  var b = t.budget; if (!b) return null;
+  if (b.state === 'over') return { text: humanDur(b.overMs) + ' over budget', color: '#C22B2B', weight: 700 };
+  if (b.state === 'warn') return { text: humanDur(b.remainingMs) + ' left of ' + b.budgetDays + 'd', color: '#B45309', weight: 600 };
+  return { text: humanDur(b.remainingMs) + ' left of ' + b.budgetDays + 'd', color: '#17803D', weight: 500 };
+}
+
 function dayDiff(d) { if (!d) return null; return (new Date(d) - new Date()) / (1000 * 60 * 60 * 24); }
 function deadlineState(d) { var x = dayDiff(d); if (x === null) return null; if (x < 0) return 'over'; if (x <= 3) return 'soon'; return null; }
 function deadlineLabel(d) {
@@ -108,6 +116,7 @@ export default function MyTasksPage() {
   var overdue = mine.filter(function (t) { return deadlineState(t.deadline_date) === 'over'; }).length;
   var soon = mine.filter(function (t) { return deadlineState(t.deadline_date) === 'soon'; }).length;
   var returned = mine.filter(function (t) { return t.return_reason; }).length;
+  var overBudget = mine.filter(function (t) { return t.budget && t.budget.state === 'over'; }).length;
 
   // group my tasks by type
   var byType = {};
@@ -146,7 +155,7 @@ export default function MyTasksPage() {
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: '13px', color: '#1A2230', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.record_type_name || t.request_description || t.title || TYPE_LABEL[t.type] || t.type}</div>
-          <div style={{ fontSize: '11.5px', color: C.muted }}>{clockLabel(t)}{t.team_name ? ' · ' + t.team_name : ''}</div>
+          <div style={{ fontSize: '11.5px', color: C.muted }}>{clockLabel(t)}{(function () { var bi = budgetInfo(t); return bi ? <span> · <span style={{ color: bi.color, fontWeight: bi.weight }}>{bi.text}</span></span> : null; })()}{t.team_name ? ' · ' + t.team_name : ''}</div>
         </div>
         <div style={{ fontSize: '12.5px', textAlign: 'right', minWidth: '92px', color: ds === 'over' ? C.crit : ds === 'soon' ? C.warn : C.muted, fontWeight: ds ? 700 : 400 }}>{deadlineLabel(t.deadline_date)}</div>
         <Link to={screenFor(t)} style={{ fontSize: '12.5px', fontWeight: 600, color: C.accent, background: C.accentSoft, border: '1px solid #E5E7EB', borderRadius: '7px', padding: '5px 11px', textDecoration: 'none', whiteSpace: 'nowrap' }}>{actionLabel(t)}</Link>
@@ -233,9 +242,10 @@ export default function MyTasksPage() {
 
       {msg ? <div style={{ fontSize: '13px', color: '#9B1C1C', background: '#FDE8E8', border: '1px solid #FBD5D5', borderRadius: '8px', padding: '9px 12px' }}>{msg}</div> : null}
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(' + (returned ? 4 : 3) + ',1fr)', gap: '12px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(' + (3 + (returned ? 1 : 0) + (overBudget ? 1 : 0)) + ',1fr)', gap: '12px' }}>
         {stat('Assigned to you', assigned, 'accent')}
         {returned ? stat('Needs corrections', returned, 'crit') : null}
+        {overBudget ? stat('Over budget', overBudget, 'crit') : null}
         {stat('Overdue', overdue, overdue ? 'crit' : 'ok')}
         {stat('Due ≤ 3 days', soon, soon ? 'warn' : 'ok')}
       </div>

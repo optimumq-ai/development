@@ -3708,3 +3708,36 @@ Design-signed-off via a mockup (dataviz-validated phase palette), then built to 
 ### NEXT
 - **Slice C** — budgeted-vs-actual overlay (generic budget file first) → turns "2d in review" into "1d over budget".
 - Then D (work timer) · E (est→actual reconciliation) · conveyor & batch · #13 org-wide bottleneck dashboard.
+
+---
+
+## 2026-07-15 (pm) — Slice C: time-budget overlay ("2d in review" → "over budget"). 572/572.
+
+Turns the Slice-B raw clocks into over/under-budget, off a generic budget file (Kevin: generic now; the brain later).
+
+- **`time_budgets` table** keyed by `(record_type_id, task_type)` — NULL record_type = the GENERIC default,
+  seeded provisional per-task-type days (redaction 4 · record_search 3 · estimate 2 · legal 6/4 · qa 2 · …).
+  Mirrors the estimate-profile pattern so the future budget "brain" adds per-record-type rows the same way.
+- **`taskBudget.js`** compares the budget against the person's OWN active elapsed (queue + process + returned,
+  **read from the same Slice-B trail as the displayed clock so the two agree**; in-review excluded — that's the
+  reviewer's separately-budgeted step).
+- **My Tasks**: a per-row budget chip ("2d left of 3d" green / "4d 6h over budget" red) + an "Over budget" tile.
+- **B-breakdown**: each work-stage bracket shows its budget and turns red when the actual exceeds it.
+
+### Evidence
+- Suite **572/572** (new `verify_time_budget` 11/11: seed present; the math — on-track / over / warn; lookup
+  specific-then-generic; active-elapsed excludes in-review; `/tasks/mine` carries a budget per task). Live clean.
+- **Live-verified (screenshot)**: My Tasks shows "Over budget 3" and each row's budget matches its clock —
+  "In queue 7d 6h · 4d 6h over budget" (7d6h − 3d). Caught + fixed a divergence mid-build (budget was using
+  assigned_at; now uses the trail elapsed so budget and clock always agree).
+
+### STATE
+`main` + this commit. Suite **572/572**. Live API restarted, budget seeded (8 generic rows), frontend deployed.
+The whole timing arc is now done: **Slice A** (bookmark trail + entry contract + awaiting-review) · **B-core**
+(live clocks) · **B-breakdown** (bottleneck timeline) · **C** (budget overlay).
+
+### NEXT
+- **Slice I** (budget "brain") — best-guess per-record-type profiles + AI best-fit + supervisor override→template
+  + feedback loop — REPLACES the generic file. Deferred (Kevin).
+- **D** (per-task work timer / actual labor) · **E** (estimate→actual reconciliation) · conveyor & batch ·
+  #13 org-wide bottleneck dashboard.

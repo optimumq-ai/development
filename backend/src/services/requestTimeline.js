@@ -52,7 +52,7 @@ function coverStretch(stage, S, E, intervals) {
 
 async function build(requestId, nowMs) {
   nowMs = nowMs || Date.now();
-  var req = await get("SELECT id, created_at, stage, status FROM requests WHERE id = ?", [requestId]);
+  var req = await get("SELECT id, created_at, stage, status, record_type_id FROM requests WHERE id = ?", [requestId]);
   if (!req) return null;
   var submitMs = parseAt(req.created_at) || nowMs;
   var hist = await all("SELECT stage_from, stage_to, created_at FROM request_history WHERE request_id = ? AND stage_to IS NOT NULL ORDER BY created_at, id", [requestId]);
@@ -100,9 +100,17 @@ async function build(requestId, nowMs) {
     .sort(function (a, b) { return (b.end - b.start) - (a.end - a.start); });
   var bn = actionable[0] || null;
 
+  // Per-work-stage budget (Slice C): the step's generic/record-type budget in days, for the timeline markers.
+  var budgetMap = await require('./taskBudget').loadBudgetMap();
+  var stageBudgets = {};
+  Object.keys(STAGE_TASKTYPE).forEach(function (stg) {
+    var d = require('./taskBudget').lookup(budgetMap, req.record_type_id, STAGE_TASKTYPE[stg][0]);
+    if (d != null) stageBudgets[stg] = d;
+  });
+
   return {
     requestId: requestId, submitAt: req.created_at, stage: req.stage, status: req.status,
-    totalMs: totalMs, workingMs: workingMs, waitingMs: waitingMs, byPhase: byPhase,
+    totalMs: totalMs, workingMs: workingMs, waitingMs: waitingMs, byPhase: byPhase, stageBudgets: stageBudgets,
     segments: segs.map(function (s) { return { stage: s.stage, stageLabel: STAGE_LABEL[s.stage] || s.stage, phase: s.phase, durationMs: s.end - s.start }; }),
     bottleneck: bn ? { stage: bn.stage, stageLabel: STAGE_LABEL[bn.stage] || bn.stage, phase: bn.phase, durationMs: bn.end - bn.start } : null
   };
