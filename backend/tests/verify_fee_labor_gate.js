@@ -20,11 +20,13 @@
 // So: the config is now the thing under test. A future edit that drops `billableWhen` -- a reseed from an
 // old script, a hand-tuned profile, a copied config for a new city -- must go RED here, not ship.
 //
-// ⚠ THE paperOnly SCOPE IS UNVERIFIED (Kevin's call 2026-07-14). § 552.261(a) says "pages of PAPER records"
-// and "photocopied", so the bar is configured to apply only to paper deliveries. It is LOAD-BEARING: the
-// demo's default delivery is `email`, so the bar does NOT fire on most requests today. Test D pins that
-// behavior EXACTLY SO IT IS VISIBLE -- if counsel reads the statute as reaching electronic copies, D is the
-// test that must be changed, deliberately, by a human who has read this paragraph.
+// THE paperOnly SCOPE — RESOLVED to paper-only (Kevin's call 2026-07-15, matching AG practice). § 552.261(a)
+// bars labor only on "50 or fewer pages of PAPER records ... photocopied"; the AG copies flow-chart routes
+// ELECTRONIC records straight to labor + overhead + medium with no page gate, and the AG worked examples charge
+// $15/hr + 20% on emailed requests. So the bar is scoped to paper deliveries (mail/pickup) and email -- the
+// portal default -- is charged labor even under 50 pages. Test D pins that divergence: paper barred, email
+// charged. This REVERSES the 2026-07-14 protective paperOnly:false, which the research showed over-protects
+// requesters relative to Texas practice. If a city wants the broader protective scope, it sets paperOnly:false.
 process.chdir('/opt/optimumq/backend');
 require('/opt/optimumq/backend/node_modules/dotenv').config({ path: '/opt/optimumq/backend/.env' });
 require(__dirname + '/testEnv').enforce();
@@ -80,37 +82,44 @@ function price(cfg, quantities, deliveryMethod) {
   // moment the bar is crossed -- the same coupling section H proves, seen from the charged side.
   ok('C3 …+ 20% overhead ($3.00) + 51 × $0.10 copies ($5.10) → $23.10 total', Number(p51.total).toFixed(2) === '23.10');
 
-  console.log('\n=== D. THE BAR APPLIES TO EVERY DELIVERY METHOD — INCLUDING EMAIL ===');
-  // Kevin, 2026-07-14 (reversing the same day's initial paper-only reading): § 552.261(a) reads "pages of
-  // PAPER records ... photocopied", but scoping the bar to paper leaves the overcharge LIVE on the path
-  // nearly every request takes -- the portal's default delivery is `email`. A 50-page-or-fewer request is the
-  // small routine one the bar exists to protect; charging $11.25 of labor on it because we emailed the PDF
-  // rather than photocopying it inverts the statute to the city's benefit. THE EMAIL CASE WAS THE REAL ONE.
-  ok('D1 paperOnly is FALSE — the bar is not scoped away from electronic delivery',
-    cfg.labor.search.billableWhen.paperOnly === false);
+  console.log('\n=== D. THE BAR IS PAPER-ONLY — EMAIL IS CHARGED LABOR (matches AG practice) ===');
+  // Kevin, 2026-07-15 (reversing the same-week protective paperOnly:false): § 552.261(a) bars labor only on
+  // "50 or fewer PAGES of PAPER records ... photocopied". The AG copies flow-chart routes ELECTRONIC records
+  // straight to labor + overhead + medium with NO page gate, and the AG worked examples charge $15/hr + 20% on
+  // emailed requests. So paper keeps the ≤50-page protection; email -- the portal default -- is charged labor.
+  // The 2026-07-14 research showed scoping the bar to ALL methods (paperOnly:false) over-charges the REQUESTER
+  // relative to Texas practice, not the city.
+  ok('D1 paperOnly is TRUE — the bar is scoped to paper deliveries only',
+    cfg.labor.search.billableWhen.paperOnly === true);
   var pEmail = price(cfg, INCIDENT, 'email');
-  ok('D2 the same 8-page report by EMAIL charges ZERO labor', Number(pEmail.laborSubtotal) === 0);
-  ok('D3 …and prices at $0.80 — the copies, and nothing else', Number(pEmail.total).toFixed(2) === '0.80');
-  ok('D4 every delivery method agrees — the bar does not depend on how we hand it over',
-    ['email', 'mail', 'pickup'].every(function (m) { return Number(price(cfg, INCIDENT, m).total).toFixed(2) === '0.80'; }));
+  // 0.25h search + 0.5h review = 0.75h × $15 = $11.25 labor.
+  ok('D2 the same 8-page report by EMAIL now CHARGES labor — 0.75h × $15 = $11.25', Number(pEmail.laborSubtotal).toFixed(2) === '11.25');
+  // $11.25 labor + 20% overhead ($2.25) + 8 × $0.10 copies ($0.80) = $14.30.
+  ok('D3 …+ 20% overhead ($2.25) + 8 × $0.10 copies ($0.80) → $14.30 total', Number(pEmail.total).toFixed(2) === '14.30');
+  ok('D4 paper and email now DIVERGE — mail/pickup are barred ($0.80), email is charged ($14.30)',
+    Number(price(cfg, INCIDENT, 'mail').total).toFixed(2) === '0.80' &&
+    Number(price(cfg, INCIDENT, 'pickup').total).toFixed(2) === '0.80' &&
+    Number(pEmail.total).toFixed(2) === '14.30');
 
   console.log('\n=== G. A PAGE BAR CANNOT BITE ON A REQUEST WITH NO PAGES ===');
-  // The trap that flipping paperOnly opened, and the reason this section exists: audio and video requests
-  // have ZERO pages. Zero is "50 or fewer". So the bar would zero out labor on the MOST EXPENSIVE records a
-  // city holds -- body-worn video redaction runs slower than real time -- and hand them over FREE.
+  // The trap the paper bar opens for audio/video: those records have ZERO pages, and zero is "50 or fewer". On
+  // a PAPER delivery -- a body-cam clip burned to a DVD and mailed -- the bar is in scope, so without a guard it
+  // would zero out labor on the MOST EXPENSIVE records a city holds (body-worn video redaction runs slower than
+  // real time) and hand them over FREE. Tested on paper delivery on purpose: that is where the guard is
+  // load-bearing; on email the bar is already scoped away (section D).
   //
   // § 552.261(a) exempts a request "for 50 or fewer PAGES of paper records". A body-cam request is not a
   // request for pages at all, and Texas prices electronic records under separate rules that DO allow
   // personnel time. So: no pages, no page-bar.
   var bwcQ = { searchHours: 0.5, reviewHours: 4.0, bwPages: 0 };   // the real rt-police-video seed
-  var pBwc = price(cfg, bwcQ, 'email');
-  ok('G1 a body-worn-camera request (0 pages) still charges labor', Number(pBwc.laborSubtotal) > 0);
+  var pBwc = price(cfg, bwcQ, 'mail');
+  ok('G1 a body-worn-camera request (0 pages) delivered on media still charges labor', Number(pBwc.laborSubtotal) > 0);
   ok('G2 …4.5h × $15 = $67.50 labor, + 20% overhead $13.50 = $81.00 total', Number(pBwc.total).toFixed(2) === '81.00');
-  var p911 = price(cfg, { searchHours: 0.25, reviewHours: 1.0, bwPages: 0 }, 'email');
+  var p911 = price(cfg, { searchHours: 0.25, reviewHours: 1.0, bwPages: 0 }, 'mail');
   ok('G3 a 911-audio request (0 pages) likewise charges labor + overhead → $22.50', Number(p911.total).toFixed(2) === '22.50');
-  // And the bar still bites the moment there IS paper.
+  // And the bar still bites the moment there IS paper (on a paper delivery).
   ok('G4 …but ONE page of paper brings the bar straight back',
-    Number(price(cfg, { searchHours: 4, reviewHours: 0, bwPages: 1 }, 'email').laborSubtotal) === 0);
+    Number(price(cfg, { searchHours: 4, reviewHours: 0, bwPages: 1 }, 'mail').laborSubtotal) === 0);
 
   console.log('\n=== H. OVERHEAD — 20% OF LABOR, AND ONLY WHEN LABOR IS CHARGED (§ 70.3(e)) ===');
   // The whole point of the coupling: § 70.3(e)(2) bars overhead on a ≤50-page request "unless the request

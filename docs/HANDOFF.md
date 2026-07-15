@@ -3323,3 +3323,46 @@ literal scope.
 2. The two exceptions are researched but need a **per-request assertion UI** (with a recorded basis / building
    map) to build — deferred until there's a reason.
 3. Tier 1 CLOSED. **Tier 2 open:** fee-choice intake · notification model · My Tasks restructure · role catalog.
+
+---
+
+## 2026-07-15 — Kevin's `paperOnly` call: FLIPPED to paper-only (`paperOnly: true`), matching AG practice. 484/484.
+
+**The one fee decision that was waiting on Kevin.** He chose **B**: the 50-page labor bar is now scoped to
+**paper deliveries** (`mail`/`pickup`); an **electronic** delivery (`email`, the portal default) falls outside
+it and labor is chargeable — exactly what the AG copies flow-chart and worked examples do. This **reverses** the
+same-week protective `paperOnly:false`, which the 2026-07-14 primary-source research had shown *over-protects
+the requester* relative to Texas practice (§8b).
+
+### What changed (one commit)
+- **Config:** `feeProfile.seed.js` `paperOnly: false → true` (+ rationale/`_verified` rewritten), reseeded into
+  **live** through its real creation path (`node scripts/feeProfile.seed.js`), fixture regenerated (`npm run
+  db:fixture`) — `seed_fixture.sql` now carries `paperOnly:true`, zero `false` left.
+- **Engine comment** (`feeEngine.js`) updated to describe the paper-only scope; **no logic change** — the
+  `laborGate` scope check and the no-pages guard were already correct.
+- **SPEC** §8b (paper-only determination), the G-section guard note, and §9 (now RESOLVED) rewritten.
+- **Test** `verify_fee_labor_gate.js`: section D rewritten (D1 paperOnly true; **email now charges labor**;
+  paper vs email **diverge** — mail/pickup $0.80, email $14.30) and section **G moved to `mail`** so the
+  no-pages guard is exercised where it's actually load-bearing (a body-cam clip on a DVD, mailed). 29/29.
+
+### Evidence
+- Suite **484/484**, `verify_fee_labor_gate` 29/29, `verify_estimate_profiles` 15/15, **live census clean —
+  not one row moved.**
+- **Live, read-only:** 8-page incident report by **EMAIL → labor $11.25, total $14.30**; by **MAIL → labor
+  $0.00, total $0.80** (paper protection intact). `assess('rt-incident-reports')` → **automated $14.30**.
+- Safety check before flipping: all ten seeds still price **under the $200 bound by email** (highest is
+  official-email at **$159**, unchanged — it's >50 pages so it always charged labor), so B1 (all ten automated)
+  stays green. The seven page-based ≤50pg types price higher by email now (e.g. incident $0.80→$14.30).
+
+### STATE
+`main` + this note. Suite **484/484**. API + nginx healthy. Live fee config reseeded, fixture regenerated.
+**Kevin's three fee calls are now all resolved** (paperOnly flipped; overhead seeded 2026-07-14; the two
+statutory exceptions researched, still unbuilt pending a per-request assertion UI).
+
+### NEXT
+1. Optional: counsel may still weigh the **one unsettled edge** — a small emailed PDF with **no media cost**
+   (no AG source blesses labor there). Current setting charges labor on it; a city wanting the protective
+   reading on that edge alone sets `paperOnly:false`. Documented in SPEC §8b/§9, not hidden.
+2. The two § 552.261(a) exceptions (separate buildings / remote storage) — researched, need a per-request
+   assertion UI with a recorded basis (AG demands a building map for #1). Deferred until there's a reason.
+3. Tier 1 CLOSED. **Tier 2 open:** fee-choice intake · notification model · My Tasks restructure · role catalog.

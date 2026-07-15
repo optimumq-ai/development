@@ -64,11 +64,11 @@ var LABOR_ORDER = ['search', 'review', 'programming']; // order free hours are c
 // `paperOnly: true` + the delivery methods that COUNT as paper (`paperMethods`). An electronic delivery
 // then falls outside the bar and labor is chargeable.
 //
-// ⚠ THE TX PROFILE SETS paperOnly: FALSE — the bar applies to EVERY delivery method. The mechanism stays
-// here because the statute's text really is paper-shaped and another jurisdiction may need that scoping.
-// But scoping it to paper would leave the overcharge live on the path nearly every request takes (`email`),
-// and a 50-page-or-fewer request is exactly the small routine one the bar exists to protect. Where the
-// reading is uncertain, the doubt is not resolved in favour of the city's own revenue.
+// THE TX PROFILE SETS paperOnly: TRUE — the bar is scoped to PAPER deliveries (mail/pickup), so an electronic
+// delivery (`email`, the portal default) falls outside it and labor is chargeable. This matches AG practice:
+// the copies flow-chart routes electronic records straight to labor + overhead + medium with no page gate, and
+// the AG's worked examples charge $15/hr + 20% overhead on emailed requests. Kevin's call 2026-07-15, reversing
+// the same-week protective paperOnly:false after 2026-07-14 research established false over-protects vs Texas.
 function laborGate(lcfg, totalPages, totalLaborHours, deliveryMethod) {
   if (lcfg && lcfg.billable === false) return { charge: false, reason: 'Not chargeable in this jurisdiction.' };
   var bw = lcfg && lcfg.billableWhen;

@@ -19,13 +19,15 @@ var ID = 'feeprof-tx-fr-v1';
 // finding. Populating the estimate profiles would have AUTOMATED that overcharge across the ten most
 // common record types, which is how it was caught.
 //
-// paperOnly: FALSE — the bar applies to EVERY delivery method (Kevin's call, 2026-07-14, reversing the
-// same day's initial paper-only reading). The literal text of § 552.261(a) is paper-shaped ("pages of PAPER
-// records ... photocopied"), but scoping the bar to paper would have left the overcharge LIVE on the path
-// almost every request actually takes: the portal's default delivery is `email`. A 50-page-or-fewer request
-// is the small routine request the legislature was protecting; charging $11.25 of labor on it because we
-// emailed the PDF instead of photocopying it inverts the statute's purpose to the city's benefit. Where the
-// reading is genuinely uncertain, do not resolve the doubt in favour of the government's own revenue.
+// paperOnly: TRUE — the 50-page bar is scoped to PAPER deliveries (mail/pickup); an electronic delivery
+// (`email`, the portal default) falls OUTSIDE it and labor is chargeable (Kevin's call, 2026-07-15). This
+// REVERSES the same-week protective paperOnly:false. The 2026-07-14 primary-source research established that
+// false OVER-charges requesters relative to Texas practice: § 552.261(a) bars labor only on "50 or fewer pages
+// of PAPER records ... photocopied", the AG's copies flow-chart routes ELECTRONIC records straight to labor +
+// overhead + medium with NO page gate, and the AG's own worked examples charge $15/hr + 20% overhead on emailed
+// requests. So paper copies keep the ≤50-page protection while email is priced with labor, matching the AG.
+// `paperMethods` defaults to mail/pickup/paper. The one case the research left genuinely unsettled is a small
+// emailed PDF with no media cost; a city that prefers the broader protective scope there sets paperOnly:false.
 //
 // OVERHEAD = 20% OF THE LABOR CHARGE (1 TAC § 70.3(e)) — VERIFIED 3-0 against primary sources, 2026-07-14
 // (deep-research pass; see SPEC §8b). Every prior "unresearched charge" caveat is now RESOLVED:
@@ -52,10 +54,11 @@ var ID = 'feeprof-tx-fr-v1';
 //       delivery gets ordinary $15/hr. When either exception applies, the FULL labor+overhead charge returns.
 var LABOR_BAR = {
   mode: 'all_or_nothing', trigger: 'pages', threshold: 50,
-  paperOnly: false,
+  paperOnly: true,
   _statute: "Tex. Gov't Code § 552.261(a)",
-  _verified: 'threshold + bar: VERIFIED against statute text. Scope: applied to ALL delivery methods — the ' +
-             'statute reads "paper", but the protective reading governs (Kevin, 2026-07-14). Counsel to confirm.'
+  _verified: 'threshold + bar: VERIFIED against statute text. Scope: PAPER deliveries only (paperOnly:true) — ' +
+             'matches the AG copies flow-chart + worked examples, which charge labor on electronic requests ' +
+             '(Kevin, 2026-07-15; reverses the 2026-07-14 protective paperOnly:false after primary-source research).'
 };
 
 var cfg = {

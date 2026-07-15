@@ -61,20 +61,20 @@ Public Information Handbook) by an adversarial 3-verifier-per-claim research pas
 (§ 552.262 delegates them to the AG); a city may charge **less**, may not exceed **125%** of the AG amount
 absent exemption, and may never exceed **actual cost** (§ 552.262).
 
-**THE BAR APPLIES TO EVERY DELIVERY METHOD — `paperOnly: false`** (Kevin, 2026-07-14).
+**THE BAR IS PAPER-ONLY — `paperOnly: true`** (Kevin, 2026-07-15; matches AG practice). The 50-page labor bar
+applies to **paper deliveries** (`mail`/`pickup`); an **electronic** delivery (`email`, the portal default)
+falls outside it and labor is chargeable, so a small emailed request now prices *labor + 20% overhead + copies*
+(e.g. an 8-page incident report by email = **$14.30**, versus **$0.80** on paper).
 
-> **⚠ The research MOVED this, it did not merely confirm it.** The AG's *actual* position is that the 50-page
-> bar is **paper-only**: the AG copies flow-chart routes electronic records straight to *"labor and overhead +
-> cost of the medium"* with **no page-count gate**, and the AG's own worked examples charge $15/hr + 20% overhead
-> on emailed/electronic requests. So `paperOnly: false` is **more protective than Texas practice requires** — for
-> an electronic request the AG would allow labor and we decline it under 50 pages. The one place the research
-> *supports* the protective reading is the **genuinely unsettled** case: a **small emailed PDF with no media
-> (CD/DVD) cost** is squarely answered by no source (every AG electronic example delivers on physical media), and
-> the research's own instruction was *do not resolve that doubt for city revenue.* **Net: `paperOnly: false`
-> stands as a deliberate, documented policy choice — protective, and defensible for the no-media email case, but
-> a real divergence from AG practice for electronic-with-media requests. This is a live decision for Kevin +
-> counsel, not a settled reading.** The `paperOnly` mechanism stays in the engine for a jurisdiction that wants
-> the literal scope.
+> **This reverses the same-week protective `paperOnly: false`.** The 2026-07-14 primary-source research showed
+> that false is **more protective than Texas practice requires**: the AG copies flow-chart routes electronic
+> records straight to *"labor and overhead + cost of the medium"* with **no page-count gate**, and the AG's own
+> worked examples charge $15/hr + 20% overhead on emailed/electronic requests — so scoping the bar to *every*
+> method over-charged the **requester** relative to Texas, not the city. Kevin's call aligns the demo with AG
+> practice. The one case the research left **genuinely unsettled** is a **small emailed PDF with no media
+> (CD/DVD) cost** — no source blesses charging labor there (every AG electronic example ships on physical
+> media), and the research's instruction was *do not resolve that doubt for city revenue.* A city that prefers
+> the broader protective scope on that edge sets `paperOnly: false`; the mechanism stays in the engine for it.
 
 **⚠ A PAGE BAR CANNOT BITE ON A REQUEST WITH NO PAGES** `[the trap the flip opened]`. Audio and video requests
 have **zero** pages, and zero is *"50 or fewer"* — so the bar would have zeroed out labor on **the most
@@ -83,7 +83,9 @@ expensive records a city holds**, handing body-worn video (redaction runs *slowe
 $18.75, and both fell to $0.00.** § 552.261(a) exempts a request *"for 50 or fewer **pages** of paper records"* —
 a body-cam request is not a request for pages at all, and Texas prices electronic records under separate rules
 that **do** allow personnel time. **No pages, no page-bar** (`feeEngine.laborGate`; tests **G1–G4**). One page of
-paper brings the bar straight back.
+paper brings the bar straight back. With the bar now scoped to paper (`paperOnly: true`), this guard is
+load-bearing for a **paper-delivered** no-page record — a body-cam clip burned to a DVD and mailed — where the
+bar is in scope; the G tests exercise it on `mail` for exactly that reason.
 
 ### Overhead — VERIFIED and now SEEDED (`labor.overheadPct: 20`)
 
@@ -118,8 +120,10 @@ returns (both § 70.3(d) and § 70.3(e)(2) cross-reference § 552.261(a)(1)-(2))
 *(`_verified` stamps on the config record the same provenance.)*
 
 ## 9. Known gaps
-- **`paperOnly: false` diverges from AG practice** (§8b) — the AG charges labor on electronic; we don't under 50
-  pages. A deliberate protective choice, **live for Kevin + counsel**, defensible for the no-media-email case.
+- **`paperOnly: true` — RESOLVED** (§8b): the bar is scoped to paper, matching AG practice (which charges labor
+  on electronic requests). The one edge the research left unsettled — a small emailed PDF with **no media cost** —
+  is now priced with labor under this setting; a city that prefers the protective reading there sets `paperOnly:
+  false`. Counsel may still weigh that single edge, but the demo default now follows Texas practice.
 - **The two § 552.261(a) exceptions are researched but UNBUILT** (§8b) — each needs a per-request assertion with
   a recorded basis (the AG demands a building map for exception 1). Design work, not a config value.
 - **Overhead** (§8b) — **RESOLVED**: verified 20%-of-labor, seeded, safe on ≤50-page requests by construction.
