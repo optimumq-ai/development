@@ -4288,3 +4288,77 @@ the parent's disposition FIELD changes none of that.
 ### Next (unchanged)
 Portal emitting n children (#12) + retire `mrrChoice` · `source_request_id` attribution (§4.2.1) · MRR
 classification roll-up (unspecified) · **the field-design pass Kevin parked** · MRR hub (§14.3 — design first).
+
+---
+
+## 2026-07-16 (f) — THE PORTAL EMITS n CHILDREN. MRR is real. 723/723. `20463a0`
+
+`BUILD_PRIORITY` #12, and the payoff for the wrap. **Until now every request was a parent with exactly ONE
+child** — a citizen describing body-cam footage AND a building permit got one blob of text in one row, routed to
+one department. Now each described record is its own child, finishing independently, while the citizen keeps ONE
+number, ONE fee, ONE deadline (§13 Layer 1/3).
+
+### Built
+- **`createRequest({ children: [{description, componentLabel}, …] })`.** A single record is **not a special
+  case** — it is n = 1 down the identical path. Children numbered `-1..-n`, `child_no` 1..n never 0, each
+  carrying `component_label` (a column that had existed unused since the beginning).
+- **`is_mrr` is DERIVED** (`child_count > 1`) and lives on the **parent** (§4.1). The classifier's and the
+  portal's `isMrr` flag is **advisory only** — what the citizen described decides. `isMrr:true` with one
+  description is ignored.
+- **`POST /public/submit` accepts `records: [{label, description}]`** (or `descriptions: [...]`, or the old
+  single `description`).
+
+### 🚨 THE RETIRED QUESTION WAS STILL LIVE — six days
+The agent was **still asking citizens** *"a single combined request or two separate requests?"* The specs retired
+it **2026-07-10**, but **that commit changed no code** (`20ff869` — "Spec/design only"), and "separate" performed
+no split anyway, so the answer was collected and discarded. Phase 3 now works records **one at a time** and keeps
+each description self-contained. `mrrChoice` is gone from the SUBMIT_READY schema. **This is the second time
+today a 07-10 spec-only commit turned out to have left live code contradicting the contract.**
+
+### 🚨 THE PORTAL ROUTE WAS THE REAL BUG
+It passed `kickIntake:false` and did its own wiring: classify **`b.description` once**, then
+`onIntake(made.id)` — **the FIRST child only**. The moment the portal could describe n records, every child after
+the first was left **unclassified, unrouted, in nobody's worklist, silently** — the exact silent-orphan shape its
+*own* AI-outage fallback exists to prevent (the 2026-07-14 credit-outage fix), reintroduced by a different path.
+Classify + `applyClassification` + history + the `routing_review` fallback now all run **per child**, off each
+child's own description; one failing child never strands its siblings.
+
+**Intake fires SEQUENTIALLY in one background chain, not n parallel ones.** Each `onIntake` is an Anthropic call;
+firing them together rate-limited and **silently lost a child** (observed in the harness). A 10-record MRR would
+have fired ten at once.
+
+### Evidence
+- **`verify_mrr_children` 36/36** (new): 3 records → 3 children with their own descriptions/labels/numbers ·
+  `is_mrr` derived on the parent, 0 on every child · **ONE clock and ONE deadline for all 3, zero clocks on any
+  child** · the scope predicates hold at **n=3** (only ever proved at n=1) · the real portal accepts `records`
+  and routes both children independently · n=1 is the identical shape · a blank child description is refused
+  **naming which one**, with no orphan parent.
+- **SUITE 723/723, GREEN TWICE CONSECUTIVELY, LIVE UNTOUCHED.** **Break-tested:** ignoring the `children` array
+  → red; routing only the first child → reproduces the live bug exactly (`1 / 0`).
+- **LIVE-VERIFIED, real `POST /public/submit` with 3 records:** parent `2026-000001` (`is_mrr=1`, no stage,
+  **1 clock**, 0 tasks) + children `-1/-2/-3` (`permits` / `body-cam` / `minutes`, `is_mrr=0`, **0 clocks each**,
+  **1 task each**, all showing the same deadline `2026-07-26`), each keeping its own description. Purged after —
+  live is back to 3 infrastructure rows, 0 citizen requests.
+
+### ⚠️ TEST-DESIGN DEFECTS FOUND IN MY OWN HARNESSES
+- **`classifier.js` calls Anthropic (`claude-sonnet-4-5`)**, so whether a description routes *confidently* — and
+  whether a task spawns — **varies run to run**. `verify_wrap_parent` passed 39/39 and then failed on identical
+  code. Both harnesses now assert what is true on **every** path: intake ran per child, and everything it
+  produced landed on a child, never the parent. **Do not assert on classifier confidence.**
+- **An intermittent red, now fixed:** `verify_deposit_clock`'s re-receipt assertion is `started_at > bStart1`, a
+  **strict** compare on **second-granularity** timestamps (`nowStr()` truncates). Inside one second the restarted
+  value came back byte-identical and it failed on correct code. Waits out the second rather than weakening to
+  `>=`. (`verify_stage_bypass` flaked once too and was **not** diagnosed — watch it.)
+
+### KNOWN, FLAGGED, NOT FIXED
+**n children = n sequential classifier calls before the 201.** Fine at n=1; a large MRR means minutes of spinner.
+Needs batch classification or classification moved behind the response. **This is a design input for Kevin's
+portal redesign, not a backend fix to guess at.**
+
+### Next — KEVIN IS DESIGNING THE PORTAL UI (his call, 2026-07-16)
+He is redesigning the portal to be friendlier and to let AI pass a request with **a large number of child
+records**. Per the UI rule, that design comes before any more portal work. The backend is the substrate and is
+done. **Do not build portal UI until the design is agreed.**
+Also open: `source_request_id` toll attribution (§4.2.1 — now meaningful) · MRR **classification roll-up**
+(the parent copies its single child's `classification`; MRR needs a worst-case rule — **unspecified**, §6) ·
+the MRR hub (§14.3) · Kevin's parked **field-design pass**.
