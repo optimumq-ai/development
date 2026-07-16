@@ -40,7 +40,26 @@ router.get('/stats/dashboard', requireAuth, async function(req, res) {
 router.get('/', requireAuth, async function(req, res) {
   const userRoles = req.user.roles || [];
   const isElevated = ['SUPERVISOR','DIRECTOR','SYSTEM_ADMIN','DEPT_MANAGER','ATTORNEY_REVIEWER'].some(function(r) { return userRoles.indexOf(r) !== -1; });
-  let sql = "SELECT r.*, d.name as department_name, d.color as department_color, u.display_name as assigned_to_name, (SELECT t.status FROM tasks t WHERE t.request_id = r.id AND t.status IN ('open','assigned','in_progress','returned','awaiting_review') ORDER BY t.updated_at DESC LIMIT 1) AS active_task_status, (SELECT tu.display_name FROM tasks t2 LEFT JOIN users tu ON tu.id = t2.assigned_to WHERE t2.request_id = r.id AND t2.status IN ('assigned','in_progress','returned','awaiting_review') ORDER BY t2.updated_at DESC LIMIT 1) AS active_task_assignee, (SELECT COUNT(*) FROM objections o WHERE o.request_id = r.id AND o.status IN ('open','tentative')) AS open_objections FROM requests r LEFT JOIN departments d ON d.id = r.department_id LEFT JOIN users u ON u.id = r.assigned_to WHERE 1=1 AND r.request_number != 'LIBRARY' AND r.request_number NOT LIKE 'SYS-%'" + scope.andLeaf('r');
+  // THE QUEUE LISTS WORK ROWS — children (§7: "filters, reports and worklists operate on CHILD rows"). But four
+  // of the columns it renders are PARENT facts, and reading them off the leaf is wrong now that children exist:
+  //
+  //   request_number — a child's own number carries the component suffix ('2026-000001-1'). That is a number the
+  //                    citizen has never seen and cannot quote on the phone. Resolve it through the parent.
+  //   is_mrr         — DERIVED and PARENT-level (§4.1). requestCreate forces `is_mrr = 0` on every child, so
+  //                    reading it off the leaf meant the MRR badge could NEVER render. Resolve it through the parent.
+  //   parent_id      — the grouping key the queue renders by (parent line, children indented).
+  //   child_count    — decides collapse: at 1 the pair renders as a single line and the '-1' is hidden.
+  //
+  // `r.*` already emits request_number and is_mrr. The explicit aliases below come LATER in the select list and
+  // node-pg keeps the LAST column of a duplicated name — that is what makes the parent's value win. This is a
+  // real driver behaviour, but it is implicit, so verify_queue_parent_child asserts it rather than trusting it.
+  let sql = "SELECT r.*, " +
+    scope.numberExpr('r') + " AS request_number, " +   // the CITIZEN's number (the parent's)
+    "r.request_number AS component_number, " +          // this child's own suffixed number
+    "COALESCE(_p.id, r.id) AS parent_id, " +
+    "COALESCE(_p.is_mrr, r.is_mrr) AS is_mrr, " +
+    "(SELECT COUNT(*) FROM requests _c2 WHERE _c2.master_request_id = COALESCE(_p.id, r.id)) AS child_count, " +
+    "d.name as department_name, d.color as department_color, u.display_name as assigned_to_name, (SELECT t.status FROM tasks t WHERE t.request_id = r.id AND t.status IN ('open','assigned','in_progress','returned','awaiting_review') ORDER BY t.updated_at DESC LIMIT 1) AS active_task_status, (SELECT tu.display_name FROM tasks t2 LEFT JOIN users tu ON tu.id = t2.assigned_to WHERE t2.request_id = r.id AND t2.status IN ('assigned','in_progress','returned','awaiting_review') ORDER BY t2.updated_at DESC LIMIT 1) AS active_task_assignee, (SELECT COUNT(*) FROM objections o WHERE o.request_id = r.id AND o.status IN ('open','tentative')) AS open_objections FROM requests r" + scope.numberJoin('r') + " LEFT JOIN departments d ON d.id = r.department_id LEFT JOIN users u ON u.id = r.assigned_to WHERE 1=1 AND r.request_number != 'LIBRARY' AND r.request_number NOT LIKE 'SYS-%'" + scope.andLeaf('r');
   const params = [];
   if (!isElevated) {
     var orTeam = await get("SELECT id FROM departments WHERE kind='team' AND is_open_records=1 ORDER BY sort_order LIMIT 1");
@@ -54,11 +73,19 @@ router.get('/', requireAuth, async function(req, res) {
   if (req.query.triage) { sql += " AND r.department_id IS NULL"; } // Needs-triage: Unassigned requests awaiting placement
   if (req.query.objections) { sql += " AND EXISTS (SELECT 1 FROM objections o WHERE o.request_id = r.id AND o.status IN ('open','tentative'))"; }
   if (req.query.search) {
-    sql += ' AND (r.request_number LIKE ? OR r.requestor_name LIKE ? OR r.requestor_email LIKE ?)';
+    // Search the CITIZEN's number, not the child's suffixed one — staff type the number the requestor quotes.
+    // (Matching the parent's number returns every child of it, which is what "find request 2026-000012" means.)
+    sql += ' AND (' + scope.numberExpr('r') + ' LIKE ? OR r.requestor_name LIKE ? OR r.requestor_email LIKE ?)';
     const s = '%' + req.query.search + '%';
     params.push(s, s, s);
   }
-  sql += ' ORDER BY r.created_at DESC, r.id DESC LIMIT 200'; // r.id: deterministic tiebreaker — created_at ties were shuffling the queue between reloads
+  // Order by the PARENT's recency, then by child_no ASCENDING within each request — the queue renders a parent
+  // line with its children indented beneath (§7), so the children of one request must arrive together and in
+  // component order. Ordering by the child's own created_at instead put an MRR's records on screen backwards
+  // (-3, -2, -1), because they are inserted in one loop milliseconds apart.
+  // COALESCE(_p.id, r.id) keeps a request's children adjacent even when two requests share a created_at;
+  // r.id remains the final deterministic tiebreaker — ties were shuffling the queue between reloads.
+  sql += ' ORDER BY COALESCE(_p.created_at, r.created_at) DESC, COALESCE(_p.id, r.id), r.child_no NULLS FIRST, r.id LIMIT 200';
   res.json({ requests: await all(sql, params) });
 });
 

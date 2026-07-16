@@ -397,7 +397,13 @@ Per §12 Layer 3, unchanged and correct: children contribute **quantities** (pag
 
 ## 7. Presentation — queue, dashboard, reports
 
+**QUEUE: `[BUILT 2026-07-16 — verify_queue_parent_child 21/21, suite 744/744]`. Dashboard + reports: NOT YET — they consume the same `GET /requests` and inherit the fix, but neither groups by parent.**
+
 **Queue and dashboard:** every request renders as a **parent line** with its children indented beneath it. When `child_count = 1`, the pair collapses to a single line and the `-1` suffix is hidden — the operator sees exactly what they see today.
+
+> **What the build added to `GET /requests` (2026-07-16).** The queue was already LEAF-scoped and therefore listing the right ROWS — but it read four PARENT facts straight off them, which the tautological scope predicates had hidden until children actually existed. `request_number` resolves through the parent (`numberJoin`/`numberExpr`), with the child's own suffixed number preserved as **`component_number`**; `is_mrr` resolves through the parent (**requestCreate forces `is_mrr = 0` on every child, so the MRR badge could never have rendered**); and **`parent_id`** + **`child_count`** are added as the grouping key and the collapse test. Ordering keys on the PARENT's recency, then `child_no` ascending — the children of one request are inserted in a single loop milliseconds apart, so ordering by the child's own `created_at` put an MRR's records on screen backwards (`-3, -2, -1`).
+>
+> **The Open control moved to the LEFT of the line** `[Kevin, 2026-07-16 — "for the moment"]`. On a collapsed `n = 1` line it targets the child, exactly as before the wrap. **On an MRR parent line there is nothing to open yet**: the hub (§14.3) is design-gated and unbuilt, and the v1 workspace expects a WORK row — pointing it at the parent renders a screen with no stage, no description and no team. It is a disabled `Hub —` placeholder until §14.3 is designed. **This is the queue half of the "hub and queue must be designed together" requirement in §14.3.**
 
 **Filters, reports, and worklists operate on CHILD rows.** This is the requirement that decided the whole model: "a report of all requests in redaction should include single-request child records as well as MRR child records." Every child row displays the parent `request_number` alongside its own `child_no`, so an overdue-work report is unambiguous about which request a line belongs to.
 

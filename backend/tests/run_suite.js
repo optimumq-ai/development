@@ -29,6 +29,7 @@ const ALL = [
   'verify_role_reconciliation', 'verify_notifications', 'verify_returned_rework', 'verify_task_lifecycle',
   'verify_task_timing', 'verify_request_timeline', 'verify_time_budget', 'verify_work_timer',
   'verify_timecapture_config', 'verify_estimate_reconcile', 'verify_concurrent_tolls', 'verify_wrap_parent', 'verify_mrr_children',
+  'verify_queue_parent_child',
 ];
 
 const args = process.argv.slice(2);
