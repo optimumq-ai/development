@@ -357,7 +357,27 @@ Per §12 Layer 3, unchanged and correct: children contribute **quantities** (pag
 
 ---
 
-## 8. Migration — additive, no data loss
+## 8. Migration — additive, no data loss `[BUILT 2026-07-16 — `1739215` + `40ae5a7`, verify_wrap_parent 39/39, suite 686/686]`
+
+> **BUILT.** `requestCreate` now creates the PARENT + CHILD pair; the child keeps the id everything hangs off and
+> is what the helper RETURNS. **The backfill described below never had to run:** the 2026-07-16 purge left 0
+> citizen requests, so there was nothing to convert — the wrap simply applies to every request created from now
+> on. The three infrastructure containers (LIBRARY / SYS-*) are created `wrap:false` and stay bare, which is what
+> they always were.
+>
+> **Two things this section did not account for, both found by the suite or by live:**
+> 1. **`description` is NOT NULL.** Copying it to the parent (the "copy up" below, taken literally) makes every
+>    description lookup match TWO rows — the double-count §11 exists to prevent. §5.1 was right that the parent
+>    has no description; the constraint was protecting the right thing on the wrong row. Replaced by
+>    `CHECK (child_no IS NULL OR description IS NOT NULL)`. Routing columns follow the same rule.
+>    **`classification` IS copied up** — it drives the statutory clock's duration, and that clock is the parent's.
+>    (§5.1 calls classification child-only because it is talking about *routing*. For one child they are
+>    identical; MRR needs a worst-case roll-up — **still unspecified, see §6.**)
+> 2. **The CHILD was getting its own statutory clock** — `workflowEngine.onIntake` runs on the child and started
+>    one there. **The suite was green and LIVE was wrong**; only the live smoke caught it. Fixed in the engine
+>    (`tolling.parentOf`), not at the five call sites. `deadline_date` now cascades to children as a derived
+>    copy so LEAF-scoped work lists still show it; `request_clocks` stays parent-only.
+
 
 The columns `master_request_id`, `component_label` and `is_mrr` **already exist and are written by zero lines of code**; there are 125 requests and **0 children have ever been created**. So the migration is a clean one-time backfill with no legacy children to reconcile.
 

@@ -4161,3 +4161,79 @@ are all unset and unused, exactly as §8 assumed.
 3. The portal emitting children (+ retire the dead `mrrChoice`).
 4. `source_request_id` toll attribution (§4.2.1).
 **Blocked on DESIGN, not decisions:** the MRR hub (§14.3 — UI rule).
+
+---
+
+## 2026-07-16 (d) — WRAP-IN-PARENT IS BUILT. Every request is now a parent + child. 686/686.
+
+Kevin: *"fix the tickler sweep then build the migration."* The sweep needed no fix (see the correction below);
+the migration is **BUILT** — `1739215` (the wrap) + `40ae5a7` (a live bug it exposed). `BUILD_PRIORITY` #11, the
+item that had been carrying since 2026-07-13.
+
+### ⚠️ FIRST: a CORRECTION I owe the record (`a17e96c`)
+**There was no tickler sweep to fix.** §11.1(a) and (b) were **decided by Kevin on 2026-07-14 and SHIPPED THE
+SAME DAY** (`a68df67` — "deposit sweep on the money axis; drop revenue-by-department"). §11.1 was written 07-13
+and never updated. I re-presented both as open decisions, **"decided" them as Claude's technical call in the
+merged spec**, and put the sweep rewrite at the top of the migration sequence in THREE places. `a68df67`'s title
+was in the git log I read at the start of the session. **This is the same staleness class I caught in §8's "two
+live bugs to fix first" and missed here.** Already built: the sweep keys off the money axis (accepted estimate +
+`deposit_due > 0` + no payment) with **no stage predicate at all** — better than the `payment_status` option
+§11.1 recommended; and `reportEngine` already refuses the child-grouped revenue cut.
+
+### The migration
+**No backfill.** The purge left 0 citizen requests, so §8's 125-row conversion never had to run. The wrap simply
+applies from now on.
+
+`createRequest` creates the **pair**: PARENT (number, requestor, money, statutory clock, deadline) + CHILD
+(description, stage, routing, and every FK). **The child keeps the id and is what the helper RETURNS**, so tasks,
+files, redaction and every deep link attach exactly where they did. Numbers: `2026-000001` / `2026-000001-1`.
+`child_no` is 1..n, **never 0** (§5.1). The three LIBRARY/SYS-* containers are created `wrap:false` and stay bare.
+
+### 🚨 A LIVE BUG THE SUITE MISSED — the reason the live-verification rule exists
+The wrap shipped **green at 682/682**. The live smoke then showed **TWO respond clocks on one request** — one on
+the CHILD. That is exactly what §2 exists to prevent: one request, one legal deadline; N children with N clocks
+is N deadlines (IL 5 ILCS 140/3(d) — one request-level answer date, no installment safe harbor).
+**Cause:** `workflowEngine.onIntake` runs on the CHILD (routing comes from the description) and started a clock
+there. **The harness missed it because it built its clock fixture with `kickIntake:false` — so the intake path,
+the thing that broke it, never ran.** Fixed in the ENGINE (`tolling.parentOf`), not at the five call sites: one
+invariant, one place. `writebackDeadline` now cascades `deadline_date` to children (a true derived copy — every
+child shares its request's due date) because every work list is LEAF-scoped and would otherwise show a blank.
+`request_clocks` stays parent-only. **Verified live: parent 1 clock, child 0, same deadline, tasks on the child.**
+
+### Two things the spec did not account for (both now in §8)
+1. **`description` is NOT NULL.** I first copied it up; every description lookup then matched TWO rows — the
+   double-count §11 exists to prevent. §5.1 was right. Now `CHECK (child_no IS NULL OR description IS NOT NULL)`
+   — the guarantee kept, on the row that carries the work. **`classification` IS copied up** (it drives the
+   statutory clock's duration). `[Claude's call — a real spec gap, not Kevin's ruling.]`
+2. **History is written at BOTH levels.** Creation happens at both and neither trail may start empty: the parent
+   records the citizen's submission, the child records the component.
+
+### Evidence
+- **`verify_wrap_parent` 39/39** (new): the pair · the split · **the clock on the parent and NOT the child, after
+  FULL INTAKE** · work on the child · scope predicates now DISCRIMINATING instead of tautologous · the CHECK
+  constraint · and — asserted rather than left to luck — **a child's composite number can never take part in
+  citizen-number sequencing** (a free consequence of the fixed-width fix `efe3c57`).
+- **SUITE 686/686** (was 641), **LIVE UNTOUCHED**. **Break-tested** (green committed first): disabling the wrap →
+  4/8; re-copying `description` to the parent → exactly the 2 double-count assertions.
+- **Live-verified end to end**: real `POST /public/submit` → 201, citizen sees **`2026-000001`** (never a suffix),
+  pair created, 1 clock on the parent / 0 on the child, both showing `2026-07-21`, `record_search` + `estimate`
+  tasks on the child. Probe rows purged after — **live is back to 3 infrastructure rows, 0 citizen requests.**
+
+### Three harness bugs the wrap exposed (all fixed)
+- `verify_request_create` counted with `LIKE '2026-%'`, which matches a CHILD's composite number — the identical
+  loose-predicate bug it exists to prove about algorithms B and C.
+- Its ALGORITHM C proof simulated on the **ambient corpus** and needed `COUNT == MAX`; that held only because live
+  happened to be contiguous. The purge emptied it, so it failed on CORRECT code. Now **constructs** the condition
+  in an isolated year.
+- Seven harnesses looked for the clock on the row they created. Resolved through the parent.
+- **`run_suite` now prints WHICH assertions failed.** It used to say a harness was red but not why, and finding
+  out meant re-running by hand against a `--keep`'d DB the run had already dirtied — where it often did not
+  reproduce.
+
+### Next
+- **The portal emitting n children** (MRR item-by-item intake, `BUILD_PRIORITY` #12) + retire the dead `mrrChoice`.
+  Today every request is a parent with exactly ONE child; `createRequest` needs an n-child signature.
+- **`source_request_id` toll attribution** (§4.2.1) — now meaningful, since "which child" finally exists.
+- **MRR classification roll-up** — the parent copies its single child's `classification` today; MRR needs a
+  worst-case rule. **Unspecified (§6).**
+- **Blocked on DESIGN, not decisions:** the MRR hub (§14.3 — parent line + child lines; UI rule).
