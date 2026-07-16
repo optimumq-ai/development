@@ -9,6 +9,10 @@ var calc = require('./deadlineCalc');
 var JR = require('./jurisdictionRules');
 var uuidv4 = require('uuid').v4;
 
+// Resolve a request id to its PARENT inline, in ONE bound parameter. The statutory clock is a parent object
+// (SPEC_parent_child_lifecycle.md §2/§4.2), so every clock lookup must ask the parent — whoever is asking.
+var RESOLVE_SQL = '(SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?)';
+
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 function cid() { return 'clk-' + uuidv4().slice(0, 8); }
 function tid() { return 'tl-' + uuidv4().slice(0, 8); }
@@ -93,13 +97,41 @@ async function writebackDeadline(requestId, rules) {
   if (!clk) return null;
   var tolls = await all("SELECT * FROM clock_tolls WHERE clock_id = ?", [clk.id]);
   var st = computeStatus(clk, tolls, rules);
-  await run("UPDATE requests SET deadline_date = ? WHERE id = ?", [st.dueDate, requestId]);
+  // Write the parent AND cascade to its children. There is still exactly ONE statutory deadline — the parent's
+  // — but `deadline_date` on a child is a true, derived copy of it, not a second deadline: every child of a
+  // request shares that request's legal due date. The cascade matters because the queue, the stall sweep and
+  // every work list are LEAF-scoped (§7) and read the CHILD's row; without it the deadline would silently
+  // disappear from every screen that shows work. The clock itself (`request_clocks`) remains parent-only —
+  // that is the thing that must never be duplicated.
+  await run("UPDATE requests SET deadline_date = ? WHERE id = ? OR master_request_id = ?", [st.dueDate, requestId, requestId]);
   return st.dueDate;
+}
+
+// THE STATUTORY CLOCK IS A PARENT OBJECT — always. Resolve whatever row a caller hands us to its parent
+// (SPEC_parent_child_lifecycle.md §2/§4.2).
+//
+// This is enforced HERE, in the engine, and not at the call sites, because there are five of them and only one
+// invariant. `workflowEngine.onIntake` runs against the CHILD (routing is decided from the description, which
+// is the child's) and called this with the child's id — so every wrapped request came out with TWO respond
+// clocks, one of them on a child. Caught on live, not by the suite (the harness had created its fixture with
+// kickIntake:false, so the intake path never ran).
+//
+// A per-child statutory clock is the exact failure §2 exists to prevent: the citizen filed ONE request and the
+// law gives it ONE deadline. N children with N legal clocks is N deadlines for one request — which is what
+// breaks Illinois (5 ILCS 140/3(d): one request-level answer date, no installment safe harbor). A child's clock
+// is its BUDGET clock (§5.4) — a different column and a different idea.
+//
+// Today `master_request_id` is NULL on the unwrapped LIBRARY/SYS-* containers, so COALESCE returns the row
+// itself and this is a no-op for them.
+async function parentOf(requestId) {
+  var r = await get("SELECT COALESCE(master_request_id, id) AS pid FROM requests WHERE id = ?", [requestId]);
+  return r ? r.pid : requestId;
 }
 
 // Idempotent: create the clocks whose rule.startOn == 'intake'. started_at = request.created_at.
 async function startClocksForRequest(requestId) {
   var rules = await loadRules();
+  requestId = await parentOf(requestId); // the statutory clock belongs to the parent, whoever asked
   var req = await get("SELECT id, classification, created_at FROM requests WHERE id = ?", [requestId]);
   if (!req) return { created: 0 };
   var created = 0;
@@ -122,6 +154,7 @@ async function startClocksForRequest(requestId) {
 async function startClock(requestId, type, opts) {
   opts = opts || {};
   var rules = await loadRules();
+  requestId = await parentOf(requestId); // same invariant: statutory clocks (incl. ag_ruling) live on the parent
   var def = (rules.clocks && rules.clocks[type]) || { label: type, basis: 'calendar_days', duration: 10 };
   var req = await get("SELECT classification FROM requests WHERE id = ?", [requestId]);
   var dur = opts.duration != null ? opts.duration : durationFor(def, req ? req.classification : 'standard');
@@ -197,8 +230,12 @@ async function satisfy(clockId) {
   return { satisfied: true };
 }
 
+// Reads resolve to the parent too. Asking "what is this CHILD's statutory deadline" is a legitimate question
+// with a parent-shaped answer: the child shares its request's one legal deadline. Resolving here means no
+// caller has to know whether it is holding a parent id or a child id.
 async function statusForRequest(requestId) {
   var rules = await loadRules();
+  requestId = await parentOf(requestId);
   var clocks = await all("SELECT * FROM request_clocks WHERE request_id = ? ORDER BY is_primary DESC, created_at", [requestId]);
   var out = [];
   for (var i = 0; i < clocks.length; i++) {
@@ -298,7 +335,9 @@ async function applyClassification(requestId) {
   var rules = await loadRules();
   var req = await get("SELECT classification FROM requests WHERE id = ?", [requestId]);
   if (!req) return { updated: 0 };
-  var clocks = await all("SELECT * FROM request_clocks WHERE request_id = ?", [requestId]);
+  // The classification is read from the row the caller named (a child reclassifies itself), but the clock it
+  // retunes is the PARENT's — there is only one statutory clock.
+  var clocks = await all("SELECT * FROM request_clocks WHERE request_id = " + RESOLVE_SQL, [requestId]);
   var updated = 0;
   for (var i = 0; i < clocks.length; i++) {
     var clk = clocks[i];

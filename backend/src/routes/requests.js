@@ -221,9 +221,9 @@ router.post('/:id/assert-exemption', requireAuth, async function(req, res) {
   var note = (req.body && req.body.note) || '';
   if (model === 'pre_clearance') {
     try { await T.startClocksForRequest(request.id); } catch (e) {}
-    var primary = await get("SELECT id FROM request_clocks WHERE request_id = ? AND is_primary = 1 ORDER BY created_at LIMIT 1", [request.id]);
+    var primary = await get("SELECT id FROM request_clocks WHERE request_id = (SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?) AND is_primary = 1 ORDER BY created_at LIMIT 1", [request.id]);
     if (primary) { try { await T.toll(primary.id, 'ag_ruling_pending', 'Awaiting AG pre-clearance ruling' + (note ? ' - ' + note : '')); } catch (e) {} }
-    var openAg = await get("SELECT id FROM request_clocks WHERE request_id = ? AND clock_type = 'ag_ruling' AND status != 'satisfied' ORDER BY created_at DESC LIMIT 1", [request.id]);
+    var openAg = await get("SELECT id FROM request_clocks WHERE request_id = (SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?) AND clock_type = 'ag_ruling' AND status != 'satisfied' ORDER BY created_at DESC LIMIT 1", [request.id]);
     var agId = openAg && openAg.id;
     if (!agId) { try { agId = await T.startClock(request.id, 'ag_ruling', {}); } catch (e) {} }
     await require('../services/taskRouting').applyStageTransition(request.id, 'ag_review', {
@@ -244,9 +244,9 @@ router.post('/:id/ag-ruling', requireAuth, async function(req, res) {
   var actor = (req.user && req.user.name) || 'Staff';
   var outcome = (req.body && req.body.outcome) || 'sustained';
   var note = (req.body && req.body.note) || '';
-  var ag = await get("SELECT id FROM request_clocks WHERE request_id = ? AND clock_type = 'ag_ruling' AND status != 'satisfied' ORDER BY created_at DESC LIMIT 1", [request.id]);
+  var ag = await get("SELECT id FROM request_clocks WHERE request_id = (SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?) AND clock_type = 'ag_ruling' AND status != 'satisfied' ORDER BY created_at DESC LIMIT 1", [request.id]);
   if (ag) { try { await T.satisfy(ag.id); } catch (e) {} }
-  var primary = await get("SELECT id FROM request_clocks WHERE request_id = ? AND is_primary = 1 ORDER BY created_at LIMIT 1", [request.id]);
+  var primary = await get("SELECT id FROM request_clocks WHERE request_id = (SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?) AND is_primary = 1 ORDER BY created_at LIMIT 1", [request.id]);
   // Release ONLY the AG hold. This used to close every open toll, so ruling on an AG matter silently ran the
   // clock even while a clarification was still outstanding. SPEC_parent_child_lifecycle.md §4.2.1.
   if (primary) { try { await T.resume(primary.id, 'ag_ruling_pending'); } catch (e) {} }

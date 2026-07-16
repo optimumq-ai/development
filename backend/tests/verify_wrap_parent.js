@@ -128,6 +128,20 @@ function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
     ok('...and NOT on the parent — a task on a parent is unworkable, it has no stage', !pt);
     // The routing DECISION is written for every request, confident or not — the sharper proof that the
     // classifier ran against the CHILD's description.
+    // THE REGRESSION THIS HARNESS MISSED THE FIRST TIME. The clock assertions above ran with kickIntake:false,
+    // so the INTAKE path never executed — and intake is exactly what broke it. workflowEngine.onIntake runs
+    // against the CHILD (routing comes from the description) and called startClocksForRequest with the child's
+    // id, so every wrapped request came out of the real portal with TWO respond clocks, one on a child. The
+    // suite was green; LIVE was wrong. Assert it on the path that actually runs.
+    var c2Clocks = await db.all('SELECT id FROM request_clocks WHERE request_id = ?', [r2.childId]);
+    var p2Clocks = await db.all('SELECT id FROM request_clocks WHERE request_id = ?', [r2.parentId]);
+    ok('AFTER FULL INTAKE: the child STILL has no statutory clock (' + c2Clocks.length + ') — N children must never mean N legal deadlines', c2Clocks.length === 0);
+    ok('AFTER FULL INTAKE: the parent has exactly one respond clock (' + p2Clocks.length + ')', p2Clocks.length === 1);
+    var c2Dl = await db.get('SELECT deadline_date FROM requests WHERE id = ?', [r2.childId]);
+    var p2Dl = await db.get('SELECT deadline_date FROM requests WHERE id = ?', [r2.parentId]);
+    ok('the child DISPLAYS the deadline (work lists are LEAF-scoped and would show a blank without it)', !!c2Dl.deadline_date);
+    ok('...and it is the SAME date as the parent\'s — a derived copy, never a second deadline', c2Dl.deadline_date === p2Dl.deadline_date);
+
     var wd = await db.all('SELECT id FROM workflow_decisions WHERE request_id = ?', [r2.childId]);
     var wdP = await db.all('SELECT id FROM workflow_decisions WHERE request_id = ?', [r2.parentId]);
     ok('the routing decision is recorded on the CHILD (' + wd.length + ')', wd.length >= 1);

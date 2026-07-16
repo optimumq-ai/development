@@ -76,9 +76,11 @@ async function requestWithDepositDue(label) {
   return { req: req, depositDue: acc.body.depositDue, stage: acc.body.stage };
 }
 async function tollsFor(rid) {
-  return await db.all("SELECT t.reason, t.tolled_from, t.tolled_until FROM clock_tolls t JOIN request_clocks c ON c.id = t.clock_id WHERE c.request_id = ?", [rid]);
+  // The clock — and therefore its toll ledger — hangs off the PARENT (the statutory clock is a parent object).
+  // `rid` here is the work row the harness created, i.e. the child.
+  return await db.all("SELECT t.reason, t.tolled_from, t.tolled_until FROM clock_tolls t JOIN request_clocks c ON c.id = t.clock_id WHERE c.request_id = (SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?)", [rid]);
 }
-async function primaryClock(rid) { return await db.get("SELECT * FROM request_clocks WHERE request_id = ? AND is_primary = 1", [rid]); }
+async function primaryClock(rid) { return await db.get("SELECT * FROM request_clocks WHERE request_id = (SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?) AND is_primary = 1", [rid]); }
 async function setPolicy(cfg) {
   await PCP.write(JID, cfg, 'harness');
   if (cfg.enabled) { await JP.sync(JID, { source: 'harness' }); await JP.attest(JID, 'payment', 'harness'); }

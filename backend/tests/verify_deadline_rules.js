@@ -47,7 +47,7 @@ async function newRequest(label) {
   if (!req) throw new Error('not created: ' + label);
   created.push(req.id);
   var clk = null;
-  for (var j = 0; j < 40 && !clk; j++) { clk = await db.get("SELECT * FROM request_clocks WHERE request_id = ? AND is_primary = 1", [req.id]); await sleep(250); }
+  for (var j = 0; j < 40 && !clk; j++) { clk = await db.get("SELECT * FROM request_clocks WHERE request_id = (SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?) AND is_primary = 1", [req.id]); await sleep(250); }
   return { req: req, clock: clk };
 }
 

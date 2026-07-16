@@ -132,7 +132,7 @@ function submit(d) {
     if (req) created.push(req.id);
 
     var clk = null;
-    for (var j = 0; j < 40 && !clk; j++) { clk = await db.get("SELECT * FROM request_clocks WHERE request_id = ? AND is_primary = 1", [req.id]); await sleep(250); }
+    for (var j = 0; j < 40 && !clk; j++) { clk = await db.get("SELECT * FROM request_clocks WHERE request_id = (SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?) AND is_primary = 1", [req.id]); await sleep(250); }
     ok('a primary clock was created for it', !!clk);
     // The clock's duration must come from the JURISDICTION row. Classification decides which bucket;
     // if it classified 'standard' we get our probe value 77 — otherwise assert it matched SOME bucket

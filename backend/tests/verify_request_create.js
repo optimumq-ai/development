@@ -229,7 +229,7 @@ var year = new Date().getFullYear();
     // =====================================================================================
     var q3full = await db.get('SELECT deadline_date, classification FROM requests WHERE id = ?', [q3.id]);
     ok('the new request has a deadline_date', !!q3full.deadline_date);
-    var clk = await db.get("SELECT duration, basis FROM request_clocks WHERE request_id = ? AND is_primary = 1", [q3.id]);
+    var clk = await db.get("SELECT duration, basis FROM request_clocks WHERE request_id = (SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?) AND is_primary = 1", [q3.id]);
     ok('a primary clock was started by the helper (' + clk.duration + ' ' + clk.basis + ')', !!clk);
     var T = require('/opt/optimumq/backend/src/services/tolling');
     var rules = await T.loadRules();

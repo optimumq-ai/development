@@ -53,7 +53,7 @@ async function automationState() {
 }
 
 async function activePrimaryClock(requestId) {
-  return await get("SELECT * FROM request_clocks WHERE request_id = ? AND is_primary = 1 AND status <> 'satisfied' ORDER BY created_at DESC LIMIT 1", [requestId]);
+  return await get("SELECT * FROM request_clocks WHERE request_id = (SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?) AND is_primary = 1 AND status <> 'satisfied' ORDER BY created_at DESC LIMIT 1", [requestId]);
 }
 
 async function logHistory(requestId, opts, action, notes) {

@@ -47,7 +47,7 @@ async function newRequest(label) {
   for (var i = 0; i < 60 && !req; i++) { req = await db.get('SELECT id, request_number FROM requests WHERE description LIKE ?', ['%' + label + ' ' + TAG + '%']); await sleep(250); }
   if (!req) throw new Error('not created: ' + label);
   created.push(req.id);
-  for (var j = 0; j < 40; j++) { var c = await db.get("SELECT id FROM request_clocks WHERE request_id = ? AND is_primary = 1", [req.id]); if (c) break; await sleep(250); }
+  for (var j = 0; j < 40; j++) { var c = await db.get("SELECT id FROM request_clocks WHERE request_id = (SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?) AND is_primary = 1", [req.id]); if (c) break; await sleep(250); }
   return req;
 }
 function estimateBody() {
@@ -130,7 +130,7 @@ function estimateBody() {
     ok('IL, clock healthy: no forfeiture risk flagged yet', riskEarly.atRisk === false);
 
     // Now blow the clock: backdate the request + its clock past the 5-business-day window.
-    var clk = await db.get("SELECT id FROM request_clocks WHERE request_id = ? AND is_primary = 1", [B.id]);
+    var clk = await db.get("SELECT id FROM request_clocks WHERE request_id = (SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?) AND is_primary = 1", [B.id]);
     await db.run("UPDATE request_clocks SET started_at = to_char(now() - interval '30 days', 'YYYY-MM-DD HH24:MI:SS') WHERE id = ?", [clk.id]);
     // ...and mark a fee waiver as pending — the hold state that eats the clock
     await db.run("UPDATE requests SET fee_waiver_requested = 1, fee_waiver_status = 'pending' WHERE id = ?", [B.id]);
@@ -156,7 +156,7 @@ function estimateBody() {
 
     // ---- 8. the WARNING that precedes the block
     var C = await newRequest('IL at risk');
-    var cclk = await db.get("SELECT id, duration FROM request_clocks WHERE request_id = ? AND is_primary = 1", [C.id]);
+    var cclk = await db.get("SELECT id, duration FROM request_clocks WHERE request_id = (SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?) AND is_primary = 1", [C.id]);
     await db.run("UPDATE requests SET fee_waiver_requested = 1, fee_waiver_status = 'pending' WHERE id = ?", [C.id]);
     // push it to 1 day left
     await db.run("UPDATE request_clocks SET started_at = to_char(now() - interval '6 days', 'YYYY-MM-DD HH24:MI:SS') WHERE id = ?", [cclk.id]);
@@ -168,7 +168,7 @@ function estimateBody() {
 
     // ---- 9. a TOLLED clock is not a blown clock
     var D = await newRequest('IL tolled');
-    var dclk = await db.get("SELECT id FROM request_clocks WHERE request_id = ? AND is_primary = 1", [D.id]);
+    var dclk = await db.get("SELECT id FROM request_clocks WHERE request_id = (SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?) AND is_primary = 1", [D.id]);
     await db.run("UPDATE request_clocks SET started_at = to_char(now() - interval '30 days', 'YYYY-MM-DD HH24:MI:SS') WHERE id = ?", [dclk.id]);
     await db.run("INSERT INTO clock_tolls (id, clock_id, reason, tolled_from, created_at) VALUES (?,?,?, to_char(now() - interval '29 days','YYYY-MM-DD HH24:MI:SS'), to_char(now(),'YYYY-MM-DD HH24:MI:SS'))",
       ['tl-fwtest', dclk.id, 'clarification_pending']);
