@@ -18,8 +18,10 @@ router.post('/request/:requestId/clock', requireAuth, async function (req, res) 
 router.post('/:clockId/toll', requireAuth, async function (req, res) {
   try { var b = req.body || {}; res.json(await T.toll(req.params.clockId, b.reason, b.note)); } catch (e) { res.status(500).json({ error: e.message }); }
 });
+// `reason` closes only that hold and leaves any sibling hold running (the clock resumes only when the last
+// one closes). Omitting it closes EVERY open toll — the deliberate manual override. SPEC §4.2.1.
 router.post('/:clockId/resume', requireAuth, async function (req, res) {
-  try { res.json(await T.resume(req.params.clockId)); } catch (e) { res.status(500).json({ error: e.message }); }
+  try { var b = req.body || {}; res.json(await T.resume(req.params.clockId, b.reason)); } catch (e) { res.status(500).json({ error: e.message }); }
 });
 // A STATUTORY extension: add a fixed number of days to the clock (IL 5 ILCS 140/3(e); CA § 7922.535(b)).
 // Not a toll — see tolling.extend(). Caps come from the jurisdiction's rules, so a 400 here is the city's

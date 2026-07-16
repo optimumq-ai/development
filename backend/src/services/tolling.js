@@ -28,13 +28,32 @@ async function loadRules() {
   return DEFAULT_RULES;
 }
 
+// UNION of toll intervals — never the sum. Two reasons can hold the clock at the same time (an AG hold
+// landing while a clarification is open), and summing them double-counts the overlap: A tolls Jan 1-10 and
+// B tolls Jan 5-15 sums to 20 days when only 15 were actually suspended, pushing the due date PAST what the
+// law allows while the dashboard still reports compliant. Merge overlapping/adjacent spans, then count.
+// See SPEC_parent_child_lifecycle.md §4.2.1.
+function unionDays(intervals, basis, H, W) {
+  if (!intervals.length) return 0;
+  var s = intervals.slice().sort(function (a, b) { return a.from < b.from ? -1 : (a.from > b.from ? 1 : 0); });
+  var merged = [], cur = { from: s[0].from, until: s[0].until };
+  for (var i = 1; i < s.length; i++) {
+    if (s[i].from <= cur.until) { if (s[i].until > cur.until) cur.until = s[i].until; } // overlap/adjacent -> extend
+    else { merged.push(cur); cur = { from: s[i].from, until: s[i].until }; }           // disjoint -> new span
+  }
+  merged.push(cur);
+  var total = 0;
+  merged.forEach(function (m) { total += calc.basisDaysBetween(m.from, m.until, basis, H, W); });
+  return total;
+}
+
 // Derived status for one clock given its toll ledger.
 function computeStatus(clock, tolls, rules) {
   var basis = clock.basis, dur = Number(clock.duration), start = clock.started_at;
   var W = rules.weekend || [0, 6], H = rules.holidays || [];
   var now = nowStr();
   var elapsed = calc.basisDaysBetween(start, now, basis, H, W);
-  var tolled = 0, currentlyTolled = false;
+  var currentlyTolled = false, intervals = [];
   (tolls || []).forEach(function (t) {
     var until = t.tolled_until || now;
     if (!t.tolled_until) currentlyTolled = true;
@@ -44,8 +63,9 @@ function computeStatus(clock, tolls, rules) {
     var from = t.tolled_from;
     if (from < start) from = start;
     if (until < from) until = from;
-    tolled += calc.basisDaysBetween(from, until, basis, H, W);
+    intervals.push({ from: from, until: until });
   });
+  var tolled = unionDays(intervals, basis, H, W);
   var consumed = Math.max(0, elapsed - tolled);
   var remaining = dur - consumed;
   var baseDue = calc.addBasisDays(start, dur, basis, H, W);
@@ -129,21 +149,34 @@ async function toll(clockId, reason, note) {
     throw new Error('"' + reason + '" is not a toll reason this jurisdiction allows for the ' + clk.clock_type +
       ' clock. Allowed: ' + def.tollReasons.join(', ') + '.');
   }
-  var open = await get("SELECT id FROM clock_tolls WHERE clock_id = ? AND tolled_until IS NULL", [clockId]);
-  if (open) return { alreadyTolled: true };
-  await run("INSERT INTO clock_tolls (id, clock_id, reason, tolled_from, note, created_at) VALUES (?,?,?,?,?,?)", [tid(), clockId, reason || 'other', nowStr(), note || null, nowStr()]);
+  // CONCURRENCY: idempotency is PER REASON, not per clock. This guard used to be per-clock, so a second
+  // trigger was SILENTLY DROPPED — a record going to the AG while a clarification was open never registered,
+  // and the next resume() then ran the clock while the request was still legally suspended. Different reasons
+  // may hold the clock simultaneously; the same reason twice is still a no-op. SPEC §4.2.1.
+  var r = reason || 'other';
+  var open = await get("SELECT id FROM clock_tolls WHERE clock_id = ? AND reason = ? AND tolled_until IS NULL", [clockId, r]);
+  if (open) return { alreadyTolled: true, reason: r };
+  await run("INSERT INTO clock_tolls (id, clock_id, reason, tolled_from, note, created_at) VALUES (?,?,?,?,?,?)", [tid(), clockId, r, nowStr(), note || null, nowStr()]);
   await run("UPDATE request_clocks SET status = 'tolled', updated_at = ? WHERE id = ?", [nowStr(), clockId]);
   await writebackDeadline(clk.request_id);
-  return { tolled: true };
+  var oc = await get("SELECT COUNT(*) AS n FROM clock_tolls WHERE clock_id = ? AND tolled_until IS NULL", [clockId]);
+  return { tolled: true, reason: r, openTolls: Number(oc.n) };
 }
 
-async function resume(clockId) {
+// Close ONE reason's toll. The clock starts running again only when the LAST open toll closes — a refcount,
+// not a flag. Passing no reason closes every open toll (the manual/admin override on the route).
+// `resumed` means THE CLOCK IS RUNNING AGAIN, not "this reason was closed" — a caller must not report a
+// resumed clock while a sibling hold is still open.
+async function resume(clockId, reason) {
   var clk = await get("SELECT * FROM request_clocks WHERE id = ?", [clockId]);
   if (!clk) throw new Error('Clock not found');
-  await run("UPDATE clock_tolls SET tolled_until = ? WHERE clock_id = ? AND tolled_until IS NULL", [nowStr(), clockId]);
-  await run("UPDATE request_clocks SET status = 'running', updated_at = ? WHERE id = ?", [nowStr(), clockId]);
+  if (reason) await run("UPDATE clock_tolls SET tolled_until = ? WHERE clock_id = ? AND reason = ? AND tolled_until IS NULL", [nowStr(), clockId, reason]);
+  else await run("UPDATE clock_tolls SET tolled_until = ? WHERE clock_id = ? AND tolled_until IS NULL", [nowStr(), clockId]);
+  var oc = await get("SELECT COUNT(*) AS n FROM clock_tolls WHERE clock_id = ? AND tolled_until IS NULL", [clockId]);
+  var remaining = Number(oc.n);
+  if (remaining === 0) await run("UPDATE request_clocks SET status = 'running', updated_at = ? WHERE id = ?", [nowStr(), clockId]);
   await writebackDeadline(clk.request_id);
-  return { resumed: true };
+  return { resumed: remaining === 0, stillTolled: remaining > 0, openTolls: remaining };
 }
 
 // Restart the clock's epoch: close any open toll and reset started_at to now, so the clock gets a

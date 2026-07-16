@@ -247,7 +247,9 @@ router.post('/:id/ag-ruling', requireAuth, async function(req, res) {
   var ag = await get("SELECT id FROM request_clocks WHERE request_id = ? AND clock_type = 'ag_ruling' AND status != 'satisfied' ORDER BY created_at DESC LIMIT 1", [request.id]);
   if (ag) { try { await T.satisfy(ag.id); } catch (e) {} }
   var primary = await get("SELECT id FROM request_clocks WHERE request_id = ? AND is_primary = 1 ORDER BY created_at LIMIT 1", [request.id]);
-  if (primary) { try { await T.resume(primary.id); } catch (e) {} }
+  // Release ONLY the AG hold. This used to close every open toll, so ruling on an AG matter silently ran the
+  // clock even while a clarification was still outstanding. SPEC_parent_child_lifecycle.md §4.2.1.
+  if (primary) { try { await T.resume(primary.id, 'ag_ruling_pending'); } catch (e) {} }
   var nextStage = outcome === 'overruled' ? 'delivery' : 'redaction_review';
   var label = outcome === 'sustained' ? 'withholding sustained' : outcome === 'overruled' ? 'must release' : 'partial release';
   // Entering redaction_review spawns the redaction task via the central path (previously left to the reconciler).

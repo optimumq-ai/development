@@ -105,7 +105,7 @@ async function onDepositPaid(requestId, opts) {
     var primary = await activePrimaryClock(requestId);
     if (primary) {
       if (plan.onPaid === 'resume') {
-        var rr = await T.resume(primary.id);
+        var rr = await T.resume(primary.id, TOLL_REASON); // ONLY our own hold — a sibling AG/clarification hold must survive this
         clock = { action: 'resume', clockId: primary.id, effect: effect, resumed: !!rr.resumed };
       } else {
         var rs = await T.restart(primary.id);
