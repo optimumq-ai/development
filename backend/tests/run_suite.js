@@ -28,7 +28,7 @@ const ALL = [
   'verify_search_intent_gate', 'verify_fee_labor_gate', 'verify_estimate_profiles',
   'verify_role_reconciliation', 'verify_notifications', 'verify_returned_rework', 'verify_task_lifecycle',
   'verify_task_timing', 'verify_request_timeline', 'verify_time_budget', 'verify_work_timer',
-  'verify_timecapture_config', 'verify_estimate_reconcile', 'verify_concurrent_tolls',
+  'verify_timecapture_config', 'verify_estimate_reconcile', 'verify_concurrent_tolls', 'verify_wrap_parent',
 ];
 
 const args = process.argv.slice(2);
@@ -127,6 +127,12 @@ function run(cmd, argv, extraEnv) {
     }
     pass += Number(m[1]); fail += Number(m[3]);
     console.log('  ' + (Number(m[3]) === 0 ? '✅' : '❌') + '  ' + h.padEnd(24) + m[0]);
+    // Print WHICH assertions failed. Without this the runner tells you a harness is red but not why, and the
+    // only way to find out is to re-run it by hand against a --keep'd DB that the run has already dirtied —
+    // where the failure often does not reproduce. The suite should say what broke.
+    if (Number(m[3]) > 0) {
+      out.split('\n').filter((l) => /^\s*FAIL\s/.test(l)).forEach((l) => console.log('        ' + l.trim()));
+    }
   }
 
   // ---- 5. Census live AFTER — the assertion this whole slice exists for -------------------------

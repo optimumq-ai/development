@@ -75,18 +75,45 @@ var year = new Date().getFullYear();
     }
 
     var maxRow = await db.get("SELECT request_number FROM requests WHERE request_number ~ ('^' || ? || '-[0-9]{" + RC.SEQ_DIGITS + "}$') ORDER BY request_number DESC LIMIT 1", [String(year)]);
-    var countRow = await db.get("SELECT COUNT(*) AS n FROM requests WHERE request_number LIKE ?", [year + '-%']);
+    // WRAP-IN-PARENT: count only CITIZEN numbers, with the SAME strict pattern the helper sequences on.
+    // `LIKE '2026-%'` also matches a CHILD's composite number (`2026-000001-1`), which doubles the count and
+    // makes this simulation overshoot the max. That loose predicate is the identical class of bug this harness
+    // exists to prove about algorithms B and C — the strict `^YYYY-[0-9]{6}$` is what excludes children.
+    var countRow = await db.get("SELECT COUNT(*) AS n FROM requests WHERE request_number ~ ('^' || ? || '-[0-9]{" + RC.SEQ_DIGITS + "}$')", [String(year)]);
     ok('a numbering baseline exists to test against (' + countRow.n + ' requests this year)', !!maxRow);
     var maxSeq = parseInt(maxRow.request_number.split('-')[1], 10);
     var countSeq = Number(countRow.n);
 
-    // Algorithm C (COUNT+1) is only safe while COUNT == MAX. Delete one request below the max and it
-    // immediately mints a number that already exists. Simulate the arithmetic on the REAL data.
-    var afterOneDeletion = countSeq - 1 + 1; // COUNT drops by one; C mints COUNT+1
-    var wouldCollide = await db.get('SELECT id FROM requests WHERE request_number = ?', [year + '-' + String(afterOneDeletion).padStart(RC.SEQ_DIGITS, '0')]);
-    ok('ALGORITHM C IS BROKEN: after deleting any request below the max, COUNT+1 = ' + year + '-' +
-       String(afterOneDeletion).padStart(RC.SEQ_DIGITS, '0') + ' — a number that ALREADY EXISTS (UNIQUE violation → intake 500s)',
-       !!wouldCollide);
+    // Algorithm C (COUNT+1) is only safe while COUNT == MAX — i.e. only while the numbers are contiguous with
+    // no gaps. This used to simulate the arithmetic on the AMBIENT corpus, which worked only because live
+    // happened to hold 44 contiguous requests ("it works today only by coincidence: COUNT == MAX"). The
+    // 2026-07-16 purge emptied the corpus and harness cleanup punches gaps in it, so the premise evaporated and
+    // the assertion started failing on CORRECT code. CONSTRUCT the condition instead of hoping for it — in an
+    // isolated far-future year so no other harness, fixture row, or purge can move it.
+    var CY = '2999';
+    await db.run("DELETE FROM requests WHERE request_number LIKE ?", [CY + '-%']);
+    var cIds = [];
+    for (var ci = 1; ci <= 3; ci++) {
+      var cid = 'algoc-' + ci + '-' + Date.now();
+      cIds.push(cid);
+      await db.run("INSERT INTO requests (id, request_number, requestor_name, requestor_email, description) VALUES (?,?,?,?,?)",
+        [cid, CY + '-' + String(ci).padStart(RC.SEQ_DIGITS, '0'), 'AlgoC', 'algoc@example.com', 'algorithm C probe ' + TAG]);
+    }
+    var cMax = await db.get("SELECT request_number FROM requests WHERE request_number ~ ('^' || ? || '-[0-9]{" + RC.SEQ_DIGITS + "}$') ORDER BY request_number DESC LIMIT 1", [CY]);
+    var cCount = await db.get("SELECT COUNT(*) AS n FROM requests WHERE request_number ~ ('^' || ? || '-[0-9]{" + RC.SEQ_DIGITS + "}$')", [CY]);
+    ok('constructed a contiguous 3-request year: COUNT(' + cCount.n + ') == MAX(' + cMax.request_number + ') — the ONLY state where C is safe',
+      Number(cCount.n) === 3 && cMax.request_number === CY + '-000003');
+    // Delete the MIDDLE one. MAX is untouched at 3; COUNT drops to 2; C therefore mints 3 — which exists.
+    await db.run("DELETE FROM requests WHERE request_number = ?", [CY + '-' + String(2).padStart(RC.SEQ_DIGITS, '0')]);
+    var cCount2 = await db.get("SELECT COUNT(*) AS n FROM requests WHERE request_number ~ ('^' || ? || '-[0-9]{" + RC.SEQ_DIGITS + "}$')", [CY]);
+    var cWould = CY + '-' + String(Number(cCount2.n) + 1).padStart(RC.SEQ_DIGITS, '0'); // C mints COUNT+1
+    var cCollide = await db.get('SELECT id FROM requests WHERE request_number = ?', [cWould]);
+    ok('ALGORITHM C IS BROKEN: delete the middle request and COUNT+1 = ' + cWould +
+       ' — a number that ALREADY EXISTS (UNIQUE violation → intake 500s)', !!cCollide);
+    // ...and the helper, on the same data, is right: MAX+1 = 4, which is free.
+    var cNext = await RC.nextRequestNumber(CY);
+    ok('...while the helper mints ' + cNext + ' — MAX+1, immune to the gap', cNext === CY + '-000004');
+    await db.run("DELETE FROM requests WHERE request_number LIKE ?", [CY + '-%']);
 
     // Algorithm B (last row by created_at) restarts at 0001 when the newest row has a non-standard number.
     //

@@ -817,6 +817,22 @@ CREATE TABLE IF NOT EXISTS clock_extensions (
 );
 CREATE INDEX IF NOT EXISTS ix_clock_extensions_clock ON clock_extensions (clock_id);
 
+-- WRAP-IN-PARENT (ARCHITECTURE item 1, ratified 2026-07-16; SPEC_parent_child_lifecycle.md §8).
+-- `child_no` is 1..n and NEVER 0: a zero would make the single-record case a different shape from a
+-- multi-record component, which is exactly what always-wrap exists to prevent (§5.1). NULL on a parent, and
+-- NULL on the LIBRARY/SYS-* infrastructure containers, which are not citizen requests and never grow a parent.
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS child_no INTEGER;
+
+-- `description` becomes NULLABLE — but only for PARENTS. §5.1: "description — Child only. The parent has no
+-- description." That is not cosmetic: the description is the work, and a copy on the parent makes every
+-- description lookup match TWO rows (proved by the suite the moment the wrap went in). The NOT NULL predates
+-- parent/child and was protecting the right thing on the wrong row, so it is replaced by a CHECK that keeps
+-- the guarantee exactly where it belongs: a CHILD must always have one. Roots (parents, and the LIBRARY/SYS-*
+-- containers) may not.
+ALTER TABLE requests ALTER COLUMN description DROP NOT NULL;
+ALTER TABLE requests DROP CONSTRAINT IF EXISTS chk_child_has_description;
+ALTER TABLE requests ADD CONSTRAINT chk_child_has_description CHECK (child_no IS NULL OR description IS NOT NULL);
+
 -- Parent/child: every scope predicate filters on master_request_id (see services/requestScope.js), so it
 -- needs an index or every list query degrades to a sequential scan once children exist.
 CREATE INDEX IF NOT EXISTS ix_requests_master ON requests (master_request_id);

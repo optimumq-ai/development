@@ -83,6 +83,11 @@ var COLUMNS = [
   'certification_requested', 'email_verification_method', 'is_mrr', 'submission_channel'
 ];
 
+// Columns that belong to the WORK ROW ONLY and are therefore NULLed on the parent (§5.1). Everything else in
+// COLUMNS is citizen/money identity and IS copied up. `classification` is deliberately NOT in this list: it
+// drives the statutory clock's duration (`tolling.durationFor`) and that clock is a parent object.
+var PARENT_NULL = { description: 1, record_types: 1, department_id: 1, record_type_id: 1 };
+
 // Map an intake payload (camelCase, from any of the three paths) onto the column set, with the defaults
 // that used to be repeated at every site.
 function normalize(f) {
@@ -112,16 +117,49 @@ function normalize(f) {
   };
 }
 
+// WRAP-IN-PARENT (ARCHITECTURE item 1, RATIFIED 2026-07-16; SPEC_parent_child_lifecycle.md §8).
+//
+// Every request is a PARENT with 1..n CHILDREN. A single-record request is a parent with ONE child — there is
+// no "single vs multi" mode, which is the whole point: filters, worklists and reports run over CHILD rows and
+// see one uniform shape.
+//
+//   PARENT — the citizen relationship: request_number, requestor, money, the STATUTORY clock, the deadline.
+//   CHILD  — the unit of work: description, stage, routing, and every FK that hangs off it (tasks, files,
+//            redaction, search). `createRequest` RETURNS THE CHILD's id, because that is what work attaches to.
+//
+// COPY-UP, NOT MOVE. §8 is explicit that the migration is "additive, no data loss": the child keeps every
+// column it has today and the parent gets COPIES of the citizen/money columns. Nothing that reads a request
+// today breaks, and readers move up to the parent one at a time. Two columns force the issue anyway:
+//   * `description` is NOT NULL — the spec says "the parent has no description", but the constraint says
+//     otherwise. We copy rather than relax the constraint: a NOT NULL description is a good rule for the row
+//     that actually carries the work. Nothing reads the parent's copy. (MRR can summarise it later.)
+//   * `classification` drives the CLOCK DURATION (`tolling.durationFor`), and the statutory clock is a PARENT
+//     object — so the parent needs it. The spec lists classification as child-only because it is talking about
+//     ROUTING. For one child the two are identical; MRR needs a worst-case roll-up (§6, not yet specified).
+//     [Claude's call, 2026-07-16 — filling a genuine gap in the spec, not Kevin's ruling.]
+//
+// `stage` is deliberately left NULL on the parent. A parent has no stage (§5.2 — `fee_review`/`awaiting_payment`
+// are parent GATES on the money axis, not stages). Every stage-reading sweep is already LEAF-scoped precisely
+// so a NULL-staged parent is invisible to it (see tickler.js's stall sweep).
+//
+// The CHILD's number carries the component suffix: `2026-000001-1`. That falls OUT of `nextRequestNumber`'s
+// `^YYYY-[0-9]{6}$` pattern for free — children can never take part in citizen-number sequencing. That is a
+// happy consequence of the fixed-width numbering fix (`efe3c57`), and it is asserted in the harness rather
+// than left to luck.
+//
 // Create a request. opts: { requestNumber (override, for SYS-*/demo rows), actorId, actorName, historyAction,
-// historyNote, startClocks (default true), kickIntake (default true) }.
-// Returns { id, requestNumber }.
+// historyNote, startClocks (default true), kickIntake (default true), wrap (default true — false inserts a
+// BARE row for the LIBRARY/SYS-* infrastructure containers, which are not citizen requests) }.
+// Returns { id (THE CHILD), requestNumber (the CITIZEN's number, i.e. the parent's), parentId, childId }.
 async function createRequest(fields, opts) {
   opts = opts || {};
   if (!fields || !fields.requestorName || !fields.requestorEmail || !fields.description) {
     throw new Error('A request needs a requestor name, an email address, and a description.');
   }
   var cols = normalize(fields);
-  var id = opts.id || uuidv4();
+  var childId = opts.id || uuidv4();
+  var parentId = uuidv4();
+  var wrap = opts.wrap !== false;
 
   var placeholders = COLUMNS.map(function () { return '?'; }).join(',');
   var values = COLUMNS.map(function (c) { return cols[c]; });
@@ -132,11 +170,33 @@ async function createRequest(fields, opts) {
   for (var attempt = 0; attempt < 5; attempt++) {
     requestNumber = opts.requestNumber || await nextRequestNumber();
     try {
-      await run(
-        'INSERT INTO requests (id, request_number, stage, status, ' + COLUMNS.join(', ') + ') ' +
-        'VALUES (?, ?, ?, ?, ' + placeholders + ')',
-        [id, requestNumber, 'intake', 'active'].concat(values)
-      );
+      if (wrap) {
+        // PARENT first — the child's master_request_id references it.
+        // The WORK columns are NULLed on the parent, not copied. `description` above all: a copy makes every
+        // description lookup match BOTH rows (the suite proved this the moment the wrap went in), which is the
+        // double-count the scope predicates exist to prevent. Routing columns follow the same rule — routing is
+        // decided from the description, so it belongs to whoever holds the description (§5.1, §14.2).
+        // `classification` IS copied: it drives the statutory clock's duration, and that clock is the parent's.
+        await run(
+          'INSERT INTO requests (id, request_number, stage, status, master_request_id, child_no, ' + COLUMNS.join(', ') + ') ' +
+          'VALUES (?, ?, NULL, ?, NULL, NULL, ' + placeholders + ')',
+          [parentId, requestNumber, 'active'].concat(COLUMNS.map(function (c) { return PARENT_NULL[c] ? null : cols[c]; }))
+        );
+        // CHILD — keeps the id everything else hangs off. child_no starts at 1, never 0: a zero would make the
+        // single-record case a different shape, which is exactly what always-wrap exists to prevent (§5.1).
+        await run(
+          'INSERT INTO requests (id, request_number, stage, status, master_request_id, child_no, ' + COLUMNS.join(', ') + ') ' +
+          'VALUES (?, ?, ?, ?, ?, ?, ' + placeholders + ')',
+          [childId, requestNumber + '-1', 'intake', 'active', parentId, 1].concat(values)
+        );
+      } else {
+        // Unwrapped: the LIBRARY / SYS-* containers. They are not citizen requests and must never grow a parent.
+        await run(
+          'INSERT INTO requests (id, request_number, stage, status, ' + COLUMNS.join(', ') + ') ' +
+          'VALUES (?, ?, ?, ?, ' + placeholders + ')',
+          [childId, requestNumber, 'intake', 'active'].concat(values)
+        );
+      }
       lastErr = null;
       break;
     } catch (e) {
@@ -148,25 +208,44 @@ async function createRequest(fields, opts) {
   }
   if (lastErr) throw lastErr;
 
+  // HISTORY IS WRITTEN AT THE LEVEL OF THE ACTION (§8) — and creation happens at BOTH levels, so both get a
+  // row. They are not duplicates; they are different facts, and MRR makes that obvious (one submission, n
+  // components):
+  //   PARENT — the citizen submitted a request. The parent's trail must not start empty; its later rows are
+  //            payments and clock events, which are also parent-level.
+  //   CHILD  — this component came into being. Staff open the CHILD (it is the work row), and its audit trail
+  //            must not start mid-story with a stage advance out of nowhere. requestTimeline builds the stage
+  //            backbone from these rows.
+  // Stage advances write their own child rows through applyStageTransition — never from here.
   await run(
     'INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
-    [uuidv4(), id, opts.actorId || null, opts.actorName || 'System',
+    [uuidv4(), childId, opts.actorId || null, opts.actorName || 'System',
      opts.historyAction || 'CREATED', opts.historyNote || 'Request created.']
   );
+  if (wrap) {
+    await run(
+      'INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+      [uuidv4(), parentId, opts.actorId || null, opts.actorName || 'System',
+       opts.historyAction || 'CREATED', 'Request received from the requestor (' + requestNumber + ').']
+    );
+  }
 
   // The DEADLINE comes from the jurisdiction, not from a hardcoded table. startClocksForRequest is
   // idempotent and writes requests.deadline_date via tolling.writebackDeadline().
+  // THE STATUTORY CLOCK IS A PARENT OBJECT (§4.2) — one legal deadline per citizen request, never one per
+  // record. A child carries only its BUDGET clock (§5.4), which is a different column and a different idea.
   if (opts.startClocks !== false) {
-    try { await require('./tolling').startClocksForRequest(id); }
+    try { await require('./tolling').startClocksForRequest(wrap ? parentId : childId); }
     catch (e) { console.error('[requestCreate] clock start failed:', e && e.message); }
   }
 
+  // Routing is decided from the DESCRIPTION, which is the child's (§14.2). onIntake therefore runs on the child.
   if (opts.kickIntake !== false) {
     var we = require('./workflowEngine');
-    we.bg(we.onIntake(id), 'intake ' + id);
+    we.bg(we.onIntake(childId), 'intake ' + childId);
   }
 
-  return { id: id, requestNumber: requestNumber };
+  return { id: childId, requestNumber: requestNumber, parentId: wrap ? parentId : null, childId: childId };
 }
 
 module.exports = {
