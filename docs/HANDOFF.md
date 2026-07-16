@@ -4237,3 +4237,54 @@ child shares its request's due date) because every work list is LEAF-scoped and 
 - **MRR classification roll-up** — the parent copies its single child's `classification` today; MRR needs a
   worst-case rule. **Unspecified (§6).**
 - **Blocked on DESIGN, not decisions:** the MRR hub (§14.3 — parent line + child lines; UI rule).
+
+---
+
+## 2026-07-16 (e) — Kevin's field-design call: the PARENT loses disposition/outcome. Docs only.
+
+**Kevin's question — *"do the parent and child have the same fields? I hope not"* — surfaced two real defects.**
+
+**1. Physically they DO share a table.** `requests` is one table, 47 columns, holding both. §1 chose that
+deliberately, but for a narrower reason than it reads: a **single-record child and an MRR child** must be the
+same row shape or every worklist unions two shapes forever. Parent/child sharing the column set is a *side
+effect*, not the goal. The parent populates ~20 of 47, the child ~40. The split is enforced today by convention
+in one function plus a single CHECK (`chk_child_has_description`) — **soft, not structural.**
+
+**2. `outcome` vs `disposition` was a LIVE CONTRADICTION in the binding spec.** §4.4 named the field `outcome`
+(`Granted` · `Granted in Part` · `Denied` · `No Responsive Records` · `Withdrawn`); §6.2 named the same field
+`disposition` (`Fulfilled` · `Partial fulfillment` · `Denied` · `No records located`) — and §4.4 *pointed at §6.2
+as its derivation*. Two names, two lists sharing only `Denied`, plus a third set from §6.2's cascade branch
+(`Closed – Non-payment` …) in neither. Same class as the §12-vs-§13 mess: two passes days apart, never
+reconciled. **Nothing could have been built on it.**
+
+### Kevin's ruling (2026-07-16) — defer rather than arbitrate
+- **The PARENT has NO disposition and NO outcome.** Only **`In Process` / `Complete`** (§6.1) — derived, coarse,
+  never stored. `Complete` = no further processing; it does **not** mean delivered or granted.
+- **The real outcome lives on the CHILD** — §5.8 already carried exactly Kevin's model
+  (`Closed – Delivered` · `No records located` · `Denied` · `No response`) plus four the law adds
+  (`Non-payment`, `Withdrawn by requestor`, `Previously furnished`, `Not in our custody / referred`).
+  **His "there might be others" was right; the child side needed no change at all.**
+- **DELIVERY IS A CHILD FACT** — *"mrr types should be delivered asap when fully processed."* A parent-level
+  `Delivered` is a lie the moment one child of five is still in redaction, and it invites holding four finished
+  records hostage to the fifth — which §5.9's coverage test forbids anyway.
+- **STAGE IS A CHILD CONCEPT** (confirmed) — an MRR's children sit at different stages simultaneously, so a
+  parent-level stage would have to lie about all but one. This also **corrects my previous entry**: I called the
+  parent "stateless" as though nulling `stage` created a gap. It did not — §4.4 always had `parent_state` as
+  **derived, not stored**. `stage = NULL` on a parent is correct. Only the derivation is unbuilt, and it needs
+  no column.
+- **Deliberate deferral:** *"This was all poorly designed in the first build and I don't want to by default carry
+  that bad design over… get the new schema working then later make a pass."*
+
+### Shipped (docs only — no columns existed, so no code changed)
+§4.4 rewritten (parent = process status only; `outcome` + `withdrawn_reason` DEFERRED) · §6.1 simplified to two
+values, with the retired five-value ladder parked and *why* each value went · §6.2 marked **DEFERRED / do not
+build**, its design parked intact for the later pass.
+
+**⚠️ §6.2(a) SURVIVES THE DEFERRAL AND IS ALREADY BUILT:** parent-level terminal events (unanswered clarification,
+unpaid deposit, withdrawal) still **cascade DOWN** — each open child takes the matching §5.8 disposition and the
+parent rolls up to `Complete`. `clarificationTimeout` already closes `COALESCE(master_request_id, id)`. Deferring
+the parent's disposition FIELD changes none of that.
+
+### Next (unchanged)
+Portal emitting n children (#12) + retire `mrrChoice` · `source_request_id` attribution (§4.2.1) · MRR
+classification roll-up (unspecified) · **the field-design pass Kevin parked** · MRR hub (§14.3 — design first).

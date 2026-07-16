@@ -172,9 +172,28 @@ The two `HOLD` payment values are **clock-holds** (§3). Today `awaiting_payment
 ### 4.4 Rolled-up state
 | Field | Values |
 |---|---|
-| `parent_state` | `Intake` · `In Process` · `Processed` · `Delivered` · `Closed` — **derived** (§6.1). Kevin's sheet stops at `Processed`; `Delivered` and `Closed` are added because nothing in the sheet records that the records actually went out. |
-| `outcome` | `Granted` · `Granted in Part` · `Denied` · `No Responsive Records` · `Withdrawn` — **derived** (§6.2). Never hand-set; the research is explicit that "granted in part" is a computed consequence of the children. |
-| `withdrawn_reason` | `Clarification not provided` · `Deposit not paid` · `Requestor did not claim records` · `Requestor withdrew` |
+> **SIMPLIFIED 2026-07-16 by Kevin — the parent carries PROCESS STATUS ONLY. No disposition, no outcome.**
+> *"Perhaps for now it's best to not include disposition/outcome at the parent and have a description of process
+> status, which would be in process, or complete. Shipped or delivered would belong at the child record… This was
+> all poorly designed in the first build and I don't want to by default carry that bad design over to the new
+> schema… get the new schema working then later make a pass."*
+>
+> This **dissolves** the `outcome`-vs-`disposition` contradiction below rather than arbitrating it: §4.4 called the
+> field `outcome` (`Granted` · `Granted in Part` · …) and §6.2 called the same field `disposition`
+> (`Fulfilled` · `Partial fulfillment` · …) — two names, two value lists sharing only `Denied`, plus a third set
+> from §6.2's cascade branch that appeared in neither. **Nothing could be built on that.** The field with two
+> definitions now has none, and the real outcome lives where Kevin says it belongs: on the CHILD (§5.8), which
+> already carries `Closed – Delivered` / `No records located` / `Denied` / `No response` and four more.
+>
+> **DELIVERY IS A CHILD FACT** (Kevin, 2026-07-16): *"mrr types should be delivered asap when fully processed."*
+> A parent-level `Delivered` state would be a lie the moment one child of five is still in redaction — and it
+> would invite holding four finished records hostage to the fifth, which §5.9's coverage test forbids anyway.
+
+| Field | Values |
+|---|---|
+| `parent_state` | **`In Process` · `Complete`** — **derived** (§6.1). Deliberately coarse. The parent does not track *where* work is (that is the child's `stage`, and an MRR's children are at different stages simultaneously) — only whether it is all done. |
+| ~~`outcome`~~ | **DEFERRED 2026-07-16.** Not built, not designed. Revisit in the field-design pass; do NOT carry the v1 model over by default. |
+| `withdrawn_reason` | `Clarification not provided` · `Deposit not paid` · `Requestor did not claim records` · `Requestor withdrew` — *also deferred with `outcome`; the reason a request ended is recorded on the CHILD's disposition (§5.8) today.* |
 
 **Withdrawal is a parent event even when triggered by one child.** Kevin's sheet has `Complete: Closed No Clarification Provided` on the child's Record Search. In Texas, §552.222(d): no answer to a clarification within 61 days and "the underlying request … is considered to have been withdrawn." So the child records *why*, but the terminal effect lands on the parent.
 
@@ -304,14 +323,43 @@ This was researched hard, twice, at Kevin's request. **Across all seven states t
 
 ## 6. Roll-up rules
 
-### 6.1 `parent_state`
-- `Intake` — no child has left intake.
-- `In Process` — any child is past intake and not all are complete.
-- `Processed` — every child has reached a point of no further processing (Kevin's definition), regardless of *what* happened to it.
-- `Delivered` — every child that is releasable has been released.
-- `Closed` — terminal.
+### 6.1 `parent_state` `[SIMPLIFIED 2026-07-16 by Kevin — two values]`
+**Derived, never stored, never hand-set.** A parent has no `stage`; `stage` is a CHILD concept and an MRR's
+children sit at different stages at the same time (Kevin, 2026-07-16) — a single parent-level stage would have to
+lie about all but one of them.
 
-### 6.2 Parent `disposition` `[ANSWERED 2026-07-14 by Kevin]`
+- **`In Process`** — any child is not yet terminal.
+- **`Complete`** — every child has reached a terminal disposition (§5.8), *whatever* those dispositions were.
+
+`Complete` means "no further processing", **not** "delivered" and **not** "granted": a request whose only child
+was denied is `Complete`. What actually happened is the child's disposition, and there is no parent-level
+summary of it today — see §4.4.
+
+> *Parked with the field-design pass (§4.4):* the earlier five-value ladder `Intake · In Process · Processed ·
+> Delivered · Closed`. `Intake` collapses into `In Process` (nothing acts on the distinction); `Delivered` is a
+> child fact, not a parent one; `Processed` vs `Closed` was never given a behavioural difference. Retained here
+> only so the later pass does not have to rediscover why they went.
+
+### 6.2 Parent `disposition` `[DEFERRED 2026-07-16 by Kevin — NOT BUILT, NOT THE CURRENT DESIGN. See §4.4.]`
+
+> **Do not build from this section.** The parent has **no disposition and no outcome** (Kevin, 2026-07-16) — only
+> `In Process` / `Complete` (§6.1). Everything below is **parked for the later field-design pass**, kept because
+> its reasoning is expensive to rediscover — in particular **(a), which is still live and still built.**
+>
+> **(a) Parent-level terminal events CASCADE DOWN — this mechanism SURVIVES the deferral and is already
+> implemented.** An unanswered clarification, an unpaid deposit or a withdrawal ends the whole request, and each
+> open child takes the matching disposition from §5.8 (`Closed – No response`, `Closed – Non-payment`,
+> `Closed – Withdrawn by requestor`). The parent then simply rolls up to `Complete`. `clarificationTimeout`
+> already closes `COALESCE(master_request_id, id)` — the event is logged on the child, the closure lands on the
+> parent (Tex. Gov't Code § 552.222(d) withdraws "the underlying request", not one record of it).
+> **Nothing about deferring the parent's disposition FIELD changes this.**
+>
+> **(b) The derived roll-up table below (`Fulfilled` / `Partial fulfillment` / …) is NOT the current design.**
+> It is one of the two conflicting vocabularies §4.4 documents; neither is built.
+
+*(Parked below — the original 2026-07-14 design, retained for the field-design pass.)*
+
+### 6.2-parked Parent `disposition` `[ANSWERED 2026-07-14 by Kevin — SUPERSEDED 2026-07-16]`
 **There are TWO mechanisms, and conflating them is the mistake to avoid.** Kevin's framing was "if a multi-child request is closed for non-payment, that is the parent's disposition" — correct, but the causality runs **downward**, not upward.
 
 **(a) Parent-level terminal events — these CASCADE DOWN, they do not roll up.** Money and the citizen relationship live on the parent (§2), so these end the whole request and every open child inherits the disposition:
