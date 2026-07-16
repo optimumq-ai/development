@@ -137,6 +137,13 @@ async function setPolicy(cfg) {
     ok('B: before payment, the clock has consumed real days (' + bBefore.consumedDays + ') and is tolled', bBefore.consumedDays > 0);
 
     // ---- the deposit lands, through the real endpoint ----
+    // The restart assertion below is `started_at > bStart1`, a STRICT comparison — but every timestamp in the
+    // clock engine is second-granularity (`nowStr()` truncates to seconds). When the whole B case ran inside one
+    // second, the restarted `started_at` came back byte-identical to the original and the assertion failed on
+    // CORRECT code — an intermittent red that appeared as the suite got faster. Wait out the second so the two
+    // moments are actually distinguishable, rather than weakening the assertion to `>=` (which would no longer
+    // catch a restart that never happened).
+    await sleep(1100);
     var dep = await api('POST', '/fee-estimates/request/' + B.req.id + '/deposit/record', {});
     ok('B: deposit recorded through the real endpoint; stage advanced to record_search',
       dep.status === 200 && dep.body.stage === 'record_search');
