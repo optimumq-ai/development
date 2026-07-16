@@ -5,7 +5,8 @@ On-premise open-records platform for cities. Node/Express backend (`backend/`, P
 ## Specs are the contract
 - Before building in any domain, READ the relevant spec in `docs/SPEC_*.md` (index: `docs/DOMAIN_MAP.md`).
 - A design change updates the spec in the SAME commit as the code.
-- Architecture decisions live in `docs/ARCHITECTURE.md` — conform to it; item 1 (wrap-in-parent) pending ratification.
+- Architecture decisions live in `docs/ARCHITECTURE.md` — conform to it. **All 7 items RATIFIED 2026-07-16**, including item 1 (wrap-in-parent).
+- **Parent/child is DESIGNED, NOT BUILT.** `docs/SPEC_parent_child_lifecycle.md` is the single binding spec (`SPEC_tasks_roles_mrr_fees.md` §12 is a pointer stub). 0 children exist; zero code writes `master_request_id`. The migration is `BUILD_PRIORITY` item 11 — MRR, per-component labor, and the budget brain all sit behind it.
 - Build order comes from `docs/BUILD_PRIORITY_SUMMARY.md`.
 
 ## Process rules (non-negotiable)

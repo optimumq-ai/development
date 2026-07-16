@@ -80,45 +80,28 @@ Applies to BOTH the chat AND the "Prefer a form" fallback. Needs a richer widget
 "**Profile**" (canonical term). Stores generating INPUTS per record type (quantities/stats/sample/expert-seed); the fee engine computes the estimate from them (standard OR commercial) into a detailed worksheet — not a stored total. `[engine BUILT; profiles table EMPTY — 0 populated]`
 **Known gap (taxonomy, open):** record types can be "buckets" with variants (e.g., building-permit sub-types), but the taxonomy has no level below `record_type` and profiles/redaction attach 1-per-type, so variants can't get distinct profiles. A variant-level / auto-discovery design is an OPEN taxonomy decision (held by Kevin, intentionally not captured here).
 
-## 12. Multi-record model — one request, many items `[SUPERSEDED IN PART 2026-07-13 → see SPEC_parent_child_lifecycle.md]`
-> **Status (2026-07-13).** **Layer 1 (citizen) and Layer 3 (fees) below stand unchanged and are correct** — one request, one number, one fee, one deadline; no "combined vs separate"; fees computed once at the request level with per-request thresholds applied once.
+## 12. Multi-record model — `[RETIRED 2026-07-16 → POINTER ONLY. The binding document is `SPEC_parent_child_lifecycle.md`.]`
+
+> **Do not build from this section. Everything it contained now lives in `SPEC_parent_child_lifecycle.md`:**
 >
-> **Layer 2 (processing) and the storage fork are superseded.** This section's move to retire the parent row in favour of a `request_items` side table is **reversed**: a single-record request and a multi-record component must be the **same row shape**, or every query, worklist and report unions two shapes forever (Kevin's requirement: "a report of all requests in redaction should include single-request child records as well as MRR child records"). The model is **always-wrap: one parent, 1..n children**, with an **asymmetric field split** — the child is the unit of work; the parent is the unit of citizen relationship, money and the statutory clock. Read "item" below as "child."
+> | Was here | Now |
+> |---|---|
+> | Layer 1 — the citizen model (one request, one number, one fee, one deadline; "combined vs separate" retired; delivery timing) | **§13** |
+> | Layer 3 — the fee model (computed once at the parent; per-request thresholds once; a child is a unit of work, never of billing) | **§13** + **§6.4** |
+> | Layer 2 — the processing model | **§1–§7** (always-wrap, parent/child, asymmetric field split) |
+> | §12.1 — the staff-side MRR design (RM workspace hub, Multi-Record Estimate, non-system contributor, Multi-Record Search, Verify≠Approve, early release, HIGH PRIORITY) | **§14** — *never superseded, only mis-filed* |
+> | The storage fork ((a) child rows vs (b) `request_items`) | **CLOSED on (a)** — child rows in `requests`. §12 had *leaned* (a) all along; the 07-13 supersede header wrongly described it as having chosen (b). |
 >
-> The binding document is **`SPEC_parent_child_lifecycle.md`** (field lists, the five-axis vocabulary, roll-up rules, record-hold vs clock-hold, the withholding log, and the additive migration).
-
-The prior framing ("every request wrapped in a parent master + child," "combined vs separate," "a child is a full request") is **retired** — it braided three separate layers together and manufactured a false fee risk. Clean model, answered by layer:
-
-**Core:** *A request has one or more items. The citizen sees one request, one number, one fee. Items are internal work-units that route and finish independently and roll up. Fees are computed once, at the request level. "Combined" is the default and the only path — there is no "combined vs separate."*
-
-**Layer 1 — Citizen.** One submission = **one request, one number, one fee, one deadline, one contact**, regardless of how many records described. Never sees "master/child/MRR/item." **Not asked "combined vs separate"** — combining is the legal norm and the default; a genuinely independent second request = file twice. The only multi-item choice that reaches the citizen is **delivery timing** (send each item as ready vs hold-all), shown only when ≥2 items; may be defaulted.
-
-**Layer 2 — Processing.** The request holds **items**, one per described record. Each item has its own department/owner, search, redaction-if-needed, files, and status. An item flows through the **same processing engine** as a standalone request — that is all "a child is a full request" ever meant (plumbing reuse, NOT a separate citizen request). A **Request Manager** owns the request and coordinates items; items **roll up** (request complete when all items complete; **Partially Granted** if some denied). Item formation from descriptions: **AI proposes / human decides**. **Single-record = a request with one item** — no special "MRR mode"; everything is uniformly 1…N items.
-
-**Layer 3 — Fees.** Computed **once, at the request level**, never per item. Per-request thresholds (**minimum, de-minimis, floor/ceiling, deposit, certification**) apply **once** to the whole request — a city's per-request minimum is charged once no matter how many items (the legal "combine into one request, one fee" rule; already the engine's "parent-level application"). Items contribute **quantities**; an item is a unit of *work*, never a unit of *billing*. Single- and multi-record use the **identical** engine and thresholds; multi only adds a per-item **gathering** step feeding the one parent estimate. *(Open sub-item: whether to re-fee on item change — recomputation mechanics only, not the number of minimums.)*
-
-**Terminology (retire the jargon that caused the tangle):** master/parent → **request**; child / "full request" → **item** (internal work-unit); `component_label` → **item label**; `is_mrr` special mode → just `item_count > 1` (a fact, not a mode); "combined vs separate" question → **removed**.
-
-**Current reality / storage.** Schema has `is_mrr`, `master_request_id`, `component_label`; a request can read its items; classifier flags `is_mrr`. NO item creation/split yet (0 in DB), NO management screen, NO route-to-Open-Records. **One implementation fork (build-time; does not affect Layers 1 or 3):** store items as **(a)** child-request rows (`master_request_id`, reuses the engine, half-scaffolded — leaning this) or **(b)** a dedicated `request_items` table (cleaner data, more engine rework). Blast radius for (a): centralize ~5 creation sites + migrate ~118 rows + review ~17 list queries & 6–8 list views; processing engine untouched.
-
-### 12.1 Staff-side MRR management — open design surface `[NOT BUILT — design next; hub = Request Manager workspace]`
-Four staff surfaces, all reached **from** the Request Manager workspace — design the hub first; the other three are actions within it. Read every "child" below as **item**.
-1. **Request Manager workspace (hub)** — RM owns the request, coordinates its items, is the sole communicator ("email Request Manager"; no per-task customer button); "MRR Processing" box.
-2. **Multi-Record Estimate interface** — gather per-item inputs (search/select auto-populates the profile, or manual; non-user via secure expiring link) → totals accrue → parent **Create Estimate** via the standard engine.
-3. **Multi-Record Search interface** — per-item search; selected/public-ready items auto-complete; a located record needing redaction hits the normal auto-routing.
-4. **Manual early release of a completed item** — default no release until the whole request completes; RM may set a **Finance-approved** acceptable payment to release specific completed items early.
-
-Detailed prior notes (retained; "child" = item):
-- **Intake:** agent elicits one description per child (detect-and-propose + validate-each + "anything else?"); >1 item → MRR at handoff.
-- **Fee-waiver gate first**; then route to Open Records, assign the **Request Manager** (owns the parent; "MRR Processing" box).
-- Children not auto-routed; RM manually assigns a department per child; a public-ready-selected child needs nothing further.
-- **Estimate:** if a profile exists, costs display for the RM; else RM assigns **Multi-Record Request Estimate** (role-agnostic) to gather; screen allows search/select (auto-populates the profile) or manual entry; on submit, ownership returns to RM and totals accrue; when all children done → parent = **Create Estimate**; RM generates via the standard engine.
-- **Non-system contributor:** RM can assign estimate-gathering to a non-user by email → secure link → they submit costs → task complete. [needs a secure, expiring, single-use token]
-- **Verify** (NOT "Approve" — "Approve" is reserved for the *requestor's* estimate approval, which in some states begins processing) → communicate the estimate to the requestor → the city's "begin processing" rules advance to fulfillment.
-- **Fulfillment** mirrors estimate: selected/public-ready → auto-complete; else RM assigns **Multi-Record Search**; a located record needing redaction uses the normal auto node-change routine.
-- Task screens have **no customer-comms button**; instead an "email Request Manager" button; the RM is the sole MRR communicator.
-- **Completion/release:** parent complete only when ALL children complete; default no release until parent complete; NO partial-fee-allocation logic; but the RM may set an acceptable payment (Finance-approved) to release specific completed children early.
-- **HIGH PRIORITY** checkbox → an AI report monitoring all high-priority MRRs.
+> **Why this section was retired rather than amended (2026-07-16).** For three days two documents redirected to
+> each other — this one said "read item as child, see the other spec"; the other said "§12 Layers 1 and 3 still
+> stand." Reconstructing which half of each was live required holding both in your head, and two sessions failed
+> to do it. Worse, this section's **Terminology** paragraph instructed readers to retire the exact vocabulary the
+> binding spec uses (`child` → item, `component_label` → item label, `is_mrr` → `item_count > 1`) — so an agent
+> reading top-to-bottom came away with the wrong words. **One document, one vocabulary: parent and child.**
+>
+> **What §12 got right, and keeps credit for:** the citizen and fee layers (adopted verbatim), `is_mrr` as a
+> *derived fact* rather than a mode, "single-record = one child, no special MRR mode", and the §12.1 staff design
+> — still the richest workflow content in any spec, and still unbuilt.
 
 ## 13. Shipped fix (this session)
 - **Self-healing reconciler** `[BUILT]`: spawns the missing stage task for any request stranded at record_search/redaction (idempotent; boot + every 2 min). Root cause of the original stage-advance-without-spawn is NOT isolated; centralized-transition fix deferred.

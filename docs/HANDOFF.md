@@ -3957,3 +3957,76 @@ Committed `c57c4c9`.
   ORO intake review; MRR→manual assign/plug; single-child→fulfillment spawns a legal-estimate task.
 - Next slices: **Slice I budget brain** (consumes the same measured labor), conveyor & batch processing,
   #13 org-wide bottleneck dashboard.
+
+---
+
+## 2026-07-16 — THE MERGE: parent/child is now ONE binding spec, item 1 RATIFIED. Docs only, no code.
+
+**Session opened on a power-outage recovery and turned into the root-cause of why `BUILD_PRIORITY` item 11 never
+got built.** Nothing was lost to the outage: the interrupted session (`e1b17dc9`) ends at Kevin's message
+*"delete all request data and let's build the parent/child schema"* (00:06:47) with **no assistant response** —
+the delete **never ran**. Live DB verified intact: 129 requests, 723 files, 552 history rows.
+
+### What was actually wrong (all verified, not asserted)
+- **Parent/child was NEVER BUILT.** 129 requests, **0 children**, `master_request_id` written by **zero lines of
+  code** (6 files read it, none write). `component_label` written on 0/129. 4 rows carry `is_mrr=1` with no
+  children — the broken middle state Kevin saw in the portal.
+- **§12's rival model was never built either.** `20ff869` touched **3 `.md` files, no code** ("Spec/design only").
+  No `request_items` table, no `item_count` anywhere. **Neither model ever reached the codebase — nothing to unwind.**
+- **The "two live bugs to fix first" were FIXED on 07-13** (`a9f8d29` ghost stage, `9ba8f32` raw stage writes).
+  Both specs still listed them as blockers. Corrected.
+- **`ARCHITECTURE.md` contradicted itself:** the header said "pending Kevin's ratification / item 1 is the only
+  open judgment call" while item 1's heading read ADOPTED — and `CLAUDE.md` told **every fresh session** item 1 was
+  unratified. That is the most likely mechanism for 13 sessions correctly taking smaller, unblocked slices instead.
+- **The 07-10 vs 07-13 "spec conflict" was largely a MISREADING.** §12 had *leaned* storage option **(a) child
+  rows** — the same choice 07-13 made. The 07-13 supersede header described §12 as having chosen `request_items`.
+  It hadn't. The genuine delta was the **field asymmetry** (retiring "a child IS a full request row") + migration
+  direction, not storage.
+- **The "manual MRR routing" contradiction was MINE, not the specs'.** §9 item 5 and
+  `MASTER_task_types_permission_groups.md` §A2 are **MRR-scoped in their own sentences**; neither ever spoke to
+  single-child requests. Kevin diagnosed this himself from memory, and his recall was near-exact (ORO Associate,
+  `mrr_processing`, the five hand-assigned workstreams).
+
+### Kevin's rulings this session
+- **ARCHITECTURE item 1 RATIFIED** — *"this is the model to be used."* All 7 items now ratified.
+- **Toll attribution (§4.2.1)** — Kevin's model, **adopted over the spec's**: the clock stays on the parent
+  (legally required), but the *trigger* is attributed via a **nullable `source_request_id`** (NULL = parent-level
+  event). Attribution ≠ ownership.
+- **Child routing (§14.2)** — **suggest-and-confirm**, superseding 07-13's "purely manual": the classifier runs on
+  **every** child; **committed** at `child_count = 1`, **suggested** at >1 for the RM to accept/override/bypass.
+  Rationale: always-wrap means a single-record request *is* a parent with one child, so children must auto-route
+  or every ordinary request would need a human. Engine uniform; only the commit gate differs.
+- **Hub ownership (§14.1)** — the ORO Associate owns the **whole tree at the parent**; children are **not**
+  individually assigned. Children are dispositioned from inside the hub.
+- **Purge, not migrate** — the 129 requests are test residue; delete rather than backfill.
+
+### 🚨 A LIVE BUG FOUND (not migration-gated — reachable TODAY on the flat schema)
+`tolling.js` **can only hold ONE open toll**: `toll()` returns `{alreadyTolled:true}` and **silently drops** a
+second trigger; `resume()` closes **all** open tolls. Today: clarification open → record goes to the AG → **the AG
+hold never registers** → clarification answered → **the clock runs while the request is still legally suspended.**
+And the accumulator **SUMS** toll intervals (safe only because of the single-toll guard) — lift it naively and
+overlapping tolls double-count (A: Jan 1–10, B: Jan 5–15 → **20 days counted, 15 actually suspended**), extending
+the due date beyond law while the dashboard reports compliant. **Required:** concurrent attributed tolls + **UNION
+of intervals, never sum** + refcounted resume. **Worth its own slice regardless of the migration.**
+
+### Shipped (docs only — `git diff` confirms zero code files)
+- **`SPEC_parent_child_lifecycle.md` is THE single binding spec** (512 → 716 lines). New **§13** (citizen + fee
+  layers, folded from §12 Layers 1/3), new **§14** (MRR staff workflow, folded from §12.1 — *never superseded,
+  only mis-filed in a tasks/roles/fees doc, which is much of why it was never found*), new **§4.2.1** (toll
+  attribution + the two engine bugs), §9 item 5 relaxed → §14.2, §8 blockers cleared.
+- **§11.1 (a) + (b) DECIDED — Claude's technical call, NOT Kevin's, reverse freely:** (a) drive the deposit sweep
+  off **`payment_status`**, drop the stage predicate — **must be rewritten BEFORE children exist or dunning
+  silently stops**; (b) report revenue by **parent-level groupings only**, refuse the child-grouped cut (needs an
+  allocation rule the law is silent on).
+- **`SPEC_tasks_roles_mrr_fees.md` §12 → a 24-line pointer stub.** Its Terminology paragraph had been instructing
+  agents to retire the exact vocabulary the binding spec uses. **One document, one vocabulary: parent + child.**
+- `ARCHITECTURE.md` ratified · `CLAUDE.md` updated (item 1 ratified; parent/child designed-not-built) ·
+  `BUILD_PRIORITY_SUMMARY.md` item 11 resequenced.
+
+### Next
+**No decisions remain on item 11 — it is now work.** Sequence: (1) **purge** the 129 demo requests; (2) rewrite
+`tickler.js`'s deposit sweep onto `payment_status` (§11.1a) — *before* children exist; (3) the backfill (§8);
+(4) the portal emitting children + retire `mrrChoice`; (5) the §4.2.1 concurrent-toll engine.
+**Blocked on DESIGN, not decisions:** the MRR hub (§14.3 — parent line + child lines; UI rule: agree before build).
+**Stale sessions still alive and idle:** tmux `claude` (pid 838913, session `efec0a92`), 841259, 278413 — safe, but
+they are what a reconnect lands in. Kill when convenient.

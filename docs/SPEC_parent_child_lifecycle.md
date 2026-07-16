@@ -1,7 +1,15 @@
 # SPEC — Parent/Child Request Model & Lifecycle Vocabulary
-**Status: DRAFT for Kevin's review — 2026-07-13. Not built. No code moves until this is ratified.**
+**Status: RATIFIED 2026-07-16 by Kevin — THE single binding document for the parent/child model.**
+`SPEC_tasks_roles_mrr_fees.md` §12 is now a pointer stub to this file; its citizen layer, fee layer and staff-workflow
+design (§12.1) are folded in here as **§13** and **§14**. `ARCHITECTURE.md` item 1 is ratified in the same commit.
 
-Supersedes, on the storage/lifecycle question, the two incompatible prior designs:
+**DESIGNED, NOT BUILT.** Measured 2026-07-16: **129 requests, 0 children, zero lines of code write
+`master_request_id` or `component_label`.** Neither this model nor §12's `request_items` model ever reached the
+codebase — there is nothing to unwind. The migration (§8) is the next build slice.
+
+**Merged 2026-07-16** from the two documents below plus Kevin's rulings of that date (toll attribution §4.2.1;
+child routing §14.2; hub ownership §14.1). Supersedes, on the storage/lifecycle question, the two incompatible
+prior designs:
 - `ARCHITECTURE.md` item 1 ("every request is wrapped in a parent"; "a child IS a full request row") — **directionally right, wrong on the field split.**
 - `SPEC_tasks_roles_mrr_fees.md` §12 ("one request, many items"; master/child "retired") — **right on the citizen and fee layers, wrong to retire the parent row.**
 
@@ -88,7 +96,53 @@ Texas needs the second kind in three places:
 - §552.263(e) deposit: the request is "considered … received on the date the governmental body receives the deposit" — a **reset**. **No rule slot exists** (§10).
 - §552.2325 catastrophe suspension is the *only true toll* in the Texas Act (max 14 days).
 
-**A third primitive is genuinely absent: `extend()`.** `toll()` pushes the due date out by *elapsed wall time*, which cannot express "+10 statutory days for unusual volume" (IL §3(e), CA §7922.535(b)). See §10.
+**A third primitive, `extend()`** — `toll()` pushes the due date out by *elapsed wall time*, which cannot express
+"+10 statutory days for unusual volume" (IL §3(e), CA §7922.535(b)). **BUILT 2026-07-13** (`0ef868d`, 30/30),
+together with `tollReasons` validation. *(This line previously read "genuinely absent" — stale since 07-13.)*
+
+### 4.2.1 Toll attribution — WHERE the trigger is recorded `[DECIDED 2026-07-16 by Kevin]`
+
+**The clock lives on the parent. The trigger is attributed to whatever caused it.** Attribution is not ownership:
+recording that child 3's clarification tolled the parent clock does **not** give child 3 a clock. This keeps the
+model legally compliant (§2) while answering the question the current schema cannot: *which record is holding up
+this request?*
+
+`clock_tolls` today is `id, clock_id, reason, tolled_from, tolled_until, note` — `reason` says **why**, nothing
+says **which child**. On a five-child request that is a real operational hole. Add:
+
+| Field | Notes |
+|---|---|
+| `source_request_id` | **Nullable.** The CHILD whose event triggered the toll. **NULL = a parent-level event** (deposit nonpayment/re-receipt, volume extension, catastrophe suspension). One ledger, both sources, full visibility. |
+
+This generalises a pattern the spec already uses in exactly one place (§11.1): the clarification **EVENT** is
+logged on the child, the **CLOSURE** lands on the parent. Kevin re-derived it independently on 2026-07-16, which
+is why it is now the general rule rather than a special case.
+
+> ⚠️ **TWO ENGINE BUGS BLOCK THIS — AND THE FIRST IS LIVE TODAY, ON THE FLAT SCHEMA.**
+>
+> **1. Only one toll may be open at a time — a second trigger is SILENTLY DROPPED.**
+> `tolling.js` `toll()`: `SELECT id FROM clock_tolls WHERE clock_id = ? AND tolled_until IS NULL` →
+> `if (open) return { alreadyTolled: true }`. No error, no log. And `resume()` closes **every** open toll at once.
+> Live consequence today: a clarification is open → a record goes to the AG → the AG hold **never registers** →
+> the clarification is answered → `resume()` → **the clock runs while the request is still legally suspended at
+> the AG.** The city burns statutory days it was entitled to suspend, and nothing records that it happened.
+> Latent today only because concurrent tolls are rare; **this model makes them routine.**
+>
+> **2. The accumulator SUMS toll intervals** — `tolled += calc.basisDaysBetween(from, until, basis, H, W)` —
+> which is safe *only* because of bug 1. Lift the single-toll guard naively and overlapping tolls double-count:
+> child A tolls Jan 1–10 (10d), child B Jan 5–15 (10d) → **summed 20 days, actually suspended 15**. The due date
+> extends five days beyond what the law allows and the dashboard reports **compliant while the city is late** —
+> the same class of failure as the 10,000 numbering ceiling: a wrong number that presents as a right one.
+
+**Required engine shape:** multiple **concurrent open tolls**, each attributed via `source_request_id`;
+`tolled_days` = the **UNION of intervals, NEVER the sum**; the clock resumes only when the **last** open toll
+closes (a refcount, not a flag). Bug 1 is worth its own bounded slice **independent of the migration** — it is
+reachable today whenever an AG hold lands while a clarification is open.
+
+**A child-triggered restart restarts the WHOLE parent clock**, including siblings that were never at fault. That
+is the law — §552.222(d) re-receipts "the underlying request," not one record — and it follows §6.2's rule that
+parent-level terminal events cascade down. It is operationally generous (one vague child hands the city a fresh
+full clock on four innocent ones) and is recorded here so that it is a **decision**, not a surprise in a report.
 
 ### 4.3 Money
 | Field | Values |
@@ -304,9 +358,11 @@ Why this direction: of the 16 tables carrying `request_id`, **8 are work-level a
 
 Backfill per existing request: create parent, copy the citizen/money/clock columns up, set `child.master_request_id`, `child.child_no = 1`, `child.request_number = parent.request_number || '-1'`, repoint the 7 tables.
 
-**Two live bugs this migration forces us to fix first** (both already found, neither yet fixed):
-1. The frontend drives stage advances through a **legacy stage order containing a ghost stage `custodian_retrieval`** that exists nowhere in the backend.
-2. `feeNonpayment.js:39` and `tickler.js:88` bypass `applyStageTransition` with a raw `UPDATE requests SET stage='closed'` — writing no history row and leaving open tasks claimable. This violates `ARCHITECTURE.md` item 6 and will silently corrupt roll-up, because a parent that closes without its children closing is exactly the state the roll-up rules cannot represent.
+~~**Two live bugs this migration forces us to fix first**~~ **BOTH FIXED 2026-07-13 — this blocker is CLEARED** *(verified 2026-07-16; the text below is retained for the record)*:
+1. ~~The frontend drives stage advances through a **legacy stage order containing a ghost stage `custodian_retrieval`**~~ → **FIXED `a9f8d29`** ("one canonical stage vocabulary — kill the ghost and the pipeline it hid", 23/23). Only historical comments now mention the name.
+2. ~~`feeNonpayment.js:39` and `tickler.js:88` bypass `applyStageTransition` with a raw `UPDATE requests SET stage='closed'`~~ → **FIXED `9ba8f32`** ("route every close through applyStageTransition — no raw stage writes", 24/24). ARCHITECTURE item 6 holds.
+
+**Remaining migration blockers as of 2026-07-16.** §9 is answered, item 1 is ratified (`ARCHITECTURE.md`), §14.2 closes routing, and §11.1 (a)+(b) are decided below. What is left is *work*, not decisions: the backfill, the portal emitting children, the §4.2.1 toll-engine upgrade, and the hub's **design direction** (§14.3 — UI rule: agree the design before building).
 
 ---
 
@@ -332,7 +388,7 @@ Backfill per existing request: create parent, copy the citizen/money/clock colum
 2. **Should nonpayment stop the statutory clock?** Today it does not — `payment_pending` is declared in `tolling.js` and has **zero callers**, so a request sitting on an unpaid deposit runs late on paper. Texas is stronger than a toll: an unpaid deposit **re-receipts** the request (§552.263(e)) and can withdraw it (§552.263(f); §552.221(e) 60-day). Recommend: add `deposit_nonpayment_effect: pause | reset | withdraw | flag_only` and set TX = `reset` (§10.4 step 3). The `restart()` primitive it needs is already built.
 3. **Clarification: reset, not pause.** Confirm we implement §552.222 / *City of Dallas v. Abbott* as a reset rather than a toll. **This is already expressible** — set `clarification_clock_effect = toll_and_restart` for TX (`clarificationAction.js:32-42`). It is not set today: the policy is at all-defaults (`no_fixed_clock`, `enabled: false`) and nothing is attested, so the automation has never fired. Turning it on **changes reported lateness on live requests**.
 4. **`delivery_mode` = `Hold-All` (default) | `As-Ready`.** Confirm you want As-Ready as a real mode rather than an MRR-only override (§5.8).
-5. **Routing for MRR stays purely manual** for now (your call, 2026-07-13): parent assigned to an MRR manager who assigns children by hand. Intake review is bypassed for MRR because the parent is already with an Open Records team member. Confirmed — recorded here, no action.
+5. ~~**Routing for MRR stays purely manual**~~ **RELAXED 2026-07-16 → see §14.2.** The 07-13 call (parent assigned to an MRR manager who assigns children by hand) is superseded by **suggest-and-confirm**: the classifier runs on every child; the result is *committed* on a single-child request and *suggested* on an MRR, for the RM to accept, override, or bypass. Pure manual is incompatible with always-wrap — a single-record request IS a parent with one child, so children must auto-route or every ordinary request would need a human to route it. **Still true and unchanged:** the parent is system-routed to an ORO Associate via `mrr_processing`, that person owns the whole tree at the parent (§14.1), and **intake review is bypassed for MRR** because the parent is already with an Open Records team member.
 
 ---
 
@@ -447,7 +503,21 @@ Today a request **is its own parent and its own child**, so both are tautologies
 ### 11.1 STILL OPEN — deliberately not guessed
 - ~~**`clarificationTimeout`**~~ **DONE 2026-07-14**, once §6.2 settled that parent-level terminal events cascade down. The clarification EVENT is logged on the **child** (that record's description was vague) but the CLOSURE lands on the **parent** — Tex. Gov't Code § 552.222(d) withdraws "the underlying request," not one record of it. The sweep now searches LEAF rows and closes `COALESCE(master_request_id, id)`. Today that resolves to the row itself (a verified no-op: `close_target === id` on all 125 rows); after the migration it closes the parent and cascades. **This sweep AUTO-CLOSES — unscoped, it was the single most destructive query in the migration.**
 
-**TWO ITEMS ARE BLOCKED ON A DECISION, NOT ON WORK. Neither is a join problem; both are design gaps in this spec.**
+**TWO ITEMS WERE BLOCKED ON A DECISION, NOT ON WORK — BOTH DECIDED 2026-07-16.** Neither is a join problem; both were design gaps in this spec. **Both decisions below are Claude's technical call, adopting this section's own recommendations — NOT Kevin's. Reverse either freely; nothing is built on them yet.**
+
+> **(a) DECIDED → option (iii): drive the deposit sweep off `payment_status`, drop the stage predicate entirely.**
+> The money axis already lives on the parent (§4.3), which is where the estimate lands after the migration, so the
+> `stage` predicate is redundant with it *today* and broken *after*. The parent gets **no** `payment_state` axis and
+> `awaiting_payment` is **not** promoted to a parent stage — both would duplicate `payment_status`. `tickler.js`'s
+> deposit sweep must be rewritten to select PARENT rows by `payment_status` before the migration runs, or it
+> silently stops dunning (no notice, no lapse, no withdrawal) the moment children exist. **This is migration work,
+> not a follow-up.**
+>
+> **(b) DECIDED → option (i): report revenue only by PARENT-level groupings; refuse the child-grouped cut.**
+> A parent with two children in two departments has one revenue figure and two departments; attributing it needs an
+> allocation rule the law is silent on (§5.10). A wrong revenue-by-department number is worse than no
+> revenue-by-department number, and nothing in the product consumes it. `reportEngine`'s `fee_revenue` stays grouped
+> by month/requestor/status. **Revisit only if a city asks for it** — and then as a labelled estimate, never as fact.
 
 **(a) Where does the PAYMENT GATE live after the migration?** §5.2 says `fee_review` and `awaiting_payment` "move off the child — they are parent gates." But **the parent has no `stage`** — it has `parent_state` (`Intake · In Process · Processed · Delivered · Closed`, §6.1), and **none of those is a payment gate.** So "awaiting payment" currently has nowhere to live on the parent.
 
@@ -510,3 +580,137 @@ Illinois' PAC **will open a fee-waiver file and then tell the requestor it was n
 
 ### 12.6 Substrate (to build — mirrors `clarificationPolicy` / `paymentClockPolicy`)
 `enabled` (default false) · `grounds` (multi-enum) · `binding` (mandatory|discretionary|none) · `requestor_must_state_purpose` (IL: true) · `denial_requires_written_reasons` · `deemed_granted_on_silence` (false everywhere) · `response_window {days, unit, trigger_event, expiry_effect}` · `clock {tolls_on_waiver_request, tolls_on_waiver_appeal, restarts_on_deposit_receipt}` · `appeal {forum, window_days, can_order_waiver, reaches_fee_amount}` · `thresholds {estimate_required_above, deposit_allowed_above, deposit_cap_pct}` · `guardrails {fee_forfeiture_on_late_response, extension_grounds_closed_list}` — each with `{source, citation, confidence}` provenance and a validated enum.
+
+---
+
+## 13. Citizen-facing model `[folded from SPEC_tasks_roles_mrr_fees.md §12 "Layer 1" — 2026-07-16. UNCHANGED and still correct: §12 got this layer right and nothing here revises it.]`
+
+**The citizen never sees any of this vocabulary** — not parent, child, master, MRR, item, or component.
+
+- **One submission = one request, one number, one fee, one deadline, one contact**, however many records they
+  describe. The number is the parent's (§4.1); a child's `-1` suffix is never shown to a requestor and is hidden
+  in staff UI when `child_count = 1` (§5.1, §7).
+- **"Combined vs separate" is RETIRED and stays retired.** Combining is the legal norm and the *only* path; a
+  genuinely independent second request means filing twice. The portal's `mrrChoice` is the retired artifact of
+  the old question (`SPEC_public_portal_intake.md` §2 Phase 3/5) — **still present in the portal payload; remove
+  it with the migration.**
+- **The only multi-child choice that reaches the citizen is DELIVERY TIMING** — each-as-ready vs hold-all —
+  shown only when `child_count > 1`, and it may be defaulted. ⚠️ Not a mere preference: **WA RCW 42.56.080(2)
+  makes installments an entitlement** and **TX §552.306(c)(2)(B) requires batch notices** (§5.8).
+- **Child formation from the description: AI proposes, a human decides.** Intake elicits one description per
+  record (detect-and-propose → validate-each → "anything else?"). `child_count > 1` at handoff ⇒ MRR (§14).
+- **The fee-waiver gate runs first**, before routing to Open Records and assigning the Request Manager.
+
+**Fees (§12 "Layer 3", folded into §6.4 and unchanged):** computed **once, at the parent**, never per child.
+Per-request thresholds — minimum, de-minimis, floor/ceiling, deposit, certification — apply **once** to the whole
+request, which is the legal "combine into one request, one fee" rule. **A child is a unit of *work*, never a unit
+of *billing*.** Children contribute quantities; the parent computes the money. Single- and multi-child requests
+use the identical engine; multi only adds a per-child gathering step feeding the one parent estimate.
+*(Open sub-item, carried forward from §12: whether to re-fee on child change — recomputation mechanics only,
+never the number of minimums.)*
+
+---
+
+## 14. MRR management & staff workflow `[folded from SPEC_tasks_roles_mrr_fees.md §12.1 — 2026-07-16. NOT BUILT. The hub is NOT SCOPED.]`
+
+> §12.1 was **never superseded by anything** — it was simply filed inside a document about tasks, roles and fees,
+> where nobody building parent/child would look. That is a large part of why item 11 fell through the cracks for
+> thirteen sessions. It lives here now. Read every "item" in the original as **child**.
+
+### 14.0 The distinction that governs this whole section
+**A parent with ONE child is an ordinary request and behaves exactly as it does today.** A parent with **2+
+children is an MRR** and gets a manager. `is_mrr` is **derived** (`child_count > 1`, §4.1) — a fact, never a mode,
+never hand-set.
+
+*This distinction is the source of an apparent contradiction that cost two sessions.* §9 item 5 ("routing for
+**MRR** stays purely manual") and `MASTER_task_types_permission_groups.md` §A2 ("the MRR **parent** is routed by
+the system; the MRR **children** are hand-assigned") are **both MRR-scoped in their own sentences**. Neither ever
+said anything about single-child requests, which have always auto-routed. Read out of scope, they look like a
+contradiction of always-wrap. They are not.
+
+### 14.1 Ownership — the ORO Associate owns the TREE, at the parent
+- The MRR parent is **system-routed** to an **ORO Associate** (the Request Manager) via the **`mrr_processing`**
+  task type when intake detects `child_count > 1`; eligibility applies.
+  (`MASTER_task_types_permission_groups.md` §A2 — `[NOT BUILT]`.)
+- **The ORO Associate owns the whole tree at the PARENT. Children are NOT individually assigned to them.**
+  `[CLARIFIED 2026-07-16 by Kevin]` Only `mrr_processing` is an eligibility-routed task type in
+  `ROUTABLE_TASK_TYPES` / the per-person subset picker; child tasks are not. Children are *dispositioned from
+  inside the hub* (§14.3), not assigned to the RM one by one.
+- **Intake review is bypassed for MRR** — the parent is already with an Open Records team member (§9 item 5).
+- **The RM is the sole communicator with the requestor.** Task screens carry **no** contact-requestor button;
+  they carry **"email the Request Manager."** One request, one voice — this exists to stop five staff
+  independently emailing one citizen about one request.
+
+### 14.2 Child routing — SUGGEST vs COMMIT `[DECIDED 2026-07-16 by Kevin — SUPERSEDES §9 item 5's "purely manual"]`
+
+**The classifier runs identically on EVERY child. Only the commit gate differs.**
+
+| | Classifier | Result |
+|---|---|---|
+| `child_count = 1` | runs | **COMMITTED** — routed and assigned automatically, exactly as today |
+| `child_count > 1` (MRR) | runs | **SUGGESTED** — held for the Request Manager in the hub |
+
+In the hub the RM may, per child: **accept the suggestion** (one click) · **override** (route to a different team
+/ assign a specific person) · **process it personally without assigning**.
+
+**Why suggest-and-confirm rather than pure automation (Kevin, 2026-07-16):** MRRs are disproportionately the
+complex requests. The ORO Associate has materially more operational experience than the classifier can encode —
+they may enter estimate data for a child themselves rather than route it at all, or hand a search to the one
+individual known to be best at it. Suggestion upgrades the RM's job from data entry to review, and leaves a
+recovery path when the classifier is wrong.
+
+**Why not pure manual (the 2026-07-13 call, now relaxed):** always-wrap means a single-record request **is** a
+parent with one child. If children did not auto-route, every ordinary request would suddenly need a human to
+route it. The **engine** must therefore be uniform for single and multi; only the **commit gate** may differ.
+This is the least special-casing that satisfies both requirements.
+
+**"Process personally without assigning" STILL SPAWNS A TASK**, self-assigned to the RM.
+`[Claude's call, 2026-07-16 — NOT Kevin's; flagged for correction]` Architecture item 6 requires every stage
+advance to write `request_history` and spawn/update the stage task. Work with no task is precisely the untracked
+state that invariant exists to prevent — and an unassigned, task-less child is **invisible to the budget clock**
+(§5.4), which is the one signal that would catch it stalling.
+
+### 14.3 The hub — MRR management workspace `[NOT SCOPED — design direction required BEFORE build (UI rule)]`
+
+**Kevin's shape (2026-07-16):** *one screen showing the entire parent/child request record — a **parent line** and
+**each child as a line**.* It is where the RM does everything: accept suggested routing/assignment, assign
+manually, or take a child personally. This is the same shape §7 already specifies for the queue (parent line,
+children indented, collapsing to a single line at `child_count = 1`) — **the hub and the queue treatment must be
+designed together, not as two screens.**
+
+Natural content, all of which already exists as data:
+- **Parent line** — `request_number`, statutory `due_date`, `clock_state`, `tolled_days`, `payment_status`,
+  `parent_state`, `outcome`.
+- **Child lines** — `component_label`, the five workstream statuses (§5.3), **budget clock days ahead/behind**
+  (§5.4), record-hold (§5.5), suggested-vs-committed routing (§14.2).
+
+**Why the budget readout is the point of this screen (Kevin's scenario, 2026-07-16):** four children fully
+processed and one behind in redaction blocks the parent from completing, which blocks estimate reconciliation and
+final billing. Today **nothing surfaces which child is the blocker.** Slice B's per-request bottleneck timeline
+already computes the raw signal (`c74b97e`..`a933b88`); `BUILD_PRIORITY` #13 is the org-wide version that turns a
+recurring blockage into a staffing pattern rather than an incident. This is also the operational reason the child
+carries `budget_clock` at all (§5.4) — the statutory clock (parent) would never reveal it.
+
+### 14.4 The three other staff surfaces — actions WITHIN the hub `[NOT BUILT]`
+1. **Multi-Record Estimate interface** — gather per-child inputs (search/select auto-populates the estimate
+   profile, or manual entry) → totals accrue to the parent → parent **Create Estimate** via the standard engine
+   (§6.4). Budgeted dates come from estimate profiles (`BUILD_PRIORITY` item 3).
+2. **Non-system contributor** — the RM may assign estimate-gathering to **someone who is not a user** by email →
+   **secure, expiring, single-use token link** → they submit costs → the task completes. *(Real-world case: the
+   AV specialist in another department who will never hold a login. Nothing else in any spec covers this.)*
+   `[needs the token substrate]`
+3. **Multi-Record Search interface** — per-child search; selected / public-ready children auto-complete; a located
+   record needing redaction hits the normal auto-routing.
+4. **Verify ≠ Approve — the distinction is LEGAL, not cosmetic.** Staff **Verify** an estimate before it goes out.
+   **Approve** is reserved for the *requestor* approving the estimate, which **in some states is the event that
+   begins processing**. Collapsing the two words into one button would corrupt a statutory trigger.
+5. **Manual early release of a completed child** — default: nothing releases until the whole request completes;
+   the RM may set a **Finance-approved** acceptable payment to release specific completed children early.
+   ⚠️ **Reconcile with §5.9:** the payment gate is a **coverage** test — a child may **never** be withheld because
+   a *sibling* is unpaid. Early release is the RM's discretion *within* that constraint, not an exception to it.
+6. **HIGH PRIORITY flag** → an AI report monitoring all high-priority MRRs.
+
+### 14.5 Roll-up (pointer, not a restatement)
+Parent completes only when **all** children complete; mixed outcomes resolve per **§6.2** (and *not* by the
+intuition that "some denied ⇒ partially granted" — read the precedence table). Parent budget variance is the
+**critical-path child**, per §6.3 — a parent is not "ahead" because four of five children are.
