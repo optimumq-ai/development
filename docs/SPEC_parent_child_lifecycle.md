@@ -375,7 +375,7 @@ Backfill per existing request: create parent, copy the citizen/money/clock colum
 1. ~~The frontend drives stage advances through a **legacy stage order containing a ghost stage `custodian_retrieval`**~~ → **FIXED `a9f8d29`** ("one canonical stage vocabulary — kill the ghost and the pipeline it hid", 23/23). Only historical comments now mention the name.
 2. ~~`feeNonpayment.js:39` and `tickler.js:88` bypass `applyStageTransition` with a raw `UPDATE requests SET stage='closed'`~~ → **FIXED `9ba8f32`** ("route every close through applyStageTransition — no raw stage writes", 24/24). ARCHITECTURE item 6 holds.
 
-**Remaining migration blockers as of 2026-07-16.** §9 is answered, item 1 is ratified (`ARCHITECTURE.md`), §14.2 closes routing, and §11.1 (a)+(b) are decided below. What is left is *work*, not decisions: the backfill, the portal emitting children, the §4.2.1 toll-engine upgrade, and the hub's **design direction** (§14.3 — UI rule: agree the design before building).
+**Remaining migration blockers as of 2026-07-16.** §9 is answered, item 1 is ratified (`ARCHITECTURE.md`), §14.2 closes routing, and §11.1 (a)+(b) are decided below. What is left is *work*, not decisions: the backfill (**0 rows to convert** after the 2026-07-16 purge), the portal emitting children, §4.2.1 `source_request_id` attribution, and the hub's **design direction** (§14.3 — UI rule: agree the design before building). The §4.2.1 toll engine shipped `01c3b36`; the §11.1 sweep + revenue items shipped `a68df67` on 2026-07-14 — **both were already done and this spec said otherwise.**
 
 ---
 
@@ -518,20 +518,20 @@ Today a request **is its own parent and its own child**, so both are tautologies
 
 **TWO ITEMS WERE BLOCKED ON A DECISION, NOT ON WORK — BOTH DECIDED 2026-07-16.** Neither is a join problem; both were design gaps in this spec. **Both decisions below are Claude's technical call, adopting this section's own recommendations — NOT Kevin's. Reverse either freely; nothing is built on them yet.**
 
-> **(a) DECIDED → option (iii): drive the deposit sweep off `payment_status`, drop the stage predicate entirely.**
-> The money axis already lives on the parent (§4.3), which is where the estimate lands after the migration, so the
-> `stage` predicate is redundant with it *today* and broken *after*. The parent gets **no** `payment_state` axis and
-> `awaiting_payment` is **not** promoted to a parent stage — both would duplicate `payment_status`. `tickler.js`'s
-> deposit sweep must be rewritten to select PARENT rows by `payment_status` before the migration runs, or it
-> silently stops dunning (no notice, no lapse, no withdrawal) the moment children exist. **This is migration work,
-> not a follow-up.**
+> **(a) ~~DECIDED 2026-07-16~~ — ALREADY BUILT 2026-07-14 (`a68df67`). This section was STALE.**
+> Kevin decided this on 07-14 and it **shipped the same day**: the deposit sweep now keys off the **money axis**
+> (accepted estimate + `deposit_due > 0` + no payment) with **no stage predicate at all** — better than the
+> `payment_status` option this section recommended, because it is what actually *defines* the condition.
+> `deposit_due > 0` is load-bearing (without it a request that accepted a no-deposit estimate has
+> `deposit_paid_at` NULL forever and is flagged overdue for a deposit it never owed — constructed and asserted
+> in the harness). The prior agent proved old and new predicates select an identical row set today.
+> **On 2026-07-16 I re-presented this as an open decision and "decided" it. It was not open.** Corrected here.
 >
-> **(b) DECIDED → option (i): report revenue only by PARENT-level groupings; refuse the child-grouped cut.**
-> A parent with two children in two departments has one revenue figure and two departments; attributing it needs an
-> allocation rule the law is silent on (§5.10). A wrong revenue-by-department number is worse than no
-> revenue-by-department number, and nothing in the product consumes it. `reportEngine`'s `fee_revenue` stays grouped
-> by month/requestor/status. **Revisit only if a city asks for it** — and then as a labelled estimate, never as fact.
-
+> **(b) ~~DECIDED 2026-07-16~~ — ALREADY BUILT 2026-07-14 (`a68df67`). This section was STALE.**
+> `reportEngine` already **refuses** the child-grouped revenue cut and explains why; counts by department remain
+> exact and are still offered; the AI report agent was taught the constraint so it cannot generate the impossible
+> spec from natural language. Same correction as (a): I re-presented a shipped decision as an open one.
+>
 **(a) Where does the PAYMENT GATE live after the migration?** §5.2 says `fee_review` and `awaiting_payment` "move off the child — they are parent gates." But **the parent has no `stage`** — it has `parent_state` (`Intake · In Process · Processed · Delivered · Closed`, §6.1), and **none of those is a payment gate.** So "awaiting payment" currently has nowhere to live on the parent.
 
 This blocks `tickler.js`'s deposit sweep concretely: it joins `requests.stage = 'awaiting_payment'` to `request_fee_estimates`. After the migration the **estimate hangs off the parent** and the **stage off the child**, so the join matches nothing and **the deposit sweep silently stops running** — no dunning, no lapse, no withdrawal. Options: (i) give the parent a `payment_state` axis; (ii) keep `awaiting_payment` as a real parent stage; (iii) drive the sweep off `payment_status` (§4.3) and drop the stage predicate entirely. **Recommend (iii)** — the money axis already exists on the parent and the stage predicate is redundant with it.
