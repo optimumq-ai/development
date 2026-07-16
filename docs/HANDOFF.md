@@ -4085,3 +4085,79 @@ Item 11 sequence: (1) **purge** the 129 demo requests; (2) rewrite `tickler.js`'
 `payment_status` (§11.1a) — **before** children exist, or dunning silently stops; (3) the backfill (§8); (4) the
 portal emitting children + retire `mrrChoice`; (5) `source_request_id` attribution.
 **Blocked on DESIGN, not decisions:** the MRR hub (§14.3 — UI rule).
+
+---
+
+## 2026-07-16 (c) — THE PURGE. 126 test requests gone, 3 infrastructure rows kept, 270 orphans swept.
+
+**Kevin: "delete all request data" → after I surfaced what was actually in there: "keep the 3, delete the 126."**
+Script: `backend/src/db/purge_test_requests.js` (dry-run by default, `--apply` to execute, idempotent).
+
+### 🚨 WHAT THE CENSUS FOUND — why "delete all request data" was NOT safe to take literally
+**THREE ROWS ARE NOT REQUESTS.** They use a request row as a container, and between them owned **644 of 723
+files — 89% of every file in the system**:
+
+| Row | What it is | Files |
+|---|---|---|
+| `req-library-files` / `LIBRARY` | *"Internal owner of published public-library document copies (not a real request)"* — **the public library** | **42** |
+| `req-911-proactive` / `SYS-911-PROACTIVE` | Standing proactive-disclosure batch | **602** |
+| `req-template-samples` / `SYS-TEMPLATE-SAMPLES` | Holding area for redaction-template samples | **0 — empty by design** |
+
+The codebase already agreed: **five** places carve them out (`reportEngine` BASE_EXCL, the request queue,
+`clarificationTimeout`, `feeNonpayment`, `renumber_request_numbers`, `requestCreate`) with the same predicate
+`request_number != 'LIBRARY' AND NOT LIKE 'SYS-%'`. **The purge uses that exact predicate, inverted**, then
+asserts the protected ids are not in the target set. A literal purge would have destroyed the public library.
+
+### 🚨 A PRE-EXISTING BUG THE PURGE EXPOSED — 270 already-orphaned ledger rows
+**Every one of the 98 `clock_tolls` and all 172 `clock_extensions` was ALREADY ORPHANED** — not one had a
+matching `request_clocks` row. Neither table has a declared FK, so nothing ever cleaned them. They are residue
+from `verify_*` harnesses that ran against **LIVE** before the suite got its own database (`42fe74b`,
+2026-07-14) — the same contamination class as the 15 orphan tasks. **This also corrects the live verification in
+entry (b):** I reported "98 tolls, 29 open" as evidence the toll fix was deployed. That was misleading — those
+rows were inert orphans. **No live clock has ever carried a toll.** The fix and its 27/27 harness stand; the
+live read-only claim was weaker than I stated.
+
+**Six FK-less ledgers** would have been silently stranded by a naive delete (`clock_tolls`, `clock_extensions`,
+`task_events`, `redaction_zones`, and `embeddings` on two owner types). The script sweeps by **ORPHANHOOD after
+the cascade**, not by the target predicate — one rule that cleans both historical residue and anything newly
+stranded. `embeddings` of `owner_type` `record_type`/`user_spec` are deliberately untouched (they do not hang
+off requests).
+
+### Guards (the script REFUSES rather than proceeds)
+1. The 3 protected rows must exist **and** must not match the target predicate.
+2. **No target request may have taken money** — checks `fee_payments` / `fee_adjustments` / paid `erp_charges` /
+   estimates with `deposit_paid_at`/`final_paid_at`. All zero, so Kevin's 2026-07-14 rule never had to fire.
+   (The 9 `request_payment_events` were `estimate_issued` entries — that ledger is mixed, which is exactly why
+   the DB guard is a trigger and not `ON DELETE RESTRICT`.)
+3. Post-purge it **proves** the outcome instead of asserting it (see below).
+
+### Result — verified, not asserted
+`requests 129 → 3` · `request_files 723 → 657` (42 library + 602 proactive + 13 pre-existing NULL orphans,
+untouched) · `tasks 32 → 0` · `request_history 554 → 301` · `request_clocks 14 → 0` · `clock_tolls 98 → 0` ·
+`clock_extensions 172 → 0` · `task_events 32 → 0` · `redaction_zones 48 → 0` (all were per-file boxes on deleted
+test documents) · `embeddings 512 → 427` · estimates/payment_events → 0.
+
+- **All post-purge checks OK**, incl. 0 orphaned ledger rows and the redaction template substrate intact
+  (`redaction_rules` 26 + `layout_profiles` 1 + `redaction_categories` 8 + `mass_redaction_jobs` 17 = 52).
+- **ONE CHECK FAILED ON THE FIRST RUN — and it was MY BAD ASSERTION, not the purge.** I asserted
+  `SYS-TEMPLATE-SAMPLES` owned files; it owns 0 and always did (my earlier "644 across the 3" was 602+42+**0**).
+  Corrected to assert the ROW survives plus the template substrate. Re-ran clean.
+- **SUITE 641/641, LIVE CLEAN.** **Public library VERIFIED SERVING** post-purge: `/public/library/search` returns
+  records, `/public/browse` returns the full department tree with counts, `/public/browse/records` returns rows.
+- **INTAKE VERIFIED END-TO-END on the empty corpus:** a real `POST /api/public/submit` returned **201** and minted
+  **`2026-000001`** — the sequence restarts cleanly, 6-digit width holds, 1 task spawned, 1 clock started. That
+  smoke row was then purged, so the slate is genuinely clean (script is idempotent — re-running is a no-op).
+
+### State
+**0 citizen requests. 3 infrastructure rows. The parent/child migration now runs against an empty corpus** —
+no backfill of 126 junk rows, no renumber, nothing to reconcile. `is_mrr`/`master_request_id`/`component_label`
+are all unset and unused, exactly as §8 assumed.
+
+### Next — the migration (§8), in this order
+1. **`tickler.js`'s deposit sweep onto `payment_status` (§11.1a) — FIRST.** After the migration the estimate is on
+   the parent and the stage on the child, so its `stage='awaiting_payment'` join matches nothing and **dunning
+   silently stops**. No error, no notice, no lapse, no withdrawal.
+2. The backfill itself — now trivial: 0 rows to convert.
+3. The portal emitting children (+ retire the dead `mrrChoice`).
+4. `source_request_id` toll attribution (§4.2.1).
+**Blocked on DESIGN, not decisions:** the MRR hub (§14.3 — UI rule).
