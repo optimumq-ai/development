@@ -4362,3 +4362,86 @@ done. **Do not build portal UI until the design is agreed.**
 Also open: `source_request_id` toll attribution (§4.2.1 — now meaningful) · MRR **classification roll-up**
 (the parent copies its single child's `classification`; MRR needs a worst-case rule — **unspecified**, §6) ·
 the MRR hub (§14.3) · Kevin's parked **field-design pass**.
+
+---
+
+## 2026-07-16 — The queue speaks parent/child (§7 BUILT). `f2ca778`
+
+**Slice:** rebuild the request queue to render the new schema, and move the `Open` control to the left of the
+parent line (Kevin, "for the moment").
+
+**§7 was already the ratified contract** — "every request renders as a parent line with its children indented
+beneath it; when `child_count = 1` the pair collapses to a single line and the `-1` suffix is hidden." This slice
+built it; it was not a new design.
+
+### The bug this exposed — the queue was LEAF-scoped and still wrong
+Yesterday's scope predicates made the queue list the right ROWS. It then read four **PARENT** facts straight off
+them. That was invisible until children actually existed, because `andLeaf`/`andParent` were tautologies against
+a childless table. **A query that looks correct against pre-migration data can still be wrong now** — this is the
+general lesson, and the dashboard/ARIA/AppLayout/tickler have not been checked for it.
+
+- **`request_number`** — a child's number carries the component suffix. The queue showed staff **a number the
+  citizen has never seen and cannot quote on the phone.** Resolved through the parent; the child's own number
+  survives as **`component_number`**.
+- **`is_mrr`** — DERIVED and PARENT-level (§4.1), and `requestCreate` forces `is_mrr = 0` on **every** child. The
+  MRR badge **could not render. Not rarely — never.** Resolved through the parent.
+- Added **`parent_id`** (grouping key) and **`child_count`** (the collapse test).
+- **Order** now keys on the PARENT's recency then `child_no` ASC. The children of one request are inserted in a
+  single loop milliseconds apart, so ordering by the child's own `created_at` put an MRR's records on screen
+  **backwards (-3, -2, -1)** — seen in the first screenshot, not reasoned about.
+- **Search** matches the citizen's number and returns the whole request.
+
+### Frontend
+Parent line + indented children, collapsing at `n = 1`. Counts are of **requests** (a 3-record MRR is one request,
+not three); stage pills stay per-child on purpose. The parent line carries only what a parent HAS — number,
+requestor, deadline, and the two-value process status (§6.1). **Classification / team / assignee render `—`**:
+they are child facts and an MRR's records differ on all three, so the parent line must not pick one child and
+imply it speaks for the rest.
+
+### The one thing left open — `Open` on an MRR parent `[NEEDS KEVIN]`
+At `n = 1` (collapsed) `Open` targets the child, exactly as before the wrap. **On an MRR parent line there is
+nothing to open yet**: the hub (§14.3) is design-gated and unbuilt, and the v1 workspace expects a WORK row —
+pointing it at a parent renders a screen with no stage, no description and no team. It is a **disabled `Hub —`
+placeholder**. §14.3 says the hub and the queue "must be designed together"; this is the queue half, and the hub
+half is Kevin's next call.
+
+### Verified
+- `verify_queue_parent_child` (21) — new, registered in `run_suite.js`. Pins the shape, and the **implicit** bit:
+  `r.*` emits `request_number`/`is_mrr` and the parent-resolved aliases win **only** because node-pg keeps the
+  LAST duplicate column. Real driver behaviour, but implicit — asserted, not trusted.
+- **Suite 744/744, live untouched.** Green before and after the break-test.
+- **Break-tested both bugs** (committed green first): reading `request_number` off the child → 3 reds naming the
+  leaked `2026-010054-1`; reading `is_mrr` off the child → exactly 1 red, the MRR badge. Restored, no diff.
+- Screenshotted the rendered queue.
+
+### Live data — I ADDED TWO REQUESTS
+Kevin purged all test data yesterday; the queue was empty and could not be verified against nothing. I seeded
+**through the real path only** (`POST /api/public/submit`, per the seed rule): **`2026-000001`** (n=1, permits) and
+**`2026-000002`** (n=3 MRR — body-cam / use-of-force / overtime). Live is now **2 parents + 4 children + the 3
+infrastructure rows**. Purge with `backend/src/db/purge_test_requests.js` (dry-run by default, `--apply` to
+commit) if they are not wanted.
+
+### Flagged, NOT fixed (out of slice)
+- **`verify_stage_bypass` is a CONFIRMED recurring flake** — `1: stage = closed, status = closed` (line 100) and
+  line 152. It flaked once on 2026-07-15 (undiagnosed) and again today during a break-test run, then passed on
+  the next two runs of identical code. **Twice in two days is a pattern, not a one-off.** Undiagnosed; likely the
+  same class as the `verify_deposit_clock` red fixed in `9a363ed` (a strict compare on second-granularity
+  timestamps). Deserves its own slice — a suite that goes red at random trains people to re-run it, which is how
+  a real red gets waved through.
+- **The dashboard, ARIA reports, the AppLayout badge and the tickler all still read parent facts off leaf rows.**
+  They consume the same `GET /requests` (so they inherit the number/`is_mrr` fix for free) but **none of them
+  group by parent** — the dashboard's recent-requests table will show a 3-record MRR as three lines. The tickler
+  is independent (`GET /tickler/status`, `routes/tickler.js`) and selects `request_number` straight off the leaf,
+  so **it still shows suffixed numbers.** Not touched — one bounded slice.
+- `CLAUDE.md` said "Parent/child is DESIGNED, NOT BUILT" — **fixed in this commit** (it was actively lying to
+  every fresh session, which is the exact failure that cost 13 sessions). Now records what is built and adds the
+  read-through-the-parent rule.
+- Still open from yesterday, unchanged: the three record-list representations in the submit payload
+  (`description` / `records` / `searchIntents`), `searchIntents.persist` writing every intent against the FIRST
+  child, `source_request_id` toll attribution (§4.2.1), MRR classification roll-up (§6), suggest-vs-commit
+  routing (§14.2 — children currently auto-commit).
+
+### Environment note
+**PM2 runs as ROOT** (`/root/.pm2`), so `pm2 list` as `optimumq` prints an empty table and `pm2 logs` is
+unreadable without sudo (which needs a password). Killing the `server.js` pid IS a valid restart — PM2 respawns
+it within ~2s with fresh code. Don't `nohup node server.js` after killing: you race PM2 and lose to `EADDRINUSE`.
