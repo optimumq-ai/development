@@ -80,13 +80,42 @@ var COLUMNS = [
   'description', 'record_types', 'classification', 'department_id', 'record_type_id',
   'fee_waiver_requested', 'fee_waiver_reason', 'purpose',
   'mailing_street1', 'mailing_street2', 'mailing_city', 'mailing_state', 'mailing_zip',
-  'certification_requested', 'email_verification_method', 'is_mrr', 'submission_channel'
+  'certification_requested', 'email_verification_method', 'is_mrr', 'submission_channel',
+  'component_label'
 ];
 
 // Columns that belong to the WORK ROW ONLY and are therefore NULLed on the parent (§5.1). Everything else in
 // COLUMNS is citizen/money identity and IS copied up. `classification` is deliberately NOT in this list: it
 // drives the statutory clock's duration (`tolling.durationFor`) and that clock is a parent object.
-var PARENT_NULL = { description: 1, record_types: 1, department_id: 1, record_type_id: 1 };
+var PARENT_NULL = { description: 1, record_types: 1, department_id: 1, record_type_id: 1, component_label: 1 };
+
+// Columns that vary PER CHILD. Everything else on a child row is a copy of the citizen/money identity, so the
+// children of one request agree about who asked and how they want it delivered, and differ only in the work.
+var CHILD_FIELDS = ['description', 'record_types', 'classification', 'department_id', 'record_type_id', 'component_label'];
+
+// Normalise the children of a request (§13: "one description per described record"; AI proposes, a human
+// decides). Two accepted shapes, and the single-description one is not a special case — it is n = 1:
+//   { description: '...' }                       -> one child   (every caller that predates MRR)
+//   { children: [{ description, ... }, ...] }    -> n children  (the portal's per-record intake loop)
+function childrenOf(fields) {
+  var list = Array.isArray(fields.children) && fields.children.length
+    ? fields.children
+    : [{ description: fields.description, recordTypes: fields.recordTypes, classification: fields.classification,
+         departmentId: fields.departmentId, recordTypeId: fields.recordTypeId, componentLabel: fields.componentLabel }];
+  return list.map(function (c, i) {
+    if (!c || !String(c.description || '').trim()) {
+      throw new Error('Child ' + (i + 1) + ' has no description. Every child is one described record (§5.1).');
+    }
+    return {
+      description: c.description,
+      record_types: c.recordTypes ? JSON.stringify(c.recordTypes) : null,
+      classification: c.classification || fields.classification || 'standard',
+      department_id: c.departmentId || null,
+      record_type_id: c.recordTypeId || null,
+      component_label: c.componentLabel || null
+    };
+  });
+}
 
 // Map an intake payload (camelCase, from any of the three paths) onto the column set, with the defaults
 // that used to be repeated at every site.
@@ -113,7 +142,8 @@ function normalize(f) {
     certification_requested: f.certificationRequested ? 1 : 0,
     email_verification_method: (f.emailVerificationMethod === 'attested' || f.emailVerificationMethod === 'visual') ? f.emailVerificationMethod : null,
     is_mrr: f.isMrr ? 1 : 0,
-    submission_channel: f.submissionChannel || 'portal'
+    submission_channel: f.submissionChannel || 'portal',
+    component_label: f.componentLabel || null // per-child in practice; here for the n=1 / unwrapped paths
   };
 }
 
@@ -153,13 +183,25 @@ function normalize(f) {
 // Returns { id (THE CHILD), requestNumber (the CITIZEN's number, i.e. the parent's), parentId, childId }.
 async function createRequest(fields, opts) {
   opts = opts || {};
-  if (!fields || !fields.requestorName || !fields.requestorEmail || !fields.description) {
-    throw new Error('A request needs a requestor name, an email address, and a description.');
+  // A request needs a requestor and AT LEAST ONE described record — either the single `description` (every
+  // caller that predates MRR) or a non-empty `children` array. childrenOf() then validates each child.
+  var hasKids = Array.isArray(fields && fields.children) && fields.children.length > 0;
+  if (!fields || !fields.requestorName || !fields.requestorEmail || (!fields.description && !hasKids)) {
+    throw new Error('A request needs a requestor name, an email address, and at least one described record.');
   }
   var cols = normalize(fields);
-  var childId = opts.id || uuidv4();
+  var kids = childrenOf(fields);
   var parentId = uuidv4();
   var wrap = opts.wrap !== false;
+  // opts.id names the FIRST child — every caller that predates MRR passes one and expects it back as `id`.
+  var childIds = kids.map(function (_, i) { return (i === 0 && opts.id) ? opts.id : uuidv4(); });
+  var childId = childIds[0];
+
+  // `is_mrr` is DERIVED, never hand-set (§4.1): it is `child_count > 1`, a FACT, not a mode. The classifier's
+  // and the portal's `isMrr` flag is now advisory only — what the citizen actually described decides. It lives
+  // on the PARENT; a child is never "an MRR", it is a component of one.
+  cols.is_mrr = 0;
+  var parentIsMrr = kids.length > 1 ? 1 : 0;
 
   var placeholders = COLUMNS.map(function () { return '?'; }).join(',');
   var values = COLUMNS.map(function (c) { return cols[c]; });
@@ -180,15 +222,25 @@ async function createRequest(fields, opts) {
         await run(
           'INSERT INTO requests (id, request_number, stage, status, master_request_id, child_no, ' + COLUMNS.join(', ') + ') ' +
           'VALUES (?, ?, NULL, ?, NULL, NULL, ' + placeholders + ')',
-          [parentId, requestNumber, 'active'].concat(COLUMNS.map(function (c) { return PARENT_NULL[c] ? null : cols[c]; }))
+          [parentId, requestNumber, 'active'].concat(COLUMNS.map(function (c) {
+            if (c === 'is_mrr') return parentIsMrr; // derived from what was actually described
+            return PARENT_NULL[c] ? null : cols[c];
+          }))
         );
-        // CHILD — keeps the id everything else hangs off. child_no starts at 1, never 0: a zero would make the
-        // single-record case a different shape, which is exactly what always-wrap exists to prevent (§5.1).
-        await run(
-          'INSERT INTO requests (id, request_number, stage, status, master_request_id, child_no, ' + COLUMNS.join(', ') + ') ' +
-          'VALUES (?, ?, ?, ?, ?, ?, ' + placeholders + ')',
-          [childId, requestNumber + '-1', 'intake', 'active', parentId, 1].concat(values)
-        );
+        // CHILDREN — 1..n. The first keeps the id everything else hangs off. child_no starts at 1, never 0: a
+        // zero would make the single-record case a different shape, which is exactly what always-wrap exists to
+        // prevent (§5.1). A single-record request is simply n = 1 and takes THIS SAME PATH — there is no
+        // "MRR mode" branch, and that is the point.
+        for (var k = 0; k < kids.length; k++) {
+          await run(
+            'INSERT INTO requests (id, request_number, stage, status, master_request_id, child_no, ' + COLUMNS.join(', ') + ') ' +
+            'VALUES (?, ?, ?, ?, ?, ?, ' + placeholders + ')',
+            [childIds[k], requestNumber + '-' + (k + 1), 'intake', 'active', parentId, k + 1]
+              .concat(COLUMNS.map(function (c) {
+                return Object.prototype.hasOwnProperty.call(kids[k], c) ? kids[k][c] : cols[c];
+              }))
+          );
+        }
       } else {
         // Unwrapped: the LIBRARY / SYS-* containers. They are not citizen requests and must never grow a parent.
         await run(
@@ -217,16 +269,23 @@ async function createRequest(fields, opts) {
   //            must not start mid-story with a stage advance out of nowhere. requestTimeline builds the stage
   //            backbone from these rows.
   // Stage advances write their own child rows through applyStageTransition — never from here.
-  await run(
-    'INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
-    [uuidv4(), childId, opts.actorId || null, opts.actorName || 'System',
-     opts.historyAction || 'CREATED', opts.historyNote || 'Request created.']
-  );
+  for (var h = 0; h < childIds.length; h++) {
+    await run(
+      'INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+      [uuidv4(), childIds[h], opts.actorId || null, opts.actorName || 'System',
+       opts.historyAction || 'CREATED',
+       kids.length > 1
+         ? 'Record ' + (h + 1) + ' of ' + kids.length + ' on request ' + requestNumber + '.'
+         : (opts.historyNote || 'Request created.')]
+    );
+  }
   if (wrap) {
     await run(
       'INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
       [uuidv4(), parentId, opts.actorId || null, opts.actorName || 'System',
-       opts.historyAction || 'CREATED', 'Request received from the requestor (' + requestNumber + ').']
+       opts.historyAction || 'CREATED',
+       'Request received from the requestor (' + requestNumber + ')' +
+       (kids.length > 1 ? ' — ' + kids.length + ' records described.' : '.')]
     );
   }
 
@@ -239,13 +298,32 @@ async function createRequest(fields, opts) {
     catch (e) { console.error('[requestCreate] clock start failed:', e && e.message); }
   }
 
-  // Routing is decided from the DESCRIPTION, which is the child's (§14.2). onIntake therefore runs on the child.
+  // Routing is decided from the DESCRIPTION, and each child has its OWN — so intake runs PER CHILD, and the
+  // children of one MRR can land in different departments at different stages (§14.2, Kevin 2026-07-16).
+  // NOTE: on an MRR the classifier's result is meant to be a SUGGESTION the ORO Associate confirms in the hub
+  // (§14.2 suggest-vs-commit). The hub does not exist yet (§14.3, design-gated), so today every child commits
+  // its routing exactly as a single-record request does. That is the pre-existing behaviour, not a new decision
+  // — flagged here so the hub slice knows where the gate belongs.
+  // SEQUENTIALLY, in ONE background chain — not n parallel ones. Each onIntake makes an Anthropic call
+  // (classifier.js, claude-sonnet-4-5), so firing n at once means n concurrent LLM calls per submission: rate
+  // limits, a cost spike, and — observed in the harness — a child that silently never gets routed because its
+  // call lost. A 10-record MRR would fire ten. One child failing must not strand its siblings, so each is
+  // caught and logged individually rather than aborting the chain.
   if (opts.kickIntake !== false) {
     var we = require('./workflowEngine');
-    we.bg(we.onIntake(childId), 'intake ' + childId);
+    we.bg((async function () {
+      for (var n = 0; n < childIds.length; n++) {
+        try { await we.onIntake(childIds[n]); }
+        catch (e) { console.error('[requestCreate] intake failed for child ' + (n + 1) + '/' + childIds.length + ' (' + childIds[n] + '):', e && e.message); }
+      }
+    })(), 'intake ' + requestNumber + ' (' + childIds.length + (childIds.length === 1 ? ' child)' : ' children)'));
   }
 
-  return { id: childId, requestNumber: requestNumber, parentId: wrap ? parentId : null, childId: childId };
+  return {
+    id: childId, requestNumber: requestNumber,
+    parentId: wrap ? parentId : null, childId: childId,
+    childIds: childIds, childCount: childIds.length, isMrr: !!parentIsMrr
+  };
 }
 
 module.exports = {

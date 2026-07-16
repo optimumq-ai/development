@@ -49,13 +49,21 @@ const SYSTEM_PROMPT = [
   '',
   'If the system returns "SEARCH_NO_RESULTS", say you did not find any directly matching public documents but that you will submit a formal request to staff. Continue to Phase 4.',
   '',
-  'Phase 3 - Multi-Record Detection: If the description names two or more distinct record types that would route to different departments (e.g., police body cam AND building permits), pause and ask: "It looks like you are requesting two different types of records. I can submit these as a single combined request or as two separate requests. Which would you prefer?" Record their choice.',
+  // COMBINED-VS-SEPARATE IS RETIRED (SPEC_parent_child_lifecycle §13; SPEC_public_portal_intake §2 Phase 3).
+  // The specs retired it on 2026-07-10 but that commit changed no code, so this agent went on asking citizens a
+  // question the contract had abolished — and "separate" performed no split anyway, so the answer was discarded.
+  // Combining is the legal norm and the ONLY path: one submission = one request, one number, one fee, one
+  // deadline (§13). A genuinely independent second request means filing twice. What the agent must do instead is
+  // capture ONE DESCRIPTION PER RECORD, which is what becomes one child each (§5.1).
+  'Phase 3 - Multi-Record Detection: If they are asking for two or more distinct kinds of records (e.g., police body cam AND building permits), do NOT ask whether to combine or separate them - that is not a choice they have to make. It is always ONE request with one number and one fee. Instead, work through the records ONE AT A TIME: confirm a clear, specific description of the first, then ask "Anything else you are looking for?" and repeat until they say no. Keep each record\'s description SEPARATE and self-contained - never merge two records into one paragraph. Each becomes its own item the team can route and finish independently, and each may finish at a different time.',
   '',
   'Phase 4 - Fee Waiver: Ask if they are requesting on behalf of a nonprofit, journalist, researcher, or for non-commercial public-interest reasons. If yes, ask them to briefly describe the purpose. Emit: [[FEE_WAIVER_INFO:yes|reason text]]',
   '',
   'Phase 5 - Confirmation and Submission: Summarize the complete request back to them. Ask them to confirm. When they confirm, emit on its own line:',
   '[[SUBMIT_READY]]',
-  '{"requestorName":"...","requestorEmail":"...","requestorPhone":"...","deliveryMethod":"email|mail","description":"full description here","feeWaiverRequested":true,"feeWaiverReason":"...","isMrr":false,"mrrChoice":"combined|separate|none"}',
+  // `records` replaces the single `description`: ONE ENTRY PER RECORD they described (§13). One record = a
+  // one-entry array, not a special case. `mrrChoice` is GONE — the question it answered is retired.
+  '{"requestorName":"...","requestorEmail":"...","requestorPhone":"...","deliveryMethod":"email|mail","records":[{"label":"short name for this record","description":"full description of THIS record only"}],"feeWaiverRequested":true,"feeWaiverReason":"...","isMrr":false}',
   '[[END_SUBMIT]]',
   '',
   'MARKER RULES:',
@@ -336,9 +344,27 @@ router.post('/chat', async function(req, res) {
   }
 });
 
+// Normalise the agent's / form's record list into the helper's `children` shape (§13: one described record =
+// one child; AI proposes, a human decides). Accepts, in order of preference:
+//   records: [{description, label}] — the per-record intake loop (n children)
+//   descriptions: ['...', '...']    — the same thing, flat
+//   description: '...'              — one record (the form, and every pre-MRR caller)
+// A single record is NOT a special case: it is n = 1 and takes the identical path.
+function childrenFromBody(b) {
+  var list = Array.isArray(b.records) && b.records.length ? b.records
+    : (Array.isArray(b.descriptions) && b.descriptions.length ? b.descriptions.map(function (d) { return { description: d }; })
+    : null);
+  if (!list) return null; // caller falls back to b.description
+  return list
+    .map(function (r) { return typeof r === 'string' ? { description: r } : (r || {}); })
+    .filter(function (r) { return String(r.description || '').trim(); })
+    .map(function (r) { return { description: String(r.description).trim(), componentLabel: r.label || r.componentLabel || null }; });
+}
+
 router.post('/submit', async function(req, res) {
   var b = req.body || {};
-  if (!b.requestorName || !b.requestorEmail || !b.description) {
+  var kids = childrenFromBody(b);
+  if (!b.requestorName || !b.requestorEmail || (!b.description && !(kids && kids.length))) {
     return res.status(400).json({ error: 'Missing required fields' });
   }
   // ONE creation helper (ARCHITECTURE item 5). This path used to mint its number with COUNT(*) + 1, which
@@ -347,7 +373,8 @@ router.post('/submit', async function(req, res) {
   var isForm = b.submissionChannel === 'manual_form';
   var made = await requestCreate.createRequest({
     requestorName: b.requestorName, requestorEmail: b.requestorEmail, requestorPhone: b.requestorPhone,
-    requestorType: b.requestorType, deliveryMethod: b.deliveryMethod, description: b.description,
+    requestorType: b.requestorType, deliveryMethod: b.deliveryMethod,
+    description: b.description, children: kids || undefined, // n children when the agent described n records
     classification: b.classification, feeWaiverRequested: b.feeWaiverRequested, feeWaiverReason: b.feeWaiverReason,
     mailingStreet1: b.mailingStreet1, mailingStreet2: b.mailingStreet2, mailingCity: b.mailingCity,
     mailingState: b.mailingState, mailingZip: b.mailingZip,
@@ -395,54 +422,67 @@ router.post('/submit', async function(req, res) {
     await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
       [uuidv4(), id, 'public', 'Public Portal', 'RECORDS_SELECTED', 'Requestor selected ' + b.selectedRecords.length + ' record(s) from search results']);
   }
-  // Auto-classify and route the request to the appropriate fulfillment team.
-  // cls is declared BEFORE the try so it is always defined at the onIntake call below; if classification
-  // throws, cls stays null and onIntake falls back to its own classification (never receives undefined).
-  var cls = null;
-  try {
-    cls = await classifier.classifyAndRoute(b.description);
-    var basisText = cls.routingBasis === 'taxonomy' ? ('matched record type "' + cls.recordTypeName + '" at ' + cls.recordTypeConfidence + '% confidence')
-      : (cls.routingBasis === 'general' ? 'general-knowledge department match' : 'no confident match - left Unassigned for triage review');
-    // is_mrr: MRR if the auto-classifier detected multiple record types OR the intake declared multiple
-    // described records (split-canvas one-item-per-record). Don't let a same-type multi-record request
-    // (e.g. two building permits) get downgraded to non-MRR by the type-diversity classifier.
-    //
-    // NOTE: deadline_date is NOT written here any more. It used to be `today + cls.deadlineDays` — a flat
-    // calendar-day add that ignored the jurisdiction entirely (wrong in IL, which counts BUSINESS days, and
-    // in CA, whose clock is a determination deadline). Classification now selects a duration from the
-    // jurisdiction's own table and the due date is DERIVED, like every other date in the system.
-    await run("UPDATE requests SET classification = ?, department_id = ?, is_mrr = ?, record_type_id = ?, classification_confidence = ?, routing_basis = ?, updated_at = datetime('now') WHERE id = ?",
-      [cls.classification, cls.departmentId, (cls.isMrr || b.isMrr) ? 1 : 0, cls.recordTypeId, cls.recordTypeConfidence, cls.routingBasis, id]);
-    try { await require('../services/tolling').applyClassification(id); } catch (e) { console.error('[publicChat] clock reclassify failed:', e && e.message); }
-    await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
-      [uuidv4(), id, 'system', 'AI Classification', 'CLASSIFIED', 'Auto-classified as ' + cls.classification + '; ' + basisText + (cls.teamName ? '; routed to ' + cls.teamName : '') + (cls.reasoning ? ' - ' + cls.reasoning : '')]);
-  } catch(ce) {
-    // AI CLASSIFICATION FAILED (an API outage, a rate limit, an exhausted credit balance...).
-    //
-    // This used to be a bare console.error, and the consequence was a SILENT ORPHAN: the request was created
-    // and returned 201 to the citizen, but it was never classified, never given a record type, and — because
-    // the rulebook still assigns a DEFAULT team — `teamId` came back non-null, so onIntake's existing
-    // "unroutable" fallback (which only fires when teamId IS null) never spawned a routing-review task.
-    // The request sat at intake, looking routed, in nobody's worklist, with no error anywhere. Found
-    // 2026-07-14 when the Anthropic credit balance ran out and 23 requests were sitting unclassified.
-    //
-    // An AI outage must degrade to HUMAN WORK, not to silence.
-    console.error('[publicChat] auto-classify failed:', ce.message);
+  // Auto-classify and route EACH CHILD, from ITS OWN description (§14.2, SPEC_parent_child_lifecycle).
+  //
+  // This used to classify `b.description` ONCE and kick onIntake on `made.id` — the FIRST child only. The
+  // moment the portal could describe n records, that left every child after the first unclassified, unrouted
+  // and in nobody's worklist, silently. Exactly the silent-orphan shape the AI-outage fallback below exists to
+  // prevent, reintroduced by a different route.
+  //
+  // NOTE: `is_mrr` is no longer written here. It is DERIVED (`child_count > 1`) and set on the PARENT by the
+  // creation helper (§4.1) — a child is never "an MRR", and the classifier's guess no longer overrides what the
+  // citizen actually described.
+  //
+  // Latency: n children means n sequential classifier calls before the 201. Acceptable at n=1 (unchanged) and
+  // for small MRRs; if a city routinely files large ones this should move behind the response.
+  async function classifyAndWire(childId, childDescription) {
+    var cls = null;
     try {
-      var trc = require('../services/taskRouting');
-      var openRt = await get("SELECT id FROM tasks WHERE request_id = ? AND type = 'routing_review' AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [id]);
-      if (!openRt) {
-        var rt = await trc.createTask({ requestId: id, type: 'routing_review',
-          title: 'Review & route — automatic classification was unavailable', teamId: null, createdBy: 'system' });
-        await trc.autoRouteOrPool(rt.id, b.description, {});
-      }
+      cls = await classifier.classifyAndRoute(childDescription);
+      var basisText = cls.routingBasis === 'taxonomy' ? ('matched record type "' + cls.recordTypeName + '" at ' + cls.recordTypeConfidence + '% confidence')
+        : (cls.routingBasis === 'general' ? 'general-knowledge department match' : 'no confident match - left Unassigned for triage review');
+      // deadline_date is NOT written here: it used to be `today + cls.deadlineDays`, a flat calendar add that
+      // ignored the jurisdiction (wrong in IL, which counts BUSINESS days, and in CA, whose clock is a
+      // determination deadline). The due date is DERIVED, on the PARENT, like every other date in the system.
+      await run("UPDATE requests SET classification = ?, department_id = ?, record_type_id = ?, classification_confidence = ?, routing_basis = ?, updated_at = datetime('now') WHERE id = ?",
+        [cls.classification, cls.departmentId, cls.recordTypeId, cls.recordTypeConfidence, cls.routingBasis, childId]);
+      // Re-tunes the PARENT's statutory clock (tolling resolves the child to its parent) — one clock per request.
+      try { await require('../services/tolling').applyClassification(childId); } catch (e) { console.error('[publicChat] clock reclassify failed:', e && e.message); }
       await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
-        [uuidv4(), id, 'system', 'System', 'CLASSIFICATION_UNAVAILABLE',
-         'Automatic classification could not run (' + String(ce.message).slice(0, 160) + '). Routed to a person for review so the request is not left unattended.']);
-    } catch (e2) { console.error('[publicChat] routing-review fallback failed:', e2 && e2.message); }
+        [uuidv4(), childId, 'system', 'AI Classification', 'CLASSIFIED', 'Auto-classified as ' + cls.classification + '; ' + basisText + (cls.teamName ? '; routed to ' + cls.teamName : '') + (cls.reasoning ? ' - ' + cls.reasoning : '')]);
+    } catch (ce) {
+      // AI CLASSIFICATION FAILED (an API outage, a rate limit, an exhausted credit balance...).
+      //
+      // This used to be a bare console.error, and the consequence was a SILENT ORPHAN: the request was created
+      // and returned 201 to the citizen, but it was never classified, never given a record type, and — because
+      // the rulebook still assigns a DEFAULT team — `teamId` came back non-null, so onIntake's existing
+      // "unroutable" fallback (which only fires when teamId IS null) never spawned a routing-review task.
+      // The request sat at intake, looking routed, in nobody's worklist, with no error anywhere. Found
+      // 2026-07-14 when the Anthropic credit balance ran out and 23 requests were sitting unclassified.
+      //
+      // An AI outage must degrade to HUMAN WORK, not to silence. Per child: one failing child must not strand
+      // its siblings.
+      console.error('[publicChat] auto-classify failed for ' + childId + ':', ce.message);
+      try {
+        var trc = require('../services/taskRouting');
+        var openRt = await get("SELECT id FROM tasks WHERE request_id = ? AND type = 'routing_review' AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [childId]);
+        if (!openRt) {
+          var rt = await trc.createTask({ requestId: childId, type: 'routing_review',
+            title: 'Review & route — automatic classification was unavailable', teamId: null, createdBy: 'system' });
+          await trc.autoRouteOrPool(rt.id, childDescription, {});
+        }
+        await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+          [uuidv4(), childId, 'system', 'System', 'CLASSIFICATION_UNAVAILABLE',
+           'Automatic classification could not run (' + String(ce.message).slice(0, 160) + '). Routed to a person for review so the request is not left unattended.']);
+      } catch (e2) { console.error('[publicChat] routing-review fallback failed:', e2 && e2.message); }
+    }
+    workflowEngine.bg(workflowEngine.onIntake(childId, cls), 'intake ' + childId);
   }
 
-  workflowEngine.bg(workflowEngine.onIntake(id, cls), 'intake ' + id);
+  var kidDescriptions = kids && kids.length ? kids.map(function (k) { return k.description; }) : [b.description];
+  for (var ci = 0; ci < made.childIds.length; ci++) {
+    await classifyAndWire(made.childIds[ci], kidDescriptions[ci] || b.description);
+  }
 
   var newReq = await get('SELECT * FROM requests WHERE id = ?', [id]);
   if (newReq) {

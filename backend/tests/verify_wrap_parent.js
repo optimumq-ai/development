@@ -121,11 +121,18 @@ function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
       description: 'building permit records for 100 Main St ' + TAG
     }, { actorName: 'harness' }); // kickIntake ON — routing runs on the description, which is the child's
     made.push(r2.parentId, r2.childId);
-    var t = null;
-    for (var i = 0; i < 40 && !t; i++) { t = await db.get('SELECT id, request_id FROM tasks WHERE request_id = ?', [r2.childId]); await sleep(250); }
-    ok('intake routing spawned a task ON THE CHILD (work hangs off the work row)', !!t && t.request_id === r2.childId);
+    // NOTE ON DETERMINISM: `classifier.js` calls Anthropic (claude-sonnet-4-5), so whether a description routes
+    // CONFIDENTLY — and therefore whether a task spawns at all — is NOT deterministic. An earlier draft asserted
+    // "a task spawned" and passed 39/39, then failed on identical code the next run. Assert what is true on
+    // EVERY path instead: the routing decision is always written (workflowEngine writes one regardless of
+    // confidence), and whatever intake produced landed on the CHILD and never on the parent. That is the
+    // parent/child property this harness exists for; the classifier's accuracy is not its business.
+    var wdWait = [];
+    for (var i = 0; i < 60; i++) { wdWait = await db.all('SELECT id FROM workflow_decisions WHERE request_id = ?', [r2.childId]); if (wdWait.length) break; await sleep(250); }
     var pt = await db.get('SELECT id FROM tasks WHERE request_id = ?', [r2.parentId]);
-    ok('...and NOT on the parent — a task on a parent is unworkable, it has no stage', !pt);
+    ok('NO task was spawned on the parent — a task on a parent is unworkable, it has no stage', !pt);
+    var ct = await db.all('SELECT id, request_id FROM tasks WHERE request_id = ?', [r2.childId]);
+    ok('any task intake produced hangs off the CHILD (' + ct.length + ')', ct.every(function (x) { return x.request_id === r2.childId; }));
     // The routing DECISION is written for every request, confident or not — the sharper proof that the
     // classifier ran against the CHILD's description.
     // THE REGRESSION THIS HARNESS MISSED THE FIRST TIME. The clock assertions above ran with kickIntake:false,
@@ -146,11 +153,9 @@ function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
     var wdP = await db.all('SELECT id FROM workflow_decisions WHERE request_id = ?', [r2.parentId]);
     ok('the routing decision is recorded on the CHILD (' + wd.length + ')', wd.length >= 1);
     ok('...and never on the parent (' + wdP.length + ')', wdP.length === 0);
-    var advanced = await db.get('SELECT stage, department_id FROM requests WHERE id = ?', [r2.childId]);
-    ok('the CHILD advanced past intake and was stamped with its team (' + advanced.stage + ')',
-      advanced.stage !== 'intake' && !!advanced.department_id);
-    var pStage = await db.get('SELECT stage FROM requests WHERE id = ?', [r2.parentId]);
-    ok('...while the parent still has NO stage — work moved, the citizen relationship did not', pStage.stage === null);
+    var pStage = await db.get('SELECT stage, department_id FROM requests WHERE id = ?', [r2.parentId]);
+    ok('the parent still has NO stage after intake — work moved, the citizen relationship did not', pStage.stage === null);
+    ok('...and intake never stamped a department on the parent — routing is a child concern', !pStage.department_id);
     var num = await db.get('SELECT ' + scope.numberExpr('r') + ' AS n FROM requests r' + scope.numberJoin('r') + ' WHERE r.id = ?', [r2.childId]);
     ok('a task on the child resolves to the CITIZEN\'s number (' + num.n + '), never the child\'s suffix', num.n === r2.requestNumber);
 
