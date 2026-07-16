@@ -4030,3 +4030,58 @@ of intervals, never sum** + refcounted resume. **Worth its own slice regardless 
 **Blocked on DESIGN, not decisions:** the MRR hub (§14.3 — parent line + child lines; UI rule: agree before build).
 **Stale sessions still alive and idle:** tmux `claude` (pid 838913, session `efec0a92`), 841259, 278413 — safe, but
 they are what a reconnect lands in. Kill when convenient.
+
+---
+
+## 2026-07-16 (b) — THE CONCURRENT-TOLL BUG IS FIXED. 641/641, break-test proven, deployed.
+
+**Kevin's pick after the merge.** The bug found while writing §4.2.1 — **live on the flat schema, no migration
+needed to reach it.** Committed `01c3b36`; spec §4.2.1 updated to match (this commit).
+
+### What was broken
+1. **`toll()` guarded per CLOCK, not per REASON** — `if (open) return {alreadyTolled:true}`. A record going to the
+   AG while a clarification was open **never registered**: no error, no ledger row, nothing.
+2. **`resume()` closed EVERY open toll** and flipped the clock to `running`. So answering the clarification **ran
+   the clock while the request was still legally suspended at the AG.** The city burns statutory days it was
+   entitled to suspend, silently.
+3. **`computeStatus` SUMMED toll intervals** — safe *only* because of (1). Allowing concurrency without union math
+   double-counts overlap (A Jan 1–10 + B Jan 5–15 → **20 counted, 15 actually suspended**), pushing the due date
+   past what the law allows **while the dashboard reports compliant**. Same class as the 10,000 ceiling.
+
+**Both trigger sites were already in the code and already pointed at the same primary clock** —
+`routes/requests.js:225` (`ag_ruling_pending`) and `clarificationAction.js:187` (`clarification_pending`). This
+was not hypothetical.
+
+### The fix
+- `toll()` idempotent **per reason**; different reasons hold concurrently, same reason twice is still a no-op.
+- **`resume(clockId, reason)`** closes only that hold; clock resumes **only when the LAST closes** (refcount).
+  `resumed` now means **the clock is running again**, never "this reason was closed". Bare `resume()` still clears
+  all — the deliberate admin override (`routes/clocks.js` takes an optional `body.reason`).
+- **`unionDays()`** — merge overlapping/adjacent spans, then count. Never sum.
+- **Every caller passes its own reason** so none can release a sibling hold: `clarificationAction` →
+  `clarification_pending`, `depositAction` → `payment_pending`, AG release → `ag_ruling_pending`.
+
+### Evidence
+- **`verify_concurrent_tolls` 27/27** (new, registered in `run_suite` ALL). Union math proved **deterministically,
+  no DB, no wall-clock**: overlap · disjoint-still-sums · wholly-contained · adjacent-merge · order-independence ·
+  pre-epoch clamp regression. Then the real scenario end-to-end: the second hold registers · same reason twice is
+  a no-op · **resuming the clarification leaves the clock `tolled` and NOT overdue while the AG holds it** · only
+  the last resume runs it · bare `resume()` override · `restart()` still closes everything.
+- **FULL SUITE 641/641** (was 614), **LIVE UNTOUCHED** — census confirms not one row moved.
+- **BREAK-TEST PROVEN** (committed green first): restoring the per-clock guard → **18/27, 9 fail**; reverting
+  union→sum → **23/27, 4 fail**, and *exactly* the four overlap-sensitive assertions, with disjoint/adjacent
+  correctly still passing. Restored via `git checkout`, suite re-run green.
+- **DEPLOYED + read-only verified.** API restarted (pid 1375150 → 1514951, health 200). Live ledger: 98 tolls,
+  29 open, **0 clocks with >1 concurrent hold** — as expected, since the old code made that state unreachable.
+  **Zero writes to live.**
+
+### Note
+**`source_request_id` attribution (§4.2.1) is deliberately NOT in this slice.** Today every row is its own parent
+and child, so the column would record an ambiguous value; it lands with the migration, where "which child" first
+means something. The bug fix stands alone and did not need it.
+
+### Next (unchanged)
+Item 11 sequence: (1) **purge** the 129 demo requests; (2) rewrite `tickler.js`'s deposit sweep onto
+`payment_status` (§11.1a) — **before** children exist, or dunning silently stops; (3) the backfill (§8); (4) the
+portal emitting children + retire `mrrChoice`; (5) `source_request_id` attribution.
+**Blocked on DESIGN, not decisions:** the MRR hub (§14.3 — UI rule).

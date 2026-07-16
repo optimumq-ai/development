@@ -118,7 +118,21 @@ This generalises a pattern the spec already uses in exactly one place (§11.1): 
 logged on the child, the **CLOSURE** lands on the parent. Kevin re-derived it independently on 2026-07-16, which
 is why it is now the general rule rather than a special case.
 
-> ⚠️ **TWO ENGINE BUGS BLOCK THIS — AND THE FIRST IS LIVE TODAY, ON THE FLAT SCHEMA.**
+> ✅ **BOTH ENGINE BUGS BELOW ARE FIXED — `01c3b36`, 2026-07-16, `verify_concurrent_tolls` 27/27, suite 641/641,
+> live untouched, deployed and read-only verified.** `toll()` is now idempotent **per reason** (different reasons
+> may hold the clock at once); `resume(clockId, reason)` closes only that hold and the clock resumes **only when
+> the last one closes** (refcount, not flag); `unionDays()` merges overlapping/adjacent spans before counting.
+> Callers pass their own reason (`clarificationAction` → `clarification_pending`, `depositAction` →
+> `payment_pending`, the AG release in `routes/requests.js` → `ag_ruling_pending`) so none can release a sibling
+> hold. **Proven by break-test:** restoring the per-clock guard fails 9/27; reverting union→sum fails exactly the
+> 4 overlap-sensitive assertions while disjoint/adjacent correctly still pass.
+> **Still outstanding from this section: `source_request_id` attribution** — deferred to the migration slice,
+> where "which child" first means something (today every row is its own parent and child, so the column would
+> record an ambiguous value). The bug fix stands alone and did not need it.
+>
+> *The two bugs, retained for the record:*
+>
+> ⚠️ **TWO ENGINE BUGS BLOCKED THIS — AND THE FIRST WAS LIVE, ON THE FLAT SCHEMA.**
 >
 > **1. Only one toll may be open at a time — a second trigger is SILENTLY DROPPED.**
 > `tolling.js` `toll()`: `SELECT id FROM clock_tolls WHERE clock_id = ? AND tolled_until IS NULL` →
@@ -134,10 +148,9 @@ is why it is now the general rule rather than a special case.
 > extends five days beyond what the law allows and the dashboard reports **compliant while the city is late** —
 > the same class of failure as the 10,000 numbering ceiling: a wrong number that presents as a right one.
 
-**Required engine shape:** multiple **concurrent open tolls**, each attributed via `source_request_id`;
-`tolled_days` = the **UNION of intervals, NEVER the sum**; the clock resumes only when the **last** open toll
-closes (a refcount, not a flag). Bug 1 is worth its own bounded slice **independent of the migration** — it is
-reachable today whenever an AG hold lands while a clarification is open.
+**Required engine shape — BUILT `01c3b36`:** multiple **concurrent open tolls**; `tolled_days` = the **UNION of
+intervals, NEVER the sum**; the clock resumes only when the **last** open toll closes (a refcount, not a flag).
+*(Attribution via `source_request_id` is the one piece deferred — see the note above.)*
 
 **A child-triggered restart restarts the WHOLE parent clock**, including siblings that were never at fault. That
 is the law — §552.222(d) re-receipts "the underlying request," not one record — and it follows §6.2's rule that
