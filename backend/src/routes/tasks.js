@@ -146,11 +146,28 @@ router.post('/:id/work/finalize', requireAuth, async function (req, res) {
   res.json({ task: await tr.getTask(req.params.id) });
 });
 
-// Mark a task complete.
-router.post('/:id/complete', requireAuth, async function (req, res) {
-  await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [req.params.id]);
-  res.json({ task: await tr.getTask(req.params.id) });
-});
+// ============================================================================================
+// `POST /tasks/:id/complete` WAS HERE AND HAS BEEN REMOVED (brief §3.3). DO NOT RE-ADD IT.
+//
+// It was three lines: `UPDATE tasks SET status='done' WHERE id = ?`, behind `requireAuth` and nothing
+// else. No ownership check, no type check, and — the part that mattered — NO STAGE SIDE-EFFECT. Any
+// authenticated user could mark ANY task done; the task went green and its stage stayed exactly where it
+// was, so the request was stranded with nothing left to move it. Silent, and invisible on every screen.
+//
+// It was DEAD ON ARRIVAL. Added 2026-06-24 (8bfc555) alongside the estimate screen, but that screen
+// completes its task by a direct UPDATE in `routes/feeEstimates.js` instead, so this endpoint never had a
+// single caller — frontend, backend, tests or scripts — in the four weeks it existed. It was pure
+// unguarded surface area.
+//
+// WHY REMOVED RATHER THAN HARDENED: it is precisely the endpoint a "click to approve" stub screen would
+// reach for, and a hardened version would still be a way to finish a task WITHOUT moving the request.
+// Every stub would look like it worked while quietly stranding its request.
+//
+// COMPLETING A TASK MUST MOVE THE REQUEST. Follow `/:id/resolve` below: check the type, enforce whatever
+// "enough to advance" means for it, then call `taskRouting.applyStageTransition` — the ONE central
+// transition (ARCHITECTURE item 6), which writes request_history and spawns the next stage's task. A stub
+// screen built that way is a genuine node in the flow, and replacing it later is a UI change, not a rewrite.
+// ============================================================================================
 
 // ============================================================================================
 // RESOLVE A RECORD-SEARCH TASK (SPEC_record_search_task_screen §5d).

@@ -82,6 +82,33 @@ async function events(taskId) { return await db.all("SELECT from_status, to_stat
   ok('C2 events carry request_id so a request-level timeline can be stitched from its tasks',
     (await db.get("SELECT COUNT(*)::int c FROM task_events WHERE request_id = ?", [reqId])).c >= 8);
 
+  // =========================================================================================
+  // D. THE STRANDING GUN IS GONE, AND STAYS GONE (brief §3.3).
+  //
+  // `POST /tasks/:id/complete` marked any task done behind `requireAuth` and nothing else — no ownership
+  // check, no type check, and no stage side-effect. It could finish a task WITHOUT moving the request, which
+  // strands the request silently: the task reads done, the stage never advances, and no screen shows the
+  // discrepancy. It was removed rather than hardened because a hardened version is still a way to complete a
+  // task without moving the request, which is exactly what a click-to-approve stub must never do.
+  //
+  // This asserts the ROUTE IS ABSENT, not merely that it is guarded — re-adding it in any form fails here.
+  // =========================================================================================
+  console.log('\n=== D. THE STRANDING GUN (POST /tasks/:id/complete) IS GONE ===');
+  var auth = require('/opt/optimumq/backend/src/services/auth');
+  var admin = await db.get("SELECT * FROM users WHERE id = ?", [V]);
+  var TOKEN = await auth.signAccessToken(admin);
+  var PORT = Number(process.env.API_PORT) || 3101;
+  var t3 = await tr.createTask({ type: 'record_search', requestId: reqId, createdBy: 'test' });
+  var stageBefore = (await db.get('SELECT stage FROM requests WHERE id = ?', [reqId])).stage;
+  var resp = await fetch('http://localhost:' + PORT + '/api/tasks/' + t3.id + '/complete', {
+    method: 'POST', headers: { Authorization: 'Bearer ' + TOKEN }
+  });
+  ok('D1 POST /tasks/:id/complete no longer exists (404, not 200)', resp.status === 404);
+  var t3After = await db.get('SELECT status FROM tasks WHERE id = ?', [t3.id]);
+  ok('D2 the task was NOT marked done by the call', t3After.status !== 'done');
+  var stageAfter = (await db.get('SELECT stage FROM requests WHERE id = ?', [reqId])).stage;
+  ok('D3 the request was not stranded — stage unchanged (' + stageBefore + ')', stageAfter === stageBefore);
+
   console.log('\n  ' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
   process.exit(fail ? 1 : 0);
 })().catch(function (e) { console.error('HARNESS ERROR:', e); process.exit(1); });
