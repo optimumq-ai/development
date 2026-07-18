@@ -4525,3 +4525,49 @@ terms — the proposed next step is a **clickable HTML prototype of the reconcil
 with the strict verify gate · Item 1..10 column · results window with the two buttons + Remove · Case A/B ·
 Submit-or-Continue · on-screen confirmation number) so he can *see and click* the design, then build for real
 against it. **Not started — awaiting his go on scope.**
+
+---
+
+## 2026-07-18 (c) — Clickable wizard prototype built + served at `/prototypes/`
+Kevin greenlit the full prototype. **Design-review artifact, not app code.**
+
+**The prototype** — `docs/mockups/portal_wizard_prototype.html`, one self-contained file (no external CSS/JS/fonts;
+system + Georgia type; project's 3-layer surface palette + civic blue `#1F4E79`; both themes). Every §2c decision
+is wired and clickable: the corrected progress rail (Begin · Your Information · Item Search · **Submitted**),
+Screen 1 with the **strict link-verify gate** (email → simulate-link-click → rest unlocks) and email-only comms,
+the **Item 1..10 color-state rail** (amber active / green complete), the assistant-then-**hide** item loop, the
+**match / Case A (not-searchable) / Case B (no-match)** branches auto-picked, per-record selection + "Also search
+with the Open Records team", **Remove item** with confirm, the **empty-request guard**, and the on-screen
+confirmation number. A **"Design notes" toggle** annotates each §2c rule (doubles as a review tool). Search
+outcomes + email verification are **simulated** (no backend) — the outcome picker is a clearly-labeled backstage
+control. Also published as a private Artifact (same file).
+
+**Prototype gallery, served with NO React rebuild.** nginx docroot is `frontend/build/`; dropping static files
+there serves them directly (SPA `try_files` yields to real files on disk). Short URLs:
+- **`/prototypes/`** — gallery index (add a card per new prototype)
+- **`/prototypes/portal-wizard.html`** — the wizard
+Live copies live in `frontend/build/prototypes/` (gitignored, ephemeral); **source copies committed in
+`frontend/public/prototypes/`** survive future CRA rebuilds. *Adding a nav-panel link would need a full rebuild
+each time — rejected for the 30s/repeatable bar; the static gallery scales without rebuilds.* **To add a
+prototype:** save HTML to `frontend/public/prototypes/`, drop a live copy into `build/prototypes/`, add a card to
+`index.html`. Remove the two `prototypes/` folders to tear the whole thing down.
+
+**Fixes after first look (Kevin's feedback):**
+- **Encoding:** the raw-served copy has no `<meta charset>`, so UTF-8 glyphs mojibake'd (`—`→`â€"`, `✅`→`âœ…`).
+  Replaced all 67 non-ASCII glyphs with **HTML entities** (ASCII, encoding-agnostic) — renders right whether
+  Artifact-wrapped or served raw. Served response verified **0 non-ASCII bytes**. Apply this to every future
+  prototype that will be nginx-served.
+- **Sim control** split out from the real "Run search" action into a dashed amber **"Prototype control — not
+  shown to requestors"** backstage box.
+- **Delivery copy:** the records-delivery step now leads with "Communications about your request will always be
+  by email" and scopes the radios to records delivery only (reinforces §2c G5).
+
+Commits (all on `main`, pushed): `3a2131f` prototype · `18bf6f9` gallery · `d62265a` encoding+backstage ·
+`bcf36f4` delivery copy. **Kevin's verdict: "you nailed it" — screens/flow/layout good.**
+
+### Next
+Kevin plans to rebuild/modify several screens against the prototype. Either (a) he marks up screens → fold into
+§2c + reflect in the prototype, or (b) green-light the real React build against §2c, reusing the ~⅓ carry-over
+core (submit-payload assembly, search/selection logic, verification data-plumbing, palette) from split-canvas.
+**Unchanged backlog:** dashboard/ARIA/AppLayout/tickler leaf-fact reads; `verify_stage_bypass` flake; MRR
+classification roll-up (§6); `source_request_id` toll attribution.
