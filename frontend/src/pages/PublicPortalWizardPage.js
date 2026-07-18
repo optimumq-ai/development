@@ -621,8 +621,16 @@ export default function PublicPortalWizardPage() {
             </div>
           </div>
           <div className="actions">
-            <button className="btn" disabled={selected.length === 0} onClick={function () { commit('complete'); }}>Use selected records — item complete</button>
-            <button className="btn sec" onClick={function () { commit('search_more'); }}>Also search with the Open Records team</button>
+            {selected.length === 0 ? (
+              // R9 / live behavior: search returns nearest-neighbor records, so "nothing matched" is the
+              // requestor selecting none. That IS the no_match_search path — not the (rare) empty-results Case B.
+              <button className="btn" onClick={function () { commit('no_match_search'); }}>None of these match — submit for Open Records team search</button>
+            ) : (
+              <>
+                <button className="btn" onClick={function () { commit('complete'); }}>Use selected records — item complete</button>
+                <button className="btn sec" onClick={function () { commit('search_more'); }}>Also search with the Open Records team</button>
+              </>
+            )}
             <button className="btn quiet" onClick={function () { setRemoveOpen(true); }}>Remove item</button>
           </div>
         </div>
