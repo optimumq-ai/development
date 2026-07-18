@@ -134,14 +134,29 @@ because no request has reached `fee_review`.
 re-creating it; the redaction-family idempotency guard ignores it, so a request can carry an open
 `legal_review` *and* an open `redaction` at once. They only clear when the request hits `closed`.
 
-### 3.3 `POST /tasks/:id/complete` is a loaded gun — **and it is the trap for the stub plan**
-`requireAuth` only. **No ownership check, no type check, no stage side-effect.** Any authenticated user can
+### 3.3 `POST /tasks/:id/complete` was a loaded gun — **REMOVED 2026-07-18 (n)**
+`requireAuth` only. **No ownership check, no type check, no stage side-effect.** Any authenticated user could
 mark any task done, stranding its stage.
 
 > **This is precisely the endpoint a "click to approve" stub would reach for.** If the stubs call it, every
 > stub will *look* like it works and will quietly strand the request. **Stubs must go through
 > `applyStageTransition`** so they write history and spawn the next task like the real thing. Then a blank
 > screen is a genuine node in the flow and replacing it later is a UI change, not a rewrite.
+
+**Resolution: removed, not hardened.** It turned out to be **dead on arrival** — added 2026-06-24 (`8bfc555`)
+alongside the estimate screen, but that screen completes its task by a direct `UPDATE` in `feeEstimates.js`
+instead, so the endpoint had **zero callers** in frontend, backend, tests or scripts for the four weeks it
+existed. Hardening it would have left a better-defended way to finish a task *without moving the request*,
+which is exactly what a stub must never do. A comment in its place points at `/:id/resolve` as the pattern.
+`verify_task_lifecycle` §D asserts the route is **absent (404), not merely guarded**, so re-adding it in any
+form fails the suite. Break-tested: restoring the endpoint fails D1/D2.
+
+**A NON-BUG that looks exactly like this one — do not "fix" it.** `feeEstimates.js:270` marks the estimate
+task done with a direct `UPDATE` and **no stage transition**. That is correct: sending an estimate does not
+advance the request, because the next move belongs to the **citizen**. The stage advances on their response
+(`applyStageTransition` at `feeEstimates.js:296`), and `tickler.js` (1) watches for a sent estimate that is
+never accepted or declined and lapses it. Task-done-with-no-stage-move is only stranding when **nothing else
+is watching**; here something is.
 
 ### 3.4 No from-`closed` guard
 `applyStageTransition` will revive a closed request. The only defense is an ad-hoc re-read in
@@ -167,9 +182,10 @@ terminal request. Consider hoisting that guard into the central function.
 
 ## 4. Proposed sequence
 
-**Phase 0 — foundation (no new screens).** ~~§3.1 leaf-fact pass~~ **DONE (n)**; lock down §3.3 and add the
-stub-safe advance path; §3.2 `legal_review` resolution route. Small, high-leverage, and everything after
-inherits it. §3.1b (money on the child) is deferred to the MRR-hub design, not to Phase 0.
+**Phase 0 — foundation (no new screens).** ~~§3.1 leaf-fact pass~~ **DONE (n)**; ~~lock down §3.3~~ **DONE
+(n) — removed**; the stub-safe advance path **[BLOCKED on §5 Q2: note or auto-approve]**; §3.2 `legal_review`
+resolution route **[NEXT]**. Small, high-leverage, and everything after inherits it. §3.1b (money on the
+child) is deferred to the MRR-hub design, not to Phase 0.
 
 **Phase 1 — decide the canonical flow (§5.1).** Which stages are in the v2 path. Cheap now, expensive once
 ten screens hang off it.

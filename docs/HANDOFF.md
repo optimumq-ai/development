@@ -5087,3 +5087,56 @@ that must land before any click-to-approve stub is written.
 **Still needs Kevin** (brief §5, unanswered): the 10-stage order; whether stubs auto-approve or require a
 note; single-record vs the MRR hub; `commercial_rate`/`mrr_processing` build-or-delete; retire the v1
 redaction duplicates now or later.
+
+---
+
+## 2026-07-18 (o) — Phase 0 §3.3: the stranding gun is gone (`6aae6f4`)
+Second Phase 0 slice. Backend only, no new screens.
+
+### Removed, not hardened — because it was dead on arrival
+`POST /tasks/:id/complete` was three lines behind `requireAuth` and nothing else: no ownership check, no type
+check, and no stage side-effect. Any authenticated user could mark ANY task done and the request stayed put —
+**task reads done, stage never advances, and no screen shows the discrepancy.**
+
+The investigation changed the fix. `git log -S` traced it to 2026-06-24 (`8bfc555`), added alongside the
+estimate screen — but **that screen completes its task by a direct `UPDATE` in `feeEstimates.js` instead**, so
+this endpoint had **ZERO callers** in frontend, backend, tests or scripts for the entire four weeks it
+existed. Pure unguarded surface area with no user.
+
+So hardening it would only have produced a **better-defended way to finish a task without moving the
+request** — exactly what the brief warns a click-to-approve stub must never do. Removed instead, with a
+comment in its place pointing at `/:id/resolve` as the pattern to copy: check the type, enforce whatever
+"enough to advance" means, then go through `applyStageTransition`.
+
+### The test asserts ABSENCE, and it was break-tested
+`verify_task_lifecycle` §D asserts the route returns **404 — gone, not merely guarded** — so re-adding it in
+any form fails the suite. Proven to bite: re-adding the endpoint failed D1 and D2, and the break was reverted
+with the green state already committed.
+
+**Note D3 passed during the break**, while the task went done. That is not a weak assertion — *that passing
+assertion IS the stranding*: the stage genuinely does not move. D1/D2 are what detect the endpoint.
+
+### ⚠️ A NON-BUG that looks identical — do not "fix" it
+`feeEstimates.js:270` marks the estimate task done with a **direct UPDATE and no stage transition**. Reading
+the sweep, that is the same bug class. It is not. Sending an estimate must NOT advance the request, because
+the next move belongs to the **citizen**: the stage advances on their response (`applyStageTransition` at
+`feeEstimates.js:296`), and `tickler.js` clock (1) watches for a sent estimate never accepted or declined and
+lapses it. **Task-done-with-no-stage-move is only stranding when nothing else is watching.** Here something
+is. Recorded in brief §3.3 so the next sweep does not flag it.
+
+This is the second time this session a grep-level inference was wrong on inspection (see (n) on §3.1).
+**On this domain, read the implementation before believing the sweep.**
+
+### Verification
+749/749 green, live census clean. Break-test performed and reverted; suite re-confirmed green after.
+
+### Next session
+**§3.2** — `legal_review` spawns at `exemption_review`/`ag_review`, no route resolves it, the reconciler keeps
+re-creating it, and it can coexist with an open `redaction`; they only clear at `closed`. That is the last
+Phase 0 repair that needs no decision from Kevin.
+
+**BLOCKED on Kevin** — the stub-safe advance path cannot be built until §5 Q2 is answered (**do stubs
+auto-approve, or require a note?**). The brief's own recommendation is that a required note costs nothing now
+and leaves an audit trail explaining why a request moved during the skeleton period. The other four §5
+questions are still open too: the 10-stage order; single-record vs the MRR hub;
+`commercial_rate`/`mrr_processing` build-or-delete; retire the v1 redaction duplicates now or later.
