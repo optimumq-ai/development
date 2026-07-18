@@ -4880,3 +4880,53 @@ dashboard / ARIA / AppLayout badge / tickler leaf-fact reads; MRR classification
 `source_request_id` toll attribution; retire split-canvas once confident; R9 `request_search_intents`
 persistence (client-side until submit per §0); singular "Open Record" in `PublicPortalV2Page.js` (retired
 split-canvas, rollback-only).
+
+---
+
+## 2026-07-18 (l) — Item Search guidance modal + agent chrome (`beaaf42`)
+Kevin's markup pass on step 3. Explicitly scoped by him as "close enough, revisit later" — NOT a finished
+design. One commit, pushed.
+
+- **"Click for detailed explanation" button** on the lede row opens a help modal. **Content was lifted from
+  the source markups, not invented** — `uploads/portal flow and screenshots.doc`, the screenshot at the top of
+  **p.2**. Covers: searches must be narrow and specific; **ONE description can legitimately return several
+  matching records** (the point most likely to confuse a requestor); a second record TYPE must be a separate
+  item; plus the honest caveat that paper / video-audio / email / miscellaneous record types cannot show
+  immediate results and require Open Records team processing, though they remain submittable. Three typos in
+  the source corrected ("othere", "algthogh", "Of courses"). Split into 3 paragraphs, caveat muted so the
+  actionable advice leads. **It replaced the "Add up to 10 records" sentence** — the cap is already carried by
+  the item rail's capnote, so nothing was lost.
+- **Panel head collapsed to one label, "AI Powered Search Assistant"** — the `ASSISTANT` eyebrow plus
+  "Open Records Assistant" said the same thing twice.
+- **Placeholder → "Enter a description of the requested item…."** in a muted red. NOTE the source mockup used
+  "Enter a descrption of the item request", so the wording tracks the original intent.
+  **The red is a NEW `--ask` token, deliberately NOT `--danger`:** danger red on an empty input reads as a
+  validation error before the requestor has done anything wrong. `--ask` is a desaturated brick that stands out
+  from the neutral text without alarming. Themed — `#8C3A32` light / `#E0918A` dark.
+
+**How to read the .doc** (no native reader here): `libreoffice --headless --convert-to pdf` in the scratchpad,
+then Read the PDF with a `pages:` range. The instructional content lives in EMBEDDED SCREENSHOTS, not in the
+document text, so text extraction alone (antiword/catdoc) would have missed all of it.
+
+### Verification
+Both themes. Asserted: panel-head text, placeholder text, **computed placeholder color in each theme**, modal
+opens from the button and closes on "Got it". Verify gate mocked client-side — no live writes. Spec §2c updated
+in the same commit.
+
+### Open / not done
+- **Help modal does NOT auto-open** on first arrival at step 3 — it is button-only. Trivial to change if wanted.
+- **Dead space UNRESOLVED and now deliberately parked** — Kevin has **sent the portal to human testers** and
+  wants their feedback before any layout change. Measured, annotated, and shown this session: **271px empty
+  column** under the item rail (a consequence of (k)'s rail fix — the column did not shrink with its contents)
+  and **177px empty panel band** between the greeting and the input row; on Results the panel void sits between
+  the last record and the action buttons. Root cause is fixed-height layout (`.card` `min-height:280px`, panel
+  sized for a full conversation). Three directions were offered: (1) size the panel to content — smallest,
+  honest, but the panel visibly jumps as content lands; (2) keep the height and fill the column with something
+  useful (what happens next, timeline, Library link); (3) rebalance the split — narrower rail, wider panel.
+  **Do not act on this until the tester feedback is in.**
+
+### Backlog — unchanged
+dashboard / ARIA / AppLayout badge / tickler leaf-fact reads; MRR classification roll-up (§6);
+`source_request_id` toll attribution; retire split-canvas once confident; R9 `request_search_intents`
+persistence (client-side until submit per §0); singular "Open Record" in `PublicPortalV2Page.js` (retired
+split-canvas, rollback-only).
