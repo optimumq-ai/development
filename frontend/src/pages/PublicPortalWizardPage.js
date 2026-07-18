@@ -3,18 +3,22 @@ import axios from 'axios';
 
 // ── Public Open Records WIZARD (SPEC §2c) ──────────────────────────────────────
 // Slice 1: full-screen stepped shell + progress rail + step routing.
-// Slice 2: the "Your Information" step + the STRICT email link-verify gate —
-//   send a real verification link, poll /verify-status, unlock the rest of the
-//   form only when the link is clicked. No "visually verified" fallback, no skip
-//   (§2c G5). Backend round-trip already exists (publicChat.js request-verification
-//   / verify / verify-status). Email is the sole communication channel; postal is
-//   records-delivery only.
-// Behind a NEW route (/portal/wizard); the live split-canvas flow at /portal/request
-// is untouched until cutover. Palette/type carried from the approved prototype.
+// Slice 2: "Your Information" + the STRICT email link-verify gate (send link →
+//   poll /verify-status → unlock; no visual fallback, no skip — §2c G5).
+// Slice 3: the ITEM LOOP — the Item 1–10 color rail + the assistant-describe
+//   panel wired to /public/chat. The agent gathers/refines ONE record
+//   description, runs the search, then HIDES; a labeled stub stands in for the
+//   slice-4 results window (selection / team-search / remove). Completing an item
+//   advances the rail (amber active → green complete) to the next record.
+// Behind a NEW route (/portal/wizard); the live split-canvas flow at
+// /portal/request is untouched until cutover.
 
 const API = (process.env.REACT_APP_API_URL || '/api');
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 function validEmail(v) { return EMAIL_RE.test((v || '').trim()); }
+
+const AGENCY = 'City of Autumn Falls';
+const MAX_ITEMS = 10;
 
 const STYLES = `
 .pwz{
@@ -22,7 +26,7 @@ const STYLES = `
   --civic:#1F4E79; --civic-700:#163A5C; --civic-tint:#E7EEF6;
   --ink:#14202B; --muted:#5B6B7A; --hair:#C9D6E2;
   --active:#C77A0A; --active-bg:#FBEFD7; --active-line:#E6B863;
-  --done:#2E7D4F; --done-line:#8FC7A6; --done-box:#BFE3CC;
+  --done:#2E7D4F; --done-line:#8FC7A6; --done-box:#BFE3CC; --done-bg:#E1F0E7;
   --danger:#B23A3A;
   --shadow:0 1px 2px rgba(20,32,43,.06),0 6px 20px rgba(20,32,43,.06);
   --radius:10px;
@@ -37,7 +41,7 @@ const STYLES = `
     --civic:#5B93C7; --civic-700:#7FB0DC; --civic-tint:#1B2C3B;
     --ink:#E6EEF5; --muted:#93A6B6; --hair:#2A3B4B;
     --active:#E0A94A; --active-bg:#3A2E17; --active-line:#7A5F2C;
-    --done:#66B487; --done-line:#2F6043; --done-box:#1E4630;
+    --done:#66B487; --done-line:#2F6043; --done-box:#1E4630; --done-bg:#17301F;
     --danger:#D77C7C;
     --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
   }
@@ -88,7 +92,7 @@ const STYLES = `
 .pwz .btn.sec:hover{background:var(--civic-tint)}
 .pwz .btn.sm{padding:8px 13px;font-size:13px}
 
-/* form */
+/* form (slice 2) */
 .pwz .field{margin:0 0 16px;max-width:520px}
 .pwz .field > label{display:block;font-weight:600;font-size:13px;margin-bottom:6px}
 .pwz .field .hint{font-weight:400;color:var(--muted);font-size:12px}
@@ -98,7 +102,6 @@ const STYLES = `
 .pwz .inline input[type=email]{flex:1 1 240px}
 .pwz .lead-note{font-size:12.5px;line-height:1.5;color:var(--muted);margin:-2px 0 10px;max-width:520px}
 .pwz .lead-note b{color:var(--ink)}
-
 .pwz .lockbanner{display:flex;gap:10px;align-items:flex-start;background:var(--civic-tint);border:1px solid var(--hair);
   border-left:3px solid var(--civic);border-radius:8px;padding:10px 12px;font-size:13px;margin:0 0 14px;max-width:520px}
 .pwz .lockbanner .pulse{width:9px;height:9px;border-radius:50%;background:var(--civic);margin-top:4px;flex:none;
@@ -107,7 +110,6 @@ const STYLES = `
 .pwz .verified{display:flex;align-items:center;gap:8px;color:var(--done);font-weight:600;font-size:13px;margin:0 0 16px}
 .pwz .expired{color:var(--danger);font-size:13px;margin:0 0 12px;max-width:520px}
 .pwz .senderr{color:var(--danger);font-size:12.5px;margin:6px 0 0}
-
 .pwz .locked.is-locked > .lockfield{opacity:.42;pointer-events:none;filter:saturate(.6)}
 .pwz .opt{display:flex;gap:10px;align-items:flex-start;padding:11px 13px;border:1px solid var(--hair);
   border-radius:9px;background:var(--surface);margin:0 0 8px;max-width:520px;cursor:pointer}
@@ -118,10 +120,62 @@ const STYLES = `
 .pwz .opt .od{font-size:12.5px;color:var(--muted)}
 .pwz .addr{max-width:520px;display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:4px 0 10px}
 .pwz .addr .full{grid-column:1/3}
+
+/* item search (slice 3) */
+.pwz .split{display:grid;grid-template-columns:220px 1fr;gap:18px}
+@media (max-width:760px){.pwz .split{grid-template-columns:1fr}}
+.pwz .itemrail{background:var(--panel);border:1px solid var(--hair);border-radius:12px;padding:14px;
+  box-shadow:var(--shadow);align-self:start}
+.pwz .itemrail h3{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 4px}
+.pwz .capnote{font-size:11px;color:var(--muted);margin:0 0 12px}
+.pwz .islot{display:flex;gap:9px;align-items:flex-start;padding:8px 9px;border-radius:8px;border:1px solid transparent;
+  margin-bottom:5px;font-size:13px}
+.pwz .islot .ic{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--hair);background:var(--surface);
+  display:grid;place-items:center;font-size:11px;font-weight:700;color:var(--muted)}
+.pwz .islot .il{min-width:0}
+.pwz .islot .iname{font-weight:600}
+.pwz .islot .idesc{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:130px}
+.pwz .islot .ibadge{display:inline-block;margin-top:3px;font-size:10.5px;letter-spacing:.03em;padding:1px 7px;
+  border-radius:20px;background:var(--done-bg);color:var(--done);border:1px solid var(--done-line)}
+.pwz .islot.active{background:var(--active-bg);border-color:var(--active-line)}
+.pwz .islot.active .ic{border-color:var(--active-line);color:var(--active)}
+.pwz .islot.done .ic{border-color:var(--done-line);background:var(--done-bg);color:var(--done)}
+
+.pwz .panel{background:var(--panel);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--shadow);
+  overflow:hidden;min-height:420px;display:flex;flex-direction:column}
+.pwz .panelhead{display:flex;align-items:center;gap:9px;padding:12px 16px;border-bottom:1px solid var(--hair);
+  background:var(--surface)}
+.pwz .panelhead .tag{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.pwz .panelhead .who{font-weight:600}
+.pwz .panelhead .live{margin-left:auto;font-size:11px;color:var(--done);font-weight:600}
+.pwz .panelbody{padding:16px;flex:1;display:flex;flex-direction:column;min-height:0}
+
+.pwz .chatlog{flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding-bottom:4px}
+.pwz .bub{max-width:82%;padding:10px 13px;border-radius:12px;font-size:14px;border:1px solid var(--hair)}
+.pwz .bub.a{align-self:flex-start;background:var(--surface);border-bottom-left-radius:3px}
+.pwz .bub.u{align-self:flex-end;background:var(--civic);color:#fff;border-color:var(--civic);border-bottom-right-radius:3px}
+.pwz .typing{align-self:flex-start;display:flex;gap:4px;padding:8px 4px}
+.pwz .typing span{width:6px;height:6px;border-radius:50%;background:var(--muted);opacity:.5;animation:pwzblink 1.2s infinite}
+.pwz .typing span:nth-child(2){animation-delay:.2s}.pwz .typing span:nth-child(3){animation-delay:.4s}
+@keyframes pwzblink{0%,60%,100%{opacity:.25}30%{opacity:.9}}
+.pwz .qr{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 0}
+.pwz .qr button{background:var(--surface);border:1px solid var(--hair);color:var(--civic);border-radius:20px;
+  padding:6px 13px;font-size:13px}
+.pwz .qr button:hover{border-color:var(--civic);background:var(--civic-tint)}
+.pwz .composer{display:flex;gap:8px;margin-top:12px;padding-top:12px;border-top:1px solid var(--hair)}
+.pwz .composer input{flex:1}
+.pwz .composer input:disabled{opacity:.6}
+
+.pwz .resstub{text-align:center;margin:auto;padding:20px;max-width:52ch}
+.pwz .resstub .ico{font-size:38px}
+.pwz .resstub h3{font-family:var(--serif);font-size:20px;margin:8px 0 8px}
+.pwz .resstub p{color:var(--muted);margin:0 auto 6px}
+.pwz .resstub .slicetag{display:inline-block;margin:8px 0 14px;font-size:11px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--active);border:1px dashed var(--active-line);background:var(--active-bg);
+  padding:4px 10px;border-radius:20px;font-weight:700}
 `;
 
 const RAIL = ['Begin', 'Your Information', 'Item Search', 'Submitted'];
-
 const EMPTY_ADDR = { street1: '', street2: '', city: '', state: '', zip: '' };
 
 export default function PublicPortalWizardPage() {
@@ -142,11 +196,22 @@ export default function PublicPortalWizardPage() {
   const [waiverReason, setWaiverReason] = useState('');
   const pollRef = useRef(null);
 
+  // ── Item loop (slice 3) ──
+  const [items, setItems] = useState([]);          // committed records {desc, disp, badge}
+  const [messages, setMessages] = useState([]);    // chat turns for the active record
+  const [input, setInput] = useState('');
+  const [chatSending, setChatSending] = useState(false);
+  const [quickReplies, setQuickReplies] = useState([]);
+  const [activeResults, setActiveResults] = useState(null); // null=describing | {query,count,notSearchable}
+  const chatLogRef = useRef(null);
+
   const emailOk = validEmail(email);
   const addrComplete = !!(addr.street1 && addr.city && addr.state && addr.zip);
   const canProceed = verified && (deliv === 'email' || addrComplete);
+  const atCap = items.length >= MAX_ITEMS;
+  const activeNo = items.length + 1;
 
-  // Poll the verification status until the citizen clicks the emailed link (or it expires).
+  // Poll verification status until the citizen clicks the emailed link (or it expires).
   useEffect(function () {
     if (!token || verified || expired) return undefined;
     pollRef.current = setInterval(async function () {
@@ -159,14 +224,13 @@ export default function PublicPortalWizardPage() {
     return function () { if (pollRef.current) clearInterval(pollRef.current); };
   }, [token, verified, expired]);
 
-  function resetGate() {
-    setSendState('idle'); setToken(null); setVerified(false); setExpired(false);
-  }
-  function onEmailChange(v) {
-    // Editing a sent/verified address invalidates the gate.
-    if (token || verified) resetGate();
-    setEmail(v);
-  }
+  // Keep the chat scrolled to the latest turn.
+  useEffect(function () {
+    if (chatLogRef.current) chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
+  }, [messages, chatSending]);
+
+  function resetGate() { setSendState('idle'); setToken(null); setVerified(false); setExpired(false); }
+  function onEmailChange(v) { if (token || verified) resetGate(); setEmail(v); }
   async function sendLink() {
     if (!emailOk) return;
     setSendState('sending'); setExpired(false);
@@ -178,11 +242,53 @@ export default function PublicPortalWizardPage() {
     } catch (e) { setSendState('error'); }
   }
 
+  // Start a fresh record description (item 1, or the next item after one completes).
+  function startDescribe() { setMessages([]); setInput(''); setQuickReplies([]); setActiveResults(null); }
+  function goToItemSearch() { startDescribe(); setIdx(2); }
+
+  async function sendMessage(text) {
+    var t = (text || '').trim();
+    if (!t || chatSending) return;
+    var base = messages.concat([{ role: 'user', content: t }]);
+    setMessages(base); setInput(''); setQuickReplies([]); setChatSending(true);
+    try {
+      var wire = base.map(function (m) { return { role: m.role, content: m.content }; });
+      var r = await axios.post(API + '/public/chat', { mode: 'split_canvas', messages: wire, selectedRecords: [] });
+      var reply = (r.data && r.data.reply) || '';
+      var results = (r.data && Array.isArray(r.data.searchResults)) ? r.data.searchResults : null;
+      var added = (r.data && r.data.recordAdded) ? String(r.data.recordAdded).trim() : '';
+      setMessages(base.concat([{ role: 'assistant', content: reply }]));
+      if (results && results.length) {
+        // A search RAN and returned records → the agent hides; results window (slice 4) takes over.
+        setActiveResults({ query: (r.data && r.data.searchQuery) || t, count: results.length, notSearchable: false });
+      } else if (added) {
+        // Agent flagged a not-searchable record (PATH b) — no search ran (§2c G1 Case A).
+        setActiveResults({ query: added, count: 0, notSearchable: true });
+      } else {
+        setQuickReplies((r.data && Array.isArray(r.data.quickReplies)) ? r.data.quickReplies : []);
+      }
+    } catch (e) {
+      setMessages(base.concat([{ role: 'assistant', content: 'I had trouble responding just now. Please try again in a moment.' }]));
+    } finally { setChatSending(false); }
+  }
+
+  // Stub for slice 4 (selection / team-search / remove). Commits the active record and
+  // advances the rail to the next one so the color-state loop is demonstrable.
+  function completeItemStub() {
+    var ns = activeResults && activeResults.notSearchable;
+    var disp = ns ? 'not_searchable' : 'complete';
+    var badge = ns ? 'Team search' : 'Records selected';
+    var desc = (activeResults && activeResults.query) || 'Record ' + activeNo;
+    setItems(items.concat([{ desc: desc, disp: disp, badge: badge }]));
+    startDescribe();
+  }
+
   const step = STEP_META[idx];
   const railIdx = step.rail;
   const first = idx === 0;
   const last = idx === STEP_META.length - 1;
 
+  // ── renderers ──
   function renderInfo() {
     return (
       <div className="card">
@@ -217,12 +323,8 @@ export default function PublicPortalWizardPage() {
                 the rest of the form stays locked until you do. (This page updates automatically.)</div>
             </div>
           )}
-          {expired && (
-            <div className="expired">That link expired. Click <b>Resend link</b> above to get a new one.</div>
-          )}
-          {verified && (
-            <div className="verified"><span>✓</span> Email verified — the rest of the form is unlocked.</div>
-          )}
+          {expired && <div className="expired">That link expired. Click <b>Resend link</b> above to get a new one.</div>}
+          {verified && <div className="verified"><span>✓</span> Email verified — the rest of the form is unlocked.</div>}
 
           <div className={'locked' + (verified ? '' : ' is-locked')}>
             <div className="lockfield">
@@ -297,10 +399,124 @@ export default function PublicPortalWizardPage() {
 
         <div className="spacer" />
         <div className="actions">
-          <button className="btn sec" onClick={function () { setIdx(idx - 1); }}>{'←'} Back</button>
-          <button className="btn" onClick={function () { setIdx(idx + 1); }} disabled={!canProceed}>
-            Proceed to record search {'→'}
-          </button>
+          <button className="btn sec" onClick={function () { setIdx(0); }}>{'←'} Back</button>
+          <button className="btn" onClick={goToItemSearch} disabled={!canProceed}>Proceed to record search {'→'}</button>
+        </div>
+      </div>
+    );
+  }
+
+  function renderItemRail() {
+    var slots = [];
+    for (var i = 0; i < MAX_ITEMS; i++) {
+      var done = items[i];
+      var active = !done && i === items.length && !atCap;
+      var cls = 'islot' + (done ? ' done' : active ? ' active' : '');
+      slots.push(
+        <div key={i} className={cls}>
+          <div className="ic">{done ? '✓' : (i + 1)}</div>
+          <div className="il">
+            <div className="iname">Item {i + 1}</div>
+            {done && <div className="idesc" title={done.desc}>{done.desc}</div>}
+            {done && <span className="ibadge">{done.badge}</span>}
+            {active && <div className="idesc" style={{ color: 'var(--active)' }}>in progress…</div>}
+          </div>
+        </div>
+      );
+    }
+    return (
+      <aside className="itemrail">
+        <h3>Records in this request</h3>
+        <div className="capnote">Maximum {MAX_ITEMS} items per request.</div>
+        {slots}
+      </aside>
+    );
+  }
+
+  function renderDescribePanel() {
+    return (
+      <div className="panel">
+        <div className="panelhead">
+          <span className="tag">Assistant</span>
+          <span className="who">Open Records Assistant</span>
+          <span className="live">Active</span>
+        </div>
+        <div className="panelbody">
+          <div className="chatlog" ref={chatLogRef}>
+            {/* Verbatim opening script — display-only, never sent to the API */}
+            <div className="bub a">Thank you for using the {AGENCY} AI-powered Open Record Search. I'll work with you
+              to write a description that gets the best search results. If you're requesting more than one type of
+              record, describe each one separately.</div>
+            <div className="bub a">Please describe a record you're looking for.</div>
+            {messages.map(function (m, i) {
+              return m.content ? <div key={i} className={'bub ' + (m.role === 'user' ? 'u' : 'a')}>{m.content}</div> : null;
+            })}
+            {chatSending && <div className="typing"><span /><span /><span /></div>}
+          </div>
+          {quickReplies.length > 0 && !chatSending && (
+            <div className="qr">
+              {quickReplies.map(function (qr, qi) {
+                return <button key={qi} type="button" onClick={function () { sendMessage(qr); }}>{qr}</button>;
+              })}
+            </div>
+          )}
+          <div className="composer">
+            <input type="text" placeholder="Describe a record…" value={input} disabled={chatSending}
+              onChange={function (e) { setInput(e.target.value); }}
+              onKeyDown={function (e) { if (e.key === 'Enter') { e.preventDefault(); sendMessage(input); } }} />
+            <button className="btn sm" type="button" disabled={chatSending || !input.trim()}
+              onClick={function () { sendMessage(input); }}>Run search</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function renderResultsStub() {
+    var ns = activeResults.notSearchable;
+    return (
+      <div className="panel">
+        <div className="panelhead"><span className="tag">Results — assistant hidden</span>
+          <span className="who">{ns ? 'Handled by staff' : 'Search results'}</span></div>
+        <div className="panelbody">
+          <div className="resstub">
+            <div className="ico">{ns ? '🗂️' : '🔍'}</div>
+            <h3>{ns ? 'This type of record is searched by our staff'
+              : 'Search ran — ' + activeResults.count + ' record' + (activeResults.count === 1 ? '' : 's') + ' found'}</h3>
+            <div className="slicetag">Slice 4 builds this window</div>
+            <p>{ns
+              ? 'Case A (not-searchable). Slice 4 adds the honest hand-off screen + "Submit for Open Records team search".'
+              : 'Slice 4 adds per-record selection, "Use selected records — item complete", "Also search with the Open Records team", and "Remove item".'}</p>
+            <p style={{ fontSize: '12.5px', marginTop: '4px' }}>Described: <b style={{ color: 'var(--ink)' }}>{activeResults.query}</b></p>
+            <div className="actions" style={{ justifyContent: 'center' }}>
+              <button className="btn" onClick={completeItemStub}>Complete this item (stub) {'→'}</button>
+              <button className="btn sec" onClick={function () { setActiveResults(null); }}>{'←'} Refine description</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function renderItemSearch() {
+    return (
+      <div className="card">
+        <div className="eyebrow">Step 3 of {RAIL.length}</div>
+        <h1 className="title">Search for records</h1>
+        <p className="lede">Describe one record at a time. The assistant runs the search, then steps aside so you
+          drive from the results. Add up to {MAX_ITEMS} records.</p>
+        <div className="split" style={{ marginTop: '8px' }}>
+          {renderItemRail()}
+          {atCap
+            ? <div className="panel"><div className="panelbody"><div className="resstub">
+                <div className="ico">✓</div><h3>You've added the maximum of {MAX_ITEMS} records</h3>
+                <div className="slicetag">Slice 5 adds submit</div>
+                <p>Submit-or-continue and the on-screen confirmation number arrive in slice 5.</p>
+              </div></div></div>
+            : (activeResults ? renderResultsStub() : renderDescribePanel())}
+        </div>
+        <div className="actions">
+          <button className="btn sec" onClick={function () { setIdx(1); }}>{'←'} Back to your information</button>
         </div>
       </div>
     );
@@ -322,6 +538,11 @@ export default function PublicPortalWizardPage() {
       </div>
     );
   }
+
+  var body;
+  if (idx === 1) body = renderInfo();
+  else if (idx === 2) body = renderItemSearch();
+  else body = renderPlaceholder();
 
   return (
     <div className="pwz">
@@ -348,21 +569,19 @@ export default function PublicPortalWizardPage() {
           })}
         </div>
 
-        {idx === 1 ? renderInfo() : renderPlaceholder()}
+        {body}
       </div>
     </div>
   );
 }
 
-// Placeholder copy for the not-yet-built steps (begin/items/submitted).
+// Placeholder copy for the not-yet-built steps (begin/submitted).
 const STEP_META = [
   { rail: 0, title: 'Welcome to the AI-powered Open Records Request portal',
     lede: "You'll enter your contact information, then describe the records you're looking for — one at a time. The assistant helps you search; you stay in control of what to submit.",
     stub: 'Shell, progress rail, and step routing — slice 1.' },
   { rail: 1, title: 'Your information', lede: '', stub: '' },
-  { rail: 2, title: 'Search for records',
-    lede: 'Describe one record at a time. The assistant runs the search, then steps aside so you drive from the results.',
-    stub: 'Slices 3–4: the Item 1–10 rail with color states, the assistant-then-hide describe loop, and the results window (records found / not-searchable / no matches) with per-record selection, team-search, and remove-item.' },
+  { rail: 2, title: 'Search for records', lede: '', stub: '' },
   { rail: 3, title: 'Submitted',
     lede: 'Your request is created and your number is shown here.',
     stub: 'Slice 5: submit-or-continue with the empty-request guard, then the on-screen confirmation number (the request is born only at Submit — §0).' },
