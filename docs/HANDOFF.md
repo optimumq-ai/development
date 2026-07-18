@@ -4445,3 +4445,54 @@ commit) if they are not wanted.
 **PM2 runs as ROOT** (`/root/.pm2`), so `pm2 list` as `optimumq` prints an empty table and `pm2 logs` is
 unreadable without sudo (which needs a password). Killing the `server.js` pid IS a valid restart — PM2 respawns
 it within ~2s with fresh code. Don't `nohup node server.js` after killing: you race PM2 and lose to `EADDRINUSE`.
+
+---
+
+## 2026-07-18 — Portal wizard redesign: §0 invariant locked + five gaps resolved (DESIGN, no build)
+**This session was design, not build.** Kevin shared 9 Excel wireframes (`uploads/screen*.xls`) + a flow
+narrative (`uploads/portal flow and screenshots.doc`) for a **wizard / one-item-at-a-time** portal redesign.
+Pulled them from GitHub (org repo `optimumq-ai/development`, `main` — the raw files were reachable via the
+contents API + raw URLs even though the local mirror hadn't fetched the web-UI commit; `gh` is not installed),
+converted with libreoffice, read all. **No product code changed — docs only, nothing to verify in the app.**
+
+### Committed & merged to main — the §0 invariant (`ce44ee5`)
+`SPEC_public_portal_intake.md §0` — **the request is born only at Submit.** The whole intake flow is client-side
+state until `POST /public/submit`; the request row, the statutory clock, and every side-effect are created in ONE
+transaction there. Verified in code: single birth site (`createRequest`, `publicChat.js:374`), stateless
+`/public/chat`, read-only searches, clock starts at creation (`tolling.startClocks`). **Consequence — abandonment
+is a NON-EVENT:** a started-but-abandoned session never becomes a row, so there is nothing to identify as
+abandoned or "forget" — no `draft` status, no reaper, no orphan cleanup. **Mid-loop writes are BARRED** (a child
+routed to a worklist before Submit would strand an orphan the instant the tab closes). Save-and-resume, if ever
+adopted, ADDS a clock-less `draft` status + a reaper — `[FUTURE — DEFERRED]`, not to be added implicitly.
+
+### The five gaps I found in the wizard flow, walked one at a time, resolved → SPEC `§2c [DECISION — LOCKED, NOT BUILT]`
+The wizard **reuses** the existing intent model (§2.4 PATH a/b fork + §2b R9 dispositions) — it does not invent a
+parallel one. Resolutions:
+- **G1** — split the misleading single "NO MATCHING RECORDS LOCATED" into **Case A** (not-searchable PATH b — no
+  search ran, records may exist, staff search by hand) and **Case B** (searchable PATH a, 0 hits). Chosen
+  automatically by the PATH a/b classification + result count; both lead with the team-search CTA.
+- **G2** — shared phrase **"Open Records team search"**, two intents: `no_match_search` (no-match) vs
+  `search_more` (**"Also search…"** on the match screen — additive). Short **"Team search"** badge.
+- **G3** — per-record selection (as built §2b); completion button reworded to **"Use selected records — item
+  complete"** (`complete`), enabled at ≥1 checked; a **transparency line** that results may be partial (the
+  digitized-vs-paper scenario — select digitized records AND `search_more` for suspected paper ones).
+- **G4** — **"Remove item"** on ALL results screens (= the substitute for "revise"); confirm-before-remove;
+  **empty-request guard** — Submit disabled until ≥1 kept item. Free under §0 (drops client state only).
+- **G5 + comms policy** — **email is the SOLE communication channel; postal = records-DELIVERY only.** Dropped
+  Screen 1's self-contradictory "visually verified / no email access" fallback. On-screen **request number is
+  authoritative** (email is a copy). **Mandatory link-click verification, STRICT gate (option A), no skip** —
+  the round-trip is ALREADY built (`/request-verification` → `/verify/:token` → `/verify-status` poll); the work
+  is removing the skip paths, wiring the gate, a "Resend link" button, and a template wording fix. `[FUTURE]`
+  Print/Save-PDF confirmation deferred to v1.1. **Assumption to keep conscious:** the city must maintain a real
+  non-portal intake channel (equal access) — the email-only portal is defensible *because* that lane exists.
+
+### Reconciliation STILL OPEN — the real next design call
+**The wizard (§2c) vs the LIVE split-canvas flow (§2b).** The wizard reuses §2b's R9 intent model but is a
+different UI (full-screen, one-item loop) vs. split-canvas (Phase-0 form + chat panel). Cut-over is a separate
+design decision, NOT made this session. Until it is, §2c is the wizard's contract, not a replacement of §2b.
+
+### Next
+Reconcile wizard vs split-canvas; then the wizard is buildable against §2c (per the UI rule, design is now
+agreed — but the reconciliation gates it). **Unchanged from prior sessions:** the dashboard / ARIA / AppLayout
+badge / tickler still read PARENT facts off leaf rows (tickler shows suffixed numbers); `verify_stage_bypass` is
+a CONFIRMED recurring flake; MRR classification roll-up (§6, unspecified); `source_request_id` toll attribution.
