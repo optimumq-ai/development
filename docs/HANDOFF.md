@@ -4595,3 +4595,43 @@ over only when whole:
 Also: enforce the **10-item cap** in `createRequest` (backend, not enforced today); decide whether R9 intent
 persistence (`request_search_intents`) lands with slice 4 or later (§0 keeps it client-side until submit anyway).
 **Awaiting Kevin's go on slice 1.**
+
+---
+
+## 2026-07-18 (e) — WIZARD BUILT: all 5 React slices shipped at `/portal/wizard`
+Built the whole §2c wizard, one bounded+verified slice per turn, behind a NEW route `/portal/wizard`
+(`frontend/src/pages/PublicPortalWizardPage.js`, scoped `.pwz`, both themes, palette carried from the prototype).
+**The live split-canvas at `/portal/request` is untouched** — cutover is a separate decision, NOT done.
+Each slice verified in the running app with Playwright screenshots (public route, no auth needed).
+
+- **Slice 1 (`63a33fb`)** — shell + progress rail (Begin·Your Information·Item Search·**Submitted**; boxed
+  higher-contrast green done nodes) + step routing.
+- **Slice 2 (`42fdd04`)** — "Your Information" + the **STRICT link-verify gate**: send link →
+  poll `/verify-status` → unlock; no visual fallback, no skip (§2c G5). Email-only comms; postal→address gating.
+  Caught+fixed a bug in-screenshot (lockfield dim never lifted on verify).
+- **Slice 3 (`6688c28`)** — item loop: Item 1–10 color rail + assistant-describe panel (`/public/chat`,
+  split_canvas contract); agent HIDES on search.
+- **Slice 4 (`65bbaf1`)** — results window: MATCH (per-record select + Selected column + transparency line +
+  "Use selected — item complete" / "Also search with the Open Records team"), CASE A (not-searchable) & CASE B
+  (0 results) honest screens, "Remove item" + confirm. R9 dispositions/badges.
+- **Slice 5 (`6bfaf83`)** — Submit-or-Continue (empty-request guard) + real `/public/submit` + on-screen
+  confirmation number. **Live contract proven:** one real submit → HTTP 201, MRR (1 parent + 2 children),
+  then surgically purged (live back to 9 requests, untouched). Payload asserted: records=n, isMrr, searchIntents
+  [complete,no_match_search], selectedRecords, emailVerificationMethod='link', submissionChannel='portal'.
+
+### 🚨 OPEN / BLOCKERS
+- **Anthropic API credits exhausted** — `/public/chat` 500s ("credit balance too low"). This breaks the LIVE
+  portal chat (split-canvas AND wizard) and intake classification, not just tests. Slices 3–4 were verified by
+  mocking `/public/chat`. **Restore credits before any live portal use/demo.** (Env/billing, not code.)
+- **Case-B backend signal** — the wizard reads `searchResults:[] + searchQuery` as "searched, 0 results" (Case B).
+  Split-canvas today routes 0-result searches back to chat, so confirm/adjust the backend emits that signal once
+  credits are back.
+- **10-item cap** not enforced in `createRequest` (backend) — wizard caps the UI only.
+- **`emailVerificationMethod:'link'`** is a NEW value (was {attested,visual}); live submit accepted it (no CHECK
+  constraint), but note it for the spec.
+
+### Next
+Kevin to click `/portal/wizard` end-to-end and mark up anything. Then: the cutover decision (point
+`/portal/request` at the wizard), backend Case-B signal + 10-item cap, and restore Anthropic credits.
+**Unchanged backlog:** dashboard/ARIA/AppLayout/tickler leaf-fact reads; `verify_stage_bypass` flake; MRR
+classification roll-up (§6); `source_request_id` toll attribution.
