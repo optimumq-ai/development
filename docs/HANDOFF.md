@@ -4496,3 +4496,32 @@ Reconcile wizard vs split-canvas; then the wizard is buildable against §2c (per
 agreed — but the reconciliation gates it). **Unchanged from prior sessions:** the dashboard / ARIA / AppLayout
 badge / tickler still read PARENT facts off leaf rows (tickler shows suffixed numbers); `verify_stage_bypass` is
 a CONFIRMED recurring flake; MRR classification roll-up (§6, unspecified); `source_request_id` toll attribution.
+
+---
+
+## 2026-07-18 (b) — Reconciliation RESOLVED: the wizard is the target shell
+**Kevin's call — build the wizard.** Usability-driven, not cost-driven. Ran a reusability audit of the built
+split-canvas (`PublicPortalV2Page.js`, 1093 lines, self-contained) against the §2c wizard target first:
+- **~⅓ CARRIES** shell-independent — the API layer, the **submit-payload assembly** (`577–635`), selection /
+  refine / passed-over logic, verification *data-plumbing*, validators, and the **3-layer design palette** (CSS
+  custom properties, portable). The risky core survives untouched.
+- **~¼ REWORK** — form fields re-laid into the "Your Information" step; the "another record?" loop → the Item
+  1..10 column; the passive stepper → a real progress-bar driver.
+- **~40–45% REBUILD** — the morphing canvas / docked chat / 27% selected side-column / scrims / mobile toggle,
+  and ~80% of the CSS. Mostly presentation — low risk.
+- **NEW (absent today):** progress-bar that *drives* steps, the Item 1..10 color-state column, the agent
+  HIDING after search, Case A/B honest no-result screens, whole-item "Remove item".
+- **⚠️ Surprise:** today's email verification is a **SOFT gate** — it fires the send but **never polls** and has a
+  **"Visually verified" bypass needing no email at all** (`655–672`, `780–795`). §2c's strict link-verify gate is
+  therefore new *client* work regardless of shell — but the **backend endpoints already exist** and are uncalled
+  (`/verify/:token`, `/verify-status`, `publicChat.js:533–554`). Frontend wiring, not backend build.
+
+Recorded: SPEC §2c intro now marks the wizard as the **ratified target shell**; §2b tagged **SHELL SUPERSEDED**
+(logic/palette = reuse substrate), still live at `/portal/request` until the wizard replaces it.
+
+### Next
+Per the UI rule, agree the wizard design concretely before building React. Kevin thinks in usability/visual
+terms — the proposed next step is a **clickable HTML prototype of the reconciled wizard** (progress bar · Screen 1
+with the strict verify gate · Item 1..10 column · results window with the two buttons + Remove · Case A/B ·
+Submit-or-Continue · on-screen confirmation number) so he can *see and click* the design, then build for real
+against it. **Not started — awaiting his go on scope.**
