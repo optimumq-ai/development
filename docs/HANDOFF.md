@@ -5009,3 +5009,81 @@ guard it non-live like `tests/testEnv.js` (live now holds real tester data), and
 REPO so the demo DB is reproducible rather than a one-off hour of typing. It doubles as the test corpus for
 this effort — only `intake`/`record_search`/`delivery` have ever been reached by real data, so the whole
 mid-pipeline currently has no specimen to build screens against.
+
+---
+
+## 2026-07-18 (n) — Phase 0 begins: parent facts on `GET /requests/:id` (`72da033`)
+First slice of the processing-flow rebuild. Backend only, no new screens, per the brief's Phase 0.
+
+### The bug was worse than the brief said
+Not "the workspace shows a suffixed number" — **there was no id you could pass to `GET /requests/:id` that
+returned a correct, complete picture of a request.** Proven live against `2026-000002` (3-child MRR), before
+the fix:
+
+| Row addressed | number | `is_mrr` | stage |
+|---|---|---|---|
+| parent | `2026-000002` ✅ | 1 ✅ | **null** ❌ |
+| each child | `2026-000002-N` ❌ | **0** ❌ | `intake` ✅ |
+
+The workspace either knew who the citizen was or knew what the work was, never both. And because
+`requestCreate` forces `is_mrr = 0` on every child, **the MRR badge silently vanished on exactly the screens
+where staff do the work.** That is a concrete mechanism for "processing feels impossible to sort out."
+
+Fixed by resolving parent-level facts through the parent (new `scope.parentFact()`, the generalisation of
+`numberExpr`); description/stage/routing still come from the row addressed, which is the work. `parent_id`
+now exposed for later navigation. Verified across **all 11 live rows** — single-record children, the MRR's
+three children, and the legacy unwrapped `SYS-`/`LIBRARY` containers (which the COALESCE fallback arm serves
+unchanged).
+
+### ⚠️ The test was asserting the bug — read this before trusting a green harness
+`verify_stages` finds its request by `description`, which is a **CHILD** field, then waited for
+`req.request_number` — the child's suffixed number — to appear on the workspace. **It passed only because the
+page was rendering the wrong number.** Fixed to assert the citizen's number and, additionally, that the suffix
+is **absent**, so the fix cannot regress silently. This is exactly the CLAUDE.md warning about predicates that
+were tautologies before children existed; expect more of it.
+
+Second finding in the same harness: the 20s `waitForSelector` timeout was aborting the whole `try` block, so
+**eight downstream assertions never ran** — including "advance works end-to-end through the real endpoint" and
+the history check. It reported 16/17, not 24/25. It now runs 25/25. Suite went 745 → 746 for this reason, not
+because one test was added.
+
+Also fixed `run_suite.js`: a harness that fails by *throwing* increments `fail` without printing a `FAIL`
+line, so the runner said "1 fail" and then listed nothing — the exact blindness that block was added to
+remove. It now surfaces `ERR`/`CLEANUP ERR` too.
+
+### Brief §3.1 was mostly wrong — corrected in the same commit
+Only **1 of its 6 entries** was a real bug. The list was built from a grep sweep, not from reading the
+implementations, and would have sent a session chasing four non-bugs:
+- **`routes/clocks.js` is correct as written** — thin passthrough to `tolling.js`, which resolves to the
+  parent at *every* entrypoint. Its comment says this is enforced in the engine deliberately, "five call
+  sites, one invariant." **Do not "fix" it.**
+- **`/tasks/mine`, `/tasks/:id` already resolve the number** via `numberExpr`/`numberJoin`. The real gap is
+  smaller: `is_mrr` is not selected at all.
+- **`requestor_name` / `deadline_date` on a child are TRUE COPIES by design**, not stale reads —
+  `requestCreate` copies citizen identity down, `tolling.writebackDeadline` cascades the deadline down on
+  purpose so leaf-scoped worklists can show it. Verified identical on every live row.
+
+### The one it understated — new §3.1b `[OPEN, DESIGN-GATED]`
+**Money is keyed on the CHILD.** All 17 `/fee-estimates/request/:requestId` endpoints use the id they are
+handed with zero parent resolution (39 raw uses); `paymentStatus.js` has none either; `EstimateTaskPage`
+passes `task.request_id` — the child. Money is a PARENT fact. For a 3-child MRR that is **three independent
+money pots and a parent that owns none**: three estimates, three deposit ledgers, three payment states, no
+request-level total to bill the citizen.
+
+**Deliberately not fixed.** It contains a real design question — how do n children's fees roll up into one
+citizen bill? — which is the same question the design-gated MRR hub (§14.3) exists to answer. Patching it
+underneath that design would prejudge it. **Latent, not yet damaging:** live money is all zero because nothing
+has reached `fee_review`.
+
+### Verification
+746/746 green; **live census clean, not one row moved**. Live probed before and after through the real
+endpoint with a real token. `2026-000003` (the tester submission) untouched, still at `record_search`.
+
+### Next session
+Phase 0 continues — **§3.3** (`POST /tasks/:id/complete` has `requireAuth` and nothing else) plus the
+stub-safe advance path, then **§3.2** (`legal_review` spawns but nothing can complete it). §3.3 is the one
+that must land before any click-to-approve stub is written.
+
+**Still needs Kevin** (brief §5, unanswered): the 10-stage order; whether stubs auto-approve or require a
+note; single-record vs the MRR hub; `commercial_rate`/`mrr_processing` build-or-delete; retire the v1
+redaction duplicates now or later.
