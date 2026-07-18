@@ -4930,3 +4930,68 @@ dashboard / ARIA / AppLayout badge / tickler leaf-fact reads; MRR classification
 `source_request_id` toll attribution; retire split-canvas once confident; R9 `request_search_intents`
 persistence (client-side until submit per §0); singular "Open Record" in `PublicPortalV2Page.js` (retired
 split-canvas, rollback-only).
+
+---
+
+## 2026-07-18 (m) — SCOPING ONLY: brief for rebuilding the request-processing flow
+Kevin's next priority: the v1 processing UI is confusing, the schema moved under it, some task screens exist
+and some don't. He proposed starting a new flow and mocking blank "click to approve" screens for the missing
+task types. **No code written this session for it** — the deliverable is `docs/BRIEF_request_processing_flow.md`,
+built from a LIVE inventory (DB census + backend sweep + staff-screen sweep), deliberately **not** from the
+specs, because the specs are badly out of date on this domain.
+
+### Headline: the spine is sound, the surface is not — his instinct checks out
+`applyStageTransition` (`taskRouting.js:349`) is genuinely central: an exhaustive grep of `src/`, `server.js`
+and `scripts/` found **exactly one `SET stage` in the whole codebase**, and all 16 callers go through it.
+Stages have one source of truth with a parity-tested frontend mirror. **So this is a new surface over a working
+spine, not a rewrite.**
+
+### The trap in the stub plan — flagged before he starts
+**`POST /tasks/:id/complete` has `requireAuth` and nothing else** — no ownership check, no type check, no stage
+side-effect. Any authenticated user can mark any task done and strand its stage. It is exactly the endpoint a
+click-to-approve stub would reach for, and every stub would *look* like it worked while quietly stranding
+requests. **Stubs must go through `applyStageTransition`** so a blank screen is still a real node in the flow.
+
+### Other repairs the brief says must land BEFORE new screens
+- **The leaf-fact bug class — the concrete reason processing "feels impossible to sort out."** Parent facts
+  (number, is_mrr, requestor, money, clock) are read off CHILD rows in `RequestWorkspacePage`, `MyTasksPage`,
+  `RecordSearchTaskPage`, `EstimateTaskPage`; `routes/feeEstimates.js` never imports `requestScope` and
+  `routes/clocks.js` has ZERO parent/child scoping though the clock is a parent field. **One backend pass over
+  `GET /requests/:id` + `/tasks/mine` + `/tasks/:id` fixes four screens at once** — do it first so new screens
+  inherit correct facts by construction.
+- **`legal_review` spawns but nothing can ever complete it**; the reconciler keeps re-creating it and it can
+  coexist with an open `redaction`.
+- **No from-`closed` guard** in the central function (only `workflowEngine` re-reads — the (h) flake fix).
+- **Routing split-brain:** `redaction_qa` excluded from `ROUTABLE_TASK_TYPES`; `/tasks/pool` and
+  `poolForUser` use DIFFERENT eligibility queries; `review_auto_redaction` spawns with NULL `role_required`
+  and NULL means "everyone eligible" — **world-claimable**.
+- **Two fragile couplings:** estimate spawning keys on the literal rule id `'wfr-confident'` (reseed it and
+  estimates silently stop); `fee_review` is in neither `STAGE_TASK` nor the reconciler sweep.
+
+### ⚠️ LIVE DATA CHANGED — and it is NOT ours
+Live is **11 requests, not the 9** recorded since (f). **`2026-000003` is a REAL tester submission** —
+`Garrett Hargrove <mkhargrove@gmail.com>`, "code enforcement tickets October November December 2024", portal
+channel, created 18:11 today, with a `record_search` task claimed 4 minutes later. Provenance was checked
+explicitly: this session's Playwright runs used `Test Requestor`/`test@example.com` with building-permit
+queries and intercepted every submit, so **no live write in this session was ours** — the claim stands.
+**DO NOT PURGE `2026-000003`.** Prior sessions habitually created-and-purged smoke requests; this one is
+genuine tester data and is the ONLY request that has ever reached `record_search` — the natural specimen for
+this work. (Kevin has the portal in front of human testers, so expect live to keep growing.)
+
+### Decisions the brief needs from Kevin before Phase 1
+(1) Is the 10-stage order the flow he wants, or is v1's being inherited by default — and are
+`exemption_review`/`ag_review` always-on or city-configurable? (2) Do stubs auto-approve or require a note?
+(3) Single-record first, or the MRR hub too (design-gated)? (4) `commercial_rate`/`mrr_processing` — build or
+delete from the catalog (today they're assignable to people and produce permanently empty pools)?
+(5) Retire the v1 redaction duplicates (`RedactionWorkspacePage`, `RedactionReviewPage`) now or later?
+
+### Doc debt recorded in the brief §6
+Four specs describe a PRE-centralization world. `SPEC_tasks_roles_mrr_fees` §13 still says the centralized
+transition is "deferred" and root cause "not isolated" — it describes the absence of the architecture's
+centerpiece. `SPEC_request_lifecycle_workflow` §1 says 8 stages, §5 of the SAME doc says 10, code has 10.
+`TASK_AND_NOTIFICATION_MODEL` §8 lists `build_redaction_template` as implemented though a test asserts it is
+never created. Recommendation: fix them AS each phase touches them, so the same-commit rule does it
+incrementally.
+
+### Next session
+Start fresh on Phase 0 (foundation repairs, no new screens). Read the brief first.
