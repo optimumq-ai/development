@@ -547,7 +547,11 @@ export default function PublicPortalWizardPage() {
 
   function renderItemRail() {
     var slots = [];
-    for (var i = 0; i < MAX_ITEMS; i++) {
+    // Only completed items plus the one in progress — rendering all 10 empty slots ate the column and read
+    // as an expectation to fill them. The cap still shows in the capnote below.
+    var hasActive = !atCap && !atContinue;
+    var shown = Math.min(items.length + (hasActive ? 1 : 0), MAX_ITEMS);
+    for (var i = 0; i < shown; i++) {
       var done = items[i];
       var active = !done && i === items.length && !atCap && !atContinue;
       var cls = 'islot' + (done ? ' done' : active ? ' active' : '');
