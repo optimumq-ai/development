@@ -350,6 +350,9 @@ router.post('/chat', async function(req, res) {
 //   descriptions: ['...', '...']    — the same thing, flat
 //   description: '...'              — one record (the form, and every pre-MRR caller)
 // A single record is NOT a special case: it is n = 1 and takes the identical path.
+// §2c — a portal request may include at most this many records. The wizard caps the UI at 10; this
+// enforces the same bound server-side so a direct POST to the untrusted /public/submit can't exceed it.
+var MAX_PORTAL_ITEMS = 10;
 function childrenFromBody(b) {
   var list = Array.isArray(b.records) && b.records.length ? b.records
     : (Array.isArray(b.descriptions) && b.descriptions.length ? b.descriptions.map(function (d) { return { description: d }; })
@@ -366,6 +369,9 @@ router.post('/submit', async function(req, res) {
   var kids = childrenFromBody(b);
   if (!b.requestorName || !b.requestorEmail || (!b.description && !(kids && kids.length))) {
     return res.status(400).json({ error: 'Missing required fields' });
+  }
+  if (kids && kids.length > MAX_PORTAL_ITEMS) {
+    return res.status(400).json({ error: 'A request can include at most ' + MAX_PORTAL_ITEMS + ' records.' });
   }
   // ONE creation helper (ARCHITECTURE item 5). This path used to mint its number with COUNT(*) + 1, which
   // collides with an existing request the moment any request below the maximum is deleted, and carried its

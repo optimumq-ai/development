@@ -80,9 +80,6 @@ const STYLES = `
 .pwz .crest{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.2px;color:var(--ink)}
 .pwz .crest .ai{color:var(--civic)}
 .pwz .sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
-.pwz .devtag{display:inline-flex;align-items:center;gap:7px;font-size:11px;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--active);border:1px dashed var(--active-line);background:var(--active-bg);
-  padding:5px 10px;border-radius:20px;font-weight:700}
 
 .pwz .rail{display:flex;gap:6px;margin:12px 0 18px;background:var(--surface);border:1px solid var(--hair);
   border-radius:var(--radius);padding:8px;box-shadow:var(--shadow);overflow-x:auto}
@@ -775,9 +772,6 @@ export default function PublicPortalWizardPage() {
             <div className="crest">City of Autumn Falls <span className="ai">· AI Open Records</span></div>
             <div className="sub">Open Records Request Portal</div>
           </div>
-          <span className="devtag" title="Wizard rebuild in progress (SPEC §2c). The live portal is at /portal/request.">
-            Preview build · in development
-          </span>
         </div>
 
         <div className="rail" aria-label="Request progress">
