@@ -76,13 +76,27 @@ const STYLES = `
 @media (prefers-reduced-motion:reduce){.pwz *{transition:none!important;animation:none!important}}
 
 .pwz .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:14px 18px;
-  background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius);box-shadow:var(--shadow)}
-.pwz .crest{font-family:var(--serif);font-size:19px;font-weight:700;letter-spacing:.2px;color:var(--ink)}
-.pwz .crest .ai{color:var(--civic)}
-.pwz .sub{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+  background:var(--surface);border:1px solid var(--hair);border-radius:var(--radius);box-shadow:var(--shadow);
+  flex-wrap:wrap}
+/* Brand block mirrors the /portal landing header: mark + agency name + small descriptor. */
+.pwz .brand{display:flex;align-items:center;gap:12px}
+.pwz .mark{width:40px;height:40px;flex-shrink:0;background:var(--civic);border-radius:8px;display:grid;
+  place-items:center;color:#fff;font-size:18px;font-weight:700;letter-spacing:.5px}
+.pwz .crest{font-size:15px;font-weight:700;color:var(--civic)}
+.pwz .sub{font-size:13px;color:var(--muted)}
+/* Library cross-link: blurb sits BESIDE the button (the library page stacks them, which runs tall). */
+.pwz .xlink{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.pwz .xlink p{margin:0;max-width:28ch;font-size:14px;line-height:1.35;color:var(--muted);text-align:right}
+.pwz .xbtn{flex-shrink:0;display:inline-block;padding:11px 22px;border-radius:10px;background:var(--civic);
+  color:#fff;font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap;
+  box-shadow:0 2px 10px rgba(31,78,121,.25)}
+.pwz .xbtn:hover{background:var(--civic-700)}
 
-.pwz .rail{display:flex;gap:6px;margin:12px 0 18px;background:var(--surface);border:1px solid var(--hair);
-  border-radius:var(--radius);padding:8px;box-shadow:var(--shadow);overflow-x:auto}
+.pwz .rail{display:flex;align-items:center;gap:6px;margin:12px 0 18px;background:var(--surface);
+  border:1px solid var(--hair);border-radius:var(--radius);padding:8px;box-shadow:var(--shadow);overflow-x:auto}
+.pwz .raillabel{flex:0 0 auto;padding:0 14px 0 6px;margin-right:4px;border-right:1px solid var(--hair);
+  font-size:11px;line-height:1.25;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--muted);text-align:left}
 .pwz .node{flex:1 1 0;min-width:120px;display:flex;align-items:center;gap:9px;padding:9px 12px;border-radius:8px;
   font-size:13px;color:var(--muted);white-space:nowrap}
 .pwz .node .dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--hair);display:grid;
@@ -96,11 +110,8 @@ const STYLES = `
   box-shadow:var(--shadow);min-height:280px;display:flex;flex-direction:column}
 .pwz .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--civic);font-weight:600;
   margin-bottom:8px}
-.pwz .title{font-family:var(--serif);font-size:26px;font-weight:700;letter-spacing:.2px;margin-bottom:6px}
+.pwz .title{font-family:var(--sans);font-size:26px;font-weight:700;margin-bottom:6px}
 .pwz .lede{color:var(--muted);max-width:64ch;margin:0 0 8px}
-.pwz .stub{margin-top:14px;border:1px dashed var(--hair);background:var(--surface);border-radius:9px;
-  padding:14px 16px;font-size:13px;color:var(--muted);max-width:64ch}
-.pwz .stub b{color:var(--ink)}
 .pwz .spacer{flex:1}
 .pwz .actions{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:22px}
 .pwz .btn{background:var(--civic);color:#fff;border:1px solid var(--civic);padding:11px 18px;border-radius:9px;
@@ -277,6 +288,7 @@ export default function PublicPortalWizardPage() {
   const [atContinue, setAtContinue] = useState(false);       // Submit-or-Continue screen
   const [submitState, setSubmitState] = useState('idle');    // idle | submitting | error | done
   const [requestNumber, setRequestNumber] = useState('');
+  const [agency, setAgency] = useState(AGENCY);
   const chatLogRef = useRef(null);
 
   const emailOk = validEmail(email);
@@ -300,6 +312,13 @@ export default function PublicPortalWizardPage() {
   useEffect(function () {
     if (chatLogRef.current) chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
   }, [messages, chatSending]);
+
+  // Agency name comes from config, same source the /portal landing and library headers use.
+  useEffect(function () {
+    axios.get(API + '/requests/public/config').then(function (r) {
+      if (r.data && r.data.agency_name) setAgency(r.data.agency_name);
+    }).catch(function () { /* keep fallback */ });
+  }, []);
 
   function resetGate() { setSendState('idle'); setToken(null); setVerified(false); setExpired(false); }
   function onEmailChange(v) { if (token || verified) resetGate(); setEmail(v); }
@@ -559,7 +578,7 @@ export default function PublicPortalWizardPage() {
         </div>
         <div className="panelbody">
           <div className="chatlog" ref={chatLogRef}>
-            <div className="bub a">Thank you for using the {AGENCY} AI-powered Open Record Search. I'll work with you
+            <div className="bub a">Thank you for using the {agency} AI-powered Open Record Search. I'll work with you
               to write a description that gets the best search results. If you're requesting more than one type of
               record, describe each one separately.</div>
             <div className="bub a">Please describe a record you're looking for.</div>
@@ -746,7 +765,7 @@ export default function PublicPortalWizardPage() {
         <div className="eyebrow">Step {railIdx + 1} of {RAIL.length}</div>
         <h1 className="title">{step.title}</h1>
         <p className="lede">{step.lede}</p>
-        <div className="stub"><b>Coming in a later slice.</b> {step.stub}</div>
+        {step.lede2 && <p className="lede">{step.lede2}</p>}
         <div className="spacer" />
         <div className="actions">
           {!first && <button className="btn sec" onClick={function () { setIdx(idx - 1); }}>{'←'} Back</button>}
@@ -768,13 +787,21 @@ export default function PublicPortalWizardPage() {
       <style>{STYLES}</style>
       <div className="wrap">
         <div className="topbar">
-          <div>
-            <div className="crest">City of Autumn Falls <span className="ai">· AI Open Records</span></div>
-            <div className="sub">Open Records Request Portal</div>
+          <div className="brand">
+            <div className="mark" aria-hidden="true">OQ</div>
+            <div>
+              <div className="crest">{agency}</div>
+              <div className="sub">Open Records Request Portal</div>
+            </div>
+          </div>
+          <div className="xlink">
+            <p>Check for records ready for immediate download</p>
+            <a className="xbtn" href="/portal/library">Public Records Library</a>
           </div>
         </div>
 
         <div className="rail" aria-label="Request progress">
+          <div className="raillabel" aria-hidden="true">Progress<br />Indicator</div>
           {RAIL.map(function (label, i) {
             var cls = 'node' + (i < railIdx ? ' done' : i === railIdx ? ' active' : '');
             return (
@@ -805,10 +832,9 @@ export default function PublicPortalWizardPage() {
 const STEP_META = [
   { rail: 0, title: 'Welcome to the AI-powered Open Records Request portal',
     lede: "You'll enter your contact information, then describe the records you're looking for — one at a time. The assistant helps you search; you stay in control of what to submit.",
-    stub: 'Shell, progress rail, and step routing — slice 1.' },
-  { rail: 1, title: 'Your information', lede: '', stub: '' },
-  { rail: 2, title: 'Search for records', lede: '', stub: '' },
+    lede2: 'Many records are available for immediate download in the Records Library. (Note that record certification is only available as an option for formal Open Records requests.)' },
+  { rail: 1, title: 'Your information', lede: '' },
+  { rail: 2, title: 'Search for records', lede: '' },
   { rail: 3, title: 'Submitted',
-    lede: 'Your request is created and your number is shown here.',
-    stub: 'Slice 5: submit-or-continue with the empty-request guard, then the on-screen confirmation number (the request is born only at Submit — §0).' },
+    lede: 'Your request is created and your number is shown here.' },
 ];
