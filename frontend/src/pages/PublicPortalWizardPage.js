@@ -28,6 +28,13 @@ const DISPO_BADGE = {
   no_match_search: 'Team search',
   not_searchable: 'Team search',
 };
+// Disposition → long-form summary text (Submit-or-Continue).
+const DISPO_TEXT = {
+  complete: 'Records selected — complete',
+  search_more: 'Selected records + Open Records team search',
+  no_match_search: 'Submitted for Open Records team search',
+  not_searchable: 'Searched by the Open Records team',
+};
 
 // Normalize a /public/chat search record for display (defensive across backend shapes).
 function recId(r) { return r.id || r.title || r.name; }
@@ -223,6 +230,21 @@ const STYLES = `
 .pwz .modal h3{font-family:var(--serif);font-size:19px;margin:0 0 8px}
 .pwz .modal p{color:var(--muted);font-size:14px;margin:0 0 18px}
 .pwz .modal .actions{margin-top:0;justify-content:flex-end}
+
+/* submit-or-continue + confirmation (slice 5) */
+.pwz .summary{display:flex;flex-direction:column;gap:8px;margin:2px 0 6px;overflow-y:auto}
+.pwz .srow{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--hair);
+  border-radius:9px;padding:10px 13px}
+.pwz .srow .sc{width:22px;height:22px;border-radius:50%;background:var(--done-bg);border:2px solid var(--done-line);
+  color:var(--done);display:grid;place-items:center;font-size:11px;font-weight:700;flex:none}
+.pwz .srow .sd{flex:1;min-width:0}
+.pwz .srow .sn{font-weight:600;font-size:14px}
+.pwz .srow .ss{font-size:12px;color:var(--muted)}
+.pwz .subconfirm{text-align:center;padding:16px 8px;margin:auto}
+.pwz .subconfirm .ico{font-size:52px}
+.pwz .reqnum{font-family:var(--serif);font-size:34px;font-weight:700;letter-spacing:1px;color:var(--civic);
+  font-variant-numeric:tabular-nums;margin:8px 0}
+.pwz .submiterr{color:var(--danger);font-size:13px;margin:8px 0 0}
 `;
 
 const RAIL = ['Begin', 'Your Information', 'Item Search', 'Submitted'];
@@ -255,6 +277,9 @@ export default function PublicPortalWizardPage() {
   const [activeResults, setActiveResults] = useState(null); // null | { kind:'match'|'caseA'|'caseB', query, records }
   const [selected, setSelected] = useState([]);             // record ids ticked for the active record
   const [removeOpen, setRemoveOpen] = useState(false);
+  const [atContinue, setAtContinue] = useState(false);       // Submit-or-Continue screen
+  const [submitState, setSubmitState] = useState('idle');    // idle | submitting | error | done
+  const [requestNumber, setRequestNumber] = useState('');
   const chatLogRef = useRef(null);
 
   const emailOk = validEmail(email);
@@ -292,8 +317,10 @@ export default function PublicPortalWizardPage() {
     } catch (e) { setSendState('error'); }
   }
 
-  function startDescribe() { setMessages([]); setInput(''); setQuickReplies([]); setActiveResults(null); setSelected([]); setRemoveOpen(false); }
+  function clearWork() { setMessages([]); setInput(''); setQuickReplies([]); setActiveResults(null); setSelected([]); setRemoveOpen(false); }
+  function startDescribe() { clearWork(); setAtContinue(false); }
   function goToItemSearch() { startDescribe(); setIdx(2); }
+  function continueNext() { startDescribe(); }
 
   async function sendMessage(text) {
     var t = (text || '').trim();
@@ -333,14 +360,47 @@ export default function PublicPortalWizardPage() {
   }
   function selectAll() { setSelected((activeResults && activeResults.records || []).map(recId)); }
 
-  // Commit the active record with its §2b R9 disposition, then open a fresh describe.
+  // Commit the active record with its §2b R9 disposition, then land on Submit-or-Continue.
   function commit(disp) {
     var q = activeResults ? activeResults.query : ('Record ' + activeNo);
-    var recCount = (disp === 'complete' || disp === 'search_more') ? selected.length : 0;
-    setItems(items.concat([{ desc: q, disp: disp, badge: DISPO_BADGE[disp], records: recCount }]));
-    startDescribe();
+    var picks = (disp === 'complete' || disp === 'search_more') && activeResults
+      ? (activeResults.records || []).filter(function (r) { return selected.indexOf(recId(r)) >= 0; })
+      : [];
+    setItems(items.concat([{ desc: q, disp: disp, badge: DISPO_BADGE[disp], records: picks, query: q }]));
+    clearWork(); setAtContinue(true);
   }
-  function confirmRemove() { setRemoveOpen(false); startDescribe(); } // discard active record; nothing persisted (§0)
+  // §2c G4 — Remove discards the in-progress record (nothing persisted, §0) and lands on Submit-or-Continue.
+  function confirmRemove() { clearWork(); setAtContinue(true); }
+
+  async function submitRequest() {
+    if (!items.length || submitState === 'submitting') return;
+    setSubmitState('submitting');
+    var descText = items.map(function (it, i) { return items.length > 1 ? ('Record ' + (i + 1) + ': ' + it.desc) : it.desc; }).join('\n\n');
+    function mapRec(r) { return { id: recId(r), title: recTitle(r), sourceSystem: r.sourceSystem || r.source_system || '', publicAvailability: r.publicAvailability || r.public_availability || '' }; }
+    var sel = items.reduce(function (a, it) { return a.concat(it.records || []); }, []).map(mapRec);
+    var searchIntents = items.map(function (it, i) {
+      return { seq: i, description: it.desc, intent: it.disp, queriesTried: it.query ? [it.query] : [],
+        selected: (it.records || []).map(mapRec), notSelected: [] };
+    });
+    var payload = {
+      requestorName: name.trim(), requestorEmail: email.trim(), requestorPhone: phone.trim(),
+      deliveryMethod: deliv, requestorType: fee === 'commercial' ? 'commercial' : 'individual',
+      feeWaiverRequested: fee === 'waiver', feeWaiverReason: fee === 'waiver' ? waiverReason.trim() : '',
+      certificationRequested: cert, emailVerificationMethod: 'link',
+      description: descText, records: items.map(function (it) { return { description: it.desc }; }),
+      selectedRecords: sel, searchIntents: searchIntents,
+      isMrr: items.length > 1, submissionChannel: 'portal',
+    };
+    if (deliv === 'mail') {
+      payload.mailingStreet1 = addr.street1.trim(); payload.mailingStreet2 = addr.street2.trim();
+      payload.mailingCity = addr.city.trim(); payload.mailingState = addr.state.trim().toUpperCase(); payload.mailingZip = addr.zip.trim();
+    }
+    try {
+      var r = await axios.post(API + '/public/submit', payload);
+      setRequestNumber((r.data && r.data.requestNumber) || '');
+      setSubmitState('done'); setIdx(3);
+    } catch (e) { setSubmitState('error'); }
+  }
 
   const step = STEP_META[idx];
   const railIdx = step.rail;
@@ -469,7 +529,7 @@ export default function PublicPortalWizardPage() {
     var slots = [];
     for (var i = 0; i < MAX_ITEMS; i++) {
       var done = items[i];
-      var active = !done && i === items.length && !atCap;
+      var active = !done && i === items.length && !atCap && !atContinue;
       var cls = 'islot' + (done ? ' done' : active ? ' active' : '');
       slots.push(
         <div key={i} className={cls}>
@@ -597,18 +657,64 @@ export default function PublicPortalWizardPage() {
     );
   }
 
+  function renderContinuePanel() {
+    return (
+      <div className="panel">
+        <div className="panelhead"><span className="tag">Review</span><span className="who">Add another record, or submit?</span></div>
+        <div className="panelbody">
+          <p className="lede" style={{ margin: '0 0 12px' }}>Here's what's in your request so far. You can add more
+            records (up to {MAX_ITEMS}) or submit now.</p>
+          <div className="summary">
+            {items.length === 0
+              ? <div className="srow"><div className="sd"><div className="sn">No records yet</div><div className="ss">Add at least one record to submit.</div></div></div>
+              : items.map(function (it, i) {
+                  var recs = (it.records && it.records.length) || 0;
+                  return (
+                    <div key={i} className="srow"><div className="sc">✓</div><div className="sd">
+                      <div className="sn">Item {i + 1} — {it.desc}</div>
+                      <div className="ss">{DISPO_TEXT[it.disp]}{recs ? (' · ' + recs + ' record' + (recs > 1 ? 's' : '')) : ''}</div>
+                    </div></div>
+                  );
+                })}
+          </div>
+          <div className="spacer" />
+          <div className="actions">
+            <button className="btn" disabled={items.length === 0 || submitState === 'submitting'} onClick={submitRequest}>
+              {submitState === 'submitting' ? 'Submitting…' : 'Submit request'}
+            </button>
+            <button className="btn sec" disabled={atCap} onClick={continueNext}>
+              {atCap ? 'Maximum ' + MAX_ITEMS + ' records reached' : 'Continue with next record →'}
+            </button>
+          </div>
+          {submitState === 'error' && <div className="submiterr">We couldn't submit just now. Please try again.</div>}
+        </div>
+      </div>
+    );
+  }
+
   function renderRightPanel() {
-    if (atCap) {
-      return (
-        <div className="panel"><div className="panelbody"><div className="bigstate">
-          <div className="ico">✓</div><h3>You've added the maximum of {MAX_ITEMS} records</h3>
-          <p>Submit-or-continue and the on-screen confirmation number arrive in slice 5.</p>
-        </div></div></div>
-      );
-    }
+    if (atContinue) return renderContinuePanel();
     if (!activeResults) return renderDescribePanel();
     if (activeResults.kind === 'match') return renderMatch();
     return renderCase(activeResults.kind);
+  }
+
+  function renderSubmitted() {
+    return (
+      <div className="card">
+        <div className="subconfirm">
+          <div className="ico">✅</div>
+          <h1 className="title">Your request has been submitted</h1>
+          <p className="lede" style={{ marginInline: 'auto' }}>Your request number is</p>
+          <div className="reqnum">{requestNumber || '—'}</div>
+          <p className="lede" style={{ marginInline: 'auto', maxWidth: '48ch' }}><b>Please save this number</b> —
+            you'll need it to check on or ask about your request.{deliv === 'email' ? " We've also emailed a copy to you." : ''}</p>
+          <div className="actions" style={{ justifyContent: 'center' }}>
+            <button className="btn sec" onClick={function () { window.location.reload(); }}>Start another request</button>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   function renderItemSearch() {
@@ -649,6 +755,7 @@ export default function PublicPortalWizardPage() {
   var body;
   if (idx === 1) body = renderInfo();
   else if (idx === 2) body = renderItemSearch();
+  else if (idx === 3 && requestNumber) body = renderSubmitted();
   else body = renderPlaceholder();
 
   return (
