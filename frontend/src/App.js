@@ -70,9 +70,11 @@ export default function App() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/portal" element={<PublicPortalPage />} />
         {/* Split-canvas intake is the live request flow (cut over 2026-07-10). /portal/v2 kept as a redirect. */}
-        <Route path="/portal/request" element={<PublicPortalV2Page />} />
-        {/* Wizard rebuild (SPEC §2c) — behind its own route until cutover; /portal/request stays the live flow. */}
-        <Route path="/portal/wizard" element={<PublicPortalWizardPage />} />
+        {/* CUTOVER 2026-07-18 (SPEC §2c): /portal/request now serves the wizard. Split-canvas kept at
+            /portal/split-canvas for instant rollback. /portal/wizard + /portal/v2 redirect to canonical. */}
+        <Route path="/portal/request" element={<PublicPortalWizardPage />} />
+        <Route path="/portal/wizard" element={<Navigate to="/portal/request" replace />} />
+        <Route path="/portal/split-canvas" element={<PublicPortalV2Page />} />
         <Route path="/portal/v2" element={<Navigate to="/portal/request" replace />} />
         <Route path="/portal/library" element={<PublicLibraryPage />} />
         <Route path="/portal/library/map" element={<PublicLibraryMapPage />} />
