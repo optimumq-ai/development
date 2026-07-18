@@ -38,7 +38,16 @@ On-premise open-records platform for cities. Node/Express backend (`backend/`, P
 - One task-routing role catalog.
 
 ## Environment
-- Restart API: `pm2 restart optimumq-api` · logs: `pm2 logs optimumq-api --nostream`
+- **Restart API: `kill $(pgrep -f "^node /opt/optimumq/backend/server.js")`** — PM2 respawns it in ~5s; confirm with
+  `curl -s -o /dev/null -w "%{http_code}" localhost:3001/api/requests/public/config` (expect 200).
+  - `pm2 restart optimumq-api` **does not work** from the `optimumq` shell: the API is supervised by the **root**
+    PM2 daemon (`/root/.pm2`), and `pm2` as `optimumq` talks to a different PM2 home, so it reports
+    "Process or Namespace optimumq-api not found". `sudo` needs a password we don't have.
+  - **Anchor the pattern with `^node`.** A bare `pgrep -f "backend/server.js"` also matches the shell wrapper
+    running the command itself, and there are FOUR `server.js` (backend + 3 connector stubs) — an unanchored
+    `pgrep ... | head -1` once killed a CONNECTOR instead, so a cap test ran against stale code and looked broken.
+- API logs need root (`/root/.pm2/logs`, not readable as `optimumq`). `pm2 logs optimumq-api` as `optimumq`
+  silently tails NOTHING rather than erroring — don't read its empty output as "no errors."
 - DB shell: `docker exec optimumq-postgres psql -U optimumq -d optimumq`
 - Never echo, log, or query secret values (keys, password hashes, DATABASE_URL credentials).
 - Do not touch the three connector stub processes (tyler/laserfiche/axon).
