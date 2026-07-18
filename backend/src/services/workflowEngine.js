@@ -81,6 +81,15 @@ async function onIntake(requestId, matcherResult){
   var teamRow = teamId ? await db.get("SELECT name FROM departments WHERE id = ?", [teamId]) : null;
   var stage = actions.stage || request.stage || 'intake';
 
+  // A request CLOSED between /public/submit and this (background) intake landing must NOT be re-routed:
+  // routing it would silently revive a terminal request and leave claimable tasks on it. The top-of-function
+  // read is stale by now (the classifier call above can take seconds), so re-read the CURRENT status and bail
+  // if it went closed. This was the verify_stage_bypass flake: a slow classifier let intake land after a
+  // nonpayment close / tickler withdrawal and revert stage=closed. applyStageTransition has no from-closed
+  // guard, so the guard belongs here at the one background router.
+  var live = await db.get("SELECT status FROM requests WHERE id = ?", [requestId]);
+  if (live && live.status === 'closed') return { routed: false, skippedClosed: true };
+
   // Pin the classifier-matched record type + owning team onto the request (ROUTING columns only — the
   // stage is applied below through the central stage-transition function, never a direct UPDATE here).
   // This feeds the estimate profile lookup (Create vs Review auto-fill) and the record-type name on task screens.

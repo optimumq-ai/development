@@ -16,6 +16,7 @@ var db = require('/opt/optimumq/backend/src/db');
 var auth = require('/opt/optimumq/backend/src/services/auth');
 var feeNonpayment = require('/opt/optimumq/backend/src/services/feeNonpayment');
 var tickler = require('/opt/optimumq/backend/src/services/tickler');
+var workflowEngine = require('/opt/optimumq/backend/src/services/workflowEngine');
 
 var TAG = 'BYPASS-' + Date.now();
 var pass = 0, fail = 0, TOKEN = null, created = [];
@@ -105,6 +106,15 @@ async function histRow(rid, action) {
       aRow.stage_from === aStageBefore && aRow.stage_to === 'closed');
     var aOpenAfter = await openTasks(A.id);
     ok('1: NO open tasks left claimable on the closed request (' + aOpenBefore + ' -> ' + aOpenAfter + ')', aOpenAfter === 0);
+
+    // THE FLAKE, MADE DETERMINISTIC: this harness intermittently went red on line 100/152 because the
+    // background onIntake kicked by /public/submit could land AFTER the close (slow classifier) and silently
+    // re-route the request out of 'closed'. Force that exact late landing here (with a stub matcher so no
+    // Anthropic call) and assert the guard in workflowEngine.onIntake holds — no timing dependence anymore.
+    await workflowEngine.onIntake(A.id, { classification: 'standard', recordTypeConfidence: 0, flags: [], reasoning: 'harness: simulated late intake' });
+    var aLate = await db.get('SELECT stage, status FROM requests WHERE id = ?', [A.id]);
+    ok('1: a late background intake does NOT revive the closed request — stays closed/closed', aLate.stage === 'closed' && aLate.status === 'closed');
+    ok('1: ...and the late intake spawned no claimable task on the closed request', (await openTasks(A.id)) === 0);
 
     // =====================================================================================
     // 2. REOPEN — the worst of the three: it landed back in awaiting_payment with NO task.
