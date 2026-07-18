@@ -4711,3 +4711,75 @@ Suite GREEN **745/0** (verify_stage_bypass 26/26), live untouched.
 ### Remaining backlog (now one item lighter)
 dashboard / ARIA / AppLayout badge / tickler leaf-fact reads; MRR classification roll-up (§6);
 `source_request_id` toll attribution. (`verify_stage_bypass` flake — DONE.)
+
+---
+
+## 2026-07-18 (i) — Portal COSMETIC PASS (Kevin-driven), plural cleanup, CLAUDE.md restart fix
+Kevin-driven tweak pass across the three public surfaces. No behavior, contract, or schema change — copy, CSS,
+and one prompt string. All on `main`, pushed. Suite GREEN **745/0**, live census clean.
+
+- **Begin screen (`2222914`)** — six tweaks in one commit:
+  - **Deleted the "Coming in a later slice." box** — slice-1 dev scaffolding that had been shipping to the
+    PUBLIC Begin screen since the build. Kevin spotted it; it was never intended UI. Dead `STEP_META.stub`
+    fields and `.stub` CSS removed with it.
+  - Header left now uses the **`/portal` landing brand block** (OQ mark + agency name + descriptor), replacing
+    the Georgia crest. Agency name now READ FROM `/requests/public/config` like the landing/library headers
+    instead of the hardcoded `AGENCY` const (the chat greeting uses it too, so a city rename propagates).
+  - Header right: **library cross-link** — "Check for records ready for immediate download" + a
+    **Public Records Library** button → `/portal/library`, laid out SIDE BY SIDE (the library page stacks
+    them, which runs taller than needed). This reciprocates the library's link back, closing the loop between
+    the two public surfaces and steering requestors to an instant download before opening a formal request.
+  - Progress rail: two-line "Progress Indicator" caption, nodes shifted right.
+  - H1 switched serif → the sans stack used by the library headings. Serif retained for the confirmation
+    number and modal/bigstate headings.
+  - New Begin paragraph steering to the Records Library, carrying the certification caveat.
+  - **Implemented against the `.pwz` tokens, NOT the hardcoded hex the other public pages use** (`--civic`
+    *is* `#1F4E79`), so light matches `/portal` exactly and the wizard's dark mode still works. Both themes
+    screenshotted.
+- **Placeholders (`0d86ec2`, `bf609ec`, `663b8e2`)** — name/email/phone used specimen values ("Jordan Rivera",
+  "you@example.com", "(555) 555-0134") that read as prefilled data. Now instructions: "First and Last name",
+  "Email address", "Phone number". (Address/waiver/chat fields were already instruction-style.) An interim
+  "Email address (immediate verification required)" was reverted — the intro copy and the adjacent
+  "Send verification link" button already carry that.
+- **Landing + library (`2b55bf8`)** — `/portal` welcome H1 orphaned "Portal" on its own line; explicit `<br />`
+  after the agency name so it always splits at a meaningful point (break is agency-name-agnostic). Library
+  header CTA "Open Records Portal" → **"Open Records Request"** (it opens the request flow, not a chooser).
+  Width was the stated worry; the new label is ONE character longer, so the button is unaffected.
+- **Plural cleanup (`fd86b96`, `12329f3`)** — wizard greeting "Open Record Search" → "Open Records Search",
+  then the **system prompt** in `publicChat.js` ("You are the AI Open Record Assistant") → plural. The prompt
+  one matters more: it sits upstream of everything the agent GENERATES, so the singular could surface in live
+  replies, not just fixed copy. Prompt text only — no behavior/routing/contract change.
+- **CLAUDE.md restart command (`26ca44a`)** — see below.
+
+### 🔧 CLAUDE.md was WRONG about restarting the API — now fixed
+`pm2 restart optimumq-api` **does not work** from the `optimumq` shell: the API runs under the **root** PM2
+daemon (`/root/.pm2`) and `pm2` as `optimumq` talks to a different PM2 home, so it reports "Process or Namespace
+not found"; `sudo` needs a password. Documented command is now
+**`kill $(pgrep -f "^node /opt/optimumq/backend/server.js")`** (PM2 respawns in ~5s), with the `^node` anchor —
+an UNANCHORED `pgrep -f "backend/server.js"` matches both the shell wrapper running it AND the three connector
+stubs (that's how (f)'s cap test ran against stale code). Also recorded: **`pm2 logs optimumq-api` as `optimumq`
+silently tails NOTHING rather than erroring** — empty output must not be read as "no errors." Memory
+[[db-access-workaround]] updated to match.
+
+### Evidence
+Every change screenshotted in the running app (Playwright, both themes where relevant): Begin light+dark,
+step 2, landing at 1280+1024, library header, Item Search. Backend change ran the FULL suite (745/0, live
+census clean: not one row moved in 12 tables), API restarted, and the running process confirmed to postdate
+the edit so the new prompt is actually loaded. **No request was created and nothing was written to live** —
+Item Search sits behind the verify gate, so the two verification endpoints were mocked CLIENT-SIDE in
+Playwright rather than driving a real round-trip.
+
+### Open / not done
+- **Item Search observations, flagged to Kevin but NOT actioned** (his call, not defects): the item rail
+  renders all **10 empty slots upfront** (eats the vertical space, implies you should fill them); the
+  conversation opens with **two assistant bubbles** where one would do; large dead space in the chat log
+  before any conversation exists.
+- **Singular "Open Record" remains in `PublicPortalV2Page.js`** (lines 1043/1056) — the retired split-canvas
+  at `/portal/split-canvas`, rollback-only. Deliberately untouched.
+- **The plural prompt fix was NOT confirmed against a real agent reply** — the prompt forbids revealing its own
+  instructions, so there's no clean assertion without burning credits on an ambiguous result. Evidence is that
+  the string is loaded, not that a citizen has seen it.
+- **Never screened:** Results and Submitted screens (Kevin has not marked them up).
+- **Unchanged backlog:** dashboard / ARIA / AppLayout badge / tickler leaf-fact reads; MRR classification
+  roll-up (§6); `source_request_id` toll attribution; retire split-canvas once confident; R9
+  `request_search_intents` persistence (client-side until submit per §0).
