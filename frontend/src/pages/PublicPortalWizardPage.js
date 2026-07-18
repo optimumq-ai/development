@@ -442,7 +442,7 @@ export default function PublicPortalWizardPage() {
           <div className="field">
             <label htmlFor="pwz-email">Email address</label>
             <div className="inline">
-              <input id="pwz-email" type="email" value={email} placeholder="Email address you can access now"
+              <input id="pwz-email" type="email" value={email} placeholder="Email address"
                 onChange={function (e) { onEmailChange(e.target.value); }} />
               <button className="btn sm" onClick={sendLink} disabled={!emailOk || sendState === 'sending' || (!!token && !expired && !verified)}>
                 {sendState === 'sending' ? 'Sending…' : (token || verified) ? 'Resend link' : 'Send verification link'}
