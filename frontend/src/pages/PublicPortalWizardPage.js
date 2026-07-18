@@ -2,16 +2,17 @@ import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
 // ── Public Open Records WIZARD (SPEC §2c) ──────────────────────────────────────
-// Slice 1: full-screen stepped shell + progress rail + step routing.
-// Slice 2: "Your Information" + the STRICT email link-verify gate (send link →
-//   poll /verify-status → unlock; no visual fallback, no skip — §2c G5).
-// Slice 3: the ITEM LOOP — the Item 1–10 color rail + the assistant-describe
-//   panel wired to /public/chat. The agent gathers/refines ONE record
-//   description, runs the search, then HIDES; a labeled stub stands in for the
-//   slice-4 results window (selection / team-search / remove). Completing an item
-//   advances the rail (amber active → green complete) to the next record.
-// Behind a NEW route (/portal/wizard); the live split-canvas flow at
-// /portal/request is untouched until cutover.
+// Slice 1: shell + progress rail + step routing.
+// Slice 2: "Your Information" + STRICT email link-verify gate (§2c G5).
+// Slice 3: item loop — Item 1–10 color rail + assistant-describe panel (/public/chat).
+// Slice 4: the RESULTS WINDOW (replaces the slice-3 stub). Three outcomes, chosen
+//   from the response: MATCH (per-record selection → "Use selected records — item
+//   complete" / "Also search with the Open Records team"), CASE A (not-searchable
+//   record — honest hand-off), CASE B (searched, 0 results). Every screen carries
+//   "Remove item" (with confirm). Dispositions recorded per §2b R9:
+//   complete / search_more / no_match_search / not_searchable. Nothing persists
+//   until Submit (§0); selection lives in client state.
+// Behind /portal/wizard; live split-canvas at /portal/request untouched until cutover.
 
 const API = (process.env.REACT_APP_API_URL || '/api');
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
@@ -19,6 +20,20 @@ function validEmail(v) { return EMAIL_RE.test((v || '').trim()); }
 
 const AGENCY = 'City of Autumn Falls';
 const MAX_ITEMS = 10;
+
+// Disposition → short rail badge (§2b R9 intents).
+const DISPO_BADGE = {
+  complete: 'Records selected',
+  search_more: 'Selected + team',
+  no_match_search: 'Team search',
+  not_searchable: 'Team search',
+};
+
+// Normalize a /public/chat search record for display (defensive across backend shapes).
+function recId(r) { return r.id || r.title || r.name; }
+function recTitle(r) { return r.title || r.name || r.id || 'Record'; }
+function recMeta(r) { return r.meta || r.description || r.source_system || ''; }
+function recPublic(r) { return !!(r.public_availability || r.publicReady || r.publicReady === 'public'); }
 
 const STYLES = `
 .pwz{
@@ -91,6 +106,8 @@ const STYLES = `
 .pwz .btn.sec{background:transparent;color:var(--civic)}
 .pwz .btn.sec:hover{background:var(--civic-tint)}
 .pwz .btn.sm{padding:8px 13px;font-size:13px}
+.pwz .btn.quiet{background:transparent;color:var(--muted);border-color:var(--hair)}
+.pwz .btn.quiet:hover{color:var(--danger);border-color:var(--danger)}
 
 /* form (slice 2) */
 .pwz .field{margin:0 0 16px;max-width:520px}
@@ -142,7 +159,7 @@ const STYLES = `
 .pwz .islot.done .ic{border-color:var(--done-line);background:var(--done-bg);color:var(--done)}
 
 .pwz .panel{background:var(--panel);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--shadow);
-  overflow:hidden;min-height:420px;display:flex;flex-direction:column}
+  overflow:hidden;min-height:440px;display:flex;flex-direction:column}
 .pwz .panelhead{display:flex;align-items:center;gap:9px;padding:12px 16px;border-bottom:1px solid var(--hair);
   background:var(--surface)}
 .pwz .panelhead .tag{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
@@ -166,13 +183,46 @@ const STYLES = `
 .pwz .composer input{flex:1}
 .pwz .composer input:disabled{opacity:.6}
 
-.pwz .resstub{text-align:center;margin:auto;padding:20px;max-width:52ch}
-.pwz .resstub .ico{font-size:38px}
-.pwz .resstub h3{font-family:var(--serif);font-size:20px;margin:8px 0 8px}
-.pwz .resstub p{color:var(--muted);margin:0 auto 6px}
-.pwz .resstub .slicetag{display:inline-block;margin:8px 0 14px;font-size:11px;letter-spacing:.1em;
-  text-transform:uppercase;color:var(--active);border:1px dashed var(--active-line);background:var(--active-bg);
-  padding:4px 10px;border-radius:20px;font-weight:700}
+/* results window (slice 4) */
+.pwz .reshead{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0 0 6px}
+.pwz .transp{font-size:12.5px;color:var(--muted);background:var(--civic-tint);border-radius:8px;padding:9px 11px;
+  border-left:3px solid var(--civic);margin:0 0 12px}
+.pwz .transp b{color:var(--ink)}
+.pwz .selectall{font-size:12px;background:none;border:none;color:var(--civic);padding:0 0 8px;text-decoration:underline}
+.pwz .reslayout{display:grid;grid-template-columns:1fr 190px;gap:14px;flex:1;min-height:0}
+@media (max-width:640px){.pwz .reslayout{grid-template-columns:1fr}}
+.pwz .reclist{display:flex;flex-direction:column;gap:7px;overflow-y:auto}
+.pwz .rec{display:flex;gap:10px;align-items:flex-start;background:var(--surface);border:1px solid var(--hair);
+  border-radius:8px;padding:10px 12px;cursor:pointer}
+.pwz .rec:hover{border-color:var(--civic)}
+.pwz .rec.on{border-color:var(--civic);background:var(--civic-tint)}
+.pwz .rec input{margin-top:3px}
+.pwz .rec .rt{font-weight:600;font-size:14px}
+.pwz .rec .rmeta{font-size:12px;color:var(--muted)}
+.pwz .rtag{font-size:10.5px;letter-spacing:.03em;padding:1px 7px;border-radius:20px;border:1px solid var(--done-line);
+  background:var(--done-bg);color:var(--done);white-space:nowrap;margin-left:auto;align-self:center}
+.pwz .selcol{background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:12px;align-self:start}
+.pwz .selcol h4{margin:0 0 8px;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.pwz .selitem{display:flex;gap:8px;justify-content:space-between;align-items:center;font-size:12px;padding:6px 0;
+  border-bottom:1px solid var(--hair)}
+.pwz .selitem:last-child{border-bottom:none}
+.pwz .selitem button{background:none;border:none;color:var(--danger);font-size:15px;line-height:1;padding:0 2px}
+.pwz .selempty{font-size:12px;color:var(--muted)}
+
+.pwz .bigstate{text-align:center;margin:auto;padding:22px 16px;max-width:52ch}
+.pwz .bigstate .ico{font-size:40px}
+.pwz .bigstate h3{font-family:var(--serif);font-size:21px;margin:8px 0 8px}
+.pwz .bigstate p{color:var(--muted);margin:0 auto 6px}
+.pwz .bigstate p b{color:var(--ink)}
+
+/* remove modal */
+.pwz .scrim{position:fixed;inset:0;background:rgba(10,16,23,.5);display:none;place-items:center;padding:20px;z-index:50}
+.pwz .scrim.on{display:grid}
+.pwz .modal{background:var(--panel);border:1px solid var(--hair);border-radius:12px;box-shadow:var(--shadow);
+  max-width:400px;padding:22px}
+.pwz .modal h3{font-family:var(--serif);font-size:19px;margin:0 0 8px}
+.pwz .modal p{color:var(--muted);font-size:14px;margin:0 0 18px}
+.pwz .modal .actions{margin-top:0;justify-content:flex-end}
 `;
 
 const RAIL = ['Begin', 'Your Information', 'Item Search', 'Submitted'];
@@ -185,24 +235,26 @@ export default function PublicPortalWizardPage() {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [sendState, setSendState] = useState('idle'); // idle | sending | sent | error
+  const [sendState, setSendState] = useState('idle');
   const [token, setToken] = useState(null);
   const [verified, setVerified] = useState(false);
   const [expired, setExpired] = useState(false);
-  const [deliv, setDeliv] = useState('email'); // email | mail
+  const [deliv, setDeliv] = useState('email');
   const [addr, setAddr] = useState(EMPTY_ADDR);
   const [cert, setCert] = useState(false);
-  const [fee, setFee] = useState('standard'); // standard | waiver | commercial
+  const [fee, setFee] = useState('standard');
   const [waiverReason, setWaiverReason] = useState('');
   const pollRef = useRef(null);
 
-  // ── Item loop (slice 3) ──
-  const [items, setItems] = useState([]);          // committed records {desc, disp, badge}
-  const [messages, setMessages] = useState([]);    // chat turns for the active record
+  // ── Item loop (slice 3–4) ──
+  const [items, setItems] = useState([]);
+  const [messages, setMessages] = useState([]);
   const [input, setInput] = useState('');
   const [chatSending, setChatSending] = useState(false);
   const [quickReplies, setQuickReplies] = useState([]);
-  const [activeResults, setActiveResults] = useState(null); // null=describing | {query,count,notSearchable}
+  const [activeResults, setActiveResults] = useState(null); // null | { kind:'match'|'caseA'|'caseB', query, records }
+  const [selected, setSelected] = useState([]);             // record ids ticked for the active record
+  const [removeOpen, setRemoveOpen] = useState(false);
   const chatLogRef = useRef(null);
 
   const emailOk = validEmail(email);
@@ -211,7 +263,6 @@ export default function PublicPortalWizardPage() {
   const atCap = items.length >= MAX_ITEMS;
   const activeNo = items.length + 1;
 
-  // Poll verification status until the citizen clicks the emailed link (or it expires).
   useEffect(function () {
     if (!token || verified || expired) return undefined;
     pollRef.current = setInterval(async function () {
@@ -219,12 +270,11 @@ export default function PublicPortalWizardPage() {
         const res = await axios.get(API + '/public/verify-status/' + token);
         if (res.data && res.data.verified) { setVerified(true); }
         else if (res.data && res.data.expired) { setExpired(true); }
-      } catch (e) { /* transient — keep polling */ }
+      } catch (e) { /* transient */ }
     }, 3000);
     return function () { if (pollRef.current) clearInterval(pollRef.current); };
   }, [token, verified, expired]);
 
-  // Keep the chat scrolled to the latest turn.
   useEffect(function () {
     if (chatLogRef.current) chatLogRef.current.scrollTop = chatLogRef.current.scrollHeight;
   }, [messages, chatSending]);
@@ -242,8 +292,7 @@ export default function PublicPortalWizardPage() {
     } catch (e) { setSendState('error'); }
   }
 
-  // Start a fresh record description (item 1, or the next item after one completes).
-  function startDescribe() { setMessages([]); setInput(''); setQuickReplies([]); setActiveResults(null); }
+  function startDescribe() { setMessages([]); setInput(''); setQuickReplies([]); setActiveResults(null); setSelected([]); setRemoveOpen(false); }
   function goToItemSearch() { startDescribe(); setIdx(2); }
 
   async function sendMessage(text) {
@@ -255,16 +304,22 @@ export default function PublicPortalWizardPage() {
       var wire = base.map(function (m) { return { role: m.role, content: m.content }; });
       var r = await axios.post(API + '/public/chat', { mode: 'split_canvas', messages: wire, selectedRecords: [] });
       var reply = (r.data && r.data.reply) || '';
-      var results = (r.data && Array.isArray(r.data.searchResults)) ? r.data.searchResults : null;
+      var hasResultsKey = r.data && Array.isArray(r.data.searchResults);
+      var results = hasResultsKey ? r.data.searchResults : null;
+      var q = (r.data && r.data.searchQuery) || t;
       var added = (r.data && r.data.recordAdded) ? String(r.data.recordAdded).trim() : '';
       setMessages(base.concat([{ role: 'assistant', content: reply }]));
-      if (results && results.length) {
-        // A search RAN and returned records → the agent hides; results window (slice 4) takes over.
-        setActiveResults({ query: (r.data && r.data.searchQuery) || t, count: results.length, notSearchable: false });
-      } else if (added) {
-        // Agent flagged a not-searchable record (PATH b) — no search ran (§2c G1 Case A).
-        setActiveResults({ query: added, count: 0, notSearchable: true });
+      if (added) {
+        // Agent flagged a not-searchable record (PATH b) — no search ran. §2c G1 Case A.
+        setActiveResults({ kind: 'caseA', query: added, records: [] });
+      } else if (results && results.length) {
+        // A search ran and returned records. §2c match.
+        setActiveResults({ kind: 'match', query: q, records: results });
+      } else if (hasResultsKey && r.data.searchQuery) {
+        // A search ran (query present) and returned NOTHING. §2c G1 Case B.
+        setActiveResults({ kind: 'caseB', query: q, records: [] });
       } else {
+        // Still conversing — the agent is refining the description.
         setQuickReplies((r.data && Array.isArray(r.data.quickReplies)) ? r.data.quickReplies : []);
       }
     } catch (e) {
@@ -272,16 +327,20 @@ export default function PublicPortalWizardPage() {
     } finally { setChatSending(false); }
   }
 
-  // Stub for slice 4 (selection / team-search / remove). Commits the active record and
-  // advances the rail to the next one so the color-state loop is demonstrable.
-  function completeItemStub() {
-    var ns = activeResults && activeResults.notSearchable;
-    var disp = ns ? 'not_searchable' : 'complete';
-    var badge = ns ? 'Team search' : 'Records selected';
-    var desc = (activeResults && activeResults.query) || 'Record ' + activeNo;
-    setItems(items.concat([{ desc: desc, disp: disp, badge: badge }]));
+  function toggleRec(r) {
+    var id = recId(r);
+    setSelected(function (cur) { return cur.indexOf(id) >= 0 ? cur.filter(function (x) { return x !== id; }) : cur.concat([id]); });
+  }
+  function selectAll() { setSelected((activeResults && activeResults.records || []).map(recId)); }
+
+  // Commit the active record with its §2b R9 disposition, then open a fresh describe.
+  function commit(disp) {
+    var q = activeResults ? activeResults.query : ('Record ' + activeNo);
+    var recCount = (disp === 'complete' || disp === 'search_more') ? selected.length : 0;
+    setItems(items.concat([{ desc: q, disp: disp, badge: DISPO_BADGE[disp], records: recCount }]));
     startDescribe();
   }
+  function confirmRemove() { setRemoveOpen(false); startDescribe(); } // discard active record; nothing persisted (§0)
 
   const step = STEP_META[idx];
   const railIdx = step.rail;
@@ -443,7 +502,6 @@ export default function PublicPortalWizardPage() {
         </div>
         <div className="panelbody">
           <div className="chatlog" ref={chatLogRef}>
-            {/* Verbatim opening script — display-only, never sent to the API */}
             <div className="bub a">Thank you for using the {AGENCY} AI-powered Open Record Search. I'll work with you
               to write a description that gets the best search results. If you're requesting more than one type of
               record, describe each one separately.</div>
@@ -472,30 +530,85 @@ export default function PublicPortalWizardPage() {
     );
   }
 
-  function renderResultsStub() {
-    var ns = activeResults.notSearchable;
+  function renderMatch() {
+    var records = activeResults.records || [];
+    return (
+      <div className="panel">
+        <div className="panelhead"><span className="tag">Results — assistant hidden</span><span className="who">Search results</span></div>
+        <div className="panelbody">
+          <div className="reshead">{activeResults.query}</div>
+          <div className="transp">These are records we could find instantly. Some records — older or paper files —
+            may not appear here. If you believe more exist, use <b>"Also search with the Open Records team."</b></div>
+          <button className="selectall" onClick={selectAll}>Select all</button>
+          <div className="reslayout">
+            <div className="reclist">
+              {records.map(function (r) {
+                var on = selected.indexOf(recId(r)) >= 0;
+                return (
+                  <label key={recId(r)} className={'rec' + (on ? ' on' : '')} onClick={function (e) { if (e.target.tagName !== 'INPUT') e.preventDefault(); toggleRec(r); }}>
+                    <input type="checkbox" readOnly checked={on} />
+                    <div><div className="rt">{recTitle(r)}</div>{recMeta(r) ? <div className="rmeta">{recMeta(r)}</div> : null}</div>
+                    {recPublic(r) ? <span className="rtag">Available now · Library</span> : null}
+                  </label>
+                );
+              })}
+            </div>
+            <div className="selcol">
+              <h4>Selected records</h4>
+              {selected.length ? records.filter(function (r) { return selected.indexOf(recId(r)) >= 0; }).map(function (r) {
+                return <div key={recId(r)} className="selitem"><span>{recTitle(r)}</span><button title="remove" onClick={function () { toggleRec(r); }}>×</button></div>;
+              }) : <div className="selempty">None yet. Check a record to add it.</div>}
+            </div>
+          </div>
+          <div className="actions">
+            <button className="btn" disabled={selected.length === 0} onClick={function () { commit('complete'); }}>Use selected records — item complete</button>
+            <button className="btn sec" onClick={function () { commit('search_more'); }}>Also search with the Open Records team</button>
+            <button className="btn quiet" onClick={function () { setRemoveOpen(true); }}>Remove item</button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  function renderCase(kind) {
+    var a = kind === 'caseA';
     return (
       <div className="panel">
         <div className="panelhead"><span className="tag">Results — assistant hidden</span>
-          <span className="who">{ns ? 'Handled by staff' : 'Search results'}</span></div>
+          <span className="who">{a ? 'Handled by staff' : 'Search results'}</span></div>
         <div className="panelbody">
-          <div className="resstub">
-            <div className="ico">{ns ? '🗂️' : '🔍'}</div>
-            <h3>{ns ? 'This type of record is searched by our staff'
-              : 'Search ran — ' + activeResults.count + ' record' + (activeResults.count === 1 ? '' : 's') + ' found'}</h3>
-            <div className="slicetag">Slice 4 builds this window</div>
-            <p>{ns
-              ? 'Case A (not-searchable). Slice 4 adds the honest hand-off screen + "Submit for Open Records team search".'
-              : 'Slice 4 adds per-record selection, "Use selected records — item complete", "Also search with the Open Records team", and "Remove item".'}</p>
-            <p style={{ fontSize: '12.5px', marginTop: '4px' }}>Described: <b style={{ color: 'var(--ink)' }}>{activeResults.query}</b></p>
+          <div className="bigstate">
+            <div className="ico">{a ? '🗂️' : '🔍'}</div>
+            <h3>{a ? 'This type of record is searched by our staff' : 'No instant matches found'}</h3>
+            {a
+              ? <p>Records like paper files, emails, audio, and photos aren't part of the instant-search catalog,
+                  so there's nothing to preview here — <b>that doesn't mean they don't exist.</b> These are searched
+                  by hand by the Open Records team.</p>
+              : <p>We searched the instant-records catalog for this description and didn't find a match. The catalog
+                  doesn't include everything the city holds — <b>staff can search further and may still locate records.</b></p>}
+            <p style={{ fontSize: '12.5px', marginTop: '4px' }}>Described: <b>{activeResults.query}</b></p>
             <div className="actions" style={{ justifyContent: 'center' }}>
-              <button className="btn" onClick={completeItemStub}>Complete this item (stub) {'→'}</button>
-              <button className="btn sec" onClick={function () { setActiveResults(null); }}>{'←'} Refine description</button>
+              <button className="btn" onClick={function () { commit(a ? 'not_searchable' : 'no_match_search'); }}>Submit for Open Records team search</button>
+              <button className="btn quiet" onClick={function () { setRemoveOpen(true); }}>Remove item</button>
             </div>
           </div>
         </div>
       </div>
     );
+  }
+
+  function renderRightPanel() {
+    if (atCap) {
+      return (
+        <div className="panel"><div className="panelbody"><div className="bigstate">
+          <div className="ico">✓</div><h3>You've added the maximum of {MAX_ITEMS} records</h3>
+          <p>Submit-or-continue and the on-screen confirmation number arrive in slice 5.</p>
+        </div></div></div>
+      );
+    }
+    if (!activeResults) return renderDescribePanel();
+    if (activeResults.kind === 'match') return renderMatch();
+    return renderCase(activeResults.kind);
   }
 
   function renderItemSearch() {
@@ -507,13 +620,7 @@ export default function PublicPortalWizardPage() {
           drive from the results. Add up to {MAX_ITEMS} records.</p>
         <div className="split" style={{ marginTop: '8px' }}>
           {renderItemRail()}
-          {atCap
-            ? <div className="panel"><div className="panelbody"><div className="resstub">
-                <div className="ico">✓</div><h3>You've added the maximum of {MAX_ITEMS} records</h3>
-                <div className="slicetag">Slice 5 adds submit</div>
-                <p>Submit-or-continue and the on-screen confirmation number arrive in slice 5.</p>
-              </div></div></div>
-            : (activeResults ? renderResultsStub() : renderDescribePanel())}
+          {renderRightPanel()}
         </div>
         <div className="actions">
           <button className="btn sec" onClick={function () { setIdx(1); }}>{'←'} Back to your information</button>
@@ -571,11 +678,21 @@ export default function PublicPortalWizardPage() {
 
         {body}
       </div>
+
+      <div className={'scrim' + (removeOpen ? ' on' : '')}>
+        <div className="modal">
+          <h3>Remove this item?</h3>
+          <p>This can't be undone. The description you entered for this item will be discarded.</p>
+          <div className="actions">
+            <button className="btn quiet sm" onClick={function () { setRemoveOpen(false); }}>Cancel</button>
+            <button className="btn sm" style={{ background: 'var(--danger)', borderColor: 'var(--danger)' }} onClick={confirmRemove}>Remove item</button>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
 
-// Placeholder copy for the not-yet-built steps (begin/submitted).
 const STEP_META = [
   { rail: 0, title: 'Welcome to the AI-powered Open Records Request portal',
     lede: "You'll enter your contact information, then describe the records you're looking for — one at a time. The assistant helps you search; you stay in control of what to submit.",
