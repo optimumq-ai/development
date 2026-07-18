@@ -1,4 +1,4 @@
-<title>Open Records Wizard — Prototype</title>
+<title>Open Records Wizard &mdash; Prototype</title>
 <style>
   :root{
     --page:#D8E0E8; --panel:#EBF3FB; --surface:#FFFFFF;
@@ -166,9 +166,9 @@
   .bub{max-width:80%;padding:10px 13px;border-radius:12px;font-size:14px;border:1px solid var(--hair)}
   .bub.a{align-self:flex-start;background:var(--surface);border-bottom-left-radius:3px}
   .bub.u{align-self:flex-end;background:var(--civic);color:#fff;border-color:var(--civic);border-bottom-right-radius:3px}
-  .simrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px;padding-top:12px;
-    border-top:1px dashed var(--hair)}
-  .simrow .sl{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+  .backstage{margin-top:16px;border:1px dashed var(--active-line);background:var(--active-bg);border-radius:9px;padding:12px 14px}
+  .backstage .bl{display:flex;align-items:center;gap:6px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--active);font-weight:700;margin-bottom:8px}
+  .backstage .bd{font-size:12px;color:var(--muted);margin-bottom:10px;max-width:52ch}
   .seg{display:inline-flex;border:1px solid var(--hair);border-radius:8px;overflow:hidden}
   .seg button{background:var(--surface);border:none;padding:7px 11px;font-size:12.5px;color:var(--ink);border-right:1px solid var(--hair)}
   .seg button:last-child{border-right:none}
@@ -237,16 +237,16 @@
 <div class="wrap">
   <div class="topbar">
     <div class="brand">
-      <div class="crest">City of Autumn Falls <span class="ai">· AI Open Records</span></div>
+      <div class="crest">City of Autumn Falls <span class="ai">&middot; AI Open Records</span></div>
       <div class="sub">Open Records Request Portal</div>
     </div>
     <div class="topacts">
-      <button class="ghost" onclick="location.reload()">↻ Restart flow</button>
+      <button class="ghost" onclick="location.reload()">&#8635; Restart flow</button>
       <button class="ghost" id="notesBtn" aria-pressed="false" onclick="toggleNotes()">Design notes: off</button>
-      <button class="ghost" id="themeBtn" onclick="toggleTheme()">◐ Theme</button>
+      <button class="ghost" id="themeBtn" onclick="toggleTheme()">&#9680; Theme</button>
     </div>
   </div>
-  <div class="protoflag"><i></i> Clickable prototype — reconciled wizard (SPEC §2c). Not the live portal.</div>
+  <div class="protoflag"><i></i> Clickable prototype &mdash; reconciled wizard (SPEC &sect;2c). Not the live portal.</div>
 
   <!-- progress rail -->
   <div class="rail" id="rail">
@@ -261,10 +261,10 @@
     <div class="card">
       <div class="eyebrow">Welcome</div>
       <h1 class="title">The AI-powered Open Records Request portal</h1>
-      <p class="lede">You'll enter your contact information, then describe the records you're looking for — one
+      <p class="lede">You'll enter your contact information, then describe the records you're looking for &mdash; one
         at a time. The assistant helps you search; you stay in control of what to submit. Most requests take a
         few minutes.</p>
-      <div class="actions"><button class="btn" onclick="go('info')">Begin →</button></div>
+      <div class="actions"><button class="btn" onclick="go('info')">Begin &rarr;</button></div>
     </div>
   </section>
 
@@ -276,7 +276,7 @@
       <p class="lede">To create a request you must provide an email address and verify it by clicking a link we
         send you. We use email to send you updates and your request number.</p>
 
-      <div class="note"><span class="nx">§2c G5</span><div><b>Email is the only communication channel.</b>
+      <div class="note"><span class="nx">&sect;2c G5</span><div><b>Email is the only communication channel.</b>
         Postal is offered for <i>delivering records</i>, never for correspondence. The old "I don't have access
         to email / visually verified" fallback is removed.</div></div>
 
@@ -291,18 +291,18 @@
       </div>
 
       <div class="lockbanner" id="lockBanner" style="display:none">
-        <span>✉️</span><div>We've emailed a verification link to your address. <b>Click the link to continue.</b>
+        <span>&#9993;</span><div>We've emailed a verification link to your address. <b>Click the link to continue.</b>
         The rest of the form stays locked until you do.</div>
       </div>
-      <div class="note" id="gateNote"><span class="nx">§2c G5</span><div><b>Strict gate (option A).</b> Enter email
-        → click the real link → <i>then</i> the rest of the form unlocks. No "proceed unverified" path.
+      <div class="note" id="gateNote"><span class="nx">&sect;2c G5</span><div><b>Strict gate (option A).</b> Enter email
+        &rarr; click the real link &rarr; <i>then</i> the rest of the form unlocks. No "proceed unverified" path.
         The verification round-trip already exists on the backend.</div></div>
       <!-- prototype-only shortcut for the email round-trip -->
       <div id="simVerify" style="display:none;margin:-6px 0 16px">
-        <button class="btn sec sm" onclick="verified()">▶ Simulate: I clicked the link in my email</button>
+        <button class="btn sec sm" onclick="verified()">&#9654; Simulate: I clicked the link in my email</button>
       </div>
 
-      <div class="verified" id="verifiedMsg">✓ Email verified — the rest of the form is unlocked.</div>
+      <div class="verified" id="verifiedMsg">&#10003; Email verified &mdash; the rest of the form is unlocked.</div>
 
       <div class="locked" id="lockRegion" data-locked="true">
         <div class="lockfield">
@@ -352,7 +352,7 @@
       </div>
 
       <div class="actions">
-        <button class="btn" id="infoProceed" onclick="go('intro')" disabled>Proceed to record search →</button>
+        <button class="btn" id="infoProceed" onclick="go('intro')" disabled>Proceed to record search &rarr;</button>
       </div>
     </div>
   </section>
@@ -363,16 +363,16 @@
       <div class="eyebrow">Item Search</div>
       <h1 class="title">Searching for records</h1>
       <p>Your next step is the record search. You can search for more than one type of record, but
-        <b>every search should be as specific as possible</b> — one type of record, described narrowly. For
+        <b>every search should be as specific as possible</b> &mdash; one type of record, described narrowly. For
         example, "building permits issued in 2025 for Main Street" is one clear request. Business licenses would
         be a <i>separate</i> item.</p>
-      <p>The AI assistant will try to find matching records for you to review. Some record types —
-        <b>paper files, emails and texts, audio, video, and photos</b> — aren't in the instant catalog and are
+      <p>The AI assistant will try to find matching records for you to review. Some record types &mdash;
+        <b>paper files, emails and texts, audio, video, and photos</b> &mdash; aren't in the instant catalog and are
         searched by the Open Records team. You can still request them here; they just won't show instant results
         to pick from.</p>
-      <div class="note"><span class="nx">§2c</span><div>The assistant only ever <b>gathers and refines one
+      <div class="note"><span class="nx">&sect;2c</span><div>The assistant only ever <b>gathers and refines one
         description, then runs the search and steps aside.</b> Everything after a search is click-driven.</div></div>
-      <div class="actions"><button class="btn" onclick="startItem()">Start your first record →</button></div>
+      <div class="actions"><button class="btn" onclick="startItem()">Start your first record &rarr;</button></div>
     </div>
   </section>
 
@@ -395,11 +395,11 @@
       <h1 class="title">Add another record, or submit?</h1>
       <p class="lede">Here's what's in your request so far. You can add more records (up to ten) or submit now.</p>
       <div class="summary" id="contSummary"></div>
-      <div class="note"><span class="nx">§2c G4</span><div><b>Empty-request guard.</b> <i>Submit</i> stays
+      <div class="note"><span class="nx">&sect;2c G4</span><div><b>Empty-request guard.</b> <i>Submit</i> stays
         disabled until at least one record is kept. Remove your only item and the sole path is "Continue."</div></div>
       <div class="actions">
         <button class="btn" id="submitBtn" onclick="go('done')">Submit request</button>
-        <button class="btn sec" id="continueBtn" onclick="startItem()">Continue with next record →</button>
+        <button class="btn sec" id="continueBtn" onclick="startItem()">Continue with next record &rarr;</button>
       </div>
     </div>
   </section>
@@ -407,14 +407,14 @@
   <!-- DONE -->
   <section class="screen" id="s-done">
     <div class="card bigstate">
-      <div class="ico">✅</div>
+      <div class="ico">&#9989;</div>
       <h1 class="title">Your request has been submitted</h1>
       <p class="lede" style="margin-inline:auto">Your request number is</p>
       <div class="reqnum">2026-000001</div>
-      <p class="lede" style="margin-inline:auto"><b>Please save this number</b> — you'll need it to check on or
+      <p class="lede" style="margin-inline:auto"><b>Please save this number</b> &mdash; you'll need it to check on or
         ask about your request. We've also emailed a copy to you.</p>
       <div class="note" style="justify-content:center;text-align:left;max-width:520px;margin-inline:auto">
-        <span class="nx">§0 · §2c</span><div>The request is <b>born only here, at Submit</b> — that's the first
+        <span class="nx">&sect;0 &middot; &sect;2c</span><div>The request is <b>born only here, at Submit</b> &mdash; that's the first
         moment the number exists. The on-screen number is authoritative; email is a copy.</div></div>
       <div class="actions" style="justify-content:center">
         <button class="btn sec" onclick="location.reload()">Start another request</button>
@@ -443,10 +443,10 @@
   var MAX=10;
 
   var RECORDS=[
-    {id:"bp1", t:"Building Permit BP-2025-0417", m:"120 Main St · issued 2025-03-11", tag:"Available now · Library"},
-    {id:"bp2", t:"Building Permit BP-2025-0621", m:"118 Main St · issued 2025-05-02", tag:"Available now · Library"},
-    {id:"bp3", t:"Building Permit BP-2025-0839", m:"124 Main St · issued 2025-07-19", tag:"Review needed"},
-    {id:"bp4", t:"Building Permit BP-2025-1002", m:"130 Main St · issued 2025-09-30", tag:"Review needed"}
+    {id:"bp1", t:"Building Permit BP-2025-0417", m:"120 Main St &middot; issued 2025-03-11", tag:"Available now &middot; Library"},
+    {id:"bp2", t:"Building Permit BP-2025-0621", m:"118 Main St &middot; issued 2025-05-02", tag:"Available now &middot; Library"},
+    {id:"bp3", t:"Building Permit BP-2025-0839", m:"124 Main St &middot; issued 2025-07-19", tag:"Review needed"},
+    {id:"bp4", t:"Building Permit BP-2025-1002", m:"130 Main St &middot; issued 2025-09-30", tag:"Review needed"}
   ];
 
   // ---------- navigation ----------
@@ -519,14 +519,14 @@
       var isActive=hasActive && i===activeIndex();
       var div=document.createElement("div");
       div.className="islot"+(done?" done":"")+(isActive?" active":"");
-      var ic = done? "✓" : (i+1);
+      var ic = done? "&#10003;" : (i+1);
       var name = "Item "+(i+1);
       var inner='<div class="ic">'+ic+'</div><div class="il"><div class="iname">'+name+'</div>';
       if(done){
         inner+='<div class="idesc" title="'+esc(done.desc)+'">'+esc(done.desc)+'</div>'+
                '<span class="ibadge">'+done.badge+'</span>';
       } else if(isActive){
-        inner+='<div class="idesc" style="color:var(--active)">in progress…</div>';
+        inner+='<div class="idesc" style="color:var(--active)">in progress&hellip;</div>';
       }
       inner+='</div>';
       div.innerHTML=inner; host.appendChild(div);
@@ -539,19 +539,22 @@
      '<div class="panel"><div class="panelhead"><span class="tag">Assistant</span><span class="who">Open Records Assistant</span></div>'+
      '<div class="panelbody">'+
        '<div class="chat">'+
-         '<div class="bub a">Please describe a record you\'re looking for. Be as specific as you can — one type of record.</div>'+
+         '<div class="bub a">Please describe a record you\'re looking for. Be as specific as you can &mdash; one type of record.</div>'+
        '</div>'+
        '<div class="field" style="max-width:none;margin-bottom:8px"><label for="desc">Describe the record</label>'+
          '<textarea id="desc" placeholder="e.g. Building permits issued in 2025 for Main Street">'+esc(prefillDesc())+'</textarea></div>'+
-       '<div class="simrow"><span class="sl">Prototype — choose the search outcome to preview:</span>'+
+       '<div class="actions" style="margin-top:6px"><button class="btn" onclick="runSearch()">Run search &rarr;</button></div>'+
+       '<div class="note"><span class="nx">&sect;2c</span><div>On "Run search" the assistant <b>hides</b> and the '+
+         'results window takes over &mdash; click-driven from here.</div></div>'+
+       '<div class="backstage"><div class="bl">&#9654; Prototype control &middot; not shown to requestors</div>'+
+         '<div class="bd">Pick which outcome the next search should simulate. The real portal runs an actual '+
+         'search instead of this switch.</div>'+
          '<span class="seg" id="seg">'+
            '<button data-o="match" class="sel" onclick="setOutcome(\'match\')">Records found</button>'+
            '<button data-o="caseA" onclick="setOutcome(\'caseA\')">Not-searchable type</button>'+
            '<button data-o="caseB" onclick="setOutcome(\'caseB\')">No matches</button>'+
          '</span>'+
-         '<button class="btn sm" onclick="runSearch()">Run search →</button></div>'+
-       '<div class="note"><span class="nx">§2c</span><div>On "Run search" the assistant <b>hides</b> and the '+
-         'results window takes over — click-driven from here.</div></div>'+
+       '</div>'+
      '</div></div>';
   }
   function prefillDesc(){ return state.items.length===0 ? "Building permits issued in 2025 for Main Street" : ""; }
@@ -579,20 +582,20 @@
         '</label>';
     }).join("");
     p.innerHTML=
-     '<div class="panel"><div class="panelhead"><span class="tag">Results — assistant hidden</span><span class="who">Search results</span></div>'+
+     '<div class="panel"><div class="panelhead"><span class="tag">Results &mdash; assistant hidden</span><span class="who">Search results</span></div>'+
      '<div class="panelbody">'+
        '<div class="reshead"><span class="rt">'+esc(state.curDesc)+'</span></div>'+
-       '<div class="transp">These are records we could find instantly. Some records — older or paper files — may '+
+       '<div class="transp">These are records we could find instantly. Some records &mdash; older or paper files &mdash; may '+
          'not appear here. If you believe more exist, use <b>"Also search with the Open Records team."</b></div>'+
        '<div style="margin-bottom:8px"><button class="selectall" onclick="selectAll()">Select all</button></div>'+
        '<div class="reslayout">'+
          '<div class="reclist" id="reclist">'+rows+'</div>'+
          '<div class="selcol"><h4>Selected records</h4><div id="selbox"></div></div>'+
        '</div>'+
-       '<div class="note"><span class="nx">§2c G3</span><div><b>Per-record selection.</b> "Use selected records" '+
-         'completes the item with what you checked; enabled once ≥1 is selected.</div></div>'+
+       '<div class="note"><span class="nx">&sect;2c G3</span><div><b>Per-record selection.</b> "Use selected records" '+
+         'completes the item with what you checked; enabled once &ge;1 is selected.</div></div>'+
        '<div class="actions">'+
-         '<button class="btn" id="useBtn" onclick="commit(\'complete\')" disabled>Use selected records — item complete</button>'+
+         '<button class="btn" id="useBtn" onclick="commit(\'complete\')" disabled>Use selected records &mdash; item complete</button>'+
          '<button class="btn sec" onclick="commit(\'search_more\')">Also search with the Open Records team</button>'+
          '<button class="btn quiet" onclick="askRemove()">Remove item</button>'+
        '</div>'+
@@ -619,7 +622,7 @@
     var ids=RECORDS.filter(function(r){return state.selected[r.id];});
     box.innerHTML = ids.length? ids.map(function(r){
       return '<div class="selitem"><span>'+esc(r.t.replace("Building Permit ",""))+'</span>'+
-        '<button title="remove" onclick="unsel(\''+r.id+'\')">×</button></div>';
+        '<button title="remove" onclick="unsel(\''+r.id+'\')">&times;</button></div>';
     }).join("") : '<div class="selempty">None yet. Check a record to add it.</div>';
     var ub=document.getElementById("useBtn"); if(ub) ub.disabled = selCount()===0;
   }
@@ -630,17 +633,17 @@
     var head = which==="A" ? "This type of record is searched by our staff" : "No instant matches found";
     var body = which==="A"
       ? "Records like paper files, emails, audio, and photos aren't part of the instant-search catalog, so "
-        +"there's nothing to preview here — <b>that doesn't mean they don't exist.</b> These are searched by hand "
+        +"there's nothing to preview here &mdash; <b>that doesn't mean they don't exist.</b> These are searched by hand "
         +"by the Open Records team."
       : "We searched the instant-records catalog for this description and didn't find a match. The catalog doesn't "
-        +"include everything the city holds — <b>staff can search further and may still locate records.</b>";
-    var nx = which==="A" ? "§2c G1 · Case A (not-searchable)" : "§2c G1 · Case B (searched, 0 results)";
+        +"include everything the city holds &mdash; <b>staff can search further and may still locate records.</b>";
+    var nx = which==="A" ? "&sect;2c G1 &middot; Case A (not-searchable)" : "&sect;2c G1 &middot; Case B (searched, 0 results)";
     p.innerHTML=
-     '<div class="panel"><div class="panelhead"><span class="tag">Results — assistant hidden</span><span class="who">'+
+     '<div class="panel"><div class="panelhead"><span class="tag">Results &mdash; assistant hidden</span><span class="who">'+
        (which==="A"?"Handled by staff":"Search results")+'</span></div>'+
      '<div class="panelbody"><div class="bigstate">'+
-       '<div class="ico">'+(which==="A"?"🗂️":"🔍")+'</div><h3>'+head+'</h3><p>'+body+'</p></div>'+
-       '<div class="note"><span class="nx">'+nx+'</span><div>The screen is chosen automatically — no search ran '+
+       '<div class="ico">'+(which==="A"?"&#128451;":"&#128269;")+'</div><h3>'+head+'</h3><p>'+body+'</p></div>'+
+       '<div class="note"><span class="nx">'+nx+'</span><div>The screen is chosen automatically &mdash; no search ran '+
          'for a not-searchable type; Case B ran a search that returned nothing. Both lead with team search.</div></div>'+
        '<div class="actions" style="justify-content:center">'+
          '<button class="btn" onclick="commit(\''+(which==="A"?"not_searchable":"no_match_search")+'\')">Submit for Open Records team search</button>'+
@@ -651,7 +654,7 @@
 
   // ---------- commit / remove ----------
   var DISPO={
-    complete:{badge:"Records selected", ss:"Records selected — complete"},
+    complete:{badge:"Records selected", ss:"Records selected &mdash; complete"},
     search_more:{badge:"Selected + team", ss:"Selected records + Open Records team search"},
     no_match_search:{badge:"Team search", ss:"Submitted for Open Records team search"},
     not_searchable:{badge:"Team search", ss:"Searched by the Open Records team"}
@@ -674,14 +677,14 @@
         '<div class="ss">Add at least one record to submit.</div></div></div>';
     } else {
       host.innerHTML=state.items.map(function(it,i){
-        return '<div class="srow"><div class="sc">✓</div><div class="sd"><div class="sn">Item '+(i+1)+' — '+esc(it.desc)+'</div>'+
-          '<div class="ss">'+esc(it.ss)+(it.records?(" · "+it.records+" record"+(it.records>1?"s":"")):"")+'</div></div></div>';
+        return '<div class="srow"><div class="sc">&#10003;</div><div class="sd"><div class="sn">Item '+(i+1)+' &mdash; '+esc(it.desc)+'</div>'+
+          '<div class="ss">'+esc(it.ss)+(it.records?(" &middot; "+it.records+" record"+(it.records>1?"s":"")):"")+'</div></div></div>';
       }).join("");
     }
     document.getElementById("submitBtn").disabled = state.items.length===0;
     document.getElementById("continueBtn").disabled = state.items.length>=MAX;
     document.getElementById("continueBtn").textContent = state.items.length>=MAX
-      ? "Maximum 10 records reached" : "Continue with next record →";
+      ? "Maximum 10 records reached" : "Continue with next record &rarr;";
   }
 
   // ---------- chrome ----------
