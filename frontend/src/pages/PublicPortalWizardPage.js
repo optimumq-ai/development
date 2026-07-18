@@ -442,7 +442,7 @@ export default function PublicPortalWizardPage() {
           <div className="field">
             <label htmlFor="pwz-email">Email address</label>
             <div className="inline">
-              <input id="pwz-email" type="email" value={email} placeholder="you@example.com"
+              <input id="pwz-email" type="email" value={email} placeholder="Email address you can access now"
                 onChange={function (e) { onEmailChange(e.target.value); }} />
               <button className="btn sm" onClick={sendLink} disabled={!emailOk || sendState === 'sending' || (!!token && !expired && !verified)}>
                 {sendState === 'sending' ? 'Sending…' : (token || verified) ? 'Resend link' : 'Send verification link'}
@@ -465,7 +465,7 @@ export default function PublicPortalWizardPage() {
             <div className="lockfield">
               <div className="field">
                 <label>Phone <span className="hint">(optional)</span></label>
-                <input type="text" value={phone} placeholder="(555) 555-0134"
+                <input type="text" value={phone} placeholder="Phone number"
                   onChange={function (e) { setPhone(e.target.value); }} />
               </div>
 
