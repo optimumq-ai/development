@@ -578,7 +578,7 @@ export default function PublicPortalWizardPage() {
         </div>
         <div className="panelbody">
           <div className="chatlog" ref={chatLogRef}>
-            <div className="bub a">Thank you for using the {agency} AI-powered Open Record Search. I'll work with you
+            <div className="bub a">Thank you for using the {agency} AI-powered Open Records Search. I'll work with you
               to write a description that gets the best search results. If you're requesting more than one type of
               record, describe each one separately.</div>
             <div className="bub a">Please describe a record you're looking for.</div>
