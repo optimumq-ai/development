@@ -588,8 +588,7 @@ export default function PublicPortalWizardPage() {
           <div className="chatlog" ref={chatLogRef}>
             <div className="bub a">Thank you for using the {agency} AI-powered Open Records Search. I'll work with you
               to write a description that gets the best search results. If you're requesting more than one type of
-              record, describe each one separately.</div>
-            <div className="bub a">Please describe a record you're looking for.</div>
+              record, describe each one separately. Please describe a record you're looking for.</div>
             {messages.map(function (m, i) {
               return m.content ? <div key={i} className={'bub ' + (m.role === 'user' ? 'u' : 'a')}>{m.content}</div> : null;
             })}
