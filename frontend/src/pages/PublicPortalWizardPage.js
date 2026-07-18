@@ -732,7 +732,7 @@ export default function PublicPortalWizardPage() {
           <p className="lede" style={{ marginInline: 'auto' }}>Your request number is</p>
           <div className="reqnum">{requestNumber || '—'}</div>
           <p className="lede" style={{ marginInline: 'auto', maxWidth: '48ch' }}><b>Please save this number</b> —
-            you'll need it to check on or ask about your request.{deliv === 'email' ? " We've also emailed a copy to you." : ''}</p>
+            you'll need it to check on or ask about your request. We've also emailed a copy to you.</p>
           <div className="actions" style={{ justifyContent: 'center' }}>
             <button className="btn sec" onClick={function () { window.location.reload(); }}>Start another request</button>
           </div>
