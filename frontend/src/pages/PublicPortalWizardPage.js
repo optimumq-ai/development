@@ -50,6 +50,7 @@ const STYLES = `
   --active:#C77A0A; --active-bg:#FBEFD7; --active-line:#E6B863;
   --done:#2E7D4F; --done-line:#8FC7A6; --done-box:#BFE3CC; --done-bg:#E1F0E7;
   --danger:#B23A3A;
+  --ask:#8C3A32;
   --shadow:0 1px 2px rgba(20,32,43,.06),0 6px 20px rgba(20,32,43,.06);
   --radius:10px;
   --serif:Georgia,"Times New Roman",serif;
@@ -65,6 +66,7 @@ const STYLES = `
     --active:#E0A94A; --active-bg:#3A2E17; --active-line:#7A5F2C;
     --done:#66B487; --done-line:#2F6043; --done-box:#1E4630; --done-bg:#17301F;
     --danger:#D77C7C;
+    --ask:#E0918A;
     --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
   }
 }
@@ -237,6 +239,16 @@ const STYLES = `
   max-width:400px;padding:22px}
 .pwz .modal h3{font-family:var(--serif);font-size:19px;margin:0 0 8px}
 .pwz .modal p{color:var(--muted);font-size:14px;margin:0 0 18px}
+/* The one prompt the requestor must act on — muted red so it reads as a cue, not an error. */
+.pwz .askinput::placeholder{color:var(--ask);opacity:1}
+/* Help launcher sits on the lede row, replacing the "add up to 10" sentence. */
+.pwz .ledeRow{display:flex;align-items:flex-start;gap:16px;justify-content:space-between;flex-wrap:wrap}
+.pwz .helpbtn{flex-shrink:0;background:transparent;color:var(--civic);border:1px solid var(--civic);
+  padding:9px 15px;border-radius:9px;font-weight:600;font-size:13px;white-space:nowrap}
+.pwz .helpbtn:hover{background:var(--civic-tint)}
+.pwz .modal.help{max-width:640px;text-align:left}
+.pwz .modal.help p{color:var(--ink);margin:0 0 13px;line-height:1.55}
+.pwz .modal.help p.note{color:var(--muted)}
 .pwz .modal .actions{margin-top:0;justify-content:flex-end}
 
 /* submit-or-continue + confirmation (slice 5) */
@@ -289,6 +301,7 @@ export default function PublicPortalWizardPage() {
   const [activeResults, setActiveResults] = useState(null); // null | { kind:'match'|'caseA'|'caseB', query, records }
   const [selected, setSelected] = useState([]);             // record ids ticked for the active record
   const [removeOpen, setRemoveOpen] = useState(false);
+  const [helpOpen, setHelpOpen] = useState(false);
   const [atContinue, setAtContinue] = useState(false);       // Submit-or-Continue screen
   const [submitState, setSubmitState] = useState('idle');    // idle | submitting | error | done
   const [requestNumber, setRequestNumber] = useState('');
@@ -580,8 +593,7 @@ export default function PublicPortalWizardPage() {
     return (
       <div className="panel">
         <div className="panelhead">
-          <span className="tag">Assistant</span>
-          <span className="who">Open Records Assistant</span>
+          <span className="who">AI Powered Search Assistant</span>
           <span className="live">Active</span>
         </div>
         <div className="panelbody">
@@ -602,7 +614,7 @@ export default function PublicPortalWizardPage() {
             </div>
           )}
           <div className="composer">
-            <input type="text" placeholder="Describe a record…" value={input} disabled={chatSending}
+            <input type="text" className="askinput" placeholder="Enter a description of the requested item…." value={input} disabled={chatSending}
               onChange={function (e) { setInput(e.target.value); }}
               onKeyDown={function (e) { if (e.key === 'Enter') { e.preventDefault(); sendMessage(input); } }} />
             <button className="btn sm" type="button" disabled={chatSending || !input.trim()}
@@ -755,8 +767,13 @@ export default function PublicPortalWizardPage() {
       <div className="card">
         <div className="eyebrow">Step 3 of {RAIL.length}</div>
         <h1 className="title">Search for records</h1>
-        <p className="lede">Describe one record at a time. The assistant runs the search, then steps aside so you
-          drive from the results. Add up to {MAX_ITEMS} records.</p>
+        <div className="ledeRow">
+          <p className="lede">Describe one record at a time. The assistant runs the search, then steps aside so you
+            drive from the results.</p>
+          <button type="button" className="helpbtn" onClick={function () { setHelpOpen(true); }}>
+            Click for detailed explanation
+          </button>
+        </div>
         <div className="split" style={{ marginTop: '8px' }}>
           {renderItemRail()}
           {renderRightPanel()}
@@ -822,6 +839,28 @@ export default function PublicPortalWizardPage() {
         </div>
 
         {body}
+      </div>
+
+      {/* Guidance carried over from the portal-redesign markups (uploads/portal flow and screenshots.doc, p.2). */}
+      <div className={'scrim' + (helpOpen ? ' on' : '')}>
+        <div className="modal help">
+          <h3>Writing a good record description</h3>
+          <p>You can search for more than one type of record, but <b>every search must be as specific as
+            possible</b>, with a description that is narrow and clear.</p>
+          <p>For example, if you're looking for a copy of building permits issued for all addresses on Main
+            Street last year, that is a clear and specific request for one type of record — <b>although the
+            result might include several building permits</b> meeting that criteria. However, if you also
+            wanted business licenses issued last year that include Main Street in the address, that cannot be
+            combined with the request for building permits. Describe it as a separate item.</p>
+          <p className="note">While the AI-powered portal will attempt to provide search results for review,
+            certain types of requests are not in a format that allows an immediate view of results, and require
+            search and processing by the Open Records team. This includes requests for paper records,
+            video/audio, emails, and other miscellaneous record types. You can still submit a request for those
+            record types through this portal, but search results will not be displayed for selection.</p>
+          <div className="actions">
+            <button className="btn sm" onClick={function () { setHelpOpen(false); }}>Got it</button>
+          </div>
+        </div>
       </div>
 
       <div className={'scrim' + (removeOpen ? ' on' : '')}>
