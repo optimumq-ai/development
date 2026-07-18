@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OptimumQ — Prototypes</title>
+<style>
+  :root{--page:#D8E0E8;--surface:#fff;--civic:#1F4E79;--ink:#14202B;--muted:#5B6B7A;--hair:#C9D6E2;
+    --sans:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;--serif:Georgia,serif}
+  @media (prefers-color-scheme:dark){:root{--page:#0A1017;--surface:#131E29;--civic:#5B93C7;--ink:#E6EEF5;--muted:#93A6B6;--hair:#2A3B4B}}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--page);color:var(--ink);font-family:var(--sans);line-height:1.5}
+  .wrap{max-width:760px;margin:0 auto;padding:48px 22px}
+  h1{font-family:var(--serif);font-size:26px;margin:0 0 4px}
+  .sub{color:var(--muted);font-size:13px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:26px}
+  .note{color:var(--muted);font-size:13px;margin:0 0 22px;max-width:60ch}
+  .card{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--hair);
+    border-radius:12px;padding:16px 18px;margin-bottom:10px;text-decoration:none;color:inherit;
+    box-shadow:0 1px 2px rgba(20,32,43,.06)}
+  .card:hover{border-color:var(--civic)}
+  .ico{font-size:26px;flex:none}
+  .t{font-weight:600}
+  .d{font-size:13px;color:var(--muted)}
+  .go{margin-left:auto;color:var(--civic);font-weight:600;font-size:14px;white-space:nowrap}
+  footer{margin-top:26px;color:var(--muted);font-size:12px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Open Records — Prototypes</h1>
+    <div class="sub">City of Autumn Falls · design review</div>
+    <p class="note">Clickable design prototypes. These are wireframes for review — not the live application.
+      Search outcomes and email verification are simulated.</p>
+
+    <a class="card" href="/prototypes/portal-wizard.html">
+      <span class="ico">🏛️</span>
+      <span><span class="t">Public request wizard</span><br>
+        <span class="d">The reconciled §2c wizard — verify gate, item loop, match / Case A / Case B, submit.</span></span>
+      <span class="go">Open →</span>
+    </a>
+
+    <!-- Add more prototypes here as they're built:
+    <a class="card" href="/prototypes/NAME.html">
+      <span class="ico">🧩</span>
+      <span><span class="t">Title</span><br><span class="d">One-line description.</span></span>
+      <span class="go">Open →</span>
+    </a>
+    -->
+
+    <footer>Reach this page any time at <b>/prototypes/</b></footer>
+  </div>
+</body>
+</html>
