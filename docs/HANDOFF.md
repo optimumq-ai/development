@@ -4689,3 +4689,25 @@ at 9 rows throughout). Each drove the wizard through a real 2-turn agent convers
 
 **No portal work remains open.** All four intake dimensions (email/postal delivery, waiver, commercial) are
 proven against the live system. Backlog unchanged from (f).
+
+---
+
+## 2026-07-18 (h) — verify_stage_bypass flake DIAGNOSED + FIXED (`5062b67`)
+The long-flagged intermittent red (`1: stage = closed, status = closed`, lines 100/152) was NOT a timestamp
+compare (the old guess). **Root cause:** `/public/submit` kicks `onIntake` in the BACKGROUND; its classifier
+call takes seconds, and `onIntake` applied the routed stage off the request row it read at the TOP of the
+function. When the harness closed the request (nonpayment close / tickler withdrawal) *before* that slow intake
+landed, the late `onIntake` re-routed it OUT of `closed` — `applyStageTransition` has **no from-closed guard**.
+Pure timing-on-classifier-latency, hence "2× in 2 days, passed on reruns."
+
+**Fix (product):** `workflowEngine.onIntake` now re-reads the CURRENT status right before mutating and bails if
+the request went `closed` — a terminal request must never be revived or left with claimable tasks by a late
+background router. Scoped to the one background router; explicit reopen/reissue paths unaffected.
+**Fix (test):** made it DETERMINISTIC — `verify_stage_bypass` now forces the exact late landing (`onIntake` with
+a stub matcher, no Anthropic) right after the close and asserts it stays closed with no task spawned. No timing
+dependence anymore. **Break-tested:** disabling the guard → the new assertion goes red (9/11); restored.
+Suite GREEN **745/0** (verify_stage_bypass 26/26), live untouched.
+
+### Remaining backlog (now one item lighter)
+dashboard / ARIA / AppLayout badge / tickler leaf-fact reads; MRR classification roll-up (§6);
+`source_request_id` toll attribution. (`verify_stage_bypass` flake — DONE.)
