@@ -4667,3 +4667,25 @@ for rollback (revert `03d227b` to fully roll back). **Unchanged backlog** (untou
 ARIA / AppLayout badge / tickler leaf-fact reads; `verify_stage_bypass` flake; MRR classification roll-up (§6);
 `source_request_id` toll attribution. Optional portal follow-ups: retire split-canvas once confident; R9
 `request_search_intents` persistence (still client-side-until-submit per §0).
+
+---
+
+## 2026-07-18 (g) — All 4 intake dimensions smoke-tested live; commercial→purpose gap closed
+Live end-to-end smokes at `/portal/request` (real agent, real submit, verified in DB, purged after — live steady
+at 9 rows throughout). Each drove the wizard through a real 2-turn agent conversation → real search → submit.
+- **Email delivery** — covered by (f)'s live smoke.
+- **Postal delivery** ✅ — address block gates Proceed (empty → disabled); on submit the parent persisted
+  `delivery_method='mail'` + all five `mailing_*` fields (state auto-upper-cased `tx`→`TX`).
+- **Fee waiver** ✅ — `fee_waiver_requested=1`, `fee_waiver_reason` captured verbatim, `fee_waiver_status=null`
+  (undecided → staff), `requestor_type='individual'`.
+- **Commercial** ✅ — `requestor_type='commercial'`, `fee_waiver_requested=0`.
+
+**Gap the commercial smoke found + FIXED (`97a0764`):** the wizard captured `requestor_type='commercial'` but
+`purpose` stayed null, so the staff estimate would not default to commercial (§5). Frontend-only couldn't fix it
+— `/public/submit` never forwards `purpose`. Fixed at the ONE creation helper: `requestCreate` now derives
+`purpose='commercial'` from `requestor_type='commercial'` (explicit `f.purpose` still wins), covering ALL paths
+(wizard/form/connectors). Re-verified: commercial→`purpose='commercial'`, individual→null (no regression).
+**Full suite GREEN 743/0, live untouched.**
+
+**No portal work remains open.** All four intake dimensions (email/postal delivery, waiver, commercial) are
+proven against the live system. Backlog unchanged from (f).
