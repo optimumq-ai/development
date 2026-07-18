@@ -1,6 +1,23 @@
 # Consolidated Spec — Domain 1: Public Portal & Intake Agent
 **Current design only.** Superseded content removed. Verified against code + DB on 2026-07-08.
-Status legend: `[BUILT]` · `[PARTIAL]` · `[NOT BUILT]` · `[DEFERRED]` · `[DECISION]`
+Status legend: `[BUILT]` · `[PARTIAL]` · `[NOT BUILT]` · `[DEFERRED]` · `[DECISION]` · `[INVARIANT]`
+
+## 0. Architectural invariant — the request is born only at Submit `[INVARIANT — LOCKED 2026-07-18]`
+**The entire intake flow is client-side state until the citizen presses Submit. The request row (parent + children), the statutory clock, and every downstream side-effect come into existence in ONE transaction at `POST /public/submit` (`requestCreate.createRequest`) — never before.**
+
+Grounded in code (verified 2026-07-18):
+- A citizen request has exactly ONE birth site — `createRequest`, called only from the submit route (`publicChat.js:374`). Nothing in the pre-submit flow writes a `requests` row.
+- The AI chat (`/public/chat`) persists nothing; the per-item searches (`/native-search`, `/refine-search`, `[[SEARCH_QUERY]]`, `[[EMAIL_SEARCH]]`) are read-only. The only pre-submit write is a self-expiring `email_verifications` token (carries `expires_at`, no clock, no worklist, no obligation).
+- The statutory clock starts at creation (`tolling.startClocks`), i.e. at Submit. Before Submit there is no clock to breach and no row to reap.
+
+Consequences (all three are the reason the invariant is stated, not left implicit):
+1. **Abandonment is a non-event.** A started-but-abandoned session never becomes a row, so nothing has to be *identified* as abandoned or *forgotten*. No `draft` status, no reaper/cron, no orphan cleanup — that machinery does not exist and is not needed.
+2. **No mid-loop persistence — the trap this invariant guards.** The per-record loop's mid-flow actions — "Submit for Open Records team search", record selection, marking an item complete — MUST be buffered in browser state and flushed in the single submit payload (`searchIntents[]` / `selectedRecords[]` / `children[]`). A mid-loop write that routed a child into a worklist before Submit would strand an orphan child under no parent the instant the citizen closes the tab — the silent-orphan failure this project is scarred by. On the results screens, **"Submit" means _tag this item's disposition_, not _persist and route now_.**
+3. **No citizen-driven abandonment after Submit either.** Once submitted, a request is a live statutory obligation the city must fulfill on the clock; only the city closes it, per statute. "Abandoned" applies to nothing in the persisted model.
+
+Accepted tradeoff (v1): zero pre-submit persistence means a citizen who loses their browser mid-session loses the in-progress entry — there is no save-and-resume. This is deliberate for v1 (simpler; no half-built PII at rest; no reaper). **If save-and-resume is ever adopted it is a deliberate future decision that ADDS** a `draft` request status that does NOT start the statutory clock **and** a scheduled reaper that deletes stale drafts — neither may be introduced implicitly. `[FUTURE — DEFERRED]`
+
+Applies to BOTH the current split-canvas intake (§2b) and the wizard / one-item-loop redesign under discussion (`uploads/portal flow and screenshots.doc`; mockups `uploads/screen*.xls`). See `SPEC_parent_child_lifecycle.md` for the parent/child model this protects.
 
 ## 1. Portal landing page `[BUILT — reworked 2026-07-07]`
 Two-block layout under a centered welcome: Public Ready Records Library description + "Access Public Ready Records Library" button (→ `/portal/library`); Open Records Request Portal description + "Create an Open Records Request" button. Both solid blue, equal 340px. **Cut over 2026-07-10:** "Create an Open Records Request" and the deep-link `/portal?start=request` now open the **split-canvas intake** at **`/portal/request`** (§2b); `/portal/v2` redirects there. The landing chooser itself is unchanged.
