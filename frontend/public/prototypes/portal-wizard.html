@@ -5,7 +5,7 @@
     --civic:#1F4E79; --civic-700:#163A5C; --civic-tint:#E7EEF6;
     --ink:#14202B; --muted:#5B6B7A; --hair:#C9D6E2;
     --active:#C77A0A; --active-bg:#FBEFD7; --active-line:#E6B863;
-    --done:#2E7D4F; --done-bg:#E1F0E7; --done-line:#8FC7A6;
+    --done:#2E7D4F; --done-bg:#E1F0E7; --done-line:#8FC7A6; --done-box:#BFE3CC;
     --danger:#B23A3A; --danger-bg:#F6E4E3;
     --shadow:0 1px 2px rgba(20,32,43,.06),0 6px 20px rgba(20,32,43,.06);
     --radius:10px;
@@ -18,7 +18,7 @@
       --civic:#5B93C7; --civic-700:#7FB0DC; --civic-tint:#1B2C3B;
       --ink:#E6EEF5; --muted:#93A6B6; --hair:#2A3B4B;
       --active:#E0A94A; --active-bg:#3A2E17; --active-line:#7A5F2C;
-      --done:#66B487; --done-bg:#17301F; --done-line:#2F6043;
+      --done:#66B487; --done-bg:#17301F; --done-line:#2F6043; --done-box:#1E4630;
       --danger:#D77C7C; --danger-bg:#3A1E1E;
       --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
     }
@@ -28,7 +28,7 @@
     --civic:#5B93C7; --civic-700:#7FB0DC; --civic-tint:#1B2C3B;
     --ink:#E6EEF5; --muted:#93A6B6; --hair:#2A3B4B;
     --active:#E0A94A; --active-bg:#3A2E17; --active-line:#7A5F2C;
-    --done:#66B487; --done-bg:#17301F; --done-line:#2F6043;
+    --done:#66B487; --done-bg:#17301F; --done-line:#2F6043; --done-box:#1E4630;
     --danger:#D77C7C; --danger-bg:#3A1E1E;
     --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
   }
@@ -37,7 +37,7 @@
     --civic:#1F4E79; --civic-700:#163A5C; --civic-tint:#E7EEF6;
     --ink:#14202B; --muted:#5B6B7A; --hair:#C9D6E2;
     --active:#C77A0A; --active-bg:#FBEFD7; --active-line:#E6B863;
-    --done:#2E7D4F; --done-bg:#E1F0E7; --done-line:#8FC7A6;
+    --done:#2E7D4F; --done-bg:#E1F0E7; --done-line:#8FC7A6; --done-box:#BFE3CC;
     --danger:#B23A3A; --danger-bg:#F6E4E3;
     --shadow:0 1px 2px rgba(20,32,43,.06),0 6px 20px rgba(20,32,43,.06);
   }
@@ -77,7 +77,7 @@
     font-size:13px;color:var(--muted);white-space:nowrap}
   .node .dot{width:20px;height:20px;border-radius:50%;border:2px solid var(--hair);display:grid;
     place-items:center;font-size:11px;font-weight:700;color:var(--muted);background:var(--panel)}
-  .node.done{color:var(--done)} .node.done .dot{border-color:var(--done-line);background:var(--done-bg);color:var(--done)}
+  .node.done{color:var(--done);background:var(--done-box)} .node.done .dot{border-color:var(--done-line);background:var(--surface);color:var(--done)}
   .node.active{color:var(--active);background:var(--active-bg)}
   .node.active .dot{border-color:var(--active-line);background:var(--surface);color:var(--active)}
 
