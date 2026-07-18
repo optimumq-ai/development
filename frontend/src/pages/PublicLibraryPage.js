@@ -177,7 +177,7 @@ export default function PublicLibraryPage() {
         </div>
         <div style={{ textAlign: 'right', maxWidth: '360px' }}>
           <div style={{ fontSize: '14px', color: '#4B5563', marginBottom: '8px', lineHeight: 1.45 }}>Didn't find what you were looking for? Click to create an Open Records Request</div>
-          <a href="/portal?start=request" style={{ display: 'inline-block', padding: '11px 22px', borderRadius: '10px', background: BLUE, color: 'white', fontSize: '14px', fontWeight: 600, textDecoration: 'none', boxShadow: '0 2px 10px rgba(31,78,121,0.25)' }}>Open Records Portal</a>
+          <a href="/portal?start=request" style={{ display: 'inline-block', padding: '11px 22px', borderRadius: '10px', background: BLUE, color: 'white', fontSize: '14px', fontWeight: 600, textDecoration: 'none', boxShadow: '0 2px 10px rgba(31,78,121,0.25)' }}>Open Records Request</a>
         </div>
       </header>
       <div style={sWrap}>

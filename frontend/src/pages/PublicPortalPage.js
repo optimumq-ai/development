@@ -44,7 +44,7 @@ export default function PublicPortalPage() {
       </header>
       <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '40px 24px' }}>
         <div style={{ maxWidth: '860px', width: '100%', textAlign: 'center' }}>
-          <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#1F4E79', margin: '0 0 30px', lineHeight: '1.2', textAlign: 'center' }}>Welcome to the {agencyName} Public Records Portal</h1>
+          <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#1F4E79', margin: '0 0 30px', lineHeight: '1.2', textAlign: 'center' }}>Welcome to the {agencyName}<br />Public Records Portal</h1>
           <div style={rowStyle}>
             <p style={blurbStyle}>
               The <strong>Public Ready Records Library</strong> contains records that have been processed and are ready for immediate download. You can browse records, or use the search tool if you're seeking a specific record.
