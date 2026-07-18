@@ -151,6 +151,9 @@ primary action that calls the central transition. Blank-but-real is the goal.
 
 **Phase 3 — thicken by priority**, replacing stubs with real screens; retire the v1 duplicates (§2.3).
 
+**Parallel track — the demo fixture importer (§7).** Independent of the phases and useful from Phase 2 onward,
+since it is what puts requests at stages the system has never reached.
+
 ---
 
 ## 5. Decisions needed from Kevin
@@ -184,3 +187,54 @@ The specs describe a **pre-centralization world** and will actively mislead anyo
 
 Recommend correcting these **as each phase touches them** rather than in one pass — the same-commit rule
 then does the work incrementally.
+
+---
+
+## 7. Demo/test fixture importer `[SCOPED, NOT BUILT]`
+
+**Ask** (Kevin, 2026-07-18): a tool to import ~30 requests from a spreadsheet, **overriding the submitted
+date** — and payment dates — so time budgets, overdue status, and payment state compute normally. He can enter
+30 requests by hand in an hour; what he cannot do by hand is fake the dates.
+
+### The shape matters more than the tool
+
+**Rejected: spreadsheet → INSERT into mid-pipeline states with chosen dates.** This is what the project rule
+against direct inserts exists to prevent, and the reason is not purity — it is that **derived state would not
+cohere**. Deadlines, tolling, `task_events`, budget burn and `request_history` would each be computed from a
+different notion of "now," producing statuses that cannot actually arise in the product. The fixture would
+then be the thing being debugged.
+
+**Adopted: a replay tool with an injectable clock.** Each row is created through the ONE creation helper and
+then driven through **real** transitions and real payment paths in order, with an "as of" timestamp supplied
+to each step. Time travel, not row forgery. Every fixture request therefore carries authentic history,
+clocks and task events — it genuinely *is* a request submitted 40 days ago, so overdue and budget burn are
+correct because they are computed from real facts rather than asserted.
+
+### The one hard part: a settable time source
+
+The code currently takes "now" from whatever writes it. Known obstacle to check FIRST, before estimating:
+**`task_events` is written by a DB trigger**, with `assigned_at` / `in_progress_at` / `done_at` denormalized
+onto `tasks` (`SPEC_tasks_roles_mrr_fees.md` §2.1). Whether that trigger stamps `now()` or accepts a supplied
+value decides the size of this build. Same question for `tolling` clock starts and `request_history`.
+
+### Spreadsheet shape (sketch)
+
+Per row: submitted date · requestor · description · record type · delivery/fee choices · then an **event
+script** — e.g. `routed +2d`, `estimate sent +5d`, `deposit paid +9d`, `search complete +21d` — with amounts.
+The tool walks the script, advancing the injected clock per step.
+
+### Non-negotiables
+
+1. **Structurally incapable of running against live.** Guard it the way `tests/testEnv.js` already guards the
+   harnesses — a tool whose entire purpose is manufacturing backdated requests must not be able to point at
+   production. (See the (m) note: live now contains real tester data.)
+2. **The spreadsheet lives in the repo.** The win is not the saved hour, it is **reproducibility** — rebuild
+   the demo DB on demand, tweak one scenario, get identical output. Thirty hand-entered requests evaporate
+   the next time the schema moves.
+
+### Why it pays for itself here
+
+It is also the **test corpus for this whole effort**: it puts requests at stages the system has never
+reached. Today only `intake`, `record_search` and `delivery` have ever been exercised by real data (§2.1),
+so the entire mid-pipeline — fee review, awaiting payment, the legal branches, redaction — has no specimen to
+build a screen against.

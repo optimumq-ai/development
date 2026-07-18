@@ -4995,3 +4995,17 @@ incrementally.
 
 ### Next session
 Start fresh on Phase 0 (foundation repairs, no new screens). Read the brief first.
+
+**Added to the brief after the above — §7 demo/test fixture importer `[SCOPED, NOT BUILT]`.** Kevin wants to
+import ~30 requests from a spreadsheet with **overridden submitted/payment dates** so budgets, overdue and
+payment state compute normally (he can key 30 rows by hand; he cannot fake dates). **Shape decided:** NOT
+spreadsheet→INSERT into mid-pipeline states — derived state wouldn't cohere and the fixture becomes the thing
+being debugged. Instead a **replay tool with an injectable clock**: create through the ONE helper, then drive
+REAL transitions and payment paths in order with an "as of" timestamp per step. Time travel, not row forgery.
+**Check FIRST before estimating:** `task_events` is written by a DB TRIGGER with `assigned_at`/`in_progress_at`/
+`done_at` denormalized onto tasks — whether that trigger stamps `now()` or accepts a supplied value decides
+the size of the build; same question for tolling clock starts and `request_history`. **Non-negotiables:**
+guard it non-live like `tests/testEnv.js` (live now holds real tester data), and keep the spreadsheet IN THE
+REPO so the demo DB is reproducible rather than a one-off hour of typing. It doubles as the test corpus for
+this effort — only `intake`/`record_search`/`delivery` have ever been reached by real data, so the whole
+mid-pipeline currently has no specimen to build screens against.
