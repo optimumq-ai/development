@@ -133,7 +133,10 @@ function normalize(f) {
     record_type_id: f.recordTypeId || null,
     fee_waiver_requested: f.feeWaiverRequested ? 1 : 0,
     fee_waiver_reason: f.feeWaiverReason || null,
-    purpose: f.purpose || null,
+    // §5 — a commercial requester implies commercial purpose, so the staff estimate opens on commercial
+    // rates (staff confirm). Explicit f.purpose still wins. Derived in the ONE creation helper so every
+    // path (portal wizard, form, connectors) is covered, not just the portal.
+    purpose: f.purpose || (f.requestorType === 'commercial' ? 'commercial' : null),
     mailing_street1: f.mailingStreet1 || null,
     mailing_street2: f.mailingStreet2 || null,
     mailing_city: f.mailingCity || null,
