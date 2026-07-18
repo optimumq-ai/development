@@ -4783,3 +4783,59 @@ Playwright rather than driving a real round-trip.
 - **Unchanged backlog:** dashboard / ARIA / AppLayout badge / tickler leaf-fact reads; MRR classification
   roll-up (§6); `source_request_id` toll attribution; retire split-canvas once confident; R9
   `request_search_intents` persistence (client-side until submit per §0).
+
+---
+
+## 2026-07-18 (j) — Wizard screen review (Kevin walked all 5); two real defects found + fixed
+Continuation of (i). Kevin asked to SEE the remaining wizard screens; each was rendered in the running app and
+reviewed. Two genuine defects surfaced out of that review (neither was a cosmetic ask) and both are fixed.
+All on `main`, pushed.
+
+### How the gated screens were rendered — no live writes
+Item Search / Results / Submitted all sit behind the STRICT verify gate, and Submitted normally requires a real
+submit. Rather than create live requests and purge them (the (e)–(g) pattern), the gate was mocked
+**client-side in Playwright** (`page.route` on `/public/request-verification` + `/verify-status`), and for the
+confirmation, `/public/submit` too. **Nothing was written to live all session.** `/public/chat` was left REAL —
+Results was driven through a genuine 2-turn agent conversation and a genuine semantic search. The confirmation
+number shown in those screenshots (`2026-000042`) is FAKE; the real submit contract stays proven by (e)/(f).
+
+### Defects found + fixed
+- **Postal requestors were told nothing about their confirmation email (`4c9d26b`).** The Submitted screen
+  appended "We've also emailed a copy to you" only when `delivery_method === 'email'`. That contradicts §2c G5
+  (email is the SOLE comms channel; delivery method governs only how RECORDS ship). **Checked the direction of
+  the fix before making it** — `sendSubmissionConfirmation` (`publicChat.js:495`) fires on EVERY submit and has
+  no delivery-method branch, so the copy was concealing a real email, not describing a real absence. Had the
+  backend actually skipped postal, the correct fix would have been the opposite. Verified by driving the POSTAL
+  path end-to-end, asserting the option was genuinely selected (`class="opt checked"`) and gating Proceed on an
+  address — otherwise the screenshot would just have been the email path again. Spec §2c G5 updated.
+- **Confirmation checkmark was a bare emoji (`166e8a1`).** U+2705 at `font-size:52px` — renders as a different
+  platform glyph on macOS/Windows/Android, ignores the palette, and was the one element that looked pasted on.
+  Now an inline stroked SVG check in a tinted disc built from the existing `--done` tokens, so it matches the
+  rail's completed nodes and flips with the theme (verified in BOTH — the disc uses `--done-bg`/`--done-line`,
+  which invert). Also gained `role="img"` + `aria-label="Submitted"`; the emoji was announced as "white heavy
+  check mark," a decoration description rather than a status.
+
+### Flagged to Kevin, NOT actioned — his call, not defects
+- **Item rail renders all 10 empty slots upfront** (Item Search AND Results AND Submit-or-Continue) — eats the
+  vertical space and implies you ought to fill them. Showing active + completed, with the existing "Maximum 10
+  items per request" line carrying the cap, would be tighter.
+- **Two assistant bubbles open the conversation** ("Thank you for using…" then "Please describe a record…")
+  where one would do.
+- **Large dead vertical space** in the Item Search / Results panels — records sit in the top third, actions are
+  pinned low. Most noticeable when a search returns only 1–2 records.
+
+### Worth knowing before any live demo
+**The result set is not stable across runs.** The same query, phrased identically, returned 2 records on one
+run and 1 on the next — the agent's generated search query varies slightly, and the search is semantic. Expected
+behavior, but do NOT script a demo around a specific record appearing.
+
+### Screens now reviewed
+Begin, Your Information, Item Search, Results (both zero-selected and with a selection — the actions swap),
+Submit-or-Continue, Submitted (light + dark). **All 5 wizard steps have now been seen and signed off**, versus
+(e)–(f) where only the flow was proven.
+
+### Backlog — unchanged
+dashboard / ARIA / AppLayout badge / tickler leaf-fact reads; MRR classification roll-up (§6);
+`source_request_id` toll attribution; retire split-canvas once confident; R9 `request_search_intents`
+persistence (client-side until submit per §0); singular "Open Record" left in `PublicPortalV2Page.js`
+(retired split-canvas, rollback-only).
