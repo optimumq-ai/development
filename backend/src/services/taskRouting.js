@@ -275,6 +275,14 @@ var STAGE_TASK = { record_search: 'record_search', redaction_review: 'redaction'
 var REDACTION_STAGES = { redaction_review: 1, redaction: 1 };
 // Legal task types are office-level (v3): they pool to legal staff office-wide, not to the request's team.
 var LEGAL_TYPES = { legal_review: 1, legal_redaction: 1 };
+
+// The FAMILY a stage's task belongs to. `redaction` and `legal_redaction` are one family — a request gets one
+// or the other, never both — so they must be treated as interchangeable both when deciding whether a task
+// already exists (spawnForStage) and when deciding whether a task is stale (staleStageTasks below).
+function taskFamily(ttype) {
+  if (ttype === 'redaction' || ttype === 'legal_redaction') return ['redaction', 'legal_redaction'];
+  return ttype ? [ttype] : [];
+}
 var LEGAL_FLAG_VALUES = ['SENSITIVE', 'LEGAL_HOLD', 'ONGOING_INVESTIGATION'];
 
 // A request needs legal (advanced) redaction if a director escalated it (legal_flag) or the classifier
@@ -367,6 +375,29 @@ async function applyStageTransition(requestId, toStage, opts) {
     "INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes, stage_from, stage_to, created_at) " +
     "VALUES (?,?,?,?,?,?,?,?, datetime('now'))",
     [uuidv4(), requestId, opts.actorId || null, opts.actorName || 'System', opts.action || 'STAGE_ADVANCED', opts.notes || null, fromStage, toStage]);
+  // A TASK BELONGS TO THE STAGE THAT IMPLIED IT. When the request moves to a stage that implies a DIFFERENT
+  // task, the old stage's task is stale and must not stay claimable.
+  //
+  // WHAT THIS FIXES (brief §3.2): `legal_review` spawns at exemption_review/ag_review, and the only thing that
+  // ever cleared it was `closed`. So `/requests/:id/ag-ruling` — which moves ag_review -> redaction_review —
+  // left an OPEN, POOLED legal_review task on a request that had already moved to redaction. A legal staffer
+  // could claim and work an exemption review for a decision that was made and acted on days earlier, and the
+  // request would carry an open legal_review and an open redaction at the same time.
+  //
+  // FAMILY-AWARE ON PURPOSE: redaction_review -> redaction implies `redaction` on BOTH sides, so the in-flight
+  // redaction task survives that move (cancelling it there would destroy real work). Likewise
+  // exemption_review -> ag_review is legal_review on both sides. Only a genuine change of task is cleared.
+  // `closed` is excluded because the branch below already cancels EVERY open task, which is stricter.
+  if (toStage !== 'closed') {
+    var leaving = taskFamily(STAGE_TASK[fromStage]);
+    var arriving = taskFamily(STAGE_TASK[toStage]);
+    var stale = leaving.filter(function (x) { return arriving.indexOf(x) === -1; });
+    if (stale.length) {
+      var sph = stale.map(function () { return '?'; }).join(',');
+      await run("UPDATE tasks SET status = 'cancelled', updated_at = datetime('now') WHERE request_id = ? AND type IN (" + sph + ") AND status IN ('open','assigned','in_progress','returned','awaiting_review')",
+        [requestId].concat(stale));
+    }
+  }
   var task = await spawnForStage(requestId, toStage, opts.createdBy || opts.actorId || 'system');
   // A CLOSED request must not leave claimable work behind. Without this, closing a request (delivery,
   // tickler lapse, nonpayment, deposit withdrawal) left its open tasks sitting in the pools — a staffer

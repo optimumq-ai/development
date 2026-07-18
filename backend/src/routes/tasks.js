@@ -193,12 +193,57 @@ router.post('/:id/resolve', requireAuth, async function (req, res) {
   try {
     var t = await get('SELECT * FROM tasks WHERE id = ?', [req.params.id]);
     if (!t) return res.status(404).json({ error: 'Task not found' });
-    if (t.type !== 'record_search') return res.status(400).json({ error: 'Not a record-search task' });
+    if (t.type !== 'record_search' && t.type !== 'legal_review') {
+      return res.status(400).json({ error: 'This task type has no resolution path here.' });
+    }
 
     var outcome = String((req.body && req.body.outcome) || '');
     var notes = String((req.body && req.body.notes) || '').trim();
     var rid = t.request_id;
     var actor = { actorId: req.user && req.user.sub, actorName: (req.user && req.user.name) || 'Staff' };
+
+    // ==========================================================================================
+    // RESOLVE A LEGAL REVIEW (brief §3.2).
+    //
+    // `legal_review` spawns at exemption_review / ag_review and, until now, NOTHING could complete it: no
+    // route resolved it, and the 2-minute reconciler re-created it for as long as the request sat at that
+    // stage — correctly, since the stage genuinely still needed its task. The removed
+    // `POST /tasks/:id/complete` was the only thing that could mark it done, and doing so would have left
+    // the request at exemption_review with no task and no way forward. So the fix is not "let it be
+    // completed" — it is "let it be DECIDED", because completing a legal review IS a stage decision.
+    //
+    // THE OUTCOME VOCABULARY IS DELIBERATELY THE SAME AS THE AG RULING'S (`/requests/:id/ag-ruling`):
+    // sustained / overruled / partial, with the same destinations. An internal exemption review and an AG
+    // pre-clearance ruling answer the SAME question — does the withholding stand? — and giving them two
+    // vocabularies would mean two ways to say one thing.
+    //
+    // A NOTE IS REQUIRED (Kevin, 2026-07-18). Asserting an exemption is a legal act the city may later have
+    // to defend; "the reviewer clicked approve" is not a defence. It costs nothing to type and it is the
+    // only durable record of WHY the material was withheld or released.
+    // ==========================================================================================
+    if (t.type === 'legal_review') {
+      var LEGAL_OUTCOMES = {
+        sustained: { stage: 'redaction_review', label: 'withholding sustained' },
+        partial:   { stage: 'redaction_review', label: 'partial release' },
+        overruled: { stage: 'delivery',         label: 'must release' }
+      };
+      var decision = LEGAL_OUTCOMES[outcome];
+      if (!decision) {
+        return res.status(400).json({ error: 'Outcome must be one of: sustained, partial, overruled.', code: 'UNKNOWN_OUTCOME' });
+      }
+      if (!notes) {
+        return res.status(422).json({
+          error: 'A note is required to record a legal review. Say what was withheld or released, and on what basis.',
+          code: 'NOTE_REQUIRED'
+        });
+      }
+      await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [req.params.id]);
+      await tr.applyStageTransition(rid, decision.stage, Object.assign({
+        action: 'LEGAL_REVIEW_RECORDED',
+        notes: 'Legal review recorded (' + decision.label + '). ' + notes
+      }, actor));
+      return res.json({ ok: true, outcome: outcome, stage: decision.stage });
+    }
 
     if (outcome === 'found') {
       var inc = await get('SELECT count(*)::int AS n FROM request_files WHERE request_id = ? AND responsive = 1', [rid]);
