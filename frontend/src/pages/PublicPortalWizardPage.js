@@ -435,7 +435,7 @@ export default function PublicPortalWizardPage() {
         <div style={{ marginTop: '10px' }}>
           <div className="field">
             <label htmlFor="pwz-name">Full name</label>
-            <input id="pwz-name" type="text" value={name} placeholder="Jordan Rivera"
+            <input id="pwz-name" type="text" value={name} placeholder="First and Last name"
               onChange={function (e) { setName(e.target.value); }} />
           </div>
 
