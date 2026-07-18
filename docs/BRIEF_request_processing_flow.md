@@ -84,22 +84,50 @@ predate parent/child and **any parent→child join silently drops them**.
 These are why processing "feels impossible to sort out." Each is small; together they are the difference
 between a new flow that clarifies and one that inherits the fog.
 
-### 3.1 The leaf-fact bug class — *fix this first*
-Parent facts (`request_number`, `is_mrr`, requestor, money, statutory clock) are being read off **child**
-rows, so screens show a citizen-invisible suffixed number and duplicated facts:
+### 3.1 The leaf-fact bug class — ~~fix this first~~ **DONE 2026-07-18 (n), and the list below was wrong**
 
-| Screen | Reads off the child |
-|---|---|
-| `RequestWorkspacePage` | `request_number`, `is_mrr`, requestor, `deadline_date`, `fee_waiver_requested` — `GET /requests/:id` is a raw `SELECT r.*` with no parent resolution |
-| `MyTasksPage` | `requestor_name`, `deadline_date` (number is correct) |
-| `RecordSearchTaskPage` | requestor, `deadline_date` |
-| `EstimateTaskPage` | requestor; money keyed on child id |
-| `routes/feeEstimates.js` | never imports `requestScope` at all |
-| `routes/clocks.js` | **zero** parent/child scoping, though the clock is a parent field |
+> **CORRECTION.** The table in the original brief was assembled from a grep sweep, not from reading the
+> implementations. Checked against the code, **only one of its six entries was a real bug** — and it was worse
+> than described, while a seventh problem it barely mentioned turned out to be the serious one. Recorded here
+> because the wrong version of this list would have sent a session chasing four non-bugs.
 
-**One backend pass over `GET /requests/:id`, `/tasks/mine` and `/tasks/:id` fixes four screens at once.**
-Do it before building anything new, so new screens inherit correct facts by construction. (This is the
-long-standing "leaf-fact reads" backlog item, now enumerated.)
+**REAL — and now fixed.** `GET /requests/:id` was a raw `SELECT r.*` with no parent resolution. The
+consequence was sharper than "shows a suffixed number": **there was no id you could pass that returned a
+correct, complete picture of a request.** Proven live against `2026-000002` (a 3-child MRR):
+
+| Row addressed | `request_number` | `is_mrr` | `stage` |
+|---|---|---|---|
+| the parent | `2026-000002` ✅ | `1` ✅ | **`null`** ❌ |
+| each child | `2026-000002-N` ❌ | **`0`** ❌ | `intake` ✅ |
+
+So the workspace either knew who the citizen was or knew what the work was, never both — and the **MRR badge
+silently vanished** on exactly the screens where staff do the work, because `requestCreate` forces
+`is_mrr = 0` on every child. Fixed by resolving parent-level facts through the parent
+(`scope.parentFact`), leaving description/stage/routing on the row addressed. Verified across all 11 live
+rows including the legacy unwrapped `SYS-`/`LIBRARY` containers.
+
+**NOT BUGS — the brief was mistaken:**
+- **`routes/clocks.js`** is a thin passthrough to `tolling.js`, which resolves to the parent at **every**
+  entrypoint (`parentOf` / `RESOLVE_SQL`). Its own comment says this is enforced in the engine *deliberately*,
+  "because there are five call sites and only one invariant." Correct as written — do not "fix" it.
+- **`/tasks/mine`, `/tasks/:id`** already resolve `request_number` through the parent via
+  `numberExpr`/`numberJoin`. Real gap is smaller and different: `is_mrr` is not selected at all.
+- **`requestor_name` / `deadline_date` read off a child** are **true copies by design**, not stale reads.
+  `requestCreate` copies citizen identity down to every child, and `tolling.writebackDeadline` cascades the
+  deadline to children *on purpose* so leaf-scoped worklists can display it. Verified identical on all live rows.
+
+### 3.1b Money is keyed on the CHILD — the real leaf-fact bug `[OPEN, DESIGN-GATED]`
+The one the original brief reduced to a parenthetical. **All 17 `/fee-estimates/request/:requestId`
+endpoints** use the id they are handed with **zero** parent resolution (39 raw uses), `paymentStatus.js` has
+none either, and `EstimateTaskPage` passes **`task.request_id` — the child**. Money is a PARENT fact
+(CLAUDE.md, `SPEC_parent_child_lifecycle` §4.2).
+
+For the 3-child MRR above that means **three independent money pots and a parent that owns none**: three
+estimates, three deposit ledgers, three payment states, and no request-level total to bill the citizen for.
+Not fixed here because it contains a genuine design question — **how do n children's fees roll up into one
+citizen bill?** — which is the same question the design-gated MRR hub (§14.3) exists to answer. It should be
+decided with that, not patched underneath it. Note this is latent, not yet damaging: live money is all zero
+because no request has reached `fee_review`.
 
 ### 3.2 `legal_review` spawns but can never complete
 `spawnForStage` creates it at `exemption_review`/`ag_review`; **no route resolves it**; the reconciler keeps
@@ -139,8 +167,9 @@ terminal request. Consider hoisting that guard into the central function.
 
 ## 4. Proposed sequence
 
-**Phase 0 — foundation (no new screens).** §3.1 leaf-fact pass; lock down §3.3 and add the stub-safe
-advance path; §3.2 `legal_review` resolution route. Small, high-leverage, and everything after inherits it.
+**Phase 0 — foundation (no new screens).** ~~§3.1 leaf-fact pass~~ **DONE (n)**; lock down §3.3 and add the
+stub-safe advance path; §3.2 `legal_review` resolution route. Small, high-leverage, and everything after
+inherits it. §3.1b (money on the child) is deferred to the MRR-hub design, not to Phase 0.
 
 **Phase 1 — decide the canonical flow (§5.1).** Which stages are in the v2 path. Cheap now, expensive once
 ten screens hang off it.

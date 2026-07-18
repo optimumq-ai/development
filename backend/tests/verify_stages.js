@@ -129,9 +129,18 @@ async function api(method, path, body) {
 
     await submit('Stage vocabulary check ' + TAG);
     var req = null;
-    for (var i = 0; i < 60 && !req; i++) { req = await db.get('SELECT id, request_number, stage FROM requests WHERE description LIKE ?', ['%' + TAG + '%']); await sleep(250); }
+    // `description` is a CHILD field (requestCreate NULLs it on the parent), so this row is the CHILD and its
+    // `request_number` carries the component suffix. The number the WORKSPACE must show is the PARENT's — the
+    // one the citizen was given. Resolve both: `citizenNumber` is what the UI is asserted on, `req.request_number`
+    // is kept so the suffix can be asserted ABSENT.
+    for (var i = 0; i < 60 && !req; i++) { req = await db.get('SELECT id, request_number, stage, master_request_id FROM requests WHERE description LIKE ?', ['%' + TAG + '%']); await sleep(250); }
     ok('a request was created through the real portal path', !!req);
     created.push(req.id);
+    var citizenNumber = req.request_number;
+    if (req.master_request_id) {
+      var par = await db.get('SELECT request_number FROM requests WHERE id = ?', [req.master_request_id]);
+      if (par) citizenNumber = par.request_number;
+    }
 
     // ---- 6. THE UI: the Advance button must offer the canonical next stage, not the legacy one.
     browser = await chromium.launch();
@@ -167,8 +176,15 @@ async function api(method, path, body) {
     page.on('pageerror', function (e) { errs.push(e.message); });
 
     await page.goto('http://localhost/requests/' + req.id, { waitUntil: 'networkidle' });
-    await page.waitForSelector('text=' + req.request_number, { timeout: 20000 });
+    await page.waitForSelector('text=' + citizenNumber, { timeout: 20000 });
     var body = await page.textContent('body');
+    // Lock in the parent-fact resolution on GET /requests/:id: the workspace is reached by the CHILD's id
+    // (that is the row that carries the stage being tested), and it must still title itself with the citizen's
+    // number. Before the fix this page rendered the suffixed child number and the assertion above passed for
+    // the wrong reason, so assert the suffix is ABSENT rather than trusting a substring match.
+    ok('the workspace shows the CITIZEN\'s request number (' + citizenNumber + '), not the child suffix',
+      body.indexOf(citizenNumber) >= 0 &&
+      (!req.master_request_id || body.indexOf(req.request_number) < 0));
 
     var stageNow = (await db.get('SELECT stage FROM requests WHERE id = ?', [req.id])).stage;
     var expectLabel = stages.LABELS[stages.next(stageNow)];

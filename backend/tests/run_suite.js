@@ -132,7 +132,10 @@ function run(cmd, argv, extraEnv) {
     // only way to find out is to re-run it by hand against a --keep'd DB that the run has already dirtied —
     // where the failure often does not reproduce. The suite should say what broke.
     if (Number(m[3]) > 0) {
-      out.split('\n').filter((l) => /^\s*FAIL\s/.test(l)).forEach((l) => console.log('        ' + l.trim()));
+      // `ERR`/`CLEANUP ERR` too: a harness that throws increments `fail` WITHOUT printing a `FAIL` line, so
+      // matching only /FAIL/ reported "1 fail" and then listed nothing — which is the exact blindness this
+      // block was added to remove.
+      out.split('\n').filter((l) => /^\s*(FAIL\s|ERR\s|CLEANUP ERR)/.test(l)).forEach((l) => console.log('        ' + l.trim()));
     }
   }
 

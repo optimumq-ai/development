@@ -99,7 +99,21 @@ router.get('/:id/timeline', requireAuth, async function(req, res) {
 });
 
 router.get('/:id', requireAuth, async function(req, res) {
-  const request = await get('SELECT r.*, d.name as department_name, d.color as department_color FROM requests r LEFT JOIN departments d ON d.id = r.department_id WHERE r.id = ? OR r.request_number = ?', [req.params.id, req.params.id]);
+  // PARENT FACTS COME FROM THE PARENT. A raw `SELECT r.*` here answered "what request is this?" differently
+  // depending on which row you addressed: the parent knew the citizen's number and that it was an MRR but
+  // carried NO stage, while each child knew its stage but reported a suffixed number the citizen has never
+  // seen and `is_mrr = 0` (requestCreate forces that on every child) — so the MRR badge silently vanished.
+  // There was no id you could pass that produced a correct, complete picture. Resolve the parent-level facts
+  // through the parent; description/stage/routing still come from the row addressed, which is the work.
+  const request = await get(
+    'SELECT r.*, ' +
+    scope.numberExpr('r') + ' AS request_number, ' +
+    scope.parentFact('is_mrr', 'r') + ' AS is_mrr, ' +
+    'r.master_request_id AS parent_id, ' +
+    'd.name as department_name, d.color as department_color ' +
+    'FROM requests r' + scope.numberJoin('r') +
+    ' LEFT JOIN departments d ON d.id = r.department_id WHERE r.id = ? OR r.request_number = ?',
+    [req.params.id, req.params.id]);
   if (!request) return res.status(404).json({ error: 'Request not found' });
   const history = await all('SELECT * FROM request_history WHERE request_id = ? ORDER BY created_at ASC', [request.id]);
   const components = (request.is_mrr && !request.master_request_id) ? await all('SELECT * FROM requests WHERE master_request_id = ? ORDER BY component_label', [request.id]) : [];

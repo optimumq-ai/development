@@ -51,21 +51,33 @@ function andLeaf(alias) { return ' AND ' + leaf(alias); }
 // child's own number carries a component suffix (`2026-0045-1`); showing that in a task list would confront
 // staff with a number the citizen has never seen.
 //
-// Same trick as the scope predicates: resolve the number THROUGH the parent, which today IS the row itself.
+// Same trick as the scope predicates: resolve the number THROUGH the parent.
 //   numberJoin('r')  -> LEFT JOIN requests _p ON _p.id = r.master_request_id
 //   numberExpr('r')  -> COALESCE(_p.request_number, r.request_number) AS request_number
-// Today `master_request_id` is NULL, so `_p` is NULL and COALESCE falls back to the row's own number — a
-// provable no-op. After the migration it resolves to the parent's number automatically.
+//
+// HISTORY: when this was written the migration had not run, `master_request_id` was NULL on every row, and
+// the COALESCE was a provable no-op. **The migration HAS since run (2026-07-16)** — children are real, so
+// `_p` now resolves for real and the fallback arm is what serves parents and the legacy unwrapped
+// `SYS-`/`LIBRARY` containers. Do not read the "today it's a no-op" reasoning as still current.
 function numberJoin(alias) {
   var a = alias || 'r';
   return ' LEFT JOIN requests _p ON _p.id = ' + a + '.master_request_id';
 }
-function numberExpr(alias) {
+
+// Generalisation of numberExpr to any PARENT-level column. Prefer the parent's value when a parent exists,
+// otherwise the row's own.
+//
+// WHY COALESCE IS RIGHT EVEN FOR `is_mrr`, WHERE THE CHILD'S VALUE IS 0 AND NOT NULL: the coalesce is over
+// `_p.<col>` — the JOINED row — not over the child's value. For a child, `_p` exists, so `_p.is_mrr` (1) wins
+// and the child's forced 0 never surfaces. For a parent, `_p` is NULL and the row answers for itself. The
+// child's 0 is only ever reachable when the row genuinely has no parent, which is exactly when it is correct.
+function parentFact(col, alias) {
   var a = alias || 'r';
-  return 'COALESCE(_p.request_number, ' + a + '.request_number)';
+  return 'COALESCE(_p.' + col + ', ' + a + '.' + col + ')';
 }
+function numberExpr(alias) { return parentFact('request_number', alias); }
 
 module.exports = {
   parent: parent, leaf: leaf, andParent: andParent, andLeaf: andLeaf,
-  numberJoin: numberJoin, numberExpr: numberExpr
+  numberJoin: numberJoin, numberExpr: numberExpr, parentFact: parentFact
 };
