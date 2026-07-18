@@ -42,6 +42,7 @@ import CashDrawerPage from './pages/CashDrawerPage';
 import AvWorkbenchPage from './pages/AvWorkbenchPage';
 import PublicPortalPage from './pages/PublicPortalPage';
 import PublicPortalV2Page from './pages/PublicPortalV2Page';
+import PublicPortalWizardPage from './pages/PublicPortalWizardPage';
 import PublicLibraryPage from './pages/PublicLibraryPage';
 
 function Guard({ c }) {
@@ -70,6 +71,8 @@ export default function App() {
         <Route path="/portal" element={<PublicPortalPage />} />
         {/* Split-canvas intake is the live request flow (cut over 2026-07-10). /portal/v2 kept as a redirect. */}
         <Route path="/portal/request" element={<PublicPortalV2Page />} />
+        {/* Wizard rebuild (SPEC §2c) — behind its own route until cutover; /portal/request stays the live flow. */}
+        <Route path="/portal/wizard" element={<PublicPortalWizardPage />} />
         <Route path="/portal/v2" element={<Navigate to="/portal/request" replace />} />
         <Route path="/portal/library" element={<PublicLibraryPage />} />
         <Route path="/portal/library/map" element={<PublicLibraryMapPage />} />
