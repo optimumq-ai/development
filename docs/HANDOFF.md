@@ -4839,3 +4839,44 @@ dashboard / ARIA / AppLayout badge / tickler leaf-fact reads; MRR classification
 `source_request_id` toll attribution; retire split-canvas once confident; R9 `request_search_intents`
 persistence (client-side until submit per §0); singular "Open Record" left in `PublicPortalV2Page.js`
 (retired split-canvas, rollback-only).
+
+---
+
+## 2026-07-18 (k) — Two of the three (j) observations actioned; one left open
+Kevin greenlit two of the three items flagged-not-actioned in (j). Both fixed, verified, pushed.
+
+- **Item rail shows only completed + in-progress (`d5b9401`).** It rendered all 10 slots unconditionally, so a
+  one-item request showed nine empty rows — it ate the column and, read as a checklist, implied the requestor
+  ought to fill them. Bound to `items.length + 1`, clamped to `MAX_ITEMS`, with the +1 dropped when nothing is
+  in progress. **That last clause is the non-obvious part:** a naive `items.length + 1` renders a phantom
+  "Item n — in progress…" row on the Submit-or-Continue review screen and at cap. Verified across all FOUR
+  states, not just the happy one: initial `1/active`, results `1/active`, submit-or-continue `1/done`
+  (no phantom), after Continue `2/done,active`. The cap is still carried by the "Maximum 10 items per request"
+  capnote.
+- **One opening assistant bubble instead of two (`5f6584e`).** The panel opened with a greeting bubble followed
+  immediately by "Please describe a record you're looking for." — two bubbles from the same speaker before the
+  citizen has said anything, which reads as a stutter. Merged into one. **Kept the ask** as the closing
+  sentence rather than dropping it as redundant with the "Describe a record…" placeholder: the system prompt's
+  **ALREADY GREETED** clause asserts the citizen "was shown the opening greeting and asked to enter a
+  description," and that clause is what stops the agent greeting again on its first turn. Deleting the ask
+  would have falsified it, with a duplicate live greeting as the failure mode — the exact stutter being removed.
+
+### Still open — the one Kevin has NOT called
+- **Dead vertical space** in the Item Search / Results panels: records sit in the top third, actions pinned
+  low. **Now more pronounced**, since the rail fix shortened the left column while the panel still runs full
+  height. This is a LAYOUT change, not copy — per the UI rule, agree the direction BEFORE building.
+
+### Reconfirmed this session
+**The agent's result set is not stable across runs.** The first rail-verification run never reached results at
+all — more clarifying turns than the previous run, for a byte-identical query. Second sighting (first in (j)).
+Any scripted demo must tolerate an extra turn or two and must not depend on a specific record appearing.
+
+### Verification posture (unchanged from (j))
+Verify gate mocked client-side in Playwright; `/public/chat` REAL. **No live writes this session at all.**
+Frontend-only changes — no suite run needed since (i)'s backend prompt commit (which was GREEN 745/0).
+
+### Backlog — unchanged
+dashboard / ARIA / AppLayout badge / tickler leaf-fact reads; MRR classification roll-up (§6);
+`source_request_id` toll attribution; retire split-canvas once confident; R9 `request_search_intents`
+persistence (client-side until submit per §0); singular "Open Record" in `PublicPortalV2Page.js` (retired
+split-canvas, rollback-only).
