@@ -4635,3 +4635,35 @@ Kevin to click `/portal/wizard` end-to-end and mark up anything. Then: the cutov
 `/portal/request` at the wizard), backend Case-B signal + 10-item cap, and restore Anthropic credits.
 **Unchanged backlog:** dashboard/ARIA/AppLayout/tickler leaf-fact reads; `verify_stage_bypass` flake; MRR
 classification roll-up (§6); `source_request_id` toll attribution.
+
+---
+
+## 2026-07-18 (f) — PORTAL LIVE: cutover + live smoke + go-live hardening. The wizard is done.
+The §2c wizard is now **the live public request portal at `/portal/request`**, verified end-to-end against the
+real agent. Sequence this session (all on `main`, pushed):
+- **Cutover (`03d227b`)** — `/portal/request` → wizard; split-canvas kept at `/portal/split-canvas` for rollback;
+  `/portal/wizard` + `/portal/v2` redirect to canonical. Spec §1/§2b/§2c updated.
+- **Anthropic credits RESTORED** (Kevin added payment) — `/public/chat` works again; live-confirmed with real
+  agent replies. The slice-3/4 blocker is gone.
+- **FULL LIVE SMOKE PASSED** at `/portal/request`, no mocks: real verify → real 2-turn agent conversation → real
+  search (6 real building-permit records, "Available now · Library" tags) → select → complete → real
+  `/public/submit` → request `2026-000003` (n=1) → purged (live back to 9).
+- **Live-smoke fix (`6241bcc`)** — the smoke revealed the semantic search **always returns nearest-neighbor
+  records (never empty)**, so the auto Case-B (empty `searchResults`) screen rarely fires. The real "no match" is
+  the requestor selecting NONE from populated results = R9 `no_match_search`. Match screen now: **0 selected →
+  "None of these match — submit for Open Records team search"** (`no_match_search`); ≥1 → complete + search_more.
+  Case-B auto-screen kept as a rare fallback.
+- **Go-live (`ec21062`)** — server-side **10-item cap** on `/public/submit` (`MAX_PORTAL_ITEMS=10`; 11 → 400;
+  scoped to the portal path, not `createRequest`, so staff/connector/import aren't affected) + **removed the
+  "Preview build" tag**. Cap-test requests purged (live back to 9).
+
+**⚠️ Process note:** restarting "the API" by `pgrep -f server.js | head -1` killed a CONNECTOR, not the backend —
+so the cap test ran against stale code (looked like the cap didn't work). There are FOUR server.js (backend +
+3 connector stubs); always target `pgrep -af "backend/server.js"`. Memory [[db-access-workaround]] updated.
+
+### State: the portal is DONE and production-ready
+Built (5 slices), cut over, live-verified end-to-end, hardened. Split-canvas remains at `/portal/split-canvas`
+for rollback (revert `03d227b` to fully roll back). **Unchanged backlog** (untouched all session): dashboard /
+ARIA / AppLayout badge / tickler leaf-fact reads; `verify_stage_bypass` flake; MRR classification roll-up (§6);
+`source_request_id` toll attribution. Optional portal follow-ups: retire split-canvas once confident; R9
+`request_search_intents` persistence (still client-side-until-submit per §0).
