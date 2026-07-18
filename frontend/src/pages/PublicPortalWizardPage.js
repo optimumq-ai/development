@@ -249,7 +249,11 @@ const STYLES = `
 .pwz .srow .sn{font-weight:600;font-size:14px}
 .pwz .srow .ss{font-size:12px;color:var(--muted)}
 .pwz .subconfirm{text-align:center;padding:16px 8px;margin:auto}
-.pwz .subconfirm .ico{font-size:52px}
+/* Inline SVG, not an emoji: ✅ renders as a different platform glyph everywhere and ignores the palette. */
+.pwz .subconfirm .ico{width:56px;height:56px;margin:0 auto 14px;border-radius:50%;background:var(--done-bg);
+  border:2px solid var(--done-line);display:grid;place-items:center}
+.pwz .subconfirm .ico svg{width:30px;height:30px;stroke:var(--done);stroke-width:3.2;fill:none;
+  stroke-linecap:round;stroke-linejoin:round}
 .pwz .reqnum{font-family:var(--serif);font-size:34px;font-weight:700;letter-spacing:1px;color:var(--civic);
   font-variant-numeric:tabular-nums;margin:8px 0}
 .pwz .submiterr{color:var(--danger);font-size:13px;margin:8px 0 0}
@@ -727,7 +731,9 @@ export default function PublicPortalWizardPage() {
     return (
       <div className="card">
         <div className="subconfirm">
-          <div className="ico">✅</div>
+          <div className="ico">
+            <svg viewBox="0 0 24 24" role="img" aria-label="Submitted"><polyline points="4 12.5 9.5 18 20 6.5" /></svg>
+          </div>
           <h1 className="title">Your request has been submitted</h1>
           <p className="lede" style={{ marginInline: 'auto' }}>Your request number is</p>
           <div className="reqnum">{requestNumber || '—'}</div>
