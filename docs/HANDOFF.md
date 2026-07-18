@@ -4571,3 +4571,27 @@ Kevin plans to rebuild/modify several screens against the prototype. Either (a) 
 core (submit-payload assembly, search/selection logic, verification data-plumbing, palette) from split-canvas.
 **Unchanged backlog:** dashboard/ARIA/AppLayout/tickler leaf-fact reads; `verify_stage_bypass` flake; MRR
 classification roll-up (§6); `source_request_id` toll attribution.
+
+---
+
+## 2026-07-18 (d) — Prototype APPROVED; wizard build gate cleared
+Kevin thumbs-upped the prototype after the completed-progress-node contrast fix (`10b17ac` — boxed bolder-green
+`--done-box`). **The UI-rule design gate is CLEARED** — SPEC §2c retagged `[DESIGN APPROVED — build gate cleared,
+NOT BUILT]`. He also confirmed the architectural rationale in review: the structured form is easier for humans
+AND shrinks the agent's job to descriptions only (fewer turns, no free-text identity parsing, smaller error
+surface). Recorded in §2c.
+
+**Next is the real React build of the wizard**, sliced (one bounded slice per session, split-canvas stays LIVE
+at `/portal/request` until cutover). Proposed sequence — build behind a new route/flag, cut `/portal/request`
+over only when whole:
+1. **Shell + progress rail + step routing** — the full-screen stepped shell; palette/tokens carried.
+2. **Screen 1 "Your Information" + STRICT verify gate** — port form fields; wire the real link-verify
+   (`/request-verification` → poll `/verify-status`), delete the visual-verify bypass, email-only delivery copy.
+   *(Biggest new behavior; backend endpoints already exist.)*
+3. **Item loop + Item 1..10 color rail** — agent-describe panel that hides after search; wire `/public/chat`.
+4. **Results + selection + intents** — match (per-record select, complete/search_more), Case A/B
+   (not_searchable/no_match_search), Remove item + confirm. Reuses selection/refine logic + R9 intents.
+5. **Submit-or-Continue + confirmation** — empty-guard, carried submit-payload assembly, on-screen number.
+Also: enforce the **10-item cap** in `createRequest` (backend, not enforced today); decide whether R9 intent
+persistence (`request_search_intents`) lands with slice 4 or later (§0 keeps it client-side until submit anyway).
+**Awaiting Kevin's go on slice 1.**
