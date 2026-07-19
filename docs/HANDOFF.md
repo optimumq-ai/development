@@ -6096,3 +6096,23 @@ branch-parity check. Frontend rebuilt and redeployed.
 3. Brief **§3.4** (no from-`closed` guard) and **§3.6** (two fragile couplings) are the last unaddressed §3
    items. §3.5 and §3.1b are now closed.
 4. Part H of `WORKING_attribute_inventory.md`; (q)'s deliberately-undone items.
+
+### Addendum to (ab) — `fee_review` deleted (`bd7f232`). The vocabulary is nine.
+Kevin's call on the thread (ab) left open. Nothing in the codebase ever set it, it was in neither `STAGE_TASK`
+nor the reconciler sweep, and **live carried zero of everything**: zero requests at that stage, zero
+`request_history` rows naming it in `stage_from`/`stage_to`, zero `workflow_decisions`, zero rules emitting
+it. Nothing to migrate, no history to orphan — the same pre-deletion check the three dead money columns got.
+
+**A stage nothing can enter is not a stage.**
+
+**⚠️ The sweep surfaced something better than the deletion itself:** `WorkflowPage.js` carried its **own
+private 4-stage label map** — the exact divergent-vocabulary defect `verify_stages` exists to catch, on a page
+its private-copy check simply did not name. It also still advertised `fee_review`. It now imports the shared
+vocabulary, and **the check covers 6 files instead of 5**, so the gap is closed rather than noted.
+
+That is the second time in two slices that deleting something dead exposed a live gap next to it (the first
+being `clockStart()` in (aa)). **Deleting a dead thing is a good excuse to read its neighbours.**
+
+**938/938 green, live census clean.** Break-tested both: reinstating the stage fails 5 (including the frontend
+mirror parity, the label/colour count, and the Playwright Advance-button check); restoring the private map
+fails the widened check and names the file. Frontend rebuilt; API and UI both 200 on the new vocabulary.

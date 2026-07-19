@@ -24,7 +24,9 @@ Stages in use: `intake → fee_review → awaiting_payment → record_search →
 > **The sequence is six:** `intake → record_search → redaction_review → redaction → delivery → closed`.
 > Money and legal review are both detours that rejoin at their return point.
 >
-> ⚠️ **`fee_review` has no writer at all.** Kept in the vocabulary; "wire it or delete it" is open. Status: `active | closed | completed`. Full audit trail in `request_history` (actor, action, notes, stage_from/to).
+> ✅ **`fee_review` was DELETED from the vocabulary 2026-07-19 (`bd7f232`)** — nothing could ever set it, and
+> live carried zero references of any kind. The vocabulary is **nine**; `awaiting_payment` remains as a real
+> branch state the fee flow enters and leaves. Status: `active | closed | completed`. Full audit trail in `request_history` (actor, action, notes, stage_from/to).
 
 ## 2. Intake pipeline (onIntake) `[BUILT + fixed 2026-07-08]`
 Classify (Domain 3) → build **signals** (classification, record-type confidence, flags) → evaluate the **rulebook** → set routing columns (`department_id`, `record_type_id`) → apply the decided stage **through the one central stage-transition function** (item 6 / §5), which writes the `request_history` advance row (`stage_from → stage_to`) AND spawns/updates the stage's task. onIntake NEVER writes `UPDATE requests SET stage` directly. Confidence ≥ 70 pins `record_type_id`. Every decision persisted to `workflow_decisions` (rule hit, reasoning, flags) for audit. On rule `wfr-confident` with an owning team: additionally spawn the **estimate task** and route it (title becomes "Review auto-generated estimate" when an estimate profile can automate).

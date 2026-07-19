@@ -30,7 +30,7 @@ So this is **not** a rewrite. It is a new surface over a working spine, plus a b
 
 ## 2. What exists, honestly
 
-### 2.1 Stages (10 in the vocabulary, 8 in the sequence) — `services/stages.js`
+### 2.1 Stages (9 in the vocabulary, 6 in the sequence) — `services/stages.js`
 **Sequence** (the linear walk, what Advance follows) `[revised again 2026-07-19]`:
 `intake → record_search → redaction_review → redaction → delivery → closed`
 
@@ -38,10 +38,10 @@ So this is **not** a rewrite. It is a new surface over a working spine, plus a b
 by a legal decision) **and** `fee_review` / `awaiting_payment` (the fee flow moves them, never the button).
 `next()` returns null for all four, so no Advance renders on them.
 
-⚠️ **`fee_review` has NO WRITER** — nothing in the codebase ever sets it, and it is in neither `STAGE_TASK` nor
-the reconciler sweep, so advancing into it produced a request with **no task and no sweep**. Kept in the
-vocabulary; **wire it or delete it is an open question**, the same one asked of `commercial_rate` /
-`mrr_processing` (deleted).
+✅ **`fee_review` was DELETED 2026-07-19 (`bd7f232`).** Nothing ever set it, it was in neither `STAGE_TASK`
+nor the reconciler sweep, and live carried zero requests, history rows, workflow decisions or rules naming it.
+Advancing into it produced a request with **no task and no sweep**. **A stage nothing can enter is not a
+stage.** The vocabulary is **nine**.
 
 Only `intake`, `record_search`, `delivery` have ever been reached in live data. The mid-pipeline is
 **untested by real traffic**.
