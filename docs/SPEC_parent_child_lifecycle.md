@@ -3,9 +3,34 @@
 `SPEC_tasks_roles_mrr_fees.md` §12 is now a pointer stub to this file; its citizen layer, fee layer and staff-workflow
 design (§12.1) are folded in here as **§13** and **§14**. `ARCHITECTURE.md` item 1 is ratified in the same commit.
 
-**DESIGNED, NOT BUILT.** Measured 2026-07-16: **129 requests, 0 children, zero lines of code write
-`master_request_id` or `component_label`.** Neither this model nor §12's `request_items` model ever reached the
-codebase — there is nothing to unwind. The migration (§8) is the next build slice.
+**BUILT — the storage model is live. `[corrected 2026-07-19]`**
+
+> ⚠️ This paragraph until 2026-07-19 read **"DESIGNED, NOT BUILT … 129 requests, 0 children, zero lines of code
+> write `master_request_id`."** That was true when written, on the morning of 2026-07-16, and **false by that
+> afternoon** — §7 and §8 shipped the same day and are tagged `[BUILT 2026-07-16]` two hundred lines below.
+> It is corrected here because the top of the binding document is the part everyone actually reads: at least
+> one later work session skipped this spec entirely and re-derived the model from a live DB inventory,
+> producing a brief whose central claims were wrong. **If a section header and this header disagree, the
+> section header wins — it is closer to the code.**
+
+**What is live.** Every request is now a parent with 1..n children. The wrap (§8), the parent/child-aware query
+layer (§11), the portal emitting n children, and the queue (§7) are all built and covered by
+`verify_wrap_parent`, `verify_mrr_children` and `verify_queue_parent_child`. Live data contains real children,
+so **every predicate in §11 is now load-bearing rather than tautological** — a query that looks correct against
+pre-migration data can be wrong now.
+
+**What is NOT built** (each tagged at its own section): the MRR hub §14.3 `[NOT SCOPED — design direction
+required first]` and the staff surfaces within it §14.4; suggest-vs-commit child routing §14.2 `[DECIDED, not
+built — children auto-commit today]`; the parent field-design pass §4.4, which parks `outcome`,
+`withdrawn_reason` and `closure_reason`; the MRR `classification` worst-case roll-up (§6); fee-waiver policy
+§12; and parent `disposition` §6.2, which is `[DEFERRED]` and must not be built from.
+
+**One known divergence between this spec and the code.** §4.3 places money at the parent. The implementation
+keys estimates, fee-waiver decisions and `estimated_fee` on the **child** — every fee endpoint uses the id it
+is handed, and every UI path hands it a child. Verified consequence (2026-07-19): non-payment dunning is
+**inert for every wrapped request**, because the sweep is parent-scoped and the money is not. Reproduction:
+`backend/tests/verify_nonpayment_scope.js`. Resolving this is gated on the same question as the hub — how n
+children's fees roll up into one citizen bill. See `WORKING_attribute_inventory.md` (working snapshot).
 
 **Merged 2026-07-16** from the two documents below plus Kevin's rulings of that date (toll attribution §4.2.1;
 child routing §14.2; hub ownership §14.1). Supersedes, on the storage/lifecycle question, the two incompatible
@@ -433,7 +458,10 @@ Per §12 Layer 3, unchanged and correct: children contribute **quantities** (pag
 >    copy so LEAF-scoped work lists still show it; `request_clocks` stays parent-only.
 
 
-The columns `master_request_id`, `component_label` and `is_mrr` **already exist and are written by zero lines of code**; there are 125 requests and **0 children have ever been created**. So the migration is a clean one-time backfill with no legacy children to reconcile.
+**Pre-migration state, kept for the record (no longer true):** the columns `master_request_id`,
+`component_label` and `is_mrr` existed and were written by zero lines of code; there were 125 requests and
+0 children. That is what made the migration a clean one-time backfill with no legacy children to reconcile.
+**It has since run** — children exist, and this paragraph describes the "before", not the present.
 
 **The existing `requests` row becomes the CHILD and keeps its `id`.** A new parent row is created above it.
 
