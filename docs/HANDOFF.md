@@ -6160,12 +6160,21 @@ the accepted types from the resolve route's own type guard and fails, naming any
    (CLAUDE.md); a parent carrying one is the legacy pseudo-request shape §2.4 flags. **The screen no longer
    trusts `task.stage`** — it derives the branch from the assertion (`AG_PRECLEARANCE_SUBMITTED` vs
    `EXEMPTION_ASSERTED`), which is the durable fact. The underlying write is untouched.
-3. **A late intake routing decision REVERTED an asserted exemption.** On one child:
+3. ~~**A late intake routing decision REVERTED an asserted exemption.**~~ **FIXED same session
+   (`cdf1845`).** On one child:
    `EXEMPTION_ASSERTED intake → exemption_review`, then `STAGE_ADVANCED exemption_review → intake`
    ("Automatic classification was unavailable. Low match confidence; routed…"). **A legal act, silently
    undone by the workflow engine**, leaving the `legal_review` cancelled behind it. Seen when the assertion
-   raced async classification; the same race exists with a *successful* classification. Related to §3.4 (no
-   from-`closed` guard) — the central function has no notion of a stage that must not be walked back.
+   raced async classification; the same race exists with a *successful* classification.
+   **The guard already existed and stopped one field short:** `onIntake` re-reads before applying — its own
+   comment says the top read "is stale by now" — but checked only `status === 'closed'` while `stage` still
+   came from the stale read. Now **stated as a POSITION, not a race**: the engine may set the opening stage
+   only while the request is still AT its opening position (`intake`, or null for a parent). ⚠️ The first cut
+   was a lost-update comparison of the two reads and **the harness caught it** — that catches the race only
+   when `onIntake` STARTS before the move, and misses a call landing wholly afterwards. Routing metadata is
+   still applied; the estimate spawn is not. Declining is recorded (`ROUTING_DEFERRED`) — the overwrite was
+   hard to find precisely because standing down left no trace. `verify_stage_bypass` §4 (9 new), including
+   **the legal_review task still being live**, which is the real damage. Break-tested: 4 fail without it.
 
 ### Lessons worth keeping
 - **Break-testing caught a worthless assertion.** H8 first matched the token `ACTIONABLE` anywhere in the
@@ -6195,3 +6204,21 @@ loaded gun (§3.3). Its replacement shipped with a narrower version of the same 
 *kind* of task it was and never whether the task was still *live*. **Deleting a dangerous endpoint does not
 make its successor safe; the successor needs its own audit.** Two defects remain open from (ac): the
 `assert-exemption` parent/child stage write, and the workflow engine reverting an asserted exemption.
+
+### Addendum to (ac) — the exemption revert is fixed (`cdf1845`). Two of three defects closed.
+**963/963 green, live clean**, API restarted. Details in defect 3 above.
+
+**Both fixes this session were the same shape: a guard that existed and stopped one step short.**
+`/resolve` replaced the §3.3 loaded gun and checked the task's TYPE but never its STATUS. `onIntake` re-read
+to catch a closed request but checked only STATUS, never STAGE — one field away, in a block whose own comment
+explains why the stale read cannot be trusted. **When you find a guard, read what it does NOT cover**; both
+holes were inside code written specifically to prevent that class of problem.
+
+**And state invariants as positions, not races.** The first cut of the intake fix was a lost-update check
+between two reads, which sounds rigorous and silently missed the case where the whole call lands after the
+move. "The engine may only make the opening move while the request is still at its opening position" needs no
+reasoning about who read what when — and the harness, not review, is what caught the difference.
+
+**Still open from (ac):** defect 2 — `assert-exemption` writes the stage onto whichever row it resolves,
+including a PARENT, so the parent moves while the child carrying the real work stage stays at `intake`. That
+one wants a decision about where stage lives for a wrapped request, not a patch.
