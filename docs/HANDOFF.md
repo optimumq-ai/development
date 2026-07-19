@@ -5833,3 +5833,62 @@ and names it; re-adding it to `ROUTABLE_TASK_TYPES` fails E1. Frontend rebuilt a
 3. **`redaction_qa` missing from `ROUTABLE_TASK_TYPES`** — surfaced twice now; a genuinely small slice.
 4. Still standing: dunning is inert (`verify_nonpayment_scope.js` written and waiting), `routing_review`
    fires per child, Part H of the attribute inventory.
+
+---
+
+## 2026-07-19 (y) — `redaction_qa` joins the v3 model, and the claim pool stops hiding work (`6b66b84`)
+Brief §3.5, the routing split-brain. **"Add `redaction_qa` to the list" would have been wrong twice over**, so
+three coupled defects landed together.
+
+### 1. Reviewing a redaction is not the same competence as doing one
+`redaction_qa` was excluded from `ROUTABLE_TASK_TYPES`, so it could never be granted to a person and was
+pinned to legacy permission-role routing forever — while its Legal sibling (`legal_redaction`) used the v3
+model. Worse: an Elevated review resolved through `ROLE_TO_TYPE` to the task type **`redaction`** — the *same
+token as doing a redaction*. This task exists precisely because the reviewer must be a different person from
+the author; routing it on the author's competence was the wrong axis.
+
+### 2. ⚠️ TWO DIVERGENT CLAIM-POOL QUERIES — already live, already biting legal work
+`taskRouting.poolForUser` checked permission roles **or** `user_task_types`. The route `GET /tasks/pool`
+checked permission roles **only**. So every task whose `role_required` is a v3 token — `legal_review`,
+`legal_redaction`, `routing_review` — was **invisible in the claim pool** while the service happily listed it.
+**A task nobody can see is a task nobody claims, and it does not look broken; it looks quiet.** Now one shared
+`POOL_ELIGIBILITY_SQL` used by both readers, so they cannot drift again.
+
+This is why the slice grew: switching `redaction_qa` to a v3 token *without* fixing this would have moved it
+into the invisible set.
+
+### 3. The cutover that cannot strand the mandatory review
+Switching naively would have routed the review to a token **nobody holds** — and an Elevated/Legal redaction
+cannot be RELEASED until a different person approves it, so **a stranded review task blocks release of every
+Elevated redaction in the system.** The token is therefore chosen at **spawn time** (`hasSeededType`), which
+is the per-(team, type) cutover the design already documented, applied where it is safe:
+
+- nobody granted → Elevated review routes to `REDACTION_WORKER`, exactly as today (no behaviour change);
+- someone granted → the next review routes on `redaction_qa`, so **the grant actually takes effect**.
+
+That last clause matters: without it, adding the key to the picker would have recreated the empty-promise
+defect deleted three commits earlier in (x).
+
+### Verification
+**915/915 green, live census clean.** New harness `verify_qa_routing` (14), registered. **§B4 revokes the
+token and asserts the task disappears**, so §B cannot pass merely by the predicate being permissive. §C is the
+guard (C1 legacy when unseeded, C3 the new token once granted, C4 a task spawned either way). **§D re-asserts
+the safety property this slice sits beside** — the author still cannot release their own Elevated redaction —
+because a routing change must never loosen that gate.
+
+Break-tested: restoring the route's private pool query fails B2/B3; switching the spawn to the v3 token
+unconditionally fails C1. Frontend rebuilt and redeployed.
+
+One self-inflicted stumble worth noting: §C first failed because `spawnReviewTask` is idempotent per request
+and §B's task was still open on the same request — it correctly refused to spawn a second one, and my test
+would have proved nothing. Fixed by giving §C its own request.
+
+### Next session
+1. **ONE §5 decision remains: 3 — single-record first, or the MRR parent hub too?** (§14.3, design-gated.)
+   Building the hub also means restoring the `mrr_processing` catalog entry deleted in (x).
+2. **⚠️ STILL OPEN from §3.5, and it is a security-shaped hole:** `review_auto_redaction` spawns with
+   `role_required` NULL, and NULL is treated as "everyone eligible" — **world-claimable by any authenticated
+   user.** Deliberately untouched here to keep the slice bounded, but it is the last bullet of the same
+   section and should not sit much longer.
+3. Open, raised, not decided: `fee_review` / `awaiting_payment` before `record_search` (from (v)).
+4. Still standing: dunning is inert, `routing_review` fires per child, Part H of the attribute inventory.

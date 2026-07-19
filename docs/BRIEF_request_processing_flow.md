@@ -57,9 +57,11 @@ Only `intake`, `record_search`, `delivery` have ever been reached in live data. 
 | `mrr_processing` | nothing spawns it | **invisible on My Tasks** | Dead catalog entry |
 | `mrr_estimate`, `mrr_search` | not built | — | Not built |
 
-Three catalogs disagree: `TASK_ROLES` (8), `ROUTABLE_TASK_TYPES` (9), and the `time_budgets` seed (8, and it
-is the one that matches reality). `redaction_qa` is real but absent from `ROUTABLE_TASK_TYPES`;
-`commercial_rate`/`mrr_processing` are in it but unspawnable.
+~~Three catalogs disagree~~ **RECONCILED 2026-07-19.** `ROUTABLE_TASK_TYPES` is now eight — `estimate`,
+`record_search`, `redaction`, `redaction_qa`, `legal_redaction`, `legal_review`, `fee_waiver`,
+`routing_review`. `redaction_qa` was added (`6b66b84`, §3.5); `commercial_rate` / `mrr_processing` were
+deleted as unspawnable (`ff32305`, §5.4). `verify_v1_retirement` §E3 now asserts the Staff Management picker
+offers nothing the router cannot route, which is the check whose absence let the three drift apart.
 
 ### 2.3 Screens
 **Real and working:** `RequestQueuePage` (best parent/child handling in the repo), `DashboardPage`,
@@ -203,14 +205,19 @@ is watching**; here something is.
 `workflowEngine` (added when the `verify_stage_bypass` flake was fixed). Any other caller can resurrect a
 terminal request. Consider hoisting that guard into the central function.
 
-### 3.5 Routing split-brain
-- `redaction_qa` is excluded from `ROUTABLE_TASK_TYPES`, so it is pinned to legacy permission-role routing
-  forever, while its Legal sibling routes on the new model.
-- `GET /tasks/pool` checks only `user_permission_roles`; `taskRouting.poolForUser` checks both that and
-  `user_task_types`. **Two divergent pool queries** — a user whose eligibility comes only from the v3 subset
-  sees an empty claim pool.
-- `review_auto_redaction` spawns with `role_required` NULL, and NULL is treated as "everyone eligible" —
-  **world-claimable by any authenticated user.**
+### 3.5 Routing split-brain — **FIXED 2026-07-19 (`6b66b84`), except the third bullet**
+- ~~`redaction_qa` is excluded from `ROUTABLE_TASK_TYPES`~~ **DONE.** It is routable and grantable. It also
+  used to resolve through `ROLE_TO_TYPE` to the task type **`redaction`** — the same token as *doing* a
+  redaction, conflating two competences the task exists to keep apart.
+  ⚠️ The cutover is **spawn-time** (`hasSeededType`): with nobody granted the type, an Elevated review still
+  routes to `REDACTION_WORKER`. Switching unconditionally would have **stranded the mandatory review**, and a
+  stranded review blocks release of every Elevated redaction — see `verify_qa_routing` §C.
+- ~~`GET /tasks/pool` checks only `user_permission_roles`~~ **DONE — and this one was already live.** Every
+  task whose `role_required` is a v3 token (`legal_review`, `legal_redaction`, `routing_review`) was
+  **invisible in the claim pool** while `poolForUser` listed it; legal work was already affected. Both
+  readers now share `taskRouting.POOL_ELIGIBILITY_SQL`.
+- **STILL OPEN:** `review_auto_redaction` spawns with `role_required` NULL, and NULL is treated as "everyone
+  eligible" — **world-claimable by any authenticated user.** Untouched by this slice.
 
 ### 3.6 Two fragile couplings
 - Estimate spawning keys on the **literal rule id `'wfr-confident'`**. Reseed or rename that row and estimate
