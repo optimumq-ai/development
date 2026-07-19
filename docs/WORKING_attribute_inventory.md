@@ -144,7 +144,9 @@ These are the terms you'll hit in the docs that have **no code behind them**. Th
 | `child_exemptions` (table) | child | §5.7 | Per-record exemption + citation + explanation. Spec: **"the field that gets a city sued if it's missing"** | Legally required |
 | `disposition` (8 values) | child | §5.8 | The real terminal outcome, incl. `Previously furnished`, `Not in our custody` | Core |
 | `installment_no`, `delivered_at` | child | §5.8 | Per-child release batching | Tied to release-policy fork |
-| `delivery_mode` (`Hold-All` / `As-Ready`) | parent | §5.8 | Operator default | Tied to release-policy fork |
+| `delivery_mode` (`as_ready` / `hold_all`) | parent | §5.8 | Release timing | **DECIDED 2026-07-19 — `as_ready` is the default**; `hold_all` unavailable in entitlement jurisdictions (WA). Build it |
+| `delivery_fee_basis` (`per_request` / `per_installment`) | parent | §5.10.6 | Whether N shipments cost N delivery charges | **DECIDED 2026-07-19 — `per_request` default.** ⚠️ Undecided for `rate: 'actual'` delivery (live in TX profile) |
+| `componentCharged` | child | §5.10.2 | Per-record price after request-level rules | **DECIDED 2026-07-19 — generalized prorata.** The field three features are blocked on |
 | 5 workstream status vocabularies | child | §5.3 | Estimate collection, record search, redaction, legal redaction, legal review — ~30 values total | **Biggest overkill candidate.** Much overlaps `tasks.status` + stage |
 | `source_request_id` on `clock_tolls` | — | §4.2.1 | Which child's event tolled the parent clock. "**Attribution is not ownership**" | Decided, deferred |
 | `mrr_manager` | parent | `:80` | Parent's `assigned_to`, only when `is_mrr` | Blocked on MRR hub |
@@ -232,6 +234,18 @@ The highest-consequence rules in the model. All legal, all currently unenforced 
 7. **`legal_flag`** — record-level or matter-level? Never stated.
 8. **Prune Part C** — especially the ~30 workstream status values in §5.3, which overlap `tasks.status` and `stage`.
 9. **`commercial_rate` / `mrr_processing`** — build or delete.
+10b. ~~**Release policy — Hold-All vs As-Ready** (was item 2)~~ **DECIDED 2026-07-19: As-Ready is the DEFAULT**
+    (`SPEC §5.8`). `delivery_mode` per Jurisdiction Profile — `as_ready` (default) · `hold_all`, with `hold_all`
+    **not selectable** where statute makes installments an entitlement (WA). Per-request **hold** override by the
+    ORO Associate managing the MRR; only meaningful for n > 1. Delivery fee stays **once per request**,
+    configurable to per-installment (§5.10.6). ⚠️ **Still open:** the override needs a guard so an RM hold cannot
+    defeat the WA entitlement — recommended (unratified) is *requires a note + a requestor installment request
+    overrides the hold*. **Do not build the override without resolving it.**
+10c. ~~**Which notice when children disagree** (was item 10)~~ **DECIDED 2026-07-19: ONE NOTICE PER CHILD**
+    (`SPEC §5.8.1`). The question dissolves — each child emits one notice for its own disposition. Content was
+    always per-record by law; only packaging was open, and no statute addresses it. ⚠️ **Watch:** per-child
+    notices must not become per-child *correspondents* — §14.1 keeps the RM the sole voice, so auto-send needs
+    an approval step or an explicit setting.
 10a. ~~**Fee allocation across children**~~ **DECIDED 2026-07-19 — generalized prorata** (`SPEC §5.10.2`):
     `componentCharged[i] = componentGross[i] × (total / grossSubtotal)`. Replaces the running-cap rule, which
     made a record's price depend on **release order**. `[NOT BUILT]` — `componentCharged` does not exist under

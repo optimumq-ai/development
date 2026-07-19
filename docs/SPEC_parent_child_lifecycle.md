@@ -319,7 +319,66 @@ The sheet ends at Redaction → `Completed` and the child falls off the edge; no
 | `installment_no` | Which delivery batch this child went out in. |
 | `delivered_at` | |
 
-**Per-child release is first-class, not an MRR override.** WA RCW 42.56.080(2) makes installment delivery a requestor *entitlement* ("on a partial or installment basis as records … are assembled or made ready"). Keep `Hold-All` as the parent's operator default (what most cities do), but model `As-Ready` as a first-class parent `delivery_mode`. The MRR "force release one child" button is then an ordinary As-Ready release, not a bespoke path.
+### 5.8.1 Notices are PER CHILD `[DECIDED 2026-07-19 by Kevin]`
+**One notice per child, carrying that child's own disposition.** Not one combined notice per request, and not
+a hybrid split by disposition type.
+
+**What the law fixes, and what it leaves open.** Notice *content* is per-record and mandatory: a denial needs
+the specific exemption, the statutory citation, and an explanation of how it applies to the record withheld
+(WA RCW 42.56.210(3) · FL § 119.07(1)(e) · IL § 9(b) · TX § 552.301(e)(2)). That is already modeled as
+`child_exemptions` (§5.7). Notice *packaging* is **not** addressed by any statute — TX § 552.306(c)(2)(B)'s
+batch notices are a scheduling device inside the AG-decision track only (§5.9), not a general mandate. So
+packaging is a design decision, and this is it.
+
+**Why per-child is the coherent choice here — it follows from `as_ready`.** Under the As-Ready default each
+child ships when it is ready, at its own time, so its own notice is the natural artifact rather than a
+bureaucratic one. The combination Hold-All + per-child notices would have meant five letters in one envelope;
+As-Ready + per-child means one letter per shipment. **For n = 1 this is one record, one shipment, one notice —
+indistinguishable from today.**
+
+**It also maps 1:1 onto the disposition model.** Each child ends in exactly one §5.8 disposition, and each
+disposition emits exactly one notice. No roll-up, no precedence table, no "what do we call it when one is
+delivered and one is denied" — the question that the retired parent `PARTIALLY_GRANTED` existed to answer
+**does not arise**, because the citizen receives one notice per record telling them what happened to that
+record.
+
+⚠️ **The RM remains the sole communicator (§14.1).** Per-child notices must not become per-child *correspondents*
+— they are one voice sending N notices, not N staff contacting the requestor. If notices are auto-emitted on
+release, that needs an RM approval step or an explicit "auto-send" setting; task screens still carry no
+contact-requestor button.
+
+**Per-child release is first-class, not an MRR override.** WA RCW 42.56.080(2) makes installment delivery a requestor *entitlement* ("on a partial or installment basis as records … are assembled or made ready"). ~~Keep `Hold-All` as the parent's operator default (what most cities do), but model `As-Ready` as a first-class parent `delivery_mode`.~~ The MRR "force release one child" button is then an ordinary As-Ready release, not a bespoke path.
+
+> ### `delivery_mode` — DECIDED 2026-07-19 by Kevin: **As-Ready is the DEFAULT**
+> The earlier draft made `Hold-All` the shipped default "because most cities do it." **Reversed.** A record
+> that is finished ships when it is finished.
+>
+> **Why the default carries the legal weight.** With As-Ready as the default, WA's entitlement is satisfied
+> **by construction** — a requestor never has to know the word "installment" or ask for anything. Under a
+> Hold-All default the entitlement would depend on the requestor knowing to ask *and* staff honoring it, which
+> is compliance-by-vigilance. TX § 552.221(a) ("shall **promptly produce**") and CA § 7922.500 (nothing permits
+> an agency to "**delay or obstruct**") point the same way even where no entitlement is codified.
+>
+> **`delivery_mode` per Jurisdiction Profile** — `as_ready` *(default)* · `hold_all`. Cities may change it,
+> **except where statute makes installments an entitlement** (WA today), where `hold_all` must not be
+> selectable. This follows Kevin's standing rule: statute where clearly stated, city config where silent — and
+> it means the pending WA model-rules rewrite is a settings change, not a code change.
+>
+> **Per-request override: the ORO Associate managing the MRR may hold.** Not the requestor — under an As-Ready
+> default there is nothing for them to elect. The override exists for the real operational cases (a coherent
+> release makes more sense delivered together; an active investigation across siblings). Kevin: *"it's likely
+> that issues arise infrequently with this model."*
+>
+> **The override only exists for n > 1.** With one child there is one record and one shipment, so As-Ready and
+> Hold-All are the same thing. This is not an MRR special case — it is n = 1 degenerating correctly.
+>
+> ⚠️ **OPEN — the override needs a guard in entitlement jurisdictions.** An RM hold in WA would defeat a
+> statutory entitlement. Recommended (not yet ratified): the override **requires a note** (consistent with the
+> 2026-07-18 stub decision), and in an entitlement jurisdiction a requestor's request for installments
+> **overrides the hold**. Do not build the override without resolving this.
+>
+> **It must never become a payment gate.** §5.9 stands: a child may **never** be withheld because a sibling is
+> unpaid. Holding for coherence is an operational choice; holding for a sibling's money is not available.
 
 ### 5.9 The payment gate is a COVERAGE test, not a whole-request test `[research 2026-07-14]`
 **A child may NEVER be withheld because a *sibling* is unpaid.** No state authorizes conditioning release of one record on payment for a different record. The payment hook is tied everywhere to *the copies being provided*: TX "charges **accrued**" (§ 552.221(b)(2)) · CA "fees covering **direct costs of duplication**" (§ 7922.530(a)) · FL "the fee prescribed by law" (§ 119.07(4)) · NY "the fee prescribed **therefor**" (§ 89(3)(a)) · CT "**such** fee" (§ 1-212(c)). And two states cut affirmatively against sitting on finished records: **TX § 552.221(a)** ("shall **promptly produce**") and **CA § 7922.500** ("nothing … shall be construed to permit an agency to **delay or obstruct** the inspection or copying of public records").
@@ -354,7 +413,7 @@ inventory, verified against the engine 2026-07-19:
 |---|---|---|
 | 1 | **Duplication tiers** | `tieredAmount()` walks bands on the **aggregate** page count. Ten 50-page records billed separately all sit in band 1; combined, 500 pages reach the cheaper bands. Literally quantity-break pricing. Implemented; not enabled in the live TX profile |
 | 2 | **`maxFee` ceiling** | The known one. **`null` in the live TX profile** — theoretical today |
-| 3 | **Delivery charged once per request** | N records, one delivery + handling. Separately, N charges. ⚠️ Collides with As-Ready (§5.8): you physically ship three times, the model charges delivery once |
+| 3 | **Delivery charged once per request** | N records, one delivery + handling. Separately, N charges. **RESOLVED 2026-07-19 — see below** |
 | 4 | **`minFee` floor** | One floor instead of N. An *uplift*, not a saving — but it still needs allocating |
 
 **Vehicles where prorata does NOT obviously apply — and this is the half that matters:**
@@ -469,6 +528,29 @@ compliance rule; we never inherit their accounting policy.
 `prorata` *(default)* · `none — report actual costs only`, for a city whose Finance department already has a
 policy. The `none` mode still satisfies their GL; it does **not** change the release gate, which always uses
 prorata because §5.9 requires a per-child coverage test.
+
+### 5.10.6 Delivery fee under As-Ready `[DECIDED 2026-07-19 by Kevin]`
+
+As-Ready ships N times but the engine charges delivery **once per request** (`feeEngine.js`, "delivery (once
+per request)"). Decision: **keep once-per-request as the default; make it city-configurable to per-installment.**
+
+`delivery_fee_basis` — `per_request` *(default)* · `per_installment`.
+
+**Why once-per-request is the right default.** Under As-Ready the requestor is not choosing extra shipments —
+the system ships as records become ready, and in WA that is an *entitlement*. Billing per installment would
+charge a requestor more for exercising a statutory right, which is legally uncomfortable and plausibly
+challengeable. The city absorbing incremental postage is the safer posture. `per_installment` exists for a city
+that genuinely incurs and wants to recover per-shipment cost, consistent with config-where-silent.
+
+**Interaction with §5.10.2 that needs no new rule:** delivery is a one-time request-level charge, so it is
+consumed by the **first installment** (the surviving WA-derived rule in §5.10.3) rather than shared prorata.
+
+⚠️ **Watch the `'actual'` rate.** `mail` is `rate: 'actual'` in the live TX profile, meaning the amount is
+resolved from real postage. Under `per_request` with N shipments, "actual" is ambiguous — the actual of which
+shipment? Either resolve it as the **sum of actual postage across all installments** (billed once, on the
+first, which may under-collect if later shipments are unexpected) or force `per_installment` whenever the
+delivery rate is `'actual'`. **Not decided.** This is the same `'actual'`-contributes-zero edge case flagged in
+§5.10.2, surfacing in a second place.
 
 ---
 
@@ -628,7 +710,7 @@ Backfill per existing request: create parent, copy the citizen/money/clock colum
 1. **Parent `Processed` vs `Delivered`.** Your sheet's parent Stage ends at `Processed`. I've added `Delivered` and `Closed` because nothing otherwise records that records went out. Confirm, or tell me `Processed` already meant "delivered."
 2. **Should nonpayment stop the statutory clock?** Today it does not — `payment_pending` is declared in `tolling.js` and has **zero callers**, so a request sitting on an unpaid deposit runs late on paper. Texas is stronger than a toll: an unpaid deposit **re-receipts** the request (§552.263(e)) and can withdraw it (§552.263(f); §552.221(e) 60-day). Recommend: add `deposit_nonpayment_effect: pause | reset | withdraw | flag_only` and set TX = `reset` (§10.4 step 3). The `restart()` primitive it needs is already built.
 3. **Clarification: reset, not pause.** Confirm we implement §552.222 / *City of Dallas v. Abbott* as a reset rather than a toll. **This is already expressible** — set `clarification_clock_effect = toll_and_restart` for TX (`clarificationAction.js:32-42`). It is not set today: the policy is at all-defaults (`no_fixed_clock`, `enabled: false`) and nothing is attested, so the automation has never fired. Turning it on **changes reported lateness on live requests**.
-4. **`delivery_mode` = `Hold-All` (default) | `As-Ready`.** Confirm you want As-Ready as a real mode rather than an MRR-only override (§5.8).
+4. ~~**`delivery_mode` = `Hold-All` (default) | `As-Ready`.** Confirm you want As-Ready as a real mode rather than an MRR-only override (§5.8).~~ **ANSWERED 2026-07-19 by Kevin — and the default is the OPPOSITE of what this question assumed. `As-Ready` is the DEFAULT**; `Hold-All` is the option, and is **not selectable** where statute makes installments an entitlement (WA). Per-request hold override by the ORO Associate on the MRR. See §5.8, and §5.8.1 for the notice rule that follows from it.
 5. ~~**Routing for MRR stays purely manual**~~ **RELAXED 2026-07-16 → see §14.2.** The 07-13 call (parent assigned to an MRR manager who assigns children by hand) is superseded by **suggest-and-confirm**: the classifier runs on every child; the result is *committed* on a single-child request and *suggested* on an MRR, for the RM to accept, override, or bypass. Pure manual is incompatible with always-wrap — a single-record request IS a parent with one child, so children must auto-route or every ordinary request would need a human to route it. **Still true and unchanged:** the parent is system-routed to an ORO Associate via `mrr_processing`, that person owns the whole tree at the parent (§14.1), and **intake review is bypassed for MRR** because the parent is already with an Open Records team member.
 
 ---
@@ -945,10 +1027,15 @@ carries `budget_clock` at all (§5.4) — the statutory clock (parent) would nev
 4. **Verify ≠ Approve — the distinction is LEGAL, not cosmetic.** Staff **Verify** an estimate before it goes out.
    **Approve** is reserved for the *requestor* approving the estimate, which **in some states is the event that
    begins processing**. Collapsing the two words into one button would corrupt a statutory trigger.
-5. **Manual early release of a completed child** — default: nothing releases until the whole request completes;
-   the RM may set a **Finance-approved** acceptable payment to release specific completed children early.
-   ⚠️ **Reconcile with §5.9:** the payment gate is a **coverage** test — a child may **never** be withheld because
-   a *sibling* is unpaid. Early release is the RM's discretion *within* that constraint, not an exception to it.
+5. ~~**Manual early release of a completed child** — default: nothing releases until the whole request completes;~~
+   **RESOLVED 2026-07-19 — the default is INVERTED, so this surface changes shape.** With `as_ready` as the
+   default (§5.8), a completed child releases on its own; there is no "early release" to grant, because nothing
+   is being held. **What the hub needs instead is the opposite control: a HOLD**, exercised by the ORO Associate
+   managing the MRR, subject to the §5.8 guard. The Finance-approved acceptable-payment path stays — but it is
+   now about **coverage** (does this child's charge have money behind it, per §5.10.2's `componentCharged`), not
+   about releasing something the system was otherwise sitting on.
+   ⚠️ **§5.9 still governs:** the payment gate is a **coverage** test — a child may **never** be withheld because
+   a *sibling* is unpaid.
 6. **HIGH PRIORITY flag** → an AI report monitoring all high-priority MRRs.
 
 ### 14.5 Roll-up (pointer, not a restatement)

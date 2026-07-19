@@ -248,11 +248,16 @@ The happy path really only models "closed" today. These exits are distinct **com
 > 2. **"Some children delivered, others denied"** — this was the **parent roll-up**, retired 2026-07-16. The
 >    parent has no disposition; each child simply carries its own.
 >
-> **❓ OPEN — the one real question this leaves.** *Which notice goes out when children disagree?* One
-> delivered + one denied is a single citizen who must receive both the records and a citable denial. Options
-> not evaluated here: one combined notice per parent, per-child notices, or a notice per delivery installment
-> (which interacts with the unresolved Hold-All vs As-Ready fork, §5.9 vs §14.4.5). **Belongs to the §4.4
-> field-design pass — do not build from this section until it is answered.**
+> ✅ **ANSWERED 2026-07-19 by Kevin — ONE NOTICE PER CHILD** (`SPEC_parent_child_lifecycle.md` §5.8.1).
+> The question "which notice goes out when children disagree" **does not arise**: each child ends in exactly
+> one §5.8 disposition and emits exactly one notice describing what happened to *that record*. No roll-up, no
+> precedence table. This is coherent because `delivery_mode` now defaults to **As-Ready** (§5.8) — each child
+> ships at its own time, so its own notice is the natural artifact, not a bureaucratic one. For n = 1 it is one
+> record, one shipment, one notice.
+>
+> Notice **content** was never optional: a denial carries the specific exemption, the statutory citation and an
+> explanation of how it applies (`child_exemptions`, §5.7). Only **packaging** was open, and no statute
+> addresses it — TX § 552.306(c)(2)(B) batch notices are AG-track scheduling only.
 
 Each terminal disposition should carry: the closing reason, the timestamp, who/what closed it (human or tickler), and any refund disposition.
 

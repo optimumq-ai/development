@@ -328,6 +328,11 @@ Captured faithfully to prevent loss; NOT yet finalized.
 - On search/redaction submit -> tasks Complete on RM view, records attached per child.
 - Individual children may be Complete, but PARENT is not Complete until ALL children Complete. *(Survives — matches `parent_state` derivation, §6.1.)*
 - ~~Default: do NOT release records until parent Complete.~~
+  > ✅ **RESOLVED 2026-07-19 by Kevin — `as_ready` is the DEFAULT, so this line is simply wrong now.** Records
+  > release as they are ready; a completed child is never held waiting for a sibling. The ORO Associate on an
+  > MRR may hold per-request, subject to the entitlement guard in `SPEC_parent_child_lifecycle.md` §5.8.
+  > Notices follow: **one per child** (§5.8.1). Original flag retained below for the reasoning.
+  >
   > ⚠️ **UNRESOLVED FORK — do not build from this line** `[flagged 2026-07-19]`. It contradicts
   > `SPEC_parent_child_lifecycle.md` §5.9, which holds that **per-child release is first-class, not an MRR
   > override**, because WA RCW 42.56.080(2) makes installment delivery a requestor *entitlement* ("on a partial
