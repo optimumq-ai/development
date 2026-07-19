@@ -756,13 +756,18 @@ CREATE TABLE IF NOT EXISTS onboarding_progress (
   notes TEXT,
   updated_at TIMESTAMP DEFAULT now()
 );
+-- SEVEN phases. `fees` was missing here while existing in the live DB (added by hand), so a FRESH INSTALL
+-- produced a wizard with no Fees & Estimates phase at all — and therefore no fee sandbox gate, which is the
+-- strongest configuration gate in the product. `redaction` moves to 6 to make room; the convergence UPDATE
+-- below repairs any database seeded from the older six-phase list.
 INSERT INTO onboarding_progress (phase_key, phase_order, title) VALUES
   ('jurisdiction', 0, 'Jurisdiction Profile'),
   ('departments', 1, 'City Departments'),
   ('teams',       2, 'Request Fulfillment Teams'),
   ('ownership',   3, 'Record Ownership'),
   ('repositories',4, 'Repositories & Discovery'),
-  ('redaction',   5, 'Redaction Readiness')
+  ('fees',        5, 'Fees & Estimates'),
+  ('redaction',   6, 'Redaction Readiness')
 ON CONFLICT (phase_key) DO NOTHING;
 
 CREATE TABLE IF NOT EXISTS import_ingest_log (id TEXT PRIMARY KEY, repository_id TEXT NOT NULL, file_key TEXT NOT NULL, original_name TEXT, request_file_id TEXT, status TEXT, detail TEXT, ingested_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
@@ -964,6 +969,26 @@ ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS test_config_ref TEXT;
 ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS requires_review BOOLEAN DEFAULT false;
 ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS review_requested_at TEXT;
 ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS reviewer_id TEXT;
+
+-- WHICH ONBOARDING PHASES ARE GATED — the seed baseline, converged on every boot.
+--
+-- THE DEFECT THIS FIXES: `requires_review` was added with DEFAULT false and **nothing in the codebase ever
+-- wrote it**. The live database carried it as true on jurisdiction / fees / redaction because someone set it
+-- by hand. A fresh city install therefore came up with ZERO gated phases — every phase completable by any
+-- authenticated user with a plain PATCH, no designated reviewer, no approval — which is the exact opposite of
+-- the intended posture (`AUTO_CONFIG_DESIGN.md` §11, `DESIGN_go_live_readiness.md`).
+--
+-- These three are gated because each carries legal weight the city must own: the jurisdiction profile sets
+-- statutory deadlines and the exemption basis; fees decide what a citizen is lawfully charged (and this phase
+-- carries the version-bound sandbox gate); redaction decides what is withheld. Nothing sets `requires_review`
+-- at runtime, so converging it here cannot clobber a customer's choice — there is no way for them to make one.
+--
+-- Both statements are guarded to be genuine no-ops when already correct, so this rewrites nothing on an
+-- existing install (the schema is re-applied on every server boot).
+UPDATE onboarding_progress SET phase_order = 6
+  WHERE phase_key = 'redaction' AND phase_order IS DISTINCT FROM 6;
+UPDATE onboarding_progress SET requires_review = true
+  WHERE phase_key IN ('jurisdiction', 'fees', 'redaction') AND requires_review IS DISTINCT FROM true;
 
 -- Notification model + nullable task/file request link (Tasks spec §1-2; Sources spec §4). A task is a
 -- request-processing stop; a NOTIFICATION is an ad-hoc heads-up (description + link, no completion UI) that
