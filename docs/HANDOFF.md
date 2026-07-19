@@ -6153,7 +6153,8 @@ the accepted types from the resolve route's own type guard and fails, naming any
    I3/I6, **the request does not move** — plus I7, that an `in_progress` task still resolves (not over-broad).
    Break-tested: removing the guard fails 4, including both did-not-move assertions.
    ⚠️ **The ~6 SQL literals still carry their own copies** — a separate mechanical pass.
-2. **`assert-exemption` writes the stage to whichever row it resolves — including a PARENT.** It does
+2. ~~**`assert-exemption` writes the stage to whichever row it resolves — including a PARENT.**~~
+   **FIXED 2026-07-19 (`cbc9e46`) on Kevin's ruling.** It does
    `SELECT ... WHERE id = ? OR request_number = ?` and hands the row straight to `applyStageTransition`, so
    asserting against a parent id moves the **parent** and spawns `legal_review` there, while the **child**
    carrying the real work stage sits at `intake` with its own open `routing_review`. Stage is a CHILD fact
@@ -6222,3 +6223,44 @@ reasoning about who read what when — and the harness, not review, is what caug
 **Still open from (ac):** defect 2 — `assert-exemption` writes the stage onto whichever row it resolves,
 including a PARENT, so the parent moves while the child carrying the real work stage stays at `intake`. That
 one wants a decision about where stage lives for a wrapped request, not a patch.
+
+### Addendum to (ac) — Kevin's parent/child ruling, and the last (ac) defect closed (`cbc9e46`)
+**974/974 green, live clean**, API restarted. All three defects from (ac) are now closed.
+
+**THE RULING (Kevin, 2026-07-19) — this is the durable part, not the patch:**
+
+> "the exemption applies to processing a request that has a description of item requested. it's a child
+>  record level issue. the parent should be thought of as who requested the information and did he pay for
+>  it, etc."
+
+**PARENT** = who asked, the number they quote, the money, the statutory clock.
+**CHILD** = the described item and everything about processing it — **stage included**.
+
+This is the rule to apply to every future question of "which row does X hang off?", not just exemptions.
+
+**What was wrong:** `assert-exemption` and its twin `ag-ruling` handed whatever row the CALLER NAMED to
+`applyStageTransition`. Naming the parent moved the parent into a legal stage and spawned `legal_review`
+there, while the child holding the description sat at `intake`.
+
+⚠️ **Correcting (ac)'s own account:** it said the endpoint "landed on different rows", implying
+nondeterminism. **It is deterministic** — it moves whatever row you address; I had passed a child id one time
+and a parent id the other. The defect is that naming the parent is possible and *natural*, since the parent
+id is the one a caller holds.
+
+**`scope.workRow()` is the piece that was missing.** `requestScope` had SQL predicates for SCOPING a query
+and nothing for *"I was handed an id — give me the row this work belongs to"*, so routes improvised by not
+resolving at all. A leaf resolves to itself; a parent with one child resolves to that child.
+**Ambiguity is refused, not guessed:** a parent with several children gets 409 `AMBIGUOUS_WORK_ROW` with the
+candidates, because picking one would attach a legal act to the wrong record.
+
+**The clock stays on the PARENT** — already true in the code (`COALESCE(master_request_id, id)`), and K5 now
+asserts it. Same division read from the other side.
+
+⚠️ **`PATCH /requests/:id/stage` (the Advance button) HAS THE SAME SHAPE and is NOT fixed** — it also passes
+`req.params.id` straight through, so advancing a parent-addressed request writes a work stage onto the
+parent. `scope.workRow()` now exists to fix it; it was left out deliberately to keep this slice to Kevin's
+ruling. **This is the first thing to pick up.**
+
+⚠️ **A test-fixture trap worth remembering:** the first draft of §K built its parent with `mkRequest()`,
+whose stage argument defaults to `record_search` when absent — so the "parent" looked like a work row and K3
+passed vacuously in the wrong direction. **A parent/child test must build the parent explicitly stage-NULL.**
