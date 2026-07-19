@@ -5731,3 +5731,59 @@ reason.**
    (reconciliation trues it up) but it means the first number a citizen sees is quoted before anyone has
    looked. **Raised with Kevin, deliberately left open.**
 3. Still standing: dunning is inert, `routing_review` fires per child, Part H of the attribute inventory.
+
+---
+
+## 2026-07-19 (w) — The v1 redaction duplicates, retired (`2057e46`) — brief §5 decision 5
+Second of Kevin's blocked decisions to land. **The brief was half wrong about what the duplicates were, and
+the wrong half is the whole finding.**
+
+### One was never a duplicate
+§2.3 said `RedactionWorkspacePage` and `RedactionReviewPage` "do what `RedactionTaskPage` does task-aware."
+True of the second, false of the first:
+
+- **`RedactionReviewPage` — DELETED.** Genuinely superseded; `RedactionTaskPage` has its own side-by-side, and
+  this page's only inbound link was a button on the v1 workspace.
+- **`RedactionWorkspacePage` — KEPT, and scoped.** It is the canvas for redaction **TEMPLATE authoring** —
+  sample documents uploaded from `MassRedactionPage` onto `req-template-samples` (`SYS-TEMPLATE-SAMPLES`), a
+  **purge-protected pseudo-request carrying zero tasks by design.** `RedactionTaskPage` is keyed on a `taskId`
+  and therefore *cannot* open those files. Deleting it on the brief's say-so would have silently removed
+  template authoring. A banner at the top of the file now states this, so the next sweep does not repeat the
+  read.
+
+### ⚠️ What was actually duplicated was an ENTRY POINT, not a page
+The per-record **`Redact` / `Auto-redact` button** on the request workspace (`RecordsPanel`) sent a **citizen
+record** into the task-less v1 canvas. That screen carries **no work timer**, so redaction labour on anything
+opened that way was **never measured** — and labour is billable, so **the city under-billed for it.** That
+button is what needed retiring. Redaction now happens only at `/redaction/:taskId`, reached from My Tasks. The
+template-match badge stays: it is information, not a way in.
+
+### What I checked rather than assumed
+I expected the v1 screen to bypass the slice-4 Elevated/Legal second-review gate. **It does not** —
+`gateApply` is enforced in `POST /redaction-jobs/jobs/:id/apply`, in the route, not the UI. The loss was
+measurement, not the gate. Worth recording because the opposite would have been a much louder finding, and
+asserting it without looking would have been wrong.
+
+### Verification
+**896/896 green, live census clean.** New harness `verify_v1_retirement` (12), registered — a **source scan**
+in `verify_stages`' ghost-check idiom, because the defect is a link that exists. **Break-tested twice:**
+re-adding the per-record button fails B1/B2 (and names the file:line); resurrecting the deleted page fails
+A1/A2. §D is the standing premise — it asserts the holding area still has zero tasks and is still
+purge-protected, so **if that ever changes the survivor DOES become a real duplicate and D2 is what notices.**
+
+Frontend rebuilt and redeployed — the deleted import would otherwise have broken the bundle; `Compiled
+successfully`, UI serving 200.
+
+### Next session
+1. **Two of Kevin's five §5 decisions remain:** 3 — single-record vs the MRR parent hub (§14.3, design-gated);
+   4 — `commercial_rate` / `mrr_processing` build-or-delete (currently assignable to people, permanently empty
+   pools).
+2. **Still open and NOT decided:** the sequence puts `fee_review` / `awaiting_payment` before `record_search`
+   — an estimate and a deposit quoted before anyone has looked. Raised in (v), deliberately left.
+3. Still standing: dunning is inert, `routing_review` fires per child, Part H of the attribute inventory.
+
+### ⚠️ The standing lesson, third session running
+(q), (r) and (v) all ended with "read the implementation before believing the sweep." This session is the
+cleanest instance yet: **acting on the brief's §2.3 line alone would have deleted a working feature**, and the
+only thing that prevented it was checking what actually linked to the page before removing it. **A document
+that lists something as dead is a hypothesis, not a finding.**

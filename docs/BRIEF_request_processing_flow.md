@@ -66,8 +66,23 @@ is the one that matches reality). `redaction_qa` is real but absent from `ROUTAB
 `MyTasksPage`, `TicklerPage`, `RecordSearchTaskPage`, `RedactionTaskPage`, `MassRedactionPage`,
 `ReleasedRecordsPage`, `StructuredRedactionFieldsPage`, `AvWorkbenchPage`, and every workspace panel.
 
-**Duplicates (v1, superseded):** `RedactionWorkspacePage` (`/redact/:fileId`) and `RedactionReviewPage`
-(`/redact/:fileId/review`) do what `RedactionTaskPage` does task-aware. Both still reachable.
+**Duplicates (v1, superseded):** ~~`RedactionWorkspacePage` (`/redact/:fileId`) and `RedactionReviewPage`
+(`/redact/:fileId/review`) do what `RedactionTaskPage` does task-aware. Both still reachable.~~
+**RESOLVED 2026-07-19 (`2057e46`) — and this entry was HALF WRONG, which is the useful part:**
+
+- `RedactionReviewPage` — genuinely superseded, **DELETED**. Its only inbound link was a button on the v1
+  workspace; `RedactionTaskPage` has its own side-by-side.
+- `RedactionWorkspacePage` — **NOT a duplicate, KEPT.** It is the canvas for redaction **TEMPLATE authoring**:
+  samples uploaded from `MassRedactionPage` onto `req-template-samples` (`SYS-TEMPLATE-SAMPLES`), a protected
+  pseudo-request with **zero tasks by design**. `RedactionTaskPage` is keyed on a `taskId` and cannot serve
+  it. A banner in the file now says so, so the next sweep does not delete it on this entry's say-so.
+- **What was actually duplicated was an ENTRY POINT, not a page:** the per-record `Redact` button on the
+  request workspace (`RecordsPanel`) sent a **citizen record** into the task-less canvas, which carries no
+  work timer — so redaction labour went unmeasured and **the city under-billed for it**. That button is
+  retired; redaction happens at `/redaction/:taskId`.
+
+Guarded by `verify_v1_retirement` (12). The backend Elevated/Legal second-review gate was **never** bypassed
+by the v1 screen — `gateApply` is enforced in the route, not the UI. Checked, not assumed.
 
 **Orphan:** `components/ui/TaskPoolSection.js` — imported nowhere; its link map would misroute record-search
 tasks. `App.js:54-62` defines a `Soon()` component that is never referenced.
@@ -253,7 +268,10 @@ since it is what puts requests at stages the system has never reached.
    parent line is deliberately inert today.
 4. **`commercial_rate` / `mrr_processing`** — build, or remove from the catalog? They are currently
    assignable to people and produce permanently empty pools.
-5. **The v1 redaction duplicates** — retire now or leave until the flow settles?
+5. ~~**The v1 redaction duplicates** — retire now or leave until the flow settles?~~ **ANSWERED 2026-07-19 —
+   retired** (`2057e46`). See §2.3: one page deleted, one kept because it was never a duplicate, and the
+   thing actually duplicated turned out to be an entry point that cost billable labour. **Two of Kevin's five
+   §5 decisions now remain: 3 (single-record vs the MRR hub) and 4 (`commercial_rate` / `mrr_processing`).**
 
 ---
 
