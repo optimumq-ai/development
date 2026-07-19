@@ -252,17 +252,18 @@ The highest-consequence rules in the model. All legal, all currently unenforced 
 | `SPEC_parent_child_lifecycle.md:461` | "there are 125 requests and **0 children have ever been created**" — inside §8, the section describing the migration that falsified it | Reframed as an explicit pre-migration "before" snapshot |
 | `TASK_AND_NOTIFICATION_MODEL.md` §7.1–7.5 | A 2026-07-07 **audit**: "'always parent' — **VERIFIED FALSE**", "child creation does NOT exist", "a child IS a full request row", the `PARTIALLY GRANTED` roll-up | Corrected inline, originals retained as history. §7.4's blast-radius estimate flagged as **too optimistic for a traceable reason** — "point-lookups by id are UNAFFECTED" is exactly the false premise that produced the `GET /requests/:id` bug |
 | `TASK_AND_NOTIFICATION_MODEL.md:51` | Task catalog tagged `[code-verified]`, listing `build_redaction_template` as implemented | **It exists nowhere in `src/`**, and `verify_notifications.js:75` asserts it is *never* created. Also added the five omitted live task types |
-| `SPEC_fees_estimates_payments.md:21` | "MRR-aware fee aggregation across children **exists**" | Retired, with the verified dunning consequence. Note §4a in the *same file* was already honest — "Request-level only… deferred to #11" |
+| `SPEC_fees_estimates_payments.md:21` | "MRR-aware fee aggregation across children **exists**" | Retired, with the verified dunning consequence. §4a in the same file said the opposite ("Request-level only") — the file contradicted itself, with the accurate sentence buried below the false one |
+| `SPEC_fees_estimates_payments.md:45` + `SPEC_tasks_roles_mrr_fees.md` ×3 | "deferred to **#11**" / "waits for #11" — **#11 shipped 2026-07-16**, so these read as *blocked* when they are **unblocked and unbuilt** | Corrected. The labor rollup's "aggregate lands on the first component" was verified false: `rollup()` has no parent/child scoping and its caller passes a child id, so an MRR gets per-child rollups and **no parent total** |
 | `SPEC_record_search_task_screen.md:406` | Per-record states justified as "the prerequisite for the MRR Partially-Granted roll-up" | Reframed to stand on their own — the searcher's answer to each description, the enforcement half of R9 |
 | `SPEC_record_search_fulfillment.md:25` | Same retired roll-up, **and** marked the resolution step `[NOT BUILT]` | Both corrected — it shipped 2026-07-14 |
 | `WORKFLOW_DECISIONS.md` Part 4 + scenarios B/E/F | "A request ends in exactly one terminal state", incl. `PARTIALLY_GRANTED` | Mapped onto §5.8's eight **child** dispositions. Surfaced two the list was missing (`Previously furnished`, `Not in our custody`). Deposit-overrun paths gained a caution: "deliver what the deposit covers" must not become "withhold child B because child A is unpaid" |
 | `SPEC_parent_child_lifecycle.md` §14.5 | Routed mixed-outcome resolution to **§6.2** — which says "do not build from this section" | No mixed-outcome resolution exists to perform; each child keeps its own disposition |
 
-### ⚠️ Still stale — not fixed
+### ⚠️ Still stale — deliberately not fixed
 
-| Doc | Problem |
+| Doc | Why left alone |
 |---|---|
-| `SPEC_tasks_roles_mrr_fees.md:22,24` | "Parent roll-up waits for #11." **#11 shipped 2026-07-16 and this was never revisited** — the time-budget parent roll-up is still unbuilt and now unblocked |
+| `HANDOFF.md:3810, 3892, 3953` | Carries the same "deferred to #11" language, but **HANDOFF is a dated historical log** — those entries were true when written. Editing them would falsify the record of what was known when. The specs they describe are corrected |
 
 ### What the sweep did NOT change
 
