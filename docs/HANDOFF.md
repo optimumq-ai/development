@@ -5787,3 +5787,49 @@ successfully`, UI serving 200.
 cleanest instance yet: **acting on the brief's §2.3 line alone would have deleted a working feature**, and the
 only thing that prevented it was checking what actually linked to the page before removing it. **A document
 that lists something as dead is a hypothesis, not a finding.**
+
+---
+
+## 2026-07-19 (x) — `commercial_rate` / `mrr_processing` deleted from the catalog (`ff32305`) — brief §5.4
+Third of Kevin's five decisions to land. Small and clean; the interesting part is what it is *adjacent* to.
+
+### The defect was a promise the router could not keep
+Both types sat in `ROUTABLE_TASK_TYPES` and in the per-person picker on Staff Management, but **nothing
+spawns either** — there is no `createTask({type:'commercial_rate'})` or `'mrr_processing'` anywhere in the
+codebase. So a supervisor could grant a person work that can never arrive: a **permanently empty pool**. An
+entry in that list is a promise the router can deliver that type, and neither could.
+
+**Checked live before cutting:** zero `user_task_types` rows for both, zero tasks, zero `time_budgets` rows.
+Nothing orphaned, no migration. (Only `routing_review` is assigned to anyone at all today.)
+
+### ⚠️ `mrr_processing` deletes a CATALOG ENTRY, not a DESIGN
+It is still the designed routing mechanism for the MRR parent hub (§14.3, MASTER §A2) — **which is brief §5
+decision 3 and remains OPEN.** Deleting the key does not settle that decision. If the hub is built, re-add it
+*alongside the code that spawns it*. Recorded at the removal site in `taskRouting.js` and in the MASTER doc,
+so the next agent does not have to rediscover why it vanished — or, worse, read its absence as the hub being
+rejected.
+
+### The guard the original problem asked for
+Brief §2.2 noted **three catalogs disagreeing** (`TASK_ROLES` 8, `ROUTABLE_TASK_TYPES` 9, `time_budgets` 8) —
+and they drifted precisely because nothing ever compared them. `verify_v1_retirement` §E now does:
+**E3** asserts the Staff Management picker offers nothing the router cannot route, **E4** stops E3 passing
+vacuously on an empty picker, and **E2** asserts nothing spawns the removed types — the premise for removing
+them — so if that ever changes the suite says so instead of the pool quietly filling.
+
+**Known and deliberately not fixed:** `redaction_qa` is real but still absent from `ROUTABLE_TASK_TYPES`.
+Different defect, and folding it into a deletion slice would have hidden it.
+
+### Verification
+**901/901 green, live census clean.** Break-tested both directions: re-adding the type to the picker fails E3
+and names it; re-adding it to `ROUTABLE_TASK_TYPES` fails E1. Frontend rebuilt and redeployed
+(`Compiled successfully`, UI 200).
+
+### Next session
+1. **ONE of Kevin's five §5 decisions remains: 3 — single-record first, or the MRR parent hub too?** (§14.3,
+   design-gated.) Everything else in §5 is answered. Note this decision now has a small dependency: building
+   the hub means restoring the `mrr_processing` catalog entry.
+2. **Open, raised, not decided:** the sequence puts `fee_review` / `awaiting_payment` before `record_search` —
+   an estimate and a deposit quoted before anyone has looked (raised in (v)).
+3. **`redaction_qa` missing from `ROUTABLE_TASK_TYPES`** — surfaced twice now; a genuinely small slice.
+4. Still standing: dunning is inert (`verify_nonpayment_scope.js` written and waiting), `routing_review`
+   fires per child, Part H of the attribute inventory.

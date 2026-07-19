@@ -23,8 +23,10 @@ A "task type" is one kind of human stop in request processing. Two flavours (des
 | `legal_review` | Legal Review | *(new — task-type key)* | ORO Senior Legal (+ Legal Associate support) | stage `exemption_review` / `ag_review` | routing `[BUILT 2026-07-09]` (team-agnostic); dedicated screen `[NOT BUILT]` |
 | `fee_waiver` | Fee-Waiver Approval | **`FINANCE`** | **ORO Finance** | trigger `fee_waiver_requested`; spawned `onIntake`; team-agnostic (`team_id=NULL`) | task + routing + resolution `[BUILT 2026-07-09]`; role reconciled `FEE_AUTHORITY`→`FINANCE`, orphan `FEE_WAIVER_APPROVER` retired `[2026-07-15]` |
 | `routing_review` | Routing Review | *(new — task-type key)* | **ORO Associate** | trigger: classifier could not determine a fulfillment team (`teamId` null); team-agnostic; closed automatically on `PATCH /requests/:id/route` | routing `[BUILT 2026-07-09]` |
-| `commercial_rate` | Commercial-Rate Approval | `FINANCE` (target) | **ORO Finance** | trigger `purpose='commercial'` | `[DEFERRED — add on customer demand]`; trigger not wired |
+| ~~`commercial_rate`~~ | Commercial-Rate Approval | `FINANCE` (target) | **ORO Finance** | trigger `purpose='commercial'` | ✅ **DELETED FROM THE CATALOG 2026-07-19** (`ff32305`, brief §5.4). Was `[DEFERRED]` with the trigger unwired — so it was offerable in the per-person picker and produced a **permanently empty pool**. The design below stands; re-add the key *with* the code that spawns it |
 
+> **`[revised 2026-07-19]` `ROUTABLE_TASK_TYPES` is now exactly seven:** `estimate`, `record_search`, `redaction`, `legal_redaction`, `legal_review`, `fee_waiver`, `routing_review`. `commercial_rate` and `mrr_processing` were deleted (§5.4) — an entry there is a **promise the router can deliver that type**, and neither could. A harness (`verify_v1_retirement` §E) now asserts the Staff Management picker offers nothing the router cannot route, because the three catalogs drifted apart precisely by never being compared. **Still unreconciled:** `redaction_qa` is real but absent from `ROUTABLE_TASK_TYPES`.
+>
 > Note: wired keys in `taskRouting.js` are `estimate`, `record_search`, `redaction`, `fee_waiver`, plus (2026-07-09) `legal_review` and `legal_redaction`. `STAGE_TASK` now maps `record_search→record_search`, `redaction_review|redaction→redaction` (→ `legal_redaction` when the request is legally flagged), and `exemption_review|ag_review→legal_review`. Legal task types are office-level (team-agnostic) and resolve eligibility via `user_task_types`. Remaining unwired: `commercial_rate` (deferred) and the `mrr_*` set.
 
 ### A2. MRR task types — two distinct behaviors
@@ -33,7 +35,7 @@ The MRR parent is **routed by the system**; the MRR children are **hand-assigned
 
 | Task type | Display name | Assignment | In per-person subset (`user_task_types`)? | Status |
 |---|---|---|---|---|
-| `mrr_processing` | MRR Processing (parent management) | **System-routed** to an ORO Associate (Request Manager) when intake detects MRR — eligibility applies | **Yes** — it is routable | `[NOT BUILT]` |
+| ~~`mrr_processing`~~ | MRR Processing (parent management) | **System-routed** to an ORO Associate (Request Manager) when intake detects MRR — eligibility applies | ~~Yes~~ **removed from `ROUTABLE_TASK_TYPES`** | ⚠️ **DELETED FROM THE CATALOG 2026-07-19** (`ff32305`) — **the DESIGN below is unchanged and still governs.** The hub is brief §5 decision 3 and is **still open**; if it is built, re-add this key alongside the code that spawns it. It was removed because nothing spawned it, not because the design was rejected |
 | `mrr_estimate` | Multi-Record Request Estimate | **Hand-assigned** by the RM to any person per child (may be a non-user via secure link) — **no eligibility, no team filter, no smart routing** | **No** | `[NOT BUILT]` |
 | `mrr_search` | Multi-Record Search | **Hand-assigned** by the RM to any person per child — no routing rules | **No** | `[NOT BUILT]` |
 

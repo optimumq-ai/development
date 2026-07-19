@@ -266,8 +266,11 @@ since it is what puts requests at stages the system has never reached.
    applied to the `legal_review` resolution (§3.2); **every stub screen must follow it.**
 3. **Single-record first, or the MRR parent hub too?** The hub (§14.3) is design-gated and the queue's
    parent line is deliberately inert today.
-4. **`commercial_rate` / `mrr_processing`** — build, or remove from the catalog? They are currently
-   assignable to people and produce permanently empty pools.
+4. ~~**`commercial_rate` / `mrr_processing`** — build, or remove from the catalog?~~ **ANSWERED 2026-07-19 —
+   DELETED** (`ff32305`). Nothing spawned either, so both were offerable in the per-person picker and produced
+   permanently empty pools. Live carried zero `user_task_types` rows for both, so nothing was orphaned.
+   ⚠️ `mrr_processing` remains the **designed** routing mechanism for the MRR hub — **decision 3, still open**
+   — so this deleted the catalog entry, not the design. **One §5 decision now remains: 3.**
 5. ~~**The v1 redaction duplicates** — retire now or leave until the flow settles?~~ **ANSWERED 2026-07-19 —
    retired** (`2057e46`). See §2.3: one page deleted, one kept because it was never a duplicate, and the
    thing actually duplicated turned out to be an entry point that cost billable labour. **Two of Kevin's five
