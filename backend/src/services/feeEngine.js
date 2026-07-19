@@ -31,6 +31,54 @@ function tieredAmount(qty, tiers) {
 }
 function hasTiers(cfg) { return cfg && cfg.tiers && cfg.tiers.length; }
 
+// GENERALIZED PRORATA — the per-component charged amount (SPEC_parent_child_lifecycle.md §5.10.2).
+//
+// THE PROBLEM. `componentGross` is a NAIVE per-record sum: components are priced with no rounding, no
+// billability gate, no free allowances and no tiers, and that figure is then DISCARDED — every real rule
+// (labor rounding, laborGate thresholds, free allowances, duplication tiers, floor, ceiling, de-minimis,
+// surcharge, delivery, certification) runs on request-level AGGREGATES. So `Σ componentGross ≠ total`, and
+// no request-level rule decomposes to components. There was therefore no per-record price anywhere in the
+// system — which is what the §5.9 per-child release gate, revenue-by-department, and ERP line items all
+// needed and none of them could have.
+//
+// THE RULE. Scale every component by the ratio of what was ACTUALLY charged to the naive sum:
+//     componentCharged[i] = componentGross[i] × (total / grossSubtotal)
+//
+// One ratio, both directions. It does not care WHY total differs from the sum, so it absorbs every vehicle
+// above — and any rule added to the engine later — with nothing to maintain per-vehicle. It is the same
+// allocation an ERP performs for a trade discount across mixed line items, and it is ORDER-INDEPENDENT,
+// which is the property that killed the previous "running cap on cumulative billing" rule (under which a
+// record cost $60 if it shipped first and $40 if it shipped last).
+function allocateComponents(comps, grossSubtotal, total) {
+  var gross = num(grossSubtotal), tot = num(total);
+  comps.forEach(function (c) {
+    // A component whose line items are all `rate: 'actual'` prices to 0 and would allocate to 0 — reading as
+    // FREE while potentially being the most expensive record in the request. `mail` delivery is 'actual' in
+    // the live TX profile, so this is reachable. Flag it rather than let a provisional 0 look final.
+    c.hasUnpricedActuals = (c.lineItems || []).some(function (li) { return !!li.needsActual; });
+  });
+  // Nothing was priced: de-minimis waived the request, every rate is 'actual', or there are no components.
+  // Guard the division and say so explicitly instead of emitting NaN.
+  if (gross <= 0) {
+    comps.forEach(function (c) { c.componentCharged = 0; });
+    return { basis: gross === 0 ? 'nothing_priced' : 'invalid_gross', ratio: null };
+  }
+  var ratio = tot / gross;
+  var running = 0;
+  comps.forEach(function (c) { c.componentCharged = r2(num(c.componentGross) * ratio); running = r2(running + c.componentCharged); });
+  // PENNY RECONCILIATION. Independently rounded shares can miss `total` by a cent or two, and this figure
+  // gates a release — an off-by-$0.01 shortfall would withhold a finished record. Settle the residual on the
+  // LARGEST component (not the last) so the result depends on the SET, not on array order; order-independence
+  // is the whole point of this rule and must not be given back at the rounding step.
+  var residual = r2(tot - running);
+  if (residual !== 0 && comps.length) {
+    var big = 0;
+    for (var i = 1; i < comps.length; i++) if (num(comps[i].componentGross) > num(comps[big].componentGross)) big = i;
+    comps[big].componentCharged = r2(num(comps[big].componentCharged) + residual);
+  }
+  return { basis: 'prorata', ratio: ratio };
+}
+
 // Round labor hours to the billing increment (e.g. 0.25). mode: 'up' (default) | 'down' | 'nearest'.
 // increment 0/null -> bill actual hours, no rounding.
 function roundHours(hours, increment, mode) {
@@ -310,10 +358,15 @@ function compute(profile, request) {
         : ('Notification threshold $' + num(t).toFixed(2) + ' — not exceeded (total $' + total.toFixed(2) + ').'))));
   })();
 
+  // Per-component charged amounts — computed LAST, because it needs the final `total` (post floor, ceiling
+  // and de-minimis). Mutates compOut, adding `componentCharged` + `hasUnpricedActuals` to each entry.
+  var allocation = allocateComponents(compOut, grossSubtotal, total);
+
   return {
     context: profile.context || 'FR',
     configVersion: (profile.version != null ? profile.version : null),
     components: compOut,
+    allocation: allocation,
     requestLevel: {
       grossSubtotal: grossSubtotal,
       labor: laborItems, laborSubtotal: r2(laborSubtotal),
