@@ -5591,3 +5591,51 @@ are off-limits.
 3. **Drop `requests.amount_paid` and `actual_fee`** — genuinely unreferenced since (s); a clean migration.
 4. Still standing: **dunning is inert** (`verify_nonpayment_scope.js` written and waiting), **`routing_review`
    fires per child**, `WORKING_attribute_inventory.md` Part H, and (q)'s deliberately-undone items.
+
+---
+
+## 2026-07-19 (u) — The dead money columns are gone (`016ad30`)
+Small, clean slice closing (t)'s item 3. `requests.actual_fee` and `requests.amount_paid` dropped from the
+schema and from live.
+
+### Checked before deleting, not after
+Neither column ever had a writer — not one line in the codebase set either. **They were not harmless:**
+`amount_paid` had exactly one reader in the repo, `reportEngine`'s `fee_revenue` metric, which is why every
+revenue figure in the product read $0 however much a city had collected (see (s)). That reader was cut over in
+`58aac73`, leaving both genuinely unreferenced.
+
+**Both were 0 in every live row (13/13)** — they only ever held their `DEFAULT 0` — so nothing was destroyed
+and the drop is exactly reversible (re-add with `DEFAULT 0`) if a reason ever appears. Verified *before*
+running the DDL, because "the inventory says it's dead" is not the same as "the data says it's empty."
+
+Removed from `CREATE TABLE` (fresh installs) plus idempotent `DROP COLUMN IF EXISTS` for existing ones; the
+schema re-applies on every boot, so the API restart is what applied it to live. **First `DROP COLUMN` in this
+schema**, so the idiom is documented inline for the next one.
+
+### The assertion was inverted rather than deleted
+`verify_revenue_allocation` A1 asserted `amount_paid` was still 0. It now asserts against
+`information_schema` that **both columns are absent** — because a reinstated column is the defect, not a
+curiosity: it would be a second, always-zero money source waiting for a future query to find and believe,
+which is precisely how the $0-revenue defect happened. Checked against the catalog, so it covers a fresh
+install too.
+
+### Verification
+**877/877 green, live census clean** (the suite builds its DB from the schema, so that run exercises both the
+fresh-install path and the drop). Applied to live by restarting the API; confirmed `actual_fee` and
+`amount_paid` are gone from `information_schema`, `estimated_fee` survives untouched, and **all 13 live rows
+are intact**. Read paths re-exercised against live afterwards — four report metrics and `releaseGate` on three
+real requests — all clean, confirming nothing selected the columns implicitly.
+
+Left alone deliberately: `src/db/schema.sql` and `src/db/index.sqlite.bak.js` still name both columns. They
+are dead sqlite-era files loaded by nothing, and they are history.
+
+### Next session
+1. **Phase 1 of the processing rebuild is BLOCKED on Kevin** (brief §5) — the 10-stage order, single-record vs
+   MRR hub, `commercial_rate`/`mrr_processing` build-or-delete, retire v1 redaction duplicates. **This is the
+   largest item on the board and it needs a decision, not a build.** Three sessions have now ended here.
+2. Still standing: **dunning is inert** (`verify_nonpayment_scope.js` written and waiting for the money axis to
+   move to the parent), **`routing_review` fires per child**, `WORKING_attribute_inventory.md` Part H, and (q)'s
+   deliberately-undone items (`dev_mode = '1'`, the `PARTIALLY_GRANTED` notification rows, the RM hold
+   override's WA-entitlement guard).
+3. `estimated_fee` was NOT examined this session — it survives, and whether it has a writer is unchecked. If
+   the next agent wants a five-minute win, that is the same question asked once more.

@@ -129,8 +129,8 @@ semantics, not schema.
 | `fee_waiver_status`, `_reason`, `_decided_by`, `_decided_at` | **child in practice** | PARENT | ⚠️ **conflict** | Money-axis facts landing on the work row |
 | `nonpayment_dunning_at` | **parent** | PARENT | ✅ | The one money column that is correctly parent-scoped |
 | `request_fee_estimates` (table) | **child** | PARENT | ⚠️ **live defect** **[verified]** | See box below |
-| `actual_fee` | **nothing writes it** | — | 💀 | Delete candidate |
-| `amount_paid` | **nothing writes it, and now nothing reads it** | — | 💀 | Delete candidate. Payments live in `request_fee_estimates`. Its ONE reader (`reportEngine`'s revenue metric) was cut over 2026-07-19 — see the box below |
+| ~~`actual_fee`~~ | nothing ever wrote it | — | ✅ **DROPPED** | Removed from the schema 2026-07-19 (`016ad30`). Was 0 in all 13 live rows |
+| ~~`amount_paid`~~ | nothing ever wrote it; ONE reader, which reported $0 revenue forever | — | ✅ **DROPPED** | Reader cut over (`58aac73`), column removed (`016ad30`). Payments live in `request_fee_estimates` |
 
 > ### ⚠️ The money split is not theoretical — dunning is inert **[verified 2026-07-19]**
 > `feeNonpayment.sweep()` is **parent**-scoped (deliberately — unscoped it would send citizens duplicate
@@ -171,8 +171,8 @@ semantics, not schema.
 
 | Thing | Evidence | Suggested |
 |---|---|---|
-| `requests.actual_fee` | no writer anywhere | drop |
-| `requests.amount_paid` | no writer; ~~reports read it and always get 0~~ **the reader was cut over 2026-07-19 — now genuinely unreferenced** | **drop** — "populate it" was the wrong branch: it would have created a second money source to keep in sync with `request_fee_estimates` |
+| ~~`requests.actual_fee`~~ | no writer anywhere | ✅ **DROPPED 2026-07-19** (`016ad30`) |
+| ~~`requests.amount_paid`~~ | no writer; its one reader reported $0 revenue forever | ✅ **DROPPED 2026-07-19** (`016ad30`). "Populate it" was the wrong branch — it would have created a second money source to keep in sync |
 | `status = 'withdrawn'` / `'abandoned'` | read in `paymentStatus.js:71`, never written — withdrawal paths write `closed` + a `closure_reason` | delete the dead branch |
 | `status = 'completed'` | 1 live row, no code path produces it | legacy import; clean up |
 | task type `commercial_rate` | nothing spawns it; assignable to people; permanently empty pool | **your call** — build or delete |
