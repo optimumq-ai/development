@@ -460,3 +460,66 @@ Deferred at Kevin's call while fresh — design is settled, build in one clean p
 **Key architectural clarification (why shared canonical store is fine):** search reads the **per-record index** (extracted text + vectors + record-type metadata in the DB), NOT the folder. Disk location is irrelevant to search once ingested; each record is individually labeled with its file, record type, and source. So a shared uploads folder does NOT degrade search — **correct record-type labeling is what protects search quality**, which is exactly what the taxonomy requirement (#1) enforces. Physical folder separation would give false safety, wouldn't help search, and would multiply what must be secured/backed up/encrypted.
 
 **Clean model:** **one import source per record type / per drop folder** → labeling stays crisp and exact. Mixed-type folder → labeling is only as precise as "came from a source associated with type X"; per-file AI classification-on-ingest is the fix but a bigger feature — **defer until actually needed**.
+
+---
+
+## Swallow audit — writes that fail silently while the caller is told "success" (2026-07-19)
+
+Prompted by `739670a`, where `PATCH /requests/:id/stage` logged a failed stage transition and still answered
+`{ success: true }`. **Method:** mechanical scan of all 42 route files — 432 `catch` blocks, 118 of them
+swallowing (empty or log-only). Filtered to the dangerous shape: *a persisting call inside a try whose catch
+swallows, in a handler that then answers 2xx unconditionally.* That left **6 handlers**, each then read by
+hand. Scanner: `docs/tests/swallow_scan.js`.
+
+**The distinction that matters:** a swallow around a best-effort side effect (a confirmation email, a
+learning signal) is fine. A swallow that loses a write the caller believes succeeded is not. Only the second
+kind is listed.
+
+### Worth fixing — state diverges and nobody is told
+
+1. **`PATCH /requests/:id/route` (`requests.js:229`) — the request moves teams, its tasks may not.**
+   The department write happens first and unguarded; the block that moves the request's open tasks onto the
+   new team, clears cross-team assignees and closes the `routing_review` is inside a log-only catch. On
+   failure the request reads "Team B" while its work still sits in Team A's pool, and the router is told it
+   worked. **Highest impact of the six** — it is a reassignment that half-happened.
+
+2. **`POST /fee-estimates/request/:requestId` (`:210`) and `.../reconcile` (`:389`) — the requestor's stated
+   PURPOSE is dropped silently.** `UPDATE requests SET purpose` sits in a bare `catch (e) {}`. Purpose is not
+   decoration: commercial vs non-commercial purpose drives the fee basis in several jurisdictions, so a lost
+   write can mean billing on the wrong basis with no trace that anything failed.
+
+3. **`POST /redaction-jobs/jobs/:jobId/submit` (`:130`) — the author's task never leaves their queue.**
+   The job goes to `pending_review` and a reviewer is tasked (both unguarded), but moving the AUTHOR's task
+   to `awaiting_review` is inside a log-only catch. On failure their processing clock keeps running on work
+   they have handed off — and labour time is billable, so this is a measurement error, not just cosmetics.
+
+### Real but narrower
+
+4. **`POST /public/submit` (`publicChat.js:481`) — the fallback has no fallback.** The outer handler is a
+   model of how to do this well: when AI classification fails it degrades to human work by spawning a
+   `routing_review` (the comment records that a bare `console.error` here once left **23 requests
+   unclassified and in nobody's worklist** when the Anthropic balance ran out). But that fallback is itself
+   wrapped in a log-only catch — so if the fallback fails, the outcome is exactly the silent orphan it was
+   written to prevent. Failing the citizen's submission is the wrong answer; this needs a notification or an
+   alert, which is a design decision, not a patch.
+
+5. **Deposit clock effects (`feeEstimates.js:307`, `:341`, `:468`) — `onDepositDue` / `onDepositPaid` in bare
+   `catch (e) {}`.** These apply the jurisdiction's deposit clock effect. A silent failure loses a tolling
+   event on the statutory clock. Deliberately a no-op unless the city has enabled AND attested the payment
+   policy, which is why it was written permissively — but a lost clock effect is a lost deadline.
+
+6. **`POST /redaction-jobs/file/:fileId/discover` (`:95`) — `discovered_at` may not be stamped**, so the
+   entry-contract gate can auto-re-scan a file. Lowest impact: wasted work, no wrong state.
+
+### Not defects — deliberate and correct
+JSON-parse defaults (`catch { config = {} }`), `ep.recordActuals` (a learning signal), the confirmation
+email, and the tolling calls in `assert-exemption` — all best-effort side effects where the primary write has
+already succeeded and been reported honestly.
+
+### Recommendation
+1–3 are mechanical and should be fixed together: report the failure rather than a false success (1 and 3 can
+report partial success explicitly, since the primary write did land). 4 needs a decision about what "alert
+someone" means here. 5–6 are judgement calls the city's config posture affects.
+
+**Worth making permanent:** the scan is cheap and deterministic. As a registered harness it would fail the
+moment a new write-swallow-then-200 is added, the same way `verify_v1_retirement` guards retired links.
