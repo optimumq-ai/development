@@ -6256,11 +6256,43 @@ candidates, because picking one would attach a legal act to the wrong record.
 **The clock stays on the PARENT** — already true in the code (`COALESCE(master_request_id, id)`), and K5 now
 asserts it. Same division read from the other side.
 
-⚠️ **`PATCH /requests/:id/stage` (the Advance button) HAS THE SAME SHAPE and is NOT fixed** — it also passes
-`req.params.id` straight through, so advancing a parent-addressed request writes a work stage onto the
-parent. `scope.workRow()` now exists to fix it; it was left out deliberately to keep this slice to Kevin's
-ruling. **This is the first thing to pick up.**
+~~⚠️ `PATCH /requests/:id/stage` (the Advance button) HAS THE SAME SHAPE and is NOT fixed~~ **FIXED
+2026-07-19 (`739670a`)** — see the addendum below.
 
 ⚠️ **A test-fixture trap worth remembering:** the first draft of §K built its parent with `mkRequest()`,
 whose stage argument defaults to `record_search` when absent — so the "parent" looked like a work row and K3
 passed vacuously in the wrong direction. **A parent/child test must build the parent explicitly stage-NULL.**
+
+### Addendum to (ac) — the Advance button, and a route that lied about succeeding (`739670a`)
+**981/981 green, live clean**, API restarted. Two defects in the same five lines of `PATCH /requests/:id/stage`.
+
+1. **It advanced whatever row was addressed** — the same shape as `assert-exemption`, on the endpoint the
+   workspace Advance button actually calls. Under Kevin's ruling stage is a CHILD fact, so advancing a
+   parent-addressed request wrote a work stage onto the parent and left the described record where it was.
+   Now resolved through `scope.workRow()`; a multi-record parent is refused (409) rather than advancing an
+   arbitrary record. **The release gate moved to the work row too** — `feeRelease.shareFor()` looks for THIS
+   row among the estimate's components, so a parent id found no share and degraded to the whole-request test.
+   Stricter, never more permissive, so nothing was wrongly released — but it judged a different row than the
+   one being advanced.
+
+2. **A failed advance reported success.** The transition sat in a `try/catch` that logged and fell through to
+   `{ success: true, stage }`. Any failure — bad stage, DB error, a guard refusing — left the UI showing the
+   request as advanced while nothing had moved. **A silent no-op that claims to have worked is worse than an
+   error, because nobody goes looking for it.** Now 500 with the message; a missing stage is a 400 up front
+   instead of throwing into that swallow. Found while making fix 1 — same five lines, not a separate slice.
+
+**Worth a sweep:** fix 2's pattern — `catch { console.error } ` followed by an unconditional success response
+— is not unique to this route. `assert-exemption`'s clock calls use the same swallow (`try {} catch (e) {}`),
+deliberately there, but the pattern should be audited wherever a write is followed by an unconditional 200.
+
+### Where (ac) ended
+**All four defects raised this session are closed** (`818b2d6`, `cdf1845`, `cbc9e46`, `739670a`), plus the
+Phase 2 screen that exposed the first three. 981 assertions green, live untouched throughout, tree clean.
+
+**Next, in order:**
+1. **Phase 2 continues** — `fee_waiver`, `routing_review`, `review_auto_redaction` still have no screen.
+   `LegalReviewTaskPage` is the template; `verify_legal_review` §H's H4 will fail the moment a resolvable
+   type has no screen.
+2. **The swallow audit** above.
+3. Brief **§3.4** (no from-`closed` guard in the central function) and **§3.6**.
+4. Part H of `WORKING_attribute_inventory.md`; (q)'s deliberately-undone items.
