@@ -6116,3 +6116,67 @@ being `clockStart()` in (aa)). **Deleting a dead thing is a good excuse to read 
 **938/938 green, live census clean.** Break-tested both: reinstating the stage fails 5 (including the frontend
 mirror parity, the label/colour count, and the Playwright Advance-button check); restoring the private map
 fails the widened check and names the file. Frontend rebuilt; API and UI both 200 on the new vocabulary.
+
+---
+
+## 2026-07-19 (ac) — Phase 2 begins: the legal review has a screen (`5393037`, `643fdd7`, `06fa2eb`, `71d3b88`)
+Kevin asked for the legal review screen. Built, verified end-to-end in the running UI, **947/947 green, live
+clean.** Building it surfaced three defects that are NOT fixed and are the most valuable thing here.
+
+### What shipped
+1. **`5393037` — SPEC §9's tokens move to `lib/theme.js`.** They lived as a private `var C` inside
+   `RecordSearchTaskPage.js`, so a second v2 screen could obey §9 only by copying them — the
+   divergent-private-copy defect `verify_stages` was widened to catch in (ab). Verbatim move, no pixel change.
+   ⚠️ **Not a promotion:** §9's "record-search MOCKUP only" scope decision stands. ⚠️ **It is a TRANSCRIPTION:**
+   the tokens originate as CSS custom properties in `PublicPortalV2Page.js` (`.scv`), which is **dark-mode
+   aware** and carries seven tokens this subset drops. The two are still not unified.
+2. **`643fdd7` — `LegalReviewTaskPage` + `legal-review/:taskId`.** The Phase 2 three-part shape; copy it for
+   the remaining stubs. `timeCaptureConfig` `legal` flipped `available: false → true` (that flag is a
+   build-status ledger — flip it in the same commit as a screen or the config panel disables real work).
+3. **`06fa2eb`, `71d3b88`** — the two corrections below, and the test fix.
+
+### ⚠️ It was resolvable for a full DAY before it was reachable
+§3.2 landed `/tasks/:id/resolve` on 07-18 with **18 green assertions**. `TASK_SCREEN` in `MyTasksPage` had no
+`legal_review` entry, so the task fell through to `/requests/:id` — a page with no resolution control. **A
+legal review was completable only by curl, and the suite was green the whole time**, because the harness
+tested the endpoint and never the reachability. `verify_legal_review` §H now closes the **class**: H4 derives
+the accepted types from the resolve route's own type guard and fails, naming any that lack a screen.
+
+### ⚠️ THREE DEFECTS FOUND, NOT FIXED — for Kevin
+1. **`/tasks/:id/resolve` never checks task STATUS.** It checks the type and nothing else, so a **cancelled**
+   `legal_review` can still be resolved and move the request. Observed for real: a cancelled task was decided
+   through the UI and advanced the request to `redaction_review`. The screen now refuses client-side (H8) but
+   **that is a courtesy, not the fix — the same call by curl still succeeds.** The guard belongs in the route.
+   This is the §3.3 "loaded gun" shape again, on the endpoint that replaced it.
+2. **`assert-exemption` writes the stage to whichever row it resolves — including a PARENT.** It does
+   `SELECT ... WHERE id = ? OR request_number = ?` and hands the row straight to `applyStageTransition`, so
+   asserting against a parent id moves the **parent** and spawns `legal_review` there, while the **child**
+   carrying the real work stage sits at `intake` with its own open `routing_review`. Stage is a CHILD fact
+   (CLAUDE.md); a parent carrying one is the legacy pseudo-request shape §2.4 flags. **The screen no longer
+   trusts `task.stage`** — it derives the branch from the assertion (`AG_PRECLEARANCE_SUBMITTED` vs
+   `EXEMPTION_ASSERTED`), which is the durable fact. The underlying write is untouched.
+3. **A late intake routing decision REVERTED an asserted exemption.** On one child:
+   `EXEMPTION_ASSERTED intake → exemption_review`, then `STAGE_ADVANCED exemption_review → intake`
+   ("Automatic classification was unavailable. Low match confidence; routed…"). **A legal act, silently
+   undone by the workflow engine**, leaving the `legal_review` cancelled behind it. Seen when the assertion
+   raced async classification; the same race exists with a *successful* classification. Related to §3.4 (no
+   from-`closed` guard) — the central function has no notion of a stage that must not be walked back.
+
+### Lessons worth keeping
+- **Break-testing caught a worthless assertion.** H8 first matched the token `ACTIONABLE` anywhere in the
+  file and **passed with the guard deleted** — the comment above it said "cancelled". Source scans must strip
+  comments and match the guard EXPRESSION. Fixed in `71d3b88`.
+- **A green harness over an unreachable feature is the failure mode to watch for.** Test the reachability, not
+  just the endpoint.
+- **Verifying in the running app is what found all three defects.** None were visible from reading source.
+- Verification used a **`--keep` test stack on :3101 with Playwright rerouting `/api/**`** to it — the real
+  built SPA against the test DB, live untouched. ⚠️ Kill that API before `npm test` or it holds :3101 and the
+  suite's own instance can't bind (cost one spurious `verify_v1_retirement` D1 failure).
+
+### Next session
+1. **The three defects above** — (1) is the smallest and the sharpest; (2) and (3) are parent/child + workflow
+   engine and want a decision, not just a patch.
+2. **Phase 2 continues:** `fee_waiver` and `routing_review` still fall through to `/requests/:id`;
+   `review_auto_redaction` links to `/mass-redaction` with no route of its own. Copy `LegalReviewTaskPage`.
+3. Brief **§3.4** and **§3.6** are still the last unaddressed §3 items.
+4. Part H of `WORKING_attribute_inventory.md`; (q)'s deliberately-undone items.
