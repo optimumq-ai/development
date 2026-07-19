@@ -257,6 +257,56 @@ async function api(method, path, body) {
     ok('history recorded ' + h.stage_from + ' → ' + h.stage_to, h.stage_from === stageNow && h.stage_to === after.stage);
 
     console.log('\n  shot: stages_workspace.png');
+
+    // =====================================================================================
+    // ADVANCING IS PROCESSING, SO IT LANDS ON THE CHILD (Kevin, 2026-07-19).
+    //
+    // Parent = who asked, the number they quote, the money, the clock. Child = the described item and
+    // everything about processing it, STAGE INCLUDED. This route passed `req.params.id` straight to
+    // applyStageTransition, so advancing a parent-addressed request wrote a work stage onto the PARENT and
+    // left the child where it was. Same defect fixed on assert-exemption in cbc9e46; the Advance button on
+    // the request workspace calls exactly this endpoint.
+    // A parent is built explicitly stage-NULL — a fixture that gives it a stage makes it look like a work
+    // row and voids the assertion (that trap cost a vacuous test in verify_legal_review §K).
+    // =====================================================================================
+    console.log('\n=== the Advance button advances the CHILD, not the parent ===');
+    var pAdv = 'req-' + TAG + '-adv-parent', cAdv = 'req-' + TAG + '-adv-child';
+    await db.run("INSERT INTO requests (id, request_number, requestor_name, requestor_email, description, stage, status) VALUES (?,?,?,?,?,NULL,'active')",
+      [pAdv, pAdv, 'Test', 't@example.com', 'advance parent ' + TAG]);
+    await db.run("INSERT INTO requests (id, request_number, requestor_name, requestor_email, description, stage, status, master_request_id) VALUES (?,?,?,?,?,'intake','active',?)",
+      [cAdv, pAdv + '-1', 'Test', 't@example.com', 'advance child ' + TAG, pAdv]);
+    created.push(pAdv); created.push(cAdv);
+
+    var advP = await api('PATCH', '/requests/' + pAdv + '/stage', { stage: 'record_search', notes: 'addressed at the parent' });
+    ok('advancing a PARENT-addressed request succeeds', advP.status === 200);
+    var pRow = await db.get('SELECT stage FROM requests WHERE id = ?', [pAdv]);
+    var cRow = await db.get('SELECT stage FROM requests WHERE id = ?', [cAdv]);
+    ok('THE CHILD advanced (' + cRow.stage + ')', cRow.stage === 'record_search');
+    ok('the PARENT did not take a work stage (' + pRow.stage + ')', pRow.stage === null);
+
+    // Several described items = several stages. Refuse rather than advance an arbitrary one.
+    var pMulti = 'req-' + TAG + '-adv-multi';
+    await db.run("INSERT INTO requests (id, request_number, requestor_name, requestor_email, description, stage, status) VALUES (?,?,?,?,?,NULL,'active')",
+      [pMulti, pMulti, 'Test', 't@example.com', 'advance multi ' + TAG]);
+    created.push(pMulti);
+    for (var ai = 1; ai <= 2; ai++) {
+      await db.run("INSERT INTO requests (id, request_number, requestor_name, requestor_email, description, stage, status, master_request_id) VALUES (?,?,?,?,?,'intake','active',?)",
+        [pMulti + '-' + ai, pMulti + '-' + ai, 'Test', 't@example.com', 'advance item ' + ai + ' ' + TAG, pMulti]);
+      created.push(pMulti + '-' + ai);
+    }
+    var advM = await api('PATCH', '/requests/' + pMulti + '/stage', { stage: 'record_search', notes: 'which record?' });
+    ok('advancing a MULTI-record parent is refused, not guessed (409 AMBIGUOUS_WORK_ROW)',
+      advM.status === 409 && advM.body && advM.body.code === 'AMBIGUOUS_WORK_ROW');
+    var kidsM = await db.all('SELECT stage FROM requests WHERE master_request_id = ?', [pMulti]);
+    ok('...and no record moved', kidsM.every(function (k) { return k.stage === 'intake'; }));
+
+    // A FAILED ADVANCE MUST NOT REPORT SUCCESS. This used to log and fall through to { success: true },
+    // so the UI showed a request as advanced while nothing had moved.
+    var advNone = await api('PATCH', '/requests/' + pAdv + '/stage', { notes: 'no stage supplied' });
+    ok('advancing with no stage is refused (400), not reported as success', advNone.status === 400);
+    var cUnmoved = await db.get('SELECT stage FROM requests WHERE id = ?', [cAdv]);
+    ok('...and nothing moved (' + cUnmoved.stage + ')', cUnmoved.stage === 'record_search');
+
   } catch (e) { console.error('ERR', (e && e.stack) || e); fail++; }
   finally {
     if (browser) await browser.close();

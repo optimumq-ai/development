@@ -136,17 +136,40 @@ router.post('/', requireAuth, async function(req, res) {
   res.status(201).json({ requestId: made.id, requestNumber: made.requestNumber, success: true });
 });
 
+// ADVANCING IS PROCESSING, SO IT LANDS ON THE CHILD (Kevin's ruling, 2026-07-19 — see requestScope.workRow).
+// Stage belongs to the described item; the parent is who asked and whether they paid. This route passed
+// `req.params.id` straight through, so advancing a parent-addressed request wrote a work stage onto the
+// PARENT and left the child where it was — the same defect fixed on assert-exemption in cbc9e46, and the
+// Advance button on the request workspace calls exactly this.
 router.patch('/:id/stage', requireAuth, async function(req, res) {
-  const request = await get('SELECT * FROM requests WHERE id = ?', [req.params.id]);
-  if (!request) return res.status(404).json({ error: 'Request not found' });
+  const resolvedStage = await scope.workRow(req.params.id);
+  if (!resolvedStage.addressed) return res.status(404).json({ error: 'Request not found' });
+  if (resolvedStage.ambiguous) {
+    return res.status(409).json({
+      error: 'This request has ' + resolvedStage.ambiguous.length + ' records, each with its own stage. ' +
+             'Advance the one you mean.',
+      code: 'AMBIGUOUS_WORK_ROW',
+      components: resolvedStage.ambiguous.map(function (c) {
+        return { id: c.id, requestNumber: c.request_number, label: c.component_label, description: c.description, stage: c.stage };
+      })
+    });
+  }
+  const request = resolvedStage.row;
+  const workId = request.id;
   const stage = req.body.stage;
+  // Without this, a missing stage reached applyStageTransition, threw, was swallowed below, and the route
+  // still answered `success: true` — the UI then showed a request as advanced when nothing had moved.
+  if (!stage) return res.status(400).json({ error: 'A stage is required.' });
   // 4d release gate: hold records at delivery until a pre-release balance is settled. Fails open.
   if (stage === 'delivery') {
     try {
       // §5.9 COVERAGE TEST — gate on THIS record's own share (`covered`), not the whole request's balance.
       // A child may never be withheld because a SIBLING is unpaid. For a single-record request the two are
       // the same number, so this is an exact no-op there; it only diverges once a request has n > 1 records.
-      const rg = await require('../services/feeRelease').releaseGate(req.params.id);
+      // The WORK row, not the addressed one: `shareFor` looks for THIS row among the estimate's components,
+      // so a parent id finds no share and silently degrades to the whole-request test (stricter, but it
+      // would judge a different row than the one being advanced).
+      const rg = await require('../services/feeRelease').releaseGate(workId);
       if (rg.hasEstimate && rg.requiresPaymentBeforeRelease && !rg.covered) {
         return res.status(409).json({
           error: 'Payment of $' + rg.balanceDue.toFixed(2) + ' is required before ' +
@@ -159,12 +182,20 @@ router.patch('/:id/stage', requireAuth, async function(req, res) {
     } catch (e) { console.error('[release gate]', e.message); }
   }
   // One central stage-transition path (Architecture item 6): UPDATE + STAGE_ADVANCED history + stage task.
+  //
+  // A FAILED ADVANCE MUST NOT REPORT SUCCESS. This used to log the error and fall through to
+  // `{ success: true, stage }`, so a transition that threw — bad stage, DB error, a guard refusing — left the
+  // UI showing the request as advanced while nothing had moved. A silent no-op that claims to have worked is
+  // worse than an error: nobody goes looking for it.
   try {
-    await require('../services/taskRouting').applyStageTransition(req.params.id, stage, {
+    await require('../services/taskRouting').applyStageTransition(workId, stage, {
       actorId: req.user.sub, actorName: req.user.name, action: 'STAGE_ADVANCED', notes: req.body.notes, createdBy: req.user.sub
     });
-  } catch (e) { console.error('[stage transition]', e.message); }
-  res.json({ success: true, stage: stage });
+  } catch (e) {
+    console.error('[stage transition]', e.message);
+    return res.status(500).json({ error: 'The stage could not be advanced. ' + e.message });
+  }
+  res.json({ success: true, stage: stage, requestId: workId });
 });
 
 
