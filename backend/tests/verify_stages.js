@@ -140,9 +140,18 @@ async function api(method, path, body) {
       !/^(const|var)\s+(STAGES|SC|STAGE_LABELS?|STAGE_COLORS|NEXT_STAGE|NEXT_LABEL)\s*=\s*[[{]/m.test(fs.readFileSync(FE + '/pages/MyTasksPage.js', 'utf8')));
 
     // ---- 5. THE LIVE BEHAVIOUR: advancing follows the BACKEND pipeline now.
-    // Old frontend said intake → record_search. The backend pipeline says intake → fee_review.
-    ok('canonical next(intake) = fee_review (the old frontend said record_search — it skipped the money)',
-      stages.next('intake') === 'fee_review');
+    // ⚠️ FLIPPED 2026-07-19. This asserted `next(intake) === 'fee_review'` and mocked the old frontend for
+    // "skipping the money". The old frontend was RIGHT — for the wrong reason, exactly like the
+    // redaction_review case below. NOTHING in the codebase ever sets `fee_review`: the only rule that
+    // advances past intake goes straight to `record_search`, and the fee flow is a branch that rejoins
+    // there. Advancing into `fee_review` produced a request with no task and no reconciler sweep.
+    ok('canonical next(intake) = record_search — the money stages are a branch, not a station',
+      stages.next('intake') === 'record_search');
+    ok('the money stages are in the VOCABULARY but not the sequence',
+      stages.SEQUENCE.indexOf('fee_review') < 0 && stages.SEQUENCE.indexOf('awaiting_payment') < 0 &&
+      stages.ORDER.indexOf('fee_review') > 0 && stages.ORDER.indexOf('awaiting_payment') > 0);
+    ok('and neither offers an Advance — the fee flow moves them, not the button',
+      stages.next('fee_review') === null && stages.next('awaiting_payment') === null);
     // ⚠️ FLIPPED 2026-07-19 (Kevin, brief §5). This used to assert exemption_review — and the old frontend
     // jumping "straight to redaction_review" turns out to have been RIGHT about the destination, for the
     // wrong reason. The legal stages are a conditional BRANCH, not steps on the way to redaction.
@@ -224,8 +233,11 @@ async function api(method, path, body) {
     var expectLabel = stages.LABELS[stages.next(stageNow)];
     ok('the request is at "' + stageNow + '"; the UI should offer "Advance to ' + expectLabel + '"', !!expectLabel);
     ok('the Advance button offers the CANONICAL next stage ("' + expectLabel + '")', body.indexOf('Advance to ' + expectLabel) >= 0);
-    ok('the UI does NOT offer the legacy destination (Record Search from intake)',
-      !(stageNow === 'intake' && body.indexOf('Advance to Record Search') >= 0));
+    // ⚠️ INVERTED 2026-07-19. This asserted the UI must NOT offer "Record Search" from intake, calling it
+    // "the legacy destination". It is now the CORRECT destination — see the flip above. The assertion is kept,
+    // pointing the other way, because the thing worth guarding is that the button matches the canonical walk.
+    ok('the UI offers the canonical destination from intake (Record Search), not a branch stage',
+      !(stageNow === 'intake' && body.indexOf('Advance to Fee Review') >= 0));
     ok('the page renders no ghost stage', body.indexOf('Custodian Retrieval') < 0);
     ok('no runtime errors on the workspace page' + (errs.length ? ': ' + errs.join('; ') : ''), errs.length === 0);
     await page.screenshot({ path: '/home/optimumq/.claude/jobs/605a0134/tmp/stages_workspace.png' });

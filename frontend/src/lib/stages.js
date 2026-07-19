@@ -48,7 +48,10 @@ export const STAGE_COLORS = {
 // of the two), and left only by a legal decision that carries a required note. The linear walk used to run
 // over all ten, so this button offered "Advance to Exemption Review" from `record_search` — routing ordinary
 // requests with nothing withheld into legal review.
-export const BRANCH_STAGES = ['exemption_review', 'ag_review'];
+// The MONEY stages are a branch for the same reason (2026-07-19): nothing ever sets `fee_review`, and
+// `awaiting_payment` is entered and left by the fee flow, never by advancing. The Advance button at `intake`
+// used to offer "Advance to: Fee Review" — a stage with no task and no reconciler sweep.
+export const BRANCH_STAGES = ['fee_review', 'awaiting_payment', 'exemption_review', 'ag_review'];
 export const STAGE_SEQUENCE = STAGE_ORDER.filter((k) => !BRANCH_STAGES.includes(k));
 
 // The next stage in the canonical SEQUENCE, or null at the end / for a branch or unknown stage. Returning
