@@ -5892,3 +5892,34 @@ would have proved nothing. Fixed by giving §C its own request.
    section and should not sit much longer.
 3. Open, raised, not decided: `fee_review` / `awaiting_payment` before `record_search` (from (v)).
 4. Still standing: dunning is inert, `routing_review` fires per child, Part H of the attribute inventory.
+
+### Addendum to (y) — the world-claimable task, closed (`1218d67`). §3.5 is now fully fixed.
+The last bullet of the routing split-brain, and the one with teeth.
+
+`role_required` NULL meant **"everyone eligible" in BOTH readers**: it was the claim-pool predicate's *first*
+branch, so such a task was advertised to every authenticated user, and `claim()` **skipped its eligibility
+check outright** (`if (task.role_required && ...)`). `review_auto_redaction` spawned exactly that way — it had
+no `TASK_ROLES` entry — so **an auto-redaction batch could be claimed and worked by anyone with a login, in
+any department, with no redaction competence at all.**
+
+Fixed at three levels, because fixing only the first would have left the door open:
+
+1. **The instance** — `review_auto_redaction` → `REDACTION_WORKER`.
+2. **The class** — `createTask` now **refuses** to create a task whose type resolves no role. Failing at
+   *creation* is deliberate: loud, at the point the omission is made, instead of a row that looks ordinary and
+   is quietly open to everyone. This matters because `POST /api/tasks` passes `roleRequired` straight from the
+   request body, so any future type could have repeated the defect.
+3. **Defence in depth** — both readers now treat NULL as *nobody* rather than *everybody*.
+
+**Live carried zero role-less tasks**, verified before and after, so nothing legitimate was hidden. All 5 open
+live tasks still carry a role; API restarted and healthy.
+
+**⚠️ E6 is a POSITIVE CONTROL and the most important assertion in the section:** an eligible user can still
+claim a properly-roled task. Failing closed is only correct if ordinary work still flows — **a guard that
+denied everything would have satisfied every other assertion here while breaking the product.** Any future
+fail-closed change in this codebase deserves the same paired control.
+
+**921/921 green, live census clean.** Break-tested all three levels independently: restoring the claim-guard
+skip fails E5; restoring NULL as the predicate's first branch fails E4; dropping the creation guard fails E3.
+
+**Board:** brief §3.5 is fully closed. **ONE §5 decision remains — 3, single-record vs the MRR parent hub.**

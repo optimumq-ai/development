@@ -205,7 +205,7 @@ is watching**; here something is.
 `workflowEngine` (added when the `verify_stage_bypass` flake was fixed). Any other caller can resurrect a
 terminal request. Consider hoisting that guard into the central function.
 
-### 3.5 Routing split-brain — **FIXED 2026-07-19 (`6b66b84`), except the third bullet**
+### 3.5 Routing split-brain — **FULLY FIXED 2026-07-19** (`6b66b84`, `1218d67`)
 - ~~`redaction_qa` is excluded from `ROUTABLE_TASK_TYPES`~~ **DONE.** It is routable and grantable. It also
   used to resolve through `ROLE_TO_TYPE` to the task type **`redaction`** — the same token as *doing* a
   redaction, conflating two competences the task exists to keep apart.
@@ -216,8 +216,15 @@ terminal request. Consider hoisting that guard into the central function.
   task whose `role_required` is a v3 token (`legal_review`, `legal_redaction`, `routing_review`) was
   **invisible in the claim pool** while `poolForUser` listed it; legal work was already affected. Both
   readers now share `taskRouting.POOL_ELIGIBILITY_SQL`.
-- **STILL OPEN:** `review_auto_redaction` spawns with `role_required` NULL, and NULL is treated as "everyone
-  eligible" — **world-claimable by any authenticated user.** Untouched by this slice.
+- ~~`review_auto_redaction` spawns with `role_required` NULL~~ **DONE 2026-07-19 (`1218d67`) — §3.5 is now
+  fully closed.** NULL meant "everyone eligible" in **both** readers: the pool predicate advertised such a
+  task to every authenticated user (it was the predicate's *first* branch) and `claim()` **skipped its
+  eligibility check outright**. So an auto-redaction batch was claimable and workable by anyone with a login,
+  in any department, with no redaction competence. Fixed at three levels — the **instance**
+  (`review_auto_redaction` → `REDACTION_WORKER`), the **class** (`createTask` now refuses a type that
+  resolves no role, failing loudly where the omission is made — `POST /api/tasks` takes `roleRequired` from
+  the request body, so any future type could have repeated it), and **defence in depth** (both readers treat
+  NULL as *nobody*). Live carried zero role-less tasks, so nothing legitimate was hidden.
 
 ### 3.6 Two fragile couplings
 - Estimate spawning keys on the **literal rule id `'wfr-confident'`**. Reseed or rename that row and estimate
