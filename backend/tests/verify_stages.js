@@ -128,13 +128,16 @@ async function api(method, path, body) {
     var dupes = [];
     // MyTasksPage is intentionally NOT here: the task-centric restructure (#8) shows task STATE (Queued/In
     // Process), not request stage, so it no longer imports the stage vocabulary. It also keeps no private copy.
+    // WorkflowPage joined this list 2026-07-19: it carried a PRIVATE 4-stage label map — the exact defect
+    // this block exists to catch, on a page the list simply did not name. It also still advertised
+    // `fee_review`, deleted that day because nothing could ever set it.
     ['pages/DashboardPage.js', 'pages/ARIAReportsPage.js', 'pages/RequestQueuePage.js',
-     'pages/RequestWorkspacePage.js', 'components/ui/WorkflowDecisionPanel.js'].forEach(function (f) {
+     'pages/RequestWorkspacePage.js', 'pages/WorkflowPage.js', 'components/ui/WorkflowDecisionPanel.js'].forEach(function (f) {
       var s = fs.readFileSync(FE + '/' + f, 'utf8');
       if (/^(const|var)\s+(STAGES|SC|STAGE_LABELS?|STAGE_COLORS|NEXT_STAGE|NEXT_LABEL)\s*=\s*[[{]/m.test(s)) dupes.push(f);
       if (!/from '\.\.?\/?\.*\/?lib\/stages'/.test(s) && !/lib\/stages/.test(s)) dupes.push(f + ' (no import)');
     });
-    ok('all 5 files import the shared vocabulary; none keeps a private copy' + (dupes.length ? ' — ' + dupes.join(', ') : ''), dupes.length === 0);
+    ok('all 6 files import the shared vocabulary; none keeps a private copy' + (dupes.length ? ' — ' + dupes.join(', ') : ''), dupes.length === 0);
     // And MyTasksPage keeps NO private stage vocabulary (it dropped stages entirely, not copied them).
     ok('MyTasksPage keeps no private stage vocabulary (task-centric, uses task state not stage)',
       !/^(const|var)\s+(STAGES|SC|STAGE_LABELS?|STAGE_COLORS|NEXT_STAGE|NEXT_LABEL)\s*=\s*[[{]/m.test(fs.readFileSync(FE + '/pages/MyTasksPage.js', 'utf8')));
@@ -147,11 +150,14 @@ async function api(method, path, body) {
     // there. Advancing into `fee_review` produced a request with no task and no reconciler sweep.
     ok('canonical next(intake) = record_search — the money stages are a branch, not a station',
       stages.next('intake') === 'record_search');
-    ok('the money stages are in the VOCABULARY but not the sequence',
-      stages.SEQUENCE.indexOf('fee_review') < 0 && stages.SEQUENCE.indexOf('awaiting_payment') < 0 &&
-      stages.ORDER.indexOf('fee_review') > 0 && stages.ORDER.indexOf('awaiting_payment') > 0);
-    ok('and neither offers an Advance — the fee flow moves them, not the button',
-      stages.next('fee_review') === null && stages.next('awaiting_payment') === null);
+    // `fee_review` was DELETED from the vocabulary 2026-07-19 (Kevin): nothing could ever set it, so it was
+    // not a stage at all. `awaiting_payment` is real — the fee flow enters and leaves it — but is not a step.
+    ok('fee_review is gone from the vocabulary entirely — a stage nothing can enter is not a stage',
+      stages.ORDER.indexOf('fee_review') < 0 && stages.SEQUENCE.indexOf('fee_review') < 0);
+    ok('awaiting_payment survives in the VOCABULARY but not the sequence',
+      stages.ORDER.indexOf('awaiting_payment') > 0 && stages.SEQUENCE.indexOf('awaiting_payment') < 0);
+    ok('and it offers no Advance — the fee flow moves it, not the button',
+      stages.next('awaiting_payment') === null);
     // ⚠️ FLIPPED 2026-07-19 (Kevin, brief §5). This used to assert exemption_review — and the old frontend
     // jumping "straight to redaction_review" turns out to have been RIGHT about the destination, for the
     // wrong reason. The legal stages are a conditional BRANCH, not steps on the way to redaction.

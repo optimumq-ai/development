@@ -1,8 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
+import { STAGE_LABELS } from '../lib/stages';
 
 var NAVY = '#1F4E79';
-var STAGE_LABEL = { intake:'Intake', record_search:'Record Search', redaction_review:'Redaction Review', fee_review:'Fee Review' };
+// Was a PRIVATE 4-stage label map — the same divergent-vocabulary defect verify_stages exists to prevent,
+// simply on a page its private-copy check did not cover (it does now). It also named `fee_review`, which was
+// deleted from the vocabulary on 2026-07-19 because nothing could ever set it. Uses the shared vocabulary,
+// so a rule routing to any real stage renders its real label.
+var STAGE_LABEL = STAGE_LABELS;
 var OP_LABEL = { gte:'at least', gt:'over', lte:'at most', lt:'below', eq:'is', neq:'is not', in:'is in', contains:'contains', contains_any:'is any of', is_true:'is set', is_false:'is not set' };
 
 function fieldLabel(f){ return (f||'').replace(/_/g,' '); }

@@ -14,7 +14,6 @@
 // parity check against GET /api/stages, so a divergence fails a test instead of rotting quietly.
 var STAGES = [
   { key: 'intake', label: 'Intake Review' },
-  { key: 'fee_review', label: 'Fee Review' },
   { key: 'awaiting_payment', label: 'Awaiting Payment' },
   { key: 'record_search', label: 'Record Search' },
   { key: 'exemption_review', label: 'Exemption Review' },
@@ -54,10 +53,12 @@ STAGES.forEach(function (s) { LABELS[s.key] = s.label; });
 // it:** requests do not pass through them. The only rule that advances past intake (`wfr-confident`) goes
 // straight to `record_search`, and live `workflow_decisions` contain only `intake` and `record_search`.
 //
-//   `fee_review`       — NOTHING in the codebase ever sets it. Not one `applyStageTransition` to it exists.
-//                        It is in neither `STAGE_TASK` nor the reconciler sweep, so a request advanced into
-//                        it gets NO task and is not swept — the same shape of stranding §3.2 fixed for
-//                        `legal_review`. The Advance button at `intake` offered exactly that.
+//   `fee_review`       — DELETED FROM THE VOCABULARY 2026-07-19 (Kevin). Nothing in the codebase ever set it:
+//                        not one `applyStageTransition` to it existed, it was in neither `STAGE_TASK` nor the
+//                        reconciler sweep, and live carried zero requests, zero history rows, zero workflow
+//                        decisions and zero rules naming it. A request advanced into it got NO task and was
+//                        not swept — the same stranding §3.2 fixed for `legal_review` — and the Advance button
+//                        at `intake` offered exactly that. A stage nothing can enter is not a stage.
 //   `awaiting_payment` — a REAL state, but reached and left by the money flow, never by advancing: entered
 //                        by the non-payment reopen, left by recording a deposit or payment (which transitions
 //                        to `record_search`), or by the ERP settlement webhook.
@@ -65,12 +66,9 @@ STAGES.forEach(function (s) { LABELS[s.key] = s.label; });
 // So money, like legal review, is a branch off the spine — not a station on it. The actual shape is
 // intake → record_search, with the fee flow a detour that rejoins at `record_search`.
 //
-// ⚠️ `fee_review` HAS NO WRITER AT ALL — it is kept in the vocabulary for now, but "wire it or delete it" is
-// an open question (the same one asked of `commercial_rate` / `mrr_processing`, which were deleted).
-//
 // So the linear walk runs over SEQUENCE, and the branch stages are reachable only by the domain action that
 // means them.
-var BRANCH = ['fee_review', 'awaiting_payment', 'exemption_review', 'ag_review'];
+var BRANCH = ['awaiting_payment', 'exemption_review', 'ag_review'];
 var SEQUENCE = ORDER.filter(function (k) { return BRANCH.indexOf(k) < 0; });
 
 function isBranch(stage) { return BRANCH.indexOf(stage) >= 0; }

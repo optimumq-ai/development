@@ -10,7 +10,6 @@
 // rather than silently corrupting stage data. If you add a stage, add it in the BACKEND module first.
 export const STAGES = [
   { key: 'intake', label: 'Intake Review' },
-  { key: 'fee_review', label: 'Fee Review' },
   { key: 'awaiting_payment', label: 'Awaiting Payment' },
   { key: 'record_search', label: 'Record Search' },
   { key: 'exemption_review', label: 'Exemption Review' },
@@ -30,7 +29,6 @@ export const STAGE_LABELS = STAGES.reduce(function (m, s) { m[s.key] = s.label; 
 // hands control to an outside authority), redaction sharing the amber family with redaction_review.
 export const STAGE_COLORS = {
   intake:           { bg: '#DBEAFE', color: '#1E40AF' },
-  fee_review:       { bg: '#D1FAE5', color: '#065F46' },
   awaiting_payment: { bg: '#FFEDD5', color: '#9A3412' },
   record_search:    { bg: '#EDE9FE', color: '#6D28D9' },
   exemption_review: { bg: '#E2E8F0', color: '#334155' },
@@ -51,7 +49,7 @@ export const STAGE_COLORS = {
 // The MONEY stages are a branch for the same reason (2026-07-19): nothing ever sets `fee_review`, and
 // `awaiting_payment` is entered and left by the fee flow, never by advancing. The Advance button at `intake`
 // used to offer "Advance to: Fee Review" — a stage with no task and no reconciler sweep.
-export const BRANCH_STAGES = ['fee_review', 'awaiting_payment', 'exemption_review', 'ag_review'];
+export const BRANCH_STAGES = ['awaiting_payment', 'exemption_review', 'ag_review'];
 export const STAGE_SEQUENCE = STAGE_ORDER.filter((k) => !BRANCH_STAGES.includes(k));
 
 // The next stage in the canonical SEQUENCE, or null at the end / for a branch or unknown stage. Returning

@@ -11,13 +11,13 @@ var parseAt = require('./taskTiming').parseAt;
 // Which task type(s) a work stage drills into (to split it queue/process/review).
 var STAGE_TASKTYPE = {
   record_search: ['record_search'], redaction: ['redaction', 'legal_redaction'],
-  redaction_review: ['redaction', 'legal_redaction'], estimate: ['estimate'], fee_review: ['estimate'],
+  redaction_review: ['redaction', 'legal_redaction'], estimate: ['estimate'],
   ag_review: ['legal_review'], exemption_review: ['legal_review']
 };
 var HOLD_STAGES = { awaiting_payment: 1, awaiting_deposit: 1 };
 var STAGE_LABEL = {
   intake: 'Intake', record_search: 'Record Search', redaction: 'Redaction', redaction_review: 'Redaction',
-  estimate: 'Estimate', fee_review: 'Estimate', awaiting_payment: 'Awaiting payment', awaiting_deposit: 'Awaiting deposit',
+  estimate: 'Estimate', awaiting_payment: 'Awaiting payment', awaiting_deposit: 'Awaiting deposit',
   ag_review: 'Legal Review', exemption_review: 'Legal Review', delivery: 'Delivery', closed: 'Closed'
 };
 function statusToPhase(s) { return ({ open: 'queue', assigned: 'queue', in_progress: 'process', awaiting_review: 'review', returned: 'queue' })[s] || 'process'; }
