@@ -6296,3 +6296,55 @@ Phase 2 screen that exposed the first three. 981 assertions green, live untouche
 2. **The swallow audit** above.
 3. Brief **§3.4** (no from-`closed` guard in the central function) and **§3.6**.
 4. Part H of `WORKING_attribute_inventory.md`; (q)'s deliberately-undone items.
+
+---
+
+## 2026-07-19 (ad) — The target process model, written down and diffed (`TARGET_process_model.md`)
+Kevin stopped the build to ask whether we were "still rewiring to a design that I don't want." **He was right
+to ask, and there is a concrete instance.**
+
+### The failure mode, named
+Design intent was being inferred **from the implementation**. Where the implementation is half-built,
+"nothing sets this" reads as "this isn't wanted." On 2026-07-19 that reasoning **deleted the `fee_review`
+stage** (`bd7f232`) — which Kevin then named as a step in his pipeline. The deletion is trivially reverted;
+**the reasoning that produced it is the thing to fix.** `TARGET_process_model.md` inverts the direction: the
+model is stated first and the code is measured against it. `DOMAIN_MAP.md` now carries a read-first warning.
+
+### The model (Kevin's words are in the doc verbatim; summary only here)
+Four kinds of thing that must not be mixed: **tasks** (work a person does, or that is bypassed with a
+recorded basis), **statuses** (conditions that can pause processing — *"Awaiting payment is not work
+performed"*), **terminal events** (conditions that stop the flow: non-payment, record not found, no response
+to clarification — *"not tasks"*), and **parent-level computation** (fee calculation across children,
+triggered by a child task completing). The pipeline belongs to the **child**; flow is driven by **task
+completion**; every task type gets its own screen that lets someone *process the task* rather than navigate
+to pieces of it.
+
+### The diff — 8 divergences, verified
+Aligned already: child-level pipeline, parent = requestor/money/clock/number, one-screen-per-task-type in
+progress, terminal conditions exist, payment off the linear walk.
+
+- **D1** engine is **stage-driven**, model is **task-driven** (`STAGE_TASK` — stages spawn tasks). Assessed a
+  **thin seam**: screens already call one function on completion; its internals and the source of truth change.
+- **D2** **`fee_review` deleted today** — direct collision. Recommend restoring.
+- **D3** **no parent-level fee aggregation across children at all** (spec corrected the same day to say so).
+  The model makes it **required**, not deferred. **Largest gap.**
+- **D4** estimate is a task at intake, not a pipeline step; no data-collection / calculation split.
+- **D5** `awaiting_payment` is a **stage value**, but the model calls it a **status that pauses** — i.e. a
+  second axis. A child cannot currently be *at* record search *and* paused. **Schema question, not vocabulary.**
+- **D6** bypass exists for **redaction only** (`redactionBypass.js` is exactly the right shape — a basis and a
+  `System` attribution instead of a user — but it is not general).
+- **D7** `intake` and `delivery` spawn **no task**, yet both are steps in the model.
+- **D8** terminal events work but are three bespoke paths, not a modelled concept.
+
+### Consequence for work in flight
+**Task screens are safe to continue** — the three-part shape survives both models; only what the completion
+action calls changes. **Stage-vocabulary and branch modelling should stop** until the model is ratified; that
+is exactly where the two bad inferences of 2026-07-19 landed.
+
+### Next session
+1. **Kevin's answers to §5** — priority order: is `awaiting_payment` a second axis (D5, schema); does
+   parent-level fee aggregation come back on the roadmap (D3); how literal is "driven by task completion"
+   (D1); are intake review and delivery tasks (D7); then the legal path (§3, deliberately OPEN).
+2. Only then: restore `fee_review` and resume pipeline work.
+3. Unblocked meanwhile: the remaining Phase 2 screens (`fee_waiver`, `routing_review`,
+   `review_auto_redaction`), and the swallow-audit fixes 1–3 in `BACKLOG.md`.

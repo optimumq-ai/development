@@ -3,6 +3,14 @@ Derived 2026-07-08 from a structural scan of ALL backend routes (36), services (
 
 **Spec status:** ✅ ALL 12 DOMAINS CONSOLIDATED (2026-07-08). Specs: SPEC_*.md
 
+> ⚠️ **READ FIRST BEFORE ANY PROCESSING-PIPELINE WORK — `TARGET_process_model.md` (2026-07-19, DRAFT).**
+> The specs below describe the pipeline **as built**. Kevin's stated target model differs on several points
+> (task-driven rather than stage-driven flow, `fee_review` as a real step, payment as a *status* rather than a
+> position, bypass as a first-class completion, parent-level fee calculation across children). Until that
+> document is ratified, **do not infer design intent from what the code currently implements** — that
+> reasoning deleted a wanted stage on 2026-07-19. Task screens are safe to continue; stage-vocabulary and
+> branch modelling are not.
+
 ## 1. ✅ Public Portal & Intake Agent
 Citizen-facing entry: landing, AI chat agent (phases, quick replies, MRR detection, fee capture), form fallback, portal search.
 `publicChat.js, requests.js(/public)` · Pages: PublicPortalPage · Related: classify
