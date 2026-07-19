@@ -5637,5 +5637,32 @@ are dead sqlite-era files loaded by nothing, and they are history.
    move to the parent), **`routing_review` fires per child**, `WORKING_attribute_inventory.md` Part H, and (q)'s
    deliberately-undone items (`dev_mode = '1'`, the `PARTIALLY_GRANTED` notification rows, the RM hold
    override's WA-entitlement guard).
-3. `estimated_fee` was NOT examined this session — it survives, and whether it has a writer is unchecked. If
-   the next agent wants a five-minute win, that is the same question asked once more.
+3. ~~`estimated_fee` was NOT examined~~ — **checked and dropped the same session, see below.**
+
+### Addendum — `estimated_fee` dropped too (`342254e`)
+Kevin asked for the check flagged above. It came back **different from the other two, and worse.**
+
+`estimated_fee` had **a writer and no reader**: `routes/feeEstimates.js` set it immediately after inserting the
+authoritative `request_fee_estimates` row, and nothing in backend, tests or frontend ever read it back. A
+write-only denormalized copy.
+
+**The reason it goes is not tidiness — it was STALE BY DESIGN.** That single write was the only one in the
+codebase. Reconciliation, reissue and adjustment each write a **new** `request_fee_estimates` snapshot and
+never touched this column, so **the moment a request was reconciled it held a superseded total.** A believable
+money number that was wrong — the same trap `amount_paid` set by silently reading $0. It also wrote to the
+**addressed row** (a child today), putting a money fact on the work row contrary to §4.3; the inventory had it
+flagged as a parent/child conflict, and the resolution turned out to be **deletion, not migration.**
+
+Verified 0 in all 13 live rows before the DDL. `verify_revenue_allocation` A1 now covers all three columns.
+
+**Coverage here is real rather than incidental:** the write lived in `POST /fee-estimates/request/:requestId`,
+which `verify_deposit_clock`, `verify_estimate_reconcile` and `verify_fee_waiver` all drive end-to-end through
+the API — so the route was proven still working against a schema without the column, not merely assumed.
+
+**877/877 green, live census clean.** Applied to live by restart; all three columns confirmed absent, 13 rows
+intact, report and gate read paths re-exercised clean.
+
+**The pattern across all three, worth carrying:** a column with no writer reads as $0; a column with no reader
+goes stale. **Both produce a plausible money figure that is wrong, and neither announces itself.** The dead
+list in `WORKING_attribute_inventory.md` is now empty of money columns — but the same two questions (who
+writes it, who reads it) are the ones that found all three.

@@ -124,7 +124,7 @@ semantics, not schema.
 
 | Attribute | Written on | Spec | Verdict | Notes |
 |---|---|---|---|---|
-| `estimated_fee` | **child in practice** | PARENT (§4.3) | ⚠️ **conflict** | Written to whatever id the endpoint got; every UI path passes a child |
+| ~~`estimated_fee`~~ | was child in practice | PARENT (§4.3) | ✅ **DROPPED 2026-07-19** (`342254e`) | Resolved by DELETION, not by moving it. It had a writer and **no reader**, and nothing updated it on reconciliation/reissue/adjustment — so it went **stale the moment a request was reconciled**. The total lives on `request_fee_estimates.total` |
 | `fee_waiver_requested` | both (copy-down) | PARENT (`:167` "already built") | ⚠️ | |
 | `fee_waiver_status`, `_reason`, `_decided_by`, `_decided_at` | **child in practice** | PARENT | ⚠️ **conflict** | Money-axis facts landing on the work row |
 | `nonpayment_dunning_at` | **parent** | PARENT | ✅ | The one money column that is correctly parent-scoped |
