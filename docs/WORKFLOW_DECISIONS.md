@@ -4,6 +4,21 @@
 
 **Status legend:** BUILT = live today | PARTIAL = partly built | PLANNED = designed, not yet built
 
+> ### ⚠️ Terminal states are now CHILD-level `[corrected 2026-07-19]`
+> This inventory predates the parent/child model (built 2026-07-16) and assumes **one request ends in one
+> terminal state**. That is no longer the shape: every request is a **parent** with **1..n children**, the
+> **child** carries the terminal disposition, and **the parent has none** — `parent_state` is `In Process` ·
+> `Complete` only, derived and never stored, where `Complete` means "no further processing", *not* "granted".
+> `SPEC_parent_child_lifecycle.md` §4.4 / §5.8 is binding.
+>
+> Most of this document survives that change unaltered, because the decisions it catalogs are per-record and
+> the child *is* the record. **The exception is `PARTIALLY_GRANTED`**, which was a parent roll-up and was
+> retired 2026-07-16 by Kevin. It is struck below wherever it appears, with the reconciliation in Part 4.
+>
+> **Nothing new has been designed here.** Where retiring the roll-up leaves a real question open — chiefly
+> *which notice goes out when one child is delivered and another denied* — it is flagged as open rather than
+> answered, and belongs to the §4.4 field-design pass.
+
 ---
 
 ## 0. How to read this
@@ -135,7 +150,7 @@ Policy numbers shown as `<...>` are placeholders to fill from your playbook (Par
 | Pending state | Waiting on | Clock tolls? | Reminders | Terminal fallback | Resumes when |
 |---|---|---|---|---|---|
 | AWAITING_DEPOSIT | Initial deposit payment | Yes | day `<7>`, day `<14>` | Close as **withdrawn (non-payment)** at day `<21>` + notice | Deposit recorded -> work begins |
-| AWAITING_ADDITIONAL_DEPOSIT | Approval + added deposit after a cost overrun | Yes | day `<7>`, day `<14>` | Deliver what the paid deposit covers, then close **partially granted**; or **withdrawn** per policy | Approval + added deposit -> resume work |
+| AWAITING_ADDITIONAL_DEPOSIT | Approval + added deposit after a cost overrun | Yes | day `<7>`, day `<14>` | Deliver what the paid deposit covers, then close ~~**partially granted**~~ **[⛔ retired — see Part 4; the delivered children close `Closed – Delivered`, the unfunded ones take their own disposition]**; or **withdrawn** per policy | Approval + added deposit -> resume work |
 | AWAITING_REQUESTOR_APPROVAL | Yes/no on a revised estimate (no extra money yet) | Yes | day `<5>`, day `<10>` | Treat non-response as **withdrawal** at day `<10 business>` | Approval received -> resume |
 | AWAITING_CLARIFICATION | Requestor to narrow / clarify an overbroad or vague request | Yes | day `<5>`, day `<10>` | **Withdrawn (no clarification)** at day `<15>` + notice | Clarification received -> re-classify & resume |
 | AWAITING_FEE_WAIVER_DECISION | Internal approver to grant/deny a waiver | No (internal) | escalate to supervisor at day `<3>` | Auto-deny and fall back to standard fee path | Decision recorded -> resume |
@@ -149,9 +164,13 @@ Policy numbers shown as `<...>` are placeholders to fill from your playbook (Par
 - Policy knob: must staff first offer a clarification opportunity before a no-records close? (Some jurisdictions expect it.)
 
 **B. Multi-record request, some children empty.**
-- Decision per child: found / not found (**HUMAN**). Roll-up across children (**CODE**).
-- Path: each child resolves independently; parent rolls up to **PARTIALLY GRANTED** when at least one child is fulfilled and at least one returns no records (or is denied).
-- Policy knobs: deliver found children as they complete, or hold until all children resolve? Re-fee per child or once at parent level?
+- Decision per child: found / not found (**HUMAN**). `[BUILT 2026-07-14 — POST /tasks/:id/resolve]`
+- ~~Roll-up across children (**CODE**). Path: each child resolves independently; parent rolls up to **PARTIALLY GRANTED** when at least one child is fulfilled and at least one returns no records (or is denied).~~
+  > ⛔ **The roll-up is RETIRED** `[2026-07-19]`. Each child resolves independently and **stops there** — it
+  > carries its own §5.8 disposition. The parent rolls up only to `In Process` · `Complete`, derived, where
+  > `Complete` = every child terminal *whatever their dispositions were*. There is no parent-level "partially
+  > granted" and, per §4.4, no parent disposition at all.
+- Policy knobs: deliver found children as they complete, or hold until all children resolve? *(**Unresolved and legal** — §5.9 makes per-child release a requestor entitlement under WA RCW 42.56.080(2); §14.4.5 states the opposite default and flags itself for reconciliation.)* Re-fee per child or once at parent level? *(**Answered:** §6.4 — children contribute quantities, **the parent bills once**. "A child is a unit of work, never a unit of billing." Note the code does not yet do this — see `WORKING_attribute_inventory.md` Part A5.)*
 
 **C. Deposit unpaid for N days -> reminder.**
 - Decision: has the deposit been paid by reminder day? **CODE timer + POLICY.**
@@ -168,7 +187,12 @@ Policy numbers shown as `<...>` are placeholders to fill from your playbook (Par
 
 **F. Requestor refuses the increase (explicit "no").**
 - Decision: requestor declined. **REQUESTOR event + POLICY.**
-- Path options (policy-defined): (1) deliver only what the already-paid deposit covers, then close **PARTIALLY GRANTED**; (2) requestor narrows scope to fit the funded amount -> re-estimate and resume; (3) full **WITHDRAWAL**. Each raises the **refund question** - its own policy knob (refund unused deposit? retain costs already incurred?).
+- Path options (policy-defined): (1) deliver only what the already-paid deposit covers, then close ~~**PARTIALLY GRANTED**~~ **[⛔ retired — the funded children close `Closed – Delivered`; the unfunded ones take `Closed – Non-payment` or `Closed – Withdrawn by requestor` per policy]**; (2) requestor narrows scope to fit the funded amount -> re-estimate and resume; (3) full **WITHDRAWAL**. Each raises the **refund question** - its own policy knob (refund unused deposit? retain costs already incurred?).
+  > ⚠️ **Caution on option (1) under the child model** `[2026-07-19]`: "deliver what the deposit covers" must
+  > not become "withhold child B because child A is unpaid." §5.9 is explicit — **"A child may NEVER be
+  > withheld because a *sibling* is unpaid"** — and no researched jurisdiction authorizes conditioning release
+  > of one record on payment for a different one. The payment gate is a **coverage test per child**, not a
+  > whole-request test.
 
 **G. Requestor never responds (silent).**
 - Decision: same fork as F, but triggered by a **timer expiring** instead of an explicit event. **CODE timer + POLICY.**
@@ -199,17 +223,38 @@ Design notes:
 
 The happy path really only models "closed" today. These exits are distinct **compliance outcomes**, each with its own paperwork. A request ends in exactly one:
 
-| Terminal state | Meaning | Notice sent |
-|---|---|---|
-| GRANTED | All responsive records released | Release / delivery notice |
-| PARTIALLY_GRANTED | Some released, some withheld or not found | Partial-release notice + basis for any withholding |
-| DENIED | Withheld in full under exemption(s) | Denial notice w/ statutory citation(s) |
-| NO_RESPONSIVE_RECORDS | A diligent search found nothing | No-records notice |
-| WITHDRAWN_BY_REQUESTOR | Requestor explicitly withdrew | Acknowledgement of withdrawal |
-| WITHDRAWN_NON_PAYMENT | Deposit/payment never made by threshold | Closure-for-non-payment notice |
-| WITHDRAWN_NO_RESPONSE | Requestor silent past threshold (constructive withdrawal) | Constructive-withdrawal notice |
+> **RECONCILED 2026-07-19.** "A request ends in exactly one" is now "**a CHILD** ends in exactly one." The
+> table below maps onto `SPEC_parent_child_lifecycle.md` §5.8's eight child dispositions — which is binding —
+> with one entry retired and two additions the original list was missing.
 
-Each terminal state should carry: the closing reason, the timestamp, who/what closed it (human or tickler), and any refund disposition.
+| Terminal state (this doc) | → §5.8 child disposition | Notice sent |
+|---|---|---|
+| GRANTED | `Closed – Delivered` | Release / delivery notice |
+| ~~PARTIALLY_GRANTED~~ | ⛔ **RETIRED — no equivalent** | see the note below |
+| DENIED | `Closed – Denied` (**requires a statutory citation**, §5.7) | Denial notice w/ statutory citation(s) |
+| NO_RESPONSIVE_RECORDS | `Closed – No records located` | No-records notice |
+| WITHDRAWN_BY_REQUESTOR | `Closed – Withdrawn by requestor` | Acknowledgement of withdrawal |
+| WITHDRAWN_NON_PAYMENT | `Closed – Non-payment` | Closure-for-non-payment notice |
+| WITHDRAWN_NO_RESPONSE | `Closed – No response` | Constructive-withdrawal notice |
+| *(was missing)* | `Closed – Previously furnished` — Tex. Gov't Code §552.232: certify the same records were already provided, in lieu of re-copying. **A real terminal outcome, not a denial.** | ❓ open |
+| *(was missing)* | `Closed – Not in our custody / referred` | ❓ open |
+
+> **Why `PARTIALLY_GRANTED` has no successor.** It described two different things, and the model now handles
+> each elsewhere:
+> 1. **"Some of this record released, some redacted"** — at child level this is **still `Closed – Delivered`**.
+>    §5.8: *"Redacted release is still Delivered"*; the per-record withholding log (§5.7 `child_exemptions`,
+>    with citation and explanation) carries the detail that "partially granted" used to gesture at. This is
+>    strictly more precise than a status word.
+> 2. **"Some children delivered, others denied"** — this was the **parent roll-up**, retired 2026-07-16. The
+>    parent has no disposition; each child simply carries its own.
+>
+> **❓ OPEN — the one real question this leaves.** *Which notice goes out when children disagree?* One
+> delivered + one denied is a single citizen who must receive both the records and a citable denial. Options
+> not evaluated here: one combined notice per parent, per-child notices, or a notice per delivery installment
+> (which interacts with the unresolved Hold-All vs As-Ready fork, §5.9 vs §14.4.5). **Belongs to the §4.4
+> field-design pass — do not build from this section until it is answered.**
+
+Each terminal disposition should carry: the closing reason, the timestamp, who/what closed it (human or tickler), and any refund disposition.
 
 ---
 

@@ -826,6 +826,18 @@ carries `budget_clock` at all (§5.4) — the statutory clock (parent) would nev
 6. **HIGH PRIORITY flag** → an AI report monitoring all high-priority MRRs.
 
 ### 14.5 Roll-up (pointer, not a restatement)
-Parent completes only when **all** children complete; mixed outcomes resolve per **§6.2** (and *not* by the
-intuition that "some denied ⇒ partially granted" — read the precedence table). Parent budget variance is the
+Parent completes only when **all** children complete. ~~mixed outcomes resolve per **§6.2** (and *not* by the
+intuition that "some denied ⇒ partially granted" — read the precedence table).~~ Parent budget variance is the
 **critical-path child**, per §6.3 — a parent is not "ahead" because four of five children are.
+
+> ⛔ **Dangling pointer, corrected 2026-07-19.** This sent mixed-outcome resolution to **§6.2**, which is
+> `[DEFERRED]` and says in its own text *"Do not build from this section. The parent has no disposition and no
+> outcome."* So the pointer led to a section forbidding the thing it was consulted for.
+>
+> **There is no mixed-outcome resolution to perform.** `parent_state` is `In Process` · `Complete`, and
+> `Complete` means every child reached a terminal disposition **whatever those dispositions were** (§4.4).
+> Mixed outcomes are not resolved into a parent verdict — each child keeps its own §5.8 disposition. The
+> warning against "some denied ⇒ partially granted" was right and is now structural rather than advisory.
+>
+> What genuinely remains open is **notices**, not status: which notice a citizen receives when one child is
+> delivered and another denied. That belongs to §4.4's field-design pass — see `WORKFLOW_DECISIONS.md` Part 4.
