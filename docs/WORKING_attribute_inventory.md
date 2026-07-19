@@ -10,6 +10,8 @@
 > **Do not cite this document as authority.** If it disagrees with the code, the code is right; if it
 > disagrees with the spec, that disagreement is the point and is flagged below.
 
+**Start with Part 0** if the question is "what changed between the old and new data model."
+
 **How the columns are meant to be read**
 
 - **Exists?** — is there a real DB column / table today?
@@ -20,6 +22,49 @@
 **Confidence.** Column ownership comes from reading `requestCreate.js` (`COLUMNS` / `PARENT_NULL` /
 `CHILD_FIELDS`) plus every `UPDATE requests SET` site. Three items were verified by running code, and are
 marked **[verified]**. One inference is marked **[unverified]** and says so.
+
+---
+
+## Part 0 — "Old schema" vs "new schema": there is only ONE
+
+**This answers the question that prompted the document, and the answer is counter-intuitive.** There is no old
+attribute set and a new one to reconcile. **The parent/child migration was ADDITIVE — one `requests` table
+before and after, and the column list barely moved.**
+
+| | |
+|---|---|
+| **Already in the original `CREATE TABLE`, dormant** | `is_mrr`, `master_request_id`, `component_label` — present from the start and **written by zero lines of code** until 2026-07-16 |
+| **Added by the wrap** (`1739215`) | **`child_no` only** — plus `CHECK (child_no IS NULL OR description IS NOT NULL)` and an index on `master_request_id` |
+| **Retired or renamed** | **None.** Nothing was dropped, nothing renamed |
+
+**So the "old schema attribute list" IS the Part A list.** Every column below existed before the migration too.
+What changed is not *which columns exist* but **which rows carry meaningful values in them** — i.e. row
+semantics, not schema.
+
+**What the migration actually changed, per column:**
+
+| Column | Before 2026-07-16 | After |
+|---|---|---|
+| *(every row)* | A standalone request | A **parent** OR a **child** |
+| `master_request_id` | always NULL | NULL on parents, set on children |
+| `child_no` | did not exist | NULL on parents, `1..n` on children |
+| `is_mrr` | hand-set flag, meaningless | **derived** (`child_count > 1`), parent only, **forced 0 on every child** |
+| `request_number` | one number per row | parent keeps the citizen's number; child gets a **`-N` suffix the citizen has never seen** |
+| `stage` | on every row | **child only** — parents are `NULL` |
+| `description`, `record_types`, `department_id`, `record_type_id`, `component_label` | on every row | **child only** — NULLed on the parent |
+| requestor identity, delivery, mailing, `purpose`, `fee_waiver_requested` | on every row | **copied down** to children (see A2) |
+| `deadline_date` | on every row | parent-owned, **cascaded down** as a derived copy |
+| everything else | on every row | unchanged — still written wherever it was |
+
+> ### ⚠️ Why this is the dangerous kind of migration
+> Because no column changed, **every pre-migration query still runs.** It just may now answer a different
+> question. `services/requestScope.js`'s predicates were deliberately chosen to be **tautologies against
+> pre-migration data** so they could be adopted as a provable no-op — which means they were invisible until
+> children existed, and are **load-bearing now**.
+>
+> **A query that looks correct, and that WAS correct against old data, can be wrong today.** Every defect in
+> Part A5 and A6 is an instance: the code did not change, the data underneath it did. This is also why the
+> "old vs new schema" framing does not find them — there is no schema diff to read. The diff is in meaning.
 
 ---
 
