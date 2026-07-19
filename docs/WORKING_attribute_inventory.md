@@ -191,7 +191,7 @@ These are the terms you'll hit in the docs that have **no code behind them**. Th
 | `installment_no`, `delivered_at` | child | §5.8 | Per-child release batching | Tied to release-policy fork |
 | `delivery_mode` (`as_ready` / `hold_all`) | parent | §5.8 | Release timing | **DECIDED 2026-07-19 — `as_ready` is the default**; `hold_all` unavailable in entitlement jurisdictions (WA). Build it |
 | `delivery_fee_basis` (`per_request` / `per_installment`) | parent | §5.10.6 | Whether N shipments cost N delivery charges | **DECIDED 2026-07-19 — `per_request` default.** ⚠️ Undecided for `rate: 'actual'` delivery (live in TX profile) |
-| `componentCharged` | child | §5.10.2 | Per-record price after request-level rules | **DECIDED 2026-07-19 — generalized prorata.** The field three features are blocked on |
+| `componentCharged` | child | §5.10.2 | Per-record price after request-level rules | ✅ **BUILT 2026-07-19** (`b2fb08b`). Emitted per component by `feeEngine`, with zero-gross and unpriced-`'actual'` guards |
 | 5 workstream status vocabularies | child | §5.3 | Estimate collection, record search, redaction, legal redaction, legal review — ~30 values total | **Biggest overkill candidate.** Much overlaps `tasks.status` + stage |
 | `source_request_id` on `clock_tolls` | — | §4.2.1 | Which child's event tolled the parent clock. "**Attribution is not ownership**" | Decided, deferred |
 | `mrr_manager` | parent | `:80` | Parent's `assigned_to`, only when `is_mrr` | Blocked on MRR hub |

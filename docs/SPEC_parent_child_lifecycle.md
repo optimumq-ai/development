@@ -393,7 +393,13 @@ contact-requestor button.
 > **It must never become a payment gate.** §5.9 stands: a child may **never** be withheld because a sibling is
 > unpaid. Holding for coherence is an operational choice; holding for a sibling's money is not available.
 
-### 5.9 The payment gate is a COVERAGE test, not a whole-request test `[research 2026-07-14]`
+### 5.9 The payment gate is a COVERAGE test, not a whole-request test `[research 2026-07-14 — BUILT 2026-07-19, `bd9befa`]`
+
+> ✅ **BUILT.** `services/feeRelease.releaseGate()` now resolves the row's own `componentCharged` (§5.10.2) from the priced snapshot — its own estimate or its **parent's** — and gates on coverage of *that share*, not the request balance. `PATCH /requests/:id/stage` blocks on `!covered`.
+> **Exact no-op for a single-record request** (one component ⇒ `componentCharged = total`), so the correct predicate was adopted while it is still an identity — the same technique `requestScope.js` used for the migration. An estimate with no per-component data falls back to the whole-request test and reports `coverageBasis: 'request_total'`: stricter than §5.9 requires, never more permissive.
+> Harness `verify_release_coverage` (18) — §C proves two paid-for records release while the request is **not** paid in full, i.e. the old gate withheld all three. Break-tested.
+> ⚠️ **Before the money axis moves to the parent**, coverage must become CUMULATIVE over already-released siblings (§5.10.3 FIFO) — otherwise three $20 children all release against $50 paid. Flagged in-code.
+
 **A child may NEVER be withheld because a *sibling* is unpaid.** No state authorizes conditioning release of one record on payment for a different record. The payment hook is tied everywhere to *the copies being provided*: TX "charges **accrued**" (§ 552.221(b)(2)) · CA "fees covering **direct costs of duplication**" (§ 7922.530(a)) · FL "the fee prescribed by law" (§ 119.07(4)) · NY "the fee prescribed **therefor**" (§ 89(3)(a)) · CT "**such** fee" (§ 1-212(c)). And two states cut affirmatively against sitting on finished records: **TX § 552.221(a)** ("shall **promptly produce**") and **CA § 7922.500** ("nothing … shall be construed to permit an agency to **delay or obstruct** the inspection or copying of public records").
 
 Per-jurisdiction **`payment_release_rule`**:
