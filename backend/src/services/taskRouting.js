@@ -32,10 +32,19 @@ var TASK_ROLES = {
 
 // Canonical routable task types (docs/MASTER_task_types_permission_groups.md §A1). These are the keys a
 // person's per-person subset (user_task_types) is drawn from — i.e. work the SYSTEM routes by eligibility.
-// mrr_processing is here because the system routes the MRR parent to an ORO Associate at intake; the MRR
-// CHILD tasks (mrr_estimate / mrr_search) are NOT here — the Request Manager hand-assigns them to any
-// person with no eligibility rules (see §A2), so they never gate through user_task_types.
-var ROUTABLE_TASK_TYPES = ['estimate', 'record_search', 'redaction', 'legal_redaction', 'legal_review', 'fee_waiver', 'commercial_rate', 'mrr_processing', 'routing_review'];
+//
+// `commercial_rate` and `mrr_processing` were REMOVED 2026-07-19 (Kevin, brief §5.4). Nothing spawned
+// either — no `createTask({type:'commercial_rate'})` or `'mrr_processing'` exists anywhere — so they were
+// offerable in the per-person picker and produced permanently empty pools: a supervisor could grant someone
+// work that can never arrive. An entry here is a PROMISE that the router can deliver that type, and neither
+// could. Live carried zero `user_task_types` rows for both, so nothing was orphaned by removing them.
+//
+// ⚠️ `mrr_processing` is still the DESIGNED routing mechanism for the MRR parent hub (§14.3, MASTER §A2) —
+// the hub itself is brief §5 decision 3 and is still open. This deletes the catalog entry, NOT the design:
+// if the hub is built, re-add the key alongside the code that actually spawns it. The MRR CHILD tasks
+// (mrr_estimate / mrr_search) were never here anyway — the Request Manager hand-assigns those with no
+// eligibility rules, so they never gate through user_task_types.
+var ROUTABLE_TASK_TYPES = ['estimate', 'record_search', 'redaction', 'legal_redaction', 'legal_review', 'fee_waiver', 'routing_review'];
 // Reverse of TASK_ROLES: legacy permission-role name -> task type, used to translate existing callers
 // (which pass task.role_required) onto the new task-type model during the cutover.
 var ROLE_TO_TYPE = { FEE_MANAGER: 'estimate', SEARCH_AND_TRIAGE: 'record_search', REDACTION_WORKER: 'redaction', FINANCE: 'fee_waiver' };

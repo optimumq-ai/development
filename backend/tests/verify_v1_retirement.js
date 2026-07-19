@@ -97,6 +97,39 @@ function codeHits(re) {
   ok('D3 and it is PROTECTED from purges, so this is a standing arrangement not an accident',
     /PROTECTED[\s\S]{0,120}req-template-samples/.test(purge));
 
+  console.log('\n=== E. THE UNSPAWNABLE TASK TYPES ARE OUT OF THE CATALOG (brief §5.4) ===');
+  // `commercial_rate` and `mrr_processing` were routable and offerable in the per-person picker, but NOTHING
+  // spawns either — so a supervisor could grant someone work that can never arrive. An entry in
+  // ROUTABLE_TASK_TYPES is a PROMISE the router can deliver that type.
+  var tr = require('/opt/optimumq/backend/src/services/taskRouting');
+  ok('E1 neither is routable any more',
+    tr.ROUTABLE_TASK_TYPES.indexOf('commercial_rate') < 0 && tr.ROUTABLE_TASK_TYPES.indexOf('mrr_processing') < 0);
+  var spawns = [];
+  walk('/opt/optimumq/backend/src').forEach(function (p) {
+    fs.readFileSync(p, 'utf8').split('\n').forEach(function (line, i) {
+      if (/type:\s*'(commercial_rate|mrr_processing)'/.test(line) && !/^\s*(\/\/|\*)/.test(line)) {
+        spawns.push(p.replace('/opt/optimumq/backend/src/', '') + ':' + (i + 1));
+      }
+    });
+  });
+  ok('E2 and nothing spawns them — the premise for removing them' + (spawns.length ? ' — found ' + spawns.join(', ') : ''),
+    spawns.length === 0);
+
+  // THE DRIFT GUARD. Three catalogs disagreed before (brief §2.2) precisely because nothing checked them
+  // against each other. The picker is what a supervisor sees, so a key here that the router will not route is
+  // the same empty-pool defect under a different name.
+  var staffSrc = fs.readFileSync(FE + '/pages/StaffManagementPage.js', 'utf8');
+  var pickerKeys = (staffSrc.match(/\{\s*key:\s*'([a-z_]+)'/g) || []).map(function (m) { return m.match(/'([a-z_]+)'/)[1]; });
+  var notRoutable = pickerKeys.filter(function (k) { return tr.ROUTABLE_TASK_TYPES.indexOf(k) < 0; });
+  ok('E3 CATALOG PARITY — the staff picker offers nothing the router cannot route' +
+     (notRoutable.length ? ' — found ' + notRoutable.join(', ') : ''), notRoutable.length === 0);
+  ok('E4 …and the picker is not silently EMPTY, which would pass E3 vacuously', pickerKeys.length >= 6);
+
+  // Live must have no leftovers, or a person keeps an eligibility token for a type that no longer exists.
+  var orphans = await db.get(
+    "SELECT count(*)::int AS n FROM user_task_types WHERE task_type IN ('commercial_rate','mrr_processing')");
+  ok('E5 no person still holds a removed task type', orphans.n === 0);
+
   console.log('\n  ' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
   process.exit(fail ? 1 : 0);
 })().catch(function (e) { console.error('HARNESS ERROR:', e); process.exit(1); });

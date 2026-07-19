@@ -256,8 +256,9 @@ export default function RequestQueuePage() {
                         <td style={{...td, whiteSpace:'nowrap'}}>
                           <span style={{fontSize:'13px',color:od?'#DC2626':'#6B7280',fontWeight:od?'700':'400'}}>{head.deadline_date||'—'}</span>
                         </td>
-                        {/* §14.1: the MRR parent is system-routed to an ORO Associate via `mrr_processing`. NOT
-                            BUILT — so there is no owner to name, and inventing one here would be a lie. */}
+                        {/* §14.1 designs the MRR parent as system-routed to an ORO Associate. NOT BUILT — and
+                            as of 2026-07-19 the `mrr_processing` task type is not even in the catalog (brief
+                            §5.4), so there is no owner to name and inventing one here would be a lie. */}
                         <td style={td}><span style={{fontSize:'12px',color:'#D1D5DB'}}>—</span></td>
                       </tr>
                       {kids.map(function(c){

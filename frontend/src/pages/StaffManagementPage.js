@@ -13,11 +13,12 @@ const TASK_TYPES = [
   { key:'legal_redaction', label:'Legal Redaction' },
   { key:'legal_review', label:'Legal Review' },
   { key:'fee_waiver', label:'Fee-Waiver Approval' },
-  { key:'commercial_rate', label:'Commercial-Rate Approval' },
   { key:'routing_review', label:'Routing Review' },
-  { key:'mrr_processing', label:'MRR Processing' },
-  // MRR child tasks (mrr_estimate / mrr_search) are intentionally NOT here — the Request Manager
-  // hand-assigns them to any person with no eligibility rules, so they aren't a per-person subset.
+  // `commercial_rate` and `mrr_processing` were REMOVED 2026-07-19 (brief §5.4). Nothing spawns either, so
+  // granting them to a person promised work that could never arrive — a permanently empty pool. This list
+  // must stay in step with ROUTABLE_TASK_TYPES in backend/src/services/taskRouting.js; a harness checks it.
+  // MRR child tasks (mrr_estimate / mrr_search) were never here either — the Request Manager hand-assigns
+  // them to any person with no eligibility rules, so they aren't a per-person subset.
 ];
 const TASK_TYPE_LABEL = TASK_TYPES.reduce(function(m,t){ m[t.key]=t.label; return m; }, {});
 const ROLE_COLORS = { SYSTEM_ADMIN:{bg:'#FEF2F2',color:'#991B1B'}, DIRECTOR:{bg:'#EDE9FE',color:'#6D28D9'}, SUPERVISOR:{bg:'#DBEAFE',color:'#1E40AF'}, DEPT_MANAGER:{bg:'#D1FAE5',color:'#065F46'}, COORDINATOR:{bg:'#FEF3C7',color:'#92400E'}, CUSTODIAN:{bg:'#E0E7FF',color:'#3730A3'}, REDACTION_REVIEWER:{bg:'#CCFBF1',color:'#0F766E'}, REDACTION_APPROVER:{bg:'#CCFBF1',color:'#0F766E'}, ATTORNEY_REVIEWER:{bg:'#FEE2E2',color:'#B91C1C'} };

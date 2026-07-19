@@ -23,7 +23,8 @@ var engine = require('./feeEngine');
 //   redaction / legal_redaction / redaction_qa /
 //   legal_review                                     -> review   (the "review/redaction" family)
 //   everything else (estimate, routing_review,
-//   fee_waiver, commercial_rate, mrr_processing, ...) -> non-billable labor: contributes NO hours.
+//   fee_waiver, ...)                                 -> non-billable labor: contributes NO hours.
+//   (`commercial_rate` / `mrr_processing` were removed from the catalog 2026-07-19, brief §5.4.)
 // programming has no routed task type today (bespoke data-extraction work is not a task) — so nothing maps to it;
 // the driver stays available for the manual path. Matches the default mapping parked in the Slice E scoping notes.
 var TASK_DRIVER = {
