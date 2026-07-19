@@ -14,6 +14,7 @@ var TIME_PRESETS = ['all', 'ytd', 'this_month', 'last_month', 'last_7d', 'last_3
 var BASE_EXCL = "r.request_number NOT LIKE 'SYS-%' AND r.request_number <> 'LIBRARY'";
 
 var scope = require('./requestScope');
+var revAlloc = require('./revenueAllocation');
 // PARENT/CHILD SCOPE for reports. Once parent rows exist, an unscoped `FROM requests` double-counts every
 // metric — volume, revenue, compliance, all of it. The right side depends on what is being measured:
 //
@@ -23,10 +24,10 @@ var scope = require('./requestScope');
 //   LEAF             — grouping by a field that only a WORK row has (department, classification).
 //                      "Requests by department" is really "work by department", and that is the child.
 //
-// KNOWN LIMIT, recorded in SPEC_parent_child_lifecycle §10.6: a PARENT-level metric grouped by a CHILD field
-// (e.g. fee_revenue by department) needs a parent<->child JOIN, because the money is on the parent and the
-// department is on the child. Today both predicates are tautologies (every row is its own parent AND its own
-// leaf), so this is a no-op; the join is migration-time work and must not be guessed here.
+// RESOLVED 2026-07-19 (was a KNOWN LIMIT here and in SPEC §10.6): a PARENT-level MONEY metric grouped by a
+// CHILD field — `fee_revenue by department` — is not a join problem and never was. A join would double-count
+// one payment into two departments. It needed an ALLOCATION rule, which `componentCharged` (§5.10.2) now
+// provides; `fee_revenue` no longer routes through this function at all, see `revenueReport` below.
 function scopeFor(metric, groupBy) {
   var childGrouped = (groupBy === 'department' || groupBy === 'classification');
   return childGrouped ? scope.leaf('r') : scope.parent('r');
@@ -73,7 +74,6 @@ function whereFrom(spec, extra, scopeSql) {
   if (extra) w.push(extra);
   return { sql: ' WHERE ' + w.join(' AND '), params: p };
 }
-function moneyRows(rows) { return rows.map(function (x) { return { label: x.k, value: Math.round((Number(x.v) || 0) * 100) / 100 }; }); }
 
 async function runSpec(spec) {
   spec = spec || {};
@@ -119,28 +119,18 @@ async function runSpec(spec) {
       note: metric === 'compliance_rate' ? 'Share of closed requests completed on or before their statutory deadline.' : 'Average calendar days from intake to close, for closed requests.' };
   }
 
-  // --- REFUSED: a MONETARY metric grouped by a CHILD field is UNDEFINED, not merely unjoined. ---
-  // (Kevin's decision, 2026-07-14.) Revenue is ONE number on the parent (the citizen pays once for the
-  // request). A parent with two children in two departments has ONE revenue figure and TWO departments — a
-  // join would double-count it into both, and the columns would not sum to the total. Attributing it needs
-  // an ALLOCATION rule, and the law is silent on allocation (SPEC_parent_child_lifecycle §5.10).
+  // --- fee_revenue: computed in JS, because collected money must be ALLOCATED before it can be grouped ---
   //
-  // A wrong revenue-by-department number is worse than no revenue-by-department number, so we refuse it and
-  // say why. COUNTS are fine and still offered: each child is counted once, so nothing double-counts.
-  if (metric === 'fee_revenue' && (groupBy === 'department' || groupBy === 'classification')) {
-    return {
-      title: 'Fee revenue by ' + GROUPS[groupBy].toLowerCase() + ' — not available',
-      viz: 'number', columns: ['Metric', 'Value'], rows: [],
-      unavailable: true,
-      note: 'Revenue is charged once per request, but a department is a property of the individual records ' +
-            'within it. A request whose records span two departments has one payment and two departments, so ' +
-            'any split between them would be an invented allocation — the figures would not sum to the total. ' +
-            'Use fee revenue by month, requestor or status; or request COUNTS by department, which are exact.'
-    };
-  }
+  // WAS REFUSED UNTIL 2026-07-19. Revenue by department/classification was recorded UNDEFINED (Kevin,
+  // 2026-07-14): revenue is one number on the parent, a department is a property of the individual RECORDS
+  // inside it, and splitting it needed an allocation rule that did not exist. `componentCharged` (SPEC
+  // §5.10.2, built 2026-07-19) is that rule, so the cut is now defined — see `services/revenueAllocation.js`.
+  //
+  // This ALSO replaces `SUM(r.amount_paid)`, which was reading a column that has never had a writer.
+  if (metric === 'fee_revenue') return await revenueReport(spec, groupBy, limit);
 
-  // --- count/revenue/overdue: SQL aggregate, optional group ---
-  var valueExpr = metric === 'fee_revenue' ? 'COALESCE(SUM(r.amount_paid),0)' : 'COUNT(*)';
+  // --- count/overdue: SQL aggregate, optional group ---
+  var valueExpr = 'COUNT(*)';
   var extra = metric === 'overdue_count' ? ("r.deadline_date < '" + today() + "' AND r.status = 'active'") : null;
   var w = whereFrom(spec, extra, scopeFor(metric, groupBy));
   if (groupBy) {
@@ -150,16 +140,106 @@ async function runSpec(spec) {
     var order = ((spec.sort === 'desc') ? 'v DESC' : (spec.sort === 'asc' ? 'v ASC' : ge.order)) + ', k';
     var sql = "SELECT " + ge.sql + " AS k, " + valueExpr + " AS v FROM requests r" + ge.join + w.sql + " GROUP BY " + ge.sql + " ORDER BY " + order + (limit ? " LIMIT " + limit : "");
     var rr = await db.all(sql, w.params);
-    var rowsOut = metric === 'fee_revenue' ? moneyRows(rr) : rr.map(function (x) { return { label: x.k, value: Number(x.v) || 0 }; });
+    var rowsOut = rr.map(function (x) { return { label: x.k, value: Number(x.v) || 0 }; });
     return { title: titleFor(metric, groupBy, spec), viz: spec.viz || (groupBy === 'month' ? 'line' : 'bar'), columns: [ge.label, metricLabel(metric)], rows: rowsOut, note: noteFor(metric) };
   } else {
     var one = await db.get("SELECT " + valueExpr + " AS v FROM requests r" + w.sql, w.params);
-    var v = Number(one.v) || 0;
-    return { title: titleFor(metric, null, spec), viz: 'number', columns: ['Metric', 'Value'], rows: [{ label: metricLabel(metric), value: metric === 'fee_revenue' ? '$' + (Math.round(v * 100) / 100).toLocaleString() : v }], note: noteFor(metric) };
+    return { title: titleFor(metric, null, spec), viz: 'number', columns: ['Metric', 'Value'], rows: [{ label: metricLabel(metric), value: Number(one.v) || 0 }], note: noteFor(metric) };
   }
 }
+
+// FEE REVENUE — collected money, attributed to the record that earned it.
+//
+// Computed in JS rather than SQL for the same reason `avg_processing_days` is: the per-record split lives in
+// each snapshot's `fee_context_json`, and the allocation (§5.10.2) is a rule, not an aggregate.
+//
+// WHICH ROW A FILTER APPLIES TO is the subtle part, and the two are deliberately different:
+//   the PAYER  (parent) carries the filters and the parent-level cuts — time range, status, requestor, month.
+//                       The citizen paid once, on a date, with a status; that is a parent fact.
+//   the EARNER (child)  carries the child-level cuts — department, classification. That is the whole point of
+//                       the allocation: money collected from one payer is earned by n records.
+// Filtering on the earner instead would drop revenue whose parent matched, and silently under-report the total.
+async function revenueReport(spec, groupBy, limit) {
+  var parts = await revAlloc.collected();
+
+  // Same filters, scope and exclusions as every other parent-level metric.
+  var w = whereFrom(spec, null, scope.parent('r'));
+  var payerRows = await db.all("SELECT r.id, r.created_at, r.status, r.requestor_name FROM requests r" + w.sql, w.params);
+  var payers = {};
+  payerRows.forEach(function (x) { payers[x.id] = x; });
+  parts = parts.filter(function (p) { return payers[p.paidForRequestId]; });
+
+  var total = 0;
+  parts.forEach(function (p) { total = Math.round((total + p.amount) * 100) / 100; });
+
+  // How much of the total could NOT be attributed to a specific record. Disclosed rather than buried: a
+  // department cut that quietly omits money reads as precise when it is not. See `revenueAllocation.splitOne`.
+  var unallocated = 0;
+  parts.forEach(function (p) { if (p.basis !== 'component') unallocated = Math.round((unallocated + p.amount) * 100) / 100; });
+
+  if (!groupBy) {
+    return { title: titleFor('fee_revenue', null, spec), viz: 'number', columns: ['Metric', 'Value'],
+      rows: [{ label: 'Fee revenue', value: '$' + total.toLocaleString() }], note: revenueNote(null, 0, total) };
+  }
+
+  var childGrouped = (groupBy === 'department' || groupBy === 'classification');
+  var earners = {};
+  if (childGrouped) {
+    var ids = {};
+    parts.forEach(function (p) { ids[p.requestId] = true; });
+    var idList = Object.keys(ids);
+    if (idList.length) {
+      var ph = idList.map(function () { return '?'; }).join(',');
+      var er = await db.all(
+        "SELECT r.id, r.classification, COALESCE(d.name,'Unassigned') AS dept FROM requests r" +
+        " LEFT JOIN departments d ON d.id = r.department_id WHERE r.id IN (" + ph + ")", idList);
+      er.forEach(function (x) { earners[x.id] = x; });
+    }
+  }
+
+  var buckets = {};
+  parts.forEach(function (p) {
+    var key;
+    if (groupBy === 'department') key = (earners[p.requestId] || {}).dept || 'Unassigned';
+    else if (groupBy === 'classification') key = (earners[p.requestId] || {}).classification || '(none)';
+    else if (groupBy === 'month') key = String(payers[p.paidForRequestId].created_at).slice(0, 7);
+    else if (groupBy === 'status') key = payers[p.paidForRequestId].status;
+    else key = payers[p.paidForRequestId].requestor_name || '(unknown)';
+    buckets[key] = Math.round(((buckets[key] || 0) + p.amount) * 100) / 100;
+  });
+
+  var out = Object.keys(buckets).map(function (k) { return { label: k, value: buckets[k] }; });
+  // Deterministic tiebreaker by label — two departments with equal revenue were swapping places between runs,
+  // which reads as data churn in a report that has not changed.
+  var asc = (spec.sort === 'asc') || (!spec.sort && groupBy === 'month');
+  out.sort(function (a, b) {
+    if (groupBy === 'month' && !spec.sort) return a.label < b.label ? -1 : (a.label > b.label ? 1 : 0);
+    if (a.value !== b.value) return asc ? a.value - b.value : b.value - a.value;
+    return a.label < b.label ? -1 : (a.label > b.label ? 1 : 0);
+  });
+  if (limit) out = out.slice(0, limit);
+
+  return { title: titleFor('fee_revenue', groupBy, spec), viz: spec.viz || (groupBy === 'month' ? 'line' : 'bar'),
+    columns: [groupExpr(groupBy).label, 'Fee revenue'], rows: out,
+    note: revenueNote(childGrouped ? groupBy : null, unallocated, total) };
+}
+
+function revenueNote(childGrouped, unallocated, total) {
+  var base = 'Fee revenue = payments collected (deposits and final payments) on fee estimates.';
+  if (!childGrouped) return base;
+  base += ' Each payment is split across the records it covers in proportion to their charged share' +
+          ' (SPEC §5.10.2), so the columns sum to the total.';
+  if (unallocated > 0) {
+    base += ' $' + unallocated.toLocaleString() + ' of $' + total.toLocaleString() +
+            ' could not be attributed to a specific record (estimates with no per-record pricing) and is' +
+            ' counted under the department that was billed.';
+  }
+  return base;
+}
 function metricLabel(m) { return { request_count: 'Requests', fee_revenue: 'Fee revenue', overdue_count: 'Overdue', avg_processing_days: 'Avg days', compliance_rate: 'Compliant %' }[m] || 'Value'; }
-function noteFor(m) { return m === 'fee_revenue' ? 'Fee revenue = payments collected (amount paid) on requests.' : (m === 'overdue_count' ? 'Active requests past their statutory deadline.' : ''); }
+// fee_revenue never reaches here — it has its own note (`revenueNote`), because the note has to disclose how
+// much of the money could not be allocated.
+function noteFor(m) { return m === 'overdue_count' ? 'Active requests past their statutory deadline.' : ''; }
 function titleFor(m, g, spec) {
   var base = { request_count: 'Request volume', fee_revenue: 'Fee revenue', overdue_count: 'Overdue requests' }[m] || 'Report';
   var t = base + (g ? ' by ' + GROUPS[g].toLowerCase() : '');
