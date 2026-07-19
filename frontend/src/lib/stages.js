@@ -41,13 +41,24 @@ export const STAGE_COLORS = {
   closed:           { bg: '#F1F5F9', color: '#475569' }
 };
 
-// The next stage in the canonical pipeline, or null at the end / for an unknown stage. Returning null for an
-// unknown stage is deliberate: the Advance button then does not render, which is the honest outcome — better
-// than guessing a destination and writing a bad stage.
+// ⚠️ THE SEQUENCE IS NOT THE VOCABULARY — mirrors backend/src/services/stages.js (Kevin, 2026-07-19).
+//
+// `exemption_review` and `ag_review` are real stages, but they are a CONDITIONAL BRANCH, not steps on the
+// way to anywhere. They are entered only by asserting an exemption (the jurisdiction profile decides which
+// of the two), and left only by a legal decision that carries a required note. The linear walk used to run
+// over all ten, so this button offered "Advance to Exemption Review" from `record_search` — routing ordinary
+// requests with nothing withheld into legal review.
+export const BRANCH_STAGES = ['exemption_review', 'ag_review'];
+export const STAGE_SEQUENCE = STAGE_ORDER.filter((k) => !BRANCH_STAGES.includes(k));
+
+// The next stage in the canonical SEQUENCE, or null at the end / for a branch or unknown stage. Returning
+// null means the Advance button does not render, which is the honest outcome in all three cases — better
+// than guessing a destination and writing a bad stage, and a legal review must be left by its own ceremony.
 export function nextStage(stage) {
-  const i = STAGE_ORDER.indexOf(stage);
-  if (i < 0 || i >= STAGE_ORDER.length - 1) return null;
-  return STAGE_ORDER[i + 1];
+  if (BRANCH_STAGES.includes(stage)) return null;
+  const i = STAGE_SEQUENCE.indexOf(stage);
+  if (i < 0 || i >= STAGE_SEQUENCE.length - 1) return null;
+  return STAGE_SEQUENCE[i + 1];
 }
 
 export function nextStageLabel(stage) {

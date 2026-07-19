@@ -29,15 +29,44 @@ var ORDER = STAGES.map(function (s) { return s.key; });
 var LABELS = {};
 STAGES.forEach(function (s) { LABELS[s.key] = s.label; });
 
-// The next stage in the canonical pipeline, or null at the end. A stage the vocabulary does not know
-// returns null rather than guessing — the frontend then shows no Advance button, which is the honest
-// outcome for an unknown stage.
+// ⚠️ THE SEQUENCE IS NOT THE VOCABULARY (Kevin's decision, 2026-07-19 — brief §5 decision 1).
+//
+// All ten stages above are real stages a request can occupy. But TWO of them are not steps on the way to
+// anywhere — they are a CONDITIONAL BRANCH, and treating them as sequential was a live defect:
+//
+//   `exemption_review` and `ag_review` are entered ONLY by asserting an exemption
+//   (`POST /requests/:id/assert-exemption`), which reads `jurisdiction_profiles.exemption_model` and picks
+//   between them — `pre_clearance` (Texas: AG pre-clearance, statutory clock tolled) vs `self_court` /
+//   `self_appeal_court` (internal review). They are left by a legal DECISION, never by advancing:
+//   the `legal_review` task resolution and `POST /requests/:id/ag-ruling` share one outcome vocabulary
+//   (sustained / partial -> redaction_review, overruled -> delivery).
+//
+// WHAT THIS FIXES. `next()` used to be purely positional, so `record_search` advanced to `exemption_review`
+// and the Advance button offered it. Every ordinary request — nothing withheld, nothing to argue — was
+// walked through two legal stages to reach redaction, and in the 19 of 20 seeded jurisdictions that are not
+// Texas, `ag_review` is a step that cannot legally apply. It survived because no live request has ever gone
+// past `record_search`; the mid-pipeline has no real traffic.
+//
+// So the linear walk runs over SEQUENCE, and the branch stages are reachable only by the domain action that
+// means them.
+var BRANCH = ['exemption_review', 'ag_review'];
+var SEQUENCE = ORDER.filter(function (k) { return BRANCH.indexOf(k) < 0; });
+
+function isBranch(stage) { return BRANCH.indexOf(stage) >= 0; }
+
+// The next stage in the canonical SEQUENCE, or null at the end.
+//
+// Returns null for a branch stage as well as for an unknown one, and for the same reason: the frontend then
+// renders no Advance button, which is the honest outcome. Leaving a legal review is a legal act with its own
+// ceremony and a required note — it must not be reachable by a generic "Advance" that records no reasoning.
 function next(stage) {
-  var i = ORDER.indexOf(stage);
-  if (i < 0 || i >= ORDER.length - 1) return null;
-  return ORDER[i + 1];
+  if (isBranch(stage)) return null;
+  var i = SEQUENCE.indexOf(stage);
+  if (i < 0 || i >= SEQUENCE.length - 1) return null;
+  return SEQUENCE[i + 1];
 }
 
 function isTerminal(stage) { return stage === 'closed'; }
 
-module.exports = { STAGES: STAGES, ORDER: ORDER, LABELS: LABELS, next: next, isTerminal: isTerminal };
+module.exports = { STAGES: STAGES, ORDER: ORDER, LABELS: LABELS, next: next, isTerminal: isTerminal,
+                   SEQUENCE: SEQUENCE, BRANCH: BRANCH, isBranch: isBranch };

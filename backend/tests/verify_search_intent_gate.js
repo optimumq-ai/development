@@ -137,7 +137,9 @@ async function intentsOf(rid) {
   var r2 = await req('POST', '/api/tasks/' + b.tid + '/resolve', { outcome: 'found' });
   ok('C9 NOW `found` is allowed', r2.status === 200);
   var moved = await db.get('SELECT stage FROM requests WHERE id = ?', [b.rid]);
-  ok('C10 …and the request advanced through the central transition', moved.stage === 'exemption_review');
+  // Destination flipped 2026-07-19 (Kevin, brief §5): a completed search goes to redaction_review, not
+  // into a legal stage. The legal stages are entered only by asserting an exemption.
+  ok('C10 …and the request advanced through the central transition', moved.stage === 'redaction_review');
 
   console.log('\n=== D. "NOTHING MORE" REQUIRES A NOTE ===');
   var d = await mkTask('Every email about the levy', [
@@ -204,7 +206,7 @@ async function intentsOf(rid) {
   await attachRecord(g.rid, 'A record the clerk found');
   var rG = await req('POST', '/api/tasks/' + g.tid + '/resolve', { outcome: 'found' });
   ok('G1 no intents → `found` still works', rG.status === 200);
-  ok('G2 …and it advanced', (await db.get('SELECT stage FROM requests WHERE id = ?', [g.rid])).stage === 'exemption_review');
+  ok('G2 …and it advanced', (await db.get('SELECT stage FROM requests WHERE id = ?', [g.rid])).stage === 'redaction_review');
 
   console.log('\n  ' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
   process.exit(fail ? 1 : 0);

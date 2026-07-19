@@ -11,7 +11,11 @@ const stages = require('../services/stages');
 router.get('/', requireAuth, function (req, res) {
   var nextMap = {};
   stages.ORDER.forEach(function (s) { nextMap[s] = stages.next(s); });
-  res.json({ stages: stages.STAGES, order: stages.ORDER, labels: stages.LABELS, next: nextMap });
+  // `order` is the full vocabulary (all ten). `sequence` is the linear walk, and `branch` the two stages
+  // reachable only by asserting an exemption — see services/stages.js. Both are served so the frontend
+  // mirror can be parity-checked on the distinction, not just on the stage list.
+  res.json({ stages: stages.STAGES, order: stages.ORDER, labels: stages.LABELS, next: nextMap,
+             sequence: stages.SEQUENCE, branch: stages.BRANCH });
 });
 
 module.exports = router;

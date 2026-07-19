@@ -144,7 +144,8 @@ async function stageOf(rid) { return (await db.get('SELECT stage FROM requests W
     includeInResponse: true });
   var r2 = await req('POST', '/api/tasks/' + b2.tid + '/resolve', { outcome: 'found' });
   ok('D1 found succeeds once a record is included', r2.status === 200 && r2.body.included === 1);
-  ok('D2 the request advanced to exemption_review', (await stageOf(b2.rid)) === 'exemption_review');
+  // Flipped 2026-07-19 (Kevin, brief §5) — finding records is not a claim that anything is exempt.
+  ok('D2 the request advanced to redaction_review', (await stageOf(b2.rid)) === 'redaction_review');
   var t2 = await db.get('SELECT status FROM tasks WHERE id = ?', [b2.tid]);
   ok('D3 the search task is done', t2.status === 'done');
   // The central transition is the ONLY thing that writes stage_from/stage_to. Its presence proves we did
@@ -152,7 +153,7 @@ async function stageOf(rid) { return (await db.get('SELECT stage FROM requests W
   var trans = await db.get(
     "SELECT stage_from, stage_to FROM request_history WHERE request_id = ? AND action = 'SEARCH_COMPLETE'", [b2.rid]);
   ok('D4 it went through the CENTRAL stage transition (stage_from/stage_to written)',
-     !!trans && trans.stage_from === 'record_search' && trans.stage_to === 'exemption_review');
+     !!trans && trans.stage_from === 'record_search' && trans.stage_to === 'redaction_review');
 
   // =============================================================================================
   // E. "NO RESPONSIVE RECORDS" REFUSES AN EMPTY EFFORT TRAIL.

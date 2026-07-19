@@ -120,8 +120,19 @@ async function api(method, path, body) {
     // Old frontend said intake → record_search. The backend pipeline says intake → fee_review.
     ok('canonical next(intake) = fee_review (the old frontend said record_search — it skipped the money)',
       stages.next('intake') === 'fee_review');
-    ok('canonical next(record_search) = exemption_review (the old frontend jumped straight to redaction_review)',
-      stages.next('record_search') === 'exemption_review');
+    // ⚠️ FLIPPED 2026-07-19 (Kevin, brief §5). This used to assert exemption_review — and the old frontend
+    // jumping "straight to redaction_review" turns out to have been RIGHT about the destination, for the
+    // wrong reason. The legal stages are a conditional BRANCH, not steps on the way to redaction.
+    ok('canonical next(record_search) = redaction_review — the legal stages are not on the linear path',
+      stages.next('record_search') === 'redaction_review');
+    ok('the legal stages are still in the VOCABULARY, just not in the sequence',
+      stages.ORDER.indexOf('exemption_review') > 0 && stages.SEQUENCE.indexOf('exemption_review') < 0 &&
+      stages.ORDER.indexOf('ag_review') > 0 && stages.SEQUENCE.indexOf('ag_review') < 0);
+    // THE POINT: Advance must never offer a legal stage, from anywhere.
+    ok('no stage in the sequence advances INTO a legal stage',
+      stages.ORDER.every(function (s) { return !stages.isBranch(stages.next(s)); }));
+    ok('and a legal stage offers no Advance at all — it is left by a legal decision, with a note',
+      stages.next('exemption_review') === null && stages.next('ag_review') === null);
     ok('the pipeline can now REACH the redaction stage at all (it was unreachable from the old list)',
       stages.ORDER.indexOf('redaction') > 0 && stages.next('redaction_review') === 'redaction');
     ok('next(closed) = null — no advance past the end', stages.next('closed') === null);

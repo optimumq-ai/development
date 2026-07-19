@@ -270,7 +270,18 @@ router.post('/:id/resolve', requireAuth, async function (req, res) {
       }
 
       await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [req.params.id]);
-      await tr.applyStageTransition(rid, 'exemption_review', Object.assign({
+      // A COMPLETED SEARCH GOES TO REDACTION REVIEW, NOT TO A LEGAL STAGE (Kevin, 2026-07-19, brief §5).
+      //
+      // This used to advance to `exemption_review` unconditionally — so EVERY request that found records
+      // entered a legal stage, spawned a `legal_review` task and had to be adjudicated
+      // (sustained/partial/overruled) before it could be redacted, whether or not anyone had asserted an
+      // exemption over anything. It was the larger half of the sequential-vs-branch defect: the Advance
+      // button merely OFFERED the wrong stage, this one took it automatically.
+      //
+      // `exemption_review` / `ag_review` are now entered only by `POST /requests/:id/assert-exemption` —
+      // which is where the reviewer says something IS being withheld. Finding records is not that claim.
+      // Exempt material is identified during redaction, and asserting it branches from there.
+      await tr.applyStageTransition(rid, 'redaction_review', Object.assign({
         action: 'SEARCH_COMPLETE',
         notes: 'Record search complete — ' + inc.n + ' record(s) marked Include in Response.' + (notes ? ' ' + notes : '')
       }, actor));
