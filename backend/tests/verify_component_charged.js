@@ -57,11 +57,21 @@ function comps(pages) {
   ok('C3 the charges still sum exactly to the total', sum(C.components) === 60);
 
   console.log('\n=== D. ⚠️ ORDER-INDEPENDENCE — the property the old rule lacked ===');
-  var fwd = engine.compute(profile({ maxFee: 100 }), { components: comps([6, 60, 6]) });
-  var rev = engine.compute(profile({ maxFee: 100 }), { components: comps([6, 6, 60]) });
-  var big = function (r) { return r.components.filter(function (c) { return c.componentGross === 60; })[0].componentCharged; };
-  ok('D1 the expensive record is charged the same regardless of its position (' + big(fwd) + ')', big(fwd) === big(rev));
-  ok('D2 …and the same regardless of which component absorbs the rounding residual', sum(fwd.components) === sum(rev.components));
+  // The scenario MUST make the cap fire AND leave a rounding residual, or this section proves nothing.
+  // (An earlier version used grosses summing to 72 against a $100 cap — the cap never fired, there was no
+  // residual to misplace, and the section passed even with the allocator deliberately broken.)
+  // Grosses 7/11/13 = 31 against a $20 cap: ratio 20/31, shares round to 4.52 + 7.10 + 8.39 = $20.01, so
+  // there IS a −$0.01 residual. Reversing the order moves which component is LAST but not which is LARGEST.
+  var fwd = engine.compute(profile({ maxFee: 20 }), { components: comps([7, 11, 13]) });
+  var rev = engine.compute(profile({ maxFee: 20 }), { components: comps([13, 11, 7]) });
+  ok('D0 the scenario actually engages the cap (gross 31 → total 20)',
+    fwd.requestLevel.grossSubtotal === 31 && fwd.requestLevel.total === 20);
+  var chargeFor = function (r, g) { return r.components.filter(function (c) { return c.componentGross === g; })[0].componentCharged; };
+  ok('D1 the largest record is charged the same in either order (' + chargeFor(fwd, 13) + ')',
+    chargeFor(fwd, 13) === chargeFor(rev, 13));
+  ok('D2 EVERY record is charged the same in either order — matched by gross, not position',
+    [7, 11, 13].every(function (g) { return chargeFor(fwd, g) === chargeFor(rev, g); }));
+  ok('D3 both orders still sum exactly to the total', sum(fwd.components) === 20 && sum(rev.components) === 20);
 
   console.log('\n=== E. PENNY RECONCILIATION — an off-by-a-cent shortfall would withhold a record ===');
   // 3 equal components against a cap that does not divide evenly: 100/3 = 33.333…
