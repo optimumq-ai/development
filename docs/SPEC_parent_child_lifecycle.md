@@ -523,9 +523,24 @@ It does not exist under **any** accounting method today — the engine emits `co
    collected. Revenue now reads `request_fee_estimates.deposit_paid_amount` / `final_paid_amount`, which is
    where the payment routes actually write. `amount_paid` and `actual_fee` remain **dead columns** (the
    `WORKING_attribute_inventory.md` dead list) — nothing writes them and nothing now reads them.
-3. **ERP line items** — see 5.10.5.
+3. ~~**ERP line items**~~ — **BUILT 2026-07-19** (`82fce3e`), see 5.10.5. **All three features §5.10.4 named are
+   now built**, and this section is closed.
 
-### 5.10.5 ERP: compute here, send detail `[DECIDED 2026-07-19 by Kevin]`
+### 5.10.5 ERP: compute here, send detail `[DECIDED 2026-07-19 by Kevin — BUILT 2026-07-19, 82fce3e]`
+
+> **BUILT.** `erpSettlement.buildLineItems()` extends the payload from a scalar to line items.
+> `erp_allocation_method` (absent ⇒ `prorata`) selects the mode. Verified by `verify_erp_line_items` (20).
+>
+> **One design decision the spec did not anticipate, and it matters:** under `none` the line items carry
+> **`actualCost`, not `amount`, and the `amount` field is absent entirely.** Raw costs do **not** sum to the
+> charge — that is the whole point of the request-level rules — so if both modes emitted `amount`, an ERP that
+> naively sums line items would post **more than the city is charging** and over-bill a citizen for a statutory
+> fee. With no `amount` field to sum, that failure is structurally unavailable rather than merely documented.
+>
+> Also: **a deposit is a partial charge**, so line items allocate *the charge*, never the estimate — billing
+> $50 of detail against a $20 deposit would be the obvious bug here. And `buildLineItems` **fails open**: no
+> components, no `componentCharged`, or any error ⇒ no line items and the charge goes as the scalar it always
+> was. Detail is a courtesy to Finance; it must never block a charge, and it is never fabricated.
 
 **Could Finance's ERP allocate this instead?** In principle yes — prorata allocation of a discount across mixed
 line items is standard AR. **It is still the wrong home, for four reasons:**

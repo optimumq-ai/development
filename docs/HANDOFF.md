@@ -5500,8 +5500,7 @@ Specs updated: §5.10.4 item 2 marked BUILT, §10.6(b) marked RESOLVED with the 
 ⚠️ **Process deviation:** the doc updates landed in a follow-up commit, not the same commit as the code.
 
 ### Next session
-1. **ERP line items** (§5.10.5) — `emitCharge()` still sends a single scalar `amount`. `componentCharged` and
-   now `revenueAllocation` both exist; this is the last of the three features §5.10.4 named, and the smallest.
+1. ~~**ERP line items**~~ — **done later the same session, see (t) below.**
 2. **Phase 1 of the processing rebuild is still BLOCKED on Kevin** (brief §5) — the 10-stage order,
    single-record vs MRR hub, `commercial_rate`/`mrr_processing` build-or-delete, retire v1 redaction duplicates.
 3. **Drop `requests.amount_paid` and `actual_fee`** — now genuinely unreferenced, so this is a clean migration.
@@ -5525,3 +5524,70 @@ stale-doc sweep had already reframed as one.
 questioned the flag.** The cost of a false anomaly is not zero: it lands in a "next session" list and buys a
 future agent's time on a settled question. **Before flagging a discrepancy against a dated document, grep the
 log — the number in the spec may be a snapshot, and the change may be someone's decision.**
+
+---
+
+## 2026-07-19 (t) — ERP line items; §5.10.4 is closed (`82fce3e`, `86958bb`)
+Continuation of (s), same day. The last of the three features `componentCharged` was blocking.
+
+### The charge carries its detail
+`emitCharge()` sent a single scalar `amount` — the ERP was never told there were eleven records, so it could
+not allocate anything. That is why "let Finance's ERP allocate it" collapsed into "build it, then also send
+it." Now `erpSettlement.buildLineItems()` extends the payload, with the city choosing via
+`erp_allocation_method` (absent ⇒ `prorata`, confirmed on live).
+
+**The decision that shapes it (§5.10.5): the release-gate allocation and the GL allocation are different
+questions and need not agree.** We own the gate because it authorizes a legal act; Finance recognises revenue
+by their own policy. So we send detail, not a mandate.
+
+### ⚠️ The design call the spec did not anticipate — `none` uses a DIFFERENT FIELD NAME
+Under `none` ("report actual costs only") the line items carry **`actualCost`, and there is no `amount` field
+at all.** Raw costs do **not** sum to the charge — that is the entire point of the request-level rules (cap,
+free allowance, labor rounding). Had both modes emitted `amount`, **an ERP that naively sums line items would
+post more than the city is charging and over-bill a citizen for a statutory fee.** With no `amount` to sum,
+that failure is structurally unavailable rather than merely documented. `verify_erp_line_items` §D is that
+guard: gross sums to $100 against a $50 charge, and D2 asserts the field's absence.
+
+Two more things worth carrying: **a deposit is a partial charge**, so lines allocate *the charge*, not the
+estimate (§B pins a $20 deposit to $2/$4/$14 — billing $50 of detail against a $20 charge is the obvious bug
+here); and `buildLineItems` **fails open** — no components, no `componentCharged`, or any error ⇒ no line items
+and the charge goes as the scalar it always was. Never fabricated.
+
+Snapshot resolution had reached its **third copy**, so `feeRelease` now exports `pricedSnapshot()` (it already
+owned the reconciliation-supersedes rule). §G asserts the gate share and the billed `componentCharged` agree —
+a record released on one split and billed on another is a defect neither side would surface alone.
+
+### ⚠️ A THIRD VACUOUS TEST — and this one generalises
+§F claimed to prove the reconciliation supersedes the estimate. It proved nothing: the reconciliation re-used
+the estimate's 10/20/70 quantities and only lifted the $50 cap. **But a cap scales every component uniformly** —
+the capped split 5/10/35 is the SAME RATIO as 10/20/70 — **and prorata allocates by ratio**, so both snapshots
+billed identically. Deleting the snapshot resolution outright still passed F1 and F2; only G1 caught it, and
+only because `componentCharged` is reported raw.
+
+**THE GENERAL LESSON, worth more than the fix: to prove WHICH snapshot was used, the snapshots must differ in
+SHAPE, not merely in total. Anything that rescales uniformly — a cap, a percentage discount, a flat multiplier
+— is invisible to a proportional allocator.** Fixed by redistributing the reconciliation (50/20/30), plus F0
+pinning the trap shut.
+
+That is **three vacuous tests in three sessions** — `verify_component_charged` §D, `verify_revenue_allocation`
+§D, now `verify_erp_line_items` §F — **all three in rounding/allocation sections, and all three caught the same
+way: commit green, then break on purpose.** The habit is now load-bearing, not ceremonial. If a session ever
+skips it, assume the newest allocation test is vacuous until shown otherwise.
+
+### Verification
+**877/877 green, live census clean.** Three break-tests performed and reverted: reusing `amount` in `none` mode
+fails D1/D2/D3; billing `componentCharged` instead of the charge share fails B1/B2; dropping the reconciliation
+resolution fails F1/G1. API restarted and healthy; `erp_allocation_method` confirmed absent on live and
+defaulting to `prorata`, and `buildLineItems` on a request with no estimate returns `null` (the scalar path).
+**No ERP charge was emitted** — that would have written an `erp_charges` row to live, and the connector stubs
+are off-limits.
+
+### Next session
+1. **§5.10.4 IS CLOSED** — release gate, revenue-by-department and ERP line items are all built. The
+   `componentCharged` thread is finished.
+2. **Phase 1 of the processing rebuild is BLOCKED on Kevin** (brief §5) — the 10-stage order, single-record vs
+   MRR hub, `commercial_rate`/`mrr_processing` build-or-delete, retire v1 redaction duplicates. **This is now
+   the largest thing on the board and it needs a decision, not a build.**
+3. **Drop `requests.amount_paid` and `actual_fee`** — genuinely unreferenced since (s); a clean migration.
+4. Still standing: **dunning is inert** (`verify_nonpayment_scope.js` written and waiting), **`routing_review`
+   fires per child**, `WORKING_attribute_inventory.md` Part H, and (q)'s deliberately-undone items.
