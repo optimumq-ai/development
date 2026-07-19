@@ -537,6 +537,23 @@ its darker token set for now, so the two staff screens **will visibly diverge un
 is a known, accepted, temporary cost — the point is to judge the color on a real screen before promoting it
 system-wide.
 
+### Where the tokens live `[2026-07-19]`
+
+`frontend/src/lib/theme.js` — exported as `C`. They were defined **privately inside
+`RecordSearchTaskPage.js`**, so a second v2 staff screen could obey this section only by copying them; that is
+the divergent-private-copy defect `verify_stages` was widened to catch on 2026-07-19 (`498bc4a`). The move is
+verbatim — **no token value changed and no pixel renders differently.**
+
+⚠️ **The extraction is not a promotion.** The scope decision above still stands: making the tokens importable
+does not decide who may import them, and a NEW screen adopting this palette remains Kevin's call.
+
+⚠️ **`lib/theme.js` is a TRANSCRIPTION, not the source.** These tokens originate as CSS custom properties in
+`PublicPortalV2Page.js` (`.scv`), which is the fuller set — **dark-mode aware**
+(`@media (prefers-color-scheme:dark)`), plus `--blue-strong`, `--shadow`, `--radius`, `--font-ui`,
+`--font-mono`, `--field-border`, `--chat-ground`. `lib/theme.js` is only the light-mode subset this screen
+consumed. **The two are not unified and can still drift** — unifying them means deciding whether staff screens
+get dark mode, which is a design decision, not a refactor.
+
 ---
 
 ## 10. Open decisions / to confirm

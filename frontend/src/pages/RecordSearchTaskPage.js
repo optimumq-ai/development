@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../lib/api';
+import { C } from '../lib/theme';
 import { useWorkTimer, WorkTimerBadge, WorkTimerCompleteModal, useTimeCaptureMode } from '../components/ui/WorkTimer';
 
 // RECORD-SEARCH TASK SCREEN — SPEC_record_search_task_screen.md
@@ -16,17 +17,8 @@ import { useWorkTimer, WorkTimerBadge, WorkTimerCompleteModal, useTimeCaptureMod
 // The search surface (§4) and the actions/resolution rail (§5) are the NEXT slices.
 
 // Palette = the PORTAL token set (Kevin, 2026-07-14): gray ground, lighter gray boxes, white fields,
-// #1E6091 as the one button colour. See SPEC §9.
-var C = {
-  ground: '#D8E0E8', surface: '#FFFFFF', surface2: '#F2F6F9', field: '#EBF3FB',
-  ink: '#12232E', muted: '#5C6F7C', faint: '#8296A4',
-  hair: '#D2DCE3', hairStrong: '#BECAD3',
-  blue: '#1E6091', blueTint: '#E4EEF6', blueInk: '#0E3A5C',
-  green: '#1B8A5A', greenTint: '#E1F2E9',
-  amber: '#9A6512', amberTint: '#F6EBD6',
-  crit: '#B02A37', critTint: '#F8E7E8',
-  mono: 'ui-monospace,"SF Mono",Menlo,Consolas,monospace'
-};
+// #1E6091 as the one button colour. See SPEC §9. Moved to lib/theme.js 2026-07-19 so a second v2 staff
+// screen cannot obey §9 only by copying it — same values, no rendered change. Import it; do not redefine.
 
 // The four intents, and what each one MEANS to the person now doing the searching. This table is the whole
 // point of R9 — see DESIGN_split_canvas_intake §R9.4.
