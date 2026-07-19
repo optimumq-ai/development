@@ -151,10 +151,37 @@ optional** — this is the largest gap in the diff.
 workflow engine when rule `wfr-confident` matches; there is no estimate stage, and no separation between
 *data collection* (child) and *calculation* (parent) as §2.3 describes.
 
-**D5 — `awaiting_payment` is a stage, not a status.** It was taken off the linear sequence (good) but remains
-a value in the same `stage` column as real work positions. The model says it is a **status that pauses**, i.e.
-a different axis: a child could be *at* record search *and* paused for payment. The current column cannot
-express that — it holds one value.
+**D5 — `awaiting_payment` is a stage, not a status. ✅ RULED 2026-07-19 (Kevin): _"awaiting_payment should be
+a status that pauses, not a stage."_**
+It was taken off the linear sequence (good) but remains a value in the same `stage` column as real work
+positions. A child cannot be *at* record search *and* paused for payment — the column holds one value.
+
+**⚠️ THE CODEBASE ALREADY IMPLEMENTS THIS MODEL — for the other payment gate.** There are two:
+
+| Gate | Question | How it is implemented | Verdict |
+|---|---|---|---|
+| **Release** (pay before delivery) | may these records go out? | a **condition evaluated at the transition** — `feeRelease.releaseGate()` returns 409 at `delivery`, per-child coverage. **Not a stage.** | ✅ already the target model |
+| **Deposit** (pay before work) | may work begin? | a **stage** — `paymentTiming.gateToStage()` maps the gate to `awaiting_payment` | ❌ the one to change |
+
+So this is not a new mechanism to invent: **make the deposit gate look like the release gate.**
+
+**And a pause vocabulary already exists**, in a third place: the tolling engine holds the statutory clock with
+named reasons (`ag_ruling_pending`, `clarification_pending`, the deposit holds in `depositAction`). The system
+already says *"processing is paused because X"* — it just says it to the **clock** rather than to the **work**,
+and never displays it as a status.
+
+**Recommended shape (derived, not stored):** express the pause the way `releaseGate` does — computed from
+whether money is owed — rather than as a new `paused_reason` column. A stored flag is a second copy of a fact
+the fee tables already hold and can drift from it; a derived one cannot. This makes the change smaller than
+"schema change" implies: **no migration, no new column.**
+
+**Migration risk: none.** Live carries **zero** requests at `awaiting_payment` and **zero** history rows
+naming it (checked 2026-07-19) — the same pre-deletion check the dead money columns and `fee_review` got.
+
+**OPEN — the one product question this raises (§5.1).** The release gate is deliberately **per-child**:
+*"a child may never be withheld because a SIBLING is unpaid."* Is an unpaid **deposit** the same — pausing
+only the records whose own share is unpaid — or is it a single up-front payment that pauses the **whole
+request**? Consistency argues per-child; how deposits are actually collected may argue whole-request.
 
 **D6 — Bypass exists for redaction only.** `redactionBypass.js` is exactly the model's shape: a released job
 with `disposition = 'bypass'`, a `basis`, and a `REDACTION_BYPASSED` history row attributed to `System`
@@ -183,11 +210,12 @@ adding one means writing another bespoke path.
 
 For Kevin, in rough priority:
 
-1. **D5 — is `awaiting_payment` a second axis?** If a status pauses processing independently of position, that
-   is a schema change (a `paused_reason` alongside `stage`), not a vocabulary change. Biggest structural
-   question here.
+1. ~~**D5 — is `awaiting_payment` a second axis?**~~ **✅ RULED: yes, a status that pauses.** One question
+   follows from it: **does an unpaid deposit pause the whole request, or only the records whose own share is
+   unpaid?** The release gate is already per-child by design; deposits may be collected whole-request.
 2. **D3 — does parent-level fee aggregation come back on the roadmap now?** The model requires it; it is
-   currently deferred.
+   currently deferred. ⚠️ **Coupled to D5's open question** — "whose share is unpaid" is only answerable
+   per-child once fees aggregate across children.
 3. **D1 — how literal is "driven by task completion"?** Does `stage` remain as a derived, readable position,
    or does the pipeline become genuinely task-list-driven with no stage column?
 4. **D7 — are intake review and delivery tasks?**
