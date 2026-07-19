@@ -215,6 +215,19 @@ which is exactly what a stub must never do. A comment in its place points at `/:
 `verify_task_lifecycle` §D asserts the route is **absent (404), not merely guarded**, so re-adding it in any
 form fails the suite. Break-tested: restoring the endpoint fails D1/D2.
 
+**THE SAME SHAPE REAPPEARED ON `/resolve` — FIXED 2026-07-19 (`818b2d6`).** `/tasks/:id/resolve` was written
+to be the safe replacement, and it checked the task **TYPE** and never its **STATUS** — so a `done` or
+`cancelled` task was still resolvable, and resolving runs `applyStageTransition`, so it **moved a request**.
+Two live routes, neither exotic: §3.2 **cancels** a stage's task whenever the request moves on (so stale
+cancelled tasks are produced continuously by normal operation — one was observed advancing a request to
+`redaction_review` days after its stage had moved), and nothing stopped the same task being resolved
+**twice**. Now 409 `TASK_NOT_ACTIONABLE`. `taskRouting.ACTIONABLE_STATUSES` is exported rather than re-typed:
+that list is duplicated as a SQL literal in ~6 places in `taskRouting.js`, and **the duplication is how the
+hole survived** — the route had no single thing to ask. `verify_legal_review` §I asserts it over the API, and
+the load-bearing assertions are I3/I6: **the request does not move.**
+**Found by building a screen, not by reading code** — the UI made a cancelled task decidable, and clicking it
+moved a real request.
+
 **A NON-BUG that looks exactly like this one — do not "fix" it.** `feeEstimates.js:270` marks the estimate
 task done with a direct `UPDATE` and **no stage transition**. That is correct: sending an estimate does not
 advance the request, because the next move belongs to the **citizen**. The stage advances on their response

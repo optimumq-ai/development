@@ -6143,11 +6143,16 @@ tested the endpoint and never the reachability. `verify_legal_review` §H now cl
 the accepted types from the resolve route's own type guard and fails, naming any that lack a screen.
 
 ### ⚠️ THREE DEFECTS FOUND, NOT FIXED — for Kevin
-1. **`/tasks/:id/resolve` never checks task STATUS.** It checks the type and nothing else, so a **cancelled**
-   `legal_review` can still be resolved and move the request. Observed for real: a cancelled task was decided
-   through the UI and advanced the request to `redaction_review`. The screen now refuses client-side (H8) but
-   **that is a courtesy, not the fix — the same call by curl still succeeds.** The guard belongs in the route.
-   This is the §3.3 "loaded gun" shape again, on the endpoint that replaced it.
+1. ~~**`/tasks/:id/resolve` never checks task STATUS.**~~ **FIXED same session (`818b2d6`).** It checked the
+   type and nothing else, so a **cancelled** or **done** task was still resolvable — and resolving runs
+   `applyStageTransition`, so it **moved a request**. Observed for real: a cancelled task was decided through
+   the UI and advanced the request to `redaction_review`. Nothing stopped a task being resolved **twice**
+   either. Now **409 `TASK_NOT_ACTIONABLE`**; `taskRouting.ACTIONABLE_STATUSES` is exported rather than
+   re-typed, because that list is duplicated as a SQL literal in ~6 places and **the duplication is how the
+   hole survived**. `verify_legal_review` §I (7 assertions) tests it over the API — the load-bearing ones are
+   I3/I6, **the request does not move** — plus I7, that an `in_progress` task still resolves (not over-broad).
+   Break-tested: removing the guard fails 4, including both did-not-move assertions.
+   ⚠️ **The ~6 SQL literals still carry their own copies** — a separate mechanical pass.
 2. **`assert-exemption` writes the stage to whichever row it resolves — including a PARENT.** It does
    `SELECT ... WHERE id = ? OR request_number = ?` and hands the row straight to `applyStageTransition`, so
    asserting against a parent id moves the **parent** and spawns `legal_review` there, while the **child**
@@ -6180,3 +6185,13 @@ the accepted types from the resolve route's own type guard and fails, naming any
    `review_auto_redaction` links to `/mass-redaction` with no route of its own. Copy `LegalReviewTaskPage`.
 3. Brief **§3.4** and **§3.6** are still the last unaddressed §3 items.
 4. Part H of `WORKING_attribute_inventory.md`; (q)'s deliberately-undone items.
+
+### Addendum to (ac) — the resolve status guard landed (`818b2d6`)
+Kevin's call on defect 1 above, fixed the same session. **954/954 green, live clean**, API restarted and
+healthy on the new code. Details in the entry above and in brief §3.3.
+
+**The general lesson is the one to keep:** `/resolve` existed *because* `POST /tasks/:id/complete` was a
+loaded gun (§3.3). Its replacement shipped with a narrower version of the same hole — it validated what
+*kind* of task it was and never whether the task was still *live*. **Deleting a dangerous endpoint does not
+make its successor safe; the successor needs its own audit.** Two defects remain open from (ac): the
+`assert-exemption` parent/child stage write, and the workflow engine reverting an asserted exemption.
