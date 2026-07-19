@@ -176,6 +176,13 @@ async function openTasks(rid, type) {
   // The note is enforced server-side (C-section); the screen must mirror it so the reviewer is not
   // surprised by a 422 after typing a decision.
   ok('H7 the screen mirrors the required-note rule client-side', /notes\.trim\(\)/.test(pageSrc) && /required/i.test(pageSrc));
+  // §3.2 CANCELS a stage's task when the request moves on, so a stale legal_review sits at `cancelled`. A
+  // screen keyed only on 'done' renders the full decision form over it — observed 2026-07-19, when a
+  // cancelled task was resolved through this screen and moved the request.
+  // ⚠️ This asserts only the CLIENT-SIDE courtesy. `/tasks/:id/resolve` still checks type and never status,
+  // so the same call by curl succeeds. When that guard lands in the route, assert it here over the API.
+  ok('H8 the screen refuses to decide a task that is not actionable (e.g. cancelled)',
+    /ACTIONABLE/.test(pageSrc) && /cancelled|closed/.test(pageSrc));
 
   console.log('\n  ' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
   process.exit(fail ? 1 : 0);

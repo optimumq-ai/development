@@ -119,13 +119,37 @@ export default function LegalReviewTaskPage() {
   if (err) return <div style={{ padding: 24, color: C.crit, fontSize: 14 }}>{err}</div>;
   if (!task) return <div style={{ padding: 24, color: C.faint, fontSize: 14 }}>Loading…</div>;
 
-  var done = resolved || task.status === 'done';
+  // A CANCELLED TASK IS NOT A DECIDABLE ONE. `status === 'done'` alone was not enough: §3.2's "a stage's task
+  // dies with its stage" CANCELS the outgoing stage's task, so a legal_review whose request has moved on sits
+  // at `cancelled` — and a screen that only checks for 'done' happily renders the full decision form over it.
+  // Observed 2026-07-19: a cancelled legal_review was resolved through this screen and moved the request.
+  // ⚠️ THE BACKEND DOES NOT GUARD THIS EITHER — `/tasks/:id/resolve` checks the task TYPE and never its
+  // STATUS, so the same call by curl still succeeds. This client-side check is a courtesy, NOT the fix.
+  // See HANDOFF 2026-07-19; the guard belongs in the route.
+  var ACTIONABLE = ['open', 'assigned', 'in_progress', 'returned', 'awaiting_review'];
+  var closed = ACTIONABLE.indexOf(task.status) < 0;
+  var done = resolved || closed;
   var days = daysUntil(task.deadline_date);
-  // THE CLOCK BEHAVES DIFFERENTLY ON THE TWO LEGAL STAGES, and the reviewer must not have to guess which.
-  // `assert-exemption` TOLLS the response clock when the jurisdiction profile is `pre_clearance` (the AG
-  // route) and explicitly does NOT toll for the internal model — it returns `tolled: false`. So at
-  // exemption_review the statutory deadline is RUNNING while this task sits in someone's queue.
-  var tolled = task.stage === 'ag_review';
+
+  // WHICH REVIEW IS THIS, AND IS THE CLOCK RUNNING? DERIVED FROM THE ASSERTION, NOT FROM `stage`.
+  //
+  // The obvious implementation — `task.stage === 'ag_review'` — is WRONG IN PRACTICE, and observing that is
+  // what this screen was first used for (2026-07-19). `stage` here is the stage of whichever row the task
+  // hangs off, and for a legal task that row is not reliably the one doing the work: `assert-exemption`
+  // resolves `id OR request_number` and hands the row it finds straight to applyStageTransition, so
+  // asserting against a PARENT id moves the PARENT and spawns legal_review there — while the CHILD, which
+  // carries the real work stage, sits at `intake` with its own open routing_review. A legal review then
+  // renders a badge reading "INTAKE REVIEW". Verified on a live-shaped tree; see HANDOFF 2026-07-19.
+  //
+  // The ASSERTION is the durable fact and the screen already loads it: AG_PRECLEARANCE_SUBMITTED means the
+  // AG route (which TOLLS the response clock), EXEMPTION_ASSERTED means the internal model (which
+  // explicitly does NOT — assert-exemption returns `tolled: false`), so at an internal review the statutory
+  // deadline is RUNNING while the task sits in someone's queue. Falls back to `stage` only when no
+  // assertion is on record, which §(b) above already calls out as worth noticing.
+  var latest = assertions.length ? assertions[assertions.length - 1] : null;
+  var isAg = latest ? latest.action === 'AG_PRECLEARANCE_SUBMITTED' : task.stage === 'ag_review';
+  var tolled = isAg;
+  var reviewLabel = isAg ? 'AG PRE-CLEARANCE' : 'EXEMPTION REVIEW';
 
   return (
     <div style={{ maxWidth: 900, padding: '4px 0 40px' }}>
@@ -135,9 +159,15 @@ export default function LegalReviewTaskPage() {
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, margin: '10px 0 4px', flexWrap: 'wrap' }}>
         <h1 style={{ fontSize: 22, fontWeight: 700, margin: 0, color: C.ink }}>Legal Review</h1>
         <span style={{ background: C.blueTint, color: C.blueInk, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20 }}>
-          {(STAGE_LABELS[task.stage] || task.stage || '').toUpperCase()}
+          {reviewLabel}
         </span>
-        {done ? <span style={{ background: C.greenTint, color: C.green, fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20 }}>DECIDED</span> : null}
+        {done ? (
+          <span style={{
+            background: resolved || task.status === 'done' ? C.greenTint : C.surface2,
+            color: resolved || task.status === 'done' ? C.green : C.muted,
+            fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 20
+          }}>{resolved || task.status === 'done' ? 'DECIDED' : String(task.status || '').toUpperCase()}</span>
+        ) : null}
         {done || tcm.mode === 'off' ? null : <WorkTimerBadge timer={timer} />}
       </div>
 
@@ -229,6 +259,12 @@ export default function LegalReviewTaskPage() {
 
         {done ? (
           <div style={{ marginTop: 14 }}>
+            {closed && !resolved && task.status !== 'done' ? (
+              <div style={{ background: C.surface2, border: '1px solid ' + C.hair, borderRadius: 8, padding: '10px 12px', fontSize: 13, color: C.muted, marginBottom: 12 }}>
+                This review is <strong>{task.status}</strong> and can no longer be decided — the request moved
+                on and the task was closed with its stage. Open the request to see where it went.
+              </div>
+            ) : null}
             <Link to="/my-tasks" style={{ fontSize: 13, color: C.blue }}>Back to My Tasks &rarr;</Link>
           </div>
         ) : (
