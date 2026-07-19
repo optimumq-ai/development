@@ -129,10 +129,31 @@ citizen bill?** — which is the same question the design-gated MRR hub (§14.3)
 decided with that, not patched underneath it. Note this is latent, not yet damaging: live money is all zero
 because no request has reached `fee_review`.
 
-### 3.2 `legal_review` spawns but can never complete
+### 3.2 `legal_review` spawns but can never complete — **DONE 2026-07-18 (p)**
 `spawnForStage` creates it at `exemption_review`/`ag_review`; **no route resolves it**; the reconciler keeps
 re-creating it; the redaction-family idempotency guard ignores it, so a request can carry an open
 `legal_review` *and* an open `redaction` at once. They only clear when the request hits `closed`.
+
+All four claims verified true against the implementation. **One root cause: a `legal_review` task had no
+relationship to the stage that spawned it.** Two fixes:
+
+1. **It can be DECIDED, not merely completed.** Marking it done was never the answer — that would leave the
+   request at `exemption_review` with no task and no way forward, which is exactly what the removed
+   `/tasks/:id/complete` would have done. Completing a legal review **is a stage decision**, so
+   `/tasks/:id/resolve` now handles it and advances through `applyStageTransition`. The reconciler then
+   correctly declines to resurrect it, because the stage has moved.
+   **Outcome vocabulary is deliberately identical to `/requests/:id/ag-ruling`** — `sustained`/`partial` →
+   `redaction_review`, `overruled` → `delivery`. An internal exemption review and an AG pre-clearance ruling
+   answer the same question; two vocabularies would be two ways to say one thing.
+   **A note is REQUIRED** (Kevin, 2026-07-18 — see §5 Q2): asserting an exemption is a legal act the city may
+   have to defend, and "the reviewer clicked approve" is not a defence.
+2. **A stage's task now dies with its stage.** The central transition cancels the outgoing stage's task when
+   the new stage implies a different one. This is what actually fixes the coexistence bug: `/ag-ruling` moved
+   `ag_review → redaction_review` while leaving an **open, pooled** `legal_review` behind, so a legal staffer
+   could claim an exemption review for a decision made and acted on days earlier.
+   **Family-aware, which is the subtle half:** `redaction_review → redaction` implies `redaction` on *both*
+   sides, so an in-flight redaction task survives that move — cancelling there would destroy real work. Same
+   for `exemption_review → ag_review`. Break-tested: dropping family-awareness fails F1 and G1.
 
 ### 3.3 `POST /tasks/:id/complete` was a loaded gun — **REMOVED 2026-07-18 (n)**
 `requireAuth` only. **No ownership check, no type check, no stage side-effect.** Any authenticated user could
@@ -182,10 +203,18 @@ terminal request. Consider hoisting that guard into the central function.
 
 ## 4. Proposed sequence
 
-**Phase 0 — foundation (no new screens).** ~~§3.1 leaf-fact pass~~ **DONE (n)**; ~~lock down §3.3~~ **DONE
-(n) — removed**; the stub-safe advance path **[BLOCKED on §5 Q2: note or auto-approve]**; §3.2 `legal_review`
-resolution route **[NEXT]**. Small, high-leverage, and everything after inherits it. §3.1b (money on the
-child) is deferred to the MRR-hub design, not to Phase 0.
+**Phase 0 — foundation (no new screens). ✅ COMPLETE 2026-07-18.** ~~§3.1 leaf-fact pass~~ **(n)**;
+~~§3.3 lock down~~ **(n) — removed**; ~~§3.2 `legal_review` resolution~~ **(p)**. §5 Q2 answered, so the
+stub-safe advance path is unblocked — and §3.2's resolution **is the reference implementation** for it:
+type check → required note → mark done → `applyStageTransition`. Copy that shape. §3.1b (money on the child)
+is deferred to the MRR-hub design, not to Phase 0.
+
+**Phase 0 leftovers, not blocking.** §3.4 (no from-`closed` guard in the central function), §3.5 (routing
+split-brain: `redaction_qa` excluded from `ROUTABLE_TASK_TYPES`; two divergent pool queries;
+`review_auto_redaction` world-claimable on NULL `role_required`), §3.6 (estimate spawning keyed on the
+literal rule id `'wfr-confident'`; `fee_review` in neither `STAGE_TASK` nor the reconciler sweep). None were
+verified this session — **check them against the implementation before believing them**, as three §3.1
+entries and the `feeEstimates.js:270` "bug" all evaporated on inspection.
 
 **Phase 1 — decide the canonical flow (§5.1).** Which stages are in the v2 path. Cheap now, expensive once
 ten screens hang off it.
@@ -205,8 +234,9 @@ since it is what puts requests at stages the system has never reached.
 
 1. **Is the 10-stage order the flow you want**, or is v1's sequence being inherited by default? In
    particular whether `exemption_review` / `ag_review` are always-on or city-configurable.
-2. **Do stubs auto-approve, or require a note?** A required note costs nothing now and leaves an audit trail
-   that explains why a request moved during the skeleton period.
+2. ~~**Do stubs auto-approve, or require a note?**~~ **ANSWERED 2026-07-18 — REQUIRE A NOTE.** It costs
+   nothing now and leaves an audit trail explaining why a request moved during the skeleton period. Already
+   applied to the `legal_review` resolution (§3.2); **every stub screen must follow it.**
 3. **Single-record first, or the MRR parent hub too?** The hub (§14.3) is design-gated and the queue's
    parent line is deliberately inert today.
 4. **`commercial_rate` / `mrr_processing`** — build, or remove from the catalog? They are currently

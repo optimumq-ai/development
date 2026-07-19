@@ -5140,3 +5140,65 @@ auto-approve, or require a note?**). The brief's own recommendation is that a re
 and leaves an audit trail explaining why a request moved during the skeleton period. The other four §5
 questions are still open too: the 10-stage order; single-record vs the MRR hub;
 `commercial_rate`/`mrr_processing` build-or-delete; retire the v1 redaction duplicates now or later.
+
+---
+
+## 2026-07-18 (p) — Phase 0 §3.2: legal_review is resolvable; a stage's task dies with its stage (`00e1b85`)
+**Phase 0 is COMPLETE.** Backend only, no new screens.
+
+### Kevin's decision, recorded
+**§5 Q2 answered: stubs REQUIRE A NOTE**, not auto-approve. Applied immediately to the `legal_review`
+resolution below, and it binds every stub screen built from here.
+
+### All four brief claims verified true — one root cause
+Unlike §3.1, §3.2's claims all held up on inspection. `legal_review` spawns at `exemption_review`/`ag_review`;
+nothing resolved it; the 2-minute reconciler re-created it; only `closed` ever cleared it. The root cause
+under all four: **a `legal_review` task had no relationship to the stage that spawned it.**
+
+### Fix 1 — it can be DECIDED, not merely completed
+Marking it done was never the answer: that leaves the request at `exemption_review` with no task and no way
+forward — precisely what the `/tasks/:id/complete` removed in (o) would have done. **Completing a legal review
+IS a stage decision.** `/tasks/:id/resolve` now handles it, marks the task done, and advances through
+`applyStageTransition`. The reconciler then correctly declines to resurrect it, because the stage has moved.
+
+**The outcome vocabulary is deliberately identical to `/requests/:id/ag-ruling`** — `sustained`/`partial` →
+`redaction_review`, `overruled` → `delivery`. An internal exemption review and an AG pre-clearance ruling
+answer the same question (does the withholding stand?); inventing a second vocabulary would be two ways to say
+one thing. **A note is required**, per the decision above.
+
+### Fix 2 — the orphan, which is what actually caused the coexistence bug
+A task belongs to the stage that implied it, but `legal_review` was only ever cleared by `closed`. So
+`/requests/:id/ag-ruling`, which moves `ag_review → redaction_review`, left an **open, pooled** `legal_review`
+on a request already in redaction — two open tasks from two different stages, and a legal staffer could claim
+and work an exemption review for a decision made and acted on days earlier. The central transition now cancels
+the outgoing stage's task when the new stage implies a different one.
+
+**FAMILY-AWARE, and this is the half that could have done real damage:** `redaction_review → redaction`
+implies `redaction` on BOTH sides, so an in-flight redaction task must survive that move — a naive
+"cancel what you left" would have destroyed live redaction work. Same for `exemption_review → ag_review`.
+
+### Verification
+New harness `verify_legal_review`, **18 assertions**, registered in `run_suite`. 767/767 green, live census
+clean. **Break-tested:** dropping family-awareness fails **F1** (in-progress redaction cancelled) and **G1**
+(escalation destroys and re-creates the review) — the over-correction is caught in two places. Break reverted,
+suite re-confirmed green.
+
+### Next session
+**Phase 0 is done — Phase 1 is a decision, not a build.** The remaining §5 questions are Kevin's:
+the 10-stage order (and whether `exemption_review`/`ag_review` are always-on or city-configurable);
+single-record first vs the MRR hub; `commercial_rate`/`mrr_processing` build-or-delete; retire the v1
+redaction duplicates now or later.
+
+Once the flow is settled, **§3.2's resolution is the reference implementation for every stub**: type check →
+required note → mark done → `applyStageTransition`. Copy that shape and a blank screen is a genuine node in
+the flow.
+
+**Phase 0 leftovers, not blocking:** §3.4 (no from-`closed` guard), §3.5 (routing split-brain), §3.6 (estimate
+spawning keyed on the literal rule id `'wfr-confident'`; `fee_review` in neither `STAGE_TASK` nor the
+reconciler sweep). **None were verified this session.**
+
+### ⚠️ The standing lesson from this session
+Three of §3.1's six entries and the `feeEstimates.js:270` "bug" all **evaporated on inspection** — they were
+grep-level inferences that the implementations contradicted, usually with a comment explaining exactly why the
+code was right. §3.2's claims, by contrast, all held. **Check each remaining claim against the implementation
+before building anything on it.**
