@@ -1040,7 +1040,25 @@ advance to write `request_history` and spawn/update the stage task. Work with no
 state that invariant exists to prevent — and an unassigned, task-less child is **invisible to the budget clock**
 (§5.4), which is the one signal that would catch it stalling.
 
-### 14.3 The hub — MRR management workspace `[NOT SCOPED — design direction required BEFORE build (UI rule)]`
+### 14.3 The hub — MRR management workspace `[DEFERRED 2026-07-19 by Kevin — SINGLE-RECORD FIRST]`
+
+> **DECISION (brief §5.3): single-record first; the MRR hub is NOT being built.** The design below stands and
+> is not withdrawn — it is the reference for whenever the hub is picked up. Nothing here is retracted.
+>
+> **What this does NOT defer, and the distinction matters:** multi-record requests still ARRIVE. The portal
+> emits n children, the wrap is built, and the queue already renders parent + indented children (§7). Skipping
+> the hub does not make n > 1 go away; it means **the queue and the task list are the only staff surfaces for
+> a multi-record request.**
+>
+> ⚠️ **The consequence to understand before this is revisited** — and it reframes a standing board item.
+> `routing_review` fires **per child** (confirmed live: one parent carries 3). That was recorded as a defect
+> to squash. It is not, or not only: `department_id` is a **child** field (§5.1) and each child is classified
+> on its **own** description, so a 3-child request that spans 3 departments genuinely needs **3 routing
+> decisions**. Three *decisions* is correct; three *separate tasks in a worklist* is a presentation problem —
+> **and the designed answer to that presentation problem was this hub.** So deferring the hub does not leave
+> the routing duplication as a bug awaiting a small fix; it leaves it as an accepted cost, until either the
+> hub is built or a narrower aggregation is designed. **Do not "fix" it by deduping to one task per parent
+> without deciding where the other two routing decisions get made.**
 
 **Kevin's shape (2026-07-16):** *one screen showing the entire parent/child request record — a **parent line** and
 **each child as a line**.* It is where the RM does everything: accept suggested routing/assignment, assign
@@ -1189,7 +1207,12 @@ MRR functionality unlocks only when every row carries a value and a basis. Unans
 behavior — it is a **locked feature**, which is the honest state. This should compose with the existing
 onboarding phase gating (`SetupPage`, `requires_review` / attestation) rather than inventing a second mechanism.
 
-⚠️ **Open:** what a city sees if an MRR arrives while the matrix is blank. A multi-record request is a citizen
-action, not something the city schedules — so "locked" cannot mean "the submission fails." Most likely it is
-accepted and wrapped normally (n children exist) but the hub, per-child release and per-child notices stay
-inert until the matrix is answered. **Needs deciding before build.**
+~~⚠️ **Open:** what a city sees if an MRR arrives while the matrix is blank.~~ **SETTLED 2026-07-19, as a
+consequence of deferring the hub (§14.3).** A multi-record request is a citizen action, not something the city
+schedules — so "locked" cannot mean "the submission fails." **It is accepted and wrapped normally** (n children
+exist, the queue renders them, each child is routed and worked), and every hub-dependent behaviour stays inert.
+
+This is no longer a prediction: **it is what the system does today**, and with the hub deferred it is what the
+system will keep doing. The matrix's six rows are all no-ops at n = 1 and inert without a hub, so a blank
+matrix blocks nothing that exists. **Verify this claim against the code before building on it** — it is
+asserted from the current behaviour of the portal + queue, not from a test.

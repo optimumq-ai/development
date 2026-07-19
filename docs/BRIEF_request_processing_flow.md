@@ -278,8 +278,12 @@ since it is what puts requests at stages the system has never reached.
 2. ~~**Do stubs auto-approve, or require a note?**~~ **ANSWERED 2026-07-18 — REQUIRE A NOTE.** It costs
    nothing now and leaves an audit trail explaining why a request moved during the skeleton period. Already
    applied to the `legal_review` resolution (§3.2); **every stub screen must follow it.**
-3. **Single-record first, or the MRR parent hub too?** The hub (§14.3) is design-gated and the queue's
-   parent line is deliberately inert today.
+3. ~~**Single-record first, or the MRR parent hub too?**~~ **ANSWERED 2026-07-19 — SINGLE-RECORD FIRST, the
+   hub is DEFERRED.** The §14.3 design stands as the reference for whenever it is picked up; nothing is
+   withdrawn. ⚠️ It does **not** defer multi-record requests themselves — the portal still emits n children
+   and the queue still renders them, so the queue + task list become the only staff surfaces for n > 1. See
+   §14.3 for the consequence this has for the per-child `routing_review` item, which is **not** the simple
+   bug it was recorded as. **ALL FIVE §5 DECISIONS ARE NOW ANSWERED.**
 4. ~~**`commercial_rate` / `mrr_processing`** — build, or remove from the catalog?~~ **ANSWERED 2026-07-19 —
    DELETED** (`ff32305`). Nothing spawned either, so both were offerable in the per-person picker and produced
    permanently empty pools. Live carried zero `user_task_types` rows for both, so nothing was orphaned.

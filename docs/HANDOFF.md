@@ -5923,3 +5923,59 @@ fail-closed change in this codebase deserves the same paired control.
 skip fails E5; restoring NULL as the predicate's first branch fails E4; dropping the creation guard fails E3.
 
 **Board:** brief §3.5 is fully closed. **ONE §5 decision remains — 3, single-record vs the MRR parent hub.**
+
+---
+
+## 2026-07-19 (z) — Single-record first; the MRR hub is deferred — brief §5.3. **ALL FIVE §5 DECISIONS ANSWERED**
+Kevin's call, and the last of the decisions that had blocked Phase 1 for three sessions. **Documentation slice,
+no code** — the decision is to *not* build something, and the honest work is recording what that does and does
+not defer.
+
+### What was decided
+**Single-record first. The MRR hub (§14.3) is not being built.** The design is **not withdrawn** — it stands
+as the reference for whenever it is picked up. `BUILD_PRIORITY` #11's "blocked on design" note is replaced:
+it is not blocked, it is deliberately not being built.
+
+### ⚠️ What it does NOT defer — the part that matters
+**Multi-record requests still arrive.** The portal emits n children, the wrap is built, and the queue already
+renders parent + indented children (§7). Deferring the hub does not make n > 1 go away; it means **the queue
+and the task list are the only staff surfaces for a multi-record request.**
+
+### The finding: a standing board item was mis-recorded, and this decision is what exposes it
+`routing_review` fires **per child** — confirmed live, one parent carries **3** (parent `312252fc…`, 3
+children). Since (q) this has sat on the board as a defect to squash: "an ORO Associate resolves the same
+citizen request three times."
+
+**That framing is wrong.** `department_id` is a **child** field, and each child is classified on its **own**
+description — so a 3-child request spanning 3 departments genuinely needs **3 routing decisions**. Three
+*decisions* is correct. Three *separate tasks in a worklist* is a presentation problem — **and the designed
+answer to that presentation problem was the hub just deferred.**
+
+So it is not a bug awaiting a small fix; it is now an **accepted cost**, until either the hub is built or a
+narrower aggregation is designed. Recorded at §14.3 with an explicit warning: **do not "fix" it by deduping to
+one task per parent without first deciding where the other two routing decisions get made** — that would
+silently drop two departments' routing.
+
+### A coupled question settled for free (§15)
+(q) left open: *what a city sees if an MRR arrives while the MRR rule matrix is blank* — "needs deciding before
+build." Deferring the hub answers it by observation rather than by decision: **accepted and wrapped normally,
+every hub-dependent behaviour inert.** That is what the system does today and, with no hub coming, what it will
+keep doing. The matrix's six rows are all no-ops at n = 1 and inert without a hub, so a blank matrix blocks
+nothing that exists. **Marked as asserted-from-behaviour, not from a test** — verify before building on it.
+
+### Verification
+**921/921 green, live census clean** (docs-only; the suite was run to confirm nothing was disturbed). Live
+re-probed read-only to confirm the routing_review claim rather than repeating it from (q).
+
+### Next session — the board is now decision-free
+1. **Phase 1 of the processing rebuild is UNBLOCKED.** All five §5 decisions are answered: the 10-stage order
+   (v), stub notes (07-18), single-record vs hub (this), the task-catalog deletions (x), the redaction
+   duplicates (w). §3.2's resolution remains the reference implementation for every stub: type check →
+   required note → mark done → `applyStageTransition`.
+2. **Dunning is inert for every wrapped request** — `verify_nonpayment_scope.js` is written and deliberately
+   unregistered; it fails today by design. Register it the moment the money axis moves to the parent. This is
+   the largest *known live defect* left on the board.
+3. **Open, raised, never decided:** `fee_review` / `awaiting_payment` sit before `record_search` — an estimate
+   and a deposit quoted before anyone has looked (raised in (v)).
+4. Part H of `WORKING_attribute_inventory.md`; (q)'s deliberately-undone items (`dev_mode = '1'`, the
+   `PARTIALLY_GRANTED` notification rows, the RM hold override's WA-entitlement guard).
