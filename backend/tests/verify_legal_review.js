@@ -129,6 +129,85 @@ async function openTasks(rid, type) {
     lrG2.length === 1 && lrG2[0].id === lrG1.id);
 
   // ==========================================================================================
+  // K. AN EXEMPTION IS A CHILD-LEVEL ACT (Kevin, 2026-07-19).
+  //
+  //   "the exemption applies to processing a request that has a description of item requested. it's a child
+  //    record level issue. the parent should be thought of as who requested the information and did he pay
+  //    for it, etc."
+  //
+  // assert-exemption used to hand whatever row the caller NAMED to applyStageTransition. Naming the parent
+  // moved the PARENT into a legal stage and spawned legal_review there, while the child holding the
+  // description sat at `intake`. Not intermittent — it moved whatever you addressed, and the parent id is
+  // the natural one for a caller to hold.
+  //
+  // The division asserted here is the whole rule: STAGE + the legal task land on the CHILD; the statutory
+  // CLOCK stays on the PARENT.
+  // ==========================================================================================
+  console.log('\n=== K. an exemption lands on the CHILD; the clock stays on the PARENT ===');
+
+  // A real wrapped request: one parent, one child (n = 1 is not a special case).
+  // A PARENT CARRIES NO STAGE — that is the shape under test, so build it explicitly. (`mkRequest` defaults
+  // an absent stage to `record_search`, which would make the parent look like a work row and quietly void
+  // K3: the first draft of this test used it and failed for that reason, not because of the code.)
+  async function mkParent(id) {
+    await db.run("INSERT INTO requests (id, request_number, requestor_name, requestor_email, description, stage, status) VALUES (?,?,?,?,?,NULL,'active') ON CONFLICT (id) DO NOTHING",
+      [id, id, 'Test', 't@example.com', 'wrapped parent ' + TAG]);
+  }
+  async function mkChild(id, parentId, num, desc) {
+    await db.run("INSERT INTO requests (id, request_number, requestor_name, requestor_email, description, stage, status, master_request_id) VALUES (?,?,?,?,?,'intake','active',?) ON CONFLICT (id) DO NOTHING",
+      [id, num, 'Test', 't@example.com', desc, parentId]);
+  }
+
+  var pK = 'req-' + TAG + '-K-parent';
+  var cK = 'req-' + TAG + '-K-child';
+  await mkParent(pK);
+  await mkChild(cK, pK, pK + '-1', 'the described item ' + TAG);
+
+  // Address the PARENT — the id a caller most naturally holds.
+  var axK = await api('POST', '/requests/' + pK + '/assert-exemption', { note: 'asserted against the parent id' });
+  ok('K1 asserting against the parent id succeeds', axK.status === 200);
+
+  var parentK = await db.get('SELECT stage FROM requests WHERE id = ?', [pK]);
+  var childK = await db.get('SELECT stage FROM requests WHERE id = ?', [cK]);
+  ok('K2 THE CHILD moved into the legal stage (' + childK.stage + ')',
+    childK.stage === 'exemption_review' || childK.stage === 'ag_review');
+  // The assertion that names the defect: the parent must NOT have taken a work stage.
+  ok('K3 the PARENT did not take a work stage (' + parentK.stage + ')',
+    parentK.stage === null || parentK.stage === 'intake');
+  var lrK = await db.all("SELECT request_id FROM tasks WHERE type = 'legal_review' AND request_id IN (?,?) AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [pK, cK]);
+  ok('K4 the legal_review task hangs off the CHILD, not the parent',
+    lrK.length === 1 && lrK[0].request_id === cK);
+
+  // The other half of Kevin's division: money/clock are the PARENT's.
+  var clocksK = await db.all("SELECT request_id FROM request_clocks WHERE request_id IN (?,?)", [pK, cK]);
+  ok('K5 the statutory clock stayed on the PARENT (' + clocksK.length + ' clock row(s), none on the child)',
+    clocksK.every(function (c) { return c.request_id === pK; }));
+
+  // The ruling must land on the SAME row the assertion did, or the child strands in a legal stage forever.
+  var ruleK = await api('POST', '/requests/' + pK + '/ag-ruling', { outcome: 'sustained', note: 'ruled against the parent id' });
+  ok('K6 an AG ruling addressed at the parent also resolves through to the child', ruleK.status === 200);
+  var childAfterK = await db.get('SELECT stage FROM requests WHERE id = ?', [cK]);
+  ok('K7 the CHILD left the legal stage (' + childAfterK.stage + ')', childAfterK.stage === 'redaction_review');
+
+  // AMBIGUITY IS REFUSED, NOT GUESSED. Two described items: which one is the exemption about?
+  var pM = 'req-' + TAG + '-M-parent';
+  await mkParent(pM);
+  for (var mi = 1; mi <= 2; mi++) await mkChild(pM + '-' + mi, pM, pM + '-' + mi, 'item ' + mi + ' ' + TAG);
+  var axM = await api('POST', '/requests/' + pM + '/assert-exemption', { note: 'which record?' });
+  ok('K8 asserting against a MULTI-record parent is refused, not guessed (409 AMBIGUOUS_WORK_ROW)',
+    axM.status === 409 && axM.body && axM.body.code === 'AMBIGUOUS_WORK_ROW' && (axM.body.components || []).length === 2);
+  var movedM = await db.all("SELECT stage FROM requests WHERE id = ? OR master_request_id = ?", [pM, pM]);
+  ok('K9 ...and nothing moved', movedM.every(function (r) { return r.stage === null || r.stage === 'intake'; }));
+
+  // Naming a child directly still works — that is the unambiguous way to say which.
+  var axM1 = await api('POST', '/requests/' + pM + '-1/assert-exemption', { note: 'this described record' });
+  ok('K10 naming the child directly is accepted', axM1.status === 200);
+  var m1 = await db.get('SELECT stage FROM requests WHERE id = ?', [pM + '-1']);
+  var m2 = await db.get('SELECT stage FROM requests WHERE id = ?', [pM + '-2']);
+  ok('K11 only the named record moved (' + m1.stage + ' / ' + m2.stage + ')',
+    (m1.stage === 'exemption_review' || m1.stage === 'ag_review') && m2.stage === 'intake');
+
+  // ==========================================================================================
   // I. A FINISHED TASK CANNOT DRIVE A STAGE TRANSITION.
   //
   // /tasks/:id/resolve checked the task TYPE and never its STATUS, so a done or cancelled task was still

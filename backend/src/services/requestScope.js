@@ -77,7 +77,46 @@ function parentFact(col, alias) {
 }
 function numberExpr(alias) { return parentFact('request_number', alias); }
 
+// ---------------------------------------------------------------------------------------------------
+// RESOLVE AN ADDRESSED ID TO THE ROW THE WORK BELONGS TO.
+//
+// Kevin, 2026-07-19, settling the parent/child division for processing:
+//
+//   "the exemption applies to processing a request that has a description of item requested. it's a child
+//    record level issue. the parent should be thought of as who requested the information and did he pay
+//    for it, etc."
+//
+// So: PARENT = who asked, the number they quote, the money, the statutory clock. CHILD = the described item
+// and everything about processing it — stage included.
+//
+// WHY THIS FUNCTION HAS TO EXIST. The predicates above are SQL fragments for SCOPING a query. Nothing gave a
+// route a way to say "I was handed an id; give me the row this stage change belongs to." So routes passed
+// whatever the caller named straight to applyStageTransition, which moves exactly the row it is given. Name
+// a parent and the PARENT takes a work stage while the child that holds the description sits untouched at
+// `intake`. Not a race and not intermittent — it moves whatever you address, and the parent id is the
+// natural one for a caller to be holding.
+//
+// AMBIGUITY IS REFUSED, NOT GUESSED. A parent with one child is unambiguous (a single-record request is
+// n = 1, not a special case). A parent with several children is a real question — WHICH described item is
+// the exemption about? — and picking one would silently attach a legal act to the wrong record. Callers get
+// `ambiguous` with the candidates and must name one.
+//
+// Returns: { row, addressed, ambiguous }
+//   row       — the work row, or null when not found / ambiguous
+//   addressed — the row actually named (for parent-level facts: money, clock, number)
+//   ambiguous — array of candidate children when the caller must choose, else null
+async function workRow(idOrNumber) {
+  var db = require('../db');
+  var addressed = await db.get('SELECT * FROM requests WHERE id = ? OR request_number = ?', [idOrNumber, idOrNumber]);
+  if (!addressed) return { row: null, addressed: null, ambiguous: null };
+  var kids = await db.all('SELECT * FROM requests WHERE master_request_id = ? ORDER BY component_label, request_number', [addressed.id]);
+  if (kids.length === 0) return { row: addressed, addressed: addressed, ambiguous: null }; // already a leaf
+  if (kids.length === 1) return { row: kids[0], addressed: addressed, ambiguous: null };
+  return { row: null, addressed: addressed, ambiguous: kids };
+}
+
 module.exports = {
   parent: parent, leaf: leaf, andParent: andParent, andLeaf: andLeaf,
-  numberJoin: numberJoin, numberExpr: numberExpr, parentFact: parentFact
+  numberJoin: numberJoin, numberExpr: numberExpr, parentFact: parentFact,
+  workRow: workRow
 };

@@ -262,9 +262,35 @@ router.post('/public', async function(req, res) {
 // Fee-waiver decision: grant or deny. Denial sends a mandatory notice, then the request
 // continues like any normal inbound request (it is NOT closed). Reasons come from a reusable
 // library; a newly typed reason is saved back into that library.
+// AN EXEMPTION IS ASSERTED ABOUT A DESCRIBED ITEM — so it lands on the CHILD (Kevin, 2026-07-19).
+//
+// "the exemption applies to processing a request that has a description of item requested. it's a child
+//  record level issue. the parent should be thought of as who requested the information and did he pay for
+//  it, etc."
+//
+// This used to hand whatever row the caller named straight to applyStageTransition. Naming the parent moved
+// the PARENT into a legal stage and spawned legal_review there, while the child holding the description sat
+// at `intake` with its own open routing_review — the request looked untouched and the legal work was
+// attached to a row that describes nothing. `scope.workRow` resolves to the row processing belongs to, and
+// REFUSES rather than guessing when a multi-record parent leaves it ambiguous.
+//
+// THE CLOCK STAYS ON THE PARENT and the code below already does that (`COALESCE(master_request_id, id)`),
+// which is the same division read from the other side: the statutory deadline is the citizen's, one per
+// request, no matter how many described items hang off it.
 router.post('/:id/assert-exemption', requireAuth, async function(req, res) {
-  var request = await get('SELECT * FROM requests WHERE id = ? OR request_number = ?', [req.params.id, req.params.id]);
-  if (!request) return res.status(404).json({ error: 'Request not found' });
+  var resolved = await scope.workRow(req.params.id);
+  if (!resolved.addressed) return res.status(404).json({ error: 'Request not found' });
+  if (resolved.ambiguous) {
+    return res.status(409).json({
+      error: 'This request has ' + resolved.ambiguous.length + ' records. An exemption is asserted about one ' +
+             'described record — say which.',
+      code: 'AMBIGUOUS_WORK_ROW',
+      components: resolved.ambiguous.map(function (c) {
+        return { id: c.id, requestNumber: c.request_number, label: c.component_label, description: c.description, stage: c.stage };
+      })
+    });
+  }
+  var request = resolved.row;
   var T = require('../services/tolling');
   var model = await activeExemptionModel();
   var actor = (req.user && req.user.name) || 'Staff';
@@ -287,9 +313,23 @@ router.post('/:id/assert-exemption', requireAuth, async function(req, res) {
   return res.json({ model: model, stage: 'exemption_review', tolled: false });
 });
 
+// THE TWIN OF assert-exemption, and it must land on the SAME row. A ruling closes the act the assertion
+// opened, so if the assertion moved the child, a ruling that moved the parent would leave the child stranded
+// in a legal stage forever with nothing able to rule on it.
 router.post('/:id/ag-ruling', requireAuth, async function(req, res) {
-  var request = await get('SELECT * FROM requests WHERE id = ? OR request_number = ?', [req.params.id, req.params.id]);
-  if (!request) return res.status(404).json({ error: 'Request not found' });
+  var resolvedAg = await scope.workRow(req.params.id);
+  if (!resolvedAg.addressed) return res.status(404).json({ error: 'Request not found' });
+  if (resolvedAg.ambiguous) {
+    return res.status(409).json({
+      error: 'This request has ' + resolvedAg.ambiguous.length + ' records. An AG ruling answers the assertion ' +
+             'made about one described record — say which.',
+      code: 'AMBIGUOUS_WORK_ROW',
+      components: resolvedAg.ambiguous.map(function (c) {
+        return { id: c.id, requestNumber: c.request_number, label: c.component_label, description: c.description, stage: c.stage };
+      })
+    });
+  }
+  var request = resolvedAg.row;
   var T = require('../services/tolling');
   var actor = (req.user && req.user.name) || 'Staff';
   var outcome = (req.body && req.body.outcome) || 'sustained';
