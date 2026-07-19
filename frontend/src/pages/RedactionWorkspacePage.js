@@ -1,3 +1,15 @@
+// REDACTION TEMPLATE AUTHORING — not a citizen-record workstation.
+//
+// ⚠️ The processing brief §2.3 listed this as a v1 duplicate of `RedactionTaskPage`. That is only half
+// right, and the half it got wrong is why this file still exists. It is the canvas used to mark up SAMPLE
+// documents uploaded from `MassRedactionPage`, which live on the `req-template-samples`
+// (`SYS-TEMPLATE-SAMPLES`) pseudo-request — a protected holding area with ZERO tasks, by design.
+// `RedactionTaskPage` is keyed on a taskId and therefore cannot serve it.
+//
+// What WAS retired (2026-07-19): the per-record `Redact` button on the request workspace, which sent a
+// CITIZEN record into this task-less canvas — losing the work timer, so redaction labour went unmeasured
+// and under-billed — and `RedactionReviewPage`, whose side-by-side `RedactionTaskPage` already has.
+// Citizen records are redacted at /redaction/:taskId. Do not add a route here that takes one.
 import React, { useEffect, useRef, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
@@ -335,7 +347,6 @@ export default function RedactionWorkspacePage() {
               <div>
                 <button onClick={apply} disabled={applying || zones.length === 0} style={{ width: '100%', padding: '11px', borderRadius: '8px', border: 'none', background: (applying || zones.length === 0) ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '14px', fontWeight: '700', cursor: (applying || zones.length === 0) ? 'default' : 'pointer' }}>{applying ? 'Applying...' : 'Apply Redaction (' + zones.length + ')'}</button>
                 <button onClick={function () { setTplMsg(null); setTplOpen(true); }} disabled={zones.length === 0} style={{ width: '100%', marginTop: '8px', padding: '9px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '13px', fontWeight: '600', cursor: zones.length === 0 ? 'default' : 'pointer', opacity: zones.length === 0 ? 0.5 : 1 }}>Save as Reusable Template</button>
-                <button onClick={function () { nav('/redact/' + fileId + '/review'); }} style={{ width: '100%', marginTop: '8px', padding: '9px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Review side-by-side</button>
               </div>
             )}
           </div>

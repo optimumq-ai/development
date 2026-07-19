@@ -219,7 +219,11 @@ export default function RecordsPanel({ requestId, stage, onChange }) {
                   <button onClick={function(){updateStatus(r.id, false);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid '+(isNR?'#DC2626':'#D1D5DB'),background:isNR?'#FEF2F2':'white',color:isNR?'#DC2626':'#6B7280',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>
                     {isNR?'✗ Excluded':'Exclude from Response'}
                   </button>
-                  {(r.mimetype && r.mimetype.indexOf('pdf') >= 0) ? <button onClick={function(){nav('/redact/' + r.id);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid #1F4E79',background:(matches[r.id]&&matches[r.id].matched)?'#1F4E79':'white',color:(matches[r.id]&&matches[r.id].matched)?'white':'#1F4E79',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>{(matches[r.id]&&matches[r.id].matched)?'Auto-redact':'Redact'}</button> : null}
+                  {/* The per-record `Redact` button was RETIRED 2026-07-19 (brief §5.5). It opened the
+                      task-less v1 canvas (/redact/:fileId), which carries no work timer — so redaction
+                      labour on a citizen record went unmeasured and the city under-billed for it — and no
+                      task ceremony. Redaction happens on the task screen (/redaction/:taskId), reached from
+                      My Tasks. The template-match badge above stays: it is information, not a way in. */}
                   {((r.mimetype && r.mimetype.indexOf('csv') >= 0) || (r.title && /\.csv$/i.test(r.title))) ? <button onClick={function(){nav('/redact-fields/' + r.id);}} style={{padding:'5px 10px',borderRadius:'6px',border:'1px solid #1F4E79',background:'white',color:'#1F4E79',fontSize:'11px',fontWeight:'600',cursor:'pointer'}}>Redact fields</button> : null}
                   <button onClick={function(){deleteFile(r.id);}} style={{padding:'5px 8px',borderRadius:'6px',border:'1px solid #FCA5A5',background:'white',color:'#DC2626',fontSize:'11px',cursor:'pointer'}}>✕</button>
                 </div>

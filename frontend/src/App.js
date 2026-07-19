@@ -32,7 +32,6 @@ import RedactionRulesPage from './pages/RedactionRulesPage';
 import RedactionWorkspacePage from './pages/RedactionWorkspacePage';
 import RedactionTaskPage from './pages/RedactionTaskPage';
 import RecordSearchTaskPage from './pages/RecordSearchTaskPage';
-import RedactionReviewPage from './pages/RedactionReviewPage';
 import StructuredRedactionFieldsPage from './pages/StructuredRedactionFieldsPage';
 import ReleasedRecordsPage from './pages/ReleasedRecordsPage';
 import PublicLibraryMapPage from './pages/PublicLibraryMapPage';
@@ -111,8 +110,9 @@ export default function App() {
           <Route path="discovery" element={<SchemaDiscoveryPage />} />
           <Route path="sources" element={<SourcesPage />} />
           <Route path="redaction-rules" element={<RedactionRulesPage />} />
+          {/* Redaction TEMPLATE authoring — samples on the SYS-TEMPLATE-SAMPLES pseudo-request, which has
+              no task and never will. Citizen records are redacted through /redaction/:taskId instead. */}
           <Route path="redact/:fileId" element={<RedactionWorkspacePage />} />
-          <Route path="redact/:fileId/review" element={<RedactionReviewPage />} />
           <Route path="av-redact/:requestId/:fileId" element={<AvWorkbenchPage />} />
           <Route path="redact-fields/:fileId" element={<StructuredRedactionFieldsPage />} />
           <Route path="released" element={<ReleasedRecordsPage />} />
