@@ -2,6 +2,26 @@
 
 **Status:** DRAFT v0.1 — reconstructed 2026-07-07 from Kevin's description + a code audit + recovered prior-chat design. Not yet verified line-by-line against code. Code-reality flags: `[code: exists]`, `[code: primitive exists]`, `[code: partial]`, `[code: to verify]`, `[code: not built]`.
 
+> ## ⛔ §7.1–§7.5 ARE SUPERSEDED AND FACTUALLY WRONG `[corrected 2026-07-19]`
+>
+> Those sections are a **code audit dated 2026-07-07**. They were accurate then. **The parent/child model was
+> designed on 2026-07-13 and BUILT on 2026-07-16**, which falsified essentially every finding in them —
+> including the ones stated most confidently, like §7.3's "VERIFIED FALSE" and §7.1's "child creation does NOT
+> exist."
+>
+> **They are dangerous precisely because they read as verified audit results rather than as status lines.** An
+> audit result carries more authority than a plan, so a reader is more likely to believe them and less likely
+> to check.
+>
+> **The binding document is `SPEC_parent_child_lifecycle.md`.** For what is actually built today versus only
+> discussed, see `WORKING_attribute_inventory.md`. The corrections are inline below; the original text is kept
+> so the record of what was believed, and when, stays intact.
+>
+> Two claims from this file have leaked into other docs and should be treated as retired wherever they appear:
+> **(1)** "a child IS a full request row" — retired by `ARCHITECTURE.md` item 1; parent and child carry
+> **different** fields. **(2)** the parent `PARTIALLY GRANTED` roll-up — retired 2026-07-16 by Kevin; the
+> parent has **no disposition and no outcome** (`SPEC_parent_child_lifecycle.md` §4.4/§6.2).
+
 ## 1. Purpose
 Authoritative definition of how work reaches a person on the **My Tasks** page: the two item types, how task assignments are routed, how workload health is scored, how the page is organized, per-type completion screens, and multi-record (parent/child) request management. Builds conform to this document.
 
@@ -48,7 +68,16 @@ Order of operations:
 `[code: to verify — dedicated management task type likely not built]`
 
 ## 8. Task catalog (current vs. target)
-**Implemented today** `[code-verified]`: `estimate` (→FEE_MANAGER), `record_search` (→SEARCH_AND_TRIAGE), `redaction` (→REDACTION_WORKER), `review_auto_redaction` (unrouted), `build_redaction_template` (unrouted).
+**Implemented today** `[re-verified 2026-07-19]`: `estimate` (→FEE_MANAGER), `record_search` (→SEARCH_AND_TRIAGE), `redaction` (→REDACTION_WORKER), `review_auto_redaction` (unrouted, and spawns with `role_required` NULL — which means *everyone* is eligible, so it is world-claimable), ~~`build_redaction_template` (unrouted)~~.
+
+> ⛔ **`build_redaction_template` DOES NOT EXIST** and never did in this form. It appears **nowhere** in
+> `backend/src/`, and `tests/verify_notifications.js:75` asserts positively that it is **never created**. The
+> `[code-verified]` tag on the original line was wrong.
+>
+> **This list also omits five live task types**: `legal_review`, `legal_redaction`, `redaction_qa`,
+> `fee_waiver` and `routing_review`. `routing_review` is the highest-volume type in live data. Treat
+> `services/taskRouting.js` (`TASK_ROLES`, `ROUTABLE_TASK_TYPES`, `STAGE_TASK`) as the catalog of record —
+> and note those three lists disagree with each other; see `BRIEF_request_processing_flow.md` §2.2/§3.5.
 **Target human-step tasks not yet spawning:** intake/triage, clarification, fee-waiver approval, custodian retrieval, redaction approval, legal/attorney review, delivery & closure, multi-record management.
 **Passive/monitor items → Notifications, not tasks** (e.g., awaiting payment).
 
@@ -187,14 +216,22 @@ Recalled design vs. what the code actually does:
 - Intake/classifier capture `is_mrr` + `mrrChoice` (combined|separate|none); AV detection checks components.
 
 **NOT built (the gaps):**
-- **Child creation / split — does NOT exist.** No code inserts component requests (no INSERT with `master_request_id`, no split logic). **Confirmed by data: 2 requests are MRR masters, 0 components exist in the entire DB.** A multi-record request is flagged but never decomposed into children. The `mrrChoice='separate'` path has no implementation.
+- ~~**Child creation / split — does NOT exist.**~~ **BUILT 2026-07-16.** `services/requestCreate.js` is the ONE creation helper and inserts the parent plus 1..n children; the portal emits n children (`20463a0`). Original 07-07 text: *"No code inserts component requests (no INSERT with `master_request_id`, no split logic). Confirmed by data: 2 requests are MRR masters, 0 components exist in the entire DB. A multi-record request is flagged but never decomposed into children. The `mrrChoice='separate'` path has no implementation."* Note `is_mrr` is now **derived** (`child_count > 1`), never hand-set, so "flagged but not decomposed" is no longer a reachable state.
 - **MRR management task — does NOT exist.** No task spawns to an Open Records request-manager; no dedicated multi-record management view.
 - **Parent -> Open Records -> manager-assigns-children routing — does NOT exist.**
 
 **So §7's vision has a real foundation (schema + read), but needs: (a) the split step that creates component children, (b) the management task, (c) the routing.**
 
-### 7.3 "Always parent, every request a child" — VERIFIED FALSE (2026-07-07)
-Belief (recalled ~2 weeks ago): the model always creates a parent, and every request — even single-item — is a child. **Not built.** Evidence:
+### 7.3 ~~"Always parent, every request a child" — VERIFIED FALSE (2026-07-07)~~ → **IT IS NOW TRUE AND BUILT**
+
+> ✅ **CORRECTION `[2026-07-19]`. This heading is the single most misleading sentence in the docs — it says
+> "VERIFIED FALSE" about the thing that is now the architecture.** Always-wrap was ratified as
+> `ARCHITECTURE.md` item 1 and built 2026-07-16 (`1739215` + `40ae5a7`). Every request IS a parent with 1..n
+> children; a single-record request is n = 1, not a special case. The 07-07 evidence below was correct **at
+> that date** and is retained as history. Note the last line of §7.3 got the design call right — it was a
+> convention to adopt, and it was adopted three days later.
+
+Belief (recalled ~2 weeks ago): the model always creates a parent, and every request — even single-item — is a child. **Not built** *(as of 2026-07-07; built 2026-07-16)*. Evidence:
 - **Schema:** `master_request_id` is nullable, no default — a request is NOT required to have a parent.
 - **Data:** 118 total requests; **0 have a parent** (`master_request_id` set); all 118 stand alone. Only 2 are `is_mrr` masters, and even those have no children.
 - **Code:** no INSERT ever sets `master_request_id` — nothing creates a parent/child relationship.
@@ -211,10 +248,21 @@ Measured cost of adopting "every request is wrapped in a master (even single-ite
 - **One-time migration** of the 118 existing standalone requests (wrap each in a master).
 
 **Review (some will change, upper bound):**
-- **~17 of 60 backend `FROM requests` queries** are non-by-id (list/aggregate) and may need master/child awareness. The other **43 are point-lookups by id and are UNAFFECTED** — a child is a full request row fetched by id.
+- **~17 of 60 backend `FROM requests` queries** are non-by-id (list/aggregate) and may need master/child awareness. ~~The other **43 are point-lookups by id and are UNAFFECTED** — a child is a full request row fetched by id.~~ **← the false premise; see the correction below.**
 - **~6-8 of 16 frontend files** are request-LIST surfaces (RequestQueue, Dashboard, MyTasks, Tickler, ARIAReports, CashDrawer) that must decide "show masters" vs "masters + children." The rest are single-request detail/workspace views, largely unaffected.
 
-**Untouched (the bulk):** all routing, task, fee, redaction, and processing code that operates on a request BY ID keeps working — a child IS a full request. 2 files (`feeEstimates.js`, `requests.js`) already handle children, so the pattern exists.
+**Untouched (the bulk):** all routing, task, fee, redaction, and processing code that operates on a request BY ID keeps working — ~~a child IS a full request~~. 2 files (`feeEstimates.js`, `requests.js`) already handle children, so the pattern exists.
+
+> ⚠️ **"A child IS a full request row" is RETIRED** `[2026-07-19]`. `ARCHITECTURE.md` item 1 originally said
+> this and `SPEC_parent_child_lifecycle.md` §1 explicitly overrules it: parent and child carry **different
+> fields**, "because the law assigns different things to the request and to the record." The child is the unit
+> of *work*; the parent is the unit of *citizen relationship, money, and the statutory clock*.
+>
+> The blast-radius estimate above was **too optimistic for exactly this reason.** "Point-lookups by id are
+> UNAFFECTED" is false: a by-id fetch of a child returns a suffixed `request_number` the citizen has never
+> seen and `is_mrr = 0`, because `requestCreate` forces that on every child. `GET /requests/:id` had precisely
+> this bug until 2026-07-18. **Reading a parent fact off a child is the recurring defect class in this
+> codebase** — see `services/requestScope.js` and `WORKING_attribute_inventory.md`.
 
 **Assessment:** additive and bounded, NOT a teardown. Core work = 5 creation sites (centralize) + migration + reviewing ~17 reads and ~6-8 list views for display. The processing engine does not get rebuilt.
 
@@ -223,7 +271,13 @@ Pre-existing multi-record PROCESSING decisions are documented in **`WORKFLOW_DEC
 - **Detection:** MRR flag — BUILT (flag only).
 - **Split into children:** HUMAN decides, AI proposes the split — PLANNED (matches code: not built).
 - **Per-child record type & routing:** AI proposes per child — PLANNED.
-- **Resolution & roll-up:** each child resolves found/not-found (HUMAN); CODE rolls up; parent -> **PARTIALLY GRANTED** when >=1 child fulfilled and >=1 returns nothing/denied.
+- ~~**Resolution & roll-up:** each child resolves found/not-found (HUMAN); CODE rolls up; parent -> **PARTIALLY GRANTED** when >=1 child fulfilled and >=1 returns nothing/denied.~~
+  > ⛔ **RETIRED 2026-07-16 by Kevin** `[noted 2026-07-19]`. **The parent has no disposition and no outcome.**
+  > `parent_state` is `In Process` · `Complete` only — derived, never stored. `Complete` means "no further
+  > processing", **not** "delivered" and **not** "granted". Kevin's reasoning: *"This was all poorly designed
+  > in the first build and I don't want to by default carry that bad design over to the new schema."* The real
+  > outcome lives on the CHILD (`SPEC_parent_child_lifecycle.md` §5.8, eight terminal dispositions).
+  > `SPEC_record_search_task_screen.md:406` still cites this retired roll-up and is likewise stale.
 - **Delivery policy:** deliver children as-completed vs. hold for all — config `mrr_delivery`, default `as-completed`.
 - **Open knobs:** re-fee per child vs. once at parent level.
 
@@ -272,8 +326,16 @@ Captured faithfully to prevent loss; NOT yet finalized.
 
 **Completion & release:**
 - On search/redaction submit -> tasks Complete on RM view, records attached per child.
-- Individual children may be Complete, but PARENT is not Complete until ALL children Complete.
-- Default: do NOT release records until parent Complete.
+- Individual children may be Complete, but PARENT is not Complete until ALL children Complete. *(Survives — matches `parent_state` derivation, §6.1.)*
+- ~~Default: do NOT release records until parent Complete.~~
+  > ⚠️ **UNRESOLVED FORK — do not build from this line** `[flagged 2026-07-19]`. It contradicts
+  > `SPEC_parent_child_lifecycle.md` §5.9, which holds that **per-child release is first-class, not an MRR
+  > override**, because WA RCW 42.56.080(2) makes installment delivery a requestor *entitlement* ("on a partial
+  > or installment basis as records … are assembled or made ready"), and TX §552.221(a) ("shall **promptly
+  > produce**") and CA §7922.500 (no "delay or obstruct") cut against sitting on finished records. §5.9 also
+  > forbids the related failure: **"A child may NEVER be withheld because a *sibling* is unpaid."**
+  > The binding spec disagrees with **itself** here — §14.4.5 re-states the hold-all default and flags
+  > "⚠️ Reconcile with §5.9". **This is a live decision for Kevin, and it is legal rather than cosmetic.**
 - Do NOT build fee-allocation logic for partial release against partial payment.
 - DO build: RM can set an acceptable payment (subject to Finance approval) to release specific completed child records early.
 
