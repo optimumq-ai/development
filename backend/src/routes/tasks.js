@@ -196,6 +196,27 @@ router.post('/:id/resolve', requireAuth, async function (req, res) {
       return res.status(400).json({ error: 'This task type has no resolution path here.' });
     }
 
+    // A FINISHED TASK MUST NOT DRIVE A STAGE TRANSITION (found 2026-07-19, brief §3.3's shape again).
+    //
+    // This route checked the task TYPE and never its STATUS, so a `done` or `cancelled` task could still be
+    // resolved — and resolving it runs applyStageTransition, so it MOVES A REQUEST. Two live ways to reach it:
+    //
+    //   cancelled — §3.2 cancels a stage's task when the request moves on. A legal_review left behind by a
+    //               stage change was still resolvable, and doing so dragged the request back into the legal
+    //               outcome's destination. Observed for real: a cancelled legal_review advanced a request to
+    //               redaction_review days after its stage had moved.
+    //   done      — nothing stopped the same task being resolved TWICE, transitioning the request each time.
+    //
+    // 409, not 400: the request is well-formed, the task's state is what makes it impossible. The UI mirrors
+    // this check so the reviewer is not surprised, but THIS is the guard — the screen's is a courtesy.
+    if (!tr.isActionable(t.status)) {
+      return res.status(409).json({
+        error: 'This task is ' + t.status + ' and can no longer be resolved.',
+        code: 'TASK_NOT_ACTIONABLE',
+        status: t.status
+      });
+    }
+
     var outcome = String((req.body && req.body.outcome) || '');
     var notes = String((req.body && req.body.notes) || '').trim();
     var rid = t.request_id;

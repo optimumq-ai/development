@@ -10,6 +10,15 @@ var all = db.all, get = db.get, run = db.run;
 var v = require('./voyageEmbed');
 var uuidv4 = require('uuid').v4;
 
+// THE STATUSES IN WHICH A TASK IS STILL LIVE WORK — i.e. it can be claimed, worked, or resolved. Anything
+// else (`done`, `cancelled`) is finished: the work is over and the task must not drive anything further.
+//
+// This list is duplicated as a SQL literal in about six places in this file, and that duplication is how the
+// hole below survived. Exported so a JS-side caller has ONE thing to ask instead of re-typing it.
+// ⚠️ The SQL literals still carry their own copies — converting them is a separate, mechanical pass.
+var ACTIONABLE_STATUSES = ['open', 'assigned', 'in_progress', 'returned', 'awaiting_review'];
+function isActionable(status) { return ACTIONABLE_STATUSES.indexOf(status) !== -1; }
+
 // Default eligible permission-role per task type. (Overridable per task / later per team config.)
 var TASK_ROLES = {
   estimate: 'FEE_MANAGER',
@@ -588,6 +597,8 @@ module.exports = {
   markTaskReturned: markTaskReturned,
   clearReturned: clearReturned,
   TASK_ROLES: TASK_ROLES,
+  ACTIONABLE_STATUSES: ACTIONABLE_STATUSES,
+  isActionable: isActionable,
   ROUTABLE_TASK_TYPES: ROUTABLE_TASK_TYPES,
   SMART_ROUTING_FLOOR: SMART_ROUTING_FLOOR,
   SMART_ROUTING_MARGIN: SMART_ROUTING_MARGIN,

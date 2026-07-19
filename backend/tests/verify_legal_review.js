@@ -129,6 +129,60 @@ async function openTasks(rid, type) {
     lrG2.length === 1 && lrG2[0].id === lrG1.id);
 
   // ==========================================================================================
+  // I. A FINISHED TASK CANNOT DRIVE A STAGE TRANSITION.
+  //
+  // /tasks/:id/resolve checked the task TYPE and never its STATUS, so a done or cancelled task was still
+  // resolvable — and resolving runs applyStageTransition, so it MOVES A REQUEST. Found 2026-07-19 by driving
+  // the new screen: a CANCELLED legal_review was decided through the UI and advanced its request to
+  // redaction_review. §3.2 cancels a stage's task whenever the request moves on, so stale cancelled tasks
+  // are a normal, continuously-produced condition — not an edge case.
+  //
+  // Asserted over the API, not by source scan: this is the real guard.
+  // ==========================================================================================
+  console.log('\n=== I. a done/cancelled task cannot be resolved ===');
+
+  // I(a) CANCELLED — the exact shape observed.
+  var rI = 'req-' + TAG + '-I';
+  await mkRequest(rI, 'record_search');
+  await tr.applyStageTransition(rI, 'exemption_review', actor);
+  var lrI = (await openTasks(rI, 'legal_review'))[0];
+  // Moving the request on cancels the outgoing stage's task (§3.2) — the real way these are produced.
+  await tr.applyStageTransition(rI, 'redaction_review', actor);
+  var cancelled = await db.get('SELECT status FROM tasks WHERE id = ?', [lrI.id]);
+  ok('I1 moving the request on leaves the legal_review cancelled (the §3.2 behaviour)', cancelled.status === 'cancelled');
+
+  var stageBefore = (await db.get('SELECT stage FROM requests WHERE id = ?', [rI])).stage;
+  var rejCancel = await api('POST', '/tasks/' + lrI.id + '/resolve', { outcome: 'overruled', notes: 'should be refused' });
+  ok('I2 resolving a cancelled task is refused with 409 TASK_NOT_ACTIONABLE',
+    rejCancel.status === 409 && rejCancel.body && rejCancel.body.code === 'TASK_NOT_ACTIONABLE');
+  var stageAfter = (await db.get('SELECT stage FROM requests WHERE id = ?', [rI])).stage;
+  // The assertion that matters: the REQUEST DID NOT MOVE. `overruled` would have sent it to `delivery`.
+  ok('I3 and the request did not move (' + stageBefore + ' still)', stageAfter === stageBefore && stageAfter !== 'delivery');
+
+  // I(b) DONE — the same task must not be resolvable twice.
+  var rJ = 'req-' + TAG + '-J';
+  await mkRequest(rJ, 'record_search');
+  await tr.applyStageTransition(rJ, 'exemption_review', actor);
+  var lrJ = (await openTasks(rJ, 'legal_review'))[0];
+  var first = await api('POST', '/tasks/' + lrJ.id + '/resolve', { outcome: 'sustained', notes: 'legitimate first decision' });
+  ok('I4 the first resolution succeeds', first.status === 200 && first.body && first.body.stage === 'redaction_review');
+  var second = await api('POST', '/tasks/' + lrJ.id + '/resolve', { outcome: 'overruled', notes: 'second bite' });
+  ok('I5 resolving the SAME task again is refused (no double transition)',
+    second.status === 409 && second.body && second.body.code === 'TASK_NOT_ACTIONABLE');
+  var stageJ = (await db.get('SELECT stage FROM requests WHERE id = ?', [rJ])).stage;
+  ok('I6 and the second outcome did not take effect (still redaction_review, not delivery)', stageJ === 'redaction_review');
+
+  // I(c) The guard must not block legitimate work.
+  var rK = 'req-' + TAG + '-K';
+  await mkRequest(rK, 'record_search');
+  await tr.applyStageTransition(rK, 'exemption_review', actor);
+  var lrK = (await openTasks(rK, 'legal_review'))[0];
+  await db.run("UPDATE tasks SET status = 'in_progress' WHERE id = ?", [lrK.id]);
+  var live = await api('POST', '/tasks/' + lrK.id + '/resolve', { outcome: 'partial', notes: 'in-progress task resolves normally' });
+  ok('I7 an in_progress task still resolves normally (the guard is not over-broad)',
+    live.status === 200 && live.body && live.body.stage === 'redaction_review');
+
+  // ==========================================================================================
   // H. THE DECISION IS REACHABLE FROM THE UI (brief §4 Phase 2).
   //
   // Sections A-G tested the ENDPOINT and passed for a full day while the decision was reachable only by
