@@ -27,7 +27,11 @@ var TASK_ROLES = {
   legal_redaction: 'legal_redaction',
   // Routing review: when the classifier can't determine a fulfillment team, an ORO Associate reviews and
   // corrects the routing. Office-level, team-agnostic; eligibility via the per-person subset.
-  routing_review: 'routing_review'
+  routing_review: 'routing_review',
+  // Reviewing an auto-redaction import batch is redaction work and needs redaction competence. It had NO
+  // entry here, which meant `role_required` came out NULL — and NULL was treated as "everyone eligible"
+  // (brief §3.5). See the fail-closed guard in createTask below.
+  review_auto_redaction: 'REDACTION_WORKER'
 };
 
 // Canonical routable task types (docs/MASTER_task_types_permission_groups.md §A1). These are the keys a
@@ -160,9 +164,29 @@ async function suggestAssignee(requestText, teamId, roleName, k) {
 
 async function getTask(taskId) { return await get('SELECT * FROM tasks WHERE id = ?', [taskId]); }
 
+// ⚠️ A TASK WITHOUT A REQUIRED ROLE WAS WORLD-CLAIMABLE (brief §3.5, fixed 2026-07-19).
+//
+// `role_required` NULL meant "everyone eligible" in BOTH readers: the claim-pool predicate listed it to
+// every authenticated user, and `claim()` skipped its eligibility check entirely (`if (task.role_required)`).
+// `review_auto_redaction` spawned that way — it had no TASK_ROLES entry — so an auto-redaction batch could be
+// claimed and worked by anyone with a login, regardless of competence or department.
+//
+// The instance is fixed above. THIS is the class: refuse to create a task nobody's competence gates. Failing
+// at CREATION is deliberate — it fails loudly, at the point the omission is made, instead of producing a row
+// that looks ordinary and is quietly open to everyone. Every caller today resolves a role, so this throws
+// only on a genuinely new type that forgot one.
+function requiredRoleFor(opts) {
+  var role = opts.roleRequired || TASK_ROLES[opts.type] || null;
+  if (!role) {
+    throw new Error('createTask: task type "' + opts.type + '" has no required role. Add it to TASK_ROLES ' +
+      'or pass roleRequired — a task with no role is claimable by any authenticated user.');
+  }
+  return role;
+}
+
 async function createTask(opts) {
   var id = 't-' + uuidv4().substring(0, 8);
-  var role = opts.roleRequired || TASK_ROLES[opts.type] || null;
+  var role = requiredRoleFor(opts);
   await run(
     "INSERT INTO tasks (id, request_id, type, title, team_id, role_required, status, created_by) " +
     "VALUES (?,?,?,?,?,?, 'open', ?)",
@@ -185,8 +209,15 @@ async function claim(taskId, userId) {
   var task = await getTask(taskId);
   if (!task) return { error: 'Task not found' };
   if (task.status !== 'open' || task.assigned_to) return { error: 'This task has already been taken' };
+  // FAIL CLOSED on a role-less task. This used to read `if (task.role_required && ...)`, so a NULL role
+  // SKIPPED the eligibility check and the task was claimable by anyone. Creation now refuses to make such a
+  // task, so this can only be a legacy or hand-inserted row — and the safe answer for one is "nobody", not
+  // "everybody". Live carried zero such rows when this landed.
+  if (!task.role_required) {
+    return { error: 'This task has no required role and cannot be claimed. Report it — it should not exist.' };
+  }
   var elig = await eligibleUsers(task.team_id, task.role_required);
-  if (task.role_required && elig.filter(function (u) { return u.id === userId; }).length === 0) {
+  if (elig.filter(function (u) { return u.id === userId; }).length === 0) {
     return { error: 'You are not eligible to claim this task' };
   }
   await run(
@@ -274,8 +305,10 @@ var POOL_ELIGIBILITY_SQL =
   "AND (t.team_id IS NULL OR t.team_id = (SELECT department_id FROM users WHERE id = ?)) " +
   // Eligible if role_required is null, OR the user holds it as a legacy permission role, OR (v3 model)
   // it is a task type in the user's per-person subset — the latter is how legal/new task types resolve.
-  "AND (t.role_required IS NULL " +
-  "  OR t.role_required IN (SELECT pr.name FROM user_permission_roles upr JOIN permission_roles pr ON pr.id = upr.permission_role_id WHERE upr.user_id = ?) " +
+  // ⚠️ `t.role_required IS NULL` used to be the FIRST branch here — i.e. a role-less task was advertised to
+  // every authenticated user. It is gone: a task nobody's competence gates is shown to nobody, matching the
+  // claim guard. Creation refuses to make one, so this only ever applies to a legacy row.
+  "AND (t.role_required IN (SELECT pr.name FROM user_permission_roles upr JOIN permission_roles pr ON pr.id = upr.permission_role_id WHERE upr.user_id = ?) " +
   "  OR t.role_required IN (SELECT task_type FROM user_task_types WHERE user_id = ?))";
 
 async function poolForUser(userId) {

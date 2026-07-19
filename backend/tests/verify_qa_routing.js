@@ -119,6 +119,54 @@ function req(method, p) {
   var unsub = rr.gateApply({ disposition: 'elevated', review_stage: 'editing', submitted_by: null }, 'bob');
   ok('D3 and an unsubmitted elevated job still cannot be released at all', unsub.allowed === false && unsub.code === 409);
 
+  console.log('\n=== E. A TASK WITH NO REQUIRED ROLE WAS CLAIMABLE BY ANYONE (brief §3.5) ===');
+  // `role_required` NULL meant "everyone eligible" in BOTH readers: the pool predicate listed it to every
+  // authenticated user, and claim() skipped its eligibility check outright. `review_auto_redaction` spawned
+  // exactly that way — no TASK_ROLES entry — so an auto-redaction batch could be claimed and worked by
+  // anyone with a login, in any department, with no redaction competence at all.
+  ok('E1 review_auto_redaction now has a required role — reviewing redactions needs redaction competence',
+    tr.TASK_ROLES.review_auto_redaction === 'REDACTION_WORKER');
+  var batch = await tr.createTask({ requestId: null, type: 'review_auto_redaction',
+    title: 'Review auto-redaction batch ' + TAG, createdBy: 'harness' });
+  ok('E2 …and a batch task spawned the way massJobs spawns it carries that role, not NULL',
+    !!batch && batch.role_required === 'REDACTION_WORKER');
+  await db.run("DELETE FROM tasks WHERE id = ?", [batch.id]);
+
+  // THE CLASS, not just the instance: refuse to CREATE a task nobody's competence gates. Failing at creation
+  // fails loudly where the omission is made, rather than producing a row that looks ordinary and is open to
+  // everyone. POST /api/tasks passes roleRequired straight from the body, so any new type could do this.
+  var threw = null;
+  try { await tr.createTask({ requestId: rid, type: 'some_new_type_' + TAG, title: 'x', createdBy: 'harness' }); }
+  catch (e) { threw = e.message; }
+  ok('E3 creating a task whose type has no role THROWS instead of quietly opening it to everyone',
+    !!threw && /no required role/i.test(threw));
+
+  // Defence in depth for a legacy or hand-inserted row: both readers must treat NULL as "nobody".
+  var orphan = 'task-' + TAG + '-null';
+  await db.run("INSERT INTO tasks (id, request_id, type, title, status, role_required, team_id, created_at, updated_at) " +
+    "VALUES (?,?,?,?,'open',NULL,NULL, datetime('now'), datetime('now'))",
+    [orphan, rid, 'review_auto_redaction', 'Legacy role-less task ' + TAG]);
+  var poolNull = await req('GET', '/api/tasks/pool');
+  ok('E4 a role-less task is advertised to NOBODY (it used to be the first branch of the predicate)',
+    (poolNull.body.tasks || []).filter(function (t) { return t.id === orphan; }).length === 0);
+  var claimNull = await tr.claim(orphan, user.id);
+  ok('E5 …and cannot be claimed — claim() used to SKIP the check entirely when the role was NULL',
+    !!claimNull.error && /no required role/i.test(claimNull.error));
+  await db.run("DELETE FROM tasks WHERE id = ?", [orphan]);
+
+  // ⚠️ POSITIVE CONTROL. Failing closed is only correct if ordinary work still flows — a guard that denies
+  // everything would pass every assertion above and break the product.
+  await db.run("INSERT INTO user_task_types (user_id, task_type) VALUES (?,?) ON CONFLICT DO NOTHING", [user.id, 'redaction_qa']);
+  var good = 'task-' + TAG + '-ok';
+  await db.run("INSERT INTO tasks (id, request_id, type, title, status, role_required, team_id, created_at, updated_at) " +
+    "VALUES (?,?,?,?,'open',?,?, datetime('now'), datetime('now'))",
+    [good, rid, 'redaction_qa', 'Claimable review ' + TAG, 'redaction_qa', TEAM]);
+  var claimOk = await tr.claim(good, user.id);
+  ok('E6 POSITIVE CONTROL — an eligible user can still claim a properly-roled task',
+    !claimOk.error && claimOk.task && claimOk.task.assigned_to === user.id);
+  await db.run("DELETE FROM tasks WHERE id = ?", [good]);
+  await db.run("DELETE FROM user_task_types WHERE user_id = ? AND task_type = ?", [user.id, 'redaction_qa']);
+
   console.log('\n  ' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
   process.exit(fail ? 1 : 0);
 })().catch(function (e) { console.error('HARNESS ERROR:', e); process.exit(1); });
