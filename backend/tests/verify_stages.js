@@ -90,6 +90,29 @@ async function api(method, path, body) {
     ok('FRONTEND MIRROR PARITY — the frontend stage list is identical, in order, to the backend\'s\n           backend: ' + beOrder.join(' → ') + '\n           frontend: ' + feKeys.join(' → '),
       JSON.stringify(feKeys) === JSON.stringify(beOrder));
 
+    // PARITY ON THE BRANCH, not just the list (added 2026-07-19 with Kevin's §5 decision).
+    //
+    // The list matching is no longer sufficient: the frontend could carry the identical ten stages and still
+    // walk them LINEARLY, putting "Advance to: Exemption Review" back on the screen while the backend
+    // branches. That is the exact shape of rot this parity block exists to prevent, so the endpoint serves
+    // `sequence` and `branch` and the mirror is checked against both.
+    ok('the endpoint serves the sequence and the branch, not just the vocabulary',
+      Array.isArray(ep.body.sequence) && Array.isArray(ep.body.branch) &&
+      JSON.stringify(ep.body.sequence) === JSON.stringify(stages.SEQUENCE) &&
+      JSON.stringify(ep.body.branch) === JSON.stringify(stages.BRANCH));
+
+    var feBranch = (function () {
+      var m = feSrc.match(/BRANCH_STAGES\s*=\s*\[([^\]]*)\]/);
+      return m ? (m[1].match(/'([a-z_]+)'/g) || []).map(function (x) { return x.replace(/'/g, ''); }) : null;
+    })();
+    ok('FRONTEND BRANCH PARITY — the mirror knows the same two stages are a branch\n           backend: ' +
+       stages.BRANCH.join(', ') + '\n           frontend: ' + (feBranch ? feBranch.join(', ') : '(none declared)'),
+      !!feBranch && JSON.stringify(feBranch) === JSON.stringify(stages.BRANCH));
+    ok('the mirror derives its sequence by EXCLUDING the branch, rather than hardcoding a second list',
+      /STAGE_SEQUENCE\s*=\s*STAGE_ORDER\.filter\(/.test(feSrc));
+    ok('and its nextStage refuses to advance from a branch stage',
+      /BRANCH_STAGES\.includes\(stage\)\)\s*return null/.test(feSrc));
+
     // every stage the frontend can render must have a label and a colour
     var feLabels = (feSrc.match(/label:\s*'[^']+'/g) || []).length;
     var feColors = (feSrc.match(/^\s{2}[a-z_]+:\s*\{ bg:/gm) || []).length;

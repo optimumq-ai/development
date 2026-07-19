@@ -30,9 +30,13 @@ So this is **not** a rewrite. It is a new surface over a working spine, plus a b
 
 ## 2. What exists, honestly
 
-### 2.1 Stages (10) — `services/stages.js`
-`intake → fee_review → awaiting_payment → record_search → exemption_review → ag_review →
-redaction_review → redaction → delivery → closed`
+### 2.1 Stages (10 in the vocabulary, 8 in the sequence) — `services/stages.js`
+**Sequence** (the linear walk, what Advance follows):
+`intake → fee_review → awaiting_payment → record_search → redaction_review → redaction → delivery → closed`
+
+**Branch** (`[revised 2026-07-19]`): `exemption_review` / `ag_review` are real stages but are **not steps** —
+entered by asserting an exemption, left by a legal decision. `next()` returns null for both, so no Advance
+button renders on them.
 
 Only `intake`, `record_search`, `delivery` have ever been reached in live data. The mid-pipeline is
 **untested by real traffic**.
@@ -232,8 +236,16 @@ since it is what puts requests at stages the system has never reached.
 
 ## 5. Decisions needed from Kevin
 
-1. **Is the 10-stage order the flow you want**, or is v1's sequence being inherited by default? In
-   particular whether `exemption_review` / `ag_review` are always-on or city-configurable.
+1. ~~**Is the 10-stage order the flow you want**~~ **ANSWERED 2026-07-19 — the legal stages are a BRANCH**
+   (`97b719e`). Kevin chose option B. The sequence is now **eight**:
+   `intake → fee_review → awaiting_payment → record_search → redaction_review → redaction → delivery → closed`.
+   `exemption_review` / `ag_review` stay in the vocabulary but leave the linear walk — entered only by
+   `POST /requests/:id/assert-exemption`, which already read `jurisdiction_profiles.exemption_model`
+   (`pre_clearance` = TX/AG, else internal), and left only by a legal decision carrying a required note.
+   **The question answered itself on inspection: the branch was already city-configurable everywhere except
+   the order.** Two defects fell out — Advance offered `exemption_review` from `record_search`, and (the
+   larger) completing a record search advanced there UNCONDITIONALLY, so every request that found records was
+   adjudicated before it could be redacted.
 2. ~~**Do stubs auto-approve, or require a note?**~~ **ANSWERED 2026-07-18 — REQUIRE A NOTE.** It costs
    nothing now and leaves an audit trail explaining why a request moved during the skeleton period. Already
    applied to the `legal_review` resolution (§3.2); **every stub screen must follow it.**

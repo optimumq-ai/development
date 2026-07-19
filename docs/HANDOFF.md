@@ -5666,3 +5666,68 @@ intact, report and gate read paths re-exercised clean.
 goes stale. **Both produce a plausible money figure that is wrong, and neither announces itself.** The dead
 list in `WORKING_attribute_inventory.md` is now empty of money columns — but the same two questions (who
 writes it, who reads it) are the ones that found all three.
+
+---
+
+## 2026-07-19 (v) — The legal stages become a branch (`97b719e`) — brief §5 decision 1
+First of the four blocked decisions to land. Kevin chose **option B** after the question was reframed by
+reading the code.
+
+### The question answered itself on inspection
+Brief §5.1 asked whether `exemption_review` / `ag_review` should be always-on or city-configurable.
+**They were already city-configurable everywhere except the order.** `POST /requests/:id/assert-exemption`
+reads `jurisdiction_profiles.exemption_model` and picks between them — `pre_clearance` (Texas: AG
+pre-clearance, statutory clock tolled) vs `self_court` (13 states) / `self_appeal_court` (6). The exits
+already returned to `redaction_review`, and the `legal_review` resolution and `/ag-ruling` already shared one
+outcome vocabulary. **Entry was conditional and exit was a return — only the sequence still treated them as
+steps.**
+
+So the fix is not a new capability, it is removing a contradiction: `SEQUENCE` (8) is now separate from the
+vocabulary `ORDER` (10), and `next()` walks the sequence.
+
+### ⚠️ TWO defects, and the one in the brief was the smaller
+1. `next()` was positional, so Advance offered **“Advance to: Exemption Review”** from `record_search`.
+2. **Completing a record search advanced to `exemption_review` UNCONDITIONALLY** (`routes/tasks.js`). Every
+   request that found records entered a legal stage, spawned a `legal_review` task, and had to be adjudicated
+   *(sustained / partial / overruled)* before it could be redacted — **whether or not anyone had asserted an
+   exemption over anything.** The Advance button merely *offered* the wrong stage; this one **took it
+   automatically**, on the normal path.
+
+Both survived because **no live request has ever gone past `record_search`.** In the 19 of 20 seeded
+jurisdictions that are not Texas, `ag_review` is a step that cannot legally apply.
+
+`next()` returns **null** for a branch stage, so no Advance renders there: leaving a legal review is a legal
+act with a required note, and must not be reachable by a generic advance that records no reasoning. **No
+stranding** — the `legal_review` resolution and `/ag-ruling` are the exits, both already built and tested.
+`ORDER` keeps all ten because `applyStageTransition` judges "forward" against it for tickler clearing.
+
+### The test that matters, and a parity gap that was open
+`verify_stages` now asserts **no stage in the vocabulary advances into a legal stage** — so this cannot
+regress from any direction, rather than pinning one transition.
+
+**A real gap was found while verifying:** parity checked the frontend mirror's stage LIST but not its walk, so
+the frontend could carry the identical ten stages and still advance linearly — putting the button straight
+back while the backend branched. `GET /api/stages` now serves `sequence` and `branch`, and four new
+assertions check the mirror against them. **Break-tested by reverting the frontend mirror alone: it fails.**
+
+### Verification
+**884/884 green, live census clean.** Break-tests performed and reverted: restoring the positional `next()`
+fails 3 in `verify_stages`; restoring the unconditional search destination fails 4 across
+`verify_search_resolve` / `verify_search_intent_gate`; reverting the frontend mirror alone fails the new
+parity assertion. API restarted and confirmed serving the 8-stage sequence with both branch stages returning
+null. **Frontend rebuilt and redeployed** (`CI=false NODE_OPTIONS=--openssl-legacy-provider npm run build`) —
+without that the mirror is a built asset and the fix would have been live in the API but not in the UI.
+
+Three tests had encoded the defect as expected behaviour (`verify_search_intent_gate` C10/G2,
+`verify_search_resolve` D2/D4) and were flipped, and `verify_stages`' old assertion said the previous
+frontend "jumped straight to redaction_review" — **it had been right about the destination for the wrong
+reason.**
+
+### Next session
+1. **Three of Kevin's four decisions remain** (brief §5): single-record vs the MRR hub (3),
+   `commercial_rate` / `mrr_processing` build-or-delete (4), retire the v1 redaction duplicates (5).
+2. **Flagged and NOT decided:** the sequence still puts `fee_review` / `awaiting_payment` **before**
+   `record_search` — an estimate and a deposit before the search that reveals what the records are. Coherent
+   (reconciliation trues it up) but it means the first number a citizen sees is quoted before anyone has
+   looked. **Raised with Kevin, deliberately left open.**
+3. Still standing: dunning is inert, `routing_review` fires per child, Part H of the attribute inventory.

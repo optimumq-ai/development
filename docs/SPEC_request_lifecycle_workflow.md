@@ -3,7 +3,16 @@
 Legend: `[BUILT]` · `[PARTIAL]` · `[NOT BUILT]`
 
 ## 1. Stages & statuses `[BUILT]`
-Stages in use: `intake → fee_review → awaiting_payment → record_search → redaction_review → delivery` plus legal branches `exemption_review` / `ag_review`. Status: `active | closed | completed`. Full audit trail in `request_history` (actor, action, notes, stage_from/to).
+Stages in use: `intake → fee_review → awaiting_payment → record_search → redaction_review → delivery` plus legal branches `exemption_review` / `ag_review`.
+
+> **`[BUILT 2026-07-19, 97b719e]` The word "branches" above is now enforced, not just descriptive.**
+> `services/stages.js` separates `SEQUENCE` (the eight-stage linear walk) from `BRANCH`
+> (`exemption_review`, `ag_review`). `next()` walks the sequence and returns **null** for a branch stage, so
+> no Advance button renders there — a legal review is left by its own ceremony (the `legal_review` task
+> resolution, or `POST /:id/ag-ruling`), both of which **require a note**. Entry is only
+> `POST /:id/assert-exemption`, which picks the destination from `jurisdiction_profiles.exemption_model`.
+> `ORDER` deliberately keeps all ten: `applyStageTransition` judges "forward" against it for tickler
+> clearing, and `exemption_review → redaction_review` must still count as forward. Status: `active | closed | completed`. Full audit trail in `request_history` (actor, action, notes, stage_from/to).
 
 ## 2. Intake pipeline (onIntake) `[BUILT + fixed 2026-07-08]`
 Classify (Domain 3) → build **signals** (classification, record-type confidence, flags) → evaluate the **rulebook** → set routing columns (`department_id`, `record_type_id`) → apply the decided stage **through the one central stage-transition function** (item 6 / §5), which writes the `request_history` advance row (`stage_from → stage_to`) AND spawns/updates the stage's task. onIntake NEVER writes `UPDATE requests SET stage` directly. Confidence ≥ 70 pins `record_type_id`. Every decision persisted to `workflow_decisions` (rule hit, reasoning, flags) for audit. On rule `wfr-confident` with an owning team: additionally spawn the **estimate task** and route it (title becomes "Review auto-generated estimate" when an estimate profile can automate).
