@@ -118,17 +118,27 @@ function rowFor(rep, label) {
   ok('C6 THE COLUMNS SUM TO THE TOTAL — no money invented, none lost', colSum === grand);
 
   console.log('\n=== D. ORDER-INDEPENDENCE — a report that reorders its input must not move a cent ===');
-  // 3 × $10 against a $20 cap: shares 6.67 / 6.67 / 6.66 leave a real residual to misplace.
-  var comps = [{ id: 'x1', componentCharged: 6.67 }, { id: 'x2', componentCharged: 6.67 }, { id: 'x3', componentCharged: 6.66 }];
-  var fwd = alloc.splitOne('p', 20, comps);
-  var rev = alloc.splitOne('p', 20, comps.slice().reverse());
+  // ⚠️ THIS SECTION WAS VACUOUS ON FIRST WRITE, exactly as verify_component_charged §D was, and a break-test
+  // caught it: shares of 6.67 / 6.67 / 6.66 against $20 sum to EXACTLY $20, so there was no residual and the
+  // residual branch never ran. It stayed green with the rule deliberately sabotaged to "settle on the last".
+  // 7 / 11 / 13 against $20 rounds to 4.52 + 7.10 + 8.39 = $20.01 — a real −$0.01 to misplace.
+  var comps = [{ id: 'x1', componentCharged: 7 }, { id: 'x2', componentCharged: 11 }, { id: 'x3', componentCharged: 13 }];
+  var PAID = 20;
+  // D0 asserts the scenario ENGAGES the residual path, so this section cannot silently go vacuous again.
+  var naive = comps.reduce(function (s, c) {
+    return Math.round((s + Math.round(PAID * (c.componentCharged / 31) * 100) / 100) * 100) / 100;
+  }, 0);
+  ok('D0 the shares do NOT divide evenly, so a residual exists to be placed', naive !== PAID);
+  var fwd = alloc.splitOne('p', PAID, comps);
+  var rev = alloc.splitOne('p', PAID, comps.slice().reverse());
   ok('D1 the residual settles on the largest share, so reversing the input changes nothing',
     amountFor(fwd, 'x1') === amountFor(rev, 'x1') &&
     amountFor(fwd, 'x2') === amountFor(rev, 'x2') &&
     amountFor(fwd, 'x3') === amountFor(rev, 'x3'));
-  ok('D2 and both orders still sum to the payment',
-    Math.round(fwd.reduce(function (s, p) { return s + p.amount; }, 0) * 100) / 100 === 20 &&
-    Math.round(rev.reduce(function (s, p) { return s + p.amount; }, 0) * 100) / 100 === 20);
+  ok('D2 the cent came off the largest share, not the last one listed', amountFor(fwd, 'x3') === 8.38);
+  ok('D3 and both orders still sum to the payment',
+    Math.round(fwd.reduce(function (s, p) { return s + p.amount; }, 0) * 100) / 100 === PAID &&
+    Math.round(rev.reduce(function (s, p) { return s + p.amount; }, 0) * 100) / 100 === PAID);
 
   console.log('\n=== E. FALLBACK — an estimate with no per-record pricing is disclosed, never guessed ===');
   var e1 = alloc.splitOne('req-E', 30, [{ id: 'k1' }, { id: 'k2' }]);   // no componentCharged at all
