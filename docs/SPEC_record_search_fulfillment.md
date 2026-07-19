@@ -22,7 +22,8 @@ Registry declares per-connector **capabilities**: `scan` (record-type discovery 
 - Citizen-side: records selected during portal intake are persisted on the request (Domain 1 §2.5) `[BUILT]`.
 - Staff-side: found records flow to redaction (job → burn → released PDF + doc sheet → `fulfilled_records`) `[BUILT — Domain 8]`.
 - **Release gate at delivery** `[BUILT]` — entering `delivery` checks the pre-release balance (feeRelease); holds records until settled; fails open.
-- Formal per-record **found / not-found resolution** (feeding the MRR Partially-Granted roll-up) `[NOT BUILT]` — currently implicit in redaction/delivery rather than an explicit resolution step.
+- Formal per-record **found / not-found resolution** ~~(feeding the MRR Partially-Granted roll-up)~~ `[BUILT 2026-07-14 — see SPEC_record_search_task_screen §5d]` — `POST /tasks/:id/resolve` enforces `found` (at least one record included, all R9 intents answered) or `no_records` (requires an evidenced effort trail), then advances through the central transition.
+  > ⛔ **The MRR Partially-Granted roll-up it once fed was RETIRED 2026-07-16 by Kevin** `[corrected 2026-07-19]` — the parent has **no disposition and no outcome**. The per-record resolution states stand on their own; the terminal outcome lives on the CHILD (`SPEC_parent_child_lifecycle.md` §5.8).
 
 ## 5. Known gaps
 - Record-search task screen `[NOT BUILT]` — the domain's one big build; demo-minimal version = request context + §1 search + select + mark found/complete.

@@ -403,7 +403,17 @@ Free-form entry — who / when / summary / outcome → `request_history` as `CAL
 ### 5d. Resolution `[BUILT 2026-07-14 — Tier 1 #5 closed]`
 - **Found** → attach the responsive record(s) → mark task complete → hand off to redaction/delivery per stage.
 - **No responsive records** → close with reason; the screen surfaces the accumulated **effort trail** (systems searched, calls logged, clarifications sent) as the closure evidence.
-- Explicit per-record found/not-found states are the prerequisite for the later MRR Partially-Granted roll-up (fulfillment spec §4).
+- Explicit per-record found/not-found states are valuable in their own right — they are the searcher's answer to each description, and the enforcement half of R9. ~~…the prerequisite for the later MRR Partially-Granted roll-up (fulfillment spec §4).~~
+  > ⛔ **The MRR "Partially Granted" roll-up was RETIRED 2026-07-16 by Kevin** `[corrected 2026-07-19]`. **The
+  > parent has no disposition and no outcome.** `parent_state` is `In Process` · `Complete` only — derived,
+  > never stored — and `Complete` means "no further processing", **not** "delivered" and **not** "granted".
+  > Kevin's reasoning: *"This was all poorly designed in the first build and I don't want to by default carry
+  > that bad design over to the new schema."*
+  >
+  > The per-record states below are **not** invalidated by this — they simply roll up to nothing at the parent.
+  > The real terminal outcome lives on the CHILD: `SPEC_parent_child_lifecycle.md` §5.8, eight dispositions
+  > (`Closed – Delivered`, `No records located`, `Denied`, `No response`, `Non-payment`, `Withdrawn by
+  > requestor`, `Previously furnished`, `Not in our custody / referred`).
 
 #### 5d-1. THE R9 GATE — the searcher answers the description `[BUILT 2026-07-14]`
 

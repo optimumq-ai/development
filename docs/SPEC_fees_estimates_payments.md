@@ -18,7 +18,27 @@ Computes an estimate from INPUT quantities + a jurisdiction **fee profile** (`fe
 `paymentTiming` decides WHAT is collected WHEN and what it gates. Four gates: `invoice_on_completion`, `estimate_acceptance`, `deposit_before_work`, `pay_in_full_before_release`. Band selection by estimate total (first band whose upTo ≥ total). `gateToStage` maps a gate to the next stage; safety rule: a request that required a deposit never regresses out of `awaiting_payment`.
 
 ## 4. Estimate lifecycle `[BUILT]`
-Create/version snapshots (`request_fee_estimates`) → **send notice** (feeNotice; marks the estimate task done) → requestor **accept** (→ awaiting_payment if deposit due, else record_search + task spawn) / **decline** → **deposit/payment record** (clears awaiting_payment → record_search + task spawn) → **final payment** → **reconcile** (actuals vs estimate) → **adjustment** + adjustment notice → **reopen**. MRR-aware fee aggregation across children exists.
+Create/version snapshots (`request_fee_estimates`) → **send notice** (feeNotice; marks the estimate task done) → requestor **accept** (→ awaiting_payment if deposit due, else record_search + task spawn) / **decline** → **deposit/payment record** (clears awaiting_payment → record_search + task spawn) → **final payment** → **reconcile** (actuals vs estimate) → **adjustment** + adjustment notice → **reopen**. ~~MRR-aware fee aggregation across children exists.~~
+
+> ⛔ **"MRR-aware fee aggregation across children exists" is FALSE** `[corrected 2026-07-19]`. There is **no
+> aggregation across children at all**. All 17 `/fee-estimates/request/:requestId` endpoints use the id they
+> are handed with zero parent resolution, and every UI path hands them a **child** — `EstimateTaskPage` passes
+> `task.request_id`, and tasks hang off children. A 3-child request therefore produces **three independent
+> money pots and a parent that owns none**: three estimates, three deposit ledgers, three payment states, and
+> no request-level total to bill the citizen for.
+>
+> **Verified consequence, not a theoretical one:** `feeNonpayment.sweep()` is parent-scoped (deliberately —
+> unscoped it would send citizens duplicate dunning emails), then skips on `!sit.hasEstimate`. Since the money
+> is on the child, **dunning and non-payment auto-close are inert for every wrapped request.** Reproduction:
+> `backend/tests/verify_nonpayment_scope.js` (not registered in the suite — it fails today by design; it is
+> the regression test for the fix).
+>
+> Note the honest statement two paragraphs below, in §4a: labor rollup is *"**Request-level only** (per-component
+> / MRR-child attribution deferred to #11)"*. **#11 shipped 2026-07-16 and this was never revisited.**
+> `SPEC_parent_child_lifecycle.md` §4.3 places money at the parent and §6.4 says why — *"children contribute
+> **quantities**… the parent applies the fee waiver, minimums, deposit and certification **once**. A child is a
+> unit of *work*, never a unit of *billing*."* Closing this gap is gated on the MRR hub (§14.3): how n children's
+> fees roll up into one citizen bill is the same question. See `WORKING_attribute_inventory.md` Part A5.
 
 ### 4a. Measured-labor reconciliation `[BUILT]` (Slice E)
 The ACTUAL labor hours fed to `/reconcile` are no longer typed by hand — Slice D's per-task active-work timer (`tasks.work_seconds`, finalized per task) now flows into the estimate→actual reconciliation. `services/laborActuals.js` is the bridge:
