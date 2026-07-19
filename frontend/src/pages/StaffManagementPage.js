@@ -10,6 +10,9 @@ const TASK_TYPES = [
   { key:'estimate', label:'Estimate Creation' },
   { key:'record_search', label:'Record Search' },
   { key:'redaction', label:'Redaction' },
+  // Reviewing someone else's redaction is not the same competence as doing one — granted separately since
+  // 2026-07-19 (brief §3.5). Until a team is granted this, Elevated reviews keep routing to REDACTION_WORKER.
+  { key:'redaction_qa', label:'Redaction Review (second person)' },
   { key:'legal_redaction', label:'Legal Redaction' },
   { key:'legal_review', label:'Legal Review' },
   { key:'fee_waiver', label:'Fee-Waiver Approval' },

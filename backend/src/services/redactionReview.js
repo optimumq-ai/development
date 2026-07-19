@@ -43,9 +43,20 @@ async function spawnReviewTask(job, ctx) {
   if (existing) return null;
   var reqRow = await get('SELECT department_id FROM requests WHERE id = ?', [job.request_id]);
   var isLegal = job.disposition === 'legal';
-  var role = isLegal ? 'legal_redaction' : 'REDACTION_WORKER';
   var teamId = isLegal ? null : (reqRow && reqRow.department_id) || null; // legal = office-level; elevated = team
   var taskRouting = require('./taskRouting'); // lazy require avoids any load-order coupling
+  // ELEVATED REVIEW: `redaction_qa` if the team has actually been granted it, else the legacy
+  // REDACTION_WORKER role (2026-07-19, brief §3.5). `redaction_qa` was excluded from ROUTABLE_TASK_TYPES, so
+  // it was pinned to legacy routing forever while its Legal sibling used the v3 model — and reviewing
+  // someone else's redaction resolved to the SAME token as doing one, conflating "can redact" with "can
+  // review another's redaction".
+  //
+  // Choosing the token at SPAWN time is what makes the cutover safe. Granting a person `redaction_qa` now
+  // takes effect; granting nobody changes nothing, so this cannot strand the mandatory second review —
+  // which, if it stranded, would block release of every Elevated redaction.
+  var role = isLegal
+    ? 'legal_redaction'
+    : ((await taskRouting.hasSeededType('redaction_qa', teamId)) ? 'redaction_qa' : 'REDACTION_WORKER');
   return await taskRouting.createTask({
     requestId: job.request_id, type: 'redaction_qa', roleRequired: role, teamId: teamId,
     title: (isLegal ? 'Legal review before release' : 'Review redaction before release'),

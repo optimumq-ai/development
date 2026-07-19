@@ -18,12 +18,11 @@ function withReq(sql) {
 
 // Open tasks the current user can claim (their team + a role they hold).
 router.get('/pool', requireAuth, async function (req, res) {
-  var rows = await all(withReq(
-    "WHERE t.status = 'open' AND t.assigned_to IS NULL " +
-    "AND (t.team_id IS NULL OR t.team_id = (SELECT department_id FROM users WHERE id = ?)) " +
-    "AND (t.role_required IS NULL OR t.role_required IN (" +
-    "  SELECT pr.name FROM user_permission_roles upr JOIN permission_roles pr ON pr.id = upr.permission_role_id WHERE upr.user_id = ?)) " +
-    "ORDER BY t.created_at"), [req.user.sub, req.user.sub]);
+  // Uses the SHARED eligibility predicate (services/taskRouting). This query used to have its own copy that
+  // checked permission roles ONLY, so a task whose role_required is a v3 task-type token — legal_review,
+  // legal_redaction, routing_review — was invisible here while taskRouting.poolForUser listed it (§3.5).
+  var rows = await all(withReq("WHERE " + tr.POOL_ELIGIBILITY_SQL + " ORDER BY t.created_at"),
+    [req.user.sub, req.user.sub, req.user.sub]);
   res.json({ tasks: rows });
 });
 

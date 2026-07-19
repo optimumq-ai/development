@@ -44,7 +44,7 @@ var TASK_ROLES = {
 // if the hub is built, re-add the key alongside the code that actually spawns it. The MRR CHILD tasks
 // (mrr_estimate / mrr_search) were never here anyway — the Request Manager hand-assigns those with no
 // eligibility rules, so they never gate through user_task_types.
-var ROUTABLE_TASK_TYPES = ['estimate', 'record_search', 'redaction', 'legal_redaction', 'legal_review', 'fee_waiver', 'routing_review'];
+var ROUTABLE_TASK_TYPES = ['estimate', 'record_search', 'redaction', 'redaction_qa', 'legal_redaction', 'legal_review', 'fee_waiver', 'routing_review'];
 // Reverse of TASK_ROLES: legacy permission-role name -> task type, used to translate existing callers
 // (which pass task.role_required) onto the new task-type model during the cutover.
 var ROLE_TO_TYPE = { FEE_MANAGER: 'estimate', SEARCH_AND_TRIAGE: 'record_search', REDACTION_WORKER: 'redaction', FINANCE: 'fee_waiver' };
@@ -260,19 +260,41 @@ async function autoRouteOrPool(taskId, requestText, opts) {
 }
 
 // Open tasks the given user is eligible to claim (their team + a role they hold).
+// THE CLAIM-POOL ELIGIBILITY PREDICATE — ONE definition, used by both readers.
+//
+// ⚠️ There were TWO (brief §3.5). This service checked permission roles OR `user_task_types`; the route
+// `GET /tasks/pool` checked permission roles ONLY. So every task whose `role_required` is a v3 task-type
+// token rather than a legacy permission-role name — `legal_review`, `legal_redaction`, `routing_review` —
+// was **invisible in the claim pool**, while `poolForUser` happily listed it. Legal work was already
+// affected: a task nobody can see is a task nobody claims, and it does not look broken, it looks quiet.
+//
+// Expects THREE bound params in order: userId (team), userId (permission roles), userId (task types).
+var POOL_ELIGIBILITY_SQL =
+  "t.status = 'open' AND t.assigned_to IS NULL " +
+  "AND (t.team_id IS NULL OR t.team_id = (SELECT department_id FROM users WHERE id = ?)) " +
+  // Eligible if role_required is null, OR the user holds it as a legacy permission role, OR (v3 model)
+  // it is a task type in the user's per-person subset — the latter is how legal/new task types resolve.
+  "AND (t.role_required IS NULL " +
+  "  OR t.role_required IN (SELECT pr.name FROM user_permission_roles upr JOIN permission_roles pr ON pr.id = upr.permission_role_id WHERE upr.user_id = ?) " +
+  "  OR t.role_required IN (SELECT task_type FROM user_task_types WHERE user_id = ?))";
+
 async function poolForUser(userId) {
   return await all(
-    "SELECT t.* FROM tasks t " +
-    "WHERE t.status = 'open' AND t.assigned_to IS NULL " +
-    "AND (t.team_id IS NULL OR t.team_id = (SELECT department_id FROM users WHERE id = ?)) " +
-    // Eligible if role_required is null, OR the user holds it as a legacy permission role, OR (v3 model)
-    // it is a task type in the user's per-person subset — the latter is how legal/new task types resolve.
-    "AND (t.role_required IS NULL " +
-    "  OR t.role_required IN (SELECT pr.name FROM user_permission_roles upr JOIN permission_roles pr ON pr.id = upr.permission_role_id WHERE upr.user_id = ?) " +
-    "  OR t.role_required IN (SELECT task_type FROM user_task_types WHERE user_id = ?)) " +
-    "ORDER BY t.created_at",
+    "SELECT t.* FROM tasks t WHERE " + POOL_ELIGIBILITY_SQL + " ORDER BY t.created_at",
     [userId, userId, userId]
   );
+}
+
+// Is anyone actually carrying this task type yet? The v3 cutover is scoped per (team, task type): a team
+// moves onto the new model for a type only once someone ON THAT TEAM holds it. Callers use this to pick the
+// eligibility token at SPAWN time, so a type nobody has been granted keeps routing the way it does today.
+async function hasSeededType(taskType, teamId) {
+  var row = teamId
+    ? await get("SELECT 1 AS x FROM user_task_types utt JOIN users u ON u.id = utt.user_id " +
+                "WHERE utt.task_type = ? AND u.department_id = ? AND u.status = 'active' LIMIT 1", [taskType, teamId])
+    : await get("SELECT 1 AS x FROM user_task_types utt JOIN users u ON u.id = utt.user_id " +
+                "WHERE utt.task_type = ? AND u.status = 'active' LIMIT 1", [taskType]);
+  return !!row;
 }
 
 // Spawn the task that a workflow STAGE implies and route it. Idempotent.
@@ -545,6 +567,8 @@ module.exports = {
   claim: claim,
   autoRouteOrPool: autoRouteOrPool,
   poolForUser: poolForUser,
+  POOL_ELIGIBILITY_SQL: POOL_ELIGIBILITY_SQL,
+  hasSeededType: hasSeededType,
   mine: mine,
   teamLoadBalancing: teamLoadBalancing,
   workloadCounts: workloadCounts,
