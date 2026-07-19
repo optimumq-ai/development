@@ -115,14 +115,27 @@ function itemFor(d, id) { return d.lineItems.filter(function (x) { return x.reco
 
   console.log('\n=== F. A RECONCILIATION SUPERSEDES THE ESTIMATE ===');
   // Bill against the figures that actually govern, or a record is released on one split and billed on another.
-  await writeSnap('fe-' + TAG + '-a2', a, 'reconciliation', profile({ maxFee: 100 }), [
-    { id: a1, label: 'One', quantities: { bwPages: 10 } },
+  //
+  // ⚠️ THIS SECTION WAS VACUOUS ON FIRST WRITE — the third such case in three sessions, and again a break-test
+  // found it. The reconciliation originally re-used the estimate's 10/20/70 quantities and only lifted the cap.
+  // But A CAP SCALES EVERY COMPONENT UNIFORMLY: the estimate's capped split 5/10/35 is the SAME RATIO as
+  // 10/20/70, and prorata allocates by ratio, so both snapshots billed identically. Ignoring the
+  // reconciliation entirely still passed.
+  //
+  // THE GENERAL LESSON: to prove WHICH snapshot was used, the snapshots must differ in SHAPE, not just in
+  // total. Anything that rescales uniformly is invisible to a proportional allocator.
+  // Here the actuals come in redistributed — 50/20/30 against the estimate's 10/20/70.
+  await writeSnap('fe-' + TAG + '-a2', a, 'reconciliation', profile({}), [
+    { id: a1, label: 'One', quantities: { bwPages: 50 } },
     { id: a2, label: 'Two', quantities: { bwPages: 20 } },
-    { id: a3, label: 'Three', quantities: { bwPages: 70 } }
+    { id: a3, label: 'Three', quantities: { bwPages: 30 } }
   ]);
   var afterRecon = await erp.buildLineItems({ requestId: a, estimateId: 'fe-' + TAG + '-a', amount: 100 }, 'prorata');
-  ok('F1 the reconciliation\'s uncapped split is billed ($10 / $20 / $70), not the estimate\'s capped one',
-    itemFor(afterRecon, a1).amount === 10 && itemFor(afterRecon, a3).amount === 70);
+  // F0 pins the trap shut: the two snapshots must disagree on shape, or F1 proves nothing.
+  ok('F0 the estimate and reconciliation splits differ in SHAPE, not merely in total',
+    Math.round(fcA.components[0].componentCharged / fcA.requestLevel.total * 1000) !== 500);
+  ok('F1 the reconciliation\'s redistributed split is billed ($50 / $20 / $30), not the estimate\'s $10/$20/$70',
+    itemFor(afterRecon, a1).amount === 50 && itemFor(afterRecon, a2).amount === 20 && itemFor(afterRecon, a3).amount === 30);
   ok('F2 and it still sums to the charge', sum(afterRecon.lineItems, 'amount') === 100);
 
   console.log('\n=== G. THE ERP AND THE RELEASE GATE MUST TELL ONE STORY ===');
