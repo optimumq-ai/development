@@ -71,12 +71,16 @@ with no teeth, and turning it on is a distinct, deliberate act** that has never 
 
 ## 3. ⚠️ Two defects found while inventorying — these are not "build later"
 
-**(a) A fresh install does not reproduce the live wizard.** `schema.postgres.sql` seeds **6** phases and no
+**(a) ~~A fresh install does not reproduce the live wizard.~~ FIXED 2026-07-19 (`9c0cfbc`).** `schema.postgres.sql` seeds **6** phases and no
 `fees` row; `requires_review` is added with `DEFAULT false` and **nothing in the codebase ever writes it**.
 Live has **7** phases with `requires_review = true` on `jurisdiction`, `fees` and `redaction` — applied by
 hand. **A new city install would therefore get a wizard with no Fees phase and no gated phases at all**, which
 is precisely the opposite of the intended posture. This is the same class as the 2026-07-14 (xr) finding, where
 a fresh install was missing the onboarding review/test columns entirely.
+
+> **Fixed:** all seven phases are now seeded (redaction moved to order 6), plus a convergence block that repairs databases seeded from the older six-phase list. Both statements are `IS DISTINCT FROM`-guarded, so they are genuine no-ops on an existing install — verified, live is unchanged. New harness `verify_fresh_install` (26 assertions) asserts the wizard the schema ALONE produces, and additionally that `SetupPage`'s `PHASE_META` can render every seeded phase, catching drift in either direction. Break-tested: reverting the schema fails 8 assertions.
+>
+> **The rule it now enforces: THE LIVE DATABASE IS NOT THE SPECIFICATION.** Anything a city needs on day one must come from the schema, not from someone remembering to run an UPDATE. The suite is the only place a fresh install is ever exercised, since `reset_test_db.js` builds from empty.
 
 **(b) `dev_mode = '1'` in live.** Correct for a demo; **must be part of the go-live checklist itself**, or the
 first real customer runs with enforcement disabled and nobody notices. Note the flag's default is ON (bypass) —
