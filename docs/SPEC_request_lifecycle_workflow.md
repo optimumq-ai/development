@@ -12,7 +12,19 @@ Stages in use: `intake → fee_review → awaiting_payment → record_search →
 > resolution, or `POST /:id/ag-ruling`), both of which **require a note**. Entry is only
 > `POST /:id/assert-exemption`, which picks the destination from `jurisdiction_profiles.exemption_model`.
 > `ORDER` deliberately keeps all ten: `applyStageTransition` judges "forward" against it for tickler
-> clearing, and `exemption_review → redaction_review` must still count as forward. Status: `active | closed | completed`. Full audit trail in `request_history` (actor, action, notes, stage_from/to).
+> clearing, and `exemption_review → redaction_review` must still count as forward.
+>
+> **`[extended 2026-07-19]` The MONEY stages joined the branch.** `fee_review` and `awaiting_payment` are also
+> not steps: **nothing in the codebase ever sets `fee_review`** (it is in neither `STAGE_TASK` nor the
+> reconciler sweep, so advancing into it produced a request with no task), and `awaiting_payment` is entered
+> and left by the fee flow — the non-payment reopen in, a recorded deposit/payment or the ERP webhook out,
+> each transitioning explicitly to `record_search`. The only rule that advances past intake goes straight to
+> `record_search`, and live `workflow_decisions` contain only `intake` and `record_search`.
+>
+> **The sequence is six:** `intake → record_search → redaction_review → redaction → delivery → closed`.
+> Money and legal review are both detours that rejoin at their return point.
+>
+> ⚠️ **`fee_review` has no writer at all.** Kept in the vocabulary; "wire it or delete it" is open. Status: `active | closed | completed`. Full audit trail in `request_history` (actor, action, notes, stage_from/to).
 
 ## 2. Intake pipeline (onIntake) `[BUILT + fixed 2026-07-08]`
 Classify (Domain 3) → build **signals** (classification, record-type confidence, flags) → evaluate the **rulebook** → set routing columns (`department_id`, `record_type_id`) → apply the decided stage **through the one central stage-transition function** (item 6 / §5), which writes the `request_history` advance row (`stage_from → stage_to`) AND spawns/updates the stage's task. onIntake NEVER writes `UPDATE requests SET stage` directly. Confidence ≥ 70 pins `record_type_id`. Every decision persisted to `workflow_decisions` (rule hit, reasoning, flags) for audit. On rule `wfr-confident` with an owning team: additionally spawn the **estimate task** and route it (title becomes "Review auto-generated estimate" when an estimate profile can automate).

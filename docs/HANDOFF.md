@@ -6041,3 +6041,58 @@ check before switching it on. Recorded in brief §3.1b too.
 3. Part H of `WORKING_attribute_inventory.md`; (q)'s deliberately-undone items (`dev_mode = '1'`, the
    `PARTIALLY_GRANTED` notification rows, the RM hold override's WA-entitlement guard).
 4. Brief §3.4 (no from-`closed` guard) and §3.6 (two fragile couplings) are the last unaddressed §3 items.
+
+---
+
+## 2026-07-19 (ab) — The money stages are a branch too (`d1b04e1`) — the fee-before-search question, answered
+The question I raised twice in (v) and (aa) and never got a ruling on. Kevin asked for it to be worked.
+**It answered itself on inspection, and my framing of it was wrong both times.**
+
+### The question, and why it dissolved
+I asked whether `fee_review` / `awaiting_payment` belong **before** `record_search` — an estimate and a
+deposit quoted before anyone has looked at the records. That framing assumed requests pass through them.
+**They do not:**
+
+- **`fee_review` is never set by anything.** Not one `applyStageTransition` to it exists in the codebase. It
+  is in **neither `STAGE_TASK` nor the reconciler sweep**, so a request advanced into it gets **no task and is
+  not swept** — the same shape of stranding §3.2 fixed for `legal_review`. **The Advance button at `intake`
+  offered exactly that.**
+- **`awaiting_payment` is a real state, but the fee flow moves it, never the button:** entered by the
+  non-payment reopen; left by a recorded deposit, a recorded payment, or the ERP settlement webhook — each
+  transitioning explicitly to `record_search`.
+- The only rule that advances past intake (`wfr-confident`) goes **straight to `record_search`**, and live
+  `workflow_decisions` contain only `intake` and `record_search`. **`fee_review` has never been decided once.**
+
+So money is a **branch off the spine**, exactly as legal review is. The real shape is `intake → record_search`,
+with the fee flow a detour that rejoins there. **The sequence is now six:**
+`intake → record_search → redaction_review → redaction → delivery → closed`.
+
+### The same irony, twice in one day
+Two `verify_stages` assertions encoded the old premise. One **mocked the old frontend** for saying
+`intake → record_search` and "skipping the money" — **the old frontend was right, for the wrong reason**,
+exactly as it was about `redaction_review` in (v). The other asserted the UI must NOT offer Record Search from
+intake, calling it "the legacy destination"; it is now the correct one, so it was **inverted rather than
+deleted** — what is worth guarding is that the button matches the canonical walk.
+
+**Twice in one session a test encoded a defect as expected behaviour and disparaged the code that was right.**
+When an assertion's comment editorialises about what some older component "got wrong", that is worth a second
+look.
+
+### ⚠️ Left for Kevin
+**`fee_review` has no writer at all.** Kept in the vocabulary for now, but **wire it or delete it** is open —
+it is the same question asked of `commercial_rate` / `mrr_processing`, which were deleted in (x). Deleting it
+would shrink the vocabulary to nine; wiring it means deciding what puts a request there and what task it
+spawns.
+
+### Verification
+**937/937 green, live census clean.** Break-tested: putting the money stages back on the linear path fails 5,
+including the **Playwright assertion that the real Advance button offers "Record Search"** and the frontend
+branch-parity check. Frontend rebuilt and redeployed.
+
+### Next session
+1. **Phase 1 of the processing rebuild** — unblocked, all decisions answered. §3.2's resolution is the
+   reference implementation for every stub.
+2. **`fee_review`: wire or delete** (above) — small, and the last loose thread in the stage vocabulary.
+3. Brief **§3.4** (no from-`closed` guard) and **§3.6** (two fragile couplings) are the last unaddressed §3
+   items. §3.5 and §3.1b are now closed.
+4. Part H of `WORKING_attribute_inventory.md`; (q)'s deliberately-undone items.

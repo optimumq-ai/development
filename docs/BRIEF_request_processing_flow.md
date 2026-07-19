@@ -31,12 +31,17 @@ So this is **not** a rewrite. It is a new surface over a working spine, plus a b
 ## 2. What exists, honestly
 
 ### 2.1 Stages (10 in the vocabulary, 8 in the sequence) — `services/stages.js`
-**Sequence** (the linear walk, what Advance follows):
-`intake → fee_review → awaiting_payment → record_search → redaction_review → redaction → delivery → closed`
+**Sequence** (the linear walk, what Advance follows) `[revised again 2026-07-19]`:
+`intake → record_search → redaction_review → redaction → delivery → closed`
 
-**Branch** (`[revised 2026-07-19]`): `exemption_review` / `ag_review` are real stages but are **not steps** —
-entered by asserting an exemption, left by a legal decision. `next()` returns null for both, so no Advance
-button renders on them.
+**Branch** (`[revised 2026-07-19]`): `exemption_review` / `ag_review` (entered by asserting an exemption, left
+by a legal decision) **and** `fee_review` / `awaiting_payment` (the fee flow moves them, never the button).
+`next()` returns null for all four, so no Advance renders on them.
+
+⚠️ **`fee_review` has NO WRITER** — nothing in the codebase ever sets it, and it is in neither `STAGE_TASK` nor
+the reconciler sweep, so advancing into it produced a request with **no task and no sweep**. Kept in the
+vocabulary; **wire it or delete it is an open question**, the same one asked of `commercial_rate` /
+`mrr_processing` (deleted).
 
 Only `intake`, `record_search`, `delivery` have ever been reached in live data. The mid-pipeline is
 **untested by real traffic**.
