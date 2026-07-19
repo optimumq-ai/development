@@ -143,9 +143,18 @@ router.patch('/:id/stage', requireAuth, async function(req, res) {
   // 4d release gate: hold records at delivery until a pre-release balance is settled. Fails open.
   if (stage === 'delivery') {
     try {
+      // §5.9 COVERAGE TEST — gate on THIS record's own share (`covered`), not the whole request's balance.
+      // A child may never be withheld because a SIBLING is unpaid. For a single-record request the two are
+      // the same number, so this is an exact no-op there; it only diverges once a request has n > 1 records.
       const rg = await require('../services/feeRelease').releaseGate(req.params.id);
-      if (rg.hasEstimate && rg.requiresPaymentBeforeRelease && !rg.paidInFull) {
-        return res.status(409).json({ error: 'Final payment of $' + rg.balanceDue.toFixed(2) + ' is required before these records can be released. Record the payment (or send the balance-due notice), then advance.', code: 'PAYMENT_REQUIRED_BEFORE_RELEASE', balanceDue: rg.balanceDue });
+      if (rg.hasEstimate && rg.requiresPaymentBeforeRelease && !rg.covered) {
+        return res.status(409).json({
+          error: 'Payment of $' + rg.balanceDue.toFixed(2) + ' is required before ' +
+            (rg.coverageBasis === 'component' ? 'this record' : 'these records') +
+            ' can be released. Record the payment (or send the balance-due notice), then advance.',
+          code: 'PAYMENT_REQUIRED_BEFORE_RELEASE', balanceDue: rg.balanceDue,
+          coverageBasis: rg.coverageBasis, componentCharged: rg.componentCharged
+        });
       }
     } catch (e) { console.error('[release gate]', e.message); }
   }
