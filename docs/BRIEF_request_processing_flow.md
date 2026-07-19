@@ -137,7 +137,24 @@ rows including the legacy unwrapped `SYS-`/`LIBRARY` containers.
   `requestCreate` copies citizen identity down to every child, and `tolling.writebackDeadline` cascades the
   deadline to children *on purpose* so leaf-scoped worklists can display it. Verified identical on all live rows.
 
-### 3.1b Money is keyed on the CHILD — the real leaf-fact bug `[OPEN, DESIGN-GATED]`
+### 3.1b Money is keyed on the CHILD — the real leaf-fact bug `[READ PATH FIXED 2026-07-19 (6487e61); WRITE PATH still child-keyed by design]`
+
+> **The damaging half is closed.** Dunning was **inert for every wrapped request** — no reminder email ever
+> sent, non-payment auto-close never fired — because the parent-scoped sweep asked a parent that owned no
+> estimate. `paymentStatus.computeSituation` and `feeNonpayment.clockStart` now resolve money over the whole
+> TREE (parent + children), the same technique `feeRelease.COVERING` uses. `verify_nonpayment_scope` is
+> registered and green.
+>
+> **Deliberately NOT done: moving the estimates.** The write path still keys on the child, and that is fine —
+> the question "how do n children's fees roll up into one citizen bill?" is answered by *reading* the tree, so
+> no migration is needed and none was invented. That the roll-up rule now exists in code (SUM totals,
+> ALL-reconciled for work-complete, ANY-waiver, ALL-delivered) also means it no longer waits on the MRR hub,
+> which was **deferred** on 2026-07-19 (§5.3).
+>
+> ⚠️ **Operational note for go-live:** dunning now *works*, and dunning emails citizens. Live has
+> `nonpayment.enabled = false` and zero estimates, so nothing fires today. A system that accumulated unpaid
+> wrapped requests while this was inert would dun that backlog the moment it is enabled — check before
+> switching it on.
 The one the original brief reduced to a parenthetical. **All 17 `/fee-estimates/request/:requestId`
 endpoints** use the id they are handed with **zero** parent resolution (39 raw uses), `paymentStatus.js` has
 none either, and `EstimateTaskPage` passes **`task.request_id` — the child**. Money is a PARENT fact

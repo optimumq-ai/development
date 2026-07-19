@@ -132,14 +132,20 @@ semantics, not schema.
 | ~~`actual_fee`~~ | nothing ever wrote it | — | ✅ **DROPPED** | Removed from the schema 2026-07-19 (`016ad30`). Was 0 in all 13 live rows |
 | ~~`amount_paid`~~ | nothing ever wrote it; ONE reader, which reported $0 revenue forever | — | ✅ **DROPPED** | Reader cut over (`58aac73`), column removed (`016ad30`). Payments live in `request_fee_estimates` |
 
-> ### ⚠️ The money split is not theoretical — dunning is inert **[verified 2026-07-19]**
+> ### ✅ The money split was not theoretical — dunning WAS inert **[FIXED 2026-07-19, `6487e61`]**
+> **Resolved by reading through the tree, not by moving the money.** `computeSituation` and `clockStart` now
+> answer the money question over parent + children, so the parent-scoped sweep sees what the child was
+> charged. The write path still keys on the child, deliberately — no migration was needed.
+> The original finding, kept because the reasoning is what made the fix safe:
 > `feeNonpayment.sweep()` is **parent**-scoped (deliberately — unscoped it would send citizens duplicate
 > dunning emails). It then asks `computeSituation(parentId)`, which looks for estimates on the parent. Estimates
 > are written on the **child**. So `if (!sit.hasEstimate) continue;` skips **every wrapped request**: no dunning
 > email is ever sent and non-payment auto-close never fires.
 >
-> Proven by `tests/verify_nonpayment_scope.js` (deliberately **not** registered in the suite — it fails today;
-> it is the regression test for the fix, already written). Latent only because nothing has reached `fee_review`.
+> Proven by `tests/verify_nonpayment_scope.js` — written as a reproduction, left failing, and **now
+> registered and green as the regression test for the fix.** Its §C drives the real sweep end-to-end, which is
+> what caught that `clockStart()` was a SECOND instance of the same defect: fixing only `computeSituation`
+> made the visibility assertion pass while the sweep still sent nothing.
 
 > ### ✅ The dead money column had a live reader — FIXED 2026-07-19 (`58aac73`)
 > This table listed `amount_paid` as dead with "reports read it and always get 0" — **recorded, and then not

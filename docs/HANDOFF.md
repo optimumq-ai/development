@@ -5979,3 +5979,65 @@ re-probed read-only to confirm the routing_review claim rather than repeating it
    and a deposit quoted before anyone has looked (raised in (v)).
 4. Part H of `WORKING_attribute_inventory.md`; (q)'s deliberately-undone items (`dev_mode = '1'`, the
    `PARTIALLY_GRANTED` notification rows, the RM hold override's WA-entitlement guard).
+
+---
+
+## 2026-07-19 (aa) — Dunning was inert for every wrapped request; fixed (`6487e61`) — brief §3.1b
+The largest known live defect on the board, open since (q) with its reproduction harness written and
+deliberately left failing. **Fixed, registered, green.**
+
+### The defect
+Money is a PARENT fact, but every UI path writes the estimate against the CHILD it is looking at.
+`feeNonpayment.sweep()` is PARENT-scoped — deliberately, because unscoped it would send the citizen
+**duplicate** dunning emails — and then asked `computeSituation(parentId)`, which looked for
+`request_fee_estimates WHERE request_id = <parent>`. The parent has none. `hasEstimate` was false, `continue`
+fired, and **for every wrapped request in the system no dunning email was ever sent and non-payment
+auto-close never fired.** The parent-scoping succeeded completely at preventing duplicates — by making
+dunning never happen at all.
+
+### Resolve-through, not a migration
+Estimates stay where the UI writes them; the money QUESTION is answered over the whole tree — the same
+technique `feeRelease.COVERING` uses for the release gate. **Nothing moves, so there is no backfill to get
+wrong**, and at n = 1 every rule is an identity, so ordinary requests are untouched.
+
+Aggregation, each the conservative reading for a citizen: totals/credits/refunds/payments **SUMMED**;
+`workComplete` = **EVERY** estimate-bearing row reconciled (one child still being worked must not trigger a
+demand for the whole request); `accepted` = **EVERY**; `waived` = **ANY** granted; `delivered` = **EVERY**
+leaf. Latest-per-row is preserved before summing so a reissue is not double-counted.
+
+**This also removes a dependency:** §3.1b said the roll-up question "should be decided with the MRR hub."
+The hub was deferred that same day (§5.3) — and the roll-up turned out to be a *read* rule, so it did not
+need the hub at all.
+
+### ⚠️ THERE WERE TWO HALVES, AND FIXING ONE LOOKED CONVINCING
+`clockStart()` — which decides whether the sweep proceeds at all — **also** read `notified_at` off the
+PARENT, while `notified_at` is stamped on the CHILD's estimate. With only `computeSituation` fixed, the
+harness's §B passed on visibility and **the sweep still sent nothing.**
+
+That is why §C was added to drive the real sweep end-to-end, and §C is what caught it. **Visibility was never
+the harm; silence was.** Break-testing confirms the split: reverting `clockStart` alone fails C6/C7 while
+every §B assertion still passes.
+
+### A test-isolation lesson worth carrying
+§C first asserted `res.actions.dunned === 1`. It passed alone and **failed in the full suite** — the sweep
+runs over every active request, so the counter also picks up whatever other harnesses left behind. Rewritten
+to judge **its own row** (the parent's `nonpayment_dunning_at` stamp). **A test of a global sweep must assert
+about its own data, never a global counter.**
+
+### Verification
+**935/935 green, live census clean.** Harness now 14 assertions and REGISTERED. Break-tested both halves
+independently. API restarted and healthy; live probed read-only — **all four live parents report
+`hasEstimate=false` (there are no estimates yet) and `nonpayment.enabled = false`**, so nothing fires today.
+
+⚠️ **Operational note for go-live:** dunning now *works*, and it emails citizens. A system that accumulated
+unpaid wrapped requests while this was inert would dun that backlog the moment it is enabled. Live has none;
+check before switching it on. Recorded in brief §3.1b too.
+
+### Next session
+1. **Phase 1 of the processing rebuild** — unblocked since (z); all five §5 decisions answered. §3.2's
+   resolution is the reference implementation for every stub.
+2. **Open, raised, never decided:** `fee_review` / `awaiting_payment` sit before `record_search` — an estimate
+   and a deposit quoted before anyone has looked (raised in (v)).
+3. Part H of `WORKING_attribute_inventory.md`; (q)'s deliberately-undone items (`dev_mode = '1'`, the
+   `PARTIALLY_GRANTED` notification rows, the RM hold override's WA-entitlement guard).
+4. Brief §3.4 (no from-`closed` guard) and §3.6 (two fragile couplings) are the last unaddressed §3 items.
