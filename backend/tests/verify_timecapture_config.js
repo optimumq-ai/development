@@ -38,9 +38,11 @@ async function work(id) { return await db.get('SELECT work_seconds, work_measure
   ok('A1 GET is readable by ordinary staff (200)', g0.status === 200 && !!c0);
   ok('A2 every UI defaults to off', c0 && ['search', 'estimate', 'legal_redaction', 'mrr', 'legal'].every(function (k) { return c0[k] === 'off'; }));
   var uis = (g0.body && g0.body.uis) || [];
-  ok('A3 built UIs marked available, unbuilt (mrr/legal) not', uis.length === 5 &&
-    uis.filter(function (u) { return u.available; }).map(function (u) { return u.key; }).sort().join(',') === 'estimate,legal_redaction,search' &&
-    uis.filter(function (u) { return !u.available; }).map(function (u) { return u.key; }).sort().join(',') === 'legal,mrr');
+  // `legal` flipped to available 2026-07-19 when LegalReviewTaskPage landed wired to that key. This assertion
+  // is the build-status ledger: it must move in the same commit as a screen, or the panel disables real work.
+  ok('A3 built UIs marked available, unbuilt (mrr) not', uis.length === 5 &&
+    uis.filter(function (u) { return u.available; }).map(function (u) { return u.key; }).sort().join(',') === 'estimate,legal,legal_redaction,search' &&
+    uis.filter(function (u) { return !u.available; }).map(function (u) { return u.key; }).sort().join(',') === 'mrr');
 
   console.log('\n=== B. SAVE — valid modes stick; junk is sanitized; partials MERGE ===');
   var put1 = await api('PUT', '/config/time-capture', tA, { config: { search: 'always', estimate: 'discretion', legal: 'always', mrr: 'nonsense', bogus_key: 'always' } });

@@ -128,6 +128,55 @@ async function openTasks(rid, type) {
   ok('G1 escalating exemption_review -> ag_review keeps the one legal_review, same id',
     lrG2.length === 1 && lrG2[0].id === lrG1.id);
 
+  // ==========================================================================================
+  // H. THE DECISION IS REACHABLE FROM THE UI (brief §4 Phase 2).
+  //
+  // Sections A-G tested the ENDPOINT and passed for a full day while the decision was reachable only by
+  // curl: `/tasks/:id/resolve` handled legal_review correctly, and `TASK_SCREEN` in MyTasksPage carried no
+  // entry for it, so the task fell through to `/requests/:id` — a page with no resolution control. 18 green
+  // assertions over a feature no staff member could use.
+  //
+  // H4 is the one that matters: it closes the CLASS rather than this instance. A task type the resolve
+  // endpoint accepts, with no screen to reach it, is unreachable work — so the check derives the accepted
+  // types FROM THE ROUTE and requires each to have a screen. Add a type to the resolve guard without a
+  // screen and this fails, naming it.
+  // ==========================================================================================
+  console.log('\n=== H. the legal review is REACHABLE from the UI, not just from curl ===');
+  var fs = require('fs');
+  var FE = '/opt/optimumq/frontend/src';
+
+  var pageExists = fs.existsSync(FE + '/pages/LegalReviewTaskPage.js');
+  ok('H1 LegalReviewTaskPage.js exists', pageExists);
+
+  var appSrc = fs.readFileSync(FE + '/App.js', 'utf8');
+  ok('H2 it is routed (legal-review/:taskId -> LegalReviewTaskPage)',
+    /legal-review\/:taskId/.test(appSrc) && /<LegalReviewTaskPage\s*\/>/.test(appSrc));
+
+  var myTasks = fs.readFileSync(FE + '/pages/MyTasksPage.js', 'utf8');
+  var screenMap = (myTasks.match(/var TASK_SCREEN = \{[\s\S]*?\n\};/) || [''])[0];
+  ok('H3 My Tasks links legal_review to that screen', /legal_review:\s*function/.test(screenMap));
+
+  // Derive the accepted types from the route itself, so the check cannot go stale against the backend.
+  var tasksRoute = fs.readFileSync('/opt/optimumq/backend/src/routes/tasks.js', 'utf8');
+  var guard = (tasksRoute.match(/if \(t\.type !== [\s\S]*?\) \{/) || [''])[0];
+  var accepted = (guard.match(/t\.type !== '([a-z_]+)'/g) || []).map(function (m) { return m.split("'")[1]; });
+  var unreachable = accepted.filter(function (ty) {
+    return !new RegExp('(^|[^a-z_])' + ty + ':\\s*function').test(screenMap);
+  });
+  ok('H4 EVERY task type /tasks/:id/resolve accepts has a screen (accepted: ' + accepted.join(', ') +
+     (unreachable.length ? '; UNREACHABLE: ' + unreachable.join(', ') : '') + ')',
+    accepted.length >= 2 && unreachable.length === 0);
+
+  var pageSrc = pageExists ? fs.readFileSync(FE + '/pages/LegalReviewTaskPage.js', 'utf8') : '';
+  ok('H5 the screen resolves through /tasks/:id/resolve (the central-transition path)',
+    /\/tasks\/'\s*\+\s*taskId\s*\+\s*'\/resolve/.test(pageSrc));
+  // §3.3: the removed `POST /tasks/:id/complete` is exactly what a stub screen reaches for, and it would
+  // finish the task WITHOUT moving the request. A stub that calls it looks like it works and strands.
+  ok('H6 and never reaches for the removed /complete endpoint', !/\/complete/.test(pageSrc));
+  // The note is enforced server-side (C-section); the screen must mirror it so the reviewer is not
+  // surprised by a 422 after typing a decision.
+  ok('H7 the screen mirrors the required-note rule client-side', /notes\.trim\(\)/.test(pageSrc) && /required/i.test(pageSrc));
+
   console.log('\n  ' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
   process.exit(fail ? 1 : 0);
 })().catch(function (e) { console.error('HARNESS ERROR:', e); process.exit(1); });

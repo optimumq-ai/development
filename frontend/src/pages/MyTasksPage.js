@@ -25,12 +25,17 @@ var TASK_SCREEN = {
   redaction: function (t) { return '/redaction/' + t.id; },
   legal_redaction: function (t) { return '/redaction/' + t.id; },
   redaction_qa: function (t) { return '/redaction/' + t.id; },
+  // legal_review has been resolvable since 2026-07-18 (`/tasks/:id/resolve`), but had no entry here — so the
+  // task fell through to `/requests/:id`, which has no resolution control, and a legal review was completable
+  // only by curl. A backend resolution path with no entry in THIS map is unreachable work.
+  legal_review: function (t) { return '/legal-review/' + t.id; },
   review_auto_redaction: function () { return '/mass-redaction'; }
 };
 function screenFor(t) { var f = TASK_SCREEN[t.type]; return f ? f(t) : (t.request_id ? '/requests/' + t.request_id : '/mass-redaction'); }
 function actionLabel(t) {
   return t.type === 'record_search' ? 'Search →' : t.type === 'redaction' || t.type === 'legal_redaction' ? 'Redact →'
     : t.type === 'estimate' ? 'Estimate →' : t.type === 'redaction_qa' || t.type === 'review_auto_redaction' ? 'Review →'
+    : t.type === 'legal_review' ? 'Decide →'
     : t.status === 'in_progress' ? 'Continue →' : 'Open →';
 }
 

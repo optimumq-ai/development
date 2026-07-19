@@ -19,14 +19,17 @@
 var KEY = 'time_capture_visibility';
 
 // The task UIs a timer can live on. `available` = the work screen actually exists and is wired to honor the mode.
-// MRR and Legal screens are not built yet — listed so the config model is complete/forward-compatible, but shown
-// disabled in the panel until their screens land.
+// The MRR screen is not built yet — listed so the config model is complete/forward-compatible, but shown
+// disabled in the panel until it lands.
+// `legal` became available 2026-07-19: LegalReviewTaskPage.js ships wired to this key, so the city can now
+// turn the timer on for it. This flag is a BUILD-STATUS LEDGER — flip it in the same commit as the screen,
+// or the config panel keeps a real screen disabled.
 var UIS = [
   { key: 'search',          label: 'Record Search',    available: true },
   { key: 'estimate',        label: 'Estimate',         available: true },
   { key: 'legal_redaction', label: 'Legal Redaction',  available: true },
   { key: 'mrr',             label: 'Multi-Record (MRR)', available: false },
-  { key: 'legal',           label: 'Legal',            available: false },
+  { key: 'legal',           label: 'Legal',            available: true },
 ];
 var MODES = ['off', 'discretion', 'always'];
 var KEYS = UIS.map(function (u) { return u.key; });

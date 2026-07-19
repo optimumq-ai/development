@@ -32,6 +32,7 @@ import RedactionRulesPage from './pages/RedactionRulesPage';
 import RedactionWorkspacePage from './pages/RedactionWorkspacePage';
 import RedactionTaskPage from './pages/RedactionTaskPage';
 import RecordSearchTaskPage from './pages/RecordSearchTaskPage';
+import LegalReviewTaskPage from './pages/LegalReviewTaskPage';
 import StructuredRedactionFieldsPage from './pages/StructuredRedactionFieldsPage';
 import ReleasedRecordsPage from './pages/ReleasedRecordsPage';
 import PublicLibraryMapPage from './pages/PublicLibraryMapPage';
@@ -92,6 +93,7 @@ export default function App() {
           {/* Record-search task screen. Inside the app shell (unlike the full-bleed redaction workstation):
               the searcher works alongside the queue, the redactor works in a focused workspace. */}
           <Route path="record-search/:taskId" element={<RecordSearchTaskPage />} />
+          <Route path="legal-review/:taskId" element={<LegalReviewTaskPage />} />
           <Route path="tickler" element={<TicklerPage />} />
           <Route path="rule-updates" element={<RuleUpdatesPage />} />
           <Route path="jurisdiction-profile" element={<JurisdictionProfilePage />} />

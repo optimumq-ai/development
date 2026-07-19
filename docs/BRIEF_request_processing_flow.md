@@ -56,7 +56,7 @@ Only `intake`, `record_search`, `delivery` have ever been reached in live data. 
 | `estimate` | **Yes** — most complete backend suite | `EstimateTaskPage` — **47-line wrapper, no completion ceremony** | Semi-stub |
 | `fee_waiver` | **Yes** | none — falls through to `/requests/:id` | Needs screen |
 | `routing_review` | **Yes** | none — falls through | Needs screen |
-| `legal_review` | **NO — spawns, nothing completes it** | none | **Broken** (§3.2) |
+| `legal_review` | **Yes** (§3.2, 2026-07-18) | `LegalReviewTaskPage` — Phase 2 skeleton, 2026-07-19 | Real |
 | `review_auto_redaction` | **NO route** | links to `/mass-redaction` | Half-built |
 | `commercial_rate` | nothing spawns it | **invisible on My Tasks** | Dead catalog entry |
 | `mrr_processing` | nothing spawns it | **invisible on My Tasks** | Dead catalog entry |
@@ -274,9 +274,20 @@ entries and the `feeEstimates.js:270` "bug" all evaporated on inspection.
 **Phase 1 — decide the canonical flow (§5.1).** Which stages are in the v2 path. Cheap now, expensive once
 ten screens hang off it.
 
-**Phase 2 — the skeleton.** One screen per task type in stage order, each with the same three parts:
-*(a)* a request-context header reading **parent** facts, *(b)* whatever evidence the task needs, *(c)* one
-primary action that calls the central transition. Blank-but-real is the goal.
+**Phase 2 — the skeleton `[STARTED 2026-07-19]`.** One screen per task type in stage order, each with the same
+three parts: *(a)* a request-context header reading **parent** facts, *(b)* whatever evidence the task needs,
+*(c)* one primary action that calls the central transition. Blank-but-real is the goal.
+
+- ✅ **`legal_review` — `LegalReviewTaskPage` + `legal-review/:taskId` (2026-07-19).** The reference build of
+  the three-part shape. Evidence = the `EXEMPTION_ASSERTED` / `AG_PRECLEARANCE_SUBMITTED` history rows; action
+  = the three outcomes through `/tasks/:id/resolve`, note required.
+  ⚠️ **It was resolvable for a full day before it was reachable.** §3.2 landed the endpoint on 07-18 with 18
+  green assertions, and `TASK_SCREEN` in `MyTasksPage` had no entry — so the task fell through to
+  `/requests/:id`, which has no resolution control, and a legal review was completable **only by curl**. The
+  harness tested the endpoint and never the reachability. `verify_legal_review` §H now closes the **class**:
+  it derives the accepted types from the resolve route and fails if any lacks a screen.
+- **Still needing screens:** `fee_waiver`, `routing_review` (both fall through to `/requests/:id`),
+  and `review_auto_redaction` (links to `/mass-redaction`, no route of its own).
 
 **Phase 3 — thicken by priority**, replacing stubs with real screens; retire the v1 duplicates (§2.3).
 
