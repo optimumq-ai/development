@@ -5512,3 +5512,16 @@ Specs updated: §5.10.4 item 2 marked BUILT, §10.6(b) marked RESOLVED with the 
 (q) and (r) both ended with "read the implementation before believing the sweep." This session adds the
 converse: **a finding that IS written down is not a finding that has been acted on.** The $0-revenue defect sat
 in a doc for a day, correctly described, because it was filed under a heading that made it look harmless.
+
+### 🙈 A FALSE ALARM I RAISED, and the cheap check that would have killed it
+I flagged "live has 11 requests, not the ~129 the specs reference" as an unexplained anomaly worth chasing.
+**It is fully documented and entirely intentional.** `129 → 3` was a deliberate purge — "purge, not migrate;
+the 129 requests are test residue" — with the result verified row-by-row across ten tables (this file, the
+2026-07-16 entry). It then grew to 11 through real submissions, including `2026-000003`, a genuine tester
+request recorded in (q). The "129" in the spec is an explicit **pre-migration snapshot**, which (q)'s own
+stale-doc sweep had already reframed as one.
+
+**One `grep` of this file for "129" would have resolved it in seconds, and I ran that grep only after Kevin
+questioned the flag.** The cost of a false anomaly is not zero: it lands in a "next session" list and buys a
+future agent's time on a settled question. **Before flagging a discrepancy against a dated document, grep the
+log — the number in the spec may be a snapshot, and the change may be someone's decision.**
