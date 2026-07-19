@@ -39,19 +39,82 @@ function deriveStatus(s) {
 // Reads DB -> normalized situation. Deposit requirement + gates are derived LIVE from the current
 // effective total (base minus approved objection credits), so a mid-flight credit/correction that
 // lowers the total re-derives the deposit (may drop to $0) and can flip the start gate.
+// ⚠️ MONEY IS RESOLVED THROUGH THE TREE, NOT OFF ONE ROW (fixed 2026-07-19; brief §3.1b).
+//
+// THE DEFECT THIS CLOSES, and it was silent and total: money is a PARENT fact, but every UI path writes an
+// estimate against the CHILD it is looking at. `feeNonpayment.sweep()` is PARENT-scoped — deliberately,
+// because unscoped it would send the citizen DUPLICATE dunning emails — and then asked
+// `computeSituation(parentId)`, which looked for `request_fee_estimates WHERE request_id = <parent>`. The
+// parent has none. So `hasEstimate` was false, `continue` fired, and **for every wrapped request in the
+// system no dunning email was ever sent and non-payment auto-close never fired.** The parent-scoping
+// succeeded completely at preventing duplicates — by making dunning never happen at all.
+//
+// Proven by tests/verify_nonpayment_scope.js, written 2026-07-19 (q) and deliberately left failing until now.
+//
+// THE FIX IS RESOLVE-THROUGH, NOT A DATA MIGRATION. Estimates stay where the UI writes them; the money
+// QUESTION is answered over the whole tree (the parent and all its children), which is the same technique
+// `feeRelease.COVERING` uses for the release gate. Nothing has to move, and there is no backfill to get wrong.
+//
+// AGGREGATION RULES, and they are not arbitrary — each is the conservative reading for a CITIZEN:
+//   totals / credits / refunds / payments — SUMMED across the tree. Three children with estimates are one
+//                     bill; the citizen pays once for the request.
+//   workComplete      — EVERY estimate-bearing row must be reconciled. Dunning only starts once the work is
+//                     done, so one child still being worked must not trigger a demand for the whole request.
+//   accepted          — EVERY estimate accepted. A tree is not accepted while a part of it is not.
+//   waived            — ANY granted waiver. If a waiver was granted anywhere, do not dun.
+//   delivered         — EVERY leaf delivered or closed.
+// At n = 1 all of these are identities, so an ordinary request is completely unaffected.
+async function moneyTreeIds(rid) {
+  var p = await db.get("SELECT COALESCE(master_request_id, id) AS pid FROM requests WHERE id = ?", [rid]);
+  if (!p || !p.pid) return [rid];
+  var rows = await db.all("SELECT id FROM requests WHERE id = ? OR master_request_id = ?", [p.pid, p.pid]);
+  return rows.length ? rows.map(function (r) { return r.id; }) : [rid];
+}
+
 async function computeSituation(rid) {
-  var est = await db.get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [rid]);
-  var reqRow = await db.get("SELECT stage, status, closure_reason, fee_waiver_status FROM requests WHERE id = ?", [rid]);
-  if (!est) return { hasEstimate: false };
-  var recon = await db.get("SELECT total FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC LIMIT 1", [rid]);
-  var base = (recon && recon.total != null) ? Number(recon.total) : (Number(est.total) || 0);
-  var credRow = await db.get("SELECT COALESCE(SUM(resolution_amount),0) AS c FROM objections WHERE request_id = ? AND status = 'resolved' AND approval_status = 'approved' AND resolution_type IN ('reduction','waiver','write_off')", [rid]);
-  var manualCred = await db.get("SELECT COALESCE(SUM(amount),0) AS c FROM fee_adjustments WHERE request_id = ? AND type = 'credit' AND COALESCE(voided,0) = 0", [rid]);
+  var ids = await moneyTreeIds(rid);
+  var ph = ids.map(function () { return '?'; }).join(',');
+
+  // Latest estimate and latest reconciliation PER ROW — a reissue makes a new estimate for the same row, so
+  // "latest per row" is what the single-row code always meant; summing raw rows would double-count reissues.
+  var estAll = await db.all(
+    "SELECT DISTINCT ON (request_id) * FROM request_fee_estimates WHERE request_id IN (" + ph + ") AND kind = 'estimate' " +
+    "ORDER BY request_id, created_at DESC", ids);
+  var reconAll = await db.all(
+    "SELECT DISTINCT ON (request_id) request_id, total FROM request_fee_estimates WHERE request_id IN (" + ph + ") AND kind = 'reconciliation' " +
+    "ORDER BY request_id, created_at DESC", ids);
+  if (!estAll.length) return { hasEstimate: false };
+
+  var reconBy = {};
+  reconAll.forEach(function (r) { reconBy[r.request_id] = r; });
+  // Most recent estimate across the tree — supplies the config profile and the acceptance/paid fields that
+  // are not summable.
+  var est = estAll.slice().sort(function (a, b) { return String(b.created_at).localeCompare(String(a.created_at)); })[0];
+  var recon = reconBy[est.request_id] || null;
+
+  var reqRows = await db.all("SELECT id, master_request_id, stage, status, closure_reason, fee_waiver_status FROM requests WHERE id IN (" + ph + ")", ids);
+  var reqRow = reqRows.filter(function (r) { return r.id === rid; })[0] || null;
+  var leaves = reqRows.filter(function (r) { return r.master_request_id != null; });
+  if (!leaves.length) leaves = reqRows; // pre-wrap / SYS rows are their own leaf
+
+  var base = 0;
+  estAll.forEach(function (e) {
+    var rc = reconBy[e.request_id];
+    base = Math.round((base + ((rc && rc.total != null) ? Number(rc.total) : (Number(e.total) || 0))) * 100) / 100;
+  });
+  var credRow = await db.get("SELECT COALESCE(SUM(resolution_amount),0) AS c FROM objections WHERE request_id IN (" + ph + ") AND status = 'resolved' AND approval_status = 'approved' AND resolution_type IN ('reduction','waiver','write_off')", ids);
+  var manualCred = await db.get("SELECT COALESCE(SUM(amount),0) AS c FROM fee_adjustments WHERE request_id IN (" + ph + ") AND type = 'credit' AND COALESCE(voided,0) = 0", ids);
   var credits = Math.round(((Number(credRow && credRow.c) || 0) + (Number(manualCred && manualCred.c) || 0)) * 100) / 100;
   var eff = Math.max(0, Math.round((base - credits) * 100) / 100);
-  var refundRow = await db.get("SELECT COALESCE(SUM(amount),0) AS r FROM fee_adjustments WHERE request_id = ? AND type = 'refund' AND COALESCE(voided,0) = 0", [rid]);
+  var refundRow = await db.get("SELECT COALESCE(SUM(amount),0) AS r FROM fee_adjustments WHERE request_id IN (" + ph + ") AND type = 'refund' AND COALESCE(voided,0) = 0", ids);
   var refunds = Math.round((Number(refundRow && refundRow.r) || 0) * 100) / 100;
-  var totalPaid = Math.max(0, Math.round(((Number(est.deposit_paid_amount) || 0) + (Number(est.final_paid_amount) || 0) - refunds) * 100) / 100);
+  var paidGross = 0;
+  estAll.forEach(function (e) { paidGross = Math.round((paidGross + (Number(e.deposit_paid_amount) || 0) + (Number(e.final_paid_amount) || 0)) * 100) / 100; });
+  var totalPaid = Math.max(0, Math.round((paidGross - refunds) * 100) / 100);
+  var allAccepted = estAll.every(function (e) { return !!e.accepted_at; });
+  var allReconciled = estAll.every(function (e) { return !!reconBy[e.request_id]; });
+  var anyWaived = reqRows.some(function (r) { return r.fee_waiver_status === 'granted'; });
+  var allDelivered = leaves.every(function (r) { return r.stage === 'delivery' || r.status === 'closed'; });
   var prof = est.config_profile_id ? await db.get('SELECT config_json FROM fee_profiles WHERE id = ?', [est.config_profile_id]) : await db.get("SELECT config_json FROM fee_profiles WHERE status = 'active' ORDER BY updated_at DESC LIMIT 1");
   var cfg = {}; try { cfg = JSON.parse((prof && prof.config_json) || '{}'); } catch (e) { cfg = {}; }
   var ptCfg = (cfg.paymentTiming && Object.keys(cfg.paymentTiming).length) ? cfg.paymentTiming : pt.deriveDefaultPaymentTiming(cfg);
@@ -62,12 +125,13 @@ async function computeSituation(rid) {
   if (startGate === 'deposit' && plan.firstPayment && plan.firstPayment.required) depositRequired = (plan.firstPayment.amount != null ? Number(plan.firstPayment.amount) : eff);
   return {
     hasEstimate: true,
-    waived: !!(reqRow && reqRow.fee_waiver_status === 'granted'),
+    waived: anyWaived,
     effectiveTotal: eff, totalPaid: totalPaid, depositRequired: depositRequired,
-    startGate: startGate, accepted: !!est.accepted_at,
+    startGate: startGate, accepted: allAccepted,
     releaseHeld: pt.requiresPaymentBeforeRelease(plan),
-    workComplete: !!recon,
-    delivered: !!(reqRow && (reqRow.stage === 'delivery' || reqRow.status === 'closed')),
+    workComplete: allReconciled,
+    delivered: allDelivered,
+    moneyRowCount: estAll.length,
     terminal: (reqRow && reqRow.status === 'closed' && /nonpayment/i.test(reqRow.closure_reason || '')) ? 'closed_nonpayment' : ((reqRow && (reqRow.status === 'withdrawn' || reqRow.status === 'abandoned')) ? 'withdrawn' : null),
     base: base, credits: credits, plan: plan
   };
@@ -107,4 +171,5 @@ async function promoteOnRelease(rid) {
   } catch (e) { console.error('[promoteOnRelease]', e.message); }
 }
 
-module.exports = { deriveStatus: deriveStatus, computeSituation: computeSituation, deriveCurrent: deriveCurrent, recordEvent: recordEvent, timeline: timeline, publicationHeld: publicationHeld, promoteOnRelease: promoteOnRelease };
+module.exports = {
+  moneyTreeIds: moneyTreeIds, deriveStatus: deriveStatus, computeSituation: computeSituation, deriveCurrent: deriveCurrent, recordEvent: recordEvent, timeline: timeline, publicationHeld: publicationHeld, promoteOnRelease: promoteOnRelease };

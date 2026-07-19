@@ -22,8 +22,20 @@ async function nonpaymentConfig() {
   return { enabled: !!np.enabled, windowDays: Number(np.windowDays) || 30, reminderDays: Number(np.reminderDays) || 15, publishOnClose: !!np.publishOnClose, agencyName: (ag && ag.value) || 'the City' };
 }
 
+// ⚠️ THE SECOND HALF OF THE SAME DEFECT (fixed 2026-07-19 with the computeSituation tree fix).
+//
+// This is the dunning CLOCK, and it decides whether the sweep proceeds at all: no invoice date, no dunning.
+// It read `WHERE request_id = <parent>`, but `notified_at` is stamped on the estimate — which every UI path
+// writes against the CHILD. So even once `computeSituation` could SEE the money, the sweep still hit
+// `if (!start) continue;` and did nothing. Fixing only the first half would have looked right, tested green
+// on `hasEstimate`, and still never sent an email — which is why the harness now drives the whole sweep.
+//
+// Scoped over the tree, and MAX() across it: the clock starts at the LATEST notice, so a citizen invoiced
+// again for a later component is not dunned on the strength of the first component's date.
 async function clockStart(rid) {
-  var row = await db.get("SELECT MAX(notified_at) AS n FROM request_fee_estimates WHERE request_id = ? AND notified_at IS NOT NULL", [rid]);
+  var ids = await ps.moneyTreeIds(rid);
+  var ph = ids.map(function () { return '?'; }).join(',');
+  var row = await db.get("SELECT MAX(notified_at) AS n FROM request_fee_estimates WHERE request_id IN (" + ph + ") AND notified_at IS NOT NULL", ids);
   return row && row.n ? row.n : null;
 }
 
