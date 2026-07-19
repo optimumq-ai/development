@@ -56,6 +56,20 @@ function shareFor(rid, feeContextJson) {
   return null;
 }
 
+// THE SNAPSHOT WHOSE COMPONENTS AND TOTAL GOVERN, for one request.
+//
+// Exported because there are now THREE consumers of this rule — the release gate below, the ERP line-item
+// payload (`erpSettlement`), and revenue attribution (`revenueAllocation`, which keeps its own bulk loader
+// because it reads every request at once, and carries a pointer back here). They MUST agree: a record released
+// against one split and billed against another is a defect nobody would find from either side alone.
+async function pricedSnapshot(rid) {
+  var est = await snapshot(rid, 'estimate');
+  if (!est) return null;
+  var recon = await snapshot(rid, 'reconciliation');
+  // A reconciliation supersedes the estimate on BOTH axes — the total and the per-component split.
+  return (recon && recon.total != null) ? recon : est;
+}
+
 async function releaseGate(rid) {
   var est = await snapshot(rid, 'estimate');
   if (!est) {
@@ -112,4 +126,4 @@ async function releaseGate(rid) {
 // Releasing three $20 children against $50 paid must release two and hold the third — not release all three
 // because each is individually under $50. Note this is still not "withheld because a sibling is unpaid": the
 // money was spent on records the citizen already received.
-module.exports = { releaseGate: releaseGate };
+module.exports = { releaseGate: releaseGate, pricedSnapshot: pricedSnapshot };
