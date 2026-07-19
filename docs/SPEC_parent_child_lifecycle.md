@@ -337,12 +337,138 @@ This was researched hard, twice, at Kevin's request. **Across all seven states t
 
 **That is the entire body of authority.** Minimums, de-minimis floors, ceilings and deposits are all drafted as if a request produces exactly one invoice. **Do not go looking for a rule to implement — there isn't one.** Design a default, and label it a design decision.
 
-**Our default** (consistent with both rules above, contradicted by none):
-- **Per-child charge = that child's actual incurred cost** (its labor, pages, media). Those are the only per-child quantities that exist — a child has no independent *price*, only quantities (§6.4).
-- **One-time request-level charges (minimum / flat fee) are consumed by the FIRST installment.** WA's only rule points exactly here.
-- **The de-minimis floor is evaluated against the REQUEST TOTAL, never per installment.** Otherwise a requestor escapes all charges by having the work split. ⚠️ This splitting arbitrage is an **unaddressed gap in the law**, not a solved problem — the only doctrinal hook (WA WAC 44-14-04004(3)) is aimed at agencies gaming *delay*, not requestors gaming *fees*.
-- **The ceiling is a running cap on cumulative billing.** TX has the only genuine request-level ceilings (§ 552.2615(b): fail to give the itemized statement and you "may not collect more than $40"; actuals may not exceed the estimate by >20%), and it never says how to enforce them batch-by-batch. Silence.
+### 5.10.1 The real problem is bigger than the cap `[REVISED 2026-07-19 — supersedes the running-cap default]`
+
+**`componentGross` is a naive per-record sum that is NEVER the amount charged.** `feeEngine.compute()` prices
+each component as hours × rate and pages × rate with **no rounding, no billability gate, no free allowances and
+no tiers** (`feeEngine.js:142-168`), then **discards that** and re-prices everything from **request-level
+aggregates** (`agg.search`, `agg.bw`, …). So `Σ componentGross ≠ total` for reasons that have nothing to do
+with the ceiling.
+
+**No request-level rule decomposes to components.** The ceiling is only the most visible instance. The full
+inventory, verified against the engine 2026-07-19:
+
+**Vehicles that make a combined request CHEAPER than the same records requested separately:**
+
+| # | Vehicle | Mechanism |
+|---|---|---|
+| 1 | **Duplication tiers** | `tieredAmount()` walks bands on the **aggregate** page count. Ten 50-page records billed separately all sit in band 1; combined, 500 pages reach the cheaper bands. Literally quantity-break pricing. Implemented; not enabled in the live TX profile |
+| 2 | **`maxFee` ceiling** | The known one. **`null` in the live TX profile** — theoretical today |
+| 3 | **Delivery charged once per request** | N records, one delivery + handling. Separately, N charges. ⚠️ Collides with As-Ready (§5.8): you physically ship three times, the model charges delivery once |
+| 4 | **`minFee` floor** | One floor instead of N. An *uplift*, not a saving — but it still needs allocating |
+
+**Vehicles where prorata does NOT obviously apply — and this is the half that matters:**
+
+| # | Vehicle | Mechanism |
+|---|---|---|
+| 5 | **Labor rounding on aggregates** | `roundHours(billable[k], increment, mode)` runs on the request total. Ten records at 0.1h each: separately 10 × 0.25 = **2.5h billed**; combined 1.0h → **1.0h**. **LIVE in the active TX profile** (increment 0.25, rounding up) while `maxFee` is null — so this gap is real *today* and the ceiling is not |
+| 6 | **`laborGate` thresholds** | Keys on `totalPages` / `totalLaborHours` across the whole request. Under TX § 552.261's 50-page rule, ten 10-page records are each under 50 → labor free; combined at 100 pages → labor becomes **chargeable**. **Runs the OTHER way**, and it is a **step function** — labor flips entirely on or off |
+| 7 | **Free allowances** | `freeLaborHours`, `freePageAllowance`, `av.freeMinutes` — one allowance per request, consumed in a fixed order across aggregates. Combining is *more* expensive, and nothing records which component consumed them |
+| 8 | **`deMinimis`** | Evaluated on the request total, deliberately, to stop splitting arbitrage |
+
+**⚠️ The consequence for design: there is not always a "saving" to allocate.** In 5–8 the combined request can
+cost **more** than the sum of individuals, so the delta is a *surcharge*. And #6 is not proportional in either
+direction. **Any rule expressed per-vehicle will be wrong for half of them.**
+
+### 5.10.2 THE RULE — generalized prorata `[DECIDED 2026-07-19 by Kevin]`
+
+One rule, both directions, no knowledge of *why* the delta exists:
+
+```
+grossSubtotal        = Σ componentGross[i]                       (already computed, feeEngine.js:172)
+componentCharged[i]  = componentGross[i] × (total / grossSubtotal)
+```
+
+Equivalently: every component is scaled by the ratio of what was **actually charged** to the naive sum. The
+delta — saving *or* surcharge — is distributed in proportion to each record's own gross.
+
+**Why this shape and not a rulebook:**
+- **It is the ERP answer.** This is exactly how an ERP allocates a trade discount or volume rebate across
+  mixed line items, which is the mental model to reach for when explaining it to Finance.
+- **It needs no knowledge of the vehicle.** Tiers, ceiling, floor, delivery, rounding, gates and allowances all
+  collapse into one ratio — and so does any rule added to the engine later. Nothing to maintain per-vehicle.
+- **It is order-independent**, which is the property that killed the previous default (see 5.10.3).
+- **It is explainable to a requestor**: "your $60 record was billed $50 because the request total was capped."
+
+**Guard two edge cases — both reachable, neither hypothetical:**
+1. **`grossSubtotal = 0`** — de-minimis waived the request, or every rate is `'actual'`. Division by zero.
+   Branch explicitly: everything is free, every `componentCharged` is 0.
+2. **`rate: 'actual'` line items contribute 0 to `componentGross`.** Such a component allocates to 0 and reads
+   as *free* while potentially being the most expensive record in the request. **`mail` delivery is `'actual'`
+   in the live TX profile**, so this is live. Either resolve actuals before allocating, or exclude
+   `needsActual` components from the ratio and charge them separately.
+
+### 5.10.3 What this replaces, and why `[the running-cap rule is RETIRED]`
+
+The previous default said *"the ceiling is a running cap on cumulative billing"* — charge each child its actual
+cost in sequence and stop billing at the cap. **Kevin's scenario broke it (2026-07-19).**
+
+Ledger: 10 records × $6 + 1 × $60 = `grossSubtotal` $120; `maxFee` $100.
+
+- The expensive record shipped **first**: cumulative $60, cap not reached → charged **$60**.
+- The same record shipped **last**: cumulative $120 → capped $100, already billed $60 → charged **$40**.
+
+**Same record, same request, $60 or $40 depending on processing order** — an operational accident, not anyone's
+decision. Whoever ships last absorbs the entire benefit; no record has a quotable price; and the release gate's
+answer changes based on which staff member finished first. It did not dissolve the allocation problem, it
+**relocated it into release order**, where it is invisible.
+
+Under 5.10.2 that record is charged $50 (`$60 × 100/120`) whenever it ships.
+
+**What SURVIVES from the earlier default, unchanged:**
+- **One-time request-level charges are consumed by the FIRST installment** — WA RCW 42.56.120(2)(b) is the only
+  authority in this whole area and it points exactly here. *(Note this is now the one deliberate exception to
+  generalized prorata: the WA flat fee is charged once by statute, not shared.)*
+- **The de-minimis floor is evaluated against the REQUEST TOTAL, never per installment.** ⚠️ The splitting
+  arbitrage remains an **unaddressed gap in the law** — the only doctrinal hook (WA WAC 44-14-04004(3)) is aimed
+  at agencies gaming *delay*, not requestors gaming *fees*.
 - **A deposit already collected is credited FIFO against the earliest installments**, so records go out sooner.
+- **TX has no per-batch charging authority anywhere in ch. 552** (see §5.9).
+
+### 5.10.4 `componentCharged` is the missing field three features are blocked on `[NOT BUILT]`
+
+It does not exist under **any** accounting method today — the engine emits `componentGross` (pre-everything) and
+`total` (post-everything), with nothing in between. Adding it closes three separate open problems at once:
+
+1. **The release gate.** `feeRelease.releaseGate()` is a **whole-request** test today
+   (`balance = effectiveTotal − deposit_paid − final_paid`), which is exactly what §5.9 forbids. The
+   per-child coverage test needs a per-child price and there isn't one.
+2. **`fee_revenue by department`** — recorded as **UNDEFINED** (HANDOFF 2026-07-14 (tm)): revenue is one number
+   on the parent, a parent with children in two departments has one figure and two departments, and attributing
+   it "needs the same allocation the law is silent on." **5.10.2 defines it.**
+3. **ERP line items** — see 5.10.5.
+
+### 5.10.5 ERP: compute here, send detail `[DECIDED 2026-07-19 by Kevin]`
+
+**Could Finance's ERP allocate this instead?** In principle yes — prorata allocation of a discount across mixed
+line items is standard AR. **It is still the wrong home, for four reasons:**
+
+1. **It is not a discount, it is a statutory ceiling.** A volume discount is a commercial term a seller elects;
+   a maximum fee limits what a government may charge and here it decides **whether a record may lawfully be
+   withheld**. That is a compliance determination, not revenue recognition.
+2. **The release gate is synchronous and per-record.** "Can this ship now?" is answered on a screen, in the
+   moment. Routing it through an ERP round-trip puts a statutory access right behind a govtech ERP's posting
+   cycle — frequently nightly batch.
+3. **The ceiling binds before the ERP hears anything.** It applies at *estimate* time, before acceptance and
+   before any charge is emitted. There may be no ERP document in existence yet.
+4. **Portability.** Two cities under the same statute would release records differently depending on which ERP
+   they run — behavior varying by a vendor we do not control, invisible to both us and the records officer.
+
+**And empirically it cannot today:** `erpSettlement.emitCharge()` sends a single scalar `amount` plus a
+reference and `chargeCodeHint` — the ERP is never told there are eleven records. To allocate, it would need line
+items; to send line items we must first compute `componentCharged`. **"Offload it" collapses into "build it,
+then also send it."**
+
+**The distinction that resolves it: the release-gate allocation and the GL allocation are different questions
+and need not agree.** Optimum Q must have a per-record answer because it gates a legal act. Finance may allocate
+however their policy dictates for revenue recognition. So: **compute the gate rule here, and extend the ERP
+payload from a scalar to line items carrying `componentCharged`.** Finance gets the detail without inheriting a
+compliance rule; we never inherit their accounting policy.
+
+**Config knob** (the law is silent, so this is a city setting, not an encoded rule): allocation method
+`prorata` *(default)* · `none — report actual costs only`, for a city whose Finance department already has a
+policy. The `none` mode still satisfies their GL; it does **not** change the release gate, which always uses
+prorata because §5.9 requires a per-child coverage test.
 
 ---
 

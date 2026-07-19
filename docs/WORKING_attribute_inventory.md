@@ -232,6 +232,11 @@ The highest-consequence rules in the model. All legal, all currently unenforced 
 7. **`legal_flag`** — record-level or matter-level? Never stated.
 8. **Prune Part C** — especially the ~30 workstream status values in §5.3, which overlap `tasks.status` and `stage`.
 9. **`commercial_rate` / `mrr_processing`** — build or delete.
+10a. ~~**Fee allocation across children**~~ **DECIDED 2026-07-19 — generalized prorata** (`SPEC §5.10.2`):
+    `componentCharged[i] = componentGross[i] × (total / grossSubtotal)`. Replaces the running-cap rule, which
+    made a record's price depend on **release order**. `[NOT BUILT]` — `componentCharged` does not exist under
+    any method today, and it is what the §5.9 release gate, `fee_revenue by department` and ERP line items are
+    all blocked on. Also decided: compute here, send Finance line items rather than totals (§5.10.5).
 10. **Which notice goes out when children disagree?** `[surfaced 2026-07-19 by the doc sweep]` Retiring the
     parent `PARTIALLY_GRANTED` roll-up removed a *status*, but the **compliance artefact it implied is still
     owed**: one child delivered + one child denied is a single citizen who must receive both the records and a
