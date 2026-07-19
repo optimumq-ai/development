@@ -216,7 +216,11 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
       'INSERT INTO request_fee_estimates (id, request_id, kind, config_profile_id, input_json, fee_context_json, total, deposit_due, notify_flag, created_by, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
       [id, req.params.requestId, 'estimate', cfgRow.id, JSON.stringify(request), JSON.stringify(feeContext), R.total, R.depositDue, R.estimateNotifyTriggered ? 1 : 0, (req.user && req.user.name) || (req.user && req.user.sub) || 'system', nowStr()]
     );
-    await run('UPDATE requests SET estimated_fee = ? WHERE id = ?', [R.total, req.params.requestId]);
+    // `requests.estimated_fee` was written here and read NOWHERE. Dropped 2026-07-19 — the authoritative
+    // total is the `request_fee_estimates` row inserted immediately above, and this was a copy that only ever
+    // went stale: nothing updated it on reconciliation, reissue or adjustment, so the moment a request was
+    // reconciled it held a superseded figure that would have looked entirely plausible to a future reader.
+    // It also landed on the ADDRESSED row (a child today), making it a money fact on the work row (§4.3).
 
     await require('../services/paymentStatus').recordEvent(req.params.requestId, { type: 'estimate_issued', amount: R.total, reason: 'estimate calculated', actor: (req.user && req.user.name) || (req.user && req.user.sub) || 'system' });
     res.json({ estimate: { id: id, total: R.total, depositDue: R.depositDue, notify: R.estimateNotifyTriggered, feeContext: feeContext, configProfile: { id: cfgRow.id, name: cfgRow.name } } });

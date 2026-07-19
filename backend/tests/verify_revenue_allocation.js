@@ -70,9 +70,13 @@ function rowFor(rep, label) {
   // reader was cut over, so the stronger assertion is that they cannot come back: a reinstated column is a
   // second, always-zero money source waiting for a future query to find and believe — which is exactly how
   // the $0-revenue defect happened. Checked against the catalog, so it also covers a fresh install.
+  // `estimated_fee` joins them: it HAD a writer but no reader, and nothing updated it on reconciliation, so
+  // it went stale the moment a request was reconciled — a believable money number that was wrong.
   var deadCols = await db.all(
-    "SELECT column_name FROM information_schema.columns WHERE table_name = 'requests' AND column_name IN ('actual_fee','amount_paid')");
-  ok('A1 the dead money columns are gone and stay gone', (deadCols || []).length === 0);
+    "SELECT column_name FROM information_schema.columns WHERE table_name = 'requests' AND column_name IN ('actual_fee','amount_paid','estimated_fee')");
+  var stillThere = (deadCols || []).map(function (x) { return x.column_name; });
+  if (stillThere.length) console.log('        still present: ' + stillThere.join(', '));
+  ok('A1 the three dead money columns are gone and stay gone', stillThere.length === 0);
   var partsA = await alloc.collected();
   ok('A2 deposit + final are BOTH counted ($25 + $15 = $40)', amountFor(partsA, a) === 40);
   var repA = await reports.run({ metric: 'fee_revenue' });

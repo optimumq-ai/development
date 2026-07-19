@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS user_permission_roles (user_id TEXT NOT NULL, permiss
 -- Per-person routable task-type subset (v3 role model). Eligibility = active + on team + subset includes the task type.
 CREATE TABLE IF NOT EXISTS user_task_types (user_id TEXT NOT NULL, task_type TEXT NOT NULL, PRIMARY KEY (user_id, task_type));
 CREATE TABLE IF NOT EXISTS requests (id TEXT PRIMARY KEY, request_number TEXT UNIQUE NOT NULL, is_mrr INTEGER DEFAULT 0, master_request_id TEXT, component_label TEXT, requestor_name TEXT NOT NULL, requestor_email TEXT NOT NULL, requestor_phone TEXT, requestor_type TEXT DEFAULT 'individual', delivery_method TEXT DEFAULT 'email', description TEXT NOT NULL, record_types TEXT, classification TEXT DEFAULT 'standard', department_id TEXT, assigned_to TEXT, stage TEXT DEFAULT 'intake', status TEXT DEFAULT 'active', closure_reason TEXT,
- fee_waiver_requested INTEGER DEFAULT 0, estimated_fee DOUBLE PRECISION DEFAULT 0, legal_flag INTEGER DEFAULT 0, legal_flag_type TEXT, deadline_date TEXT, submission_channel TEXT DEFAULT 'portal', created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')), updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
+ fee_waiver_requested INTEGER DEFAULT 0, legal_flag INTEGER DEFAULT 0, legal_flag_type TEXT, deadline_date TEXT, submission_channel TEXT DEFAULT 'portal', created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')), updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
 CREATE TABLE IF NOT EXISTS request_history (id TEXT PRIMARY KEY, request_id TEXT NOT NULL, actor_id TEXT, actor_name TEXT NOT NULL, action TEXT NOT NULL, details TEXT, notes TEXT, stage_from TEXT, stage_to TEXT, created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
 CREATE TABLE IF NOT EXISTS fee_matrix (id TEXT PRIMARY KEY, category TEXT NOT NULL, description TEXT, rate DOUBLE PRECISION NOT NULL, unit TEXT NOT NULL, is_active INTEGER DEFAULT 1, sort_order INTEGER DEFAULT 0);
 CREATE TABLE IF NOT EXISTS request_files (id TEXT PRIMARY KEY, request_id TEXT, repository_id TEXT, filename TEXT NOT NULL, original_name TEXT NOT NULL, mimetype TEXT, size INTEGER, status TEXT DEFAULT 'attached', responsive INTEGER DEFAULT 0, uploaded_by TEXT, uploaded_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
@@ -859,6 +859,19 @@ CREATE INDEX IF NOT EXISTS ix_requests_master ON requests (master_request_id);
 -- (they are gone from the CREATE TABLE above).
 ALTER TABLE requests DROP COLUMN IF EXISTS actual_fee;
 ALTER TABLE requests DROP COLUMN IF EXISTS amount_paid;
+
+-- `estimated_fee` goes too, and it was the MIRROR IMAGE of those two: it had a writer
+-- (routes/feeEstimates.js, immediately after inserting the authoritative `request_fee_estimates` row) and no
+-- reader anywhere. A write-only denormalized copy.
+--
+-- ⚠️ IT WAS STALE BY DESIGN, which is the real reason it goes. That single write was the ONLY one in the
+-- codebase: reconciliation, reissue and adjustment each write a NEW `request_fee_estimates` snapshot and never
+-- touched this column. So the moment a request was reconciled it held a superseded total — a believable money
+-- number that was wrong, the same trap `amount_paid` set. It also landed on the ADDRESSED row (a child today),
+-- putting a money fact on the work row, contrary to §4.3.
+--
+-- Verified 0 in all 13 live rows before dropping. The estimate total lives on `request_fee_estimates.total`.
+ALTER TABLE requests DROP COLUMN IF EXISTS estimated_fee;
 
 -- ============================================================================================
 -- REFERENTIAL INTEGRITY FOR requests(id)  +  THE PAYMENT-HISTORY DELETE GUARD
