@@ -5202,3 +5202,154 @@ Three of §3.1's six entries and the `feeEstimates.js:270` "bug" all **evaporate
 grep-level inferences that the implementations contradicted, usually with a comment explaining exactly why the
 code was right. §3.2's claims, by contrast, all held. **Check each remaining claim against the implementation
 before building anything on it.**
+
+---
+
+## 2026-07-19 (q) — Parent/child attribute audit, a 7-doc stale sweep, four MRR decisions, and a fresh-install defect
+Long session, 16 commits after (p). Two code fixes, one live defect proven, one schema defect fixed, and the
+rest is design/doc reconciliation driven by Kevin. Suite **745 → 793**, live census clean throughout.
+
+### ⚠️ THE FINDING THAT MATTERS MOST — dunning is INERT for every wrapped request
+**Verified, not inferred** (`tests/verify_nonpayment_scope.js`). Money is a PARENT fact, but every UI path
+addresses a **child**: `EstimateTaskPage` passes `task.request_id`, and all 17 `/fee-estimates` endpoints use
+the id they are handed with zero parent resolution. `feeNonpayment.sweep()` is **parent**-scoped — deliberately,
+because unscoped it would send citizens *duplicate* dunning emails — then hits `if (!sit.hasEstimate) continue;`.
+The parent has no estimate, so **every wrapped request is skipped: no dunning email ever sends, and non-payment
+auto-close never fires.** The parent-scoping succeeded completely at preventing duplicates, by making dunning
+never happen at all.
+
+Latent only because nothing has reached `fee_review`. **The harness is deliberately NOT registered in
+`run_suite` — it FAILS today by design.** Register it the moment the money axis moves to the parent; it is that
+fix's regression test, already written.
+
+### Two more live facts worth carrying
+- **`routing_review` fires PER CHILD.** `onIntake` loops over `childIds`, and its idempotency guard is scoped
+  `WHERE request_id = ?` so it cannot dedupe across siblings. **Confirmed in live data: one parent carries 3
+  routing_review tasks.** An ORO Associate resolves the same citizen request three times. Also: "routed to ORO"
+  is a *staffing convention*, not code — the task is team-agnostic and resolved by eligibility.
+- **MRR → ORO routing does not exist.** No `createTask({type:'mrr_processing'})` anywhere. The queue is already
+  honest about it, rendering `—` with a comment that inventing an owner "would be a lie."
+
+### The stale-doc sweep — 7 documents corrected at source
+The binding spec's own header said **"DESIGNED, NOT BUILT … 0 children"** — true the morning of 07-16, false by
+that afternoon. **This had a traceable cost:** it is why (m)'s brief was rebuilt from a live DB inventory
+instead of the spec, and why 3 of its 6 §3.1 entries were wrong. `DOMAIN_MAP.md` (the index agents read first)
+said the same. Both corrected, plus a precedence rule: **a section's own build tag beats the header.**
+
+Also corrected: `TASK_AND_NOTIFICATION_MODEL.md` §7 (a 07-07 *audit* asserting "'always parent' — **VERIFIED
+FALSE**" and "child creation does NOT exist" — dangerous precisely because audit results read as authoritative);
+`SPEC_fees_estimates_payments.md` ("MRR-aware fee aggregation exists" — disproved by the dunning test, and the
+same file contradicted itself two paragraphs down); two docs citing the retired `PARTIALLY_GRANTED` roll-up;
+`WORKFLOW_DECISIONS.md`'s terminal-state table (mapped onto §5.8's eight child dispositions, which surfaced two
+the list was missing); a dangling §14.5 → §6.2 pointer *inside* the binding spec, aimed at a section that
+forbids building from itself; and four **"waits for #11"** deferrals — #11 shipped 07-16.
+
+`HANDOFF.md` carries the same "#11" language in three places and was **left alone deliberately** — it is a dated
+log and those entries were true when written.
+
+### `docs/WORKING_attribute_inventory.md` — Kevin's ask, a scratchpad not a spec
+Every `requests` column with where it is actually written, what the spec says, and whether they agree; a dead
+list (`actual_fee`, `amount_paid` have **no writers**); the designed-but-unbuilt "overkill" list to prune; and
+the four inheritance mechanisms already in ad-hoc use — **copy-down, cascade-down, resolve-through, roll-up
+(which does not exist)**. Most defects found are a column using the wrong one.
+
+### §5.10 rewritten — generalized prorata `[NOT BUILT]`
+Kevin's scenario killed the old "running cap on cumulative billing" rule: 10 × $6 + 1 × $60, cap $100 — the
+expensive record is charged **$60 if it ships first, $40 if it ships last**. Price by processing order. It did
+not dissolve the allocation problem, it **relocated it into release order, where it is invisible**.
+
+Investigating it found something larger: **`componentGross` is a naive per-record sum that is NEVER charged.**
+The engine prices components with no rounding, gates, allowances or tiers, then discards that and re-prices from
+request-level aggregates. **No request-level rule decomposes to components.** Eight vehicles inventoried — and
+the cap is not the main one and is **`null` in the live TX profile**, while aggregate labor rounding (0.25, up)
+is **live today**. Four vehicles run the *other* way (combining costs MORE), and `laborGate` is a step function,
+so any per-vehicle rulebook is wrong for half of them.
+
+Hence one rule: **`componentCharged[i] = componentGross[i] × (total / grossSubtotal)`** — the ERP answer,
+order-independent, ignorant of the vehicle, absorbs rules not yet invented. Two guarded edge cases:
+`grossSubtotal = 0`, and `rate:'actual'` items contributing 0 (live — `mail` is `'actual'` in TX).
+
+**`componentCharged` is the missing field THREE features are blocked on:** the §5.9 release gate (today a
+whole-request test, which §5.9 forbids), `fee_revenue by department` (recorded UNDEFINED on 07-14), and ERP line
+items. **Highest-leverage next build.**
+
+### ERP: compute here, send detail
+`erpSettlement.emitCharge()` sends a **single scalar amount** — the ERP is never told there are eleven records,
+so it cannot allocate anything. "Offload it" collapses into "build it, then also send it." Decided: the
+**release-gate allocation and the GL allocation are different questions and need not agree.** Optimum Q owns the
+gate (it authorizes a legal act); Finance allocates however their policy dictates; extend the payload to line
+items.
+
+### §15 — THE MRR RULE MATRIX, SHIPPED BLANK `[Kevin, and it supersedes four decisions made earlier the same day]`
+Mid-session Kevin decided As-Ready default, per-child notices, per-request delivery fee. **Then he pulled back**:
+of six calls made, only one (notice *content*) is clearly stated in statute. Where the law is that silent, a
+shipped default is **the vendor making policy for a government**, and it runs invisibly.
+
+So: **no values ship.** Six rows — `delivery_mode`, `hold_override`, `delivery_fee_basis`, `notice_packaging`,
+`notice_send`, `fee_allocation` — each storing **value + basis + who set it, when**. City fills them with
+counsel; **MRR does not unlock until complete.**
+
+**The gate costs nothing: every row is a no-op at n = 1** (one record → one shipment → one notice → one
+component). Ordinary requests untouched; the only thing gated is a hub that is not built.
+
+Today's decisions are **not discarded — they became permitted values**, and the seven-state research is
+surfaced beside each row as **considerations for the city to weigh, never a recommended value.** §15.4 lists
+what may NEVER enter the matrix (sibling-nonpayment withholding, denial-notice content, per-child statutory
+deadlines, record/AG-hold scope, appeal scope, parent disposition) — a row there lets a city configure itself
+into unlawful conduct.
+
+### Go-live readiness — `docs/DESIGN_go_live_readiness.md` `[BUILD LATER]`
+Kevin could not recall where any prior work lived. There is a lot: the wizard is **BUILT** (7 phases, reviewer
+flow, live readiness signals), the fee sandbox gate genuinely bites and is version-bound, redaction rule approval
+is genuinely enforced at `zoneDiscovery`, attestation is built and verified. **But none of it gates go-live** —
+`onboarding_progress` is read by one route and two frontend files, there is **ONE** hard enforcement point in the
+codebase, `dev_mode = '1'` bypasses it, and **0 of 180 sections are attested**.
+
+**Recorded disagreement:** gates and wizard have **opposite timing**. A gate is domain-local (only fees knows
+what "complete" means) so gates must land WITH each domain — as already happened for fees and redaction. The
+wizard is a shell owning no domain knowledge. **Building gates late IS the rebuild Kevin fears.** The MRR matrix
+is the first test; it already specifies its own gate.
+
+**Pushed back on "the key will deactivate":** disabling a records system a city relies on for *statutory*
+compliance is not ordinary SaaS deactivation — missed deadlines become a harm the vendor plausibly caused, which
+inverts the liability posture in `BUSINESS_LEGAL_IP_LOG.md`. Kevin's own 2026-06-25 two-key design is better:
+**WITHHOLD ACTIVATION, NEVER REVOKE IT.** His call, but settle wording with counsel before it enters a contract.
+
+### Fresh-install defect FIXED (`9c0cfbc`) — this class has now bitten THREE times
+`schema.postgres.sql` seeded **6** phases with no `fees` row, and **nothing in the codebase ever wrote
+`requires_review`** — live's 7 phases and 3 gated flags were set **by hand**. A new city install got **no Fees
+phase (so no sandbox gate) and ZERO gated phases** — every phase completable by any authenticated user via a
+plain PATCH. The opposite of the intended posture, and silent, because the wizard still *looks* configured.
+
+Fixed with all 7 phases seeded plus an `IS DISTINCT FROM`-guarded convergence block (the schema re-applies on
+every boot; verified live unchanged). New harness **`verify_fresh_install` (26 assertions)**, registered,
+break-tested (reverting fails 8, including "gated phases found 0"). It also asserts `SetupPage`'s `PHASE_META`
+can render every seeded phase, catching drift the other way.
+
+**The rule it enforces: THE LIVE DATABASE IS NOT THE SPECIFICATION.** Anything a city needs on day one must come
+from the schema. The suite is the *only* place a fresh install is exercised (`reset_test_db.js` builds from
+empty) — which is why these sat undetected while the running system looked fine.
+
+### Verification
+**793/793 green, live census clean.** Break-tests performed and reverted for `verify_fresh_install` and
+`verify_legal_review`; suite re-confirmed green after each. Live probed read-only throughout; `2026-000003`
+(tester data) untouched.
+
+### Next session
+1. **`componentCharged`** — one field unblocks the release gate, revenue-by-department and ERP line items. Best
+   ratio of leverage to risk on the board, and §5.10.2 fully specifies it.
+2. **Phase 1 of the processing rebuild is BLOCKED on Kevin** — brief §5: the 10-stage order,
+   single-record vs MRR hub, `commercial_rate`/`mrr_processing` build-or-delete, retire v1 redaction duplicates.
+3. `WORKING_attribute_inventory.md` **Part H** — 7 remaining items, none with legal exposure (copy-down vs
+   resolve-through for citizen identity; `closure_reason`/`tickler_flag` ownership; `legal_flag` scope; Part C
+   prune, especially §5.3's ~30 workstream status values).
+4. **Left deliberately undone:** `dev_mode = '1'` (belongs on the go-live checklist, not a commit);
+   `WORKFLOW_DECISIONS.md`'s `PARTIALLY_GRANTED` notification rows (needs the §4.4 field-design pass);
+   the RM hold override's WA-entitlement guard (**do not build the override without resolving it**).
+
+### ⚠️ THE STANDING LESSON — earned twice this session
+Three of §3.1's six entries, the `feeEstimates.js:270` "bug", and `laborActuals`' "aggregate lands on the first
+component" **all evaporated on inspection** — grep-level inferences the implementations contradicted, usually
+with a comment explaining exactly why the code was right. §3.2's claims, by contrast, all held.
+**On this domain, read the implementation before believing the sweep — and check the schema before believing
+live.**
