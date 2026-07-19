@@ -234,18 +234,20 @@ The highest-consequence rules in the model. All legal, all currently unenforced 
 7. **`legal_flag`** — record-level or matter-level? Never stated.
 8. **Prune Part C** — especially the ~30 workstream status values in §5.3, which overlap `tasks.status` and `stage`.
 9. **`commercial_rate` / `mrr_processing`** — build or delete.
-10b. ~~**Release policy — Hold-All vs As-Ready** (was item 2)~~ **DECIDED 2026-07-19: As-Ready is the DEFAULT**
-    (`SPEC §5.8`). `delivery_mode` per Jurisdiction Profile — `as_ready` (default) · `hold_all`, with `hold_all`
-    **not selectable** where statute makes installments an entitlement (WA). Per-request **hold** override by the
-    ORO Associate managing the MRR; only meaningful for n > 1. Delivery fee stays **once per request**,
-    configurable to per-installment (§5.10.6). ⚠️ **Still open:** the override needs a guard so an RM hold cannot
-    defeat the WA entitlement — recommended (unratified) is *requires a note + a requestor installment request
-    overrides the hold*. **Do not build the override without resolving it.**
-10c. ~~**Which notice when children disagree** (was item 10)~~ **DECIDED 2026-07-19: ONE NOTICE PER CHILD**
-    (`SPEC §5.8.1`). The question dissolves — each child emits one notice for its own disposition. Content was
-    always per-record by law; only packaging was open, and no statute addresses it. ⚠️ **Watch:** per-child
-    notices must not become per-child *correspondents* — §14.1 keeps the RM the sole voice, so auto-send needs
-    an approval step or an explicit setting.
+10b+10c. ~~**Release policy (was item 2) and notice packaging (was item 10)**~~ → **RESOLVED 2026-07-19 by
+    becoming the MRR RULE MATRIX, SHIPPED BLANK** (`SPEC §15`). Kevin's call: where the law is this silent, a
+    shipped default is the vendor making policy for a government — and it runs invisibly, so a wrong default
+    stays wrong for years. **No values ship.** The city answers each row with counsel; **MRR does not unlock
+    until the matrix is complete.**
+    Rows: `delivery_mode` · `hold_override` · `delivery_fee_basis` · `notice_packaging` · `notice_send` ·
+    `fee_allocation`. Each stores **value + basis (statute/ordinance/city policy) + who set it, when**.
+    **The gate costs nothing: every row is a no-op at n = 1** (one record → one shipment → one notice → one
+    component), so ordinary requests are untouched and the un-built hub is the only thing gated.
+    Our seven-state research is surfaced beside each row as **considerations for the city to weigh, never as a
+    recommended value** — that keeps the research valuable without turning it into vendor policy.
+    ⚠️ **Still open:** what a city sees if an MRR arrives while the matrix is blank (a citizen submits when they
+    choose — "locked" must not mean "submission fails"). Likely: accept and wrap normally, hub and per-child
+    release/notices inert until answered. **Needs deciding before build.**
 10a. ~~**Fee allocation across children**~~ **DECIDED 2026-07-19 — generalized prorata** (`SPEC §5.10.2`):
     `componentCharged[i] = componentGross[i] × (total / grossSubtotal)`. Replaces the running-cap rule, which
     made a record's price depend on **release order**. `[NOT BUILT]` — `componentCharged` does not exist under

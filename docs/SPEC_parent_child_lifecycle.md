@@ -319,9 +319,16 @@ The sheet ends at Redaction → `Completed` and the child falls off the edge; no
 | `installment_no` | Which delivery batch this child went out in. |
 | `delivered_at` | |
 
-### 5.8.1 Notices are PER CHILD `[DECIDED 2026-07-19 by Kevin]`
-**One notice per child, carrying that child's own disposition.** Not one combined notice per request, and not
-a hybrid split by disposition type.
+### 5.8.1 Notice packaging — **A MATRIX ROW, SHIPPED BLANK** `[REVISED 2026-07-19 — see §15]`
+
+`notice_packaging` — `per_child` · `combined`. **No default.** The city answers it before MRR unlocks.
+
+**Notice CONTENT is not in the matrix and never was** — a denial carries the specific exemption, the statutory
+citation, and an explanation of how it applies to the record withheld (WA RCW 42.56.210(3) · FL § 119.07(1)(e) ·
+IL § 9(b) · TX § 552.301(e)(2)), already modeled as `child_exemptions` (§5.7). That is an invariant (§15.4).
+**Packaging** is the city's; **content** is not.
+
+The considerations below are for the city to weigh — findings, not a recommended value.
 
 **What the law fixes, and what it leaves open.** Notice *content* is per-record and mandatory: a denial needs
 the specific exemption, the statutory citation, and an explanation of how it applies to the record withheld
@@ -330,14 +337,14 @@ the specific exemption, the statutory citation, and an explanation of how it app
 batch notices are a scheduling device inside the AG-decision track only (§5.9), not a general mandate. So
 packaging is a design decision, and this is it.
 
-**Why per-child is the coherent choice here — it follows from `as_ready`.** Under the As-Ready default each
-child ships when it is ready, at its own time, so its own notice is the natural artifact rather than a
-bureaucratic one. The combination Hold-All + per-child notices would have meant five letters in one envelope;
-As-Ready + per-child means one letter per shipment. **For n = 1 this is one record, one shipment, one notice —
-indistinguishable from today.**
+**CONSIDERATION — packaging interacts with `delivery_mode`.** If a city selects `as_ready`, each
+child ships at its own time, so a per-child notice is the natural artifact. Under `hold_all`, `per_child`
+would mean five letters arriving in one envelope, and `combined` reads better. **The two rows are not
+independent — a city answering them inconsistently gets an awkward result, so they should be presented
+together.** For n = 1 both values produce one record, one shipment, one notice.
 
-**It also maps 1:1 onto the disposition model.** Each child ends in exactly one §5.8 disposition, and each
-disposition emits exactly one notice. No roll-up, no precedence table, no "what do we call it when one is
+**CONSIDERATION — `per_child` maps 1:1 onto the disposition model.** Each child ends in exactly one §5.8
+disposition, so `per_child` emits exactly one notice per disposition. No roll-up, no precedence table, no "what do we call it when one is
 delivered and one is denied" — the question that the retired parent `PARTIALLY_GRANTED` existed to answer
 **does not arise**, because the citizen receives one notice per record telling them what happened to that
 record.
@@ -349,25 +356,31 @@ contact-requestor button.
 
 **Per-child release is first-class, not an MRR override.** WA RCW 42.56.080(2) makes installment delivery a requestor *entitlement* ("on a partial or installment basis as records … are assembled or made ready"). ~~Keep `Hold-All` as the parent's operator default (what most cities do), but model `As-Ready` as a first-class parent `delivery_mode`.~~ The MRR "force release one child" button is then an ordinary As-Ready release, not a bespoke path.
 
-> ### `delivery_mode` — DECIDED 2026-07-19 by Kevin: **As-Ready is the DEFAULT**
-> The earlier draft made `Hold-All` the shipped default "because most cities do it." **Reversed.** A record
-> that is finished ships when it is finished.
+> ### `delivery_mode` — **A MATRIX ROW, SHIPPED BLANK** `[REVISED 2026-07-19 — see §15]`
 >
-> **Why the default carries the legal weight.** With As-Ready as the default, WA's entitlement is satisfied
-> **by construction** — a requestor never has to know the word "installment" or ask for anything. Under a
-> Hold-All default the entitlement would depend on the requestor knowing to ask *and* staff honoring it, which
-> is compliance-by-vigilance. TX § 552.221(a) ("shall **promptly produce**") and CA § 7922.500 (nothing permits
-> an agency to "**delay or obstruct**") point the same way even where no entitlement is codified.
+> This section briefly (same day) said "As-Ready is the DEFAULT," reversing an earlier "Hold-All by default."
+> **Both are superseded: there is no default.** `delivery_mode` is a row in the MRR Rule Matrix (§15), shipped
+> **empty**, answered by the city with counsel before MRR unlocks. Kevin's reasoning: where the law is this
+> silent, a shipped default is the vendor making policy for a government, and it runs invisibly.
 >
-> **`delivery_mode` per Jurisdiction Profile** — `as_ready` *(default)* · `hold_all`. Cities may change it,
-> **except where statute makes installments an entitlement** (WA today), where `hold_all` must not be
-> selectable. This follows Kevin's standing rule: statute where clearly stated, city config where silent — and
-> it means the pending WA model-rules rewrite is a settings change, not a code change.
+> The reasoning below is retained **as a consideration to surface beside the row** — research for the city to
+> weigh, **not a recommended value**.
 >
-> **Per-request override: the ORO Associate managing the MRR may hold.** Not the requestor — under an As-Ready
-> default there is nothing for them to elect. The override exists for the real operational cases (a coherent
-> release makes more sense delivered together; an active investigation across siblings). Kevin: *"it's likely
-> that issues arise infrequently with this model."*
+> **CONSIDERATION — which value leaves the entitlement satisfied without anyone having to act.** If a city
+> selects `as_ready`, WA's entitlement is satisfied **by construction**: a requestor never has to know the word
+> "installment" or ask for anything. If a city selects `hold_all` where that is permitted, honoring an
+> entitlement depends on the requestor knowing to ask *and* staff honoring it — compliance-by-vigilance.
+> TX § 552.221(a) ("shall **promptly produce**") and CA § 7922.500 (nothing permits an agency to "**delay or
+> obstruct**") point the same way even where no entitlement is codified.
+>
+> **Jurisdiction constraint, not a default:** `hold_all` **must not be selectable** where statute makes
+> installments an entitlement (WA today). Statute where clearly stated, city choice where silent — and it means
+> the pending WA model-rules rewrite is a constraint update, not a code change.
+>
+> **The `hold_override` row** governs whether the ORO Associate managing an MRR may hold a ready record. It is
+> the RM's, not the requestor's — under `as_ready` there is nothing for a requestor to elect. The real cases are
+> operational (a coherent release reads better delivered together; an active investigation spanning siblings).
+> Kevin: *"it's likely that issues arise infrequently with this model."*
 >
 > **The override only exists for n > 1.** With one child there is one record and one shipment, so As-Ready and
 > Hold-All are the same thing. This is not an MRR special case — it is n = 1 degenerating correctly.
@@ -531,16 +544,16 @@ prorata because §5.9 requires a per-child coverage test.
 
 ### 5.10.6 Delivery fee under As-Ready `[DECIDED 2026-07-19 by Kevin]`
 
-As-Ready ships N times but the engine charges delivery **once per request** (`feeEngine.js`, "delivery (once
-per request)"). Decision: **keep once-per-request as the default; make it city-configurable to per-installment.**
+`as_ready` ships N times but the engine charges delivery **once per request** (`feeEngine.js`, "delivery (once
+per request)"). `delivery_fee_basis` — `per_request` · `per_installment` — is a **matrix row shipped blank**
+(§15). No default.
 
-`delivery_fee_basis` — `per_request` *(default)* · `per_installment`.
-
-**Why once-per-request is the right default.** Under As-Ready the requestor is not choosing extra shipments —
-the system ships as records become ready, and in WA that is an *entitlement*. Billing per installment would
-charge a requestor more for exercising a statutory right, which is legally uncomfortable and plausibly
-challengeable. The city absorbing incremental postage is the safer posture. `per_installment` exists for a city
-that genuinely incurs and wants to recover per-shipment cost, consistent with config-where-silent.
+**CONSIDERATION for the city.** Under `as_ready` the requestor is not choosing extra shipments — the system
+ships as records become ready, and in WA that is an *entitlement*. Billing `per_installment` therefore charges a
+requestor more for exercising a statutory right, which is legally uncomfortable and plausibly challengeable.
+`per_installment` reflects real incurred cost and may be defensible where the city genuinely bears per-shipment
+expense. **No statute addresses this** — §5.10 found only two allocation rules in seven states, neither on
+point.
 
 **Interaction with §5.10.2 that needs no new rule:** delivery is a one-time request-level charge, so it is
 consumed by the **first installment** (the surviving WA-derived rule in §5.10.3) rather than shared prorata.
@@ -1054,3 +1067,95 @@ intuition that "some denied ⇒ partially granted" — read the precedence table
 >
 > What genuinely remains open is **notices**, not status: which notice a citizen receives when one child is
 > delivered and another denied. That belongs to §4.4's field-design pass — see `WORKFLOW_DECISIONS.md` Part 4.
+
+---
+
+## 15. The MRR Rule Matrix — **SHIPPED BLANK** `[DECIDED 2026-07-19 by Kevin — NOT BUILT]`
+
+**The product ships with NO values in this matrix.** Every row is empty on install. The city fills it in — with
+their counsel — and **MRR functionality does not unlock until it is complete**. Optimum Q never picks a value.
+
+### 15.1 Why blank, and not "sensible defaults"
+
+The MRR release/notice/fee questions have almost no statutory answer. §5.10 established that across seven
+states there are exactly **two** rules that decide a fee-allocation question; §5.9 found the payment hook tied
+everywhere to "the copies being provided" and nothing at all about batching; and no statute anywhere addresses
+notice *packaging*. Where the law is that silent, a shipped default is **the vendor making policy for a
+government** — and it runs invisibly, so a default that is wrong for a jurisdiction stays wrong for years.
+
+A blank row cannot be silently wrong. It forces the decision to the party who owns it, at onboarding, when
+counsel is in the room.
+
+> **Kevin's standing rule (2026-07-19):** *"I want to steer clear of granular level code where the law does not
+> clearly define what is supposed to happen. If it's not clearly stated in state statute or local ordinance, I
+> want to provide a customer configurable option."* The matrix is that rule applied to MRR, taken to its end:
+> not merely configurable, but **unset until configured**.
+
+### 15.2 The gate costs nothing, because every row is a no-op at n = 1
+
+This is what makes shipping blank cheap rather than obstructive. **Each rule only has meaning for n > 1:**
+
+| Rule | At n = 1 |
+|---|---|
+| `delivery_mode` | One record, one shipment — as-ready and hold-all are the same event |
+| `notice_packaging` | One child, one notice either way |
+| `delivery_fee_basis` | One installment |
+| `fee_allocation` | `componentGross × (total / grossSubtotal)` collapses to `total` with a single component |
+
+So an unfilled matrix **blocks nothing that works today**. Ordinary single-record requests — the overwhelming
+majority — are untouched. And the MRR hub (§14.3) is not built, so there is nothing live to gate.
+
+**This is not an MRR special case.** It is n = 1 degenerating correctly, which is the same property always-wrap
+exists to produce (§1).
+
+### 15.3 The rows
+
+**Axis: the matrix is CITY-level** (this is an on-premise, per-city install), **with jurisdiction-level
+constraints that remove values.** Two Texas cities may legitimately answer `notice_packaging` differently; no
+Washington city may answer `delivery_mode = hold_all`. Constraints come from `jurisdiction_rules`; answers live
+with the city.
+
+| Row | Permitted values | Jurisdiction constraint | What the city is deciding |
+|---|---|---|---|
+| `delivery_mode` | `as_ready` · `hold_all` | **`hold_all` FORBIDDEN where installments are a statutory entitlement (WA — RCW 42.56.080(2))** | Whether a finished record ships on its own or waits for its siblings |
+| `hold_override` | `none` · `rm_with_note` | Where `delivery_mode` is constrained to `as_ready`, an override that defeats the entitlement is likewise forbidden | Whether the ORO Associate on an MRR may hold a ready record, and whether a reason is required |
+| `delivery_fee_basis` | `per_request` · `per_installment` | — | Whether N shipments cost N delivery charges |
+| `notice_packaging` | `per_child` · `combined` | — (content is fixed by law, §15.4) | One notice per record, or one itemized notice per shipment |
+| `notice_send` | `rm_approves` · `auto` | — | Whether notices auto-emit on release or wait for the Request Manager (§14.1 keeps the RM the sole voice) |
+| `fee_allocation` | `prorata` *(§5.10.2)* | — | How a request-level saving or surcharge distributes across children |
+
+**Each row stores three things, not one:** the **value**, the **basis** (`statute` + citation · `local ordinance`
++ citation · `city policy`), and **who set it, when**. That is what makes it defensible — asked why the system
+behaves this way, the answer is a citation or "the city chose this on 2026-08-14," and never "the vendor decided."
+
+**Ship the research, not the answer.** The seven-state work in §§5.9–5.10 and Appendix A is genuinely useful to
+a city's counsel and should be surfaced beside each row as *considerations* — WA's entitlement, TX § 552.221(a)
+"shall promptly produce," CA § 7922.500 "delay or obstruct," the fact that only two allocation rules exist
+anywhere. **Presented as findings for them to weigh, never as a recommended value.** This preserves the value of
+the research without converting it into vendor policy.
+
+### 15.4 What is NOT in the matrix — the invariants
+
+**No configuration may override these.** They are code, guarded by the suite, because no jurisdiction authorizes
+the alternative — a matrix row here would let a city configure itself into unlawful conduct.
+
+- **A child may NEVER be withheld because a *sibling* is unpaid** (§5.9). The payment gate is a coverage test.
+- **Denial notices carry the specific exemption, a statutory citation, and an explanation of how it applies**
+  (§5.7). *Packaging* is the city's; *content* is not.
+- **A per-child STATUTORY deadline does not exist** (§4.2). Children carry budget dates only.
+- **A record-hold never stops the parent clock and never blocks a sibling** (§3, §5.5).
+- **An AG hold is not a request-level freeze** — §3 calls this "the highest-consequence modeling decision in
+  the document"; getting it wrong makes a city unlawfully withhold records it was obliged to release.
+- **An appeal on one child does not freeze the parent or its siblings** (§5.6).
+- **The parent has no disposition and no outcome** (§4.4) — a modeling decision, not a policy knob.
+
+### 15.5 Completion gate
+
+MRR functionality unlocks only when every row carries a value and a basis. Unanswered is **not** undefined
+behavior — it is a **locked feature**, which is the honest state. This should compose with the existing
+onboarding phase gating (`SetupPage`, `requires_review` / attestation) rather than inventing a second mechanism.
+
+⚠️ **Open:** what a city sees if an MRR arrives while the matrix is blank. A multi-record request is a citizen
+action, not something the city schedules — so "locked" cannot mean "the submission fails." Most likely it is
+accepted and wrapped normally (n children exist) but the hub, per-child release and per-child notices stay
+inert until the matrix is answered. **Needs deciding before build.**
