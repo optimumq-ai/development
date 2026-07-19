@@ -1,6 +1,8 @@
 # WORKING — Parent/Child attribute inventory (snapshot)
 
-> **THIS IS A SCRATCHPAD, NOT A SPEC.** Snapshot of **2026-07-19**. It exists so Kevin can see, in one place,
+> **THIS IS A SCRATCHPAD, NOT A SPEC.** Snapshot of **2026-07-19** *(revised same day, after the stale-doc
+> sweep — see the Appendix; the docs this was built to route around are now mostly corrected at source)*.
+> It exists so Kevin can see, in one place,
 > what actually exists today, where it is used, whether it is currently treated as parent or child, and what
 > has only ever been *discussed*. It is expected to be marked up, argued with, and **thrown away** once the
 > decisions it supports land in `SPEC_parent_child_lifecycle.md`.
@@ -117,6 +119,7 @@ marked **[verified]**. One inference is marked **[unverified]** and says so.
 | `status = 'completed'` | 1 live row, no code path produces it | legacy import; clean up |
 | task type `commercial_rate` | nothing spawns it; assignable to people; permanently empty pool | **your call** — build or delete |
 | task type `mrr_processing` | nothing spawns it; same | **your call** — it is the MRR parent routing that isn't built |
+| task type `build_redaction_template` | **[verified 2026-07-19]** appears nowhere in `src/`; `verify_notifications.js:75` asserts it is **never** created. Existed only as a doc claim tagged `[code-verified]` | already corrected in `TASK_AND_NOTIFICATION_MODEL.md`; nothing to delete in code |
 | `TaskPoolSection.js` | imported nowhere; its link map would misroute record-search tasks | delete |
 | `Soon()` in `App.js` | never referenced | delete |
 
@@ -229,17 +232,39 @@ The highest-consequence rules in the model. All legal, all currently unenforced 
 7. **`legal_flag`** — record-level or matter-level? Never stated.
 8. **Prune Part C** — especially the ~30 workstream status values in §5.3, which overlap `tasks.status` and `stage`.
 9. **`commercial_rate` / `mrr_processing`** — build or delete.
+10. **Which notice goes out when children disagree?** `[surfaced 2026-07-19 by the doc sweep]` Retiring the
+    parent `PARTIALLY_GRANTED` roll-up removed a *status*, but the **compliance artefact it implied is still
+    owed**: one child delivered + one child denied is a single citizen who must receive both the records and a
+    citable denial. Options, none evaluated: one combined notice per parent · per-child notices · a notice per
+    delivery installment. **Interacts with item 2** (Hold-All vs As-Ready), because installment delivery and
+    per-installment notices are the same decision seen twice. Belongs to the §4.4 field-design pass.
 
 ---
 
-## Appendix — docs that will actively mislead you
+## Appendix — the stale-doc sweep `[all but one CORRECTED 2026-07-19]`
+
+### ✅ Fixed
+
+| Doc | What it said | What it says now |
+|---|---|---|
+| `SPEC_parent_child_lifecycle.md:6-8` | "**DESIGNED, NOT BUILT** … 129 requests, 0 children" — the most-read part of the binding spec disclaiming its own existence | "**BUILT — the storage model is live**", split into what's live / what isn't / the one money divergence. Adds the rule that **a section's own build tag beats the header** — it is closer to the code |
+| `DOMAIN_MAP.md:24` | "DESIGNED 2026-07-13, NOT BUILT" — in the index agents read first | Built, plus the warning that `andParent`/`andLeaf` are now load-bearing rather than tautological |
+| `SPEC_parent_child_lifecycle.md:461` | "there are 125 requests and **0 children have ever been created**" — inside §8, the section describing the migration that falsified it | Reframed as an explicit pre-migration "before" snapshot |
+| `TASK_AND_NOTIFICATION_MODEL.md` §7.1–7.5 | A 2026-07-07 **audit**: "'always parent' — **VERIFIED FALSE**", "child creation does NOT exist", "a child IS a full request row", the `PARTIALLY GRANTED` roll-up | Corrected inline, originals retained as history. §7.4's blast-radius estimate flagged as **too optimistic for a traceable reason** — "point-lookups by id are UNAFFECTED" is exactly the false premise that produced the `GET /requests/:id` bug |
+| `TASK_AND_NOTIFICATION_MODEL.md:51` | Task catalog tagged `[code-verified]`, listing `build_redaction_template` as implemented | **It exists nowhere in `src/`**, and `verify_notifications.js:75` asserts it is *never* created. Also added the five omitted live task types |
+| `SPEC_fees_estimates_payments.md:21` | "MRR-aware fee aggregation across children **exists**" | Retired, with the verified dunning consequence. Note §4a in the *same file* was already honest — "Request-level only… deferred to #11" |
+| `SPEC_record_search_task_screen.md:406` | Per-record states justified as "the prerequisite for the MRR Partially-Granted roll-up" | Reframed to stand on their own — the searcher's answer to each description, the enforcement half of R9 |
+| `SPEC_record_search_fulfillment.md:25` | Same retired roll-up, **and** marked the resolution step `[NOT BUILT]` | Both corrected — it shipped 2026-07-14 |
+| `WORKFLOW_DECISIONS.md` Part 4 + scenarios B/E/F | "A request ends in exactly one terminal state", incl. `PARTIALLY_GRANTED` | Mapped onto §5.8's eight **child** dispositions. Surfaced two the list was missing (`Previously furnished`, `Not in our custody`). Deposit-overrun paths gained a caution: "deliver what the deposit covers" must not become "withhold child B because child A is unpaid" |
+| `SPEC_parent_child_lifecycle.md` §14.5 | Routed mixed-outcome resolution to **§6.2** — which says "do not build from this section" | No mixed-outcome resolution exists to perform; each child keeps its own disposition |
+
+### ⚠️ Still stale — not fixed
 
 | Doc | Problem |
 |---|---|
-| `SPEC_parent_child_lifecycle.md:6-8` | **Header says "DESIGNED, NOT BUILT"** — contradicted by its own §7/§8 tagged `[BUILT 2026-07-16]`. The most-read part of the binding spec disclaims its own existence |
-| `DOMAIN_MAP.md:24` | Same — "DESIGNED 2026-07-13, NOT BUILT". This is the index agents read first |
-| `TASK_AND_NOTIFICATION_MODEL.md` §7 | Asserts *"'always parent, every request a child' — **VERIFIED FALSE**"* and "child creation does NOT exist". Every claim now false. Also still carries the retired `PARTIALLY GRANTED` roll-up |
-| `SPEC_fees_estimates_payments.md:21` | "MRR-aware fee aggregation across children **exists**" — disproved by the dunning test |
-| `SPEC_record_search_task_screen.md:406` | Still cites the retired Partially-Granted roll-up |
-| `SPEC_tasks_roles_mrr_fees.md:22,24` | "Parent roll-up waits for #11" — #11 shipped 07-16, never revisited |
-| `SPEC_parent_child_lifecycle.md:800` | §14.5 points mixed-outcome resolution at §6.2 — which §6.2 itself forbids building from |
+| `SPEC_tasks_roles_mrr_fees.md:22,24` | "Parent roll-up waits for #11." **#11 shipped 2026-07-16 and this was never revisited** — the time-budget parent roll-up is still unbuilt and now unblocked |
+
+### What the sweep did NOT change
+
+**No code was touched, and no design was invented.** Where correcting a doc exposed a real question rather than
+a stale fact, it was flagged `[OPEN]` and left for you — see Part H items 2 and 10.
