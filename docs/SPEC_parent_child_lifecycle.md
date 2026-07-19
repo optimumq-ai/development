@@ -511,9 +511,18 @@ It does not exist under **any** accounting method today — the engine emits `co
 1. **The release gate.** `feeRelease.releaseGate()` is a **whole-request** test today
    (`balance = effectiveTotal − deposit_paid − final_paid`), which is exactly what §5.9 forbids. The
    per-child coverage test needs a per-child price and there isn't one.
-2. **`fee_revenue by department`** — recorded as **UNDEFINED** (HANDOFF 2026-07-14 (tm)): revenue is one number
-   on the parent, a parent with children in two departments has one figure and two departments, and attributing
-   it "needs the same allocation the law is silent on." **5.10.2 defines it.**
+2. ~~**`fee_revenue by department`**~~ — **BUILT 2026-07-19** (`58aac73`). Was recorded **UNDEFINED** (HANDOFF
+   2026-07-14 (tm)): revenue is one number on the parent, a parent with children in two departments has one
+   figure and two departments, and attributing it "needs the same allocation the law is silent on." §5.10.2
+   defines it, so `revenue[i] = paid × (componentCharged[i] / Σ componentCharged)` in
+   `services/revenueAllocation.js`. The columns sum to the collected total by construction — the property
+   whose absence made the cut undefined. **An exact identity at n = 1.**
+   ⚠️ Building it surfaced a **second, unrelated defect**: `reportEngine` sourced revenue from
+   `requests.amount_paid`, a column with **no writer anywhere in the codebase** — that read was its only
+   reference in the repo. **Every revenue figure in the product was structurally $0**, however much a city had
+   collected. Revenue now reads `request_fee_estimates.deposit_paid_amount` / `final_paid_amount`, which is
+   where the payment routes actually write. `amount_paid` and `actual_fee` remain **dead columns** (the
+   `WORKING_attribute_inventory.md` dead list) — nothing writes them and nothing now reads them.
 3. **ERP line items** — see 5.10.5.
 
 ### 5.10.5 ERP: compute here, send detail `[DECIDED 2026-07-19 by Kevin]`
@@ -860,14 +869,18 @@ Today a request **is its own parent and its own child**, so both are tautologies
 > `reportEngine` already **refuses** the child-grouped revenue cut and explains why; counts by department remain
 > exact and are still offered; the AI report agent was taught the constraint so it cannot generate the impossible
 > spec from natural language. Same correction as (a): I re-presented a shipped decision as an open one.
+> **⚠️ SUPERSEDED 2026-07-19:** the refusal and the agent's hard constraint were both **removed** — the cut is
+> now built and exact. See §5.10.4 item 2. Counts by department are unaffected.
 >
 **(a) Where does the PAYMENT GATE live after the migration?** §5.2 says `fee_review` and `awaiting_payment` "move off the child — they are parent gates." But **the parent has no `stage`** — it has `parent_state` (`Intake · In Process · Processed · Delivered · Closed`, §6.1), and **none of those is a payment gate.** So "awaiting payment" currently has nowhere to live on the parent.
 
 This blocks `tickler.js`'s deposit sweep concretely: it joins `requests.stage = 'awaiting_payment'` to `request_fee_estimates`. After the migration the **estimate hangs off the parent** and the **stage off the child**, so the join matches nothing and **the deposit sweep silently stops running** — no dunning, no lapse, no withdrawal. Options: (i) give the parent a `payment_state` axis; (ii) keep `awaiting_payment` as a real parent stage; (iii) drive the sweep off `payment_status` (§4.3) and drop the stage predicate entirely. **Recommend (iii)** — the money axis already exists on the parent and the stage predicate is redundant with it.
 
-**(b) A parent-level MONEY metric grouped by a CHILD field is UNDEFINED, not just unjoined.** I previously called `fee_revenue by department` a join problem. **It is not.** Revenue is one number on the parent; a parent with two children in two departments has **one revenue figure and two departments**. Attributing it requires an **allocation rule** — the same allocation the law is silent on (§5.10). A join would just double-count the revenue into both departments.
+**(b) ~~A parent-level MONEY metric grouped by a CHILD field is UNDEFINED, not just unjoined.~~** **RESOLVED 2026-07-19 — see §5.10.4 item 2.** The diagnosis below was right and is retained because it is why the cut was refused for five days: revenue is one number on the parent, a parent with two children in two departments has **one revenue figure and two departments**, and a join would double-count it into both. It needed an **allocation rule**, and there was none.
 
-Options: (i) report revenue **only** by parent-level groupings (month, requestor, status) and refuse the child-grouped cut; (ii) allocate revenue across children by their quantity share, and label the report as an estimate; (iii) report "revenue of requests **touching** department X," accepting that the figures overlap and do not sum to the total. **Recommend (i) for now** — a wrong revenue-by-department number is worse than no revenue-by-department number, and nothing in the product depends on it yet.
+`componentCharged` (§5.10.2, built the same day) is that rule. Of the three options weighed below, **(ii) is what shipped** — but not in the form proposed. The objection to (ii) was that a quantity-share split is an *estimate*; allocating by **charged share** is not, because the shares are the prices the system actually charged and they sum to the total by construction. The report is exact, not labelled-approximate.
+
+Options as originally weighed: (i) report revenue **only** by parent-level groupings (month, requestor, status) and refuse the child-grouped cut; (ii) allocate revenue across children by their quantity share, and label the report as an estimate; (iii) report "revenue of requests **touching** department X," accepting that the figures overlap and do not sum to the total. **(i) was the right call at the time** — a wrong revenue-by-department number is worse than no revenue-by-department number — and it was correctly reversed once a non-invented allocation existed.
 - ~~**`routes/tasks.js` `withReq()`** and the 7 `objections.js` joins select `request_number` from the work row.~~ **DONE 2026-07-13 (15/15).** `requestScope.numberJoin()` / `numberExpr()` resolve the **citizen-facing number through the parent** — `COALESCE(_p.request_number, r.request_number)`. Today `master_request_id` is NULL so it falls back to the row's own number (a no-op, verified on the live API); after the migration a task on a child shows the parent's `2026-0045`, never the child's `2026-0045-1`. Staff must never be shown a number the citizen has never seen.
 
 ---

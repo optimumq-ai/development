@@ -130,7 +130,7 @@ semantics, not schema.
 | `nonpayment_dunning_at` | **parent** | PARENT | ✅ | The one money column that is correctly parent-scoped |
 | `request_fee_estimates` (table) | **child** | PARENT | ⚠️ **live defect** **[verified]** | See box below |
 | `actual_fee` | **nothing writes it** | — | 💀 | Delete candidate |
-| `amount_paid` | **nothing writes it** | — | 💀 | Delete candidate. Payments live in `request_fee_estimates` |
+| `amount_paid` | **nothing writes it, and now nothing reads it** | — | 💀 | Delete candidate. Payments live in `request_fee_estimates`. Its ONE reader (`reportEngine`'s revenue metric) was cut over 2026-07-19 — see the box below |
 
 > ### ⚠️ The money split is not theoretical — dunning is inert **[verified 2026-07-19]**
 > `feeNonpayment.sweep()` is **parent**-scoped (deliberately — unscoped it would send citizens duplicate
@@ -140,6 +140,19 @@ semantics, not schema.
 >
 > Proven by `tests/verify_nonpayment_scope.js` (deliberately **not** registered in the suite — it fails today;
 > it is the regression test for the fix, already written). Latent only because nothing has reached `fee_review`.
+
+> ### ✅ The dead money column had a live reader — FIXED 2026-07-19 (`58aac73`)
+> This table listed `amount_paid` as dead with "reports read it and always get 0" — **recorded, and then not
+> acted on for a day.** It was not a cosmetic dead column: `reportEngine`'s `fee_revenue` metric summed it, so
+> the `fee_revenue_ytd` button and every revenue figure in the product reported **$0 no matter how much a city
+> had collected**. A city would have seen a plausible, empty revenue report rather than an error.
+>
+> Revenue now reads `request_fee_estimates.deposit_paid_amount` / `final_paid_amount`, the columns the payment
+> routes actually write. `amount_paid` and `actual_fee` are now genuinely unreferenced and safe to drop.
+>
+> **The lesson for the rest of this inventory:** a "💀 dead" verdict means *nothing writes it*. It does **not**
+> mean nothing reads it — and a read of a never-written column is silent, plausible and wrong. Every 💀 row
+> here deserves a reader check before it is dismissed as harmless.
 
 ### A6. Status, closure, dormancy — the ambiguous ones
 
@@ -159,7 +172,7 @@ semantics, not schema.
 | Thing | Evidence | Suggested |
 |---|---|---|
 | `requests.actual_fee` | no writer anywhere | drop |
-| `requests.amount_paid` | no writer; reports read it and always get 0 | drop, or populate from `request_fee_estimates` |
+| `requests.amount_paid` | no writer; ~~reports read it and always get 0~~ **the reader was cut over 2026-07-19 — now genuinely unreferenced** | **drop** — "populate it" was the wrong branch: it would have created a second money source to keep in sync with `request_fee_estimates` |
 | `status = 'withdrawn'` / `'abandoned'` | read in `paymentStatus.js:71`, never written — withdrawal paths write `closed` + a `closure_reason` | delete the dead branch |
 | `status = 'completed'` | 1 live row, no code path produces it | legacy import; clean up |
 | task type `commercial_rate` | nothing spawns it; assignable to people; permanently empty pool | **your call** — build or delete |

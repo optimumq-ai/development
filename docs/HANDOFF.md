@@ -5429,3 +5429,86 @@ same commits: §5.9 marked BUILT, `componentCharged` marked BUILT in the working
 3. **Phase 1 of the processing rebuild is still BLOCKED on Kevin** (brief §5) — the 10-stage order,
    single-record vs MRR hub, `commercial_rate`/`mrr_processing` build-or-delete, retire v1 redaction duplicates.
 4. Everything in (q)'s "next session" list still stands, including the deliberately-undone items.
+
+---
+
+## 2026-07-19 (s) — Revenue by department, and the revenue metric that was always $0 (`58aac73`, `c07bfc5`)
+Continuation of (r), same day. Item 1 off (r)'s board. **Two defects closed, only one of which was on it.**
+
+### The one I went looking for — `fee_revenue by department` is BUILT
+Recorded **UNDEFINED** on 07-14 and refused in code, correctly at the time: revenue is one number on the
+parent, a department belongs to the individual records inside it, and a join would double-count one payment
+into two departments. It needed an **allocation rule**, and there was none. `componentCharged` (§5.10.2, built
+in (r)) is that rule:
+
+    revenue[i] = paid × (componentCharged[i] / Σ componentCharged)
+
+`services/revenueAllocation.js`. Order-independent and vehicle-ignorant for the same reason the pricing rule
+is, and **the columns sum to the collected total by construction** — the exact property whose absence made the
+cut undefined. **An exact identity at n = 1** (one component takes the whole payment), so ordinary requests are
+untouched: the same "adopt the correct predicate while it is still an identity" move as `requestScope.js` and
+`feeRelease.js`.
+
+Snapshot resolution mirrors `feeRelease` deliberately — payments off the latest `estimate`, the split off the
+latest `reconciliation` if one exists. **The two must agree**, or a record could be released against one split
+and booked against another.
+
+**Filters apply to the PAYER, grouping resolves the EARNER.** Time range, status, requestor and month are
+parent facts — the citizen paid once, on a date. Department and classification are child facts. Filtering on
+the earner would silently under-report the total, which is why §G tests it.
+
+### ⚠️ THE ONE I DIDN'T GO LOOKING FOR — every revenue figure in the product was $0
+`reportEngine` summed `requests.amount_paid`. **That column has no writer anywhere in the codebase**, and that
+read was its **only reference in the entire repo**. Money is recorded on `request_fee_estimates`
+(`deposit_paid_amount` / `final_paid_amount`). So `fee_revenue_ytd` and every revenue number reported **$0
+however much a city had collected** — not an error, a plausible empty report.
+
+**`WORKING_attribute_inventory.md` had already recorded this** — "no writer; reports read it and always get 0"
+— on 07-19 (q), one day earlier. It was written down and not acted on, because it was filed as a *dead column*
+and dead columns read as harmless. **A "💀 dead" verdict means nothing WRITES it; it says nothing about
+readers, and a read of a never-written column is silent, plausible and wrong.** A box in the inventory now says
+so, and every 💀 row there deserves a reader check. The inventory's "drop, or populate from
+`request_fee_estimates`" is resolved to **drop** — populating it would have created a second money source to
+keep in sync.
+
+This is also why the department cut could not be built alone: the columns have to sum to a total that is real.
+
+### ⚠️ I SHIPPED A VACUOUS TEST AGAIN — same trap, second session running
+`verify_revenue_allocation` §D claimed to prove the residual cent settles on the **largest** share regardless of
+input order. Shares of 6.67 / 6.67 / 6.66 against $20 sum to **exactly $20**, so the residual was 0 and the
+branch under test **never executed**. It stayed green with the rule deliberately sabotaged to "settle on the
+last."
+
+This is the **identical failure** to `verify_component_charged` §D one session earlier (`5ce7313`), and it was
+caught the identical way: **commit green, then break on purpose.** Fixed with 7/11/13 against $20 (a real
+−$0.01 to place), plus **D0 asserting the shares do not divide evenly** so it cannot go vacuous again, and D2
+pinning the cent to the largest share. Fixed in its own commit (`c07bfc5`) so the finding stays legible.
+
+**Worth naming as a pattern:** both vacuous tests were in the *residual/rounding* section, and both were
+vacuous for the same reason — the author picked round numbers that happened to divide evenly. **When testing a
+rounding remainder, assert the remainder exists.**
+
+### Verification
+**857/857 green, live census clean.** Three break-tests performed and reverted: residual-on-last fails D1/D2;
+equal-split-instead-of-charged-share fails C2/C4/C5/D1/D2/G1; restoring the `SUM(r.amount_paid)` read fails
+A3/C6. Verified in the running app — API restarted, healthy, and the live engine now returns
+`Fee revenue by department` with `unavailable: false` (empty rows, because live genuinely has 0 estimates —
+honestly $0 rather than falsely $0).
+
+Specs updated: §5.10.4 item 2 marked BUILT, §10.6(b) marked RESOLVED with the reasoning retained, the stale
+"reportEngine already refuses" note marked SUPERSEDED, and the inventory's dead-list rows corrected.
+⚠️ **Process deviation:** the doc updates landed in a follow-up commit, not the same commit as the code.
+
+### Next session
+1. **ERP line items** (§5.10.5) — `emitCharge()` still sends a single scalar `amount`. `componentCharged` and
+   now `revenueAllocation` both exist; this is the last of the three features §5.10.4 named, and the smallest.
+2. **Phase 1 of the processing rebuild is still BLOCKED on Kevin** (brief §5) — the 10-stage order,
+   single-record vs MRR hub, `commercial_rate`/`mrr_processing` build-or-delete, retire v1 redaction duplicates.
+3. **Drop `requests.amount_paid` and `actual_fee`** — now genuinely unreferenced, so this is a clean migration.
+4. Everything in (q)/(r)'s lists still stands, including **dunning being inert** (`verify_nonpayment_scope.js`
+   is written and waiting) and **`routing_review` firing per child**.
+
+### ⚠️ The standing lesson, restated because it earned another entry
+(q) and (r) both ended with "read the implementation before believing the sweep." This session adds the
+converse: **a finding that IS written down is not a finding that has been acted on.** The $0-revenue defect sat
+in a doc for a day, correctly described, because it was filed under a heading that made it look harmless.
