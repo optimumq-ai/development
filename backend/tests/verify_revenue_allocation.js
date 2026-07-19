@@ -66,9 +66,13 @@ function rowFor(rep, label) {
   var a = 'req-' + TAG + '-A';
   await mkRequest(a, null, 'dep-' + TAG + '-police');
   await writeEstimate('fe-' + TAG + '-a', a, profile({}), [{ id: a, label: 'R', quantities: { bwPages: 40 } }], 25, 15);
-  // `requests.amount_paid` stays 0 — nothing writes it. If revenue still read that column, this is $0.
-  var amtPaidCol = await db.get('SELECT COALESCE(amount_paid,0) AS v FROM requests WHERE id = ?', [a]);
-  ok('A1 requests.amount_paid is still 0 — the dead column really is dead', Number(amtPaidCol.v) === 0);
+  // A1 used to assert `requests.amount_paid` was still 0. The columns were DROPPED 2026-07-19 once the last
+  // reader was cut over, so the stronger assertion is that they cannot come back: a reinstated column is a
+  // second, always-zero money source waiting for a future query to find and believe — which is exactly how
+  // the $0-revenue defect happened. Checked against the catalog, so it also covers a fresh install.
+  var deadCols = await db.all(
+    "SELECT column_name FROM information_schema.columns WHERE table_name = 'requests' AND column_name IN ('actual_fee','amount_paid')");
+  ok('A1 the dead money columns are gone and stay gone', (deadCols || []).length === 0);
   var partsA = await alloc.collected();
   ok('A2 deposit + final are BOTH counted ($25 + $15 = $40)', amountFor(partsA, a) === 40);
   var repA = await reports.run({ metric: 'fee_revenue' });
