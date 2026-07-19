@@ -167,7 +167,15 @@ async function openTasks(rid, type) {
      (unreachable.length ? '; UNREACHABLE: ' + unreachable.join(', ') : '') + ')',
     accepted.length >= 2 && unreachable.length === 0);
 
-  var pageSrc = pageExists ? fs.readFileSync(FE + '/pages/LegalReviewTaskPage.js', 'utf8') : '';
+  // SCAN CODE, NOT COMMENTS. A first cut of H8 matched the word ACTIONABLE anywhere in the file and passed
+  // when the guard was deleted, because the explanatory comment above it still said "cancelled" and a dead
+  // identifier still contained the token. Break-testing caught it. Strip comment lines first so these
+  // assertions can only be satisfied by code.
+  function codeOf(p) {
+    return fs.readFileSync(p, 'utf8').split('\n')
+      .filter(function (l) { return !/^\s*(\/\/|\*|\/\*)/.test(l); }).join('\n');
+  }
+  var pageSrc = pageExists ? codeOf(FE + '/pages/LegalReviewTaskPage.js') : '';
   ok('H5 the screen resolves through /tasks/:id/resolve (the central-transition path)',
     /\/tasks\/'\s*\+\s*taskId\s*\+\s*'\/resolve/.test(pageSrc));
   // §3.3: the removed `POST /tasks/:id/complete` is exactly what a stub screen reaches for, and it would
@@ -181,8 +189,12 @@ async function openTasks(rid, type) {
   // cancelled task was resolved through this screen and moved the request.
   // ⚠️ This asserts only the CLIENT-SIDE courtesy. `/tasks/:id/resolve` still checks type and never status,
   // so the same call by curl succeeds. When that guard lands in the route, assert it here over the API.
+  // Match the GUARD EXPRESSION itself — the status must be tested against the actionable set, and the
+  // result must gate rendering. Deleting the guard fails this; a comment about it cannot satisfy it.
   ok('H8 the screen refuses to decide a task that is not actionable (e.g. cancelled)',
-    /ACTIONABLE/.test(pageSrc) && /cancelled|closed/.test(pageSrc));
+    /ACTIONABLE\s*=\s*\[[^\]]*'open'[^\]]*\]/.test(pageSrc) &&
+    /ACTIONABLE\.indexOf\(\s*task\.status\s*\)\s*<\s*0/.test(pageSrc) &&
+    /var done = resolved \|\| closed/.test(pageSrc));
 
   console.log('\n  ' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
   process.exit(fail ? 1 : 0);
