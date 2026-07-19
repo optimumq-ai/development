@@ -173,6 +173,61 @@ async function histRow(rid, action) {
     var profBack = await db.get('SELECT config_json FROM fee_profiles WHERE id = ?', [prof.id]);
     ok('3: the fee profile is restored byte-for-byte', profBack.config_json === savedProf);
 
+    // =====================================================================================
+    // 4. A LATE INTAKE MUST NOT WALK BACK A STAGE A PERSON ALREADY MOVED (2026-07-19).
+    //
+    // Case 1 above made the CLOSED case deterministic and fixed it. The guard it added checked only
+    // `status`, and `stage` below it came from the STALE top-of-function read — so a request that a PERSON
+    // moved while the classifier was running was still overwritten by the rulebook's decided stage.
+    //
+    // Observed on a real child request:
+    //     EXEMPTION_ASSERTED  intake -> exemption_review      (a legal act)
+    //     STAGE_ADVANCED      exemption_review -> intake      ("Automatic classification was unavailable.")
+    //
+    // The exemption was undone and its legal_review cancelled with the stage it belonged to (§3.2), so the
+    // request looked untouched and the reviewer's work was simply gone. Nothing is exemption-specific here:
+    // any staff action inside the classifier window loses, and a SUCCESSFUL classification races the same.
+    // Same deterministic technique as case 1 — stub matcher, onIntake called by hand.
+    // =====================================================================================
+    var C = await newRequestWithEstimate('late-intake-revert');
+    // Put it where a person would: assert an exemption through the real endpoint.
+    var ax = await api('POST', '/requests/' + C.id + '/assert-exemption', { note: 'harness: exemption asserted mid-classification' });
+    ok('4: the exemption assertion succeeded', ax.status === 200);
+    var cAfterAssert = await db.get('SELECT stage FROM requests WHERE id = ?', [C.id]);
+    var legalStage = cAfterAssert.stage;
+    ok('4: the request sits in a legal stage (' + legalStage + ')',
+      legalStage === 'exemption_review' || legalStage === 'ag_review');
+    var lrBefore = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'legal_review' AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [C.id]);
+    ok('4: ...with an open legal_review on it', !!lrBefore);
+
+    // THE LATE LANDING. Before the fix this wrote STAGE_ADVANCED legal-stage -> intake.
+    await workflowEngine.onIntake(C.id, { classification: 'standard', recordTypeConfidence: 0, flags: [], reasoning: 'harness: simulated late intake' });
+
+    var cLate = await db.get('SELECT stage FROM requests WHERE id = ?', [C.id]);
+    ok('4: THE ASSERTED EXEMPTION SURVIVES — stage is still ' + legalStage + ' (was reverted to intake)',
+      cLate.stage === legalStage);
+    ok('4: no STAGE_ADVANCED walked it back to intake',
+      (await db.get("SELECT count(*)::int AS n FROM request_history WHERE request_id = ? AND action = 'STAGE_ADVANCED' AND stage_to = 'intake'", [C.id])).n === 0);
+    // The legal_review must survive too: §3.2 cancels a stage's task when the stage changes, so a reverted
+    // stage silently destroyed the task as well. This is the assertion that catches the REAL damage.
+    var lrAfter = await db.get("SELECT status FROM tasks WHERE id = ?", [lrBefore.id]);
+    ok('4: the legal_review task is still live (' + lrAfter.status + ') — a reverted stage used to cancel it',
+      ['open', 'assigned', 'in_progress', 'returned', 'awaiting_review'].indexOf(lrAfter.status) !== -1);
+    // Declining must be RECORDED. The overwrite was hard to find precisely because skipping left no trace.
+    ok('4: a ROUTING_DEFERRED history row records that the engine stood down',
+      (await histCount(C.id, 'ROUTING_DEFERRED')) === 1);
+    // And it must not pool estimate work onto a request now sitting in legal review.
+    ok('4: the late intake spawned no estimate task on the moved request',
+      (await db.get("SELECT count(*)::int AS n FROM tasks WHERE request_id = ? AND type = 'estimate' AND status IN ('open','assigned','in_progress') AND created_by = 'workflow'", [C.id])).n === 0);
+
+    // NOT OVER-BROAD: a request still sitting where intake left it must route normally.
+    var D = await newRequestWithEstimate('late-intake-normal');
+    var dBefore = (await db.get('SELECT stage FROM requests WHERE id = ?', [D.id])).stage;
+    await workflowEngine.onIntake(D.id, { classification: 'standard', recordTypeConfidence: 0, flags: [], reasoning: 'harness: normal intake' });
+    var dAfter = await db.get('SELECT stage FROM requests WHERE id = ?', [D.id]);
+    ok('4: an UNMOVED request still routes normally (' + dBefore + ' -> ' + dAfter.stage + ') — the guard is not over-broad',
+      (await histCount(D.id, 'ROUTING_DEFERRED')) === 0);
+
   } catch (e) { console.error('ERR', (e && e.stack) || e); fail++; }
   finally {
     try {

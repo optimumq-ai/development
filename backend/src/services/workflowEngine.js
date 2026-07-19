@@ -87,8 +87,40 @@ async function onIntake(requestId, matcherResult){
   // if it went closed. This was the verify_stage_bypass flake: a slow classifier let intake land after a
   // nonpayment close / tickler withdrawal and revert stage=closed. applyStageTransition has no from-closed
   // guard, so the guard belongs here at the one background router.
-  var live = await db.get("SELECT status FROM requests WHERE id = ?", [requestId]);
+  var live = await db.get("SELECT status, stage FROM requests WHERE id = ?", [requestId]);
   if (live && live.status === 'closed') return { routed: false, skippedClosed: true };
+
+  // ...AND THE SAME STALENESS APPLIES TO THE STAGE, WHICH IS WHERE THIS GUARD USED TO STOP.
+  //
+  // The guard above re-reads because the classifier call takes seconds — then checked only `status`, so a
+  // request that MOVED in that window was still routed, and `stage` below comes from the STALE top-of-
+  // function read. Anything a person did while the classifier ran was silently overwritten by the rulebook's
+  // decided stage (usually `intake`).
+  //
+  // Observed 2026-07-19 on a real child request:
+  //     EXEMPTION_ASSERTED  intake -> exemption_review     (a legal act, by a person)
+  //     STAGE_ADVANCED      exemption_review -> intake     ("Automatic classification was unavailable.")
+  //
+  // The asserted exemption was undone and its legal_review task cancelled with the stage it belonged to
+  // (§3.2) — so the request looked untouched and the reviewer's work was gone. It is NOT specific to
+  // exemptions or to a failing classifier: any staff action landing inside the classifier window loses, and
+  // a SUCCESSFUL classification races exactly the same way.
+  //
+  // Intake routing is an OPENING move, so the guard is stated as a POSITION, not as a race.
+  //
+  // The first cut of this compared the stale read against `live` — a lost-update check. It caught the race
+  // only when onIntake STARTED before the move, and missed the case where the whole call lands afterwards
+  // (both reads then agree on the new stage and it overwrites anyway). The harness caught that.
+  //
+  // The real invariant does not mention timing at all: the engine may set the opening stage only while the
+  // request is still AT its opening position — `intake`, or null for a parent that carries no stage. Once
+  // anything has moved it, the opening move is over and is not the engine's to make. That covers the race,
+  // the late landing, and any future caller, without needing to reason about who read what when.
+  //
+  // Routing metadata (record type, owning team) is still applied either way: it is the classifier's answer
+  // to "what is this?", which stays correct and useful no matter where the request has got to.
+  var atOpeningPosition = !!live && (live.stage === null || live.stage === 'intake');
+  var movedUnderUs = !!live && !atOpeningPosition;
 
   // Pin the classifier-matched record type + owning team onto the request (ROUTING columns only — the
   // stage is applied below through the central stage-transition function, never a direct UPDATE here).
@@ -105,15 +137,31 @@ async function onIntake(requestId, matcherResult){
   // Replaces the former direct `UPDATE requests SET stage` above, whose unlogged jump + missing stage task
   // was the root cause of the reconciler's stranded requests (reproduced on 2026-0039). department_id is
   // set just above so spawnForStage stamps the task onto the owning team. A no-op when stage is unchanged.
-  try {
-    await require('./taskRouting').applyStageTransition(requestId, stage, {
-      actorId: 'workflow', actorName: 'Workflow Engine', action: 'STAGE_ADVANCED', notes: reasoning, createdBy: 'workflow'
-    });
-  } catch (e) { console.error('[workflowEngine] stage transition failed:', e && e.message); }
+  if (movedUnderUs) {
+    // Recorded, not silent. The whole reason this was hard to see is that the overwrite left no trace of a
+    // decision having been declined — only the clobbered stage. The workflow_decisions row above still
+    // captures WHAT the engine decided; this says it was not applied, and why.
+    await db.run(
+      "INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes, stage_from, stage_to, created_at) " +
+      "VALUES (?,?,?,?,?,?,?,?,datetime('now'))",
+      [uuid.v4(), requestId, 'workflow', 'Workflow Engine', 'ROUTING_DEFERRED',
+        'Intake routing decided ' + stage + ', but the request had already moved to ' + live.stage +
+        ' while classification was running — the stage was left as it was found. ' + reasoning,
+        live.stage, live.stage]);
+  } else {
+    try {
+      await require('./taskRouting').applyStageTransition(requestId, stage, {
+        actorId: 'workflow', actorName: 'Workflow Engine', action: 'STAGE_ADVANCED', notes: reasoning, createdBy: 'workflow'
+      });
+    } catch (e) { console.error('[workflowEngine] stage transition failed:', e && e.message); }
+  }
 
   // Auto path: a confident match routed to an owning team -> spawn the ESTIMATE task and route it
   // (Smart Routing to a specialist, else into the team's claim pool). Estimate precedes record search.
-  if (hit && hit.rule && hit.rule.id === 'wfr-confident' && teamId) {
+  // Skipped when the request moved under us: this task belongs to the opening move the engine just declined
+  // to make, and pooling an estimate onto a request now sitting in legal review is the same overwrite in
+  // task form — it would put claimable work on a stage that never asked for it.
+  if (hit && hit.rule && hit.rule.id === 'wfr-confident' && teamId && !movedUnderUs) {
     try {
       var tr = require('./taskRouting');
       var existing = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'estimate' AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [requestId]);
