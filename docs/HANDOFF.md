@@ -5353,3 +5353,79 @@ component" **all evaporated on inspection** — grep-level inferences the implem
 with a comment explaining exactly why the code was right. §3.2's claims, by contrast, all held.
 **On this domain, read the implementation before believing the sweep — and check the schema before believing
 live.**
+
+---
+
+## 2026-07-19 (r) — `componentCharged` + the release gate becomes a coverage test (`b2fb08b`, `5ce7313`, `bd9befa`)
+Continuation of (q), same day. Two real code slices, the highest-leverage items on the board.
+
+### `componentCharged` — the per-record price that did not exist under any accounting method
+`componentGross` is a naive per-record sum that is **never charged**: components are priced with no rounding,
+gates, allowances or tiers, and that figure is discarded while every real rule runs on request-level
+aggregates. **No request-level rule decomposes to components**, so the engine emitted gross (pre-everything)
+and total (post-everything) with nothing in between.
+
+    componentCharged[i] = componentGross[i] × (total / grossSubtotal)
+
+One ratio, both directions, ignorant of the vehicle — absorbs labor rounding, `laborGate` thresholds, free
+allowances, duplication tiers, floor, ceiling, de-minimis, surcharge, delivery, certification, and anything
+added later. Kevin's originating scenario verified: 10 × $6 + 1 × $60 against a $100 cap ⇒ the expensive record
+is charged **$50 whenever it ships**, shares summing to exactly $100.
+
+Two guards, both reachable: **zero gross** (de-minimis waive, all-`'actual'` rates, no components) returns 0 and
+reports `basis: 'nothing_priced'` rather than `NaN`; a component of all-`'actual'` line items is flagged
+`hasUnpricedActuals` rather than allocating to 0 and reading as FREE — **`mail` is `'actual'` in the live TX
+profile**. Penny residual settles on the **largest** component, not the last, so the result depends on the SET
+and not array order.
+
+### ⚠️ I SHIPPED A TEST THAT COULD NOT FAIL — and the break-test caught it
+`verify_component_charged` §D claimed to prove **order-independence** — the exact property whose absence killed
+the running-cap rule — and proved nothing. Grosses summed to 72 against a $100 cap, so **the cap never fired**:
+ratio 1, no residual to misplace. It stayed green with the allocator deliberately sabotaged.
+
+Found only because the green state was committed and then broken on purpose. **A test that cannot fail is worse
+than no test — it reports the property as protected.** Replaced with 7/11/13 against a $20 cap (cap fires,
+shares leave a real −$0.01 residual), plus **D0 asserting the scenario actually engages the cap** so it cannot
+go vacuous again, and D2 matching components by gross rather than position. Fixed in its own commit so the
+finding stays legible.
+
+### The release gate — §5.9 is now enforced
+It blocked on `!paidInFull`, the whole request's balance. On a multi-record request that **withholds a
+finished, fully-paid-for record because a DIFFERENT record's money has not arrived** — which §5.9 forbids
+outright ("a child may NEVER be withheld because a SIBLING is unpaid"). Legal, not preference: no state
+authorizes it, and TX § 552.221(a) / CA § 7922.500 cut against sitting on finished records.
+
+Now resolves the row's own share and gates on `covered`. **Exact no-op for a single-record request** (one
+component ⇒ `componentCharged = total`) — the correct predicate adopted while it is still an identity, the same
+technique `requestScope.js` used for the migration.
+
+Three details worth knowing: the covering snapshot is the row's own estimate **or its parent's** (today the
+first hits; when money moves to the parent the second does, unchanged); a **reconciliation supersedes on both
+axes**, so the share is read from whichever snapshot set the effective total; and an estimate with no
+per-component data falls back to the whole-request test as `coverageBasis: 'request_total'` — the **previous**
+behaviour, stricter than §5.9 requires and never more permissive.
+
+`verify_release_coverage` (18). §C is the point: $10/$20/$70 children with $30 paid ⇒ the two cheap records
+release, the expensive one holds owing **$40** (not the $70 request balance), while C6 asserts the request is
+**not** paid in full — the old gate withheld all three. Break-tested: reverting fails C2/C3/C7/E1.
+
+### ⚠️ Required before the money axis moves to the parent
+Coverage is per-child today because each child carries its own estimate and therefore its own payment pool.
+Once ONE parent-level estimate funds n children from ONE pool, coverage must become **CUMULATIVE over
+already-released siblings** (§5.10.3 FIFO) — otherwise three $20 children all release against $50 paid, each
+being individually under $50. Not reachable today (needs `delivered_at` / `installment_no`, not built), and
+**flagged at the bottom of `feeRelease.js`** where that work will land.
+
+### Verification
+**834/834 green, live census clean.** Break-tests performed and reverted for both slices. Specs updated in the
+same commits: §5.9 marked BUILT, `componentCharged` marked BUILT in the working inventory. **Pushed** —
+`origin/main` at `81bb6f5`; note the branch had been **20 commits unpushed** before this session pushed it.
+
+### Next session
+1. **Revenue-by-department** — recorded UNDEFINED on 07-14 because attribution "needs the allocation the law is
+   silent on." `componentCharged` now defines it. Small, and it closes a stale open item.
+2. **ERP line items** — `emitCharge()` still sends a single scalar `amount`; extend to line items carrying
+   `componentCharged` (§5.10.5).
+3. **Phase 1 of the processing rebuild is still BLOCKED on Kevin** (brief §5) — the 10-stage order,
+   single-record vs MRR hub, `commercial_rate`/`mrr_processing` build-or-delete, retire v1 redaction duplicates.
+4. Everything in (q)'s "next session" list still stands, including the deliberately-undone items.
