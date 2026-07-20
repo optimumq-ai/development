@@ -6348,3 +6348,56 @@ is exactly where the two bad inferences of 2026-07-19 landed.
 2. Only then: restore `fee_review` and resume pipeline work.
 3. Unblocked meanwhile: the remaining Phase 2 screens (`fee_waiver`, `routing_review`,
    `review_auto_redaction`), and the swallow-audit fixes 1–3 in `BACKLOG.md`.
+
+---
+
+## 2026-07-20 (ae) — Swallow fixes 1–3, and a lost conversation to reconstruct
+
+### ⚠️ READ FIRST — context was lost, and it has not been recovered
+Kevin's connection dropped after `f67fda5` (2026-07-19 20:37 UTC, the D5 ruling). **Nothing after that
+commit was written to disk** — verified: no commit and no `docs/` mtime later than 2026-07-19.
+
+- **Saved:** the task-vs-stage discussion. `TARGET_process_model.md` holds the model in Kevin's words,
+  divergences D1–D8, and D5 ruled.
+- **LOST:** everything after — in particular Kevin's request to **research all 50 states and produce a
+  comprehensive, parameterized list of the rules the system must consider when processing a request.**
+  That discussion left no trace. **Kevin is rewriting it as a doc and uploading it.** Do not try to
+  reconstruct it from memory; wait for his doc.
+
+**Prior art that already exists** (both **2026-06-24** — a month old, NOT from that conversation, and
+covering **5 states, not 50**): `JURISDICTION_RULES.md` (TX/CA/FL/NY/WA; Part A is 10 axes the
+Jurisdiction Profile must parameterize) and `AUTO_CONFIG_DESIGN.md` (governing spec — *"expressiveness
+precedes automation"*, PARAMETERS vs STRUCTURE/BEHAVIOR, §6 instruction-set catalog as the completeness
+guarantee). **When Kevin's doc lands, reconcile it with these two explicitly** — supersede them or build
+on their axis structure. Two competing rule catalogs would be worse than either.
+
+### What was built (`b706c8f`)
+Swallow-audit items **1–3**, the set the audit itself called mechanical and said to fix together. Each was
+a real write in a log-only or bare catch, inside a handler that then answered 2xx unconditionally.
+
+1. **`PATCH /requests/:id/route`** — request moves teams, tasks may not. Primary write already landed, so
+   a 500 would wrongly imply nothing happened: now reports **partial** success (`tasksReassigned:false` +
+   warning) **and writes the divergence into the REROUTED history note.** The history row is the durable
+   part — a response field is only as good as the UI that renders it.
+2. **`POST /fee-estimates/request/:requestId`** and **`.../reconcile`** — the requestor's PURPOSE was
+   dropped by a bare `catch (e) {}`; purpose drives the fee basis. Both sites run before anything is
+   persisted and both handlers already answer 500 from an outer catch, so **removing the swallow was the
+   whole fix.**
+3. **`POST /redaction-jobs/jobs/:jobId/submit`** — the author's task never left their queue, so their
+   **billable** clock kept running on handed-off work. Same partial-success shape as 1.
+
+**Evidence:** 981 assertions pass, live untouched in all 12 tables, API restarted healthy (200).
+**Stated honestly:** that proves **no regression**; it does **not** exercise the new partial-success
+paths, which need injected failures.
+
+### Next, in order
+1. **Kevin's 50-state rules doc** — reconcile with `JURISDICTION_RULES.md` + `AUTO_CONFIG_DESIGN.md`.
+2. **Still-open product questions in `TARGET_process_model.md` §5**, unchanged and still blocking
+   pipeline work: D5's follow-on (does an unpaid **deposit** pause the whole request or only the records
+   whose share is unpaid? — coupled to D3), **D3** (parent-level fee aggregation), **D1** (how literal is
+   "driven by task completion"), **D7** (are intake review and delivery tasks?). Then restore `fee_review`.
+3. **Unblocked meanwhile:** Phase 2 screens `fee_waiver`, `routing_review`, `review_auto_redaction`
+   (`LegalReviewTaskPage` is the template). Swallow items **4–6** deliberately left: 4 needs a decision on
+   what "alert someone" means; 5–6 depend on the city's config posture.
+4. **Cheap and worth doing:** register `docs/tests/swallow_scan.js` as a harness so a new
+   write-swallow-then-200 fails the suite, plus a harness that injects failures into the three paths above.
