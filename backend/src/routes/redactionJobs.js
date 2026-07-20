@@ -126,6 +126,11 @@ router.post('/jobs/:jobId/submit', requireAuth, async function(req, res) {
   // null for self-releasing simple/standard redactions), the author's task moves to 'awaiting_review', which
   // STOPS their processing clock while it sits with the reviewer. No reviewer -> nothing changes (no forced
   // review). Either way, a re-submit clears any prior "returned for corrections" flag.
+  // The job write and the reviewer task above have already landed, so a failure here is PARTIAL: the work has
+  // been handed off but the author's task never left their queue, and their processing clock keeps running on
+  // it. Labour time is billable, so that is a measurement error, not cosmetics — report it instead of a bare
+  // `success: true` (what this used to do).
+  var handoffError = null;
   try {
     var tr = require('../services/taskRouting');
     var authTask = await get("SELECT id, status FROM tasks WHERE request_id = ? AND type IN ('redaction','legal_redaction') AND status IN ('open','assigned','in_progress','returned','awaiting_review') ORDER BY updated_at DESC LIMIT 1", [job.request_id]);
@@ -136,8 +141,15 @@ router.post('/jobs/:jobId/submit', requireAuth, async function(req, res) {
         await tr.clearReturned(authTask.id);
       }
     }
-  } catch (e) { console.error('[redaction submit -> author task]', e && e.message); }
-  res.json({ success: true, review_stage: 'pending_review', reviewTask: reviewTask ? reviewTask.id : null });
+  } catch (e) {
+    handoffError = (e && e.message) || 'unknown error';
+    console.error('[redaction submit -> author task]', handoffError);
+  }
+  res.json({
+    success: true, review_stage: 'pending_review', reviewTask: reviewTask ? reviewTask.id : null,
+    authorTaskHandedOff: !handoffError,
+    warning: handoffError ? 'Submitted for review, but your own task could not be moved to Awaiting review — it is still in your queue and its processing clock is still running.' : undefined
+  });
 });
 
 // Begin review (reviewer opens a submitted doc -> moves Awaiting review to Review in process).

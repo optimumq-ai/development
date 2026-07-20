@@ -226,6 +226,11 @@ router.patch('/:id/route', requireAuth, async function(req, res) {
   // #3 reassignment symmetry: move the request's active work onto the new team and re-route it there
   // (a specialist on the new team via Smart Routing, else the new team's pool). If none exists yet
   // (e.g. the request was Unassigned/triage), spawn the first work task on the new team and route it.
+  // The department write above has already landed, so a failure here is a PARTIAL reassignment, not a failed
+  // one: the request reads as the new team while its work may still sit in the old team's pool. A 500 would
+  // wrongly imply nothing happened; a bare `success: true` (what this used to do) hides a real divergence.
+  // So: report it in the response AND in the REROUTED history note, where the router is already looking.
+  var rerouteError = null;
   try {
     var tr = require('../services/taskRouting');
     // The correction itself resolves any open routing-review task (the ORO Associate just did the review).
@@ -245,10 +250,18 @@ router.patch('/:id/route', requireAuth, async function(req, res) {
       var ntask = await tr.createTask({ requestId: req.params.id, type: 'estimate', title: 'Create estimate', teamId: teamId, createdBy: req.user.sub });
       await tr.autoRouteOrPool(ntask.id, request.description, {});
     }
-  } catch (e) { console.error('[requests] reassignment re-route failed:', e && e.message); }
+  } catch (e) {
+    rerouteError = (e && e.message) || 'unknown error';
+    console.error('[requests] reassignment re-route failed:', rerouteError);
+  }
   await logHistory(req.params.id, req.user.sub, req.user.name, 'REROUTED',
-    'Re-routed from ' + fromName + ' to ' + team.name + (cleared ? ' (prior assignment cleared)' : '') + (req.body.notes ? ' - ' + req.body.notes : ''));
-  res.json({ success: true, departmentId: teamId, teamName: team.name, assignmentCleared: cleared });
+    'Re-routed from ' + fromName + ' to ' + team.name + (cleared ? ' (prior assignment cleared)' : '') + (req.body.notes ? ' - ' + req.body.notes : '')
+    + (rerouteError ? ' — WARNING: the request moved teams but its open work did NOT follow. Its tasks may still sit with ' + fromName + '. (' + rerouteError + ')' : ''));
+  res.json({
+    success: true, departmentId: teamId, teamName: team.name, assignmentCleared: cleared,
+    tasksReassigned: !rerouteError,
+    warning: rerouteError ? 'The request moved to ' + team.name + ', but its open tasks could not be moved and may still sit with ' + fromName + '.' : undefined
+  });
 });
 
 
