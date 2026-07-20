@@ -1,4 +1,9 @@
 # Optimum Q — Application Domain Map
+
+> ⚠️ **2026-07-20 — PIPELINE/STAGE DEVELOPMENT IS STOPPED** pending a design session (Kevin: *"before more
+> development takes place as I believe we've been applying changes that might break when code is revised"*).
+> Read `KEVIN_2026-07-20_revised_architecture_and_rules_project.md` FIRST. Task **screens** remain safe.
+
 Derived 2026-07-08 from a structural scan of ALL backend routes (36), services (40+), connectors (11), and frontend pages (37). This is the master index for domain-by-domain spec consolidation. Structural only — file presence, not verified functionality.
 
 **Spec status:** ✅ ALL 12 DOMAINS CONSOLIDATED (2026-07-08). Specs: SPEC_*.md

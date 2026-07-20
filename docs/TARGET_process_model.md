@@ -210,13 +210,22 @@ adding one means writing another bespoke path.
 
 For Kevin, in rough priority:
 
-1. ~~**D5 — is `awaiting_payment` a second axis?**~~ **✅ RULED: yes, a status that pauses.** One question
-   follows from it: **does an unpaid deposit pause the whole request, or only the records whose own share is
-   unpaid?** The release gate is already per-child by design; deposits may be collected whole-request.
+> ⚠️ **SUPERSEDED IN PART, 2026-07-20.** Kevin's write-up
+> (`KEVIN_2026-07-20_revised_architecture_and_rules_project.md`) answers D5's follow-on, D1, and bears on
+> D4/D7/D8 — **and STOPS pipeline/stage development pending a design session.** Read it before acting on §5.
+
+1. ~~**D5 — is `awaiting_payment` a second axis?**~~ **✅ RULED: yes, a status that pauses.** ~~One question
+   follows from it: does an unpaid deposit pause the whole request, or only the records whose own share is
+   unpaid?~~ **✅ ANSWERED 2026-07-20: the PARENT.** *"the status of a parent is either active or closed, or
+   hold awaiting payment."* Whole-request, not per-child. ⚠️ This makes the two gates **deliberately
+   asymmetric** — deposit pauses at the parent, release withholds per-child — and they must not be collapsed
+   into one mechanism. **Still open:** does the parent *push* the pause onto children, or does each child
+   *pull* (monitor parent status)? Kevin flags the answer may differ for a *pause* vs a closing *event*.
 2. **D3 — does parent-level fee aggregation come back on the roadmap now?** The model requires it; it is
    currently deferred. ⚠️ **Coupled to D5's open question** — "whose share is unpaid" is only answerable
    per-child once fees aggregate across children.
-3. **D1 — how literal is "driven by task completion"?** Does `stage` remain as a derived, readable position,
-   or does the pipeline become genuinely task-list-driven with no stage column?
+3. ~~**D1 — how literal is "driven by task completion"?**~~ **✅ ANSWERED 2026-07-20: literal.** *"The
+   workflow for processing child request items is to be driven by task completion."* Scope fence: single-item
+   requests only for now, MRR excluded.
 4. **D7 — are intake review and delivery tasks?**
 5. **§3 — the legal path**, once the spine is settled.
