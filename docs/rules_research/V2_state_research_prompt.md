@@ -91,16 +91,17 @@ request tracking *(only if legally required)* · special record types *(only tho
 | 1 | **Rule ID** | `{{ST}}-0001`, sequential, no gaps. |
 | 2 | **Authority Scope** | Generally Applicable · Municipal-Specific · Local-Government General · Agency-Specific Model · Record-Specific · Judicially Established. (Retention/Preservation only for the keeper-sliver hold.) |
 | 3 | **Category** | Broad subject (Intake, Clarification, Deadlines, Search, Custody/Routing, Communications, Production, Inspection, Fees, Payment, Redaction, Denials, Review, Appeals, Enforcement, Special Records…). The *subject*, one. |
-| 4 | **Concept Key** ⭐ | A short, stable slug naming the specific configurable concept, `family.thing` form — e.g. `intake.acknowledgment_window`, `fee.copy_rate_per_page`, `clarification.nonresponse_abandonment`. **If a shared concept dictionary is supplied with this prompt, MAP to an existing key when one fits; otherwise coin a new key AND list it in "Proposed Concept Keys" (SUGGEST).** This is the cross-state join key — two states' rows for the same concept must carry the *same* key. |
+| 4 | **Concept Key** ⭐ | A short, stable slug naming the specific configurable concept, `family.thing` form — e.g. `intake.acknowledgment_window`, `fee.copy_rate_per_page`, `clarification.nonresponse_abandonment`. **If a shared concept dictionary is supplied with this prompt, MAP to an existing key when one fits; otherwise coin a new key AND list it in "Proposed Concept Keys" (SUGGEST).** This is the cross-state join key — two states' rows for the same concept must carry the *same* key. **Namespace the appeal *type* (pilot #1):** use `appeal.judicial.*` vs `appeal.administrative.*` explicitly, so a state's court-review path is never merged with another state's internal-appeal stage. |
 | 5 | **Legal Concept** | Prose name, preserving {{STATE}} terminology. (Human-readable companion to the slug.) |
 | 6 | **Rule Type** | Requirement · Prohibition · Permission · Discretion · Definition · Classification · Deadline · Trigger · Exception · Presumption · Calculation · Remedy. Primary type; note a secondary in Notes. |
 | 7 | **Config Home** ⭐ | `parameter` = a value/threshold/rate/window/enum the city fills in. `structural` = a step, branch, state, or path the engine must be able to *execute* (a required notice, an internal-appeal stage, {{STATE}}'s bespoke review paths). Routes the rule to the right home in the config system; keeps state-specific *forks* from being mislabeled as *values*. |
 | 8 | **Atomic Rule** | Exactly one rule, one level. Actor · action/prohibition · trigger · key condition · resulting deadline/outcome. Stay close to source; add no conclusion the authority does not state. |
 | 9 | **Trigger / Conditions** | The facts/events that activate it. "None stated" if unconditional. |
 | 10 | **Clock Effect** ⭐ | One of: `none` · `sets-deadline` · `tolls` · `pauses` · `restarts` · `resets` · `terminal`. This is the **filterable timing dimension** — the field a later calendar/tolling pass queries. Most rows are `none`; that blank is itself signal. |
-| 11 | **Clock Spec** ⭐ | If Clock Effect ≠ none: the value + unit + start event, short — e.g. `5 business-days from request receipt`, `30 calendar-days from clarification sent`. Human-readable; not JSON. |
+| 11 | **Clock Spec** ⭐ | If Clock Effect ≠ none: the value + unit + start event, short — e.g. `5 business-days from request receipt`, `30 calendar-days from clarification sent`. Human-readable; not JSON. **Soft/undefined standards (pilot #1):** a deadline stated as "promptly" / "reasonable" / "without unreasonable delay" / "date certain" is NOT numeric — write `undefined-soft: "<the source term>" from <start event>` and set **Config Home = structural** (it is a standard the engine applies, not a value the city fills in). This lets a soft-standard deadline join the deadline concept across states instead of falling into the human-triage bucket. Do **not** invent a day-count for it. |
 | 12 | **Related Rule IDs** ⭐ | IDs of rules this one attaches to — the exception it modifies, the notice a deadline is attached to, the terminal event a clock leads to. **Moves relationship out of Notes and into a parseable cell.** An atomic split without this loses information the source sentence carried. |
-| 13 | **Source Language** | Minimum quote to preserve meaning. Short. If wording is unverifiable: no quotation marks, cautious summary, flag in Notes. |
+| 13 | **Source Language** ⭐ **(verbatim mandate — A/B 2026-07-20)** | The **complete operative clause(s) VERBATIM** — the sentence(s) stating the duty, threshold, deadline, or condition — **not trimmed to a fragment, not expanded to the whole subsection.** These sources are **government edicts** (statutes, regulations, published opinions) and carry **no copyright**; verbatim reproduction of the operative clause is **required, not optional** — do not truncate to avoid "quoting too much." The A/B showed paraphrase flattens distinct rules (a multi-factor *test* and a bare *policy* both become "reasonable time") and the merger then wrongly fuses them; verbatim is what prevents that content-destroying over-merge. **Provenance:** if you could not open the official source, set **`is_paraphrase = true`** (column 13a), put a cautious paraphrase here (no quotation marks), and flag manual verification — never fabricate a quote. |
+| 13a | **is_paraphrase** ⭐ | Boolean. `true` when Source Language is NOT verbatim from an opened source. Forces the verbatim/paraphrase distinction to be machine-readable so downstream never mistakes one for the other. |
 | 14 | **Source Authority** | Precise cite (`Ariz. Rev. Stat. § …`, session-law chapter/year, AG opinion no./date, rule citation, case + citation). |
 | 15 | **Source Type** | Constitution · Statute · Session Law · Administrative Rule · AG Opinion · Appellate Decision · Official Guidance · Official Form · Agency Procedure. |
 | 16 | **Effective Date / Status** | Current · Effective [date] · Amended effective [date] · Delayed · Enacted-awaiting-effect · Superseded · Repealed · Requires manual verification. Never blank. |
@@ -118,6 +119,29 @@ next to a single narrow rule ("portal acknowledgment exception"). If a provision
 permission (notice a fee estimate *and* accept advance payment), split them into separate rows and **link
 them with Related Rule IDs** — never leave the linkage in prose. Do not fragment a balancing test or a
 conjunctive exemption; keep those in one row and explain the conjunction in Notes.
+
+---
+
+## Discovery discipline added 2026-07-20 (from pilot #1 + the verbatim A/B)
+
+**1. No contentless rules — the biggest single lever (A/B: 5 of 8 bad merges came from this).** Never emit a
+row that has no operative content — empty `Source Language`, no `Config Home`, no `Trigger`, no `Clock`. An
+empty shell has nothing for the merger to compare, so it gets fused into unrelated rules and destroys their
+content. If a concept simply *exists* in this state without operative detail you could open, that is a
+**material negative** (a structured absence), **not** a rule row. A rule row must carry a real duty/threshold/
+condition or it does not get written.
+
+**2. Universal-access symmetry — the asymmetry that manufactures fake differences at scale (pilot #1).** A
+universal-access fact — "any person may request," "no residency requirement," "no statement-of-purpose
+required" — must be emitted as a **rule with a fixed shared canonical key** (`eligibility.any_person`,
+`eligibility.no_residency_requirement`, `eligibility.no_purpose_requirement`), **never** as a material
+negative. One state stating it affirmatively and another stating it as an absence is the same law; if one goes
+to a rule and the other to a negative, the cross-state join never sees them and reports a phantom difference.
+Always emit these as rules with the shared key.
+
+**3. Verbatim is mandatory (A/B ruling).** See column 13 — full operative clause, verbatim, with the
+`is_paraphrase` flag when you could not open the source. This is the cheap insurance against content-
+destroying over-merges; it is not optional in this version.
 
 ---
 
@@ -158,8 +182,8 @@ redaction, qualification, fee treatment, or production method. Flag rules that r
 
 1. **Research date & current-law statement** — date, session reviewed, whether codified statutes were
    available, any gap between guidance and current law.
-2. **Primary rule inventory** — the 18-column table. Group rows by Category for readability but keep
-   sequential Rule IDs.
+2. **Primary rule inventory** — the table (18 columns + the `is_paraphrase` flag). Group rows by Category for
+   readability but keep sequential Rule IDs.
 3. **Special record types & exemptions** — the separate, selective table.
 4. **Proposed Concept Keys (SUGGEST)** ⭐ — every new `Concept Key` you coined that was **not** in the
    supplied dictionary, each with a one-line definition and the Rule IDs using it. *(This is what feeds the
@@ -185,7 +209,10 @@ procedures not presented as municipal requirements · possession/custody/control
 "reasonable" not converted to fixed numbers · ordinary vs special fee rules separated · exemptions don't
 overwhelm processing rules · **every row has a Concept Key** · **every row has a Config Home** · **every
 Clock Effect ≠ none has a Clock Spec** · **atomic-split rows carry Related Rule IDs** · the Excluded list is
-populated (an empty one means the inclusion test wasn't applied).
+populated (an empty one means the inclusion test wasn't applied) · **every row has verbatim Source Language OR
+`is_paraphrase = true`** (added 2026-07-20) · **no contentless rows** — anything with no operative content is
+a material negative, not a rule · **universal-access facts are rules with the shared eligibility key, never
+material negatives** · **appeal rows namespace judicial vs administrative**.
 
 ## Prohibited output (unchanged from V1)
 No software architecture, database schemas, code, YAML, JSON, config files, screen designs, workflow

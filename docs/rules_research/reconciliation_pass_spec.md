@@ -53,12 +53,27 @@ and each agent sees a coherent slice.
 **1. Harvest & normalize** *(one pass, cheap).*
 Concatenate all state rows. Trim obvious noise. Group by `Category`. Emit the distinct
 `(state, Concept Key, Legal Concept, Config Home, Atomic Rule excerpt)` tuples per category. No judgment yet.
+**Also harvest each state's material negatives AND excluded items** — not just its rules (see stage 2b).
+**Drop contentless rows before clustering** (empty Source Language + no Config Home + no Trigger + no Clock):
+pilot #1 / the A/B showed these are the dominant cause of bad merges — a shell with nothing to compare gets
+fused into real rules and destroys their content. A dropped shell is logged, not silently discarded.
 
 **2. Canonicalize concepts** *(per category, parallel; the core merge).*
 For each category, an agent clusters the state-proposed keys into **canonical concepts**, using Atomic Rule +
-Source Language as the identity test — not the slug. For each cluster it emits: canonical key, one-line
-definition, config-home, and the alias list (state slug → canonical). Ambiguous or singleton clusters it
-**does not force** — they go to the unresolved bucket with a reason. Output feeds the dictionary.
+**verbatim Source Language** as the identity test — not the slug. (The A/B proved this: paraphrase flattens a
+multi-factor *test* and a bare *policy* both to "reasonable time," and the merger fuses them; the verbatim
+operative text is what keeps them apart. Weight verbatim over paraphrase when both are present.) For each
+cluster it emits: canonical key, one-line definition, config-home, and the alias list (state slug →
+canonical). Ambiguous or singleton clusters it **does not force** — they go to the unresolved bucket with a
+reason. Output feeds the dictionary.
+
+**2b. Reconcile across rules AND negatives/exclusions (pilot #1 — the asymmetry that fakes differences).**
+The join must not compare rule-to-rule only. A fact one state emits as a **rule** and another emits as a
+**material negative** (or drops via exclusion) is the *same law* stated two ways — if the join can't see the
+negative side, it reports a phantom cross-state difference. So for every canonical concept, also scan the
+other states' negatives and exclusions for the same fact and fold it in. Universal-access facts
+(`eligibility.any_person`, `eligibility.no_residency_requirement`, …) are the worst offenders and now carry a
+fixed shared key upstream; this stage catches the rest.
 
 **3. Pivot** *(per category, parallel).*
 - `parameter` concepts → build the value table: canonical concept × state → value + unit + citation. Flag
@@ -74,8 +89,23 @@ special-record fee schedule masquerading as the ordinary rate? a `structural` fo
 locked. This is where the per-row citation requirement pays off — a merge with no shared operative language
 fails here.
 
+> **Prove verify BITES before the blast (pilot #1 — verify passed 2 merges and rejected 0, so its guardrail
+> is unproven).** Seed the verify stage with a **red-team false-merge fixture**: a hand-built pair that looks
+> similar but differs on toll-vs-terminal or ordinary-vs-special fee basis. If verify does not reject it, the
+> stage is broken and no amount of clean output proves otherwise. This is the project's "tests must bite"
+> rule applied to the merge engine — run it as a standing check, not a one-time spot check.
+
 **5. Emit & feed back** *(one pass).*
 Write the five outputs. The updated Concept Dictionary becomes the next wave's input.
+
+### Many-state merge semantics (pilot #1 — untested at n=2, must be defined before the blast)
+At 2 states almost every concept is single-state, so the pipeline never merged a **third** member into an
+existing pair. Define it explicitly before scaling: when state C's rule joins an existing canonical concept
+that already holds A and B, **verify C against every current member (A *and* B), not just one** — a merge is
+only valid if C shares the operative rule with all of them. Merging is **not assumed transitive**: A≈B and
+B≈C does not license A≈C without C being checked against A. If C matches some members but not others, that is
+a signal the canonical concept is too broad — **split it**, don't force C in. Add a 3rd seed state early to
+exercise this before committing to the full run.
 
 ---
 
