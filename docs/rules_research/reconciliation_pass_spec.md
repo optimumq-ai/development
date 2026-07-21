@@ -76,8 +76,17 @@ other states' negatives and exclusions for the same fact and fold it in. Univers
 fixed shared key upstream; this stage catches the rest.
 
 **3. Pivot** *(per category, parallel).*
-- `parameter` concepts → build the value table: canonical concept × state → value + unit + citation. Flag
-  states where the concept is **absent** (a material negative finding — meaningful, not a blank).
+- `parameter` concepts → build the value table: canonical concept × state → **constraint basis** +
+  bound/value + unit + citation. **The state layer is a CONSTRAINT, not the final number** (ruled
+  2026-07-21): a state gives a `fixed` value, a `ceiling` ("shall not exceed 25¢"), a `floor`, or a
+  `soft-standard` ("reasonable"), and the *city* plugs in the operative value underneath it. So a ceiling-25¢
+  state and a fixed-25¢ state are the **same concept** (`fee.copy_rate_per_page`) with a different `basis`
+  attribute — never two concepts. Default-when-city-blank = worst-outcome-for-requestor (for a ceiling, the
+  max; for a soft standard, no number — leave for the city). Flag states where the concept is **absent**
+  (a material negative finding — meaningful, not a blank).
+  - *City-layer validation (lives in `AUTO_CONFIG_DESIGN`, noted here for the contract):* when a city uploads
+    an ordinance value, validate it against this constraint — value ≤ ceiling (or ≥ floor). A violation is
+    **flagged for review**, never silently accepted and never silently clamped.
 - `structural` concepts → build the catalog row: concept × states-that-have-it + a one-line shape.
 - Any concept with clock rows → add to the timing/tolling table (effect + spec per state).
 
@@ -85,7 +94,15 @@ fixed shared key upstream; this stage catches the rest.
 For each canonical cluster, an independent agent tries to **refute the merge**: are two rules here that carry
 a *different* operative effect (a deadline that tolls vs one that's hard)? a value pulled from a
 special-record fee schedule masquerading as the ordinary rate? a `structural` fork flattened into a
-`parameter`? Default to **split** on doubt. Confirmed false-merges return to stage 2's input; survivors are
+`parameter`? Default to **split** on doubt.
+
+> **Do NOT split on parametric variance (ruled 2026-07-21).** Two rules for the *same underlying parameter*
+> that differ only in **constraint basis** (`fixed` vs `ceiling` vs `floor` vs `soft-standard`) or in the
+> **value** (25¢ vs 50¢) are the **same concept** — HOLD them; the basis and value are per-state attributes,
+> not concept boundaries. Split only when the *underlying operative rule* differs: a different fee type (copy
+> vs search), a different record class (ordinary vs special-format), a toll-vs-terminal clock, or a
+> judicial-vs-administrative fork. (This is the `true-copy-rate` miss the gate fixture caught: cap-25 vs
+> fixed-25 must HOLD.) Confirmed false-merges return to stage 2's input; survivors are
 locked. This is where the per-row citation requirement pays off — a merge with no shared operative language
 fails here.
 
