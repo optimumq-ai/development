@@ -20,6 +20,34 @@ const WAVE = (args && args.wave) || 'wave'
 const MAX_VERIFY_AGENTS = (args && args.maxVerifyAgents) || 150   // hard ceiling on the Verify fan-out
 const MIN_BUDGET_TO_VERIFY = 200_000                              // skip/abort Verify if the token budget can't cover it
 const MIN_BUDGET_TO_PIVOT  = 120_000
+
+// ---- exclusions --------------------------------------------------------
+// Rule types we KNOW are out of scope for the configurable request-processing
+// engine (e.g. office hours for in-person inspection, "no duty to create a
+// record"). Filtering here — deterministically, after discovery — cuts noise
+// and, more importantly, shrinks the Verify fan-out (the expensive step). All
+// three lists OR together; anything matched is dropped before canonicalize
+// (rows) or before verify (candidate families/keys), and logged.
+// Populate from EXCLUSION_review.md. args.exclude can override/extend at runtime.
+const EXCLUDE = {
+  categories:        [],   // exact rule.category match, e.g. 'Inspection'
+  conceptKeyMatches: [],   // substring match on a rule's coined concept_key, e.g. 'office_hours', 'create_record'
+  candidateFamilies: [],   // candidate_key prefix before the first dot, e.g. 'inspection'
+  candidateKeys:     [],   // exact reconciled candidate_key, e.g. 'inspection.office_hours'
+  ...(args && args.exclude ? args.exclude : {}),
+}
+function rowExcluded(r){
+  if (EXCLUDE.categories.includes(r.category)) return true
+  const ck = (r.concept_key || '').toLowerCase()
+  if (EXCLUDE.conceptKeyMatches.some(p => ck.includes(String(p).toLowerCase()))) return true
+  return false
+}
+function candidateExcluded(c){
+  const key = c.key || ''
+  const fam = key.split('.')[0]
+  return EXCLUDE.candidateFamilies.includes(fam) || EXCLUDE.candidateKeys.includes(key)
+}
+
 function abbr(s){ return ({Texas:'TX',California:'CA','New York':'NY',Florida:'FL',Illinois:'IL',Virginia:'VA',Washington:'WA',Arizona:'AZ',Georgia:'GA',Ohio:'OH',Pennsylvania:'PA',Michigan:'MI',Colorado:'CO',Oregon:'OR',Minnesota:'MN',Massachusetts:'MA','North Carolina':'NC','New Jersey':'NJ'})[s] || s.slice(0,2).toUpperCase() }
 const budgetOk = (floor) => !budget.total || budget.remaining() > floor
 
@@ -79,8 +107,16 @@ states.forEach(s => s.rules.filter(r=>!isContentless(r)).forEach(r => rows.push(
   source_language: r.source_language||'', is_paraphrase: !!r.is_paraphrase, clock_effect: r.clock_effect,
   clock_spec: r.clock_spec||'', source_authority: r.source_authority||'',
 })))
+// EXCLUDE out-of-scope rule types before anything downstream sees them.
+const preExcludeCount = rows.length
+const excludedRows = rows.filter(rowExcluded)
+for (let i = rows.length - 1; i >= 0; i--) if (rowExcluded(rows[i])) rows.splice(i, 1)
 const rowById = {}; rows.forEach(r => rowById[r.rule_id] = r)
-log(`Discovered: ` + states.map(s => `${abbr(s.state)} ${s.rules.length}r/${s.verbatim_captured_count}v`).join('  ') + `  | total usable rows: ${rows.length}`)
+if (excludedRows.length) {
+  const byCat = {}; excludedRows.forEach(r => { byCat[r.category] = (byCat[r.category]||0)+1 })
+  log(`Excluded ${excludedRows.length}/${preExcludeCount} rows as out-of-scope: ` + Object.entries(byCat).map(([k,v])=>`${k} ${v}`).join(', '))
+}
+log(`Discovered: ` + states.map(s => `${abbr(s.state)} ${s.rules.length}r/${s.verbatim_captured_count}v`).join('  ') + `  | usable rows after exclusions: ${rows.length}`)
 
 phase('Canonicalize')
 const CANON_SCHEMA = {
@@ -109,11 +145,15 @@ ${JSON.stringify(rows.map(r => ({ id: r.rule_id, st: r.st, cat: r.category, home
 }
 if (!canon) return { error: 'canonicalize failed', states: states.length }
 
-// candidate clusters, cleaned to real rule_ids
-const candidates = (canon.candidate_concepts||[]).map(c => ({
+// candidate clusters, cleaned to real rule_ids (members already exclude dropped rows via rowById)
+const candidatesAll = (canon.candidate_concepts||[]).map(c => ({
   key: c.candidate_key, definition: c.definition||'', config_home: c.config_home||'',
   members: (c.member_rule_ids||[]).filter(id => rowById[id]).map(id => ({ rule_id: id, st: rowById[id].st })),
 })).filter(c => c.members.length > 0)
+// EXCLUDE whole candidate families/keys before the (expensive) Verify fan-out.
+const droppedCands = candidatesAll.filter(candidateExcluded)
+const candidates = candidatesAll.filter(c => !candidateExcluded(c))
+if (droppedCands.length) log(`Excluded ${droppedCands.length} candidate concepts by family/key: ` + droppedCands.map(c=>c.key).join(', '))
 
 // ============================================================================
 // VERIFY — one PARTITION agent per multi-state cluster.
