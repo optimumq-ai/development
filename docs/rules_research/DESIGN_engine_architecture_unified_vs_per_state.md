@@ -1,8 +1,16 @@
 # Design note — engine architecture: unified + state profiles vs per-state engines
 
-> Discussion captured 2026-07-21 (Kevin + Claude). **Status: OPEN** — a recommendation is recorded
-> below, but the decision is deferred to a hands-on spike (see §7). Relates to
-> `DESIGN_master_list_and_city_config.md` (the two-layer state/city model) and `AUTO_CONFIG_DESIGN.md`.
+> Discussion captured 2026-07-21 (Kevin + Claude). **Status: OPEN — DEFERRED.** A leaning is recorded,
+> but the decision is **explicitly parked until the rules exercise (gather + consolidate all relevant
+> rules for the target states) is complete.** Relates to `DESIGN_master_list_and_city_config.md` (the
+> two-layer state/city model) and `AUTO_CONFIG_DESIGN.md`.
+>
+> **Update 2026-07-21 (Kevin):** a second, stronger motivation for per-state segregation has been
+> added — **fault isolation / update blast radius** (see §5b). This is independent of the
+> customer-clarity motivation and is *not* dissolved by the view-layer reframe; it materially shifts
+> the balance toward per-state segregation and is now the primary driver to weigh. Near-term work
+> pauses the wave run and focuses on improving the gather/consolidate pipeline; the engine-architecture
+> decision is to be planned **after** the rules exercise finishes.
 
 ## The question
 
@@ -55,10 +63,44 @@ Not "one engine vs fifty engines," but:
 | Completeness / coverage tooling | Master list gives one surface to verify | No cross-checkable surface across 50 engines |
 | Customer config surface | State-scoped view of the profile → clean | Clean (but no cleaner) |
 | Genuinely different **shapes** across states (structural forks) | Handled by composing stages (see below) | Handled naturally, but by duplicating shared parts too |
+| **Fault isolation / update blast radius** (§5b) | A regression in shared logic can reach **every** state on update | **Contained** — a state's logic change touches only that state's customers |
 
 The mechanics of calendars, tolling, and fee estimation are **largely identical** across states — only
 the parameters (5 days vs 10; 15¢ vs 25¢) and **which stages are active** differ. Forking by state
-copies the shared machinery; that is the core cost of path B.
+copies the shared machinery; that is the core cost of path B. The core cost of path A is the last row —
+a shared fault surface. **These are the two forces in tension**; the rest of the table mostly favors A.
+
+## §5b — Fault isolation / update blast radius (the decisive new driver)
+
+The strongest reason for per-state segregation is **operational, not UX**: with one all-encompassing
+configurator, a fix for a bug reported in *one* state — written under pressure, with a regression that
+testing doesn't catch — can ship to and break customers in *other* states when they next update. A
+**library whose configuration code/logic files are segregated by state** lets an update ship for only
+that state's files, so the blast radius of a bad fix is bounded to that state's customers.
+
+Important scope note (Kevin): this is about the **code/logic files** — the calendar/tolling/estimate
+*logic* — **not** the configuration *data* a customer produces during setup. The data is per-city
+regardless; the question is whether the *logic that consumes it* is shared or per-state.
+
+The consequence: estimate, tolling, deadline, etc. logic may need to live (to some extent) **inside
+each state's files** rather than as one universal implementation — accepting some duplication as the
+price of isolation. This directly opposes path A's "implement each mechanic once," which is exactly why
+the decision is now genuinely balanced.
+
+**A spectrum, not a binary.** Full duplication is not the only way to get isolation. Options, from most
+shared to most isolated:
+1. **Unified engine + profiles** — max reuse, shared fault surface (path A).
+2. **Shared core + per-state override modules** — common mechanics in a core lib; each state has an
+   override file that can replace any piece. A state-only fix edits that state's override; the shared
+   core is touched only for genuinely universal changes. Partial isolation.
+3. **Per-state logic modules, independently versioned + staged rollout** — each state's logic is its own
+   deployable unit with its own test suite; updates roll out per state. Strong isolation, more duplication.
+4. **Fully separate per-state engines** — max isolation, max duplication (path B).
+
+Where on this spectrum to land is exactly what the rules data + a hands-on spike should decide: how much
+of the calendar/tolling/estimate logic is *truly* shared vs state-specific determines how much isolation
+costs. If most logic is shared, (2) buys most of the isolation cheaply; if states diverge structurally,
+(3)/(4) get more attractive.
 
 ## Where the per-state instinct is genuinely right
 
@@ -72,18 +114,23 @@ compose the subset of stages that state needs**. One implementation per stage; a
 composition; the customer sees only the stages their profile activates. This delivers what the
 per-state idea reached for, without the ~50× maintenance.
 
-## Recommendation (leaning, pending the spike)
+## Recommendation — no lean yet; decide after the rules exercise
 
-Single engine, with:
-1. **Pluggable stages** — modularize by capability, so structural forks are *composed*, not branched.
-2. **State profiles** — each selects active levers + enabled stages + constraints; the config UI
-   renders strictly from the profile, so the customer's surface is state-clean.
+With only the customer-clarity motivation, the balance favored a single engine + profiles. The
+fault-isolation driver (§5b) changes that: there are now **two strong, opposing forces** —
+maintenance economy (favors shared logic) vs update blast-radius containment (favors per-state
+segregation) — and they can't be traded off honestly without knowing **how much of the
+calendar/tolling/estimate logic is actually shared vs state-specific.** That is precisely what the
+rules exercise will reveal.
 
-This is essentially the design already recorded in `DESIGN_master_list_and_city_config.md`. The new
-customer-clarity concern becomes an explicit **UI-scoping requirement** on top of it, not a reason to
-fork the engine.
+So the recommendation is **to decide later**, and in the meantime treat the design space as the §5b
+spectrum (unified → shared-core+overrides → per-state modules → separate engines) rather than a binary.
+Whatever the outcome, two things hold on every path and can be built now without prejudging it:
+- the **comprehensive per-state relevant-rule master list** (required substrate — see below), and
+- **modularization by stage/capability** (structural forks composed, not branched) — this is
+  orthogonal to the shared-vs-segregated axis and helps under any option.
 
-## §7 — The experiment / spike (2026-07-22)
+## §7 — The experiment / spike (after the rules exercise)
 
 Decide from real build experience, not on paper. Plan:
 
@@ -100,6 +147,8 @@ Decide from real build experience, not on paper. Plan:
    - How many genuinely distinct *stages* appeared? (Drives how much composition machinery A needs.)
    - Effort to add the *next* state under each.
    - Cost of a cross-cutting change (introduce a new tolling rule and apply it everywhere).
+   - **Blast-radius test:** make a *state-specific* fix under each option — does it force a shared-core
+     change (putting other states at risk on update), or stay contained to that state's files? (§5b.)
    - Could the unified profile's state-scoped config view be made as clean as a bespoke per-state UI?
 
 Outcome: enough real information to close this note with a decision.
