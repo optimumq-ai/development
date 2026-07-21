@@ -104,6 +104,21 @@ special-record fee schedule masquerading as the ordinary rate? a `structural` fo
 > judicial-vs-administrative fork. (This is the `true-copy-rate` miss the gate fixture caught: cap-25 vs
 > fixed-25 must HOLD.)
 
+> **A concept is the LEVER, not the VALUE (ruled 2026-07-21, from wave 1).** Wave 1 fragmented the initial
+> response window into three concepts keyed by value (5-day / 10-day / absent). Wrong: they are ONE lever
+> (`deadline.initial_response_window`) with per-state cells — NY 5, CA 10, GA 3, and TX/FL/AZ/OH soft. **Value,
+> constraint basis (incl. fixed-vs-soft), AND config_home labeling are per-state attributes — none of them
+> split a concept.** Split into a new concept ONLY on a genuine SHAPE/OBLIGATION/TYPE difference: a different
+> obligation (time-to-**acknowledge** vs time-to-**comply/deny**), a different fee type (copy vs search), a
+> different record class, a toll-vs-terminal clock, or a judicial-vs-administrative fork. Otherwise the concept
+> count grows faster than the legal surface it represents and will not scale to 50 states.
+
+> **One `config_home` per concept (ruled 2026-07-21).** A lever's home is a property of the lever, not the
+> state — never `parameter` in VA and `structural` in AZ for the same deposit. If it is a tunable
+> value/threshold/window/rate (even where a state's basis is soft or the state is absent), it is a
+> **parameter** everywhere; reserve **structural** for genuine process-shape forks (a stage, branch, gate, or
+> eligibility fork). The pivot resolves the single home by the lever when member rules disagree.
+
 Confirmed false-merges return to stage 2's input; survivors are locked. This is where the per-row citation
 requirement pays off — a merge with no shared operative language fails here.
 
