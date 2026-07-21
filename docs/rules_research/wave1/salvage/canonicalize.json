@@ -1,0 +1,1121 @@
+{
+  "candidate_concepts": [
+    {
+      "candidate_key": "eligibility.requester_standing",
+      "config_home": "structural",
+      "definition": "Who has standing to request (open to any person / no residency-citizenship requirement, or restricted requester class).",
+      "member_rule_ids": [
+        "TX-0001",
+        "TX-0003",
+        "CA-0001",
+        "CA-0003",
+        "NY-0001",
+        "NY-0003",
+        "FL-0001",
+        "FL-0002",
+        "IL-0001",
+        "IL-0003",
+        "WA-0001",
+        "WA-0003",
+        "WA-0004",
+        "AZ-0001",
+        "AZ-0003",
+        "GA-0001",
+        "GA-0003",
+        "OH-0001",
+        "OH-0004",
+        "VA-0001"
+      ]
+    },
+    {
+      "candidate_key": "eligibility.no_purpose_requirement",
+      "config_home": "structural",
+      "definition": "Requester need not state a reason/purpose to obtain records.",
+      "member_rule_ids": [
+        "TX-0002",
+        "CA-0002",
+        "NY-0002",
+        "FL-0003",
+        "IL-0002",
+        "VA-0002",
+        "WA-0002",
+        "AZ-0004",
+        "GA-0002",
+        "OH-0002"
+      ]
+    },
+    {
+      "candidate_key": "eligibility.identity_disclosure",
+      "config_home": "structural",
+      "definition": "Whether the agency may require/condition access on requester identity.",
+      "member_rule_ids": [
+        "OH-0003",
+        "VA-0004",
+        "OH-0006"
+      ]
+    },
+    {
+      "candidate_key": "eligibility.incarcerated_requester",
+      "config_home": "structural",
+      "definition": "Special handling/exclusion of requests from incarcerated persons.",
+      "member_rule_ids": [
+        "TX-0004",
+        "OH-0035"
+      ]
+    },
+    {
+      "candidate_key": "intake.writing_requirement",
+      "config_home": "structural",
+      "definition": "Whether a request must be in writing vs oral/optional.",
+      "member_rule_ids": [
+        "TX-0005",
+        "NY-0004",
+        "IL-0005",
+        "FL-0004",
+        "GA-0004",
+        "OH-0005"
+      ]
+    },
+    {
+      "candidate_key": "intake.no_standard_form",
+      "config_home": "structural",
+      "definition": "Agency may not require a particular/standard form or official format.",
+      "member_rule_ids": [
+        "IL-0004",
+        "WA-0005"
+      ]
+    },
+    {
+      "candidate_key": "intake.no_magic_words_required",
+      "config_home": "structural",
+      "definition": "Request need not cite the statute to invoke it/its deadlines.",
+      "member_rule_ids": [
+        "VA-0006"
+      ]
+    },
+    {
+      "candidate_key": "intake.request_channels",
+      "config_home": "structural",
+      "definition": "Which submission channels must be accepted (mail, email, fax, in person).",
+      "member_rule_ids": [
+        "NY-0006",
+        "WA-0006",
+        "AZ-0005",
+        "GA-0006"
+      ]
+    },
+    {
+      "candidate_key": "intake.request_form_provided",
+      "config_home": "structural",
+      "definition": "A public request form is developed/made available.",
+      "member_rule_ids": [
+        "NY-0007"
+      ]
+    },
+    {
+      "candidate_key": "intake.bot_request",
+      "config_home": "structural",
+      "definition": "Handling/denial of automated bot requests.",
+      "member_rule_ids": [
+        "WA-0009"
+      ]
+    },
+    {
+      "candidate_key": "intake.designated_recipient",
+      "config_home": "structural",
+      "definition": "Agency may designate the address/individual to which requests must be directed.",
+      "member_rule_ids": [
+        "TX-0006",
+        "GA-0005"
+      ]
+    },
+    {
+      "candidate_key": "scope.reasonably_identifiable",
+      "config_home": "structural",
+      "definition": "Request must reasonably describe an identifiable record before the duty attaches.",
+      "member_rule_ids": [
+        "CA-0006",
+        "NY-0005",
+        "VA-0005",
+        "WA-0007"
+      ]
+    },
+    {
+      "candidate_key": "search.overbroad_burdensome_denial",
+      "config_home": "structural",
+      "definition": "Whether/when an overbroad, categorical, or unduly burdensome request may be denied.",
+      "member_rule_ids": [
+        "WA-0008",
+        "IL-0015",
+        "OH-0011",
+        "NY-0018"
+      ]
+    },
+    {
+      "candidate_key": "clarification.assist_confer_revise",
+      "config_home": "structural",
+      "definition": "Agency may/must clarify, assist identifying, confer to narrow, or give chance to revise.",
+      "member_rule_ids": [
+        "TX-0012",
+        "TX-0013",
+        "CA-0007",
+        "CA-0008",
+        "IL-0016",
+        "WA-0015",
+        "WA-0017",
+        "OH-0012"
+      ]
+    },
+    {
+      "candidate_key": "abandonment.clarification_nonresponse",
+      "config_home": "parameter",
+      "definition": "Request deemed withdrawn on requester's failure to respond to a clarification request (terminal).",
+      "member_rule_ids": [
+        "TX-0014",
+        "WA-0016"
+      ]
+    },
+    {
+      "candidate_key": "abandonment.cost_estimate_nonresponse",
+      "config_home": "parameter",
+      "definition": "Request deemed withdrawn on requester's failure to respond to a cost/itemized estimate (terminal).",
+      "member_rule_ids": [
+        "TX-0029",
+        "TX-0030",
+        "VA-0028"
+      ]
+    },
+    {
+      "candidate_key": "abandonment.failure_to_claim_or_pay",
+      "config_home": "parameter",
+      "definition": "Request deemed withdrawn/unfulfilled on failure to inspect, claim, or pay (terminal).",
+      "member_rule_ids": [
+        "TX-0011",
+        "WA-0032"
+      ]
+    },
+    {
+      "candidate_key": "deadline.clock_tolling",
+      "config_home": "structural",
+      "definition": "Response/decision clock tolls during pendency of clarification, cost estimate, or deposit.",
+      "member_rule_ids": [
+        "TX-0015",
+        "VA-0027",
+        "VA-0032"
+      ]
+    },
+    {
+      "candidate_key": "coverage.definitions",
+      "config_home": "structural",
+      "definition": "Definitions of covered agency and public record.",
+      "member_rule_ids": [
+        "CA-0004",
+        "CA-0005"
+      ]
+    },
+    {
+      "candidate_key": "classification.presumption_of_openness",
+      "config_home": "structural",
+      "definition": "All records presumed open/available except enumerated exceptions.",
+      "member_rule_ids": [
+        "NY-0008",
+        "NY-0023",
+        "IL-0008",
+        "FL-0005"
+      ]
+    },
+    {
+      "candidate_key": "inspection.availability_hours",
+      "config_home": "parameter",
+      "definition": "Records available for inspection during normal/office business hours.",
+      "member_rule_ids": [
+        "TX-0007",
+        "CA-0015",
+        "AZ-0002"
+      ]
+    },
+    {
+      "candidate_key": "inspection.reasonable_conditions_supervision",
+      "config_home": "structural",
+      "definition": "Inspection at reasonable time, under reasonable conditions and custodian supervision.",
+      "member_rule_ids": [
+        "FL-0009",
+        "FL-0015"
+      ]
+    },
+    {
+      "candidate_key": "inspection.requester_self_copy",
+      "config_home": "structural",
+      "definition": "Whether requester may make own copies (own device / when custodian lacks facilities / not required).",
+      "member_rule_ids": [
+        "CA-0016",
+        "GA-0027",
+        "AZ-0012",
+        "OH-0022"
+      ]
+    },
+    {
+      "candidate_key": "custody.records_officer_designation",
+      "config_home": "structural",
+      "definition": "Agency designates/publicly identifies a FOIA/records officer point of contact.",
+      "member_rule_ids": [
+        "IL-0006",
+        "VA-0035",
+        "WA-0040",
+        "GA-0008"
+      ]
+    },
+    {
+      "candidate_key": "custody.custodian_designee_duties",
+      "config_home": "structural",
+      "definition": "Custodian/person-responsible duty to permit access; designee disclosure; absence no delay.",
+      "member_rule_ids": [
+        "FL-0010",
+        "GA-0009",
+        "OH-0013"
+      ]
+    },
+    {
+      "candidate_key": "custody.contractor_vendor_records",
+      "config_home": "structural",
+      "definition": "Contractor/vendor duties to keep, provide, transfer, and not impede access to public records.",
+      "member_rule_ids": [
+        "FL-0011",
+        "FL-0012",
+        "FL-0013",
+        "GA-0033"
+      ]
+    },
+    {
+      "candidate_key": "deadline.initial_response_window",
+      "config_home": "parameter",
+      "constraint_basis": "mixed",
+      "definition": "First statutory deadline to respond/determine/produce/acknowledge (fixed day-counts and soft promptly).",
+      "member_rule_ids": [
+        "NY-0009",
+        "CA-0009",
+        "CA-0010",
+        "IL-0010",
+        "VA-0007",
+        "WA-0010",
+        "WA-0011",
+        "GA-0011",
+        "FL-0007",
+        "TX-0008",
+        "AZ-0007",
+        "OH-0007"
+      ]
+    },
+    {
+      "candidate_key": "deadline.production_soft_standard",
+      "config_home": "structural",
+      "definition": "Downstream soft production/availability timing (promptly / reasonable time / as soon as practicable / most timely).",
+      "member_rule_ids": [
+        "CA-0014",
+        "FL-0014",
+        "GA-0014",
+        "OH-0008",
+        "WA-0013",
+        "WA-0041"
+      ]
+    },
+    {
+      "candidate_key": "communication.delay_notice_estimated_date",
+      "config_home": "structural",
+      "definition": "When production is delayed, notify requester with reason and an estimated/certain date of availability.",
+      "member_rule_ids": [
+        "NY-0010",
+        "NY-0011",
+        "NY-0012",
+        "CA-0011",
+        "WA-0012",
+        "GA-0013",
+        "TX-0009",
+        "TX-0010"
+      ]
+    },
+    {
+      "candidate_key": "deadline.extension",
+      "config_home": "parameter",
+      "definition": "Extension of the response deadline (for cause, by written notice, by agreement, or by court petition).",
+      "member_rule_ids": [
+        "CA-0012",
+        "CA-0013",
+        "IL-0011",
+        "IL-0012",
+        "IL-0013",
+        "VA-0008",
+        "VA-0010",
+        "WA-0014"
+      ]
+    },
+    {
+      "candidate_key": "deadline.record_class_specific_window",
+      "config_home": "parameter",
+      "definition": "Extended response window keyed to a specific record class (criminal investigative files, intercollegiate sports).",
+      "member_rule_ids": [
+        "VA-0009",
+        "GA-0039"
+      ]
+    },
+    {
+      "candidate_key": "deadline.commercial_request_window",
+      "config_home": "parameter",
+      "definition": "Response window/options for commercial-purpose requests.",
+      "member_rule_ids": [
+        "IL-0017",
+        "IL-0018"
+      ]
+    },
+    {
+      "candidate_key": "deadline.recurrent_requester_handling",
+      "config_home": "parameter",
+      "definition": "Recurrent-requester response window, notice, and definition.",
+      "member_rule_ids": [
+        "IL-0020",
+        "IL-0021",
+        "IL-0022"
+      ]
+    },
+    {
+      "candidate_key": "deadline.voluminous_request_handling",
+      "config_home": "parameter",
+      "definition": "Voluminous-request response windows, requester-response window, and definition.",
+      "member_rule_ids": [
+        "IL-0023",
+        "IL-0024",
+        "IL-0025",
+        "IL-0026"
+      ]
+    },
+    {
+      "candidate_key": "deadline.clock_start_computation",
+      "config_home": "structural",
+      "definition": "When the response clock starts / due-date computation and notation.",
+      "member_rule_ids": [
+        "IL-0007",
+        "GA-0010"
+      ]
+    },
+    {
+      "candidate_key": "denial.deemed_denial_on_nonresponse",
+      "config_home": "structural",
+      "definition": "Failure to timely respond is deemed/constitutes a denial (opening review).",
+      "member_rule_ids": [
+        "NY-0013",
+        "IL-0014",
+        "VA-0015",
+        "AZ-0013",
+        "FL-0028",
+        "NY-0040"
+      ]
+    },
+    {
+      "candidate_key": "denial.written_form",
+      "config_home": "structural",
+      "definition": "A denial must be in writing.",
+      "member_rule_ids": [
+        "CA-0026",
+        "IL-0039",
+        "WA-0035",
+        "OH-0015"
+      ]
+    },
+    {
+      "candidate_key": "denial.reasons_and_exemption_citation",
+      "config_home": "structural",
+      "definition": "Denial/withholding must state particularized reasons, cite the specific exemption/legal authority, and describe withheld records.",
+      "member_rule_ids": [
+        "CA-0028",
+        "NY-0034",
+        "NY-0035",
+        "IL-0040",
+        "VA-0011",
+        "VA-0012",
+        "WA-0034",
+        "FL-0018",
+        "FL-0019",
+        "GA-0015",
+        "OH-0014",
+        "AZ-0011"
+      ]
+    },
+    {
+      "candidate_key": "denial.identify_responsible_persons",
+      "config_home": "structural",
+      "definition": "Denial must name persons responsible for the denial.",
+      "member_rule_ids": [
+        "CA-0027"
+      ]
+    },
+    {
+      "candidate_key": "denial.notify_review_rights",
+      "config_home": "structural",
+      "definition": "Denial notice must inform requester of PAC/judicial review rights.",
+      "member_rule_ids": [
+        "IL-0041",
+        "IL-0042"
+      ]
+    },
+    {
+      "candidate_key": "appeal.burden_on_public_body",
+      "config_home": "structural",
+      "definition": "Agency bears the burden to prove an exemption applies.",
+      "member_rule_ids": [
+        "IL-0009",
+        "NY-0041",
+        "VA-0038"
+      ]
+    },
+    {
+      "candidate_key": "redaction.segregability",
+      "config_home": "structural",
+      "definition": "Redact exempt portions and produce/segregate the non-exempt remainder.",
+      "member_rule_ids": [
+        "CA-0020",
+        "NY-0033",
+        "VA-0020",
+        "WA-0033",
+        "GA-0034",
+        "OH-0016",
+        "FL-0017"
+      ]
+    },
+    {
+      "candidate_key": "redaction.notice_of_redaction",
+      "config_home": "structural",
+      "definition": "Notify requester of any redaction / make it plainly visible.",
+      "member_rule_ids": [
+        "OH-0017"
+      ]
+    },
+    {
+      "candidate_key": "redaction.pii_privacy_deletion",
+      "config_home": "structural",
+      "definition": "Delete/redact personal identifiers (SSN, PII) to prevent privacy invasion, without added process.",
+      "member_rule_ids": [
+        "NY-0032",
+        "GA-0035",
+        "TX-0024"
+      ]
+    },
+    {
+      "candidate_key": "production.format_and_medium_choice",
+      "config_home": "structural",
+      "definition": "Produce in the medium/electronic format requested (subject to what agency holds/regularly uses); inspect-vs-copy option.",
+      "member_rule_ids": [
+        "CA-0017",
+        "CA-0018",
+        "NY-0021",
+        "NY-0022",
+        "FL-0016",
+        "IL-0034",
+        "VA-0003",
+        "VA-0018",
+        "VA-0019",
+        "GA-0030",
+        "OH-0021",
+        "AZ-0022",
+        "FL-0006"
+      ]
+    },
+    {
+      "candidate_key": "production.website_in_lieu",
+      "config_home": "structural",
+      "definition": "Agency may satisfy production by directing requester to records posted on its website.",
+      "member_rule_ids": [
+        "CA-0019",
+        "GA-0032"
+      ]
+    },
+    {
+      "candidate_key": "search.no_duty_to_create_record",
+      "config_home": "structural",
+      "definition": "No duty to create a record that does not already exist.",
+      "member_rule_ids": [
+        "NY-0014",
+        "VA-0014",
+        "GA-0029"
+      ]
+    },
+    {
+      "candidate_key": "search.programming_extraction_not_new_record",
+      "config_home": "structural",
+      "definition": "Programming/excision/query commands to extract or redact are not creation of a new record.",
+      "member_rule_ids": [
+        "NY-0017",
+        "VA-0017",
+        "GA-0031"
+      ]
+    },
+    {
+      "candidate_key": "search.electronic_retrieval_efficiency",
+      "config_home": "structural",
+      "definition": "Duty to retrieve electronically with reasonable effort / organize records / use most economical means.",
+      "member_rule_ids": [
+        "NY-0015",
+        "NY-0016",
+        "VA-0016",
+        "GA-0020",
+        "OH-0009"
+      ]
+    },
+    {
+      "candidate_key": "records.retention_schedule_available",
+      "config_home": "structural",
+      "definition": "Current records retention schedule kept publicly available.",
+      "member_rule_ids": [
+        "OH-0010"
+      ]
+    },
+    {
+      "candidate_key": "production.partial_installment",
+      "config_home": "structural",
+      "definition": "Produce available records on a partial/installment basis within the window.",
+      "member_rule_ids": [
+        "WA-0018",
+        "GA-0012"
+      ]
+    },
+    {
+      "candidate_key": "production.records_not_found",
+      "config_home": "structural",
+      "definition": "Response when records cannot be found/do not exist; certify or refer to another body.",
+      "member_rule_ids": [
+        "NY-0020",
+        "VA-0013"
+      ]
+    },
+    {
+      "candidate_key": "payment.advance_prepayment_before_copies",
+      "config_home": "structural",
+      "definition": "Agency may condition/require payment before providing copies.",
+      "member_rule_ids": [
+        "CA-0025",
+        "NY-0019",
+        "IL-0019",
+        "AZ-0006",
+        "OH-0020"
+      ]
+    },
+    {
+      "candidate_key": "payment.deposit_for_anticipated_costs",
+      "config_home": "parameter",
+      "definition": "Deposit/bond/prepayment required when estimated cost exceeds a threshold.",
+      "member_rule_ids": [
+        "TX-0034",
+        "VA-0031",
+        "WA-0031",
+        "GA-0024"
+      ]
+    },
+    {
+      "candidate_key": "payment.prepayment_for_prior_unpaid",
+      "config_home": "parameter",
+      "definition": "Deposit/prepayment required for amounts unpaid on prior requests.",
+      "member_rule_ids": [
+        "TX-0035",
+        "GA-0025"
+      ]
+    },
+    {
+      "candidate_key": "payment.deferral_pending_cost_agreement",
+      "config_home": "structural",
+      "definition": "Agency may defer search/retrieval until requester agrees to pay estimated costs.",
+      "member_rule_ids": [
+        "GA-0023"
+      ]
+    },
+    {
+      "candidate_key": "payment.electronic_method",
+      "config_home": "structural",
+      "definition": "Local body may offer an electronic payment method.",
+      "member_rule_ids": [
+        "VA-0030"
+      ]
+    },
+    {
+      "candidate_key": "payment.collection_of_incurred_costs",
+      "config_home": "structural",
+      "definition": "Agency may collect agreed, lawfully-incurred costs regardless of pickup.",
+      "member_rule_ids": [
+        "GA-0026"
+      ]
+    },
+    {
+      "candidate_key": "fee.copy_duplication_charge",
+      "config_home": "parameter",
+      "constraint_basis": "mixed",
+      "definition": "The copy/duplication fee: per-page rate or actual-cost basis, paper and electronic media, surcharges, flat-fee option, actual-cost definition/prereq.",
+      "member_rule_ids": [
+        "TX-0025",
+        "TX-0027",
+        "CA-0021",
+        "CA-0022",
+        "NY-0024",
+        "NY-0025",
+        "FL-0020",
+        "FL-0021",
+        "FL-0022",
+        "FL-0023",
+        "IL-0028",
+        "IL-0029",
+        "IL-0031",
+        "VA-0021",
+        "VA-0022",
+        "VA-0024",
+        "WA-0020",
+        "WA-0021",
+        "WA-0022",
+        "WA-0023",
+        "WA-0024",
+        "WA-0025",
+        "WA-0027",
+        "AZ-0008",
+        "GA-0018",
+        "GA-0019",
+        "OH-0018"
+      ]
+    },
+    {
+      "candidate_key": "fee.certified_copy_charge",
+      "config_home": "parameter",
+      "definition": "Fee for a certified copy.",
+      "member_rule_ids": [
+        "FL-0024",
+        "IL-0030"
+      ]
+    },
+    {
+      "candidate_key": "fee.specific_statutory_fee_controls",
+      "config_home": "structural",
+      "definition": "A specific statutory fee, where prescribed, controls over the general charges.",
+      "member_rule_ids": [
+        "GA-0021"
+      ]
+    },
+    {
+      "candidate_key": "fee.no_search_review_charge",
+      "config_home": "structural",
+      "definition": "No charge for search/review/inspection labor.",
+      "member_rule_ids": [
+        "NY-0029",
+        "IL-0032",
+        "WA-0019",
+        "CA-0024",
+        "TX-0026"
+      ]
+    },
+    {
+      "candidate_key": "fee.no_overhead_general_cost",
+      "config_home": "structural",
+      "definition": "No recoupment of overhead/general administrative costs.",
+      "member_rule_ids": [
+        "VA-0023",
+        "WA-0028"
+      ]
+    },
+    {
+      "candidate_key": "fee.labor_rate_lowest_paid",
+      "config_home": "parameter",
+      "definition": "Labor/search-retrieval-redaction rate capped at the lowest-paid qualified employee's hourly salary.",
+      "member_rule_ids": [
+        "NY-0027",
+        "GA-0016"
+      ]
+    },
+    {
+      "candidate_key": "fee.labor_free_threshold",
+      "config_home": "parameter",
+      "definition": "Free labor increment/allowance before any labor charge (first quarter hour / two hours / hour allowances).",
+      "member_rule_ids": [
+        "NY-0028",
+        "GA-0017",
+        "TX-0031"
+      ]
+    },
+    {
+      "candidate_key": "fee.commercial_search_charge",
+      "config_home": "parameter",
+      "definition": "Search/retrieval labor charge for commercial requests, free-hour allowance, and accounting.",
+      "member_rule_ids": [
+        "IL-0035",
+        "IL-0036",
+        "IL-0037"
+      ]
+    },
+    {
+      "candidate_key": "fee.special_service_data_extraction",
+      "config_home": "structural",
+      "definition": "Special/extraordinary service charge for data compilation, extraction, programming, or outside professional service.",
+      "member_rule_ids": [
+        "FL-0025",
+        "CA-0023",
+        "WA-0029",
+        "NY-0030"
+      ]
+    },
+    {
+      "candidate_key": "fee.photograph_supervision",
+      "config_home": "parameter",
+      "definition": "Charges for supervising photographing of records and for room expense.",
+      "member_rule_ids": [
+        "FL-0026",
+        "FL-0027"
+      ]
+    },
+    {
+      "candidate_key": "fee.waiver_public_interest",
+      "config_home": "structural",
+      "definition": "Fee waiver/reduction when disclosure primarily benefits the public interest.",
+      "member_rule_ids": [
+        "TX-0032",
+        "IL-0033"
+      ]
+    },
+    {
+      "candidate_key": "fee.waiver_when_collection_exceeds",
+      "config_home": "structural",
+      "definition": "Charge may be waived when collection cost exceeds the charge.",
+      "member_rule_ids": [
+        "TX-0033"
+      ]
+    },
+    {
+      "candidate_key": "fee.statutory_purpose_waiver",
+      "config_home": "structural",
+      "definition": "No-charge for enumerated purposes/records (federal benefit claims, crime-victim, scholastic/FERPA).",
+      "member_rule_ids": [
+        "AZ-0009",
+        "AZ-0019",
+        "AZ-0020",
+        "VA-0033"
+      ]
+    },
+    {
+      "candidate_key": "fee.free_page_allowance",
+      "config_home": "parameter",
+      "definition": "Initial pages provided free of copy charge.",
+      "member_rule_ids": [
+        "IL-0027"
+      ]
+    },
+    {
+      "candidate_key": "fee.no_charge_special_cases",
+      "config_home": "structural",
+      "definition": "No copy charge for reused recent records or website-posted records.",
+      "member_rule_ids": [
+        "NY-0026",
+        "WA-0026"
+      ]
+    },
+    {
+      "candidate_key": "fee.cost_estimate_itemized_notice",
+      "config_home": "structural",
+      "definition": "Duty to give an itemized/cost estimate (over a threshold or on request) before charging/searching; estimate cost credited.",
+      "member_rule_ids": [
+        "TX-0028",
+        "NY-0031",
+        "VA-0025",
+        "VA-0026",
+        "VA-0029",
+        "GA-0022"
+      ]
+    },
+    {
+      "candidate_key": "fee.special_record_type_rate",
+      "config_home": "parameter",
+      "definition": "Fee rate keyed to a special record type (GIS/topo maps, video production).",
+      "member_rule_ids": [
+        "VA-0034",
+        "OH-0019"
+      ]
+    },
+    {
+      "candidate_key": "fee.commercial_purpose_rate",
+      "config_home": "parameter",
+      "definition": "Fee basis for commercial-purpose reproductions (cost, reasonable fee, commercial-market value).",
+      "member_rule_ids": [
+        "AZ-0016"
+      ]
+    },
+    {
+      "candidate_key": "fee.voluminous_electronic_data_tiers",
+      "config_home": "parameter",
+      "definition": "Tiered fee caps by data size for voluminous electronic-record requests.",
+      "member_rule_ids": [
+        "IL-0038"
+      ]
+    },
+    {
+      "candidate_key": "classification.commercial_purpose",
+      "config_home": "structural",
+      "definition": "Commercial-purpose affirmation/statement requirement and definition.",
+      "member_rule_ids": [
+        "AZ-0010",
+        "AZ-0015",
+        "AZ-0018"
+      ]
+    },
+    {
+      "candidate_key": "review.commercial_misuse_hold",
+      "config_home": "parameter",
+      "definition": "Custodian may seek a governor's order barring commercial-misuse production; pauses up to 30 days.",
+      "member_rule_ids": [
+        "AZ-0017"
+      ]
+    },
+    {
+      "candidate_key": "disclosure.commercial_list_prohibition",
+      "config_home": "structural",
+      "definition": "No providing lists of individuals for commercial purposes absent authorization.",
+      "member_rule_ids": [
+        "WA-0030"
+      ]
+    },
+    {
+      "candidate_key": "enforcement.no_obstruction",
+      "config_home": "structural",
+      "definition": "No delay/obstruction; no third-party control of disclosure; good-faith handling.",
+      "member_rule_ids": [
+        "CA-0030",
+        "CA-0031",
+        "FL-0008"
+      ]
+    },
+    {
+      "candidate_key": "preservation.retention_hold",
+      "config_home": "parameter",
+      "definition": "Hold/retain records against destruction pending a request; no destruction to prevent disclosure.",
+      "member_rule_ids": [
+        "FL-0030",
+        "WA-0042",
+        "GA-0038"
+      ]
+    },
+    {
+      "candidate_key": "production.third_party_affected_notice",
+      "config_home": "structural",
+      "definition": "Notice to third parties/submitters (trade-secret affidavit; discretionary affected-person notice).",
+      "member_rule_ids": [
+        "GA-0041",
+        "WA-0043"
+      ]
+    },
+    {
+      "candidate_key": "routing.civil_litigant_counsel_copy",
+      "config_home": "structural",
+      "definition": "Civil-litigant requests copied to agency counsel; duplicate set provided at no cost.",
+      "member_rule_ids": [
+        "GA-0040"
+      ]
+    },
+    {
+      "candidate_key": "delivery.mail_electronic_transmission_caps",
+      "config_home": "parameter",
+      "definition": "Mail/electronic transmission of copies permitted; monthly volume caps with non-commercial certification exception.",
+      "member_rule_ids": [
+        "OH-0023",
+        "OH-0024",
+        "OH-0025",
+        "OH-0026"
+      ]
+    },
+    {
+      "candidate_key": "production.copies_in_lieu_for_redaction",
+      "config_home": "structural",
+      "definition": "Agency may provide copies in lieu of access when redaction of confidential info is required.",
+      "member_rule_ids": [
+        "GA-0028"
+      ]
+    },
+    {
+      "candidate_key": "production.record_type_priority",
+      "config_home": "structural",
+      "definition": "Priority processing for a specific record type (crime-victim police reports).",
+      "member_rule_ids": [
+        "AZ-0021"
+      ]
+    },
+    {
+      "candidate_key": "enforcement.written_request_gates_remedies",
+      "config_home": "structural",
+      "definition": "Enforcement/penalty remedies available only for written requests.",
+      "member_rule_ids": [
+        "GA-0007"
+      ]
+    },
+    {
+      "candidate_key": "appeal.admin.review_path_exists",
+      "config_home": "structural",
+      "definition": "Existence of an administrative review path for a denial (agency head, PAC, court of claims, internal review).",
+      "member_rule_ids": [
+        "NY-0036",
+        "IL-0043",
+        "OH-0028",
+        "WA-0036"
+      ]
+    },
+    {
+      "candidate_key": "appeal.admin.requester_filing_deadline",
+      "config_home": "parameter",
+      "definition": "Requester's window to file an administrative appeal/review.",
+      "member_rule_ids": [
+        "NY-0037",
+        "IL-0044"
+      ]
+    },
+    {
+      "candidate_key": "appeal.admin.reviewer_decision_deadline",
+      "config_home": "parameter",
+      "definition": "Deadlines for the reviewer/public body to respond, decide, report, or object in the administrative review.",
+      "member_rule_ids": [
+        "NY-0038",
+        "IL-0045",
+        "IL-0046",
+        "OH-0031",
+        "OH-0032",
+        "OH-0033"
+      ]
+    },
+    {
+      "candidate_key": "appeal.admin.oversight_notification",
+      "config_home": "structural",
+      "definition": "Agency must forward appeal/determination to an oversight body.",
+      "member_rule_ids": [
+        "NY-0039"
+      ]
+    },
+    {
+      "candidate_key": "appeal.admin.filing_fee",
+      "config_home": "parameter",
+      "definition": "Filing fee for an administrative complaint.",
+      "member_rule_ids": [
+        "OH-0029"
+      ]
+    },
+    {
+      "candidate_key": "appeal.admin.mediation",
+      "config_home": "structural",
+      "definition": "Complaint referred to mediation.",
+      "member_rule_ids": [
+        "OH-0030"
+      ]
+    },
+    {
+      "candidate_key": "review.ag_predisclosure_ruling_required",
+      "config_home": "structural",
+      "definition": "Agency must seek an AG decision before withholding absent a previous determination.",
+      "member_rule_ids": [
+        "TX-0016",
+        "TX-0017"
+      ]
+    },
+    {
+      "candidate_key": "deadline.ag_request_and_notice",
+      "config_home": "parameter",
+      "definition": "Deadline to request the AG decision and give the requestor the withholding/notice.",
+      "member_rule_ids": [
+        "TX-0018",
+        "TX-0019"
+      ]
+    },
+    {
+      "candidate_key": "deadline.ag_brief_and_comments",
+      "config_home": "parameter",
+      "definition": "Deadline to submit AG brief/comments and copy the requestor.",
+      "member_rule_ids": [
+        "TX-0020",
+        "TX-0021"
+      ]
+    },
+    {
+      "candidate_key": "deadline.ag_decision_render",
+      "config_home": "parameter",
+      "definition": "Deadline for the AG to render the decision (with extension).",
+      "member_rule_ids": [
+        "TX-0023"
+      ]
+    },
+    {
+      "candidate_key": "denial.exemption_waiver_on_lapse",
+      "config_home": "structural",
+      "definition": "Information presumed public/must be released when the agency misses the AG-request/notice deadline.",
+      "member_rule_ids": [
+        "TX-0022"
+      ]
+    },
+    {
+      "candidate_key": "appeal.judicial.right_to_sue",
+      "config_home": "structural",
+      "definition": "Judicial enforcement path (mandamus/injunction/declaratory/special action) and venue.",
+      "member_rule_ids": [
+        "CA-0029",
+        "IL-0047",
+        "IL-0048",
+        "VA-0036",
+        "AZ-0014",
+        "GA-0036",
+        "OH-0034",
+        "WA-0037"
+      ]
+    },
+    {
+      "candidate_key": "appeal.judicial.expedited_hearing_precedence",
+      "config_home": "parameter",
+      "definition": "Expedited hearing timeframe and docket precedence for enforcement actions.",
+      "member_rule_ids": [
+        "VA-0037",
+        "VA-0039"
+      ]
+    },
+    {
+      "candidate_key": "appeal.judicial.limitations_period",
+      "config_home": "parameter",
+      "definition": "Limitations period to file a judicial-review action.",
+      "member_rule_ids": [
+        "WA-0039"
+      ]
+    },
+    {
+      "candidate_key": "appeal.judicial.in_camera_review",
+      "config_home": "structural",
+      "definition": "In camera inspection of contested records by the court.",
+      "member_rule_ids": [
+        "FL-0029"
+      ]
+    },
+    {
+      "candidate_key": "appeal.judicial.charge_estimate_review",
+      "config_home": "structural",
+      "definition": "Judicial review of an agency's time estimate or copying charges.",
+      "member_rule_ids": [
+        "WA-0038"
+      ]
+    },
+    {
+      "candidate_key": "appeal.judicial.third_party_injunction",
+      "config_home": "structural",
+      "definition": "Agency/third party may move to enjoin inspection of a specific record.",
+      "member_rule_ids": [
+        "WA-0044"
+      ]
+    },
+    {
+      "candidate_key": "review.ag_enforcement_authority",
+      "config_home": "structural",
+      "definition": "Attorney General discretionary authority to enforce and seek penalties.",
+      "member_rule_ids": [
+        "GA-0037"
+      ]
+    },
+    {
+      "candidate_key": "enforcement.pre_suit_cure_period",
+      "config_home": "parameter",
+      "definition": "Pre-suit cure period after a complaint is served before the requester may proceed.",
+      "member_rule_ids": [
+        "OH-0027"
+      ]
+    }
+  ]
+}
