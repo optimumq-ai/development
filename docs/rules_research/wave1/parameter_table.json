@@ -1,0 +1,626 @@
+[
+  {
+    "canonical_key": "inspection.office_hours",
+    "cells": [
+      {
+        "st": "TX",
+        "basis": "floor",
+        "value": "Available at a minimum during the body's normal business hours (city sets the hours)",
+        "citation": "Tex. Gov't Code \u00a7 552.021"
+      },
+      {
+        "st": "CA",
+        "basis": "fixed",
+        "value": "Open at all times during the agency's office hours",
+        "citation": "Cal. Gov. Code \u00a7 7922.525(a)"
+      },
+      {
+        "st": "AZ",
+        "basis": "fixed",
+        "value": "Available at all times during regular office hours",
+        "citation": "Ariz. Rev. Stat. \u00a7 39-121"
+      }
+    ]
+  },
+  {
+    "canonical_key": "deadline.initial_response_window__1",
+    "cells": [
+      {
+        "st": "NY",
+        "basis": "fixed",
+        "value": "5 business days from receipt of written request",
+        "citation": "N.Y. Pub. Off. Law \u00a7 89(3)(a)"
+      },
+      {
+        "st": "VA",
+        "basis": "fixed",
+        "value": "5 working days from receipt of request",
+        "citation": "Va. Code \u00a7 2.2-3704(B)"
+      },
+      {
+        "st": "WA",
+        "basis": "fixed",
+        "value": "5 business days from request receipt",
+        "citation": "RCW 42.56.520(1)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "deadline.determination_extension__1",
+    "cells": [
+      {
+        "st": "CA",
+        "basis": "ceiling",
+        "value": "Up to 14 additional days beyond the 10-day determination deadline; written notice required",
+        "citation": "Cal. Gov. Code \u00a7 7922.535(b)"
+      },
+      {
+        "st": "IL",
+        "basis": "ceiling",
+        "value": "Up to 5 business days beyond the original due date (7 enumerated grounds)",
+        "citation": "5 ILCS 140/3(e)"
+      },
+      {
+        "st": "VA",
+        "basis": "fixed",
+        "value": "Additional 7 work days beyond the original 5-working-day response",
+        "citation": "Va. Code \u00a7 2.2-3704(B)(4)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.copy_actual_cost_ceiling__1",
+    "cells": [
+      {
+        "st": "CA",
+        "basis": "ceiling",
+        "value": "Direct cost of duplication (or applicable statutory fee); electronic = direct cost of producing an electronic copy",
+        "citation": "Cal. Gov. Code \u00a7 7922.530(a); \u00a7 7922.575(a)"
+      },
+      {
+        "st": "VA",
+        "basis": "ceiling",
+        "value": "Actual cost of duplication",
+        "citation": "Va. Code \u00a7 2.2-3704(F)"
+      },
+      {
+        "st": "WA",
+        "basis": "ceiling",
+        "value": "Actual costs directly incident to copying",
+        "citation": "RCW 42.56.120(1)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.copy_actual_cost_ceiling__2",
+    "cells": [
+      {
+        "st": "VA",
+        "basis": "ceiling",
+        "value": "Actual cost incurred in accessing, duplicating, supplying, or searching",
+        "citation": "Va. Code \u00a7 2.2-3704(F)"
+      },
+      {
+        "st": "FL",
+        "basis": "fixed",
+        "value": "Actual cost of duplication for copies other than standard-size paper",
+        "citation": "\u00a7 119.07(4)(a)3., Fla. Stat."
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.per_page_rate_ceiling__1",
+    "cells": [
+      {
+        "st": "NY",
+        "basis": "ceiling",
+        "value": "25\u00a2 per photocopy not exceeding 9x14 in, unless a different statutory fee applies",
+        "citation": "N.Y. Pub. Off. Law \u00a7 87(1)(b)(iii)(1)"
+      },
+      {
+        "st": "FL",
+        "basis": "ceiling",
+        "value": "15\u00a2 per one-sided copy not larger than 14x8.5 in",
+        "citation": "\u00a7 119.07(4)(a)1., Fla. Stat."
+      },
+      {
+        "st": "IL",
+        "basis": "ceiling",
+        "value": "15\u00a2 per page for B&W letter/legal copies (after the free 50)",
+        "citation": "5 ILCS 140/6(b)"
+      },
+      {
+        "st": "WA",
+        "basis": "ceiling",
+        "value": "15\u00a2 per page for photocopies/printed electronic records, absent a published actual-cost calc",
+        "citation": "RCW 42.56.120(2)(b)(i)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.other_records_actual_cost__1",
+    "cells": [
+      {
+        "st": "NY",
+        "basis": "ceiling",
+        "value": "Actual cost of reproduction (records other than 9x14 paper) per \u00a7 87(1)(c)",
+        "citation": "N.Y. Pub. Off. Law \u00a7 87(1)(b)(iii)(1)"
+      },
+      {
+        "st": "IL",
+        "basis": "ceiling",
+        "value": "Actual cost of reproduction for color or non-letter/legal-size copies",
+        "citation": "5 ILCS 140/6(b)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.labor_special_service_charge__4",
+    "cells": [
+      {
+        "st": "FL",
+        "basis": "soft-standard",
+        "value": "Reasonable special service charge based on cost actually incurred, added to duplication cost, where extensive IT or clerical/supervisory assistance is required",
+        "citation": "\u00a7 119.07(4)(d), Fla. Stat."
+      },
+      {
+        "st": "WA",
+        "basis": "soft-standard",
+        "value": "Customized service charge where IT expertise is required to prepare data compilations/custom access; requires notice; no numeric cap",
+        "citation": "RCW 42.56.120(3)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.certified_copy_charge",
+    "cells": [
+      {
+        "st": "FL",
+        "basis": "ceiling",
+        "value": "Up to $1 per certified copy",
+        "citation": "\u00a7 119.07(4)(c), Fla. Stat."
+      },
+      {
+        "st": "IL",
+        "basis": "ceiling",
+        "value": "Certification cost not to exceed $1",
+        "citation": "5 ILCS 140/6(b)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "payment.advance_deposit_before_production__2",
+    "cells": [
+      {
+        "st": "VA",
+        "basis": "fixed",
+        "value": "Threshold $200; deposit ceiling = the advance-determination amount",
+        "citation": "Va. Code \u00a7 2.2-3704(H)"
+      },
+      {
+        "st": "WA",
+        "basis": "ceiling",
+        "value": "Deposit not exceeding 10% of the estimated cost of providing copies",
+        "citation": "RCW 42.56.120(4)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "deadline.initial_response_window__2",
+    "cells": [
+      {
+        "st": "IL",
+        "basis": "fixed",
+        "value": "5 business days from request receipt (comply or deny), unless properly extended",
+        "citation": "5 ILCS 140/3(d)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "deadline.initial_response_window__3",
+    "cells": [
+      {
+        "st": "CA",
+        "basis": "fixed",
+        "value": "10 days from receipt to determine and notify",
+        "citation": "Cal. Gov. Code \u00a7 7922.535(a)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "deadline.determination_extension__2",
+    "cells": [
+      {
+        "st": "VA",
+        "basis": "fixed",
+        "value": "60 work days (in lieu of 7) for criminal investigative files under \u00a7 2.2-3706.1",
+        "citation": "Va. Code \u00a7 2.2-3704(B)(4)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "communication.delay_certification_date_certain__2",
+    "cells": [
+      {
+        "st": "NY",
+        "basis": "fixed",
+        "value": "20 business days from acknowledgement \u2014 trigger to state reasons and a date certain if disclosure cannot occur",
+        "citation": "N.Y. Pub. Off. Law \u00a7 89(3)(a)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "withdrawal.clarification_nonresponse__1",
+    "cells": [
+      {
+        "st": "TX",
+        "basis": "fixed",
+        "value": "61 days from clarification/discussion request sent with no written response = request considered withdrawn",
+        "citation": "Tex. Gov't Code \u00a7 552.222(d)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "withdrawal.fee_estimate_nonresponse__1",
+    "cells": [
+      {
+        "st": "TX",
+        "basis": "fixed",
+        "value": "10 business days from itemized statement sent with no written response = withdrawn; updated statement required if estimate rises 20%+",
+        "citation": "Tex. Gov't Code \u00a7 552.2615(b),(c)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "withdrawal.fee_estimate_nonresponse__2",
+    "cells": [
+      {
+        "st": "VA",
+        "basis": "fixed",
+        "value": "30 days from sending the cost estimate with no response = deemed withdrawn",
+        "citation": "Va. Code \u00a7 2.2-3704(F)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "withdrawal.abandonment_fail_inspect_or_pay__1",
+    "cells": [
+      {
+        "st": "TX",
+        "basis": "fixed",
+        "value": "60 days from info made available (or from cost notice) without inspection/payment = considered withdrawn",
+        "citation": "Tex. Gov't Code \u00a7 552.221(e)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "review.ag_referral_deadlines_notices",
+    "cells": [
+      {
+        "st": "TX",
+        "basis": "fixed",
+        "value": "AG-decision request + requestor withholding notice by 10th business day; AG written comments + requestor copy by 15th business day, from receipt of the request",
+        "citation": "Tex. Gov't Code \u00a7 552.301(b),(d),(e),(e-1)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "review.ag_decision_render_deadline",
+    "cells": [
+      {
+        "st": "TX",
+        "basis": "ceiling",
+        "value": "AG renders decision within 45 business days of receipt, extendable once by 10 business days",
+        "citation": "Tex. Gov't Code \u00a7 552.306"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.copy_all_costs_incl_overhead",
+    "cells": [
+      {
+        "st": "TX",
+        "basis": "soft-standard",
+        "value": "Reasonable amount including all reproduction costs \u2014 materials, labor, and overhead",
+        "citation": "Tex. Gov't Code \u00a7 552.261(a)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.per_page_rate_ceiling__2",
+    "cells": [
+      {
+        "st": "FL",
+        "basis": "ceiling",
+        "value": "No more than an additional 5\u00a2 for a two-sided copy",
+        "citation": "\u00a7 119.07(4)(a)2., Fla. Stat."
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.per_page_rate_ceiling__3",
+    "cells": [
+      {
+        "st": "WA",
+        "basis": "ceiling",
+        "value": "Flat fee up to $2 per request in lieu of itemized charges",
+        "citation": "RCW 42.56.120(2)(d)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.other_records_actual_cost__2",
+    "cells": [
+      {
+        "st": "WA",
+        "basis": "ceiling",
+        "value": "Up to 10\u00a2 per page for records scanned into electronic format, absent a published actual-cost calc",
+        "citation": "RCW 42.56.120(2)(b)(ii)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.electronic_medium_cost__1",
+    "cells": [
+      {
+        "st": "IL",
+        "basis": "ceiling",
+        "value": "Actual cost of the recording medium; voluminous e-records tiered caps of $20/$40/$100 by data size (non-PDF: \u22642/2-4/>4 MB; PDF: \u226480/80-160/>160 MB)",
+        "citation": "5 ILCS 140/6(a); 6(a-5)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.electronic_medium_cost__2",
+    "cells": [
+      {
+        "st": "WA",
+        "basis": "ceiling",
+        "value": "Up to 5\u00a2 per 4 files/attachments uploaded; up to 10\u00a2 per GB transmitted, absent a published actual-cost calc",
+        "citation": "RCW 42.56.120(2)(b)(iii),(iv)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.first_pages_free",
+    "cells": [
+      {
+        "st": "IL",
+        "basis": "fixed",
+        "value": "First 50 pages of B&W letter/legal copies free",
+        "citation": "5 ILCS 140/6(b)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.inspection_no_charge",
+    "cells": [
+      {
+        "st": "WA",
+        "basis": "fixed",
+        "value": "No fee for inspecting records or for locating documents and making them available for copying ($0)",
+        "citation": "RCW 42.56.120(1)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.labor_special_service_charge__1",
+    "cells": [
+      {
+        "st": "NY",
+        "basis": "fixed",
+        "value": "Hourly salary of the lowest-paid employee with the necessary skill; no preparation fee unless \u22652 hours needed; outside-service cost only if agency IT inadequate",
+        "citation": "N.Y. Pub. Off. Law \u00a7 87(1)(c)(i),(iii),(iv)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.labor_special_service_charge__2",
+    "cells": [
+      {
+        "st": "IL",
+        "basis": "ceiling; 8-hour free floor",
+        "value": "Commercial requests: up to $10 per personnel hour for search/retrieval/redaction; first 8 hours free",
+        "citation": "5 ILCS 140/6(f)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.labor_special_service_charge__3",
+    "cells": [
+      {
+        "st": "TX",
+        "basis": "floor",
+        "value": "If it caps uncompensated personnel time, must allow at least 36 hours/requestor per 12 months and at least 15 hours/requestor per month before charging",
+        "citation": "Tex. Gov't Code \u00a7 552.275(a),(b)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.reused_electronic_no_fee",
+    "cells": [
+      {
+        "st": "NY",
+        "basis": "fixed",
+        "value": "No fee (except actual storage-media cost) where an identical record was prepared within the prior 6 months and an electronic copy is available",
+        "citation": "N.Y. Pub. Off. Law \u00a7 87(1)(b)(iii)(2)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.no_charge_website_posted",
+    "cells": [
+      {
+        "st": "WA",
+        "basis": "fixed",
+        "value": "No copying charge for access to or downloading of records routinely posted on the agency website ($0)",
+        "citation": "RCW 42.56.120(2)(e)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.gis_records_charge",
+    "cells": [
+      {
+        "st": "VA",
+        "basis": "ceiling",
+        "value": "Reasonable charge not exceeding actual cost; exception \u2014 pro rata per-acre for body-developed topo maps over 50 contiguous acres",
+        "citation": "Va. Code \u00a7 2.2-3704(F)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.photograph_charges",
+    "cells": [
+      {
+        "st": "FL",
+        "basis": "soft-standard; fixed room expense",
+        "value": "Supervision charge at a rate agreed by the parties (else set by custodian); expense of any separate room/place paid by the requester",
+        "citation": "\u00a7 119.07(4)(e)1.,2., Fla. Stat."
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.lowest_cost_effort",
+    "cells": [
+      {
+        "st": "VA",
+        "basis": "soft-standard",
+        "value": "Reasonable efforts to supply the requested records at the lowest possible cost",
+        "citation": "Va. Code \u00a7 2.2-3704(F)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.commercial_purpose_rate",
+    "cells": [
+      {
+        "st": "AZ",
+        "basis": "soft-standard",
+        "value": "May include a portion of the cost of the original/copies, a reasonable fee for time/materials/equipment/personnel, and the reproduction's commercial-market value",
+        "citation": "Ariz. Rev. Stat. \u00a7 39-121.03(A)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.copy_charge_standard",
+    "cells": [
+      {
+        "st": "AZ",
+        "basis": "soft-standard",
+        "value": "May charge a fee for copies if facilities available; no statutory per-page rate for ordinary requests \u2014 the public body sets the amount",
+        "citation": "Ariz. Rev. Stat. \u00a7 39-121.01(D)(1)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "fee.rate_ceiling_ag_rules",
+    "cells": [
+      {
+        "st": "TX",
+        "basis": "ceiling",
+        "value": "May not exceed AG-established amounts; a non-state body setting its own charges may not exceed AG amounts by more than 25% absent an exemption",
+        "citation": "Tex. Gov't Code \u00a7 552.262(a),(c)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "payment.advance_deposit_before_production__1",
+    "cells": [
+      {
+        "st": "TX",
+        "basis": "fixed",
+        "value": "Deposit/bond after itemized estimate when charge exceeds $100 (>15 FTE) or $50 (<16 FTE); also for prior unpaid amounts exceeding $100",
+        "citation": "Tex. Gov't Code \u00a7 552.263(a),(a-1)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.filing_deadline__1",
+    "cells": [
+      {
+        "st": "NY",
+        "basis": "fixed",
+        "value": "30 days from the denial to file the written administrative appeal",
+        "citation": "N.Y. Pub. Off. Law \u00a7 89(4)(a)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.filing_deadline__2",
+    "cells": [
+      {
+        "st": "IL",
+        "basis": "fixed",
+        "value": "Within 60 days of the final denial to file a PAC request for review",
+        "citation": "5 ILCS 140/9.5(a)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.determination_deadline__1",
+    "cells": [
+      {
+        "st": "NY",
+        "basis": "fixed",
+        "value": "10 business days from receipt of the appeal to explain further denial or provide access",
+        "citation": "N.Y. Pub. Off. Law \u00a7 89(4)(a)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.determination_deadline__2",
+    "cells": [
+      {
+        "st": "IL",
+        "basis": "fixed",
+        "value": "60 days from receipt of the request for review for the AG to issue a binding opinion",
+        "citation": "5 ILCS 140/9.5(f)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.cooperation_forwarding__2",
+    "cells": [
+      {
+        "st": "IL",
+        "basis": "fixed",
+        "value": "Within 7 business days of receiving the request for review, provide the records to the PAC and fully cooperate",
+        "citation": "5 ILCS 140/9.5(c)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "appeal.judicial.procedure_timing__1",
+    "cells": [
+      {
+        "st": "VA",
+        "basis": "fixed",
+        "value": "Petition heard within 7 days of being made; at least 3 working days' notice to the defendant; docket precedence",
+        "citation": "Va. Code \u00a7 2.2-3713(D)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "appeal.judicial.procedure_timing__2",
+    "cells": [
+      {
+        "st": "WA",
+        "basis": "fixed",
+        "value": "Action filed within 1 year of the agency's claim of exemption or the last partial/installment production",
+        "citation": "RCW 42.56.550(6)"
+      }
+    ]
+  },
+  {
+    "canonical_key": "response.special_requester_windows",
+    "cells": [
+      {
+        "st": "IL",
+        "basis": "fixed",
+        "value": "Commercial: 21 working days; recurrent: 21 business days; voluminous: 5 business days initial, then requester's 10-business-day response and final response within 5 business days",
+        "citation": "5 ILCS 140/3.1(a); 3.2(a); 3.6"
+      }
+    ]
+  }
+]

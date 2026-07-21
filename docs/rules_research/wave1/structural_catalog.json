@@ -1,0 +1,931 @@
+[
+  {
+    "canonical_key": "eligibility.any_person__1",
+    "shape": "eligibility gate: right of access open to any person, no enumerated requester class",
+    "states": [
+      "TX",
+      "CA",
+      "NY",
+      "FL",
+      "IL",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "eligibility.no_purpose_requirement__1",
+    "shape": "intake gate: no purpose/reason may be required or inquired into",
+    "states": [
+      "TX",
+      "CA",
+      "NY",
+      "FL",
+      "IL",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "eligibility.no_residency_requirement",
+    "shape": "eligibility gate: no residency/citizenship qualifier on the right to request",
+    "states": [
+      "TX",
+      "CA",
+      "NY",
+      "FL",
+      "IL",
+      "WA",
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "intake.no_form_required__2",
+    "shape": "intake channel: no mandatory standard form / prescribed format",
+    "states": [
+      "IL",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "intake.examine_or_copy_option",
+    "shape": "intake branch: inspect-in-person vs receive-copies, at requester's option",
+    "states": [
+      "AZ",
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "intake.reasonably_describes_identifiable",
+    "shape": "intake gate: duty attaches only on reasonably-described identifiable records",
+    "states": [
+      "CA",
+      "NY",
+      "VA",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "custody.foia_officer_designation",
+    "shape": "org/role node: designate and publicly identify a records/FOIA officer",
+    "states": [
+      "IL",
+      "VA",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "classification.presumption_of_openness",
+    "shape": "classification default: all records presumed open except enumerated exemptions",
+    "states": [
+      "NY",
+      "IL",
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "production.promptly__1",
+    "shape": "production stage: soft-standard 'promptly / reasonable time' production clock",
+    "states": [
+      "TX",
+      "CA",
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "denial.deemed_denial_on_nonresponse",
+    "shape": "terminal branch: timely-response lapse = deemed/constructive denial",
+    "states": [
+      "NY",
+      "IL",
+      "VA",
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "clarification.request_permitted",
+    "shape": "clarification branch: body may ask requester to clarify an unclear request",
+    "states": [
+      "TX",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "redaction.segregability__1",
+    "shape": "production step: redact exempt portions, produce the segregable remainder",
+    "states": [
+      "CA",
+      "FL",
+      "VA",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "fee.no_search_review_labor_overhead__1",
+    "shape": "fee rule: search/review/administrative time not chargeable to requester",
+    "states": [
+      "NY",
+      "IL",
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "fee.estimate_itemized_statement__1",
+    "shape": "communication step: itemized cost estimate on threshold/request",
+    "states": [
+      "TX",
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "payment.advance_deposit_before_production__4",
+    "shape": "payment gate: condition release of copies on advance payment",
+    "states": [
+      "AZ",
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "production.format_medium__1",
+    "shape": "production option: deliver in requested/available electronic format or medium",
+    "states": [
+      "CA",
+      "IL",
+      "VA",
+      "NY",
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "production.no_duty_create_new_record__1",
+    "shape": "duty limit: no obligation to create a record not possessed/maintained",
+    "states": [
+      "NY",
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "production.no_duty_create_new_record__2",
+    "shape": "duty limit: retrieval/programming/excision is not creation of a new record",
+    "states": [
+      "NY",
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "denial.written_form__1",
+    "shape": "denial step: denial issued in writing",
+    "states": [
+      "CA",
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "denial.cite_exemption_particularized__1",
+    "shape": "denial step: cite specific exemption + particularized factual/legal basis",
+    "states": [
+      "IL",
+      "WA",
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "denial.cite_exemption_particularized__2",
+    "shape": "denial step: withholding index / per-category specific-citation particularity",
+    "states": [
+      "VA",
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "burden.agency_justify_exemption",
+    "shape": "burden rule: agency bears burden to justify withholding",
+    "states": [
+      "IL",
+      "CA",
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "appeal.judicial.enforcement_right__1",
+    "shape": "appeal branch: judicial enforcement via mandate/injunctive/declaratory relief",
+    "states": [
+      "CA",
+      "IL",
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "appeal.judicial.enforcement_right__2",
+    "shape": "appeal branch: judicial enforcement via Article 78 / special action / show-cause",
+    "states": [
+      "NY",
+      "AZ",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "eligibility.any_person__2",
+    "shape": "eligibility gate: any person may inspect (no qualification)",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "eligibility.no_purpose_requirement__2",
+    "shape": "intake gate: no purpose required (name/legal address only)",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "eligibility.no_purpose_requirement__3",
+    "shape": "intake gate: no purpose required except commercial-purpose affirmation",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "eligibility.no_distinction_among_requesters",
+    "shape": "eligibility rule: no distinction among persons requesting records",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "eligibility.requester_class_restricted",
+    "shape": "eligibility gate: standing restricted to enumerated classes (citizens/press)",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "eligibility.incarcerated_exclusion",
+    "shape": "eligibility carve-out: incarcerated requester/agent excluded",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "intake.written_request_required__1",
+    "shape": "intake gate: written request via approved delivery methods triggers duty",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "intake.written_request_required__2",
+    "shape": "intake gate: written request triggers the response clock",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "intake.no_form_required__1",
+    "shape": "intake channel: no writing/form/in-person/ID may be required",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "intake.oral_request_permitted",
+    "shape": "intake channel: oral requests may be honored",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "intake.email_multichannel_accepted__1",
+    "shape": "intake channel: accept and respond by email",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "intake.email_multichannel_accepted__2",
+    "shape": "intake channel: in-person/mail/email requests honored",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "intake.request_form_available",
+    "shape": "resource node: oversight-published internet request form",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "intake.designated_address",
+    "shape": "intake channel: single designated mailing/email address for requests",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "intake.overbreadth_not_sole_denial",
+    "shape": "denial guard: overbreadth may not be the sole basis for denial",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "intake.bot_request_denial",
+    "shape": "intake gate: bot-request denial where excessive interference is shown",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "intake.no_statutory_citation_required",
+    "shape": "intake rule: no need to cite the act to invoke it or its clocks",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "intake.identification_allowed",
+    "shape": "intake field: name and legal address may be required",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "intake.commercial_purpose_statement_required",
+    "shape": "intake field: commercial-purpose affirmation/statement at request time",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "intake.receipt_date_computation",
+    "shape": "intake step: record receipt date and compute the due date",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "custody.duty_to_permit_inspection",
+    "shape": "custody duty: permit inspection/copying at reasonable time under supervision",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "custody.designee_disclosure",
+    "shape": "org/role node: may designate a designee but must disclose their identity",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "custody.contractor_records",
+    "shape": "custody scope: contractor keep/provide/transfer public records",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "coverage.local_agency",
+    "shape": "coverage definition: covered 'local agency'",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "coverage.public_record_definition",
+    "shape": "coverage definition: 'public record' regardless of physical form",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "classification.recurrent_requester_definition",
+    "shape": "classification definition: recurrent-requester volume thresholds (50/12mo, 15/30d, 7/7d)",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "classification.voluminous_request_definition",
+    "shape": "classification definition: voluminous-request thresholds (>5 requests/>5 categories or >500 pages)",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "classification.commercial_purpose_definition",
+    "shape": "classification definition: 'commercial purpose'",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "inspection.self_copy_own_device__1",
+    "shape": "inspection option: self-copy with own device on premises, no physical contact",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "inspection.self_copy_own_device__2",
+    "shape": "inspection option: self-copy when custodian lacks facilities, under supervision",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "production.promptly__2",
+    "shape": "production stage: soft-standard 'promptly / most timely possible action'",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "response.options_enumerated",
+    "shape": "response branch: one of five enumerated response forms incl. time estimate",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "communication.acknowledgment_response_duty__1",
+    "shape": "communication step: written acknowledgement with an approximate date",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "communication.acknowledgment_response_duty__2",
+    "shape": "communication step: state the estimated availability date on a grant",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "communication.acknowledgment_response_duty__3",
+    "shape": "communication step: prompt, good-faith acknowledgement",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "deadline.determination_extension__3",
+    "shape": "extension grounds: clarify / locate-assemble / third-party notice / exemption review",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "communication.extension_notice__1",
+    "shape": "communication step: written extension notice stating reasons and expected date",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "communication.extension_notice__2",
+    "shape": "communication step: extension notice with reasons and forthcoming date within 5 business days",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "deadline.extension_by_agreement",
+    "shape": "extension branch: extend compliance time by written agreement of the parties",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "deadline.court_petition_additional_time",
+    "shape": "extension branch: petition court for more time on extraordinary requests",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "communication.delay_certification_date_certain__1",
+    "shape": "communication step: certify inability to produce and set a date/hour certain",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "clarification.duty_to_assist_identify",
+    "shape": "clarification duty: assist to identify records; satisfied after reasonable effort",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "clarification.confer_before_burden_denial",
+    "shape": "clarification step: offer to confer to narrow before an unduly-burdensome denial",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "clarification.consequences_notice",
+    "shape": "communication step: clarification request must state consequences of nonresponse",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "withdrawal.clarification_nonresponse__2",
+    "shape": "terminal branch: no response duty if wholly-unclear request goes unclarified (clear portions still answered)",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "withdrawal.abandonment_fail_inspect_or_pay__2",
+    "shape": "terminal branch: balance of request not fulfilled on an unclaimed installment",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "deadline.tolling_pending_requester_response__1",
+    "shape": "clock rule: tolls the AG-request clock during a good-faith clarification",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "deadline.tolling_pending_requester_response__2",
+    "shape": "clock rule: tolls response period during cost-estimate / advance-determination wait",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "review.ag_decision_required",
+    "shape": "review branch: must seek AG decision to withhold, absent a prior determination",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "denial.deemed_disclosure_on_noncompliance",
+    "shape": "terminal branch: untimely AG request/notice \u2192 information presumed public",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "redaction.ssn_no_ag",
+    "shape": "redaction rule: SSN redaction permitted without an AG decision",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "redaction.segregability__2",
+    "shape": "production step: delete identifying details / segregate accessible electronic items",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "fee.copy_actual_cost_ceiling__3",
+    "shape": "fee definition: 'actual cost of duplication' = materials/supplies, excludes labor/overhead",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "fee.small_request_labor_bar",
+    "shape": "fee rule: 50-or-fewer pages limited to per-page charge, no labor/overhead",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "fee.no_search_review_labor_overhead__2",
+    "shape": "fee rule: no salaries/benefits/general-overhead in actual copy cost",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "fee.no_search_review_labor_overhead__3",
+    "shape": "fee rule: no extraneous/intermediary/surplus fees for general costs",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "fee.estimate_itemized_statement__2",
+    "shape": "communication step: pre-search cost notice and estimate on request",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "fee.estimate_itemized_statement__3",
+    "shape": "communication step: accounting of \u00a76(f) fees, costs, and personnel hours",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "fee.waiver_public_interest__1",
+    "shape": "fee waiver: public-interest waiver / collection-cost-exceeds-charge waiver",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "fee.waiver_public_interest__2",
+    "shape": "fee waiver: public-interest reduced or no charge on stated purpose",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "fee.statutory_categorical_exemption__1",
+    "shape": "fee waiver: statutory categories (federal-benefit claims, crime-victim records) at no charge",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "fee.statutory_categorical_exemption__2",
+    "shape": "fee waiver: FERPA scholastic records exempt from reasonable-charge provisions",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "fee.data_extraction_cost_shift",
+    "shape": "fee rule: requester bears data compilation/extraction/programming cost",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "fee.actual_cost_statement_prereq",
+    "shape": "fee prerequisite: actual copy costs chargeable only per a published cost statement",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "payment.advance_deposit_before_production__3",
+    "shape": "payment gate: full prepayment before copying for commercial/recurrent requests",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "payment.electronic_method",
+    "shape": "payment channel: local body may offer an electronic payment method",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "production.certification_or_no_record__1",
+    "shape": "production step: certify copy correctness, or certify no record after diligent search",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "production.certification_or_no_record__2",
+    "shape": "production step: state records not found/nonexistent and refer to the holding body",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "production.format_medium__2",
+    "shape": "production option: native electronic format including embedded metadata",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "production.format_medium__3",
+    "shape": "production option: electronic database records in a used format at reasonable cost",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "production.format_medium__4",
+    "shape": "production rule: computer-format records shall not be encrypted",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "production.electronic_retrieval_required",
+    "shape": "production rule: electronic retrieval/extraction required when feasible / preferred when faster",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "production.website_redirect",
+    "shape": "production option: satisfy via website redirect, provide copy if inaccessible",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "production.installment_basis",
+    "shape": "production option: partial/installment delivery as records are assembled",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "production.electronic_reasonable_access_policy",
+    "shape": "production policy: reasonable public access to electronically maintained records",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "production.crime_victim_priority",
+    "shape": "production priority: prioritize processing of requested police reports",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "denial.burdensome_standard__1",
+    "shape": "denial standard: unduly-burdensome test \u2014 no narrowing + burden outweighs public interest",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "denial.burdensome_standard__2",
+    "shape": "denial guard: no voluminous/burdensome denial where outside service is available",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "denial.written_form__2",
+    "shape": "denial step: written statement of the specific reasons for denial",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "denial.cite_exemption_particularized__3",
+    "shape": "denial rule: particularized/specific justification, not category-based",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "denial.identify_responsible_persons",
+    "shape": "denial step: name and title/position of each person responsible for the denial",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "denial.notify_appeal_rights",
+    "shape": "denial step: inform of PAC review and judicial-review rights",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.review_right__1",
+    "shape": "appeal branch: written administrative appeal to agency head/governing body",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.review_right__2",
+    "shape": "appeal branch: request for review with the Public Access Counselor",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.review_right__3",
+    "shape": "appeal branch: internal review, deemed complete at end of 2nd business day (final agency action)",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.cooperation_forwarding__1",
+    "shape": "appeal step: forward the appeal and determination to oversight (Committee on Open Government)",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.constructive_denial",
+    "shape": "terminal branch: failure to conform to appeal provisions constitutes a denial",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "appeal.judicial.enforcement_right__3",
+    "shape": "appeal venue: circuit court at the body's principal office or requester's residence",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "appeal.judicial.in_camera_special__1",
+    "shape": "judicial procedure: in camera inspection of asserted-exempt records",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "appeal.judicial.in_camera_special__2",
+    "shape": "judicial procedure: third-party affidavit motion to enjoin inspection",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "appeal.judicial.charge_estimate_review",
+    "shape": "judicial procedure: petition to review time estimate / copy charges (agency shows reasonableness)",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "handling.no_delay_obstruct__1",
+    "shape": "handling rule: no delay or obstruction of inspection/copying",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "handling.no_delay_obstruct__2",
+    "shape": "handling rule: only limited reasonable retrieve/redact delay; policy delay = constructive denial",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "handling.no_third_party_control",
+    "shape": "handling rule: no third-party control over disclosure of disclosable info",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "communication.third_party_notice",
+    "shape": "communication option: discretionary notice to persons named in the record",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "fee.commercial_list_prohibition",
+    "shape": "disclosure carve-out: no lists of individuals provided for commercial purposes",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "preservation.hold_pending_request__1",
+    "shape": "preservation rule: 30-day hold on a requested record against disposal",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "preservation.hold_pending_request__2",
+    "shape": "preservation rule: retain a record scheduled for destruction until the request resolves",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "communication.special_requester_notice",
+    "shape": "communication step: commercial/recurrent classification notice and response options",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "review.commercial_misuse_governor_order",
+    "shape": "review branch: governor-order pause for suspected commercial misuse (30-day)",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "communication.determination_with_reasons",
+    "shape": "communication step: prompt notice of the determination and its reasons",
+    "states": [
+      "CA"
+    ]
+  }
+]

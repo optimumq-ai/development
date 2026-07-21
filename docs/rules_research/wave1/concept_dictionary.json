@@ -1,0 +1,1456 @@
+[
+  {
+    "canonical_key": "eligibility.any_person__1",
+    "definition": "Any person may request/inspect public records (no enumerated requester class).",
+    "config_home": "structural",
+    "states": [
+      "TX",
+      "CA",
+      "NY",
+      "FL",
+      "IL",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "eligibility.no_purpose_requirement__1",
+    "definition": "Requester need not state a reason/purpose; body may not inquire into purpose.",
+    "config_home": "structural",
+    "states": [
+      "TX",
+      "CA",
+      "NY",
+      "FL",
+      "IL",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "eligibility.no_residency_requirement",
+    "definition": "No residency/citizenship qualification on the right to request.",
+    "config_home": "structural",
+    "states": [
+      "TX",
+      "CA",
+      "NY",
+      "FL",
+      "IL",
+      "WA",
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "intake.no_form_required__2",
+    "definition": "Body may not require a particular/standard form or in-person/written submission.",
+    "config_home": "structural",
+    "states": [
+      "IL",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "intake.examine_or_copy_option",
+    "definition": "Access provided by inspection or copies at requester's option.",
+    "config_home": "structural",
+    "states": [
+      "AZ",
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "intake.reasonably_describes_identifiable",
+    "definition": "Duty attaches only where the request reasonably describes identifiable records.",
+    "config_home": "structural",
+    "states": [
+      "CA",
+      "NY",
+      "VA",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "custody.foia_officer_designation",
+    "definition": "Body must designate/publicly identify a FOIA/public-records officer.",
+    "config_home": "structural",
+    "states": [
+      "IL",
+      "VA",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "classification.presumption_of_openness",
+    "definition": "All records presumed open/available except enumerated exemptions.",
+    "config_home": "structural",
+    "states": [
+      "NY",
+      "IL",
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "inspection.office_hours",
+    "definition": "Records available for inspection during normal/office business hours.",
+    "config_home": "parameter",
+    "states": [
+      "TX",
+      "CA",
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "production.promptly__1",
+    "definition": "Records must be produced promptly / with most timely possible action (soft standard).",
+    "config_home": "structural",
+    "states": [
+      "TX",
+      "CA",
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "deadline.initial_response_window__1",
+    "definition": "Body must respond/determine within a fixed number of days from receipt.",
+    "config_home": "parameter",
+    "states": [
+      "NY",
+      "VA",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "deadline.determination_extension__1",
+    "definition": "Response deadline may be extended for enumerated/unusual-circumstance grounds.",
+    "config_home": "parameter",
+    "states": [
+      "CA",
+      "IL",
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "denial.deemed_denial_on_nonresponse",
+    "definition": "Failure to timely respond is deemed/constitutes a denial.",
+    "config_home": "structural",
+    "states": [
+      "NY",
+      "IL",
+      "VA",
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "clarification.request_permitted",
+    "definition": "Body may ask requester to clarify an unclear request.",
+    "config_home": "structural",
+    "states": [
+      "TX",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "redaction.segregability__1",
+    "definition": "Redact exempt portions and produce/segregate the non-exempt remainder.",
+    "config_home": "structural",
+    "states": [
+      "CA",
+      "FL",
+      "VA",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "fee.copy_actual_cost_ceiling__1",
+    "definition": "Copy fee capped at actual/direct cost of duplication.",
+    "config_home": "parameter",
+    "states": [
+      "CA",
+      "VA",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "fee.copy_actual_cost_ceiling__2",
+    "definition": "Copy fee capped at actual/direct cost of duplication.",
+    "config_home": "parameter",
+    "states": [
+      "VA",
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "fee.per_page_rate_ceiling__1",
+    "definition": "Per-page/per-copy statutory rate ceiling for paper copies (incl. flat-fee option).",
+    "config_home": "parameter",
+    "states": [
+      "NY",
+      "FL",
+      "IL",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "fee.other_records_actual_cost__1",
+    "definition": "For non-standard/other records, fee limited to actual cost of reproduction.",
+    "config_home": "parameter",
+    "states": [
+      "NY",
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "fee.no_search_review_labor_overhead__1",
+    "definition": "Search, review, administrative, salary, and overhead costs not chargeable.",
+    "config_home": "structural",
+    "states": [
+      "NY",
+      "IL",
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "fee.labor_special_service_charge__4",
+    "definition": "Personnel/labor and special-service charge terms, rates, thresholds, and free allowances.",
+    "config_home": "parameter",
+    "states": [
+      "FL",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "fee.estimate_itemized_statement__1",
+    "definition": "Body must give/estimate itemized cost statement (and credit estimate cost) on request or threshold.",
+    "config_home": "structural",
+    "states": [
+      "TX",
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "fee.certified_copy_charge",
+    "definition": "Ceiling on charge for certifying a record.",
+    "config_home": "parameter",
+    "states": [
+      "FL",
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "payment.advance_deposit_before_production__2",
+    "definition": "Body may require deposit/advance full payment before producing copies.",
+    "config_home": "parameter",
+    "states": [
+      "VA",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "payment.advance_deposit_before_production__4",
+    "definition": "Body may require deposit/advance full payment before producing copies.",
+    "config_home": "structural",
+    "states": [
+      "AZ",
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "production.format_medium__1",
+    "definition": "Produce records in requested/available electronic format or medium (limits, no encryption).",
+    "config_home": "structural",
+    "states": [
+      "CA",
+      "IL",
+      "VA",
+      "NY",
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "production.no_duty_create_new_record__1",
+    "definition": "No duty to create a new record; retrieval/programming/excision is not creation.",
+    "config_home": "structural",
+    "states": [
+      "NY",
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "production.no_duty_create_new_record__2",
+    "definition": "No duty to create a new record; retrieval/programming/excision is not creation.",
+    "config_home": "structural",
+    "states": [
+      "NY",
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "denial.written_form__1",
+    "definition": "Denials must be in writing with a statement of reasons.",
+    "config_home": "structural",
+    "states": [
+      "CA",
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "denial.cite_exemption_particularized__1",
+    "definition": "Denial must cite specific exemption and give particularized factual basis / withholding index.",
+    "config_home": "structural",
+    "states": [
+      "IL",
+      "WA",
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "denial.cite_exemption_particularized__2",
+    "definition": "Denial must cite specific exemption and give particularized factual basis / withholding index.",
+    "config_home": "structural",
+    "states": [
+      "VA",
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "burden.agency_justify_exemption",
+    "definition": "Agency bears burden to justify withholding by the statutory standard.",
+    "config_home": "structural",
+    "states": [
+      "IL",
+      "CA",
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "appeal.judicial.enforcement_right__1",
+    "definition": "Requester may bring a court action (mandate/injunction/special action) to enforce access; venue.",
+    "config_home": "structural",
+    "states": [
+      "CA",
+      "IL",
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "appeal.judicial.enforcement_right__2",
+    "definition": "Requester may bring a court action (mandate/injunction/special action) to enforce access; venue.",
+    "config_home": "structural",
+    "states": [
+      "NY",
+      "AZ",
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "eligibility.any_person__2",
+    "definition": "Any person may request/inspect public records (no enumerated requester class).",
+    "config_home": "structural",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "eligibility.no_purpose_requirement__2",
+    "definition": "Requester need not state a reason/purpose; body may not inquire into purpose.",
+    "config_home": "structural",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "eligibility.no_purpose_requirement__3",
+    "definition": "Requester need not state a reason/purpose; body may not inquire into purpose.",
+    "config_home": "structural",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "eligibility.no_distinction_among_requesters",
+    "definition": "Agency shall not distinguish among persons requesting records.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "eligibility.requester_class_restricted",
+    "definition": "Standing restricted to enumerated classes (citizens/press).",
+    "config_home": "structural",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "eligibility.incarcerated_exclusion",
+    "definition": "Body need not comply with request from an incarcerated person or agent.",
+    "config_home": "structural",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "intake.written_request_required__1",
+    "definition": "Request must be in writing (delivered by approved methods) to trigger duty.",
+    "config_home": "structural",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "intake.written_request_required__2",
+    "definition": "Request must be in writing (delivered by approved methods) to trigger duty.",
+    "config_home": "structural",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "intake.no_form_required__1",
+    "definition": "Body may not require a particular/standard form or in-person/written submission.",
+    "config_home": "structural",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "intake.oral_request_permitted",
+    "definition": "Body may honor oral requests.",
+    "config_home": "structural",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "intake.email_multichannel_accepted__1",
+    "definition": "Body must accept requests by email/mail/in person and respond in kind.",
+    "config_home": "structural",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "intake.email_multichannel_accepted__2",
+    "definition": "Body must accept requests by email/mail/in person and respond in kind.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "intake.request_form_available",
+    "definition": "Oversight body develops a public request form on the internet.",
+    "config_home": "structural",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "intake.designated_address",
+    "definition": "Body may designate a mailing/email address for requests.",
+    "config_home": "structural",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "intake.overbreadth_not_sole_denial",
+    "definition": "Body shall not deny solely because request is overbroad.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "intake.bot_request_denial",
+    "definition": "Body may deny an automated bot request causing excessive interference.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "intake.no_statutory_citation_required",
+    "definition": "Request need not cite the act to invoke it or impose time limits.",
+    "config_home": "structural",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "intake.identification_allowed",
+    "definition": "Custodian may require requester's name and legal address.",
+    "config_home": "structural",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "intake.commercial_purpose_statement_required",
+    "definition": "For commercial-purpose requests, requester must affirm/provide a commercial-purpose statement.",
+    "config_home": "structural",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "intake.receipt_date_computation",
+    "definition": "Officer must note receipt date and compute the response due date.",
+    "config_home": "structural",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "custody.duty_to_permit_inspection",
+    "definition": "Custodian must permit inspection/copying at reasonable time, conditions, supervision.",
+    "config_home": "structural",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "custody.designee_disclosure",
+    "definition": "Custodian may designate another to permit access but must disclose the designee.",
+    "config_home": "structural",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "custody.contractor_records",
+    "definition": "Contractor must keep, provide, and transfer public records created for the agency.",
+    "config_home": "structural",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "coverage.local_agency",
+    "definition": "Definition of covered local agency.",
+    "config_home": "structural",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "coverage.public_record_definition",
+    "definition": "Definition of a public record regardless of form.",
+    "config_home": "structural",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "classification.recurrent_requester_definition",
+    "definition": "Definition of recurrent requester by request volume thresholds.",
+    "config_home": "structural",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "classification.voluminous_request_definition",
+    "definition": "Definition of a voluminous request.",
+    "config_home": "structural",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "classification.commercial_purpose_definition",
+    "definition": "Definition of commercial purpose.",
+    "config_home": "structural",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "inspection.self_copy_own_device__1",
+    "definition": "Requester may make own copies on premises/when facilities unavailable, under supervision.",
+    "config_home": "structural",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "inspection.self_copy_own_device__2",
+    "definition": "Requester may make own copies on premises/when facilities unavailable, under supervision.",
+    "config_home": "structural",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "production.promptly__2",
+    "definition": "Records must be produced promptly / with most timely possible action (soft standard).",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "deadline.initial_response_window__2",
+    "definition": "Body must respond/determine within a fixed number of days from receipt.",
+    "config_home": "parameter",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "deadline.initial_response_window__3",
+    "definition": "Body must respond/determine within a fixed number of days from receipt.",
+    "config_home": "parameter",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "response.options_enumerated",
+    "definition": "Initial response must take one of enumerated forms including a reasonable time estimate.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "communication.acknowledgment_response_duty__1",
+    "definition": "Body must acknowledge/notify determination with an estimated date and respond in good faith.",
+    "config_home": "structural",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "communication.acknowledgment_response_duty__2",
+    "definition": "Body must acknowledge/notify determination with an estimated date and respond in good faith.",
+    "config_home": "structural",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "communication.acknowledgment_response_duty__3",
+    "definition": "Body must acknowledge/notify determination with an estimated date and respond in good faith.",
+    "config_home": "structural",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "deadline.determination_extension__2",
+    "definition": "Response deadline may be extended for enumerated/unusual-circumstance grounds.",
+    "config_home": "parameter",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "deadline.determination_extension__3",
+    "definition": "Response deadline may be extended for enumerated/unusual-circumstance grounds.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "communication.extension_notice__1",
+    "definition": "Extension valid only on written notice stating reasons and expected date.",
+    "config_home": "structural",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "communication.extension_notice__2",
+    "definition": "Extension valid only on written notice stating reasons and expected date.",
+    "config_home": "structural",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "deadline.extension_by_agreement",
+    "definition": "Parties may agree in writing to extend the compliance time.",
+    "config_home": "structural",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "deadline.court_petition_additional_time",
+    "definition": "Body may petition court for additional time for extraordinary requests.",
+    "config_home": "structural",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "communication.delay_certification_date_certain__1",
+    "definition": "When production cannot occur in the window, certify/notify and set a date certain.",
+    "config_home": "structural",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "communication.delay_certification_date_certain__2",
+    "definition": "When production cannot occur in the window, certify/notify and set a date certain.",
+    "config_home": "parameter",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "clarification.duty_to_assist_identify",
+    "definition": "Body must assist requester to identify responsive records; duty satisfied after reasonable effort.",
+    "config_home": "structural",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "clarification.confer_before_burden_denial",
+    "definition": "Body must offer to confer to narrow before denying as unduly burdensome.",
+    "config_home": "structural",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "clarification.consequences_notice",
+    "definition": "Clarification request must state consequences of failure to timely respond.",
+    "config_home": "structural",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "withdrawal.clarification_nonresponse__1",
+    "definition": "Request withdrawn / need not be answered if requester fails to answer clarification.",
+    "config_home": "parameter",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "withdrawal.clarification_nonresponse__2",
+    "definition": "Request withdrawn / need not be answered if requester fails to answer clarification.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "withdrawal.fee_estimate_nonresponse__1",
+    "definition": "Request deemed withdrawn if requester does not respond to cost estimate in time.",
+    "config_home": "parameter",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "withdrawal.fee_estimate_nonresponse__2",
+    "definition": "Request deemed withdrawn if requester does not respond to cost estimate in time.",
+    "config_home": "parameter",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "withdrawal.abandonment_fail_inspect_or_pay__1",
+    "definition": "Request withdrawn / balance not fulfilled if requester fails to inspect, pay, or claim.",
+    "config_home": "parameter",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "withdrawal.abandonment_fail_inspect_or_pay__2",
+    "definition": "Request withdrawn / balance not fulfilled if requester fails to inspect, pay, or claim.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "deadline.tolling_pending_requester_response__1",
+    "definition": "Response clock tolls while awaiting requester response to clarification/estimate/deposit.",
+    "config_home": "structural",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "deadline.tolling_pending_requester_response__2",
+    "definition": "Response clock tolls while awaiting requester response to clarification/estimate/deposit.",
+    "config_home": "structural",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "review.ag_decision_required",
+    "definition": "Body wishing to withhold must seek AG decision absent a previous determination.",
+    "config_home": "structural",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "review.ag_referral_deadlines_notices",
+    "definition": "AG-referral procedural deadlines and requestor notices (10/15 business days).",
+    "config_home": "parameter",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "review.ag_decision_render_deadline",
+    "definition": "AG must render decision within 45 business days (extendable).",
+    "config_home": "parameter",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "denial.deemed_disclosure_on_noncompliance",
+    "definition": "Failure to timely seek AG decision presumes information public.",
+    "config_home": "structural",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "redaction.ssn_no_ag",
+    "definition": "Body may redact SSN without an AG decision.",
+    "config_home": "structural",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "redaction.segregability__2",
+    "definition": "Redact exempt portions and produce/segregate the non-exempt remainder.",
+    "config_home": "structural",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "fee.copy_actual_cost_ceiling__3",
+    "definition": "Copy fee capped at actual/direct cost of duplication.",
+    "config_home": "structural",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "fee.copy_all_costs_incl_overhead",
+    "definition": "Copy charge reasonably includes materials, labor, and overhead.",
+    "config_home": "parameter",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "fee.per_page_rate_ceiling__2",
+    "definition": "Per-page/per-copy statutory rate ceiling for paper copies (incl. flat-fee option).",
+    "config_home": "parameter",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "fee.per_page_rate_ceiling__3",
+    "definition": "Per-page/per-copy statutory rate ceiling for paper copies (incl. flat-fee option).",
+    "config_home": "parameter",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "fee.other_records_actual_cost__2",
+    "definition": "For non-standard/other records, fee limited to actual cost of reproduction.",
+    "config_home": "parameter",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "fee.electronic_medium_cost__1",
+    "definition": "For electronic delivery, charge limited to medium/transmission cost or tiered data caps.",
+    "config_home": "parameter",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "fee.electronic_medium_cost__2",
+    "definition": "For electronic delivery, charge limited to medium/transmission cost or tiered data caps.",
+    "config_home": "parameter",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "fee.small_request_labor_bar",
+    "definition": "For 50 or fewer pages, charge limited to per-page and excludes labor/overhead.",
+    "config_home": "structural",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "fee.first_pages_free",
+    "definition": "No fee for the first 50 pages.",
+    "config_home": "parameter",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "fee.inspection_no_charge",
+    "definition": "No fee for inspection or for locating/making records available.",
+    "config_home": "parameter",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "fee.no_search_review_labor_overhead__2",
+    "definition": "Search, review, administrative, salary, and overhead costs not chargeable.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "fee.no_search_review_labor_overhead__3",
+    "definition": "Search, review, administrative, salary, and overhead costs not chargeable.",
+    "config_home": "structural",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "fee.labor_special_service_charge__1",
+    "definition": "Personnel/labor and special-service charge terms, rates, thresholds, and free allowances.",
+    "config_home": "parameter",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "fee.labor_special_service_charge__2",
+    "definition": "Personnel/labor and special-service charge terms, rates, thresholds, and free allowances.",
+    "config_home": "parameter",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "fee.labor_special_service_charge__3",
+    "definition": "Personnel/labor and special-service charge terms, rates, thresholds, and free allowances.",
+    "config_home": "parameter",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "fee.estimate_itemized_statement__2",
+    "definition": "Body must give/estimate itemized cost statement (and credit estimate cost) on request or threshold.",
+    "config_home": "structural",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "fee.estimate_itemized_statement__3",
+    "definition": "Body must give/estimate itemized cost statement (and credit estimate cost) on request or threshold.",
+    "config_home": "structural",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "fee.waiver_public_interest__1",
+    "definition": "Fee waived/reduced when in the public interest or collection cost exceeds charge.",
+    "config_home": "structural",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "fee.waiver_public_interest__2",
+    "definition": "Fee waived/reduced when in the public interest or collection cost exceeds charge.",
+    "config_home": "structural",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "fee.statutory_categorical_exemption__1",
+    "definition": "Fees waived for statutory categories (federal benefit, crime victim, FERPA scholastic).",
+    "config_home": "structural",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "fee.statutory_categorical_exemption__2",
+    "definition": "Fees waived for statutory categories (federal benefit, crime victim, FERPA scholastic).",
+    "config_home": "structural",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "fee.data_extraction_cost_shift",
+    "definition": "Requester bears cost of data compilation/extraction/programming for electronic records.",
+    "config_home": "structural",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "fee.reused_electronic_no_fee",
+    "definition": "No fee for reproducing an identical record prepared within the prior six months.",
+    "config_home": "parameter",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "fee.no_charge_website_posted",
+    "definition": "No copy charge for records routinely posted on the agency website.",
+    "config_home": "parameter",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "fee.gis_records_charge",
+    "definition": "Charge for GIS records limited to actual cost with topo-map exception.",
+    "config_home": "parameter",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "fee.photograph_charges",
+    "definition": "Charges for supervision and room expense when requester photographs records.",
+    "config_home": "parameter",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "fee.actual_cost_statement_prereq",
+    "definition": "Actual copy costs chargeable only per an established/published cost statement.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "fee.lowest_cost_effort",
+    "definition": "Body must make reasonable efforts to supply records at lowest possible cost.",
+    "config_home": "parameter",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "fee.commercial_purpose_rate",
+    "definition": "Commercial-purpose reproductions charged on cost/reasonable-fee/market-value basis.",
+    "config_home": "parameter",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "fee.copy_charge_standard",
+    "definition": "Body may charge a fee for copies if facilities available (no statutory rate).",
+    "config_home": "parameter",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "fee.rate_ceiling_ag_rules",
+    "definition": "Charges may not exceed AG-established amounts (with 25% cap for local bodies).",
+    "config_home": "parameter",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "payment.advance_deposit_before_production__1",
+    "definition": "Body may require deposit/advance full payment before producing copies.",
+    "config_home": "parameter",
+    "states": [
+      "TX"
+    ]
+  },
+  {
+    "canonical_key": "payment.advance_deposit_before_production__3",
+    "definition": "Body may require deposit/advance full payment before producing copies.",
+    "config_home": "structural",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "payment.electronic_method",
+    "definition": "Local body may offer an electronic payment method.",
+    "config_home": "structural",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "production.certification_or_no_record__1",
+    "definition": "On payment provide copy and certify correctness, or certify no record after diligent search / refer.",
+    "config_home": "structural",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "production.certification_or_no_record__2",
+    "definition": "On payment provide copy and certify correctness, or certify no record after diligent search / refer.",
+    "config_home": "structural",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "production.format_medium__2",
+    "definition": "Produce records in requested/available electronic format or medium (limits, no encryption).",
+    "config_home": "structural",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "production.format_medium__3",
+    "definition": "Produce records in requested/available electronic format or medium (limits, no encryption).",
+    "config_home": "structural",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "production.format_medium__4",
+    "definition": "Produce records in requested/available electronic format or medium (limits, no encryption).",
+    "config_home": "structural",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "production.electronic_retrieval_required",
+    "definition": "Body must retrieve/extract electronically when feasible and preferred when faster.",
+    "config_home": "structural",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "production.website_redirect",
+    "definition": "Body may satisfy by directing to website but must provide copy if inaccessible.",
+    "config_home": "structural",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "production.installment_basis",
+    "definition": "Records may be provided on a partial/installment basis.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "production.electronic_reasonable_access_policy",
+    "definition": "Agency must provide reasonable public access to electronically maintained records.",
+    "config_home": "structural",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "production.crime_victim_priority",
+    "definition": "Law enforcement must prioritize processing of requested police reports.",
+    "config_home": "structural",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "denial.burdensome_standard__1",
+    "definition": "Standard for denying/handling burdensome requests (outside-service or burden-outweighs test).",
+    "config_home": "structural",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "denial.burdensome_standard__2",
+    "definition": "Standard for denying/handling burdensome requests (outside-service or burden-outweighs test).",
+    "config_home": "structural",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "denial.written_form__2",
+    "definition": "Denials must be in writing with a statement of reasons.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "denial.cite_exemption_particularized__3",
+    "definition": "Denial must cite specific exemption and give particularized factual basis / withholding index.",
+    "config_home": "structural",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "denial.identify_responsible_persons",
+    "definition": "Denial must name persons responsible for the denial.",
+    "config_home": "structural",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "denial.notify_appeal_rights",
+    "definition": "Denial must inform requester of review/judicial-review rights.",
+    "config_home": "structural",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.review_right__1",
+    "definition": "Requester may seek administrative/oversight review of a denial.",
+    "config_home": "structural",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.review_right__2",
+    "definition": "Requester may seek administrative/oversight review of a denial.",
+    "config_home": "structural",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.review_right__3",
+    "definition": "Requester may seek administrative/oversight review of a denial.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.filing_deadline__1",
+    "definition": "Administrative appeal/review must be filed within a fixed window.",
+    "config_home": "parameter",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.filing_deadline__2",
+    "definition": "Administrative appeal/review must be filed within a fixed window.",
+    "config_home": "parameter",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.determination_deadline__1",
+    "definition": "Review authority must decide the appeal within a fixed window (binding).",
+    "config_home": "parameter",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.determination_deadline__2",
+    "definition": "Review authority must decide the appeal within a fixed window (binding).",
+    "config_home": "parameter",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.cooperation_forwarding__1",
+    "definition": "Body must forward appeal/records to oversight and cooperate.",
+    "config_home": "structural",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.cooperation_forwarding__2",
+    "definition": "Body must forward appeal/records to oversight and cooperate.",
+    "config_home": "parameter",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "appeal.admin.constructive_denial",
+    "definition": "Failure to conform to appeal provisions constitutes a denial.",
+    "config_home": "structural",
+    "states": [
+      "NY"
+    ]
+  },
+  {
+    "canonical_key": "appeal.judicial.enforcement_right__3",
+    "definition": "Requester may bring a court action (mandate/injunction/special action) to enforce access; venue.",
+    "config_home": "structural",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "appeal.judicial.procedure_timing__1",
+    "definition": "Judicial procedure timing: expedited hearing, docket precedence, limitations period.",
+    "config_home": "parameter",
+    "states": [
+      "VA"
+    ]
+  },
+  {
+    "canonical_key": "appeal.judicial.procedure_timing__2",
+    "definition": "Judicial procedure timing: expedited hearing, docket precedence, limitations period.",
+    "config_home": "parameter",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "appeal.judicial.in_camera_special__1",
+    "definition": "In camera inspection / third-party injunction procedures.",
+    "config_home": "structural",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "appeal.judicial.in_camera_special__2",
+    "definition": "In camera inspection / third-party injunction procedures.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "appeal.judicial.charge_estimate_review",
+    "definition": "Requester may petition court to review time estimate or copy charges.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "handling.no_delay_obstruct__1",
+    "definition": "No delay/obstruction beyond limited reasonable time to retrieve and redact.",
+    "config_home": "structural",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "handling.no_delay_obstruct__2",
+    "definition": "No delay/obstruction beyond limited reasonable time to retrieve and redact.",
+    "config_home": "structural",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "handling.no_third_party_control",
+    "definition": "Agency may not let another party control disclosure of disclosable info.",
+    "config_home": "structural",
+    "states": [
+      "CA"
+    ]
+  },
+  {
+    "canonical_key": "communication.third_party_notice",
+    "definition": "Agency discretion to notify persons named in records of a request.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "fee.commercial_list_prohibition",
+    "definition": "No providing lists of individuals for commercial purposes.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "preservation.hold_pending_request__1",
+    "definition": "Requested record must be retained/not destroyed while request pending.",
+    "config_home": "structural",
+    "states": [
+      "FL"
+    ]
+  },
+  {
+    "canonical_key": "preservation.hold_pending_request__2",
+    "definition": "Requested record must be retained/not destroyed while request pending.",
+    "config_home": "structural",
+    "states": [
+      "WA"
+    ]
+  },
+  {
+    "canonical_key": "response.special_requester_windows",
+    "definition": "Response deadlines for commercial/recurrent/voluminous requests.",
+    "config_home": "parameter",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "communication.special_requester_notice",
+    "definition": "Notice/response options for commercial and recurrent requesters.",
+    "config_home": "structural",
+    "states": [
+      "IL"
+    ]
+  },
+  {
+    "canonical_key": "review.commercial_misuse_governor_order",
+    "definition": "Custodian may seek governor order barring commercial misuse; 30-day pause.",
+    "config_home": "structural",
+    "states": [
+      "AZ"
+    ]
+  },
+  {
+    "canonical_key": "communication.determination_with_reasons",
+    "definition": "Body must promptly notify the requester of the determination and its reasons.",
+    "config_home": "structural",
+    "states": [
+      "CA"
+    ]
+  }
+]
