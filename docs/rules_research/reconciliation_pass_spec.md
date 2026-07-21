@@ -102,15 +102,31 @@ special-record fee schedule masquerading as the ordinary rate? a `structural` fo
 > not concept boundaries. Split only when the *underlying operative rule* differs: a different fee type (copy
 > vs search), a different record class (ordinary vs special-format), a toll-vs-terminal clock, or a
 > judicial-vs-administrative fork. (This is the `true-copy-rate` miss the gate fixture caught: cap-25 vs
-> fixed-25 must HOLD.) Confirmed false-merges return to stage 2's input; survivors are
-locked. This is where the per-row citation requirement pays off — a merge with no shared operative language
-fails here.
+> fixed-25 must HOLD.)
+
+Confirmed false-merges return to stage 2's input; survivors are locked. This is where the per-row citation
+requirement pays off — a merge with no shared operative language fails here.
+
+**Pairwise-COMPLETE, never sampled (gate 2, 2026-07-21).** Verify must run on **every cross-state pair inside
+every multi-member cluster**, not just clusters flagged "contested." The clusterer over-fuses on summary
+glosses — in a 4-state gate it proposed ~3 false fusions, incl. a non-transitive triangle (AZ~NY hold, but IL
+splits from both) that single-linkage would have admitted. An unchecked pair inside a large cluster is exactly
+where a transitivity failure slips through. Do **not** let this degrade to sampled pairs under scale/cost
+pressure — verify is load-bearing here, not a backstop.
 
 > **Prove verify BITES before the blast (pilot #1 — verify passed 2 merges and rejected 0, so its guardrail
-> is unproven).** Seed the verify stage with a **red-team false-merge fixture**: a hand-built pair that looks
-> similar but differs on toll-vs-terminal or ordinary-vs-special fee basis. If verify does not reject it, the
-> stage is broken and no amount of clean output proves otherwise. This is the project's "tests must bite"
-> rule applied to the merge engine — run it as a standing check, not a one-time spot check.
+> is unproven).** Seed the verify stage with a **red-team false-merge fixture**: false pairs it must SPLIT
+> (toll-vs-terminal, ordinary-vs-special fee, judicial-vs-administrative) AND true pairs it must HOLD
+> (same-value, parametric variants). Gate 2 (2026-07-21) landed this at **7/7** — proving verify both bites
+> and discriminates. Run it as a **standing check**, not a one-time spot check.
+
+**4b. Apply the verdicts — regenerate the map (gate 2 — the step the harness lacked).** Verify *deciding* a
+split is worthless if the emitted map ignores it. After verify, **re-home every split member to its own
+concept and regenerate the canonical list** so the output contains zero clusters verify rejected. The gate
+proved the verdict layer correct while the displayed clusters still showed the fusions verify had split —
+that gap must be closed *in the pipeline*, not left to a reader. **Acceptance check:** diff the pre-verify
+candidate clusters against the post-verify map and confirm every split verdict is reflected; a fused pair that
+verify split must not appear in the final map.
 
 **5. Emit & feed back** *(one pass).*
 Write the five outputs. The updated Concept Dictionary becomes the next wave's input.
