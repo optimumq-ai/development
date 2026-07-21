@@ -51,5 +51,14 @@ Official ${s} sources only; inclusion test; one atomic rule per row. Cover the c
   )
 ))
 const states = disc.filter(Boolean)
+// Silent-loss guard: a state that clearly found content but returned ZERO rules
+// is the NJ output-size-overflow failure — surface it loudly; re-run that state chunked.
+const sizeSuspect = states.filter(s =>
+  (s.rules || []).length === 0 &&
+  (((s.verbatim_captured_count || 0) > 0) || (s.material_negatives || []).length || (s.structural_branches || []).length)
+).map(s => s.state)
+if (sizeSuspect.length) {
+  log(`WARNING: ${sizeSuspect.length} state(s) returned ZERO rules despite finding content — likely output-size overflow; RE-RUN CHUNKED: ${sizeSuspect.join(', ')}`)
+}
 log(`Discovered: ` + states.map(s => `${abbr(s.state)} ${s.rules.length}r/${s.verbatim_captured_count}v`).join('  '))
-return { states, requested: STATES, got: states.length }
+return { states, requested: STATES, got: states.length, sizeSuspect }
