@@ -1,0 +1,1464 @@
+[
+  {
+    "state": "Oklahoma",
+    "verbatim_captured_count": 28,
+    "rules": [
+      {
+        "rule_id": "OK-0001",
+        "category": "Eligibility",
+        "concept_key": "eligibility.any_person__1",
+        "legal_concept": "Records open to any person",
+        "rule_type": "Permission",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "Any person may inspect, copy, or mechanically reproduce the records of public bodies and public officials during regular business hours.",
+        "trigger": "None stated (unconditional right, subject to enumerated exemptions).",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0004",
+          "OK-0005"
+        ],
+        "source_language": "All records of public bodies and public officials shall be open to any person for inspection, copying, or mechanical reproduction during regular business hours; provided:",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5",
+        "source_language_note": "Statute",
+        "effective_status": "Current (last amended Laws 2026, SB 2184, c. 217, § 72, emerg. eff. May 6, 2026; operative access clause unchanged)",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "Maps to dictionary key eligibility.any_person__1 (TX/CA/NY/FL/IL/WA). 'Any person' carries no requester-class limitation.",
+        "source_authority_dup": ""
+      },
+      {
+        "rule_id": "OK-0002",
+        "category": "Eligibility",
+        "concept_key": "eligibility.no_residency_requirement",
+        "legal_concept": "No residency or citizenship qualification",
+        "rule_type": "Permission",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "The right to inspect/copy records extends to any person with no residency or citizenship qualification.",
+        "trigger": "None stated.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0001"
+        ],
+        "source_language": "All records of public bodies and public officials shall be open to any person for inspection, copying, or mechanical reproduction during regular business hours",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "Universal-access symmetry: emitted as a rule with shared key, not a negative. Source clause 'any person' contains no residency qualifier; the Act states none anywhere."
+      },
+      {
+        "rule_id": "OK-0003",
+        "category": "Eligibility",
+        "concept_key": "eligibility.no_purpose_requirement__1",
+        "legal_concept": "No statement of purpose required for access",
+        "rule_type": "Prohibition",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "A public body may not impose access procedures beyond those specified in the Act; no statement of purpose is required to inspect/copy records (purpose matters only to fees, not access).",
+        "trigger": "None stated.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0001",
+          "OK-0019"
+        ],
+        "source_language": "Except as may be required by other statutes, public bodies do not need to follow any procedures for providing access to public records except those specifically required by the Oklahoma Open Records Act.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.2",
+        "effective_status": "Current (24A.2 last amended Laws 1988, c. 187, § 2)",
+        "official_link": "https://oksenate.gov/sites/default/files/2022-05/os51.pdf",
+        "notes": "Universal-access symmetry: emitted as a rule with shared key. The Act nowhere requires a purpose statement; commercial-purpose classification affects only whether a search fee may be charged (OK-0019), not the right of access."
+      },
+      {
+        "rule_id": "OK-0004",
+        "category": "Inspection",
+        "concept_key": "inspection.office_hours",
+        "legal_concept": "Inspection during regular business hours",
+        "rule_type": "Requirement",
+        "config_home": "parameter",
+        "constraint_basis": "soft-standard",
+        "atomic_rule": "Records are open for inspection/copying during the public body's regular business hours.",
+        "trigger": "None stated.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0001",
+          "OK-0015"
+        ],
+        "source_language": "All records of public bodies and public officials shall be open to any person for inspection, copying, or mechanical reproduction during regular business hours",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "Maps to dictionary key inspection.office_hours (TX/CA/AZ). 'Regular business hours' is a soft standard the city fills in; see § 24A.6 for the sub-30-hours branch (OK-0025)."
+      },
+      {
+        "rule_id": "OK-0005",
+        "category": "Classification",
+        "concept_key": "classification.presumption_of_openness",
+        "legal_concept": "Presumption of openness / right to know",
+        "rule_type": "Presumption",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "All records are presumed open and subject to disclosure except records specifically required by law to be kept confidential.",
+        "trigger": "None stated.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0001",
+          "OK-0006"
+        ],
+        "source_language": "The Oklahoma Open Records Act, Sections 24A.1 through 24A.30 of this title, does not apply to records specifically required by law to be kept confidential",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(1); § 24A.2",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "Maps to dictionary key classification.presumption_of_openness (NY/IL/FL). Reinforced by the § 24A.2 public-policy declaration of the 'inherent right to know.' Underlying exemption catalog (24A.7-24A.32) excluded per inclusion test except where a distinct workflow arises (see Special Records)."
+      },
+      {
+        "rule_id": "OK-0006",
+        "category": "Denials",
+        "concept_key": "burden.agency_justify_exemption",
+        "legal_concept": "Burden on withholder to establish privilege",
+        "rule_type": "Requirement",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "The public body/official asserting confidentiality bears, at all times, the burden of establishing that the record is protected by a confidential privilege.",
+        "trigger": "Body withholds a record as privileged/confidential.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0005"
+        ],
+        "source_language": "provided, the person, agency or political subdivision shall at all times bear the burden of establishing such records are protected by such a confidential privilege.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.2",
+        "effective_status": "Current",
+        "official_link": "https://oksenate.gov/sites/default/files/2022-05/os51.pdf",
+        "notes": "Maps to dictionary key burden.agency_justify_exemption (IL/CA/VA)."
+      },
+      {
+        "rule_id": "OK-0007",
+        "category": "Redaction",
+        "concept_key": "redaction.segregability__1",
+        "legal_concept": "Segregability of exempt portions",
+        "rule_type": "Requirement",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "Any reasonably segregable portion of a record containing exempt material must be provided after deletion of the exempt portions.",
+        "trigger": "Record contains both exempt and non-exempt material.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0005"
+        ],
+        "source_language": "Any reasonably segregable portion of a record containing exempt material shall be provided after deletion of the exempt portions;",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(3)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "Maps to dictionary key redaction.segregability__1 (CA/FL/VA/WA). The same paragraph adds a DPS/OSBI carve-out (need not assemble records where requester fails to supply identifiers) — captured as a material negative/special note, not a general processing rule."
+      },
+      {
+        "rule_id": "OK-0008",
+        "category": "Redaction",
+        "concept_key": "redaction.ssn_permitted",
+        "legal_concept": "Discretionary redaction of Social Security numbers",
+        "rule_type": "Permission",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "A public body may treat Social Security numbers in a record as confidential and redact or delete them prior to release, regardless of the person's status.",
+        "trigger": "Record to be released contains a Social Security number.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0007"
+        ],
+        "source_language": "All Social Security numbers included in a record may be confidential regardless of the person's status as a public employee or private individual and may be redacted or deleted prior to release of the record by the public body;",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(2)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "New coined key redaction.ssn_permitted. Unlike TX (redaction.ssn_no_ag), Oklahoma has no AG-predicate; redaction is a bare permission."
+      },
+      {
+        "rule_id": "OK-0009",
+        "category": "Deadlines",
+        "concept_key": "production.promptly__1",
+        "legal_concept": "Prompt, reasonable access",
+        "rule_type": "Requirement",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "A public body must provide prompt, reasonable access to its records.",
+        "trigger": "Record request received.",
+        "clock_effect": "sets-deadline",
+        "clock_spec": "undefined-soft: \"prompt, reasonable access\" from request receipt",
+        "related_rule_ids": [
+          "OK-0010",
+          "OK-0011",
+          "OK-0012",
+          "OK-0013"
+        ],
+        "source_language": "A public body must provide prompt, reasonable access to its records but may establish reasonable procedures which protect the integrity and organization of its records and to prevent excessive disruptions of its essential functions.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(6)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "Maps to dictionary key production.promptly__1 (TX/CA/AZ). Soft standard — config_home=structural, no invented day-count. Oklahoma has NO fixed statutory response/acknowledgment deadline (see material negatives)."
+      },
+      {
+        "rule_id": "OK-0010",
+        "category": "Production",
+        "concept_key": "handling.reasonable_procedures_integrity",
+        "legal_concept": "Reasonable procedures to protect records and prevent disruption",
+        "rule_type": "Permission",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "A public body may establish reasonable procedures that protect the integrity and organization of its records and prevent excessive disruptions of its essential functions.",
+        "trigger": "None stated.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0009"
+        ],
+        "source_language": "but may establish reasonable procedures which protect the integrity and organization of its records and to prevent excessive disruptions of its essential functions.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(6)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "New coined key handling.reasonable_procedures_integrity. This permission bounds, but cannot defeat, the prompt-access duty (OK-0009)."
+      },
+      {
+        "rule_id": "OK-0011",
+        "category": "Deadlines",
+        "concept_key": "handling.no_delay_obstruct",
+        "legal_concept": "Delay limited to preparation and disruption-avoidance",
+        "rule_type": "Prohibition",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "A delay in providing access must be limited solely to the time required to prepare the requested documents and to avoid excessive disruption of the body's essential functions.",
+        "trigger": "Body delays production.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0009",
+          "OK-0010"
+        ],
+        "source_language": "A delay in providing access to records shall be limited solely to the time required for preparing the requested documents and the avoidance of excessive disruptions of the public body's essential functions.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(6)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "Maps to dictionary key handling.no_delay_obstruct (CA/FL). Bounds the soft prompt-access clock; not itself a numeric deadline."
+      },
+      {
+        "rule_id": "OK-0012",
+        "category": "Deadlines",
+        "concept_key": "handling.no_queue_blocking",
+        "legal_concept": "No blocking a current request behind a longer prior request",
+        "rule_type": "Prohibition",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "Production of a current request may not be unreasonably delayed until completion of a prior request that will take substantially longer than the current request.",
+        "trigger": "A prior, substantially longer request is pending when a new request arrives.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0009"
+        ],
+        "source_language": "In no event may production of a current request for records be unreasonably delayed until after completion of a prior records request that will take substantially longer than the current request.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(6)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "New coined key handling.no_queue_blocking. A queue-management branch: the engine must not FIFO-block a short request behind a long one."
+      },
+      {
+        "rule_id": "OK-0013",
+        "category": "Production",
+        "concept_key": "production.website_redirect",
+        "legal_concept": "Internet availability satisfies prompt-access duty",
+        "rule_type": "Permission",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "A public body that makes the requested records available on the Internet is deemed to meet its obligation to provide prompt, reasonable access.",
+        "trigger": "Requested records are available on the body's Internet site.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0009"
+        ],
+        "source_language": "Any public body which makes the requested records available on the Internet shall meet the obligation of providing prompt, reasonable access to its records as required by this paragraph;",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(6)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "Maps loosely to dictionary key production.website_redirect (CA); Oklahoma states it as satisfaction of the prompt-access duty rather than a conditional redirect."
+      },
+      {
+        "rule_id": "OK-0014",
+        "category": "Custody/Routing",
+        "concept_key": "custody.foia_officer_designation",
+        "legal_concept": "Designation of persons authorized to release records",
+        "rule_type": "Requirement",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "A public body must designate certain persons authorized to release its records for inspection, copying, or mechanical reproduction.",
+        "trigger": "None stated (standing obligation of the body).",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0015"
+        ],
+        "source_language": "A public body shall designate certain persons who are authorized to release records of the public body for inspection, copying, or mechanical reproduction.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(7)",
+        "effective_status": "Current (paragraph may be renumbered by post-2022 amendments; operative text confirmed present in current OSCN version)",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "Maps to dictionary key custody.foia_officer_designation (IL/VA/WA). Drives routing (keeper-sliver #1)."
+      },
+      {
+        "rule_id": "OK-0015",
+        "category": "Custody/Routing",
+        "concept_key": "custody.release_agent_availability",
+        "legal_concept": "At least one release agent available at all times",
+        "rule_type": "Requirement",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "At least one authorized person must be available at all times to release records during the public body's regular business hours.",
+        "trigger": "During regular business hours.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0014",
+          "OK-0004"
+        ],
+        "source_language": "At least one person shall be available at all times to release records during the regular business hours of the public body.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(7)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "New coined key custody.release_agent_availability. Atomic-split from OK-0014."
+      },
+      {
+        "rule_id": "OK-0016",
+        "category": "Fees",
+        "concept_key": "fee.copy_actual_cost_ceiling__1",
+        "legal_concept": "Copy fee limited to reasonable direct cost",
+        "rule_type": "Calculation",
+        "config_home": "parameter",
+        "constraint_basis": "ceiling",
+        "atomic_rule": "A public body may charge a fee only to recover the reasonable, direct costs of record copying or mechanical reproduction.",
+        "trigger": "Body charges a copy fee (non-commercial, non-disruptive request).",
+        "clock_effect": "none",
+        "clock_spec": "ceiling: reasonable direct cost of copying/reproduction",
+        "related_rule_ids": [
+          "OK-0017",
+          "OK-0018",
+          "OK-0019"
+        ],
+        "source_language": "Otherwise, a public body may charge a fee only for recovery of the reasonable, direct costs of record copying, or mechanical reproduction.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "Maps to dictionary key fee.copy_actual_cost_ceiling__1 (CA/VA/WA). Search/labor cost is NOT recoverable except in the two circumstances in OK-0019."
+      },
+      {
+        "rule_id": "OK-0017",
+        "category": "Fees",
+        "concept_key": "fee.per_page_rate_ceiling__1",
+        "legal_concept": "25-cent-per-page copy fee cap",
+        "rule_type": "Calculation",
+        "config_home": "parameter",
+        "constraint_basis": "ceiling",
+        "atomic_rule": "The record copying fee may not exceed twenty-five cents ($0.25) per page for records 8.5 by 14 inches or smaller.",
+        "trigger": "Body charges a per-page copy fee for standard-size pages.",
+        "clock_effect": "none",
+        "clock_spec": "ceiling: $0.25/page (pages <= 8.5 x 14 in)",
+        "related_rule_ids": [
+          "OK-0016",
+          "OK-0018"
+        ],
+        "source_language": "Notwithstanding any state or local provision to the contrary, in no instance shall the record copying fee exceed twenty-five cents ($0.25) per page for records having the dimensions of eight and one-half (8 1/2) by fourteen (14) inches or smaller,",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "Maps to dictionary key fee.per_page_rate_ceiling__1 (NY/FL/IL/WA). 'Notwithstanding any state or local provision to the contrary' pre-empts higher local rates for standard requests."
+      },
+      {
+        "rule_id": "OK-0018",
+        "category": "Fees",
+        "concept_key": "fee.certified_copy_charge",
+        "legal_concept": "Certified-copy fee cap",
+        "rule_type": "Calculation",
+        "config_home": "parameter",
+        "constraint_basis": "ceiling",
+        "atomic_rule": "The fee for a certified copy may not exceed One Dollar ($1.00) per copied page.",
+        "trigger": "Requester seeks a certified copy.",
+        "clock_effect": "none",
+        "clock_spec": "ceiling: $1.00/page (certified copy)",
+        "related_rule_ids": [
+          "OK-0017"
+        ],
+        "source_language": "or a maximum of One Dollar ($1.00) per copied page for a certified copy.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "Maps to dictionary key fee.certified_copy_charge (FL/IL)."
+      },
+      {
+        "rule_id": "OK-0019",
+        "category": "Fees",
+        "concept_key": "fee.search_fee_conditional",
+        "legal_concept": "Search fee permitted only for commercial or excessively-disruptive requests",
+        "rule_type": "Permission",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "If a request is solely for a commercial purpose, or would clearly cause excessive disruption of the body's essential functions, the body may charge a reasonable fee to recover the direct cost of record search and copying.",
+        "trigger": "Request is solely for commercial purpose OR would clearly cause excessive disruption of essential functions.",
+        "clock_effect": "none",
+        "clock_spec": "ceiling: reasonable direct cost of search and copying",
+        "related_rule_ids": [
+          "OK-0016",
+          "OK-0020",
+          "OK-0022"
+        ],
+        "source_language": "However, if the request: a. is solely for commercial purpose, or b. would clearly cause excessive disruption of the essential functions of the public body, then the public body may charge a reasonable fee to recover the direct cost of record search and copying;",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "New coined key fee.search_fee_conditional. Structural because it is a fee-basis fork gated by request classification (commercial purpose is a definition the software branches on — keeper-sliver). Search-fee recovery is otherwise prohibited (contrast OK-0016)."
+      },
+      {
+        "rule_id": "OK-0020",
+        "category": "Fees",
+        "concept_key": "classification.commercial_purpose_news_exclusion",
+        "legal_concept": "News-media use is not a commercial purpose",
+        "rule_type": "Exception",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "Newspaper publication or news-media broadcast for news purposes is not a resale or commercial/trade use, and charges for electronic data provided to news media for a news purpose may not exceed the direct cost of copying.",
+        "trigger": "Requester is news media using the record for a news purpose.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0019",
+          "OK-0022"
+        ],
+        "source_language": "however, publication in a newspaper or broadcast by news media for news purposes shall not constitute a resale or use of a record for trade or commercial purpose and charges for providing copies of electronic data to the news media for a news purpose shall not exceed the direct cost of making the copy.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "New coined key classification.commercial_purpose_news_exclusion. Definition the software branches on: prevents news-media requests from triggering the commercial-purpose search fee (OK-0019)."
+      },
+      {
+        "rule_id": "OK-0021",
+        "category": "Fees",
+        "concept_key": "fee.schedule_posting",
+        "legal_concept": "Public posting of fee schedule",
+        "rule_type": "Requirement",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "A public body that establishes fees must post a written schedule of the fees at its principal office and with the county clerk.",
+        "trigger": "Body establishes fees under the Act.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0016"
+        ],
+        "source_language": "Any public body establishing fees under this act shall post a written schedule of the fees at its principal office and with the county clerk.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "New coined key fee.schedule_posting. A precondition to charging fees."
+      },
+      {
+        "rule_id": "OK-0022",
+        "category": "Fees",
+        "concept_key": "fee.waiver_public_interest__1",
+        "legal_concept": "No search fee when release is in the public interest",
+        "rule_type": "Prohibition",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "No search fee may be charged when release of the records is in the public interest, including release to news media, scholars, authors, and taxpayers seeking to determine whether officials are performing their duties.",
+        "trigger": "Release of records is in the public interest.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0019"
+        ],
+        "source_language": "In no case shall a search fee be charged when the release of records is in the public interest, including, but not limited to, release to the news media, scholars, authors and taxpayers seeking to determine whether those entrusted with the affairs of the government are honestly, faithfully, and competently performing their duties as public servants.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "Maps to dictionary key fee.waiver_public_interest__1 (TX/IL). Overrides the search-fee permission (OK-0019) for public-interest requests."
+      },
+      {
+        "rule_id": "OK-0023",
+        "category": "Fees",
+        "concept_key": "fee.no_discouragement",
+        "legal_concept": "Fees not to be used to discourage requests",
+        "rule_type": "Prohibition",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "Fees may not be used to discourage requests for information or as obstacles to disclosure of requested information.",
+        "trigger": "None stated.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0016",
+          "OK-0019"
+        ],
+        "source_language": "The fees shall not be used for the purpose of discouraging requests for information or as obstacles to disclosure of requested information;",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "New coined key fee.no_discouragement. Anti-obstruction constraint on fee-setting."
+      },
+      {
+        "rule_id": "OK-0024",
+        "category": "Fees",
+        "concept_key": "fee.statutory_per_record",
+        "legal_concept": "Per-record fee where prescribed by other state law",
+        "rule_type": "Permission",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "Where the cost of copying/reproducing/certifying each individual record is otherwise prescribed by state law, the body may assess that cost per individual record or portion requested.",
+        "trigger": "Request contains individual records whose copy/certification cost is set by another state statute.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0017"
+        ],
+        "source_language": "Any request for a record which contains individual records of persons, and the cost of copying, reproducing or certifying each individual record is otherwise prescribed by state law, the cost may be assessed for each individual record, or portion thereof requested as prescribed by state law.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+        "effective_status": "Current",
+        "official_link": "https://www.oscn.net/applications/oscn/deliverdocument.asp?citeid=80292",
+        "notes": "New coined key fee.statutory_per_record. A branch to externally-prescribed fee schedules that displaces the $0.25/page cap."
+      },
+      {
+        "rule_id": "OK-0025",
+        "category": "Intake",
+        "concept_key": "intake.limited_hours_notice",
+        "legal_concept": "Access-notice duty for bodies open fewer than 30 hours/week",
+        "rule_type": "Requirement",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "A public body without at least 30 regular business hours per week must post and maintain a written notice (at its principal office and with the county clerk) designating the days records are available, the name/mailing address/telephone of the individual in charge of records, and detailed procedures for obtaining access at least two days per week excluding Sunday.",
+        "trigger": "Public body/office lacks regular business hours of at least 30 hours per week.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0026",
+          "OK-0004"
+        ],
+        "source_language": "If a public body or its office does not have regular business hours of at least thirty (30) hours a week, the public body shall post and maintain a written notice at its principal office and with the county clerk where the public body is located which notice shall: 1. Designate the days of the week when records are available for inspection, copying or mechanical reproduction; 2. Set forth the name, mailing address, and telephone number of the individual in charge of the records; and 3. Describe in detail the procedures for obtaining access to the records at least two days of the week, excluding Sunday.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.6(A)",
+        "effective_status": "Current (24A.6 added Laws 1985, c. 355, § 6; unamended)",
+        "official_link": "https://oksenate.gov/sites/default/files/2022-05/os51.pdf",
+        "notes": "New coined key intake.limited_hours_notice. Structural branch: a distinct intake/availability path for low-hours bodies (routing + a minimum 2-day access floor)."
+      },
+      {
+        "rule_id": "OK-0026",
+        "category": "Intake",
+        "concept_key": "intake.appointment_by_agreement",
+        "legal_concept": "Access by mutual agreement outside designated days",
+        "rule_type": "Permission",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "The requester and the authorized release person may agree to inspection/copying on a day and time other than that designated in the sub-30-hours notice.",
+        "trigger": "Body operates under a § 24A.6 limited-hours notice.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0025"
+        ],
+        "source_language": "The person requesting the record and the person authorized to release the records of the public body may agree to inspection, copying, or mechanical reproduction on a day and at a time other than that designated in the notice.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.6(B)",
+        "effective_status": "Current",
+        "official_link": "https://oksenate.gov/sites/default/files/2022-05/os51.pdf",
+        "notes": "New coined key intake.appointment_by_agreement."
+      },
+      {
+        "rule_id": "OK-0027",
+        "category": "Denials",
+        "concept_key": "denial.law_enforcement_discretion",
+        "legal_concept": "Discretionary denial of law-enforcement records",
+        "rule_type": "Discretion",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "Except for records made open by § 24A.8(A) or other law, a law enforcement agency may deny access to law enforcement records unless a court finds the public interest or an individual's interest outweighs the reason for denial.",
+        "trigger": "Request for law-enforcement records not within the mandatory-disclosure list of § 24A.8(A).",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0028"
+        ],
+        "source_language": "Except for the records listed in subsection A of this section and those made open by other state or local laws, law enforcement agencies may deny access to law enforcement records except where a court finds that the public interest or the interest of an individual outweighs the reason for denial.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.8(B)",
+        "effective_status": "Current (24A.8 last amended Laws 2015, c. 370, § 2)",
+        "official_link": "https://oksenate.gov/sites/default/files/2022-05/os51.pdf",
+        "notes": "New coined key denial.law_enforcement_discretion. Record-Specific discretion path; the court-balancing standard is flagged for human legal review (not auto-configurable). See Special Records for the § 24A.8(A) mandatory list and body-camera redaction workflow."
+      },
+      {
+        "rule_id": "OK-0028",
+        "category": "Appeals",
+        "concept_key": "appeal.judicial.enforcement_right__2",
+        "legal_concept": "Civil suit for declaratory or injunctive relief",
+        "rule_type": "Remedy",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "A person denied access to records may bring a civil suit for declaratory or injunctive relief, or both, limited to records requested and denied prior to filing the suit.",
+        "trigger": "Person is denied access to records of a public body/official.",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "OK-0027"
+        ],
+        "source_language": "Any person denied access to records of a public body or public official: 1. May bring a civil suit for declarative or injunctive relief, or both, but such civil suit shall be limited to records requested and denied prior to filing of the civil suit; and 2. If successful, shall be entitled to reasonable attorney fees.",
+        "is_paraphrase": false,
+        "source_authority": "Okla. Stat. tit. 51, § 24A.17(B)",
+        "effective_status": "Current (24A.17 last amended Laws 2005, c. 199, § 7)",
+        "official_link": "https://oksenate.gov/sites/default/files/2022-05/os51.pdf",
+        "notes": "Maps to dictionary key appeal.judicial.enforcement_right__2 (NY/AZ/WA). Only the enforcement trigger/right is captured; the attorney-fee remedy amount is out of scope per inclusion test. Oklahoma provides NO administrative/AG appeal path (material negative)."
+      }
+    ],
+    "structural_branches": [
+      {
+        "concept_key": "intake.limited_hours_notice",
+        "description": "OK-0025 (§24A.6(A)): distinct intake/availability path for public bodies open fewer than 30 hours/week — posted notice, designated in-charge individual, and a minimum-two-days-per-week access floor."
+      },
+      {
+        "concept_key": "intake.appointment_by_agreement",
+        "description": "OK-0026 (§24A.6(B)): mutual-agreement appointment path for access outside the designated limited-hours days."
+      },
+      {
+        "concept_key": "fee.search_fee_conditional",
+        "description": "OK-0019 (§24A.5(4)): fee-basis fork — a search fee is unlockable ONLY when the request is solely commercial-purpose or would clearly cause excessive disruption; otherwise search cost is non-recoverable."
+      },
+      {
+        "concept_key": "classification.commercial_purpose_news_exclusion",
+        "description": "OK-0020 (§24A.5(4)): classification branch excluding news-media/news-purpose use from 'commercial purpose', diverting it away from the search-fee path and into a direct-cost-only electronic-data rate."
+      },
+      {
+        "concept_key": "handling.no_queue_blocking",
+        "description": "OK-0012 (§24A.5(6)): queue-management branch prohibiting a short current request from being blocked behind a substantially longer prior request."
+      },
+      {
+        "concept_key": "production.website_redirect",
+        "description": "OK-0013 (§24A.5(6)): Internet-availability path that satisfies the prompt-access duty."
+      },
+      {
+        "concept_key": "denial.law_enforcement_discretion",
+        "description": "OK-0027 (§24A.8(B)): record-specific discretionary-denial path for law-enforcement records not on the §24A.8(A) mandatory-disclosure list, subject to a court public-interest balancing test (human-legal-review flagged)."
+      }
+    ],
+    "material_negatives": [
+      {
+        "concept_key": "deadline.initial_response_window",
+        "note": "Oklahoma sets NO fixed numeric response or determination deadline. The only timing standard is the soft 'prompt, reasonable access' of §24A.5(6). Absence of a found rule is not proof none exists, but the Act contains no day-count."
+      },
+      {
+        "concept_key": "intake.acknowledgment_window",
+        "note": "No statutory duty to acknowledge a request or issue an estimated completion date. The Act specifies only prompt, reasonable access."
+      },
+      {
+        "concept_key": "denial.deemed_denial_on_nonresponse",
+        "note": "No statutory 'silence = denial' trigger. §24A.17(B) provides a civil remedy for records 'requested and denied,' but the Act fixes no clock after which non-response is deemed a denial (Oklahoma case law has treated unreasonable delay as constructive denial; not codified — flagged for a later case-law pass)."
+      },
+      {
+        "concept_key": "appeal.administrative.review_right",
+        "note": "No administrative or Attorney-General records-review/appeal process exists (contrast Texas's AG-decision regime). Enforcement is judicial only (§24A.17(B))."
+      },
+      {
+        "concept_key": "clarification.request_permitted",
+        "note": "No statutory clarification/narrowing procedure, clarification clock, or reasonably-describes-identifiable threshold is stated in the Act."
+      },
+      {
+        "concept_key": "preservation.hold_pending_request",
+        "note": "No statutory preservation/litigation-hold triggered by a pending request. §24A.8(C) and §24A.18 expressly disclaim any additional recordkeeping requirement; retention is governed by separate records-management law (out of scope)."
+      },
+      {
+        "concept_key": "production.format_medium",
+        "note": "No general 'produce in the requester's chosen electronic format' mandate. The Act addresses electronic format only for narrow record types (news-media electronic data and DPS computerized copies), both capped at direct cost — not a general format-choice right."
+      },
+      {
+        "concept_key": "payment.advance_deposit_before_production",
+        "note": "The Act contains no provision authorizing or governing advance deposits or pre-payment before production; only the fee caps of §24A.5(4) are stated."
+      },
+      {
+        "concept_key": "deadline.determination_extension",
+        "note": "No statutory extension mechanism or unusual-circumstances tolling; consistent with the absence of any fixed response clock."
+      },
+      {
+        "concept_key": "intake.written_request_required",
+        "note": "The Act does not require a written request or any particular form; §24A.2 bars imposing procedures beyond those the Act specifies, and none is specified for intake form or channel."
+      }
+    ]
+  },
+  {
+    "state": "Missouri",
+    "verbatim_captured_count": 29,
+    "rules": [
+      {
+        "rule_id": "MO-0001",
+        "category": "Eligibility",
+        "concept_key": "eligibility.any_person",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Public records open to the public",
+        "rule_type": "Requirement",
+        "atomic_rule": "Each public governmental body must make its public records available for inspection and copying by the public; access is not limited to any class or category of requester.",
+        "trigger": "None stated (unconditional access to open records)",
+        "clock_effect": "none",
+        "source_language": "Each public governmental body shall make available for inspection and copying by the public of that body's public records.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.023.2, RSMo",
+        "effective_status": "Current",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.023",
+        "notes": "Universal-access rule. 'By the public' is not limited to residents or any purpose. Source Type: Statute. Enforcement standing under 610.027 (citizen/taxpayer/aggrieved person) governs lawsuits, not the right to make a request."
+      },
+      {
+        "rule_id": "MO-0002",
+        "category": "Eligibility",
+        "concept_key": "eligibility.no_residency_requirement",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "No residency condition on records access",
+        "rule_type": "Permission",
+        "atomic_rule": "There is no Missouri residency or citizenship condition on the right to inspect or copy public records; the statute grants access to 'the public' with no residency qualifier.",
+        "trigger": "None stated",
+        "clock_effect": "none",
+        "source_language": "Each public governmental body shall make available for inspection and copying by the public of that body's public records.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.023.2, RSMo",
+        "effective_status": "Current",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.023",
+        "notes": "Universal-access rule emitted per symmetry requirement. Source Type: Statute. Chapter 610 imposes no residency condition for requesting records; verbatim clause quoted is the affirmative access grant."
+      },
+      {
+        "rule_id": "MO-0003",
+        "category": "Eligibility",
+        "concept_key": "eligibility.no_purpose_requirement",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "No statement of purpose required",
+        "rule_type": "Permission",
+        "atomic_rule": "A requester need not state a purpose or reason for requesting public records; the access grant to 'the public' carries no purpose condition.",
+        "trigger": "None stated",
+        "clock_effect": "none",
+        "source_language": "Each public governmental body shall make available for inspection and copying by the public of that body's public records.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.023.2, RSMo",
+        "effective_status": "Current",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.023",
+        "notes": "Universal-access rule emitted per symmetry requirement. Source Type: Statute. AGO guidance confirms requesters need not justify a request. Commercial-purpose distinctions in some states' fee schedules have no counterpart in Chapter 610."
+      },
+      {
+        "rule_id": "MO-0004",
+        "category": "Custody/Routing",
+        "concept_key": "custody.custodian_designation",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Appointment of custodian of records",
+        "rule_type": "Requirement",
+        "atomic_rule": "Each public governmental body must appoint a custodian who is responsible for the maintenance of that body's records.",
+        "trigger": "None stated (standing obligation of each body)",
+        "clock_effect": "none",
+        "source_language": "Each public governmental body is to appoint a custodian who is to be responsible for the maintenance of that body's records.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.023.1, RSMo",
+        "effective_status": "Current",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.023",
+        "notes": "Keeper-sliver: custodian designation drives routing/who-must-respond. Source Type: Statute."
+      },
+      {
+        "rule_id": "MO-0005",
+        "category": "Custody/Routing",
+        "concept_key": "custody.custodian_availability_designation",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Custodian identity and location disclosed on request",
+        "rule_type": "Requirement",
+        "atomic_rule": "The identity and location of a public governmental body's custodian must be made available upon request.",
+        "trigger": "Upon request for the custodian's identity/location",
+        "clock_effect": "none",
+        "source_language": "The identity and location of a public governmental body's custodian is to be made available upon request.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.023.1, RSMo",
+        "effective_status": "Current",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.023",
+        "notes": "Supports routing to the correct responder. Source Type: Statute. Related to MO-0004."
+      },
+      {
+        "rule_id": "MO-0006",
+        "category": "Intake",
+        "concept_key": "intake.no_required_form",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Request form may be offered but not required",
+        "rule_type": "Prohibition",
+        "atomic_rule": "A public governmental body may ask a requester to fill out a request form but may not require use of a form as a condition of access.",
+        "trigger": "On receipt of a records request",
+        "clock_effect": "none",
+        "source_language": "a public governmental body may ask that requestors fill out a form, but it can't require them to do so.",
+        "is_paraphrase": false,
+        "source_authority": "Mo. Att'y Gen., Sunshine Law FAQs (interpreting § 610.023.3)",
+        "effective_status": "Current",
+        "official_link": "https://ago.mo.gov/get-help/programs-services-from-a-z/sunshine-law/sunshine-law-faqs/",
+        "notes": "Source Type: Official Guidance (AGO). Statute is silent on request form; AGO interprets that a form cannot be mandated. Flag for confirmation against any controlling case law."
+      },
+      {
+        "rule_id": "MO-0007",
+        "category": "Intake",
+        "concept_key": "intake.oral_request_permitted",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Request need not be in writing",
+        "rule_type": "Permission",
+        "atomic_rule": "A records request need not be submitted in writing; written submission is encouraged as helpful but is not required by statute.",
+        "trigger": "On making a records request",
+        "clock_effect": "none",
+        "source_language": "Section 610.023.3, RSMo, ... does not specify a manner in which these requests must be submitted; while not required, it may be helpful to submit requests in writing.",
+        "is_paraphrase": true,
+        "source_authority": "Mo. Att'y Gen., Sunshine Law FAQs (interpreting § 610.023.3)",
+        "effective_status": "Requires manual verification",
+        "official_link": "https://ago.mo.gov/get-help/programs-services-from-a-z/sunshine-law/sunshine-law-faqs/",
+        "notes": "Source Type: Official Guidance (AGO). Paraphrased from AGO FAQ / search summary; confirm exact FAQ wording. Statute does not prescribe request form or medium."
+      },
+      {
+        "rule_id": "MO-0008",
+        "category": "Deadlines",
+        "concept_key": "deadline.initial_response_window",
+        "config_home": "parameter",
+        "constraint_basis": "ceiling",
+        "legal_concept": "Third-business-day response deadline",
+        "rule_type": "Deadline",
+        "atomic_rule": "The custodian must act upon a request for access no later than the end of the third business day following the date the request is received by the custodian.",
+        "trigger": "Request received by the custodian of records",
+        "clock_effect": "sets-deadline",
+        "clock_spec": "ceiling: 3 business-days from request receipt by custodian",
+        "source_language": "Each request for access to a public record shall be acted upon as soon as possible, but in no event later than the end of the third business day following the date the request is received by the custodian of records of a public governmental body.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.023.3, RSMo",
+        "effective_status": "Current",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.023",
+        "notes": "Source Type: Statute. Hard cap on the action deadline; the concurrent 'as soon as possible' promptness standard is split out to MO-0009. This is a state-fixed maximum (ceiling), not a value the city sets."
+      },
+      {
+        "rule_id": "MO-0009",
+        "category": "Deadlines",
+        "concept_key": "deadline.production_promptly",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Act upon request as soon as possible",
+        "rule_type": "Deadline",
+        "atomic_rule": "A request for access must be acted upon as soon as possible, a promptness standard operating within the outer three-business-day cap.",
+        "trigger": "Request received by the custodian",
+        "clock_effect": "sets-deadline",
+        "clock_spec": "undefined-soft: \"as soon as possible\" from request receipt",
+        "source_language": "Each request for access to a public record shall be acted upon as soon as possible, but in no event later than the end of the third business day following the date the request is received by the custodian of records of a public governmental body.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.023.3, RSMo",
+        "effective_status": "Current",
+        "related_rule_ids": [
+          "MO-0008"
+        ],
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.023",
+        "notes": "Source Type: Statute. Soft promptness standard within the same sentence as the 3-day cap; kept as a distinct undefined-soft standard so it is not converted into a fixed number."
+      },
+      {
+        "rule_id": "MO-0010",
+        "category": "Production",
+        "concept_key": "production.format_election",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Provide records in requested format if available",
+        "rule_type": "Requirement",
+        "atomic_rule": "If records are requested in a certain format, the public body must provide the records in the requested format if such format is available.",
+        "trigger": "Requester specifies a format and that format is available",
+        "clock_effect": "none",
+        "source_language": "If records are requested in a certain format, the public body shall provide the records in the requested format, if such format is available.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.023.3, RSMo",
+        "effective_status": "Current",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.023",
+        "notes": "Source Type: Statute. Conditional on availability of the requested format."
+      },
+      {
+        "rule_id": "MO-0011",
+        "category": "Communications",
+        "concept_key": "communications.delay_notice_date_certain",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Detailed delay explanation with earliest availability",
+        "rule_type": "Requirement",
+        "atomic_rule": "If access is not granted immediately, the custodian must give a detailed explanation of the cause for further delay and the place and earliest time and date the record will be available for inspection.",
+        "trigger": "Access not granted immediately",
+        "clock_effect": "none",
+        "source_language": "If access to the public record is not granted immediately, the custodian shall give a detailed explanation of the cause for further delay and the place and earliest time and date that the record will be available for inspection.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.023.3, RSMo",
+        "effective_status": "Current",
+        "related_rule_ids": [
+          "MO-0008",
+          "MO-0012"
+        ],
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.023",
+        "notes": "Source Type: Statute. Requires a date-certain in the delay notice."
+      },
+      {
+        "rule_id": "MO-0012",
+        "category": "Deadlines",
+        "concept_key": "deadline.extension_reasonable_cause",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Production period may exceed three days for reasonable cause",
+        "rule_type": "Discretion",
+        "atomic_rule": "The period for document production may exceed three business days for reasonable cause.",
+        "trigger": "Reasonable cause for exceeding three business days",
+        "clock_effect": "sets-deadline",
+        "clock_spec": "undefined-soft: \"reasonable cause\" extension beyond 3 business-days from request receipt",
+        "source_language": "This period for document production may exceed three days for reasonable cause.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.023.3, RSMo",
+        "effective_status": "Current",
+        "related_rule_ids": [
+          "MO-0008"
+        ],
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.023",
+        "notes": "Source Type: Statute. Extends the outer window on an undefined-soft 'reasonable cause' standard; no numeric limit stated. Pairs with the delay notice in MO-0011."
+      },
+      {
+        "rule_id": "MO-0013",
+        "category": "Denials",
+        "concept_key": "denial.exemption_citation_required",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Written statement of grounds citing specific provision",
+        "rule_type": "Requirement",
+        "atomic_rule": "If a request for access is denied, the custodian must, upon request, provide a written statement of the grounds for denial citing the specific provision of law under which access is denied.",
+        "trigger": "Access denied and requester requests a written statement of grounds",
+        "clock_effect": "none",
+        "source_language": "If a request for access is denied, the custodian shall provide, upon request, a written statement of the grounds for such denial. Such statement shall cite the specific provision of law under which access is denied",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.023.4, RSMo",
+        "effective_status": "Current",
+        "related_rule_ids": [
+          "MO-0014"
+        ],
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.023",
+        "notes": "Source Type: Statute. Written grounds statement is triggered only 'upon request' by the requester."
+      },
+      {
+        "rule_id": "MO-0014",
+        "category": "Deadlines",
+        "concept_key": "deadline.denial_statement_window",
+        "config_home": "parameter",
+        "constraint_basis": "ceiling",
+        "legal_concept": "Third-business-day deadline for denial statement",
+        "rule_type": "Deadline",
+        "atomic_rule": "The written statement of grounds for denial must be furnished to the requester no later than the end of the third business day following the date the request for the statement is received.",
+        "trigger": "Request for the written statement of grounds is received",
+        "clock_effect": "sets-deadline",
+        "clock_spec": "ceiling: 3 business-days from receipt of the request for the statement",
+        "source_language": "and shall be furnished to the requester no later than the end of the third business day following the date that the request for the statement is received.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.023.4, RSMo",
+        "effective_status": "Current",
+        "related_rule_ids": [
+          "MO-0013"
+        ],
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.023",
+        "notes": "Source Type: Statute. Clock runs from receipt of the request for the statement, not from the original records request."
+      },
+      {
+        "rule_id": "MO-0015",
+        "category": "Redaction",
+        "concept_key": "redaction.segregability",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Separate exempt and nonexempt material",
+        "rule_type": "Requirement",
+        "atomic_rule": "If a record contains both nonexempt and exempt material, the public body must separate them and make the nonexempt material available for examination and copying.",
+        "trigger": "Record contains both exempt and nonexempt material",
+        "clock_effect": "none",
+        "source_language": "If a public record contains material which is not exempt from disclosure as well as material which is exempt from disclosure, the public governmental body shall separate the exempt and nonexempt material and make the nonexempt material available for examination and copying.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.024.1, RSMo",
+        "effective_status": "Current",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.024",
+        "notes": "Source Type: Statute."
+      },
+      {
+        "rule_id": "MO-0016",
+        "category": "Redaction",
+        "concept_key": "redaction.segregability_design",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Design records to facilitate separation",
+        "rule_type": "Requirement",
+        "atomic_rule": "When designing a public record, a public body must, to the extent practicable, facilitate a separation of exempt from nonexempt information.",
+        "trigger": "Designing a public record",
+        "clock_effect": "none",
+        "source_language": "When designing a public record, a public governmental body shall, to the extent practicable, facilitate a separation of exempt from nonexempt information.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.024.2, RSMo",
+        "effective_status": "Current",
+        "related_rule_ids": [
+          "MO-0015"
+        ],
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.024",
+        "notes": "Source Type: Statute. Standing design obligation; borderline on the per-request inclusion test but supports segregability workflow."
+      },
+      {
+        "rule_id": "MO-0017",
+        "category": "Redaction",
+        "concept_key": "redaction.notice_of_redaction",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Generally describe material exempted",
+        "rule_type": "Requirement",
+        "atomic_rule": "If the separation is readily apparent, the public body must generally describe the material exempted, unless that description would reveal the contents of the exempt information and thus defeat the purpose of the exemption.",
+        "trigger": "Separation of exempt material is readily apparent to the requester",
+        "clock_effect": "none",
+        "source_language": "If the separation is readily apparent to a person requesting to inspect or receive copies of the form, the public governmental body shall generally describe the material exempted unless that description would reveal the contents of the exempt information and thus defeat the purpose of the exemption.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.024.2, RSMo",
+        "effective_status": "Current",
+        "related_rule_ids": [
+          "MO-0015"
+        ],
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.024",
+        "notes": "Source Type: Statute. Conjunctive: describe exempt material EXCEPT where description would defeat the exemption; kept in one row per grain rule."
+      },
+      {
+        "rule_id": "MO-0018",
+        "category": "Fees",
+        "concept_key": "fee.copy_rate_per_page",
+        "config_home": "parameter",
+        "constraint_basis": "ceiling",
+        "legal_concept": "Ten cents per page paper copy ceiling",
+        "rule_type": "Calculation",
+        "atomic_rule": "Fees for copying public records provided in paper form shall not exceed ten cents per page for a paper copy not larger than nine by fourteen inches.",
+        "trigger": "Producing paper copies not larger than 9x14 inches",
+        "clock_effect": "none",
+        "source_language": "Fees for copying public records ... shall not exceed ten cents per page for a paper copy not larger than nine by fourteen inches, with the hourly fee for duplicating time not to exceed the average hourly rate of pay for clerical staff of the public governmental body.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.026.1(1), RSMo",
+        "effective_status": "Current",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+        "notes": "Source Type: Statute. ceiling: $0.10/page for paper copies up to 9x14 inches. The city sets the actual charge at or below this ceiling. Duplicating-time labor ceiling split to MO-0019."
+      },
+      {
+        "rule_id": "MO-0019",
+        "category": "Fees",
+        "concept_key": "fee.labor_rate_hourly_ceiling",
+        "config_home": "parameter",
+        "constraint_basis": "ceiling",
+        "legal_concept": "Duplicating-time hourly fee ceiling",
+        "rule_type": "Calculation",
+        "atomic_rule": "The hourly fee charged for duplicating time shall not exceed the average hourly rate of pay for clerical staff of the public governmental body.",
+        "trigger": "Charging for duplicating (copying) time",
+        "clock_effect": "none",
+        "source_language": "with the hourly fee for duplicating time not to exceed the average hourly rate of pay for clerical staff of the public governmental body.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.026.1(1), RSMo",
+        "effective_status": "Current",
+        "related_rule_ids": [
+          "MO-0018"
+        ],
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+        "notes": "Source Type: Statute. ceiling: clerical-staff average hourly rate for duplicating time. City supplies the actual clerical rate under the ceiling."
+      },
+      {
+        "rule_id": "MO-0020",
+        "category": "Fees",
+        "concept_key": "fee.research_retrieval_rate",
+        "config_home": "parameter",
+        "constraint_basis": "ceiling",
+        "legal_concept": "Research time charged at actual cost",
+        "rule_type": "Permission",
+        "atomic_rule": "Research time required for fulfilling records requests may be charged at the actual cost of research time.",
+        "trigger": "Research time required to fulfill a request",
+        "clock_effect": "none",
+        "source_language": "Research time required for fulfilling records requests may be charged at the actual cost of research time.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.026.1(1), RSMo",
+        "effective_status": "Current",
+        "related_rule_ids": [
+          "MO-0021"
+        ],
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+        "notes": "Source Type: Statute. ceiling: actual cost of research time. Permissive ('may'). Fees are to be based on the employees that produce the lowest charges (MO-0021)."
+      },
+      {
+        "rule_id": "MO-0021",
+        "category": "Fees",
+        "concept_key": "fee.lowest_cost_staff",
+        "config_home": "parameter",
+        "constraint_basis": "soft-standard",
+        "legal_concept": "Use staff yielding the lowest amount of charges",
+        "rule_type": "Requirement",
+        "atomic_rule": "Documents must be copied/duplicated using the personnel of the body that results in the lowest amount of charges for the request.",
+        "trigger": "Assigning staff to fulfill a request",
+        "clock_effect": "none",
+        "source_language": "Documents may be copied using employees of the body that result in the lowest amount of charges for search, research, and duplication time.",
+        "is_paraphrase": true,
+        "source_authority": "§ 610.026.1(1), RSMo",
+        "effective_status": "Requires manual verification",
+        "related_rule_ids": [
+          "MO-0020"
+        ],
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+        "notes": "Source Type: Statute. Paraphrased/reconstructed from the fee subsection; confirm exact statutory wording. soft-standard: 'lowest amount of charges' cost-minimization duty, no fixed value."
+      },
+      {
+        "rule_id": "MO-0022",
+        "category": "Fees",
+        "concept_key": "fee.cost_estimate_on_request",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Cost estimate available before production",
+        "rule_type": "Permission",
+        "atomic_rule": "A requester may request an estimate of the cost of copies before the public body produces them.",
+        "trigger": "Requester asks for a cost estimate before production",
+        "clock_effect": "none",
+        "source_language": "a person requesting records may request that the public governmental body provide an estimate of the cost prior to producing the copies.",
+        "is_paraphrase": true,
+        "source_authority": "§ 610.026.1(1), RSMo",
+        "effective_status": "Requires manual verification",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+        "notes": "Source Type: Statute. Paraphrased/reconstructed; confirm exact statutory wording. AGO guidance recommends requesters ask for a cost breakdown."
+      },
+      {
+        "rule_id": "MO-0023",
+        "category": "Fees",
+        "concept_key": "fee.electronic_media_actual_cost",
+        "config_home": "parameter",
+        "constraint_basis": "ceiling",
+        "legal_concept": "Electronic/media records cost limited to copies, staff time, and medium",
+        "rule_type": "Calculation",
+        "atomic_rule": "Fees for records maintained on computer facilities, tapes, disks, videotapes or films shall include only the cost of copies, staff time (not exceeding the average hourly rate of pay for staff needed for copies and programming), and the cost of the medium used for duplication.",
+        "trigger": "Providing records on electronic or special media",
+        "clock_effect": "none",
+        "source_language": "Fees for providing access to public records maintained on computer facilities, recording tapes or disks, videotapes or films ... shall include only the cost of copies, staff time, which shall not exceed the average hourly rate of pay for staff of the public governmental body required for making copies and programming, if necessary, and the cost of the disk, tape, or other medium used for the duplication.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.026.1(2), RSMo",
+        "effective_status": "Current",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+        "notes": "Source Type: Statute. ceiling: cost of copies + staff time (capped at staff average hourly rate) + cost of medium. No overhead or profit recoverable."
+      },
+      {
+        "rule_id": "MO-0024",
+        "category": "Fees",
+        "concept_key": "fee.waiver_public_interest",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Public-interest fee waiver or reduction",
+        "rule_type": "Discretion",
+        "atomic_rule": "A public body may waive or reduce the fees when it determines that waiver or reduction of the fee is in the public interest.",
+        "trigger": "Body determines waiver/reduction is in the public interest",
+        "clock_effect": "none",
+        "source_language": "Documents may be furnished without charge or at a reduced charge when the public governmental body determines that waiver or reduction of the fee is in the public interest because it is likely to contribute significantly to public understanding of the operations or activities of the public governmental body.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.026.1(1), RSMo",
+        "effective_status": "Current",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+        "notes": "Source Type: Statute. Discretionary public-interest waiver. No indigency waiver is separately specified (see material negatives)."
+      },
+      {
+        "rule_id": "MO-0025",
+        "category": "Payment",
+        "concept_key": "payment.advance_payment_permitted",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Fees may be requested before fulfilling request",
+        "rule_type": "Permission",
+        "atomic_rule": "Payment of fees may be requested prior to fulfilling the request.",
+        "trigger": "Before fulfilling a records request",
+        "clock_effect": "none",
+        "source_language": "Payment of fees may be requested prior to fulfilling the request.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.026.2, RSMo",
+        "effective_status": "Current",
+        "related_rule_ids": [
+          "MO-0026"
+        ],
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+        "notes": "Source Type: Statute. No statutory deposit percentage or dollar threshold is set (see material negatives)."
+      },
+      {
+        "rule_id": "MO-0026",
+        "category": "Payment",
+        "concept_key": "fee.nonpayment_withdrawal",
+        "config_home": "parameter",
+        "constraint_basis": "fixed",
+        "legal_concept": "Request deemed withdrawn on nonpayment of fees",
+        "rule_type": "Trigger",
+        "atomic_rule": "A request is considered withdrawn if the requester fails to remit all fees within ninety days, or within one hundred fifty days if the requested fees are greater than one thousand dollars.",
+        "trigger": "Fees requested and requester fails to remit within 90 days (150 days if fees > $1,000)",
+        "clock_effect": "terminal",
+        "clock_spec": "fixed: 90 calendar-days from fee request; 150 calendar-days if fees > $1,000",
+        "source_language": "A request for public records to a public governmental body shall be considered withdrawn if the requester fails to remit all fees within ninety days, or within one hundred fifty days if the requested fees are greater than one thousand dollars.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.026.2, RSMo",
+        "effective_status": "Amended effective August 28, 2025",
+        "related_rule_ids": [
+          "MO-0025",
+          "MO-0027"
+        ],
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+        "notes": "Source Type: Statute (2025 amendment). Terminal clock: nonpayment deems the request withdrawn. Requests pending on Aug. 28, 2025 had to be paid by Jan. 1, 2026. City cannot alter the 90/150-day thresholds (state-fixed)."
+      },
+      {
+        "rule_id": "MO-0027",
+        "category": "Communications",
+        "concept_key": "payment.nonpayment_withdrawal_notice",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Notice of withdrawal consequence for nonpayment",
+        "rule_type": "Requirement",
+        "atomic_rule": "The public body must notify the requester that failing to remit payment within ninety days (or one hundred fifty days if fees exceed one thousand dollars) will cause the request to be considered withdrawn.",
+        "trigger": "When fees are requested",
+        "clock_effect": "none",
+        "source_language": "The public governmental body shall include notice to the requester that if the requester fails to remit payment of the fees within ninety days, or within one hundred fifty days if the requested fees are greater than one thousand dollars, then the request for public records shall be considered withdrawn.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.026.2, RSMo",
+        "effective_status": "Amended effective August 28, 2025",
+        "related_rule_ids": [
+          "MO-0026"
+        ],
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+        "notes": "Source Type: Statute (2025 amendment). Required notice attached to the fee request; prerequisite to the withdrawal in MO-0026."
+      },
+      {
+        "rule_id": "MO-0028",
+        "category": "Denials",
+        "concept_key": "classification.presumption_of_openness",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Open-records public policy; strict construction of exceptions",
+        "rule_type": "Presumption",
+        "atomic_rule": "Records of public governmental bodies are presumed open to the public unless otherwise provided by law; the Sunshine Law is liberally construed and its exceptions strictly construed.",
+        "trigger": "Any determination of whether a record is open or closed",
+        "clock_effect": "none",
+        "source_language": "It is the public policy of this state that meetings, records, votes, actions, and deliberations of public governmental bodies be open to the public unless otherwise provided by law. ... [the sections] shall be liberally construed and their exceptions strictly construed to promote this public policy.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.011.1, RSMo",
+        "effective_status": "Current",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.011",
+        "notes": "Source Type: Statute. Presumption gating classification/denial decisions; drives the burden allocation in MO-0035."
+      },
+      {
+        "rule_id": "MO-0029",
+        "category": "Inspection",
+        "concept_key": "inspection.no_removal_of_originals",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Original records may not be removed without permission",
+        "rule_type": "Prohibition",
+        "atomic_rule": "No person may remove original public records from the office of a public governmental body or its custodian without written permission of the designated custodian.",
+        "trigger": "Inspection of original records",
+        "clock_effect": "none",
+        "source_language": "No person shall remove original public records from the office of a public governmental body or its custodian without written permission of the designated custodian.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.023.2, RSMo",
+        "effective_status": "Current",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.023",
+        "notes": "Source Type: Statute. Governs on-site inspection handling."
+      },
+      {
+        "rule_id": "MO-0030",
+        "category": "Special Records",
+        "concept_key": "coverage.public_agency_includes_municipal",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Public governmental body includes political subdivisions",
+        "rule_type": "Definition",
+        "atomic_rule": "'Public governmental body' includes governmental entities created by order or ordinance of any political subdivision or district, bringing municipal bodies within the Sunshine Law's coverage.",
+        "trigger": "Determining whether a body is subject to the law",
+        "clock_effect": "none",
+        "source_language": "'Public governmental body', any legislative, administrative or governmental entity created by the Constitution or statutes of this state, by order or ordinance of any political subdivision or district, judicial entities when operating in an administrative capacity, or by executive order ...",
+        "is_paraphrase": true,
+        "source_authority": "§ 610.010(4), RSMo",
+        "effective_status": "Requires manual verification",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.010",
+        "notes": "Source Type: Statute. Definition reconstructed from source summary (long enumerated definition); confirm exact subdivision number and full text. Included because it is the coverage definition the platform branches on for municipal applicability."
+      },
+      {
+        "rule_id": "MO-0031",
+        "category": "Special Records",
+        "concept_key": "coverage.public_record_definition",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Definition of public record",
+        "rule_type": "Definition",
+        "atomic_rule": "'Public record' means any record, written or electronically stored, retained by or of any public governmental body, including reports, studies, and records created or maintained by private contractors under an agreement with or on behalf of the body.",
+        "trigger": "Determining whether requested material is a public record",
+        "clock_effect": "none",
+        "source_language": "'Public record', any record, whether written or electronically stored, retained by or of any public governmental body including any report, survey, memorandum, or other document or study ... including records created or maintained by private contractors under an agreement with a public governmental body or on behalf of a public governmental body ...",
+        "is_paraphrase": true,
+        "source_authority": "§ 610.010(6), RSMo",
+        "effective_status": "Requires manual verification",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.010",
+        "notes": "Source Type: Statute. Reconstructed from source summary; confirm exact subdivision number and full text. Definition the platform branches on for scope (includes contractor-held records)."
+      },
+      {
+        "rule_id": "MO-0032",
+        "category": "Production",
+        "concept_key": "production.electronic_format_on_request",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Access to records in electronic format",
+        "rule_type": "Requirement",
+        "atomic_rule": "A public body keeping records in electronic format is strongly encouraged to provide access electronically, and where its system allows electronic copying it must provide data in electronic format if requested.",
+        "trigger": "Records maintained electronically and requester seeks electronic format",
+        "clock_effect": "none",
+        "source_language": "A public governmental body keeping its records in an electronic format is strongly encouraged to provide access to its public records to members of the public in an electronic format. ... the public governmental body shall provide data to the public in such electronic format, if requested.",
+        "is_paraphrase": true,
+        "source_authority": "§ 610.029.1, RSMo",
+        "effective_status": "Requires manual verification",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.029",
+        "notes": "Source Type: Statute. Reconstructed from source summary; the 'strongly encouraged' clause is advisory while the 'shall provide data ... if requested' clause is mandatory. Confirm exact operative wording and subsection numbering."
+      },
+      {
+        "rule_id": "MO-0033",
+        "category": "Appeals",
+        "concept_key": "appeal.judicial.enforcement_right",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Judicial enforcement standing",
+        "rule_type": "Permission",
+        "atomic_rule": "Any aggrieved person, taxpayer to or citizen of the state, or the attorney general or prosecuting attorney, may seek judicial enforcement of the Sunshine Law's records provisions.",
+        "trigger": "Alleged violation of §§ 610.010 to 610.026",
+        "clock_effect": "none",
+        "source_language": "Any aggrieved person, taxpayer to, or citizen of, this state, or the attorney general or prosecuting attorney, may seek judicial enforcement of the requirements of sections 610.010 to 610.026.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.027.1, RSMo",
+        "effective_status": "Current",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.027",
+        "notes": "Source Type: Statute. Enforcement is judicial; there is no internal administrative appeal stage (see material negatives)."
+      },
+      {
+        "rule_id": "MO-0034",
+        "category": "Appeals",
+        "concept_key": "appeal.judicial.venue",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Venue for enforcement suit",
+        "rule_type": "Requirement",
+        "atomic_rule": "Suits to enforce the records provisions must be brought in the circuit court for the county in which the public governmental body has its principal place of business.",
+        "trigger": "Filing an enforcement suit",
+        "clock_effect": "none",
+        "source_language": "Suits to enforce sections 610.010 to 610.026 shall be brought in the circuit court for the county in which the public governmental body has its principal place of business.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.027.1, RSMo",
+        "effective_status": "Current",
+        "related_rule_ids": [
+          "MO-0033"
+        ],
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.027",
+        "notes": "Source Type: Statute."
+      },
+      {
+        "rule_id": "MO-0035",
+        "category": "Appeals",
+        "concept_key": "appeal.judicial.burden_on_public_body",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "legal_concept": "Burden of persuasion on the public body",
+        "rule_type": "Presumption",
+        "atomic_rule": "Once the enforcement-seeking party shows the body is subject to the law and closed a record, the burden of persuasion shifts to the body to demonstrate compliance.",
+        "trigger": "Enforcement action where a record was closed/withheld",
+        "clock_effect": "none",
+        "source_language": "Once a party seeking judicial enforcement of sections 610.010 to 610.026 demonstrates to the court that the body in question is subject to the requirements of sections 610.010 to 610.026 and has held a closed meeting, record or vote, the burden of persuasion shall be on the body and its members to demonstrate compliance with the requirements of sections 610.010 to 610.026.",
+        "is_paraphrase": false,
+        "source_authority": "§ 610.027.2, RSMo",
+        "effective_status": "Current",
+        "related_rule_ids": [
+          "MO-0033",
+          "MO-0028"
+        ],
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.027",
+        "notes": "Source Type: Statute. Burden-shifting supports the presumption of openness (MO-0028)."
+      }
+    ],
+    "material_negatives": [
+      {
+        "concept_key": "denial.deemed_denial_nonresponse",
+        "note": "No statutory deemed/constructive-denial trigger. Chapter 610 requires action within three business days (610.023.3) but does not state that silence past that deadline is automatically a denial; a failure to respond is treated as a violation enforceable in court (610.027), and knowing/purposeful violations carry penalties, rather than converting silence into a deemed denial with its own clock. Absence of a found rule is not proof none exists."
+      },
+      {
+        "concept_key": "appeal.administrative.none",
+        "note": "No internal administrative appeal or binding administrative-review stage for records denials. Enforcement is exclusively judicial (610.027). The Attorney General or a prosecuting attorney may investigate and sue, and a requester may complain to the AG's office, but no statute creates a binding administrative determination the platform would route to before court."
+      },
+      {
+        "concept_key": "fee.waiver_indigency",
+        "note": "No separate statutory indigency fee waiver. The only fee-waiver provision is the discretionary public-interest waiver/reduction in 610.026.1 (MO-0024); Chapter 610 does not provide a mandatory indigency-based waiver."
+      },
+      {
+        "concept_key": "payment.deposit_threshold",
+        "note": "No statutory deposit percentage or dollar threshold governing advance payment. 610.026.2 permits requesting payment before fulfillment (MO-0025) but sets no required deposit amount; the 90/150-day figures (MO-0026) are withdrawal deadlines, not deposit thresholds."
+      },
+      {
+        "concept_key": "search.burden_hour_threshold",
+        "note": "No statutory 'unduly burdensome' or search-hour threshold permitting denial of a voluminous request. Chapter 610 sets no burden-hour cap; a body may recover search/research time as a fee (MO-0020) rather than refuse the request for burden."
+      },
+      {
+        "concept_key": "intake.acknowledgment_window",
+        "note": "No separate acknowledgment deadline distinct from the substantive-response deadline. The three-business-day clock in 610.023.3 (MO-0008) is a deadline to act upon the request, not a mere acknowledgment; Missouri does not require a separate receipt acknowledgment."
+      },
+      {
+        "concept_key": "classification.commercial_purpose",
+        "note": "No commercial-purpose classification or commercial-use fee surcharge in Chapter 610. Unlike several states, Missouri's fee schedule (610.026) draws no distinction based on the requester's commercial vs. non-commercial purpose."
+      }
+    ],
+    "structural_branches": [
+      {
+        "concept_key": "communications.delay_notice_date_certain",
+        "description": "Delay-notice path (MO-0011): when access is not immediate, custodian must issue a detailed cause explanation plus a date-certain for availability."
+      },
+      {
+        "concept_key": "deadline.extension_reasonable_cause",
+        "description": "Reasonable-cause extension path (MO-0012): production window may exceed three business days on an undefined-soft 'reasonable cause' standard, paired with the delay notice."
+      },
+      {
+        "concept_key": "denial.exemption_citation_required",
+        "description": "Denial-statement path (MO-0013/MO-0014): on a requester's request, a written grounds statement citing the specific legal provision must issue within three business days of that request."
+      },
+      {
+        "concept_key": "redaction.segregability",
+        "description": "Segregate-and-produce path (MO-0015/MO-0016/MO-0017): separate exempt from nonexempt material, produce the nonexempt, and generally describe the exempted material unless doing so defeats the exemption."
+      },
+      {
+        "concept_key": "fee.nonpayment_withdrawal",
+        "description": "Fee-nonpayment withdrawal path (MO-0026/MO-0027): a request terminates as withdrawn if fees go unpaid for 90 days (150 days if > $1,000), preceded by a mandatory withdrawal-consequence notice — a Missouri-specific terminal branch added by the 2025 amendment."
+      },
+      {
+        "concept_key": "appeal.judicial.enforcement_right",
+        "description": "Judicial-only enforcement path (MO-0033/MO-0034/MO-0035): no administrative appeal; enforcement is a circuit-court suit with venue at the body's principal place of business and burden-shifting to the body."
+      },
+      {
+        "concept_key": "production.electronic_format_on_request",
+        "description": "Electronic-format path (MO-0032): where the body maintains records electronically and its system permits electronic copying, it must provide data in electronic format on request."
+      }
+    ]
+  }
+]
