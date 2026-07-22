@@ -11,7 +11,7 @@ let ARGS = args
 if (typeof ARGS === 'string') { try { ARGS = JSON.parse(ARGS) } catch (e) { ARGS = {} } }
 const STATES = (ARGS && ARGS.states && ARGS.states.length) ? ARGS.states : []
 if (!STATES.length) return { error: 'no states supplied — pass args.states', argsType: typeof args }
-function abbr(s){ return ({Texas:'TX',California:'CA','New York':'NY',Florida:'FL',Illinois:'IL',Virginia:'VA',Washington:'WA',Arizona:'AZ',Georgia:'GA',Ohio:'OH',Pennsylvania:'PA',Michigan:'MI',Colorado:'CO',Oregon:'OR',Minnesota:'MN',Massachusetts:'MA','North Carolina':'NC','New Jersey':'NJ',Tennessee:'TN'})[s] || s.slice(0,2).toUpperCase() }
+function abbr(s){ return ({Texas:'TX',California:'CA','New York':'NY',Florida:'FL',Illinois:'IL',Virginia:'VA',Washington:'WA',Arizona:'AZ',Georgia:'GA',Ohio:'OH',Pennsylvania:'PA',Michigan:'MI',Colorado:'CO',Oregon:'OR',Minnesota:'MN',Massachusetts:'MA','North Carolina':'NC','New Jersey':'NJ',Tennessee:'TN',Connecticut:'CT',Alabama:'AL',Nevada:'NV'})[s] || s.slice(0,2).toUpperCase() }
 
 const RULE = {
   type: 'object',
