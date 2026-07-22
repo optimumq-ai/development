@@ -11,7 +11,10 @@ let ARGS = args
 if (typeof ARGS === 'string') { try { ARGS = JSON.parse(ARGS) } catch (e) { ARGS = {} } }
 const STATES = (ARGS && ARGS.states && ARGS.states.length) ? ARGS.states : []
 if (!STATES.length) return { error: 'no states supplied — pass args.states', argsType: typeof args }
-function abbr(s){ return ({Texas:'TX',California:'CA','New York':'NY',Florida:'FL',Illinois:'IL',Virginia:'VA',Washington:'WA',Arizona:'AZ',Georgia:'GA',Ohio:'OH',Pennsylvania:'PA',Michigan:'MI',Colorado:'CO',Oregon:'OR',Minnesota:'MN',Massachusetts:'MA','North Carolina':'NC','New Jersey':'NJ',Tennessee:'TN',Connecticut:'CT',Alabama:'AL',Nevada:'NV'})[s] || s.slice(0,2).toUpperCase() }
+// Complete USPS postal codes (used only for log labels here — the agent picks its own
+// rule_id prefix — but keep it correct so logs read right; slice(0,2) gives Kansas->"KA" etc.).
+const ABBRS = {Alabama:'AL',Alaska:'AK',Arizona:'AZ',Arkansas:'AR',California:'CA',Colorado:'CO',Connecticut:'CT',Delaware:'DE','District of Columbia':'DC',Florida:'FL',Georgia:'GA',Hawaii:'HI',Idaho:'ID',Illinois:'IL',Indiana:'IN',Iowa:'IA',Kansas:'KS',Kentucky:'KY',Louisiana:'LA',Maine:'ME',Maryland:'MD',Massachusetts:'MA',Michigan:'MI',Minnesota:'MN',Mississippi:'MS',Missouri:'MO',Montana:'MT',Nebraska:'NE',Nevada:'NV','New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM','New York':'NY','North Carolina':'NC','North Dakota':'ND',Ohio:'OH',Oklahoma:'OK',Oregon:'OR',Pennsylvania:'PA','Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD',Tennessee:'TN',Texas:'TX',Utah:'UT',Vermont:'VT',Virginia:'VA',Washington:'WA','West Virginia':'WV',Wisconsin:'WI',Wyoming:'WY'}
+function abbr(s){ const c = String(s).split(/[.,\n]/)[0].trim(); return ABBRS[c] || c.slice(0,2).toUpperCase() }
 
 const RULE = {
   type: 'object',
@@ -46,7 +49,9 @@ const disc = await parallel(STATES.map(s => () =>
 
 FIRST Read ${CONTRACT} — the FULL contract incl. the "Discovery discipline" section. Follow ALL of it: VERBATIM operative clause in source_language (is_paraphrase=true ONLY if you truly could not open the source — try hard to open the primary statute); NO contentless rules (empty -> a material_negative, not a rule); universal-access facts (any person / no residency / no purpose) as RULES with the shared eligibility keys, never negatives; soft deadlines -> clock_spec undefined-soft + config_home=structural; for PARAMETER rules set constraint_basis (fixed | ceiling | floor | soft-standard) — a state gives a constraint, the city fills the value. ONE override: ignore the "Prohibited output: JSON" line; return via the schema.
 
-Official ${s} sources only; inclusion test; one atomic rule per row. Cover the common areas thoroughly (eligibility, intake, response/acknowledgment deadlines, search, fees & payment, redaction, denials, appeals, production) so there is rich cross-state overlap. Accuracy over count.`,
+Official ${s} sources only; inclusion test; one atomic rule per row. Cover the common areas thoroughly (eligibility, intake, response/acknowledgment deadlines, search, fees & payment, redaction, denials, appeals, production) so there is rich cross-state overlap. Accuracy over count.
+
+rule_id format: **${abbr(s)}-0001, ${abbr(s)}-0002, …** — the prefix is the two-letter USPS postal code for ${s} (given here as "${abbr(s)}"); do NOT derive it from the first two letters of the state name. Also set the \`state\` field to exactly "${s}" — the bare state name, no notes or narrative.`,
     { label: `discover:${abbr(s)}`, phase: 'Discover', schema: DISCOVERY_SCHEMA, effort: 'high' }
   )
 ))

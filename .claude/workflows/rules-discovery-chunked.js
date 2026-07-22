@@ -10,8 +10,13 @@ const CONTRACT = '/opt/optimumq/docs/rules_research/V2_state_research_prompt.md'
 let ARGS = args
 if (typeof ARGS === 'string') { try { ARGS = JSON.parse(ARGS) } catch (e) { ARGS = {} } }
 const STATE = (ARGS && ARGS.state) || 'New Jersey'
-const ABBRS = {Texas:'TX',California:'CA','New York':'NY',Florida:'FL',Illinois:'IL',Virginia:'VA',Washington:'WA',Arizona:'AZ',Georgia:'GA',Ohio:'OH',Pennsylvania:'PA',Michigan:'MI',Colorado:'CO',Oregon:'OR',Minnesota:'MN',Massachusetts:'MA','North Carolina':'NC','New Jersey':'NJ',Tennessee:'TN',Connecticut:'CT'}
-const ST = ABBRS[STATE] || STATE.slice(0,2).toUpperCase()
+// Complete USPS postal codes — this ST drives every rule_id prefix (line ~56), so a wrong
+// value silently corrupts all rule_ids. Never fall back to name.slice(0,2) (that yields
+// Missouri->MI, Louisiana->LO, Kansas->KA…). Fail loudly on any unmapped/dirty input instead.
+const ABBRS = {Alabama:'AL',Alaska:'AK',Arizona:'AZ',Arkansas:'AR',California:'CA',Colorado:'CO',Connecticut:'CT',Delaware:'DE','District of Columbia':'DC',Florida:'FL',Georgia:'GA',Hawaii:'HI',Idaho:'ID',Illinois:'IL',Indiana:'IN',Iowa:'IA',Kansas:'KS',Kentucky:'KY',Louisiana:'LA',Maine:'ME',Maryland:'MD',Massachusetts:'MA',Michigan:'MI',Minnesota:'MN',Mississippi:'MS',Missouri:'MO',Montana:'MT',Nebraska:'NE',Nevada:'NV','New Hampshire':'NH','New Jersey':'NJ','New Mexico':'NM','New York':'NY','North Carolina':'NC','North Dakota':'ND',Ohio:'OH',Oklahoma:'OK',Oregon:'OR',Pennsylvania:'PA','Rhode Island':'RI','South Carolina':'SC','South Dakota':'SD',Tennessee:'TN',Texas:'TX',Utah:'UT',Vermont:'VT',Virginia:'VA',Washington:'WA','West Virginia':'WV',Wisconsin:'WI',Wyoming:'WY'}
+const STATE_CLEAN = String(STATE).split(/[.,\n]/)[0].trim()  // tolerate a polluted state field
+const ST = ABBRS[STATE_CLEAN]
+if (!ST) return { error: `no USPS code for state "${STATE}" — add it to ABBRS; refusing to guess a rule_id prefix`, state: STATE }
 
 // Category chunks — each a balanced slice so a dense statute fits one response.
 // Override via args.chunks: [{ label, prefix, areas:[...] }]
