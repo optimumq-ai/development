@@ -18,8 +18,27 @@ config templates ([[requester-class-eligibility-cluster]], [[compliant-automatio
   legal analysis / majority, not by trusting the discovery value.
 
 ## Artifacts
-- `master_concept_dictionary_SEED.json` — the 75 multi-state concepts (canonical_key, majority config_home,
-  representative definition, states, member rule_ids). The confident core to build on.
+- **`master_concept_dictionary.json`** — THE deliverable. All 1,101 pruned rules clustered into **128
+  canonical concepts** across 17 families (860 source keys → 128; ~6.7x consolidation). Every rule mapped
+  exactly once (0 dropped, 0 duplicated). Each entry: canonical_key, family, resolved config_home,
+  state_count, states, representative definition, merged_from (source keys), members_by_state (rule_ids).
+  Mirrored to the exchange folder as `Master_concept_dictionary.xlsx`.
+- `master_concept_dictionary_SEED.json` — the earlier 75-concept multi-state seed (superseded by the master).
+- `families/eligibility.json`, `families/timing.json` — the two hand-curated family slices (drove the master
+  via a key→canonical lookup); the rest were clustered by a tuned per-family functional bucketer.
+
+## config_home (the design payload)
+128 concepts: **8 pure parameter, 46 mixed, 74 structural**. The ~54 parameter/mixed concepts are the
+**value-knobs** a per-state/city config template fills (copy rates, response windows, fee schedules, deposit
+thresholds, extension length…); the 74 structural are process-shape forks. `mixed` means states split
+parameter-vs-structural — usually the qualitative-standard-plus-local-value pattern (e.g. response window is
+a number in 21 states, a soft "promptly" in 10), but sometimes a discovery mis-code to resolve at design time.
+
+## Status / caveats (first-pass draft)
+The eligibility + timing families were hand-clustered (high confidence). The remaining families were
+clustered by tuned regex bucketing of concept_keys — good first-pass, but the `*.other_*` catch-alls
+(~4% of rules; biggest is custody.other 16) and any coarse merge should be reviewed before the design
+commits. Refine a family by editing its bucket rules (scratchpad `align_all.js`) and re-running.
 
 ## Method (safe, linear — NOT the quadratic pairwise verify, see [[workflow-fanout-safety]])
 Align **family-by-family** (each family is a bounded sub-problem; linear in families, never pairwise across
