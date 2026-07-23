@@ -221,64 +221,33 @@
     }
   },
   {
-    "canonical_key": "classification.other_classification",
+    "canonical_key": "classification.commercial_purpose",
     "family": "classification",
     "config_home": "structural",
     "state_count": 5,
     "states": [
-      "MI",
-      "MN",
-      "OH",
-      "PA",
-      "UT"
-    ],
-    "definition": "All government data is public unless classified by statute, temporary classification, or federal law as not public (nonpublic/protected nonpublic, or, for data on individ",
-    "merged_from": [
-      "classification.determined_at_request_time",
-      "classification.discretionary_release_exempt",
-      "classification.incarcerated_requester_screening",
-      "classification.on_access_request_timing",
-      "classification.public_by_default",
-      "classification.two_record_classes"
-    ],
-    "members_by_state": {
-      "MI": [
-        "MI-0085"
-      ],
-      "MN": [
-        "MN-0014",
-        "MN-0015"
-      ],
-      "OH": [
-        "OH-0035"
-      ],
-      "PA": [
-        "PA-0008"
-      ],
-      "UT": [
-        "UT-0048"
-      ]
-    }
-  },
-  {
-    "canonical_key": "classification.commercial_purpose",
-    "family": "classification",
-    "config_home": "structural",
-    "state_count": 3,
-    "states": [
+      "AZ",
       "IN",
+      "MA",
       "NJ",
       "OK"
     ],
-    "definition": "Newspaper publication or news-media broadcast for news purposes is not a resale or commercial/trade use, and charges for electronic data provided to news media for a news",
+    "definition": "'Commercial purpose' means the sale/resale of a record or use of its information to advance the requester's strategic business interests for profit, excluding news, citiz",
     "merged_from": [
       "classification.commercial_purpose",
       "classification.commercial_purpose_definition",
-      "classification.commercial_purpose_news_exclusion"
+      "classification.commercial_purpose_news_exclusion",
+      "definition.commercial_purpose"
     ],
     "members_by_state": {
+      "AZ": [
+        "AZ-0009"
+      ],
       "IN": [
         "IN-0027"
+      ],
+      "MA": [
+        "MA-0004"
       ],
       "NJ": [
         "NJ-T47"
@@ -289,24 +258,35 @@
     }
   },
   {
-    "canonical_key": "classification.definition_misc",
+    "canonical_key": "classification.record_classification_scheme",
     "family": "classification",
     "config_home": "structural",
-    "state_count": 2,
+    "state_count": 4,
     "states": [
-      "AZ",
-      "MA"
+      "MI",
+      "MN",
+      "PA",
+      "UT"
     ],
-    "definition": "'Commercial purpose' means use of a public record for sale or resale, for producing a document containing the record for sale, obtaining names/addresses for solicitation,",
+    "definition": "The classification of data (and thus its accessibility) is determined by the law applicable to the data at the time the request for access is made.",
     "merged_from": [
-      "definition.commercial_purpose"
+      "classification.determined_at_request_time",
+      "classification.discretionary_release_exempt",
+      "classification.on_access_request_timing",
+      "classification.two_record_classes"
     ],
     "members_by_state": {
-      "AZ": [
-        "AZ-0009"
+      "MI": [
+        "MI-0085"
       ],
-      "MA": [
-        "MA-0004"
+      "MN": [
+        "MN-0015"
+      ],
+      "PA": [
+        "PA-0008"
+      ],
+      "UT": [
+        "UT-0048"
       ]
     }
   },
@@ -371,6 +351,24 @@
     }
   },
   {
+    "canonical_key": "classification.presumption_of_openness",
+    "family": "classification",
+    "config_home": "structural",
+    "state_count": 1,
+    "states": [
+      "MN"
+    ],
+    "definition": "All government data is public unless classified by statute, temporary classification, or federal law as not public (nonpublic/protected nonpublic, or, for data on individ",
+    "merged_from": [
+      "classification.public_by_default"
+    ],
+    "members_by_state": {
+      "MN": [
+        "MN-0014"
+      ]
+    }
+  },
+  {
     "canonical_key": "classification.written_policy_required",
     "family": "classification",
     "config_home": "structural",
@@ -408,33 +406,6 @@
       ],
       "KS": [
         "KS-0012"
-      ]
-    }
-  },
-  {
-    "canonical_key": "communication.other_notice",
-    "family": "communication",
-    "config_home": "structural",
-    "state_count": 2,
-    "states": [
-      "CA",
-      "WI"
-    ],
-    "definition": "If an authority decides to permit access to a record relating to a record subject who is an officer/employee holding a local or state public office, it shall within 3 day",
-    "merged_from": [
-      "notice.extension_written",
-      "notice.public_official_record_augmentation",
-      "notice.record_subject_pre_release",
-      "notice.record_subject_release_hold"
-    ],
-    "members_by_state": {
-      "CA": [
-        "CA-0013"
-      ],
-      "WI": [
-        "WI-0057",
-        "WI-0060",
-        "WI-0061"
       ]
     }
   },
@@ -703,18 +674,20 @@
     "canonical_key": "custody.contractor_and_thirdparty_custody",
     "family": "custody",
     "config_home": "structural",
-    "state_count": 5,
+    "state_count": 6,
     "states": [
       "FL",
+      "GA",
       "MI",
       "PA",
       "TN",
       "WI"
     ],
-    "definition": "At contract completion the contractor must transfer, at no cost, all public records in its possession to the agency, or keep and maintain the records; if transferring, it",
+    "definition": "A public record in the possession of a contractor or other person performing a governmental function on behalf of an agency is considered a record of the agency; the requ",
     "merged_from": [
       "custody.contractor_records",
       "custody.no_contractual_delegation",
+      "production.vendor_must_not_impede_access",
       "routing.contractor_maintain_records",
       "routing.contractor_provide_on_request",
       "routing.contractor_transfer_on_completion",
@@ -726,6 +699,9 @@
         "FL-0011",
         "FL-0012",
         "FL-0013"
+      ],
+      "GA": [
+        "GA-0033"
       ],
       "MI": [
         "MI-0014"
@@ -834,10 +810,11 @@
       "WA",
       "WI"
     ],
-    "definition": "If a request is ultimately denied in part or whole, the office shall provide the requester an explanation, including legal authority, setting forth why the request was de",
+    "definition": "If an authority denies a written request in whole or in part, the requester shall receive from the authority a written statement of the reasons for denying the written re",
     "merged_from": [
       "clarification.specificity_required",
       "clarification.specificity_requirement",
+      "denial.attorney_client_privilege_log",
       "denial.cite_exemption_and_factual_basis",
       "denial.cite_exemption_particularized",
       "denial.cite_specific_provision",
@@ -887,7 +864,8 @@
         "KS-0029"
       ],
       "MA": [
-        "MA-0053"
+        "MA-0053",
+        "MA-0054"
       ],
       "MI": [
         "MI-0024"
@@ -1349,24 +1327,6 @@
     }
   },
   {
-    "canonical_key": "denial.other_denial",
-    "family": "denial",
-    "config_home": "structural",
-    "state_count": 1,
-    "states": [
-      "MA"
-    ],
-    "definition": "Where a record is withheld on a claim of attorney-client privilege, the written denial must provide a detailed description of the record, including the names of the autho",
-    "merged_from": [
-      "denial.attorney_client_privilege_log"
-    ],
-    "members_by_state": {
-      "MA": [
-        "MA-0054"
-      ]
-    }
-  },
-  {
     "canonical_key": "denial.neither_confirm_nor_deny",
     "family": "denial",
     "config_home": "structural",
@@ -1784,11 +1744,12 @@
   {
     "canonical_key": "eligibility.incarcerated_requester_exclusion",
     "family": "eligibility",
-    "config_home": "mixed(p:1/s:5)",
-    "state_count": 6,
+    "config_home": "mixed(p:1/s:6)",
+    "state_count": 7,
     "states": [
       "LA",
       "MI",
+      "OH",
       "SC",
       "TX",
       "UT",
@@ -1796,6 +1757,7 @@
     ],
     "definition": "An entity is not required to respond to a request by or on behalf of an individual on parole or confined in a correctional facility, except for the first five requests pe",
     "merged_from": [
+      "classification.incarcerated_requester_screening",
       "eligibility.incarcerated_exclusion",
       "eligibility.incarcerated_person_excluded",
       "eligibility.incarcerated_person_exclusion",
@@ -1808,6 +1770,9 @@
       ],
       "MI": [
         "MI-0002"
+      ],
+      "OH": [
+        "OH-0035"
       ],
       "SC": [
         "SC-0004"
@@ -2022,7 +1987,7 @@
       "WA",
       "WI"
     ],
-    "definition": "The charge for paper copies must not exceed 10 cents per sheet for copies made on 8.5x11 or 8.5x14 paper, calculated as a total cost per sheet.",
+    "definition": "Absent a published actual-cost calculation, the agency may charge up to ten cents per page for public records scanned into an electronic format.",
     "merged_from": [
       "fee.copy_charge",
       "fee.copy_charge_basis",
@@ -2036,7 +2001,8 @@
       "fee.copy_rate_per_page_scanned",
       "fee.data_subject_copy_cost",
       "fee.per_page_rate_ceiling",
-      "fee.two_sided_surcharge"
+      "fee.two_sided_surcharge",
+      "fee.website_physical_copy_multiplier"
     ],
     "members_by_state": {
       "AZ": [
@@ -2082,7 +2048,8 @@
         "NV-0020"
       ],
       "NJ": [
-        "NJ-M01"
+        "NJ-M01",
+        "NJ-M11"
       ],
       "NY": [
         "NY-0024"
@@ -2111,6 +2078,136 @@
       ],
       "WI": [
         "WI-0035"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.actual_cost_basis",
+    "family": "fee",
+    "config_home": "mixed(p:24/s:8)",
+    "state_count": 21,
+    "states": [
+      "CA",
+      "FL",
+      "GA",
+      "ID",
+      "KS",
+      "MA",
+      "MI",
+      "MO",
+      "NC",
+      "NE",
+      "NJ",
+      "NV",
+      "NY",
+      "OK",
+      "OR",
+      "SC",
+      "TN",
+      "UT",
+      "VA",
+      "WA",
+      "WI"
+    ],
+    "definition": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records.",
+    "merged_from": [
+      "fee.actual_cost_basis",
+      "fee.actual_cost_ceiling",
+      "fee.actual_cost_of_duplication_definition",
+      "fee.actual_cost_other_records",
+      "fee.actual_cost_statement_prereq",
+      "fee.compilation_cost_components",
+      "fee.contractor_reproduction_cost",
+      "fee.copy_actual_cost_ceiling",
+      "fee.copy_charge_actual_cost_ceiling",
+      "fee.copy_direct_cost",
+      "fee.duplication_actual_cost_ceiling",
+      "fee.excluded_cost_components",
+      "fee.location_cost",
+      "fee.lowest_cost_staff",
+      "fee.lowest_possible_cost",
+      "fee.lowest_possible_cost_effort",
+      "fee.most_economical_means",
+      "fee.nonresident_actual_cost_ceiling",
+      "fee.other_facilities_copying_cost",
+      "fee.outside_service_condition",
+      "fee.supply_actual_cost",
+      "production.most_economical_method"
+    ],
+    "members_by_state": {
+      "CA": [
+        "CA-0021"
+      ],
+      "FL": [
+        "FL-0023"
+      ],
+      "GA": [
+        "GA-0020"
+      ],
+      "ID": [
+        "ID-0019",
+        "ID-0022"
+      ],
+      "KS": [
+        "KS-0034",
+        "KS-0037",
+        "KS-0040"
+      ],
+      "MA": [
+        "MA-0029"
+      ],
+      "MI": [
+        "MI-0033"
+      ],
+      "MO": [
+        "MO-0021"
+      ],
+      "NE": [
+        "NE-0019"
+      ],
+      "NV": [
+        "NV-0021"
+      ],
+      "NJ": [
+        "NJ-M03"
+      ],
+      "NY": [
+        "NY-0025",
+        "NY-0030"
+      ],
+      "NC": [
+        "NC-0019"
+      ],
+      "OK": [
+        "OK-0016"
+      ],
+      "OR": [
+        "OR-0020"
+      ],
+      "SC": [
+        "SC-0014"
+      ],
+      "TN": [
+        "TN-0019",
+        "TN-0031"
+      ],
+      "UT": [
+        "UT-0028",
+        "UT-0029"
+      ],
+      "VA": [
+        "VA-0021",
+        "VA-0022",
+        "VA-0024"
+      ],
+      "WA": [
+        "WA-0020",
+        "WA-0027",
+        "WA-0028"
+      ],
+      "WI": [
+        "WI-0037",
+        "WI-0040"
       ]
     }
   },
@@ -2230,127 +2327,6 @@
       ],
       "WI": [
         "WI-0039"
-      ]
-    }
-  },
-  {
-    "canonical_key": "fee.actual_cost_basis",
-    "family": "fee",
-    "config_home": "mixed(p:23/s:6)",
-    "state_count": 20,
-    "states": [
-      "CA",
-      "FL",
-      "ID",
-      "KS",
-      "MA",
-      "MI",
-      "MO",
-      "NC",
-      "NE",
-      "NJ",
-      "NV",
-      "NY",
-      "OK",
-      "OR",
-      "SC",
-      "TN",
-      "UT",
-      "VA",
-      "WA",
-      "WI"
-    ],
-    "definition": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records.",
-    "merged_from": [
-      "fee.actual_cost_basis",
-      "fee.actual_cost_ceiling",
-      "fee.actual_cost_of_duplication_definition",
-      "fee.actual_cost_other_records",
-      "fee.actual_cost_statement_prereq",
-      "fee.compilation_cost_components",
-      "fee.contractor_reproduction_cost",
-      "fee.copy_actual_cost_ceiling",
-      "fee.copy_charge_actual_cost_ceiling",
-      "fee.copy_direct_cost",
-      "fee.duplication_actual_cost_ceiling",
-      "fee.excluded_cost_components",
-      "fee.location_cost",
-      "fee.lowest_cost_staff",
-      "fee.lowest_possible_cost",
-      "fee.lowest_possible_cost_effort",
-      "fee.nonresident_actual_cost_ceiling",
-      "fee.outside_service_condition",
-      "fee.supply_actual_cost"
-    ],
-    "members_by_state": {
-      "CA": [
-        "CA-0021"
-      ],
-      "FL": [
-        "FL-0023"
-      ],
-      "ID": [
-        "ID-0019",
-        "ID-0022"
-      ],
-      "KS": [
-        "KS-0034",
-        "KS-0037"
-      ],
-      "MA": [
-        "MA-0029"
-      ],
-      "MI": [
-        "MI-0033"
-      ],
-      "MO": [
-        "MO-0021"
-      ],
-      "NE": [
-        "NE-0019"
-      ],
-      "NV": [
-        "NV-0021"
-      ],
-      "NJ": [
-        "NJ-M03"
-      ],
-      "NY": [
-        "NY-0025",
-        "NY-0030"
-      ],
-      "NC": [
-        "NC-0019"
-      ],
-      "OK": [
-        "OK-0016"
-      ],
-      "OR": [
-        "OR-0020"
-      ],
-      "SC": [
-        "SC-0014"
-      ],
-      "TN": [
-        "TN-0031"
-      ],
-      "UT": [
-        "UT-0028",
-        "UT-0029"
-      ],
-      "VA": [
-        "VA-0021",
-        "VA-0022",
-        "VA-0024"
-      ],
-      "WA": [
-        "WA-0020",
-        "WA-0027",
-        "WA-0028"
-      ],
-      "WI": [
-        "WI-0037",
-        "WI-0040"
       ]
     }
   },
@@ -2567,6 +2543,120 @@
     }
   },
   {
+    "canonical_key": "fee.labor_charge",
+    "family": "fee",
+    "config_home": "mixed(p:25/s:4)",
+    "state_count": 16,
+    "states": [
+      "CO",
+      "GA",
+      "ID",
+      "KS",
+      "LA",
+      "MA",
+      "MI",
+      "MN",
+      "MO",
+      "NC",
+      "NY",
+      "OR",
+      "SC",
+      "TN",
+      "UT",
+      "WI"
+    ],
+    "definition": "A public body may add up to 50% to the applicable labor charge to cover fringe benefits, not exceeding the actual cost of fringe benefits, if it notes the multiplier on t",
+    "merged_from": [
+      "fee.attorney_review_time_includable",
+      "fee.duplication_labor_rate_ceiling",
+      "fee.fringe_benefit_multiplier",
+      "fee.hourly_staff_rate_cap",
+      "fee.labor_rate_basis",
+      "fee.labor_rate_hourly_ceiling",
+      "fee.labor_rate_lowest_paid_staff",
+      "fee.labor_threshold_hours",
+      "fee.labor_time_increment",
+      "fee.labor_two_hour_threshold",
+      "fee.law_enforcement_av_redaction",
+      "fee.overtime_exclusion",
+      "fee.redaction_labor_rate_ceiling",
+      "fee.research_policy_prerequisite",
+      "fee.research_retrieval_rate",
+      "fee.review_redaction_chargeable",
+      "fee.search_labor_rate_cap",
+      "fee.search_retrieval_cost",
+      "fee.search_retrieval_redaction_rate",
+      "fee.search_retrieval_redaction_recoverable",
+      "fee.staff_time_salary_basis_no_benefits",
+      "fee.supervisor_petition_excess",
+      "payment.after_hours_compensation",
+      "redaction.separation_cost_allocation"
+    ],
+    "members_by_state": {
+      "CO": [
+        "CO-0018",
+        "CO-0020"
+      ],
+      "GA": [
+        "GA-0016"
+      ],
+      "ID": [
+        "ID-0020"
+      ],
+      "KS": [
+        "KS-0035",
+        "KS-0038"
+      ],
+      "LA": [
+        "LA-0027"
+      ],
+      "MA": [
+        "MA-0032",
+        "MA-0033",
+        "MA-0037"
+      ],
+      "MI": [
+        "MI-0034",
+        "MI-0035",
+        "MI-0036",
+        "MI-0039",
+        "MI-0041",
+        "MI-0042"
+      ],
+      "MN": [
+        "MN-0008"
+      ],
+      "MO": [
+        "MO-0019",
+        "MO-0020"
+      ],
+      "NY": [
+        "NY-0027",
+        "NY-0028"
+      ],
+      "NC": [
+        "NC-0010"
+      ],
+      "OR": [
+        "OR-0021"
+      ],
+      "SC": [
+        "SC-0007",
+        "SC-0008"
+      ],
+      "TN": [
+        "TN-0032",
+        "TN-0033"
+      ],
+      "UT": [
+        "UT-0031"
+      ],
+      "WI": [
+        "WI-0041"
+      ]
+    }
+  },
+  {
     "canonical_key": "fee.schedule_and_authority",
     "family": "fee",
     "config_home": "mixed(p:6/s:10)",
@@ -2651,7 +2741,7 @@
   {
     "canonical_key": "fee.estimate_and_notice",
     "family": "fee",
-    "config_home": "mixed(p:3/s:17)",
+    "config_home": "mixed(p:3/s:19)",
     "state_count": 13,
     "states": [
       "AL",
@@ -2671,6 +2761,7 @@
     "definition": "The requester shall be informed of the estimated cost of preparing the copy if more than two hours of employee time is needed or if an outside professional service would ",
     "merged_from": [
       "communications.fee_itemization_notice",
+      "communications.fee_review_objection",
       "fee.advance_estimate_threshold",
       "fee.advance_fee_notice",
       "fee.cost_estimate_on_request",
@@ -2684,6 +2775,7 @@
       "fee.itemized_estimate_over_threshold",
       "fee.itemized_estimate_required",
       "fee.itemized_explanation",
+      "fee.pre_charge_review_objection",
       "fee.pre_search_charge_notice",
       "fee.updated_estimate_variance",
       "payment.cost_estimate_notice_threshold"
@@ -2714,7 +2806,9 @@
       ],
       "NJ": [
         "NJ-T22",
-        "NJ-M07"
+        "NJ-T23",
+        "NJ-M07",
+        "NJ-M08"
       ],
       "NY": [
         "NY-0031"
@@ -2734,103 +2828,6 @@
         "VA-0025",
         "VA-0026",
         "VA-0029"
-      ]
-    }
-  },
-  {
-    "canonical_key": "fee.labor_charge",
-    "family": "fee",
-    "config_home": "mixed(p:22/s:3)",
-    "state_count": 13,
-    "states": [
-      "CO",
-      "GA",
-      "ID",
-      "KS",
-      "MA",
-      "MI",
-      "MN",
-      "MO",
-      "NY",
-      "OR",
-      "SC",
-      "TN",
-      "UT"
-    ],
-    "definition": "Labor directly associated with duplication or publication (paper or digital copies, transfers) may not exceed the hourly wage of the lowest-paid employee capable of the d",
-    "merged_from": [
-      "fee.attorney_review_time_includable",
-      "fee.duplication_labor_rate_ceiling",
-      "fee.fringe_benefit_multiplier",
-      "fee.hourly_staff_rate_cap",
-      "fee.labor_rate_basis",
-      "fee.labor_rate_hourly_ceiling",
-      "fee.labor_rate_lowest_paid_staff",
-      "fee.labor_threshold_hours",
-      "fee.labor_time_increment",
-      "fee.labor_two_hour_threshold",
-      "fee.overtime_exclusion",
-      "fee.redaction_labor_rate_ceiling",
-      "fee.research_policy_prerequisite",
-      "fee.research_retrieval_rate",
-      "fee.review_redaction_chargeable",
-      "fee.search_labor_rate_cap",
-      "fee.search_retrieval_cost",
-      "fee.search_retrieval_redaction_rate",
-      "fee.search_retrieval_redaction_recoverable",
-      "fee.staff_time_salary_basis_no_benefits"
-    ],
-    "members_by_state": {
-      "CO": [
-        "CO-0018",
-        "CO-0020"
-      ],
-      "GA": [
-        "GA-0016"
-      ],
-      "ID": [
-        "ID-0020"
-      ],
-      "KS": [
-        "KS-0035",
-        "KS-0038"
-      ],
-      "MA": [
-        "MA-0032",
-        "MA-0033"
-      ],
-      "MI": [
-        "MI-0034",
-        "MI-0035",
-        "MI-0036",
-        "MI-0039",
-        "MI-0041",
-        "MI-0042"
-      ],
-      "MN": [
-        "MN-0008"
-      ],
-      "MO": [
-        "MO-0019",
-        "MO-0020"
-      ],
-      "NY": [
-        "NY-0027",
-        "NY-0028"
-      ],
-      "OR": [
-        "OR-0021"
-      ],
-      "SC": [
-        "SC-0007",
-        "SC-0008"
-      ],
-      "TN": [
-        "TN-0032",
-        "TN-0033"
-      ],
-      "UT": [
-        "UT-0031"
       ]
     }
   },
@@ -3002,7 +2999,7 @@
   {
     "canonical_key": "fee.special_service_charge",
     "family": "fee",
-    "config_home": "mixed(p:6/s:1)",
+    "config_home": "mixed(p:7/s:1)",
     "state_count": 7,
     "states": [
       "FL",
@@ -3019,7 +3016,8 @@
       "fee.enhanced_access_charge",
       "fee.enhanced_electronic_access",
       "fee.special_service_charge",
-      "fee.voluminous_electronic_data_tiers"
+      "fee.voluminous_electronic_data_tiers",
+      "fee.voluntary_creation_charge"
     ],
     "members_by_state": {
       "FL": [
@@ -3035,65 +3033,14 @@
         "NJ-M06"
       ],
       "NC": [
-        "NC-0021"
+        "NC-0021",
+        "NC-0029"
       ],
       "PA": [
         "PA-0045"
       ],
       "WA": [
         "WA-0029"
-      ]
-    }
-  },
-  {
-    "canonical_key": "fee.other_fee",
-    "family": "fee",
-    "config_home": "mixed(p:6/s:3)",
-    "state_count": 7,
-    "states": [
-      "GA",
-      "KS",
-      "LA",
-      "MA",
-      "NC",
-      "NJ",
-      "WI"
-    ],
-    "definition": "Where a requestor directed to a website record still cannot find it and requests a physical copy, the custodian shall provide a physical copy for a fee not exceeding two ",
-    "merged_from": [
-      "communications.fee_review_objection",
-      "fee.law_enforcement_av_redaction",
-      "fee.most_economical_means",
-      "fee.other_facilities_copying_cost",
-      "fee.supervisor_petition_excess",
-      "fee.voluntary_creation_charge",
-      "fee.website_physical_copy_multiplier",
-      "payment.after_hours_compensation",
-      "redaction.separation_cost_allocation"
-    ],
-    "members_by_state": {
-      "GA": [
-        "GA-0020"
-      ],
-      "KS": [
-        "KS-0040"
-      ],
-      "LA": [
-        "LA-0027"
-      ],
-      "MA": [
-        "MA-0037"
-      ],
-      "NJ": [
-        "NJ-T23",
-        "NJ-M11"
-      ],
-      "NC": [
-        "NC-0010",
-        "NC-0029"
-      ],
-      "WI": [
-        "WI-0041"
       ]
     }
   },
@@ -3363,14 +3310,15 @@
   {
     "canonical_key": "intake.reasonably_describes",
     "family": "intake",
-    "config_home": "mixed(p:1/s:11)",
-    "state_count": 10,
+    "config_home": "mixed(p:1/s:12)",
+    "state_count": 11,
     "states": [
       "CA",
       "ID",
       "IN",
       "MA",
       "MI",
+      "NJ",
       "NY",
       "PA",
       "SC",
@@ -3388,7 +3336,8 @@
       "intake.reasonably_describes_identifiable",
       "intake.request_description_specificity",
       "intake.specificity_required",
-      "scope.reasonable_description_required"
+      "scope.reasonable_description_required",
+      "search.correspondence_scope_specificity"
     ],
     "members_by_state": {
       "CA": [
@@ -3407,6 +3356,9 @@
       ],
       "MI": [
         "MI-0006"
+      ],
+      "NJ": [
+        "NJ-A26"
       ],
       "NY": [
         "NY-0005"
@@ -3440,8 +3392,9 @@
       "VA",
       "WI"
     ],
-    "definition": "A public office may ask for a written request, identity, or intended use only after first disclosing to the requester that these are not mandatory and may be declined.",
+    "definition": "A governmental entity may require government-issued photo identification as a prerequisite to providing access to records.",
     "merged_from": [
+      "denial.anonymous_not_incomplete",
       "intake.anonymous_request_permitted",
       "intake.conditional_id_requirement",
       "intake.identification_register_permitted",
@@ -3462,7 +3415,8 @@
         "MI-0007"
       ],
       "NJ": [
-        "NJ-A04"
+        "NJ-A04",
+        "NJ-M17"
       ],
       "OH": [
         "OH-0006"
@@ -3538,6 +3492,7 @@
     ],
     "definition": "A public officer is not obligated to respond to a public records request that is not made pursuant to the officer's written procedures.",
     "merged_from": [
+      "denial.incomplete_request",
       "intake.good_faith_response_duty",
       "intake.incomplete_letter_denial",
       "intake.no_statutory_citation_required",
@@ -3556,7 +3511,8 @@
         "KS-0008"
       ],
       "NJ": [
-        "NJ-A14"
+        "NJ-A14",
+        "NJ-M16"
       ],
       "VA": [
         "VA-0006"
@@ -3746,6 +3702,7 @@
     "definition": "The custodian may deny repeated requests submitted to multiple custodians in the same public agency for the same record while an identical or substantially similar reques",
     "merged_from": [
       "denial.duplicate_pending_multi_custodian",
+      "denial.identical_no_change",
       "intake.bot_request_multiple_denial",
       "intake.duplicate_pending_request_denial",
       "intake.identical_unchanged_request_denial",
@@ -3758,7 +3715,8 @@
         "NJ-A17",
         "NJ-A18",
         "NJ-A19",
-        "NJ-M19"
+        "NJ-M19",
+        "NJ-M24"
       ],
       "UT": [
         "UT-0006",
@@ -3809,28 +3767,6 @@
     "members_by_state": {
       "ID": [
         "ID-0007"
-      ]
-    }
-  },
-  {
-    "canonical_key": "intake.other_intake",
-    "family": "intake",
-    "config_home": "structural",
-    "state_count": 1,
-    "states": [
-      "NJ"
-    ],
-    "definition": "The custodian may deny a request that is incomplete (missing information required on the adopted form), including a letter/email request that omits all required informati",
-    "merged_from": [
-      "denial.anonymous_not_incomplete",
-      "denial.identical_no_change",
-      "denial.incomplete_request"
-    ],
-    "members_by_state": {
-      "NJ": [
-        "NJ-M16",
-        "NJ-M17",
-        "NJ-M24"
       ]
     }
   },
@@ -4018,10 +3954,12 @@
       "payment.fee_suspends_response",
       "payment.fee_tender_precondition",
       "payment.full_payment_at_production",
-      "payment.prepayment_before_search"
+      "payment.prepayment_before_search",
+      "payment.withhold_until_payment"
     ],
     "members_by_state": {
       "AL": [
+        "AL-0041",
         "AL-0043",
         "AL-0046"
       ],
@@ -4153,42 +4091,6 @@
     }
   },
   {
-    "canonical_key": "payment.other_payment",
-    "family": "payment",
-    "config_home": "structural",
-    "state_count": 1,
-    "states": [
-      "AL"
-    ],
-    "definition": "For a standard request where a fee is charged, the public officer shall withhold any public records until receipt of payment.",
-    "merged_from": [
-      "payment.withhold_until_payment"
-    ],
-    "members_by_state": {
-      "AL": [
-        "AL-0041"
-      ]
-    }
-  },
-  {
-    "canonical_key": "payment.other",
-    "family": "payment",
-    "config_home": "structural",
-    "state_count": 1,
-    "states": [
-      "NJ"
-    ],
-    "definition": "The requestor shall have the opportunity to review and object to any fee or charge before it is incurred.",
-    "merged_from": [
-      "fee.pre_charge_review_objection"
-    ],
-    "members_by_state": {
-      "NJ": [
-        "NJ-M08"
-      ]
-    }
-  },
-  {
     "canonical_key": "payment.method",
     "family": "payment",
     "config_home": "structural",
@@ -4210,7 +4112,7 @@
     "canonical_key": "production.format_and_medium",
     "family": "production",
     "config_home": "structural",
-    "state_count": 25,
+    "state_count": 27,
     "states": [
       "AZ",
       "CA",
@@ -4231,15 +4133,19 @@
       "NE",
       "NJ",
       "NV",
+      "NY",
       "OH",
       "OR",
       "PA",
       "SC",
       "UT",
-      "VA"
+      "VA",
+      "WI"
     ],
     "definition": "If information constituting a non-exempt identifiable public record is held in an electronic format, the agency must make it available in an electronic format when reques",
     "merged_from": [
+      "production.copy_method_custodian_option",
+      "production.copy_type_discretion",
       "production.electronic_by_default",
       "production.electronic_conversion_limit",
       "production.electronic_copy_preference",
@@ -4270,7 +4176,9 @@
       "production.requested_electronic_format",
       "production.requested_medium",
       "production.requester_format_choice",
-      "production.tangible_medium_of_requester_choice"
+      "production.tangible_medium_of_requester_choice",
+      "search.electronic_preferred_when_faster",
+      "search.electronic_retrieval_required"
     ],
     "members_by_state": {
       "AZ": [
@@ -4285,6 +4193,7 @@
         "CO-0013"
       ],
       "CT": [
+        "CT-0025",
         "CT-0028"
       ],
       "FL": [
@@ -4336,6 +4245,10 @@
         "NJ-T27",
         "NJ-T28"
       ],
+      "NY": [
+        "NY-0015",
+        "NY-0016"
+      ],
       "NC": [
         "NC-0015"
       ],
@@ -4357,6 +4270,9 @@
       "VA": [
         "VA-0016",
         "VA-0018"
+      ],
+      "WI": [
+        "WI-0045"
       ]
     }
   },
@@ -4364,7 +4280,7 @@
     "canonical_key": "production.no_duty_to_create_or_convert",
     "family": "production",
     "config_home": "structural",
-    "state_count": 15,
+    "state_count": 16,
     "states": [
       "AL",
       "GA",
@@ -4375,6 +4291,7 @@
       "MN",
       "NC",
       "NE",
+      "NJ",
       "NY",
       "PA",
       "SC",
@@ -4400,7 +4317,9 @@
       "production.no_encryption",
       "production.no_format_conversion",
       "production.no_refusal_for_query_or_redaction_commands",
-      "production.reduce_to_written_form"
+      "production.reduce_to_written_form",
+      "search.no_duty_to_create_record",
+      "search.no_research_or_new_records"
     ],
     "members_by_state": {
       "AL": [
@@ -4429,7 +4348,11 @@
       "NE": [
         "NE-0024"
       ],
+      "NJ": [
+        "NJ-A25"
+      ],
       "NY": [
+        "NY-0014",
         "NY-0022"
       ],
       "NC": [
@@ -4459,8 +4382,8 @@
   {
     "canonical_key": "production.delivery_and_completion",
     "family": "production",
-    "config_home": "structural",
-    "state_count": 12,
+    "config_home": "mixed(p:1/s:12)",
+    "state_count": 13,
     "states": [
       "AZ",
       "CA",
@@ -4473,6 +4396,7 @@
       "NV",
       "OK",
       "OR",
+      "PA",
       "TN"
     ],
     "definition": "On request, the custodian must prepare the copy of the record and must not require the requester to prepare the copy himself or herself.",
@@ -4486,6 +4410,7 @@
       "production.promptly",
       "production.reasonable_time",
       "production.response_promptness",
+      "production.unclaimed_copy_discard",
       "response.stipulated_delivery_method"
     ],
     "members_by_state": {
@@ -4521,6 +4446,9 @@
       ],
       "OR": [
         "OR-0009"
+      ],
+      "PA": [
+        "PA-0016"
       ],
       "TN": [
         "TN-0022"
@@ -4845,44 +4773,6 @@
     }
   },
   {
-    "canonical_key": "production.other_production",
-    "family": "production",
-    "config_home": "mixed(p:1/s:4)",
-    "state_count": 5,
-    "states": [
-      "CT",
-      "GA",
-      "PA",
-      "TN",
-      "WI"
-    ],
-    "definition": "An agency may dispose of copies that a requester has not retrieved after 60 days following notification that the record is available, and may retain fees already paid.",
-    "merged_from": [
-      "production.copy_method_custodian_option",
-      "production.copy_type_discretion",
-      "production.most_economical_method",
-      "production.unclaimed_copy_discard",
-      "production.vendor_must_not_impede_access"
-    ],
-    "members_by_state": {
-      "CT": [
-        "CT-0025"
-      ],
-      "GA": [
-        "GA-0033"
-      ],
-      "PA": [
-        "PA-0016"
-      ],
-      "TN": [
-        "TN-0019"
-      ],
-      "WI": [
-        "WI-0045"
-      ]
-    }
-  },
-  {
     "canonical_key": "production.no_medium_refusal",
     "family": "production",
     "config_home": "structural",
@@ -4959,7 +4849,7 @@
     "canonical_key": "redaction.segregability",
     "family": "redaction",
     "config_home": "structural",
-    "state_count": 24,
+    "state_count": 25,
     "states": [
       "CA",
       "CO",
@@ -4981,15 +4871,17 @@
       "OR",
       "PA",
       "SC",
+      "TN",
       "UT",
       "VA",
       "WA",
       "WI"
     ],
-    "definition": "A custodian asserting that an exemption applies to part of a record must redact that portion to which the exemption is asserted and validly applies, and must produce the ",
+    "definition": "If a record contains both disclosable and non-disclosable information, the authority shall provide the disclosable information and delete the non-disclosable information ",
     "merged_from": [
       "redaction.commingled_no_denial",
       "redaction.design_for_separation",
+      "redaction.not_new_record",
       "redaction.redact_and_produce_remainder",
       "redaction.redact_and_release_remainder",
       "redaction.redaction_is_denial",
@@ -5067,6 +4959,9 @@
       ],
       "SC": [
         "SC-0032"
+      ],
+      "TN": [
+        "TN-0024"
       ],
       "UT": [
         "UT-0043"
@@ -5200,13 +5095,17 @@
   {
     "canonical_key": "redaction.personnel_privacy_process",
     "family": "redaction",
-    "config_home": "mixed(p:1/s:3)",
-    "state_count": 1,
+    "config_home": "mixed(p:1/s:6)",
+    "state_count": 2,
     "states": [
-      "CT"
+      "CT",
+      "WI"
     ],
     "definition": "When an agency receives a personnel/medical-file request and reasonably believes disclosure would NOT invade privacy, it shall first disclose the records, then within a r",
     "merged_from": [
+      "notice.public_official_record_augmentation",
+      "notice.record_subject_pre_release",
+      "notice.record_subject_release_hold",
       "redaction.personnel_disclose_then_notify",
       "redaction.personnel_objection_deadline",
       "redaction.personnel_privacy_notice",
@@ -5218,6 +5117,11 @@
         "CT-0030",
         "CT-0031",
         "CT-0032"
+      ],
+      "WI": [
+        "WI-0057",
+        "WI-0060",
+        "WI-0061"
       ]
     }
   },
@@ -5242,7 +5146,7 @@
   {
     "canonical_key": "response.initial_decision_window",
     "family": "response",
-    "config_home": "mixed(p:21/s:10)",
+    "config_home": "mixed(p:21/s:9)",
     "state_count": 23,
     "states": [
       "AL",
@@ -5269,9 +5173,8 @@
       "WA",
       "WI"
     ],
-    "definition": "When taking a reasonable extension for unforeseen circumstances, the custodian shall notify the requestor of the time extension within seven business days after receiving",
+    "definition": "If the requester demonstrates that an expedited response benefits the public rather than the person, the entity must respond no later than 5 business days after receiving",
     "merged_from": [
-      "communications.extension_notice",
       "deadline.database_response_promptness",
       "deadline.determination_window",
       "deadline.initial_response_window",
@@ -5335,8 +5238,7 @@
         "NV-0006"
       ],
       "NJ": [
-        "NJ-T01",
-        "NJ-T08"
+        "NJ-T01"
       ],
       "NY": [
         "NY-0009",
@@ -5591,6 +5493,64 @@
     }
   },
   {
+    "canonical_key": "response.extension_notice",
+    "family": "response",
+    "config_home": "mixed(p:1/s:8)",
+    "state_count": 9,
+    "states": [
+      "CA",
+      "CO",
+      "IL",
+      "MA",
+      "MI",
+      "NJ",
+      "NV",
+      "PA",
+      "UT"
+    ],
+    "definition": "When taking a reasonable extension for unforeseen circumstances, the custodian shall notify the requestor of the time extension within seven business days after receiving",
+    "merged_from": [
+      "communications.extension_notice",
+      "deadline.extension_notice",
+      "deadline.extension_notice_window",
+      "extension.copy_to_requestor",
+      "extension.notice_contents",
+      "notice.extension_written",
+      "response.extension_notice",
+      "response.extension_written_finding",
+      "response.extraordinary_circumstances_notice"
+    ],
+    "members_by_state": {
+      "CA": [
+        "CA-0013"
+      ],
+      "CO": [
+        "CO-0009"
+      ],
+      "IL": [
+        "IL-0012"
+      ],
+      "MA": [
+        "MA-0024"
+      ],
+      "MI": [
+        "MI-0020"
+      ],
+      "NV": [
+        "NV-0008"
+      ],
+      "NJ": [
+        "NJ-T08"
+      ],
+      "PA": [
+        "PA-0024"
+      ],
+      "UT": [
+        "UT-0014"
+      ]
+    }
+  },
+  {
     "canonical_key": "response.valid_response_forms",
     "family": "response",
     "config_home": "mixed(p:1/s:6)",
@@ -5694,54 +5654,6 @@
       "UT": [
         "UT-0016",
         "UT-0017"
-      ]
-    }
-  },
-  {
-    "canonical_key": "response.extension_notice",
-    "family": "response",
-    "config_home": "mixed(p:1/s:6)",
-    "state_count": 7,
-    "states": [
-      "CO",
-      "IL",
-      "MA",
-      "MI",
-      "NV",
-      "PA",
-      "UT"
-    ],
-    "definition": "When it extends, the public body must, within 5 business days after receipt, notify the requester of the reasons for the extension and the date the response will be forth",
-    "merged_from": [
-      "deadline.extension_notice",
-      "deadline.extension_notice_window",
-      "extension.copy_to_requestor",
-      "extension.notice_contents",
-      "response.extension_notice",
-      "response.extension_written_finding",
-      "response.extraordinary_circumstances_notice"
-    ],
-    "members_by_state": {
-      "CO": [
-        "CO-0009"
-      ],
-      "IL": [
-        "IL-0012"
-      ],
-      "MA": [
-        "MA-0024"
-      ],
-      "MI": [
-        "MI-0020"
-      ],
-      "NV": [
-        "NV-0008"
-      ],
-      "PA": [
-        "PA-0024"
-      ],
-      "UT": [
-        "UT-0014"
       ]
     }
   },
@@ -5870,40 +5782,6 @@
     }
   },
   {
-    "canonical_key": "search.other_search",
-    "family": "search",
-    "config_home": "structural",
-    "state_count": 3,
-    "states": [
-      "NJ",
-      "NY",
-      "OH"
-    ],
-    "definition": "Where electronic retrieval/extraction requires less employee time than manual retrieval or redaction from non-electronic records, the agency shall retrieve or extract the",
-    "merged_from": [
-      "search.correspondence_scope_specificity",
-      "search.electronic_preferred_when_faster",
-      "search.electronic_retrieval_required",
-      "search.no_duty_to_create_record",
-      "search.no_research_or_new_records",
-      "search.organize_maintain_for_retrieval"
-    ],
-    "members_by_state": {
-      "NJ": [
-        "NJ-A25",
-        "NJ-A26"
-      ],
-      "NY": [
-        "NY-0014",
-        "NY-0015",
-        "NY-0016"
-      ],
-      "OH": [
-        "OH-0009"
-      ]
-    }
-  },
-  {
     "canonical_key": "search.identify_responsive",
     "family": "search",
     "config_home": "structural",
@@ -5927,6 +5805,29 @@
     }
   },
   {
+    "canonical_key": "search.reasonable_search_duty",
+    "family": "search",
+    "config_home": "structural",
+    "state_count": 2,
+    "states": [
+      "OH",
+      "UT"
+    ],
+    "definition": "A public office must organize and maintain its public records so that they can be made available for inspection or copying.",
+    "merged_from": [
+      "search.organize_maintain_for_retrieval",
+      "search.reasonable_search_duty"
+    ],
+    "members_by_state": {
+      "OH": [
+        "OH-0009"
+      ],
+      "UT": [
+        "UT-0020"
+      ]
+    }
+  },
+  {
     "canonical_key": "search.burden_limit",
     "family": "search",
     "config_home": "structural",
@@ -5941,24 +5842,6 @@
     "members_by_state": {
       "IL": [
         "IL-0015"
-      ]
-    }
-  },
-  {
-    "canonical_key": "search.reasonable_search_duty",
-    "family": "search",
-    "config_home": "structural",
-    "state_count": 1,
-    "states": [
-      "UT"
-    ],
-    "definition": "A governmental entity must conduct a reasonable search for a requested record.",
-    "merged_from": [
-      "search.reasonable_search_duty"
-    ],
-    "members_by_state": {
-      "UT": [
-        "UT-0020"
       ]
     }
   },
@@ -6167,24 +6050,6 @@
         "NJ-T42",
         "NJ-T43",
         "NJ-T44"
-      ]
-    }
-  },
-  {
-    "canonical_key": "special_records.other_special",
-    "family": "special_records",
-    "config_home": "structural",
-    "state_count": 1,
-    "states": [
-      "TN"
-    ],
-    "definition": "The redaction of confidential information shall not constitute the creation of a new record.",
-    "merged_from": [
-      "redaction.not_new_record"
-    ],
-    "members_by_state": {
-      "TN": [
-        "TN-0024"
       ]
     }
   }
