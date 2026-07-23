@@ -1,0 +1,576 @@
+[
+  {
+    "canonical_key": "eligibility.no_purpose_requirement",
+    "definition": "A public agency may not deny a request because the requester refuses to state the purpose of the request, unless another applicable statute requires it.",
+    "config_home": "structural",
+    "state_count": 32,
+    "states": [
+      "AL",
+      "AZ",
+      "CA",
+      "CO",
+      "CT",
+      "FL",
+      "GA",
+      "ID",
+      "IL",
+      "IN",
+      "KS",
+      "LA",
+      "MA",
+      "MI",
+      "MN",
+      "MO",
+      "NC",
+      "NE",
+      "NJ",
+      "NV",
+      "NY",
+      "OH",
+      "OK",
+      "OR",
+      "PA",
+      "SC",
+      "TN",
+      "TX",
+      "UT",
+      "VA",
+      "WA",
+      "WI"
+    ],
+    "merged_from": [
+      "eligibility.no_purpose_requirement"
+    ],
+    "members_by_state": {
+      "AL": [
+        "AL-0003"
+      ],
+      "AZ": [
+        "AZ-0003"
+      ],
+      "CA": [
+        "CA-0002"
+      ],
+      "CO": [
+        "CO-0003"
+      ],
+      "CT": [
+        "CT-0003"
+      ],
+      "FL": [
+        "FL-0003"
+      ],
+      "GA": [
+        "GA-0002"
+      ],
+      "ID": [
+        "ID-0002"
+      ],
+      "IL": [
+        "IL-0002"
+      ],
+      "IN": [
+        "IN-0002"
+      ],
+      "KS": [
+        "KS-0003"
+      ],
+      "LA": [
+        "LA-0003"
+      ],
+      "MA": [
+        "MA-0003"
+      ],
+      "MI": [
+        "MI-0004"
+      ],
+      "MN": [
+        "MN-0002"
+      ],
+      "MO": [
+        "MO-0003"
+      ],
+      "NE": [
+        "NE-0003"
+      ],
+      "NV": [
+        "NV-0003"
+      ],
+      "NJ": [
+        "NJ-A03"
+      ],
+      "NY": [
+        "NY-0002"
+      ],
+      "NC": [
+        "NC-0002"
+      ],
+      "OH": [
+        "OH-0002"
+      ],
+      "OK": [
+        "OK-0003"
+      ],
+      "OR": [
+        "OR-0003"
+      ],
+      "PA": [
+        "PA-0002"
+      ],
+      "SC": [
+        "SC-0003"
+      ],
+      "TN": [
+        "TN-0002"
+      ],
+      "TX": [
+        "TX-0002"
+      ],
+      "UT": [
+        "UT-0003"
+      ],
+      "VA": [
+        "VA-0002"
+      ],
+      "WA": [
+        "WA-0002"
+      ],
+      "WI": [
+        "WI-0002"
+      ]
+    }
+  },
+  {
+    "canonical_key": "eligibility.any_person",
+    "definition": "Any person may apply to the officer for public information and the officer shall promptly produce public information for inspection, duplication, or both.",
+    "config_home": "structural",
+    "state_count": 28,
+    "states": [
+      "AZ",
+      "CA",
+      "CO",
+      "CT",
+      "FL",
+      "GA",
+      "ID",
+      "IL",
+      "IN",
+      "KS",
+      "LA",
+      "MA",
+      "MI",
+      "MN",
+      "MO",
+      "NC",
+      "NE",
+      "NJ",
+      "NV",
+      "NY",
+      "OH",
+      "OK",
+      "OR",
+      "SC",
+      "TX",
+      "UT",
+      "WA",
+      "WI"
+    ],
+    "merged_from": [
+      "eligibility.any_person",
+      "eligibility.no_distinction_among_requesters"
+    ],
+    "members_by_state": {
+      "AZ": [
+        "AZ-0001"
+      ],
+      "CA": [
+        "CA-0001"
+      ],
+      "CO": [
+        "CO-0001"
+      ],
+      "CT": [
+        "CT-0001"
+      ],
+      "FL": [
+        "FL-0001"
+      ],
+      "GA": [
+        "GA-0001"
+      ],
+      "ID": [
+        "ID-0001"
+      ],
+      "IL": [
+        "IL-0001"
+      ],
+      "IN": [
+        "IN-0001"
+      ],
+      "KS": [
+        "KS-0001"
+      ],
+      "LA": [
+        "LA-0001"
+      ],
+      "MA": [
+        "MA-0001"
+      ],
+      "MI": [
+        "MI-0001"
+      ],
+      "MN": [
+        "MN-0001"
+      ],
+      "MO": [
+        "MO-0001"
+      ],
+      "NE": [
+        "NE-0001"
+      ],
+      "NV": [
+        "NV-0001"
+      ],
+      "NJ": [
+        "NJ-A01"
+      ],
+      "NY": [
+        "NY-0001"
+      ],
+      "NC": [
+        "NC-0001"
+      ],
+      "OH": [
+        "OH-0001"
+      ],
+      "OK": [
+        "OK-0001"
+      ],
+      "OR": [
+        "OR-0001"
+      ],
+      "SC": [
+        "SC-0001"
+      ],
+      "TX": [
+        "TX-0001"
+      ],
+      "UT": [
+        "UT-0001"
+      ],
+      "WA": [
+        "WA-0001",
+        "WA-0003"
+      ],
+      "WI": [
+        "WI-0001"
+      ]
+    }
+  },
+  {
+    "canonical_key": "eligibility.no_residency_requirement",
+    "definition": "There is no Georgia residency or citizenship condition on the right to request public records; the right runs to any person.",
+    "config_home": "structural",
+    "state_count": 27,
+    "states": [
+      "AZ",
+      "CA",
+      "CO",
+      "CT",
+      "FL",
+      "GA",
+      "IL",
+      "IN",
+      "KS",
+      "LA",
+      "MA",
+      "MI",
+      "MN",
+      "MO",
+      "NC",
+      "NE",
+      "NJ",
+      "NV",
+      "NY",
+      "OH",
+      "OK",
+      "OR",
+      "SC",
+      "TX",
+      "UT",
+      "WA",
+      "WI"
+    ],
+    "merged_from": [
+      "eligibility.no_residency_requirement"
+    ],
+    "members_by_state": {
+      "AZ": [
+        "AZ-0002"
+      ],
+      "CA": [
+        "CA-0003"
+      ],
+      "CO": [
+        "CO-0002"
+      ],
+      "CT": [
+        "CT-0002"
+      ],
+      "FL": [
+        "FL-0002"
+      ],
+      "GA": [
+        "GA-0003"
+      ],
+      "IL": [
+        "IL-0003"
+      ],
+      "IN": [
+        "IN-0003"
+      ],
+      "KS": [
+        "KS-0002"
+      ],
+      "LA": [
+        "LA-0004"
+      ],
+      "MA": [
+        "MA-0002"
+      ],
+      "MI": [
+        "MI-0003"
+      ],
+      "MN": [
+        "MN-0003"
+      ],
+      "MO": [
+        "MO-0002"
+      ],
+      "NE": [
+        "NE-0002"
+      ],
+      "NV": [
+        "NV-0002"
+      ],
+      "NJ": [
+        "NJ-A02"
+      ],
+      "NY": [
+        "NY-0003"
+      ],
+      "NC": [
+        "NC-0003"
+      ],
+      "OH": [
+        "OH-0004"
+      ],
+      "OK": [
+        "OK-0002"
+      ],
+      "OR": [
+        "OR-0002"
+      ],
+      "SC": [
+        "SC-0002"
+      ],
+      "TX": [
+        "TX-0003"
+      ],
+      "UT": [
+        "UT-0002"
+      ],
+      "WA": [
+        "WA-0004"
+      ],
+      "WI": [
+        "WI-0004"
+      ]
+    }
+  },
+  {
+    "canonical_key": "eligibility.incarcerated_requester_exclusion",
+    "definition": "An entity is not required to respond to a request by or on behalf of an individual on parole or confined in a correctional facility, except for the first five requests per calendar",
+    "config_home": "structural",
+    "state_count": 6,
+    "states": [
+      "LA",
+      "MI",
+      "SC",
+      "TX",
+      "UT",
+      "WI"
+    ],
+    "merged_from": [
+      "eligibility.incarcerated_exclusion",
+      "eligibility.incarcerated_person_excluded",
+      "eligibility.incarcerated_person_exclusion",
+      "eligibility.incarcerated_person_restriction",
+      "eligibility.incarcerated_requester_limit"
+    ],
+    "members_by_state": {
+      "LA": [
+        "LA-0005"
+      ],
+      "MI": [
+        "MI-0002"
+      ],
+      "SC": [
+        "SC-0004"
+      ],
+      "TX": [
+        "TX-0004"
+      ],
+      "UT": [
+        "UT-0050"
+      ],
+      "WI": [
+        "WI-0005"
+      ]
+    }
+  },
+  {
+    "canonical_key": "eligibility.requester_class_restriction",
+    "definition": "Public records are open only to citizens of the Commonwealth and to representatives of newspapers/magazines with circulation in, and radio/TV stations broadcasting in or into, the ",
+    "config_home": "structural",
+    "state_count": 4,
+    "states": [
+      "AL",
+      "PA",
+      "TN",
+      "VA"
+    ],
+    "merged_from": [
+      "eligibility.citizen_requirement",
+      "eligibility.requester_class_restricted",
+      "eligibility.residency_requirement",
+      "eligibility.us_residency_required"
+    ],
+    "members_by_state": {
+      "AL": [
+        "AL-0001"
+      ],
+      "PA": [
+        "PA-0001"
+      ],
+      "TN": [
+        "TN-0001"
+      ],
+      "VA": [
+        "VA-0001"
+      ]
+    }
+  },
+  {
+    "canonical_key": "eligibility.out_of_class_discretionary",
+    "definition": "A public officer has discretion to respond to public records requests made by nonresidents; responding to one nonresident request does not waive the officer's right to deny other o",
+    "config_home": "structural",
+    "state_count": 2,
+    "states": [
+      "AL",
+      "TN"
+    ],
+    "merged_from": [
+      "eligibility.noncitizen_discretion",
+      "eligibility.nonresident_discretionary"
+    ],
+    "members_by_state": {
+      "AL": [
+        "AL-0005"
+      ],
+      "TN": [
+        "TN-0003"
+      ]
+    }
+  },
+  {
+    "canonical_key": "eligibility.no_identity_requirement",
+    "definition": "A request may not be refused because the requester is unwilling to be identified, except where acceptable identification may be required for records kept at a private residence or ",
+    "config_home": "structural",
+    "state_count": 2,
+    "states": [
+      "OH",
+      "WI"
+    ],
+    "merged_from": [
+      "eligibility.anonymous_request_allowed",
+      "eligibility.no_identity_requirement"
+    ],
+    "members_by_state": {
+      "OH": [
+        "OH-0003"
+      ],
+      "WI": [
+        "WI-0003"
+      ]
+    }
+  },
+  {
+    "canonical_key": "eligibility.resident_definition",
+    "definition": "'Resident' means an individual permanently domiciled in Alabama with an expectation to remain, as demonstrated by reasonable proof of residency such as an Alabama driver license or",
+    "config_home": "structural",
+    "state_count": 1,
+    "states": [
+      "AL"
+    ],
+    "merged_from": [
+      "eligibility.resident_definition"
+    ],
+    "members_by_state": {
+      "AL": [
+        "AL-0002"
+      ]
+    }
+  },
+  {
+    "canonical_key": "eligibility.proof_of_residency",
+    "definition": "A public officer may request reasonable evidence from the requester to establish proof of residency.",
+    "config_home": "structural",
+    "state_count": 1,
+    "states": [
+      "AL"
+    ],
+    "merged_from": [
+      "eligibility.proof_of_residency"
+    ],
+    "members_by_state": {
+      "AL": [
+        "AL-0004"
+      ]
+    }
+  },
+  {
+    "canonical_key": "eligibility.no_age_requirement",
+    "definition": "Any person (no age-of-majority limit) may obtain a copy or reproduction of any public record.",
+    "config_home": "structural",
+    "state_count": 1,
+    "states": [
+      "LA"
+    ],
+    "merged_from": [
+      "eligibility.copy_no_age_requirement"
+    ],
+    "members_by_state": {
+      "LA": [
+        "LA-0002"
+      ]
+    }
+  },
+  {
+    "canonical_key": "eligibility.record_subject_self_access",
+    "definition": "A requester who is the individual (or person authorized by the individual) has an additional right to inspect and copy personally identifiable information pertaining to that indivi",
+    "config_home": "structural",
+    "state_count": 1,
+    "states": [
+      "WI"
+    ],
+    "merged_from": [
+      "eligibility.record_subject_self_access"
+    ],
+    "members_by_state": {
+      "WI": [
+        "WI-0006"
+      ]
+    }
+  }
+]
