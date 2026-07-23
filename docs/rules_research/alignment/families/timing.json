@@ -1,0 +1,708 @@
+{
+  "canonical_concepts": [
+    {
+      "canonical_key": "response.initial_decision_window",
+      "definition": "If the requester demonstrates that an expedited response benefits the public rather than the person, the entity must respond no later than 5 business days after receiving the reque",
+      "config_home": "mixed (parameter:21 fixed-value states / structural:9 soft-standard states)",
+      "state_count": 23,
+      "states": [
+        "AL",
+        "CA",
+        "ID",
+        "IL",
+        "KS",
+        "LA",
+        "MA",
+        "MI",
+        "MN",
+        "MO",
+        "NC",
+        "NE",
+        "NJ",
+        "NV",
+        "NY",
+        "OH",
+        "PA",
+        "SC",
+        "TN",
+        "UT",
+        "VA",
+        "WA",
+        "WI"
+      ],
+      "merged_from": [
+        "deadline.database_response_promptness",
+        "deadline.determination_window",
+        "deadline.initial_response_window",
+        "deadline.prompt_good_faith_determination",
+        "deadline.response_window",
+        "deadlines.acknowledgment_date_reasonable",
+        "deadlines.determination_notice_older_records",
+        "deadlines.determination_notice_standard",
+        "deadlines.initial_response_window",
+        "deadlines.response_decision_window",
+        "deadlines.response_time_general",
+        "deadlines.status_determination_window",
+        "deadlines.substantive_response_window",
+        "response.copy_reasonable_period",
+        "response.determination_deadline",
+        "response.expedited_response_window",
+        "response.initial_response_deadline",
+        "response.initial_response_window",
+        "response.political_subdivision_alt_timeframes",
+        "response.promptly_available",
+        "response.promptness_standard",
+        "response.standard_response_window",
+        "response.written_response_window"
+      ],
+      "members_by_state": {
+        "AL": [
+          "AL-0025"
+        ],
+        "CA": [
+          "CA-0009"
+        ],
+        "ID": [
+          "ID-0008",
+          "ID-0009"
+        ],
+        "IL": [
+          "IL-0010"
+        ],
+        "KS": [
+          "KS-0026"
+        ],
+        "LA": [
+          "LA-0028"
+        ],
+        "MA": [
+          "MA-0018"
+        ],
+        "MI": [
+          "MI-0016"
+        ],
+        "MN": [
+          "MN-0005"
+        ],
+        "MO": [
+          "MO-0008"
+        ],
+        "NE": [
+          "NE-0011"
+        ],
+        "NV": [
+          "NV-0006"
+        ],
+        "NJ": [
+          "NJ-T01"
+        ],
+        "NY": [
+          "NY-0009",
+          "NY-0010"
+        ],
+        "NC": [
+          "NC-0024"
+        ],
+        "OH": [
+          "OH-0008"
+        ],
+        "PA": [
+          "PA-0021",
+          "PA-0022"
+        ],
+        "SC": [
+          "SC-0020",
+          "SC-0021"
+        ],
+        "TN": [
+          "TN-0014"
+        ],
+        "UT": [
+          "UT-0009",
+          "UT-0010",
+          "UT-0049"
+        ],
+        "VA": [
+          "VA-0007"
+        ],
+        "WA": [
+          "WA-0010",
+          "WA-0013"
+        ],
+        "WI": [
+          "WI-0023"
+        ]
+      }
+    },
+    {
+      "canonical_key": "response.extension_grounds",
+      "definition": "Additional time to respond may be based on the need to clarify the request, to locate and assemble records, to notify affected third persons or agencies, or to determine whether in",
+      "config_home": "mixed (parameter:2 fixed-value states / structural:10 soft-standard states)",
+      "state_count": 11,
+      "states": [
+        "CO",
+        "IL",
+        "MA",
+        "MO",
+        "NJ",
+        "OR",
+        "PA",
+        "SC",
+        "UT",
+        "VA",
+        "WA"
+      ],
+      "merged_from": [
+        "deadline.extension_grounds",
+        "deadline.extension_reasonable_cause",
+        "deadlines.emergency_suspension",
+        "deadlines.extension_by_mutual_agreement",
+        "deadlines.impracticability_exception",
+        "deadlines.unforeseen_circumstances_extension",
+        "response.additional_time_grounds",
+        "response.extension_asap_standard",
+        "response.extension_by_written_agreement",
+        "response.extension_extenuating",
+        "response.extension_not_practically_possible",
+        "response.voluntary_extension_by_agreement"
+      ],
+      "members_by_state": {
+        "CO": [
+          "CO-0008"
+        ],
+        "IL": [
+          "IL-0013"
+        ],
+        "MA": [
+          "MA-0022"
+        ],
+        "MO": [
+          "MO-0012"
+        ],
+        "NJ": [
+          "NJ-T07",
+          "NJ-T15"
+        ],
+        "OR": [
+          "OR-0029"
+        ],
+        "PA": [
+          "PA-0023"
+        ],
+        "SC": [
+          "SC-0027"
+        ],
+        "UT": [
+          "UT-0018"
+        ],
+        "VA": [
+          "VA-0008"
+        ],
+        "WA": [
+          "WA-0014"
+        ]
+      }
+    },
+    {
+      "canonical_key": "production.completion_window",
+      "definition": "A stored or archived record must be made available no more than 21 business days from the date the requestor is advised it is in storage/archived.",
+      "config_home": "mixed (parameter:5 fixed-value states / structural:8 soft-standard states)",
+      "state_count": 10,
+      "states": [
+        "FL",
+        "GA",
+        "MA",
+        "MN",
+        "MO",
+        "NC",
+        "NJ",
+        "NV",
+        "NY",
+        "TX"
+      ],
+      "merged_from": [
+        "deadline.expeditious_production",
+        "deadline.production_promptly",
+        "deadline.production_promptness",
+        "deadline.stored_records_production",
+        "deadlines.copies_delivery_time",
+        "deadlines.production_as_soon_as_practicable",
+        "deadlines.production_checkpoint_twenty_days",
+        "deadlines.production_reasonable_time",
+        "deadlines.production_response_window",
+        "deadlines.storage_production_window",
+        "response.production_window",
+        "response.without_unreasonable_delay"
+      ],
+      "members_by_state": {
+        "FL": [
+          "FL-0014"
+        ],
+        "GA": [
+          "GA-0011",
+          "GA-0014"
+        ],
+        "MA": [
+          "MA-0016",
+          "MA-0017"
+        ],
+        "MN": [
+          "MN-0006"
+        ],
+        "MO": [
+          "MO-0009"
+        ],
+        "NV": [
+          "NV-0007",
+          "NV-0019"
+        ],
+        "NJ": [
+          "NJ-T12"
+        ],
+        "NY": [
+          "NY-0011"
+        ],
+        "NC": [
+          "NC-0005"
+        ],
+        "TX": [
+          "TX-0008"
+        ]
+      }
+    },
+    {
+      "canonical_key": "response.extension_length",
+      "definition": "For a (state) agency, the reasonable production timeframe stated in the written response shall not exceed 15 business days following initial receipt of the request.",
+      "config_home": "parameter",
+      "state_count": 7,
+      "states": [
+        "AL",
+        "CA",
+        "ID",
+        "IL",
+        "MA",
+        "NJ",
+        "UT"
+      ],
+      "merged_from": [
+        "deadline.determination_extension",
+        "deadlines.fire_district_extension",
+        "deadlines.privacy_review_extension",
+        "deadlines.standard_extension",
+        "deadlines.time_intensive_extension",
+        "extension.petition_deadline",
+        "extension.supervisor_decision_window",
+        "response.extended_production_ceiling",
+        "response.extension_extensive_editing_window",
+        "response.extension_legal_review_window",
+        "response.extension_window"
+      ],
+      "members_by_state": {
+        "AL": [
+          "AL-0026",
+          "AL-0034"
+        ],
+        "CA": [
+          "CA-0012"
+        ],
+        "ID": [
+          "ID-0010",
+          "ID-0011"
+        ],
+        "IL": [
+          "IL-0011"
+        ],
+        "MA": [
+          "MA-0020",
+          "MA-0021",
+          "MA-0023",
+          "MA-0027"
+        ],
+        "NJ": [
+          "NJ-T03",
+          "NJ-T05"
+        ],
+        "UT": [
+          "UT-0016",
+          "UT-0017"
+        ]
+      }
+    },
+    {
+      "canonical_key": "response.extension_notice",
+      "definition": "When it extends, the public body must, within 5 business days after receipt, notify the requester of the reasons for the extension and the date the response will be forthcoming.",
+      "config_home": "mixed (parameter:1 fixed-value states / structural:6 soft-standard states)",
+      "state_count": 7,
+      "states": [
+        "CO",
+        "IL",
+        "MA",
+        "MI",
+        "NV",
+        "PA",
+        "UT"
+      ],
+      "merged_from": [
+        "deadline.extension_notice",
+        "deadline.extension_notice_window",
+        "extension.copy_to_requestor",
+        "extension.notice_contents",
+        "response.extension_notice",
+        "response.extension_written_finding",
+        "response.extraordinary_circumstances_notice"
+      ],
+      "members_by_state": {
+        "CO": [
+          "CO-0009"
+        ],
+        "IL": [
+          "IL-0012"
+        ],
+        "MA": [
+          "MA-0024"
+        ],
+        "MI": [
+          "MI-0020"
+        ],
+        "NV": [
+          "NV-0008"
+        ],
+        "PA": [
+          "PA-0024"
+        ],
+        "UT": [
+          "UT-0014"
+        ]
+      }
+    },
+    {
+      "canonical_key": "response.clock_computation",
+      "definition": "The four business days are computed by excluding the day the request is received; a business day excludes Saturdays, Sundays, and any day the custodian's offices are closed.",
+      "config_home": "mixed (parameter:1 fixed-value states / structural:8 soft-standard states)",
+      "state_count": 7,
+      "states": [
+        "GA",
+        "MA",
+        "MI",
+        "NE",
+        "NJ",
+        "VA",
+        "WI"
+      ],
+      "merged_from": [
+        "deadline.business_day_computation",
+        "deadline.electronic_receipt_deeming",
+        "deadlines.anonymous_requestor_toll",
+        "deadlines.clock_only_valid_requests",
+        "deadlines.clock_start_on_written_to_designee",
+        "deadlines.clock_start_receipt",
+        "deadlines.time_computation",
+        "response.tolling_pending_advance_deposit",
+        "response.tolling_pending_cost_estimate_response"
+      ],
+      "members_by_state": {
+        "GA": [
+          "GA-0010"
+        ],
+        "MA": [
+          "MA-0014",
+          "MA-0015"
+        ],
+        "MI": [
+          "MI-0009"
+        ],
+        "NE": [
+          "NE-0017"
+        ],
+        "NJ": [
+          "NJ-T10"
+        ],
+        "VA": [
+          "VA-0027",
+          "VA-0032"
+        ],
+        "WI": [
+          "WI-0024"
+        ]
+      }
+    },
+    {
+      "canonical_key": "response.time_estimate_notice",
+      "definition": "The custodian may respond within the five-day window with an estimate of the time reasonably necessary for collection, segregation, redaction, examination, or review, which foresta",
+      "config_home": "mixed (parameter:1 fixed-value states / structural:5 soft-standard states)",
+      "state_count": 6,
+      "states": [
+        "GA",
+        "LA",
+        "MI",
+        "OR",
+        "TN",
+        "WA"
+      ],
+      "merged_from": [
+        "deadlines.interim_status_statement",
+        "deadlines.time_estimate_option",
+        "deadlines.unavailable_description_and_timeline_notice",
+        "response.time_estimate_notice",
+        "response.time_estimate_reasonable"
+      ],
+      "members_by_state": {
+        "GA": [
+          "GA-0013"
+        ],
+        "LA": [
+          "LA-0031"
+        ],
+        "MI": [
+          "MI-0055"
+        ],
+        "OR": [
+          "OR-0008"
+        ],
+        "TN": [
+          "TN-0016"
+        ],
+        "WA": [
+          "WA-0012"
+        ]
+      }
+    },
+    {
+      "canonical_key": "response.valid_response_forms",
+      "definition": "The initial response must take one of five forms: provide the record; provide a website link to it; acknowledge and give a reasonable time estimate; acknowledge and request clarifi",
+      "config_home": "mixed (parameter:1 fixed-value states / structural:5 soft-standard states)",
+      "state_count": 6,
+      "states": [
+        "IL",
+        "MA",
+        "MI",
+        "NE",
+        "TN",
+        "WA"
+      ],
+      "merged_from": [
+        "response.commercial_response_options",
+        "response.determination_options",
+        "response.mandatory_action_window",
+        "response.options_enumerated",
+        "response.response_options_enumerated",
+        "response.written_response_contents"
+      ],
+      "members_by_state": {
+        "IL": [
+          "IL-0018"
+        ],
+        "MA": [
+          "MA-0019"
+        ],
+        "MI": [
+          "MI-0017"
+        ],
+        "NE": [
+          "NE-0013"
+        ],
+        "TN": [
+          "TN-0015"
+        ],
+        "WA": [
+          "WA-0011"
+        ]
+      }
+    },
+    {
+      "canonical_key": "response.extension_limit",
+      "definition": "Upon a showing of good cause, the Supervisor may grant a single extension to a municipality not to exceed 30 business days.",
+      "config_home": "mixed (parameter:5 fixed-value states / structural:2 soft-standard states)",
+      "state_count": 4,
+      "states": [
+        "CO",
+        "MA",
+        "MI",
+        "PA"
+      ],
+      "merged_from": [
+        "deadline.extension_cap",
+        "extension.frivolous_series_relief",
+        "extension.single_extension_ceiling",
+        "extension.single_extension_limit",
+        "response.extenuating_single_document_bar"
+      ],
+      "members_by_state": {
+        "CO": [
+          "CO-0010"
+        ],
+        "MA": [
+          "MA-0025",
+          "MA-0026",
+          "MA-0028"
+        ],
+        "MI": [
+          "MI-0018",
+          "MI-0019"
+        ],
+        "PA": [
+          "PA-0025"
+        ]
+      }
+    },
+    {
+      "canonical_key": "response.classified_request_window",
+      "definition": "Within 5 business days after receiving a request from a recurrent requester, the public body must notify the requester that it is being treated under the recurrent-requester provis",
+      "config_home": "mixed (parameter:6 fixed-value states / structural:2 soft-standard states)",
+      "state_count": 3,
+      "states": [
+        "AL",
+        "IL",
+        "NJ"
+      ],
+      "merged_from": [
+        "deadlines.commercial_purpose_extension",
+        "deadlines.time_intensive_response_window",
+        "response.commercial_purpose_window",
+        "response.recurrent_requester_notice",
+        "response.recurrent_requester_window",
+        "response.voluminous_final_response",
+        "response.voluminous_initial_response",
+        "response.voluminous_requester_response_window"
+      ],
+      "members_by_state": {
+        "AL": [
+          "AL-0033"
+        ],
+        "IL": [
+          "IL-0017",
+          "IL-0020",
+          "IL-0021",
+          "IL-0024",
+          "IL-0025",
+          "IL-0026"
+        ],
+        "NJ": [
+          "NJ-T02"
+        ]
+      }
+    },
+    {
+      "canonical_key": "response.repeat_request_handling",
+      "definition": "Nothing prevents a requestor from filing periodic requests regarding regularly updated public records, including certified payrolls, permits, and licensing applications.",
+      "config_home": "structural",
+      "state_count": 1,
+      "states": [
+        "NJ"
+      ],
+      "merged_from": [
+        "response.identical_request_no_change",
+        "response.periodic_requests_permitted"
+      ],
+      "members_by_state": {
+        "NJ": [
+          "NJ-T17",
+          "NJ-T18"
+        ]
+      }
+    }
+  ],
+  "cross_family_moves": {
+    "special_records": [
+      {
+        "source_key": "deadlines.record_type_extended_window",
+        "states": [
+          "GA"
+        ]
+      },
+      {
+        "source_key": "deadline.economic_development_disclosure",
+        "states": [
+          "NC"
+        ]
+      },
+      {
+        "source_key": "deadline.qualifying_site_disclosure",
+        "states": [
+          "NC"
+        ]
+      },
+      {
+        "source_key": "response.extension_criminal_investigative_files",
+        "states": [
+          "VA"
+        ]
+      }
+    ],
+    "denial": [
+      {
+        "source_key": "deadline.deemed_denial_window_in_person_phone",
+        "states": [
+          "IN"
+        ]
+      },
+      {
+        "source_key": "deadline.deemed_denial_window_mail_fax",
+        "states": [
+          "IN"
+        ]
+      },
+      {
+        "source_key": "deadline.denial_statement_window",
+        "states": [
+          "KS",
+          "MO"
+        ]
+      },
+      {
+        "source_key": "deadlines.deemed_denial_nonresponse",
+        "states": [
+          "NJ"
+        ]
+      },
+      {
+        "source_key": "deadlines.storage_deemed_denial",
+        "states": [
+          "NJ"
+        ]
+      },
+      {
+        "source_key": "deadlines.constructive_denial",
+        "states": [
+          "NY"
+        ]
+      },
+      {
+        "source_key": "response.expedited_denial_notice",
+        "states": [
+          "UT"
+        ]
+      }
+    ],
+    "production_format": [
+      {
+        "source_key": "response.stipulated_delivery_method",
+        "states": [
+          "MI"
+        ]
+      }
+    ],
+    "custody": [
+      {
+        "source_key": "response.record_not_maintained_referral",
+        "states": [
+          "UT"
+        ]
+      },
+      {
+        "source_key": "response.records_not_found_referral",
+        "states": [
+          "VA"
+        ]
+      }
+    ],
+    "external": [
+      {
+        "source_key": "response.court_petition_for_additional_time",
+        "states": [
+          "VA"
+        ]
+      }
+    ]
+  }
+}
