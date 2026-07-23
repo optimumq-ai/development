@@ -1,6 +1,6 @@
 # Relevance-prune cut log
 
-Applied 2026-07-23. Removed 344 of 1443 rules (kept 1099). Originals untouched in `../wave*/discovery.json`. The 15 held items (pulled by Kevin for individual review) were RETAINED.
+Applied 2026-07-23. Removed 344 of 1445 rules (kept 1101). Originals untouched in `../wave*/discovery.json`. The 15 held items (pulled by Kevin for individual review) were RETAINED.
 
 Rules removed, by state:
 

@@ -12545,6 +12545,51 @@
         "effective_status": "Requires manual verification",
         "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.029",
         "notes": "Source Type: Statute. Reconstructed from source summary; the 'strongly encouraged' clause is advisory while the 'shall provide data ... if requested' clause is mandatory. Confirm exact operative wording and subsection numbering."
+      },
+      {
+        "rule_id": "MO-S01",
+        "category": "Clarification",
+        "concept_key": "clarification.nonresponse_withdrawal",
+        "legal_concept": "Request deemed withdrawn on non-response to a clarification request",
+        "rule_type": "Trigger",
+        "config_home": "parameter",
+        "constraint_basis": "fixed",
+        "atomic_rule": "If the public governmental body responds to a request in order to seek clarification and no response to the clarification request is received within ninety days (or one hundred fifty days if the requested fees exceed one thousand dollars), the public records request is considered withdrawn.",
+        "trigger": "Body sent a clarification request; requester does not respond within the window",
+        "clock_effect": "terminal",
+        "clock_spec": "90 days from clarification request sent (150 days if requested fees > $1,000)",
+        "related_rule_ids": [
+          "MO-0026",
+          "MO-0027"
+        ],
+        "source_language": "If the public governmental body responds to a request for public records in order to seek a clarification of the request and no response to the request for clarification is received within ninety days, or within one hundred fifty days if the requested fees are greater than one thousand dollars, then such request for public records shall be considered withdrawn.",
+        "is_paraphrase": false,
+        "source_authority": "Mo. Rev. Stat. § 610.026",
+        "effective_status": "Current (§ 610.026 as amended)",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+        "notes": "ADDED 2026-07-23 via ChatGPT-pilot completeness cross-check; verified verbatim against § 610.026. Sibling of the fee-nonpayment 90-day withdrawal (MO-0026/0027) — both live in § 610.026; original discovery captured the fee twin but not this clarification twin. Confirm exact subdivision citation on production."
+      },
+      {
+        "rule_id": "MO-S02",
+        "category": "Fees",
+        "concept_key": "fee.repeat_request_unpaid_carryforward",
+        "legal_concept": "Unpaid original fees carried forward to a repeat request",
+        "rule_type": "Permission",
+        "config_home": "structural",
+        "constraint_basis": "n/a",
+        "atomic_rule": "If the same or a substantially similar request is made within six months after expiration of the ninety-day nonpayment-withdrawal period (or one hundred fifty days if requested fees exceed one thousand dollars) and no fee was remitted on the original request, the public governmental body may require payment of the fees for the original request in addition to any allowable fees for the subsequent request.",
+        "trigger": "Same/substantially-similar request within 6 months (150 days if fees > $1,000) with the original fee unpaid",
+        "clock_effect": "none",
+        "clock_spec": "",
+        "related_rule_ids": [
+          "MO-0026"
+        ],
+        "source_language": "If the same or a substantially similar request for public records is made within six months after the expiration of the ninety-day period, or within one hundred fifty days if the requested fees are greater than one thousand dollars, and no fee was remitted, the public governmental body is authorized to request payment of fees for the original request as well as any allowable fees for the subsequent request.",
+        "is_paraphrase": false,
+        "source_authority": "Mo. Rev. Stat. § 610.026",
+        "effective_status": "Current (§ 610.026 as amended)",
+        "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+        "notes": "ADDED 2026-07-23 via completeness cross-check; verified verbatim against § 610.026. Repeat-request fee carry-forward tied to the nonpayment-withdrawal window (MO-0026)."
       }
     ],
     "material_negatives": [
