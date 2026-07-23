@@ -1,0 +1,1970 @@
+[
+  {
+    "canonical_key": "eligibility.no_purpose_requirement",
+    "state_count": 32,
+    "config_home": "structural",
+    "config_home_conflict": "structural:28,parameter:4",
+    "definition": "A public agency may not deny a request because the requester refuses to state the purpose of the request, unless another applicable statute requires it.",
+    "states": [
+      "AL",
+      "AZ",
+      "CA",
+      "CO",
+      "CT",
+      "FL",
+      "GA",
+      "ID",
+      "IL",
+      "IN",
+      "KS",
+      "LA",
+      "MA",
+      "MI",
+      "MN",
+      "MO",
+      "NC",
+      "NE",
+      "NJ",
+      "NV",
+      "NY",
+      "OH",
+      "OK",
+      "OR",
+      "PA",
+      "SC",
+      "TN",
+      "TX",
+      "UT",
+      "VA",
+      "WA",
+      "WI"
+    ],
+    "members": {
+      "AL": [
+        "AL-0003"
+      ],
+      "AZ": [
+        "AZ-0003"
+      ],
+      "CA": [
+        "CA-0002"
+      ],
+      "CO": [
+        "CO-0003"
+      ],
+      "CT": [
+        "CT-0003"
+      ],
+      "FL": [
+        "FL-0003"
+      ],
+      "GA": [
+        "GA-0002"
+      ],
+      "ID": [
+        "ID-0002"
+      ],
+      "IL": [
+        "IL-0002"
+      ],
+      "IN": [
+        "IN-0002"
+      ],
+      "KS": [
+        "KS-0003"
+      ],
+      "LA": [
+        "LA-0003"
+      ],
+      "MA": [
+        "MA-0003"
+      ],
+      "MI": [
+        "MI-0004"
+      ],
+      "MN": [
+        "MN-0002"
+      ],
+      "MO": [
+        "MO-0003"
+      ],
+      "NE": [
+        "NE-0003"
+      ],
+      "NV": [
+        "NV-0003"
+      ],
+      "NJ": [
+        "NJ-A03"
+      ],
+      "NY": [
+        "NY-0002"
+      ],
+      "NC": [
+        "NC-0002"
+      ],
+      "OH": [
+        "OH-0002"
+      ],
+      "OK": [
+        "OK-0003"
+      ],
+      "OR": [
+        "OR-0003"
+      ],
+      "PA": [
+        "PA-0002"
+      ],
+      "SC": [
+        "SC-0003"
+      ],
+      "TN": [
+        "TN-0002"
+      ],
+      "TX": [
+        "TX-0002"
+      ],
+      "UT": [
+        "UT-0003"
+      ],
+      "VA": [
+        "VA-0002"
+      ],
+      "WA": [
+        "WA-0002"
+      ],
+      "WI": [
+        "WI-0002"
+      ]
+    }
+  },
+  {
+    "canonical_key": "eligibility.any_person",
+    "state_count": 28,
+    "config_home": "structural",
+    "config_home_conflict": "structural:24,parameter:4",
+    "definition": "Any person has the right to inspect a public record free of charge and to take a copy during normal working hours, subject to the fee and response sections.",
+    "states": [
+      "AZ",
+      "CA",
+      "CO",
+      "CT",
+      "FL",
+      "GA",
+      "ID",
+      "IL",
+      "IN",
+      "KS",
+      "LA",
+      "MA",
+      "MI",
+      "MN",
+      "MO",
+      "NC",
+      "NE",
+      "NJ",
+      "NV",
+      "NY",
+      "OH",
+      "OK",
+      "OR",
+      "SC",
+      "TX",
+      "UT",
+      "WA",
+      "WI"
+    ],
+    "members": {
+      "AZ": [
+        "AZ-0001"
+      ],
+      "CA": [
+        "CA-0001"
+      ],
+      "CO": [
+        "CO-0001"
+      ],
+      "CT": [
+        "CT-0001"
+      ],
+      "FL": [
+        "FL-0001"
+      ],
+      "GA": [
+        "GA-0001"
+      ],
+      "ID": [
+        "ID-0001"
+      ],
+      "IL": [
+        "IL-0001"
+      ],
+      "IN": [
+        "IN-0001"
+      ],
+      "KS": [
+        "KS-0001"
+      ],
+      "LA": [
+        "LA-0001"
+      ],
+      "MA": [
+        "MA-0001"
+      ],
+      "MI": [
+        "MI-0001"
+      ],
+      "MN": [
+        "MN-0001"
+      ],
+      "MO": [
+        "MO-0001"
+      ],
+      "NE": [
+        "NE-0001"
+      ],
+      "NV": [
+        "NV-0001"
+      ],
+      "NJ": [
+        "NJ-A01"
+      ],
+      "NY": [
+        "NY-0001"
+      ],
+      "NC": [
+        "NC-0001"
+      ],
+      "OH": [
+        "OH-0001"
+      ],
+      "OK": [
+        "OK-0001"
+      ],
+      "OR": [
+        "OR-0001"
+      ],
+      "SC": [
+        "SC-0001"
+      ],
+      "TX": [
+        "TX-0001"
+      ],
+      "UT": [
+        "UT-0001"
+      ],
+      "WA": [
+        "WA-0001"
+      ],
+      "WI": [
+        "WI-0001"
+      ]
+    }
+  },
+  {
+    "canonical_key": "eligibility.no_residency_requirement",
+    "state_count": 27,
+    "config_home": "structural",
+    "config_home_conflict": "structural:23,parameter:4",
+    "definition": "There is no Georgia residency or citizenship condition on the right to request public records; the right runs to any person.",
+    "states": [
+      "AZ",
+      "CA",
+      "CO",
+      "CT",
+      "FL",
+      "GA",
+      "IL",
+      "IN",
+      "KS",
+      "LA",
+      "MA",
+      "MI",
+      "MN",
+      "MO",
+      "NC",
+      "NE",
+      "NJ",
+      "NV",
+      "NY",
+      "OH",
+      "OK",
+      "OR",
+      "SC",
+      "TX",
+      "UT",
+      "WA",
+      "WI"
+    ],
+    "members": {
+      "AZ": [
+        "AZ-0002"
+      ],
+      "CA": [
+        "CA-0003"
+      ],
+      "CO": [
+        "CO-0002"
+      ],
+      "CT": [
+        "CT-0002"
+      ],
+      "FL": [
+        "FL-0002"
+      ],
+      "GA": [
+        "GA-0003"
+      ],
+      "IL": [
+        "IL-0003"
+      ],
+      "IN": [
+        "IN-0003"
+      ],
+      "KS": [
+        "KS-0002"
+      ],
+      "LA": [
+        "LA-0004"
+      ],
+      "MA": [
+        "MA-0002"
+      ],
+      "MI": [
+        "MI-0003"
+      ],
+      "MN": [
+        "MN-0003"
+      ],
+      "MO": [
+        "MO-0002"
+      ],
+      "NE": [
+        "NE-0002"
+      ],
+      "NV": [
+        "NV-0002"
+      ],
+      "NJ": [
+        "NJ-A02"
+      ],
+      "NY": [
+        "NY-0003"
+      ],
+      "NC": [
+        "NC-0003"
+      ],
+      "OH": [
+        "OH-0004"
+      ],
+      "OK": [
+        "OK-0002"
+      ],
+      "OR": [
+        "OR-0002"
+      ],
+      "SC": [
+        "SC-0002"
+      ],
+      "TX": [
+        "TX-0003"
+      ],
+      "UT": [
+        "UT-0002"
+      ],
+      "WA": [
+        "WA-0004"
+      ],
+      "WI": [
+        "WI-0004"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.copy_rate_per_page",
+    "state_count": 12,
+    "config_home": "parameter",
+    "definition": "The charge for paper copies must not exceed 10 cents per sheet for copies made on 8.5x11 or 8.5x14 paper, calculated as a total cost per sheet.",
+    "states": [
+      "CO",
+      "CT",
+      "FL",
+      "GA",
+      "IL",
+      "MA",
+      "MI",
+      "MN",
+      "MO",
+      "NJ",
+      "NY",
+      "PA"
+    ],
+    "members": {
+      "CO": [
+        "CO-0016"
+      ],
+      "CT": [
+        "CT-0015",
+        "CT-0016"
+      ],
+      "FL": [
+        "FL-0020"
+      ],
+      "GA": [
+        "GA-0018"
+      ],
+      "IL": [
+        "IL-0028"
+      ],
+      "MA": [
+        "MA-0030"
+      ],
+      "MI": [
+        "MI-0038"
+      ],
+      "MN": [
+        "MN-0009"
+      ],
+      "MO": [
+        "MO-0018"
+      ],
+      "NJ": [
+        "NJ-M01"
+      ],
+      "NY": [
+        "NY-0024"
+      ],
+      "PA": [
+        "PA-0040"
+      ]
+    }
+  },
+  {
+    "canonical_key": "redaction.segregability",
+    "state_count": 11,
+    "config_home": "structural",
+    "definition": "If a record contains both disclosable and nondisclosable information, the agency must separate the disclosable material and make it available for inspection and copying.",
+    "states": [
+      "CA",
+      "CO",
+      "ID",
+      "IN",
+      "KS",
+      "MI",
+      "MO",
+      "NJ",
+      "OH",
+      "OK",
+      "PA"
+    ],
+    "members": {
+      "CA": [
+        "CA-0020"
+      ],
+      "CO": [
+        "CO-0015"
+      ],
+      "ID": [
+        "ID-0016"
+      ],
+      "IN": [
+        "IN-0011"
+      ],
+      "KS": [
+        "KS-0032"
+      ],
+      "MI": [
+        "MI-0030"
+      ],
+      "MO": [
+        "MO-0015"
+      ],
+      "NJ": [
+        "NJ-T37"
+      ],
+      "OH": [
+        "OH-0016"
+      ],
+      "OK": [
+        "OK-0007"
+      ],
+      "PA": [
+        "PA-0031"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.waiver_public_interest",
+    "state_count": 9,
+    "config_home": "structural",
+    "definition": "No search fee may be charged when release of the records is in the public interest, including release to news media, scholars, authors, and taxpayers seeking to determine whether officials are perform",
+    "states": [
+      "ID",
+      "IL",
+      "MO",
+      "NE",
+      "OK",
+      "OR",
+      "SC",
+      "TX",
+      "WI"
+    ],
+    "members": {
+      "ID": [
+        "ID-0023"
+      ],
+      "IL": [
+        "IL-0033"
+      ],
+      "MO": [
+        "MO-0024"
+      ],
+      "NE": [
+        "NE-0022"
+      ],
+      "OK": [
+        "OK-0022"
+      ],
+      "OR": [
+        "OR-0023"
+      ],
+      "SC": [
+        "SC-0015"
+      ],
+      "TX": [
+        "TX-0032"
+      ],
+      "WI": [
+        "WI-0039"
+      ]
+    }
+  },
+  {
+    "canonical_key": "intake.written_request_required",
+    "state_count": 8,
+    "config_home": "structural",
+    "definition": "A person desiring to inspect or receive a copy of a public record must make a written request to the public body's FOIA coordinator.",
+    "states": [
+      "CT",
+      "MI",
+      "NE",
+      "NY",
+      "OR",
+      "SC",
+      "TX",
+      "UT"
+    ],
+    "members": {
+      "CT": [
+        "CT-0007"
+      ],
+      "MI": [
+        "MI-0005"
+      ],
+      "NE": [
+        "NE-0010"
+      ],
+      "NY": [
+        "NY-0004"
+      ],
+      "OR": [
+        "OR-0004"
+      ],
+      "SC": [
+        "SC-0005"
+      ],
+      "TX": [
+        "TX-0005"
+      ],
+      "UT": [
+        "UT-0004"
+      ]
+    }
+  },
+  {
+    "canonical_key": "deadline.initial_response_window",
+    "state_count": 6,
+    "config_home": "parameter",
+    "definition": "A public agency or custodian shall either grant or deny a resident's request to examine or copy public records within three (3) working days of receipt of the request.",
+    "states": [
+      "ID",
+      "KS",
+      "MI",
+      "MO",
+      "NE",
+      "PA"
+    ],
+    "members": {
+      "ID": [
+        "ID-0008",
+        "ID-0009"
+      ],
+      "KS": [
+        "KS-0026"
+      ],
+      "MI": [
+        "MI-0016"
+      ],
+      "MO": [
+        "MO-0008"
+      ],
+      "NE": [
+        "NE-0011"
+      ],
+      "PA": [
+        "PA-0021"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.copy_actual_cost_ceiling",
+    "state_count": 5,
+    "config_home": "parameter",
+    "definition": "A custodian may charge a fee for providing copies, but the fee shall not exceed the actual added cost of making the copies available.",
+    "states": [
+      "ID",
+      "KS",
+      "NC",
+      "NE",
+      "OK"
+    ],
+    "members": {
+      "ID": [
+        "ID-0019"
+      ],
+      "KS": [
+        "KS-0034"
+      ],
+      "NE": [
+        "NE-0019"
+      ],
+      "NC": [
+        "NC-0019"
+      ],
+      "OK": [
+        "OK-0016"
+      ]
+    }
+  },
+  {
+    "canonical_key": "production.no_duty_to_create_record",
+    "state_count": 5,
+    "config_home": "structural",
+    "definition": "The RAO is not required to create a new public record to comply with a request; furnishing a segregable portion of an existing record is not creation of a new record.",
+    "states": [
+      "MA",
+      "MI",
+      "NC",
+      "VA",
+      "WI"
+    ],
+    "members": {
+      "MA": [
+        "MA-0046"
+      ],
+      "MI": [
+        "MI-0063"
+      ],
+      "NC": [
+        "NC-0028"
+      ],
+      "VA": [
+        "VA-0014"
+      ],
+      "WI": [
+        "WI-0050"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.actual_cost_basis",
+    "state_count": 5,
+    "config_home": "parameter",
+    "config_home_conflict": "parameter:4,structural:1",
+    "definition": "A public body may establish fees reasonably calculated to reimburse it for its actual cost of making public records available, including costs for summarizing, compiling or tailoring the records in or",
+    "states": [
+      "MI",
+      "NV",
+      "OR",
+      "TN",
+      "UT"
+    ],
+    "members": {
+      "MI": [
+        "MI-0033"
+      ],
+      "NV": [
+        "NV-0021"
+      ],
+      "OR": [
+        "OR-0020"
+      ],
+      "TN": [
+        "TN-0031"
+      ],
+      "UT": [
+        "UT-0028"
+      ]
+    }
+  },
+  {
+    "canonical_key": "production.website_redirect",
+    "state_count": 4,
+    "config_home": "structural",
+    "definition": "An agency may satisfy a records-posting/production obligation by maintaining the record on its website and directing the requester there, but must promptly provide a copy if the requester cannot acces",
+    "states": [
+      "CA",
+      "MI",
+      "NJ",
+      "OK"
+    ],
+    "members": {
+      "CA": [
+        "CA-0019"
+      ],
+      "MI": [
+        "MI-0047"
+      ],
+      "NJ": [
+        "NJ-T31"
+      ],
+      "OK": [
+        "OK-0013"
+      ]
+    }
+  },
+  {
+    "canonical_key": "redaction.segregability_duty",
+    "state_count": 4,
+    "config_home": "structural",
+    "definition": "If a record contains both disclosable and non-disclosable information and the disclosable portion is intelligible, the entity must allow access to the disclosable information and may deny the exempt i",
+    "states": [
+      "GA",
+      "UT",
+      "VA",
+      "WI"
+    ],
+    "members": {
+      "GA": [
+        "GA-0034"
+      ],
+      "UT": [
+        "UT-0043"
+      ],
+      "VA": [
+        "VA-0020"
+      ],
+      "WI": [
+        "WI-0030"
+      ]
+    }
+  },
+  {
+    "canonical_key": "denial.deemed_denial_on_nonresponse",
+    "state_count": 4,
+    "config_home": "structural",
+    "definition": "If the public agency or custodian fails to respond within the time allotted for the response, the request shall be deemed to be denied.",
+    "states": [
+      "ID",
+      "IL",
+      "IN",
+      "PA"
+    ],
+    "members": {
+      "ID": [
+        "ID-0013"
+      ],
+      "IL": [
+        "IL-0014"
+      ],
+      "IN": [
+        "IN-0009"
+      ],
+      "PA": [
+        "PA-0027"
+      ]
+    }
+  },
+  {
+    "canonical_key": "payment.advance_payment_permitted",
+    "state_count": 4,
+    "config_home": "structural",
+    "definition": "A records custodian may require payment for copies before producing the copies of the records.",
+    "states": [
+      "LA",
+      "MO",
+      "OH",
+      "TN"
+    ],
+    "members": {
+      "LA": [
+        "LA-0023"
+      ],
+      "MO": [
+        "MO-0025"
+      ],
+      "OH": [
+        "OH-0020"
+      ],
+      "TN": [
+        "TN-0035"
+      ]
+    }
+  },
+  {
+    "canonical_key": "intake.acknowledgment_window",
+    "state_count": 3,
+    "config_home": "parameter",
+    "config_home_conflict": "parameter:3,structural:1",
+    "definition": "For a time-intensive request, the public officer shall acknowledge the request within 10 business days of receiving the request.",
+    "states": [
+      "AL",
+      "FL",
+      "OR"
+    ],
+    "members": {
+      "AL": [
+        "AL-0024",
+        "AL-0030"
+      ],
+      "FL": [
+        "FL-0007"
+      ],
+      "OR": [
+        "OR-0006"
+      ]
+    }
+  },
+  {
+    "canonical_key": "denials.constructive_denial_trigger",
+    "state_count": 3,
+    "config_home": "parameter",
+    "config_home_conflict": "parameter:2,structural:2",
+    "definition": "Passage of five days (excluding weekends and legal holidays) from an in-person, written, or electronic request without receiving a written determination or a time estimate constitutes a denial, entitl",
+    "states": [
+      "AL",
+      "LA",
+      "MI"
+    ],
+    "members": {
+      "AL": [
+        "AL-0027",
+        "AL-0036"
+      ],
+      "LA": [
+        "LA-0030"
+      ],
+      "MI": [
+        "MI-0022"
+      ]
+    }
+  },
+  {
+    "canonical_key": "intake.reasonably_describes_identifiable",
+    "state_count": 3,
+    "config_home": "structural",
+    "definition": "A request must identify with reasonable particularity the record being requested for the agency's duty to attach.",
+    "states": [
+      "CA",
+      "ID",
+      "IN"
+    ],
+    "members": {
+      "CA": [
+        "CA-0006"
+      ],
+      "ID": [
+        "ID-0006"
+      ],
+      "IN": [
+        "IN-0004"
+      ]
+    }
+  },
+  {
+    "canonical_key": "production.promptly",
+    "state_count": 3,
+    "config_home": "structural",
+    "definition": "Independent of the four-day cap, the custodian must respond as soon as is practicable and without delay.",
+    "states": [
+      "CA",
+      "NE",
+      "OK"
+    ],
+    "members": {
+      "CA": [
+        "CA-0014"
+      ],
+      "NE": [
+        "NE-0012"
+      ],
+      "OK": [
+        "OK-0009"
+      ]
+    }
+  },
+  {
+    "canonical_key": "custody.custodian_definition",
+    "state_count": 3,
+    "config_home": "structural",
+    "definition": "The 'official custodian' is any officer/employee responsible for maintaining public records (regardless of actual personal custody); 'custodian' includes any person the official custodian designates.",
+    "states": [
+      "CO",
+      "KS",
+      "LA"
+    ],
+    "members": {
+      "CO": [
+        "CO-0004"
+      ],
+      "KS": [
+        "KS-0015"
+      ],
+      "LA": [
+        "LA-0008"
+      ]
+    }
+  },
+  {
+    "canonical_key": "payment.prepayment_threshold",
+    "state_count": 3,
+    "config_home": "parameter",
+    "definition": "An authority may require prepayment of any fee(s) imposed under sub. (3) if the total amount exceeds $5.",
+    "states": [
+      "CT",
+      "PA",
+      "WI"
+    ],
+    "members": {
+      "CT": [
+        "CT-0022"
+      ],
+      "PA": [
+        "PA-0046"
+      ],
+      "WI": [
+        "WI-0042"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.special_service_charge",
+    "state_count": 3,
+    "config_home": "parameter",
+    "definition": "If the nature or volume of records requires extensive use of IT resources or extensive clerical/supervisory assistance, the agency may charge, in addition to actual duplication cost, a reasonable spec",
+    "states": [
+      "FL",
+      "NC",
+      "NJ"
+    ],
+    "members": {
+      "FL": [
+        "FL-0025"
+      ],
+      "NJ": [
+        "NJ-M06"
+      ],
+      "NC": [
+        "NC-0021"
+      ]
+    }
+  },
+  {
+    "canonical_key": "denial.written_notice_required",
+    "state_count": 3,
+    "config_home": "structural",
+    "definition": "The RAO must provide written notice by first class or electronic mail of any denial of access, within 10 business days of receipt of the request.",
+    "states": [
+      "ID",
+      "IL",
+      "MA"
+    ],
+    "members": {
+      "ID": [
+        "ID-0014"
+      ],
+      "IL": [
+        "IL-0039"
+      ],
+      "MA": [
+        "MA-0052"
+      ]
+    }
+  },
+  {
+    "canonical_key": "intake.oral_request_permitted",
+    "state_count": 3,
+    "config_home": "structural",
+    "definition": "A records request need not be submitted in writing; written submission is encouraged as helpful but is not required by statute.",
+    "states": [
+      "MA",
+      "MO",
+      "WI"
+    ],
+    "members": {
+      "MA": [
+        "MA-0008"
+      ],
+      "MO": [
+        "MO-0007"
+      ],
+      "WI": [
+        "WI-0009"
+      ]
+    }
+  },
+  {
+    "canonical_key": "intake.no_required_form",
+    "state_count": 3,
+    "config_home": "structural",
+    "definition": "A records access officer shall not require requesters to use a particular form, though optional forms may be made available.",
+    "states": [
+      "MA",
+      "MO",
+      "WA"
+    ],
+    "members": {
+      "MA": [
+        "MA-0009"
+      ],
+      "MO": [
+        "MO-0006"
+      ],
+      "WA": [
+        "WA-0005"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.labor_rate_hourly_ceiling",
+    "state_count": 3,
+    "config_home": "parameter",
+    "definition": "For a municipality, the hourly labor rate must equal or be less than the lowest-paid capable employee's rate and shall not exceed $25 per hour, unless a higher rate is approved by the Supervisor.",
+    "states": [
+      "MA",
+      "MI",
+      "MO"
+    ],
+    "members": {
+      "MA": [
+        "MA-0032",
+        "MA-0033"
+      ],
+      "MI": [
+        "MI-0034"
+      ],
+      "MO": [
+        "MO-0019"
+      ]
+    }
+  },
+  {
+    "canonical_key": "denial.exemption_citation_required",
+    "state_count": 3,
+    "config_home": "structural",
+    "definition": "If a request for access is denied, the custodian must, upon request, provide a written statement of the grounds for denial citing the specific provision of law under which access is denied.",
+    "states": [
+      "MA",
+      "MI",
+      "MO"
+    ],
+    "members": {
+      "MA": [
+        "MA-0053"
+      ],
+      "MI": [
+        "MI-0024"
+      ],
+      "MO": [
+        "MO-0013"
+      ]
+    }
+  },
+  {
+    "canonical_key": "custody.custodian_designation",
+    "state_count": 3,
+    "config_home": "structural",
+    "definition": "A city, village, township, county, or state department (or a body under its control) must designate an individual as its FOIA coordinator, responsible for accepting and processing requests and approvi",
+    "states": [
+      "MI",
+      "MO",
+      "NJ"
+    ],
+    "members": {
+      "MI": [
+        "MI-0010"
+      ],
+      "MO": [
+        "MO-0004"
+      ],
+      "NJ": [
+        "NJ-A06"
+      ]
+    }
+  },
+  {
+    "canonical_key": "payment.deposit_threshold",
+    "state_count": 3,
+    "config_home": "parameter",
+    "definition": "A public body may require a good-faith deposit before providing records if the entire estimated fee or charge exceeds $50, based on a good-faith total-fee calculation.",
+    "states": [
+      "MI",
+      "NJ",
+      "TX"
+    ],
+    "members": {
+      "MI": [
+        "MI-0053"
+      ],
+      "NJ": [
+        "NJ-M15"
+      ],
+      "TX": [
+        "TX-0034"
+      ]
+    }
+  },
+  {
+    "canonical_key": "payment.deposit_ceiling",
+    "state_count": 3,
+    "config_home": "parameter",
+    "definition": "A good-faith deposit must not exceed one-half of the total estimated fee, and the deposit request must include a detailed fee itemization.",
+    "states": [
+      "MI",
+      "SC",
+      "WA"
+    ],
+    "members": {
+      "MI": [
+        "MI-0054"
+      ],
+      "SC": [
+        "SC-0018"
+      ],
+      "WA": [
+        "WA-0031"
+      ]
+    }
+  },
+  {
+    "canonical_key": "production.format_election",
+    "state_count": 3,
+    "config_home": "structural",
+    "definition": "If records are requested in a certain format, the public body must provide the records in the requested format if such format is available.",
+    "states": [
+      "MI",
+      "MO",
+      "NC"
+    ],
+    "members": {
+      "MI": [
+        "MI-0067"
+      ],
+      "MO": [
+        "MO-0010"
+      ],
+      "NC": [
+        "NC-0015"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.reasonable_fee_standard",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "A public officer may require the requester to pay a reasonable fee set by the public officer before the requester may receive any public records (standard request); more generally, a certified copy is",
+    "states": [
+      "AL",
+      "KS"
+    ],
+    "members": {
+      "AL": [
+        "AL-0039"
+      ],
+      "KS": [
+        "KS-0033"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.estimate_notice",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "If the public officer elects to charge a fee for a standard request, the officer shall notify the requester of the estimated fee and withhold any public records until receipt of payment.",
+    "states": [
+      "AL",
+      "NY"
+    ],
+    "members": {
+      "AL": [
+        "AL-0040"
+      ],
+      "NY": [
+        "NY-0031"
+      ]
+    }
+  },
+  {
+    "canonical_key": "definition.commercial_purpose",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "'Commercial purpose' means use of a public record for sale or resale, for producing a document containing the record for sale, obtaining names/addresses for solicitation, or any purpose from which the",
+    "states": [
+      "AZ",
+      "MA"
+    ],
+    "members": {
+      "AZ": [
+        "AZ-0009"
+      ],
+      "MA": [
+        "MA-0004"
+      ]
+    }
+  },
+  {
+    "canonical_key": "deadline.determination_extension",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "If a longer period is needed to locate or retrieve the records, the public agency shall provide the public records no later than ten (10) working days following a resident's request.",
+    "states": [
+      "CA",
+      "ID"
+    ],
+    "members": {
+      "CA": [
+        "CA-0012"
+      ],
+      "ID": [
+        "ID-0010",
+        "ID-0011"
+      ]
+    }
+  },
+  {
+    "canonical_key": "denial.identify_responsible_persons",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "A notification of denial must set forth the names and titles or positions of each person responsible for the denial.",
+    "states": [
+      "CA",
+      "NE"
+    ],
+    "members": {
+      "CA": [
+        "CA-0027"
+      ],
+      "NE": [
+        "NE-0028"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.research_retrieval_rate",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "After the first hour, the custodian may charge a fee for research and retrieval of public records not to exceed thirty dollars per hour.",
+    "states": [
+      "CO",
+      "MO"
+    ],
+    "members": {
+      "CO": [
+        "CO-0018"
+      ],
+      "MO": [
+        "MO-0020"
+      ]
+    }
+  },
+  {
+    "canonical_key": "production.certified_copy_on_request",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "If an agency's response grants access, the agency shall, upon request, provide a certified copy of the record if the requester pays the applicable fees under section 1307.",
+    "states": [
+      "CT",
+      "PA"
+    ],
+    "members": {
+      "CT": [
+        "CT-0026"
+      ],
+      "PA": [
+        "PA-0015"
+      ]
+    }
+  },
+  {
+    "canonical_key": "intake.oral_or_written_request",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "A request may be made to the custodian orally or in writing; an oral request is a valid intake path (though it does not unlock the statutory enforcement remedies — see GA-0007).",
+    "states": [
+      "GA",
+      "NV"
+    ],
+    "members": {
+      "GA": [
+        "GA-0004"
+      ],
+      "NV": [
+        "NV-0005"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.electronic_media_actual_cost",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "Fees for records maintained on computer facilities, tapes, disks, videotapes or films shall include only the cost of copies, staff time (not exceeding the average hourly rate of pay for staff needed f",
+    "states": [
+      "GA",
+      "MO"
+    ],
+    "members": {
+      "GA": [
+        "GA-0019"
+      ],
+      "MO": [
+        "MO-0023"
+      ]
+    }
+  },
+  {
+    "canonical_key": "response.standard_response_window",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "A governmental entity must respond (approve/provide, deny, disclaim custody, or claim extraordinary circumstances) as soon as reasonably possible but no later than 10 business days after receiving a w",
+    "states": [
+      "IL",
+      "UT"
+    ],
+    "members": {
+      "IL": [
+        "IL-0010"
+      ],
+      "UT": [
+        "UT-0009"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.certification_charge",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "An agency may impose reasonable fees for official certification of copies where the certification is at the requester's behest and for the purpose of legally verifying the public record.",
+    "states": [
+      "IL",
+      "PA"
+    ],
+    "members": {
+      "IL": [
+        "IL-0030"
+      ],
+      "PA": [
+        "PA-0041"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.per_page_rate_ceiling",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "The fee for copying documents may not exceed the greater of ten cents ($0.10) per non-color page or twenty-five cents ($0.25) per color page, or the agency's actual cost.",
+    "states": [
+      "IN",
+      "OK"
+    ],
+    "members": {
+      "IN": [
+        "IN-0015"
+      ],
+      "OK": [
+        "OK-0017"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.certified_copy_charge",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "The fee for certification of documents may not exceed five dollars ($5) per document.",
+    "states": [
+      "IN",
+      "OK"
+    ],
+    "members": {
+      "IN": [
+        "IN-0016"
+      ],
+      "OK": [
+        "OK-0018"
+      ]
+    }
+  },
+  {
+    "canonical_key": "denial.cite_exemption_particularized",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "A denial must include a description of the contents of the records withheld and a statement of specific reasons, correlating specific portions of the records to specific reasons, including citations t",
+    "states": [
+      "IN",
+      "NE"
+    ],
+    "members": {
+      "IN": [
+        "IN-0020"
+      ],
+      "NE": [
+        "NE-0027"
+      ]
+    }
+  },
+  {
+    "canonical_key": "custody.custodian_availability_designation",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "Each official custodian shall designate the persons necessary to carry out custodian duties and shall ensure a custodian is available during regular business hours.",
+    "states": [
+      "KS",
+      "MO"
+    ],
+    "members": {
+      "KS": [
+        "KS-0014"
+      ],
+      "MO": [
+        "MO-0005"
+      ]
+    }
+  },
+  {
+    "canonical_key": "deadline.denial_statement_window",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "The written statement of grounds for denial must be furnished to the requester no later than the end of the third business day following the date the request for the statement is received.",
+    "states": [
+      "KS",
+      "MO"
+    ],
+    "members": {
+      "KS": [
+        "KS-0030"
+      ],
+      "MO": [
+        "MO-0014"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.electronic_medium_cost",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "When a county custodian provides a copy by transmitting it modem-to-modem, a reasonable fee may be charged for the specialized service, which may include a reasonable amortization of added computer eq",
+    "states": [
+      "KS",
+      "NE"
+    ],
+    "members": {
+      "KS": [
+        "KS-0036"
+      ],
+      "NE": [
+        "NE-0023"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.lowest_cost_staff",
+    "state_count": 2,
+    "config_home": "structural",
+    "config_home_conflict": "structural:1,parameter:1",
+    "definition": "If the agency incurs staff-time costs, it shall use in good faith the lowest-cost category of staff reasonably necessary to provide access or furnish copies.",
+    "states": [
+      "KS",
+      "MO"
+    ],
+    "members": {
+      "KS": [
+        "KS-0037"
+      ],
+      "MO": [
+        "MO-0021"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.estimate_itemized_statement",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "Upon request, the agency shall provide an itemized statement of costs charged to the requester, including the hourly rates for each employee involved and an itemized list of any other fees.",
+    "states": [
+      "KS",
+      "NE"
+    ],
+    "members": {
+      "KS": [
+        "KS-0039"
+      ],
+      "NE": [
+        "NE-0018"
+      ]
+    }
+  },
+  {
+    "canonical_key": "payment.advance_deposit_before_production",
+    "state_count": 2,
+    "config_home": "structural",
+    "config_home_conflict": "structural:1,parameter:1",
+    "definition": "If the estimated cost of requested copies exceeds fifty dollars, the custodian may require the requester to furnish a deposit before fulfilling the request.",
+    "states": [
+      "KS",
+      "NE"
+    ],
+    "members": {
+      "KS": [
+        "KS-0043"
+      ],
+      "NE": [
+        "NE-0021"
+      ]
+    }
+  },
+  {
+    "canonical_key": "production.format_as_maintained",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "K.S.A. 45-219(a) requires a public agency, upon request, to provide a copy of a public record in the format in which the agency maintains that record.",
+    "states": [
+      "KS",
+      "NJ"
+    ],
+    "members": {
+      "KS": [
+        "KS-0046"
+      ],
+      "NJ": [
+        "NJ-T26"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.copy_rate",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "Copies of public records shall be made available 'at cost' — the office may not charge more than its actual cost of making the copy.",
+    "states": [
+      "LA",
+      "OH"
+    ],
+    "members": {
+      "LA": [
+        "LA-0021"
+      ],
+      "OH": [
+        "OH-0018"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.schedule_posting",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "A custodian who elects to collect copying fees shall establish a reasonable fee schedule and post it where it can be readily accessed by the public.",
+    "states": [
+      "LA",
+      "OK"
+    ],
+    "members": {
+      "LA": [
+        "LA-0022"
+      ],
+      "OK": [
+        "OK-0021"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.indigent_waiver",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "A record search and copies must be furnished without charge for the first $20 of the fee for each request by a qualifying indigent individual (with affidavit) or by a state-designated developmental-di",
+    "states": [
+      "LA",
+      "MI"
+    ],
+    "members": {
+      "LA": [
+        "LA-0025"
+      ],
+      "MI": [
+        "MI-0043"
+      ]
+    }
+  },
+  {
+    "canonical_key": "extension.single_extension_ceiling",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "Upon a showing of good cause, the Supervisor may grant a single extension to a municipality not to exceed 30 business days.",
+    "states": [
+      "MA",
+      "MI"
+    ],
+    "members": {
+      "MA": [
+        "MA-0025",
+        "MA-0026"
+      ],
+      "MI": [
+        "MI-0018"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.actual_cost_ceiling",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "A records access officer may assess a reasonable fee for production (except freely-inspectable records), and the fee shall not exceed the actual cost of reproducing the record.",
+    "states": [
+      "MA",
+      "VA"
+    ],
+    "members": {
+      "MA": [
+        "MA-0029"
+      ],
+      "VA": [
+        "VA-0021"
+      ]
+    }
+  },
+  {
+    "canonical_key": "routing.forward_to_custodian",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "Any officer or employee who receives a records request shall forward it to, or direct the requestor to, the custodian; the request is not considered submitted until received by the custodian of record",
+    "states": [
+      "MI",
+      "NJ"
+    ],
+    "members": {
+      "MI": [
+        "MI-0013"
+      ],
+      "NJ": [
+        "NJ-T25"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.mailing_cost",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "An authority may impose a fee for the actual, necessary and direct cost of mailing or shipping any copy or photograph of a record that is mailed or shipped to the requester.",
+    "states": [
+      "MI",
+      "WI"
+    ],
+    "members": {
+      "MI": [
+        "MI-0040"
+      ],
+      "WI": [
+        "WI-0038"
+      ]
+    }
+  },
+  {
+    "canonical_key": "response.time_estimate_notice",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "As the third permitted response, the custodian furnishes the requester, in writing or on the OORC response form, the time reasonably necessary to produce the record or information.",
+    "states": [
+      "MI",
+      "TN"
+    ],
+    "members": {
+      "MI": [
+        "MI-0055"
+      ],
+      "TN": [
+        "TN-0016"
+      ]
+    }
+  },
+  {
+    "canonical_key": "production.certified_copy",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "An entity must provide a certified copy of a record if the person has a right to inspect it, identifies it with reasonable specificity, and pays the lawful fees.",
+    "states": [
+      "MI",
+      "UT"
+    ],
+    "members": {
+      "MI": [
+        "MI-0065"
+      ],
+      "UT": [
+        "UT-0027"
+      ]
+    }
+  },
+  {
+    "canonical_key": "deadline.production_promptly",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "The officer must produce public information promptly, i.e., as soon as possible under the circumstances, within a reasonable time, without delay.",
+    "states": [
+      "MO",
+      "TX"
+    ],
+    "members": {
+      "MO": [
+        "MO-0009"
+      ],
+      "TX": [
+        "TX-0008"
+      ]
+    }
+  },
+  {
+    "canonical_key": "communications.delay_notice_date_certain",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "When disclosure cannot occur within twenty business days, the agency must state in writing both the reason for the inability and a date certain, within a reasonable period, when the request will be gr",
+    "states": [
+      "MO",
+      "NY"
+    ],
+    "members": {
+      "MO": [
+        "MO-0011"
+      ],
+      "NY": [
+        "NY-0012"
+      ]
+    }
+  },
+  {
+    "canonical_key": "redaction.segregability_design",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "Where electronic records mix accessible and withholdable items, the agency shall, whenever practicable and reasonable, design retrieval to permit segregation and retrieval of the accessible items to p",
+    "states": [
+      "MO",
+      "NY"
+    ],
+    "members": {
+      "MO": [
+        "MO-0016"
+      ],
+      "NY": [
+        "NY-0033"
+      ]
+    }
+  },
+  {
+    "canonical_key": "redaction.notice_of_redaction",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "If the separation is readily apparent, the public body must generally describe the material exempted, unless that description would reveal the contents of the exempt information and thus defeat the pu",
+    "states": [
+      "MO",
+      "OH"
+    ],
+    "members": {
+      "MO": [
+        "MO-0017"
+      ],
+      "OH": [
+        "OH-0017"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.cost_estimate_on_request",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "A requester may request an estimate of the cost of copies before the public body produces them.",
+    "states": [
+      "MO",
+      "VA"
+    ],
+    "members": {
+      "MO": [
+        "MO-0022"
+      ],
+      "VA": [
+        "VA-0026"
+      ]
+    }
+  },
+  {
+    "canonical_key": "production.electronic_format_on_request",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "If requested, the entity must provide a copy in an electronic format by electronic medium, unless the record was neither created nor available electronically, or doing so would give access to propriet",
+    "states": [
+      "MO",
+      "NV"
+    ],
+    "members": {
+      "MO": [
+        "MO-0032"
+      ],
+      "NV": [
+        "NV-0014"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.format_conversion_charge",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "If the agency converts a record to a requested medium/format, it may charge, in addition to actual duplication cost, a reasonable special service fee based on the cost of extensive IT use or the labor",
+    "states": [
+      "NJ",
+      "SC"
+    ],
+    "members": {
+      "NJ": [
+        "NJ-M10"
+      ],
+      "SC": [
+        "SC-0012"
+      ]
+    }
+  },
+  {
+    "canonical_key": "production.medium_requested",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "An agency shall provide records in the medium requested if it can reasonably make the copy or have it made by engaging an outside professional service.",
+    "states": [
+      "NY",
+      "PA"
+    ],
+    "members": {
+      "NY": [
+        "NY-0021"
+      ],
+      "PA": [
+        "PA-0010"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.labor_rate_basis",
+    "state_count": 2,
+    "config_home": "parameter",
+    "definition": "Labor above the threshold is charged at the hourly wage of the employee(s) reasonably necessary, using the lowest practicable wage; the hourly wage is the employee's base salary (excluding benefits), ",
+    "states": [
+      "NY",
+      "TN"
+    ],
+    "members": {
+      "NY": [
+        "NY-0027"
+      ],
+      "TN": [
+        "TN-0033"
+      ]
+    }
+  },
+  {
+    "canonical_key": "production.fragile_record_restrictions",
+    "state_count": 2,
+    "config_home": "parameter",
+    "config_home_conflict": "parameter:1,structural:1",
+    "definition": "Inspection or copying of a record that could be damaged due to its age or condition may be made subject to reasonable restrictions intended to preserve the record.",
+    "states": [
+      "NC",
+      "WI"
+    ],
+    "members": {
+      "NC": [
+        "NC-0014"
+      ],
+      "WI": [
+        "WI-0052"
+      ]
+    }
+  },
+  {
+    "canonical_key": "custody.foia_officer_designation",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "All state, local, and regional public bodies subject to the chapter shall designate and publicly identify one or more FOIA officers to serve as the point of contact for records requests and to coordin",
+    "states": [
+      "OK",
+      "VA"
+    ],
+    "members": {
+      "OK": [
+        "OK-0014"
+      ],
+      "VA": [
+        "VA-0035"
+      ]
+    }
+  },
+  {
+    "canonical_key": "fee.waiver_discretion",
+    "state_count": 2,
+    "config_home": "structural",
+    "definition": "An entity may (and is encouraged to) fulfill a request without charge if release primarily benefits the public, the requester is the subject of/specified in the record, or the requester's legal rights",
+    "states": [
+      "TN",
+      "UT"
+    ],
+    "members": {
+      "TN": [
+        "TN-0036"
+      ],
+      "UT": [
+        "UT-0032"
+      ]
+    }
+  },
+  {
+    "canonical_key": "clarification.nonresponse_abandonment",
+    "state_count": 2,
+    "config_home": "parameter",
+    "config_home_conflict": "parameter:1,structural:1",
+    "definition": "If the body receives no written response by the 61st day after sending a clarification/discussion request (or additional-information request), the underlying request is considered withdrawn.",
+    "states": [
+      "TX",
+      "WA"
+    ],
+    "members": {
+      "TX": [
+        "TX-0014"
+      ],
+      "WA": [
+        "WA-0016"
+      ]
+    }
+  },
+  {
+    "canonical_key": "eligibility.incarcerated_requester_limit",
+    "state_count": 2,
+    "config_home": "parameter",
+    "config_home_conflict": "parameter:1,structural:1",
+    "definition": "A committed or incarcerated person is not a 'requester' with general access rights unless the requested record contains specific references to that person or his or her minor children (for whom physic",
+    "states": [
+      "UT",
+      "WI"
+    ],
+    "members": {
+      "UT": [
+        "UT-0050"
+      ],
+      "WI": [
+        "WI-0005"
+      ]
+    }
+  }
+]
