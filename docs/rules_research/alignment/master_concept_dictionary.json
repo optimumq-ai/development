@@ -537,11 +537,14 @@
     "canonical_key": "custody.referral_to_proper_custodian",
     "family": "custody",
     "config_home": "structural",
-    "state_count": 10,
+    "state_count": 13,
     "states": [
       "AL",
       "CO",
+      "FL",
+      "KS",
       "LA",
+      "MA",
       "MI",
       "NJ",
       "NV",
@@ -550,7 +553,7 @@
       "UT",
       "VA"
     ],
-    "definition": "Any officer or employee who receives a records request shall forward it to, or direct the requestor to, the custodian; the request is not considered submitted until recei",
+    "definition": "Requests for records defined as 'files' under K.S.A. 75-4379 submitted to a state or local law enforcement or governmental agency shall be directed to the agency that mad",
     "merged_from": [
       "custody.custodian_referral",
       "custody.forward_to_custodian",
@@ -560,11 +563,15 @@
       "custody.record_not_in_custody_certification",
       "custody.referral_to_originating_agency",
       "custody.website_redirect",
+      "custody.wrong_department_routing",
       "custody.wrong_entity_referral",
+      "custody.wrong_recipient_routing",
       "response.record_not_maintained_referral",
       "response.records_not_found_referral",
+      "routing.designee_disclosure",
       "routing.forward_to_custodian",
       "routing.no_custody_referral",
+      "routing.record_type_originating_agency",
       "routing.redirect_originating_agency"
     ],
     "members_by_state": {
@@ -574,8 +581,21 @@
       "CO": [
         "CO-0006"
       ],
+      "FL": [
+        "FL-0010"
+      ],
+      "KS": [
+        "KS-0013",
+        "KS-0016",
+        "KS-0017",
+        "KS-0018",
+        "KS-0019"
+      ],
       "LA": [
         "LA-0018"
+      ],
+      "MA": [
+        "MA-0012"
       ],
       "MI": [
         "MI-0013"
@@ -609,19 +629,21 @@
     "canonical_key": "custody.custodian_definition_and_role",
     "family": "custody",
     "config_home": "structural",
-    "state_count": 9,
+    "state_count": 11,
     "states": [
       "AL",
       "CO",
+      "FL",
       "KS",
       "LA",
       "MI",
       "MN",
       "OK",
       "OR",
-      "WA"
+      "WA",
+      "WI"
     ],
-    "definition": "'Public officer' means a public officer or his or her designee responsible for responding to public records requests; this identifies who must respond and to whom request",
+    "definition": "The custodian may make and enforce rules reasonably necessary for the protection of the records and to prevent unnecessary interference with the discharge of duties.",
     "merged_from": [
       "custody.custodian_default_officer",
       "custody.custodian_definition",
@@ -632,7 +654,10 @@
       "custody.release_agent_availability",
       "custody.responsible_authority",
       "intake.custodian_duty_access",
-      "intake.custodian_rulemaking"
+      "intake.custodian_rulemaking",
+      "routing.custodian_duty_to_permit",
+      "routing.default_custodian",
+      "routing.deputy_custodian"
     ],
     "members_by_state": {
       "AL": [
@@ -641,6 +666,9 @@
       "CO": [
         "CO-0004",
         "CO-0005"
+      ],
+      "FL": [
+        "FL-0009"
       ],
       "KS": [
         "KS-0015"
@@ -664,65 +692,51 @@
       ],
       "WA": [
         "WA-0041"
+      ],
+      "WI": [
+        "WI-0016",
+        "WI-0017"
       ]
     }
   },
   {
-    "canonical_key": "custody.other_custody",
+    "canonical_key": "custody.contractor_and_thirdparty_custody",
     "family": "custody",
     "config_home": "structural",
-    "state_count": 6,
+    "state_count": 5,
     "states": [
       "FL",
-      "GA",
-      "KS",
-      "MA",
       "MI",
+      "PA",
+      "TN",
       "WI"
     ],
     "definition": "At contract completion the contractor must transfer, at no cost, all public records in its possession to the agency, or keep and maintain the records; if transferring, it",
     "merged_from": [
-      "custody.wrong_department_routing",
-      "custody.wrong_recipient_routing",
-      "routing.civil_litigant_copy_to_counsel",
+      "custody.contractor_records",
+      "custody.no_contractual_delegation",
       "routing.contractor_maintain_records",
       "routing.contractor_provide_on_request",
       "routing.contractor_transfer_on_completion",
-      "routing.custodian_duty_to_permit",
-      "routing.default_custodian",
-      "routing.deputy_custodian",
-      "routing.designee_disclosure",
       "routing.it_custodian_passthrough",
-      "routing.les_records_management_system",
-      "routing.record_type_originating_agency"
+      "routing.les_records_management_system"
     ],
     "members_by_state": {
       "FL": [
-        "FL-0009",
-        "FL-0010",
         "FL-0011",
         "FL-0012",
         "FL-0013"
       ],
-      "GA": [
-        "GA-0040"
-      ],
-      "KS": [
-        "KS-0013",
-        "KS-0016",
-        "KS-0017",
-        "KS-0018",
-        "KS-0019"
-      ],
-      "MA": [
-        "MA-0012"
-      ],
       "MI": [
         "MI-0014"
       ],
+      "PA": [
+        "PA-0020"
+      ],
+      "TN": [
+        "TN-0013"
+      ],
       "WI": [
-        "WI-0016",
-        "WI-0017",
         "WI-0018"
       ]
     }
@@ -747,29 +761,6 @@
       ],
       "PA": [
         "PA-0019"
-      ]
-    }
-  },
-  {
-    "canonical_key": "custody.contractor_and_thirdparty_custody",
-    "family": "custody",
-    "config_home": "structural",
-    "state_count": 2,
-    "states": [
-      "PA",
-      "TN"
-    ],
-    "definition": "A public record in the possession of a contractor or other person performing a governmental function on behalf of an agency is considered a record of the agency; the requ",
-    "merged_from": [
-      "custody.contractor_records",
-      "custody.no_contractual_delegation"
-    ],
-    "members_by_state": {
-      "PA": [
-        "PA-0020"
-      ],
-      "TN": [
-        "TN-0013"
       ]
     }
   },
@@ -3707,9 +3698,10 @@
     "canonical_key": "intake.purpose_and_certification",
     "family": "intake",
     "config_home": "structural",
-    "state_count": 3,
+    "state_count": 4,
     "states": [
       "AZ",
+      "GA",
       "NJ",
       "OR"
     ],
@@ -3720,12 +3712,16 @@
       "intake.commercial_purpose_statement",
       "intake.legal_proceeding_certification",
       "intake.legal_proceeding_court_order_bar",
-      "intake.litigation_party_dual_service"
+      "intake.litigation_party_dual_service",
+      "routing.civil_litigant_copy_to_counsel"
     ],
     "members_by_state": {
       "AZ": [
         "AZ-0007",
         "AZ-0008"
+      ],
+      "GA": [
+        "GA-0040"
       ],
       "NJ": [
         "NJ-A16",

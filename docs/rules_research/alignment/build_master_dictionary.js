@@ -5,7 +5,7 @@ const RESEARCH = '/opt/optimumq/docs/rules_research';
 const pr = require(RESEARCH + '/pruned/pruned_discovery.json');
 const norm = k => String(k||'').toLowerCase().trim().replace(/__\d+$/,'');
 const famOf = k => { const f=k.split('.')[0];
-  return ({deadlines:'deadline',denials:'denial',communications:'communication',special:'special_records',fees:'fee'})[f]||f; };
+  return ({deadlines:'deadline',denials:'denial',communications:'communication',special:'special_records',fees:'fee',routing:'custody'})[f]||f; };
 
 // families already aligned in their own slices (loaded at assembly)
 const DONE = new Set(['eligibility','deadline','response','extension']); // timing handled separately
@@ -52,7 +52,7 @@ const R = {
     [/acknowledg|receipt_date|receipt_determin|receipt_comput|due_date_comput/, '→response'],
     [/residency_attest|resident_attest|proof_of_resident/, 'intake.residency_attestation'],
     [/duplicate_pending|identical_unchanged|unreasonable_duplicate|bot_request|single_agency_per|single_entity_per/, 'intake.duplicate_request_denial'],
-    [/commercial_purpose|legal_proceeding|litigation_party/, 'intake.purpose_and_certification'],
+    [/commercial_purpose|legal_proceeding|litigation_party|civil_litigant|litigant/, 'intake.purpose_and_certification'],
     [/procedures_publication|procedures_required|public_procedures_notice|written_procedure_published|submission_per_written_procedures|request_form_adoption|custodian_rulemaking/, 'intake.procedures_publication'],
     [/identit|identif(?!iable)|proof_of_id|photo_id|register|conditional_id/, 'intake.identity_requirement'],
     [/anonymous_request_permitted/, 'intake.identity_requirement'],
@@ -107,10 +107,11 @@ const R = {
     [/.*/, 'redaction.other_redaction'],
   ],
   custody: [
+    [/civil_litigant|litigant/, '→intake'],
     [/receipt_by_custodian_starts|receipt.*request/, '→response'],
-    [/contractor|it_custodian_passthrough|les_records_management|no_contractual_delegation|record_type_originating/, 'custody.contractor_and_thirdparty_custody'],
+    [/contractor|it_custodian_passthrough|les_records_management|no_contractual_delegation/, 'custody.contractor_and_thirdparty_custody'],
     [/tracking/, 'custody.request_tracking'],
-    [/not_custodian_statement|not_in_custody|record_not_in_custody|refer|forward|redirect|other_agency|proper_custodian|designee_disclosure|record_not_maintained_referral|records_not_found_referral/, 'custody.referral_to_proper_custodian'],
+    [/not_custodian_statement|not_in_custody|record_not_in_custody|refer|forward|redirect|other_agency|proper_custodian|designee_disclosure|record_not_maintained_referral|records_not_found_referral|wrong_recipient|wrong_department|record_type_originating/, 'custody.referral_to_proper_custodian'],
     [/designat|foia_officer|records_officer|coordinator|public_records_officer|point_of_contact|identify_custodian|municipal_clerk_default_rao|compliance_official/, 'custody.records_officer_designation'],
     [/custodian_defin|who_is_custodian|custodian_means|public_officer_definition|functional_custodian|responsible_authority|default_officer|default_custodian|deputy_custodian|delegation|duty_access|duty_to_permit|rulemaking|assistance_standard|release_agent/, 'custody.custodian_definition_and_role'],
     [/respond|responds|responsible_for_response/, 'custody.custodian_responds'],
