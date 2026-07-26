@@ -1,0 +1,680 @@
+{
+ "state": "Oregon",
+ "code": "OR",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.written_request_required": [
+     {
+      "rule_id": "OR-0004",
+      "authority": "Or. Rev. Stat. § 192.324(1)",
+      "summary": "The custodian's duty to give a copy or a reasonable opportunity to inspect is triggered upon receipt of a written request."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {
+    "response.acknowledgment_window": [
+     {
+      "rule_id": "OR-0006",
+      "authority": "Or. Rev. Stat. § 192.324(2)",
+      "summary": "When an individual identified in the public body's written procedure receives a written request, the public body shall within five business days acknowledge receipt or complete its response.",
+      "clock_spec": "5 business-days from receipt of request by the designated individual",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "OR-0007",
+      "authority": "Or. Rev. Stat. § 192.324(2)",
+      "summary": "The acknowledgment must confirm the public body is the custodian, inform the requester it is not the custodian, or notify the requester it is uncertain whether it is the custodian."
+     }
+    ]
+   },
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "OR-0022",
+      "authority": "Or. Rev. Stat. § 192.324(4)(c)",
+      "summary": "A public body may not establish a fee greater than $25 unless it first provides the requester written notification of the estimated fee amount and the requester confirms that it wants the public body to proceed."
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "OR-0008",
+      "authority": "Or. Rev. Stat. § 192.329(5)",
+      "summary": "As soon as reasonably possible but not later than 10 business days after the date acknowledgment is due, the public body shall either complete its response or provide a written statement that it is still processing plus a reasonable estimated completion date.",
+      "clock_spec": "10 business-days from the date acknowledgment is due under ORS 192.324(2)",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {
+    "denial.neither_confirm_nor_deny": [
+     {
+      "rule_id": "OR-0014",
+      "authority": "Or. Rev. Stat. § 192.329(2)(e)",
+      "summary": "Where state or federal law prohibits acknowledging whether a record exists (or acknowledgment would forfeit federal benefits or impose a sanction), the public body must provide a written statement to that effect citing the law relied on, unless the statement itself would violate law."
+     }
+    ]
+   }
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {
+    "clarification.nonresponse_withdrawal": [
+     {
+      "rule_id": "OR-0028",
+      "authority": "Or. Rev. Stat. § 192.329(4)(b)",
+      "summary": "If the requester fails to respond within 60 days to a good-faith request for information or clarification, the public body shall close the request.",
+      "clock_spec": "60 calendar-days from the good-faith clarification request; on lapse the request closes",
+      "clock_effect": "terminal"
+     }
+    ]
+   },
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {
+    "clarification.nonresponse_withdrawal": [
+     {
+      "rule_id": "OR-0028",
+      "authority": "Or. Rev. Stat. § 192.329(4)(b)",
+      "summary": "If the requester fails to respond within 60 days to a good-faith request for information or clarification, the public body shall close the request.",
+      "clock_spec": "60 calendar-days from the good-faith clarification request; on lapse the request closes",
+      "clock_effect": "terminal"
+     }
+    ]
+   },
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "OR-0022",
+      "authority": "Or. Rev. Stat. § 192.324(4)(c)",
+      "summary": "A public body may not establish a fee greater than $25 unless it first provides the requester written notification of the estimated fee amount and the requester confirms that it wants the public body to proceed."
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "OR-0008",
+      "authority": "Or. Rev. Stat. § 192.329(5)",
+      "summary": "As soon as reasonably possible but not later than 10 business days after the date acknowledgment is due, the public body shall either complete its response or provide a written statement that it is still processing plus a reasonable estimated completion date.",
+      "clock_spec": "10 business-days from the date acknowledgment is due under ORS 192.324(2)",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "OR-0022",
+      "authority": "Or. Rev. Stat. § 192.324(4)(c)",
+      "summary": "A public body may not establish a fee greater than $25 unless it first provides the requester written notification of the estimated fee amount and the requester confirms that it wants the public body to proceed."
+     }
+    ]
+   },
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "OR-0024",
+      "authority": "Or. Rev. Stat. § 192.329(3)(a)",
+      "summary": "If the public body has informed the requester of a permitted fee, its obligation to complete the response is suspended until the fee is paid, waived by the body, or ordered waived.",
+      "clock_spec": "completion obligation tolled from date requester is informed of fee until fee paid or waived",
+      "clock_effect": "tolls"
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "OR-0025",
+      "authority": "Or. Rev. Stat. § 192.329(3)(b)",
+      "summary": "If the requester fails to pay the fee within 60 days of being informed of the fee (or within 60 days of denial of a fee waiver), the public body shall close the request.",
+      "clock_spec": "60 calendar-days from date requester informed of fee, or from date of fee-waiver denial; on lapse the request closes",
+      "clock_effect": "terminal"
+     }
+    ]
+   },
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "OR-0011",
+      "authority": "Or. Rev. Stat. § 192.329(2)(b)",
+      "summary": "To complete a response the public body must assert any exemptions it believes apply and, if citing ORS 192.355(8) or (9), identify the state or federal law relied upon."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "OR-0011",
+      "authority": "Or. Rev. Stat. § 192.329(2)(b)",
+      "summary": "To complete a response the public body must assert any exemptions it believes apply and, if citing ORS 192.355(8) or (9), identify the state or federal law relied upon."
+     }
+    ],
+    "appeal.retained_optional": [
+     {
+      "rule_id": "OR-0034",
+      "authority": "Or. Rev. Stat. § 192.411(2)",
+      "summary": "If the AG orders disclosure, the state agency shall comply in full within seven days after issuance of the order unless within that period it issues a notice of intent to seek injunctive or declaratory relief; it must then institute the proceedings within seven days after issuing the notice.",
+      "clock_spec": "7 days from issuance of AG order to comply or notice suit; then 7 days from notice to institute proceedings",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {
+    "denial.neither_confirm_nor_deny": [
+     {
+      "rule_id": "OR-0014",
+      "authority": "Or. Rev. Stat. § 192.329(2)(e)",
+      "summary": "Where state or federal law prohibits acknowledging whether a record exists (or acknowledgment would forfeit federal benefits or impose a sanction), the public body must provide a written statement to that effect citing the law relied on, unless the statement itself would violate law."
+     }
+    ]
+   }
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "OR-0012",
+      "authority": "Or. Rev. Stat. § 192.338",
+      "summary": "If a record contains both exempt and nonexempt material, the public body shall separate the exempt and nonexempt material and make the nonexempt material available for examination."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "OR-0018",
+      "authority": "Or. Rev. Stat. § 192.324(3)",
+      "summary": "If a public record is maintained in machine readable or electronic form, the public body shall provide a copy in the form requested if available; if not available in the form requested, it shall make the record available in the form in which it maintains the record."
+     }
+    ],
+    "production.delivery_and_completion": [
+     {
+      "rule_id": "OR-0009",
+      "authority": "Or. Rev. Stat. § 192.329(1)",
+      "summary": "A public body shall complete its response to a written public records request as soon as practicable and without unreasonable delay.",
+      "clock_spec": "undefined-soft: \"as soon as practicable and without unreasonable delay\" from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": true,
+   "activated_by": {
+    "intake.purpose_and_certification": [
+     {
+      "rule_id": "OR-0039",
+      "authority": "Or. Rev. Stat. § 192.314(2)(a)",
+      "summary": "A requester who is a party to a civil judicial proceeding to which a public body is a party (or who filed an ORS 30.275(5)(a) tort-claim notice) and who requests a record known to relate to that proceeding must submit the request in writing to the custodian and, at the same time, to the attorney …"
+     }
+    ]
+   },
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "OR-0001",
+      "authority": "Or. Rev. Stat. § 192.314(1)",
+      "summary": "Any person (no requester qualification) has a right to inspect any public record of an Oregon public body, subject only to the stated exemptions."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "OR-0003",
+      "authority": "Or. Rev. Stat. § 192.314(1)",
+      "summary": "A requester need not state a purpose or reason to exercise the inspection right; no purpose is a condition of access."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "OR-0002",
+      "authority": "Or. Rev. Stat. § 192.314(1)",
+      "summary": "Oregon imposes no residency requirement; the inspection right runs to every person regardless of residency."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "OR-0023",
+      "authority": "Or. Rev. Stat. § 192.324(5)",
+      "summary": "The custodian may furnish copies without charge or at a substantially reduced fee if it determines the waiver or reduction is in the public interest because making the record available primarily benefits the general public."
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": true,
+   "activated_by": {
+    "custody.referral_to_proper_custodian": [
+     {
+      "rule_id": "OR-0013",
+      "authority": "Or. Rev. Stat. § 192.329(2)(d)",
+      "summary": "To the extent the public body is not the custodian of requested records, it must provide a written statement to that effect."
+     }
+    ]
+   }
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": true,
+   "activated_by": {
+    "clarification.toll_on_clarification": [
+     {
+      "rule_id": "OR-0027",
+      "authority": "Or. Rev. Stat. § 192.329(4)(a)",
+      "summary": "A public body may request additional information or clarification to expedite its response; if made in good faith, its obligation to further complete the response is suspended until the requester provides the information/clarification or affirmatively declines.",
+      "clock_spec": "further-completion obligation tolled from clarification request until requester responds or declines",
+      "clock_effect": "tolls"
+     }
+    ]
+   }
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "OR-0023",
+      "authority": "Or. Rev. Stat. § 192.324(5)",
+      "summary": "The custodian may furnish copies without charge or at a substantially reduced fee if it determines the waiver or reduction is in the public interest because making the record available primarily benefits the general public."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "OR-0023",
+      "authority": "Or. Rev. Stat. § 192.324(5)",
+      "summary": "The custodian may furnish copies without charge or at a substantially reduced fee if it determines the waiver or reduction is in the public interest because making the record available primarily benefits the general public."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": false,
+   "suppressed_by": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "OR-0024",
+      "authority": "Or. Rev. Stat. § 192.329(3)(a)",
+      "summary": "If the public body has informed the requester of a permitted fee, its obligation to complete the response is suspended until the fee is paid, waived by the body, or ordered waived.",
+      "clock_spec": "completion obligation tolled from date requester is informed of fee until fee paid or waived",
+      "clock_effect": "tolls"
+     }
+    ]
+   },
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": true,
+   "activated_by": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "OR-0024",
+      "authority": "Or. Rev. Stat. § 192.329(3)(a)",
+      "summary": "If the public body has informed the requester of a permitted fee, its obligation to complete the response is suspended until the fee is paid, waived by the body, or ordered waived.",
+      "clock_spec": "completion obligation tolled from date requester is informed of fee until fee paid or waived",
+      "clock_effect": "tolls"
+     }
+    ]
+   }
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": true,
+   "statutory": {
+    "response.acknowledgment_window": [
+     {
+      "rule_id": "OR-0006",
+      "authority": "Or. Rev. Stat. § 192.324(2)",
+      "summary": "When an individual identified in the public body's written procedure receives a written request, the public body shall within five business days acknowledge receipt or complete its response.",
+      "clock_spec": "5 business-days from receipt of request by the designated individual",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "OR-0007",
+      "authority": "Or. Rev. Stat. § 192.324(2)",
+      "summary": "The acknowledgment must confirm the public body is the custodian, inform the requester it is not the custodian, or notify the requester it is uncertain whether it is the custodian."
+     }
+    ]
+   }
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "denial.deemed_denial_on_nonresponse": [
+     {
+      "rule_id": "OR-0035",
+      "authority": "Or. Rev. Stat. § 192.418(2)",
+      "summary": "Failure of an elected official to grant or deny a request within seven days of receipt is treated as a denial, enabling the requester to institute injunctive or declaratory relief proceedings.",
+      "clock_spec": "7 days from elected official's receipt of the request; on lapse the request is deemed denied",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": true,
+   "statutory": {
+    "response.extension_grounds": [
+     {
+      "rule_id": "OR-0029",
+      "authority": "Or. Rev. Stat. § 192.329(6), (7), (8)",
+      "summary": "The ORS 192.324 and 192.329(5) time periods do not apply when compliance would be impracticable because necessary staff/volunteers are unavailable (including those on leave or not scheduled), compliance would demonstrably impede other necessary services, or because of the volume of simultaneous r…",
+      "clock_spec": "numeric acknowledgment (5 bd) and status (10 bd) deadlines suspended for a listed impracticability reason; soft 'as soon as practicable and without unreasonable delay' standard substitutes",
+      "clock_effect": "pauses"
+     }
+    ]
+   }
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": true,
+   "statutory": {
+    "clarification.nonresponse_withdrawal": [
+     {
+      "rule_id": "OR-0028",
+      "authority": "Or. Rev. Stat. § 192.329(4)(b)",
+      "summary": "If the requester fails to respond within 60 days to a good-faith request for information or clarification, the public body shall close the request.",
+      "clock_spec": "60 calendar-days from the good-faith clarification request; on lapse the request closes",
+      "clock_effect": "terminal"
+     }
+    ],
+    "clarification.toll_on_clarification": [
+     {
+      "rule_id": "OR-0027",
+      "authority": "Or. Rev. Stat. § 192.329(4)(a)",
+      "summary": "A public body may request additional information or clarification to expedite its response; if made in good faith, its obligation to further complete the response is suspended until the requester provides the information/clarification or affirmatively declines.",
+      "clock_spec": "further-completion obligation tolled from clarification request until requester responds or declines",
+      "clock_effect": "tolls"
+     }
+    ]
+   }
+  },
+  "nonpayment_close": {
+   "present": true,
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "OR-0025",
+      "authority": "Or. Rev. Stat. § 192.329(3)(b)",
+      "summary": "If the requester fails to pay the fee within 60 days of being informed of the fee (or within 60 days of denial of a fee waiver), the public body shall close the request.",
+      "clock_spec": "60 calendar-days from date requester informed of fee, or from date of fee-waiver denial; on lapse the request closes",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.labor_charge": [
+   {
+    "rule_id": "OR-0021",
+    "authority": "Or. Rev. Stat. § 192.324(4)(b)",
+    "summary": "A public body may include in the fee the cost of attorney time spent reviewing, redacting, or segregating records into exempt and nonexempt, but may NOT include attorney time spent determining the application of ORS 192.311 to 192.478."
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "OR-0020",
+    "authority": "Or. Rev. Stat. § 192.324(4)(a)",
+    "summary": "A public body may establish fees reasonably calculated to reimburse it for its actual cost of making public records available, including costs for summarizing, compiling or tailoring the records in organization or media to meet the request."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.custodian_definition_and_role": [
+   {
+    "rule_id": "OR-0016",
+    "authority": "Or. Rev. Stat. § 192.311(1)",
+    "summary": "'Custodian' means the person described in ORS 7.110 for court records, or a public body mandated (directly or indirectly) to create, maintain, care for or control a public record; a public body that is not the custodian and lacks control is not required to search for/produce a record."
+   }
+  ],
+  "intake.procedures_publication": [
+   {
+    "rule_id": "OR-0005",
+    "authority": "Or. Rev. Stat. § 192.324(7)",
+    "summary": "A public body shall make available to the public a written procedure for making public records requests that names one or more individuals (with addresses) to whom requests may be sent and states the amounts and manner of calculating fees."
+   }
+  ]
+ },
+ "ledger": {},
+ "audit": {
+  "rules_total": 27,
+  "rules_referenced": 27,
+  "unreferenced_rule_ids": []
+ }
+}

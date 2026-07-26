@@ -1,6 +1,6 @@
 # Relevance-prune cut log
 
-Applied 2026-07-23; rebuilt 2026-07-26. Removed 338 of 1454 rules (kept 1116). Originals untouched in `../wave*/discovery.json`. The 15 held items (pulled by Kevin for individual review) were RETAINED. The 6 TX AG-referral rules (TX-0016..TX-0021) were RESTORED 2026-07-26 — over-pruned as external appeal; the referral trigger, hard clocks, and requestor notices are the city's own duties (TX has no staff-denial path). TX-0023 (the AG's own render deadline) stays cut.
+Applied 2026-07-23; rebuilt 2026-07-26. Removed 338 of 1455 rules (kept 1117). Originals untouched in `../wave*/discovery.json`. The 15 held items (pulled by Kevin for individual review) were RETAINED. The 6 TX AG-referral rules (TX-0016..TX-0021) were RESTORED 2026-07-26 — over-pruned as external appeal; the referral trigger, hard clocks, and requestor notices are the city's own duties (TX has no staff-denial path). TX-0023 (the AG's own render deadline) stays cut.
 
 Rules removed, by state:
 

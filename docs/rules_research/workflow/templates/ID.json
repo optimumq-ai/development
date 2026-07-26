@@ -1,0 +1,551 @@
+{
+ "state": "Idaho",
+ "code": "ID",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {},
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {},
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "ID-0005",
+      "authority": "Idaho Code § 74-103(1)",
+      "summary": "A request must clearly indicate that it is a public records request."
+     },
+     {
+      "rule_id": "ID-0006",
+      "authority": "Idaho Code § 74-102",
+      "summary": "The requester must submit a written request describing the subject matter, the records sought, and the specific date range, together with the requester's name, mailing address, email address, and telephone number."
+     }
+    ]
+   },
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {},
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.advance_payment": [
+     {
+      "rule_id": "ID-0024",
+      "authority": "Idaho Code § 74-102(12)",
+      "summary": "The custodian may require advance payment of the fees authorized by this section before providing the records."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "ID-0015",
+      "authority": "Idaho Code § 74-103(5)",
+      "summary": "The notice of denial or partial denial shall indicate the statutory authority for the denial and clearly indicate the person's right to appeal the denial or partial denial and the time periods for doing so."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "ID-0014",
+      "authority": "Idaho Code § 74-103(4)",
+      "summary": "On a denial or partial denial, the person legally responsible for administering the public agency or that person's designee shall notify the person in writing of the denial or partial denial."
+     }
+    ],
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "ID-0015",
+      "authority": "Idaho Code § 74-103(5)",
+      "summary": "The notice of denial or partial denial shall indicate the statutory authority for the denial and clearly indicate the person's right to appeal the denial or partial denial and the time periods for doing so."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {
+    "production.installment_partial": [
+     {
+      "rule_id": "ID-0012",
+      "authority": "Idaho Code § 74-103(2)",
+      "summary": "If an existing electronic record must first be converted to another electronic format and the conversion cannot be completed within the response time allotted, the agency shall so notify the requester in writing and provide the converted record at a time mutually agreed upon between the agency an…",
+      "clock_spec": "undefined-soft: \"mutually agreed upon\" time from written conversion notice",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "ID-0016",
+      "authority": "Idaho Code § 74-112",
+      "summary": "If a record contains both nonexempt and exempt material, the agency shall, upon receipt of a request, separate the exempt and nonexempt material and make the nonexempt material available for examination; a request to copy nonexempt material may not be denied merely because it is contained in the …"
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "ID-0025",
+      "authority": "Idaho Code § 74-102(15)",
+      "summary": "An agency may provide a copy of a public record in electronic form if the record is available in electronic form and the person specifically requests an electronic copy."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": true,
+   "activated_by": {
+    "intake.residency_attestation": [
+     {
+      "rule_id": "ID-0007",
+      "authority": "Idaho Code § 74-102",
+      "summary": "The request must include the requester's name, mailing address, email address, telephone number, and a written declaration, attesting or affirming under oath, whether the requester is a resident."
+     }
+    ]
+   },
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "ID-0001",
+      "authority": "Idaho Code § 74-102(1)",
+      "summary": "Any person has the right to examine and take a copy of any public record of the state (no enumerated requester class), subject to statutory exemptions."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "ID-0002",
+      "authority": "Idaho Code § 74-102",
+      "summary": "The custodian shall make no inquiry of any person who requests a public record, except to verify identity, to ensure records are not used for prohibited mailing/telephone number lists, or to protect personal information as allowed by law."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "ID-0023",
+      "authority": "Idaho Code § 74-102",
+      "summary": "The agency shall not charge a resident any cost or fee for copies or labor when the examination is likely to contribute significantly to public understanding, is not primarily in the individual interest of the requester, and the requester lacks sufficient financial resources such that fees would …"
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "context": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "ID-0005",
+      "authority": "Idaho Code § 74-103(1)",
+      "summary": "A request must clearly indicate that it is a public records request."
+     },
+     {
+      "rule_id": "ID-0006",
+      "authority": "Idaho Code § 74-102",
+      "summary": "The requester must submit a written request describing the subject matter, the records sought, and the specific date range, together with the requester's name, mailing address, email address, and telephone number."
+     }
+    ]
+   },
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "ID-0023",
+      "authority": "Idaho Code § 74-102",
+      "summary": "The agency shall not charge a resident any cost or fee for copies or labor when the examination is likely to contribute significantly to public understanding, is not primarily in the individual interest of the requester, and the requester lacks sufficient financial resources such that fees would …"
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "ID-0023",
+      "authority": "Idaho Code § 74-102",
+      "summary": "The agency shall not charge a resident any cost or fee for copies or labor when the examination is likely to contribute significantly to public understanding, is not primarily in the individual interest of the requester, and the requester lacks sufficient financial resources such that fees would …"
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "ID-0008",
+      "authority": "Idaho Code § 74-103(2)",
+      "summary": "A public agency or custodian shall either grant or deny a resident's request to examine or copy public records within three (3) working days of receipt of the request.",
+      "clock_spec": "fixed: 3 working-days from receipt of request (resident)",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "ID-0009",
+      "authority": "Idaho Code § 74-103(2)",
+      "summary": "A public agency or custodian shall either grant or deny a request from a person who is not a resident and not employed by a resident to examine or copy public records within twenty-one (21) days of receipt of the request.",
+      "clock_spec": "fixed: 21 calendar-days from receipt of request (nonresident)",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "denial.deemed_denial_on_nonresponse": [
+     {
+      "rule_id": "ID-0013",
+      "authority": "Idaho Code § 74-103(3)",
+      "summary": "If the public agency or custodian fails to respond within the time allotted for the response, the request shall be deemed to be denied.",
+      "clock_spec": "terminal: deemed denial at expiry of the applicable response window (ID-0008/0009, or extension ID-0010/0011)",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": true,
+   "statutory": {
+    "response.extension_length": [
+     {
+      "rule_id": "ID-0010",
+      "authority": "Idaho Code § 74-103(2)",
+      "summary": "If a longer period is needed to locate or retrieve the records, the public agency shall provide the public records no later than ten (10) working days following a resident's request.",
+      "clock_spec": "ceiling: no later than 10 working-days from resident's request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "ID-0011",
+      "authority": "Idaho Code § 74-103(2)",
+      "summary": "If a longer period is needed to locate or retrieve the records, the public agency shall provide the public records no later than thirty-five (35) days following a nonresident's request.",
+      "clock_spec": "ceiling: no later than 35 calendar-days from nonresident's request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.labor_charge": [
+   {
+    "rule_id": "ID-0020",
+    "authority": "Idaho Code § 74-102(10)(e)",
+    "summary": "Fees for resident requests shall not exceed reasonable labor costs necessarily incurred, charged at the per-hour pay rate of the lowest-paid administrative staff employee or public official of the agency."
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "ID-0019",
+    "authority": "Idaho Code § 74-102(10)(c)",
+    "summary": "The fee charged to a resident may not exceed the actual cost to the agency of copying the record."
+   },
+   {
+    "rule_id": "ID-0022",
+    "authority": "Idaho Code § 74-102(10)",
+    "summary": "The agency may charge nonresidents higher fees than residents (including for labor and copies without the resident free allotments), but such fees may not exceed the actual cost to the agency."
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "ID-0021",
+    "authority": "Idaho Code § 74-102(10)(d)(i)",
+    "summary": "For computer records, the agency may charge a fee that does not exceed the sum of the direct cost of copying, the standard cost of publication, and the cost of conversion."
+   }
+  ],
+  "fee.free_allowance": [
+   {
+    "rule_id": "ID-0017",
+    "authority": "Idaho Code § 74-102(10)(a)",
+    "summary": "No fee shall be charged for the first two (2) hours of labor in responding to a resident's public records request."
+   }
+  ],
+  "fee.no_charge_categories": [
+   {
+    "rule_id": "ID-0018",
+    "authority": "Idaho Code § 74-102(10)(a)",
+    "summary": "No fee shall be charged for copying the first one hundred (100) pages of paper records in responding to a resident's request."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.records_officer_designation": [
+   {
+    "rule_id": "ID-0004",
+    "authority": "Idaho Code § 74-103(1)",
+    "summary": "All requests to examine public records shall be made to the designated custodian of such records as defined in section 74-101(3)."
+   }
+  ]
+ },
+ "ledger": {
+  "payment.advance_payment": [
+   {
+    "rule_id": "ID-0024",
+    "authority": "Idaho Code § 74-102(12)",
+    "summary": "The custodian may require advance payment of the fees authorized by this section before providing the records."
+   }
+  ]
+ },
+ "audit": {
+  "rules_total": 24,
+  "rules_referenced": 24,
+  "unreferenced_rule_ids": []
+ }
+}

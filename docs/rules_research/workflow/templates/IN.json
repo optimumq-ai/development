@@ -1,0 +1,519 @@
+{
+ "state": "Indiana",
+ "code": "IN",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.form_permitted": [
+     {
+      "rule_id": "IN-0005",
+      "authority": "Ind. Code § 5-14-3-3(a)",
+      "summary": "A public agency may, at its discretion, require a request to be in writing on or in a form provided by the agency."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {},
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "IN-0004",
+      "authority": "Ind. Code § 5-14-3-3(a)",
+      "summary": "A request must identify with reasonable particularity the record being requested for the agency's duty to attach."
+     }
+    ]
+   },
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {},
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {},
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "IN-0020",
+      "authority": "Ind. Code § 5-14-3-9(c)",
+      "summary": "A denial made in writing (or by facsimile) must include a statement of the specific exemption(s) authorizing the withholding and the name and title/position of the person responsible for the denial."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "IN-0020",
+      "authority": "Ind. Code § 5-14-3-9(c)",
+      "summary": "A denial made in writing (or by facsimile) must include a statement of the specific exemption(s) authorizing the withholding and the name and title/position of the person responsible for the denial."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "IN-0011",
+      "authority": "Ind. Code § 5-14-3-6(a)",
+      "summary": "If a record contains both disclosable and nondisclosable information, the agency must separate the disclosable material and make it available for inspection and copying."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "IN-0030",
+      "authority": "Ind. Code § 5-14-3-3(b)",
+      "summary": "A public agency shall provide an electronic copy or a paper copy of a public record at the option of the person making the request."
+     }
+    ],
+    "production.delivery_and_completion": [
+     {
+      "rule_id": "IN-0010",
+      "authority": "Ind. Code § 5-14-3-3(b)",
+      "summary": "After a proper request, the agency must produce copies or permit copying within a reasonable time.",
+      "clock_spec": "undefined-soft: \"reasonable time\" from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "production.inspection_access": [
+     {
+      "rule_id": "IN-0029",
+      "authority": "Ind. Code § 5-14-3-3(e)",
+      "summary": "A public agency may (but need not) permit a person to inspect and copy records through enhanced access under a contract described in section 3.5."
+     }
+    ],
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "IN-0013",
+      "authority": "Ind. Code § 5-14-3-6(d)",
+      "summary": "An agency is not required to reprogram a computer system to provide enhanced access or access to a governmental entity by an electronic device."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": false,
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "IN-0001",
+      "authority": "Ind. Code § 5-14-3-3(a)",
+      "summary": "Any person may inspect and copy the public records of any public agency during the agency's regular business hours."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "IN-0002",
+      "authority": "Ind. Code § 5-14-3-3(a)",
+      "summary": "A public agency may not deny a request because the requester refuses to state the purpose of the request, unless another applicable statute requires it."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "IN-0003",
+      "authority": "Ind. Code § 5-14-3-3(a)",
+      "summary": "The right to inspect and copy public records extends to any person; the Act imposes no residency or citizenship qualification."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": false
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": true,
+   "activated_by": {
+    "classification.commercial_purpose": [
+     {
+      "rule_id": "IN-0027",
+      "authority": "Ind. Code § 5-14-3-2",
+      "summary": "'Commercial purpose' is defined by statute and, where it applies, drives fee treatment and the list-disclosure restriction."
+     }
+    ]
+   }
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "context": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "IN-0004",
+      "authority": "Ind. Code § 5-14-3-3(a)",
+      "summary": "A request must identify with reasonable particularity the record being requested for the agency's duty to attach."
+     }
+    ]
+   },
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": false
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": false
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "context": {
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "IN-0013",
+      "authority": "Ind. Code § 5-14-3-6(d)",
+      "summary": "An agency is not required to reprogram a computer system to provide enhanced access or access to a governmental entity by an electronic device."
+     }
+    ]
+   },
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": true,
+   "activated_by": {
+    "special_records.special_production_constraint": [
+     {
+      "rule_id": "IN-0028",
+      "authority": "Ind. Code § 5-14-3-3(f)",
+      "summary": "Enumerated lists (e.g., of names and addresses) may not be disclosed to any individual/entity for political purposes, nor to commercial entities for commercial purposes."
+     }
+    ]
+   }
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "denial.deemed_denial_on_nonresponse": [
+     {
+      "rule_id": "IN-0007",
+      "authority": "Ind. Code § 5-14-3-9(a)",
+      "summary": "For a request made in person, by telephone, or for enhanced access, a denial is deemed to occur when 24 hours elapse after an agency employee refuses to permit inspection and copying.",
+      "clock_spec": "terminal: denial deemed at 24 hours after an agency employee's refusal to permit inspection/copying (in-person, telephone, or enhanced-access requests)",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "IN-0008",
+      "authority": "Ind. Code § 5-14-3-9(b)",
+      "summary": "For a request received by mail or facsimile, a denial of disclosure does not occur until seven days elapse from the date the agency receives the request.",
+      "clock_spec": "terminal: denial deemed 7 days from the date the public agency receives a mailed or faxed request",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "IN-0009",
+      "authority": "Ind. Code § 5-14-3-9(a), (b)",
+      "summary": "Agency silence/refusal for the applicable statutory window is deemed a denial of disclosure, moving the request into a denied state.",
+      "clock_spec": "terminal: request enters denied state upon expiry of the applicable § 5-14-3-9 window",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "IN-0015",
+    "authority": "Ind. Code § 5-14-3-8(b)-(d)",
+    "summary": "The fee for copying documents may not exceed the greater of ten cents ($0.10) per non-color page or twenty-five cents ($0.25) per color page, or the agency's actual cost."
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "IN-0012",
+    "authority": "Ind. Code § 5-14-3-6(c)",
+    "summary": "An agency may charge the requester the agency's direct cost of reprogramming a computer system where reprogramming is required to separate disclosable from nondisclosable information stored electronically."
+   },
+   {
+    "rule_id": "IN-0017",
+    "authority": "Ind. Code § 5-14-3-8(g)",
+    "summary": "An agency may charge a fee for providing an electronic map based upon a reasonable percentage of the agency's direct cost of maintaining, upgrading, and enhancing the electronic map."
+   }
+  ],
+  "fee.certified_copy_charge": [
+   {
+    "rule_id": "IN-0016",
+    "authority": "Ind. Code § 5-14-3-8(b)",
+    "summary": "The fee for certification of documents may not exceed five dollars ($5) per document."
+   }
+  ],
+  "fee.special_service_charge": [
+   {
+    "rule_id": "IN-0018",
+    "authority": "Ind. Code § 5-14-3-8(h)",
+    "summary": "An agency may charge any reasonable fee agreed on in an enhanced-access contract under section 3.5 for providing enhanced access to public records."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "IN-0019",
+    "authority": "Ind. Code § 5-14-3-8(d)",
+    "summary": "For a local public agency, the fiscal body of the political subdivision establishes the copying fee schedule by ordinance, and the fee must be uniform."
+   }
+  ]
+ },
+ "program_setup": {
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "IN-0019",
+    "authority": "Ind. Code § 5-14-3-8(d)",
+    "summary": "For a local public agency, the fiscal body of the political subdivision establishes the copying fee schedule by ordinance, and the fee must be uniform."
+   }
+  ]
+ },
+ "ledger": {},
+ "audit": {
+  "rules_total": 22,
+  "rules_referenced": 22,
+  "unreferenced_rule_ids": []
+ }
+}

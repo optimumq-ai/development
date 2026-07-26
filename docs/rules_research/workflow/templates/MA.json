@@ -1,0 +1,811 @@
+{
+ "state": "Massachusetts",
+ "code": "MA",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.submission_channels": [
+     {
+      "rule_id": "MA-0007",
+      "authority": "M.G.L. c. 66, § 10(a)",
+      "summary": "A request may be delivered by hand, by first class mail to the RAO's business address, or by electronic mail to the posted address (regulations add facsimile if the custodian has fax access)."
+     }
+    ],
+    "intake.oral_request_permitted": [
+     {
+      "rule_id": "MA-0008",
+      "authority": "950 CMR 32.06(1)(a)",
+      "summary": "Requests may be made orally in person to a records access officer or custodian; telephone requests may be accepted at the RAO's discretion."
+     }
+    ],
+    "intake.no_required_form": [
+     {
+      "rule_id": "MA-0009",
+      "authority": "950 CMR 32.06(1)(d)",
+      "summary": "A records access officer shall not require requesters to use a particular form, though optional forms may be made available."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {
+    "response.valid_response_forms": [
+     {
+      "rule_id": "MA-0019",
+      "authority": "M.G.L. c. 66, § 10(b)(i)-(ix)",
+      "summary": "The § 10(b) written response must contain nine enumerated elements: receipt confirmation; records not in custody; other custodian; records withheld with specific exemptions; records to be produced with a burden statement; a reasonable production timeframe; a suggested scope modification; an itemi…"
+     }
+    ]
+   },
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "MA-0039",
+      "authority": "950 CMR 32.07(2)(b)",
+      "summary": "If fees are to be assessed, the RAO must provide a written, itemized, good-faith estimate of fees before complying, within the 10-business-day response."
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "MA-0005",
+      "authority": "M.G.L. c. 66, § 10(a)(i)",
+      "summary": "A valid request must reasonably describe the public record sought so the RAO can identify and locate it."
+     },
+     {
+      "rule_id": "MA-0006",
+      "authority": "M.G.L. c. 66, § 10(a)(ii)",
+      "summary": "The duty to produce applies only where the record is within the possession, custody, or control of the agency or municipality the RAO serves."
+     }
+    ]
+   },
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "MA-0039",
+      "authority": "950 CMR 32.07(2)(b)",
+      "summary": "If fees are to be assessed, the RAO must provide a written, itemized, good-faith estimate of fees before complying, within the 10-business-day response."
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "MA-0039",
+      "authority": "950 CMR 32.07(2)(b)",
+      "summary": "If fees are to be assessed, the RAO must provide a written, itemized, good-faith estimate of fees before complying, within the 10-business-day response."
+     }
+    ]
+   },
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.advance_payment": [
+     {
+      "rule_id": "MA-0044",
+      "authority": "950 CMR 32.06(2)(f)",
+      "summary": "A records access officer may delay provision of records until all fees related to the request are paid in full by the person seeking access."
+     }
+    ],
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "MA-0043",
+      "authority": "M.G.L. c. 66, § 10(a)(iii)",
+      "summary": "The production duty is conditioned on the RAO receiving payment of a reasonable fee as set forth in subsection (d)."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "MA-0040",
+      "authority": "M.G.L. c. 66, § 10(e)",
+      "summary": "A records access officer shall not charge a fee for a public record unless the RAO responded to the requestor within 10 business days under subsection (b).",
+      "clock_spec": "terminal: fee right is forfeited if no § 10(b) response within 10 business-days",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "MA-0041",
+      "authority": "M.G.L. c. 66, § 10(d)(vi)",
+      "summary": "The RAO may deny public-records requests from a requester who has failed to compensate the entity for previously produced public records."
+     },
+     {
+      "rule_id": "MA-0042",
+      "authority": "M.G.L. c. 66, § 10(d)(vii)",
+      "summary": "When denying for an unpaid balance, the RAO shall provide written notification detailing the reasons, including an itemized list of balances attributed to previously produced records."
+     }
+    ]
+   },
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "MA-0053",
+      "authority": "M.G.L. c. 66, § 10(b)(iv)",
+      "summary": "A denial/withholding must identify the records withheld and provide the specific reasons, including the specific statutory exemption(s) or common-law privilege and its applicability to each withheld portion."
+     },
+     {
+      "rule_id": "MA-0054",
+      "authority": "950 CMR 32.06(3)(d)",
+      "summary": "Where a record is withheld on a claim of attorney-client privilege, the written denial must provide a detailed description of the record, including the names of the author and recipients and, in general terms, the subject matter of the withheld information."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "MA-0052",
+      "authority": "950 CMR 32.06(3)(a)-(b)",
+      "summary": "The RAO must provide written notice by first class or electronic mail of any denial of access, within 10 business days of receipt of the request.",
+      "clock_spec": "within 10 business-days of receipt of the request",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "MA-0053",
+      "authority": "M.G.L. c. 66, § 10(b)(iv)",
+      "summary": "A denial/withholding must identify the records withheld and provide the specific reasons, including the specific statutory exemption(s) or common-law privilege and its applicability to each withheld portion."
+     },
+     {
+      "rule_id": "MA-0054",
+      "authority": "950 CMR 32.06(3)(d)",
+      "summary": "Where a record is withheld on a claim of attorney-client privilege, the written denial must provide a detailed description of the record, including the names of the author and recipients and, in general terms, the subject matter of the withheld information."
+     }
+    ],
+    "appeal.retained_optional": [
+     {
+      "rule_id": "MA-0055",
+      "authority": "M.G.L. c. 66, § 10(b)(ix)",
+      "summary": "The response/denial must include a statement informing the requester of the right of administrative appeal to the Supervisor under § 10A(a) and the right to seek judicial review by civil action in the superior court."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "MA-0045",
+      "authority": "M.G.L. c. 66, § 10(a)",
+      "summary": "The RAO must furnish any segregable portion of a public record (i.e., disclose non-exempt portions even where other portions are withheld)."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "MA-0047",
+      "authority": "M.G.L. c. 66, § 6A(d)",
+      "summary": "The RAO must provide public records by electronic means unless the record is not available in electronic form or the requestor cannot receive/access a usable electronic form."
+     },
+     {
+      "rule_id": "MA-0048",
+      "authority": "M.G.L. c. 66, § 6A(d)",
+      "summary": "The RAO must, to the extent feasible, provide the record in the requestor's preferred format or, absent a preference, in a searchable, machine-readable format."
+     },
+     {
+      "rule_id": "MA-0049",
+      "authority": "950 CMR 32.07(1)(c)-(d)",
+      "summary": "The RAO must provide electronic records in native form when possible, presuming machine-readable electronic copies unless the requester specifies otherwise."
+     }
+    ],
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "MA-0046",
+      "authority": "M.G.L. c. 66, § 6A(d)",
+      "summary": "The RAO is not required to create a new public record to comply with a request; furnishing a segregable portion of an existing record is not creation of a new record."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": false,
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "MA-0001",
+      "authority": "M.G.L. c. 66, § 10(a)",
+      "summary": "A records access officer must permit inspection or furnish a copy of any public record to any requestor, without limiting access to a class of persons."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "MA-0003",
+      "authority": "M.G.L. c. 66, § 10(d)(viii)",
+      "summary": "A records access officer may not require the requester to state the purpose of a request, except to determine a commercial purpose or to rule on a fee-waiver request."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "MA-0002",
+      "authority": "M.G.L. c. 66, § 10(a)",
+      "summary": "Access to public records is not conditioned on the requestor's residency or citizenship; any person may request regardless of state of residence."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "MA-0038",
+      "authority": "M.G.L. c. 66, § 10(d)(v)",
+      "summary": "The RAO may waive or reduce a fee upon a showing that disclosure is in the public interest (likely to contribute significantly to public understanding of government and not primarily in the requestor's commercial interest), or that the requestor lacks the financial ability to pay the full reasona…"
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": true,
+   "activated_by": {
+    "classification.commercial_purpose": [
+     {
+      "rule_id": "MA-0004",
+      "authority": "M.G.L. c. 66, § 10(d)(ix)",
+      "summary": "'Commercial purpose' means the sale/resale of a record or use of its information to advance the requester's strategic business interests for profit, excluding news, citizen oversight, and academic/scientific/journalistic/public research."
+     }
+    ]
+   }
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": true,
+   "activated_by": {
+    "custody.referral_to_proper_custodian": [
+     {
+      "rule_id": "MA-0012",
+      "authority": "M.G.L. c. 66, § 10(b)(ii)-(iii)",
+      "summary": "If sought records are not within its possession, custody, or control, the written response must identify those records and identify the agency or municipality that may possess them, if known."
+     }
+    ]
+   }
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "context": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "MA-0005",
+      "authority": "M.G.L. c. 66, § 10(a)(i)",
+      "summary": "A valid request must reasonably describe the public record sought so the RAO can identify and locate it."
+     },
+     {
+      "rule_id": "MA-0006",
+      "authority": "M.G.L. c. 66, § 10(a)(ii)",
+      "summary": "The duty to produce applies only where the record is within the possession, custody, or control of the agency or municipality the RAO serves."
+     }
+    ]
+   },
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "MA-0038",
+      "authority": "M.G.L. c. 66, § 10(d)(v)",
+      "summary": "The RAO may waive or reduce a fee upon a showing that disclosure is in the public interest (likely to contribute significantly to public understanding of government and not primarily in the requestor's commercial interest), or that the requestor lacks the financial ability to pay the full reasona…"
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "MA-0038",
+      "authority": "M.G.L. c. 66, § 10(d)(v)",
+      "summary": "The RAO may waive or reduce a fee upon a showing that disclosure is in the public interest (likely to contribute significantly to public understanding of government and not primarily in the requestor's commercial interest), or that the requestor lacks the financial ability to pay the full reasona…"
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": false,
+   "suppressed_by": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "MA-0043",
+      "authority": "M.G.L. c. 66, § 10(a)(iii)",
+      "summary": "The production duty is conditioned on the RAO receiving payment of a reasonable fee as set forth in subsection (d)."
+     }
+    ]
+   },
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "context": {
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "MA-0046",
+      "authority": "M.G.L. c. 66, § 6A(d)",
+      "summary": "The RAO is not required to create a new public record to comply with a request; furnishing a segregable portion of an existing record is not creation of a new record."
+     }
+    ]
+   },
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": true,
+   "activated_by": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "MA-0043",
+      "authority": "M.G.L. c. 66, § 10(a)(iii)",
+      "summary": "The production duty is conditioned on the RAO receiving payment of a reasonable fee as set forth in subsection (d)."
+     }
+    ]
+   }
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "MA-0018",
+      "authority": "M.G.L. c. 66, § 10(b)",
+      "summary": "If the entity will not fully produce within the initial timeframe (or will withhold), it must inform the requestor in writing not later than 10 business days after initial receipt.",
+      "clock_spec": "10 business-days from initial receipt of request",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.clock_computation": [
+     {
+      "rule_id": "MA-0014",
+      "authority": "950 CMR 32.03(3)",
+      "summary": "For a written request, time computation begins on the first business day following the date of receipt; an oral request is deemed received the day it was made.",
+      "clock_spec": "start event: first business day following receipt (written) / day made (oral)"
+     },
+     {
+      "rule_id": "MA-0015",
+      "authority": "950 CMR 32.06(1)(f)",
+      "summary": "Calculation of time commences only for requests made in accordance with the request requirements (e.g., reasonable description, proper delivery)."
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": true,
+   "statutory": {
+    "response.extension_grounds": [
+     {
+      "rule_id": "MA-0022",
+      "authority": "M.G.L. c. 66, § 10(b)(vi)",
+      "summary": "The requestor may voluntarily agree to a response date beyond the statutory extended timeframes."
+     }
+    ],
+    "response.extension_length": [
+     {
+      "rule_id": "MA-0020",
+      "authority": "M.G.L. c. 66, § 10(b)(vi)",
+      "summary": "For a municipality, the reasonable production timeframe stated in the written response shall not exceed 25 business days following initial receipt of the request.",
+      "clock_spec": "ceiling: 25 business-days from initial receipt (municipality)",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "MA-0021",
+      "authority": "M.G.L. c. 66, § 10(b)(vi)",
+      "summary": "For a (state) agency, the reasonable production timeframe stated in the written response shall not exceed 15 business days following initial receipt of the request.",
+      "clock_spec": "ceiling: 15 business-days from initial receipt (agency)",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "MA-0023",
+      "authority": "M.G.L. c. 66, § 10(c)",
+      "summary": "A records access officer may petition the Supervisor of Records for an extension of time as soon as practical and within 20 business days after initial receipt (or within 10 business days after a Supervisor determination that the record is public).",
+      "clock_spec": "within 20 business-days from initial receipt (or 10 business-days from Supervisor determination)",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "MA-0027",
+      "authority": "M.G.L. c. 66, § 10(c)",
+      "summary": "The Supervisor must issue a written decision on an RAO extension petition within 5 business days following receipt of the petition.",
+      "clock_spec": "5 business-days from Supervisor's receipt of the petition",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.extension_limit": [
+     {
+      "rule_id": "MA-0025",
+      "authority": "M.G.L. c. 66, § 10(c)",
+      "summary": "Upon a showing of good cause, the Supervisor may grant a single extension to a municipality not to exceed 30 business days.",
+      "clock_spec": "ceiling: single extension up to 30 business-days (municipality)",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "MA-0026",
+      "authority": "M.G.L. c. 66, § 10(c)",
+      "summary": "Upon a showing of good cause, the Supervisor may grant a single extension to a (state) agency not to exceed 20 business days.",
+      "clock_spec": "ceiling: single extension up to 20 business-days (agency)",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "MA-0028",
+      "authority": "M.G.L. c. 66, § 10(c)",
+      "summary": "If the Supervisor finds a request is part of a series of contemporaneous requests that are frivolous or designed to intimidate/harass and not for broad public dissemination, the Supervisor may grant a longer extension or relieve the entity of its obligation to provide copies.",
+      "clock_spec": "terminal: obligation to provide copies may be relieved (or a longer extension granted)",
+      "clock_effect": "terminal"
+     }
+    ],
+    "response.extension_notice": [
+     {
+      "rule_id": "MA-0024",
+      "authority": "M.G.L. c. 66, § 10(c)",
+      "summary": "Upon submitting the extension petition to the Supervisor, the RAO must furnish a copy of the petition to the requestor."
+     }
+    ]
+   }
+  },
+  "completion": {
+   "present": true,
+   "statutory": {
+    "production.completion_window": [
+     {
+      "rule_id": "MA-0016",
+      "authority": "M.G.L. c. 66, § 10(a)",
+      "summary": "The RAO must permit inspection or furnish a copy (or any segregable portion) not later than 10 business days following receipt of the request.",
+      "clock_spec": "10 business-days from receipt of request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "MA-0017",
+      "authority": "M.G.L. c. 66, § 10(a)",
+      "summary": "Independent of the 10-day cap, production or inspection must occur at reasonable times and without unreasonable delay.",
+      "clock_spec": "undefined-soft: \"at reasonable times and without unreasonable delay\" from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": true,
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "MA-0040",
+      "authority": "M.G.L. c. 66, § 10(e)",
+      "summary": "A records access officer shall not charge a fee for a public record unless the RAO responded to the requestor within 10 business days under subsection (b).",
+      "clock_spec": "terminal: fee right is forfeited if no § 10(b) response within 10 business-days",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "MA-0041",
+      "authority": "M.G.L. c. 66, § 10(d)(vi)",
+      "summary": "The RAO may deny public-records requests from a requester who has failed to compensate the entity for previously produced public records."
+     },
+     {
+      "rule_id": "MA-0042",
+      "authority": "M.G.L. c. 66, § 10(d)(vii)",
+      "summary": "When denying for an unpaid balance, the RAO shall provide written notification detailing the reasons, including an itemized list of balances attributed to previously produced records."
+     }
+    ]
+   }
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "MA-0030",
+    "authority": "M.G.L. c. 66, § 10(d)(i)",
+    "summary": "The fee for standard black-and-white paper copies or printouts shall not exceed 5 cents per page, for both single- and double-sided copies."
+   }
+  ],
+  "fee.labor_charge": [
+   {
+    "rule_id": "MA-0032",
+    "authority": "M.G.L. c. 66, § 10(d)(iii)",
+    "summary": "For a municipality, the hourly labor rate must equal or be less than the lowest-paid capable employee's rate and shall not exceed $25 per hour, unless a higher rate is approved by the Supervisor."
+   },
+   {
+    "rule_id": "MA-0033",
+    "authority": "M.G.L. c. 66, § 10(d)(ii)",
+    "summary": "For a (state) agency, the hourly labor rate must equal or be less than the lowest-paid capable employee's rate and shall not be more than $25 per hour."
+   },
+   {
+    "rule_id": "MA-0037",
+    "authority": "M.G.L. c. 66, § 10(d)(iv)",
+    "summary": "The Supervisor may approve a petition to charge for segregation/redaction time, or a municipal petition to charge over $25/hour, if the request is for a commercial purpose or the fee is a necessary, reasonable good-faith cost not designed to deter access; the entity must furnish the petition to t…",
+    "clock_spec": "Supervisor written determination within 5 business-days of receipt of the petition",
+    "clock_effect": "sets-deadline"
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "MA-0029",
+    "authority": "M.G.L. c. 66, § 10(d)",
+    "summary": "A records access officer may assess a reasonable fee for production (except freely-inspectable records), and the fee shall not exceed the actual cost of reproducing the record."
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "MA-0031",
+    "authority": "M.G.L. c. 66, § 10(d)(i)",
+    "summary": "The actual cost of any storage device or material provided in response to a request may be included as part of the fee."
+   }
+  ],
+  "fee.free_allowance": [
+   {
+    "rule_id": "MA-0034",
+    "authority": "M.G.L. c. 66, § 10(d)(iii)(B)",
+    "summary": "For a municipality with a population over 20,000, no labor fee may be assessed for the first 2 hours of work performed."
+   },
+   {
+    "rule_id": "MA-0035",
+    "authority": "M.G.L. c. 66, § 10(d)(ii)(B)",
+    "summary": "For a (state) agency, no labor fee may be assessed for the first 4 hours of work performed."
+   }
+  ],
+  "fee.no_charge_categories": [
+   {
+    "rule_id": "MA-0036",
+    "authority": "M.G.L. c. 66, § 10(d)(ii)(C), (iii)(C)",
+    "summary": "A fee shall not be assessed for time spent segregating or redacting records unless such segregation/redaction is required by law or approved by the Supervisor."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.records_officer_designation": [
+   {
+    "rule_id": "MA-0010",
+    "authority": "M.G.L. c. 66, § 6A(a)",
+    "summary": "Each agency and municipality must designate one or more employees as records access officers to coordinate and respond to public-records requests."
+   },
+   {
+    "rule_id": "MA-0011",
+    "authority": "M.G.L. c. 66, § 6A(a)",
+    "summary": "In a municipality, the municipal clerk (or the clerk's designees, or any designee the chief executive officer appoints) serves as records access officer."
+   }
+  ]
+ },
+ "ledger": {
+  "payment.advance_payment": [
+   {
+    "rule_id": "MA-0044",
+    "authority": "950 CMR 32.06(2)(f)",
+    "summary": "A records access officer may delay provision of records until all fees related to the request are paid in full by the person seeking access."
+   }
+  ]
+ },
+ "audit": {
+  "rules_total": 52,
+  "rules_referenced": 52,
+  "unreferenced_rule_ids": []
+ }
+}

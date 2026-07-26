@@ -1,0 +1,1201 @@
+{
+ "state": "Texas",
+ "code": "TX",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.written_request_required": [
+     {
+      "rule_id": "TX-0005",
+      "authority": "Tex. Gov't Code § 552.234(a)",
+      "summary": "A request must be in writing and delivered by U.S. mail, e-mail, hand delivery, or another method the governmental body has approved (e.g., fax, submission through its website)."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "TX-0028",
+      "authority": "Tex. Gov't Code § 552.2615(a)",
+      "summary": "If a copy charge (or a § 552.271 paper-inspection charge) will exceed $40, the body must give the requestor a written itemized statement detailing all estimated charges (including labor/personnel), notice of any less-costly alternative, and the requestor's response responsibilities."
+     },
+     {
+      "rule_id": "TX-0029",
+      "authority": "Tex. Gov't Code § 552.2615(b)",
+      "summary": "The request is considered withdrawn if the requestor does not respond in writing within 10 business days after the itemized statement is sent (accepting charges, modifying the request, or filing an overcharge complaint).",
+      "clock_spec": "10 business-days from date the itemized statement is sent",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "TX-0030",
+      "authority": "Tex. Gov't Code § 552.2615(c)",
+      "summary": "If, before making the copy available, the body determines estimated charges will exceed the itemized statement by 20% or more, it must send a written updated itemized statement; no timely response to the update means the request is withdrawn."
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {
+    "payment.deposit": [
+     {
+      "rule_id": "TX-0035",
+      "authority": "Tex. Gov't Code § 552.263(a-1)",
+      "summary": "The officer may require a deposit or bond for unpaid amounts owed on prior requests if those unpaid amounts exceed $100, and this becomes the sole means of collecting those amounts."
+     }
+    ],
+    "payment.deposit_threshold": [
+     {
+      "rule_id": "TX-0034",
+      "authority": "Tex. Gov't Code § 552.263(a)",
+      "summary": "The officer may require a deposit or bond for anticipated copy costs once an itemized estimate has been provided and the estimated charge exceeds $100 (body with more than 15 full-time employees) or $50 (fewer than 16 full-time employees)."
+     }
+    ]
+   }
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {
+    "denial.no_responsive_records": [
+     {
+      "rule_id": "TX-S01",
+      "authority": "Tex. Gov't Code § 552.221(f) (added by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "If the governmental body determines it has no information responsive to a request, the officer for public information must notify the requestor in writing not later than the 10th business day after the date the request is received.",
+      "clock_spec": "10 business days from receipt of the request",
+      "clock_effect": "deadline"
+     }
+    ]
+   }
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {
+    "clarification.clarification_process": [
+     {
+      "rule_id": "TX-0012",
+      "authority": "Tex. Gov't Code § 552.222(b)",
+      "summary": "If a request is unclear the body may ask the requestor to clarify; if a large amount is requested the body may discuss narrowing the scope."
+     },
+     {
+      "rule_id": "TX-0013",
+      "authority": "Tex. Gov't Code § 552.222(e)",
+      "summary": "A written clarification/discussion request (or a request for additional info) must include a statement of the consequences of the requestor's failure to timely respond."
+     }
+    ]
+   },
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {
+    "clarification.nonresponse_withdrawal": [
+     {
+      "rule_id": "TX-0014",
+      "authority": "Tex. Gov't Code § 552.222(d)",
+      "summary": "If the body receives no written response by the 61st day after sending a clarification/discussion request (or additional-information request), the underlying request is considered withdrawn.",
+      "clock_spec": "61 days from date clarification/discussion request sent",
+      "clock_effect": "terminal"
+     }
+    ]
+   },
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {
+    "clarification.nonresponse_withdrawal": [
+     {
+      "rule_id": "TX-0014",
+      "authority": "Tex. Gov't Code § 552.222(d)",
+      "summary": "If the body receives no written response by the 61st day after sending a clarification/discussion request (or additional-information request), the underlying request is considered withdrawn.",
+      "clock_spec": "61 days from date clarification/discussion request sent",
+      "clock_effect": "terminal"
+     }
+    ]
+   },
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "TX-0028",
+      "authority": "Tex. Gov't Code § 552.2615(a)",
+      "summary": "If a copy charge (or a § 552.271 paper-inspection charge) will exceed $40, the body must give the requestor a written itemized statement detailing all estimated charges (including labor/personnel), notice of any less-costly alternative, and the requestor's response responsibilities."
+     },
+     {
+      "rule_id": "TX-0029",
+      "authority": "Tex. Gov't Code § 552.2615(b)",
+      "summary": "The request is considered withdrawn if the requestor does not respond in writing within 10 business days after the itemized statement is sent (accepting charges, modifying the request, or filing an overcharge complaint).",
+      "clock_spec": "10 business-days from date the itemized statement is sent",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "TX-0030",
+      "authority": "Tex. Gov't Code § 552.2615(c)",
+      "summary": "If, before making the copy available, the body determines estimated charges will exceed the itemized statement by 20% or more, it must send a written updated itemized statement; no timely response to the update means the request is withdrawn."
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "TX-0028",
+      "authority": "Tex. Gov't Code § 552.2615(a)",
+      "summary": "If a copy charge (or a § 552.271 paper-inspection charge) will exceed $40, the body must give the requestor a written itemized statement detailing all estimated charges (including labor/personnel), notice of any less-costly alternative, and the requestor's response responsibilities."
+     },
+     {
+      "rule_id": "TX-0029",
+      "authority": "Tex. Gov't Code § 552.2615(b)",
+      "summary": "The request is considered withdrawn if the requestor does not respond in writing within 10 business days after the itemized statement is sent (accepting charges, modifying the request, or filing an overcharge complaint).",
+      "clock_spec": "10 business-days from date the itemized statement is sent",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "TX-0030",
+      "authority": "Tex. Gov't Code § 552.2615(c)",
+      "summary": "If, before making the copy available, the body determines estimated charges will exceed the itemized statement by 20% or more, it must send a written updated itemized statement; no timely response to the update means the request is withdrawn."
+     }
+    ]
+   },
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.deposit": [
+     {
+      "rule_id": "TX-0035",
+      "authority": "Tex. Gov't Code § 552.263(a-1)",
+      "summary": "The officer may require a deposit or bond for unpaid amounts owed on prior requests if those unpaid amounts exceed $100, and this becomes the sole means of collecting those amounts."
+     }
+    ],
+    "payment.deposit_threshold": [
+     {
+      "rule_id": "TX-0034",
+      "authority": "Tex. Gov't Code § 552.263(a)",
+      "summary": "The officer may require a deposit or bond for anticipated copy costs once an itemized estimate has been provided and the estimated charge exceeds $100 (body with more than 15 full-time employees) or $50 (fewer than 16 full-time employees)."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "TX-S05",
+      "authority": "Tex. Gov't Code § 552.221(e)",
+      "summary": "A request is considered withdrawn if the requestor fails to inspect or duplicate the public information in the governmental body's offices on or before the 60th day after the date the information is made available, or fails to pay the postage and other applicable charges under Subchapter F on or …",
+      "clock_spec": "60 calendar days from availability notice (inspection/duplication) or from charge notice (payment)",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {},
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.no_responsive_records": [
+     {
+      "rule_id": "TX-S01",
+      "authority": "Tex. Gov't Code § 552.221(f) (added by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "If the governmental body determines it has no information responsive to a request, the officer for public information must notify the requestor in writing not later than the 10th business day after the date the request is received.",
+      "clock_spec": "10 business days from receipt of the request",
+      "clock_effect": "deadline"
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {
+    "denial.no_responsive_records": [
+     {
+      "rule_id": "TX-S01",
+      "authority": "Tex. Gov't Code § 552.221(f) (added by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "If the governmental body determines it has no information responsive to a request, the officer for public information must notify the requestor in writing not later than the 10th business day after the date the request is received.",
+      "clock_spec": "10 business days from receipt of the request",
+      "clock_effect": "deadline"
+     }
+    ]
+   }
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {},
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {
+    "redaction.mandatory_pii": [
+     {
+      "rule_id": "TX-0024",
+      "authority": "Tex. Gov't Code § 552.147(b)",
+      "summary": "A body may redact a living person's social security number from information it discloses under § 552.021 without requesting an attorney general decision under Subchapter G."
+     }
+    ]
+   }
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": true,
+   "activated_by": {
+    "eligibility.incarcerated_requester_exclusion": [
+     {
+      "rule_id": "TX-0004",
+      "authority": "Tex. Gov't Code § 552.028(a)",
+      "summary": "A governmental body is not required to accept or comply with a request from an incarcerated/confined individual or that individual's agent (other than the individual's attorney seeking disclosable information)."
+     }
+    ]
+   },
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "TX-0001",
+      "authority": "Tex. Gov't Code § 552.221(a)",
+      "summary": "Any person may apply to the officer for public information and the officer shall promptly produce public information for inspection, duplication, or both."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "TX-0002",
+      "authority": "Tex. Gov't Code § 552.222(b)",
+      "summary": "The governmental body may not inquire into the purpose for which the requested information will be used."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "TX-0003",
+      "authority": "Tex. Gov't Code § 552.221(a)",
+      "summary": "There is no residency requirement; the right to request runs to 'any person' regardless of residence."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "TX-0032",
+      "authority": "Tex. Gov't Code § 552.267(a)",
+      "summary": "The body must provide a copy without charge or at a reduced charge if it determines waiver/reduction is in the public interest because providing the copy primarily benefits the general public."
+     },
+     {
+      "rule_id": "TX-0033",
+      "authority": "Tex. Gov't Code § 552.267(b)",
+      "summary": "The body may waive the charge if the cost of processing the collection of the charge would exceed the amount of the charge."
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": true,
+   "activated_by": {
+    "clarification.toll_on_clarification": [
+     {
+      "rule_id": "TX-0015",
+      "authority": "City of Dallas v. Abbott, 304 S.W.3d 380 (Tex. 2010)",
+      "summary": "A governmental body's good-faith request for clarification tolls the 10-business-day period for requesting an attorney general decision until the requestor responds.",
+      "clock_spec": "tolls the 10 business-day AG-request clock (TX-0018) from clarification sent until requestor responds",
+      "clock_effect": "tolls"
+     }
+    ]
+   }
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "TX-0032",
+      "authority": "Tex. Gov't Code § 552.267(a)",
+      "summary": "The body must provide a copy without charge or at a reduced charge if it determines waiver/reduction is in the public interest because providing the copy primarily benefits the general public."
+     },
+     {
+      "rule_id": "TX-0033",
+      "authority": "Tex. Gov't Code § 552.267(b)",
+      "summary": "The body may waive the charge if the cost of processing the collection of the charge would exceed the amount of the charge."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "TX-0032",
+      "authority": "Tex. Gov't Code § 552.267(a)",
+      "summary": "The body must provide a copy without charge or at a reduced charge if it determines waiver/reduction is in the public interest because providing the copy primarily benefits the general public."
+     },
+     {
+      "rule_id": "TX-0033",
+      "authority": "Tex. Gov't Code § 552.267(b)",
+      "summary": "The body may waive the charge if the cost of processing the collection of the charge would exceed the amount of the charge."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": true,
+   "activated_by": {
+    "appeal.ag_referral_to_withhold": [
+     {
+      "rule_id": "TX-0016",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "A body that receives a written request for information it wishes to withhold under a Subchapter C exception must ask the attorney general for a decision, unless there has been a previous determination."
+     },
+     {
+      "rule_id": "TX-0017",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "No new AG decision is required where there has already been a previous determination that the information falls within an exception (or is public)."
+     },
+     {
+      "rule_id": "TX-0018",
+      "authority": "Tex. Gov't Code § 552.301(b)",
+      "summary": "The body must ask the attorney general for a decision and state the applicable exceptions within a reasonable time but not later than the 10th business day after receiving the written request.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0019",
+      "authority": "Tex. Gov't Code § 552.301(d)",
+      "summary": "Within 10 business days of the request the body must give the requestor a written statement that it is withholding and has asked the AG, plus a copy (redacted if needed) of its AG communication.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0020",
+      "authority": "Tex. Gov't Code § 552.301(e)",
+      "summary": "Within 15 business days of the request the body must submit to the AG written comments on the exceptions, a copy of the request, a dated receipt statement, and a copy (or representative sample) of the requested information.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0021",
+      "authority": "Tex. Gov't Code § 552.301(e-1)",
+      "summary": "A body that submits written comments to the AG must send a copy of those comments to the requestor not later than the 15th business day after receiving the written request.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-S02",
+      "authority": "Tex. Gov't Code § 552.221(g) (added by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "If the body withholds based on a previous determination, the officer for public information must, not later than the 10th business day after receipt, notify the requestor in writing that the information is being withheld and identify the specific previous determination relied on.",
+      "clock_spec": "10 business days from receipt of the request",
+      "clock_effect": "deadline"
+     },
+     {
+      "rule_id": "TX-S03",
+      "authority": "Tex. Gov't Code § 552.301(b) (as amended by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "The governmental body must ask for the attorney general's decision and state the specific exceptions that apply within a reasonable time but not later than the 10th business day after the date of receiving the written request.",
+      "clock_spec": "10 business days from receipt of the request (hard; miss = information presumed public under § 552.302)",
+      "clock_effect": "deadline"
+     }
+    ]
+   }
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": true,
+   "activated_by": {
+    "appeal.ag_referral_to_withhold": [
+     {
+      "rule_id": "TX-0016",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "A body that receives a written request for information it wishes to withhold under a Subchapter C exception must ask the attorney general for a decision, unless there has been a previous determination."
+     },
+     {
+      "rule_id": "TX-0017",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "No new AG decision is required where there has already been a previous determination that the information falls within an exception (or is public)."
+     },
+     {
+      "rule_id": "TX-0018",
+      "authority": "Tex. Gov't Code § 552.301(b)",
+      "summary": "The body must ask the attorney general for a decision and state the applicable exceptions within a reasonable time but not later than the 10th business day after receiving the written request.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0019",
+      "authority": "Tex. Gov't Code § 552.301(d)",
+      "summary": "Within 10 business days of the request the body must give the requestor a written statement that it is withholding and has asked the AG, plus a copy (redacted if needed) of its AG communication.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0020",
+      "authority": "Tex. Gov't Code § 552.301(e)",
+      "summary": "Within 15 business days of the request the body must submit to the AG written comments on the exceptions, a copy of the request, a dated receipt statement, and a copy (or representative sample) of the requested information.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0021",
+      "authority": "Tex. Gov't Code § 552.301(e-1)",
+      "summary": "A body that submits written comments to the AG must send a copy of those comments to the requestor not later than the 15th business day after receiving the written request.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-S02",
+      "authority": "Tex. Gov't Code § 552.221(g) (added by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "If the body withholds based on a previous determination, the officer for public information must, not later than the 10th business day after receipt, notify the requestor in writing that the information is being withheld and identify the specific previous determination relied on.",
+      "clock_spec": "10 business days from receipt of the request",
+      "clock_effect": "deadline"
+     },
+     {
+      "rule_id": "TX-S03",
+      "authority": "Tex. Gov't Code § 552.301(b) (as amended by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "The governmental body must ask for the attorney general's decision and state the specific exceptions that apply within a reasonable time but not later than the 10th business day after the date of receiving the written request.",
+      "clock_spec": "10 business days from receipt of the request (hard; miss = information presumed public under § 552.302)",
+      "clock_effect": "deadline"
+     }
+    ]
+   }
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": true,
+   "activated_by": {
+    "appeal.ag_referral_to_withhold": [
+     {
+      "rule_id": "TX-0016",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "A body that receives a written request for information it wishes to withhold under a Subchapter C exception must ask the attorney general for a decision, unless there has been a previous determination."
+     },
+     {
+      "rule_id": "TX-0017",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "No new AG decision is required where there has already been a previous determination that the information falls within an exception (or is public)."
+     },
+     {
+      "rule_id": "TX-0018",
+      "authority": "Tex. Gov't Code § 552.301(b)",
+      "summary": "The body must ask the attorney general for a decision and state the applicable exceptions within a reasonable time but not later than the 10th business day after receiving the written request.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0019",
+      "authority": "Tex. Gov't Code § 552.301(d)",
+      "summary": "Within 10 business days of the request the body must give the requestor a written statement that it is withholding and has asked the AG, plus a copy (redacted if needed) of its AG communication.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0020",
+      "authority": "Tex. Gov't Code § 552.301(e)",
+      "summary": "Within 15 business days of the request the body must submit to the AG written comments on the exceptions, a copy of the request, a dated receipt statement, and a copy (or representative sample) of the requested information.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0021",
+      "authority": "Tex. Gov't Code § 552.301(e-1)",
+      "summary": "A body that submits written comments to the AG must send a copy of those comments to the requestor not later than the 15th business day after receiving the written request.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-S02",
+      "authority": "Tex. Gov't Code § 552.221(g) (added by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "If the body withholds based on a previous determination, the officer for public information must, not later than the 10th business day after receipt, notify the requestor in writing that the information is being withheld and identify the specific previous determination relied on.",
+      "clock_spec": "10 business days from receipt of the request",
+      "clock_effect": "deadline"
+     },
+     {
+      "rule_id": "TX-S03",
+      "authority": "Tex. Gov't Code § 552.301(b) (as amended by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "The governmental body must ask for the attorney general's decision and state the specific exceptions that apply within a reasonable time but not later than the 10th business day after the date of receiving the written request.",
+      "clock_spec": "10 business days from receipt of the request (hard; miss = information presumed public under § 552.302)",
+      "clock_effect": "deadline"
+     }
+    ]
+   }
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": true,
+   "activated_by": {
+    "appeal.ag_referral_to_withhold": [
+     {
+      "rule_id": "TX-0016",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "A body that receives a written request for information it wishes to withhold under a Subchapter C exception must ask the attorney general for a decision, unless there has been a previous determination."
+     },
+     {
+      "rule_id": "TX-0017",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "No new AG decision is required where there has already been a previous determination that the information falls within an exception (or is public)."
+     },
+     {
+      "rule_id": "TX-0018",
+      "authority": "Tex. Gov't Code § 552.301(b)",
+      "summary": "The body must ask the attorney general for a decision and state the applicable exceptions within a reasonable time but not later than the 10th business day after receiving the written request.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0019",
+      "authority": "Tex. Gov't Code § 552.301(d)",
+      "summary": "Within 10 business days of the request the body must give the requestor a written statement that it is withholding and has asked the AG, plus a copy (redacted if needed) of its AG communication.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0020",
+      "authority": "Tex. Gov't Code § 552.301(e)",
+      "summary": "Within 15 business days of the request the body must submit to the AG written comments on the exceptions, a copy of the request, a dated receipt statement, and a copy (or representative sample) of the requested information.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0021",
+      "authority": "Tex. Gov't Code § 552.301(e-1)",
+      "summary": "A body that submits written comments to the AG must send a copy of those comments to the requestor not later than the 15th business day after receiving the written request.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-S02",
+      "authority": "Tex. Gov't Code § 552.221(g) (added by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "If the body withholds based on a previous determination, the officer for public information must, not later than the 10th business day after receipt, notify the requestor in writing that the information is being withheld and identify the specific previous determination relied on.",
+      "clock_spec": "10 business days from receipt of the request",
+      "clock_effect": "deadline"
+     },
+     {
+      "rule_id": "TX-S03",
+      "authority": "Tex. Gov't Code § 552.301(b) (as amended by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "The governmental body must ask for the attorney general's decision and state the specific exceptions that apply within a reasonable time but not later than the 10th business day after the date of receiving the written request.",
+      "clock_spec": "10 business days from receipt of the request (hard; miss = information presumed public under § 552.302)",
+      "clock_effect": "deadline"
+     }
+    ]
+   }
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": true,
+   "activated_by": {
+    "appeal.ag_referral_to_withhold": [
+     {
+      "rule_id": "TX-0016",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "A body that receives a written request for information it wishes to withhold under a Subchapter C exception must ask the attorney general for a decision, unless there has been a previous determination."
+     },
+     {
+      "rule_id": "TX-0017",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "No new AG decision is required where there has already been a previous determination that the information falls within an exception (or is public)."
+     },
+     {
+      "rule_id": "TX-0018",
+      "authority": "Tex. Gov't Code § 552.301(b)",
+      "summary": "The body must ask the attorney general for a decision and state the applicable exceptions within a reasonable time but not later than the 10th business day after receiving the written request.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0019",
+      "authority": "Tex. Gov't Code § 552.301(d)",
+      "summary": "Within 10 business days of the request the body must give the requestor a written statement that it is withholding and has asked the AG, plus a copy (redacted if needed) of its AG communication.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0020",
+      "authority": "Tex. Gov't Code § 552.301(e)",
+      "summary": "Within 15 business days of the request the body must submit to the AG written comments on the exceptions, a copy of the request, a dated receipt statement, and a copy (or representative sample) of the requested information.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0021",
+      "authority": "Tex. Gov't Code § 552.301(e-1)",
+      "summary": "A body that submits written comments to the AG must send a copy of those comments to the requestor not later than the 15th business day after receiving the written request.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-S02",
+      "authority": "Tex. Gov't Code § 552.221(g) (added by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "If the body withholds based on a previous determination, the officer for public information must, not later than the 10th business day after receipt, notify the requestor in writing that the information is being withheld and identify the specific previous determination relied on.",
+      "clock_spec": "10 business days from receipt of the request",
+      "clock_effect": "deadline"
+     },
+     {
+      "rule_id": "TX-S03",
+      "authority": "Tex. Gov't Code § 552.301(b) (as amended by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "The governmental body must ask for the attorney general's decision and state the specific exceptions that apply within a reasonable time but not later than the 10th business day after the date of receiving the written request.",
+      "clock_spec": "10 business days from receipt of the request (hard; miss = information presumed public under § 552.302)",
+      "clock_effect": "deadline"
+     }
+    ]
+   }
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": true,
+   "activated_by": {
+    "appeal.ag_referral_to_withhold": [
+     {
+      "rule_id": "TX-0016",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "A body that receives a written request for information it wishes to withhold under a Subchapter C exception must ask the attorney general for a decision, unless there has been a previous determination."
+     },
+     {
+      "rule_id": "TX-0017",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "No new AG decision is required where there has already been a previous determination that the information falls within an exception (or is public)."
+     },
+     {
+      "rule_id": "TX-0018",
+      "authority": "Tex. Gov't Code § 552.301(b)",
+      "summary": "The body must ask the attorney general for a decision and state the applicable exceptions within a reasonable time but not later than the 10th business day after receiving the written request.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0019",
+      "authority": "Tex. Gov't Code § 552.301(d)",
+      "summary": "Within 10 business days of the request the body must give the requestor a written statement that it is withholding and has asked the AG, plus a copy (redacted if needed) of its AG communication.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0020",
+      "authority": "Tex. Gov't Code § 552.301(e)",
+      "summary": "Within 15 business days of the request the body must submit to the AG written comments on the exceptions, a copy of the request, a dated receipt statement, and a copy (or representative sample) of the requested information.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0021",
+      "authority": "Tex. Gov't Code § 552.301(e-1)",
+      "summary": "A body that submits written comments to the AG must send a copy of those comments to the requestor not later than the 15th business day after receiving the written request.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-S02",
+      "authority": "Tex. Gov't Code § 552.221(g) (added by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "If the body withholds based on a previous determination, the officer for public information must, not later than the 10th business day after receipt, notify the requestor in writing that the information is being withheld and identify the specific previous determination relied on.",
+      "clock_spec": "10 business days from receipt of the request",
+      "clock_effect": "deadline"
+     },
+     {
+      "rule_id": "TX-S03",
+      "authority": "Tex. Gov't Code § 552.301(b) (as amended by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "The governmental body must ask for the attorney general's decision and state the specific exceptions that apply within a reasonable time but not later than the 10th business day after the date of receiving the written request.",
+      "clock_spec": "10 business days from receipt of the request (hard; miss = information presumed public under § 552.302)",
+      "clock_effect": "deadline"
+     }
+    ]
+   }
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": true,
+   "activated_by": {
+    "appeal.ag_referral_to_withhold": [
+     {
+      "rule_id": "TX-0016",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "A body that receives a written request for information it wishes to withhold under a Subchapter C exception must ask the attorney general for a decision, unless there has been a previous determination."
+     },
+     {
+      "rule_id": "TX-0017",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "No new AG decision is required where there has already been a previous determination that the information falls within an exception (or is public)."
+     },
+     {
+      "rule_id": "TX-0018",
+      "authority": "Tex. Gov't Code § 552.301(b)",
+      "summary": "The body must ask the attorney general for a decision and state the applicable exceptions within a reasonable time but not later than the 10th business day after receiving the written request.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0019",
+      "authority": "Tex. Gov't Code § 552.301(d)",
+      "summary": "Within 10 business days of the request the body must give the requestor a written statement that it is withholding and has asked the AG, plus a copy (redacted if needed) of its AG communication.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0020",
+      "authority": "Tex. Gov't Code § 552.301(e)",
+      "summary": "Within 15 business days of the request the body must submit to the AG written comments on the exceptions, a copy of the request, a dated receipt statement, and a copy (or representative sample) of the requested information.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0021",
+      "authority": "Tex. Gov't Code § 552.301(e-1)",
+      "summary": "A body that submits written comments to the AG must send a copy of those comments to the requestor not later than the 15th business day after receiving the written request.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-S02",
+      "authority": "Tex. Gov't Code § 552.221(g) (added by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "If the body withholds based on a previous determination, the officer for public information must, not later than the 10th business day after receipt, notify the requestor in writing that the information is being withheld and identify the specific previous determination relied on.",
+      "clock_spec": "10 business days from receipt of the request",
+      "clock_effect": "deadline"
+     },
+     {
+      "rule_id": "TX-S03",
+      "authority": "Tex. Gov't Code § 552.301(b) (as amended by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "The governmental body must ask for the attorney general's decision and state the specific exceptions that apply within a reasonable time but not later than the 10th business day after the date of receiving the written request.",
+      "clock_spec": "10 business days from receipt of the request (hard; miss = information presumed public under § 552.302)",
+      "clock_effect": "deadline"
+     }
+    ]
+   }
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": true,
+   "activated_by": {
+    "appeal.ag_referral_to_withhold": [
+     {
+      "rule_id": "TX-0016",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "A body that receives a written request for information it wishes to withhold under a Subchapter C exception must ask the attorney general for a decision, unless there has been a previous determination."
+     },
+     {
+      "rule_id": "TX-0017",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "No new AG decision is required where there has already been a previous determination that the information falls within an exception (or is public)."
+     },
+     {
+      "rule_id": "TX-0018",
+      "authority": "Tex. Gov't Code § 552.301(b)",
+      "summary": "The body must ask the attorney general for a decision and state the applicable exceptions within a reasonable time but not later than the 10th business day after receiving the written request.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0019",
+      "authority": "Tex. Gov't Code § 552.301(d)",
+      "summary": "Within 10 business days of the request the body must give the requestor a written statement that it is withholding and has asked the AG, plus a copy (redacted if needed) of its AG communication.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0020",
+      "authority": "Tex. Gov't Code § 552.301(e)",
+      "summary": "Within 15 business days of the request the body must submit to the AG written comments on the exceptions, a copy of the request, a dated receipt statement, and a copy (or representative sample) of the requested information.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0021",
+      "authority": "Tex. Gov't Code § 552.301(e-1)",
+      "summary": "A body that submits written comments to the AG must send a copy of those comments to the requestor not later than the 15th business day after receiving the written request.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-S02",
+      "authority": "Tex. Gov't Code § 552.221(g) (added by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "If the body withholds based on a previous determination, the officer for public information must, not later than the 10th business day after receipt, notify the requestor in writing that the information is being withheld and identify the specific previous determination relied on.",
+      "clock_spec": "10 business days from receipt of the request",
+      "clock_effect": "deadline"
+     },
+     {
+      "rule_id": "TX-S03",
+      "authority": "Tex. Gov't Code § 552.301(b) (as amended by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "The governmental body must ask for the attorney general's decision and state the specific exceptions that apply within a reasonable time but not later than the 10th business day after the date of receiving the written request.",
+      "clock_spec": "10 business days from receipt of the request (hard; miss = information presumed public under § 552.302)",
+      "clock_effect": "deadline"
+     }
+    ],
+    "denial.deemed_disclosure": [
+     {
+      "rule_id": "TX-0022",
+      "authority": "Tex. Gov't Code § 552.302",
+      "summary": "If the body does not timely request an AG decision and provide the § 552.301(d) and (e-1) notices, the requested information is presumed public and must be released absent a compelling reason to withhold.",
+      "clock_spec": "terminal event on lapse of the 10 business-day AG-request/notice deadline",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": true,
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "extension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "completion": {
+   "present": true,
+   "statutory": {
+    "production.completion_window": [
+     {
+      "rule_id": "TX-0008",
+      "authority": "Tex. Gov't Code § 552.221(a), (b)",
+      "summary": "The officer must produce public information promptly, i.e., as soon as possible under the circumstances, within a reasonable time, without delay.",
+      "clock_spec": "undefined-soft: \"promptly ... as soon as possible under the circumstances, that is, within a reasonable time, without delay\" from request receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0009",
+      "authority": "Tex. Gov't Code § 552.221(d)",
+      "summary": "If information cannot be produced within 10 business days after receipt, the officer must certify that fact in writing to the requestor and set a date and hour, within a reasonable time, when it will be available.",
+      "clock_spec": "10 business-days from request receipt (certification trigger)",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0010",
+      "authority": "Tex. Gov't Code § 552.221(c)",
+      "summary": "If requested information is in active use or in storage and therefore unavailable when requested, the officer must certify this in writing and set a date and hour, within a reasonable time, when it will be available."
+     }
+    ]
+   }
+  },
+  "clarification_response": {
+   "present": true,
+   "statutory": {
+    "clarification.nonresponse_withdrawal": [
+     {
+      "rule_id": "TX-0014",
+      "authority": "Tex. Gov't Code § 552.222(d)",
+      "summary": "If the body receives no written response by the 61st day after sending a clarification/discussion request (or additional-information request), the underlying request is considered withdrawn.",
+      "clock_spec": "61 days from date clarification/discussion request sent",
+      "clock_effect": "terminal"
+     }
+    ],
+    "clarification.toll_on_clarification": [
+     {
+      "rule_id": "TX-0015",
+      "authority": "City of Dallas v. Abbott, 304 S.W.3d 380 (Tex. 2010)",
+      "summary": "A governmental body's good-faith request for clarification tolls the 10-business-day period for requesting an attorney general decision until the requestor responds.",
+      "clock_spec": "tolls the 10 business-day AG-request clock (TX-0018) from clarification sent until requestor responds",
+      "clock_effect": "tolls"
+     }
+    ]
+   }
+  },
+  "nonpayment_close": {
+   "present": true,
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "TX-S05",
+      "authority": "Tex. Gov't Code § 552.221(e)",
+      "summary": "A request is considered withdrawn if the requestor fails to inspect or duplicate the public information in the governmental body's offices on or before the 60th day after the date the information is made available, or fails to pay the postage and other applicable charges under Subchapter F on or …",
+      "clock_spec": "60 calendar days from availability notice (inspection/duplication) or from charge notice (payment)",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": true,
+   "statutory": {
+    "response.catastrophe_suspension": [
+     {
+      "rule_id": "TX-S04",
+      "authority": "Tex. Gov't Code § 552.233 (formerly § 552.2325; as amended by SB 1225, 87th Leg., 2021)",
+      "summary": "A body currently significantly impacted by a catastrophe may suspend PIA requirements for an initial period of up to 7 consecutive days (once per catastrophe, after submitting notice to the AG on the prescribed form), extendable once by up to 7 more consecutive days; the combined suspension may n…",
+      "clock_spec": "Up to 7 consecutive days + one 7-day extension (max 14 calendar days per catastrophe); requests during suspension deemed received the first business day after it ends; pending-request clocks tolled",
+      "clock_effect": "pause"
+     }
+    ]
+   }
+  },
+  "ag_referral": {
+   "present": true,
+   "statutory": {
+    "appeal.ag_referral_to_withhold": [
+     {
+      "rule_id": "TX-0016",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "A body that receives a written request for information it wishes to withhold under a Subchapter C exception must ask the attorney general for a decision, unless there has been a previous determination."
+     },
+     {
+      "rule_id": "TX-0017",
+      "authority": "Tex. Gov't Code § 552.301(a)",
+      "summary": "No new AG decision is required where there has already been a previous determination that the information falls within an exception (or is public)."
+     },
+     {
+      "rule_id": "TX-0018",
+      "authority": "Tex. Gov't Code § 552.301(b)",
+      "summary": "The body must ask the attorney general for a decision and state the applicable exceptions within a reasonable time but not later than the 10th business day after receiving the written request.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0019",
+      "authority": "Tex. Gov't Code § 552.301(d)",
+      "summary": "Within 10 business days of the request the body must give the requestor a written statement that it is withholding and has asked the AG, plus a copy (redacted if needed) of its AG communication.",
+      "clock_spec": "10 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0020",
+      "authority": "Tex. Gov't Code § 552.301(e)",
+      "summary": "Within 15 business days of the request the body must submit to the AG written comments on the exceptions, a copy of the request, a dated receipt statement, and a copy (or representative sample) of the requested information.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-0021",
+      "authority": "Tex. Gov't Code § 552.301(e-1)",
+      "summary": "A body that submits written comments to the AG must send a copy of those comments to the requestor not later than the 15th business day after receiving the written request.",
+      "clock_spec": "15 business-days from receipt of the written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TX-S02",
+      "authority": "Tex. Gov't Code § 552.221(g) (added by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "If the body withholds based on a previous determination, the officer for public information must, not later than the 10th business day after receipt, notify the requestor in writing that the information is being withheld and identify the specific previous determination relied on.",
+      "clock_spec": "10 business days from receipt of the request",
+      "clock_effect": "deadline"
+     },
+     {
+      "rule_id": "TX-S03",
+      "authority": "Tex. Gov't Code § 552.301(b) (as amended by HB 4219, 89th Leg., eff. 9/1/2025)",
+      "summary": "The governmental body must ask for the attorney general's decision and state the specific exceptions that apply within a reasonable time but not later than the 10th business day after the date of receiving the written request.",
+      "clock_spec": "10 business days from receipt of the request (hard; miss = information presumed public under § 552.302)",
+      "clock_effect": "deadline"
+     }
+    ],
+    "denial.deemed_disclosure": [
+     {
+      "rule_id": "TX-0022",
+      "authority": "Tex. Gov't Code § 552.302",
+      "summary": "If the body does not timely request an AG decision and provide the § 552.301(d) and (e-1) notices, the requested information is presumed public and must be released absent a compelling reason to withhold.",
+      "clock_spec": "terminal event on lapse of the 10 business-day AG-request/notice deadline",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "TX-0025",
+    "authority": "Tex. Gov't Code § 552.261(a)",
+    "summary": "The copy charge must be an amount that reasonably includes all costs related to reproducing the information, including materials, labor, and overhead."
+   }
+  ],
+  "fee.free_allowance": [
+   {
+    "rule_id": "TX-0026",
+    "authority": "Tex. Gov't Code § 552.261(a)",
+    "summary": "For a request of 50 or fewer pages of paper records, the charge may not include materials, labor, or overhead and is limited to the per-page photocopy charge, unless the pages are in two-or-more unconnected buildings or a remote storage facility."
+   },
+   {
+    "rule_id": "TX-0031",
+    "authority": "Tex. Gov't Code § 552.275(a), (b)",
+    "summary": "A body that sets time limits on uncompensated personnel time must allow at least 36 hours per requestor over a 12-month period and at least 15 hours per requestor in a one-month period before charging for personnel time."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "TX-0027",
+    "authority": "Tex. Gov't Code § 552.262(a), (c)",
+    "summary": "Charges for copies/inspection may not exceed the amounts established by attorney general rule; a non-state governmental body setting its own charges may not exceed the AG-established amounts by more than 25% absent an exemption."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.records_officer_designation": [
+   {
+    "rule_id": "TX-0006",
+    "authority": "Tex. Gov't Code § 552.234(c), (d)",
+    "summary": "A governmental body may designate one mailing address and one e-mail address for requests; if it posts/prints them, it need not respond to a request unless received at a designated address, by hand delivery, or by an approved (a)(4) method."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "TX-0027",
+    "authority": "Tex. Gov't Code § 552.262(a), (c)",
+    "summary": "Charges for copies/inspection may not exceed the amounts established by attorney general rule; a non-state governmental body setting its own charges may not exceed the AG-established amounts by more than 25% absent an exemption."
+   }
+  ]
+ },
+ "ledger": {},
+ "audit": {
+  "rules_total": 37,
+  "rules_referenced": 37,
+  "unreferenced_rule_ids": []
+ }
+}

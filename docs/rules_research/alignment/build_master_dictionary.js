@@ -242,6 +242,12 @@ for(const f of ['eligibility','timing']){ const slice=JSON.parse(fs.readFileSync
 }
 function resolve(fam,key){ const [t,c]=canonOf(fam,key); if(t){ let tf=t==='production_format'?'production':t; const [t2,c2]=canonOf(tf,key); return c2||(tf+'.other'); } return c; }
 
+// Rule-id-level re-homes for mis-bucketed rules (regex bucketer collisions).
+// TX-0009/0010: "delay/active-use certification" swallowed by /certif/ → production.certified_copy;
+// they are the 10-bd certify-date checkpoints of TX's production clock → completion_window (found
+// during Phase-6 template generation, 2026-07-26).
+const RULE_OVERRIDES={ 'TX-0009':'production.completion_window', 'TX-0010':'production.completion_window' };
+
 const CAN={}, unmapped=[];
 function add(store, can, code, r){ store[can]=store[can]||{members:{},keys:new Set(),homes:{},defs:[]};
   (store[can].members[code]=store[can].members[code]||[]).push(r.rule_id);
@@ -249,7 +255,8 @@ function add(store, can, code, r){ store[can]=store[can]||{members:{},keys:new S
   if(r.atomic_rule) store[can].defs.push(r.atomic_rule); }
 for(const s of pr){ for(const r of (s.rules||[])){
   const key=norm(r.concept_key); let can;
-  if(KEYMAP[key]) can=KEYMAP[key];
+  if(RULE_OVERRIDES[r.rule_id]) can=RULE_OVERRIDES[r.rule_id];
+  else if(KEYMAP[key]) can=KEYMAP[key];
   else if(CROSSMAP[key]){ let tf=CROSSMAP[key]==='production_format'?'production':CROSSMAP[key]; can=resolve(tf,key); }
   else can=resolve(famOf(key), key);
   if(!can||/^UNMAPPED/.test(can)){ unmapped.push(key); continue; }

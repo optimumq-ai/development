@@ -1,0 +1,686 @@
+{
+ "state": "Pennsylvania",
+ "code": "PA",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.submission_channels": [
+     {
+      "rule_id": "PA-0003",
+      "authority": "65 P.S. § 67.703",
+      "summary": "A written request may be submitted in person, by mail, by e-mail, by facsimile or, to the extent provided by agency rules, by any other electronic means."
+     }
+    ],
+    "intake.written_request_required": [
+     {
+      "rule_id": "PA-0006",
+      "authority": "65 P.S. § 67.702",
+      "summary": "An agency may fulfill verbal, written or anonymous requests, but a requester must submit a written request before pursuing the relief and remedies provided by the act."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {},
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "PA-0005",
+      "authority": "65 P.S. § 67.703",
+      "summary": "A written request should identify or describe the records sought with sufficient specificity to enable the agency to ascertain which records are requested, and shall include the name and address to which the agency should address its response."
+     }
+    ]
+   },
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {},
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.advance_payment": [
+     {
+      "rule_id": "PA-0046",
+      "authority": "65 P.S. § 67.1307(h)",
+      "summary": "An agency may require a requester to prepay an estimate of the authorized fees if the fees required to fulfill the request are expected to exceed $100."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.agency_burden": [
+     {
+      "rule_id": "PA-0029",
+      "authority": "65 P.S. § 67.506(a)",
+      "summary": "An agency may deny a requester access to a record if the requester has made repeated requests for that same record and the repeated requests have placed an unreasonable burden on the agency."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "PA-0028",
+      "authority": "65 P.S. § 67.903",
+      "summary": "A denial (in whole or in part) must be in writing and include: (1) a description of the record requested; (2) the specific reasons for denial including a citation of supporting legal authority; (3) the typed/printed name, title, business address, business telephone number and signature of the ope…"
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {
+    "production.installment_partial": [
+     {
+      "rule_id": "PA-0014",
+      "authority": "65 P.S. § 67.704(b)",
+      "summary": "A requester unable to access an electronically-available record may, within 30 days, submit a written request to have the record converted to paper, and the agency shall provide access within five days of that request.",
+      "clock_spec": "requester: within 30 days of notice to request paper conversion; agency: within 5 days of that conversion request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "PA-0031",
+      "authority": "65 P.S. § 67.706",
+      "summary": "If a record contains information subject to access and information not subject to access, the agency's response shall grant access to the accessible information and deny access to the non-accessible information."
+     },
+     {
+      "rule_id": "PA-0032",
+      "authority": "65 P.S. § 67.706",
+      "summary": "Where non-accessible information cannot be separated, the agency shall redact the non-accessible information and grant access to the remainder; the agency may not deny access to the record if the non-accessible information can be redacted."
+     },
+     {
+      "rule_id": "PA-0033",
+      "authority": "65 P.S. § 67.706",
+      "summary": "Information that an agency redacts under § 706 shall be deemed a denial under Chapter 9, and is therefore appealable."
+     }
+    ],
+    "classification.record_classification_scheme": [
+     {
+      "rule_id": "PA-0008",
+      "authority": "65 P.S. § 67.506(c)",
+      "summary": "An agency may exercise discretion to make an otherwise-exempt record accessible if disclosure is not prohibited by law/court order, the record is not privileged, and the agency head determines the public interest favoring access outweighs any interest favoring restriction."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "PA-0013",
+      "authority": "65 P.S. § 67.704",
+      "summary": "An agency may satisfy a request by notifying the requester that the record is available through publicly accessible electronic means, or may make records available through any publicly accessible electronic means."
+     }
+    ],
+    "production.no_medium_refusal": [
+     {
+      "rule_id": "PA-0010",
+      "authority": "65 P.S. § 67.701",
+      "summary": "A record shall be provided in the medium requested if it exists in that medium; otherwise it shall be provided in the medium in which it exists."
+     }
+    ],
+    "production.delivery_and_completion": [
+     {
+      "rule_id": "PA-0016",
+      "authority": "65 P.S. § 67.905",
+      "summary": "An agency may dispose of copies that a requester has not retrieved after 60 days following notification that the record is available, and may retain fees already paid."
+     }
+    ],
+    "production.certified_copy": [
+     {
+      "rule_id": "PA-0015",
+      "authority": "65 P.S. § 67.904",
+      "summary": "If an agency's response grants access, the agency shall, upon request, provide a certified copy of the record if the requester pays the applicable fees under section 1307."
+     }
+    ],
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "PA-0012",
+      "authority": "65 P.S. § 67.705",
+      "summary": "An agency is not required to create a record that does not currently exist, or to compile, maintain, format or organize a record in a manner in which the agency does not currently do so."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": true,
+   "activated_by": {
+    "eligibility.requester_class_restriction": [
+     {
+      "rule_id": "PA-0001",
+      "authority": "65 P.S. § 67.102",
+      "summary": "Only a person who is a legal resident of the United States (or an agency) may be a 'requester' entitled to make a Right-to-Know request; US legal residency is a gate on standing."
+     }
+    ]
+   },
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "PA-0011",
+      "authority": "65 P.S. § 67.701",
+      "summary": "Public, legislative or financial records shall be available for access during the regular business hours of an agency."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "PA-0002",
+      "authority": "65 P.S. § 67.703",
+      "summary": "A written request need not state the requester's reason for requesting or intended use of the records, unless another law requires it."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "PA-0043",
+      "authority": "65 P.S. § 67.1307(f)",
+      "summary": "An agency may waive duplication fees, including when the requester duplicates the record or when the agency deems it in the public interest to do so."
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false,
+   "context": {
+    "custody.contractor_and_thirdparty_custody": [
+     {
+      "rule_id": "PA-0020",
+      "authority": "65 P.S. § 67.506(d)",
+      "summary": "A public record in the possession of a contractor or other person performing a governmental function on behalf of an agency is considered a record of the agency; the request is made to the agency's open-records officer, who assesses applicable duplication fees."
+     }
+    ]
+   }
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "context": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "PA-0005",
+      "authority": "65 P.S. § 67.703",
+      "summary": "A written request should identify or describe the records sought with sufficient specificity to enable the agency to ascertain which records are requested, and shall include the name and address to which the agency should address its response."
+     }
+    ]
+   },
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "PA-0043",
+      "authority": "65 P.S. § 67.1307(f)",
+      "summary": "An agency may waive duplication fees, including when the requester duplicates the record or when the agency deems it in the public interest to do so."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "PA-0043",
+      "authority": "65 P.S. § 67.1307(f)",
+      "summary": "An agency may waive duplication fees, including when the requester duplicates the record or when the agency deems it in the public interest to do so."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "context": {
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "PA-0012",
+      "authority": "65 P.S. § 67.705",
+      "summary": "An agency is not required to create a record that does not currently exist, or to compile, maintain, format or organize a record in a manner in which the agency does not currently do so."
+     }
+    ]
+   },
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": true,
+   "activated_by": {
+    "special_records.court_records": [
+     {
+      "rule_id": "PA-0036",
+      "authority": "65 P.S. § 67.707(c)(1)",
+      "summary": "Prior to an adjudication becoming final, binding and nonappealable, a transcript of an administrative proceeding shall be provided to a requester by the agency stenographer or a court reporter, in accordance with agency procedure or an applicable contract."
+     },
+     {
+      "rule_id": "PA-0037",
+      "authority": "65 P.S. § 67.707(c)(2)",
+      "summary": "Following an adjudication becoming final, binding and nonappealable, a transcript of an administrative proceeding shall be provided to a requester in accordance with the duplication rates established in section 1307(b)."
+     }
+    ],
+    "special_records.law_enforcement": [
+     {
+      "rule_id": "PA-0030",
+      "authority": "65 P.S. § 67.506(b)",
+      "summary": "An agency may deny access where a timely response is impossible due to fire, flood or other disaster, or where the record is of such rarity/fragility that access could cause physical damage; contents should be made accessible when possible."
+     }
+    ]
+   }
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": true,
+   "activated_by": {
+    "special_records.third_party_proprietary": [
+     {
+      "rule_id": "PA-0034",
+      "authority": "65 P.S. § 67.707(a)",
+      "summary": "If, in response to a request, an agency produces a record that is not a public, legislative or financial record, the agency shall notify any third party that provided the record, the person who is the subject of the record, and the requester."
+     }
+    ]
+   }
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "PA-0021",
+      "authority": "65 P.S. § 67.901",
+      "summary": "The agency's time to respond to a written request shall not exceed five business days from the date the written request is received by the open-records officer.",
+      "clock_spec": "5 business-days from date written request is received by the open-records officer",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "PA-0022",
+      "authority": "65 P.S. § 67.901",
+      "summary": "Upon receipt of a written request, an agency shall make a good faith effort to determine whether the requested item is a public/legislative/financial record and whether the agency has possession, custody or control of it, and respond as promptly as possible under the circumstances.",
+      "clock_spec": "undefined-soft: \"as promptly as possible under the circumstances existing at the time of the request\" from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "denial.deemed_denial_on_nonresponse": [
+     {
+      "rule_id": "PA-0026",
+      "authority": "65 P.S. § 67.902(b)(3)",
+      "summary": "If the requester agrees to the extension, the request is deemed denied on the day following the date specified in the notice if the agency has not provided a response by that date.",
+      "clock_spec": "terminal: deemed denied on the day following the date specified in the extension notice",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "PA-0027",
+      "authority": "65 P.S. § 67.901",
+      "summary": "If the agency fails to send its response within five business days of receiving the written request, the request is deemed denied.",
+      "clock_spec": "terminal: deemed denied when no response is sent within 5 business days of receipt by the open-records officer",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": true,
+   "statutory": {
+    "response.extension_grounds": [
+     {
+      "rule_id": "PA-0023",
+      "authority": "65 P.S. § 67.902(a)",
+      "summary": "The time for response may be extended if the open-records officer determines one of seven enumerated factors applies: (1) redaction under § 706; (2) retrieval from a remote location; (3) bona fide, specified staffing limitations; (4) legal review needed to determine access; (5) requester's noncom…"
+     }
+    ],
+    "response.extension_limit": [
+     {
+      "rule_id": "PA-0025",
+      "authority": "65 P.S. § 67.902(b)(2)",
+      "summary": "If the expected response date is more than 30 days following the five business days allowed under § 901, the request is deemed denied unless the requester has agreed in writing to the extension.",
+      "clock_spec": "ceiling: 30 calendar-days beyond the initial 5 business days; deemed denied on excess absent written agreement",
+      "clock_effect": "terminal"
+     }
+    ],
+    "response.extension_notice": [
+     {
+      "rule_id": "PA-0024",
+      "authority": "65 P.S. § 67.902(b)(1)-(2)",
+      "summary": "If an extension factor applies, the open-records officer shall send the requester written notice within five business days of receipt, stating that the request is under review, the reason, a reasonable expected response date, and an estimate of applicable fees.",
+      "clock_spec": "5 business-days from receipt of the request (to send extension notice)",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "PA-0040",
+    "authority": "OOR Official RTKL Fee Schedule (adopted Dec. 30, 2024), issued under 65 P.S. § 67.1307(b)",
+    "summary": "Under the OOR Official RTKL Fee Schedule, an agency may charge up to $0.25 per copy for black-and-white photocopies (8.5x11 or 8.5x14), reduced to $0.20 per copy beyond the first 1,000 copies."
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "PA-0044",
+    "authority": "65 P.S. § 67.1307(d)",
+    "summary": "If a record is maintained only electronically or in nonpaper media, duplication fees are limited to the lesser of the paper-duplication fee or the original-media fee under § 1307(b), unless the requester specifically requests the more expensive medium."
+   }
+  ],
+  "fee.certified_copy_charge": [
+   {
+    "rule_id": "PA-0041",
+    "authority": "65 P.S. § 67.1307(c)",
+    "summary": "An agency may impose reasonable fees for official certification of copies where the certification is at the requester's behest and for the purpose of legally verifying the public record."
+   }
+  ],
+  "fee.delivery_charge": [
+   {
+    "rule_id": "PA-0038",
+    "authority": "65 P.S. § 67.1307(a)",
+    "summary": "Fees for postage may not exceed the actual cost of mailing."
+   }
+  ],
+  "fee.special_service_charge": [
+   {
+    "rule_id": "PA-0045",
+    "authority": "65 P.S. § 67.1307(e)",
+    "summary": "If an agency offers enhanced electronic access to records in addition to the inspection-and-duplication access required by the act, it may establish user fees specifically for the provision of that enhanced electronic access."
+   }
+  ],
+  "fee.no_charge_categories": [
+   {
+    "rule_id": "PA-0042",
+    "authority": "65 P.S. § 67.1307(g)",
+    "summary": "No fee may be imposed for an agency's review of a record to determine whether it is a public, legislative or financial record subject to access."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "PA-0039",
+    "authority": "65 P.S. § 67.1307(b)",
+    "summary": "Duplication fees for Commonwealth and local agencies (absent an agency-specific fee schedule) are established by the Office of Open Records and must be reasonable and based on prevailing fees for comparable duplication services provided by local business entities."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.records_officer_designation": [
+   {
+    "rule_id": "PA-0004",
+    "authority": "65 P.S. § 67.703",
+    "summary": "A written request must be addressed to the designated open-records officer, and agency employees must be directed to forward requests for records to that officer."
+   },
+   {
+    "rule_id": "PA-0018",
+    "authority": "65 P.S. § 67.502(a)",
+    "summary": "An agency shall designate an official or employee to act as the open-records officer."
+   }
+  ],
+  "custody.request_tracking": [
+   {
+    "rule_id": "PA-0019",
+    "authority": "65 P.S. § 67.502(b)",
+    "summary": "Upon receiving a request, the open-records officer shall note the date received, compute the day the five-business-day response period expires, and maintain the request and related documents/response as an agency file."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "PA-0039",
+    "authority": "65 P.S. § 67.1307(b)",
+    "summary": "Duplication fees for Commonwealth and local agencies (absent an agency-specific fee schedule) are established by the Office of Open Records and must be reasonable and based on prevailing fees for comparable duplication services provided by local business entities."
+   }
+  ]
+ },
+ "ledger": {
+  "payment.advance_payment": [
+   {
+    "rule_id": "PA-0046",
+    "authority": "65 P.S. § 67.1307(h)",
+    "summary": "An agency may require a requester to prepay an estimate of the authorized fees if the fees required to fulfill the request are expected to exceed $100."
+   }
+  ]
+ },
+ "audit": {
+  "rules_total": 42,
+  "rules_referenced": 42,
+  "unreferenced_rule_ids": []
+ }
+}

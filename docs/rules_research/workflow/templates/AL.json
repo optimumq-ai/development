@@ -1,0 +1,826 @@
+{
+ "state": "Alabama",
+ "code": "AL",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.submission_channels": [
+     {
+      "rule_id": "AL-0017",
+      "authority": "Ala. Code § 36-12-45(b)(1) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "In the absence of written procedures to the contrary, a resident may submit a request by hand-delivering it or mailing it to the main office or principal place of business of the public officer having custody of the record."
+     }
+    ],
+    "intake.form_permitted": [
+     {
+      "rule_id": "AL-0015",
+      "authority": "Ala. Code § 36-12-44(a)(1) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a standard request, the public officer may require the requester to submit using a standard request form or by following the officer's written procedures for accepting requests."
+     },
+     {
+      "rule_id": "AL-0016",
+      "authority": "Ala. Code § 36-12-44(b)(1) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a time-intensive request, the public officer shall require the requester to submit using a standard request form or by following the officer's written procedures for accepting requests."
+     },
+     {
+      "rule_id": "AL-0019",
+      "authority": "Ala. Code § 36-12-45(b)(3) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "The standard request form shall read substantially as the statutory form (requester contact info, agency, date, and records requested), and the requester, by submitting, certifies being an Alabama resident with standing to request; the officer may require additional information or reorder/reforma…"
+     }
+    ],
+    "intake.no_technicality_denial": [
+     {
+      "rule_id": "AL-0014",
+      "authority": "Ala. Code § 36-12-45(a)(3) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "A public officer is not obligated to respond to a public records request that is not made pursuant to the officer's written procedures."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {
+    "response.acknowledgment_window": [
+     {
+      "rule_id": "AL-0024",
+      "authority": "Ala. Code § 36-12-44(a)(3) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a standard request, the public officer shall acknowledge a proper request within 10 days of receiving the request.",
+      "clock_spec": "10 days from receipt of the request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "AL-0030",
+      "authority": "Ala. Code § 36-12-44(b)(3) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a time-intensive request, the public officer shall acknowledge the request within 10 business days of receiving the request.",
+      "clock_spec": "10 business-days from receipt of the request",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.valid_response_forms": [
+     {
+      "rule_id": "AL-0011",
+      "authority": "Ala. Code § 36-12-43(b)(5) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "A 'substantive response' is a response setting forth the public officer's ultimate position on the substance of the request; it includes (in whole or part) providing the records, stating access will be provided at a set/agreed time and place, stating records are ready upon payment of a reasonable…"
+     }
+    ]
+   },
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "AL-0040",
+      "authority": "Ala. Code § 36-12-44(a)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "If the public officer elects to charge a fee for a standard request, the officer shall notify the requester of the estimated fee and withhold any public records until receipt of payment."
+     },
+     {
+      "rule_id": "AL-0045",
+      "authority": "Ala. Code § 36-12-44(b)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a time-intensive request, the public officer shall notify the requester in advance of any likely fees and shall withhold any substantive response until receipt of payment."
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "AL-0040",
+      "authority": "Ala. Code § 36-12-44(a)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "If the public officer elects to charge a fee for a standard request, the officer shall notify the requester of the estimated fee and withhold any public records until receipt of payment."
+     },
+     {
+      "rule_id": "AL-0045",
+      "authority": "Ala. Code § 36-12-44(b)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a time-intensive request, the public officer shall notify the requester in advance of any likely fees and shall withhold any substantive response until receipt of payment."
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "AL-0040",
+      "authority": "Ala. Code § 36-12-44(a)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "If the public officer elects to charge a fee for a standard request, the officer shall notify the requester of the estimated fee and withhold any public records until receipt of payment."
+     },
+     {
+      "rule_id": "AL-0045",
+      "authority": "Ala. Code § 36-12-44(b)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a time-intensive request, the public officer shall notify the requester in advance of any likely fees and shall withhold any substantive response until receipt of payment."
+     }
+    ]
+   },
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.advance_payment": [
+     {
+      "rule_id": "AL-0044",
+      "authority": "Ala. Code § 36-12-44(b)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a time-intensive request, the public officer shall require the requester to pay a reasonable fee set by the public officer before providing a substantive response."
+     }
+    ],
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "AL-0041",
+      "authority": "Ala. Code § 36-12-44(a)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a standard request where a fee is charged, the public officer shall withhold any public records until receipt of payment."
+     },
+     {
+      "rule_id": "AL-0043",
+      "authority": "Ala. Code § 36-12-44(a)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a standard request, the public officer has discretion to require the requester to pay all or a portion of the estimated fee prior to searching for any responsive public records."
+     },
+     {
+      "rule_id": "AL-0046",
+      "authority": "Ala. Code § 36-12-44(b)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a time-intensive request, the public officer has discretion to require the requester to pay all or a portion of the estimated fee prior to searching for any responsive public records."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "AL-0042",
+      "authority": "Ala. Code § 36-12-44(a)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "The requester may opt not to pay the fee and thus not receive any substantive response (standard request)."
+     }
+    ]
+   },
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "AL-0020",
+      "authority": "Ala. Code § 36-12-44(c) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "A request shall identify the requested public record with reasonable specificity, and a public officer is not obligated to respond to a request that is vague, ambiguous, overly broad, or unreasonable in scope."
+     },
+     {
+      "rule_id": "AL-0048",
+      "authority": "Ala. Code § 36-12-43(b)(5)d (added by SB270, 2024 Reg. Sess.)",
+      "summary": "A response that denies a request must state the reasons for the denial (a denial 'with reasons stated therefor' is what counts as a substantive response denying the request)."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "AL-0020",
+      "authority": "Ala. Code § 36-12-44(c) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "A request shall identify the requested public record with reasonable specificity, and a public officer is not obligated to respond to a request that is vague, ambiguous, overly broad, or unreasonable in scope."
+     },
+     {
+      "rule_id": "AL-0048",
+      "authority": "Ala. Code § 36-12-43(b)(5)d (added by SB270, 2024 Reg. Sess.)",
+      "summary": "A response that denies a request must state the reasons for the denial (a denial 'with reasons stated therefor' is what counts as a substantive response denying the request)."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {},
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {
+    "redaction.protected_person": [
+     {
+      "rule_id": "AL-0047",
+      "authority": "Ala. Code § 36-12-40(a) (amended by SB270, 2024 Reg. Sess.)",
+      "summary": "A public officer who receives a request that may appear to relate to critical infrastructure or critical energy infrastructure information shall notify the owner of such infrastructure in writing of the request and provide the owner an opportunity to comment on the request and on the threats to p…"
+     }
+    ]
+   }
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.certified_copy": [
+     {
+      "rule_id": "AL-0051",
+      "authority": "Ala. Code § 36-12-41 (amended by SB270, 2024 Reg. Sess.)",
+      "summary": "Every public officer having custody of a public record a resident has a right to inspect shall, on proper request, provide a certified copy of the record on payment of a reasonable fee, and such copy is admissible as evidence like the original."
+     }
+    ],
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "AL-0021",
+      "authority": "Ala. Code § 36-12-44(d) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "A public officer is not required to create a new public record if the requested record does not already exist."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": true,
+   "activated_by": {
+    "eligibility.requester_class_restriction": [
+     {
+      "rule_id": "AL-0001",
+      "authority": "Ala. Code § 36-12-40(a) (amended by SB270, 2024 Reg. Sess., eff. Oct. 1, 2024)",
+      "summary": "Every Alabama resident has a right to inspect and take a copy of any public record of the state, except as otherwise expressly provided by applicable law; the right (and the corresponding duty to respond under the procedural sections) runs to residents, not to any person."
+     }
+    ],
+    "eligibility.proof_of_residency": [
+     {
+      "rule_id": "AL-0004",
+      "authority": "Ala. Code § 36-12-44(f) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "A public officer may request reasonable evidence from the requester to establish proof of residency."
+     }
+    ],
+    "eligibility.resident_definition": [
+     {
+      "rule_id": "AL-0002",
+      "authority": "Ala. Code § 36-12-43(b)(3) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "'Resident' means an individual permanently domiciled in Alabama with an expectation to remain, as demonstrated by reasonable proof of residency such as an Alabama driver license or voter registration; the software branches request eligibility on this definition."
+     }
+    ],
+    "eligibility.out_of_class_discretionary": [
+     {
+      "rule_id": "AL-0005",
+      "authority": "Ala. Code § 36-12-44(f) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "A public officer has discretion to respond to public records requests made by nonresidents; responding to one nonresident request does not waive the officer's right to deny other or future nonresident requests."
+     }
+    ]
+   },
+   "context": {
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "AL-0003",
+      "authority": "Ala. Code § 36-12-40(a) (amended by SB270, 2024 Reg. Sess.)",
+      "summary": "The right to inspect and copy is granted to every resident without any condition that the requester state or justify a purpose; no statement of purpose is required to make a request."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": false
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": true,
+   "activated_by": {
+    "custody.referral_to_proper_custodian": [
+     {
+      "rule_id": "AL-0049",
+      "authority": "Ala. Code § 36-12-43(b)(5)e (added by SB270, 2024 Reg. Sess.)",
+      "summary": "When denying a request because the requested public record does not exist within the agency, the public officer may, if known, identify the proper custodian or location for the requested record."
+     }
+    ]
+   }
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": true,
+   "activated_by": {
+    "clarification.toll_on_clarification": [
+     {
+      "rule_id": "AL-0023",
+      "authority": "Ala. Code § 36-12-44(g) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "If a public officer responds by seeking clarification or additional information, the timelines are tolled and restart once the officer receives the requested clarification/information, as if the requester had submitted a new request.",
+      "clock_spec": "Timelines tolled on request for clarification; restart from zero upon receipt of clarification/additional information (treated as a new request)",
+      "clock_effect": "restarts"
+     }
+    ]
+   }
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": false
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": false
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": false,
+   "suppressed_by": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "AL-0041",
+      "authority": "Ala. Code § 36-12-44(a)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a standard request where a fee is charged, the public officer shall withhold any public records until receipt of payment."
+     },
+     {
+      "rule_id": "AL-0043",
+      "authority": "Ala. Code § 36-12-44(a)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a standard request, the public officer has discretion to require the requester to pay all or a portion of the estimated fee prior to searching for any responsive public records."
+     },
+     {
+      "rule_id": "AL-0046",
+      "authority": "Ala. Code § 36-12-44(b)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a time-intensive request, the public officer has discretion to require the requester to pay all or a portion of the estimated fee prior to searching for any responsive public records."
+     }
+    ]
+   },
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "context": {
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "AL-0021",
+      "authority": "Ala. Code § 36-12-44(d) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "A public officer is not required to create a new public record if the requested record does not already exist."
+     }
+    ]
+   },
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": true,
+   "activated_by": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "AL-0041",
+      "authority": "Ala. Code § 36-12-44(a)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a standard request where a fee is charged, the public officer shall withhold any public records until receipt of payment."
+     },
+     {
+      "rule_id": "AL-0043",
+      "authority": "Ala. Code § 36-12-44(a)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a standard request, the public officer has discretion to require the requester to pay all or a portion of the estimated fee prior to searching for any responsive public records."
+     },
+     {
+      "rule_id": "AL-0046",
+      "authority": "Ala. Code § 36-12-44(b)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a time-intensive request, the public officer has discretion to require the requester to pay all or a portion of the estimated fee prior to searching for any responsive public records."
+     }
+    ]
+   }
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": true,
+   "activated_by": {
+    "classification.processing_track": [
+     {
+      "rule_id": "AL-0009",
+      "authority": "Ala. Code § 36-12-43(b)(4) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "A 'standard request' is one that seeks specifically and discretely identified records the public officer determines would take less than eight hours of staff time to process (identifying, retrieving, and redacting/withholding protected information), requiring no or minimal clarification; it route…"
+     },
+     {
+      "rule_id": "AL-0010",
+      "authority": "Ala. Code § 36-12-43(b)(6) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "A 'time-intensive request' is one the public officer determines would take more than eight hours of staff time to process (identifying, retrieving, and redacting/withholding protected information); it routes to the time-intensive track."
+     },
+     {
+      "rule_id": "AL-0031",
+      "authority": "Ala. Code § 36-12-44(b)(4) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "The public officer shall notify the requester within 15 business days after acknowledging receipt that the request qualifies as a time-intensive request, and shall at that time notify the requester of any likely fees.",
+      "clock_spec": "15 business-days from acknowledgment of receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "AL-0032",
+      "authority": "Ala. Code § 36-12-44(b)(4) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "Upon the time-intensive designation notice, the officer shall allow the requester to withdraw the time-intensive request and submit a new request that is not time-intensive; the requester may instead elect to proceed."
+     }
+    ]
+   },
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": true,
+   "statutory": {
+    "response.acknowledgment_window": [
+     {
+      "rule_id": "AL-0024",
+      "authority": "Ala. Code § 36-12-44(a)(3) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a standard request, the public officer shall acknowledge a proper request within 10 days of receiving the request.",
+      "clock_spec": "10 days from receipt of the request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "AL-0030",
+      "authority": "Ala. Code § 36-12-44(b)(3) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a time-intensive request, the public officer shall acknowledge the request within 10 business days of receiving the request.",
+      "clock_spec": "10 business-days from receipt of the request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "AL-0025",
+      "authority": "Ala. Code § 36-12-44(a)(4) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "For a standard request, the public officer shall provide a substantive response fulfilling or denying a proper request within 15 business days of acknowledging receipt.",
+      "clock_spec": "15 business-days from acknowledgment of receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.clock_computation": [
+     {
+      "rule_id": "AL-0018",
+      "authority": "Ala. Code § 36-12-45(b)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "Receipt of a hand-delivered request occurs when it is received at the officer's main office or principal place of business; receipt of a mailed request occurs on the date of actual receipt by the officer; a certified-mail or similar signed postage receipt is prima facie evidence of receipt."
+     }
+    ],
+    "denial.deemed_denial_on_nonresponse": [
+     {
+      "rule_id": "AL-0027",
+      "authority": "Ala. Code § 36-12-44(a)(5)a (added by SB270, 2024 Reg. Sess.)",
+      "summary": "There is a rebuttable presumption that a proper standard request has been denied if a substantive response is not provided within the earlier of 30 business days or 60 calendar days following acknowledgment of receipt.",
+      "clock_spec": "Earlier of 30 business-days or 60 calendar-days from acknowledgment of receipt",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "AL-0028",
+      "authority": "Ala. Code § 36-12-44(a)(5)b (added by SB270, 2024 Reg. Sess.)",
+      "summary": "There is a rebuttable presumption that a proper standard request has been denied if the public records are not produced within the earlier of 30 business days or 60 calendar days following payment of the estimated fees to the public officer.",
+      "clock_spec": "Earlier of 30 business-days or 60 calendar-days from payment of estimated fees",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "AL-0029",
+      "authority": "Ala. Code § 36-12-44(a)(6) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "No presumption of denial arises for a standard request if the request is not proper or the officer is not obligated to respond, the officer has responded in part, the officer and requester have agreed on the time or substance of the response, negotiations are ongoing, or the officer has reasonabl…"
+     },
+     {
+      "rule_id": "AL-0036",
+      "authority": "Ala. Code § 36-12-44(b)(6)a (added by SB270, 2024 Reg. Sess.)",
+      "summary": "There is a rebuttable presumption that a proper time-intensive request has been denied if a substantive response is not provided within the earlier of 180 business days or 270 calendar days following the requester's election to proceed.",
+      "clock_spec": "Earlier of 180 business-days or 270 calendar-days from election to proceed",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "AL-0037",
+      "authority": "Ala. Code § 36-12-44(b)(6)b (added by SB270, 2024 Reg. Sess.)",
+      "summary": "There is a rebuttable presumption that a proper time-intensive request has been denied if the records are not produced within the earlier of 180 business days or 270 calendar days following payment of the estimated fees to the public officer.",
+      "clock_spec": "Earlier of 180 business-days or 270 calendar-days from payment of estimated fees",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "AL-0038",
+      "authority": "Ala. Code § 36-12-44(b)(7) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "No presumption of denial arises for a time-intensive request if the request is not proper or the officer is not obligated to respond, the officer has responded in part, the officer and requester have agreed on the time or substance of the response, negotiations are ongoing, or the officer has rea…"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": true,
+   "statutory": {
+    "response.extension_length": [
+     {
+      "rule_id": "AL-0026",
+      "authority": "Ala. Code § 36-12-44(a)(4) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "The public officer may extend the standard substantive-response period in 15-business-day increments upon written notice to the requester.",
+      "clock_spec": "+15 business-days per written extension notice (repeatable increments)",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "AL-0034",
+      "authority": "Ala. Code § 36-12-44(b)(4) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "The public officer may extend the 45-business-day time-intensive response period in 45-business-day increments by notifying the requester in writing.",
+      "clock_spec": "+45 business-days per written extension notice (repeatable increments)",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": true,
+   "statutory": {
+    "clarification.toll_on_clarification": [
+     {
+      "rule_id": "AL-0023",
+      "authority": "Ala. Code § 36-12-44(g) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "If a public officer responds by seeking clarification or additional information, the timelines are tolled and restart once the officer receives the requested clarification/information, as if the requester had submitted a new request.",
+      "clock_spec": "Timelines tolled on request for clarification; restart from zero upon receipt of clarification/additional information (treated as a new request)",
+      "clock_effect": "restarts"
+     }
+    ]
+   }
+  },
+  "nonpayment_close": {
+   "present": true,
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "AL-0042",
+      "authority": "Ala. Code § 36-12-44(a)(2) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "The requester may opt not to pay the fee and thus not receive any substantive response (standard request)."
+     }
+    ]
+   }
+  },
+  "special_windows": {
+   "present": true,
+   "statutory": {
+    "response.classified_request_window": [
+     {
+      "rule_id": "AL-0033",
+      "authority": "Ala. Code § 36-12-44(b)(4) (added by SB270, 2024 Reg. Sess.)",
+      "summary": "If the requester elects to proceed with a time-intensive request, the public officer shall provide a substantive response fulfilling or denying the request within 45 business days after the requester elected to proceed.",
+      "clock_spec": "45 business-days from the requester's election to proceed",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "AL-0039",
+    "authority": "Ala. Code § 36-12-44(a)(2), § 36-12-41 (SB270, 2024 Reg. Sess.)",
+    "summary": "A public officer may require the requester to pay a reasonable fee set by the public officer before the requester may receive any public records (standard request); more generally, a certified copy is furnished on payment of a reasonable fee."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.custodian_definition_and_role": [
+   {
+    "rule_id": "AL-0008",
+    "authority": "Ala. Code § 36-12-43(b)(2) (added by SB270, 2024 Reg. Sess.)",
+    "summary": "'Public officer' means a public officer or his or her designee responsible for responding to public records requests; this identifies who must respond and to whom requests route."
+   }
+  ],
+  "custody.request_tracking": [
+   {
+    "rule_id": "AL-0035",
+    "authority": "Ala. Code § 36-12-44(b)(5) (added by SB270, 2024 Reg. Sess.)",
+    "summary": "At or around the time of designating a request as time-intensive, the public officer shall record it in a log of currently pending time-intensive requests identifying the requester's name and the date of acknowledgment; the log is confidential and not subject to disclosure under this article (tho…"
+   }
+  ],
+  "intake.procedures_publication": [
+   {
+    "rule_id": "AL-0012",
+    "authority": "Ala. Code § 36-12-45(a)(1) (added by SB270, 2024 Reg. Sess.)",
+    "summary": "A resident may request access to a public record by following the written procedures established by the public officer having custody; those procedures may set a standard form, a designated recipient (e.g., a public records coordinator), permissible transmission methods, and other submission poli…"
+   },
+   {
+    "rule_id": "AL-0013",
+    "authority": "Ala. Code § 36-12-45(a)(2) (added by SB270, 2024 Reg. Sess.)",
+    "summary": "The public officer shall make its written procedures concerning public records reasonably available to the public."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "AL-0039",
+    "authority": "Ala. Code § 36-12-44(a)(2), § 36-12-41 (SB270, 2024 Reg. Sess.)",
+    "summary": "A public officer may require the requester to pay a reasonable fee set by the public officer before the requester may receive any public records (standard request); more generally, a certified copy is furnished on payment of a reasonable fee."
+   }
+  ]
+ },
+ "ledger": {
+  "classification.processing_track": [
+   {
+    "rule_id": "AL-0009",
+    "authority": "Ala. Code § 36-12-43(b)(4) (added by SB270, 2024 Reg. Sess.)",
+    "summary": "A 'standard request' is one that seeks specifically and discretely identified records the public officer determines would take less than eight hours of staff time to process (identifying, retrieving, and redacting/withholding protected information), requiring no or minimal clarification; it route…"
+   },
+   {
+    "rule_id": "AL-0010",
+    "authority": "Ala. Code § 36-12-43(b)(6) (added by SB270, 2024 Reg. Sess.)",
+    "summary": "A 'time-intensive request' is one the public officer determines would take more than eight hours of staff time to process (identifying, retrieving, and redacting/withholding protected information); it routes to the time-intensive track."
+   },
+   {
+    "rule_id": "AL-0031",
+    "authority": "Ala. Code § 36-12-44(b)(4) (added by SB270, 2024 Reg. Sess.)",
+    "summary": "The public officer shall notify the requester within 15 business days after acknowledging receipt that the request qualifies as a time-intensive request, and shall at that time notify the requester of any likely fees.",
+    "clock_spec": "15 business-days from acknowledgment of receipt",
+    "clock_effect": "sets-deadline"
+   },
+   {
+    "rule_id": "AL-0032",
+    "authority": "Ala. Code § 36-12-44(b)(4) (added by SB270, 2024 Reg. Sess.)",
+    "summary": "Upon the time-intensive designation notice, the officer shall allow the requester to withdraw the time-intensive request and submit a new request that is not time-intensive; the requester may instead elect to proceed."
+   }
+  ],
+  "payment.advance_payment": [
+   {
+    "rule_id": "AL-0044",
+    "authority": "Ala. Code § 36-12-44(b)(2) (added by SB270, 2024 Reg. Sess.)",
+    "summary": "For a time-intensive request, the public officer shall require the requester to pay a reasonable fee set by the public officer before providing a substantive response."
+   }
+  ],
+  "response.classified_request_window": [
+   {
+    "rule_id": "AL-0033",
+    "authority": "Ala. Code § 36-12-44(b)(4) (added by SB270, 2024 Reg. Sess.)",
+    "summary": "If the requester elects to proceed with a time-intensive request, the public officer shall provide a substantive response fulfilling or denying the request within 45 business days after the requester elected to proceed.",
+    "clock_spec": "45 business-days from the requester's election to proceed",
+    "clock_effect": "sets-deadline"
+   }
+  ]
+ },
+ "audit": {
+  "rules_total": 47,
+  "rules_referenced": 47,
+  "unreferenced_rule_ids": []
+ }
+}

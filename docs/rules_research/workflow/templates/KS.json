@@ -1,0 +1,693 @@
+{
+ "state": "Kansas",
+ "code": "KS",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.submission_channels": [
+     {
+      "rule_id": "KS-0011",
+      "authority": "K.S.A. 45-220(a)",
+      "summary": "Each public agency shall adopt procedures that provide full access, protect records, prevent excessive disruption, provide assistance and information, and ensure efficient and timely action on requests."
+     }
+    ],
+    "intake.written_request_required": [
+     {
+      "rule_id": "KS-0004",
+      "authority": "K.S.A. 45-220(b)",
+      "summary": "A public agency may require a written request for inspection of public records but shall not otherwise require a request in any particular form."
+     },
+     {
+      "rule_id": "KS-0009",
+      "authority": "K.S.A. 45-219(a)",
+      "summary": "If copies are requested, the public agency may require a written request and advance payment of the prescribed fee."
+     }
+    ],
+    "intake.no_required_form": [
+     {
+      "rule_id": "KS-0005",
+      "authority": "K.S.A. 45-220(b)",
+      "summary": "A public agency shall not require a request to be made in any particular form."
+     }
+    ],
+    "intake.required_fields": [
+     {
+      "rule_id": "KS-0006",
+      "authority": "K.S.A. 45-220(b)",
+      "summary": "A public agency shall not require that a request contain more than the requester's name and address, information necessary to ascertain the records desired, and the requester's right of access."
+     }
+    ],
+    "intake.no_technicality_denial": [
+     {
+      "rule_id": "KS-0008",
+      "authority": "K.S.A. 45-220(b)",
+      "summary": "No request shall be returned, delayed, or denied because of any technicality unless it is impossible to determine the records to which the requester desires access."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "KS-0039",
+      "authority": "K.S.A. 45-219(c)(4)",
+      "summary": "Upon request, the agency shall provide an itemized statement of costs charged to the requester, including the hourly rates for each employee involved and an itemized list of any other fees."
+     },
+     {
+      "rule_id": "KS-0041",
+      "authority": "K.S.A. 45-219(e)(1)",
+      "summary": "When staff time to respond will exceed five hours, or estimated actual staff-time cost exceeds $200, the agency shall make reasonable efforts to contact the requester and engage in interactive communication about mitigating costs; the requester is not obligated to mitigate."
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "KS-0027",
+      "authority": "K.S.A. 45-218(d)",
+      "summary": "If access is not granted immediately, the custodian shall give a detailed explanation of the cause for further delay and the place and earliest time and date the record will be available for inspection.",
+      "clock_spec": "undefined-soft: \"earliest time and date that the record will be available\" from delay notice",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {
+    "payment.deposit": [
+     {
+      "rule_id": "KS-0043",
+      "authority": "K.S.A. 45-218(f)",
+      "summary": "A public agency may charge and require advance payment of a fee for providing access to or furnishing copies of public records, subject to K.S.A. 45-219."
+     }
+    ]
+   }
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "KS-0039",
+      "authority": "K.S.A. 45-219(c)(4)",
+      "summary": "Upon request, the agency shall provide an itemized statement of costs charged to the requester, including the hourly rates for each employee involved and an itemized list of any other fees."
+     },
+     {
+      "rule_id": "KS-0041",
+      "authority": "K.S.A. 45-219(e)(1)",
+      "summary": "When staff time to respond will exceed five hours, or estimated actual staff-time cost exceeds $200, the agency shall make reasonable efforts to contact the requester and engage in interactive communication about mitigating costs; the requester is not obligated to mitigate."
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "KS-0027",
+      "authority": "K.S.A. 45-218(d)",
+      "summary": "If access is not granted immediately, the custodian shall give a detailed explanation of the cause for further delay and the place and earliest time and date the record will be available for inspection.",
+      "clock_spec": "undefined-soft: \"earliest time and date that the record will be available\" from delay notice",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "KS-0039",
+      "authority": "K.S.A. 45-219(c)(4)",
+      "summary": "Upon request, the agency shall provide an itemized statement of costs charged to the requester, including the hourly rates for each employee involved and an itemized list of any other fees."
+     },
+     {
+      "rule_id": "KS-0041",
+      "authority": "K.S.A. 45-219(e)(1)",
+      "summary": "When staff time to respond will exceed five hours, or estimated actual staff-time cost exceeds $200, the agency shall make reasonable efforts to contact the requester and engage in interactive communication about mitigating costs; the requester is not obligated to mitigate."
+     }
+    ]
+   },
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.deposit": [
+     {
+      "rule_id": "KS-0043",
+      "authority": "K.S.A. 45-218(f)",
+      "summary": "A public agency may charge and require advance payment of a fee for providing access to or furnishing copies of public records, subject to K.S.A. 45-219."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "KS-0042",
+      "authority": "K.S.A. 45-219(e)(2)",
+      "summary": "If the agency has made reasonable efforts to contact the requester under subsection (e) and the requester fails to respond by the end of the third business day, the request is deemed withdrawn until the requester makes subsequent contact.",
+      "clock_spec": "terminal: deemed withdrawn if no requester response by end of 3rd business day after the agency's reasonable-efforts contact",
+      "clock_effect": "terminal"
+     }
+    ]
+   },
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "KS-0029",
+      "authority": "K.S.A. 45-218(d)",
+      "summary": "The written statement of denial shall cite the specific provision of law under which access is denied."
+     }
+    ],
+    "denial.agency_burden": [
+     {
+      "rule_id": "KS-0031",
+      "authority": "K.S.A. 45-218(e)",
+      "summary": "The custodian may refuse access if a request places an unreasonable burden in producing records, or if the custodian has reason to believe repeated requests are intended to disrupt other essential functions; such refusal must be sustained by a preponderance of the evidence."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "KS-0028",
+      "authority": "K.S.A. 45-218(d)",
+      "summary": "If the request for access is denied, the custodian shall provide, upon request, a written statement of the grounds for denial."
+     }
+    ],
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "KS-0029",
+      "authority": "K.S.A. 45-218(d)",
+      "summary": "The written statement of denial shall cite the specific provision of law under which access is denied."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {
+    "denial.denial_deadline": [
+     {
+      "rule_id": "KS-0030",
+      "authority": "K.S.A. 45-218(d)",
+      "summary": "The written statement of grounds for denial shall be furnished not later than the end of the third business day following the date the request for the statement is received.",
+      "clock_spec": "ceiling: 3 business-days from receipt of the request for the written statement",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "KS-0032",
+      "authority": "K.S.A. 45-221(d)",
+      "summary": "If a record contains material not subject to disclosure, the agency shall separate or delete that material and make the disclosable remainder available; identifying portions of records pertaining to an identifiable individual shall be deleted and remaining disclosable portions produced."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "KS-0046",
+      "authority": "Roe v. Phillips Cnty. Hosp., 317 Kan. 1, 522 P.3d 277 (2023)",
+      "summary": "K.S.A. 45-219(a) requires a public agency, upon request, to provide a copy of a public record in the format in which the agency maintains that record."
+     }
+    ],
+    "production.certified_copy": [
+     {
+      "rule_id": "KS-0010",
+      "authority": "K.S.A. 45-220(c)",
+      "summary": "Where access to records or their permitted use is limited under K.S.A. 45-221 or 45-230, the agency may require the requester to certify in writing either a right of access or that the requester will not use/sell any list of names and addresses to sell property or services."
+     }
+    ],
+    "production.inspection_access": [
+     {
+      "rule_id": "KS-0045",
+      "authority": "K.S.A. 45-219(b)",
+      "summary": "Copies shall be made while records are in the custodian's possession/custody/control and under the custodian's supervision; whenever practicable, copies shall be made where the records are kept, and if not practicable the custodian shall allow arrangements for other facilities."
+     },
+     {
+      "rule_id": "KS-0047",
+      "authority": "K.S.A. 45-219(i)",
+      "summary": "Nothing in the act requires an agency to make electronic copies by allowing a person to attach an electronic device provided by that person to the agency's computer or other electronic device."
+     }
+    ],
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "KS-0044",
+      "authority": "K.S.A. 45-219(a)",
+      "summary": "A public agency is not required to provide copies of tapes, discs, video, film, pictures, slides, graphics, illustrations, or similar audio/visual items unless they were shown/played to a public meeting of the governing body; and need not provide items copyrighted by another."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": true,
+   "activated_by": {
+    "intake.identity_requirement": [
+     {
+      "rule_id": "KS-0007",
+      "authority": "K.S.A. 45-220(b)",
+      "summary": "A public agency may require proof of identity of any person requesting access to a public record."
+     }
+    ]
+   },
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "KS-0001",
+      "authority": "K.S.A. 45-218(a)",
+      "summary": "All public records shall be open for inspection by any person, except as otherwise provided by the act; each public agency must make suitable facilities available for inspection."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "KS-0003",
+      "authority": "K.S.A. 45-220(b)",
+      "summary": "A public agency shall not require a request to contain more than the requester's name and address and the information necessary to ascertain the records and the requester's right of access; no general statement of purpose is required."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "KS-0002",
+      "authority": "K.S.A. 45-218(a)",
+      "summary": "No residency or citizenship qualification is imposed on the right to request; the right runs to 'any person.'"
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": false
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": true,
+   "activated_by": {
+    "custody.referral_to_proper_custodian": [
+     {
+      "rule_id": "KS-0013",
+      "authority": "K.S.A. 45-218(c)",
+      "summary": "If the person to whom the request is directed is not the custodian, that person shall notify the requester and furnish the custodian's name and location, if known or readily ascertainable."
+     },
+     {
+      "rule_id": "KS-0016",
+      "authority": "K.S.A. 45-220(g)",
+      "summary": "Except for multi-agency summary data or as otherwise provided by law, requests for records held in the KBI-maintained central/criminal-justice repositories shall be directed to the criminal justice agency from which the records originated."
+     },
+     {
+      "rule_id": "KS-0017",
+      "authority": "K.S.A. 45-220(h)",
+      "summary": "Except for multi-agency summary data or as otherwise provided by law, requests for records in the KBI-maintained Kansas asset seizure and forfeiture repository shall be directed to the law enforcement agency from which the records originated."
+     },
+     {
+      "rule_id": "KS-0018",
+      "authority": "K.S.A. 45-220(i)",
+      "summary": "Requests for records defined as 'files' under K.S.A. 75-4379 submitted to a state or local law enforcement or governmental agency shall be directed to the agency that made, maintained, or kept such files."
+     },
+     {
+      "rule_id": "KS-0019",
+      "authority": "K.S.A. 45-220(j)",
+      "summary": "Requests for records containing captured license plate data or pertaining to the location of an automated license plate recognition system shall be directed to the agency that owns, leases, or contracts for the system."
+     }
+    ]
+   }
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": false
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": false
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "context": {
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "KS-0044",
+      "authority": "K.S.A. 45-219(a)",
+      "summary": "A public agency is not required to provide copies of tapes, discs, video, film, pictures, slides, graphics, illustrations, or similar audio/visual items unless they were shown/played to a public meeting of the governing body; and need not provide items copyrighted by another."
+     }
+    ]
+   },
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "KS-0026",
+      "authority": "K.S.A. 45-218(d)",
+      "summary": "Each request for access shall be acted upon as soon as possible, but not later than the end of the third business day following the date the request is received.",
+      "clock_spec": "ceiling: 3 business-days from date request is received (with soft 'as soon as possible' floor)",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": true,
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "KS-0042",
+      "authority": "K.S.A. 45-219(e)(2)",
+      "summary": "If the agency has made reasonable efforts to contact the requester under subsection (e) and the requester fails to respond by the end of the third business day, the request is deemed withdrawn until the requester makes subsequent contact.",
+      "clock_spec": "terminal: deemed withdrawn if no requester response by end of 3rd business day after the agency's reasonable-efforts contact",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": true,
+   "statutory": {
+    "denial.denial_deadline": [
+     {
+      "rule_id": "KS-0030",
+      "authority": "K.S.A. 45-218(d)",
+      "summary": "The written statement of grounds for denial shall be furnished not later than the end of the third business day following the date the request for the statement is received.",
+      "clock_spec": "ceiling: 3 business-days from receipt of the request for the written statement",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  }
+ },
+ "fee_schedule": {
+  "fee.labor_charge": [
+   {
+    "rule_id": "KS-0035",
+    "authority": "K.S.A. 45-219(c)(1)",
+    "summary": "Actual costs may include the cost to review and redact the requested records but shall not include incidental costs not attributable to furnishing the requested records."
+   },
+   {
+    "rule_id": "KS-0038",
+    "authority": "K.S.A. 45-219(c)(3)",
+    "summary": "Charges for staff time shall be based on the employee's salary or hourly wage and shall not include the costs of employee benefits."
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "KS-0034",
+    "authority": "K.S.A. 45-219(c)(1)",
+    "summary": "Fees for copies shall not exceed the actual cost of furnishing the requested records, including the cost of staff time required to make the information available."
+   },
+   {
+    "rule_id": "KS-0037",
+    "authority": "K.S.A. 45-219(c)(3)",
+    "summary": "If the agency incurs staff-time costs, it shall use in good faith the lowest-cost category of staff reasonably necessary to provide access or furnish copies."
+   },
+   {
+    "rule_id": "KS-0040",
+    "authority": "K.S.A. 45-219(b)",
+    "summary": "If it is necessary to use other facilities for copying, the requester shall pay that cost; the agency may also charge the same supervision fee as for furnishing copies under subsection (c)."
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "KS-0036",
+    "authority": "K.S.A. 45-219(c)(2)",
+    "summary": "Fees for providing access to records maintained on computer facilities shall include only the cost of any computer services, including staff time required."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "KS-0033",
+    "authority": "K.S.A. 45-219(c)",
+    "summary": "Except where fees are prescribed by statute or subsection (h) applies, each public agency may prescribe reasonable fees for providing access to or furnishing copies of public records, subject to enumerated limits."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.custodian_definition_and_role": [
+   {
+    "rule_id": "KS-0015",
+    "authority": "K.S.A. 45-217(f), (j)",
+    "summary": "The 'official custodian' is any officer/employee responsible for maintaining public records (regardless of actual personal custody); 'custodian' includes any person the official custodian designates."
+   }
+  ],
+  "custody.records_officer_designation": [
+   {
+    "rule_id": "KS-0014",
+    "authority": "K.S.A. 45-220(e)",
+    "summary": "Each official custodian shall designate the persons necessary to carry out custodian duties and shall ensure a custodian is available during regular business hours."
+   }
+  ],
+  "communication.determination_notice": [
+   {
+    "rule_id": "KS-0012",
+    "authority": "K.S.A. 45-220(f)",
+    "summary": "Each public agency shall, upon request of any person, provide its principal office and office hours, the title and address of the official custodian and any ordinarily-available custodian, the fees charged, and the procedures for requesting records."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "KS-0033",
+    "authority": "K.S.A. 45-219(c)",
+    "summary": "Except where fees are prescribed by statute or subsection (h) applies, each public agency may prescribe reasonable fees for providing access to or furnishing copies of public records, subject to enumerated limits."
+   }
+  ]
+ },
+ "ledger": {},
+ "audit": {
+  "rules_total": 41,
+  "rules_referenced": 41,
+  "unreferenced_rule_ids": []
+ }
+}

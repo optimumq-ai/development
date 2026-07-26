@@ -1,0 +1,600 @@
+[
+ {
+  "code": "AL",
+  "state": "Alabama",
+  "branches_active": [
+   "Master.g2",
+   "Master.br",
+   "Clarification.d2",
+   "Disposition.hold",
+   "Disposition.caps"
+  ],
+  "timers_present": [
+   "acknowledgment",
+   "initial_decision",
+   "extension",
+   "clarification_response",
+   "nonpayment_close",
+   "special_windows"
+  ],
+  "rules": 47,
+  "unreferenced": 0
+ },
+ {
+  "code": "AZ",
+  "state": "Arizona",
+  "branches_active": [
+   "Master.g2",
+   "Master.s1",
+   "Master.s2",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Disposition.hold"
+  ],
+  "timers_present": [
+   "initial_decision"
+  ],
+  "rules": 21,
+  "unreferenced": 0
+ },
+ {
+  "code": "CA",
+  "state": "California",
+  "branches_active": [
+   "Clarification.d1",
+   "Clarification.duty",
+   "Records-Search.web",
+   "Disposition.hold"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "extension"
+  ],
+  "rules": 24,
+  "unreferenced": 0
+ },
+ {
+  "code": "CO",
+  "state": "Colorado",
+  "branches_active": [
+   "Master.br",
+   "Estimate-Fee.proc"
+  ],
+  "timers_present": [
+   "extension"
+  ],
+  "rules": 19,
+  "unreferenced": 0
+ },
+ {
+  "code": "CT",
+  "state": "Connecticut",
+  "branches_active": [
+   "Master.s1",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Estimate-Fee.proc",
+   "Redaction.tp"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "denial_deadline"
+  ],
+  "rules": 25,
+  "unreferenced": 0
+ },
+ {
+  "code": "FL",
+  "state": "Florida",
+  "branches_active": [
+   "Master.br",
+   "Estimate-Fee.proc"
+  ],
+  "timers_present": [
+   "acknowledgment",
+   "initial_decision",
+   "completion"
+  ],
+  "rules": 26,
+  "unreferenced": 0
+ },
+ {
+  "code": "GA",
+  "state": "Georgia",
+  "branches_active": [
+   "Master.g2",
+   "Records-Search.web",
+   "Records-Search.spec",
+   "Disposition.hold"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "completion",
+   "nonpayment_close",
+   "special_windows"
+  ],
+  "rules": 35,
+  "unreferenced": 0
+ },
+ {
+  "code": "ID",
+  "state": "Idaho",
+  "branches_active": [
+   "Master.g2",
+   "Master.s1",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Estimate-Fee.proc"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "extension"
+  ],
+  "rules": 24,
+  "unreferenced": 0
+ },
+ {
+  "code": "IL",
+  "state": "Illinois",
+  "branches_active": [
+   "Master.s1",
+   "Master.s2",
+   "Clarification.d1",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Disposition.hold",
+   "Disposition.caps"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "extension",
+   "special_windows"
+  ],
+  "rules": 37,
+  "unreferenced": 0
+ },
+ {
+  "code": "IN",
+  "state": "Indiana",
+  "branches_active": [
+   "Master.s2",
+   "Estimate-Fee.proc",
+   "Records-Search.spec"
+  ],
+  "timers_present": [
+   "initial_decision"
+  ],
+  "rules": 22,
+  "unreferenced": 0
+ },
+ {
+  "code": "KS",
+  "state": "Kansas",
+  "branches_active": [
+   "Master.g2",
+   "Master.br",
+   "Estimate-Fee.proc"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "nonpayment_close",
+   "denial_deadline"
+  ],
+  "rules": 41,
+  "unreferenced": 0
+ },
+ {
+  "code": "LA",
+  "state": "Louisiana",
+  "branches_active": [
+   "Master.g2",
+   "Master.s1",
+   "Master.br",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Estimate-Fee.proc",
+   "Records-Search.spec"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "nonpayment_close"
+  ],
+  "rules": 28,
+  "unreferenced": 0
+ },
+ {
+  "code": "MA",
+  "state": "Massachusetts",
+  "branches_active": [
+   "Master.s1",
+   "Master.s2",
+   "Master.br",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Disposition.hold"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "extension",
+   "completion",
+   "nonpayment_close"
+  ],
+  "rules": 52,
+  "unreferenced": 0
+ },
+ {
+  "code": "MI",
+  "state": "Michigan",
+  "branches_active": [
+   "Master.g2",
+   "Master.s1",
+   "Master.br",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Estimate-Fee.proc",
+   "Records-Search.web",
+   "Records-Search.spec"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "extension",
+   "nonpayment_close"
+  ],
+  "rules": 66,
+  "unreferenced": 0
+ },
+ {
+  "code": "MN",
+  "state": "Minnesota",
+  "branches_active": [
+   "Estimate-Fee.proc",
+   "Records-Search.spec"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "completion"
+  ],
+  "rules": 21,
+  "unreferenced": 0
+ },
+ {
+  "code": "MO",
+  "state": "Missouri",
+  "branches_active": [
+   "Master.s1",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Estimate-Fee.proc",
+   "Disposition.caps"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "extension",
+   "completion",
+   "clarification_response",
+   "nonpayment_close",
+   "denial_deadline"
+  ],
+  "rules": 30,
+  "unreferenced": 0
+ },
+ {
+  "code": "NE",
+  "state": "Nebraska",
+  "branches_active": [
+   "Master.s1",
+   "Clarification.d2",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Estimate-Fee.proc"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "clarification_response",
+   "nonpayment_close"
+  ],
+  "rules": 23,
+  "unreferenced": 0
+ },
+ {
+  "code": "NV",
+  "state": "Nevada",
+  "branches_active": [
+   "Master.s1",
+   "Master.br",
+   "Clarification.d1",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Disposition.hold"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "extension",
+   "completion"
+  ],
+  "rules": 26,
+  "unreferenced": 0
+ },
+ {
+  "code": "NJ",
+  "state": "New Jersey",
+  "branches_active": [
+   "Master.g2",
+   "Master.s1",
+   "Master.s2",
+   "Master.br",
+   "Clarification.d1",
+   "Clarification.deny",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Estimate-Fee.proc",
+   "Records-Search.web",
+   "Records-Search.spec",
+   "Disposition.caps"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "extension",
+   "completion",
+   "special_windows"
+  ],
+  "rules": 97,
+  "unreferenced": 0
+ },
+ {
+  "code": "NY",
+  "state": "New York",
+  "branches_active": [
+   "Estimate-Fee.proc"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "completion"
+  ],
+  "rules": 32,
+  "unreferenced": 0
+ },
+ {
+  "code": "NC",
+  "state": "North Carolina",
+  "branches_active": [
+   "Estimate-Fee.proc",
+   "Records-Search.web",
+   "Records-Search.spec",
+   "Redaction.tp"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "completion",
+   "special_windows"
+  ],
+  "rules": 28,
+  "unreferenced": 0
+ },
+ {
+  "code": "OH",
+  "state": "Ohio",
+  "branches_active": [
+   "Master.g2",
+   "Clarification.d1",
+   "Clarification.deny",
+   "Estimate-Fee.proc",
+   "Disposition.caps"
+  ],
+  "timers_present": [
+   "initial_decision"
+  ],
+  "rules": 26,
+  "unreferenced": 0
+ },
+ {
+  "code": "OK",
+  "state": "Oklahoma",
+  "branches_active": [
+   "Master.s1",
+   "Master.s2",
+   "Clarification.d1",
+   "Clarification.deny",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Estimate-Fee.proc",
+   "Records-Search.web",
+   "Records-Search.spec"
+  ],
+  "timers_present": [
+   "nonpayment_close"
+  ],
+  "rules": 24,
+  "unreferenced": 0
+ },
+ {
+  "code": "OR",
+  "state": "Oregon",
+  "branches_active": [
+   "Master.g2",
+   "Master.s1",
+   "Master.br",
+   "Clarification.d2",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Disposition.hold"
+  ],
+  "timers_present": [
+   "acknowledgment",
+   "initial_decision",
+   "extension",
+   "clarification_response",
+   "nonpayment_close"
+  ],
+  "rules": 27,
+  "unreferenced": 0
+ },
+ {
+  "code": "PA",
+  "state": "Pennsylvania",
+  "branches_active": [
+   "Master.g2",
+   "Master.s1",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Estimate-Fee.proc",
+   "Records-Search.spec",
+   "Redaction.tp"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "extension"
+  ],
+  "rules": 42,
+  "unreferenced": 0
+ },
+ {
+  "code": "SC",
+  "state": "South Carolina",
+  "branches_active": [
+   "Master.g2",
+   "Master.s1",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Records-Search.web",
+   "Records-Search.spec",
+   "Disposition.hold"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "extension"
+  ],
+  "rules": 33,
+  "unreferenced": 0
+ },
+ {
+  "code": "TN",
+  "state": "Tennessee",
+  "branches_active": [
+   "Master.g2",
+   "Master.s1",
+   "Master.s2",
+   "Master.br",
+   "Clarification.d1",
+   "Clarification.deny",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Estimate-Fee.proc",
+   "Disposition.caps"
+  ],
+  "timers_present": [
+   "initial_decision"
+  ],
+  "rules": 40,
+  "unreferenced": 0
+ },
+ {
+  "code": "TX",
+  "state": "Texas",
+  "branches_active": [
+   "Master.g2",
+   "Master.s1",
+   "Clarification.d2",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Estimate-Fee.proc",
+   "Denial.dag",
+   "Denial.dprev",
+   "Denial.ag1",
+   "Denial.agclk",
+   "Denial.agnot",
+   "Denial.agwait",
+   "Denial.agdec",
+   "Denial.agrel",
+   "Records-Search.prog"
+  ],
+  "timers_present": [
+   "completion",
+   "clarification_response",
+   "nonpayment_close",
+   "suspension",
+   "ag_referral"
+  ],
+  "rules": 37,
+  "unreferenced": 0
+ },
+ {
+  "code": "UT",
+  "state": "Utah",
+  "branches_active": [
+   "Master.g2",
+   "Master.s1",
+   "Master.br",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Estimate-Fee.proc",
+   "Records-Search.web",
+   "Records-Search.spec",
+   "Redaction.tp",
+   "Disposition.caps"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "extension",
+   "denial_deadline"
+  ],
+  "rules": 43,
+  "unreferenced": 0
+ },
+ {
+  "code": "VA",
+  "state": "Virginia",
+  "branches_active": [
+   "Master.g2",
+   "Master.s1",
+   "Master.br",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Estimate-Fee.proc",
+   "Records-Search.spec"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "extension",
+   "clarification_response"
+  ],
+  "rules": 33,
+  "unreferenced": 0
+ },
+ {
+  "code": "WA",
+  "state": "Washington",
+  "branches_active": [
+   "Master.s2",
+   "Estimate-Fee.proc",
+   "Redaction.tp",
+   "Disposition.caps"
+  ],
+  "timers_present": [
+   "initial_decision",
+   "extension",
+   "clarification_response",
+   "nonpayment_close"
+  ],
+  "rules": 37,
+  "unreferenced": 0
+ },
+ {
+  "code": "WI",
+  "state": "Wisconsin",
+  "branches_active": [
+   "Master.g2",
+   "Master.s1",
+   "Estimate-Fee.dwv",
+   "Estimate-Fee.wrev",
+   "Estimate-Fee.proc",
+   "Records-Search.spec",
+   "Redaction.tp"
+  ],
+  "timers_present": [
+   "initial_decision"
+  ],
+  "rules": 51,
+  "unreferenced": 0
+ }
+]

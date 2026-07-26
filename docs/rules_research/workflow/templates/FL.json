@@ -1,0 +1,520 @@
+{
+ "state": "Florida",
+ "code": "FL",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.no_required_form": [
+     {
+      "rule_id": "FL-0004",
+      "authority": "Interpreting § 119.07(1)(a), Fla. Stat.; Fla. AG guidance / Government-in-the-Sunshine Manual",
+      "summary": "A custodian may not require that a public-records request be made in writing, on a particular form, or in person, and may not require the requester to disclose their identity as a condition of access."
+     }
+    ],
+    "intake.no_technicality_denial": [
+     {
+      "rule_id": "FL-0008",
+      "authority": "§ 119.07(1)(c), Fla. Stat.",
+      "summary": "A custodian and any designee must respond to requests to inspect or copy records in good faith."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {
+    "response.acknowledgment_window": [
+     {
+      "rule_id": "FL-0007",
+      "authority": "§ 119.07(1)(c), Fla. Stat.",
+      "summary": "A custodian and any designee must acknowledge a request to inspect or copy records promptly.",
+      "clock_spec": "undefined-soft: \"promptly\" from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {},
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {},
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {},
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {},
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "FL-0019",
+      "authority": "§ 119.07(1)(f), Fla. Stat.",
+      "summary": "If the requester asks, the custodian must state in writing and with particularity the reasons for the conclusion that the record is exempt or confidential."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "FL-0017",
+      "authority": "§ 119.07(1)(d), Fla. Stat.",
+      "summary": "A custodian asserting that an exemption applies to part of a record must redact that portion to which the exemption is asserted and validly applies, and must produce the remainder for inspection and copying."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {
+    "redaction.marking_and_explanation": [
+     {
+      "rule_id": "FL-0018",
+      "authority": "§ 119.07(1)(e), Fla. Stat.",
+      "summary": "A custodian contending all or part of a record is exempt must state the basis of the exemption, including the statutory citation to the exemption."
+     }
+    ]
+   },
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "FL-0006",
+      "authority": "§ 119.01(2)(a), Fla. Stat.",
+      "summary": "As an agency increases its use of electronic recordkeeping it must provide reasonable public access to records electronically maintained and must ensure exempt/confidential records are not disclosed except as permitted by law."
+     },
+     {
+      "rule_id": "FL-0016",
+      "authority": "§ 119.01(2)(f), Fla. Stat.",
+      "summary": "An agency must provide a copy of a record in the medium requested if it maintains the record in that medium; providing a copy in a medium not routinely used, or compiling/manipulating data, is charged under s. 119.07(4)."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": false,
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "FL-0001",
+      "authority": "Art. I, § 24(a), Fla. Const.",
+      "summary": "Every person has the right to inspect or copy any public record made or received in connection with the official business of any public body, officer, or employee of the state (or persons acting on their behalf), except records exempted under this section or made confidential by the Constitution."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "FL-0003",
+      "authority": "Curry v. State, 811 So. 2d 736 (Fla. 4th DCA 2002); Lorei v. Smith, 464 So. 2d 1330 (Fla. 2d DCA 1985)",
+      "summary": "A custodian may not require the requester to state a reason or purpose for the request; the requester's motivation does not affect the right of access."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "FL-0002",
+      "authority": "Art. I, § 24(a), Fla. Const.; § 119.01(1), Fla. Stat.",
+      "summary": "The right of access runs to 'every person' / 'any person' with no residency or citizenship qualification; a custodian may not condition access on the requester being a Florida resident."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": false
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": true,
+   "activated_by": {
+    "custody.referral_to_proper_custodian": [
+     {
+      "rule_id": "FL-0010",
+      "authority": "§ 119.07(1)(b), Fla. Stat.",
+      "summary": "A custodian may designate another officer or employee to permit inspection and copying, but must disclose the identity of the designee to the requester."
+     }
+    ]
+   },
+   "context": {
+    "custody.contractor_and_thirdparty_custody": [
+     {
+      "rule_id": "FL-0011",
+      "authority": "§ 119.0701(2)(a), Fla. Stat.",
+      "summary": "A contractor providing services to a public agency must keep and maintain the public records required by the agency to perform the service."
+     },
+     {
+      "rule_id": "FL-0012",
+      "authority": "§ 119.0701(2)(b), Fla. Stat.",
+      "summary": "On the agency custodian's request, a contractor must provide the agency a copy of, or allow inspection/copying of, requested records within a reasonable time at a cost not exceeding the chapter's fees.",
+      "clock_spec": "undefined-soft: \"within a reasonable time\" from the agency custodian's request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "FL-0013",
+      "authority": "§ 119.0701(2)(d), Fla. Stat.",
+      "summary": "At contract completion the contractor must transfer, at no cost, all public records in its possession to the agency, or keep and maintain the records; if transferring, it must destroy exempt/confidential duplicates."
+     }
+    ]
+   }
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": false
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": false
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": true,
+   "statutory": {
+    "response.acknowledgment_window": [
+     {
+      "rule_id": "FL-0007",
+      "authority": "§ 119.07(1)(c), Fla. Stat.",
+      "summary": "A custodian and any designee must acknowledge a request to inspect or copy records promptly.",
+      "clock_spec": "undefined-soft: \"promptly\" from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "denial.deemed_denial_on_nonresponse": [
+     {
+      "rule_id": "FL-0028",
+      "authority": "Tribune Co. v. Cannella, 458 So. 2d 1075 (Fla. 1984)",
+      "summary": "Delay beyond the limited reasonable time needed to retrieve and redact, or a policy-based/automatic delay, constitutes an unlawful (constructive) denial of access.",
+      "clock_spec": "undefined-soft: constructive denial arises once delay exceeds the \"limited reasonable time\" (no fixed day-count)",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "completion": {
+   "present": true,
+   "statutory": {
+    "production.completion_window": [
+     {
+      "rule_id": "FL-0014",
+      "authority": "Tribune Co. v. Cannella, 458 So. 2d 1075 (Fla. 1984)",
+      "summary": "The only delay permitted in producing records is the limited reasonable time the custodian needs to retrieve the record and delete the portions asserted to be exempt; no automatic or policy-based delay is allowed.",
+      "clock_spec": "undefined-soft: \"limited reasonable time\" to retrieve and redact, from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "FL-0020",
+    "authority": "§ 119.07(4)(a)1., Fla. Stat.",
+    "summary": "For duplicated copies of records not larger than 14 by 8.5 inches, the agency may charge up to 15 cents per one-sided copy."
+   },
+   {
+    "rule_id": "FL-0021",
+    "authority": "§ 119.07(4)(a)2., Fla. Stat.",
+    "summary": "For a two-sided copy, the agency may charge no more than an additional 5 cents."
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "FL-0023",
+    "authority": "§ 119.011(1), Fla. Stat.",
+    "summary": "'Actual cost of duplication' means the cost of the material and supplies used to duplicate the record, and does not include labor cost or overhead cost associated with such duplication."
+   }
+  ],
+  "fee.certified_copy_charge": [
+   {
+    "rule_id": "FL-0024",
+    "authority": "§ 119.07(4)(c), Fla. Stat.",
+    "summary": "An agency may charge up to $1 per copy for a certified copy of a public record."
+   }
+  ],
+  "fee.nonstandard_rate": [
+   {
+    "rule_id": "FL-0022",
+    "authority": "§ 119.07(4)(a)3., Fla. Stat.",
+    "summary": "For all copies other than standard-size paper copies, the agency charges the actual cost of duplication of the public record."
+   },
+   {
+    "rule_id": "FL-0026",
+    "authority": "§ 119.07(4)(e)2., Fla. Stat.",
+    "summary": "When a person photographs public records, the custodian may charge for supervision services at a rate agreed upon by the parties; if they cannot agree, the custodian determines the charge."
+   },
+   {
+    "rule_id": "FL-0027",
+    "authority": "§ 119.07(4)(e)1., Fla. Stat.",
+    "summary": "Where another room or place is necessary to photograph public records, the expense of providing it is paid by the person desiring to photograph the records."
+   }
+  ],
+  "fee.special_service_charge": [
+   {
+    "rule_id": "FL-0025",
+    "authority": "§ 119.07(4)(d), Fla. Stat.",
+    "summary": "If the nature or volume of records requires extensive use of IT resources or extensive clerical/supervisory assistance, the agency may charge, in addition to actual duplication cost, a reasonable special service charge based on the cost actually incurred."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.custodian_definition_and_role": [
+   {
+    "rule_id": "FL-0009",
+    "authority": "§ 119.07(1)(a), Fla. Stat.",
+    "summary": "Every person who has custody of a public record must permit that record to be inspected and copied by any person desiring to do so."
+   }
+  ]
+ },
+ "ledger": {},
+ "audit": {
+  "rules_total": 26,
+  "rules_referenced": 26,
+  "unreferenced_rule_ids": []
+ }
+}

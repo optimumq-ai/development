@@ -1,0 +1,744 @@
+{
+ "state": "Wisconsin",
+ "code": "WI",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.submission_channels": [
+     {
+      "rule_id": "WI-0010",
+      "authority": "Wis. Stat. § 19.35(1)(i)",
+      "summary": "A request may not be refused because it is received by mail, unless prepayment of a fee is required under s. 19.35(3)(f)."
+     }
+    ],
+    "intake.oral_request_permitted": [
+     {
+      "rule_id": "WI-0009",
+      "authority": "Wis. Stat. § 19.35(1)(h)",
+      "summary": "A request may be made orally, but must be reduced to writing before an enforcement action under s. 19.37 is commenced."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {},
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {},
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.advance_payment": [
+     {
+      "rule_id": "WI-0042",
+      "authority": "Wis. Stat. § 19.35(3)(f)",
+      "summary": "An authority may require prepayment of any fee(s) imposed under sub. (3) if the total amount exceeds $5.",
+      "clock_spec": "fixed: prepayment may be required when total fees exceed $5"
+     },
+     {
+      "rule_id": "WI-0043",
+      "authority": "Wis. Stat. § 19.35(3)(f)",
+      "summary": "If the requester is a prisoner (or person confined in a federal institution in this state) who failed to pay a fee for a previous request, the authority may require prepayment of both the previously owed amount and the current amount."
+     },
+     {
+      "rule_id": "WI-0044",
+      "authority": "State ex rel. Hill v. Zimmerman, 196 Wis. 2d 419, 538 N.W.2d 608 (Ct. App. 1995)",
+      "summary": "The amount of prepayment required for copies may be based on a reasonable estimate."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "WI-0026",
+      "authority": "Wis. Stat. § 19.35(4)(b)",
+      "summary": "If an authority denies a written request in whole or in part, the requester shall receive from the authority a written statement of the reasons for denying the written request."
+     }
+    ],
+    "denial.agency_burden": [
+     {
+      "rule_id": "WI-0029",
+      "authority": "Wis. Stat. § 19.35(1)(a)",
+      "summary": "The open-session (open-meetings) exemptions may be used as grounds for denying access only if the authority or legal custodian makes a specific demonstration that there is a need to restrict public access at the time the request is made."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "WI-0027",
+      "authority": "Wis. Stat. § 19.35(4)(b)",
+      "summary": "If a request was made orally, the authority may deny it orally unless the requester demands a written statement of the reasons for denial within 5 business days of the oral denial.",
+      "clock_spec": "5 business-days from oral denial (requester's demand window)",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "WI-0026",
+      "authority": "Wis. Stat. § 19.35(4)(b)",
+      "summary": "If an authority denies a written request in whole or in part, the requester shall receive from the authority a written statement of the reasons for denying the written request."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "WI-0030",
+      "authority": "Wis. Stat. § 19.36(6)",
+      "summary": "If a record contains both disclosable and non-disclosable information, the authority shall provide the disclosable information and delete the non-disclosable information from the record before release."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {
+    "redaction.mandatory_pii": [
+     {
+      "rule_id": "WI-0034",
+      "authority": "Wis. Stat. § 19.36(13)",
+      "summary": "An authority shall not provide access to personally identifiable information containing an individual's account/customer number with a financial institution (including credit card, debit card, checking, or draft account numbers) unless specifically required by law."
+     }
+    ],
+    "redaction.protected_person": [
+     {
+      "rule_id": "WI-0031",
+      "authority": "Wis. Stat. § 19.36(8)(b)",
+      "summary": "A law enforcement authority receiving a request for a record containing information (name, address, phone, voice recording, handwriting sample) that would identify an informant shall delete that portion, or withhold the record if it cannot be segregated, unless the legal custodian determines at t…"
+     }
+    ]
+   }
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "WI-0045",
+      "authority": "Wis. Stat. § 19.35(1)(b)",
+      "summary": "If a requester appears personally to request a copy of a copyable record, the authority may, at its option, permit the requester to copy the record or provide the requester with a copy substantially as readable as the original."
+     }
+    ],
+    "production.av_media_specific": [
+     {
+      "rule_id": "WI-0032",
+      "authority": "Wis. Stat. § 19.35(1)(em)",
+      "summary": "If a handwritten record or voice recording must be withheld/redacted under s. 19.36(8)(b) because the handwriting or voice would identify an informant, the authority shall provide the requester, upon request, a transcript of the record or information, if otherwise subject to disclosure."
+     },
+     {
+      "rule_id": "WI-0046",
+      "authority": "Wis. Stat. § 19.35(1)(c)",
+      "summary": "For a record that is a comprehensible audio recording, the requester has a right to a copy substantially as audible as the original; the authority may instead provide a transcript if the requester so requests."
+     },
+     {
+      "rule_id": "WI-0047",
+      "authority": "Wis. Stat. § 19.35(1)(d)",
+      "summary": "For a record that is a video recording, the requester has a right to a copy substantially as good as the original."
+     }
+    ],
+    "production.inspection_access": [
+     {
+      "rule_id": "WI-0019",
+      "authority": "Wis. Stat. § 19.34(2)(a)",
+      "summary": "An authority that maintains regular office hours at the location where records are kept shall permit access to those records at all times during those office hours, unless otherwise specifically authorized by law."
+     },
+     {
+      "rule_id": "WI-0020",
+      "authority": "Wis. Stat. § 19.34(2)(b)1.",
+      "summary": "An authority without regular office hours at the records location may require at least 48 hours' written or oral notice of intent to inspect or copy before permitting access.",
+      "clock_spec": "floor: 48 hours advance written or oral notice of intent to inspect/copy"
+     },
+     {
+      "rule_id": "WI-0021",
+      "authority": "Wis. Stat. § 19.34(2)(b)2.",
+      "summary": "As an alternative, such an authority may establish a period of at least 2 consecutive hours per week during which access is permitted, and may then require 24 hours' advance written or oral notice of intent to inspect or copy.",
+      "clock_spec": "floor: 2 consecutive hours per week access window; may require 24 hours advance notice"
+     },
+     {
+      "rule_id": "WI-0022",
+      "authority": "Wis. Stat. § 19.35(2)",
+      "summary": "The authority shall provide facilities comparable to those used by its employees to inspect, copy, and abstract the record during established office hours, but is not required to purchase/lease equipment or provide a separate room."
+     }
+    ],
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "WI-0048",
+      "authority": "Wis. Stat. § 19.35(1)(e)",
+      "summary": "For a record not in a readily comprehensible form, the requester has a right to a copy of the information assembled and reduced to written form on paper."
+     },
+     {
+      "rule_id": "WI-0050",
+      "authority": "Wis. Stat. § 19.35(1)(L)",
+      "summary": "Except as necessary to comply with pars. (c)-(e) or s. 19.36(6), the law does not require an authority to create a new record by extracting information from existing records and compiling it in a new format."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": true,
+   "activated_by": {
+    "eligibility.incarcerated_requester_exclusion": [
+     {
+      "rule_id": "WI-0005",
+      "authority": "Wis. Stat. § 19.32(3)",
+      "summary": "A committed or incarcerated person is not a 'requester' with general access rights unless the requested record contains specific references to that person or his or her minor children (for whom physical placement has not been denied) and the record is otherwise accessible to the person by law."
+     }
+    ],
+    "eligibility.record_subject_self_access": [
+     {
+      "rule_id": "WI-0006",
+      "authority": "Wis. Stat. § 19.35(1)(am)",
+      "summary": "A requester who is the individual (or person authorized by the individual) has an additional right to inspect and copy personally identifiable information pertaining to that individual, subject to the enumerated exceptions (enforcement/investigation records, life/safety, informant, security, etc.)."
+     }
+    ],
+    "intake.identity_requirement": [
+     {
+      "rule_id": "WI-0013",
+      "authority": "Wis. Stat. § 19.35(1)(i)",
+      "summary": "A requester may be required to show acceptable identification whenever the requested record is kept at a private residence, or whenever security reasons or federal law/regulations so require."
+     }
+    ]
+   },
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "WI-0001",
+      "authority": "Wis. Stat. §§ 19.35(1)(a), 19.32(3)",
+      "summary": "Any requester (any person requesting inspection or copies of a record) has a right to inspect any record, except as otherwise provided by law."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "WI-0002",
+      "authority": "Wis. Stat. § 19.35(1)(i)",
+      "summary": "A request may not be refused because the requester is unwilling to state the purpose of the request."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "WI-0004",
+      "authority": "Wis. Stat. §§ 19.35(1)(a), 19.31",
+      "summary": "No residency or citizenship qualification is imposed on a requester; any requester has the right to inspect any record."
+     }
+    ],
+    "eligibility.no_identity_requirement": [
+     {
+      "rule_id": "WI-0003",
+      "authority": "Wis. Stat. § 19.35(1)(i)",
+      "summary": "A request may not be refused because the requester is unwilling to be identified, except where acceptable identification may be required for records kept at a private residence or where security/federal law requires."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "WI-0039",
+      "authority": "Wis. Stat. § 19.35(3)(e)",
+      "summary": "An authority may provide copies without charge or at a reduced charge where it determines that waiver or reduction of the fee is in the public interest."
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false,
+   "context": {
+    "custody.contractor_and_thirdparty_custody": [
+     {
+      "rule_id": "WI-0018",
+      "authority": "Wis. Stat. § 19.35(7)(b), (c)",
+      "summary": "A local information technology authority holding a law enforcement record only for storage/processing is not the legal custodian; the custodian is the authority for which the record is stored, and the IT authority shall deny any portion of a request relating to a local law enforcement record."
+     }
+    ]
+   }
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "WI-0039",
+      "authority": "Wis. Stat. § 19.35(3)(e)",
+      "summary": "An authority may provide copies without charge or at a reduced charge where it determines that waiver or reduction of the fee is in the public interest."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "WI-0039",
+      "authority": "Wis. Stat. § 19.35(3)(e)",
+      "summary": "An authority may provide copies without charge or at a reduced charge where it determines that waiver or reduction of the fee is in the public interest."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "context": {
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "WI-0048",
+      "authority": "Wis. Stat. § 19.35(1)(e)",
+      "summary": "For a record not in a readily comprehensible form, the requester has a right to a copy of the information assembled and reduced to written form on paper."
+     },
+     {
+      "rule_id": "WI-0050",
+      "authority": "Wis. Stat. § 19.35(1)(L)",
+      "summary": "Except as necessary to comply with pars. (c)-(e) or s. 19.36(6), the law does not require an authority to create a new record by extracting information from existing records and compiling it in a new format."
+     }
+    ]
+   },
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": true,
+   "activated_by": {
+    "special_records.special_production_constraint": [
+     {
+      "rule_id": "WI-0049",
+      "authority": "Wis. Stat. § 19.35(1)(f)",
+      "summary": "For a record whose form does not permit copying, the requester has a right to inspect it; the authority may permit the requester to photograph it, and if the requester requests a photograph be provided, the authority shall provide a good quality photograph."
+     },
+     {
+      "rule_id": "WI-0051",
+      "authority": "Wis. Stat. § 19.35(1)(g)",
+      "summary": "The inspection/copy rights in pars. (a)-(c), (e) and (f) do not apply to a record that has been or will be promptly published with copies offered for sale or distribution."
+     },
+     {
+      "rule_id": "WI-0052",
+      "authority": "Wis. Stat. § 19.35(1)(k)",
+      "summary": "A legal custodian may impose reasonable restrictions on the manner of access to an original record if the record is irreplaceable or easily damaged."
+     },
+     {
+      "rule_id": "WI-0053",
+      "authority": "Wis. Stat. § 19.35(1)(j)",
+      "summary": "A requester shall comply with any regulations or restrictions upon access to or use of information that are specifically prescribed by law."
+     }
+    ]
+   }
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": true,
+   "activated_by": {
+    "redaction.personnel_privacy_process": [
+     {
+      "rule_id": "WI-0057",
+      "authority": "Wis. Stat. § 19.356(2)(a)",
+      "summary": "If an authority decides to permit access to a specified record (employee disciplinary-investigation records, records obtained by subpoena/search warrant, or private-employer records about an employee), it shall, before permitting access and within 3 days after deciding to permit access, serve wri…",
+      "clock_spec": "sets-deadline: within 3 days after the decision to permit access",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "WI-0060",
+      "authority": "Wis. Stat. § 19.356(5)",
+      "summary": "An authority shall not provide access to a requested record within 12 days of sending a record-subject notice under s. 19.356(2)(a); if the record subject commences an action, the authority shall not release during the pendency of the action (and through any appeal/review period).",
+      "clock_spec": "sets-deadline: no release within 12 days of sending the 19.356(2)(a) notice; further hold during pendency of any action/appeal",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "WI-0061",
+      "authority": "Wis. Stat. § 19.356(9)(a), (b)",
+      "summary": "If an authority decides to permit access to a record relating to a record subject who is an officer/employee holding a local or state public office, it shall within 3 days serve written notice on the subject; the subject may within 5 days augment the record with written comments/documentation, an…",
+      "clock_spec": "sets-deadline: notice within 3 days of decision to permit access; record subject may augment within 5 days after receipt of notice",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "WI-0023",
+      "authority": "Wis. Stat. § 19.35(4)(a)",
+      "summary": "Upon any request, the authority shall, as soon as practicable and without delay, either fill the request or notify the requester of its determination to deny the request in whole or in part and the reasons therefor.",
+      "clock_spec": "undefined-soft: \"as soon as practicable and without delay\" from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.clock_computation": [
+     {
+      "rule_id": "WI-0024",
+      "authority": "Wis. Stat. § 19.345",
+      "summary": "When a time period (in hours or days) is provided for performing an act under ss. 19.33 to 19.39, the whole of Saturday, Sunday, and any legal holiday (midnight to midnight) is excluded in computing the period."
+     }
+    ],
+    "denial.deemed_denial_on_nonresponse": [
+     {
+      "rule_id": "WI-0025",
+      "authority": "WTMJ, Inc. v. Sullivan, 204 Wis. 2d 452, 555 N.W.2d 125 (Ct. App. 1996)",
+      "summary": "A custodian is not authorized to comply with a request at some unspecified future date; such a response constitutes a denial of the request.",
+      "clock_spec": "terminal: constructive denial upon indefinite-future response",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "WI-0035",
+    "authority": "Wis. Stat. § 19.35(3)(a)",
+    "summary": "An authority may impose a fee for a copy of a record not exceeding the actual, necessary and direct cost of reproduction and transcription, unless a fee is otherwise specifically established or authorized by law.",
+    "clock_spec": "ceiling: actual, necessary and direct cost of reproduction and transcription"
+   }
+  ],
+  "fee.labor_charge": [
+   {
+    "rule_id": "WI-0041",
+    "authority": "Wis. Stat. § 19.35(3)(am), created by 2023 Wis. Act 253",
+    "summary": "A law enforcement agency may impose a fee for the actual, necessary and direct cost of redacting recorded audio or video content to the extent redaction is required by law, but may not charge if: the requester (an individual) certifies non-commercial use; the event is an officer-involved shooting…",
+    "clock_spec": "ceiling: actual, necessary and direct cost of redacting recorded audio/video content"
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "WI-0037",
+    "authority": "Wis. Stat. § 19.35(3)(c)",
+    "summary": "An authority may impose a fee for locating a record, not exceeding the actual, necessary and direct cost of location, but only if that cost is $50 or more.",
+    "clock_spec": "ceiling: actual, necessary and direct cost of location; chargeable only if cost is $50 or more"
+   },
+   {
+    "rule_id": "WI-0040",
+    "authority": "Wis. Stat. § 19.35(3)(g)",
+    "summary": "If a record is produced or collected by a non-authority under contract with an authority, the authorized fee for a copy may not exceed the actual, necessary and direct cost of reproduction or transcription incurred by that person, unless a fee is otherwise established by law.",
+    "clock_spec": "ceiling: actual, necessary and direct cost of reproduction/transcription incurred by the contractor"
+   }
+  ],
+  "fee.delivery_charge": [
+   {
+    "rule_id": "WI-0038",
+    "authority": "Wis. Stat. § 19.35(3)(d)",
+    "summary": "An authority may impose a fee for the actual, necessary and direct cost of mailing or shipping any copy or photograph of a record that is mailed or shipped to the requester.",
+    "clock_spec": "ceiling: actual, necessary and direct cost of mailing or shipping"
+   }
+  ],
+  "fee.nonstandard_rate": [
+   {
+    "rule_id": "WI-0036",
+    "authority": "Wis. Stat. § 19.35(3)(b)",
+    "summary": "Where an authority provides a photograph of a record whose form does not permit copying, it may impose a fee not exceeding the actual, necessary and direct cost of photographing and photographic processing.",
+    "clock_spec": "ceiling: actual, necessary and direct cost of photographing and photographic processing"
+   }
+  ],
+  "fee.no_charge_categories": [
+   {
+    "rule_id": "WI-0033",
+    "authority": "Milwaukee Journal Sentinel v. City of Milwaukee, 2012 WI 65, 341 Wis. 2d 607",
+    "summary": "Redaction is not one of the four statutory fee tasks (reproduction/transcription, photographing/processing, locating, mailing/shipping); an authority generally may not impose a fee for the process of redacting information from a record.",
+    "clock_spec": "fixed: $0 for redaction/separation of information (general records)"
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.custodian_definition_and_role": [
+   {
+    "rule_id": "WI-0016",
+    "authority": "Wis. Stat. § 19.33(4)",
+    "summary": "In the absence of a designation, the authority's highest ranking officer and the chief administrative officer (if any) are the legal custodians."
+   },
+   {
+    "rule_id": "WI-0017",
+    "authority": "Wis. Stat. § 19.33(6)",
+    "summary": "The legal custodian (or appointing authority) of records in a publicly owned/leased building shall designate one or more deputies to act as legal custodian in his or her absence or as otherwise required to respond to requests under s. 19.35(4)."
+   }
+  ],
+  "custody.records_officer_designation": [
+   {
+    "rule_id": "WI-0015",
+    "authority": "Wis. Stat. § 19.33(4)",
+    "summary": "Every authority not otherwise specified shall designate in writing one or more positions as legal custodian to fulfill the authority's duties under the subchapter, vested with full legal power to render decisions and carry out those duties."
+   }
+  ],
+  "intake.procedures_publication": [
+   {
+    "rule_id": "WI-0014",
+    "authority": "Wis. Stat. § 19.34(1)",
+    "summary": "Each authority shall adopt, prominently display, and make available a notice describing its organization, the times/places and legal custodian from whom, and methods whereby, the public may obtain access to and copies of records, and the costs thereof; the notice shall separately identify each lo…"
+   }
+  ]
+ },
+ "ledger": {
+  "payment.advance_payment": [
+   {
+    "rule_id": "WI-0042",
+    "authority": "Wis. Stat. § 19.35(3)(f)",
+    "summary": "An authority may require prepayment of any fee(s) imposed under sub. (3) if the total amount exceeds $5.",
+    "clock_spec": "fixed: prepayment may be required when total fees exceed $5"
+   },
+   {
+    "rule_id": "WI-0043",
+    "authority": "Wis. Stat. § 19.35(3)(f)",
+    "summary": "If the requester is a prisoner (or person confined in a federal institution in this state) who failed to pay a fee for a previous request, the authority may require prepayment of both the previously owed amount and the current amount."
+   },
+   {
+    "rule_id": "WI-0044",
+    "authority": "State ex rel. Hill v. Zimmerman, 196 Wis. 2d 419, 538 N.W.2d 608 (Ct. App. 1995)",
+    "summary": "The amount of prepayment required for copies may be based on a reasonable estimate."
+   }
+  ]
+ },
+ "audit": {
+  "rules_total": 51,
+  "rules_referenced": 51,
+  "unreferenced_rule_ids": []
+ }
+}

@@ -90,5 +90,12 @@ value-knobs (◆) · 25 state-branches (▲)** — rendered as glyphs + legend o
 value per reachable ◆ + on/off per ▲ + nothing for shared; knob values come from the dictionary's
 parameter/mixed concepts, gates from its structural ones).
 
-**Not started:** per-state config templates (Phase 6 — start from OVERLAY.md + the master dictionary);
-the build (Phase 7).
+**Per-state config templates: DONE (Phase 6, 2026-07-26).** `node_concept_map.json` assigns all 122
+concepts to config surfaces (knobs · branch activate/context gates · 10-timer clock matrix ·
+fee-schedule · program-setup · requestor-ledger); `build_state_templates.js` generates
+`templates/<ST>.json` for all 32 states with a fail-loud audit (1,117/1,117 rules reachable).
+Data fixes en route: TX-0009/0010 re-homed to completion_window (RULE_OVERRIDES) · TX-S05
+(§ 552.221(e) 60-day withdrawal) added and verified. Kevin deliverables in
+`exchange/config_templates/` (32 HTML + index + Config_templates.xlsx). See `templates/README.md`.
+
+**Not started:** the build (Phase 7 — engine + config loader off the templates).

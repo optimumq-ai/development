@@ -1,0 +1,577 @@
+{
+ "state": "Nevada",
+ "code": "NV",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.oral_request_permitted": [
+     {
+      "rule_id": "NV-0005",
+      "authority": "Nev. Rev. Stat. § 239.0107(1)",
+      "summary": "A request to inspect, copy or receive a copy may be made either in writing or orally; the response duty is triggered by either form."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "NV-0009",
+      "authority": "Nev. Rev. Stat. § 239.0107(1)(c)(1)",
+      "summary": "If the record is still not available by the date and time the entity previously represented, the entity must provide a written explanation of the reason and a new reasonably-believed availability date and time.",
+      "clock_spec": "undefined-soft: new \"date and time after which the governmental entity reasonably believes\" availability, from lapse of the previously represented date",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "NV-0009",
+      "authority": "Nev. Rev. Stat. § 239.0107(1)(c)(1)",
+      "summary": "If the record is still not available by the date and time the entity previously represented, the entity must provide a written explanation of the reason and a new reasonably-believed availability date and time.",
+      "clock_spec": "undefined-soft: new \"date and time after which the governmental entity reasonably believes\" availability, from lapse of the previously represented date",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "NV-0018",
+      "authority": "Nev. Rev. Stat. § 239.030",
+      "summary": "For certified copies, the requester must pay or tender the prescribed copying and certifying fees as a condition of the officer's duty to furnish them."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {},
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "NV-0012",
+      "authority": "Nev. Rev. Stat. § 239.0107(1)(d)",
+      "summary": "If the entity must deny the request because the record (or part) is confidential, it must provide written notice of that fact and a citation to the specific statute or other legal authority making it confidential."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "NV-0013",
+      "authority": "Nev. Rev. Stat. § 239.010(3)",
+      "summary": "The entity must not deny a request on the basis that the record contains confidential information if it can redact, delete, conceal or separate (including electronically) the confidential information from the non-confidential information."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "NV-0014",
+      "authority": "Nev. Rev. Stat. § 239.010(4)",
+      "summary": "If requested, the entity must provide a copy in an electronic format by electronic medium, unless the record was neither created nor available electronically, or doing so would give access to proprietary software or require producing non-separable confidential information."
+     },
+     {
+      "rule_id": "NV-0015",
+      "authority": "Nev. Rev. Stat. § 239.010(5)(a)",
+      "summary": "A custodian must not refuse to provide a copy in the requested medium because it has already prepared, or would prefer to provide, the copy in a different medium."
+     }
+    ],
+    "production.delivery_and_completion": [
+     {
+      "rule_id": "NV-0016",
+      "authority": "Nev. Rev. Stat. § 239.010(5)(b)",
+      "summary": "On request, the custodian must prepare the copy of the record and must not require the requester to prepare the copy himself or herself."
+     }
+    ],
+    "production.certified_copy": [
+     {
+      "rule_id": "NV-0017",
+      "authority": "Nev. Rev. Stat. § 239.030",
+      "summary": "An officer having custody of non-confidential public records must furnish certified copies to any person who requests them and pays or tenders the prescribed copying/certifying fees."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": false,
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "NV-0001",
+      "authority": "Nev. Rev. Stat. § 239.010(1)",
+      "summary": "All public books and records of a governmental entity must be open during office hours to inspection by any person, and may be fully copied."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "NV-0003",
+      "authority": "Nev. Rev. Stat. § 239.010(1)",
+      "summary": "Access runs to 'any person'; the statute requires no statement of purpose or justification for a request."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "NV-0002",
+      "authority": "Nev. Rev. Stat. § 239.010(1)",
+      "summary": "Access runs to 'any person'; the statute imposes no residency or citizenship condition on who may request public records."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "NV-0023",
+      "authority": "Nev. Rev. Stat. § 239.052(2)",
+      "summary": "A governmental entity may waive all or part of a copy fee if it adopts a written waiver policy and posts a legible sign or notice of the policy's terms at each office providing copies."
+     },
+     {
+      "rule_id": "NV-0027",
+      "authority": "Nev. Rev. Stat. § 239.020",
+      "summary": "When a public record copy is required by the federal Department of Veterans Affairs to determine benefit eligibility, the custodian must provide a certified copy without charge to the applicant, their representative, or the VA."
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": true,
+   "activated_by": {
+    "custody.referral_to_proper_custodian": [
+     {
+      "rule_id": "NV-0011",
+      "authority": "Nev. Rev. Stat. § 239.0107(1)(b)",
+      "summary": "If the entity does not have legal custody or control of the record, it must provide written notice of that fact and the name and address of the entity that does have custody or control, if known."
+     }
+    ]
+   }
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": true,
+   "activated_by": {
+    "clarification.duty_to_assist": [
+     {
+      "rule_id": "NV-0010",
+      "authority": "Nev. Rev. Stat. § 239.0107(1)(c)(2)",
+      "summary": "When unable to produce by day five, the entity must make a reasonable effort to assist the requester to focus the request to maximize the likelihood of obtaining the record as expeditiously as possible."
+     }
+    ]
+   }
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "NV-0023",
+      "authority": "Nev. Rev. Stat. § 239.052(2)",
+      "summary": "A governmental entity may waive all or part of a copy fee if it adopts a written waiver policy and posts a legible sign or notice of the policy's terms at each office providing copies."
+     },
+     {
+      "rule_id": "NV-0027",
+      "authority": "Nev. Rev. Stat. § 239.020",
+      "summary": "When a public record copy is required by the federal Department of Veterans Affairs to determine benefit eligibility, the custodian must provide a certified copy without charge to the applicant, their representative, or the VA."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "NV-0023",
+      "authority": "Nev. Rev. Stat. § 239.052(2)",
+      "summary": "A governmental entity may waive all or part of a copy fee if it adopts a written waiver policy and posts a legible sign or notice of the policy's terms at each office providing copies."
+     },
+     {
+      "rule_id": "NV-0027",
+      "authority": "Nev. Rev. Stat. § 239.020",
+      "summary": "When a public record copy is required by the federal Department of Veterans Affairs to determine benefit eligibility, the custodian must provide a certified copy without charge to the applicant, their representative, or the VA."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": false,
+   "suppressed_by": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "NV-0018",
+      "authority": "Nev. Rev. Stat. § 239.030",
+      "summary": "For certified copies, the requester must pay or tender the prescribed copying and certifying fees as a condition of the officer's duty to furnish them."
+     }
+    ]
+   },
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": true,
+   "activated_by": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "NV-0018",
+      "authority": "Nev. Rev. Stat. § 239.030",
+      "summary": "For certified copies, the requester must pay or tender the prescribed copying and certifying fees as a condition of the officer's duty to furnish them."
+     }
+    ]
+   }
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "NV-0006",
+      "authority": "Nev. Rev. Stat. § 239.0107(1)(a)",
+      "summary": "Not later than the end of the fifth business day after receipt of a request, the entity must allow inspection/copying or provide the copy (or give one of the alternative statutory responses).",
+      "clock_spec": "5 business-days from custodian's receipt of request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": true,
+   "statutory": {
+    "response.extension_notice": [
+     {
+      "rule_id": "NV-0008",
+      "authority": "Nev. Rev. Stat. § 239.0107(1)(c)(1)",
+      "summary": "If unable to make the record available by the end of the fifth business day, the entity must give the requester written notice of that fact and the earliest date and time the entity reasonably believes the record will be available.",
+      "clock_spec": "undefined-soft: \"earliest date and time after which the governmental entity reasonably believes\" the record will be available, from the end of the 5th business day",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "completion": {
+   "present": true,
+   "statutory": {
+    "production.completion_window": [
+     {
+      "rule_id": "NV-0007",
+      "authority": "Nev. Rev. Stat. § 239.0107(2)",
+      "summary": "If a record is readily available for inspection or copying, the custodian must allow the requester to inspect, copy or receive a copy as expeditiously as practicable.",
+      "clock_spec": "undefined-soft: \"as expeditiously as practicable\" from receipt of request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "NV-0019",
+      "authority": "Nev. Rev. Stat. § 239.015(2)",
+      "summary": "When a county recorder receives a request for a particular item that has been removed to storage, the recorder must produce a microfilmed copy or the original within three working days.",
+      "clock_spec": "3 working-days from county recorder's receipt of request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "NV-0020",
+    "authority": "Nev. Rev. Stat. § 239.052(1)",
+    "summary": "A governmental entity may charge a fee for a copy, but the fee must not exceed the actual cost to provide the copy unless a specific statute or regulation sets the fee.",
+    "clock_spec": "ceiling: actual cost of providing the copy"
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "NV-0021",
+    "authority": "Nev. Rev. Stat. § 239.005(1)",
+    "summary": "'Actual cost' means direct cost of providing the copy (ink, toner, paper, media, postage) and excludes any cost the entity incurs regardless of whether a copy is requested."
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "NV-0026",
+    "authority": "Nev. Rev. Stat. § 239.054(1)",
+    "summary": "A fee for information from a geographic information system may include, in addition to actual medium cost, the reasonable costs of data gathering/entry, database maintenance, hardware, software, quality control, and consultation with personnel."
+   }
+  ],
+  "fee.nonstandard_rate": [
+   {
+    "rule_id": "NV-0024",
+    "authority": "Nev. Rev. Stat. § 239.052(4)",
+    "summary": "The fee for a copy of a record in the custody of a governmental law library must not exceed 50 cents per page.",
+    "clock_spec": "ceiling: $0.50/page"
+   },
+   {
+    "rule_id": "NV-0025",
+    "authority": "Nev. Rev. Stat. § 239.053(1)",
+    "summary": "For a copy of a certified-court-reporter transcript of an administrative proceeding, the entity must charge, on top of actual medium cost, a per-page fee equal to the court reporter's contract per-page fee, and remit that amount to the reporter.",
+    "clock_spec": "fixed: court reporter's contract per-page fee + actual medium cost"
+   }
+  ],
+  "fee.no_charge_categories": [
+   {
+    "rule_id": "NV-0022",
+    "authority": "Nev. Rev. Stat. § 239.052(1)",
+    "summary": "A governmental entity must not charge a fee for a copy if a specific statute or regulation requires it to provide the copy without charge."
+   }
+  ]
+ },
+ "program_setup": {},
+ "ledger": {},
+ "audit": {
+  "rules_total": 26,
+  "rules_referenced": 26,
+  "unreferenced_rule_ids": []
+ }
+}

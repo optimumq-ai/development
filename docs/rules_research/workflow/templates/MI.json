@@ -1,0 +1,982 @@
+{
+ "state": "Michigan",
+ "code": "MI",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.submission_channels": [
+     {
+      "rule_id": "MI-0008",
+      "authority": "Mich. Comp. Laws § 15.232(m); § 15.235(1)",
+      "summary": "A written request may be transmitted by facsimile, electronic mail, or other electronic means."
+     }
+    ],
+    "intake.written_request_required": [
+     {
+      "rule_id": "MI-0005",
+      "authority": "Mich. Comp. Laws § 15.235(1)",
+      "summary": "A person desiring to inspect or receive a copy of a public record must make a written request to the public body's FOIA coordinator."
+     }
+    ],
+    "intake.oral_request_permitted": [
+     {
+      "rule_id": "MI-0068",
+      "authority": "Mich. Comp. Laws § 15.234(6),(7)",
+      "summary": "A public body may provide requested information available in public records without receipt of a written request; and for a verbal request believed to be on the website, the employee should, where practicable, inform the requester of the pertinent website address."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {
+    "response.valid_response_forms": [
+     {
+      "rule_id": "MI-0017",
+      "authority": "Mich. Comp. Laws § 15.235(2)(a)-(d)",
+      "summary": "A timely response must take one of four forms: grant; written denial; partial grant with written partial denial; or a single extension notice."
+     }
+    ]
+   },
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "MI-0048",
+      "authority": "Mich. Comp. Laws § 15.234(4)",
+      "summary": "A public body's procedures must use a standard form for detailed itemization of any fee that clearly lists and explains the allowable charges for each of the six fee components used in estimating or charging."
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "MI-0055",
+      "authority": "Mich. Comp. Laws § 15.234(8)",
+      "summary": "A deposit response must contain a good-faith best-efforts estimate of the time frame to provide the records; the estimate is nonbinding but must be made in good faith.",
+      "clock_spec": "undefined-soft: nonbinding best-efforts time-frame estimate"
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {
+    "payment.deposit": [
+     {
+      "rule_id": "MI-0056",
+      "authority": "Mich. Comp. Laws § 15.234(11)",
+      "summary": "For a subsequent request from an individual who did not pay in full for a prior fulfilled request, the body may require a deposit of up to 100% of the estimated fee before beginning the search, if six enumerated conditions are all met.",
+      "clock_spec": "ceiling: up to 100% of estimated fee (only when all six conditions met, incl. 90 days since availability notice)"
+     },
+     {
+      "rule_id": "MI-0057",
+      "authority": "Mich. Comp. Laws § 15.234(12)",
+      "summary": "The body must stop requiring the increased (up to 100%) deposit if the individual shows proof of prior full payment, the body is later paid in full, or 365 days have passed since the unpaid request was made.",
+      "clock_spec": "terminal: 365 days from the unpaid written request extinguishes the increased-deposit authority",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "MI-0059",
+      "authority": "Mich. Comp. Laws § 15.234(14)",
+      "summary": "If a required deposit is not received within 45 days after the requester's receipt of the deposit notice, and no deposit-amount appeal was filed, the request is considered abandoned and the body need no longer fulfill it.",
+      "clock_spec": "terminal: 45 days from requester's receipt of the deposit notice",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "MI-0060",
+      "authority": "Mich. Comp. Laws § 15.234(14)",
+      "summary": "A deposit notice is considered received 3 days after it is sent (regardless of transmission means), and it must state the deposit-due date, which is 48 days after the notice is sent.",
+      "clock_spec": "fixed: notice deemed received 3 days after sent; due date 48 days after sent"
+     }
+    ],
+    "payment.deposit_threshold": [
+     {
+      "rule_id": "MI-0053",
+      "authority": "Mich. Comp. Laws § 15.234(8)",
+      "summary": "A public body may require a good-faith deposit before providing records if the entire estimated fee or charge exceeds $50, based on a good-faith total-fee calculation.",
+      "clock_spec": "floor: deposit only allowed when estimate exceeds $50.00"
+     }
+    ],
+    "payment.deposit_ceiling": [
+     {
+      "rule_id": "MI-0054",
+      "authority": "Mich. Comp. Laws § 15.234(8)",
+      "summary": "A good-faith deposit must not exceed one-half of the total estimated fee, and the deposit request must include a detailed fee itemization.",
+      "clock_spec": "ceiling: 1/2 of the total estimated fee"
+     }
+    ]
+   }
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "MI-0006",
+      "authority": "Mich. Comp. Laws § 15.233(1)",
+      "summary": "The written request must describe a public record sufficiently to enable the public body to find the public record."
+     }
+    ]
+   },
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {
+    "denial.no_responsive_records": [
+     {
+      "rule_id": "MI-0025",
+      "authority": "Mich. Comp. Laws § 15.235(5)(b)",
+      "summary": "If the denial is because the record does not exist, the written notice must contain a certificate that the record does not exist under the name given or another name reasonably known to the public body."
+     }
+    ]
+   }
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "MI-0048",
+      "authority": "Mich. Comp. Laws § 15.234(4)",
+      "summary": "A public body's procedures must use a standard form for detailed itemization of any fee that clearly lists and explains the allowable charges for each of the six fee components used in estimating or charging."
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "MI-0055",
+      "authority": "Mich. Comp. Laws § 15.234(8)",
+      "summary": "A deposit response must contain a good-faith best-efforts estimate of the time frame to provide the records; the estimate is nonbinding but must be made in good faith.",
+      "clock_spec": "undefined-soft: nonbinding best-efforts time-frame estimate"
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "MI-0048",
+      "authority": "Mich. Comp. Laws § 15.234(4)",
+      "summary": "A public body's procedures must use a standard form for detailed itemization of any fee that clearly lists and explains the allowable charges for each of the six fee components used in estimating or charging."
+     }
+    ]
+   },
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.deposit": [
+     {
+      "rule_id": "MI-0056",
+      "authority": "Mich. Comp. Laws § 15.234(11)",
+      "summary": "For a subsequent request from an individual who did not pay in full for a prior fulfilled request, the body may require a deposit of up to 100% of the estimated fee before beginning the search, if six enumerated conditions are all met.",
+      "clock_spec": "ceiling: up to 100% of estimated fee (only when all six conditions met, incl. 90 days since availability notice)"
+     },
+     {
+      "rule_id": "MI-0057",
+      "authority": "Mich. Comp. Laws § 15.234(12)",
+      "summary": "The body must stop requiring the increased (up to 100%) deposit if the individual shows proof of prior full payment, the body is later paid in full, or 365 days have passed since the unpaid request was made.",
+      "clock_spec": "terminal: 365 days from the unpaid written request extinguishes the increased-deposit authority",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "MI-0059",
+      "authority": "Mich. Comp. Laws § 15.234(14)",
+      "summary": "If a required deposit is not received within 45 days after the requester's receipt of the deposit notice, and no deposit-amount appeal was filed, the request is considered abandoned and the body need no longer fulfill it.",
+      "clock_spec": "terminal: 45 days from requester's receipt of the deposit notice",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "MI-0060",
+      "authority": "Mich. Comp. Laws § 15.234(14)",
+      "summary": "A deposit notice is considered received 3 days after it is sent (regardless of transmission means), and it must state the deposit-due date, which is 48 days after the notice is sent.",
+      "clock_spec": "fixed: notice deemed received 3 days after sent; due date 48 days after sent"
+     }
+    ],
+    "payment.deposit_threshold": [
+     {
+      "rule_id": "MI-0053",
+      "authority": "Mich. Comp. Laws § 15.234(8)",
+      "summary": "A public body may require a good-faith deposit before providing records if the entire estimated fee or charge exceeds $50, based on a good-faith total-fee calculation.",
+      "clock_spec": "floor: deposit only allowed when estimate exceeds $50.00"
+     }
+    ],
+    "payment.deposit_ceiling": [
+     {
+      "rule_id": "MI-0054",
+      "authority": "Mich. Comp. Laws § 15.234(8)",
+      "summary": "A good-faith deposit must not exceed one-half of the total estimated fee, and the deposit request must include a detailed fee itemization.",
+      "clock_spec": "ceiling: 1/2 of the total estimated fee"
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "MI-0045",
+      "authority": "Mich. Comp. Laws § 15.234(3)",
+      "summary": "A fee for search, examination, review, and separation/deletion of exempt material may not be charged unless failure to charge would result in unreasonably high costs to the public body because of the nature of the request, and the body specifically identifies the nature of those costs."
+     },
+     {
+      "rule_id": "MI-0051",
+      "authority": "Mich. Comp. Laws § 15.234(9)",
+      "summary": "If a public body does not respond timely and the lateness was willful/intentional or the request was flagged, it must reduce labor-cost charges by 5% for each day it exceeds the response deadline, up to a 50% maximum reduction.",
+      "clock_spec": "fixed: -5% of labor charge per late day, capped at -50%"
+     }
+    ]
+   },
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "MI-0024",
+      "authority": "Mich. Comp. Laws § 15.235(5)(a)",
+      "summary": "If a record or portion is denied as exempt, the written denial must explain the basis under the act or other statute for that exemption determination."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "MI-0023",
+      "authority": "Mich. Comp. Laws § 15.235(5)",
+      "summary": "A written notice denying a request in whole or in part is the public body's final determination to deny; it must contain the statutorily required contents."
+     }
+    ],
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "MI-0024",
+      "authority": "Mich. Comp. Laws § 15.235(5)(a)",
+      "summary": "If a record or portion is denied as exempt, the written denial must explain the basis under the act or other statute for that exemption determination."
+     }
+    ],
+    "denial.partial_withholding_notice": [
+     {
+      "rule_id": "MI-0026",
+      "authority": "Mich. Comp. Laws § 15.235(5)(c)",
+      "summary": "If a separation or deletion is made, the written notice must describe the public record or information that was separated or deleted under section 14."
+     }
+    ],
+    "denial.no_responsive_records": [
+     {
+      "rule_id": "MI-0025",
+      "authority": "Mich. Comp. Laws § 15.235(5)(b)",
+      "summary": "If the denial is because the record does not exist, the written notice must contain a certificate that the record does not exist under the name given or another name reasonably known to the public body."
+     }
+    ],
+    "denial.denial_form_and_log": [
+     {
+      "rule_id": "MI-0029",
+      "authority": "Mich. Comp. Laws § 15.235(6)",
+      "summary": "The individual designated as responsible for the denial must sign the written notice of denial."
+     }
+    ],
+    "appeal.retained_optional": [
+     {
+      "rule_id": "MI-0028",
+      "authority": "Mich. Comp. Laws § 15.235(5)(e)",
+      "summary": "The written denial must include notice of the right to receive attorneys' fees and damages if, after judicial review, the court finds noncompliance and orders disclosure."
+     },
+     {
+      "rule_id": "MI-0081",
+      "authority": "Mich. Comp. Laws § 15.240a(1)(b)",
+      "summary": "If a civil fee-reduction action is commenced, the public body is not obligated to complete processing of the request at issue until the court resolves the fee dispute.",
+      "clock_spec": "processing paused until the court resolves the fee dispute",
+      "clock_effect": "pauses"
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {
+    "denial.no_responsive_records": [
+     {
+      "rule_id": "MI-0025",
+      "authority": "Mich. Comp. Laws § 15.235(5)(b)",
+      "summary": "If the denial is because the record does not exist, the written notice must contain a certificate that the record does not exist under the name given or another name reasonably known to the public body."
+     }
+    ]
+   }
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "MI-0030",
+      "authority": "Mich. Comp. Laws § 15.244(1)",
+      "summary": "If a record contains both exempt and nonexempt material, the public body must separate them and make the nonexempt material available for examination and copying."
+     },
+     {
+      "rule_id": "MI-0031",
+      "authority": "Mich. Comp. Laws § 15.244(2)",
+      "summary": "When designing a record the public body must, to the extent practicable, facilitate separation of exempt from nonexempt information, and must generally describe exempted material unless the description would defeat the exemption."
+     }
+    ],
+    "classification.record_classification_scheme": [
+     {
+      "rule_id": "MI-0085",
+      "authority": "Mich. Comp. Laws § 15.232(i)",
+      "summary": "The act separates public records into two classes: those exempt from disclosure under section 13, and all others, which are subject to disclosure."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "MI-0067",
+      "authority": "Mich. Comp. Laws § 15.234(1)(c)",
+      "summary": "A requester may stipulate that records be provided on nonpaper physical media, electronically mailed, or otherwise electronically provided in lieu of paper copies, unless the body lacks the technological capability for the particular media."
+     }
+    ],
+    "production.delivery_and_completion": [
+     {
+      "rule_id": "MI-0021",
+      "authority": "Mich. Comp. Laws § 15.235(10)",
+      "summary": "A requester may stipulate that the public body's response be delivered by email, facsimile, or first-class mail, unless the body lacks the technological capability for an emailed response."
+     }
+    ],
+    "production.certified_copy": [
+     {
+      "rule_id": "MI-0065",
+      "authority": "Mich. Comp. Laws § 15.233(6)",
+      "summary": "The custodian of a public record must, upon written request, furnish a requester a certified copy of the record."
+     }
+    ],
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "MI-0063",
+      "authority": "Mich. Comp. Laws § 15.233(5)",
+      "summary": "The act does not require a public body to create a new public record, except as required in section 11 and to the extent needed to furnish copies or edited copies of an existing record."
+     },
+     {
+      "rule_id": "MI-0064",
+      "authority": "Mich. Comp. Laws § 15.233(4)",
+      "summary": "The act does not require a public body to make a compilation, summary, or report of information, except as required in section 11."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": true,
+   "activated_by": {
+    "eligibility.incarcerated_requester_exclusion": [
+     {
+      "rule_id": "MI-0002",
+      "authority": "Mich. Comp. Laws § 15.232(g); § 15.231(2)",
+      "summary": "An individual serving a sentence of imprisonment in a state, county, or federal correctional facility is not a 'person' entitled to make a request under the act."
+     }
+    ],
+    "intake.identity_requirement": [
+     {
+      "rule_id": "MI-0007",
+      "authority": "Mich. Comp. Laws § 15.233(1)",
+      "summary": "A request (from a non-indigent requester) must include the requesting person's complete name, address, and valid contact information (telephone number or email); a non-individual must give its individual agent's information."
+     }
+    ]
+   },
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "MI-0001",
+      "authority": "Mich. Comp. Laws § 15.231(2); § 15.233(1)",
+      "summary": "Any person (as defined) has a right, upon a sufficient written request to a public body's FOIA coordinator, to inspect, copy, or receive copies of a nonexempt public record."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "MI-0004",
+      "authority": "Mich. Comp. Laws § 15.233(1)",
+      "summary": "A requester need not state a purpose to obtain records; the required request contents are limited to a sufficient description plus name, address, and contact information."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "MI-0003",
+      "authority": "Mich. Comp. Laws § 15.231(2); § 15.232(g)",
+      "summary": "Eligibility to request records extends to all persons with no residency or citizenship qualification."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "MI-0043",
+      "authority": "Mich. Comp. Laws § 15.234(2)(a),(b)",
+      "summary": "A record search and copies must be furnished without charge for the first $20 of the fee for each request by a qualifying indigent individual (with affidavit) or by a state-designated developmental-disabilities/mental-illness protection-and-advocacy nonprofit.",
+      "clock_spec": "fixed: first $20.00 of the fee waived per request"
+     },
+     {
+      "rule_id": "MI-0044",
+      "authority": "Mich. Comp. Laws § 15.234(2)",
+      "summary": "A public body may search for or furnish copies without charge or at a reduced charge if it determines a waiver/reduction is in the public interest because the disclosure primarily benefits the general public."
+     },
+     {
+      "rule_id": "MI-0052",
+      "authority": "Mich. Comp. Laws § 15.234(10)",
+      "summary": "The fee section does not apply to records prepared under a statute specifically authorizing their sale, or where another act/statute specifically sets the copy fee."
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": true,
+   "activated_by": {
+    "custody.referral_to_proper_custodian": [
+     {
+      "rule_id": "MI-0013",
+      "authority": "Mich. Comp. Laws § 15.233(1)",
+      "summary": "An employee of a public body who receives a request for a public record must promptly forward that request to the FOIA coordinator.",
+      "clock_spec": "undefined-soft: \"promptly\" from employee receipt"
+     }
+    ]
+   },
+   "context": {
+    "custody.contractor_and_thirdparty_custody": [
+     {
+      "rule_id": "MI-0014",
+      "authority": "Mich. Comp. Laws § 15.235(9)",
+      "summary": "A public body maintaining a law enforcement records management system is not the custodian of records stored for a subscribing body; upon a request for such a record it must, within 10 business days, give written notice identifying the subscribing body and directing the requester to submit the re…",
+      "clock_spec": "10 business-days from receipt of request (written referral notice)",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "context": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "MI-0006",
+      "authority": "Mich. Comp. Laws § 15.233(1)",
+      "summary": "The written request must describe a public record sufficiently to enable the public body to find the public record."
+     }
+    ]
+   },
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "MI-0043",
+      "authority": "Mich. Comp. Laws § 15.234(2)(a),(b)",
+      "summary": "A record search and copies must be furnished without charge for the first $20 of the fee for each request by a qualifying indigent individual (with affidavit) or by a state-designated developmental-disabilities/mental-illness protection-and-advocacy nonprofit.",
+      "clock_spec": "fixed: first $20.00 of the fee waived per request"
+     },
+     {
+      "rule_id": "MI-0044",
+      "authority": "Mich. Comp. Laws § 15.234(2)",
+      "summary": "A public body may search for or furnish copies without charge or at a reduced charge if it determines a waiver/reduction is in the public interest because the disclosure primarily benefits the general public."
+     },
+     {
+      "rule_id": "MI-0052",
+      "authority": "Mich. Comp. Laws § 15.234(10)",
+      "summary": "The fee section does not apply to records prepared under a statute specifically authorizing their sale, or where another act/statute specifically sets the copy fee."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "MI-0043",
+      "authority": "Mich. Comp. Laws § 15.234(2)(a),(b)",
+      "summary": "A record search and copies must be furnished without charge for the first $20 of the fee for each request by a qualifying indigent individual (with affidavit) or by a state-designated developmental-disabilities/mental-illness protection-and-advocacy nonprofit.",
+      "clock_spec": "fixed: first $20.00 of the fee waived per request"
+     },
+     {
+      "rule_id": "MI-0044",
+      "authority": "Mich. Comp. Laws § 15.234(2)",
+      "summary": "A public body may search for or furnish copies without charge or at a reduced charge if it determines a waiver/reduction is in the public interest because the disclosure primarily benefits the general public."
+     },
+     {
+      "rule_id": "MI-0052",
+      "authority": "Mich. Comp. Laws § 15.234(10)",
+      "summary": "The fee section does not apply to records prepared under a statute specifically authorizing their sale, or where another act/statute specifically sets the copy fee."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "context": {
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "MI-0063",
+      "authority": "Mich. Comp. Laws § 15.233(5)",
+      "summary": "The act does not require a public body to create a new public record, except as required in section 11 and to the extent needed to furnish copies or edited copies of an existing record."
+     },
+     {
+      "rule_id": "MI-0064",
+      "authority": "Mich. Comp. Laws § 15.233(4)",
+      "summary": "The act does not require a public body to make a compilation, summary, or report of information, except as required in section 11."
+     }
+    ]
+   },
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": true,
+   "activated_by": {
+    "production.website_satisfies": [
+     {
+      "rule_id": "MI-0047",
+      "authority": "Mich. Comp. Laws § 15.234(5)",
+      "summary": "If the coordinator knows or has reason to know requested information is on the body's website, the written response must so notify the requester and, to the degree practicable, include the specific webpage address."
+     }
+    ]
+   }
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": true,
+   "activated_by": {
+    "special_records.special_production_constraint": [
+     {
+      "rule_id": "MI-0062",
+      "authority": "Mich. Comp. Laws § 15.233(3)",
+      "summary": "A public body may make reasonable rules necessary to protect its records and prevent excessive and unreasonable interference with its functions, and must protect records from loss, alteration, or destruction."
+     },
+     {
+      "rule_id": "MI-0066",
+      "authority": "Mich. Comp. Laws § 15.233(1)",
+      "summary": "A person may subscribe to future issuances of public records created/issued/disseminated on a regular basis; a subscription is valid for up to 6 months at the subscriber's request and is renewable.",
+      "clock_spec": "ceiling: subscription valid up to 6 months, renewable"
+     }
+    ]
+   }
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "MI-0016",
+      "authority": "Mich. Comp. Laws § 15.235(2)",
+      "summary": "Unless the requester agrees otherwise in writing, a public body must respond to a request within 5 business days after receiving it by granting, denying, partially granting/denying, or extending.",
+      "clock_spec": "5 business-days from receipt of request (receipt per MI-0009 for electronic)",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.clock_computation": [
+     {
+      "rule_id": "MI-0009",
+      "authority": "Mich. Comp. Laws § 15.235(1)",
+      "summary": "An electronically transmitted written request is not 'received' (starting the response clock) until 1 business day after transmission; if delivered to spam/junk-mail, not received until 1 day after the body first becomes aware, and the body must log both times.",
+      "clock_spec": "receipt deemed 1 business day after electronic transmission (or 1 day after body first becomes aware, if in spam/junk)"
+     }
+    ],
+    "denial.deemed_denial_on_nonresponse": [
+     {
+      "rule_id": "MI-0022",
+      "authority": "Mich. Comp. Laws § 15.235(3)",
+      "summary": "Failure to respond within the response period constitutes a public body's final determination to deny the request if the failure was willful and intentional, or if the request was flagged (FOIA language within first 250 words, or FOIA keywords/code reference on the envelope or subject line).",
+      "clock_spec": "terminal on expiry of the 5-business-day (or extended 10-business-day) response period",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": true,
+   "statutory": {
+    "response.extension_limit": [
+     {
+      "rule_id": "MI-0018",
+      "authority": "Mich. Comp. Laws § 15.235(2)(d)",
+      "summary": "A public body may extend the response period by issuing a notice extending it for not more than 10 business days.",
+      "clock_spec": "ceiling: +10 business-days beyond the initial 5-business-day window",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "MI-0019",
+      "authority": "Mich. Comp. Laws § 15.235(2)(d)",
+      "summary": "A public body may not issue more than one notice of extension for a particular request.",
+      "clock_spec": "ceiling: 1 extension per request"
+     }
+    ],
+    "response.extension_notice": [
+     {
+      "rule_id": "MI-0020",
+      "authority": "Mich. Comp. Laws § 15.235(7)",
+      "summary": "An extension notice must specify the reasons for the extension and the date by which the public body will grant, deny, or partially grant/deny the request."
+     }
+    ]
+   }
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": true,
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "MI-0045",
+      "authority": "Mich. Comp. Laws § 15.234(3)",
+      "summary": "A fee for search, examination, review, and separation/deletion of exempt material may not be charged unless failure to charge would result in unreasonably high costs to the public body because of the nature of the request, and the body specifically identifies the nature of those costs."
+     },
+     {
+      "rule_id": "MI-0051",
+      "authority": "Mich. Comp. Laws § 15.234(9)",
+      "summary": "If a public body does not respond timely and the lateness was willful/intentional or the request was flagged, it must reduce labor-cost charges by 5% for each day it exceeds the response deadline, up to a 50% maximum reduction.",
+      "clock_spec": "fixed: -5% of labor charge per late day, capped at -50%"
+     }
+    ]
+   }
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "MI-0038",
+    "authority": "Mich. Comp. Laws § 15.234(1)(d)",
+    "summary": "The charge for paper copies must not exceed 10 cents per sheet for copies made on 8.5x11 or 8.5x14 paper, calculated as a total cost per sheet.",
+    "clock_spec": "ceiling: $0.10 per sheet (8.5x11 or 8.5x14)"
+   }
+  ],
+  "fee.labor_charge": [
+   {
+    "rule_id": "MI-0034",
+    "authority": "Mich. Comp. Laws § 15.234(1)(a)",
+    "summary": "Labor for searching, locating, and examining records may not be charged at more than the hourly wage of the public body's lowest-paid employee capable of doing so, regardless of who performs the labor.",
+    "clock_spec": "ceiling: hourly wage of lowest-paid capable employee"
+   },
+   {
+    "rule_id": "MI-0035",
+    "authority": "Mich. Comp. Laws § 15.234(1)(a)",
+    "summary": "Search/examination labor costs must be estimated and charged in increments of 15 minutes or more, with all partial time increments rounded down.",
+    "clock_spec": "fixed: 15-minute increments, partial increments rounded down"
+   },
+   {
+    "rule_id": "MI-0036",
+    "authority": "Mich. Comp. Laws § 15.234(1)(b)",
+    "summary": "Labor to separate/delete exempt from nonexempt information may not exceed the hourly wage of the lowest-paid capable employee; if none is employed, contracted labor may be charged like employee labor but not exceeding 6 times the state minimum hourly wage.",
+    "clock_spec": "ceiling: lowest-paid capable employee wage; contracted labor <= 6x state minimum hourly wage"
+   },
+   {
+    "rule_id": "MI-0039",
+    "authority": "Mich. Comp. Laws § 15.234(1)(e)",
+    "summary": "Labor directly associated with duplication or publication (paper or digital copies, transfers) may not exceed the hourly wage of the lowest-paid employee capable of the duplication.",
+    "clock_spec": "ceiling: hourly wage of lowest-paid capable employee; increments of body's choosing, rounded down"
+   },
+   {
+    "rule_id": "MI-0041",
+    "authority": "Mich. Comp. Laws § 15.234(2)",
+    "summary": "A public body may add up to 50% to the applicable labor charge to cover fringe benefits, not exceeding the actual cost of fringe benefits, if it notes the multiplier on the itemization.",
+    "clock_spec": "ceiling: +50% of the applicable labor charge (capped at actual fringe cost)"
+   },
+   {
+    "rule_id": "MI-0042",
+    "authority": "Mich. Comp. Laws § 15.234(2)",
+    "summary": "Overtime wages may not be included in labor-cost calculations unless overtime is specifically stipulated by the requester and noted on the itemization."
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "MI-0033",
+    "authority": "Mich. Comp. Laws § 15.234(1)",
+    "summary": "A permitted fee is limited to actual mailing costs and the actual incremental cost of duplication or publication, including labor and the cost of search, examination, review, and separation/deletion of exempt material, and the total must not exceed the sum of the six enumerated components.",
+    "clock_spec": "ceiling: sum of the 6 enumerated components (actual incremental cost)"
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "MI-0037",
+    "authority": "Mich. Comp. Laws § 15.234(1)(c)",
+    "summary": "For records provided on nonpaper physical media, the charge is limited to the actual and most reasonably economical cost of that media.",
+    "clock_spec": "ceiling: actual most-economical cost of the nonpaper media"
+   }
+  ],
+  "fee.delivery_charge": [
+   {
+    "rule_id": "MI-0040",
+    "authority": "Mich. Comp. Laws § 15.234(1)(f)",
+    "summary": "Mailing may be charged at actual cost in a reasonably economical manner; no charge for expedited shipping or insurance unless stipulated by the requester.",
+    "clock_spec": "ceiling: actual cost of least-expensive economical mailing (plus delivery confirmation)"
+   }
+  ],
+  "fee.no_charge_categories": [
+   {
+    "rule_id": "MI-0032",
+    "authority": "Mich. Comp. Laws § 15.234(1)(b)",
+    "summary": "A public body may not charge for redaction labor if it knows or has reason to know it previously redacted the record and the redacted version is still in its possession."
+   },
+   {
+    "rule_id": "MI-0046",
+    "authority": "Mich. Comp. Laws § 15.234(5)",
+    "summary": "Public records available to the general public on the body's website at the time of the request are exempt from separation/deletion labor charges under (1)(b)."
+   },
+   {
+    "rule_id": "MI-0050",
+    "authority": "Mich. Comp. Laws § 15.234(4)",
+    "summary": "A public body that has not established procedures and guidelines, created a written public summary, or made them publicly available free may not require deposits or charge fees until it is in compliance."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "MI-0049",
+    "authority": "Mich. Comp. Laws § 15.234(4)",
+    "summary": "A public body must establish procedures and guidelines to implement the act and create a written public summary (how to submit requests, understand responses, deposits, fee calculations, and appeals), post them on any website, and provide free copies with responses and on request."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.custodian_definition_and_role": [
+   {
+    "rule_id": "MI-0011",
+    "authority": "Mich. Comp. Laws § 15.236(1), (2)",
+    "summary": "In a county without an executive form of government the county board chairperson is the FOIA coordinator; for all other public bodies the chief administrative officer is the designated FOIA coordinator."
+   },
+   {
+    "rule_id": "MI-0012",
+    "authority": "Mich. Comp. Laws § 15.236(3)",
+    "summary": "A FOIA coordinator may designate another individual to accept and process requests and to approve denials on the coordinator's behalf."
+   }
+  ],
+  "custody.records_officer_designation": [
+   {
+    "rule_id": "MI-0010",
+    "authority": "Mich. Comp. Laws § 15.236(1)",
+    "summary": "A city, village, township, county, or state department (or a body under its control) must designate an individual as its FOIA coordinator, responsible for accepting and processing requests and approving denials."
+   }
+  ],
+  "denial.denial_form_and_log": [
+   {
+    "rule_id": "MI-0029",
+    "authority": "Mich. Comp. Laws § 15.235(6)",
+    "summary": "The individual designated as responsible for the denial must sign the written notice of denial."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "MI-0049",
+    "authority": "Mich. Comp. Laws § 15.234(4)",
+    "summary": "A public body must establish procedures and guidelines to implement the act and create a written public summary (how to submit requests, understand responses, deposits, fee calculations, and appeals), post them on any website, and provide free copies with responses and on request."
+   }
+  ]
+ },
+ "ledger": {},
+ "audit": {
+  "rules_total": 66,
+  "rules_referenced": 66,
+  "unreferenced_rule_ids": []
+ }
+}

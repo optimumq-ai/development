@@ -1,0 +1,668 @@
+{
+ "state": "South Carolina",
+ "code": "SC",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.written_request_required": [
+     {
+      "rule_id": "SC-0005",
+      "authority": "S.C. Code Ann. § 30-4-30(C)",
+      "summary": "The statutory determination/response duties and their clocks are triggered by a written request for records made under the chapter."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {},
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {
+    "payment.deposit_ceiling": [
+     {
+      "rule_id": "SC-0018",
+      "authority": "S.C. Code Ann. § 30-4-30(B)",
+      "summary": "A public body may require, prior to searching for or making copies of records, a deposit not to exceed twenty-five percent of the total reasonably anticipated cost for reproduction of the records."
+     }
+    ]
+   }
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "SC-0006",
+      "authority": "S.C. Code Ann. § 30-4-30(A)(1)",
+      "summary": "A public body may condition access on reasonable rules concerning the time and place of access."
+     }
+    ]
+   },
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {},
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.deposit_ceiling": [
+     {
+      "rule_id": "SC-0018",
+      "authority": "S.C. Code Ann. § 30-4-30(B)",
+      "summary": "A public body may require, prior to searching for or making copies of records, a deposit not to exceed twenty-five percent of the total reasonably anticipated cost for reproduction of the records."
+     }
+    ],
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "SC-0019",
+      "authority": "S.C. Code Ann. § 30-4-30(C)",
+      "summary": "The full amount of the total cost must be paid at the time of the production of the request."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "SC-0022",
+      "authority": "S.C. Code Ann. § 30-4-30(C)",
+      "summary": "The determination notice must state the public body's determination and the reasons for it."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "SC-0022",
+      "authority": "S.C. Code Ann. § 30-4-30(C)",
+      "summary": "The determination notice must state the public body's determination and the reasons for it."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {
+    "production.installment_partial": [
+     {
+      "rule_id": "SC-0024",
+      "authority": "S.C. Code Ann. § 30-4-30(C)",
+      "summary": "If the request is granted, the record must be furnished or made available for inspection or copying no later than thirty calendar days from the date the final determination was provided.",
+      "clock_spec": "30 calendar-days from date final determination was provided",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "SC-0025",
+      "authority": "S.C. Code Ann. § 30-4-30(C)",
+      "summary": "If the granted records are more than twenty-four months old, they must be furnished no later than thirty-five calendar days from the date the final determination was provided.",
+      "clock_spec": "35 calendar-days from date final determination was provided",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "SC-0026",
+      "authority": "S.C. Code Ann. § 30-4-30(C)",
+      "summary": "If a deposit is required, the record must be furnished or made available no later than thirty calendar days (thirty-five if records are more than 24 months old) from the date the deposit is received.",
+      "clock_spec": "30 calendar-days (35 if records >24 months old) from date deposit is received",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "SC-0032",
+      "authority": "S.C. Code Ann. § 30-4-40(b)",
+      "summary": "If a public record contains material that is not exempt under § 30-4-40(a), the public body shall separate the exempt and nonexempt material and make the nonexempt material available."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "SC-0030",
+      "authority": "S.C. Code Ann. § 30-4-30(B)",
+      "summary": "Records must be provided in a form both convenient and practical for use by the requester, if it is equally convenient for the public body to provide them in that form."
+     }
+    ],
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "SC-0031",
+      "authority": "S.C. Code Ann. § 30-4-30(A)(2)",
+      "summary": "A public body is not required to create an electronic version of a public record when one does not exist in order to fulfill a records request."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": true,
+   "activated_by": {
+    "eligibility.incarcerated_requester_exclusion": [
+     {
+      "rule_id": "SC-0004",
+      "authority": "S.C. Code Ann. § 30-4-30(A)(1)",
+      "summary": "The right to inspect/copy does not extend to individuals serving a sentence of imprisonment in a state, county, or federal correctional facility (whether in South Carolina or elsewhere); their constitutionally protected rights, including the right to call for evidence in a criminal prosecution, a…"
+     }
+    ]
+   },
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "SC-0001",
+      "authority": "S.C. Code Ann. § 30-4-30(A)(1); § 30-4-20(b) (definition of \"person\")",
+      "summary": "Any person (individual, corporation, partnership, firm, organization, or association) has a right to inspect, copy, or receive an electronic transmission of any public record of a public body, subject to exemptions and reasonable time/place rules."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "SC-0003",
+      "authority": "S.C. Code Ann. § 30-4-30(A)(1)",
+      "summary": "A requester need not state a reason or purpose for the request; the statutory right to inspect/copy is unconditioned on purpose."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "SC-0002",
+      "authority": "S.C. Code Ann. § 30-4-30(A)(1); § 30-4-20(b)",
+      "summary": "There is no residency or state-citizenship requirement to request records; the right runs to any \"person\" without qualification as to residence."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "SC-0013",
+      "authority": "S.C. Code Ann. § 30-4-30(B)",
+      "summary": "Fees may not be charged for examination and review to determine if documents are subject to disclosure."
+     },
+     {
+      "rule_id": "SC-0015",
+      "authority": "S.C. Code Ann. § 30-4-30(B)",
+      "summary": "A public body may furnish documents without charge or at a reduced charge where it determines that waiver or reduction is in the public interest because furnishing the information primarily benefits the general public."
+     },
+     {
+      "rule_id": "SC-0016",
+      "authority": "S.C. Code Ann. § 30-4-30(B)",
+      "summary": "Members of the General Assembly may receive copies of records or documents at no charge when the request relates to their legislative duties."
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "context": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "SC-0006",
+      "authority": "S.C. Code Ann. § 30-4-30(A)(1)",
+      "summary": "A public body may condition access on reasonable rules concerning the time and place of access."
+     }
+    ]
+   },
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "SC-0013",
+      "authority": "S.C. Code Ann. § 30-4-30(B)",
+      "summary": "Fees may not be charged for examination and review to determine if documents are subject to disclosure."
+     },
+     {
+      "rule_id": "SC-0015",
+      "authority": "S.C. Code Ann. § 30-4-30(B)",
+      "summary": "A public body may furnish documents without charge or at a reduced charge where it determines that waiver or reduction is in the public interest because furnishing the information primarily benefits the general public."
+     },
+     {
+      "rule_id": "SC-0016",
+      "authority": "S.C. Code Ann. § 30-4-30(B)",
+      "summary": "Members of the General Assembly may receive copies of records or documents at no charge when the request relates to their legislative duties."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "SC-0013",
+      "authority": "S.C. Code Ann. § 30-4-30(B)",
+      "summary": "Fees may not be charged for examination and review to determine if documents are subject to disclosure."
+     },
+     {
+      "rule_id": "SC-0015",
+      "authority": "S.C. Code Ann. § 30-4-30(B)",
+      "summary": "A public body may furnish documents without charge or at a reduced charge where it determines that waiver or reduction is in the public interest because furnishing the information primarily benefits the general public."
+     },
+     {
+      "rule_id": "SC-0016",
+      "authority": "S.C. Code Ann. § 30-4-30(B)",
+      "summary": "Members of the General Assembly may receive copies of records or documents at no charge when the request relates to their legislative duties."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": false,
+   "suppressed_by": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "SC-0019",
+      "authority": "S.C. Code Ann. § 30-4-30(C)",
+      "summary": "The full amount of the total cost must be paid at the time of the production of the request."
+     }
+    ]
+   },
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "context": {
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "SC-0031",
+      "authority": "S.C. Code Ann. § 30-4-30(A)(2)",
+      "summary": "A public body is not required to create an electronic version of a public record when one does not exist in order to fulfill a records request."
+     }
+    ]
+   },
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": true,
+   "activated_by": {
+    "production.website_satisfies": [
+     {
+      "rule_id": "SC-0034",
+      "authority": "S.C. Code Ann. § 30-4-30(E)",
+      "summary": "A public body that places the § 30-4-30(D) records in a convenient and practical form on a publicly available Internet website is deemed compliant with subsection (D), provided it also produces documents on request under the section."
+     }
+    ]
+   }
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": true,
+   "activated_by": {
+    "special_records.law_enforcement": [
+     {
+      "rule_id": "SC-0040",
+      "authority": "S.C. Code Ann. § 30-4-50(A)(9)(a)",
+      "summary": "For disclosure of law-enforcement vehicle-mounted/dashboard recording data of an officer-involved incident resulting in death, injury, property damage, or use of deadly force, the agency may apply to circuit court for a non-disclosure order; the hearing must be requested within fifteen days (excl…",
+      "clock_spec": "15 business-days (excluding Sat/Sun/legal holidays) from receipt of the disclosure request to request a hearing",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": true,
+   "activated_by": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "SC-0019",
+      "authority": "S.C. Code Ann. § 30-4-30(C)",
+      "summary": "The full amount of the total cost must be paid at the time of the production of the request."
+     }
+    ]
+   }
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "SC-0020",
+      "authority": "S.C. Code Ann. § 30-4-30(C)",
+      "summary": "The public body shall, within ten days (excluding Saturdays, Sundays, and legal public holidays) of receipt of a written request, notify the requester of its determination and the reasons for it.",
+      "clock_spec": "10 business-days (excluding Sat/Sun/legal holidays) from receipt of request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "SC-0021",
+      "authority": "S.C. Code Ann. § 30-4-30(C)",
+      "summary": "If the record is more than twenty-four months old at the date the request is made, the public body has twenty days (excluding Saturdays, Sundays, and legal public holidays) of receipt to make the determination notification.",
+      "clock_spec": "20 business-days (excluding Sat/Sun/legal holidays) from receipt of request",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "denial.deemed_denial_on_nonresponse": [
+     {
+      "rule_id": "SC-0028",
+      "authority": "S.C. Code Ann. § 30-4-30(C)",
+      "summary": "If written notification of the determination is neither mailed, electronically transmitted, nor personally delivered to the requester within the statutory time, the request must be considered approved as to nonexempt records or information.",
+      "clock_spec": "Deemed approved upon expiry of the 10/20 business-day determination deadline without notice",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "SC-0029",
+      "authority": "S.C. Code Ann. § 30-4-30(C)",
+      "summary": "Exemptions from disclosure under § 30-4-40 or other state/federal law are not waived by the public body's failure to respond within the statutory time."
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": true,
+   "statutory": {
+    "response.extension_grounds": [
+     {
+      "rule_id": "SC-0027",
+      "authority": "S.C. Code Ann. § 30-4-30(C)",
+      "summary": "The response, determination, and production deadlines may be extended by written mutual agreement of the public body and the requesting party, which agreement shall not be unreasonably withheld.",
+      "clock_spec": "undefined-soft: extension for the period set by written mutual agreement, from the affected deadline",
+      "clock_effect": "tolls"
+     }
+    ]
+   }
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "SC-0009",
+    "authority": "S.C. Code Ann. § 30-4-30(B)",
+    "summary": "Fees for copies may not exceed the prevailing commercial rate for the producing of copies."
+   }
+  ],
+  "fee.labor_charge": [
+   {
+    "rule_id": "SC-0007",
+    "authority": "S.C. Code Ann. § 30-4-30(B)",
+    "summary": "A public body may establish and collect reasonable fees not to exceed the actual cost of the search, retrieval, and redaction of records."
+   },
+   {
+    "rule_id": "SC-0008",
+    "authority": "S.C. Code Ann. § 30-4-30(B)",
+    "summary": "The fee for search, retrieval, or redaction shall not exceed the prorated hourly salary of the lowest paid employee who, in the custodian's reasonable discretion, has the necessary skill and training to perform the request."
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "SC-0014",
+    "authority": "S.C. Code Ann. § 30-4-30(B)",
+    "summary": "Records must be furnished at the lowest possible cost to the person requesting them."
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "SC-0012",
+    "authority": "S.C. Code Ann. § 30-4-30(B)",
+    "summary": "If records are not in electronic format and the public body agrees to produce them electronically, it may charge for the staff time required to transfer the documents to electronic format."
+   }
+  ],
+  "fee.no_charge_categories": [
+   {
+    "rule_id": "SC-0011",
+    "authority": "S.C. Code Ann. § 30-4-30(B)",
+    "summary": "Copy charges may not be applied to records that are transmitted in an electronic format."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "SC-0010",
+    "authority": "S.C. Code Ann. § 30-4-30(B)",
+    "summary": "Fees charged must be uniform for copies of the same record or document across requesters."
+   },
+   {
+    "rule_id": "SC-0017",
+    "authority": "S.C. Code Ann. § 30-4-30(B)",
+    "summary": "A public body shall develop a fee schedule and post it online."
+   }
+  ]
+ },
+ "program_setup": {
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "SC-0010",
+    "authority": "S.C. Code Ann. § 30-4-30(B)",
+    "summary": "Fees charged must be uniform for copies of the same record or document across requesters."
+   },
+   {
+    "rule_id": "SC-0017",
+    "authority": "S.C. Code Ann. § 30-4-30(B)",
+    "summary": "A public body shall develop a fee schedule and post it online."
+   }
+  ]
+ },
+ "ledger": {},
+ "audit": {
+  "rules_total": 33,
+  "rules_referenced": 33,
+  "unreferenced_rule_ids": []
+ }
+}

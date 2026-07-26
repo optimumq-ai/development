@@ -1,0 +1,718 @@
+{
+ "state": "Georgia",
+ "code": "GA",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.submission_channels": [
+     {
+      "rule_id": "GA-0006",
+      "authority": "O.C.G.A. § 50-18-71(b)(2)",
+      "summary": "An agency shall permit receipt of written requests by e-mail or facsimile in addition to other approved methods, provided the agency uses e-mail or facsimile in the normal course of its business."
+     }
+    ],
+    "intake.oral_request_permitted": [
+     {
+      "rule_id": "GA-0004",
+      "authority": "O.C.G.A. § 50-18-71(b)(1)(B)",
+      "summary": "A request may be made to the custodian orally or in writing; an oral request is a valid intake path (though it does not unlock the statutory enforcement remedies — see GA-0007)."
+     }
+    ],
+    "intake.form_permitted": [
+     {
+      "rule_id": "GA-0005",
+      "authority": "O.C.G.A. § 50-18-71(b)(1)(B)",
+      "summary": "An agency may (but is not obligated to) require that all written requests be directed to a designated official chosen from an enumerated list (director/chair/CEO, senior satellite official, designated records custodian clerk, or designated open records officer)."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "GA-0022",
+      "authority": "O.C.G.A. § 50-18-71(d)",
+      "summary": "Where an agency will seek costs in excess of $25.00 to respond, it shall notify the requester within three business days and inform the requester of the cost estimate.",
+      "clock_spec": "estimate notice due within 3 business-days of receipt of request",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "GA-0013",
+      "authority": "O.C.G.A. § 50-18-71(b)(1)(A)",
+      "summary": "Where responsive records exist but are unavailable within three business days, the agency shall within that period provide the requester a description of the records and a timeline for when they will be available.",
+      "clock_spec": "notice due within 3 business-days of receipt of request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "GA-0022",
+      "authority": "O.C.G.A. § 50-18-71(d)",
+      "summary": "Where an agency will seek costs in excess of $25.00 to respond, it shall notify the requester within three business days and inform the requester of the cost estimate.",
+      "clock_spec": "estimate notice due within 3 business-days of receipt of request",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "GA-0013",
+      "authority": "O.C.G.A. § 50-18-71(b)(1)(A)",
+      "summary": "Where responsive records exist but are unavailable within three business days, the agency shall within that period provide the requester a description of the records and a timeline for when they will be available.",
+      "clock_spec": "notice due within 3 business-days of receipt of request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "GA-0022",
+      "authority": "O.C.G.A. § 50-18-71(d)",
+      "summary": "Where an agency will seek costs in excess of $25.00 to respond, it shall notify the requester within three business days and inform the requester of the cost estimate.",
+      "clock_spec": "estimate notice due within 3 business-days of receipt of request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.advance_payment": [
+     {
+      "rule_id": "GA-0024",
+      "authority": "O.C.G.A. § 50-18-71(d)",
+      "summary": "Where the estimated production cost exceeds $500.00, the agency may insist on prepayment of the costs before beginning search, retrieval, review, or production.",
+      "clock_spec": "processing paused pending prepayment when estimate exceeds $500.00",
+      "clock_effect": "pauses"
+     }
+    ],
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "GA-0023",
+      "authority": "O.C.G.A. § 50-18-71(d)",
+      "summary": "The agency may defer search and retrieval until the requester agrees to pay the estimated costs, unless the request already stated a willingness to pay an amount exceeding the search and retrieval costs.",
+      "clock_spec": "processing paused until requester agrees to pay the estimated costs",
+      "clock_effect": "pauses"
+     },
+     {
+      "rule_id": "GA-0026",
+      "authority": "O.C.G.A. § 50-18-71(c)(3)",
+      "summary": "Where charges were lawfully estimated and agreed and the agency has incurred the agreed-upon costs to make records available, the agency may collect those charges (via tax/fee collection methods) regardless of whether the requester inspects or accepts the records."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "GA-0025",
+      "authority": "O.C.G.A. § 50-18-71(d)",
+      "summary": "Where a requester has not paid costs lawfully incurred for a prior request, the agency may require prepayment for all future requests from that person until the prior costs are paid or the payment dispute is resolved.",
+      "clock_spec": "future requests paused pending prepayment until prior costs paid or dispute resolved",
+      "clock_effect": "pauses"
+     }
+    ]
+   },
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "GA-0015",
+      "authority": "O.C.G.A. § 50-18-71(d)",
+      "summary": "When an agency withholds all or part of a record, it shall notify the requester of the specific legal authority for the exemption by Code section, subsection, and paragraph within three business days (or, if search/retrieval is delayed, no later than three business days after retrieval).",
+      "clock_spec": "within 3 business-days of request, or within 3 business-days after retrieval where search/retrieval is delayed",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "GA-0015",
+      "authority": "O.C.G.A. § 50-18-71(d)",
+      "summary": "When an agency withholds all or part of a record, it shall notify the requester of the specific legal authority for the exemption by Code section, subsection, and paragraph within three business days (or, if search/retrieval is delayed, no later than three business days after retrieval).",
+      "clock_spec": "within 3 business-days of request, or within 3 business-days after retrieval where search/retrieval is delayed",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {
+    "production.installment_partial": [
+     {
+      "rule_id": "GA-0012",
+      "authority": "O.C.G.A. § 50-18-71(b)(1)(A)",
+      "summary": "Where some but not all responsive records are available within three business days, the agency shall make available within that period those records that can be located and produced.",
+      "clock_spec": "3 business-days from receipt of request (for the subset that can be located)",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "GA-0034",
+      "authority": "O.C.G.A. § 50-18-72(b)",
+      "summary": "Exemptions are interpreted narrowly to exclude only the portion of a record to which an exclusion is directly applicable, and the agency having custody has a duty to provide all other portions of the record for inspection or copying."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {
+    "redaction.mandatory_pii": [
+     {
+      "rule_id": "GA-0035",
+      "authority": "O.C.G.A. § 50-18-72(a)(20)(A)",
+      "summary": "Enumerated personal identifiers (e.g., social security number, financial/bank/credit-card/account data, personal e-mail or cell number, day and month of birth, medical/insurance information, and similar items) shall be redacted prior to disclosure of any requested record, subject to statutory exc…"
+     }
+    ]
+   }
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "GA-0030",
+      "authority": "O.C.G.A. § 50-18-71(f)",
+      "summary": "A requester may request that electronic records, data, or data fields be produced in the format in which the agency keeps them, or in a standard export format such as a flat-file ASCII format, if the agency's existing computer programs support such export; and the agency shall produce electronic …"
+     }
+    ],
+    "production.inspection_access": [
+     {
+      "rule_id": "GA-0027",
+      "authority": "O.C.G.A. § 50-18-71(b)(1)(B)",
+      "summary": "At the time of inspection, any person may make photographic copies or other electronic reproductions of the records using suitable portable devices brought to the place of inspection."
+     },
+     {
+      "rule_id": "GA-0028",
+      "authority": "O.C.G.A. § 50-18-71(b)(1)(B)",
+      "summary": "An agency may, in its discretion, provide copies of a record in lieu of providing access to the record when portions contain confidential information that must be redacted."
+     }
+    ],
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "GA-0029",
+      "authority": "O.C.G.A. § 50-18-71(j)",
+      "summary": "No public officer or agency is required to prepare new reports, summaries, or compilations not in existence at the time of the request."
+     },
+     {
+      "rule_id": "GA-0031",
+      "authority": "O.C.G.A. § 50-18-71(f)",
+      "summary": "An agency shall not refuse to produce electronic records, data, or data fields on the ground that exporting or redacting requires inputting range, search, filter, or report commands, so long as those commands can be executed using existing programs the agency uses in the ordinary course of business."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": true,
+   "activated_by": {
+    "intake.purpose_and_certification": [
+     {
+      "rule_id": "GA-0040",
+      "authority": "O.C.G.A. § 50-18-71(e)",
+      "summary": "Requests by civil litigants for records sought for use in ongoing civil or administrative litigation against the agency shall be made in writing and copied to the agency's counsel of record contemporaneously; the agency shall provide duplicate sets of produced records to that counsel at no cost u…"
+     }
+    ]
+   },
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "GA-0001",
+      "authority": "O.C.G.A. § 50-18-71(a)",
+      "summary": "All public records are open for personal inspection and copying by any person, except records specifically exempted by court order or by law; no requester qualification is imposed for general access."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "GA-0002",
+      "authority": "O.C.G.A. § 50-18-71(a)-(b); contrast § 50-18-72(a)(5)",
+      "summary": "A requester need not state a reason or purpose to obtain general public records; a purpose/'need' showing is required only for enumerated special record types (e.g., motor vehicle accident reports)."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "GA-0003",
+      "authority": "O.C.G.A. §§ 50-18-70, 50-18-71",
+      "summary": "There is no Georgia residency or citizenship condition on the right to request public records; the right runs to any person."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": false
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false,
+   "context": {
+    "custody.contractor_and_thirdparty_custody": [
+     {
+      "rule_id": "GA-0033",
+      "authority": "O.C.G.A. § 50-18-71(h)",
+      "summary": "If an agency contracts with a private vendor to collect or maintain public records, the agency shall ensure the arrangement does not limit public access and that the vendor does not impede record access or the method of delivery established by the agency or by law."
+     }
+    ]
+   }
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": false
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": false
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": false,
+   "suppressed_by": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "GA-0023",
+      "authority": "O.C.G.A. § 50-18-71(d)",
+      "summary": "The agency may defer search and retrieval until the requester agrees to pay the estimated costs, unless the request already stated a willingness to pay an amount exceeding the search and retrieval costs.",
+      "clock_spec": "processing paused until requester agrees to pay the estimated costs",
+      "clock_effect": "pauses"
+     },
+     {
+      "rule_id": "GA-0026",
+      "authority": "O.C.G.A. § 50-18-71(c)(3)",
+      "summary": "Where charges were lawfully estimated and agreed and the agency has incurred the agreed-upon costs to make records available, the agency may collect those charges (via tax/fee collection methods) regardless of whether the requester inspects or accepts the records."
+     }
+    ]
+   },
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "context": {
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "GA-0029",
+      "authority": "O.C.G.A. § 50-18-71(j)",
+      "summary": "No public officer or agency is required to prepare new reports, summaries, or compilations not in existence at the time of the request."
+     },
+     {
+      "rule_id": "GA-0031",
+      "authority": "O.C.G.A. § 50-18-71(f)",
+      "summary": "An agency shall not refuse to produce electronic records, data, or data fields on the ground that exporting or redacting requires inputting range, search, filter, or report commands, so long as those commands can be executed using existing programs the agency uses in the ordinary course of business."
+     }
+    ]
+   },
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": true,
+   "activated_by": {
+    "production.website_satisfies": [
+     {
+      "rule_id": "GA-0032",
+      "authority": "O.C.G.A. § 50-18-71(h)",
+      "summary": "An agency may provide access to records through a public website in lieu of separate printouts or copies, but if it receives a request for data fields it shall not refuse the responsive data on the ground that it is available through a website when the requester seeks the data in the electronic f…"
+     }
+    ]
+   }
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": true,
+   "activated_by": {
+    "special_records.special_record_window": [
+     {
+      "rule_id": "GA-0039",
+      "authority": "O.C.G.A. § 50-18-71(d.1)",
+      "summary": "For records (other than nonclerical staff salary information) of intercollegiate sports programs of any University System of Georgia unit, the period for any production, access, response, or notice is 90 business days from the date the agency received the request.",
+      "clock_spec": "fixed: 90 business-days from date agency received the request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": true,
+   "activated_by": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "GA-0023",
+      "authority": "O.C.G.A. § 50-18-71(d)",
+      "summary": "The agency may defer search and retrieval until the requester agrees to pay the estimated costs, unless the request already stated a willingness to pay an amount exceeding the search and retrieval costs.",
+      "clock_spec": "processing paused until requester agrees to pay the estimated costs",
+      "clock_effect": "pauses"
+     },
+     {
+      "rule_id": "GA-0026",
+      "authority": "O.C.G.A. § 50-18-71(c)(3)",
+      "summary": "Where charges were lawfully estimated and agreed and the agency has incurred the agreed-upon costs to make records available, the agency may collect those charges (via tax/fee collection methods) regardless of whether the requester inspects or accepts the records."
+     }
+    ]
+   }
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.clock_computation": [
+     {
+      "rule_id": "GA-0010",
+      "authority": "O.C.G.A. § 50-18-71(b)(2)",
+      "summary": "Where an agency requires that requests be directed to designated individuals, the three-day response period does not begin to run until the request is made in writing upon such individuals.",
+      "clock_spec": "3 business-day response clock does not start until written request is delivered to the required designated individual",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "completion": {
+   "present": true,
+   "statutory": {
+    "production.completion_window": [
+     {
+      "rule_id": "GA-0011",
+      "authority": "O.C.G.A. § 50-18-71(b)(1)(A)",
+      "summary": "An agency shall produce responsive records within a reasonable amount of time not to exceed three business days of receipt of the request; the agency is not required to produce records that did not exist at the time of the request.",
+      "clock_spec": "ceiling: 3 business-days from receipt of request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "GA-0014",
+      "authority": "O.C.G.A. § 50-18-71(b)(1)(A)",
+      "summary": "For records that could not be produced within three business days, the agency shall provide the responsive records or access to them as soon as practicable (a soft, undefined standard, not a fixed day count).",
+      "clock_spec": "undefined-soft: \"as soon as practicable\" from receipt of request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": true,
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "GA-0025",
+      "authority": "O.C.G.A. § 50-18-71(d)",
+      "summary": "Where a requester has not paid costs lawfully incurred for a prior request, the agency may require prepayment for all future requests from that person until the prior costs are paid or the payment dispute is resolved.",
+      "clock_spec": "future requests paused pending prepayment until prior costs paid or dispute resolved",
+      "clock_effect": "pauses"
+     }
+    ]
+   }
+  },
+  "special_windows": {
+   "present": true,
+   "statutory": {
+    "special_records.special_record_window": [
+     {
+      "rule_id": "GA-0039",
+      "authority": "O.C.G.A. § 50-18-71(d.1)",
+      "summary": "For records (other than nonclerical staff salary information) of intercollegiate sports programs of any University System of Georgia unit, the period for any production, access, response, or notice is 90 business days from the date the agency received the request.",
+      "clock_spec": "fixed: 90 business-days from date agency received the request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "GA-0018",
+    "authority": "O.C.G.A. § 50-18-71(c)(2)",
+    "summary": "In addition to labor charges, an agency may charge for copying, not to exceed 10 cents per page for letter or legal size documents, or the actual cost of producing the copy for other document types."
+   }
+  ],
+  "fee.labor_charge": [
+   {
+    "rule_id": "GA-0016",
+    "authority": "O.C.G.A. § 50-18-71(c)(1)",
+    "summary": "An agency may impose a reasonable charge for search, retrieval, and redaction, but that charge shall not exceed the prorated hourly salary of the lowest paid full-time employee who, in the custodian's reasonable discretion, has the necessary skill and training to perform the request."
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "GA-0020",
+    "authority": "O.C.G.A. § 50-18-71(c)(1)",
+    "summary": "An agency shall utilize the most economical means reasonably calculated to identify and produce responsive, nonexcluded documents."
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "GA-0019",
+    "authority": "O.C.G.A. § 50-18-71(c)(2)",
+    "summary": "For electronic records, the agency may charge the actual cost of the media on which the records or data are produced."
+   }
+  ],
+  "fee.free_allowance": [
+   {
+    "rule_id": "GA-0017",
+    "authority": "O.C.G.A. § 50-18-71(c)(1)",
+    "summary": "No labor charge may be made for the first quarter hour of search, retrieval, or redaction."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "GA-0021",
+    "authority": "O.C.G.A. § 50-18-71(c)(1)",
+    "summary": "Where a specific fee for certified copies or other records is authorized or prescribed by law, that specific fee applies instead of the general search/retrieval/copy charges when such records are sought."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.records_officer_designation": [
+   {
+    "rule_id": "GA-0008",
+    "authority": "O.C.G.A. § 50-18-71(b)(2)",
+    "summary": "An agency that designates one or more open records officers shall make the designation in writing, immediately provide notice of them to any person on request (orally or in writing), notify the county legal organ, and, if it has a website, prominently display the designation."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "GA-0021",
+    "authority": "O.C.G.A. § 50-18-71(c)(1)",
+    "summary": "Where a specific fee for certified copies or other records is authorized or prescribed by law, that specific fee applies instead of the general search/retrieval/copy charges when such records are sought."
+   }
+  ]
+ },
+ "ledger": {
+  "payment.advance_payment": [
+   {
+    "rule_id": "GA-0024",
+    "authority": "O.C.G.A. § 50-18-71(d)",
+    "summary": "Where the estimated production cost exceeds $500.00, the agency may insist on prepayment of the costs before beginning search, retrieval, review, or production.",
+    "clock_spec": "processing paused pending prepayment when estimate exceeds $500.00",
+    "clock_effect": "pauses"
+   }
+  ]
+ },
+ "audit": {
+  "rules_total": 35,
+  "rules_referenced": 35,
+  "unreferenced_rule_ids": []
+ }
+}

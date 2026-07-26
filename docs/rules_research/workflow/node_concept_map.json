@@ -1,0 +1,227 @@
+{
+  "_meta": {
+    "purpose": "Phase-6 bridge: assigns every canonical concept in ../alignment/master_concept_dictionary.json to the workflow overlay's config surfaces. Consumed by build_state_templates.js. Every concept MUST appear in >=1 home; the generator fails loud otherwise.",
+    "homes": {
+      "knob (param node)": "concepts[] — statutory evidence for the value the state/city config fills; city_config notes what remains local policy",
+      "branch node": "activate[] — concept presence in a state switches the branch ON; context[] — evidence shown but never activates (e.g. permissive any-person rules prove the eligibility gate is OFF); states_override — hard state list when the mapped concept is broader than the branch; complement_of — branch is ON where NONE of those concepts are present",
+      "clock_matrix": "named timers (the clock is engine machinery, not a flow node)",
+      "fee_schedule": "the per-state fee data table feeding the shared ledger compute node f1",
+      "program_setup": "org-level obligations (one-time setup, not per-request flow)",
+      "ledger": "requestor-ledger triggers (DESIGN_requestor_ledger.md classes A-D)",
+      "engine_notes": "shared-engine behavior with no per-state value; listed only so the audit closes"
+    },
+    "city_config_flag": "knobs whose value is wholly or partly local policy (the diagram's ⚠ config-not-law edges) carry a city_config note with a suggested default"
+  },
+  "nodes": {
+    "Master.g1": {
+      "class": "param",
+      "concepts": ["intake.submission_channels", "intake.written_request_required", "intake.oral_request_permitted", "intake.form_permitted", "intake.no_required_form", "intake.required_fields", "intake.no_technicality_denial", "denial.improper_request_denial"],
+      "city_config": { "note": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses." }
+    },
+    "Master.g2": {
+      "class": "branch",
+      "activate": ["eligibility.requester_class_restriction", "eligibility.proof_of_residency", "eligibility.resident_definition", "eligibility.incarcerated_requester_exclusion", "eligibility.out_of_class_discretionary", "eligibility.record_subject_self_access", "eligibility.vexatious_requester_gate", "intake.identity_requirement", "intake.residency_attestation", "intake.purpose_and_certification"],
+      "context": ["eligibility.any_person", "eligibility.no_purpose_requirement", "eligibility.no_residency_requirement", "eligibility.no_identity_requirement", "eligibility.no_age_requirement"]
+    },
+    "Master.g4": {
+      "class": "param",
+      "concepts": ["response.acknowledgment_window", "response.valid_response_forms"],
+      "city_config": { "note": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)." }
+    },
+    "Master.s1": { "class": "branch", "activate": ["fee.waiver"] },
+    "Master.s2": { "class": "branch", "activate": ["classification.commercial_purpose", "fee.commercial_charge"] },
+    "Master.p3": {
+      "class": "param",
+      "concepts": ["fee.estimate_and_notice", "response.time_estimate_notice"],
+      "city_config": { "note": "Which data points intake must capture to estimate (page count, media, labor class)." }
+    },
+    "Master.dd": { "class": "param", "concepts": ["payment.deposit", "payment.deposit_threshold", "payment.deposit_ceiling"] },
+    "Master.bv": {
+      "class": "param",
+      "concepts": ["intake.reasonably_describes"],
+      "city_config": { "note": "Vagueness screen wording; the reasonably-describes standard is statutory where present." }
+    },
+    "Master.bn": { "class": "param", "concepts": ["denial.no_responsive_records", "denial.neither_confirm_nor_deny"] },
+    "Master.br": {
+      "class": "branch",
+      "activate": ["custody.referral_to_proper_custodian"],
+      "context": ["custody.contractor_and_thirdparty_custody"]
+    },
+    "Master.f2": {
+      "class": "param",
+      "concepts": [],
+      "city_config": { "note": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)." }
+    },
+    "Clarification.d1": { "class": "branch", "activate": ["clarification.duty_to_assist", "clarification.confer_to_narrow"] },
+    "Clarification.deny": {
+      "class": "branch",
+      "activate": [],
+      "context": ["intake.reasonably_describes", "search.burden_limit"],
+      "states_override": ["TN", "NJ", "OH", "OK"],
+      "override_note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+    },
+    "Clarification.n2": {
+      "class": "param",
+      "concepts": ["clarification.clarification_process"],
+      "city_config": { "note": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity." }
+    },
+    "Clarification.d2": { "class": "branch", "activate": ["clarification.toll_on_clarification"] },
+    "Clarification.n3": {
+      "class": "param",
+      "concepts": ["clarification.nonresponse_withdrawal"],
+      "city_config": { "note": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d." }
+    },
+    "Clarification.close": {
+      "class": "param",
+      "concepts": ["clarification.nonresponse_withdrawal"],
+      "city_config": { "note": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere." }
+    },
+    "Clarification.d4": {
+      "class": "param",
+      "concepts": [],
+      "city_config": { "note": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request." }
+    },
+    "Clarification.duty": { "class": "branch", "activate": ["clarification.duty_satisfied"] },
+    "Estimate-Fee.dreq": {
+      "class": "param",
+      "concepts": ["fee.estimate_and_notice", "response.time_estimate_notice"],
+      "city_config": { "note": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)." }
+    },
+    "Estimate-Fee.addt": {
+      "class": "param",
+      "concepts": [],
+      "city_config": { "note": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target." }
+    },
+    "Estimate-Fee.dwv": { "class": "branch", "activate": ["fee.waiver"] },
+    "Estimate-Fee.wrev": { "class": "branch", "activate": ["fee.waiver"] },
+    "Estimate-Fee.frev": {
+      "class": "param",
+      "concepts": [],
+      "city_config": { "note": "Estimate review $ threshold + reviewer role — same knob family as Master.f2." }
+    },
+    "Estimate-Fee.fcom": {
+      "class": "param",
+      "concepts": ["fee.estimate_and_notice"],
+      "city_config": { "note": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it." }
+    },
+    "Estimate-Fee.drsp": {
+      "class": "param",
+      "concepts": [],
+      "city_config": { "note": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d." }
+    },
+    "Estimate-Fee.optout": {
+      "class": "param",
+      "concepts": [],
+      "city_config": { "note": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window." }
+    },
+    "Estimate-Fee.ddep": {
+      "class": "param",
+      "concepts": ["payment.advance_payment", "payment.deposit", "payment.deposit_threshold", "payment.deposit_ceiling", "payment.production_conditioned_on_payment"],
+      "city_config": { "note": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)." }
+    },
+    "Estimate-Fee.cnp": {
+      "class": "param",
+      "concepts": ["payment.nonpayment_consequence"],
+      "city_config": { "note": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)." }
+    },
+    "Estimate-Fee.proc": {
+      "class": "branch",
+      "activate": [],
+      "complement_of": ["payment.production_conditioned_on_payment"],
+      "override_note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+    },
+    "Denial.dag": { "class": "branch", "activate": ["appeal.ag_referral_to_withhold"] },
+    "Denial.nreason": {
+      "class": "param",
+      "concepts": ["denial.reasons_and_citation_required", "denial.agency_burden", "search.burden_limit"],
+      "city_config": { "note": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites." }
+    },
+    "Denial.dlegal": {
+      "class": "param",
+      "concepts": ["custody.custodian_responds"],
+      "city_config": { "note": "Who may approve a denial (city routing); CT requires the custodian personally." }
+    },
+    "Denial.ncomm": {
+      "class": "param",
+      "concepts": ["denial.written_notice_required", "denial.reasons_and_citation_required", "denial.identify_responsible_person", "denial.partial_withholding_notice", "denial.no_responsive_records", "denial.denial_form_and_log", "appeal.retained_optional"],
+      "city_config": { "note": "Denial letter template — must satisfy every content element listed for the state." }
+    },
+    "Denial.ddl": { "class": "param", "concepts": ["denial.denial_deadline"] },
+    "Denial.dprev": { "class": "branch", "activate": ["appeal.ag_referral_to_withhold"] },
+    "Denial.ag1": { "class": "branch", "activate": ["appeal.ag_referral_to_withhold"] },
+    "Denial.agclk": { "class": "branch", "activate": ["appeal.ag_referral_to_withhold"] },
+    "Denial.agnot": { "class": "branch", "activate": ["appeal.ag_referral_to_withhold"] },
+    "Denial.agwait": { "class": "branch", "activate": ["appeal.ag_referral_to_withhold"] },
+    "Denial.agdec": { "class": "branch", "activate": ["appeal.ag_referral_to_withhold"] },
+    "Denial.agrel": { "class": "branch", "activate": ["appeal.ag_referral_to_withhold", "denial.deemed_disclosure"] },
+    "Records-Search.bn": { "class": "param", "concepts": ["denial.no_responsive_records", "denial.neither_confirm_nor_deny"] },
+    "Records-Search.prog": {
+      "class": "branch",
+      "activate": [],
+      "context": ["production.no_duty_to_create_or_convert"],
+      "states_override": ["TX"],
+      "override_note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+    },
+    "Records-Search.web": { "class": "branch", "activate": ["production.website_satisfies"] },
+    "Records-Search.inst": { "class": "param", "concepts": ["production.installment_partial"] },
+    "Records-Search.spec": {
+      "class": "branch",
+      "activate": ["special_records.court_records", "special_records.election_records", "special_records.law_enforcement", "special_records.special_production_constraint", "special_records.special_record_window", "data_subject.accuracy_challenge"]
+    },
+    "Redaction.r1": {
+      "class": "param",
+      "concepts": ["redaction.segregability", "search.identify_responsive", "classification.record_classification_scheme"],
+      "city_config": { "note": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states." }
+    },
+    "Redaction.pii": { "class": "param", "concepts": ["redaction.mandatory_pii", "redaction.protected_person"] },
+    "Redaction.r2": {
+      "class": "param",
+      "concepts": ["redaction.marking_and_explanation"],
+      "city_config": { "note": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present." }
+    },
+    "Redaction.tp": {
+      "class": "branch",
+      "activate": ["redaction.third_party_claim", "special_records.third_party_proprietary", "redaction.personnel_privacy_process"]
+    },
+    "Redaction.d3": {
+      "class": "param",
+      "concepts": [],
+      "city_config": { "note": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)." }
+    },
+    "Disposition.hold": { "class": "branch", "activate": ["payment.production_conditioned_on_payment"] },
+    "Disposition.fmt": {
+      "class": "param",
+      "concepts": ["production.format_and_medium", "production.no_medium_refusal", "production.delivery_method", "production.delivery_and_completion", "production.certified_copy", "production.av_media_specific", "production.inspection_access", "payment.method", "production.no_duty_to_create_or_convert"]
+    },
+    "Disposition.caps": {
+      "class": "branch",
+      "activate": ["classification.recurrent_requester", "classification.voluminous_request", "classification.processing_track", "fee.aggregation", "fee.repeat_request_carryforward", "intake.duplicate_request_denial", "eligibility.vexatious_requester_gate"],
+      "override_note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+    }
+  },
+  "clock_matrix": {
+    "acknowledgment": { "concepts": ["response.acknowledgment_window"] },
+    "initial_decision": { "concepts": ["response.initial_decision_window", "response.clock_computation", "denial.deemed_denial_on_nonresponse"] },
+    "extension": { "concepts": ["response.extension_grounds", "response.extension_length", "response.extension_limit", "response.extension_notice", "external.court_dependent"] },
+    "completion": { "concepts": ["production.completion_window"] },
+    "clarification_response": { "concepts": ["clarification.nonresponse_withdrawal", "clarification.toll_on_clarification"] },
+    "nonpayment_close": { "concepts": ["payment.nonpayment_consequence"] },
+    "special_windows": { "concepts": ["response.classified_request_window", "special_records.special_record_window"] },
+    "suspension": { "concepts": ["response.catastrophe_suspension"] },
+    "ag_referral": { "concepts": ["appeal.ag_referral_to_withhold", "denial.deemed_disclosure"] },
+    "denial_deadline": { "concepts": ["denial.denial_deadline"] }
+  },
+  "fee_schedule": {
+    "concepts": ["fee.copy_rate_per_page", "fee.labor_charge", "fee.actual_cost_basis", "fee.electronic_media_charge", "fee.certified_copy_charge", "fee.delivery_charge", "fee.nonstandard_rate", "fee.commercial_charge", "fee.special_service_charge", "fee.free_allowance", "fee.no_charge_categories", "fee.schedule_and_authority"]
+  },
+  "program_setup": {
+    "concepts": ["custody.custodian_definition_and_role", "custody.records_officer_designation", "custody.request_tracking", "intake.procedures_publication", "classification.written_policy_required", "classification.presumption_of_openness", "communication.determination_notice", "denial.denial_form_and_log", "fee.schedule_and_authority"]
+  },
+  "ledger": {
+    "concepts": ["classification.recurrent_requester", "classification.voluminous_request", "classification.processing_track", "fee.aggregation", "fee.repeat_request_carryforward", "intake.duplicate_request_denial", "eligibility.vexatious_requester_gate", "payment.advance_payment", "response.classified_request_window", "response.repeat_request_handling"]
+  },
+  "engine_notes": {
+    "concepts": ["search.reasonable_search_duty"],
+    "note": "Shared-engine behavior with no per-state configurable value; listed so the concept-coverage audit closes."
+  }
+}

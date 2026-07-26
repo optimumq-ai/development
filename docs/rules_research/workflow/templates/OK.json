@@ -1,0 +1,570 @@
+{
+ "state": "Oklahoma",
+ "code": "OK",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.submission_channels": [
+     {
+      "rule_id": "OK-0025",
+      "authority": "Okla. Stat. tit. 51, § 24A.6(A)",
+      "summary": "A public body without at least 30 regular business hours per week must post and maintain a written notice (at its principal office and with the county clerk) designating the days records are available, the name/mailing address/telephone of the individual in charge of records, and detailed procedu…"
+     },
+     {
+      "rule_id": "OK-0026",
+      "authority": "Okla. Stat. tit. 51, § 24A.6(B)",
+      "summary": "The requester and the authorized release person may agree to inspection/copying on a day and time other than that designated in the sub-30-hours notice."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {},
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "OK-S01",
+      "authority": "51 O.S. § 24A.5(7) (added by SB 535, Laws 2025, c. 404, § 2, eff. 11/1/2025)",
+      "summary": "A public body may require a requestor to complete a records request form, and may ask the requestor to clarify a request that does not describe the records with reasonable specificity. Reasonable specificity requires: (a) a general time frame of creation/transmission, (b) identifiable records rat…"
+     }
+    ]
+   },
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {},
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.advance_payment": [
+     {
+      "rule_id": "OK-S03",
+      "authority": "51 O.S. § 24A.5(4) (as amended by SB 535, Laws 2025, c. 404, § 2, eff. 11/1/2025)",
+      "summary": "A public body may require advance payment of estimated fees when the estimated cost exceeds $75.00 or if the requestor has outstanding fees from previous requests; any portion of an advance payment exceeding the actual cost of responding must be returned to the requestor."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "OK-0019",
+      "authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+      "summary": "If a request is solely for a commercial purpose, or would clearly cause excessive disruption of the body's essential functions, the body may charge a reasonable fee to recover the direct cost of record search and copying.",
+      "clock_spec": "ceiling: reasonable direct cost of search and copying"
+     }
+    ]
+   },
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {},
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {},
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "OK-0007",
+      "authority": "Okla. Stat. tit. 51, § 24A.5(3)",
+      "summary": "Any reasonably segregable portion of a record containing exempt material must be provided after deletion of the exempt portions."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {
+    "redaction.mandatory_pii": [
+     {
+      "rule_id": "OK-0008",
+      "authority": "Okla. Stat. tit. 51, § 24A.5(2)",
+      "summary": "A public body may treat Social Security numbers in a record as confidential and redact or delete them prior to release, regardless of the person's status."
+     }
+    ]
+   }
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.delivery_and_completion": [
+     {
+      "rule_id": "OK-0009",
+      "authority": "Okla. Stat. tit. 51, § 24A.5(6)",
+      "summary": "A public body must provide prompt, reasonable access to its records.",
+      "clock_spec": "undefined-soft: \"prompt, reasonable access\" from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": false,
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "OK-0001",
+      "authority": "Okla. Stat. tit. 51, § 24A.5",
+      "summary": "Any person may inspect, copy, or mechanically reproduce the records of public bodies and public officials during regular business hours."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "OK-0003",
+      "authority": "Okla. Stat. tit. 51, § 24A.2",
+      "summary": "A public body may not impose access procedures beyond those specified in the Act; no statement of purpose is required to inspect/copy records (purpose matters only to fees, not access)."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "OK-0002",
+      "authority": "Okla. Stat. tit. 51, § 24A.5",
+      "summary": "The right to inspect/copy records extends to any person with no residency or citizenship qualification."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "OK-0022",
+      "authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+      "summary": "No search fee may be charged when release of the records is in the public interest, including release to news media, scholars, authors, and taxpayers seeking to determine whether officials are performing their duties."
+     },
+     {
+      "rule_id": "OK-0023",
+      "authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+      "summary": "Fees may not be used to discourage requests for information or as obstacles to disclosure of requested information."
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": true,
+   "activated_by": {
+    "classification.commercial_purpose": [
+     {
+      "rule_id": "OK-0020",
+      "authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+      "summary": "Newspaper publication or news-media broadcast for news purposes is not a resale or commercial/trade use, and charges for electronic data provided to news media for a news purpose may not exceed the direct cost of copying."
+     }
+    ]
+   }
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": true,
+   "activated_by": {
+    "clarification.duty_to_assist": [
+     {
+      "rule_id": "OK-S02",
+      "authority": "51 O.S. § 24A.5(7) (added by SB 535, Laws 2025, c. 404, § 2, eff. 11/1/2025)",
+      "summary": "A request may be denied for lack of reasonable specificity only if the public body has first engaged with the requestor to seek the information needed to fulfill the request and to identify the records sought - including providing the requestor with general topics or a specific list of records re…"
+     }
+    ]
+   }
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": true,
+   "context": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "OK-S01",
+      "authority": "51 O.S. § 24A.5(7) (added by SB 535, Laws 2025, c. 404, § 2, eff. 11/1/2025)",
+      "summary": "A public body may require a requestor to complete a records request form, and may ask the requestor to clarify a request that does not describe the records with reasonable specificity. Reasonable specificity requires: (a) a general time frame of creation/transmission, (b) identifiable records rat…"
+     }
+    ]
+   },
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "OK-0022",
+      "authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+      "summary": "No search fee may be charged when release of the records is in the public interest, including release to news media, scholars, authors, and taxpayers seeking to determine whether officials are performing their duties."
+     },
+     {
+      "rule_id": "OK-0023",
+      "authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+      "summary": "Fees may not be used to discourage requests for information or as obstacles to disclosure of requested information."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "OK-0022",
+      "authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+      "summary": "No search fee may be charged when release of the records is in the public interest, including release to news media, scholars, authors, and taxpayers seeking to determine whether officials are performing their duties."
+     },
+     {
+      "rule_id": "OK-0023",
+      "authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+      "summary": "Fees may not be used to discourage requests for information or as obstacles to disclosure of requested information."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": true,
+   "activated_by": {
+    "production.website_satisfies": [
+     {
+      "rule_id": "OK-0013",
+      "authority": "Okla. Stat. tit. 51, § 24A.5(6)",
+      "summary": "A public body that makes the requested records available on the Internet is deemed to meet its obligation to provide prompt, reasonable access."
+     }
+    ]
+   }
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": true,
+   "activated_by": {
+    "special_records.law_enforcement": [
+     {
+      "rule_id": "OK-0027",
+      "authority": "Okla. Stat. tit. 51, § 24A.8(B)",
+      "summary": "Except for records made open by § 24A.8(A) or other law, a law enforcement agency may deny access to law enforcement records unless a court finds the public interest or an individual's interest outweighs the reason for denial."
+     }
+    ]
+   }
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "extension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": true,
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "OK-0019",
+      "authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+      "summary": "If a request is solely for a commercial purpose, or would clearly cause excessive disruption of the body's essential functions, the body may charge a reasonable fee to recover the direct cost of record search and copying.",
+      "clock_spec": "ceiling: reasonable direct cost of search and copying"
+     }
+    ]
+   }
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "OK-0017",
+    "authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+    "summary": "The record copying fee may not exceed twenty-five cents ($0.25) per page for records 8.5 by 14 inches or smaller.",
+    "clock_spec": "ceiling: $0.25/page (pages <= 8.5 x 14 in)"
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "OK-0016",
+    "authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+    "summary": "A public body may charge a fee only to recover the reasonable, direct costs of record copying or mechanical reproduction.",
+    "clock_spec": "ceiling: reasonable direct cost of copying/reproduction"
+   }
+  ],
+  "fee.certified_copy_charge": [
+   {
+    "rule_id": "OK-0018",
+    "authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+    "summary": "The fee for a certified copy may not exceed One Dollar ($1.00) per copied page.",
+    "clock_spec": "ceiling: $1.00/page (certified copy)"
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "OK-0021",
+    "authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+    "summary": "A public body that establishes fees must post a written schedule of the fees at its principal office and with the county clerk."
+   },
+   {
+    "rule_id": "OK-0024",
+    "authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+    "summary": "Where the cost of copying/reproducing/certifying each individual record is otherwise prescribed by state law, the body may assess that cost per individual record or portion requested."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.custodian_definition_and_role": [
+   {
+    "rule_id": "OK-0015",
+    "authority": "Okla. Stat. tit. 51, § 24A.5(7)",
+    "summary": "At least one authorized person must be available at all times to release records during the public body's regular business hours."
+   }
+  ],
+  "custody.records_officer_designation": [
+   {
+    "rule_id": "OK-0014",
+    "authority": "Okla. Stat. tit. 51, § 24A.5(7)",
+    "summary": "A public body must designate certain persons authorized to release its records for inspection, copying, or mechanical reproduction."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "OK-0021",
+    "authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+    "summary": "A public body that establishes fees must post a written schedule of the fees at its principal office and with the county clerk."
+   },
+   {
+    "rule_id": "OK-0024",
+    "authority": "Okla. Stat. tit. 51, § 24A.5(4)",
+    "summary": "Where the cost of copying/reproducing/certifying each individual record is otherwise prescribed by state law, the body may assess that cost per individual record or portion requested."
+   }
+  ]
+ },
+ "ledger": {
+  "payment.advance_payment": [
+   {
+    "rule_id": "OK-S03",
+    "authority": "51 O.S. § 24A.5(4) (as amended by SB 535, Laws 2025, c. 404, § 2, eff. 11/1/2025)",
+    "summary": "A public body may require advance payment of estimated fees when the estimated cost exceeds $75.00 or if the requestor has outstanding fees from previous requests; any portion of an advance payment exceeding the actual cost of responding must be returned to the requestor."
+   }
+  ]
+ },
+ "audit": {
+  "rules_total": 24,
+  "rules_referenced": 24,
+  "unreferenced_rule_ids": []
+ }
+}

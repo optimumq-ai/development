@@ -1,0 +1,732 @@
+{
+ "state": "Tennessee",
+ "code": "TN",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.submission_channels": [
+     {
+      "rule_id": "TN-0006",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(7)(A)(i)",
+      "summary": "Requests to view public records may be submitted in person, by telephone, fax, mail, or email (if the entity uses such means for official business), or via internet portal (if the entity maintains one for records requests)."
+     }
+    ],
+    "intake.form_permitted": [
+     {
+      "rule_id": "TN-0007",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(7)(A)(ii)",
+      "summary": "A governmental entity may require a request for COPIES of public records to be in writing, on a form complying with subsection (c), or on a form developed by the Office of Open Records Counsel."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {
+    "response.valid_response_forms": [
+     {
+      "rule_id": "TN-0015",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(2)(B)(i)-(iii)",
+      "summary": "When it is not practicable for a record to be promptly available, the custodian shall within seven (7) business days take one of three actions: (i) make it available, (ii) deny in writing with basis, or (iii) furnish in writing the time reasonably necessary to produce it.",
+      "clock_spec": "fixed: 7 business-days from custodian's receipt of the request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "TN-0034",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(7)(B); OORC Schedule of Reasonable Charges § I.G; OORC Model Public Records Policy § VI.B",
+      "summary": "The records custodian shall provide the requestor an estimate of the reasonable costs to provide copies of the requested material before producing them."
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "TN-0016",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(2)(B)(iii)",
+      "summary": "As the third permitted response, the custodian furnishes the requester, in writing or on the OORC response form, the time reasonably necessary to produce the record or information.",
+      "clock_spec": "undefined-soft: \"time reasonably necessary to produce\" stated by custodian, from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {
+    "denial.no_responsive_records": [
+     {
+      "rule_id": "TN-0028",
+      "authority": "OORC Model Public Records Policy §§ III.A.2.b.iv, III.A.2.b.v",
+      "summary": "A request may be denied where the governmental entity is not the custodian of the requested records, or the records do not exist."
+     }
+    ]
+   }
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "TN-0034",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(7)(B); OORC Schedule of Reasonable Charges § I.G; OORC Model Public Records Policy § VI.B",
+      "summary": "The records custodian shall provide the requestor an estimate of the reasonable costs to provide copies of the requested material before producing them."
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "TN-0016",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(2)(B)(iii)",
+      "summary": "As the third permitted response, the custodian furnishes the requester, in writing or on the OORC response form, the time reasonably necessary to produce the record or information.",
+      "clock_spec": "undefined-soft: \"time reasonably necessary to produce\" stated by custodian, from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "TN-0034",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(7)(B); OORC Schedule of Reasonable Charges § I.G; OORC Model Public Records Policy § VI.B",
+      "summary": "The records custodian shall provide the requestor an estimate of the reasonable costs to provide copies of the requested material before producing them."
+     }
+    ]
+   },
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.advance_payment": [
+     {
+      "rule_id": "TN-0035",
+      "authority": "OORC Schedule of Reasonable Charges § I.E; Tenn. Code Ann. § 10-7-503(a)(7)(B)",
+      "summary": "A records custodian may require payment for copies before producing the copies of the records."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "TN-0008",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(3)",
+      "summary": "Any request for inspection or copying must be sufficiently detailed to enable the governmental entity to identify the specific records sought."
+     },
+     {
+      "rule_id": "TN-0027",
+      "authority": "OORC Model Public Records Policy § III.A.2.b.iii",
+      "summary": "A request may be denied where an exemption makes the record not subject to disclosure under the TPRA; the applicable exemption must be provided in the written denial."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "TN-0026",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(2)(B)(ii)",
+      "summary": "A denial must be in writing (or on the OORC-developed records request response form) and shall include the basis for the denial."
+     }
+    ],
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "TN-0008",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(3)",
+      "summary": "Any request for inspection or copying must be sufficiently detailed to enable the governmental entity to identify the specific records sought."
+     },
+     {
+      "rule_id": "TN-0027",
+      "authority": "OORC Model Public Records Policy § III.A.2.b.iii",
+      "summary": "A request may be denied where an exemption makes the record not subject to disclosure under the TPRA; the applicable exemption must be provided in the written denial."
+     }
+    ],
+    "denial.no_responsive_records": [
+     {
+      "rule_id": "TN-0028",
+      "authority": "OORC Model Public Records Policy §§ III.A.2.b.iv, III.A.2.b.v",
+      "summary": "A request may be denied where the governmental entity is not the custodian of the requested records, or the records do not exist."
+     }
+    ],
+    "appeal.retained_optional": [
+     {
+      "rule_id": "TN-0041",
+      "authority": "OORC Reasonable Charges for Frequent and Multiple Requests §§ II.B, II.D",
+      "summary": "When aggregating, the custodian must inform the requestor(s) of the determination to aggregate and of the right to appeal that decision to the Office of Open Records Counsel; disputes regarding aggregation shall be brought to the OORC."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {
+    "denial.no_responsive_records": [
+     {
+      "rule_id": "TN-0028",
+      "authority": "OORC Model Public Records Policy §§ III.A.2.b.iv, III.A.2.b.v",
+      "summary": "A request may be denied where the governmental entity is not the custodian of the requested records, or the records do not exist."
+     }
+    ]
+   }
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {
+    "production.installment_partial": [
+     {
+      "rule_id": "TN-0020",
+      "authority": "OORC Model Public Records Policy § III.B.4",
+      "summary": "If production should be segmented because of a large volume of records, the custodian uses the response form to notify the requestor that production will be in segments and a production schedule will be provided as expeditiously as practicable.",
+      "clock_spec": "undefined-soft: production schedule \"as expeditiously as practicable\" from response form notice",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "TN-0021",
+      "authority": "OORC Model Public Records Policy § III.B.5",
+      "summary": "If the custodian discovers responsive records were omitted, the custodian should contact the requestor about the omission and produce the records as quickly as practicable.",
+      "clock_spec": "undefined-soft: produce omitted records \"as quickly as practicable\" from discovery",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "TN-0024",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(4)",
+      "summary": "The redaction of confidential information shall not constitute the creation of a new record."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {
+    "redaction.mandatory_pii": [
+     {
+      "rule_id": "TN-0023",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(4)",
+      "summary": "Information made confidential by state law shall be redacted whenever possible, and the redacted record shall be made available for inspection and copying."
+     }
+    ]
+   }
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {
+    "redaction.marking_and_explanation": [
+     {
+      "rule_id": "TN-0025",
+      "authority": "OORC Model Public Records Policy § III.C.2",
+      "summary": "Whenever a redacted record is provided, the custodian should provide the requestor the basis for redaction, stated generally so as not to disclose the confidential information."
+     }
+    ]
+   },
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.delivery_and_completion": [
+     {
+      "rule_id": "TN-0022",
+      "authority": "OORC Schedule of Reasonable Charges § III.D",
+      "summary": "If a requestor chooses not to personally retrieve copies and the actual delivery cost plus other permitted charges are paid or waived, the custodian must deliver the copies via USPS First-Class Mail; other means (including electronic) are discretionary and may carry delivery costs."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": true,
+   "activated_by": {
+    "eligibility.requester_class_restriction": [
+     {
+      "rule_id": "TN-0001",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(2)(A)",
+      "summary": "Access under the TPRA runs to any citizen of Tennessee; those in charge of records shall not refuse inspection to any citizen unless otherwise provided by state law."
+     }
+    ],
+    "eligibility.out_of_class_discretionary": [
+     {
+      "rule_id": "TN-0003",
+      "authority": "OORC Model Public Records Policy, Policy Considerations § I.A",
+      "summary": "A governmental entity may determine, in its public records policy, whether to respond to TPRA requests from persons who are not citizens of Tennessee."
+     }
+    ],
+    "intake.identity_requirement": [
+     {
+      "rule_id": "TN-0004",
+      "authority": "OORC Model Public Records Policy, Policy Considerations § I.B; statutory basis Tenn. Code Ann. § 10-7-503(a)(7)(A)(vi)",
+      "summary": "A governmental entity may require government-issued photo identification as a prerequisite to providing access to records."
+     }
+    ]
+   },
+   "context": {
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "TN-0002",
+      "authority": "OORC Schedule of Reasonable Charges § I.F (implementing Tenn. Code Ann. § 8-4-604); Tenn. Code Ann. § 10-7-503",
+      "summary": "The TPRA does not distinguish requests based on the requester's intended use; a requester need not state a purpose to access open records."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "TN-0036",
+      "authority": "OORC Schedule of Reasonable Charges § I.D",
+      "summary": "A records custodian may reduce or waive charges, in whole or in part, in accordance with the governmental entity's public records policy."
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": true,
+   "activated_by": {
+    "fee.commercial_charge": [
+     {
+      "rule_id": "TN-0049",
+      "authority": "OORC Schedule of Reasonable Charges § I.F, citing Tenn. Code Ann. § 10-7-506(c)",
+      "summary": "Although standard copy/labor charges do not vary by purpose, other statutory provisions (e.g., § 10-7-506(c)) enumerate fees that may be assessed when specific documents are requested for a specific use."
+     }
+    ]
+   }
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": true,
+   "activated_by": {
+    "custody.referral_to_proper_custodian": [
+     {
+      "rule_id": "TN-0012",
+      "authority": "OORC Model Public Records Policy § III.A.2.e",
+      "summary": "If requested records are in the custody of a different governmental entity and the correct entity is known, the coordinator advises the requestor of the correct entity and its coordinator."
+     }
+    ]
+   },
+   "context": {
+    "custody.contractor_and_thirdparty_custody": [
+     {
+      "rule_id": "TN-0013",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(5) (as codified 2021)",
+      "summary": "A governmental entity is prohibited from avoiding its disclosure obligations by contractually delegating its responsibility to a private entity."
+     }
+    ]
+   }
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": true,
+   "activated_by": {
+    "clarification.duty_to_assist": [
+     {
+      "rule_id": "TN-0009",
+      "authority": "OORC Model Public Records Policy §§ III.A.2.b.ii, III.A.2.c",
+      "summary": "If a request lacks specificity, the coordinator/custodian may deny for lack of specificity while offering to assist in clarification, or contact the requestor to see if the request can be narrowed."
+     }
+    ]
+   }
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": true,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "TN-0036",
+      "authority": "OORC Schedule of Reasonable Charges § I.D",
+      "summary": "A records custodian may reduce or waive charges, in whole or in part, in accordance with the governmental entity's public records policy."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "TN-0036",
+      "authority": "OORC Schedule of Reasonable Charges § I.D",
+      "summary": "A records custodian may reduce or waive charges, in whole or in part, in accordance with the governmental entity's public records policy."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": true,
+   "activated_by": {
+    "fee.aggregation": [
+     {
+      "rule_id": "TN-0038",
+      "authority": "OORC Reasonable Charges for Frequent and Multiple Requests § I.D",
+      "summary": "A governmental entity's policy shall specify the number of requests within a calendar month that triggers aggregation; that amount must be no lower than four (4) requests."
+     },
+     {
+      "rule_id": "TN-0039",
+      "authority": "OORC Reasonable Charges for Frequent and Multiple Requests § II.A",
+      "summary": "Once a records custodian reaches the aggregation threshold, the custodian is no longer required to deduct the labor threshold or any other minimum charge per request that would ordinarily be waived."
+     },
+     {
+      "rule_id": "TN-0040b",
+      "authority": "OORC Reasonable Charges for Frequent and Multiple Requests § I.C",
+      "summary": "An entity may aggregate multiple requests by a single requestor, and may aggregate requests by multiple requestors if the coordinator determines they are acting in concert with each other or as agents of another person, entity, or organization."
+     }
+    ]
+   },
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "TN-0014",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(2)(B)",
+      "summary": "The custodian or the custodian's designee shall promptly make available for inspection any public record not specifically exempt from disclosure.",
+      "clock_spec": "undefined-soft: \"promptly\" from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "denial.deemed_denial_on_nonresponse": [
+     {
+      "rule_id": "TN-0017",
+      "authority": "Tenn. Code Ann. § 10-7-503(a)(2)(C)",
+      "summary": "Failure to respond as described in subdivision (a)(2) constitutes a denial, and the requester has the right to bring an action under § 10-7-505.",
+      "clock_spec": "terminal: silence past 7 business-days = denial, triggering § 10-7-505 action",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "TN-0029",
+    "authority": "OORC Schedule of Reasonable Charges § II.A",
+    "summary": "For each standard 8.5x11 or 8.5x14 black-and-white copy produced, a records custodian may assess a per-page charge of up to 15 cents ($0.15)."
+   }
+  ],
+  "fee.labor_charge": [
+   {
+    "rule_id": "TN-0032",
+    "authority": "OORC Schedule of Reasonable Charges § IV.C",
+    "summary": "The labor threshold is the first (1st) hour of labor reasonably necessary to produce requested material; a governmental entity may adopt a higher threshold, and labor may be charged only for time exceeding the threshold."
+   },
+   {
+    "rule_id": "TN-0033",
+    "authority": "OORC Schedule of Reasonable Charges §§ IV.B, IV.D, IV.E",
+    "summary": "Labor above the threshold is charged at the hourly wage of the employee(s) reasonably necessary, using the lowest practicable wage; the hourly wage is the employee's base salary (excluding benefits), computed by dividing annual salary by required hours per year."
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "TN-0019",
+    "authority": "OORC Schedule of Reasonable Charges § III.A",
+    "summary": "When assessing fees for copies, records custodians shall utilize the most economical and efficient method of producing the requested records."
+   },
+   {
+    "rule_id": "TN-0031",
+    "authority": "OORC Schedule of Reasonable Charges § II.C",
+    "summary": "If actual costs are higher than the schedule amounts, or records are produced on a non-standard medium, the entity may develop its own charges but must document 'actual cost' calculation and reasoning in an adopted policy; charges above $0.15 (B&W) / $0.50 (color) require documented actual-cost a…"
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "TN-0037",
+    "authority": "OORC Schedule of Reasonable Charges §§ III.B, III.E, III.F",
+    "summary": "A custodian may charge actual out-of-pocket cost for flash drives/storage devices provided; if internal production is not practicable, may use an outside vendor and charge those actual costs; and may recover actual retrieval charges assessed by an archive or other entity holding the records."
+   }
+  ],
+  "fee.nonstandard_rate": [
+   {
+    "rule_id": "TN-0030",
+    "authority": "OORC Schedule of Reasonable Charges § II.A",
+    "summary": "For each standard 8.5x11 or 8.5x14 color copy produced, a records custodian may assess a per-page charge of up to 50 cents ($0.50)."
+   }
+  ],
+  "fee.commercial_charge": [
+   {
+    "rule_id": "TN-0049",
+    "authority": "OORC Schedule of Reasonable Charges § I.F, citing Tenn. Code Ann. § 10-7-506(c)",
+    "summary": "Although standard copy/labor charges do not vary by purpose, other statutory provisions (e.g., § 10-7-506(c)) enumerate fees that may be assessed when specific documents are requested for a specific use."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "TN-0050",
+    "authority": "Tenn. Code Ann. § 10-7-503(a)(7)(B)",
+    "summary": "A records custodian may require a requestor to pay the custodian's reasonable costs incurred in producing the requested material, assessed in the manner established by the Office of Open Records Counsel pursuant to § 8-4-604."
+   }
+  ]
+ },
+ "program_setup": {
+  "classification.written_policy_required": [
+   {
+    "rule_id": "TN-0046",
+    "authority": "Tenn. Code Ann. § 10-7-503(g)(1)",
+    "summary": "Every county and municipal governmental entity shall establish a written public records policy, adopted by its governing authority, that is not more burdensome than state law and includes the request process and any required form, the response process (including redaction), a statement of fees an…"
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "TN-0050",
+    "authority": "Tenn. Code Ann. § 10-7-503(a)(7)(B)",
+    "summary": "A records custodian may require a requestor to pay the custodian's reasonable costs incurred in producing the requested material, assessed in the manner established by the Office of Open Records Counsel pursuant to § 8-4-604."
+   }
+  ]
+ },
+ "ledger": {
+  "fee.aggregation": [
+   {
+    "rule_id": "TN-0038",
+    "authority": "OORC Reasonable Charges for Frequent and Multiple Requests § I.D",
+    "summary": "A governmental entity's policy shall specify the number of requests within a calendar month that triggers aggregation; that amount must be no lower than four (4) requests."
+   },
+   {
+    "rule_id": "TN-0039",
+    "authority": "OORC Reasonable Charges for Frequent and Multiple Requests § II.A",
+    "summary": "Once a records custodian reaches the aggregation threshold, the custodian is no longer required to deduct the labor threshold or any other minimum charge per request that would ordinarily be waived."
+   },
+   {
+    "rule_id": "TN-0040b",
+    "authority": "OORC Reasonable Charges for Frequent and Multiple Requests § I.C",
+    "summary": "An entity may aggregate multiple requests by a single requestor, and may aggregate requests by multiple requestors if the coordinator determines they are acting in concert with each other or as agents of another person, entity, or organization."
+   }
+  ],
+  "payment.advance_payment": [
+   {
+    "rule_id": "TN-0035",
+    "authority": "OORC Schedule of Reasonable Charges § I.E; Tenn. Code Ann. § 10-7-503(a)(7)(B)",
+    "summary": "A records custodian may require payment for copies before producing the copies of the records."
+   }
+  ]
+ },
+ "audit": {
+  "rules_total": 40,
+  "rules_referenced": 40,
+  "unreferenced_rule_ids": []
+ }
+}

@@ -1,0 +1,657 @@
+{
+ "state": "Missouri",
+ "code": "MO",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.oral_request_permitted": [
+     {
+      "rule_id": "MO-0007",
+      "authority": "Mo. Att'y Gen., Sunshine Law FAQs (interpreting § 610.023.3)",
+      "summary": "A records request need not be submitted in writing; written submission is encouraged as helpful but is not required by statute."
+     }
+    ],
+    "intake.no_required_form": [
+     {
+      "rule_id": "MO-0006",
+      "authority": "Mo. Att'y Gen., Sunshine Law FAQs (interpreting § 610.023.3)",
+      "summary": "A public governmental body may ask a requester to fill out a request form but may not require use of a form as a condition of access."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "MO-0022",
+      "authority": "§ 610.026.1(1), RSMo",
+      "summary": "A requester may request an estimate of the cost of copies before the public body produces them."
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "MO-0011",
+      "authority": "§ 610.023.3, RSMo",
+      "summary": "If access is not granted immediately, the custodian must give a detailed explanation of the cause for further delay and the place and earliest time and date the record will be available for inspection."
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {
+    "clarification.nonresponse_withdrawal": [
+     {
+      "rule_id": "MO-S01",
+      "authority": "Mo. Rev. Stat. § 610.026",
+      "summary": "If the public governmental body responds to a request in order to seek clarification and no response to the clarification request is received within ninety days (or one hundred fifty days if the requested fees exceed one thousand dollars), the public records request is considered withdrawn.",
+      "clock_spec": "90 days from clarification request sent (150 days if requested fees > $1,000)",
+      "clock_effect": "terminal"
+     }
+    ]
+   },
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {
+    "clarification.nonresponse_withdrawal": [
+     {
+      "rule_id": "MO-S01",
+      "authority": "Mo. Rev. Stat. § 610.026",
+      "summary": "If the public governmental body responds to a request in order to seek clarification and no response to the clarification request is received within ninety days (or one hundred fifty days if the requested fees exceed one thousand dollars), the public records request is considered withdrawn.",
+      "clock_spec": "90 days from clarification request sent (150 days if requested fees > $1,000)",
+      "clock_effect": "terminal"
+     }
+    ]
+   },
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "MO-0022",
+      "authority": "§ 610.026.1(1), RSMo",
+      "summary": "A requester may request an estimate of the cost of copies before the public body produces them."
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "MO-0011",
+      "authority": "§ 610.023.3, RSMo",
+      "summary": "If access is not granted immediately, the custodian must give a detailed explanation of the cause for further delay and the place and earliest time and date the record will be available for inspection."
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "MO-0022",
+      "authority": "§ 610.026.1(1), RSMo",
+      "summary": "A requester may request an estimate of the cost of copies before the public body produces them."
+     }
+    ]
+   },
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.advance_payment": [
+     {
+      "rule_id": "MO-0025",
+      "authority": "§ 610.026.2, RSMo",
+      "summary": "Payment of fees may be requested prior to fulfilling the request."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "MO-0026",
+      "authority": "§ 610.026.2, RSMo",
+      "summary": "A request is considered withdrawn if the requester fails to remit all fees within ninety days, or within one hundred fifty days if the requested fees are greater than one thousand dollars.",
+      "clock_spec": "fixed: 90 calendar-days from fee request; 150 calendar-days if fees > $1,000",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "MO-0027",
+      "authority": "§ 610.026.2, RSMo",
+      "summary": "The public body must notify the requester that failing to remit payment within ninety days (or one hundred fifty days if fees exceed one thousand dollars) will cause the request to be considered withdrawn."
+     }
+    ]
+   },
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "MO-0013",
+      "authority": "§ 610.023.4, RSMo",
+      "summary": "If a request for access is denied, the custodian must, upon request, provide a written statement of the grounds for denial citing the specific provision of law under which access is denied."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "MO-0013",
+      "authority": "§ 610.023.4, RSMo",
+      "summary": "If a request for access is denied, the custodian must, upon request, provide a written statement of the grounds for denial citing the specific provision of law under which access is denied."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {
+    "denial.denial_deadline": [
+     {
+      "rule_id": "MO-0014",
+      "authority": "§ 610.023.4, RSMo",
+      "summary": "The written statement of grounds for denial must be furnished to the requester no later than the end of the third business day following the date the request for the statement is received.",
+      "clock_spec": "ceiling: 3 business-days from receipt of the request for the statement",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "MO-0015",
+      "authority": "§ 610.024.1, RSMo",
+      "summary": "If a record contains both nonexempt and exempt material, the public body must separate them and make the nonexempt material available for examination and copying."
+     },
+     {
+      "rule_id": "MO-0016",
+      "authority": "§ 610.024.2, RSMo",
+      "summary": "When designing a public record, a public body must, to the extent practicable, facilitate a separation of exempt from nonexempt information."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {
+    "redaction.marking_and_explanation": [
+     {
+      "rule_id": "MO-0017",
+      "authority": "§ 610.024.2, RSMo",
+      "summary": "If the separation is readily apparent, the public body must generally describe the material exempted, unless that description would reveal the contents of the exempt information and thus defeat the purpose of the exemption."
+     }
+    ]
+   },
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "MO-0010",
+      "authority": "§ 610.023.3, RSMo",
+      "summary": "If records are requested in a certain format, the public body must provide the records in the requested format if such format is available."
+     },
+     {
+      "rule_id": "MO-0032",
+      "authority": "§ 610.029.1, RSMo",
+      "summary": "A public body keeping records in electronic format is strongly encouraged to provide access electronically, and where its system allows electronic copying it must provide data in electronic format if requested."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": false,
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "MO-0001",
+      "authority": "§ 610.023.2, RSMo",
+      "summary": "Each public governmental body must make its public records available for inspection and copying by the public; access is not limited to any class or category of requester."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "MO-0003",
+      "authority": "§ 610.023.2, RSMo",
+      "summary": "A requester need not state a purpose or reason for requesting public records; the access grant to 'the public' carries no purpose condition."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "MO-0002",
+      "authority": "§ 610.023.2, RSMo",
+      "summary": "There is no Missouri residency or citizenship condition on the right to inspect or copy public records; the statute grants access to 'the public' with no residency qualifier."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "MO-0024",
+      "authority": "§ 610.026.1(1), RSMo",
+      "summary": "A public body may waive or reduce the fees when it determines that waiver or reduction of the fee is in the public interest."
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "MO-0024",
+      "authority": "§ 610.026.1(1), RSMo",
+      "summary": "A public body may waive or reduce the fees when it determines that waiver or reduction of the fee is in the public interest."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "MO-0024",
+      "authority": "§ 610.026.1(1), RSMo",
+      "summary": "A public body may waive or reduce the fees when it determines that waiver or reduction of the fee is in the public interest."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": true,
+   "activated_by": {
+    "fee.repeat_request_carryforward": [
+     {
+      "rule_id": "MO-S02",
+      "authority": "Mo. Rev. Stat. § 610.026",
+      "summary": "If the same or a substantially similar request is made within six months after expiration of the ninety-day nonpayment-withdrawal period (or one hundred fifty days if requested fees exceed one thousand dollars) and no fee was remitted on the original request, the public governmental body may requ…"
+     }
+    ]
+   },
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "MO-0008",
+      "authority": "§ 610.023.3, RSMo",
+      "summary": "The custodian must act upon a request for access no later than the end of the third business day following the date the request is received by the custodian.",
+      "clock_spec": "ceiling: 3 business-days from request receipt by custodian",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": true,
+   "statutory": {
+    "response.extension_grounds": [
+     {
+      "rule_id": "MO-0012",
+      "authority": "§ 610.023.3, RSMo",
+      "summary": "The period for document production may exceed three business days for reasonable cause.",
+      "clock_spec": "undefined-soft: \"reasonable cause\" extension beyond 3 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "completion": {
+   "present": true,
+   "statutory": {
+    "production.completion_window": [
+     {
+      "rule_id": "MO-0009",
+      "authority": "§ 610.023.3, RSMo",
+      "summary": "A request for access must be acted upon as soon as possible, a promptness standard operating within the outer three-business-day cap.",
+      "clock_spec": "undefined-soft: \"as soon as possible\" from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "clarification_response": {
+   "present": true,
+   "statutory": {
+    "clarification.nonresponse_withdrawal": [
+     {
+      "rule_id": "MO-S01",
+      "authority": "Mo. Rev. Stat. § 610.026",
+      "summary": "If the public governmental body responds to a request in order to seek clarification and no response to the clarification request is received within ninety days (or one hundred fifty days if the requested fees exceed one thousand dollars), the public records request is considered withdrawn.",
+      "clock_spec": "90 days from clarification request sent (150 days if requested fees > $1,000)",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "nonpayment_close": {
+   "present": true,
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "MO-0026",
+      "authority": "§ 610.026.2, RSMo",
+      "summary": "A request is considered withdrawn if the requester fails to remit all fees within ninety days, or within one hundred fifty days if the requested fees are greater than one thousand dollars.",
+      "clock_spec": "fixed: 90 calendar-days from fee request; 150 calendar-days if fees > $1,000",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "MO-0027",
+      "authority": "§ 610.026.2, RSMo",
+      "summary": "The public body must notify the requester that failing to remit payment within ninety days (or one hundred fifty days if fees exceed one thousand dollars) will cause the request to be considered withdrawn."
+     }
+    ]
+   }
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": true,
+   "statutory": {
+    "denial.denial_deadline": [
+     {
+      "rule_id": "MO-0014",
+      "authority": "§ 610.023.4, RSMo",
+      "summary": "The written statement of grounds for denial must be furnished to the requester no later than the end of the third business day following the date the request for the statement is received.",
+      "clock_spec": "ceiling: 3 business-days from receipt of the request for the statement",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "MO-0018",
+    "authority": "§ 610.026.1(1), RSMo",
+    "summary": "Fees for copying public records provided in paper form shall not exceed ten cents per page for a paper copy not larger than nine by fourteen inches."
+   }
+  ],
+  "fee.labor_charge": [
+   {
+    "rule_id": "MO-0019",
+    "authority": "§ 610.026.1(1), RSMo",
+    "summary": "The hourly fee charged for duplicating time shall not exceed the average hourly rate of pay for clerical staff of the public governmental body."
+   },
+   {
+    "rule_id": "MO-0020",
+    "authority": "§ 610.026.1(1), RSMo",
+    "summary": "Research time required for fulfilling records requests may be charged at the actual cost of research time."
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "MO-0021",
+    "authority": "§ 610.026.1(1), RSMo",
+    "summary": "Documents must be copied/duplicated using the personnel of the body that results in the lowest amount of charges for the request."
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "MO-0023",
+    "authority": "§ 610.026.1(2), RSMo",
+    "summary": "Fees for records maintained on computer facilities, tapes, disks, videotapes or films shall include only the cost of copies, staff time (not exceeding the average hourly rate of pay for staff needed for copies and programming), and the cost of the medium used for duplication."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.records_officer_designation": [
+   {
+    "rule_id": "MO-0004",
+    "authority": "§ 610.023.1, RSMo",
+    "summary": "Each public governmental body must appoint a custodian who is responsible for the maintenance of that body's records."
+   },
+   {
+    "rule_id": "MO-0005",
+    "authority": "§ 610.023.1, RSMo",
+    "summary": "The identity and location of a public governmental body's custodian must be made available upon request."
+   }
+  ]
+ },
+ "ledger": {
+  "fee.repeat_request_carryforward": [
+   {
+    "rule_id": "MO-S02",
+    "authority": "Mo. Rev. Stat. § 610.026",
+    "summary": "If the same or a substantially similar request is made within six months after expiration of the ninety-day nonpayment-withdrawal period (or one hundred fifty days if requested fees exceed one thousand dollars) and no fee was remitted on the original request, the public governmental body may requ…"
+   }
+  ],
+  "payment.advance_payment": [
+   {
+    "rule_id": "MO-0025",
+    "authority": "§ 610.026.2, RSMo",
+    "summary": "Payment of fees may be requested prior to fulfilling the request."
+   }
+  ]
+ },
+ "audit": {
+  "rules_total": 30,
+  "rules_referenced": 30,
+  "unreferenced_rule_ids": []
+ }
+}

@@ -1,0 +1,498 @@
+{
+ "state": "Minnesota",
+ "code": "MN",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {},
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {},
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {},
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {},
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "MN-0018",
+      "authority": "Minn. Stat. § 13.03, subd. 3(f)",
+      "summary": "If the responsible authority denies access because data is classified, it must inform the requester of the determination orally at the time of the request or in writing as soon after as possible, and cite the specific statutory section, temporary classification, or federal-law provision on which …",
+      "clock_spec": "undefined-soft: \"in writing as soon after that time as possible\" from the request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "MN-0019",
+      "authority": "Minn. Stat. § 13.03, subd. 3(f)",
+      "summary": "Upon the request of any person denied access, the responsible authority must certify in writing that the request was denied and cite the specific statutory section, temporary classification, or federal-law provision on which the denial was based."
+     }
+    ],
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "MN-0018",
+      "authority": "Minn. Stat. § 13.03, subd. 3(f)",
+      "summary": "If the responsible authority denies access because data is classified, it must inform the requester of the determination orally at the time of the request or in writing as soon after as possible, and cite the specific statutory section, temporary classification, or federal-law provision on which …",
+      "clock_spec": "undefined-soft: \"in writing as soon after that time as possible\" from the request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "classification.record_classification_scheme": [
+     {
+      "rule_id": "MN-0015",
+      "authority": "Minn. Stat. § 13.03 (subdivision number requires verification)",
+      "summary": "The classification of data (and thus its accessibility) is determined by the law applicable to the data at the time the request for access is made."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "MN-0012",
+      "authority": "Minn. Stat. § 13.03, subd. 3(e)",
+      "summary": "An entity maintaining public data in a computer storage medium must provide a copy in electronic form if it can reasonably make the copy or have it made."
+     }
+    ],
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "MN-0013",
+      "authority": "Minn. Stat. § 13.03, subd. 3(e)",
+      "summary": "The entity is not required to provide data in an electronic format or program different from the one in which it maintains the data."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": false,
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "MN-0001",
+      "authority": "Minn. Stat. § 13.03, subd. 3(a)",
+      "summary": "Any person may inspect and copy public government data upon request to the responsible authority or designee, at reasonable times and places."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "MN-0002",
+      "authority": "Minn. R. 1205.0300, subp. 2",
+      "summary": "The responsible authority must provide access to public data to any person without regard to the nature of that person's interest in the data; no statement of purpose may be required."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "MN-0003",
+      "authority": "Minn. Stat. § 13.03, subd. 3(a)",
+      "summary": "Access to public government data is available to any person; the statute imposes no residency requirement."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": false
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": false
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": false
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "context": {
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "MN-0013",
+      "authority": "Minn. Stat. § 13.03, subd. 3(e)",
+      "summary": "The entity is not required to provide data in an electronic format or program different from the one in which it maintains the data."
+     }
+    ]
+   },
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": true,
+   "activated_by": {
+    "data_subject.accuracy_challenge": [
+     {
+      "rule_id": "MN-0020",
+      "authority": "Minn. Stat. § 13.04, subd. 3",
+      "summary": "For a data subject's request about their own data, the responsible authority must comply immediately if possible, or within ten days of the request excluding Saturdays, Sundays and legal holidays if immediate compliance is not possible.",
+      "clock_spec": "ceiling: 10 days (excluding Sat/Sun/legal holidays) from date of request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "MN-0021",
+      "authority": "Minn. Stat. § 13.04, subd. 3",
+      "summary": "Upon request, an individual must be informed whether they are the subject of stored data on individuals and whether that data is classified as public, private, or confidential."
+     },
+     {
+      "rule_id": "MN-0022",
+      "authority": "Minn. Stat. § 13.04, subd. 3",
+      "summary": "Upon further request, a data subject must be shown their private or public data and, if desired, informed of its content and meaning."
+     },
+     {
+      "rule_id": "MN-0023",
+      "authority": "Minn. Stat. § 13.04, subd. 4",
+      "summary": "Upon a data subject's challenge to accuracy or completeness, the responsible authority must within 30 days either correct the data or notify the individual that it has determined the data to be correct.",
+      "clock_spec": "ceiling: 30 days from receipt of the data subject's notification",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "MN-0005",
+      "authority": "Minn. Stat. § 13.03, subd. 2; Minn. R. 1205.0300, subp. 3",
+      "summary": "The responsible authority must comply with a data request in an appropriate and prompt manner; a response must be provided within a reasonable time.",
+      "clock_spec": "undefined-soft: \"appropriate and prompt manner\" / \"reasonable time\" from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "completion": {
+   "present": true,
+   "statutory": {
+    "production.completion_window": [
+     {
+      "rule_id": "MN-0006",
+      "authority": "Minn. Stat. § 13.03, subd. 3(a)",
+      "summary": "If the responsible authority cannot provide copies at the time of request, copies must be supplied as soon as reasonably possible.",
+      "clock_spec": "undefined-soft: \"as soon as reasonably possible\" from request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "MN-0009",
+    "authority": "Minn. Stat. § 13.03, subd. 3(c)",
+    "summary": "For requests of 100 or fewer black-and-white letter/legal-size paper copies, actual costs may not be used; the entity may charge no more than 25 cents per page copied.",
+    "clock_spec": "ceiling: $0.25/page (≤100 pages, b/w letter/legal)"
+   },
+   {
+    "rule_id": "MN-0010",
+    "authority": "Minn. Stat. § 13.04, subd. 3",
+    "summary": "When a data subject requests copies of data about themselves, the responsible authority may require payment of the actual costs of making and certifying the copies.",
+    "clock_spec": "ceiling: actual cost of making and certifying copies"
+   }
+  ],
+  "fee.labor_charge": [
+   {
+    "rule_id": "MN-0008",
+    "authority": "Minn. Stat. § 13.03, subd. 3(c)",
+    "summary": "When copies or electronic transmittal are requested, the responsible authority may require payment of the actual costs of searching for and retrieving the data, including employee time.",
+    "clock_spec": "ceiling: actual cost (search + retrieval + employee time)"
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.custodian_definition_and_role": [
+   {
+    "rule_id": "MN-0016",
+    "authority": "Minn. Stat. § 13.03, subd. 3(a)",
+    "summary": "Requests are made to, and must be acted on by, the responsible authority or its designee."
+   }
+  ],
+  "custody.records_officer_designation": [
+   {
+    "rule_id": "MN-0017",
+    "authority": "Minn. Stat. § 13.05, subd. 13",
+    "summary": "Each government entity must designate an employee to act as its data practices compliance official to handle questions and problems regarding access to data."
+   }
+  ],
+  "intake.procedures_publication": [
+   {
+    "rule_id": "MN-0004",
+    "authority": "Minn. Stat. § 13.03, subd. 2",
+    "summary": "Each government entity's responsible authority must establish procedures to ensure requests for government data are received and complied with in an appropriate and prompt manner."
+   }
+  ],
+  "classification.presumption_of_openness": [
+   {
+    "rule_id": "MN-0014",
+    "authority": "Minn. Stat. § 13.03, subd. 1",
+    "summary": "All government data is public unless classified by statute, temporary classification, or federal law as not public (nonpublic/protected nonpublic, or, for data on individuals, private or confidential)."
+   }
+  ]
+ },
+ "ledger": {},
+ "audit": {
+  "rules_total": 21,
+  "rules_referenced": 21,
+  "unreferenced_rule_ids": []
+ }
+}

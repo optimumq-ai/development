@@ -1,0 +1,717 @@
+{
+ "state": "Utah",
+ "code": "UT",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.written_request_required": [
+     {
+      "rule_id": "UT-0004",
+      "authority": "Utah Code § 63G-2-204(1)(a)",
+      "summary": "A person requesting a record must submit a written request to the governmental entity that retains the record."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {},
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {},
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.advance_payment": [
+     {
+      "rule_id": "UT-0037",
+      "authority": "Utah Code § 63G-2-203(8)(a)",
+      "summary": "An entity may require payment of past fees and future estimated fees before beginning to process a request.",
+      "clock_spec": "undefined-soft: processing withheld until prepayment received ('before beginning to process a request')",
+      "clock_effect": "pauses"
+     },
+     {
+      "rule_id": "UT-0038",
+      "authority": "Utah Code § 63G-2-203(8)(a)(i)",
+      "summary": "Prepayment may be required when fees are expected to exceed $50."
+     },
+     {
+      "rule_id": "UT-0039",
+      "authority": "Utah Code § 63G-2-203(8)(b)",
+      "summary": "Any prepaid amount in excess of fees due must be returned to the requester."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "UT-0045",
+      "authority": "Utah Code § 63G-2-205(2)",
+      "summary": "The notice of denial must contain a description of the denied record/portions, citations to the exempting provisions, a statement of the right to appeal to the chief administrative officer, and the appeal time limits plus the CAO's name and business address."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "UT-0044",
+      "authority": "Utah Code § 63G-2-205(1)",
+      "summary": "If the entity denies a request in whole or part, it must provide a notice of denial to the requester either in person or by sending it to the requester's address."
+     }
+    ],
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "UT-0045",
+      "authority": "Utah Code § 63G-2-205(2)",
+      "summary": "The notice of denial must contain a description of the denied record/portions, citations to the exempting provisions, a statement of the right to appeal to the chief administrative officer, and the appeal time limits plus the CAO's name and business address."
+     }
+    ],
+    "appeal.retained_optional": [
+     {
+      "rule_id": "UT-0065",
+      "authority": "Utah Code § 63G-2-403(15)(c)",
+      "summary": "If the director orders production and no appeal is filed (or production is required as a result of appeal), the governmental entity must produce the record and file a notice of compliance with the director."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {
+    "denial.denial_deadline": [
+     {
+      "rule_id": "UT-0011",
+      "authority": "Utah Code § 63G-2-204(4)(a)",
+      "summary": "For a request seeking expedited response, the entity must review it and, within 5 business days, notify any requester who has not demonstrated public benefit that the response will not be expedited.",
+      "clock_spec": "ceiling: 5 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "UT-0043",
+      "authority": "Utah Code § 63G-2-308",
+      "summary": "If a record contains both disclosable and non-disclosable information and the disclosable portion is intelligible, the entity must allow access to the disclosable information and may deny the exempt information by issuing a notice of denial."
+     }
+    ],
+    "classification.record_classification_scheme": [
+     {
+      "rule_id": "UT-0048",
+      "authority": "Utah Code § 63G-2-307(2)",
+      "summary": "An entity is not required to classify a particular record, record series, or information until access to the record is requested."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "UT-0024",
+      "authority": "Utah Code § 63G-2-201(13)",
+      "summary": "An entity must provide an electronic copy in lieu of paper if the requester prefers electronic, the entity currently maintains a reproducible electronic format providable without reformatting/conversion, and the copy does not disclose exempt records or can be segregated without undue expenditure."
+     }
+    ],
+    "production.certified_copy": [
+     {
+      "rule_id": "UT-0027",
+      "authority": "Utah Code § 63G-2-201(6)",
+      "summary": "An entity must provide a certified copy of a record if the person has a right to inspect it, identifies it with reasonable specificity, and pays the lawful fees."
+     }
+    ],
+    "production.inspection_access": [
+     {
+      "rule_id": "UT-0025",
+      "authority": "Utah Code § 63G-2-201(12)",
+      "summary": "An entity may not use the physical form (electronic or otherwise) in which a record is stored to deny or unreasonably hinder inspection or copying."
+     },
+     {
+      "rule_id": "UT-0026",
+      "authority": "Utah Code § 63G-2-201(10)",
+      "summary": "For a request of more than 50 pages, an entity may allow the requester to make the copies (using entity facilities or the requester's own) where the files contain no exempt records or can be segregated and reasonable safeguards are provided."
+     }
+    ],
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "UT-0021",
+      "authority": "Utah Code § 63G-2-201(7)(a)(i)-(iii)",
+      "summary": "In responding, an entity is not required to create a record; compile/format/manipulate/package/summarize/tailor information; or provide a record in a format, medium, or program not currently maintained."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": true,
+   "activated_by": {
+    "eligibility.incarcerated_requester_exclusion": [
+     {
+      "rule_id": "UT-0050",
+      "authority": "Utah Code § 63G-2-201(9)",
+      "summary": "An entity is not required to respond to a request by or on behalf of an individual on parole or confined in a correctional facility, except for the first five requests per calendar year seeking only records referencing that individual, or a request submitted by the individual's attorney."
+     }
+    ]
+   },
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "UT-0001",
+      "authority": "Utah Code § 63G-2-201(1)(a)",
+      "summary": "Any person has the right to inspect a public record free of charge and to take a copy during normal working hours, subject to the fee and response sections."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "UT-0003",
+      "authority": "Utah Code § 63G-2-204(1)(a)",
+      "summary": "A requester need not state a reason or purpose; purpose is not among the required contents of a records request."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "UT-0002",
+      "authority": "Utah Code §§ 63G-2-201(1)(a), 63G-2-204(1)(a)",
+      "summary": "The right of access runs to 'a person' with no residency or citizenship qualification imposed by GRAMA."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "UT-0032",
+      "authority": "Utah Code § 63G-2-203(4)",
+      "summary": "An entity may (and is encouraged to) fulfill a request without charge if release primarily benefits the public, the requester is the subject of/specified in the record, or the requester's legal rights are directly implicated and the requester is impecunious."
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": true,
+   "activated_by": {
+    "custody.referral_to_proper_custodian": [
+     {
+      "rule_id": "UT-0008",
+      "authority": "Utah Code § 63G-2-204(8)",
+      "summary": "If a request goes to the wrong office, that office must promptly forward it to the appropriate office; if promptly forwarded, the response clock starts when the correct office receives it.",
+      "clock_spec": "response time limit begins when request is received by the office specified by rule",
+      "clock_effect": "restarts"
+     },
+     {
+      "rule_id": "UT-0013",
+      "authority": "Utah Code § 63G-2-204(4)(b)(iii)",
+      "summary": "If the entity does not maintain the requested record, it must, within the response window, notify the requester and provide (if known) the name and address of the entity that does maintain it."
+     }
+    ]
+   }
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "UT-0032",
+      "authority": "Utah Code § 63G-2-203(4)",
+      "summary": "An entity may (and is encouraged to) fulfill a request without charge if release primarily benefits the public, the requester is the subject of/specified in the record, or the requester's legal rights are directly implicated and the requester is impecunious."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "UT-0032",
+      "authority": "Utah Code § 63G-2-203(4)",
+      "summary": "An entity may (and is encouraged to) fulfill a request without charge if release primarily benefits the public, the requester is the subject of/specified in the record, or the requester's legal rights are directly implicated and the requester is impecunious."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "context": {
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "UT-0021",
+      "authority": "Utah Code § 63G-2-201(7)(a)(i)-(iii)",
+      "summary": "In responding, an entity is not required to create a record; compile/format/manipulate/package/summarize/tailor information; or provide a record in a format, medium, or program not currently maintained."
+     }
+    ]
+   },
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": true,
+   "activated_by": {
+    "production.website_satisfies": [
+     {
+      "rule_id": "UT-0023",
+      "authority": "Utah Code § 63G-2-201(7)(a)(v)",
+      "summary": "An entity need not fill a request where the record is publicly accessible online or in a public publication/product, provided the entity specifies where it is accessible or provides the publication and specifies where the record is found."
+     }
+    ]
+   }
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": true,
+   "activated_by": {
+    "special_records.special_production_constraint": [
+     {
+      "rule_id": "UT-0047",
+      "authority": "Utah Code § 63G-2-204(2)",
+      "summary": "An entity may not provide a record it received as a shared record under § 63G-2-206; it must deny the request and inform the requester of the identity of the entity from which the shared record was received."
+     }
+    ]
+   }
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": true,
+   "activated_by": {
+    "redaction.third_party_claim": [
+     {
+      "rule_id": "UT-0063",
+      "authority": "Utah Code § 63G-2-309(1)(a)(i)",
+      "summary": "A person who provides a record they believe should be protected as a trade secret/commercial information under 63G-2-305(1)/(2) must provide, with or within a reasonable time after the record, a written claim of business confidentiality and a concise statement of supporting reasons."
+     }
+    ]
+   }
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": true,
+   "activated_by": {
+    "intake.duplicate_request_denial": [
+     {
+      "rule_id": "UT-0006",
+      "authority": "Utah Code § 63G-2-204(1)(b)",
+      "summary": "A single record request may not be submitted to multiple governmental entities (though identical separate requests to each entity are allowed)."
+     },
+     {
+      "rule_id": "UT-0022",
+      "authority": "Utah Code § 63G-2-201(7)(a)(iv)",
+      "summary": "An entity is not required to fulfill a request that unreasonably duplicates prior records requests from that same person."
+     }
+    ]
+   },
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "UT-0009",
+      "authority": "Utah Code § 63G-2-204(4)(b)",
+      "summary": "A governmental entity must respond (approve/provide, deny, disclaim custody, or claim extraordinary circumstances) as soon as reasonably possible but no later than 10 business days after receiving a written request.",
+      "clock_spec": "ceiling: 10 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "UT-0010",
+      "authority": "Utah Code § 63G-2-204(4)(b)",
+      "summary": "If the requester demonstrates that an expedited response benefits the public rather than the person, the entity must respond no later than 5 business days after receiving the request.",
+      "clock_spec": "ceiling: 5 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "UT-0049",
+      "authority": "Utah Code § 63G-2-701(4)",
+      "summary": "In its records ordinance/policy, a political subdivision may establish reasonable response times and appeal time limits different from those in § 63G-2-204 and Part 4 if it determines its resources are insufficient to meet those sections."
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": true,
+   "statutory": {
+    "response.extension_grounds": [
+     {
+      "rule_id": "UT-0018",
+      "authority": "Utah Code § 63G-2-204(7)(c), (7)(f)",
+      "summary": "For voluminous/high-volume/locate-review grounds and for grounds requiring computer programming, the entity must disclose located records the requester may inspect, give an estimate of time to finish, and complete and disclose as soon as reasonably possible.",
+      "clock_spec": "undefined-soft: \"as soon as reasonably possible\" from the extraordinary-circumstances notice",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.extension_length": [
+     {
+      "rule_id": "UT-0016",
+      "authority": "Utah Code § 63G-2-204(7)(d)",
+      "summary": "Where the delay is due to legal-issue analysis requiring counsel, the entity must approve or deny within 5 business days after the original response time expired.",
+      "clock_spec": "ceiling: 5 business-days after the original response time expires",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "UT-0017",
+      "authority": "Utah Code § 63G-2-204(7)(e)",
+      "summary": "Where segregating disclosable from non-disclosable information requires extensive editing, the entity must fulfill the request within 15 business days from the date of the original request.",
+      "clock_spec": "ceiling: 15 business-days from date of original request",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.extension_notice": [
+     {
+      "rule_id": "UT-0014",
+      "authority": "Utah Code § 63G-2-204(4)(b)(iv)",
+      "summary": "If extraordinary circumstances prevent immediate approval or denial, the entity must, within the response window, notify the requester with a description of the circumstances and the date the records will be available.",
+      "clock_spec": "undefined-soft: extension period per Subsection (7), stated as a 'date when the records will be available'",
+      "clock_effect": "pauses"
+     }
+    ]
+   }
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": true,
+   "statutory": {
+    "denial.denial_deadline": [
+     {
+      "rule_id": "UT-0011",
+      "authority": "Utah Code § 63G-2-204(4)(a)",
+      "summary": "For a request seeking expedited response, the entity must review it and, within 5 business days, notify any requester who has not demonstrated public benefit that the response will not be expedited.",
+      "clock_spec": "ceiling: 5 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  }
+ },
+ "fee_schedule": {
+  "fee.labor_charge": [
+   {
+    "rule_id": "UT-0031",
+    "authority": "Utah Code § 63G-2-203(2)(b)",
+    "summary": "An hourly staff-time charge may not exceed the salary of the lowest paid employee who has the necessary skill and training to perform the request."
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "UT-0028",
+    "authority": "Utah Code § 63G-2-203(1)",
+    "summary": "An entity may charge a reasonable fee to cover its actual cost of providing a record; the fee must be approved by the entity's executive officer."
+   },
+   {
+    "rule_id": "UT-0029",
+    "authority": "Utah Code § 63G-2-203(2)(a)",
+    "summary": "When compiling a record in a form other than normally maintained, actual costs may include staff time for compiling/formatting/tailoring, staff time for search/retrieval and direct administrative costs, and (for non-word-processing computer output) actual incremental cost plus a reasonable portio…"
+   }
+  ],
+  "fee.free_allowance": [
+   {
+    "rule_id": "UT-0035",
+    "authority": "Utah Code § 63G-2-203(5)(b)(iii)",
+    "summary": "An entity may not charge a fee for the first quarter hour of staff time spent responding to a request."
+   },
+   {
+    "rule_id": "UT-0036",
+    "authority": "Utah Code § 63G-2-203(5)(c)",
+    "summary": "The free first quarter hour does not apply if the requester is not a Utah media representative AND previously submitted a separate request within the 10-day period immediately before the current request."
+   }
+  ],
+  "fee.no_charge_categories": [
+   {
+    "rule_id": "UT-0034",
+    "authority": "Utah Code § 63G-2-203(5)(b)(i)",
+    "summary": "An entity may not charge a fee for reviewing a record to determine whether it is subject to disclosure, except as permitted for search/retrieval staff time under 203(2)(a)(ii)."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "UT-0030",
+    "authority": "Utah Code § 63G-2-203(3)(c)",
+    "summary": "Political subdivisions must establish records fees by ordinance or written formal policy adopted by the governing body."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.records_officer_designation": [
+   {
+    "rule_id": "UT-0007",
+    "authority": "Utah Code § 63G-2-204(3)",
+    "summary": "A governmental entity may make rules specifying where and to whom requests for access must be directed."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "UT-0030",
+    "authority": "Utah Code § 63G-2-203(3)(c)",
+    "summary": "Political subdivisions must establish records fees by ordinance or written formal policy adopted by the governing body."
+   }
+  ]
+ },
+ "ledger": {
+  "intake.duplicate_request_denial": [
+   {
+    "rule_id": "UT-0006",
+    "authority": "Utah Code § 63G-2-204(1)(b)",
+    "summary": "A single record request may not be submitted to multiple governmental entities (though identical separate requests to each entity are allowed)."
+   },
+   {
+    "rule_id": "UT-0022",
+    "authority": "Utah Code § 63G-2-201(7)(a)(iv)",
+    "summary": "An entity is not required to fulfill a request that unreasonably duplicates prior records requests from that same person."
+   }
+  ],
+  "payment.advance_payment": [
+   {
+    "rule_id": "UT-0037",
+    "authority": "Utah Code § 63G-2-203(8)(a)",
+    "summary": "An entity may require payment of past fees and future estimated fees before beginning to process a request.",
+    "clock_spec": "undefined-soft: processing withheld until prepayment received ('before beginning to process a request')",
+    "clock_effect": "pauses"
+   },
+   {
+    "rule_id": "UT-0038",
+    "authority": "Utah Code § 63G-2-203(8)(a)(i)",
+    "summary": "Prepayment may be required when fees are expected to exceed $50."
+   },
+   {
+    "rule_id": "UT-0039",
+    "authority": "Utah Code § 63G-2-203(8)(b)",
+    "summary": "Any prepaid amount in excess of fees due must be returned to the requester."
+   }
+  ]
+ },
+ "audit": {
+  "rules_total": 43,
+  "rules_referenced": 43,
+  "unreferenced_rule_ids": []
+ }
+}

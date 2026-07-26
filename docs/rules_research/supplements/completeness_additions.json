@@ -1,53 +1,88 @@
 {
-  "_meta": {
-    "purpose": "Rules ADDED to the working set after original wave discovery, found via the ChatGPT-pilot completeness cross-check (2026-07-23). Kept separate from the frozen wave*/discovery.json originals. The prune build merges these into pruned_discovery.json (always KEEP). Each is verified verbatim against the cited statute.",
-    "method": "Deadline-anchored + procedural-sibling cross-check of the 31 overlapping ChatGPT pilot docs vs. our full captured data. Only Missouri surfaced genuine multi-clause misses (both siblings of the already-captured MO-0026 fee-nonpayment withdrawal, all in Mo. Rev. Stat. Sec. 610.026)."
-  },
-  "additions": [
+ "_meta": {
+  "purpose": "Rules ADDED to the working set after original wave discovery, found via the ChatGPT-pilot completeness cross-check (2026-07-23). Kept separate from the frozen wave*/discovery.json originals. The prune build merges these into pruned_discovery.json (always KEEP). Each is verified verbatim against the cited statute.",
+  "method": "Deadline-anchored + procedural-sibling cross-check of the 31 overlapping ChatGPT pilot docs vs. our full captured data. Only Missouri surfaced genuine multi-clause misses (both siblings of the already-captured MO-0026 fee-nonpayment withdrawal, all in Mo. Rev. Stat. Sec. 610.026).",
+  "update_2026_07_26": "TX-S05 added during Phase-6 template generation: the 552.221(e) 60-day unclaimed-withdrawal timer was on the workflow diagram (v2.4, from desktop research) but missing from the working rule set. Verified verbatim against texas.public.law (current through May 26, 2025)."
+ },
+ "additions": [
+  {
+   "state": "Missouri",
+   "rules": [
     {
-      "state": "Missouri",
-      "rules": [
-        {
-          "rule_id": "MO-S01",
-          "category": "Clarification",
-          "concept_key": "clarification.nonresponse_withdrawal",
-          "legal_concept": "Request deemed withdrawn on non-response to a clarification request",
-          "rule_type": "Trigger",
-          "config_home": "parameter",
-          "constraint_basis": "fixed",
-          "atomic_rule": "If the public governmental body responds to a request in order to seek clarification and no response to the clarification request is received within ninety days (or one hundred fifty days if the requested fees exceed one thousand dollars), the public records request is considered withdrawn.",
-          "trigger": "Body sent a clarification request; requester does not respond within the window",
-          "clock_effect": "terminal",
-          "clock_spec": "90 days from clarification request sent (150 days if requested fees > $1,000)",
-          "related_rule_ids": ["MO-0026", "MO-0027"],
-          "source_language": "If the public governmental body responds to a request for public records in order to seek a clarification of the request and no response to the request for clarification is received within ninety days, or within one hundred fifty days if the requested fees are greater than one thousand dollars, then such request for public records shall be considered withdrawn.",
-          "is_paraphrase": false,
-          "source_authority": "Mo. Rev. Stat. § 610.026",
-          "effective_status": "Current (§ 610.026 as amended)",
-          "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
-          "notes": "ADDED 2026-07-23 via ChatGPT-pilot completeness cross-check; verified verbatim against § 610.026. Sibling of the fee-nonpayment 90-day withdrawal (MO-0026/0027) — both live in § 610.026; original discovery captured the fee twin but not this clarification twin. Confirm exact subdivision citation on production."
-        },
-        {
-          "rule_id": "MO-S02",
-          "category": "Fees",
-          "concept_key": "fee.repeat_request_unpaid_carryforward",
-          "legal_concept": "Unpaid original fees carried forward to a repeat request",
-          "rule_type": "Permission",
-          "config_home": "structural",
-          "constraint_basis": "n/a",
-          "atomic_rule": "If the same or a substantially similar request is made within six months after expiration of the ninety-day nonpayment-withdrawal period (or one hundred fifty days if requested fees exceed one thousand dollars) and no fee was remitted on the original request, the public governmental body may require payment of the fees for the original request in addition to any allowable fees for the subsequent request.",
-          "trigger": "Same/substantially-similar request within 6 months (150 days if fees > $1,000) with the original fee unpaid",
-          "clock_effect": "none",
-          "clock_spec": "",
-          "related_rule_ids": ["MO-0026"],
-          "source_language": "If the same or a substantially similar request for public records is made within six months after the expiration of the ninety-day period, or within one hundred fifty days if the requested fees are greater than one thousand dollars, and no fee was remitted, the public governmental body is authorized to request payment of fees for the original request as well as any allowable fees for the subsequent request.",
-          "is_paraphrase": false,
-          "source_authority": "Mo. Rev. Stat. § 610.026",
-          "effective_status": "Current (§ 610.026 as amended)",
-          "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
-          "notes": "ADDED 2026-07-23 via completeness cross-check; verified verbatim against § 610.026. Repeat-request fee carry-forward tied to the nonpayment-withdrawal window (MO-0026)."
-        }
-      ]
+     "rule_id": "MO-S01",
+     "category": "Clarification",
+     "concept_key": "clarification.nonresponse_withdrawal",
+     "legal_concept": "Request deemed withdrawn on non-response to a clarification request",
+     "rule_type": "Trigger",
+     "config_home": "parameter",
+     "constraint_basis": "fixed",
+     "atomic_rule": "If the public governmental body responds to a request in order to seek clarification and no response to the clarification request is received within ninety days (or one hundred fifty days if the requested fees exceed one thousand dollars), the public records request is considered withdrawn.",
+     "trigger": "Body sent a clarification request; requester does not respond within the window",
+     "clock_effect": "terminal",
+     "clock_spec": "90 days from clarification request sent (150 days if requested fees > $1,000)",
+     "related_rule_ids": [
+      "MO-0026",
+      "MO-0027"
+     ],
+     "source_language": "If the public governmental body responds to a request for public records in order to seek a clarification of the request and no response to the request for clarification is received within ninety days, or within one hundred fifty days if the requested fees are greater than one thousand dollars, then such request for public records shall be considered withdrawn.",
+     "is_paraphrase": false,
+     "source_authority": "Mo. Rev. Stat. \u00a7 610.026",
+     "effective_status": "Current (\u00a7 610.026 as amended)",
+     "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+     "notes": "ADDED 2026-07-23 via ChatGPT-pilot completeness cross-check; verified verbatim against \u00a7 610.026. Sibling of the fee-nonpayment 90-day withdrawal (MO-0026/0027) \u2014 both live in \u00a7 610.026; original discovery captured the fee twin but not this clarification twin. Confirm exact subdivision citation on production."
+    },
+    {
+     "rule_id": "MO-S02",
+     "category": "Fees",
+     "concept_key": "fee.repeat_request_unpaid_carryforward",
+     "legal_concept": "Unpaid original fees carried forward to a repeat request",
+     "rule_type": "Permission",
+     "config_home": "structural",
+     "constraint_basis": "n/a",
+     "atomic_rule": "If the same or a substantially similar request is made within six months after expiration of the ninety-day nonpayment-withdrawal period (or one hundred fifty days if requested fees exceed one thousand dollars) and no fee was remitted on the original request, the public governmental body may require payment of the fees for the original request in addition to any allowable fees for the subsequent request.",
+     "trigger": "Same/substantially-similar request within 6 months (150 days if fees > $1,000) with the original fee unpaid",
+     "clock_effect": "none",
+     "clock_spec": "",
+     "related_rule_ids": [
+      "MO-0026"
+     ],
+     "source_language": "If the same or a substantially similar request for public records is made within six months after the expiration of the ninety-day period, or within one hundred fifty days if the requested fees are greater than one thousand dollars, and no fee was remitted, the public governmental body is authorized to request payment of fees for the original request as well as any allowable fees for the subsequent request.",
+     "is_paraphrase": false,
+     "source_authority": "Mo. Rev. Stat. \u00a7 610.026",
+     "effective_status": "Current (\u00a7 610.026 as amended)",
+     "official_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+     "notes": "ADDED 2026-07-23 via completeness cross-check; verified verbatim against \u00a7 610.026. Repeat-request fee carry-forward tied to the nonpayment-withdrawal window (MO-0026)."
     }
-  ]
+   ]
+  },
+  {
+   "state": "Texas",
+   "rules": [
+    {
+     "rule_id": "TX-S05",
+     "category": "Payment",
+     "concept_key": "payment.nonpayment_withdrawal",
+     "legal_concept": "Request deemed withdrawn if records not inspected/duplicated or charges not paid within 60 days",
+     "rule_type": "Trigger",
+     "config_home": "parameter",
+     "constraint_basis": "fixed",
+     "atomic_rule": "A request is considered withdrawn if the requestor fails to inspect or duplicate the public information in the governmental body's offices on or before the 60th day after the date the information is made available, or fails to pay the postage and other applicable charges under Subchapter F on or before the 60th day after the date the requestor is informed of the charges.",
+     "trigger": "Records made available (or charges communicated) and 60 days elapse without inspection/duplication or payment",
+     "clock_effect": "sets-deadline",
+     "clock_spec": "60 calendar days from availability notice (inspection/duplication) or from charge notice (payment)",
+     "source_language": "A request is considered to have been withdrawn if the requestor fails to inspect or duplicate the public information in the offices of the governmental body on or before the 60th day after the date the information is made available or fails to pay the postage and any other applicable charges accrued under Subchapter F on or before the 60th day after the date the requestor is informed of the charges.",
+     "is_paraphrase": false,
+     "source_authority": "Tex. Gov't Code \u00a7 552.221(e)",
+     "source_type": "Statute",
+     "effective_status": "Current through May 26, 2025 (texas.public.law mirror of statutes.capitol.texas.gov)",
+     "official_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm",
+     "notes": "Surfaced by Kevin's desktop research (texas_process_flow.md \u00a75.4) and already on the Disposition page's unclaimed-timers node; added to the working set so the TX template's nonpayment/unclaimed timer carries statutory evidence. Verified verbatim 2026-07-26.",
+     "related_rule_ids": [
+      "TX-0034",
+      "TX-0035"
+     ]
+    }
+   ]
+  }
+ ]
 }

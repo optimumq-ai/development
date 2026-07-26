@@ -23099,6 +23099,30 @@
         "notes": "Source_language reconstructed from a full-text reproduction summary; verify exact subsection and wording (overdue-balance provision of § 552.263)."
       },
       {
+        "rule_id": "TX-S05",
+        "category": "Payment",
+        "concept_key": "payment.nonpayment_withdrawal",
+        "legal_concept": "Request deemed withdrawn if records not inspected/duplicated or charges not paid within 60 days",
+        "rule_type": "Trigger",
+        "config_home": "parameter",
+        "constraint_basis": "fixed",
+        "atomic_rule": "A request is considered withdrawn if the requestor fails to inspect or duplicate the public information in the governmental body's offices on or before the 60th day after the date the information is made available, or fails to pay the postage and other applicable charges under Subchapter F on or before the 60th day after the date the requestor is informed of the charges.",
+        "trigger": "Records made available (or charges communicated) and 60 days elapse without inspection/duplication or payment",
+        "clock_effect": "sets-deadline",
+        "clock_spec": "60 calendar days from availability notice (inspection/duplication) or from charge notice (payment)",
+        "source_language": "A request is considered to have been withdrawn if the requestor fails to inspect or duplicate the public information in the offices of the governmental body on or before the 60th day after the date the information is made available or fails to pay the postage and any other applicable charges accrued under Subchapter F on or before the 60th day after the date the requestor is informed of the charges.",
+        "is_paraphrase": false,
+        "source_authority": "Tex. Gov't Code § 552.221(e)",
+        "source_type": "Statute",
+        "effective_status": "Current through May 26, 2025 (texas.public.law mirror of statutes.capitol.texas.gov)",
+        "official_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm",
+        "notes": "Surfaced by Kevin's desktop research (texas_process_flow.md §5.4) and already on the Disposition page's unclaimed-timers node; added to the working set so the TX template's nonpayment/unclaimed timer carries statutory evidence. Verified verbatim 2026-07-26.",
+        "related_rule_ids": [
+          "TX-0034",
+          "TX-0035"
+        ]
+      },
+      {
         "rule_id": "TX-S01",
         "category": "Communications",
         "concept_key": "response.no_records_notice",

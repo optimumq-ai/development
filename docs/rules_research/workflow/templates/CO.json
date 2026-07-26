@@ -1,0 +1,469 @@
+{
+ "state": "Colorado",
+ "code": "CO",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {},
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {},
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {},
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {},
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "CO-0014",
+      "authority": "C.R.S. § 24-72-204(4)",
+      "summary": "On denial of access, if the applicant requests it, the custodian must furnish forthwith a written statement of the grounds for denial citing the law or regulation under which access is denied.",
+      "clock_spec": "undefined-soft: \"forthwith\" from the applicant's request for a written statement",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "CO-0014",
+      "authority": "C.R.S. § 24-72-204(4)",
+      "summary": "On denial of access, if the applicant requests it, the custodian must furnish forthwith a written statement of the grounds for denial citing the law or regulation under which access is denied.",
+      "clock_spec": "undefined-soft: \"forthwith\" from the applicant's request for a written statement",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "CO-0015",
+      "authority": "C.R.S. § 24-72-204(2)(a)(VIII)(B)",
+      "summary": "Where only portions of a record are withholdable (e.g., specialized details of security arrangements or investigations), the custodian may deny inspection of only those portions and shall allow inspection of the remaining portions."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "CO-0012",
+      "authority": "C.R.S. § 24-72-203(3.5)",
+      "summary": "If a public record is stored in a digital format that is sortable, the custodian shall provide a copy in a sortable format; if stored in a searchable format, in a searchable format."
+     },
+     {
+      "rule_id": "CO-0013",
+      "authority": "C.R.S. § 24-72-203(3.5)",
+      "summary": "The custodian need not produce in the sortable/searchable format if doing so would violate a copyright or licensing agreement, or if it is not technologically or practically feasible to remove withholdable information or to provide the format without purchasing new software."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": false,
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "CO-0001",
+      "authority": "C.R.S. § 24-72-203(1)(a)",
+      "summary": "Any person may inspect any public record at reasonable times, except as otherwise provided in the Act or by law; no requester qualification is imposed."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "CO-0003",
+      "authority": "C.R.S. § 24-72-203(1)(a)",
+      "summary": "A requester need not state a purpose or reason to inspect general public records; the right runs to any person at reasonable times."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "CO-0002",
+      "authority": "C.R.S. § 24-72-203(1)(a)",
+      "summary": "CORA imposes no residency or citizenship requirement; the right to inspect runs to 'any person' without geographic qualification."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": false
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": true,
+   "activated_by": {
+    "custody.referral_to_proper_custodian": [
+     {
+      "rule_id": "CO-0006",
+      "authority": "C.R.S. § 24-72-203(2)(b)",
+      "summary": "If the requested records are not in the custody or control of the person to whom application is made, that person shall so notify the applicant in writing and, if known, state which custodian has custody or control."
+     }
+    ]
+   }
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": false
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": false
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "extension": {
+   "present": true,
+   "statutory": {
+    "response.extension_grounds": [
+     {
+      "rule_id": "CO-0008",
+      "authority": "C.R.S. § 24-72-203(3)(b)",
+      "summary": "The three-working-day period may be extended when extenuating circumstances exist, but the extension shall not exceed seven working days.",
+      "clock_spec": "ceiling: up to 7 additional working days beyond the presumptive 3-working-day period",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.extension_limit": [
+     {
+      "rule_id": "CO-0010",
+      "authority": "C.R.S. § 24-72-203(3)(b)",
+      "summary": "Extenuating circumstances can never apply to a request that relates to a single, specifically identified document."
+     }
+    ],
+    "response.extension_notice": [
+     {
+      "rule_id": "CO-0009",
+      "authority": "C.R.S. § 24-72-203(3)(b)",
+      "summary": "A finding that extenuating circumstances exist must be made in writing by the custodian and provided to the requester within the three-working-day period.",
+      "clock_spec": "written finding due within 3 working days of the request (before extension takes effect)",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "CO-0016",
+    "authority": "C.R.S. § 24-72-205(5)(a)",
+    "summary": "The custodian may charge a fee not to exceed twenty-five cents per standard page for a copy of a public record."
+   }
+  ],
+  "fee.labor_charge": [
+   {
+    "rule_id": "CO-0018",
+    "authority": "C.R.S. § 24-72-205(6)(a)",
+    "summary": "After the first hour, the custodian may charge a fee for research and retrieval of public records not to exceed thirty dollars per hour."
+   },
+   {
+    "rule_id": "CO-0020",
+    "authority": "C.R.S. § 24-72-205(6)(a)",
+    "summary": "A custodian may impose a research-and-retrieval fee only if, before receiving the request, it has posted on its website or otherwise published a written policy specifying the applicable conditions and the amount of any current fee."
+   }
+  ],
+  "fee.nonstandard_rate": [
+   {
+    "rule_id": "CO-0017",
+    "authority": "C.R.S. § 24-72-205(5)(a)",
+    "summary": "For a copy, printout, or photograph in a format other than a standard page, the custodian may charge a fee not to exceed the actual cost of providing it."
+   }
+  ],
+  "fee.free_allowance": [
+   {
+    "rule_id": "CO-0019",
+    "authority": "C.R.S. § 24-72-205(6)(a)",
+    "summary": "The custodian shall not impose any charge for the first hour of time expended in research and retrieval of public records."
+   }
+  ],
+  "fee.no_charge_categories": [
+   {
+    "rule_id": "CO-0021",
+    "authority": "C.R.S. § 24-72-205(1)(b)",
+    "summary": "No transmission fee may be charged to the requester for transmitting public records via electronic mail."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.custodian_definition_and_role": [
+   {
+    "rule_id": "CO-0004",
+    "authority": "C.R.S. § 24-72-202(1)",
+    "summary": "The 'custodian' is the official custodian or any authorized person having personal custody and control of the public records in question; this identifies who must respond and drives routing."
+   },
+   {
+    "rule_id": "CO-0005",
+    "authority": "C.R.S. § 24-72-203(2)(a)",
+    "summary": "The custodian may make and enforce rules reasonably necessary for the protection of the records and to prevent unnecessary interference with the discharge of duties."
+   }
+  ]
+ },
+ "ledger": {},
+ "audit": {
+  "rules_total": 19,
+  "rules_referenced": 19,
+  "unreferenced_rule_ids": []
+ }
+}

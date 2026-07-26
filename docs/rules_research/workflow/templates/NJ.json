@@ -1,0 +1,1186 @@
+{
+ "state": "New Jersey",
+ "code": "NJ",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.submission_channels": [
+     {
+      "rule_id": "NJ-A13",
+      "authority": "N.J.S.A. 47:1A-5(f) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "A completed adopted form, a letter, or an email from a requestor that includes all of the information required on the adopted form suffices, in place of a completed form, as a valid government record request."
+     },
+     {
+      "rule_id": "NJ-A20",
+      "authority": "N.J.S.A. 47:1A-5(g) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "A public agency may make available on its website an online form, portal, or software for transmitting requests electronically, and the GRC form may be submitted electronically or by fax."
+     },
+     {
+      "rule_id": "NJ-A21",
+      "authority": "N.J.S.A. 47:1A-5(f) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "Custodians who have adopted electronic government record request forms must provide directions on how to submit requests, including any required forms, on the public agency's website."
+     }
+    ],
+    "intake.form_permitted": [
+     {
+      "rule_id": "NJ-A10",
+      "authority": "N.J.S.A. 47:1A-5(g) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "A request for access to a government record must be in writing and hand-delivered, mailed, transmitted electronically, or otherwise conveyed to the appropriate custodian."
+     }
+    ],
+    "intake.required_fields": [
+     {
+      "rule_id": "NJ-A05",
+      "authority": "N.J.S.A. 47:1A-5(i)(1) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "If the requestor has elected not to accurately identify themselves or to provide an accurate address, email address, or telephone number, the custodian is not required to respond (and the failure-to-respond deemed-denial does not run) until the requestor contacts the custodian seeking a response.",
+      "clock_spec": "tolls the custodian's response obligation indefinitely until the requestor contacts the custodian seeking a response to the original request",
+      "clock_effect": "tolls"
+     },
+     {
+      "rule_id": "NJ-A12",
+      "authority": "N.J.S.A. 47:1A-5(f) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "The request form must provide space for the requestor's name, address, email address, and telephone number, and a brief description of the government record sought."
+     }
+    ],
+    "intake.no_technicality_denial": [
+     {
+      "rule_id": "NJ-A14",
+      "authority": "N.J.S.A. 47:1A-5(f) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "If a letter or email from a requestor does not include all of the information required on the adopted form, the custodian may deny the record request."
+     },
+     {
+      "rule_id": "NJ-M16",
+      "authority": "N.J.S.A. 47:1A-5(f); P.L.2024, c.16, §2",
+      "summary": "The custodian may deny a request that is incomplete (missing information required on the adopted form), including a letter/email request that omits all required information."
+     }
+    ],
+    "denial.improper_request_denial": [
+     {
+      "rule_id": "NJ-A15",
+      "authority": "N.J.S.A. 47:1A-5(f) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "If a letter or email from a requestor includes substantially more information than required on the adopted form and requires more than reasonable effort to clarify the information, the custodian may deny the request."
+     },
+     {
+      "rule_id": "NJ-M23",
+      "authority": "N.J.S.A. 47:1A-5(g); P.L.2024, c.16, §2",
+      "summary": "The custodian is not required to complete a request (e.g., for mail, email, texts, correspondence, social media) that does not identify a specific job title/accounts, a specific subject matter, and a reasonable time period, or that would require research and creation of new records."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "NJ-T22",
+      "authority": "N.J.S.A. 47:1A-5(c), as amended by P.L. 2024, c.16, s.2",
+      "summary": "When imposing a special service charge, the custodian shall provide the requestor with an explanation for, and an itemized list of, the fees or charges."
+     },
+     {
+      "rule_id": "NJ-T23",
+      "authority": "N.J.S.A. 47:1A-5(c), as amended by P.L. 2024, c.16, s.2",
+      "summary": "The requestor shall have the opportunity to review and object to any fee or charge prior to it being incurred; there is a rebuttable presumption fees are reasonable, and on objection the burden is on the requestor to show they are unreasonable."
+     },
+     {
+      "rule_id": "NJ-M07",
+      "authority": "N.J.S.A. 47:1A-5(c); P.L.2024, c.16, §2",
+      "summary": "The custodian shall provide the requestor with an explanation for, and an itemized list of, the fees or charges."
+     },
+     {
+      "rule_id": "NJ-M08",
+      "authority": "N.J.S.A. 47:1A-5(c); P.L.2024, c.16, §2",
+      "summary": "The requestor shall have the opportunity to review and object to any fee or charge before it is incurred."
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "NJ-T04",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "When invoking the 14-business-day window (commercial or c.371 review), the custodian shall notify the requestor of the additional response time within seven business days.",
+      "clock_spec": "7 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "NJ-T11",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "If the record is in storage or archived, the custodian shall so advise the requestor within seven or fourteen business days (as appropriate) after receiving the request, and advise when the record can be made available.",
+      "clock_spec": "7 or 14 business-days from request receipt to advise",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "NJ-T20",
+      "authority": "N.J.S.A. 47:1A-5(g), as amended by P.L. 2024, c.16, s.2",
+      "summary": "If unable to comply with a request, the custodian shall indicate the specific basis on the request form, promptly return it to the requestor, and sign and date the form and provide the requestor a copy.",
+      "clock_spec": "undefined-soft: 'promptly' return of the form",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {
+    "payment.deposit": [
+     {
+      "rule_id": "NJ-M14",
+      "authority": "N.J.S.A. 47:1A-5(f); P.L.2024, c.16, §2",
+      "summary": "The custodian may require prepayment of fees or a deposit, and the request form must state whether prepayment of fees or a deposit is required."
+     }
+    ],
+    "payment.deposit_threshold": [
+     {
+      "rule_id": "NJ-M15",
+      "authority": "N.J.S.A. 47:1A-5(f); P.L.2024, c.16, §2",
+      "summary": "The custodian may require a deposit against costs whenever the custodian anticipates the requested reproduction will cost in excess of $5."
+     }
+    ]
+   }
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "NJ-A26",
+      "authority": "N.J.S.A. 47:1A-5(g) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "A custodian is not required to complete a request for mail, email, text messages, correspondence, or social media postings/messages unless the request identifies a specific job title or accounts to be searched, a specific subject matter, and is confined to a reasonable time period."
+     }
+    ]
+   },
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "NJ-T22",
+      "authority": "N.J.S.A. 47:1A-5(c), as amended by P.L. 2024, c.16, s.2",
+      "summary": "When imposing a special service charge, the custodian shall provide the requestor with an explanation for, and an itemized list of, the fees or charges."
+     },
+     {
+      "rule_id": "NJ-T23",
+      "authority": "N.J.S.A. 47:1A-5(c), as amended by P.L. 2024, c.16, s.2",
+      "summary": "The requestor shall have the opportunity to review and object to any fee or charge prior to it being incurred; there is a rebuttable presumption fees are reasonable, and on objection the burden is on the requestor to show they are unreasonable."
+     },
+     {
+      "rule_id": "NJ-M07",
+      "authority": "N.J.S.A. 47:1A-5(c); P.L.2024, c.16, §2",
+      "summary": "The custodian shall provide the requestor with an explanation for, and an itemized list of, the fees or charges."
+     },
+     {
+      "rule_id": "NJ-M08",
+      "authority": "N.J.S.A. 47:1A-5(c); P.L.2024, c.16, §2",
+      "summary": "The requestor shall have the opportunity to review and object to any fee or charge before it is incurred."
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "NJ-T04",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "When invoking the 14-business-day window (commercial or c.371 review), the custodian shall notify the requestor of the additional response time within seven business days.",
+      "clock_spec": "7 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "NJ-T11",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "If the record is in storage or archived, the custodian shall so advise the requestor within seven or fourteen business days (as appropriate) after receiving the request, and advise when the record can be made available.",
+      "clock_spec": "7 or 14 business-days from request receipt to advise",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "NJ-T20",
+      "authority": "N.J.S.A. 47:1A-5(g), as amended by P.L. 2024, c.16, s.2",
+      "summary": "If unable to comply with a request, the custodian shall indicate the specific basis on the request form, promptly return it to the requestor, and sign and date the form and provide the requestor a copy.",
+      "clock_spec": "undefined-soft: 'promptly' return of the form",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "NJ-T22",
+      "authority": "N.J.S.A. 47:1A-5(c), as amended by P.L. 2024, c.16, s.2",
+      "summary": "When imposing a special service charge, the custodian shall provide the requestor with an explanation for, and an itemized list of, the fees or charges."
+     },
+     {
+      "rule_id": "NJ-T23",
+      "authority": "N.J.S.A. 47:1A-5(c), as amended by P.L. 2024, c.16, s.2",
+      "summary": "The requestor shall have the opportunity to review and object to any fee or charge prior to it being incurred; there is a rebuttable presumption fees are reasonable, and on objection the burden is on the requestor to show they are unreasonable."
+     },
+     {
+      "rule_id": "NJ-M07",
+      "authority": "N.J.S.A. 47:1A-5(c); P.L.2024, c.16, §2",
+      "summary": "The custodian shall provide the requestor with an explanation for, and an itemized list of, the fees or charges."
+     },
+     {
+      "rule_id": "NJ-M08",
+      "authority": "N.J.S.A. 47:1A-5(c); P.L.2024, c.16, §2",
+      "summary": "The requestor shall have the opportunity to review and object to any fee or charge before it is incurred."
+     }
+    ]
+   },
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.deposit": [
+     {
+      "rule_id": "NJ-M14",
+      "authority": "N.J.S.A. 47:1A-5(f); P.L.2024, c.16, §2",
+      "summary": "The custodian may require prepayment of fees or a deposit, and the request form must state whether prepayment of fees or a deposit is required."
+     }
+    ],
+    "payment.deposit_threshold": [
+     {
+      "rule_id": "NJ-M15",
+      "authority": "N.J.S.A. 47:1A-5(f); P.L.2024, c.16, §2",
+      "summary": "The custodian may require a deposit against costs whenever the custodian anticipates the requested reproduction will cost in excess of $5."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {},
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "NJ-M20",
+      "authority": "N.J.S.A. 47:1A-5(g); P.L.2024, c.16, §2",
+      "summary": "If unable to comply with a request, the custodian shall indicate the specific basis on the request form, promptly return it to the requestor, and sign, date, and provide the requestor a copy."
+     }
+    ],
+    "appeal.retained_optional": [
+     {
+      "rule_id": "NJ-T24",
+      "authority": "N.J.S.A. 47:1A-5(j), as amended by P.L. 2024, c.16, s.2",
+      "summary": "The custodian shall include, on the agency's website and public-records request form, information regarding a requestor's right to appeal a denial of or failure to provide access and the appeal procedure, including the GRC's website address and toll-free information line phone number."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {
+    "production.installment_partial": [
+     {
+      "rule_id": "NJ-T14",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "A requestor shall have 14 business days to retrieve the government records following the custodian's notice that the request is completed and the records are available.",
+      "clock_spec": "14 business-days from completion/availability notice",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "NJ-T37",
+      "authority": "N.J.S.A. 47:1A-5(g), as amended by P.L. 2024, c.16, s.2",
+      "summary": "If the custodian asserts part of a record is exempt, the custodian shall delete or excise from a copy the portion asserted exempt and shall promptly permit access to the remainder of the record.",
+      "clock_spec": "undefined-soft: 'promptly' permit access to remainder",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "search.identify_responsive": [
+     {
+      "rule_id": "NJ-A27",
+      "authority": "N.J.S.A. 47:1A-5(g) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "It is sufficient for a requestor to identify specific individuals to be searched by the individual's job title and position."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {
+    "redaction.mandatory_pii": [
+     {
+      "rule_id": "NJ-T35",
+      "authority": "N.J.S.A. 47:1A-5(a), as amended by P.L. 2024, c.16, s.2",
+      "summary": "Prior to allowing access to any record, the custodian shall redact any information disclosing the social security number, credit card number, personal telephone number, or driver license number of any person (subject to enumerated government-use and child-support exceptions)."
+     }
+    ],
+    "redaction.protected_person": [
+     {
+      "rule_id": "NJ-T36",
+      "authority": "N.J.S.A. 47:1A-5(a), as amended by P.L. 2024, c.16, s.2",
+      "summary": "Prior to allowing access, the custodian shall redact, per P.L.2021, c.371, the home address (primary or secondary) of any active, formerly active, or retired judicial officer, prosecutor, law enforcement officer, or child protective investigator in DCP&P, or any immediate family member."
+     },
+     {
+      "rule_id": "NJ-T38",
+      "authority": "N.J.S.A. 47:1B-2(b)(1), as amended by P.L. 2024, c.16, s.6",
+      "summary": "A public agency shall redact or cease disclosing the home address of a covered person approved by the Office of Information Privacy no later than 30 days following the approval, and shall discontinue redaction for an approved revocation within 30 days of that approval.",
+      "clock_spec": "30 calendar-days from OIP approval",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "NJ-T26",
+      "authority": "N.J.S.A. 47:1A-5(d), as amended by P.L. 2024, c.16, s.2",
+      "summary": "The custodian shall permit access and provide a copy in the medium or format requested if the agency maintains the record in that medium or format."
+     },
+     {
+      "rule_id": "NJ-T27",
+      "authority": "N.J.S.A. 47:1A-5(d), as amended by P.L. 2024, c.16, s.2",
+      "summary": "If the agency does not maintain the record in the requested medium/format, the custodian shall convert it to the requested medium/format if that medium/format is available to the agency and does not require a substantial amount of manipulation or programming of information technology or the servi…"
+     },
+     {
+      "rule_id": "NJ-T28",
+      "authority": "N.J.S.A. 47:1A-5(d), as amended by P.L. 2024, c.16, s.2",
+      "summary": "If the agency does not maintain the record in the requested electronic medium/format and it is not available without substantial IT manipulation or programming, the custodian need not convert it but shall at minimum provide a copy in the electronic format maintained by the agency."
+     }
+    ],
+    "production.delivery_and_completion": [
+     {
+      "rule_id": "NJ-T19",
+      "authority": "N.J.S.A. 47:1A-5(g), as amended by P.L. 2024, c.16, s.2",
+      "summary": "The custodian shall promptly comply with a request to inspect, examine, copy, or provide a copy of a government record.",
+      "clock_spec": "undefined-soft: 'promptly' from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "production.inspection_access": [
+     {
+      "rule_id": "NJ-T30",
+      "authority": "N.J.S.A. 47:1A-5(e), as amended by P.L. 2024, c.16, s.2",
+      "summary": "Immediate access to government records is not required to be granted for documents over 24 months old."
+     }
+    ],
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "NJ-A25",
+      "authority": "N.J.S.A. 47:1A-5(g) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "A custodian is not required to complete a request if the custodian determines that the request would require research and the collection of information from the contents of government records and the creation of new government records setting forth that research and information."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": true,
+   "activated_by": {
+    "intake.identity_requirement": [
+     {
+      "rule_id": "NJ-A04",
+      "authority": "N.J.S.A. 47:1A-5(f) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "A request may be submitted anonymously; indicating the request is anonymous is not a ground for denial and an anonymous request is not to be considered incomplete - but an anonymous requestor may not institute an OPRA proceeding under N.J.S.A. 47:1A-6."
+     },
+     {
+      "rule_id": "NJ-M17",
+      "authority": "N.J.S.A. 47:1A-5(f); P.L.2024, c.16, §2",
+      "summary": "A request submitted anonymously shall not be considered incomplete and anonymity is not grounds for denial."
+     }
+    ],
+    "intake.purpose_and_certification": [
+     {
+      "rule_id": "NJ-A16",
+      "authority": "N.J.S.A. 47:1A-5(f) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "The form must include space for the requestor to certify whether the record will be used by the requestor or another person for a commercial purpose, and the requestor is required to provide this information for the request to be fulfilled."
+     },
+     {
+      "rule_id": "NJ-A22",
+      "authority": "N.J.S.A. 47:1A-5(g) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "The requestor is required to certify whether the government record is being sought in connection with a legal proceeding and identify the proceeding, for the request to be fulfilled."
+     },
+     {
+      "rule_id": "NJ-A23",
+      "authority": "N.J.S.A. 47:1A-5(g) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "A party to a legal proceeding may not request a government record if the record sought is the subject of a court order including a pending discovery request, and the custodian is not required to complete such a request."
+     }
+    ]
+   },
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "NJ-A01",
+      "authority": "N.J.S.A. 47:1A-5(a) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "The custodian must permit a government record to be inspected, examined, and copied by any person (no requester qualification beyond being a person) during regular business hours, unless the record is exempt."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "NJ-A03",
+      "authority": "N.J.S.A. 47:1A-5(f) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "A requestor need not state a reason or purpose to obtain access; the only purpose-related field is a yes/no certification of whether the record will be used for a commercial purpose, which affects fee basis and response window (deferred), not access eligibility."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "NJ-A02",
+      "authority": "N.J.S.A. 47:1A-5(a) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "Access is available to any person; OPRA imposes no residency or in-state requirement on the requestor."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "NJ-M05",
+      "authority": "N.J.S.A. 47:1A-5(b)(2); P.L.2024, c.16, §2",
+      "summary": "No fee shall be charged to a victim of a crime for a copy of a record to which the crime victim is entitled to access."
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": true,
+   "activated_by": {
+    "classification.commercial_purpose": [
+     {
+      "rule_id": "NJ-T47",
+      "authority": "N.J.S.A. 47:1A-1.1, as amended by P.L. 2024, c.16, s.1",
+      "summary": "'Commercial purpose' means direct or indirect use of any part of a government record for sale, resale, solicitation, rent, or lease of a service, or any use by which the user expects a profit; it excludes use by the news media, news/journalistic/educational/scientific/scholarly/governmental organ…"
+     }
+    ],
+    "fee.commercial_charge": [
+     {
+      "rule_id": "NJ-M12",
+      "authority": "N.J.S.A. 47:1A-5(i)(1); P.L.2024, c.16, §2",
+      "summary": "If a commercial requestor wants the record within seven business days (rather than the 14-day commercial window), the custodian may charge a special service fee not exceeding two times the cost of production of the record.",
+      "clock_spec": "ceiling: 2x cost of production"
+     },
+     {
+      "rule_id": "NJ-M13",
+      "authority": "N.J.S.A. 47:1A-1.1; P.L.2024, c.16, §1",
+      "summary": "A request has a 'commercial purpose' where any part of the record is used, directly or indirectly, for sale, resale, solicitation, rent, or lease of a service, or any use by which the user expects a profit through commission, salary, or fee; this classification triggers the 14-business-day respon…"
+     }
+    ]
+   }
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": true,
+   "activated_by": {
+    "custody.referral_to_proper_custodian": [
+     {
+      "rule_id": "NJ-A30",
+      "authority": "N.J.S.A. 47:1A-5(h) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "Any officer or employee of a public agency who receives a request for access to a government record must forward the request to the custodian of the record or direct the requestor to the custodian of the record."
+     },
+     {
+      "rule_id": "NJ-A33",
+      "authority": "N.J.S.A. 47:1A-5(i)(1) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "If the custodian does not provide a record held only by another agency, the custodian must direct the requestor, within seven business days, to the public agency that (to the best of their knowledge) created, maintains, or received the record; at which time the request is considered completed.",
+      "clock_spec": "7 business days from receipt of the request to direct the requestor to the originating agency; request then deemed completed (terminal)",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "NJ-A34",
+      "authority": "N.J.S.A. 47:1A-5(e) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "If a government record in complete and unabridged form is readily available on the public agency's website, the custodian may require the requestor to obtain it from the website (which must contain a search-bar feature on its home page), and the custodian must provide directions to assist in find…"
+     },
+     {
+      "rule_id": "NJ-T16",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "For a record created/maintained/received by another agency and made available only by remote access or courtesy copy (unless that agency is in the judicial branch), the custodian is not obligated to produce it and, if not providing it, shall direct the requestor within seven business days to the …",
+      "clock_spec": "7 business-days from request receipt to redirect; redirect completes the request (terminal)",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "NJ-T25",
+      "authority": "N.J.S.A. 47:1A-5(h), as amended by P.L. 2024, c.16, s.2",
+      "summary": "Any officer or employee who receives a records request shall forward it to, or direct the requestor to, the custodian; the request is not considered submitted until received by the custodian of records."
+     }
+    ]
+   }
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": true,
+   "activated_by": {
+    "clarification.confer_to_narrow": [
+     {
+      "rule_id": "NJ-A24",
+      "authority": "N.J.S.A. 47:1A-5(g) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "If a request would substantially disrupt agency operations, the custodian may deny access only after informing the requestor of the potential disruption and attempting to reach a reasonable solution with the requestor that accommodates the interests of both the requestor and the agency."
+     }
+    ]
+   }
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": true,
+   "context": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "NJ-A26",
+      "authority": "N.J.S.A. 47:1A-5(g) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "A custodian is not required to complete a request for mail, email, text messages, correspondence, or social media postings/messages unless the request identifies a specific job title or accounts to be searched, a specific subject matter, and is confined to a reasonable time period."
+     }
+    ]
+   },
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "NJ-M05",
+      "authority": "N.J.S.A. 47:1A-5(b)(2); P.L.2024, c.16, §2",
+      "summary": "No fee shall be charged to a victim of a crime for a copy of a record to which the crime victim is entitled to access."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "NJ-M05",
+      "authority": "N.J.S.A. 47:1A-5(b)(2); P.L.2024, c.16, §2",
+      "summary": "No fee shall be charged to a victim of a crime for a copy of a record to which the crime victim is entitled to access."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "context": {
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "NJ-A25",
+      "authority": "N.J.S.A. 47:1A-5(g) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "A custodian is not required to complete a request if the custodian determines that the request would require research and the collection of information from the contents of government records and the creation of new government records setting forth that research and information."
+     }
+    ]
+   },
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": true,
+   "activated_by": {
+    "production.website_satisfies": [
+     {
+      "rule_id": "NJ-T31",
+      "authority": "N.J.S.A. 47:1A-5(e), as amended by P.L. 2024, c.16, s.2",
+      "summary": "If the government record in complete and unabridged form is readily available on the agency's website (which must have a home-page search bar), the custodian may require the requestor to obtain it from the website and shall provide directions (URL and location of the search bar/menu/tab/link/land…"
+     },
+     {
+      "rule_id": "NJ-T32",
+      "authority": "N.J.S.A. 47:1A-5(e), as amended by P.L. 2024, c.16, s.2",
+      "summary": "If the requestor does not respond within seven business days of the custodian providing website information, the request is deemed fulfilled, unless the website version omits non-protected information in the original, in which case the custodian shall produce the original subject to required reda…",
+      "clock_spec": "terminal (deemed fulfilled) at 7 business-days from custodian providing website info",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "NJ-T33",
+      "authority": "N.J.S.A. 47:1A-5(e), as amended by P.L. 2024, c.16, s.2",
+      "summary": "If the requestor cannot find the record after a good-faith effort, the requestor shall notify the custodian within seven business days, and the custodian shall make a reasonable attempt to assist within seven business days of that notification.",
+      "clock_spec": "7 business-days for requestor to notify; 7 business-days for custodian to assist",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "NJ-T34",
+      "authority": "N.J.S.A. 47:1A-5(e), as amended by P.L. 2024, c.16, s.2",
+      "summary": "If the requestor is still unable to locate the record and requests a physical copy, the custodian shall provide a physical copy within seven business days of the request for a physical copy, for a fee not exceeding two times the cost of production.",
+      "clock_spec": "7 business-days from the request for a physical copy",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": true,
+   "activated_by": {
+    "special_records.court_records": [
+     {
+      "rule_id": "NJ-M22",
+      "authority": "N.J.S.A. 47:1A-5(g); P.L.2024, c.16, §2",
+      "summary": "A party to a legal proceeding may not request a record that is the subject of a court order (including a pending discovery request); the custodian shall not be required to complete such a request, and the requestor must certify whether the record is sought in connection with a legal proceeding."
+     }
+    ],
+    "special_records.election_records": [
+     {
+      "rule_id": "NJ-T41",
+      "authority": "N.J.S.A. 47:1A-5.2(b) (P.L. 2024, c.16, s.8, new section)",
+      "summary": "For enumerated election records, an election agency shall not redact the provided information except for voter signatures, Social Security numbers, driver license numbers, and non-driver identification numbers."
+     },
+     {
+      "rule_id": "NJ-T42",
+      "authority": "N.J.S.A. 47:1A-5.2(c) (P.L. 2024, c.16, s.8, new section)",
+      "summary": "An election agency shall make enumerated election records available for immediate access and email transmission as soon as possible but not later than two business days after receipt of the request, provided the request is not for a commercial purpose, with no fee charged.",
+      "clock_spec": "2 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "NJ-T43",
+      "authority": "N.J.S.A. 47:1A-5.2(d) (P.L. 2024, c.16, s.8, new section)",
+      "summary": "For non-commercial requests pertaining only to an election within 16 days, election agencies shall provide enumerated voter lists for immediate access; transmission is not later than two business days after receipt when the request is made 1-15 days before the election, and a request submitted by…",
+      "clock_spec": "2 business-days from receipt (1-15 days pre-election); if submitted by noon day-before-election, complete by noon election day",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "NJ-T44",
+      "authority": "N.J.S.A. 47:1A-5.2(c)(6) and (d)(3) (P.L. 2024, c.16, s.8, new section)",
+      "summary": "The inspection and transmission deadline requirements are deemed satisfied if the election agency posts the records and information on its website.",
+      "clock_spec": "deadline requirement deemed satisfied upon website posting",
+      "clock_effect": "terminal"
+     }
+    ],
+    "special_records.law_enforcement": [
+     {
+      "rule_id": "NJ-T39",
+      "authority": "N.J.S.A. 47:1A-3(b)",
+      "summary": "Enumerated information concerning a criminal investigation shall be available to the public within 24 hours or as soon as practicable of a request for such information.",
+      "clock_spec": "24 hours (or 'as soon as practicable') from request",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "special_records.special_production_constraint": [
+     {
+      "rule_id": "NJ-T06",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "If a commercial requestor wishes to receive the record within seven business days, the custodian shall provide a copy and may charge a special service fee not exceeding two times the cost of production.",
+      "clock_spec": "7 business-days from request receipt (elected expedite)",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "NJ-T21",
+      "authority": "N.J.S.A. 47:1A-5(g), as amended by P.L. 2024, c.16, s.2",
+      "summary": "If a request would substantially disrupt agency operations, the custodian may deny access after informing the requestor of the potential disruption and attempting to reach a reasonable solution accommodating both parties' interests."
+     },
+     {
+      "rule_id": "NJ-T29",
+      "authority": "N.J.S.A. 47:1A-5(e), as amended by P.L. 2024, c.16, s.2",
+      "summary": "Immediate access ordinarily shall be granted to budgets, bills, vouchers, contracts (including collective negotiations agreements and individual employment contracts), and public employee salary and overtime information.",
+      "clock_spec": "undefined-soft: 'immediate access' from request receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "NJ-M21",
+      "authority": "N.J.S.A. 47:1A-5(g); P.L.2024, c.16, §2",
+      "summary": "If a request would substantially disrupt agency operations, the custodian may deny access after informing the requestor of the potential disruption and attempting to reach a reasonable solution accommodating both parties' interests."
+     }
+    ],
+    "special_records.special_record_window": [
+     {
+      "rule_id": "NJ-M27",
+      "authority": "N.J.S.A. 47:1A-5(i)(1); P.L.2024, c.16, §2",
+      "summary": "If the record is in storage or archived, the requestor must be so advised within 7/14 business days and told when the record can be made available, which shall be no more than 21 business days from that advisory; if not made available by then, access is deemed denied.",
+      "clock_spec": "advise within 7/14 business-days of receipt; availability no more than 21 business-days from the advisory; non-availability = deemed denied",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": true,
+   "activated_by": {
+    "intake.duplicate_request_denial": [
+     {
+      "rule_id": "NJ-A17",
+      "authority": "N.J.S.A. 47:1A-5(g) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "Each submission of a government record request form or email record request must be made to the custodian of not more than one public agency."
+     },
+     {
+      "rule_id": "NJ-A18",
+      "authority": "N.J.S.A. 47:1A-5(g) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "Submission of repeated requests to multiple custodians in the same public agency for the same record, while an identical or substantially similar request is pending in the agency, permits the custodian to deny the request."
+     },
+     {
+      "rule_id": "NJ-A19",
+      "authority": "N.J.S.A. 47:1A-5(i)(1) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "The custodian is not required to complete an identical request for a record from the same requestor if the information has not changed; but this does not prevent periodic requests regarding regularly updated records (e.g., certified payrolls, permits, licensing applications)."
+     },
+     {
+      "rule_id": "NJ-M19",
+      "authority": "N.J.S.A. 47:1A-5(g); P.L.2024, c.16, §2",
+      "summary": "The custodian may deny repeated requests submitted to multiple custodians in the same public agency for the same record while an identical or substantially similar request is pending in that agency."
+     },
+     {
+      "rule_id": "NJ-M24",
+      "authority": "N.J.S.A. 47:1A-5(i)(1); P.L.2024, c.16, §2",
+      "summary": "The custodian is not required to complete an identical request from the same requestor if the information has not changed (periodic requests for regularly-updated records remain permitted)."
+     }
+    ]
+   },
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "NJ-T01",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "The custodian shall grant access to, or deny, a government-record request as soon as possible but not later than seven business days after receiving the request, provided the record is currently available and not in storage or archived.",
+      "clock_spec": "7 business-days from request receipt (ceiling; 'as soon as possible' soft floor overlay)",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.clock_computation": [
+     {
+      "rule_id": "NJ-A31",
+      "authority": "N.J.S.A. 47:1A-5(h) (as amended by P.L.2024, c.16, s.2)",
+      "summary": "A request is not considered submitted until it is received by the custodian of records."
+     },
+     {
+      "rule_id": "NJ-T10",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "If the requestor elected not to accurately identify themselves or to provide an accurate address, email, or telephone number, the custodian is not required to respond until the requestor contacts the custodian seeking a response to the original request.",
+      "clock_spec": "response clock does not run until requestor contacts custodian",
+      "clock_effect": "tolls"
+     }
+    ],
+    "denial.deemed_denial_on_nonresponse": [
+     {
+      "rule_id": "NJ-T09",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "Failure of the custodian to respond within the applicable seven or fourteen business days is deemed a denial of the request (unless the requestor elected not to accurately identify themselves or provide accurate contact information).",
+      "clock_spec": "terminal event at expiry of 7 or 14 business-days from request receipt",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "NJ-T13",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "If a stored/archived record is not made available by the advised availability time (max 21 business days), access shall be deemed denied.",
+      "clock_spec": "terminal event at expiry of the storage-availability window (<=21 business-days)",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "NJ-M25",
+      "authority": "N.J.S.A. 47:1A-5(i)(1); P.L.2024, c.16, §2",
+      "summary": "If the custodian fails to respond within seven business days (or 14 business days for commercial-purpose/redaction-review requests) after receiving a request, the failure to respond is deemed a denial of the request.",
+      "clock_spec": "7 business-days from request receipt (14 business-days if commercial purpose or C.47:1B compliance review); +7 business-days for a fire district with one or fewer full-time custodial employees",
+      "clock_effect": "terminal"
+     },
+     {
+      "rule_id": "NJ-M26",
+      "authority": "N.J.S.A. 47:1A-5(i)(1); P.L.2024, c.16, §2",
+      "summary": "Where the requestor elected not to accurately identify themselves or provide an accurate address/email/phone, the deemed-denial does not run and the custodian need not respond until the requestor contacts the custodian seeking a response.",
+      "clock_spec": "response obligation suspended until requestor contacts custodian seeking a response",
+      "clock_effect": "pauses"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": true,
+   "statutory": {
+    "response.extension_grounds": [
+     {
+      "rule_id": "NJ-T07",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "If unable to fulfill a request due to unforeseen circumstances or circumstances reasonably necessitating more time, the custodian is entitled to a reasonable extension of any response deadline.",
+      "clock_spec": "undefined-soft: 'reasonable extension' of the response deadline",
+      "clock_effect": "tolls"
+     },
+     {
+      "rule_id": "NJ-T15",
+      "authority": "N.J.S.A. 47:1A-5(i)(2), as amended by P.L. 2024, c.16, s.2",
+      "summary": "During a declared state of emergency, public health emergency, or state of local disaster emergency, the response deadlines under (i)(1) and subsection e. do not apply, but the custodian shall make a reasonable effort to respond within 7 or 14 business days, or as soon as possible thereafter.",
+      "clock_spec": "undefined-soft: statutory deadlines do not apply; 'reasonable effort ... as soon as possible' from request receipt",
+      "clock_effect": "tolls"
+     }
+    ],
+    "response.extension_length": [
+     {
+      "rule_id": "NJ-T03",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "The response window is not later than 14 business days if the records must be reviewed by the agency for compliance with P.L.2021, c.371 (covered-officer home-address protection).",
+      "clock_spec": "14 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "NJ-T05",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "The seven- or fourteen-business-day response periods are an additional seven business days longer if the public agency is a fire district employing one or fewer full-time employees serving as custodians.",
+      "clock_spec": "+7 business-days added to the applicable 7- or 14-business-day window",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.extension_notice": [
+     {
+      "rule_id": "NJ-T08",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "When taking a reasonable extension for unforeseen circumstances, the custodian shall notify the requestor of the time extension within seven business days after receiving the request.",
+      "clock_spec": "7 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "completion": {
+   "present": true,
+   "statutory": {
+    "production.completion_window": [
+     {
+      "rule_id": "NJ-T12",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "A stored or archived record must be made available no more than 21 business days from the date the requestor is advised it is in storage/archived.",
+      "clock_spec": "21 business-days from date requestor is advised",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": true,
+   "statutory": {
+    "response.classified_request_window": [
+     {
+      "rule_id": "NJ-T02",
+      "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+      "summary": "The response window is not later than 14 business days if the request is for a commercial purpose.",
+      "clock_spec": "14 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "special_records.special_record_window": [
+     {
+      "rule_id": "NJ-M27",
+      "authority": "N.J.S.A. 47:1A-5(i)(1); P.L.2024, c.16, §2",
+      "summary": "If the record is in storage or archived, the requestor must be so advised within 7/14 business days and told when the record can be made available, which shall be no more than 21 business days from that advisory; if not made available by then, access is deemed denied.",
+      "clock_spec": "advise within 7/14 business-days of receipt; availability no more than 21 business-days from the advisory; non-availability = deemed denied",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "NJ-M01",
+    "authority": "N.J.S.A. 47:1A-5(b)(1); P.L.2024, c.16, §2",
+    "summary": "For a government record embodied in printed matter, the custodian shall assess a duplication fee of $0.05 per letter-size page or smaller and $0.07 per legal-size page or larger."
+   },
+   {
+    "rule_id": "NJ-M11",
+    "authority": "N.J.S.A. 47:1A-5(e); P.L.2024, c.16, §2",
+    "summary": "Where a requestor directed to a website record still cannot find it and requests a physical copy, the custodian shall provide a physical copy for a fee not exceeding two times the cost of production of the document.",
+    "clock_spec": "ceiling: 2x cost of production"
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "NJ-M03",
+    "authority": "N.J.S.A. 47:1A-5(b)(1); P.L.2024, c.16, §2",
+    "summary": "When providing electronic/non-printed records free of charge, the public agency may charge for the actual costs of any needed supplies such as computer discs."
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "NJ-M10",
+    "authority": "N.J.S.A. 47:1A-5(d); P.L.2024, c.16, §2",
+    "summary": "If the agency converts a record to a requested medium/format, it may charge, in addition to actual duplication cost, a reasonable special service fee based on the cost of extensive IT use or the labor cost of personnel providing the service."
+   }
+  ],
+  "fee.commercial_charge": [
+   {
+    "rule_id": "NJ-M12",
+    "authority": "N.J.S.A. 47:1A-5(i)(1); P.L.2024, c.16, §2",
+    "summary": "If a commercial requestor wants the record within seven business days (rather than the 14-day commercial window), the custodian may charge a special service fee not exceeding two times the cost of production of the record.",
+    "clock_spec": "ceiling: 2x cost of production"
+   },
+   {
+    "rule_id": "NJ-M13",
+    "authority": "N.J.S.A. 47:1A-1.1; P.L.2024, c.16, §1",
+    "summary": "A request has a 'commercial purpose' where any part of the record is used, directly or indirectly, for sale, resale, solicitation, rent, or lease of a service, or any use by which the user expects a profit through commission, salary, or fee; this classification triggers the 14-business-day respon…"
+   }
+  ],
+  "fee.special_service_charge": [
+   {
+    "rule_id": "NJ-M06",
+    "authority": "N.J.S.A. 47:1A-5(c); P.L.2024, c.16, §2",
+    "summary": "Where a printed record cannot be reproduced by ordinary copying equipment or involves an extraordinary expenditure of time and effort, the agency may charge, in addition to actual duplication cost, a reasonable special service charge based on the actual direct cost of providing the copies."
+   }
+  ],
+  "fee.no_charge_categories": [
+   {
+    "rule_id": "NJ-M02",
+    "authority": "N.J.S.A. 47:1A-5(b)(1); P.L.2024, c.16, §2",
+    "summary": "Access to electronic records and non-printed materials shall be provided free of charge (fee = $0)."
+   },
+   {
+    "rule_id": "NJ-M04",
+    "authority": "N.J.S.A. 47:1A-5(b)(1); P.L.2024, c.16, §2",
+    "summary": "No fee shall be charged if the request is completed by directing the requestor to the record available on the public agency's website or another public agency's website."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.records_officer_designation": [
+   {
+    "rule_id": "NJ-A06",
+    "authority": "N.J.S.A. 47:1A-1.1 (as amended by P.L.2024, c.16, s.1)",
+    "summary": "The custodian who must receive and respond to a request is, for a municipality, the municipal clerk; for any other public agency, the officer officially designated by formal action of that agency's director or governing body."
+   }
+  ],
+  "intake.procedures_publication": [
+   {
+    "rule_id": "NJ-A11",
+    "authority": "N.J.S.A. 47:1A-5(f) (as amended by P.L.2024, c.16, s.2)",
+    "summary": "The custodian must adopt the form established by the Government Records Council for use by any person requesting a record; a request shall be submitted in the adopted form and the custodian may deny a request that is incomplete, except that indicating the request is anonymous is not a ground for …"
+   }
+  ]
+ },
+ "ledger": {
+  "intake.duplicate_request_denial": [
+   {
+    "rule_id": "NJ-A17",
+    "authority": "N.J.S.A. 47:1A-5(g) (as amended by P.L.2024, c.16, s.2)",
+    "summary": "Each submission of a government record request form or email record request must be made to the custodian of not more than one public agency."
+   },
+   {
+    "rule_id": "NJ-A18",
+    "authority": "N.J.S.A. 47:1A-5(g) (as amended by P.L.2024, c.16, s.2)",
+    "summary": "Submission of repeated requests to multiple custodians in the same public agency for the same record, while an identical or substantially similar request is pending in the agency, permits the custodian to deny the request."
+   },
+   {
+    "rule_id": "NJ-A19",
+    "authority": "N.J.S.A. 47:1A-5(i)(1) (as amended by P.L.2024, c.16, s.2)",
+    "summary": "The custodian is not required to complete an identical request for a record from the same requestor if the information has not changed; but this does not prevent periodic requests regarding regularly updated records (e.g., certified payrolls, permits, licensing applications)."
+   },
+   {
+    "rule_id": "NJ-M19",
+    "authority": "N.J.S.A. 47:1A-5(g); P.L.2024, c.16, §2",
+    "summary": "The custodian may deny repeated requests submitted to multiple custodians in the same public agency for the same record while an identical or substantially similar request is pending in that agency."
+   },
+   {
+    "rule_id": "NJ-M24",
+    "authority": "N.J.S.A. 47:1A-5(i)(1); P.L.2024, c.16, §2",
+    "summary": "The custodian is not required to complete an identical request from the same requestor if the information has not changed (periodic requests for regularly-updated records remain permitted)."
+   }
+  ],
+  "response.classified_request_window": [
+   {
+    "rule_id": "NJ-T02",
+    "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+    "summary": "The response window is not later than 14 business days if the request is for a commercial purpose.",
+    "clock_spec": "14 business-days from request receipt",
+    "clock_effect": "sets-deadline"
+   }
+  ],
+  "response.repeat_request_handling": [
+   {
+    "rule_id": "NJ-T17",
+    "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+    "summary": "The custodian is not required to complete an identical request for access from the same requestor if the information has not changed."
+   },
+   {
+    "rule_id": "NJ-T18",
+    "authority": "N.J.S.A. 47:1A-5(i)(1), as amended by P.L. 2024, c.16, s.2",
+    "summary": "Nothing prevents a requestor from filing periodic requests regarding regularly updated public records, including certified payrolls, permits, and licensing applications."
+   }
+  ]
+ },
+ "audit": {
+  "rules_total": 97,
+  "rules_referenced": 97,
+  "unreferenced_rule_ids": []
+ }
+}

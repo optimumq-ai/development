@@ -1,0 +1,685 @@
+{
+ "state": "Washington",
+ "code": "WA",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.submission_channels": [
+     {
+      "rule_id": "WA-0006",
+      "authority": "RCW 42.56.080(2)",
+      "summary": "An agency shall honor requests for identifiable public records received in person during normal office hours, or by mail or email, unless exempted by the chapter."
+     }
+    ],
+    "intake.no_required_form": [
+     {
+      "rule_id": "WA-0005",
+      "authority": "RCW 42.56.080(2)",
+      "summary": "No official format is required to make a records request, though an agency may recommend a form or web page."
+     }
+    ],
+    "intake.no_technicality_denial": [
+     {
+      "rule_id": "WA-0008",
+      "authority": "RCW 42.56.080(2)",
+      "summary": "An agency shall not deny a request for identifiable public records solely because the request is overbroad."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {
+    "response.valid_response_forms": [
+     {
+      "rule_id": "WA-0011",
+      "authority": "RCW 42.56.520(1)(a)-(e)",
+      "summary": "The initial response must take one of five forms: provide the record; provide a website link to it; acknowledge and give a reasonable time estimate; acknowledge and request clarification with an estimate; or deny."
+     }
+    ]
+   },
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "WA-0012",
+      "authority": "RCW 42.56.520(1)(c)",
+      "summary": "When acknowledging a request rather than fulfilling it, the agency must provide a reasonable estimate of the time it will require to respond.",
+      "clock_spec": "undefined-soft: \"reasonable estimate of the time ... to respond\" from acknowledgment",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {
+    "payment.deposit_ceiling": [
+     {
+      "rule_id": "WA-0031",
+      "authority": "RCW 42.56.120(4)",
+      "summary": "An agency may require a deposit not exceeding ten percent of the estimated cost of providing copies for a request."
+     }
+    ]
+   }
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "WA-0007",
+      "authority": "RCW 42.56.080(1)(a)",
+      "summary": "A request must be for identifiable records; a request for all or substantially all of an agency's records is not valid, but a request for all records on a particular topic, keyword, or name is not treated as a request for all records."
+     }
+    ]
+   },
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {
+    "clarification.clarification_process": [
+     {
+      "rule_id": "WA-0015",
+      "authority": "RCW 42.56.520(3)(a)",
+      "summary": "When acknowledging an unclear request, the agency may ask the requester to clarify what information is sought."
+     },
+     {
+      "rule_id": "WA-0017",
+      "authority": "RCW 42.56.520(3)(b)",
+      "summary": "Where only part of a request is unclear, the agency must respond to the portions that are clear."
+     }
+    ]
+   },
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {
+    "clarification.nonresponse_withdrawal": [
+     {
+      "rule_id": "WA-0016",
+      "authority": "RCW 42.56.520(3)(b)",
+      "summary": "If the requester fails to respond to a clarification request and the entire request is unclear, the agency need not respond to it.",
+      "clock_spec": "terminal: agency need not respond; no statutory waiting period specified",
+      "clock_effect": "terminal"
+     }
+    ]
+   },
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {
+    "clarification.nonresponse_withdrawal": [
+     {
+      "rule_id": "WA-0016",
+      "authority": "RCW 42.56.520(3)(b)",
+      "summary": "If the requester fails to respond to a clarification request and the entire request is unclear, the agency need not respond to it.",
+      "clock_spec": "terminal: agency need not respond; no statutory waiting period specified",
+      "clock_effect": "terminal"
+     }
+    ]
+   },
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "WA-0012",
+      "authority": "RCW 42.56.520(1)(c)",
+      "summary": "When acknowledging a request rather than fulfilling it, the agency must provide a reasonable estimate of the time it will require to respond.",
+      "clock_spec": "undefined-soft: \"reasonable estimate of the time ... to respond\" from acknowledgment",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.deposit_ceiling": [
+     {
+      "rule_id": "WA-0031",
+      "authority": "RCW 42.56.120(4)",
+      "summary": "An agency may require a deposit not exceeding ten percent of the estimated cost of providing copies for a request."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "WA-0032",
+      "authority": "RCW 42.56.120(4)",
+      "summary": "If the requester fails to inspect, pay for, or claim an installment of a records request, the agency need not fulfill the balance of the request.",
+      "clock_spec": "terminal: balance of request not fulfilled when an installment is unclaimed",
+      "clock_effect": "terminal"
+     }
+    ]
+   },
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "WA-0034",
+      "authority": "RCW 42.56.210(3)",
+      "summary": "A response refusing inspection in whole or in part must include a statement of the specific exemption authorizing the withholding and a brief explanation of how the exemption applies to the record withheld."
+     },
+     {
+      "rule_id": "WA-0035",
+      "authority": "RCW 42.56.520(4)",
+      "summary": "Denials of requests must be accompanied by a written statement of the specific reasons for the denial."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "WA-0034",
+      "authority": "RCW 42.56.210(3)",
+      "summary": "A response refusing inspection in whole or in part must include a statement of the specific exemption authorizing the withholding and a brief explanation of how the exemption applies to the record withheld."
+     },
+     {
+      "rule_id": "WA-0035",
+      "authority": "RCW 42.56.520(4)",
+      "summary": "Denials of requests must be accompanied by a written statement of the specific reasons for the denial."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {
+    "production.installment_partial": [
+     {
+      "rule_id": "WA-0018",
+      "authority": "RCW 42.56.080(2)",
+      "summary": "Records may be provided on a partial or installment basis as records in a larger set are assembled or made ready."
+     }
+    ]
+   }
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "WA-0033",
+      "authority": "RCW 42.56.210(1)",
+      "summary": "The chapter's exemptions are inapplicable to the extent that information whose disclosure would violate personal privacy or vital governmental interests can be deleted from the specific records sought; the non-exempt remainder must be disclosed."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": false,
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "WA-0001",
+      "authority": "RCW 42.56.080(2)",
+      "summary": "Upon request for identifiable public records, the agency shall make them promptly available to any person."
+     },
+     {
+      "rule_id": "WA-0003",
+      "authority": "RCW 42.56.080(2)",
+      "summary": "An agency shall not distinguish among persons requesting records."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "WA-0002",
+      "authority": "RCW 42.56.080(2)",
+      "summary": "A requester shall not be required to provide the purpose of the request, except to establish whether disclosure would violate the commercial-purpose list prohibition or another statute restricting disclosure to certain persons."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "WA-0004",
+      "authority": "RCW 42.56.080(2)",
+      "summary": "Records must be made available to any person with no residency or citizenship qualification."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": false
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": true,
+   "activated_by": {
+    "fee.commercial_charge": [
+     {
+      "rule_id": "WA-0030",
+      "authority": "RCW 42.56.070(8)",
+      "summary": "The chapter does not authorize giving, selling, or providing access to lists of individuals requested for commercial purposes, and agencies shall not do so unless specifically authorized or directed by law."
+     }
+    ]
+   }
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "context": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "WA-0007",
+      "authority": "RCW 42.56.080(1)(a)",
+      "summary": "A request must be for identifiable records; a request for all or substantially all of an agency's records is not valid, but a request for all records on a particular topic, keyword, or name is not treated as a request for all records."
+     }
+    ]
+   },
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": false
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": false
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": true,
+   "activated_by": {
+    "special_records.third_party_proprietary": [
+     {
+      "rule_id": "WA-0043",
+      "authority": "RCW 42.56.540",
+      "summary": "An agency has discretion to notify persons named in, or to whom a requested record specifically pertains, that release of the record has been requested, except where notice is required by law."
+     }
+    ]
+   }
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": true,
+   "activated_by": {
+    "intake.duplicate_request_denial": [
+     {
+      "rule_id": "WA-0009",
+      "authority": "RCW 42.56.080(3)",
+      "summary": "An agency may deny a bot request that is one of multiple requests from the same requester within a 24-hour period if it establishes that responding would cause excessive interference with other essential functions."
+     }
+    ]
+   },
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "WA-0010",
+      "authority": "RCW 42.56.520(1)",
+      "summary": "Within five business days of receiving a request, the agency must respond in one of the five statutory ways.",
+      "clock_spec": "5 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "WA-0013",
+      "authority": "RCW 42.56.520(1)",
+      "summary": "Responses to public records requests shall be made promptly.",
+      "clock_spec": "undefined-soft: \"promptly\" from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": true,
+   "statutory": {
+    "response.extension_grounds": [
+     {
+      "rule_id": "WA-0014",
+      "authority": "RCW 42.56.520(2)",
+      "summary": "Additional time to respond may be based on the need to clarify the request, to locate and assemble records, to notify affected third persons or agencies, or to determine whether information is exempt."
+     }
+    ]
+   }
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": true,
+   "statutory": {
+    "clarification.nonresponse_withdrawal": [
+     {
+      "rule_id": "WA-0016",
+      "authority": "RCW 42.56.520(3)(b)",
+      "summary": "If the requester fails to respond to a clarification request and the entire request is unclear, the agency need not respond to it.",
+      "clock_spec": "terminal: agency need not respond; no statutory waiting period specified",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "nonpayment_close": {
+   "present": true,
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "WA-0032",
+      "authority": "RCW 42.56.120(4)",
+      "summary": "If the requester fails to inspect, pay for, or claim an installment of a records request, the agency need not fulfill the balance of the request.",
+      "clock_spec": "terminal: balance of request not fulfilled when an installment is unclaimed",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "WA-0021",
+    "authority": "RCW 42.56.120(2)(b)(i)",
+    "summary": "Absent a published actual-cost calculation, the agency may charge up to fifteen cents per page for photocopies or printed copies of electronic records."
+   },
+   {
+    "rule_id": "WA-0022",
+    "authority": "RCW 42.56.120(2)(b)(ii)",
+    "summary": "Absent a published actual-cost calculation, the agency may charge up to ten cents per page for public records scanned into an electronic format."
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "WA-0020",
+    "authority": "RCW 42.56.120(1)",
+    "summary": "A reasonable charge may be imposed for copies and for use of agency copying equipment, not exceeding the amount necessary to reimburse the agency for its actual costs directly incident to copying."
+   },
+   {
+    "rule_id": "WA-0027",
+    "authority": "RCW 42.56.070(7); RCW 42.56.120(2)(a)",
+    "summary": "An agency may charge actual copying costs only in accordance with costs it has established and published; it may establish and make available a statement of the actual costs it charges for copies."
+   },
+   {
+    "rule_id": "WA-0028",
+    "authority": "RCW 42.56.070(7)(b)",
+    "summary": "In determining actual copy costs, an agency may not include staff salaries, benefits, or general administrative or overhead charges unless directly related to the actual cost of copying."
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "WA-0023",
+    "authority": "RCW 42.56.120(2)(b)(iii)",
+    "summary": "Absent a published actual-cost calculation, the agency may charge up to five cents per each four electronic files or attachments uploaded for electronic delivery."
+   },
+   {
+    "rule_id": "WA-0024",
+    "authority": "RCW 42.56.120(2)(b)(iv)",
+    "summary": "Absent a published actual-cost calculation, the agency may charge up to ten cents per gigabyte for transmission of records in an electronic format."
+   }
+  ],
+  "fee.commercial_charge": [
+   {
+    "rule_id": "WA-0030",
+    "authority": "RCW 42.56.070(8)",
+    "summary": "The chapter does not authorize giving, selling, or providing access to lists of individuals requested for commercial purposes, and agencies shall not do so unless specifically authorized or directed by law."
+   }
+  ],
+  "fee.special_service_charge": [
+   {
+    "rule_id": "WA-0029",
+    "authority": "RCW 42.56.120(3)",
+    "summary": "An agency may impose a customized service charge for a request that requires information-technology expertise to prepare data compilations or provide customized electronic access not used by the agency for other purposes, only after notifying the requester of the charge and the reason it applies."
+   }
+  ],
+  "fee.no_charge_categories": [
+   {
+    "rule_id": "WA-0026",
+    "authority": "RCW 42.56.120(2)(e)",
+    "summary": "An agency may not impose copying charges for access to or downloading of records it routinely posts on its public internet website."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "WA-0025",
+    "authority": "RCW 42.56.120(2)(d)",
+    "summary": "An agency may charge a flat fee of up to two dollars for a request as payment for the costs of providing the copies, in lieu of itemized charges."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.custodian_definition_and_role": [
+   {
+    "rule_id": "WA-0041",
+    "authority": "RCW 42.56.100",
+    "summary": "Agency rules must provide for the fullest assistance to inquirers and the most timely possible action on requests for information.",
+    "clock_spec": "undefined-soft: \"most timely possible action\" from request receipt",
+    "clock_effect": "sets-deadline"
+   }
+  ],
+  "custody.records_officer_designation": [
+   {
+    "rule_id": "WA-0040",
+    "authority": "RCW 42.56.580(1)",
+    "summary": "Each state and local agency shall appoint and publicly identify a public records officer to serve as the point of contact for records requests and to oversee the agency's compliance with the chapter."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "WA-0025",
+    "authority": "RCW 42.56.120(2)(d)",
+    "summary": "An agency may charge a flat fee of up to two dollars for a request as payment for the costs of providing the copies, in lieu of itemized charges."
+   }
+  ]
+ },
+ "ledger": {
+  "intake.duplicate_request_denial": [
+   {
+    "rule_id": "WA-0009",
+    "authority": "RCW 42.56.080(3)",
+    "summary": "An agency may deny a bot request that is one of multiple requests from the same requester within a 24-hour period if it establishes that responding would cause excessive interference with other essential functions."
+   }
+  ]
+ },
+ "audit": {
+  "rules_total": 37,
+  "rules_referenced": 37,
+  "unreferenced_rule_ids": []
+ }
+}

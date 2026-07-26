@@ -1,0 +1,597 @@
+{
+ "state": "Nebraska",
+ "code": "NE",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.written_request_required": [
+     {
+      "rule_id": "NE-0010",
+      "authority": "Neb. Rev. Stat. § 84-712(4)",
+      "summary": "The custodian's duty to provide a cost estimate and one of the enumerated responses is triggered by receipt of a written request for access to or copies of a public record."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {
+    "response.valid_response_forms": [
+     {
+      "rule_id": "NE-0013",
+      "authority": "Neb. Rev. Stat. § 84-712(4)",
+      "summary": "The custodian's timely response must be one of three enumerated forms: (a) access/copies, (b) a written denial with a legal basis, or (c) a written explanation of delay."
+     }
+    ]
+   },
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "NE-0018",
+      "authority": "Neb. Rev. Stat. § 84-712(4)",
+      "summary": "With its timely response, the custodian must provide the requester an estimate of the expected cost of the copies."
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "NE-0014",
+      "authority": "Neb. Rev. Stat. § 84-712(4)(c)",
+      "summary": "When a request cannot with reasonable good-faith efforts be fulfilled within four business days due to significant difficulty or extensiveness, the custodian must give a written explanation including the earliest practicable date for fulfilling the request, a cost estimate, and an opportunity for…",
+      "clock_spec": "undefined-soft: \"earliest practicable date for fulfilling the request\" stated in the written explanation",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {
+    "payment.deposit": [
+     {
+      "rule_id": "NE-0021",
+      "authority": "Neb. Rev. Stat. § 84-712(1)",
+      "summary": "If the estimated cost of requested copies exceeds fifty dollars, the custodian may require the requester to furnish a deposit before fulfilling the request."
+     }
+    ]
+   }
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "NE-0018",
+      "authority": "Neb. Rev. Stat. § 84-712(4)",
+      "summary": "With its timely response, the custodian must provide the requester an estimate of the expected cost of the copies."
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "NE-0014",
+      "authority": "Neb. Rev. Stat. § 84-712(4)(c)",
+      "summary": "When a request cannot with reasonable good-faith efforts be fulfilled within four business days due to significant difficulty or extensiveness, the custodian must give a written explanation including the earliest practicable date for fulfilling the request, a cost estimate, and an opportunity for…",
+      "clock_spec": "undefined-soft: \"earliest practicable date for fulfilling the request\" stated in the written explanation",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "NE-0018",
+      "authority": "Neb. Rev. Stat. § 84-712(4)",
+      "summary": "With its timely response, the custodian must provide the requester an estimate of the expected cost of the copies."
+     }
+    ]
+   },
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.deposit": [
+     {
+      "rule_id": "NE-0021",
+      "authority": "Neb. Rev. Stat. § 84-712(1)",
+      "summary": "If the estimated cost of requested copies exceeds fifty dollars, the custodian may require the requester to furnish a deposit before fulfilling the request."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "NE-0016",
+      "authority": "Neb. Rev. Stat. § 84-712(4)",
+      "summary": "If the requester does not respond to the custodian within ten business days of the cost estimate, the custodian shall not proceed to fulfill the request.",
+      "clock_spec": "terminal at 10 business-days from cost estimate; nonresponse halts fulfillment",
+      "clock_effect": "terminal"
+     }
+    ]
+   },
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "NE-0027",
+      "authority": "Neb. Rev. Stat. § 84-712.04(1)",
+      "summary": "A denial must include a description of the contents of the records withheld and a statement of specific reasons, correlating specific portions of the records to specific reasons, including citations to the particular statute and subsection expressly providing the exception."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "NE-0026",
+      "authority": "Neb. Rev. Stat. § 84-712(4)(b); § 84-712.04",
+      "summary": "If there is a legal basis for denial, the custodian must issue a written denial of the request."
+     }
+    ],
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "NE-0027",
+      "authority": "Neb. Rev. Stat. § 84-712.04(1)",
+      "summary": "A denial must include a description of the contents of the records withheld and a statement of specific reasons, correlating specific portions of the records to specific reasons, including citations to the particular statute and subsection expressly providing the exception."
+     }
+    ],
+    "denial.identify_responsible_person": [
+     {
+      "rule_id": "NE-0028",
+      "authority": "Neb. Rev. Stat. § 84-712.04(2)",
+      "summary": "A denial must state the name of the public official or employee responsible for the decision to deny the request."
+     }
+    ],
+    "denial.denial_form_and_log": [
+     {
+      "rule_id": "NE-0030",
+      "authority": "Neb. Rev. Stat. § 84-712.04",
+      "summary": "Each public body must maintain a file of all letters denying requests, and that file must be made accessible to the public upon request."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {},
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "NE-0025",
+      "authority": "Neb. Rev. Stat. § 84-712.01(1)",
+      "summary": "Data that is a public record in its original form remains a public record when maintained in computer files."
+     }
+    ],
+    "production.delivery_and_completion": [
+     {
+      "rule_id": "NE-0012",
+      "authority": "Neb. Rev. Stat. § 84-712(4)",
+      "summary": "Independent of the four-day cap, the custodian must respond as soon as is practicable and without delay.",
+      "clock_spec": "undefined-soft: \"as soon as is practicable and without delay\" from actual receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "NE-0024",
+      "authority": "Neb. Rev. Stat. § 84-712.01(2)",
+      "summary": "A governmental entity is not required to acquire computer capability to generate public records in a new or different form when that new form would require additional computer equipment or software the entity does not already possess."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": false,
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "NE-0001",
+      "authority": "Neb. Rev. Stat. § 84-712(1)",
+      "summary": "Any resident of the state and any other person interested in examining public records is empowered to examine those records and make memoranda, copies, and abstracts, free of charge, during office business hours."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "NE-0003",
+      "authority": "Neb. Rev. Stat. § 84-712(1)",
+      "summary": "A requester need not state a reason or purpose to examine or obtain public records; the right to examine attaches to any interested person without a purpose condition."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "NE-0002",
+      "authority": "Neb. Rev. Stat. § 84-712(1)",
+      "summary": "Eligibility to examine and copy public records is not limited to residents; 'all other persons interested in the examination of the public records' are equally authorized, so no residency or citizenship qualification gates the right."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "NE-0022",
+      "authority": "Neb. Rev. Stat. § 84-712(1)",
+      "summary": "The custodian may waive or reduce any fee if the waiver or reduction would be in the public interest."
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": true,
+   "activated_by": {
+    "clarification.toll_on_clarification": [
+     {
+      "rule_id": "NE-0015",
+      "authority": "Neb. Rev. Stat. § 84-712(4)",
+      "summary": "After receiving the cost estimate, the requester has ten business days to review estimated costs (including any special service charge) and either request fulfillment of the original request, negotiate to narrow/simplify it, or withdraw it.",
+      "clock_spec": "10 business-days from delivery of the cost estimate",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "NE-0022",
+      "authority": "Neb. Rev. Stat. § 84-712(1)",
+      "summary": "The custodian may waive or reduce any fee if the waiver or reduction would be in the public interest."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "NE-0022",
+      "authority": "Neb. Rev. Stat. § 84-712(1)",
+      "summary": "The custodian may waive or reduce any fee if the waiver or reduction would be in the public interest."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "context": {
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "NE-0024",
+      "authority": "Neb. Rev. Stat. § 84-712.01(2)",
+      "summary": "A governmental entity is not required to acquire computer capability to generate public records in a new or different form when that new form would require additional computer equipment or software the entity does not already possess."
+     }
+    ]
+   },
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "NE-0011",
+      "authority": "Neb. Rev. Stat. § 84-712(4)",
+      "summary": "Within not more than four business days after actual receipt of a written request, the custodian must provide a cost estimate and either (a) access/copies, (b) a written denial, or (c) a written explanation of delay.",
+      "clock_spec": "ceiling: 4 business-days from actual receipt of the written request",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.clock_computation": [
+     {
+      "rule_id": "NE-0017",
+      "authority": "Neb. Rev. Stat. § 84-712(4)",
+      "summary": "The four business days are computed by excluding the day the request is received; a business day excludes Saturdays, Sundays, and any day the custodian's offices are closed."
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": true,
+   "statutory": {
+    "clarification.toll_on_clarification": [
+     {
+      "rule_id": "NE-0015",
+      "authority": "Neb. Rev. Stat. § 84-712(4)",
+      "summary": "After receiving the cost estimate, the requester has ten business days to review estimated costs (including any special service charge) and either request fulfillment of the original request, negotiate to narrow/simplify it, or withdraw it.",
+      "clock_spec": "10 business-days from delivery of the cost estimate",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "nonpayment_close": {
+   "present": true,
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "NE-0016",
+      "authority": "Neb. Rev. Stat. § 84-712(4)",
+      "summary": "If the requester does not respond to the custodian within ten business days of the cost estimate, the custodian shall not proceed to fulfill the request.",
+      "clock_spec": "terminal at 10 business-days from cost estimate; nonresponse halts fulfillment",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "NE-0019",
+    "authority": "Neb. Rev. Stat. § 84-712(1)",
+    "summary": "A custodian may charge a fee for providing copies, but the fee shall not exceed the actual added cost of making the copies available."
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "NE-0023",
+    "authority": "Neb. Rev. Stat. § 84-712.01(2)",
+    "summary": "When a county custodian provides a copy by transmitting it modem-to-modem, a reasonable fee may be charged for the specialized service, which may include a reasonable amortization of added computer equipment/software cost."
+   }
+  ],
+  "fee.free_allowance": [
+   {
+    "rule_id": "NE-0020",
+    "authority": "Neb. Rev. Stat. § 84-712(1)",
+    "summary": "For a Nebraska resident's request, the actual added cost used to calculate a fee shall not include any charge for existing salary/pay obligations for the first eight cumulative hours of searching, identifying, physically redacting, or copying."
+   }
+  ]
+ },
+ "program_setup": {
+  "denial.denial_form_and_log": [
+   {
+    "rule_id": "NE-0030",
+    "authority": "Neb. Rev. Stat. § 84-712.04",
+    "summary": "Each public body must maintain a file of all letters denying requests, and that file must be made accessible to the public upon request."
+   }
+  ]
+ },
+ "ledger": {},
+ "audit": {
+  "rules_total": 23,
+  "rules_referenced": 23,
+  "unreferenced_rule_ids": []
+ }
+}

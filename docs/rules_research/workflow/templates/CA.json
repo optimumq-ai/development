@@ -1,0 +1,540 @@
+{
+ "state": "California",
+ "code": "CA",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {},
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "CA-0011",
+      "authority": "Cal. Gov. Code § 7922.535(a) (Statute)",
+      "summary": "If the agency determines the request seeks disclosable public records, it must also state the estimated date and time when the records will be made available."
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "CA-0006",
+      "authority": "Cal. Gov. Code § 7922.530(a) (Statute)",
+      "summary": "A copy request must reasonably describe an identifiable record or records before the duty to produce attaches."
+     }
+    ]
+   },
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "CA-0011",
+      "authority": "Cal. Gov. Code § 7922.535(a) (Statute)",
+      "summary": "If the agency determines the request seeks disclosable public records, it must also state the estimated date and time when the records will be made available."
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "CA-0025",
+      "authority": "Cal. Gov. Code § 7922.530(a) (Statute)",
+      "summary": "The agency's duty is to make copies available upon payment of the duplication fees, permitting the agency to condition release of copies on payment."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.agency_burden": [
+     {
+      "rule_id": "CA-0028",
+      "authority": "Cal. Gov. Code § 7922.000 (Statute)",
+      "summary": "An agency must justify withholding any record by demonstrating that it is exempt under an express provision of the CPRA, or that on the facts of the particular case the public interest served by nondisclosure clearly outweighs the public interest served by disclosure."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "CA-0026",
+      "authority": "Cal. Gov. Code § 7922.540(a) (Statute)",
+      "summary": "A response to a written request that includes a determination denying the request, in whole or in part, must be in writing."
+     }
+    ],
+    "denial.identify_responsible_person": [
+     {
+      "rule_id": "CA-0027",
+      "authority": "Cal. Gov. Code § 7922.540(b) (Statute)",
+      "summary": "A notification of denial must set forth the names and titles or positions of each person responsible for the denial."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "CA-0020",
+      "authority": "Cal. Gov. Code § 7922.525(b) (Statute)",
+      "summary": "Any reasonably segregable portion of a record must be made available after deletion of the portions that are exempt by law."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "CA-0017",
+      "authority": "Cal. Gov. Code § 7922.570(a) (Statute)",
+      "summary": "If information constituting a non-exempt identifiable public record is held in an electronic format, the agency must make it available in an electronic format when requested by any person."
+     },
+     {
+      "rule_id": "CA-0018",
+      "authority": "Cal. Gov. Code § 7922.570(b) (Statute)",
+      "summary": "The agency must make the information available in any electronic format in which it holds the information, and must provide a copy in the requested format if that format is one the agency has used to create copies for its own use or for other agencies."
+     }
+    ],
+    "production.delivery_and_completion": [
+     {
+      "rule_id": "CA-0014",
+      "authority": "Cal. Gov. Code § 7922.530(a) (Statute)",
+      "summary": "Once a disclosable copy request is made, the agency must make the records promptly available (a soft-standard production deadline distinct from the 10-day determination).",
+      "clock_spec": "undefined-soft: \"promptly\" from request receipt / upon payment of duplication fees",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": false,
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "CA-0001",
+      "authority": "Cal. Gov. Code § 7922.525(a) (Statute)",
+      "summary": "Every person has a right to inspect any public record; the right to request/inspect is not limited to residents, citizens, or an enumerated class of requesters."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "CA-0002",
+      "authority": "Cal. Gov. Code § 7921.300 (Statute)",
+      "summary": "An agency may not condition or limit access to an otherwise-disclosable public record based on the purpose for which the record is requested; requesters need not state a reason."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "CA-0003",
+      "authority": "Cal. Gov. Code § 7922.530(a) (Statute)",
+      "summary": "Records must be made available to any person; there is no residency, citizenship, or in-state requirement to request records."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": false
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": true,
+   "activated_by": {
+    "clarification.duty_to_assist": [
+     {
+      "rule_id": "CA-0007",
+      "authority": "Cal. Gov. Code § 7922.600(a) (Statute)",
+      "summary": "To assist the requester in making a focused, effective request, the agency shall (to the extent reasonable) help identify responsive records, describe the information technology and physical location where records exist, and suggest ways to overcome any practical basis for denying access."
+     }
+    ]
+   }
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "context": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "CA-0006",
+      "authority": "Cal. Gov. Code § 7922.530(a) (Statute)",
+      "summary": "A copy request must reasonably describe an identifiable record or records before the duty to produce attaches."
+     }
+    ]
+   },
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": true,
+   "activated_by": {
+    "clarification.duty_satisfied": [
+     {
+      "rule_id": "CA-0008",
+      "authority": "Cal. Gov. Code § 7922.600(b) (Statute)",
+      "summary": "The agency's duty to help identify responsive records is deemed satisfied if it cannot identify the requested information after making a reasonable effort to elicit additional clarifying information from the requester."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": false
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": false
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": false,
+   "suppressed_by": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "CA-0025",
+      "authority": "Cal. Gov. Code § 7922.530(a) (Statute)",
+      "summary": "The agency's duty is to make copies available upon payment of the duplication fees, permitting the agency to condition release of copies on payment."
+     }
+    ]
+   },
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": true,
+   "activated_by": {
+    "production.website_satisfies": [
+     {
+      "rule_id": "CA-0019",
+      "authority": "Cal. Gov. Code § 7922.545 (Statute)",
+      "summary": "An agency may satisfy a records-posting/production obligation by maintaining the record on its website and directing the requester there, but must promptly provide a copy if the requester cannot access or reproduce the record from the website."
+     }
+    ]
+   }
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": true,
+   "activated_by": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "CA-0025",
+      "authority": "Cal. Gov. Code § 7922.530(a) (Statute)",
+      "summary": "The agency's duty is to make copies available upon payment of the duplication fees, permitting the agency to condition release of copies on payment."
+     }
+    ]
+   }
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "CA-0009",
+      "authority": "Cal. Gov. Code § 7922.535(a) (Statute)",
+      "summary": "Within 10 days of receiving a copy request, the agency must determine whether it seeks disclosable public records in its possession and promptly notify the requester of the determination and the reasons.",
+      "clock_spec": "fixed: 10 days from receipt of request",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": true,
+   "statutory": {
+    "response.extension_length": [
+     {
+      "rule_id": "CA-0012",
+      "authority": "Cal. Gov. Code § 7922.535(b) (Statute)",
+      "summary": "In unusual circumstances the determination time limit may be extended by written notice, but not by more than 14 days.",
+      "clock_spec": "ceiling: up to 14 additional days beyond the 10-day determination deadline; requires written extension notice",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.extension_notice": [
+     {
+      "rule_id": "CA-0013",
+      "authority": "Cal. Gov. Code § 7922.535(b) (Statute)",
+      "summary": "An extension of the determination deadline is valid only if made by written notice from the agency head or designee, setting forth the reasons for the extension and the date a determination is expected to be dispatched."
+     }
+    ]
+   }
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "CA-0021",
+    "authority": "Cal. Gov. Code § 7922.530(a) (Statute)",
+    "summary": "Fees for copies of records are limited to fees covering the direct costs of duplication, or a statutory fee if one applies."
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "CA-0022",
+    "authority": "Cal. Gov. Code § 7922.575(a) (Statute)",
+    "summary": "The cost of duplicating an electronic record is limited to the direct cost of producing a copy of the record in an electronic format."
+   },
+   {
+    "rule_id": "CA-0023",
+    "authority": "Cal. Gov. Code § 7922.575(b) (Statute)",
+    "summary": "The requester bears the cost of producing a copy (including the cost to construct a record and the cost of programming and computer services) when the electronic record is produced only at regularly scheduled intervals, or when the request requires data compilation, extraction, or programming to …"
+   }
+  ],
+  "fee.no_charge_categories": [
+   {
+    "rule_id": "CA-0024",
+    "authority": "National Lawyers Guild, S.F. Bay Area Chapter v. City of Hayward (2020) 9 Cal.5th 488 (Appellate/Supreme Court Decision)",
+    "summary": "For ordinary production of electronic records, an agency may not charge for the ancillary staff time of searching for and redacting/reviewing records; such time is chargeable only within the narrow data-extraction cost-shift of Section 7922.575(b) (i.e., where extraction/programming or interval-o…"
+   }
+  ]
+ },
+ "program_setup": {
+  "communication.determination_notice": [
+   {
+    "rule_id": "CA-0010",
+    "authority": "Cal. Gov. Code § 7922.535(a) (Statute)",
+    "summary": "The agency must promptly notify the requester of its determination and the reasons therefor."
+   }
+  ]
+ },
+ "ledger": {},
+ "audit": {
+  "rules_total": 24,
+  "rules_referenced": 24,
+  "unreferenced_rule_ids": []
+ }
+}

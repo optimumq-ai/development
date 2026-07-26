@@ -1,0 +1,677 @@
+{
+ "state": "Virginia",
+ "code": "VA",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.no_technicality_denial": [
+     {
+      "rule_id": "VA-0006",
+      "authority": "Va. Code § 2.2-3704(B)",
+      "summary": "A request need not reference VFOIA to invoke the chapter's provisions or to impose the response time limits on the public body."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "VA-0025",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "Prior to conducting a search for records, the body shall notify the requester in writing that it may make reasonable charges not to exceed actual cost and inquire whether the requester would like a cost estimate in advance."
+     },
+     {
+      "rule_id": "VA-0026",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "The public body shall provide the requester with a cost estimate if requested."
+     },
+     {
+      "rule_id": "VA-0029",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "Any costs incurred by the public body in estimating the cost of supplying the records shall be applied toward the overall charges to be paid by the requester."
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {
+    "payment.deposit_threshold": [
+     {
+      "rule_id": "VA-0031",
+      "authority": "Va. Code § 2.2-3704(H)",
+      "summary": "Where a public body determines in advance that charges are likely to exceed $200, it may, before continuing to process the request, require the requester to pay a deposit not to exceed the amount of the advance determination.",
+      "clock_spec": "fixed threshold: $200; deposit ceiling = the advance-determination amount"
+     }
+    ]
+   }
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "VA-0005",
+      "authority": "Va. Code § 2.2-3704(B)",
+      "summary": "A request for public records shall identify the requested records with reasonable specificity."
+     }
+    ]
+   },
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {
+    "clarification.nonresponse_withdrawal": [
+     {
+      "rule_id": "VA-0028",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "If the public body receives no response from the requester within 30 days of sending the cost estimate, the request is deemed withdrawn.",
+      "clock_spec": "fixed terminal: 30 days from sending the cost estimate = deemed withdrawn",
+      "clock_effect": "terminal"
+     }
+    ]
+   },
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {
+    "clarification.nonresponse_withdrawal": [
+     {
+      "rule_id": "VA-0028",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "If the public body receives no response from the requester within 30 days of sending the cost estimate, the request is deemed withdrawn.",
+      "clock_spec": "fixed terminal: 30 days from sending the cost estimate = deemed withdrawn",
+      "clock_effect": "terminal"
+     }
+    ]
+   },
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "VA-0025",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "Prior to conducting a search for records, the body shall notify the requester in writing that it may make reasonable charges not to exceed actual cost and inquire whether the requester would like a cost estimate in advance."
+     },
+     {
+      "rule_id": "VA-0026",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "The public body shall provide the requester with a cost estimate if requested."
+     },
+     {
+      "rule_id": "VA-0029",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "Any costs incurred by the public body in estimating the cost of supplying the records shall be applied toward the overall charges to be paid by the requester."
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "VA-0025",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "Prior to conducting a search for records, the body shall notify the requester in writing that it may make reasonable charges not to exceed actual cost and inquire whether the requester would like a cost estimate in advance."
+     },
+     {
+      "rule_id": "VA-0026",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "The public body shall provide the requester with a cost estimate if requested."
+     },
+     {
+      "rule_id": "VA-0029",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "Any costs incurred by the public body in estimating the cost of supplying the records shall be applied toward the overall charges to be paid by the requester."
+     }
+    ]
+   },
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.deposit_threshold": [
+     {
+      "rule_id": "VA-0031",
+      "authority": "Va. Code § 2.2-3704(H)",
+      "summary": "Where a public body determines in advance that charges are likely to exceed $200, it may, before continuing to process the request, require the requester to pay a deposit not to exceed the amount of the advance determination.",
+      "clock_spec": "fixed threshold: $200; deposit ceiling = the advance-determination amount"
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {},
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.partial_withholding_notice": [
+     {
+      "rule_id": "VA-0011",
+      "authority": "Va. Code § 2.2-3704(B)(1)",
+      "summary": "A response withholding records entirely shall identify with reasonable particularity the volume and subject matter of withheld records and cite, as to each category, the specific Code section authorizing the withholding."
+     },
+     {
+      "rule_id": "VA-0012",
+      "authority": "Va. Code § 2.2-3704(B)(2)",
+      "summary": "A response providing records in part and withholding in part shall identify with reasonable particularity the subject matter of withheld portions and cite, as to each category, the specific Code section authorizing the withholding."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "VA-0020",
+      "authority": "Va. Code § 2.2-3704.01",
+      "summary": "A public body may not withhold an entire record because some portion is excluded; a record may be withheld in full only where an exclusion applies to its entire content, otherwise only the excluded portions are withheld and all nonexcluded portions shall be disclosed."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "VA-0016",
+      "authority": "Va. Code § 2.2-3704(G)",
+      "summary": "Records maintained in an electronic data processing system or database shall be made available at a reasonable cost not exceeding actual cost; where databases combine exempt and nonexempt records, the body shall provide access to the nonexempt records."
+     },
+     {
+      "rule_id": "VA-0018",
+      "authority": "Va. Code § 2.2-3704(G)",
+      "summary": "The body shall produce nonexempt database records in any tangible medium identified by the requester — including, where it has the capability, posting on a website or delivery to a requester-provided email address — if that medium is used in the regular course of business."
+     }
+    ],
+    "payment.method": [
+     {
+      "rule_id": "VA-0030",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "Any local public body that charges for producing records may provide an electronic method of payment (noncash, non-paper-check — credit/debit cards, direct deposit/debit, electronic checks, telephonic payment)."
+     }
+    ],
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "VA-0014",
+      "authority": "Va. Code § 2.2-3704(D)",
+      "summary": "No public body is required to create a new record that does not already exist, but it may abstract or summarize information under terms agreed with the requester."
+     },
+     {
+      "rule_id": "VA-0019",
+      "authority": "Va. Code § 2.2-3704(G)",
+      "summary": "No public body is required to produce records from an electronic database in a format not regularly used by it, but it shall make reasonable efforts to provide records in any format under terms agreed with the requester, including payment of reasonable costs."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": true,
+   "activated_by": {
+    "eligibility.requester_class_restriction": [
+     {
+      "rule_id": "VA-0001",
+      "authority": "Va. Code § 2.2-3704(A)",
+      "summary": "Public records are open only to citizens of the Commonwealth and to representatives of newspapers/magazines with circulation in, and radio/TV stations broadcasting in or into, the Commonwealth; the engine may restrict standing to these requester classes."
+     }
+    ],
+    "intake.identity_requirement": [
+     {
+      "rule_id": "VA-0004",
+      "authority": "Va. Code § 2.2-3704(A)",
+      "summary": "The custodian may require the requester to provide his name and legal address."
+     }
+    ]
+   },
+   "context": {
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "VA-0002",
+      "authority": "Va. Code § 2.2-3704(A)",
+      "summary": "A requester need not state a purpose or reason to obtain public records; the custodian may require only the requester's name and legal address."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "VA-0033",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "The reasonable-charge fee provisions do not apply to scholastic records that must be made available under FERPA when requested by a parent or legal guardian of a minor student or by a student who is 18 or older."
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": true,
+   "activated_by": {
+    "custody.referral_to_proper_custodian": [
+     {
+      "rule_id": "VA-0013",
+      "authority": "Va. Code § 2.2-3704(B)(3)",
+      "summary": "If records could not be found or do not exist, the response says so; and if the receiving body knows another public body has the records, the response shall include contact information for that other public body."
+     }
+    ]
+   }
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "context": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "VA-0005",
+      "authority": "Va. Code § 2.2-3704(B)",
+      "summary": "A request for public records shall identify the requested records with reasonable specificity."
+     }
+    ]
+   },
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "VA-0033",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "The reasonable-charge fee provisions do not apply to scholastic records that must be made available under FERPA when requested by a parent or legal guardian of a minor student or by a student who is 18 or older."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "VA-0033",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "The reasonable-charge fee provisions do not apply to scholastic records that must be made available under FERPA when requested by a parent or legal guardian of a minor student or by a student who is 18 or older."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "context": {
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "VA-0014",
+      "authority": "Va. Code § 2.2-3704(D)",
+      "summary": "No public body is required to create a new record that does not already exist, but it may abstract or summarize information under terms agreed with the requester."
+     },
+     {
+      "rule_id": "VA-0019",
+      "authority": "Va. Code § 2.2-3704(G)",
+      "summary": "No public body is required to produce records from an electronic database in a format not regularly used by it, but it shall make reasonable efforts to provide records in any format under terms agreed with the requester, including payment of reasonable costs."
+     }
+    ]
+   },
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": true,
+   "activated_by": {
+    "special_records.law_enforcement": [
+     {
+      "rule_id": "VA-0009",
+      "authority": "Va. Code § 2.2-3704(B)(4)",
+      "summary": "For a request for criminal investigative files under § 2.2-3706.1, the additional extension when a response is not practically possible is 60 work days rather than seven.",
+      "clock_spec": "fixed: 60 work days (in lieu of 7) from the original 5-working-day response",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "VA-0007",
+      "authority": "Va. Code § 2.2-3704(B)",
+      "summary": "The custodian shall, promptly but in all cases within five working days of receiving a request, provide the records or make one of four written responses.",
+      "clock_spec": "fixed: 5 working days from receipt of request",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.clock_computation": [
+     {
+      "rule_id": "VA-0027",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "The response period is tolled for the amount of time that elapses between the public body's notice of the cost estimate and the requester's response.",
+      "clock_spec": "tolls: from notice of cost estimate until requester responds",
+      "clock_effect": "tolls"
+     },
+     {
+      "rule_id": "VA-0032",
+      "authority": "Va. Code § 2.2-3704(H)",
+      "summary": "The response period is tolled for the amount of time that elapses between notice of the advance determination and the requester's response.",
+      "clock_spec": "tolls: from notice of advance determination until requester responds",
+      "clock_effect": "tolls"
+     }
+    ],
+    "denial.deemed_denial_on_nonresponse": [
+     {
+      "rule_id": "VA-0015",
+      "authority": "Va. Code § 2.2-3704(E)",
+      "summary": "Failure to respond to a request within the statutory period is deemed a denial of the request and constitutes a violation of the chapter.",
+      "clock_spec": "terminal: expiry of the 5-working-day (or extended) response window with no response = deemed denial",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": true,
+   "statutory": {
+    "response.extension_grounds": [
+     {
+      "rule_id": "VA-0008",
+      "authority": "Va. Code § 2.2-3704(B)(4)",
+      "summary": "If, within the five-work-day period, the body responds in writing that it is not practically possible to provide the records or determine availability and specifies the conditions making a response impossible, it gets an additional seven work days to make one of the four responses.",
+      "clock_spec": "fixed: additional 7 work days from the original 5-working-day response",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "external.court_dependent": [
+     {
+      "rule_id": "VA-0010",
+      "authority": "Va. Code § 2.2-3704(C)",
+      "summary": "A public body may petition the appropriate court for additional time to respond when the request is for an extraordinary volume of records or requires an extraordinarily lengthy search that would prevent it from meeting operational responsibilities, but must first make reasonable efforts to reach…"
+     }
+    ]
+   }
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": true,
+   "statutory": {
+    "clarification.nonresponse_withdrawal": [
+     {
+      "rule_id": "VA-0028",
+      "authority": "Va. Code § 2.2-3704(F)",
+      "summary": "If the public body receives no response from the requester within 30 days of sending the cost estimate, the request is deemed withdrawn.",
+      "clock_spec": "fixed terminal: 30 days from sending the cost estimate = deemed withdrawn",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "VA-0021",
+    "authority": "Va. Code § 2.2-3704(F)",
+    "summary": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records.",
+    "clock_spec": "ceiling: actual cost incurred in accessing/duplicating/supplying/searching"
+   },
+   {
+    "rule_id": "VA-0022",
+    "authority": "Va. Code § 2.2-3704(F)",
+    "summary": "The body shall make all reasonable efforts to supply the requested records at the lowest possible cost.",
+    "clock_spec": "soft-standard: 'lowest possible cost'"
+   },
+   {
+    "rule_id": "VA-0024",
+    "authority": "Va. Code § 2.2-3704(F)",
+    "summary": "Any duplicating fee charged by a public body shall not exceed the actual cost of duplication.",
+    "clock_spec": "ceiling: actual cost of duplication"
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "VA-0034",
+    "authority": "Va. Code § 2.2-3704(F)",
+    "summary": "A body may make a reasonable charge, not exceeding actual cost, for records produced from a geographic information system at the request of anyone other than the owner of the subject land, except that it may charge on a pro rata per-acre basis for topographical maps it developed that encompass a …",
+    "clock_spec": "ceiling: actual cost; exception — pro rata per-acre for body-developed topo maps over 50 contiguous acres"
+   }
+  ],
+  "fee.no_charge_categories": [
+   {
+    "rule_id": "VA-0023",
+    "authority": "Va. Code § 2.2-3704(F)",
+    "summary": "No public body shall impose extraneous, intermediary, or surplus fees or expenses to recoup the general costs of creating or maintaining records or transacting the general business of the public body."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.records_officer_designation": [
+   {
+    "rule_id": "VA-0035",
+    "authority": "Va. Code § 2.2-3704.2(A)",
+    "summary": "All state, local, and regional public bodies subject to the chapter shall designate and publicly identify one or more FOIA officers to serve as the point of contact for records requests and to coordinate the body's FOIA compliance."
+   }
+  ]
+ },
+ "ledger": {},
+ "audit": {
+  "rules_total": 33,
+  "rules_referenced": 33,
+  "unreferenced_rule_ids": []
+ }
+}

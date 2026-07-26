@@ -1,0 +1,598 @@
+{
+ "state": "New York",
+ "code": "NY",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.submission_channels": [
+     {
+      "rule_id": "NY-0006",
+      "authority": "N.Y. Pub. Off. Law § 89(3)(b)",
+      "summary": "An entity with reasonable means available shall accept requests submitted by email and respond by email, unless the request seeks a response in another form."
+     }
+    ],
+    "intake.written_request_required": [
+     {
+      "rule_id": "NY-0004",
+      "authority": "N.Y. Pub. Off. Law § 89(3)(a)",
+      "summary": "The agency's five-business-day response duty is triggered by receipt of a written request for a record."
+     }
+    ],
+    "intake.form_permitted": [
+     {
+      "rule_id": "NY-0007",
+      "authority": "N.Y. Pub. Off. Law § 89(1)(b)(v)",
+      "summary": "The Committee on Open Government develops a request form, made available on the internet, that the public may use to request a record."
+     }
+    ],
+    "denial.improper_request_denial": [
+     {
+      "rule_id": "NY-0035",
+      "authority": "N.Y. Pub. Off. Law § 87(2)",
+      "summary": "A denial of access shall not be based solely on the category or type of the record."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "NY-0031",
+      "authority": "N.Y. Pub. Off. Law § 87(1)(c)",
+      "summary": "The requester shall be informed of the estimated cost of preparing the copy if more than two hours of employee time is needed or if an outside professional service would be retained."
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "NY-0012",
+      "authority": "N.Y. Pub. Off. Law § 89(3)(a)",
+      "summary": "When disclosure cannot occur within twenty business days, the agency must state in writing both the reason for the inability and a date certain, within a reasonable period, when the request will be granted.",
+      "clock_spec": "undefined-soft: \"date certain within a reasonable period\" from the delay notice",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "NY-0005",
+      "authority": "N.Y. Pub. Off. Law § 89(3)(a)",
+      "summary": "The response duty attaches only where the requested record is reasonably described."
+     }
+    ]
+   },
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "NY-0031",
+      "authority": "N.Y. Pub. Off. Law § 87(1)(c)",
+      "summary": "The requester shall be informed of the estimated cost of preparing the copy if more than two hours of employee time is needed or if an outside professional service would be retained."
+     }
+    ],
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "NY-0012",
+      "authority": "N.Y. Pub. Off. Law § 89(3)(a)",
+      "summary": "When disclosure cannot occur within twenty business days, the agency must state in writing both the reason for the inability and a date certain, within a reasonable period, when the request will be granted.",
+      "clock_spec": "undefined-soft: \"date certain within a reasonable period\" from the delay notice",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {
+    "fee.estimate_and_notice": [
+     {
+      "rule_id": "NY-0031",
+      "authority": "N.Y. Pub. Off. Law § 87(1)(c)",
+      "summary": "The requester shall be informed of the estimated cost of preparing the copy if more than two hours of employee time is needed or if an outside professional service would be retained."
+     }
+    ]
+   },
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {},
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.agency_burden": [
+     {
+      "rule_id": "NY-0034",
+      "authority": "N.Y. Pub. Off. Law § 87(2)",
+      "summary": "A denial of access is valid only when there is a particularized and specific justification for the denial."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "appeal.retained_optional": [
+     {
+      "rule_id": "NY-0037",
+      "authority": "N.Y. Pub. Off. Law § 89(4)(a)",
+      "summary": "The requester must file the written administrative appeal within thirty days of the denial.",
+      "clock_spec": "30 days from denial (requester's filing window)",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "NY-0033",
+      "authority": "N.Y. Pub. Off. Law § 89(9)",
+      "summary": "Where electronic records mix accessible and withholdable items, the agency shall, whenever practicable and reasonable, design retrieval to permit segregation and retrieval of the accessible items to provide maximum public access."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {
+    "redaction.mandatory_pii": [
+     {
+      "rule_id": "NY-0032",
+      "authority": "N.Y. Pub. Off. Law § 89(2)(a)",
+      "summary": "An agency may delete identifying details when it makes records available to prevent an unwarranted invasion of personal privacy."
+     }
+    ]
+   }
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "NY-0015",
+      "authority": "N.Y. Pub. Off. Law § 89(3)(a)",
+      "summary": "When an agency can retrieve or extract a record or data from a computer storage system with reasonable effort, it shall do so."
+     },
+     {
+      "rule_id": "NY-0016",
+      "authority": "N.Y. Pub. Off. Law § 89(3)(a)",
+      "summary": "Where electronic retrieval/extraction requires less employee time than manual retrieval or redaction from non-electronic records, the agency shall retrieve or extract the record electronically."
+     }
+    ],
+    "production.no_medium_refusal": [
+     {
+      "rule_id": "NY-0021",
+      "authority": "N.Y. Pub. Off. Law § 87(5)(a)",
+      "summary": "An agency shall provide records in the medium requested if it can reasonably make the copy or have it made by engaging an outside professional service."
+     }
+    ],
+    "production.certified_copy": [
+     {
+      "rule_id": "NY-0019",
+      "authority": "N.Y. Pub. Off. Law § 89(3)(a)",
+      "summary": "Upon payment of, or offer to pay, the prescribed fee, the entity shall provide a copy of the record and, if requested, certify its correctness."
+     },
+     {
+      "rule_id": "NY-0020",
+      "authority": "N.Y. Pub. Off. Law § 89(3)(a)",
+      "summary": "Where applicable, the entity shall certify that it does not possess the record or that the record cannot be found after a diligent search."
+     }
+    ],
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "NY-0014",
+      "authority": "N.Y. Pub. Off. Law § 89(3)(a)",
+      "summary": "An entity is not required to prepare any record it does not possess or maintain (except the statutorily specified subject-matter/vote records)."
+     },
+     {
+      "rule_id": "NY-0022",
+      "authority": "N.Y. Pub. Off. Law § 87(5)(a)",
+      "summary": "Records provided in a computer format shall not be encrypted."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": false,
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "NY-0001",
+      "authority": "N.Y. Pub. Off. Law § 84",
+      "summary": "Any member of the public may request access to the records of government; access is a public right exercisable by any person."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "NY-0002",
+      "authority": "Matter of M. Farbman & Sons v. N.Y.C. Health & Hosps. Corp., 62 N.Y.2d 75 (1984); Committee on Open Government advisory opinions",
+      "summary": "A requester need not state a reason, need, good faith, or legitimate purpose to obtain accessible records."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "NY-0003",
+      "authority": "Committee on Open Government advisory opinions (construing N.Y. Pub. Off. Law art. 6)",
+      "summary": "Accessible records are equally available to any person regardless of residency, citizenship, or status; an agency may not condition access on proof of residency or identity."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": false
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "context": {
+    "intake.reasonably_describes": [
+     {
+      "rule_id": "NY-0005",
+      "authority": "N.Y. Pub. Off. Law § 89(3)(a)",
+      "summary": "The response duty attaches only where the requested record is reasonably described."
+     }
+    ]
+   },
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": false
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": false
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "context": {
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "NY-0014",
+      "authority": "N.Y. Pub. Off. Law § 89(3)(a)",
+      "summary": "An entity is not required to prepare any record it does not possess or maintain (except the statutorily specified subject-matter/vote records)."
+     },
+     {
+      "rule_id": "NY-0022",
+      "authority": "N.Y. Pub. Off. Law § 87(5)(a)",
+      "summary": "Records provided in a computer format shall not be encrypted."
+     }
+    ]
+   },
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "NY-0009",
+      "authority": "N.Y. Pub. Off. Law § 89(3)(a)",
+      "summary": "Within five business days of receipt of a written request, the agency shall grant access, deny the request in writing, or furnish a written acknowledgement of receipt with an approximate date.",
+      "clock_spec": "5 business-days from receipt of written request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "NY-0010",
+      "authority": "N.Y. Pub. Off. Law § 89(3)(a)",
+      "summary": "A written acknowledgement must state an approximate date, reasonable under the circumstances, when the request will be granted or denied.",
+      "clock_spec": "undefined-soft: \"reasonable under the circumstances\" from date of acknowledgement",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "denial.deemed_denial_on_nonresponse": [
+     {
+      "rule_id": "NY-0013",
+      "authority": "N.Y. Pub. Off. Law § 89(4)(a)",
+      "summary": "An agency's failure to conform to the subdivision-three response provisions constitutes a denial of the request.",
+      "clock_spec": "on lapse of the § 89(3) response obligations",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "completion": {
+   "present": true,
+   "statutory": {
+    "production.completion_window": [
+     {
+      "rule_id": "NY-0011",
+      "authority": "N.Y. Pub. Off. Law § 89(3)(a)",
+      "summary": "If the agency grants a request but circumstances prevent disclosure within twenty business days from the acknowledgement, it must act (state reasons and a date certain).",
+      "clock_spec": "20 business-days from date of acknowledgement",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "NY-0024",
+    "authority": "N.Y. Pub. Off. Law § 87(1)(b)(iii)(1)",
+    "summary": "Fees for paper copies shall not exceed 25 cents per photocopy not exceeding 9 by 14 inches, unless a different fee is prescribed by statute."
+   }
+  ],
+  "fee.labor_charge": [
+   {
+    "rule_id": "NY-0027",
+    "authority": "N.Y. Pub. Off. Law § 87(1)(c)(i)",
+    "summary": "Actual reproduction cost may include only the hourly salary attributed to the lowest-paid agency employee who has the necessary skill to prepare the copy."
+   },
+   {
+    "rule_id": "NY-0028",
+    "authority": "N.Y. Pub. Off. Law § 87(1)(c)(iv)",
+    "summary": "No preparation fee may be charged unless at least two hours of agency employee time is needed to prepare the copy."
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "NY-0025",
+    "authority": "N.Y. Pub. Off. Law § 87(1)(b)(iii)(1)",
+    "summary": "For records other than 9x14 paper photocopies, the fee shall not exceed the actual cost of reproduction determined under § 87(1)(c)."
+   },
+   {
+    "rule_id": "NY-0030",
+    "authority": "N.Y. Pub. Off. Law § 87(1)(c)(iii)",
+    "summary": "The actual cost of engaging an outside professional service to prepare a copy may be included only when the agency's information technology equipment is inadequate to prepare the copy and the service is used."
+   }
+  ],
+  "fee.no_charge_categories": [
+   {
+    "rule_id": "NY-0026",
+    "authority": "N.Y. Pub. Off. Law § 87(1)(b)(iii)(2)",
+    "summary": "Where an identical record was prepared for a prior request within the past six months and an electronic copy is available, the agency shall charge no fee except the actual cost of a storage device/media if provided."
+   },
+   {
+    "rule_id": "NY-0029",
+    "authority": "N.Y. Pub. Off. Law § 87(1)(c)(iv)",
+    "summary": "Preparing a copy shall not include search time or administrative costs; these may not be charged to the requester."
+   }
+  ]
+ },
+ "program_setup": {},
+ "ledger": {},
+ "audit": {
+  "rules_total": 32,
+  "rules_referenced": 32,
+  "unreferenced_rule_ids": []
+ }
+}

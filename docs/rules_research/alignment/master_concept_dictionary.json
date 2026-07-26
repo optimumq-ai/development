@@ -3938,8 +3938,8 @@
   {
     "canonical_key": "payment.nonpayment_consequence",
     "family": "payment",
-    "config_home": "mixed(p:4/s:11)",
-    "state_count": 11,
+    "config_home": "mixed(p:5/s:11)",
+    "state_count": 12,
     "states": [
       "AL",
       "GA",
@@ -3951,9 +3951,10 @@
       "NE",
       "OK",
       "OR",
+      "TX",
       "WA"
     ],
-    "definition": "When denying for an unpaid balance, the RAO shall provide written notification detailing the reasons, including an itemized list of balances attributed to previously prod",
+    "definition": "A request is considered withdrawn if the requester fails to remit all fees within ninety days, or within one hundred fifty days if the requested fees are greater than one",
     "merged_from": [
       "fee.denial_for_unpaid_prior",
       "fee.forfeited_if_late_response",
@@ -3965,6 +3966,7 @@
       "payment.installment_nonclaim_termination",
       "payment.nonpayment_abandonment_close",
       "payment.nonpayment_production_gate",
+      "payment.nonpayment_withdrawal",
       "payment.nonpayment_withdrawal_notice",
       "payment.prepayment_for_prior_unpaid_costs",
       "payment.requester_opt_out",
@@ -4005,6 +4007,9 @@
       ],
       "OR": [
         "OR-0025"
+      ],
+      "TX": [
+        "TX-S05"
       ],
       "WA": [
         "WA-0032"
@@ -4619,7 +4624,7 @@
   {
     "canonical_key": "production.completion_window",
     "family": "production",
-    "config_home": "mixed(p:5/s:8)",
+    "config_home": "mixed(p:5/s:10)",
     "state_count": 10,
     "states": [
       "FL",
@@ -4633,7 +4638,7 @@
       "NY",
       "TX"
     ],
-    "definition": "A stored or archived record must be made available no more than 21 business days from the date the requestor is advised it is in storage/archived.",
+    "definition": "If a record is readily available for inspection or copying, the custodian must allow the requester to inspect, copy or receive a copy as expeditiously as practicable.",
     "merged_from": [
       "deadline.expeditious_production",
       "deadline.production_promptly",
@@ -4645,6 +4650,8 @@
       "deadlines.production_reasonable_time",
       "deadlines.production_response_window",
       "deadlines.storage_production_window",
+      "production.active_use_certification",
+      "production.delay_certification",
       "response.production_window",
       "response.without_unreasonable_delay"
     ],
@@ -4680,7 +4687,9 @@
         "NC-0005"
       ],
       "TX": [
-        "TX-0008"
+        "TX-0008",
+        "TX-0009",
+        "TX-0010"
       ]
     }
   },
@@ -4688,7 +4697,7 @@
     "canonical_key": "production.certified_copy",
     "family": "production",
     "config_home": "structural",
-    "state_count": 9,
+    "state_count": 8,
     "states": [
       "AL",
       "CT",
@@ -4697,20 +4706,17 @@
       "NV",
       "NY",
       "PA",
-      "TX",
       "UT"
     ],
-    "definition": "If an agency's response grants access, the agency shall, upon request, provide a certified copy of the record if the requester pays the applicable fees under section 1307",
+    "definition": "An entity must provide a certified copy of a record if the person has a right to inspect it, identifies it with reasonable specificity, and pays the lawful fees.",
     "merged_from": [
       "certification.access_or_nonsale_when_restricted",
-      "production.active_use_certification",
       "production.certified_copies",
       "production.certified_copy",
       "production.certified_copy_on_payment",
       "production.certified_copy_on_request",
       "production.certify_no_record_after_search",
-      "production.copy_on_payment_and_certification",
-      "production.delay_certification"
+      "production.copy_on_payment_and_certification"
     ],
     "members_by_state": {
       "AL": [
@@ -4734,10 +4740,6 @@
       ],
       "PA": [
         "PA-0015"
-      ],
-      "TX": [
-        "TX-0009",
-        "TX-0010"
       ],
       "UT": [
         "UT-0027"

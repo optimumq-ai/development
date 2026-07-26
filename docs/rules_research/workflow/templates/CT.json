@@ -1,0 +1,551 @@
+{
+ "state": "Connecticut",
+ "code": "CT",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.written_request_required": [
+     {
+      "rule_id": "CT-0007",
+      "authority": "Conn. Gen. Stat. § 1-212(a)",
+      "summary": "To receive a copy of a public record, the requester must apply in writing; an oral request for a copy is not enforceable before the FOI Commission."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {},
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {},
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.advance_payment": [
+     {
+      "rule_id": "CT-0022",
+      "authority": "Conn. Gen. Stat. § 1-212(c)",
+      "summary": "A public agency may require prepayment of any fee if the fee is estimated to be ten dollars or more."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {},
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {
+    "custody.custodian_responds": [
+     {
+      "rule_id": "CT-0010",
+      "authority": "Conn. Gen. Stat. § 1-206(a)",
+      "summary": "Any denial of access must be made by the public agency official who has custody or control of the public record."
+     }
+    ]
+   },
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {},
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {
+    "denial.denial_deadline": [
+     {
+      "rule_id": "CT-0012",
+      "authority": "Conn. Gen. Stat. § 1-206(a)",
+      "summary": "A public agency must issue any denial of inspection/copying to the requester in writing within four business days of the request.",
+      "clock_spec": "4 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "CT-0013",
+      "authority": "Conn. Gen. Stat. § 1-206(a)",
+      "summary": "When a request is subject to the personnel/medical-file objection process (1-214(b)-(c)), any denial must be made in writing within ten business days of the request.",
+      "clock_spec": "10 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "CT-0042",
+      "authority": "Director of Info. Tech. v. FOIC, 307 Conn. 648 (2012) (construing Conn. Gen. Stat. § 1-211)",
+      "summary": "When a request encompasses both exempt and nonexempt data, disclosure of the nonexempt portion may be ordered where the agency can reasonably separate the data, but only after inquiry into reasonable separability and (for computerized data) a public-safety assessment."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {
+    "redaction.protected_person": [
+     {
+      "rule_id": "CT-0041",
+      "authority": "Conn. Gen. Stat. § 1-217(a)(2)",
+      "summary": "When an agency receives a request that specifically names a person who has filed a confidentiality request for their residential address, the agency shall copy the record and redact that person's residential address before disclosing it (reasonable-effort redaction for list-type requests)."
+     }
+    ]
+   }
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "CT-0025",
+      "authority": "Conn. Gen. Stat. § 1-212(a)",
+      "summary": "The type of copy provided (plain, facsimile, electronic, or certified) is within the public agency's discretion, subject to the two exceptions in CT-0026 and CT-0027."
+     },
+     {
+      "rule_id": "CT-0028",
+      "authority": "Conn. Gen. Stat. § 1-211(a)",
+      "summary": "An agency maintaining public records in a computer storage system shall provide a copy of nonexempt data in the medium the requester specifies (paper, disk, tape, other electronic medium, or email), if the agency can reasonably make or have such copy made."
+     }
+    ],
+    "production.delivery_and_completion": [
+     {
+      "rule_id": "CT-0009",
+      "authority": "Conn. Gen. Stat. § 1-212(a)",
+      "summary": "Upon a written request, a public agency must provide the requested copy of a public record promptly.",
+      "clock_spec": "undefined-soft: \"promptly upon request\" from written request",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "production.certified_copy": [
+     {
+      "rule_id": "CT-0026",
+      "authority": "Conn. Gen. Stat. § 1-212(a)",
+      "summary": "The agency shall provide a certified copy whenever a certified copy is requested."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": false,
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "CT-0001",
+      "authority": "Conn. Gen. Stat. § 1-210(a)",
+      "summary": "Every person has the right to inspect, copy, or receive a copy of any public record maintained or kept on file by any public agency (subject to statutory exemptions)."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "CT-0003",
+      "authority": "Conn. Gen. Stat. § 1-210(a)",
+      "summary": "A requester need not state or justify a purpose to inspect, copy, or receive public records; the right is unconditional as to motive."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "CT-0002",
+      "authority": "Conn. Gen. Stat. § 1-210(a)",
+      "summary": "Access is granted to 'every person' / 'any person' with no in-state residency condition; a requester need not be a Connecticut resident."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "CT-0024",
+      "authority": "Conn. Gen. Stat. § 1-212(d)",
+      "summary": "A public agency shall waive any copy fee when any enumerated ground applies: requester is indigent; records are exempt under 1-210(b); compliance benefits the general welfare in the agency's judgment; requester is an elected official of the political subdivision certifying the record pertains to …"
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "CT-0024",
+      "authority": "Conn. Gen. Stat. § 1-212(d)",
+      "summary": "A public agency shall waive any copy fee when any enumerated ground applies: requester is indigent; records are exempt under 1-210(b); compliance benefits the general welfare in the agency's judgment; requester is an elected official of the political subdivision certifying the record pertains to …"
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "CT-0024",
+      "authority": "Conn. Gen. Stat. § 1-212(d)",
+      "summary": "A public agency shall waive any copy fee when any enumerated ground applies: requester is indigent; records are exempt under 1-210(b); compliance benefits the general welfare in the agency's judgment; requester is an elected official of the political subdivision certifying the record pertains to …"
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": true,
+   "activated_by": {
+    "redaction.personnel_privacy_process": [
+     {
+      "rule_id": "CT-0029",
+      "authority": "Conn. Gen. Stat. § 1-214(b)(1)",
+      "summary": "When an agency receives a request for records in an employee's personnel/medical/similar file and reasonably believes disclosure would legally constitute an invasion of privacy, it shall immediately notify in writing each employee concerned and their collective-bargaining representative.",
+      "clock_spec": "undefined-soft: \"immediately\" notify from receipt of request",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "CT-0030",
+      "authority": "Conn. Gen. Stat. § 1-214(b)(2)",
+      "summary": "When an agency receives a personnel/medical-file request and reasonably believes disclosure would NOT invade privacy, it shall first disclose the records, then within a reasonable time make a reasonable attempt to send the employee(s) and their bargaining representative a copy or brief descriptio…",
+      "clock_spec": "undefined-soft: \"within a reasonable time after such disclosure\" for post-disclosure notice",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "CT-0031",
+      "authority": "Conn. Gen. Stat. § 1-214(c)",
+      "summary": "After giving privacy notice, the agency shall disclose the requested records unless the employee or their bargaining representative files a written objection within seven business days from receipt of the notice (or, absent evidence of receipt, within nine business days from when the notice was m…",
+      "clock_spec": "7 business-days from employee receipt of notice; or 9 business-days from mailing/sending if no evidence of receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "CT-0032",
+      "authority": "Conn. Gen. Stat. § 1-214(c)",
+      "summary": "Upon the filing of a valid employee/representative objection, the agency shall not disclose the requested records unless ordered to do so by the Freedom of Information Commission; failure to comply with the request is itself a denial for appeal purposes.",
+      "clock_spec": "request enters withheld/hold state pending FOIC order under § 1-206",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "denial.deemed_denial_on_nonresponse": [
+     {
+      "rule_id": "CT-0014",
+      "authority": "Conn. Gen. Stat. § 1-206(a)",
+      "summary": "An agency's failure to comply with an inspection/copy request within the applicable number of business days is deemed a denial (which then starts the appeal clock).",
+      "clock_spec": "deemed denial upon expiry of 4 business-days (or 10 for personnel/medical) from request",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": true,
+   "statutory": {
+    "denial.denial_deadline": [
+     {
+      "rule_id": "CT-0012",
+      "authority": "Conn. Gen. Stat. § 1-206(a)",
+      "summary": "A public agency must issue any denial of inspection/copying to the requester in writing within four business days of the request.",
+      "clock_spec": "4 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "CT-0013",
+      "authority": "Conn. Gen. Stat. § 1-206(a)",
+      "summary": "When a request is subject to the personnel/medical-file objection process (1-214(b)-(c)), any denial must be made in writing within ten business days of the request.",
+      "clock_spec": "10 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "CT-0015",
+    "authority": "Conn. Gen. Stat. § 1-212(a)(B)",
+    "summary": "For all public agencies other than state offices/agencies, the fee for a copy of a public record shall not exceed fifty cents per page."
+   },
+   {
+    "rule_id": "CT-0016",
+    "authority": "Conn. Gen. Stat. § 1-212(a)(A)",
+    "summary": "For state executive/administrative/legislative offices and state agencies (and judicial offices in their administrative functions), the copy fee shall not exceed twenty-five cents per page."
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "CT-0018",
+    "authority": "Conn. Gen. Stat. § 1-212(b)",
+    "summary": "The fee for a copy of computer-stored public records shall not exceed the agency's cost, and (for non-preexisting printouts) may include only enumerated components: employee hourly salary for producing/formatting/programming (not search/retrieval except sub-(4)), outside copying-service cost, act…"
+   }
+  ],
+  "fee.certified_copy_charge": [
+   {
+    "rule_id": "CT-0020",
+    "authority": "Conn. Gen. Stat. § 1-212(e)",
+    "summary": "For certifying a copy of records/files (or certifying a fact appearing therein), the fee is one dollar for the first page and fifty cents for each additional page."
+   }
+  ],
+  "fee.nonstandard_rate": [
+   {
+    "rule_id": "CT-0017",
+    "authority": "Conn. Gen. Stat. § 1-212(a)",
+    "summary": "Where a copy requires a transcription, or a person requests a transcription of a public record, the transcription fee shall not exceed the agency's cost."
+   }
+  ]
+ },
+ "program_setup": {},
+ "ledger": {
+  "payment.advance_payment": [
+   {
+    "rule_id": "CT-0022",
+    "authority": "Conn. Gen. Stat. § 1-212(c)",
+    "summary": "A public agency may require prepayment of any fee if the fee is estimated to be ten dollars or more."
+   }
+  ]
+ },
+ "audit": {
+  "rules_total": 25,
+  "rules_referenced": 25,
+  "unreferenced_rule_ids": []
+ }
+}

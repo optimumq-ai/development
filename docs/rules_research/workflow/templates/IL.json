@@ -1,0 +1,729 @@
+{
+ "state": "Illinois",
+ "code": "IL",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.no_required_form": [
+     {
+      "rule_id": "IL-0004",
+      "authority": "5 ILCS 140/3(c)",
+      "summary": "A public body may not require that a request be submitted on a standard form."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {
+    "response.valid_response_forms": [
+     {
+      "rule_id": "IL-0018",
+      "authority": "5 ILCS 140/3.1(a)",
+      "summary": "The commercial-request response must do one of four things: give a time-and-fee estimate, deny under an exemption, notify the request is unduly burdensome with an opportunity to narrow, or provide the records."
+     }
+    ]
+   },
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {},
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {},
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "IL-0019",
+      "authority": "5 ILCS 140/3.1(a); 5 ILCS 140/3.2(a)",
+      "summary": "When it gives a fee estimate on a commercial or recurrent-requester request, the public body may require the requester to pay the fees in full before copying the requested documents."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "IL-0040",
+      "authority": "5 ILCS 140/9(a)",
+      "summary": "The denial notice must specify the exemption claimed and the specific reasons for the denial, including a detailed factual basis and a citation to supporting legal authority."
+     }
+    ],
+    "search.burden_limit": [
+     {
+      "rule_id": "IL-0015",
+      "authority": "5 ILCS 140/3(g)",
+      "summary": "A request for all records within a category may be denied only if compliance would be unduly burdensome, there is no way to narrow it, and the burden outweighs the public interest in the information."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "IL-0039",
+      "authority": "5 ILCS 140/9(a)",
+      "summary": "A public body denying a request must notify the requester in writing of the decision to deny."
+     }
+    ],
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "IL-0040",
+      "authority": "5 ILCS 140/9(a)",
+      "summary": "The denial notice must specify the exemption claimed and the specific reasons for the denial, including a detailed factual basis and a citation to supporting legal authority."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {},
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "IL-0034",
+      "authority": "5 ILCS 140/6(a)",
+      "summary": "When a person requests a copy of a record maintained in electronic format, the public body must furnish it in the electronic format the requester specifies, if feasible."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": false,
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "IL-0001",
+      "authority": "5 ILCS 140/3(a)",
+      "summary": "A public body must make all public records available to any person for inspection or copying, except records exempt under Sections 7 and 8.5."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "IL-0002",
+      "authority": "5 ILCS 140/3(c)",
+      "summary": "A public body may not require a requester to state the purpose of a request, except to determine commercial-purpose status or to rule on a fee-waiver request."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "IL-0003",
+      "authority": "5 ILCS 140/3(a)",
+      "summary": "Any person may request public records; the Act imposes no residency or citizenship condition on the right of access."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "IL-0033",
+      "authority": "5 ILCS 140/6(c)",
+      "summary": "Documents must be furnished without charge or at reduced charge, as determined by the public body, if the requester states a specific purpose and the waiver is in the public interest (principally to disseminate information on public health/safety/welfare or legal rights, not for personal/commerci…"
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": true,
+   "activated_by": {
+    "fee.commercial_charge": [
+     {
+      "rule_id": "IL-0035",
+      "authority": "5 ILCS 140/6(f)",
+      "summary": "For a commercial request, a public body may charge up to $10 for each hour spent by personnel searching for, retrieving, or examining the record for necessary redactions."
+     },
+     {
+      "rule_id": "IL-0037",
+      "authority": "5 ILCS 140/6(f)",
+      "summary": "If it imposes a Section 6(f) fee, the public body must provide the requester an accounting of all fees, costs, and personnel hours connected with the request."
+     }
+    ]
+   }
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": true,
+   "activated_by": {
+    "clarification.confer_to_narrow": [
+     {
+      "rule_id": "IL-0016",
+      "authority": "5 ILCS 140/3(g)",
+      "summary": "Before denying a categorical request as unduly burdensome, the public body must give the requester an opportunity to confer to reduce the request to manageable proportions."
+     }
+    ]
+   }
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "context": {
+    "search.burden_limit": [
+     {
+      "rule_id": "IL-0015",
+      "authority": "5 ILCS 140/3(g)",
+      "summary": "A request for all records within a category may be denied only if compliance would be unduly burdensome, there is no way to narrow it, and the burden outweighs the public interest in the information."
+     }
+    ]
+   },
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "IL-0033",
+      "authority": "5 ILCS 140/6(c)",
+      "summary": "Documents must be furnished without charge or at reduced charge, as determined by the public body, if the requester states a specific purpose and the waiver is in the public interest (principally to disseminate information on public health/safety/welfare or legal rights, not for personal/commerci…"
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "IL-0033",
+      "authority": "5 ILCS 140/6(c)",
+      "summary": "Documents must be furnished without charge or at reduced charge, as determined by the public body, if the requester states a specific purpose and the waiver is in the public interest (principally to disseminate information on public health/safety/welfare or legal rights, not for personal/commerci…"
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": false,
+   "suppressed_by": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "IL-0019",
+      "authority": "5 ILCS 140/3.1(a); 5 ILCS 140/3.2(a)",
+      "summary": "When it gives a fee estimate on a commercial or recurrent-requester request, the public body may require the requester to pay the fees in full before copying the requested documents."
+     }
+    ]
+   },
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": true,
+   "activated_by": {
+    "payment.production_conditioned_on_payment": [
+     {
+      "rule_id": "IL-0019",
+      "authority": "5 ILCS 140/3.1(a); 5 ILCS 140/3.2(a)",
+      "summary": "When it gives a fee estimate on a commercial or recurrent-requester request, the public body may require the requester to pay the fees in full before copying the requested documents."
+     }
+    ]
+   }
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": true,
+   "activated_by": {
+    "classification.recurrent_requester": [
+     {
+      "rule_id": "IL-0022",
+      "authority": "5 ILCS 140/2(g)",
+      "summary": "A requester is a recurrent requester if, in the prior 12 months, it submitted to the same public body at least 50 requests, or at least 15 within a 30-day period, or at least 7 within a 7-day period."
+     }
+    ],
+    "classification.voluminous_request": [
+     {
+      "rule_id": "IL-0023",
+      "authority": "5 ILCS 140/2(h)",
+      "summary": "A request is voluminous if it includes more than 5 individual requests for more than 5 different categories of records within 20 business days, or requires compiling more than 500 letter/legal-sized pages (unless a single record exceeds 500 pages)."
+     }
+    ]
+   },
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "IL-0010",
+      "authority": "5 ILCS 140/3(d)",
+      "summary": "A public body must comply with or deny a written request within 5 business days after receipt, unless the time is properly extended.",
+      "clock_spec": "5 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.clock_computation": [
+     {
+      "rule_id": "IL-0007",
+      "authority": "5 ILCS 140/3.5(b)",
+      "summary": "Upon receiving a request, the FOIA officer must note the date the public body received the written request and compute and record the date the response period expires.",
+      "clock_spec": "start event = date written request received; due-date computed per Section 3(d)/(e)",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "denial.deemed_denial_on_nonresponse": [
+     {
+      "rule_id": "IL-0014",
+      "authority": "5 ILCS 140/3(d)",
+      "summary": "Failure to comply with, extend the time for, or deny a written request within 5 business days after receipt is treated as a denial of the request.",
+      "clock_spec": "denial deemed at expiry of 5 business-days from request receipt",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": true,
+   "statutory": {
+    "response.extension_grounds": [
+     {
+      "rule_id": "IL-0013",
+      "authority": "5 ILCS 140/3(e)",
+      "summary": "The requester and the public body may agree in writing to extend the time for compliance for a period determined by the parties.",
+      "clock_spec": "period agreed in writing by the parties (no statutory cap)",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.extension_length": [
+     {
+      "rule_id": "IL-0011",
+      "authority": "5 ILCS 140/3(e)",
+      "summary": "A public body may extend the response time by not more than 5 business days beyond the original due date for any of seven enumerated reasons.",
+      "clock_spec": "ceiling: up to 5 business-days beyond original due date",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "response.extension_notice": [
+     {
+      "rule_id": "IL-0012",
+      "authority": "5 ILCS 140/3(e)",
+      "summary": "When it extends, the public body must, within 5 business days after receipt, notify the requester of the reasons for the extension and the date the response will be forthcoming.",
+      "clock_spec": "notice due within 5 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": true,
+   "statutory": {
+    "response.classified_request_window": [
+     {
+      "rule_id": "IL-0017",
+      "authority": "5 ILCS 140/3.1(a)",
+      "summary": "A public body must respond to a request for records to be used for a commercial purpose within 21 working days after receipt.",
+      "clock_spec": "21 working-days from request receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "IL-0020",
+      "authority": "5 ILCS 140/3.2(a)",
+      "summary": "A public body must respond to a request from a recurrent requester within 21 business days after receipt.",
+      "clock_spec": "21 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "IL-0021",
+      "authority": "5 ILCS 140/3.2(b)",
+      "summary": "Within 5 business days after receiving a request from a recurrent requester, the public body must notify the requester that it is being treated under the recurrent-requester provisions.",
+      "clock_spec": "notice due within 5 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "IL-0024",
+      "authority": "5 ILCS 140/3.6(a)",
+      "summary": "A public body must respond to a voluminous request within 5 business days after receipt (notifying the requester it is being treated as voluminous).",
+      "clock_spec": "5 business-days from request receipt",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "IL-0025",
+      "authority": "5 ILCS 140/3.6",
+      "summary": "After the public body's voluminous-request response, the requester must respond within 10 business days; if the requester does not respond (or the request remains voluminous), the public body responds and assesses any fees.",
+      "clock_spec": "10 business-days from the public body's response being sent",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "IL-0026",
+      "authority": "5 ILCS 140/3.6(c)",
+      "summary": "The public body must give its final voluminous-request response within the earlier of 5 business days after receiving the requester's response or 5 business days after the final day for the requester to respond.",
+      "clock_spec": "earlier of 5 business-days from requester's response OR 5 business-days from final day for requester to respond",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "IL-0028",
+    "authority": "5 ILCS 140/6(b)",
+    "summary": "The fee for black-and-white, letter- or legal-sized copies (after the free 50) may not exceed 15 cents per page."
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "IL-0031",
+    "authority": "5 ILCS 140/6(a)",
+    "summary": "For records provided in electronic format, a public body may charge the requester only the actual cost of purchasing the recording medium."
+   }
+  ],
+  "fee.certified_copy_charge": [
+   {
+    "rule_id": "IL-0030",
+    "authority": "5 ILCS 140/6(b)",
+    "summary": "The cost for certifying a record may not exceed $1."
+   }
+  ],
+  "fee.nonstandard_rate": [
+   {
+    "rule_id": "IL-0029",
+    "authority": "5 ILCS 140/6(b)",
+    "summary": "For copies in color or in a size other than letter/legal, a public body may not charge more than its actual cost of reproduction."
+   }
+  ],
+  "fee.commercial_charge": [
+   {
+    "rule_id": "IL-0035",
+    "authority": "5 ILCS 140/6(f)",
+    "summary": "For a commercial request, a public body may charge up to $10 for each hour spent by personnel searching for, retrieving, or examining the record for necessary redactions."
+   },
+   {
+    "rule_id": "IL-0037",
+    "authority": "5 ILCS 140/6(f)",
+    "summary": "If it imposes a Section 6(f) fee, the public body must provide the requester an accounting of all fees, costs, and personnel hours connected with the request."
+   }
+  ],
+  "fee.special_service_charge": [
+   {
+    "rule_id": "IL-0038",
+    "authority": "5 ILCS 140/6(a-5)",
+    "summary": "For a voluminous request for electronic records, a public body may charge tiered caps by data size: for non-PDF data up to $20 (<=2 MB), $40 (2-4 MB), or $100 (>4 MB); for PDF data up to $20 (<=80 MB), $40 (80-160 MB), or $100 (>160 MB)."
+   }
+  ],
+  "fee.free_allowance": [
+   {
+    "rule_id": "IL-0027",
+    "authority": "5 ILCS 140/6(b)",
+    "summary": "No fee may be charged for the first 50 pages of black-and-white, letter- or legal-sized copies requested."
+   },
+   {
+    "rule_id": "IL-0036",
+    "authority": "5 ILCS 140/6(f)",
+    "summary": "No fee may be charged for the first 8 hours spent by personnel searching for or retrieving a requested record on a commercial request."
+   }
+  ],
+  "fee.no_charge_categories": [
+   {
+    "rule_id": "IL-0032",
+    "authority": "5 ILCS 140/6(a)",
+    "summary": "A public body may not charge the requester for the cost of any search for and review of the records."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.records_officer_designation": [
+   {
+    "rule_id": "IL-0006",
+    "authority": "5 ILCS 140/3.5(a)",
+    "summary": "Each public body must designate one or more officials or employees to act as its Freedom of Information officer(s)."
+   }
+  ]
+ },
+ "ledger": {
+  "classification.recurrent_requester": [
+   {
+    "rule_id": "IL-0022",
+    "authority": "5 ILCS 140/2(g)",
+    "summary": "A requester is a recurrent requester if, in the prior 12 months, it submitted to the same public body at least 50 requests, or at least 15 within a 30-day period, or at least 7 within a 7-day period."
+   }
+  ],
+  "classification.voluminous_request": [
+   {
+    "rule_id": "IL-0023",
+    "authority": "5 ILCS 140/2(h)",
+    "summary": "A request is voluminous if it includes more than 5 individual requests for more than 5 different categories of records within 20 business days, or requires compiling more than 500 letter/legal-sized pages (unless a single record exceeds 500 pages)."
+   }
+  ],
+  "response.classified_request_window": [
+   {
+    "rule_id": "IL-0017",
+    "authority": "5 ILCS 140/3.1(a)",
+    "summary": "A public body must respond to a request for records to be used for a commercial purpose within 21 working days after receipt.",
+    "clock_spec": "21 working-days from request receipt",
+    "clock_effect": "sets-deadline"
+   },
+   {
+    "rule_id": "IL-0020",
+    "authority": "5 ILCS 140/3.2(a)",
+    "summary": "A public body must respond to a request from a recurrent requester within 21 business days after receipt.",
+    "clock_spec": "21 business-days from request receipt",
+    "clock_effect": "sets-deadline"
+   },
+   {
+    "rule_id": "IL-0021",
+    "authority": "5 ILCS 140/3.2(b)",
+    "summary": "Within 5 business days after receiving a request from a recurrent requester, the public body must notify the requester that it is being treated under the recurrent-requester provisions.",
+    "clock_spec": "notice due within 5 business-days from request receipt",
+    "clock_effect": "sets-deadline"
+   },
+   {
+    "rule_id": "IL-0024",
+    "authority": "5 ILCS 140/3.6(a)",
+    "summary": "A public body must respond to a voluminous request within 5 business days after receipt (notifying the requester it is being treated as voluminous).",
+    "clock_spec": "5 business-days from request receipt",
+    "clock_effect": "sets-deadline"
+   },
+   {
+    "rule_id": "IL-0025",
+    "authority": "5 ILCS 140/3.6",
+    "summary": "After the public body's voluminous-request response, the requester must respond within 10 business days; if the requester does not respond (or the request remains voluminous), the public body responds and assesses any fees.",
+    "clock_spec": "10 business-days from the public body's response being sent",
+    "clock_effect": "sets-deadline"
+   },
+   {
+    "rule_id": "IL-0026",
+    "authority": "5 ILCS 140/3.6(c)",
+    "summary": "The public body must give its final voluminous-request response within the earlier of 5 business days after receiving the requester's response or 5 business days after the final day for the requester to respond.",
+    "clock_spec": "earlier of 5 business-days from requester's response OR 5 business-days from final day for requester to respond",
+    "clock_effect": "sets-deadline"
+   }
+  ]
+ },
+ "audit": {
+  "rules_total": 37,
+  "rules_referenced": 37,
+  "unreferenced_rule_ids": []
+ }
+}

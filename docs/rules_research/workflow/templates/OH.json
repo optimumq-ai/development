@@ -1,0 +1,545 @@
+{
+ "state": "Ohio",
+ "code": "OH",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.written_request_required": [
+     {
+      "rule_id": "OH-0005",
+      "authority": "Ohio Rev. Code § 149.43(B)(5)",
+      "summary": "A written request is not mandatory; a requester may make an oral request and the office must honor it."
+     }
+    ],
+    "denial.improper_request_denial": [
+     {
+      "rule_id": "OH-0011",
+      "authority": "Ohio Rev. Code § 149.43(B)(2)",
+      "summary": "A public office may deny a request that is ambiguous or overly broad, or that does not reasonably identify what public records are being requested."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {},
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {},
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.advance_payment": [
+     {
+      "rule_id": "OH-0020",
+      "authority": "Ohio Rev. Code § 149.43(B)(6)",
+      "summary": "A public office may require the requester to pay in advance the cost of providing a copy, in accordance with the format the requester chose."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "OH-0014",
+      "authority": "Ohio Rev. Code § 149.43(B)(3)",
+      "summary": "If a request is ultimately denied in part or whole, the office shall provide the requester an explanation, including legal authority, setting forth why the request was denied."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "OH-0015",
+      "authority": "Ohio Rev. Code § 149.43(B)(3)",
+      "summary": "If the initial request was provided in writing, the denial explanation shall also be provided to the requester in writing."
+     }
+    ],
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "OH-0014",
+      "authority": "Ohio Rev. Code § 149.43(B)(3)",
+      "summary": "If a request is ultimately denied in part or whole, the office shall provide the requester an explanation, including legal authority, setting forth why the request was denied."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "OH-0016",
+      "authority": "Ohio Rev. Code § 149.43(B)(9)",
+      "summary": "If a public record contains information exempt from disclosure, the office shall make available all of the information within the record that is not exempt."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {
+    "redaction.marking_and_explanation": [
+     {
+      "rule_id": "OH-0017",
+      "authority": "Ohio Rev. Code § 149.43(B)(9)",
+      "summary": "When making a record available, the office shall notify the requester of any redaction or make the redaction plainly visible."
+     }
+    ]
+   },
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "OH-0021",
+      "authority": "Ohio Rev. Code § 149.43(B)(6)",
+      "summary": "The office shall permit the requester to choose to have the record duplicated on paper, on the same medium the office keeps it, or on any other medium the office determines it can reasonably be duplicated on, and shall provide the copy in accordance with that choice."
+     }
+    ],
+    "production.delivery_method": [
+     {
+      "rule_id": "OH-0023",
+      "authority": "Ohio Rev. Code § 149.43(B)(7)",
+      "summary": "A public office may transmit copies of public records to a requester by United States mail or by any other means of delivery or transmission the requester chooses, if the requester pays the postage/delivery cost in advance."
+     },
+     {
+      "rule_id": "OH-0024",
+      "authority": "Ohio Rev. Code § 149.43(B)(7)(c)(i)",
+      "summary": "A public office may limit the number of records it will physically deliver by U.S. mail or another delivery service to ten per month, unless the requester certifies in writing non-commercial use.",
+      "clock_spec": "floor: office may not cap physical-mail delivery below 10 records per month"
+     },
+     {
+      "rule_id": "OH-0025",
+      "authority": "Ohio Rev. Code § 149.43(B)(7)(c)(i)",
+      "summary": "The ten-per-month delivery limit does not apply if the requester certifies in writing that they do not intend to use or forward the records, or the information in them, for commercial purposes."
+     },
+     {
+      "rule_id": "OH-0026",
+      "authority": "Ohio Rev. Code § 149.43(B)(7)(c)(ii)",
+      "summary": "A public office that makes records available online may limit the number of records it will transmit electronically (or otherwise) to a person to ten per month, unless the records are not available online or the requester certifies non-commercial use.",
+      "clock_spec": "floor: office may not cap electronic delivery below 10 records per month"
+     }
+    ],
+    "production.inspection_access": [
+     {
+      "rule_id": "OH-0022",
+      "authority": "Ohio Rev. Code § 149.43(B)(6)",
+      "summary": "Nothing requires a public office to allow a requester to make the copies of a public record themselves."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": true,
+   "activated_by": {
+    "eligibility.incarcerated_requester_exclusion": [
+     {
+      "rule_id": "OH-0035",
+      "authority": "Ohio Rev. Code § 149.43(B)(8)",
+      "summary": "A public office need not permit a person incarcerated pursuant to a criminal conviction to inspect or copy a record concerning a criminal investigation or prosecution unless the sentencing judge (or successor) finds the information is necessary to support what appears to be a justiciable claim of…"
+     }
+    ],
+    "eligibility.vexatious_requester_gate": [
+     {
+      "rule_id": "OH-S01",
+      "authority": "Ohio R.C. § 2323.52(J)(1) (added by HB 265, 135th G.A., eff. 4/9/2025)",
+      "summary": "A person subject to a vexatious-litigator order may not request public records without first obtaining leave from the court of common pleas and an accompanying order specifying with particularity what records the person may request; until evidence of both is presented to the public office, the of…"
+     },
+     {
+      "rule_id": "OH-S02",
+      "authority": "Ohio R.C. § 2323.52(J)(2) (added by HB 265, 135th G.A., eff. 4/9/2025)",
+      "summary": "If a public office receives an anonymous records request (or one whose listed name matches) and knows or has reasonable cause to believe the requester is a vexatious litigator, it may require the person to present an acceptable form of identification before responding - an exception to the R.C. 1…"
+     }
+    ],
+    "intake.identity_requirement": [
+     {
+      "rule_id": "OH-0006",
+      "authority": "Ohio Rev. Code § 149.43(B)(5)",
+      "summary": "A public office may ask for a written request, identity, or intended use only after first disclosing to the requester that these are not mandatory and may be declined."
+     }
+    ]
+   },
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "OH-0001",
+      "authority": "Ohio Rev. Code § 149.43(B)(1)",
+      "summary": "Any person may request public records; upon such a request all responsive public records shall be promptly prepared and made available for inspection at all reasonable times during regular business hours."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "OH-0002",
+      "authority": "Ohio Rev. Code § 149.43(B)(4)",
+      "summary": "A public office may not condition availability of records on the requester disclosing the intended use of the record; requiring intended-use disclosure constitutes a denial."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "OH-0004",
+      "authority": "Ohio Rev. Code § 149.43(B)(1)",
+      "summary": "Access is available to any person with no residency limitation; the statute extends the right to 'any person' without an Ohio-residency qualifier."
+     }
+    ],
+    "eligibility.no_identity_requirement": [
+     {
+      "rule_id": "OH-0003",
+      "authority": "Ohio Rev. Code § 149.43(B)(4)",
+      "summary": "A public office may not condition availability of records on the requester disclosing the requester's identity; requiring identity disclosure constitutes a denial."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": false
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": true,
+   "activated_by": {
+    "clarification.confer_to_narrow": [
+     {
+      "rule_id": "OH-0012",
+      "authority": "Ohio Rev. Code § 149.43(B)(2)",
+      "summary": "If a request is denied as ambiguous or overly broad, the office shall provide the requester an opportunity to revise the request by informing the requester of the manner in which records are maintained and accessed in the ordinary course of duties."
+     }
+    ]
+   }
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": true,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": false
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": false
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": false
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": true,
+   "activated_by": {
+    "eligibility.vexatious_requester_gate": [
+     {
+      "rule_id": "OH-S01",
+      "authority": "Ohio R.C. § 2323.52(J)(1) (added by HB 265, 135th G.A., eff. 4/9/2025)",
+      "summary": "A person subject to a vexatious-litigator order may not request public records without first obtaining leave from the court of common pleas and an accompanying order specifying with particularity what records the person may request; until evidence of both is presented to the public office, the of…"
+     },
+     {
+      "rule_id": "OH-S02",
+      "authority": "Ohio R.C. § 2323.52(J)(2) (added by HB 265, 135th G.A., eff. 4/9/2025)",
+      "summary": "If a public office receives an anonymous records request (or one whose listed name matches) and knows or has reasonable cause to believe the requester is a vexatious litigator, it may require the person to present an acceptable form of identification before responding - an exception to the R.C. 1…"
+     }
+    ]
+   },
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "OH-0008",
+      "authority": "Ohio Rev. Code § 149.43(B)(1)",
+      "summary": "Copies of requested public records shall be made available at cost and within a reasonable period of time.",
+      "clock_spec": "undefined-soft: \"within a reasonable period of time\" from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "OH-0018",
+    "authority": "Ohio Rev. Code § 149.43(B)(1)",
+    "summary": "Copies of public records shall be made available 'at cost' — the office may not charge more than its actual cost of making the copy.",
+    "clock_spec": "ceiling: actual cost of the copy (no statutory per-page rate)"
+   }
+  ],
+  "fee.nonstandard_rate": [
+   {
+    "rule_id": "OH-0019",
+    "authority": "Ohio Rev. Code § 149.43(B)(1)",
+    "summary": "A law enforcement agency or prosecuting attorney's office may charge the actual cost of preparing a video record, not to exceed $75 per hour of video produced and not to exceed $750 total.",
+    "clock_spec": "ceiling: $75.00 per hour of video produced; ceiling: $750.00 total"
+   }
+  ]
+ },
+ "program_setup": {},
+ "ledger": {
+  "eligibility.vexatious_requester_gate": [
+   {
+    "rule_id": "OH-S01",
+    "authority": "Ohio R.C. § 2323.52(J)(1) (added by HB 265, 135th G.A., eff. 4/9/2025)",
+    "summary": "A person subject to a vexatious-litigator order may not request public records without first obtaining leave from the court of common pleas and an accompanying order specifying with particularity what records the person may request; until evidence of both is presented to the public office, the of…"
+   },
+   {
+    "rule_id": "OH-S02",
+    "authority": "Ohio R.C. § 2323.52(J)(2) (added by HB 265, 135th G.A., eff. 4/9/2025)",
+    "summary": "If a public office receives an anonymous records request (or one whose listed name matches) and knows or has reasonable cause to believe the requester is a vexatious litigator, it may require the person to present an acceptable form of identification before responding - an exception to the R.C. 1…"
+   }
+  ],
+  "payment.advance_payment": [
+   {
+    "rule_id": "OH-0020",
+    "authority": "Ohio Rev. Code § 149.43(B)(6)",
+    "summary": "A public office may require the requester to pay in advance the cost of providing a copy, in accordance with the format the requester chose."
+   }
+  ]
+ },
+ "audit": {
+  "rules_total": 26,
+  "rules_referenced": 26,
+  "unreferenced_rule_ids": []
+ }
+}

@@ -1,0 +1,575 @@
+{
+ "state": "North Carolina",
+ "code": "NC",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.written_request_required": [
+     {
+      "rule_id": "NC-0023",
+      "authority": "N.C. Gen. Stat. § 132-6.2(c)",
+      "summary": "For copies of computer databases, the agency may require the request to be made or submitted in writing."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {},
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {},
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {},
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {},
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "NC-0025",
+      "authority": "N.C. Gen. Stat. § 132-6.2(c)",
+      "summary": "If a computer-database copy request is denied, the denial must be accompanied by an explanation of the basis for the denial."
+     }
+    ]
+   },
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "NC-0026",
+      "authority": "N.C. Gen. Stat. § 132-6.2(c)",
+      "summary": "On request, the person denying a computer-database copy request must, as promptly as possible, reduce the explanation for the denial to writing.",
+      "clock_spec": "undefined-soft: \"as promptly as possible\" from the requester's ask",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "denial.reasons_and_citation_required": [
+     {
+      "rule_id": "NC-0025",
+      "authority": "N.C. Gen. Stat. § 132-6.2(c)",
+      "summary": "If a computer-database copy request is denied, the denial must be accompanied by an explanation of the basis for the denial."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "redaction.segregability": [
+     {
+      "rule_id": "NC-0009",
+      "authority": "N.C. Gen. Stat. § 132-6(c)",
+      "summary": "A request may not be denied on the ground that confidential information is commingled with the requested nonconfidential information; the agency must segregate."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "NC-0015",
+      "authority": "N.C. Gen. Stat. § 132-6.2(a)",
+      "summary": "A requester may elect to obtain copies in any and all media in which the agency is capable of providing them."
+     }
+    ],
+    "production.no_medium_refusal": [
+     {
+      "rule_id": "NC-0016",
+      "authority": "N.C. Gen. Stat. § 132-6.2(a)",
+      "summary": "A request for copies in a particular medium may not be denied on the ground that the custodian has made or prefers another medium."
+     }
+    ],
+    "production.inspection_access": [
+     {
+      "rule_id": "NC-0027",
+      "authority": "N.C. Gen. Stat. § 132-6.2(d)",
+      "summary": "An agency is not required to respond to copy requests outside of its usual business hours."
+     }
+    ],
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "NC-0028",
+      "authority": "N.C. Gen. Stat. § 132-6.2(e)",
+      "summary": "An agency is not required to respond by creating or compiling a record that does not exist."
+     },
+     {
+      "rule_id": "NC-0030",
+      "authority": "N.C. Gen. Stat. § 132-6.2(e)",
+      "summary": "An agency is not required to put into electronic medium a record that is not kept in electronic medium."
+     },
+     {
+      "rule_id": "NC-0032",
+      "authority": "N.C. Gen. Stat. § 132-6.1(c)",
+      "summary": "An agency is not required to create a computer database it has not otherwise created or is not otherwise required to create."
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": false,
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "NC-0001",
+      "authority": "N.C. Gen. Stat. § 132-6(a)",
+      "summary": "Any person may inspect, examine, and obtain copies of public records held by a custodian; access is not limited to a class of requesters."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "NC-0002",
+      "authority": "N.C. Gen. Stat. § 132-6(b)",
+      "summary": "A requester may not be required to disclose the purpose or motive for inspecting, examining, or copying public records."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "NC-0003",
+      "authority": "N.C. Gen. Stat. § 132-6(a)",
+      "summary": "There is no residency requirement to request public records; access runs to any person."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": false
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": false
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": false
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": false
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "context": {
+    "production.no_duty_to_create_or_convert": [
+     {
+      "rule_id": "NC-0028",
+      "authority": "N.C. Gen. Stat. § 132-6.2(e)",
+      "summary": "An agency is not required to respond by creating or compiling a record that does not exist."
+     },
+     {
+      "rule_id": "NC-0030",
+      "authority": "N.C. Gen. Stat. § 132-6.2(e)",
+      "summary": "An agency is not required to put into electronic medium a record that is not kept in electronic medium."
+     },
+     {
+      "rule_id": "NC-0032",
+      "authority": "N.C. Gen. Stat. § 132-6.1(c)",
+      "summary": "An agency is not required to create a computer database it has not otherwise created or is not otherwise required to create."
+     }
+    ]
+   },
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": true,
+   "activated_by": {
+    "production.website_satisfies": [
+     {
+      "rule_id": "NC-0006",
+      "authority": "N.C. Gen. Stat. § 132-6(a1)",
+      "summary": "An agency may satisfy the access/copy duty by making records available online in a viewable, printable/savable format; if so maintained, it need not provide copies any other way."
+     },
+     {
+      "rule_id": "NC-0031",
+      "authority": "N.C. Gen. Stat. § 132-6.1(a1)",
+      "summary": "An agency may satisfy the § 132-6 database-access duty by making database records individually available online (viewable/printable/savable), but must still allow inspection of any such records it also maintains in a nondigital medium."
+     }
+    ]
+   }
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": true,
+   "activated_by": {
+    "special_records.special_production_constraint": [
+     {
+      "rule_id": "NC-0014",
+      "authority": "N.C. Gen. Stat. § 132-6(f)",
+      "summary": "Inspection or copying of a record that could be damaged due to its age or condition may be made subject to reasonable restrictions intended to preserve the record."
+     }
+    ],
+    "special_records.special_record_window": [
+     {
+      "rule_id": "NC-0011",
+      "authority": "N.C. Gen. Stat. § 132-6(d)",
+      "summary": "Records relating to the proposed expansion or location of a specific business or industrial project may be withheld so long as inspection or copying would frustrate the purpose for which they were created."
+     },
+     {
+      "rule_id": "NC-0012",
+      "authority": "N.C. Gen. Stat. § 132-6(d)",
+      "summary": "Once the withholding basis no longer applies, the agency must disclose the requested announced-project records (not otherwise confidential) as soon as practicable and within 25 business days.",
+      "clock_spec": "25 business-days from the point the withholding basis ceases (as soon as practicable)",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "NC-0013",
+      "authority": "N.C. Gen. Stat. § 132-6(d1)",
+      "summary": "Once the qualifying-site withholding basis no longer applies, the agency must disclose the requested qualifying-site records (not otherwise confidential) as soon as practicable and within 25 business days.",
+      "clock_spec": "25 business-days from the point the withholding basis ceases (as soon as practicable)",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": true,
+   "activated_by": {
+    "special_records.third_party_proprietary": [
+     {
+      "rule_id": "NC-0008",
+      "authority": "N.C. Gen. Stat. § 132-1(d)",
+      "summary": "A political subdivision may not withhold or deny access on the basis of a nondisclosure agreement entered to restrict access to records subject to disclosure."
+     }
+    ]
+   }
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "NC-0024",
+      "authority": "N.C. Gen. Stat. § 132-6.2(c)",
+      "summary": "Custodians must respond to computer-database copy requests as promptly as possible, and if granted provide copies as soon as reasonably possible.",
+      "clock_spec": "undefined-soft: \"as promptly as possible\" to respond / \"as soon as reasonably possible\" to provide, from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "completion": {
+   "present": true,
+   "statutory": {
+    "production.completion_window": [
+     {
+      "rule_id": "NC-0005",
+      "authority": "N.C. Gen. Stat. § 132-6(a)",
+      "summary": "The custodian must furnish copies as promptly as possible upon payment of any lawful fees.",
+      "clock_spec": "undefined-soft: \"as promptly as possible\" from request receipt",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "special_windows": {
+   "present": true,
+   "statutory": {
+    "special_records.special_record_window": [
+     {
+      "rule_id": "NC-0011",
+      "authority": "N.C. Gen. Stat. § 132-6(d)",
+      "summary": "Records relating to the proposed expansion or location of a specific business or industrial project may be withheld so long as inspection or copying would frustrate the purpose for which they were created."
+     },
+     {
+      "rule_id": "NC-0012",
+      "authority": "N.C. Gen. Stat. § 132-6(d)",
+      "summary": "Once the withholding basis no longer applies, the agency must disclose the requested announced-project records (not otherwise confidential) as soon as practicable and within 25 business days.",
+      "clock_spec": "25 business-days from the point the withholding basis ceases (as soon as practicable)",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "NC-0013",
+      "authority": "N.C. Gen. Stat. § 132-6(d1)",
+      "summary": "Once the qualifying-site withholding basis no longer applies, the agency must disclose the requested qualifying-site records (not otherwise confidential) as soon as practicable and within 25 business days.",
+      "clock_spec": "25 business-days from the point the withholding basis ceases (as soon as practicable)",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.labor_charge": [
+   {
+    "rule_id": "NC-0010",
+    "authority": "N.C. Gen. Stat. § 132-6(c)",
+    "summary": "When separation of confidential from nonconfidential information is necessary to permit access, the public agency bears the cost of separation."
+   }
+  ],
+  "fee.actual_cost_basis": [
+   {
+    "rule_id": "NC-0019",
+    "authority": "N.C. Gen. Stat. § 132-6.2(b)",
+    "summary": "An agency may not charge a fee for an uncertified copy of a public record that exceeds the actual cost to the agency of making the copy.",
+    "clock_spec": "ceiling: actual cost of making the copy"
+   }
+  ],
+  "fee.electronic_media_charge": [
+   {
+    "rule_id": "NC-0017",
+    "authority": "N.C. Gen. Stat. § 132-6.2(a)",
+    "summary": "An agency may assess different fees for different media, as prescribed by law."
+   }
+  ],
+  "fee.certified_copy_charge": [
+   {
+    "rule_id": "NC-0018",
+    "authority": "N.C. Gen. Stat. § 132-6.2(b)",
+    "summary": "A requester may request certified or uncertified copies; fees for certifying copies are as provided by law."
+   }
+  ],
+  "fee.special_service_charge": [
+   {
+    "rule_id": "NC-0021",
+    "authority": "N.C. Gen. Stat. § 132-6.2(b)",
+    "summary": "Where a request requires extensive use of information technology resources or extensive clerical/supervisory assistance, the agency may charge a reasonable special service charge (based on actual cost) in addition to duplication cost."
+   },
+   {
+    "rule_id": "NC-0029",
+    "authority": "N.C. Gen. Stat. § 132-6.2(e)",
+    "summary": "If an agency voluntarily elects, as a service, to create or compile a record, it may negotiate a reasonable charge for the service with the requester."
+   }
+  ]
+ },
+ "program_setup": {},
+ "ledger": {},
+ "audit": {
+  "rules_total": 28,
+  "rules_referenced": 28,
+  "unreferenced_rule_ids": []
+ }
+}

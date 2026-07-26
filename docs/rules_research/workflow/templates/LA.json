@@ -1,0 +1,594 @@
+{
+ "state": "Louisiana",
+ "code": "LA",
+ "_meta": {
+  "phase": 6,
+  "generated_by": "build_state_templates.js",
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+ },
+ "knobs": {
+  "Master.g1": {
+   "label": "Request submitted",
+   "statutory": {
+    "intake.oral_request_permitted": [
+     {
+      "rule_id": "LA-0011",
+      "authority": "La. R.S. 44:35(A)",
+      "summary": "A public-records request may be submitted in person, in writing, or electronically."
+     }
+    ]
+   },
+   "city_config": "Which channels the city actually operates (portal / form / paper / phone) — statute constrains, city chooses."
+  },
+  "Master.g4": {
+   "label": "Acknowledgment auto-sent",
+   "statutory": {},
+   "city_config": "Auto-acknowledgment text + send timing; statutory ack window where present, else city default (recommend: same business day)."
+  },
+  "Master.p3": {
+   "label": "Estimate Data",
+   "statutory": {
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "LA-0031",
+      "authority": "La. R.S. 44:35(A)",
+      "summary": "The custodian may respond within the five-day window with an estimate of the time reasonably necessary for collection, segregation, redaction, examination, or review, which forestalls the constructive denial.",
+      "clock_spec": "undefined-soft: \"time reasonably necessary for collection, segregation, redaction, examination, or review\" from the estimate",
+      "clock_effect": "pauses"
+     }
+    ]
+   },
+   "city_config": "Which data points intake must capture to estimate (page count, media, labor class)."
+  },
+  "Master.dd": {
+   "label": "Deposit before",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.bv": {
+   "label": "VAGUE → Clarification",
+   "statutory": {},
+   "city_config": "Vagueness screen wording; the reasonably-describes standard is statutory where present."
+  },
+  "Master.bn": {
+   "label": "NO RECORD FOUND",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Master.f2": {
+   "label": "Estimate Review (config: $ threshold +",
+   "statutory": {},
+   "city_config": "Estimate-review $ threshold + reviewer role — pure city policy (recommend: supervisor review over $50)."
+  },
+  "Clarification.n2": {
+   "label": "Send clarification / assist request",
+   "statutory": {},
+   "city_config": "Clarification letter template; TX requires consequences-warning content; OK SB 535 3-element specificity."
+  },
+  "Clarification.n3": {
+   "label": "Await requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law for most states: response window before close. Statutory: MO 90d · TX 61d. Recommend default 30d."
+  },
+  "Clarification.close": {
+   "label": "CLOSE item (withdrawn)",
+   "statutory": {},
+   "city_config": "Close-as-withdrawn notice; statutory consequence in MO/TX, city policy elsewhere."
+  },
+  "Clarification.d4": {
+   "label": "Materially revised?",
+   "statutory": {},
+   "city_config": "Materially-revised test (treat as NEW request → new clock, vs. continue) — pure city policy; recommend: new scope = new request."
+  },
+  "Estimate-Fee.dreq": {
+   "label": "Estimate required?",
+   "statutory": {
+    "response.time_estimate_notice": [
+     {
+      "rule_id": "LA-0031",
+      "authority": "La. R.S. 44:35(A)",
+      "summary": "The custodian may respond within the five-day window with an estimate of the time reasonably necessary for collection, segregation, redaction, examination, or review, which forestalls the constructive denial.",
+      "clock_spec": "undefined-soft: \"time reasonably necessary for collection, segregation, redaction, examination, or review\" from the estimate",
+      "clock_effect": "pauses"
+     }
+    ]
+   },
+   "city_config": "Estimate-required trigger (statutory where present; else city $ threshold — recommend: estimate when > free allowance)."
+  },
+  "Estimate-Fee.addt": {
+   "label": "NOT ESTIMABLE YET →",
+   "statutory": {},
+   "city_config": "⚠ Not-estimable-yet path (prelim search first) — pure city policy on when allowed and its operational target."
+  },
+  "Estimate-Fee.frev": {
+   "label": "Estimate Review (config: $ threshold + reviewer:",
+   "statutory": {},
+   "city_config": "Estimate review $ threshold + reviewer role — same knob family as Master.f2."
+  },
+  "Estimate-Fee.fcom": {
+   "label": "Send itemized good-faith estimate /",
+   "statutory": {},
+   "city_config": "Estimate communication template; itemization statutory where fee.estimate_and_notice requires it."
+  },
+  "Estimate-Fee.drsp": {
+   "label": "Requester response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: requester response window on the estimate. Recommend default 30d."
+  },
+  "Estimate-Fee.optout": {
+   "label": "opt-out / no response",
+   "statutory": {},
+   "city_config": "⚠ config-not-law: opt-out / no-response handling on the estimate (close vs. hold). Recommend close-as-withdrawn after window."
+  },
+  "Estimate-Fee.ddep": {
+   "label": "Deposit / pay before",
+   "statutory": {
+    "payment.advance_payment": [
+     {
+      "rule_id": "LA-0023",
+      "authority": "La. R.S. 44:32(C)(1)(a)",
+      "summary": "The custodian may request payment of fees in advance of production."
+     }
+    ]
+   },
+   "city_config": "Whether to exercise permissive deposit/advance-payment authority, and at what threshold (statute caps; city elects)."
+  },
+  "Estimate-Fee.cnp": {
+   "label": "nonpayment (MO 90d · OR 60d ·",
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "LA-0024",
+      "authority": "La. R.S. 44:32(C)(1)(a)",
+      "summary": "The custodian need not provide copies where the requester fails to pay applicable copying fees after advance notice of the amount, or has an outstanding balance from a prior request."
+     }
+    ]
+   },
+   "city_config": "⚠ nonpayment close window: statutory MO 90d · OR 60d · TX 60d · MI 45d (deposit); else city default (recommend 60d)."
+  },
+  "Denial.nreason": {
+   "label": "Select reason(s) from config library",
+   "statutory": {},
+   "city_config": "The exemption/reason library itself is per-state config content (Phase-7 data load), keyed to statute cites."
+  },
+  "Denial.dlegal": {
+   "label": "Legal approval",
+   "statutory": {},
+   "city_config": "Who may approve a denial (city routing); CT requires the custodian personally."
+  },
+  "Denial.ncomm": {
+   "label": "Compose denial communication",
+   "statutory": {
+    "denial.written_notice_required": [
+     {
+      "rule_id": "LA-0029",
+      "authority": "La. R.S. 44:32(D)",
+      "summary": "A written determination withholding a record (or part) must reference the basis under law the custodian determined exempts the record, or any part thereof, from inspection, copying, or reproduction."
+     }
+    ]
+   },
+   "city_config": "Denial letter template — must satisfy every content element listed for the state."
+  },
+  "Denial.ddl": {
+   "label": "Denial deadline?",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.bn": {
+   "label": "NONE → NO RECORD FOUND (master branch)",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Records-Search.inst": {
+   "label": "INSTALLMENTS / partial production (7 states):",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r1": {
+   "label": "Review against exemption / reason library",
+   "statutory": {
+    "search.identify_responsive": [
+     {
+      "rule_id": "LA-0017",
+      "authority": "La. R.S. 44:33(A)(1)-(2)",
+      "summary": "The responsible official shall segregate the requested record from other records so the public can reasonably view it; if segregation is unreasonably burdensome/expensive or unnecessary, the official shall so state in writing and state the record's location."
+     }
+    ]
+   },
+   "city_config": "The exemption library content (shared with Denial.nreason); segregability default applies in 25 states."
+  },
+  "Redaction.pii": {
+   "label": "MANDATORY / AUTO-REDACT CLASSES",
+   "statutory": {},
+   "city_config": "No statutory constraint in this state — city policy."
+  },
+  "Redaction.r2": {
+   "label": "Apply redactions — mark visibly / note each",
+   "statutory": {},
+   "city_config": "Marking style (visible box + exemption cite per redaction) — statutory content elements where present."
+  },
+  "Redaction.d3": {
+   "label": "Legal review needed?",
+   "statutory": {},
+   "city_config": "Legal-review escalation trigger for redactions — pure city policy (recommend: any novel exemption or protected-person class)."
+  },
+  "Disposition.fmt": {
+   "label": "Deliver in requested format / medium",
+   "statutory": {
+    "production.format_and_medium": [
+     {
+      "rule_id": "LA-0020",
+      "authority": "La. R.S. 44:32(C)(1)(a)",
+      "summary": "Copies provided may include the transmission of electronic copies of public records."
+     }
+    ],
+    "production.delivery_and_completion": [
+     {
+      "rule_id": "LA-0019",
+      "authority": "La. R.S. 44:32(C)(1)(a)",
+      "summary": "For non-state-agency public records, the custodian has a duty to provide copies to a requester, unless the requester fails to pay applicable copying fees after advance notice of the amount or has an outstanding balance from a prior request."
+     }
+    ],
+    "production.inspection_access": [
+     {
+      "rule_id": "LA-0015",
+      "authority": "La. R.S. 44:33(B)(1)",
+      "summary": "If the requested record is immediately available (not in active use), it shall be immediately presented to the requester.",
+      "clock_spec": "undefined-soft: \"immediately\" from application (when record not in active use)",
+      "clock_effect": "sets-deadline"
+     },
+     {
+      "rule_id": "LA-0016",
+      "authority": "La. R.S. 44:33(B)(1)",
+      "summary": "If the record is in active use, the custodian shall promptly certify this in writing and fix a day and hour within three days (excluding weekends and legal holidays) for the requester to exercise the right.",
+      "clock_spec": "ceiling: within 3 business-days from application (excl. Sat/Sun/legal holidays)",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  }
+ },
+ "branches": {
+  "Master.g2": {
+   "label": "Requester eligible?",
+   "active": true,
+   "activated_by": {
+    "eligibility.incarcerated_requester_exclusion": [
+     {
+      "rule_id": "LA-0005",
+      "authority": "La. R.S. 44:31.1",
+      "summary": "An individual in custody after sentence following a felony conviction who has exhausted appellate remedies is not a 'person' entitled to records unless the request is limited to grounds for post-conviction relief under C.Cr.P. art. 930.3."
+     }
+    ],
+    "intake.identity_requirement": [
+     {
+      "rule_id": "LA-0012",
+      "authority": "La. R.S. 44:32(A)(1)",
+      "summary": "The custodian may inquire as to the requester's age and identification and may require the requester to sign a register."
+     }
+    ]
+   },
+   "context": {
+    "eligibility.any_person": [
+     {
+      "rule_id": "LA-0001",
+      "authority": "La. R.S. 44:31(B)(1)",
+      "summary": "Any person of the age of majority may inspect, copy, or reproduce any public record, except as otherwise provided by this Chapter or specifically provided by law."
+     }
+    ],
+    "eligibility.no_purpose_requirement": [
+     {
+      "rule_id": "LA-0003",
+      "authority": "La. R.S. 44:32(A)(1)",
+      "summary": "The custodian shall make no inquiry of a requester except as to age and identification; no statement of purpose may be required."
+     }
+    ],
+    "eligibility.no_residency_requirement": [
+     {
+      "rule_id": "LA-0004",
+      "authority": "La. R.S. 44:31(B)(1)",
+      "summary": "Access is available to any person of the age of majority; no Louisiana residency is required to inspect, copy, or reproduce a public record."
+     }
+    ],
+    "eligibility.no_age_requirement": [
+     {
+      "rule_id": "LA-0002",
+      "authority": "La. R.S. 44:31(B)(2)",
+      "summary": "Any person (no age-of-majority limit) may obtain a copy or reproduction of any public record."
+     }
+    ]
+   }
+  },
+  "Master.s1": {
+   "label": "Fee-waiver requested",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "LA-0025",
+      "authority": "La. R.S. 44:32(C)(1)(a)",
+      "summary": "Copies of records may be furnished without charge or at a reduced charge to indigent citizens of the state."
+     }
+    ]
+   }
+  },
+  "Master.s2": {
+   "label": "Commercial-rate requested",
+   "active": false
+  },
+  "Master.br": {
+   "label": "NOT OURS → proper custodian",
+   "active": true,
+   "activated_by": {
+    "custody.referral_to_proper_custodian": [
+     {
+      "rule_id": "LA-0018",
+      "authority": "La. R.S. 44:34",
+      "summary": "If the requested record is not in the custody/control of the person applied to, that person shall promptly certify in writing the reason for its absence, its location, who has custody, and how/when it left his custody.",
+      "clock_spec": "undefined-soft: \"promptly\" from application",
+      "clock_effect": "sets-deadline"
+     }
+    ]
+   }
+  },
+  "Clarification.d1": {
+   "label": "Assist / confer required",
+   "active": false
+  },
+  "Clarification.deny": {
+   "label": "Deny as vague / overbroad",
+   "active": false,
+   "note": "Deny-as-vague is narrower than reasonably-describes membership: TN·NJ·OH, OK only after SB 535 engagement (diagram legend, v2.2)."
+  },
+  "Clarification.d2": {
+   "label": "Clock effect of sending?",
+   "active": false
+  },
+  "Clarification.duty": {
+   "label": "Still vague after reasonable effort →",
+   "active": false
+  },
+  "Estimate-Fee.dwv": {
+   "label": "Fee waiver",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "LA-0025",
+      "authority": "La. R.S. 44:32(C)(1)(a)",
+      "summary": "Copies of records may be furnished without charge or at a reduced charge to indigent citizens of the state."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.wrev": {
+   "label": "Review (public-interest / indigent /",
+   "active": true,
+   "activated_by": {
+    "fee.waiver": [
+     {
+      "rule_id": "LA-0025",
+      "authority": "La. R.S. 44:32(C)(1)(a)",
+      "summary": "Copies of records may be furnished without charge or at a reduced charge to indigent citizens of the state."
+     }
+    ]
+   }
+  },
+  "Estimate-Fee.proc": {
+   "label": "No → proceed to work; collect at end",
+   "active": true,
+   "note": "Collect-at-end is the default path wherever production is NOT statutorily conditioned on prepayment."
+  },
+  "Denial.dag": {
+   "label": "Mandatory EXTERNAL ruling",
+   "active": false
+  },
+  "Denial.dprev": {
+   "label": "Previous determination",
+   "active": false
+  },
+  "Denial.ag1": {
+   "label": "Prepare AG ruling request —",
+   "active": false
+  },
+  "Denial.agclk": {
+   "label": "HARD CLOCKS (from receipt;",
+   "active": false
+  },
+  "Denial.agnot": {
+   "label": "Requestor notices:",
+   "active": false
+  },
+  "Denial.agwait": {
+   "label": "AWAIT AG ruling [external]",
+   "active": false
+  },
+  "Denial.agdec": {
+   "label": "AG ruling?",
+   "active": false
+  },
+  "Denial.agrel": {
+   "label": "RELEASE ordered / deemed public →",
+   "active": false
+  },
+  "Records-Search.prog": {
+   "label": "BUT extraction/programming of EXISTING",
+   "active": false,
+   "note": "Programming-≠-creation loop is TX 552.231 only; the broader no-duty-to-create concept (16 states) is context, not an activator."
+  },
+  "Records-Search.web": {
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):",
+   "active": false
+  },
+  "Records-Search.spec": {
+   "label": "SPECIAL-RECORD CLASS? (overlay)",
+   "active": true,
+   "activated_by": {
+    "special_records.special_production_constraint": [
+     {
+      "rule_id": "LA-0034",
+      "authority": "La. R.S. 44:32(A)(2)",
+      "summary": "If the custodian reasonably determines a request would substantially disrupt required government operations, the custodian may deny access, but only after reasonable attempts to narrow or specify the request with the requester."
+     }
+    ]
+   }
+  },
+  "Redaction.tp": {
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)",
+   "active": false
+  },
+  "Disposition.hold": {
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)",
+   "active": false
+  },
+  "Disposition.caps": {
+   "label": "REQUESTOR-LEDGER CHECK (class D)",
+   "active": false,
+   "note": "Requestor-ledger class-D delivery caps (OH) ride on ledger config; see ledger section."
+  }
+ },
+ "clock_matrix": {
+  "acknowledgment": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "initial_decision": {
+   "present": true,
+   "statutory": {
+    "response.initial_decision_window": [
+     {
+      "rule_id": "LA-0028",
+      "authority": "La. R.S. 44:32(D)",
+      "summary": "When the custodian raises a question whether an item is a public record, the custodian shall, within five days (excluding weekends and legal holidays) of receipt of the request, notify the requester in writing of the determination and the reasons.",
+      "clock_spec": "ceiling: within 5 business-days from receipt of the written request (excl. Sat/Sun/legal holidays)",
+      "clock_effect": "sets-deadline"
+     }
+    ],
+    "denial.deemed_denial_on_nonresponse": [
+     {
+      "rule_id": "LA-0030",
+      "authority": "La. R.S. 44:35(A)",
+      "summary": "Passage of five days (excluding weekends and legal holidays) from an in-person, written, or electronic request without receiving a written determination or a time estimate constitutes a denial, entitling the requester to enforcement proceedings.",
+      "clock_spec": "terminal: 5 business-days from request (in-person/written/electronic), excl. Sat/Sun/legal holidays, with no determination or estimate",
+      "clock_effect": "terminal"
+     }
+    ]
+   }
+  },
+  "extension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "completion": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "clarification_response": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "nonpayment_close": {
+   "present": true,
+   "statutory": {
+    "payment.nonpayment_consequence": [
+     {
+      "rule_id": "LA-0024",
+      "authority": "La. R.S. 44:32(C)(1)(a)",
+      "summary": "The custodian need not provide copies where the requester fails to pay applicable copying fees after advance notice of the amount, or has an outstanding balance from a prior request."
+     }
+    ]
+   }
+  },
+  "special_windows": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "suspension": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "ag_referral": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  },
+  "denial_deadline": {
+   "present": false,
+   "note": "No statutory timer — city operational target only (soft-standard pattern S-002)."
+  }
+ },
+ "fee_schedule": {
+  "fee.copy_rate_per_page": [
+   {
+    "rule_id": "LA-0021",
+    "authority": "La. R.S. 44:32(C)(1)(a)",
+    "summary": "The custodian may establish and collect reasonable fees for making copies of public records."
+   }
+  ],
+  "fee.labor_charge": [
+   {
+    "rule_id": "LA-0027",
+    "authority": "La. R.S. 44:32(B)",
+    "summary": "When examination is conducted outside regular working hours, persons representing the custodian are entitled to reasonable compensation, paid by the public body and funded in advance by the party demanding the extraordinary examination."
+   }
+  ],
+  "fee.no_charge_categories": [
+   {
+    "rule_id": "LA-0014",
+    "authority": "La. R.S. 44:32(C)(3)",
+    "summary": "No fee may be charged to examine or review a public record, or to determine whether a record is subject to disclosure, except as provided in this Section."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "LA-0022",
+    "authority": "La. R.S. 44:32(C)(1)(a)",
+    "summary": "A custodian who elects to collect copying fees shall establish a reasonable fee schedule and post it where it can be readily accessed by the public."
+   },
+   {
+    "rule_id": "LA-0026",
+    "authority": "La. R.S. 44:32(C)(2)(a)",
+    "summary": "For state-agency public records, copy fees shall be charged according to the uniform fee schedule adopted by the commissioner of administration (R.S. 39:241) or as otherwise fixed by law."
+   }
+  ]
+ },
+ "program_setup": {
+  "custody.custodian_definition_and_role": [
+   {
+    "rule_id": "LA-0008",
+    "authority": "La. R.S. 44:1(A)(3)",
+    "summary": "The 'custodian' who must respond is the public official or head of the public body having custody or control of the record, or a representative specifically authorized by him to respond to inspection requests."
+   },
+   {
+    "rule_id": "LA-0010",
+    "authority": "La. R.S. 44:31(A)",
+    "summary": "Providing access to public records is a mandatory responsibility and duty of the custodian's office and its employees."
+   }
+  ],
+  "fee.schedule_and_authority": [
+   {
+    "rule_id": "LA-0022",
+    "authority": "La. R.S. 44:32(C)(1)(a)",
+    "summary": "A custodian who elects to collect copying fees shall establish a reasonable fee schedule and post it where it can be readily accessed by the public."
+   },
+   {
+    "rule_id": "LA-0026",
+    "authority": "La. R.S. 44:32(C)(2)(a)",
+    "summary": "For state-agency public records, copy fees shall be charged according to the uniform fee schedule adopted by the commissioner of administration (R.S. 39:241) or as otherwise fixed by law."
+   }
+  ]
+ },
+ "ledger": {
+  "payment.advance_payment": [
+   {
+    "rule_id": "LA-0023",
+    "authority": "La. R.S. 44:32(C)(1)(a)",
+    "summary": "The custodian may request payment of fees in advance of production."
+   }
+  ]
+ },
+ "audit": {
+  "rules_total": 28,
+  "rules_referenced": 28,
+  "unreferenced_rule_ids": []
+ }
+}
