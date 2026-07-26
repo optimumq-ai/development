@@ -68,8 +68,12 @@ OH certification stickiness).
 ag_referral_to_withhold · deemed_disclosure (TX-0022 un-merged from deemed-denial) · vexatious_requester_gate ·
 catastrophe_suspension. See `../alignment/README.md`.
 
-**Ohio minors (not yet folded):** oral/phone as a named intake channel; delivery volume-caps parameter
-(OH-0024/0026); no-forwarding-duty state gate on the referral path.
+**Ohio minors: FOLDED (v2.3, 2026-07-26).** Oral/phone is a named intake channel on the Master page
+(OH·GA·LA·MA·MI·MO·NV·WI) with the OH channel caveats noted (ask-only-after-disclosure OH-0006; written
+denial only if written request OH-0015). Referral path added as a state-gated "NOT OURS" branch — 4-way
+split: forward internally (MI·NJ·UT) · notify+identify custodian (CO·KS·LA·MA·NV·OR·VA) · courtesy only
+(AL·TN) · NO duty (OH, config). Delivery volume-caps (OH-0024/0026) are covered by the requestor-ledger
+design (class D).
 
 **Not yet detailed:** Records Search · Redaction (+ Legal Redaction) · Disposition/Status sub-flows.
 **Not started:** state-gated overlay (color every node shared/param/branch — the bridge to Phase 6);

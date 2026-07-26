@@ -6,8 +6,9 @@ const C={process:['#dae8fc','#6c8ebf'],decision:['#ffe6cc','#d79b00'],parent:['#
 
 // ---------- PAGE 1: MASTER ----------
 const MN=[
- ['title',20,10,1000,26,'title','MASTER FLOW · single-item, manual (no-AI) — v2.2 · OH + TX refinements folded (eligibility gate · soft clock · AG-referral · 2025 amendments)'],
- ['g1',20,60,214,80,'parent','Request submitted\nPortal · Online form · Clerk (paper)\n→ normalized to ≤10 items'],
+ ['title',20,10,1000,26,'title','MASTER FLOW · single-item, manual (no-AI) — v2.3 · OH + TX refinements folded (eligibility gate · soft clock · AG-referral · oral channel · referral gate)'],
+ ['g1',20,56,214,88,'parent','Request submitted\nPortal · Online form · Clerk (paper) ·\nOral/phone (OH·GA·LA·MA·MI·MO·NV·WI)\n→ normalized to ≤10 items'],
+ ['no',1130,50,320,112,'note','ORAL CHANNEL (state-gated)\nOH: office may ask for writing / ID / purpose only\nAFTER disclosing they are optional (OH-0006);\ndenial explanation must be written only if the\nrequest was written (OH-0015) → channel captured\nat intake drives later communication duties'],
  ['g2',248,54,204,92,'decision','Requester eligible?\n(state-gated: residency ·\ncitizenship · incarcerated)'],
  ['g3',462,66,150,68,'decision','MRR?\n(this pass: single)'],
  ['g4',646,58,214,84,'parent','Acknowledgment auto-sent\n(parent flag ✓)\nmuted where “no duty to\nattach” a vague request'],
@@ -24,6 +25,7 @@ const MN=[
  ['bv',210,368,238,100,'link','VAGUE → Clarification\nawait response (implied-ext clock)\n→ resolve ↑ or timeout → Closed\n▸ open Clarification sub-flow'],
  ['bd',500,368,232,100,'link','DENIAL\nreasons from config library →\ndirect or → Legal review\n▸ open Denial sub-flow'],
  ['bn',828,372,262,92,'branch','NO RECORD FOUND\n“not found — contact us” comm →\nimplied-ext (+3d) → auto-close (10d)'],
+ ['br',1110,372,330,100,'branch','NOT OURS → proper custodian\nstate-gated duty: forward internally (MI·NJ·UT) ·\nnotify + identify custodian (CO·KS·LA·MA·NV·OR·VA)\n· courtesy only (AL·TN) · NO duty (OH — config)'],
  ['tc',560,506,150,54,'closed','CLOSED'],
  ['td',744,506,150,54,'denied','DENIED'],
  ['l1',500,596,232,74,'legal','Legal Review – Denial (UI, submit)\nspawns: Intake / Search / Redaction /\nLegal-Redaction → Closed'],
@@ -44,6 +46,7 @@ const ME=[
  ['p2','bv','vague'],['bv','p3','resolved'],['bv','tc','timeout'],
  ['p2','bd','deny'],['p4','bd',''],['p5','bd',''],['bd','td',''],['bd','l1','to legal'],
  ['p4','bn','none'],['bn','tc',''],
+ ['p2','br','not ours'],['br','tc',''],
  ['p3','fin','estimate submit → fee calc'],['fin','p6','payment-adequate'],
  ['l1','tc',''],['p4','l2',''],['p5','l2',''],['l2','p5','back'],
 ];
