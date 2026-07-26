@@ -57,12 +57,16 @@ rules; TX-0016..0021 AG-referral rules RESTORED to the working set — now 1116 
    (requestor-level ledger) triggers flagged: TX 552.263(c)/552.275 · OK unpaid-fees.
 
 ## OPEN — pick up here next session
-**Data question (still open):** TX-0031 free allowance is **per-requestor / 12 months** (cross-request) — the
-per-request parent ledger can’t hold it; needs a requestor-level running total. (OK’s unpaid-prior-fees
-advance-payment trigger, OK-S03, needs the same requestor-level balance — one mechanism serves both.)
+**Requestor-level ledger: DESIGNED** (2026-07-26) — see **`DESIGN_requestor_ledger.md`** (HTML copy in the
+exchange folder). One cross-request mechanism (profile + balance/allowances/counters/flags, trigger
+evaluation at the 3 existing gates, adverse-triggers-require-identity) serving 14+ states: TX 552.263(c)/
+552.275, OK unpaid-fees, GA/MA/MI/UT/WI balance gates, IL recurrent, NJ/UT/PA duplicates, OH delivery caps,
+vexatious flags. **3 open questions for Kevin at the end of the doc** (identity anchor · MVP cut ·
+OH certification stickiness).
 
-**Alignment debt:** the 15 new working-set rules (9 supplements + 6 restored) are NOT yet mapped into the
-118-concept master dictionary — rerun/extend the alignment before Phase 6 templates.
+**Alignment: refreshed** (2026-07-26) — all 1,116 rules mapped into **122 concepts** (0 catch-alls); new:
+ag_referral_to_withhold · deemed_disclosure (TX-0022 un-merged from deemed-denial) · vexatious_requester_gate ·
+catastrophe_suspension. See `../alignment/README.md`.
 
 **Ohio minors (not yet folded):** oral/phone as a named intake channel; delivery volume-caps parameter
 (OH-0024/0026); no-forwarding-duty state gate on the referral path.
