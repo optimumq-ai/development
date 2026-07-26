@@ -6,7 +6,7 @@ const C={process:['#dae8fc','#6c8ebf'],decision:['#ffe6cc','#d79b00'],parent:['#
 
 // ---------- PAGE 1: MASTER ----------
 const MN=[
- ['title',20,10,1000,26,'title','MASTER FLOW · single-item, manual (no-AI) — v2.1 · Ohio refinements folded (eligibility gate + soft clock)'],
+ ['title',20,10,1000,26,'title','MASTER FLOW · single-item, manual (no-AI) — v2.2 · OH + TX refinements folded (eligibility gate · soft clock · AG-referral · 2025 amendments)'],
  ['g1',20,60,214,80,'parent','Request submitted\nPortal · Online form · Clerk (paper)\n→ normalized to ≤10 items'],
  ['g2',248,54,204,92,'decision','Requester eligible?\n(state-gated: residency ·\ncitizenship · incarcerated)'],
  ['g3',462,66,150,68,'decision','MRR?\n(this pass: single)'],
@@ -54,22 +54,22 @@ const CN=[
  ['title',20,10,760,26,'title','Clarification sub-flow (child-level) — shared spine; per-state = params + gated branches'],
  ['n1',350,58,300,54,'process','Item marked VAGUE at Intake Review\n(child-level decision)'],
  ['d1',370,146,260,80,'decision','Assist / confer required\nbefore any denial?\n(state-gated)'],
- ['deny',700,152,330,70,'branch','Deny as vague / overbroad\n(TN · NJ · OH — OH must still offer revise)\n→ DENIAL sub-flow'],
- ['n2',350,268,300,64,'process','Send clarification / assist request\n(communication; may itself be\ndue within the response window)'],
+ ['deny',700,152,330,70,'branch','Deny as vague / overbroad\n(TN · NJ · OH — OH must still offer revise;\nOK only AFTER engagement — SB 535)\n→ DENIAL sub-flow'],
+ ['n2',350,268,300,64,'process','Send clarification / assist request\n(may itself be due within the response window;\nTX: letter MUST state consequences of\nnon-response — § 552.222(d))'],
  ['d2',370,372,260,80,'decision','Clock effect of sending?\n(state-gated)'],
  ['ct',30,378,300,68,'note','TOLL / RESTART:\nAL restart · OR · TX toll → clock pauses'],
  ['ci',700,372,340,80,'note','NO PAUSE (most states) → IMPLIED-EXTENSION\nextended_due = received + statutory_days\n+ implied_extension (triggered here)'],
- ['n3',330,500,340,96,'hl','Await requester response\nResponse deadline:\n• MO = 90 days (statutory)\n• KS = soft “reasonable efforts”\n• all others = CITY SOFT-POLICY (config)'],
- ['gap',720,486,360,110,'gap','⚠ GAP (as predicted)\nThe requester-response window &\nclose-on-nonresponse are statutory ONLY in\nMO (90d); KS soft; all others silent.\n→ this edge is a CONFIG KNOB, not law.'],
+ ['n3',330,500,340,96,'hl','Await requester response\nResponse deadline:\n• MO = 90d · TX = 61 days (statutory)\n• KS = soft “reasonable efforts”\n• all others = CITY SOFT-POLICY (config)'],
+ ['gap',720,486,360,110,'gap','⚠ GAP (narrowed 2026-07-26)\nThe requester-response window &\nclose-on-nonresponse are statutory ONLY in\nMO (90d) + TX (61d, § 552.222(e));\nKS soft; all others silent.\n→ elsewhere this edge is a CONFIG KNOB, not law.'],
  ['d3',390,636,240,64,'decision','Responded by\ndeadline?'],
- ['close',40,628,300,80,'closed','CLOSE item (withdrawn)\nMO 90d · KS soft · else city policy\n→ CLOSED'],
+ ['close',40,628,300,80,'closed','CLOSE item (withdrawn)\nMO 90d · TX 61d · KS soft · else city policy\n→ CLOSED'],
  ['n4',380,736,260,50,'process','Revised request received'],
  ['d4',370,822,280,80,'decision','Materially revised?\n(design / config — no statute)'],
  ['nnew',700,828,330,64,'process','Treat as NEW request →\nnew receipt & clock →\nre-enter Intake Review'],
  ['d5',390,932,240,64,'decision','Reasonably\ndescribed now?'],
  ['resume',320,1030,360,64,'ship','RESUME processing\n(clock per toll decision above)\n→ back to spine (Estimate Data)'],
  ['duty',30,1024,300,80,'branch','Still vague after reasonable effort →\nDuty satisfied (CA-0008) →\ndeny / close → CLOSED / DENIED'],
- ['leg',700,940,380,150,'note','STATE COVERAGE\nAssist: CA·NJ·NV·TN·WA    Confer: IL·KS·NV·OH\nExplicit toll: AL·OR·TX\nStatutory response deadline: MO (90d) only\nDeny-as-vague: TN·NJ·OH    Duty satisfied: CA'],
+ ['leg',700,940,380,150,'note','STATE COVERAGE\nAssist: CA·NJ·NV·TN·WA    Confer: IL·KS·NV·OH·OK\nExplicit toll: AL·OR·TX (TX re-measures 10-bd AG clock)\nStatutory response deadline: MO 90d · TX 61d\nDeny-as-vague: TN·NJ·OH · OK only after engagement\nDuty satisfied: CA\nOK specificity (SB 535): time-frame · identifiable\nrecords · search terms'],
 ];
 const CE=[['n1','d1',''],['d1','deny','deny allowed'],['d1','n2','assist / confer first'],['n2','d2',''],['d2','n3',''],
  ['n3','d3',''],['d3','close','no'],['d3','n4','yes'],['n4','d4',''],['d4','nnew','yes → material'],['d4','d5','no → resume original'],
@@ -102,7 +102,7 @@ const EN=[
  ['exit',420,800,430,54,'ship','→ back to child spine (Search → Redaction);\nbalance at disposition → Awaiting Payment'],
  ['gap',20,884,600,84,'gap','⚠ GAP: requester-response-to-estimate window & close-on-\nnonpayment are clean statute only in TX·IL (10bd), OR (60d),\nMO (90d); LA soft; ALL OTHERS = configurable city policy.'],
  ['chick',640,884,300,84,'note','Chicken-and-egg: the estimate must include redaction labor,\nbut that needs the record → why Preliminary Search feeds\nthis stage (see Intake).'],
- ['leg',960,600,270,266,'note','STATE COVERAGE\nEstimate rule: AL·GA·MA·MO·TN·TX·VA\nThreshold: GA$25 · OR$25 · TX$40 · KS5h · NY2h\nDeposit / advance: 21 states\nPay-before-release: AL·AZ·IL·KS·MA·NE·NV·OH\nNonpayment-close: MO90d · OR60d · LA soft\nWaiver: 19 states'],
+ ['leg',960,600,270,266,'note','STATE COVERAGE\nEstimate rule: AL·GA·MA·MO·TN·TX·VA\nThreshold: GA$25 · OR$25 · TX$40 · KS5h · NY2h\nDeposit / advance: 21 states · OK statutory:\n>$75 est. OR unpaid prior fees (SB 535, 11/25)\nPay-before-release: AL·AZ·IL·KS·MA·NE·NV·OH\nNonpayment-close: MO90d · OR60d · LA soft\nWaiver: 19 states\nCross-request triggers (requestor-level ledger):\nTX 552.263(c)/552.275 · OK unpaid-fees'],
 ];
 const EE=[['e1','dreq',''],['dreq','skip','no'],['dreq','dtmpl','yes'],['dtmpl','tmpl','template'],['dtmpl','manual','manual'],
  ['dtmpl','addt','not estimable'],['addt','dtmpl','when ready'],['tmpl','esub',''],['manual','esub',''],['skip','exit',''],
@@ -112,9 +112,10 @@ const EE=[['e1','dreq',''],['dreq','skip','no'],['dreq','dtmpl','yes'],['dtmpl',
 
 // ---------- PAGE 4: DENIAL ----------
 const DN=[
- ['title',20,10,900,26,'title','Denial sub-flow — config reason-library + legal routing; deemed-denial is clock-driven'],
+ ['title',20,10,900,26,'title','Denial sub-flow — config reason-library + legal routing; deemed-denial is clock-driven; AG-referral states have NO staff denial'],
  ['e1',400,56,380,54,'process','DENY clicked\n(from Intake · Search · Redaction · Legal-Redaction)'],
- ['ntypes',20,150,352,138,'note','DENIAL TYPES:\n• full — record exempt\n• partial → Redaction / segregability\n• no responsive records (MI·TN·UT)\n• burden / vexatious (IL·KS·PA)\n• vague / overbroad → Clarification (NJ·OH)\n• neither-confirm-nor-deny (OR)'],
+ ['dag',810,50,310,74,'decision','Mandatory EXTERNAL ruling\nto withhold? (state-gated:\nTX — no staff denial)'],
+ ['ntypes',20,150,352,138,'note','DENIAL TYPES:\n• full — record exempt\n• partial → Redaction / segregability\n• no responsive records (MI·TN·UT · TX 10bd)\n• burden / vexatious (IL·KS·PA · OH gate)\n• vague / overbroad → Clarification (NJ·OH·OK)\n• neither-confirm-nor-deny (OR)\n• AG-referral — no staff denial (TX)'],
  ['nreason',420,150,330,74,'process','Select reason(s) from config library\n(AI-filled at setup from exemption\ncatalog; edit / attest)'],
  ['dlegal',445,262,280,84,'decision','Legal approval\nrequired?'],
  ['ncfg',770,258,360,96,'note','Config: always-route-to-legal ON → forced.\nOFF → user picks “submit for legal approval”\nor “submit” (direct to comm).\nAny city may force-route denials to legal.'],
@@ -122,14 +123,27 @@ const DN=[
  ['dlegok',835,470,170,64,'decision','Approved?'],
  ['back',770,566,300,54,'process','rejected → back to processing\n(re-enter spine)'],
  ['ncomm',420,384,330,86,'process','Compose denial communication'],
- ['ncontent',20,372,352,150,'note','CONTENT (assembled per state):\n• reasons + exemption citation (13st)\n• responsible person (CA·NE)\n• partial particularity (VA) — if partial\n• no-records notice (MI·TN·UT) — if no-records\n• appeal-rights block — CITY-DRAFTED (not a rule)'],
+ ['ncontent',20,372,352,150,'note','CONTENT (assembled per state):\n• reasons + exemption citation (13st)\n• responsible person (CA·NE)\n• partial particularity (VA) — if partial\n• no-records notice (MI·TN·UT · TX 10bd) — if no-records\n• previous-determination id (TX 10bd, § 552.221(g))\n• appeal-rights block — CITY-DRAFTED (not a rule)'],
  ['ddl',445,506,280,84,'decision','Denial deadline?\n(CT 4bd · KS/MO 3bd ·\nIN 24hr/7d; else resp. window)'],
  ['send',410,622,350,60,'closed','Send denial comm → child status = DENIED\n→ (single item: request denied) → CLOSED'],
- ['deemed',20,710,560,96,'gap','DEEMED / CONSTRUCTIVE DENIAL  (clock-driven, 16 states)\nNo response by the deadline → auto-denied (AL 30/180bd rebuttable\npresumption; IN 24hr in-person / 7d mail). System AVOIDS this by\nresponding in time; the requestor’s remedy is external (out of scope).'],
+ ['deemed',20,710,560,96,'gap','DEEMED / CONSTRUCTIVE DENIAL  (clock-driven, 16 states)\nNo response by the deadline → auto-denied (AL 30/180bd rebuttable\npresumption; IN 24hr in-person / 7d mail). System AVOIDS this by\nresponding in time; the requestor’s remedy is external (out of scope).\n↔ TX INVERTS this — see DEEMED DISCLOSURE in the AG band below.'],
  ['lib',600,710,290,96,'note','CONFIG LIBRARY: every state has an exemption /\ndenial-reason list → loaded once at setup\n(upload → AI draft → edit → attest),\nsame pattern as all other config.'],
- ['leg',910,506,300,300,'note','STATE COVERAGE\nReasons + citation: 13 states\nResponsible person: CA · NE\nPartial notice: VA\nNo-records notice: MI · TN · UT\nBurden / vexatious: IL · KS · PA\nDenial deadline: CT · KS · MO · IN\nDeemed denial: 16 states\nNeither-confirm-nor-deny: OR\nAppeal-rights content: city-drafted'],
+ ['leg',910,506,300,300,'note','STATE COVERAGE\nReasons + citation: 13 states\nResponsible person: CA · NE\nPartial notice: VA\nNo-records notice: MI · TN · UT · TX (10bd)\nBurden / vexatious: IL · KS · PA · OH (2323.52(J))\nDenial deadline: CT · KS · MO · IN\nDeemed denial: 16 states · Deemed DISCLOSURE: TX\nNeither-confirm-nor-deny: OR\nAG-ruling-to-withhold: TX (10bd hard)\nAppeal-rights content: city-drafted'],
+ ['agband',20,830,1200,20,'lanelabel','AG-REFERRAL BAND (state-gated: TX + any future AG-ruling state) — “to withhold, petition the external authority in time — or the record goes public”'],
+ ['dprev',20,868,300,76,'decision','Previous determination\ncovers this info?\n(§ 552.301(a) exception)'],
+ ['ag1',360,868,300,76,'process','Prepare AG ruling request —\nmust state the SPECIFIC exceptions\nclaimed (§ 552.301(b), HB 4219)'],
+ ['agclk',700,868,280,76,'hl','HARD CLOCKS (from receipt;\nclarification re-measures):\nsubmit by 10th bd · comments,\nrequest copy + samples by 15th bd'],
+ ['agnot',1000,868,220,76,'process','Requestor notices:\nwithholding + AG-request (10bd);\nredacted comments copy (15bd)'],
+ ['agwait',1000,980,220,64,'branch','AWAIT AG ruling [external]\n≈45bd (+10 ext) — informational,\nnot a city duty'],
+ ['agdec',700,980,240,64,'decision','AG ruling?'],
+ ['agrel',360,1064,320,54,'ship','RELEASE ordered / deemed public →\nback to spine (Redaction → Shipped)'],
+ ['agmiss',20,980,640,72,'gap','DEEMED DISCLOSURE (inverts deemed-denial): miss the 10-bd/15-bd clocks →\ninformation PRESUMED PUBLIC (§ 552.302) — release absent compelling reason.\nPost-HB 4219 no request silently closes: five 10-bd exits (produce · certify\ndate · no-records · previous-determination · AG request).'],
 ];
-const DE=[['e1','nreason',''],['nreason','dlegal',''],['dlegal','legal','yes / route'],['dlegal','ncomm','no → direct submit'],
+const DE=[['e1','nreason',''],['nreason','dag',''],['dag','dlegal','no — staff denial allowed'],['dag','dprev','yes (TX)'],
+ ['dprev','ncomm','yes → § 552.221(g) notice ids the specific prior determination (10bd)'],['dprev','ag1','no → must petition AG'],
+ ['ag1','agclk',''],['agclk','agnot',''],['agnot','agwait',''],['agwait','agdec',''],
+ ['agdec','ncomm','withhold approved'],['agdec','agrel','release ordered'],['agclk','agmiss','missed'],
+ ['dlegal','legal','yes / route'],['dlegal','ncomm','no → direct submit'],
  ['legal','dlegok',''],['dlegok','ncomm','approved'],['dlegok','back','rejected'],['ncomm','ddl',''],['ddl','send','']];
 
 // ---------- emit ----------
@@ -159,7 +173,7 @@ const doc='<mxfile host="app.diagrams.net">'
  +page('Master','pgM',MN,ME,null,MLINK,1600,1000)
  +page('Clarification','pgC',CN,CE,null,null,1120,1140)
  +page('Estimate-Fee','pgE',EN,EE,EBANDS,null,1260,990)
- +page('Denial','pgD',DN,DE,null,null,1240,840)
+ +page('Denial','pgD',DN,DE,null,null,1240,1160)
  +'</mxfile>';
 fs.writeFileSync(OUT+'/request_flow_master_v2.drawio',doc);
 // ---- master-page SVG preview (shows the ▸ drill-down badges) ----

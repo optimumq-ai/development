@@ -37,23 +37,32 @@ branches** (a path active only for that state). This is the unified-engine-with-
 ## Pressure tests
 - **Ohio** (all-soft, staff-denies): passed. Two refinements FOLDED IN (v2.1): eligibility gate generalized
   to residency·citizenship·incarcerated; soft-clock made first-class. Ohio MINORS still open (below).
-- **Texas** (hard sub-clocks, AG-rules-to-withhold): found real gaps — see OPEN below.
+- **Texas** (hard sub-clocks, AG-rules-to-withhold): found real gaps — RESOLVED in v2.2 (below).
+
+## RESOLVED in v2.2 (2026-07-26)
+Driven by Kevin's desktop research (`../desktop_research/`), which surfaced the 2025 session laws our
+discovery missed (TX HB 4219 · OK SB 535 · OH HB 265 → `../supplements/amendments_2025.json`, 9 verified
+rules; TX-0016..0021 AG-referral rules RESTORED to the working set — now 1116 rules).
+1. **AG-referral band added to the Denial page** (state-gated: TX). No staff denial: previous-determination
+   check → prepare AG request stating SPECIFIC exceptions (HB 4219) → HARD 10-bd submit / 15-bd comments
+   clocks → requestor notices → [external AG ruling ≈45bd, informational] → apply. Post-HB 4219 the 10-bd
+   checkpoint has **five exits** (produce · certify date · no-records · previous-determination · AG request) —
+   no request silently closes.
+2. **Deemed-disclosure branch added** — TX inverts deemed-denial: missed AG clocks → info PRESUMED PUBLIC
+   (§ 552.302); cross-referenced from the deemed-denial note.
+3. **Clarification page fixed**: statutory response window = MO (90d) **+ TX (61d)**; TX
+   consequences-warning content requirement; TX 10-bd AG clock re-measured from clarification. OK SB 535
+   folded: statutory clarify procedure (3-element specificity) + deny-only-after-engagement.
+4. Estimate page: OK statutory advance-payment gate (>$75 or unpaid prior fees) noted; cross-request
+   (requestor-level ledger) triggers flagged: TX 552.263(c)/552.275 · OK unpaid-fees.
 
 ## OPEN — pick up here next session
-**Structural (from Texas):**
-1. **“Mandatory external ruling to withhold” branch on the Denial page.** TX (and other AG-ruling states)
-   have NO staff-denial; to withhold, the body must petition the AG within a HARD 10-business-day clock, else
-   the info is **deemed PUBLIC** (TX-0022). Model: flag potentially-exempt → prepare AG request → 10-bd
-   submission timer → [external AG decision] → apply. Likely **over-pruned TX’s `Review` category** — the
-   AG-referral *trigger + clock* are in-scope even though the AG’s deliberation is external. Revisit that cut.
-2. **Deemed-disclosure inverts deemed-denial.** Elsewhere silence → deemed DENIED (16 states); TX → deemed
-   PUBLIC. Its own branch on the clock/denial consequence.
+**Data question (still open):** TX-0031 free allowance is **per-requestor / 12 months** (cross-request) — the
+per-request parent ledger can’t hold it; needs a requestor-level running total. (OK’s unpaid-prior-fees
+advance-payment trigger, OK-S03, needs the same requestor-level balance — one mechanism serves both.)
 
-**Correction:** the Clarification page says statutory response window = “MO (90d) only” — WRONG; it’s
-**MO (90d) + TX (61d)** (TX-0014). Fix the node.
-
-**Data question:** TX-0031 free allowance is **per-requestor / 12 months** (cross-request) — the per-request
-parent ledger can’t hold it; needs a requestor-level running total.
+**Alignment debt:** the 15 new working-set rules (9 supplements + 6 restored) are NOT yet mapped into the
+118-concept master dictionary — rerun/extend the alignment before Phase 6 templates.
 
 **Ohio minors (not yet folded):** oral/phone as a named intake channel; delivery volume-caps parameter
 (OH-0024/0026); no-forwarding-duty state gate on the referral path.

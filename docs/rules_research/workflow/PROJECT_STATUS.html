@@ -40,7 +40,7 @@ state. We are currently between step 3 (done) and step 4 (in progress).
 
 <div class="card" style="text-align:center">
 <span class="stat"><span class="big">32</span><span class="lbl">states gathered</span></span>
-<span class="stat"><span class="big">1,101</span><span class="lbl">rules kept</span></span>
+<span class="stat"><span class="big">1,116</span><span class="lbl">rules kept</span></span>
 <span class="stat"><span class="big">118</span><span class="lbl">canonical concepts</span></span>
 <span class="stat"><span class="big">~53</span><span class="lbl">config knobs</span></span>
 <span class="stat"><span class="big">4</span><span class="lbl">workflow pages drawn</span></span>
@@ -52,13 +52,15 @@ state. We are currently between step 3 (done) and step 4 (in progress).
 <tr><td><b>1. Gather state rules</b></td><td><span class="b done">DONE</span></td>
 <td>32 of 50 states researched, each rule captured <b>verbatim with its legal citation</b>. (The other 18 are low-priority and deliberately deferred.)</td></tr>
 <tr><td><b>2. Relevance prune</b></td><td><span class="b done">DONE</span></td>
-<td>Removed 344 rules the system doesn't act on (external appeals, walk-in-inspection mechanics, definitions). 1,443 → <b>1,101 kept</b>. Originals kept untouched.</td></tr>
+<td>Removed 344 rules the system doesn't act on (external appeals, walk-in-inspection mechanics, definitions). 1,443 → <b>1,101 kept</b> (now 1,116 — see the 2025-amendments row). Originals kept untouched.</td></tr>
 <tr><td><b>3. Completeness cross-check</b></td><td><span class="b done">DONE</span></td>
 <td>Compared our data against a second, independent ChatGPT research pass. Caught 2 of <i>their</i> errors; found &amp; fixed 2 real gaps in <i>ours</i> (Missouri).</td></tr>
+<tr><td><b>3b. 2025-amendments check</b></td><td><span class="b done">DONE</span></td>
+<td>Your desktop research (29 states, July 2026) surfaced 2025 session laws our gather predated. Verified against the enrolled bills and folded in: <b>Texas HB 4219</b> (new 10-day notice duties; specific-exceptions AG rule), Texas catastrophe clock, <b>Oklahoma SB 535</b> (request-form/specificity + $75 advance-payment), <b>Ohio HB 265</b> (vexatious-litigator gate). Also restored the 6 Texas AG-referral rules the prune had cut too aggressively. Working set: <b>1,116 rules</b>.</td></tr>
 <tr><td><b>4. Cross-state alignment</b></td><td><span class="b done">DONE</span></td>
 <td>Collapsed 860 differently-named rule-keys into <b>118 shared concepts</b>. Each is tagged as a <b>value knob</b> (~53) or a <b>process branch</b> (~65).</td></tr>
 <tr><td><b>5. Master workflow design</b></td><td><span class="b prog">IN PROGRESS</span></td>
-<td>The single-item manual flow is drawn (master + 3 detailed sub-flows). Ohio has been pressure-tested end-to-end. More sub-flows and refinements pending.</td></tr>
+<td>The single-item manual flow is drawn (master + 3 detailed sub-flows), now <b>v2.2</b>. Ohio AND Texas pressure-tested end-to-end; both sets of refinements folded in (eligibility gate, soft clock, AG-referral band, deemed-disclosure, 61-day Texas clarification window). Remaining sub-flows pending.</td></tr>
 <tr><td><b>6. Per-state config templates</b></td><td><span class="b todo">NOT STARTED</span></td>
 <td>Turn the ~53 knobs + branches into the actual per-state setup screens. This is the bridge to the software.</td></tr>
 <tr><td><b>7. Build the system</b></td><td><span class="b todo">NOT STARTED</span></td>
@@ -74,13 +76,10 @@ page tabs at the bottom, to move between pages.</p>
 <tr><td>Master flow</td><td><span class="b prog">DRAFT v2</span></td><td>The whole single-item request, portal → shipped, with the parent "financial processor" lane.</td></tr>
 <tr><td>Clarification</td><td><span class="b done">DETAILED</span></td><td>What happens when a request is too vague.</td></tr>
 <tr><td>Estimate / Fee</td><td><span class="b done">DETAILED</span></td><td>Cost estimate, the fee ledger, deposits and payment.</td></tr>
-<tr><td>Denial</td><td><span class="b done">DETAILED</span></td><td>Denying a request, the reason library, legal routing.</td></tr>
+<tr><td>Denial</td><td><span class="b done">DETAILED</span></td><td>Denying a request, the reason library, legal routing — plus the <b>AG-referral band</b> (Texas: the city cannot deny on its own; it must petition the Attorney General within a hard 10-business-day clock or the record is <i>presumed public</i>).</td></tr>
 <tr><td>Records Search · Redaction · Disposition</td><td><span class="b todo">NOT YET</span></td><td>Still shown as single boxes on the master; not yet exploded into their own pages.</td></tr>
 </table>
-<div class="hl"><b>Two refinements found in the Ohio pressure-test</b>, to fold into the master before templating:
-(1) generalize the "residency gate" into a broader requester-eligibility gate (Ohio uses an incarcerated-person
-exclusion instead); (2) make the "soft clock" a first-class case — states like Ohio set <i>no</i> numeric
-deadline, so the city configures an internal target that isn't a legal deadline.</div>
+<div class="hl"><b>Both pressure-tests are folded in.</b> Ohio (v2.1): the generalized requester-eligibility gate and the first-class "soft clock." Texas (v2.2): the AG-referral band, the deemed-<i>disclosure</i> rule (miss the clock → record presumed public — the opposite of most states' deemed-denial), and the statutory 61-day clarification window.</div>
 
 <h2>Where every file lives</h2>
 <h3>In this exchange folder (download &amp; review these)</h3>
@@ -102,10 +101,11 @@ deadline, so the city configures an internal target that isn't a legal deadline.
 <code>/opt/optimumq/docs/rules_research/</code>. Listed so you know nothing is lost when you clear this folder.</p>
 <ul>
 <li><b>wave1–9 / discovery.json</b> — every gathered rule, verbatim (the frozen originals).</li>
-<li><b>pruned/pruned_discovery.json</b> + <b>CUT_LOG.md</b> — the 1,101-rule working set + full removal audit.</li>
+<li><b>pruned/pruned_discovery.json</b> + <b>CUT_LOG.md</b> — the 1,116-rule working set + full removal audit (incl. the 6 restored Texas AG-referral rules).</li>
 <li><b>alignment/master_concept_dictionary.json</b> — the 118 concepts (source of the Excel).</li>
-<li><b>supplements/completeness_additions.json</b> — the 2 verified Missouri additions.</li>
+<li><b>supplements/</b> — the 2 verified Missouri additions + <b>amendments_2025.json</b> (9 verified 2025-law rules: TX/OK/OH).</li>
 <li><b>chatgpt_pilot/</b> — the 33 second-opinion research docs, preserved as a cross-check.</li>
+<li><b>desktop_research/</b> — your 29-state desktop research (July 2026), vendored with a README; the source of the 2025-amendments check.</li>
 <li><b>wave1/DATA_state_rules_ALL_STATES.md</b> — a single readable render of all states.</li>
 </ul>
 
@@ -119,8 +119,9 @@ deadline, so the city configures an internal target that isn't a legal deadline.
 
 <h2>What's next (your pick)</h2>
 <ul>
-<li>Fold the two Ohio refinements into the master, then detail the remaining sub-flows (search, redaction, disposition).</li>
-<li>Pressure-test a contrasting state (Texas — hard deadlines &amp; heavy fees) to stress the opposite corner.</li>
+<li>Map the 15 new rules (9 amendment additions + 6 restored) into the 118-concept dictionary so the alignment stays complete.</li>
+<li>Design the <b>requestor-level ledger</b> — Texas's per-requestor 36-hour/year free allowance and Oklahoma's unpaid-prior-fees trigger both need a running balance that crosses individual requests; one mechanism serves both.</li>
+<li>Detail the remaining sub-flows (search, redaction, disposition) and fold the Ohio-minors items (oral channel, delivery caps).</li>
 <li>Start the <b>state-gated overlay</b> — color every workflow node as shared / value-knob / state-branch — which is the direct bridge to the per-state config templates (Phase 6).</li>
 </ul>
 
