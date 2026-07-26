@@ -1,6 +1,6 @@
 # Relevance-prune cut log
 
-Applied 2026-07-23. Removed 344 of 1445 rules (kept 1101). Originals untouched in `../wave*/discovery.json`. The 15 held items (pulled by Kevin for individual review) were RETAINED.
+Applied 2026-07-23; rebuilt 2026-07-26. Removed 338 of 1454 rules (kept 1116). Originals untouched in `../wave*/discovery.json`. The 15 held items (pulled by Kevin for individual review) were RETAINED. The 6 TX AG-referral rules (TX-0016..TX-0021) were RESTORED 2026-07-26 — over-pruned as external appeal; the referral trigger, hard clocks, and requestor notices are the city's own duties (TX has no staff-denial path). TX-0023 (the AG's own render deadline) stays cut.
 
 Rules removed, by state:
 
@@ -291,12 +291,6 @@ Rules removed, by state:
 | TN | TN-0048 | CUT | Special Records | `special.le_inspector_identification` | A person inspecting law-enforcement personnel records must provide their name, address, business and home telephone numbers, driver license number, or other app |
 | TX | TX-0007 | CUT | Inspection | `inspection.availability_hours` | Public information must be available to the public at a minimum during the governmental body's normal business hours. |
 | TX | TX-0011 | CUT | Production | `production.abandonment_no_inspection` | A request is considered withdrawn if the requestor fails to inspect/duplicate the information within 60 days after it is made available, or fails to pay applica |
-| TX | TX-0016 | CUT | Review | `appeal.administrative.ag_ruling_required` | A body that receives a written request for information it wishes to withhold under a Subchapter C exception must ask the attorney general for a decision, unless |
-| TX | TX-0017 | CUT | Review | `appeal.administrative.previous_determination` | No new AG decision is required where there has already been a previous determination that the information falls within an exception (or is public). |
-| TX | TX-0018 | CUT | Review | `appeal.administrative.ag_request_deadline` | The body must ask the attorney general for a decision and state the applicable exceptions within a reasonable time but not later than the 10th business day afte |
-| TX | TX-0019 | CUT | Communications | `appeal.administrative.requestor_notice` | Within 10 business days of the request the body must give the requestor a written statement that it is withholding and has asked the AG, plus a copy (redacted i |
-| TX | TX-0020 | CUT | Review | `appeal.administrative.ag_brief_deadline` | Within 15 business days of the request the body must submit to the AG written comments on the exceptions, a copy of the request, a dated receipt statement, and  |
-| TX | TX-0021 | CUT | Communications | `appeal.administrative.comments_copy_to_requestor` | A body that submits written comments to the AG must send a copy of those comments to the requestor not later than the 15th business day after receiving the writ |
 | TX | TX-0023 | CUT | Review | `appeal.administrative.ag_decision_render_deadline` | The attorney general must render the decision not later than the 45th business day after receiving the request, extendable once by 10 business days on timely no |
 | UT | UT-0005 | CUT | Clarification | `scope.description_specificity` | The request's description must identify the record with reasonable specificity. |
 | UT | UT-0012 | MAYBE | Communications | `response.public_benefit_presumption_media` | A person who requests a record to obtain information for a story or report for publication or broadcast to the general public is presumed to act to benefit the  |
@@ -368,3 +362,12 @@ Rules removed, by state:
 - OR-0034
 - PA-0001
 - TN-0041
+
+## Restored 2026-07-26 (over-pruned; retained despite CUT/MAYBE flag)
+
+- TX-0016
+- TX-0017
+- TX-0018
+- TX-0019
+- TX-0020
+- TX-0021

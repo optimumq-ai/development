@@ -14,12 +14,14 @@ const origin = {};
 const map = {};
 for (const f of WAVES) { let o; try{o=JSON.parse(fs.readFileSync(f,'utf8'))}catch(e){continue}
   for (const s of (Array.isArray(o)?o:o.states||[o])) { if(!s||!s.state)continue; const nm=String(s.state).replace(/\..*$/,'').trim(); map[nm]=s; origin[nm]=f.split('/').slice(-2)[0]; } }
-// merge completeness-cross-check additions (verified, always KEEP) into the matching state
+// merge supplement additions (verified, always KEEP) into the matching state
 let ADDED = 0;
-try { const supp=JSON.parse(fs.readFileSync(RESEARCH+'/supplements/completeness_additions.json','utf8'));
-  for (const a of (supp.additions||[])) { const s=map[a.state]; if(!s)continue;
-    for (const r of a.rules) { if(!s.rules.some(x=>x.rule_id===r.rule_id)){ s.rules.push(r); ADDED++; } } }
-} catch(e) {}
+for (const sf of ['completeness_additions.json','amendments_2025.json']) {
+  try { const supp=JSON.parse(fs.readFileSync(RESEARCH+'/supplements/'+sf,'utf8'));
+    for (const a of (supp.additions||[])) { const s=map[a.state]; if(!s)continue;
+      for (const r of a.rules) { if(!s.rules.some(x=>x.rule_id===r.rule_id)){ s.rules.push(r); ADDED++; } } }
+  } catch(e) {}
+}
 
 // ---- verdicts: hand-approved for CA/IL/CT, classifier for the rest (same as calibrated triage) ----
 const HAND = {
@@ -46,12 +48,19 @@ function classify(r){
   return ['KEEP','core request→response workflow'];
 }
 const VALIDATED = ['California','Illinois','Connecticut'];
-function verdict(nm,r){ if(VALIDATED.includes(nm)){ const h=HAND[r.rule_id]; return h?[h[0], 'approved']:['KEEP','core']; } return classify(r); }
+function verdict(nm,r){
+  if (/-S\d+$/.test(r.rule_id||'')) return ['KEEP','supplement (verified addition, always KEEP)'];
+  if(VALIDATED.includes(nm)){ const h=HAND[r.rule_id]; return h?[h[0], 'approved']:['KEEP','core']; } return classify(r); }
 
 const HELD = new Set(['AL-0011','FL-0023','MI-0081','MN-0023','NV-0021','NJ-T24','NJ-T39','NJ-T42','NJ-T43','NJ-T44','NY-0005','NY-0037','OR-0034','PA-0001','TN-0041']);
+// RESTORED 2026-07-26: the TX AG-referral trigger + clocks were over-pruned as "external appeal" —
+// TX has NO staff-denial path; the referral duty, 10-bd/15-bd clocks, and requestor notices are the
+// city's own workflow (only the AG's deliberation is external; TX-0023, the AG's render deadline,
+// stays cut). See workflow/README.md open item 1.
+const RESTORED = new Set(['TX-0016','TX-0017','TX-0018','TX-0019','TX-0020','TX-0021']);
 
 // ---- prune ----
-const pruned = []; const cutlog = []; let kept=0, removed=0, heldKept=0;
+const pruned = []; const cutlog = []; let kept=0, removed=0, heldKept=0, restoredKept=0;
 const heldSeen = new Set();
 for (const nm of Object.keys(map).sort()) {
   const s = map[nm]; const keepRules = [];
@@ -59,7 +68,8 @@ for (const nm of Object.keys(map).sort()) {
     const [v] = verdict(nm, r);
     const flagged = (v==='CUT' || v==='MAYBE');
     if (flagged && HELD.has(r.rule_id)) { heldKept++; heldSeen.add(r.rule_id); }
-    if (flagged && !HELD.has(r.rule_id)) {
+    if (flagged && RESTORED.has(r.rule_id)) { restoredKept++; }
+    if (flagged && !HELD.has(r.rule_id) && !RESTORED.has(r.rule_id)) {
       removed++;
       cutlog.push({ state:nm, code:abbr(nm), id:r.rule_id, verdict:v, category:r.category, concept_key:r.concept_key, rule:(r.atomic_rule||'') });
     } else { keepRules.push(r); kept++; }
@@ -72,11 +82,13 @@ for (const nm of Object.keys(map).sort()) {
 // ---- write repo artifacts ----
 fs.mkdirSync(REPO_OUT, { recursive:true });
 fs.writeFileSync(REPO_OUT + '/pruned_discovery.json', JSON.stringify(pruned,null,2)+'\n');
-let cl = `# Relevance-prune cut log\n\nApplied 2026-07-23. Removed ${removed} of ${kept+removed} rules (kept ${kept}). `
- + `Originals untouched in \`../wave*/discovery.json\`. The ${HELD.size} held items (pulled by Kevin for individual review) were RETAINED.\n\n`
+let cl = `# Relevance-prune cut log\n\nApplied 2026-07-23; rebuilt 2026-07-26. Removed ${removed} of ${kept+removed} rules (kept ${kept}). `
+ + `Originals untouched in \`../wave*/discovery.json\`. The ${HELD.size} held items (pulled by Kevin for individual review) were RETAINED. `
+ + `The ${RESTORED.size} TX AG-referral rules (TX-0016..TX-0021) were RESTORED 2026-07-26 — over-pruned as external appeal; the referral trigger, hard clocks, and requestor notices are the city's own duties (TX has no staff-denial path). TX-0023 (the AG's own render deadline) stays cut.\n\n`
  + `Rules removed, by state:\n\n| State | Rule ID | Verdict | Category | Concept key | Rule |\n|---|---|---|---|---|---|\n`;
 for (const c of cutlog) cl += `| ${c.code} | ${c.id} | ${c.verdict} | ${c.category} | \`${c.concept_key}\` | ${String(c.rule).replace(/\|/g,'\\|').slice(0,160)} |\n`;
 cl += `\n## Held (retained despite CUT/MAYBE flag)\n\n` + [...HELD].map(id=>`- ${id}`).join('\n') + '\n';
+cl += `\n## Restored 2026-07-26 (over-pruned; retained despite CUT/MAYBE flag)\n\n` + [...RESTORED].map(id=>`- ${id}`).join('\n') + '\n';
 fs.writeFileSync(REPO_OUT + '/CUT_LOG.md', cl);
 
 // ---- render pruned per-state HTML (same format as before) ----
@@ -109,7 +121,7 @@ s2.addRow({st:'TOTAL',cd:'',k:kept,r:removed}).font={bold:true};
 for (const ws of [s1,s2,s3]){ const h=ws.getRow(1); h.font={bold:true,color:{argb:'FFFFFFFF'}}; h.eachCell(c=>c.fill={type:'pattern',pattern:'solid',fgColor:{argb:'FF0B5CAD'}}); ws.autoFilter={from:{row:1,column:1},to:{row:1,column:ws.columns.length}}; ws.eachRow((row,n)=>{if(n>1)row.alignment={vertical:'top',wrapText:true};}); }
 wb.xlsx.writeFile(EX_OUT + '/State_rules_PRUNED.xlsx').then(()=>{
   console.log(`PRUNE COMPLETE (supplement additions merged: ${ADDED})`);
-  console.log(`  kept ${kept} · removed ${removed} · held-and-retained ${heldKept}/${HELD.size}`);
+  console.log(`  kept ${kept} · removed ${removed} · held-and-retained ${heldKept}/${HELD.size} · restored ${restoredKept}/${RESTORED.size}`);
   const missing=[...HELD].filter(id=>!heldSeen.has(id) && !pruned.some(s=>s.rules.some(r=>r.rule_id===id)));
   console.log(`  held items retained: ${[...HELD].filter(id=>pruned.some(s=>s.rules.some(r=>r.rule_id===id))).length}/${HELD.size}` + (missing.length?`  MISSING: ${missing.join(',')}`:''));
   console.log(`  repo: ${REPO_OUT}/pruned_discovery.json + CUT_LOG.md`);
