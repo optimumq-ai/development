@@ -6,7 +6,7 @@ const C={process:['#dae8fc','#6c8ebf'],decision:['#ffe6cc','#d79b00'],parent:['#
 
 // ---------- PAGE 1: MASTER ----------
 const MN=[
- ['title',20,10,1000,26,'title','MASTER FLOW · single-item, manual (no-AI) — v2.4 · all sub-flows detailed (7 pages) · OH + TX refinements folded'],
+ ['title',20,10,1000,26,'title','MASTER FLOW · single-item, manual (no-AI) — v2.5 · 7 pages · state-gated OVERLAY: unmarked = shared · ◆ = value knob · ▲ = state branch'],
  ['g1',20,56,214,88,'parent','Request submitted\nPortal · Online form · Clerk (paper) ·\nOral/phone (OH·GA·LA·MA·MI·MO·NV·WI)\n→ normalized to ≤10 items'],
  ['no',1130,50,320,112,'note','ORAL CHANNEL (state-gated)\nOH: office may ask for writing / ID / purpose only\nAFTER disclosing they are optional (OH-0006);\ndenial explanation must be written only if the\nrequest was written (OH-0015) → channel captured\nat intake drives later communication duties'],
  ['g2',248,54,204,92,'decision','Requester eligible?\n(state-gated: residency ·\ncitizenship · incarcerated)'],
@@ -219,6 +219,30 @@ const XE=[['e1','d1',''],['d1','hold','no → Hold'],['hold','d1','paid'],['hold
  ['unc','wd',''],['d1','fmt','yes'],['fmt','caps',''],['caps','ship',''],
  ['ship','fin',''],['den','fin',''],['wd','fin',''],['fin','close','']];
 
+// ---------- STATE-GATED OVERLAY (Phase-6 bridge) ----------
+// Every FLOW node classified: S = shared logic (same everywhere) · P = value knob (per-state/city
+// config fills a value) · B = state-gated branch (path active only for some states).
+// Annotation cats (title/lanelabel/note/gap/band/fin) carry no class. Rendered as label glyphs:
+// unmarked = S · ◆ = P · ▲ = B. Also emitted to overlay.json for the Phase-6 template work.
+const OV = {
+ pgM:{g1:'P',g2:'B',g3:'S',g4:'P',s1:'B',s2:'B',p1:'S',p2:'S',p3:'P',dd:'P',p4:'S',p5:'S',p6:'S',pd:'S',
+      bv:'P',bd:'S',bn:'P',br:'B',tc:'S',td:'S',l1:'S',l2:'S',f1:'S',f2:'P',f3:'S',f5:'S',f4:'S'},
+ pgC:{n1:'S',d1:'B',deny:'B',n2:'P',d2:'B',n3:'P',d3:'S',close:'P',n4:'S',d4:'P',nnew:'S',d5:'S',
+      resume:'S',duty:'B'},
+ pgE:{e1:'S',dreq:'P',skip:'S',dtmpl:'S',tmpl:'S',addt:'P',manual:'S',esub:'S',fled:'S',dwv:'B',wrev:'B',
+      frev:'P',fcom:'P',drsp:'P',optout:'P',ddep:'P',hold:'S',paid:'S',cnp:'P',proc:'B',exit:'S'},
+ pgD:{e1:'S',dag:'B',nreason:'P',dlegal:'P',legal:'S',dlegok:'S',back:'S',ncomm:'P',ddl:'P',send:'S',
+      dprev:'B',ag1:'B',agclk:'B',agnot:'B',agwait:'B',agdec:'B',agrel:'B'},
+ pgS:{e1:'S',s1:'S',s2:'S',d1:'S',bn:'P',d2:'S',nod:'S',prog:'B',d3:'S',web:'B',d4:'S',inst:'P',
+      spec:'B',exit:'S'},
+ pgR:{e1:'S',r1:'P',d1:'S',clean:'S',seg:'S',pii:'P',r2:'P',d2:'S',tp:'B',d3:'P',legal:'S',exit:'S'},
+ pgX:{e1:'S',d1:'S',hold:'B',fmt:'P',caps:'B',ship:'S',den:'S',wd:'S',fin:'S',close:'S'},
+};
+const OVGLYPH={P:'◆ ',B:'▲ ',S:''};
+const ovLabel=(pid,nid,label)=>{const c=OV[pid]&&OV[pid][nid];return c&&OVGLYPH[c]?OVGLYPH[c]+label:label;};
+const OVERLAY_OUT=[];
+const OVLEGEND='OVERLAY:  unmarked = SHARED logic (identical everywhere)   ·   ◆ = VALUE KNOB (per-state/city config fills a value)   ·   ▲ = STATE-GATED BRANCH (active only for some states)';
+
 // ---------- emit ----------
 const xe=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const dL=s=>xe(s).replace(/\n/g,'&#10;');
@@ -232,13 +256,16 @@ function styleOf(cat){const [fill,stroke]=C[cat]||C.process; let st=`whiteSpace=
   return st;}
 function page(name,id,N,E,BANDS,linkMap,pw,ph){
   let cells=''; const all=[...(BANDS||[]).map(b=>[b[0],b[1],b[2],b[3],b[4],'band',b[5]]),...N];
-  for(const [nid,x,y,w,h,cat,label] of all){
+  for(const [nid,x,y,w,h,cat,label0] of all){
+    const label=ovLabel(id,nid,label0);
+    if(OV[id]&&OV[id][nid]) OVERLAY_OUT.push({page:name,node:nid,class:{S:'shared',P:'param',B:'branch'}[OV[id][nid]],label:String(label0).split('\n')[0]});
     if(cat==='title'){cells+=`<mxCell id="${nid}" value="${dL(label)}" style="text;html=1;fontSize=14;fontStyle=1;align=left;" vertex="1" parent="1"><mxGeometry x="${x}" y="${y}" width="${w}" height="${h}" as="geometry"/></mxCell>`;continue;}
     if(cat==='lanelabel'){cells+=`<mxCell id="${nid}" value="${dL(label)}" style="text;html=1;fontSize=12;fontStyle=2;align=left;fontColor=#555;" vertex="1" parent="1"><mxGeometry x="${x}" y="${y}" width="${w}" height="${h}" as="geometry"/></mxCell>`;continue;}
     const st=styleOf(cat); const link=linkMap&&linkMap[nid];
     if(link) cells+=`<UserObject label="${dL(label)}" link="data:page/id,${link}" id="${nid}"><mxCell style="${st}" vertex="1" parent="1"><mxGeometry x="${x}" y="${y}" width="${w}" height="${h}" as="geometry"/></mxCell></UserObject>`;
     else cells+=`<mxCell id="${nid}" value="${dL(label)}" style="${st}" vertex="1" parent="1"><mxGeometry x="${x}" y="${y}" width="${w}" height="${h}" as="geometry"/></mxCell>`;
   }
+  cells+=`<mxCell id="${id}_ovleg" value="${dL(OVLEGEND)}" style="text;html=1;fontSize=11;fontStyle=2;align=left;fontColor=#666;" vertex="1" parent="1"><mxGeometry x="20" y="${ph-26}" width="${Math.min(pw-40,1100)}" height="20" as="geometry"/></mxCell>`;
   let i=0;for(const [s,t,l] of E){i++;cells+=`<mxCell id="${id}_e${i}" value="${dL(l)}" style="edgeStyle=orthogonalEdgeStyle;rounded=1;html=1;fontSize=10;endArrow=block;endFill=1;strokeColor=#555;" edge="1" parent="1" source="${s}" target="${t}"><mxGeometry relative="1" as="geometry"/></mxCell>`;}
   return `<diagram name="${name}" id="${id}"><mxGraphModel dx="1300" dy="1000" grid="1" gridSize="10" page="1" pageWidth="${pw}" pageHeight="${ph}"><root><mxCell id="0"/><mxCell id="1" parent="0"/>${cells}</root></mxGraphModel></diagram>`;
 }
@@ -252,6 +279,7 @@ const doc='<mxfile host="app.diagrams.net">'
  +page('Disposition','pgX',XN,XE,null,null,1180,720)
  +'</mxfile>';
 fs.writeFileSync(OUT+'/request_flow_master_v2.drawio',doc);
+fs.writeFileSync(OUT+'/workflow_overlay.json',JSON.stringify({_meta:{generated:'by build_workflow_diagram.js',classes:{shared:'identical logic everywhere',param:'value knob — per-state/city config fills a value',branch:'state-gated branch — active only for some states'}},nodes:OVERLAY_OUT},null,1)+'\n');
 // ---- master-page SVG preview (shows the ▸ drill-down badges) ----
 C.link=['#dae8fc','#2d6a9f'];
 const se=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
@@ -263,7 +291,8 @@ function anchors(s,t){const sx=cx(s),sy=cy(s),tx=cx(t),ty=cy(t);
 for(const [sId,tId,l] of ME){const s=byId[sId],t=byId[tId];if(!s||!t)continue;const pts=anchors(s,t);const d=pts.map((p,i)=>(i?'L':'M')+p[0]+' '+p[1]).join(' ');
   svg+=`<path d="${d}" fill="none" stroke="#555" stroke-width="1.3" marker-end="url(#a)"/>`;
   if(l){const lx=(pts[0][0]+pts[pts.length-1][0])/2,ly=(pts[0][1]+pts[pts.length-1][1])/2;svg+=`<rect x="${lx-se(l).length*3.1-3}" y="${ly-9}" width="${se(l).length*6.2+6}" height="15" fill="#fff" opacity="0.9"/><text x="${lx}" y="${ly+2}" font-size="10" fill="#444" text-anchor="middle">${se(l)}</text>`;}}
-for(const [id,x,y,w,h,cat,label] of MN){
+for(const [id,x,y,w,h,cat,label0] of MN){
+  const label=ovLabel('pgM',id,label0);
   if(cat==='title'){svg+=`<text x="${x}" y="${y+18}" font-size="15" font-weight="700" fill="#222">${se(label)}</text>`;continue;}
   if(cat==='lanelabel'){svg+=`<text x="${x}" y="${y+14}" font-size="12" font-style="italic" fill="#666">${se(label)}</text>`;continue;}
   const [fill,stroke]=C[cat]||C.process;

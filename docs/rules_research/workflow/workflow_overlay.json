@@ -1,0 +1,702 @@
+{
+ "_meta": {
+  "generated": "by build_workflow_diagram.js",
+  "classes": {
+   "shared": "identical logic everywhere",
+   "param": "value knob — per-state/city config fills a value",
+   "branch": "state-gated branch — active only for some states"
+  }
+ },
+ "nodes": [
+  {
+   "page": "Master",
+   "node": "g1",
+   "class": "param",
+   "label": "Request submitted"
+  },
+  {
+   "page": "Master",
+   "node": "g2",
+   "class": "branch",
+   "label": "Requester eligible?"
+  },
+  {
+   "page": "Master",
+   "node": "g3",
+   "class": "shared",
+   "label": "MRR?"
+  },
+  {
+   "page": "Master",
+   "node": "g4",
+   "class": "param",
+   "label": "Acknowledgment auto-sent"
+  },
+  {
+   "page": "Master",
+   "node": "s1",
+   "class": "branch",
+   "label": "Fee-waiver requested"
+  },
+  {
+   "page": "Master",
+   "node": "s2",
+   "class": "branch",
+   "label": "Commercial-rate requested"
+  },
+  {
+   "page": "Master",
+   "node": "p1",
+   "class": "shared",
+   "label": "In Review"
+  },
+  {
+   "page": "Master",
+   "node": "p2",
+   "class": "shared",
+   "label": "Intake Review"
+  },
+  {
+   "page": "Master",
+   "node": "p3",
+   "class": "param",
+   "label": "Estimate Data"
+  },
+  {
+   "page": "Master",
+   "node": "dd",
+   "class": "param",
+   "label": "Deposit before"
+  },
+  {
+   "page": "Master",
+   "node": "p4",
+   "class": "shared",
+   "label": "Records Search (full)"
+  },
+  {
+   "page": "Master",
+   "node": "p5",
+   "class": "shared",
+   "label": "Redaction"
+  },
+  {
+   "page": "Master",
+   "node": "p6",
+   "class": "shared",
+   "label": "SHIPPED"
+  },
+  {
+   "page": "Master",
+   "node": "pd",
+   "class": "shared",
+   "label": "Disposition & delivery"
+  },
+  {
+   "page": "Master",
+   "node": "bv",
+   "class": "param",
+   "label": "VAGUE → Clarification"
+  },
+  {
+   "page": "Master",
+   "node": "bd",
+   "class": "shared",
+   "label": "DENIAL"
+  },
+  {
+   "page": "Master",
+   "node": "bn",
+   "class": "param",
+   "label": "NO RECORD FOUND"
+  },
+  {
+   "page": "Master",
+   "node": "br",
+   "class": "branch",
+   "label": "NOT OURS → proper custodian"
+  },
+  {
+   "page": "Master",
+   "node": "tc",
+   "class": "shared",
+   "label": "CLOSED"
+  },
+  {
+   "page": "Master",
+   "node": "td",
+   "class": "shared",
+   "label": "DENIED"
+  },
+  {
+   "page": "Master",
+   "node": "l1",
+   "class": "shared",
+   "label": "Legal Review – Denial (UI, submit)"
+  },
+  {
+   "page": "Master",
+   "node": "l2",
+   "class": "shared",
+   "label": "Legal Redaction (UI, submit)"
+  },
+  {
+   "page": "Master",
+   "node": "f1",
+   "class": "shared",
+   "label": "Ledger: child lines → compute per line →"
+  },
+  {
+   "page": "Master",
+   "node": "f2",
+   "class": "param",
+   "label": "Estimate Review (config: $ threshold +"
+  },
+  {
+   "page": "Master",
+   "node": "f3",
+   "class": "shared",
+   "label": "Payment receipt"
+  },
+  {
+   "page": "Master",
+   "node": "f5",
+   "class": "shared",
+   "label": "→ ship-auth (payment-adequate) gates SHIPPED"
+  },
+  {
+   "page": "Master",
+   "node": "f4",
+   "class": "shared",
+   "label": "Flags:   Active / Closed        ·        Financial Status:   OK  /  Hold–Awaiting Payment  /  Closed–Nonpayment"
+  },
+  {
+   "page": "Clarification",
+   "node": "n1",
+   "class": "shared",
+   "label": "Item marked VAGUE at Intake Review"
+  },
+  {
+   "page": "Clarification",
+   "node": "d1",
+   "class": "branch",
+   "label": "Assist / confer required"
+  },
+  {
+   "page": "Clarification",
+   "node": "deny",
+   "class": "branch",
+   "label": "Deny as vague / overbroad"
+  },
+  {
+   "page": "Clarification",
+   "node": "n2",
+   "class": "param",
+   "label": "Send clarification / assist request"
+  },
+  {
+   "page": "Clarification",
+   "node": "d2",
+   "class": "branch",
+   "label": "Clock effect of sending?"
+  },
+  {
+   "page": "Clarification",
+   "node": "n3",
+   "class": "param",
+   "label": "Await requester response"
+  },
+  {
+   "page": "Clarification",
+   "node": "d3",
+   "class": "shared",
+   "label": "Responded by"
+  },
+  {
+   "page": "Clarification",
+   "node": "close",
+   "class": "param",
+   "label": "CLOSE item (withdrawn)"
+  },
+  {
+   "page": "Clarification",
+   "node": "n4",
+   "class": "shared",
+   "label": "Revised request received"
+  },
+  {
+   "page": "Clarification",
+   "node": "d4",
+   "class": "param",
+   "label": "Materially revised?"
+  },
+  {
+   "page": "Clarification",
+   "node": "nnew",
+   "class": "shared",
+   "label": "Treat as NEW request →"
+  },
+  {
+   "page": "Clarification",
+   "node": "d5",
+   "class": "shared",
+   "label": "Reasonably"
+  },
+  {
+   "page": "Clarification",
+   "node": "resume",
+   "class": "shared",
+   "label": "RESUME processing"
+  },
+  {
+   "page": "Clarification",
+   "node": "duty",
+   "class": "branch",
+   "label": "Still vague after reasonable effort →"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "e1",
+   "class": "shared",
+   "label": "From Intake Review"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "dreq",
+   "class": "param",
+   "label": "Estimate required?"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "skip",
+   "class": "shared",
+   "label": "No → $0 / minimal →"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "dtmpl",
+   "class": "shared",
+   "label": "Record attached /"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "tmpl",
+   "class": "shared",
+   "label": "TEMPLATE → auto-fill"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "addt",
+   "class": "param",
+   "label": "NOT ESTIMABLE YET →"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "manual",
+   "class": "shared",
+   "label": "or MANUAL entry (knowledge)"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "esub",
+   "class": "shared",
+   "label": "Submit estimate data (child)"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "fled",
+   "class": "shared",
+   "label": "Ledger: per-line → aggregate →"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "dwv",
+   "class": "branch",
+   "label": "Fee waiver"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "wrev",
+   "class": "branch",
+   "label": "Review (public-interest / indigent /"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "frev",
+   "class": "param",
+   "label": "Estimate Review (config: $ threshold + reviewer:"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "fcom",
+   "class": "param",
+   "label": "Send itemized good-faith estimate /"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "drsp",
+   "class": "param",
+   "label": "Requester response"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "optout",
+   "class": "param",
+   "label": "opt-out / no response"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "ddep",
+   "class": "param",
+   "label": "Deposit / pay before"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "hold",
+   "class": "shared",
+   "label": "HOLD–Awaiting Payment"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "paid",
+   "class": "shared",
+   "label": "paid → resume"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "cnp",
+   "class": "param",
+   "label": "nonpayment (MO 90d · OR 60d ·"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "proc",
+   "class": "branch",
+   "label": "No → proceed to work; collect at end"
+  },
+  {
+   "page": "Estimate-Fee",
+   "node": "exit",
+   "class": "shared",
+   "label": "→ back to child spine (Search → Redaction);"
+  },
+  {
+   "page": "Denial",
+   "node": "e1",
+   "class": "shared",
+   "label": "DENY clicked"
+  },
+  {
+   "page": "Denial",
+   "node": "dag",
+   "class": "branch",
+   "label": "Mandatory EXTERNAL ruling"
+  },
+  {
+   "page": "Denial",
+   "node": "nreason",
+   "class": "param",
+   "label": "Select reason(s) from config library"
+  },
+  {
+   "page": "Denial",
+   "node": "dlegal",
+   "class": "param",
+   "label": "Legal approval"
+  },
+  {
+   "page": "Denial",
+   "node": "legal",
+   "class": "shared",
+   "label": "Legal Review – Denial"
+  },
+  {
+   "page": "Denial",
+   "node": "dlegok",
+   "class": "shared",
+   "label": "Approved?"
+  },
+  {
+   "page": "Denial",
+   "node": "back",
+   "class": "shared",
+   "label": "rejected → back to processing"
+  },
+  {
+   "page": "Denial",
+   "node": "ncomm",
+   "class": "param",
+   "label": "Compose denial communication"
+  },
+  {
+   "page": "Denial",
+   "node": "ddl",
+   "class": "param",
+   "label": "Denial deadline?"
+  },
+  {
+   "page": "Denial",
+   "node": "send",
+   "class": "shared",
+   "label": "Send denial comm → child status = DENIED"
+  },
+  {
+   "page": "Denial",
+   "node": "dprev",
+   "class": "branch",
+   "label": "Previous determination"
+  },
+  {
+   "page": "Denial",
+   "node": "ag1",
+   "class": "branch",
+   "label": "Prepare AG ruling request —"
+  },
+  {
+   "page": "Denial",
+   "node": "agclk",
+   "class": "branch",
+   "label": "HARD CLOCKS (from receipt;"
+  },
+  {
+   "page": "Denial",
+   "node": "agnot",
+   "class": "branch",
+   "label": "Requestor notices:"
+  },
+  {
+   "page": "Denial",
+   "node": "agwait",
+   "class": "branch",
+   "label": "AWAIT AG ruling [external]"
+  },
+  {
+   "page": "Denial",
+   "node": "agdec",
+   "class": "branch",
+   "label": "AG ruling?"
+  },
+  {
+   "page": "Denial",
+   "node": "agrel",
+   "class": "branch",
+   "label": "RELEASE ordered / deemed public →"
+  },
+  {
+   "page": "Records-Search",
+   "node": "e1",
+   "class": "shared",
+   "label": "From spine: Estimate/Deposit cleared"
+  },
+  {
+   "page": "Records-Search",
+   "node": "s1",
+   "class": "shared",
+   "label": "Route to custodian department(s)"
+  },
+  {
+   "page": "Records-Search",
+   "node": "s2",
+   "class": "shared",
+   "label": "Reasonable, good-faith search where records"
+  },
+  {
+   "page": "Records-Search",
+   "node": "d1",
+   "class": "shared",
+   "label": "Anything responsive?"
+  },
+  {
+   "page": "Records-Search",
+   "node": "bn",
+   "class": "param",
+   "label": "NONE → NO RECORD FOUND (master branch)"
+  },
+  {
+   "page": "Records-Search",
+   "node": "d2",
+   "class": "shared",
+   "label": "Needs creation /"
+  },
+  {
+   "page": "Records-Search",
+   "node": "nod",
+   "class": "shared",
+   "label": "NO DUTY TO CREATE (16 states):"
+  },
+  {
+   "page": "Records-Search",
+   "node": "prog",
+   "class": "branch",
+   "label": "BUT extraction/programming of EXISTING"
+  },
+  {
+   "page": "Records-Search",
+   "node": "d3",
+   "class": "shared",
+   "label": "Already posted online?"
+  },
+  {
+   "page": "Records-Search",
+   "node": "web",
+   "class": "branch",
+   "label": "WEBSITE SATISFIES (8 states incl. OK ¶6):"
+  },
+  {
+   "page": "Records-Search",
+   "node": "d4",
+   "class": "shared",
+   "label": "Voluminous?"
+  },
+  {
+   "page": "Records-Search",
+   "node": "inst",
+   "class": "param",
+   "label": "INSTALLMENTS / partial production (7 states):"
+  },
+  {
+   "page": "Records-Search",
+   "node": "spec",
+   "class": "branch",
+   "label": "SPECIAL-RECORD CLASS? (overlay)"
+  },
+  {
+   "page": "Records-Search",
+   "node": "exit",
+   "class": "shared",
+   "label": "→ REDACTION"
+  },
+  {
+   "page": "Redaction",
+   "node": "e1",
+   "class": "shared",
+   "label": "From Records Search — responsive set attached"
+  },
+  {
+   "page": "Redaction",
+   "node": "r1",
+   "class": "param",
+   "label": "Review against exemption / reason library"
+  },
+  {
+   "page": "Redaction",
+   "node": "seg",
+   "class": "shared",
+   "label": "SEGREGABILITY IS THE DEFAULT (25 states)"
+  },
+  {
+   "page": "Redaction",
+   "node": "d1",
+   "class": "shared",
+   "label": "Any exempt content?"
+  },
+  {
+   "page": "Redaction",
+   "node": "clean",
+   "class": "shared",
+   "label": "NONE → DISPOSITION"
+  },
+  {
+   "page": "Redaction",
+   "node": "pii",
+   "class": "param",
+   "label": "MANDATORY / AUTO-REDACT CLASSES"
+  },
+  {
+   "page": "Redaction",
+   "node": "r2",
+   "class": "param",
+   "label": "Apply redactions — mark visibly / note each"
+  },
+  {
+   "page": "Redaction",
+   "node": "d2",
+   "class": "shared",
+   "label": "Third-party interest?"
+  },
+  {
+   "page": "Redaction",
+   "node": "tp",
+   "class": "branch",
+   "label": "THIRD-PARTY NOTICE / CLAIM (state-gated)"
+  },
+  {
+   "page": "Redaction",
+   "node": "d3",
+   "class": "param",
+   "label": "Legal review needed?"
+  },
+  {
+   "page": "Redaction",
+   "node": "legal",
+   "class": "shared",
+   "label": "LEGAL REDACTION (spawnable escalation)"
+  },
+  {
+   "page": "Redaction",
+   "node": "exit",
+   "class": "shared",
+   "label": "→ DISPOSITION"
+  },
+  {
+   "page": "Disposition",
+   "node": "e1",
+   "class": "shared",
+   "label": "Item resolved: produced / redacted set ready ·"
+  },
+  {
+   "page": "Disposition",
+   "node": "d1",
+   "class": "shared",
+   "label": "Balance adequate?"
+  },
+  {
+   "page": "Disposition",
+   "node": "hold",
+   "class": "branch",
+   "label": "PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)"
+  },
+  {
+   "page": "Disposition",
+   "node": "fmt",
+   "class": "param",
+   "label": "Deliver in requested format / medium"
+  },
+  {
+   "page": "Disposition",
+   "node": "caps",
+   "class": "branch",
+   "label": "REQUESTOR-LEDGER CHECK (class D)"
+  },
+  {
+   "page": "Disposition",
+   "node": "ship",
+   "class": "shared",
+   "label": "SHIPPED — child terminal"
+  },
+  {
+   "page": "Disposition",
+   "node": "den",
+   "class": "shared",
+   "label": "DENIED — child terminal"
+  },
+  {
+   "page": "Disposition",
+   "node": "wd",
+   "class": "shared",
+   "label": "WITHDRAWN / CLOSED — timers or requester opt-out"
+  },
+  {
+   "page": "Disposition",
+   "node": "fin",
+   "class": "shared",
+   "label": "PARENT ROLL-UP: final invoice · refund excess"
+  },
+  {
+   "page": "Disposition",
+   "node": "close",
+   "class": "shared",
+   "label": "PARENT CLOSED (Active/Closed flag)"
+  }
+ ]
+}

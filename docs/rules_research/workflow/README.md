@@ -84,5 +84,11 @@ labor-chargeability ledger note). Disposition page (ship-auth/pay-before-release
 requestor-ledger delivery caps · unclaimed/nonpayment terminal timers TX 60d/MI 45d/MO 90d/OR 60d ·
 parent roll-up incl. OK refund-of-excess · retention note).
 
-**Not started:** state-gated overlay (color every node shared/param/branch — the bridge to Phase 6);
-per-state config templates (Phase 6); the build (Phase 7).
+**State-gated overlay: DONE (v2.5, 2026-07-26).** All 115 flow nodes classified — **60 shared · 30
+value-knobs (◆) · 25 state-branches (▲)** — rendered as glyphs + legend on every page, emitted to
+`workflow_overlay.json` by the build, summarized in **`OVERLAY.md`** (the Phase-6 work-list: template =
+value per reachable ◆ + on/off per ▲ + nothing for shared; knob values come from the dictionary's
+parameter/mixed concepts, gates from its structural ones).
+
+**Not started:** per-state config templates (Phase 6 — start from OVERLAY.md + the master dictionary);
+the build (Phase 7).
