@@ -60,6 +60,7 @@ for (const t of templates) {
     if (b.suppressed_by) parts.push(`<b>suppressed by:</b><table>${conceptTable(b.suppressed_by)}</table>`);
     if (b.context) parts.push(`<b>context (does not activate):</b><table>${conceptTable(b.context)}</table>`);
     if (b.note) parts.push(`<span class="note">${esc(b.note)}</span>`);
+    if (b.city_config) parts.push(`<div class="cc">⚠ city config: ${esc(b.city_config)}</div>`);
     return `<tr><td style="width:15%"><b>${esc(node)}</b><br><span class="note">${esc(b.label)}</span></td><td style="width:6%">${badge}</td><td>${parts.join('') || '<span class="note">—</span>'}</td></tr>`;
   }).join('');
 

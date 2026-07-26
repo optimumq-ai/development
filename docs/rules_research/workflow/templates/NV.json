@@ -280,11 +280,13 @@
       "summary": "When a public record copy is required by the federal Department of Veterans Affairs to determine benefit eligibility, the custodian must provide a certified copy without charge to the applicant, their representative, or the VA."
      }
     ]
-   }
+   },
+   "city_config": "fee_waiver approval module (v1, DESIGN_fee_waiver_commercial.md): enabled on/off governs the DISCRETIONARY program only — statutory-mandatory waiver categories fire regardless, on verified evidence. mode = intake_review (inline approve/deny) | routed_task {assignee_role, task_name}."
   },
   "Master.s2": {
    "label": "Commercial-rate requested",
-   "active": false
+   "active": false,
+   "city_config": "commercial_rate approval module (v1): same two modes as fee_waiver (intake_review | routed_task). Must decide at INTAKE — commercial classification changes the response clock in NJ (14-bd) and IL (recurrent/commercial track). Classification overriding a self-declaration is always communicated."
   },
   "Master.br": {
    "label": "NOT OURS → proper custodian",
@@ -341,7 +343,8 @@
       "summary": "When a public record copy is required by the federal Department of Veterans Affairs to determine benefit eligibility, the custodian must provide a certified copy without charge to the applicant, their representative, or the VA."
      }
     ]
-   }
+   },
+   "city_config": "Waiver decision point: resolved AFTER estimate computed, BEFORE estimate communicated — a waiver is always decided before any amount is invoiced. Denial is folded into the estimate notice (no separate letter); processing never stops — flows to the requester-response gate."
   },
   "Estimate-Fee.wrev": {
    "label": "Review (public-interest / indigent /",
@@ -359,7 +362,8 @@
       "summary": "When a public record copy is required by the federal Department of Veterans Affairs to determine benefit eligibility, the custodian must provide a certified copy without charge to the applicant, their representative, or the VA."
      }
     ]
-   }
+   },
+   "city_config": "Review seat per the module mode: intake_review = the intake reviewer already decided; routed_task = designated role + task name. NV precondition: waiver only lawful with an adopted+posted written policy. IL: requester must have stated a specific purpose."
   },
   "Estimate-Fee.proc": {
    "label": "No → proceed to work; collect at end",

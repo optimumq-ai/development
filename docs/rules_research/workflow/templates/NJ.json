@@ -545,7 +545,8 @@
       "summary": "No fee shall be charged to a victim of a crime for a copy of a record to which the crime victim is entitled to access."
      }
     ]
-   }
+   },
+   "city_config": "fee_waiver approval module (v1, DESIGN_fee_waiver_commercial.md): enabled on/off governs the DISCRETIONARY program only — statutory-mandatory waiver categories fire regardless, on verified evidence. mode = intake_review (inline approve/deny) | routed_task {assignee_role, task_name}."
   },
   "Master.s2": {
    "label": "Commercial-rate requested",
@@ -571,7 +572,8 @@
       "summary": "A request has a 'commercial purpose' where any part of the record is used, directly or indirectly, for sale, resale, solicitation, rent, or lease of a service, or any use by which the user expects a profit through commission, salary, or fee; this classification triggers the 14-business-day respon…"
      }
     ]
-   }
+   },
+   "city_config": "commercial_rate approval module (v1): same two modes as fee_waiver (intake_review | routed_task). Must decide at INTAKE — commercial classification changes the response clock in NJ (14-bd) and IL (recurrent/commercial track). Classification overriding a self-declaration is always communicated."
   },
   "Master.br": {
    "label": "NOT OURS → proper custodian",
@@ -656,7 +658,8 @@
       "summary": "No fee shall be charged to a victim of a crime for a copy of a record to which the crime victim is entitled to access."
      }
     ]
-   }
+   },
+   "city_config": "Waiver decision point: resolved AFTER estimate computed, BEFORE estimate communicated — a waiver is always decided before any amount is invoiced. Denial is folded into the estimate notice (no separate letter); processing never stops — flows to the requester-response gate."
   },
   "Estimate-Fee.wrev": {
    "label": "Review (public-interest / indigent /",
@@ -669,7 +672,8 @@
       "summary": "No fee shall be charged to a victim of a crime for a copy of a record to which the crime victim is entitled to access."
      }
     ]
-   }
+   },
+   "city_config": "Review seat per the module mode: intake_review = the intake reviewer already decided; routed_task = designated role + task name. NV precondition: waiver only lawful with an adopted+posted written policy. IL: requester must have stated a specific purpose."
   },
   "Estimate-Fee.proc": {
    "label": "No → proceed to work; collect at end",

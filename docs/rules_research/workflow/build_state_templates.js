@@ -122,6 +122,7 @@ for (const sm of stateMeta) {
       }
       if (Object.keys(context).length) br.context = context;
       if (spec.override_note) br.note = spec.override_note;
+      if (spec.city_config) br.city_config = spec.city_config.note;
       t.branches[nodeKey] = br;
     }
   }
