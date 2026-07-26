@@ -18,17 +18,21 @@ config templates ([[requester-class-eligibility-cluster]], [[compliant-automatio
   legal analysis / majority, not by trusting the discovery value.
 
 ## Artifacts
-- **`master_concept_dictionary.json`** — THE deliverable. All 1,101 pruned rules clustered into **128
-  canonical concepts** across 17 families (860 source keys → 128; ~6.7x consolidation). Every rule mapped
+- **`master_concept_dictionary.json`** — THE deliverable. All **1,116** pruned rules (updated 2026-07-26:
+  +9 `amendments_2025.json` supplements, +6 restored TX AG-referral rules) clustered into **122 canonical
+  concepts** across 17 families (874 source keys → 122; 0 catch-alls after review). Every rule mapped
   exactly once (0 dropped, 0 duplicated). Each entry: canonical_key, family, resolved config_home,
   state_count, states, representative definition, merged_from (source keys), members_by_state (rule_ids).
-  Mirrored to the exchange folder as `Master_concept_dictionary.xlsx`.
+  Mirrored to the exchange folder as `Master_concept_dictionary.xlsx` (`../scripts/gen_dict_xlsx.js`).
+  New concepts 2026-07-26: `appeal.ag_referral_to_withhold` (TX, 8 rules) · `denial.deemed_disclosure`
+  (TX-0022 — was mis-merged into deemed_denial by the `/deem/` regex; now split) ·
+  `eligibility.vexatious_requester_gate` (OH) · `response.catastrophe_suspension` (TX).
 - `master_concept_dictionary_SEED.json` — the earlier 75-concept multi-state seed (superseded by the master).
 - `families/eligibility.json`, `families/timing.json` — the two hand-curated family slices (drove the master
   via a key→canonical lookup); the rest were clustered by a tuned per-family functional bucketer.
 
 ## config_home (the design payload)
-128 concepts: **8 pure parameter, 46 mixed, 74 structural**. The ~54 parameter/mixed concepts are the
+122 concepts: **8 pure parameter, 47 mixed, 67 structural**. The ~55 parameter/mixed concepts are the
 **value-knobs** a per-state/city config template fills (copy rates, response windows, fee schedules, deposit
 thresholds, extension length…); the 74 structural are process-shape forks. `mixed` means states split
 parameter-vs-structural — usually the qualitative-standard-plus-local-value pattern (e.g. response window is

@@ -50,6 +50,37 @@
     }
   },
   {
+    "canonical_key": "appeal.ag_referral_to_withhold",
+    "family": "appeal",
+    "config_home": "mixed(p:3/s:5)",
+    "state_count": 1,
+    "states": [
+      "TX"
+    ],
+    "definition": "A body that receives a written request for information it wishes to withhold under a Subchapter C exception must ask the attorney general for a decision, unless there has",
+    "merged_from": [
+      "appeal.administrative.ag_brief_deadline",
+      "appeal.administrative.ag_request_deadline",
+      "appeal.administrative.ag_ruling_required",
+      "appeal.administrative.comments_copy_to_requestor",
+      "appeal.administrative.previous_determination",
+      "appeal.administrative.requestor_notice",
+      "response.previous_determination_notice"
+    ],
+    "members_by_state": {
+      "TX": [
+        "TX-0016",
+        "TX-0017",
+        "TX-0018",
+        "TX-0019",
+        "TX-0020",
+        "TX-0021",
+        "TX-S02",
+        "TX-S03"
+      ]
+    }
+  },
+  {
     "canonical_key": "clarification.nonresponse_withdrawal",
     "family": "clarification",
     "config_home": "mixed(p:4/s:1)",
@@ -123,15 +154,17 @@
     "canonical_key": "clarification.duty_to_assist",
     "family": "clarification",
     "config_home": "structural",
-    "state_count": 3,
+    "state_count": 4,
     "states": [
       "CA",
       "NV",
+      "OK",
       "TN"
     ],
-    "definition": "When unable to produce by day five, the entity must make a reasonable effort to assist the requester to focus the request to maximize the likelihood of obtaining the reco",
+    "definition": "To assist the requester in making a focused, effective request, the agency shall (to the extent reasonable) help identify responsive records, describe the information tec",
     "merged_from": [
       "clarification.agency_assist_identify",
+      "clarification.deny_after_engagement",
       "clarification.narrowing_assistance",
       "clarification.offer_assistance"
     ],
@@ -141,6 +174,9 @@
       ],
       "NV": [
         "NV-0010"
+      ],
+      "OK": [
+        "OK-S02"
       ],
       "TN": [
         "TN-0009"
@@ -908,125 +944,6 @@
     }
   },
   {
-    "canonical_key": "denial.deemed_denial_on_nonresponse",
-    "family": "denial",
-    "config_home": "mixed(p:6/s:24)",
-    "state_count": 18,
-    "states": [
-      "AL",
-      "AZ",
-      "CT",
-      "FL",
-      "ID",
-      "IL",
-      "IN",
-      "LA",
-      "MI",
-      "NJ",
-      "NY",
-      "OR",
-      "PA",
-      "SC",
-      "TN",
-      "TX",
-      "VA",
-      "WI"
-    ],
-    "definition": "For a request made in person, by telephone, or for enhanced access, a denial is deemed to occur when 24 hours elapse after an agency employee refuses to permit inspection",
-    "merged_from": [
-      "deadline.deemed_denial_window_in_person_phone",
-      "deadline.deemed_denial_window_mail_fax",
-      "deadlines.constructive_denial",
-      "deadlines.deemed_denial_nonresponse",
-      "deadlines.storage_deemed_denial",
-      "denial.constructive_denial_nonresponse",
-      "denial.deemed_denial_nonresponse",
-      "denial.deemed_denial_on_extension_lapse",
-      "denial.deemed_denial_on_nonresponse",
-      "denial.deemed_denial_unidentified_pause",
-      "denial.deemed_disclosure_on_noncompliance",
-      "denial.indefinite_delay_constructive_denial",
-      "denial.nonresponse_deemed_denial",
-      "denials.constructive_denial_exceptions",
-      "denials.constructive_denial_on_silence",
-      "denials.constructive_denial_production",
-      "denials.constructive_denial_trigger",
-      "denials.constructive_denial_unjustified_delay",
-      "denials.deemed_denial_elected_official",
-      "denials.deemed_denial_on_nonresponse",
-      "denials.deemed_granted_on_nonresponse",
-      "denials.exemptions_not_waived_by_nonresponse"
-    ],
-    "members_by_state": {
-      "AL": [
-        "AL-0027",
-        "AL-0028",
-        "AL-0029",
-        "AL-0036",
-        "AL-0037",
-        "AL-0038"
-      ],
-      "AZ": [
-        "AZ-0012"
-      ],
-      "CT": [
-        "CT-0014"
-      ],
-      "FL": [
-        "FL-0028"
-      ],
-      "ID": [
-        "ID-0013"
-      ],
-      "IL": [
-        "IL-0014"
-      ],
-      "IN": [
-        "IN-0007",
-        "IN-0008",
-        "IN-0009"
-      ],
-      "LA": [
-        "LA-0030"
-      ],
-      "MI": [
-        "MI-0022"
-      ],
-      "NJ": [
-        "NJ-T09",
-        "NJ-T13",
-        "NJ-M25",
-        "NJ-M26"
-      ],
-      "NY": [
-        "NY-0013"
-      ],
-      "OR": [
-        "OR-0035"
-      ],
-      "PA": [
-        "PA-0026",
-        "PA-0027"
-      ],
-      "SC": [
-        "SC-0028",
-        "SC-0029"
-      ],
-      "TN": [
-        "TN-0017"
-      ],
-      "TX": [
-        "TX-0022"
-      ],
-      "VA": [
-        "VA-0015"
-      ],
-      "WI": [
-        "WI-0025"
-      ]
-    }
-  },
-  {
     "canonical_key": "denial.written_notice_required",
     "family": "denial",
     "config_home": "structural",
@@ -1124,6 +1041,120 @@
       ],
       "WI": [
         "WI-0027"
+      ]
+    }
+  },
+  {
+    "canonical_key": "denial.deemed_denial_on_nonresponse",
+    "family": "denial",
+    "config_home": "mixed(p:6/s:23)",
+    "state_count": 17,
+    "states": [
+      "AL",
+      "AZ",
+      "CT",
+      "FL",
+      "ID",
+      "IL",
+      "IN",
+      "LA",
+      "MI",
+      "NJ",
+      "NY",
+      "OR",
+      "PA",
+      "SC",
+      "TN",
+      "VA",
+      "WI"
+    ],
+    "definition": "If the requester agrees to the extension, the request is deemed denied on the day following the date specified in the notice if the agency has not provided a response by ",
+    "merged_from": [
+      "deadline.deemed_denial_window_in_person_phone",
+      "deadline.deemed_denial_window_mail_fax",
+      "deadlines.constructive_denial",
+      "deadlines.deemed_denial_nonresponse",
+      "deadlines.storage_deemed_denial",
+      "denial.constructive_denial_nonresponse",
+      "denial.deemed_denial_nonresponse",
+      "denial.deemed_denial_on_extension_lapse",
+      "denial.deemed_denial_on_nonresponse",
+      "denial.deemed_denial_unidentified_pause",
+      "denial.indefinite_delay_constructive_denial",
+      "denial.nonresponse_deemed_denial",
+      "denials.constructive_denial_exceptions",
+      "denials.constructive_denial_on_silence",
+      "denials.constructive_denial_production",
+      "denials.constructive_denial_trigger",
+      "denials.constructive_denial_unjustified_delay",
+      "denials.deemed_denial_elected_official",
+      "denials.deemed_denial_on_nonresponse",
+      "denials.deemed_granted_on_nonresponse",
+      "denials.exemptions_not_waived_by_nonresponse"
+    ],
+    "members_by_state": {
+      "AL": [
+        "AL-0027",
+        "AL-0028",
+        "AL-0029",
+        "AL-0036",
+        "AL-0037",
+        "AL-0038"
+      ],
+      "AZ": [
+        "AZ-0012"
+      ],
+      "CT": [
+        "CT-0014"
+      ],
+      "FL": [
+        "FL-0028"
+      ],
+      "ID": [
+        "ID-0013"
+      ],
+      "IL": [
+        "IL-0014"
+      ],
+      "IN": [
+        "IN-0007",
+        "IN-0008",
+        "IN-0009"
+      ],
+      "LA": [
+        "LA-0030"
+      ],
+      "MI": [
+        "MI-0022"
+      ],
+      "NJ": [
+        "NJ-T09",
+        "NJ-T13",
+        "NJ-M25",
+        "NJ-M26"
+      ],
+      "NY": [
+        "NY-0013"
+      ],
+      "OR": [
+        "OR-0035"
+      ],
+      "PA": [
+        "PA-0026",
+        "PA-0027"
+      ],
+      "SC": [
+        "SC-0028",
+        "SC-0029"
+      ],
+      "TN": [
+        "TN-0017"
+      ],
+      "VA": [
+        "VA-0015"
+      ],
+      "WI": [
+        "WI-0025"
       ]
     }
   },
@@ -1234,6 +1265,34 @@
     }
   },
   {
+    "canonical_key": "denial.no_responsive_records",
+    "family": "denial",
+    "config_home": "mixed(p:1/s:2)",
+    "state_count": 3,
+    "states": [
+      "MI",
+      "TN",
+      "TX"
+    ],
+    "definition": "If the denial is because the record does not exist, the written notice must contain a certificate that the record does not exist under the name given or another name reas",
+    "merged_from": [
+      "denial.ground_not_custodian_or_nonexistent",
+      "denials.nonexistent_record_certificate",
+      "response.no_records_notice"
+    ],
+    "members_by_state": {
+      "MI": [
+        "MI-0025"
+      ],
+      "TN": [
+        "TN-0028"
+      ],
+      "TX": [
+        "TX-S01"
+      ]
+    }
+  },
+  {
     "canonical_key": "denial.identify_responsible_person",
     "family": "denial",
     "config_home": "structural",
@@ -1252,29 +1311,6 @@
       ],
       "NE": [
         "NE-0028"
-      ]
-    }
-  },
-  {
-    "canonical_key": "denial.no_responsive_records",
-    "family": "denial",
-    "config_home": "structural",
-    "state_count": 2,
-    "states": [
-      "MI",
-      "TN"
-    ],
-    "definition": "If the denial is because the record does not exist, the written notice must contain a certificate that the record does not exist under the name given or another name reas",
-    "merged_from": [
-      "denial.ground_not_custodian_or_nonexistent",
-      "denials.nonexistent_record_certificate"
-    ],
-    "members_by_state": {
-      "MI": [
-        "MI-0025"
-      ],
-      "TN": [
-        "TN-0028"
       ]
     }
   },
@@ -1341,6 +1377,24 @@
     "members_by_state": {
       "OR": [
         "OR-0014"
+      ]
+    }
+  },
+  {
+    "canonical_key": "denial.deemed_disclosure",
+    "family": "denial",
+    "config_home": "structural",
+    "state_count": 1,
+    "states": [
+      "TX"
+    ],
+    "definition": "If the body does not timely request an AG decision and provide the § 552.301(d) and (e-1) notices, the requested information is presumed public and must be released absen",
+    "merged_from": [
+      "denial.deemed_disclosure_on_noncompliance"
+    ],
+    "members_by_state": {
+      "TX": [
+        "TX-0022"
       ]
     }
   },
@@ -1918,6 +1972,26 @@
     "members_by_state": {
       "LA": [
         "LA-0002"
+      ]
+    }
+  },
+  {
+    "canonical_key": "eligibility.vexatious_requester_gate",
+    "family": "eligibility",
+    "config_home": "structural",
+    "state_count": 1,
+    "states": [
+      "OH"
+    ],
+    "definition": "A person subject to a vexatious-litigator order may not request public records without first obtaining leave from the court of common pleas and an accompanying order spec",
+    "merged_from": [
+      "eligibility.vexatious_litigator_gate",
+      "eligibility.vexatious_suspected_id_demand"
+    ],
+    "members_by_state": {
+      "OH": [
+        "OH-S01",
+        "OH-S02"
       ]
     }
   },
@@ -3240,6 +3314,81 @@
     }
   },
   {
+    "canonical_key": "intake.reasonably_describes",
+    "family": "intake",
+    "config_home": "mixed(p:1/s:13)",
+    "state_count": 12,
+    "states": [
+      "CA",
+      "ID",
+      "IN",
+      "MA",
+      "MI",
+      "NJ",
+      "NY",
+      "OK",
+      "PA",
+      "SC",
+      "VA",
+      "WA"
+    ],
+    "definition": "The written request must describe a public record sufficiently to enable the public body to find the public record.",
+    "merged_from": [
+      "clarification.reasonable_specificity",
+      "intake.clearly_indicate_prr",
+      "intake.identifiable_record_required",
+      "intake.possession_custody_control",
+      "intake.reasonable_description_required",
+      "intake.reasonable_specificity",
+      "intake.reasonable_time_place_rules",
+      "intake.reasonably_describes_identifiable",
+      "intake.request_description_specificity",
+      "intake.specificity_required",
+      "scope.reasonable_description_required",
+      "search.correspondence_scope_specificity"
+    ],
+    "members_by_state": {
+      "CA": [
+        "CA-0006"
+      ],
+      "ID": [
+        "ID-0005",
+        "ID-0006"
+      ],
+      "IN": [
+        "IN-0004"
+      ],
+      "MA": [
+        "MA-0005",
+        "MA-0006"
+      ],
+      "MI": [
+        "MI-0006"
+      ],
+      "NJ": [
+        "NJ-A26"
+      ],
+      "NY": [
+        "NY-0005"
+      ],
+      "OK": [
+        "OK-S01"
+      ],
+      "PA": [
+        "PA-0005"
+      ],
+      "SC": [
+        "SC-0006"
+      ],
+      "VA": [
+        "VA-0005"
+      ],
+      "WA": [
+        "WA-0007"
+      ]
+    }
+  },
+  {
     "canonical_key": "intake.written_request_required",
     "family": "intake",
     "config_home": "structural",
@@ -3304,76 +3453,6 @@
       ],
       "UT": [
         "UT-0004"
-      ]
-    }
-  },
-  {
-    "canonical_key": "intake.reasonably_describes",
-    "family": "intake",
-    "config_home": "mixed(p:1/s:12)",
-    "state_count": 11,
-    "states": [
-      "CA",
-      "ID",
-      "IN",
-      "MA",
-      "MI",
-      "NJ",
-      "NY",
-      "PA",
-      "SC",
-      "VA",
-      "WA"
-    ],
-    "definition": "A request must identify with reasonable particularity the record being requested for the agency's duty to attach.",
-    "merged_from": [
-      "intake.clearly_indicate_prr",
-      "intake.identifiable_record_required",
-      "intake.possession_custody_control",
-      "intake.reasonable_description_required",
-      "intake.reasonable_specificity",
-      "intake.reasonable_time_place_rules",
-      "intake.reasonably_describes_identifiable",
-      "intake.request_description_specificity",
-      "intake.specificity_required",
-      "scope.reasonable_description_required",
-      "search.correspondence_scope_specificity"
-    ],
-    "members_by_state": {
-      "CA": [
-        "CA-0006"
-      ],
-      "ID": [
-        "ID-0005",
-        "ID-0006"
-      ],
-      "IN": [
-        "IN-0004"
-      ],
-      "MA": [
-        "MA-0005",
-        "MA-0006"
-      ],
-      "MI": [
-        "MI-0006"
-      ],
-      "NJ": [
-        "NJ-A26"
-      ],
-      "NY": [
-        "NY-0005"
-      ],
-      "PA": [
-        "PA-0005"
-      ],
-      "SC": [
-        "SC-0006"
-      ],
-      "VA": [
-        "VA-0005"
-      ],
-      "WA": [
-        "WA-0007"
       ]
     }
   },
@@ -3773,8 +3852,8 @@
   {
     "canonical_key": "payment.advance_payment",
     "family": "payment",
-    "config_home": "mixed(p:5/s:12)",
-    "state_count": 13,
+    "config_home": "mixed(p:6/s:12)",
+    "state_count": 14,
     "states": [
       "AL",
       "AZ",
@@ -3785,13 +3864,15 @@
       "MA",
       "MO",
       "OH",
+      "OK",
       "PA",
       "TN",
       "UT",
       "WI"
     ],
-    "definition": "An entity may require payment of past fees and future estimated fees before beginning to process a request.",
+    "definition": "The custodian may require advance payment of the fees authorized by this section before providing the records.",
     "merged_from": [
+      "fee.advance_payment_threshold",
       "fee.mandatory_prepayment_time_intensive",
       "payment.advance_payment_mailed_copies",
       "payment.advance_payment_permitted",
@@ -3832,6 +3913,9 @@
       ],
       "OH": [
         "OH-0020"
+      ],
+      "OK": [
+        "OK-S03"
       ],
       "PA": [
         "PA-0046"
@@ -5778,6 +5862,24 @@
       "NJ": [
         "NJ-T17",
         "NJ-T18"
+      ]
+    }
+  },
+  {
+    "canonical_key": "response.catastrophe_suspension",
+    "family": "response",
+    "config_home": "structural",
+    "state_count": 1,
+    "states": [
+      "TX"
+    ],
+    "definition": "A body currently significantly impacted by a catastrophe may suspend PIA requirements for an initial period of up to 7 consecutive days (once per catastrophe, after submi",
+    "merged_from": [
+      "clock.catastrophe_suspension"
+    ],
+    "members_by_state": {
+      "TX": [
+        "TX-S04"
       ]
     }
   },

@@ -13,7 +13,7 @@ const DONE = new Set(['eligibility','deadline','response','extension']); // timi
 // ordered [regex-on-key, canonical] per family; first match wins. '→fam' = route to another family.
 const R = {
   fee: [
-    [/nonpayment|denial_for_unpaid|unpaid_denial|forfeited_if_late|late_response|mandatory_prepayment|search_fee_conditional|search_fee_unreasonable_cost_gate/, '→payment'],
+    [/nonpayment|denial_for_unpaid|unpaid_denial|forfeited_if_late|late_response|mandatory_prepayment|advance_payment|search_fee_conditional|search_fee_unreasonable_cost_gate/, '→payment'],
     [/repeat_request|carryforward|carry_forward/, 'fee.repeat_request_carryforward'],
     [/tax/, 'fee.tax_treatment'],
     [/waiver|indigent|crime_victim|public_interest|welfare|legislator_no_charge|veterans|scholastic|_exemption|no_discouragement/, 'fee.waiver'],
@@ -72,6 +72,7 @@ const R = {
     [/duplicate_pending|identical_no_change|incomplete_request|anonymous_not_incomplete/, '→intake'],
     [/attorney_fee/, '→appeal'],
     [/legal_proceeding_bar|law_enforcement_discretion|nondisclosure_agreement|disaster_or_fragile|substantial_disruption|storage_archived_deadline|shared_record_referral/, '→special_records'],
+    [/deemed_disclosure/, 'denial.deemed_disclosure'], // TX inverts deemed-denial: miss AG clocks → presumed PUBLIC (552.302)
     [/deem|constructive|exemptions_not_waived/, 'denial.deemed_denial_on_nonresponse'],
     [/neither_confirm_nor_deny|glomar/, 'denial.neither_confirm_nor_deny'],
     [/log_maintain|denial_log|signature_required/, 'denial.denial_form_and_log'],
@@ -129,8 +130,9 @@ const R = {
   ],
   clarification: [
     [/ambiguous_overbroad_denial|excessive_information_denial|specificity_requir/, '→denial'],
+    [/reasonable_specificity/, '→intake'], // OK SB 535 3-element specificity standard → intake.reasonably_describes
     [/withdraw|nonresponse|no_response|abandon/, 'clarification.nonresponse_withdrawal'],
-    [/assist|help_identify|duty_to_assist|reasonable_effort|elicit/, 'clarification.duty_to_assist'],
+    [/assist|help_identify|duty_to_assist|reasonable_effort|elicit|deny_after_engagement|engage/, 'clarification.duty_to_assist'],
     [/confer|opportunity_to_narrow|opportunity_to_revise|narrow|reduce_scope|burden|substantial_disruption_resolution/, 'clarification.confer_to_narrow'],
     [/toll|pause|restart|reset|new_request|revised|suspends_response|cost_review_window/, 'clarification.toll_on_clarification'],
     [/deemed_satisfied|satisfied_after|reasonable_effort_satisfies/, 'clarification.duty_satisfied'],
@@ -188,7 +190,12 @@ const R = {
   ],
   delivery: [ [/.*/, 'production.delivery_method'] ],
   aggregation: [ [/.*/, 'fee.aggregation'] ],
-  appeal: [ [/.*/, 'appeal.retained_optional'] ], // held items (NY-0037, MI-0081, OR-0034, TN-0041 notice)
+  appeal: [
+    // TX AG-referral-to-withhold (restored TX-0016..0021 + HB 4219 TX-S02/S03): the city's own duties —
+    // referral trigger, hard 10-bd/15-bd clocks, requestor notices. Structural branch, not external appeal.
+    [/ag_ruling_required|ag_request_deadline|ag_brief_deadline|comments_copy_to_requestor|administrative\.requestor_notice|previous_determination/, 'appeal.ag_referral_to_withhold'],
+    [/.*/, 'appeal.retained_optional'], // held items (NY-0037, MI-0081, OR-0034, TN-0041 notice)
+  ],
   withdrawal: [ [/.*/, 'payment.nonpayment_consequence'] ],
   tracking: [ [/.*/, 'custody.request_tracking'] ],
   certification: [ [/.*/, 'production.certified_copy'] ],
@@ -197,11 +204,16 @@ const R = {
   access: [ [/.*/, 'eligibility.any_person'] ],
   policy: [ [/.*/, 'classification.written_policy_required'] ],
   definition: [ [/commercial/, 'classification.commercial_purpose'], [/.*/, 'classification.definition_misc'] ],
-  eligibility: [ [/incarcerated/, 'eligibility.incarcerated_requester_exclusion'], [/.*/, 'eligibility.any_person'] ],
+  eligibility: [ [/incarcerated/, 'eligibility.incarcerated_requester_exclusion'],
+    [/vexatious/, 'eligibility.vexatious_requester_gate'], // OH 2323.52(J) intake gate (cf. UT-0051..53 concept, adjudication side cut)
+    [/.*/, 'eligibility.any_person'] ],
+  clock: [ [/catastrophe/, 'response.catastrophe_suspension'], [/.*/, 'response.initial_decision_window'] ], // TX-S04 552.233 global clock pause
   handling: [ [/.*/, 'classification.other_classification'] ],
   coverage: [ [/.*/, 'classification.coverage_misc'] ],
   // safety fallbacks for keys routed INTO timing families from elsewhere
   response: [
+    [/no_records_notice/, '→denial'], // TX-S01 552.221(f) → denial.no_responsive_records (with MI/TN)
+    [/previous_determination/, '→appeal'], // TX-S02 552.221(g) → appeal.ag_referral_to_withhold
     [/acknowledg/, 'response.acknowledgment_window'],
     [/receipt/, 'response.clock_computation'],
     [/substantive_response_definition/, 'response.valid_response_forms'],
