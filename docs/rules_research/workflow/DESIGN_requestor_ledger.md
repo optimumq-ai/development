@@ -1,4 +1,4 @@
-# Requestor-level ledger — design (2026-07-26)
+# Requestor-level ledger — design (2026-07-26; decisions settled with Kevin same day)
 
 ## Why this exists
 
@@ -112,10 +112,19 @@ this: `payment.advance_payment` (14 states), `fee.personnel_time_free_allowance`
 - Auto-classifying anyone as vexatious — OH list is the court's; UT designation is the director's order;
   the system only *records and applies* an externally-established status until expiry.
 
-## Open questions for Kevin
-1. **Identity model:** are portal accounts mandatory enough to be the primary anchor, with verified-email
-   matching for the email channel? (Recommended; walk-in/paper stays staff-confirmed.)
-2. **MVP cut:** balances + deposit/advance triggers (class A) are needed for TX/OK/GA/MA/MI/UT day one;
-   allowances (B) and frequency counters (C) can ship as config stubs with manual tracking. Agree?
-3. Should the OH non-commercial certification live on the profile (sticky per requestor) or per request?
-   Statute reads per-request; sticky-with-reconfirmation is friendlier. Default: per request.
+## Decisions (Kevin, 2026-07-26)
+1. **Identity model — DECIDED:** portal account is the primary anchor; verified email for the email
+   channel; walk-in/paper stays staff-confirmed. No fuzzy matching into adverse actions, ever.
+2. **MVP cut — DECIDED:** **Class A built fully** (balance ledger + deposit/advance/prepay/deny triggers —
+   fed by parent-processor events, no new data entry). **Classes B and C ship as config stubs**: all knobs,
+   downstream paperwork, and timers exist (a staff-entered number produces fully compliant output); the
+   automated *counting* (per-task time attribution, request-history matching) is deferred until a city
+   elects those regimes.
+   *Noted (Kevin):* class C is virtually unenforceable against a determined alias-user (new email, name
+   variant) — accepted. The statutes themselves function as deterrents against undisguised repeaters; the
+   adverse-triggers-require-affirmative-identity rule means the system never pretends otherwise, and C's
+   real value is operational (NY-0026 free reuse, duplicate advisories), not enforcement. The same leakage
+   partially applies to class A (fresh-email dodge) — cities already live with it; the bar is "as good as
+   a diligent clerk."
+3. **OH non-commercial certification — DECIDED: per-request** (the statute's literal read; only ever
+   surfaces on physical delivery beyond 10 records/month, so the friction is rare).
