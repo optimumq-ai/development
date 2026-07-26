@@ -6,7 +6,7 @@ const C={process:['#dae8fc','#6c8ebf'],decision:['#ffe6cc','#d79b00'],parent:['#
 
 // ---------- PAGE 1: MASTER ----------
 const MN=[
- ['title',20,10,1000,26,'title','MASTER FLOW · single-item, manual (no-AI) — v2.3 · OH + TX refinements folded (eligibility gate · soft clock · AG-referral · oral channel · referral gate)'],
+ ['title',20,10,1000,26,'title','MASTER FLOW · single-item, manual (no-AI) — v2.4 · all sub-flows detailed (7 pages) · OH + TX refinements folded'],
  ['g1',20,56,214,88,'parent','Request submitted\nPortal · Online form · Clerk (paper) ·\nOral/phone (OH·GA·LA·MA·MI·MO·NV·WI)\n→ normalized to ≤10 items'],
  ['no',1130,50,320,112,'note','ORAL CHANNEL (state-gated)\nOH: office may ask for writing / ID / purpose only\nAFTER disclosing they are optional (OH-0006);\ndenial explanation must be written only if the\nrequest was written (OH-0015) → channel captured\nat intake drives later communication duties'],
  ['g2',248,54,204,92,'decision','Requester eligible?\n(state-gated: residency ·\ncitizenship · incarcerated)'],
@@ -19,9 +19,10 @@ const MN=[
  ['p2',210,228,182,76,'process','Intake Review\n+ Preliminary Search\n(designate request type)'],
  ['p3',432,224,182,84,'link','Estimate Data\n(template · manual · letter)\n▸ open Estimate/Fee sub-flow'],
  ['dd',654,236,150,60,'decision','Deposit before\nwork? (config)'],
- ['p4',844,228,182,76,'process','Records Search (full)\n(if not in prelim ·\nIT · police-video)'],
- ['p5',1066,236,150,60,'process','Redaction\n(auto if none)'],
+ ['p4',844,224,182,84,'link','Records Search (full)\n(if not in prelim ·\nIT · police-video)\n▸ open Search sub-flow'],
+ ['p5',1066,228,150,76,'link','Redaction\n(auto if none)\n▸ open Redaction\nsub-flow'],
  ['p6',1262,232,168,68,'ship','SHIPPED\n(gated by payment-\nadequate)'],
+ ['pd',1262,312,168,48,'link','Disposition & delivery\n▸ open sub-flow'],
  ['bv',210,368,238,100,'link','VAGUE → Clarification\nawait response (implied-ext clock)\n→ resolve ↑ or timeout → Closed\n▸ open Clarification sub-flow'],
  ['bd',500,368,232,100,'link','DENIAL\nreasons from config library →\ndirect or → Legal review\n▸ open Denial sub-flow'],
  ['bn',828,372,262,92,'branch','NO RECORD FOUND\n“not found — contact us” comm →\nimplied-ext (+3d) → auto-close (10d)'],
@@ -50,7 +51,7 @@ const ME=[
  ['p3','fin','estimate submit → fee calc'],['fin','p6','payment-adequate'],
  ['l1','tc',''],['p4','l2',''],['p5','l2',''],['l2','p5','back'],
 ];
-const MLINK={p3:'pgE',bv:'pgC',bd:'pgD'};
+const MLINK={p3:'pgE',bv:'pgC',bd:'pgD',p4:'pgS',p5:'pgR',pd:'pgX'};
 
 // ---------- PAGE 2: CLARIFICATION ----------
 const CN=[
@@ -149,6 +150,75 @@ const DE=[['e1','nreason',''],['nreason','dag',''],['dag','dlegal','no — staff
  ['dlegal','legal','yes / route'],['dlegal','ncomm','no → direct submit'],
  ['legal','dlegok',''],['dlegok','ncomm','approved'],['dlegok','back','rejected'],['ncomm','ddl',''],['ddl','send','']];
 
+// ---------- PAGE 5: RECORDS SEARCH ----------
+const SN=[
+ ['title',20,10,980,26,'title','Records Search sub-flow — reasonable search · no-duty-to-create · programming loop · installments · special-record overlay'],
+ ['e1',20,60,300,60,'process','From spine: Estimate/Deposit cleared\n(scope = request as clarified/narrowed)'],
+ ['s1',380,56,300,68,'process','Route to custodian department(s)\n(multi-dept fan-out; each confirms\nsearch done or none-held)'],
+ ['s2',740,56,340,68,'process','Reasonable, good-faith search where records\nare kept in the ordinary course\n(organize-and-maintain duty: OH·WA)'],
+ ['d1',770,170,280,70,'decision','Anything responsive?'],
+ ['bn',20,180,330,96,'branch','NONE → NO RECORD FOUND (master branch)\n“not found — contact us” · implied-ext +3d\nTX: WRITTEN no-records notice by 10th bd (TX-S01)\nOH: none-exists statement = denial → (B)(3) explanation'],
+ ['d2',770,290,280,80,'decision','Needs creation /\ncompilation of a\nNEW record?'],
+ ['nod',20,300,330,84,'branch','NO DUTY TO CREATE (16 states):\nanswering questions · legal research ·\nnew compilations — decline that part\n→ partial no-records / denial comm'],
+ ['prog',380,300,340,92,'process','BUT extraction/programming of EXISTING\nelectronic data ≠ creation → cost it:\nTX 552.231 written statement + estimate in 20d (+10);\nrequester 30d to respond or withdrawn\n→ loops to Estimate sub-flow'],
+ ['d3',770,420,280,70,'decision','Already posted online?'],
+ ['web',380,420,340,74,'branch','WEBSITE SATISFIES (8 states incl. OK ¶6):\npoint to posting (NJ: if copy still requested\n→ special multiplier rate)'],
+ ['d4',770,540,280,64,'decision','Voluminous?'],
+ ['inst',380,540,340,74,'process','INSTALLMENTS / partial production (7 states):\nrelease as located · time estimate ·\nper-installment fees per config'],
+ ['spec',770,650,340,88,'branch','SPECIAL-RECORD CLASS? (overlay)\nlaw-enforcement · third-party proprietary ·\ncourt · election · shared-record constraints\n→ special windows / limits (state-gated)'],
+ ['exit',380,780,340,54,'ship','→ REDACTION\n(all responsive items attached)'],
+ ['gap',20,650,320,110,'gap','⚠ Search adequacy is a SOFT standard everywhere —\nno state sets a numeric “search deadline”; the binding\nclock is the RESPONSE / production clock. City sets\noperational search targets (drives My Tasks aging).'],
+ ['leg',20,790,320,160,'note','STATE COVERAGE\nReasonable-search / organize duty: OH·WA\nBurden / categorical limit: WA (+ IL·KS·PA burden denial)\nNo duty to create/convert: 16 states\nProgramming ≠ creation: TX 552.231 (electronic data)\nWebsite satisfies: 8 states\nInstallments: 7 states (param)\nCompletion windows (archived): 10 states → named timers'],
+];
+const SE=[['e1','s1',''],['s1','s2',''],['s2','d1',''],['d1','bn','none'],['d1','d2','yes'],
+ ['d2','nod','new record → decline part'],['d2','prog','existing data → cost'],['d2','d3','no'],
+ ['d3','web','yes'],['d3','d4','no'],['web','d4','copy still wanted'],['d4','inst','yes'],['d4','spec','no'],
+ ['inst','spec',''],['spec','exit',''],['nod','exit','rest continues']];
+
+// ---------- PAGE 6: REDACTION ----------
+const RN=[
+ ['title',20,10,980,26,'title','Redaction sub-flow (+ Legal Redaction) — segregability default · mandatory PII · third-party claims · marking'],
+ ['e1',400,56,380,54,'process','From Records Search — responsive set attached'],
+ ['r1',400,140,380,60,'process','Review against exemption / reason library\n(config: per-state catalog loaded at setup)'],
+ ['seg',820,140,340,104,'hl','SEGREGABILITY IS THE DEFAULT (25 states)\nRelease non-exempt portions; redact the rest —\nblanket denial improper where redaction is\nfeasible; a redaction = PARTIAL DENIAL\n(explanation duty attaches, e.g. OH (B)(3))'],
+ ['d1',445,232,290,70,'decision','Any exempt content?'],
+ ['clean',20,238,300,58,'ship','NONE → DISPOSITION\n(no redaction; auto-pass)'],
+ ['pii',20,340,330,88,'process','MANDATORY / AUTO-REDACT CLASSES\nSSN + statutory identifiers (7 states) ·\nprotected-person addresses: victims ·\nofficers · program participants (4 states)'],
+ ['r2',420,340,340,88,'process','Apply redactions — mark visibly / note each\nredaction (marking duty: 4 states);\nEVERY redaction carries reason + citation\n→ feeds partial-denial comm (VA particularity)'],
+ ['d2',445,470,290,80,'decision','Third-party interest?\n(trade secret · personnel ·\nnamed person)'],
+ ['tp',820,470,340,100,'branch','THIRD-PARTY NOTICE / CLAIM (state-gated)\nUT business-confidentiality claim (12-bd CAO path) ·\npersonnel-privacy objection process (MI…) ·\ndiscretionary notice (3 states) → EXTERNAL WAIT\ntimer (clock matrix; response window per state)'],
+ ['d3',445,600,290,70,'decision','Legal review needed?\n(config: force-route option)'],
+ ['legal',820,600,340,60,'legal','LEGAL REDACTION (spawnable escalation)\ndedicated UI · submit-complete → back'],
+ ['lab',20,470,330,130,'note','REDACTION LABOR — chargeability varies (ledger):\nnever chargeable: OH (exc. police video $75/hr,\n$750 cap) · PA · NV…  TX: exemption-REVIEW time\nnever chargeable (1 TAC 70.3); physical redaction\nonly inside $15/hr processing when labor is\nchargeable at all.  KS: lowest-cost staff (45-219(c))'],
+ ['exit',420,710,340,58,'ship','→ DISPOSITION\npartial withholding → Denial comm (partial)'],
+ ['leg',820,700,340,140,'note','STATE COVERAGE\nSegregability: 25 states\nMandatory PII: 7 · Protected person: 4\nMarking / explanation: 4\nThird-party claim/notice: UT · MI · +3 discretionary\nAG-referral states: the WITHHOLD decision itself\nneeds the AG (TX → Denial page AG band), not staff'],
+];
+const RE=[['e1','r1',''],['r1','d1',''],['d1','clean','no'],['d1','r2','yes'],['pii','r2','always applied'],
+ ['r2','d2',''],['d2','tp','yes → notice / wait'],['tp','d3','resolved'],['d2','d3','no'],
+ ['d3','legal','yes / forced'],['legal','exit','approved → back'],['d3','exit','no']];
+
+// ---------- PAGE 7: DISPOSITION ----------
+const XN=[
+ ['title',20,10,1000,26,'title','Disposition & delivery sub-flow — end states · payment-at-release · delivery mechanics · retention'],
+ ['e1',400,56,400,56,'process','Item resolved: produced / redacted set ready ·\nor denied / withdrawn upstream'],
+ ['d1',430,150,320,76,'decision','Balance adequate?\n(parent financial processor —\nship-auth gate)'],
+ ['hold',20,150,340,84,'hl','PAY-BEFORE-RELEASE (AL·AZ·IL·KS·MA·NE·NV·OH)\n→ HOLD–Awaiting Payment at delivery\n(child hidden from My Tasks; parent stays queued)'],
+ ['unc',20,270,340,110,'gap','UNCLAIMED / NONPAYMENT TERMINAL TIMERS\nTX: 60d to inspect/pay after availability notice →\nWITHDRAWN (552.221(e)) · MI: deposit 45d → abandoned\nMO 90d · OR 60d nonpay-close · else city config ⚠\n→ named timers in the clock matrix'],
+ ['cw',820,150,320,90,'note','COMPLETION WINDOWS (10 states, param):\narchived / stored record windows (e.g. 21bd) ·\nMA municipal 25-bd production — named timers\nlayered on the response clock'],
+ ['fmt',430,270,340,92,'process','Deliver in requested format / medium\n(format duty: 27 states · no-medium-refusal: 3 ·\nelectronic-if-exists: TX…) · email / download link /\nmail · certified copy on request (9 states)'],
+ ['caps',820,270,320,84,'process','REQUESTOR-LEDGER CHECK (class D)\nOH: ≤10/month physical delivery unless per-request\nnon-commercial certification · electronic cap config\n→ decrement counters on actual delivery'],
+ ['ship',430,410,340,58,'ship','SHIPPED — child terminal\nexemption citations attached for anything redacted'],
+ ['den',820,410,320,54,'denied','DENIED — child terminal\n(comm per Denial page)'],
+ ['wd',20,410,340,54,'closed','WITHDRAWN / CLOSED — timers or requester opt-out'],
+ ['fin',430,510,340,84,'finkid','PARENT ROLL-UP: final invoice · refund excess\nadvance (OK: “shall be returned”) · unpaid balance →\nledger class A (TX: cannot sue; deposit gate only)\n→ Financial Status final'],
+ ['ret',20,510,340,90,'note','RETENTION: the request file (request + responses +\ncomms) is itself a public record — retain per\nschedule (config); denial-log states (4) keep a\ndenial registry'],
+ ['close',430,634,340,54,'closed','PARENT CLOSED (Active/Closed flag)\nall children terminal + financial settled'],
+ ['leg',820,510,320,178,'note','STATE COVERAGE\nPay-before-release: 8 states\nFormat / medium duty: 27 · no-refusal: 3\nCertified copy: 9 · Website satisfies: 8\nDelivery caps: OH (requestor ledger)\nCompletion windows: 10 states\nUnclaimed / withdrawn: TX 60d · MI 45d ·\nMO 90d · OR 60d · rest config ⚠'],
+];
+const XE=[['e1','d1',''],['d1','hold','no → Hold'],['hold','d1','paid'],['hold','unc','never paid'],
+ ['unc','wd',''],['d1','fmt','yes'],['fmt','caps',''],['caps','ship',''],
+ ['ship','fin',''],['den','fin',''],['wd','fin',''],['fin','close','']];
+
 // ---------- emit ----------
 const xe=s=>String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 const dL=s=>xe(s).replace(/\n/g,'&#10;');
@@ -177,6 +247,9 @@ const doc='<mxfile host="app.diagrams.net">'
  +page('Clarification','pgC',CN,CE,null,null,1120,1140)
  +page('Estimate-Fee','pgE',EN,EE,EBANDS,null,1260,990)
  +page('Denial','pgD',DN,DE,null,null,1240,1160)
+ +page('Records-Search','pgS',SN,SE,null,null,1180,980)
+ +page('Redaction','pgR',RN,RE,null,null,1200,880)
+ +page('Disposition','pgX',XN,XE,null,null,1180,720)
  +'</mxfile>';
 fs.writeFileSync(OUT+'/request_flow_master_v2.drawio',doc);
 // ---- master-page SVG preview (shows the ▸ drill-down badges) ----
@@ -202,4 +275,4 @@ for(const [id,x,y,w,h,cat,label] of MN){
   lines.forEach((ln,i)=>{const badge=(cat==='link'&&i===lines.length-1);svg+=`<text x="${ax}" y="${startY+i*(fs2+2.6)}" font-size="${fs2}" font-weight="${(i===0&&b)||badge?'700':'400'}" fill="${badge?'#2d6a9f':'#222'}" text-anchor="${ta}">${se(ln)}</text>`;});
 }
 svg+='</svg>'; fs.writeFileSync(OUT+'/request_flow_master_v2.svg',svg);
-console.log('wrote request_flow_master_v2.drawio (4 linked pages) + request_flow_master_v2.svg (master preview)');
+console.log('wrote request_flow_master_v2.drawio (7 linked pages) + request_flow_master_v2.svg (master preview)');

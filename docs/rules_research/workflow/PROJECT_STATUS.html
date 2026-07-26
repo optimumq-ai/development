@@ -60,7 +60,7 @@ state. We are currently between step 3 (done) and step 4 (in progress).
 <tr><td><b>4. Cross-state alignment</b></td><td><span class="b done">DONE</span></td>
 <td>Collapsed 860 differently-named rule-keys into <b>118 shared concepts</b>. Each is tagged as a <b>value knob</b> (~53) or a <b>process branch</b> (~65).</td></tr>
 <tr><td><b>5. Master workflow design</b></td><td><span class="b prog">IN PROGRESS</span></td>
-<td>The single-item manual flow is drawn (master + 3 detailed sub-flows), now <b>v2.3</b>. Ohio AND Texas pressure-tested end-to-end; both sets of refinements folded in (eligibility gate, soft clock, AG-referral band, deemed-disclosure, 61-day Texas clarification window). Remaining sub-flows pending.</td></tr>
+<td>The single-item manual flow is drawn (master + 3 detailed sub-flows), now <b>v2.4</b> — all seven pages drawn. Ohio AND Texas pressure-tested end-to-end; both sets of refinements folded in (eligibility gate, soft clock, AG-referral band, deemed-disclosure, 61-day Texas clarification window). Remaining sub-flows pending.</td></tr>
 <tr><td><b>6. Per-state config templates</b></td><td><span class="b todo">NOT STARTED</span></td>
 <td>Turn the ~53 knobs + branches into the actual per-state setup screens. This is the bridge to the software.</td></tr>
 <tr><td><b>7. Build the system</b></td><td><span class="b todo">NOT STARTED</span></td>
@@ -68,7 +68,7 @@ state. We are currently between step 3 (done) and step 4 (in progress).
 </table>
 
 <h2>The workflow diagrams (Phase 5) — what's drawn</h2>
-<p>One file, <span class="file">request_flow_master_v2.drawio</span>, holds <b>4 linked pages</b>. Open it in
+<p>One file, <span class="file">request_flow_master_v2.drawio</span>, holds <b>7 linked pages</b>. Open it in
 the free <b>draw.io / diagrams.net</b> (in a browser, no install). Double-click a blue <b>▸</b> box, or use the
 page tabs at the bottom, to move between pages.</p>
 <table>
@@ -77,7 +77,9 @@ page tabs at the bottom, to move between pages.</p>
 <tr><td>Clarification</td><td><span class="b done">DETAILED</span></td><td>What happens when a request is too vague.</td></tr>
 <tr><td>Estimate / Fee</td><td><span class="b done">DETAILED</span></td><td>Cost estimate, the fee ledger, deposits and payment.</td></tr>
 <tr><td>Denial</td><td><span class="b done">DETAILED</span></td><td>Denying a request, the reason library, legal routing — plus the <b>AG-referral band</b> (Texas: the city cannot deny on its own; it must petition the Attorney General within a hard 10-business-day clock or the record is <i>presumed public</i>).</td></tr>
-<tr><td>Records Search · Redaction · Disposition</td><td><span class="b todo">NOT YET</span></td><td>Still shown as single boxes on the master; not yet exploded into their own pages.</td></tr>
+<tr><td>Records Search</td><td><span class="b done">DETAILED</span></td><td>The search itself: reasonable-search duty, the "no duty to create a new record" line (and the Texas programming loop that prices work on existing electronic data), online-posting shortcuts, installment production.</td></tr>
+<tr><td>Redaction</td><td><span class="b done">DETAILED</span></td><td>Segregability (release the rest, redact the exempt part — the default in 25 states), auto-redact classes (SSNs, protected addresses), third-party notice waits, legal-redaction escalation.</td></tr>
+<tr><td>Disposition &amp; delivery</td><td><span class="b done">DETAILED</span></td><td>The endgame: pay-before-release holds, delivery in the requested format, Ohio delivery caps, unclaimed/nonpayment closure timers, final parent accounting and retention.</td></tr>
 </table>
 <div class="hl"><b>Both pressure-tests are folded in.</b> Ohio (v2.1): the generalized requester-eligibility gate and the first-class "soft clock." Texas (v2.2): the AG-referral band, the deemed-<i>disclosure</i> rule (miss the clock → record presumed public — the opposite of most states' deemed-denial), and the statutory 61-day clarification window.</div>
 
@@ -121,7 +123,7 @@ page tabs at the bottom, to move between pages.</p>
 <ul>
 <li>Map the 15 new rules (9 amendment additions + 6 restored) into the 118-concept dictionary so the alignment stays complete.</li>
 <li>Design the <b>requestor-level ledger</b> — Texas's per-requestor 36-hour/year free allowance and Oklahoma's unpaid-prior-fees trigger both need a running balance that crosses individual requests; one mechanism serves both.</li>
-<li>Detail the remaining sub-flows (search, redaction, disposition). <i>(Ohio-minors items now folded: oral channel + referral gate on the master, v2.3; delivery caps live in the requestor-ledger design.)</i></li>
+
 <li>Start the <b>state-gated overlay</b> — color every workflow node as shared / value-knob / state-branch — which is the direct bridge to the per-state config templates (Phase 6).</li>
 </ul>
 

@@ -7,8 +7,9 @@ branches** (a path active only for that state). This is the unified-engine-with-
 ([[engine-architecture-deferred]] — now the chosen direction).
 
 ## Artifacts
-- **`request_flow_master_v2.drawio`** — the diagram. **4 linked pages**: Master · Clarification ·
-  Estimate-Fee · Denial. Open in draw.io/diagrams.net; the blue ▸ boxes on Master drill into the sub-pages.
+- **`request_flow_master_v2.drawio`** — the diagram. **7 linked pages**: Master · Clarification ·
+  Estimate-Fee · Denial · Records-Search · Redaction · Disposition. Open in draw.io/diagrams.net; the
+  blue ▸ boxes on Master drill into the sub-pages.
 - `request_flow_master_v2.svg` — flat preview of the Master page.
 - `build_workflow_diagram.js` — regenerates BOTH files from an inline node/edge model (edit + `node` it).
 - `PROJECT_STATUS.html` — the plain-language status/orientation doc (given to Kevin in the exchange folder).
@@ -75,6 +76,13 @@ split: forward internally (MI·NJ·UT) · notify+identify custodian (CO·KS·LA�
 (AL·TN) · NO duty (OH, config). Delivery volume-caps (OH-0024/0026) are covered by the requestor-ledger
 design (class D).
 
-**Not yet detailed:** Records Search · Redaction (+ Legal Redaction) · Disposition/Status sub-flows.
+**Sub-flows: ALL DETAILED (v2.4, 2026-07-26).** Records-Search page (reasonable search · no-duty-to-create
+16st vs TX 552.231 programming-≠-creation loop back to Estimate · website-satisfies 8st · installments 7st ·
+special-record overlay · soft-standard gap note). Redaction page (segregability-default 25st · mandatory
+PII 7st + protected-person 4st · third-party notice/claim external-wait · legal-redaction escalation ·
+labor-chargeability ledger note). Disposition page (ship-auth/pay-before-release 8st · format duty 27st ·
+requestor-ledger delivery caps · unclaimed/nonpayment terminal timers TX 60d/MI 45d/MO 90d/OR 60d ·
+parent roll-up incl. OK refund-of-excess · retention note).
+
 **Not started:** state-gated overlay (color every node shared/param/branch — the bridge to Phase 6);
 per-state config templates (Phase 6); the build (Phase 7).
