@@ -432,6 +432,24 @@ async function applyStageTransition(requestId, toStage, opts) {
   var reqRow = await get("SELECT stage, department_id FROM requests WHERE id = ?", [requestId]);
   if (!reqRow) return null;
   var fromStage = reqRow.stage;
+  // PHASE 7 / WS2 — THE BRANCH-PROFILE BACKSTOP. A stage the state's imported branch profile switches off
+  // does not exist in that state, and a request moved into it would sit in a stage with a task nobody in
+  // that jurisdiction can legally resolve. Every caller should have decided this already (the AG band is
+  // chosen at assert-exemption); this is the central path, so it refuses rather than trusts.
+  //
+  // It THROWS. Returning null would be silently swallowed by the several callers that ignore the return
+  // value, and the request would stay where it was with no record of why — the stranding class of bug
+  // this whole module exists to prevent. Only an EXPLICIT `false` blocks: an un-imported jurisdiction is
+  // unknown, not off (see branchProfile.js).
+  if (toStage && toStage !== fromStage) {
+    var BP = require('./branchProfile');
+    if (await BP.stageBlocked(null, toStage)) {
+      var e = new Error('Cannot move this request to "' + toStage + '": ' + BP.reason(BP.STAGE_CAPABILITY[toStage]));
+      e.code = 'STAGE_NOT_IN_JURISDICTION';
+      e.stage = toStage;
+      throw e;
+    }
+  }
   if (toStage == null || toStage === fromStage) {
     // No actual stage change: nothing to log, nothing new to spawn. (spawnForStage is idempotent and
     // the reconciler covers a missing task for the current stage.)

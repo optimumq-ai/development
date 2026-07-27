@@ -121,6 +121,16 @@ app.use(function(req, res) {
 });
 
 app.use(function(err, req, res, next) {
+  // PHASE 7 / WS2 — a jurisdiction rule that REFUSES is not a server fault, and must not be reported as
+  // one. A citizen turned away by a residency statute seeing "Internal server error" cannot tell a lawful
+  // refusal from a broken portal, and neither can the staffer they call about it. These two carry their
+  // own reason text and are typed at the throw site precisely so they can be answered honestly here.
+  if (err && err.code === 'ELIGIBILITY_BLOCKED') {
+    return res.status(403).json({ error: err.message, code: err.code, eligibility: err.eligibility || null });
+  }
+  if (err && err.code === 'STAGE_NOT_IN_JURISDICTION') {
+    return res.status(409).json({ error: err.message, code: err.code, stage: err.stage || null });
+  }
   console.error(err.stack);
   res.status(500).json({ error: 'Internal server error' });
 });

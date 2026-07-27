@@ -192,6 +192,30 @@ async function createRequest(fields, opts) {
   if (!fields || !fields.requestorName || !fields.requestorEmail || (!fields.description && !hasKids)) {
     throw new Error('A request needs a requestor name, an email address, and at least one described record.');
   }
+  // PHASE 7 / WS2 — THE ELIGIBILITY GATE, evaluated BEFORE a row is written.
+  //
+  // A state whose statutes restrict who may request (residency in AL/ID/VA/TN/PA, the incarcerated-requester
+  // exclusion, the vexatious-litigator gate) gets that condition checked here. It refuses ONLY where the
+  // city has confirmed the dimension AND chosen to refuse AND the submission actually carries the failing
+  // fact — see services/eligibilityGate.js, which is where the reasoning lives. Everything else comes back
+  // as an advisory that is recorded and does not stop the request.
+  //
+  // So on a freshly imported state this is inert by construction. That is the point: refusing a citizen on
+  // imported evidence nobody has reviewed would be a denial of a statutory right that looks exactly like a
+  // bug from the outside.
+  var eligibility = null;
+  if (opts.skipEligibility !== true) {
+    try { eligibility = await require('./eligibilityGate').evaluate(null, fields); }
+    catch (e) { console.error('[requestCreate] eligibility gate failed open:', e && e.message); eligibility = null; }
+  }
+  if (eligibility && eligibility.blocked) {
+    var EG = require('./eligibilityGate');
+    var err = new Error(EG.refusalMessage(eligibility));
+    err.code = 'ELIGIBILITY_BLOCKED';
+    err.eligibility = eligibility;
+    throw err;
+  }
+
   var cols = normalize(fields);
   var kids = childrenOf(fields);
   var parentId = uuidv4();
@@ -292,6 +316,27 @@ async function createRequest(fields, opts) {
     );
   }
 
+  // An eligibility finding that did not refuse still has to be VISIBLE — otherwise the gate's advisory
+  // mode is indistinguishable from no gate at all, and an intake reviewer never learns that the state has
+  // a residency condition this submission does not answer. Written on the work row (the child), where
+  // intake staff actually look, and never fatal.
+  if (eligibility && (eligibility.advisories.length || eligibility.reviews.length)) {
+    var findings = eligibility.reviews.concat(eligibility.advisories);
+    var summary = findings.map(function (f) {
+      return f.label + ' — ' + (f.action === 'route_review' || eligibility.reviews.indexOf(f) >= 0 ? 'needs review' : 'advisory') +
+             (f.source_rule_ids.length ? ' [' + f.source_rule_ids.join(', ') + ']' : '');
+    }).join('; ');
+    for (var a = 0; a < childIds.length; a++) {
+      try {
+        await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+          [uuidv4(), childIds[a], null, 'Eligibility Gate',
+           eligibility.reviews.length ? 'ELIGIBILITY_REVIEW' : 'ELIGIBILITY_ADVISORY',
+           'This state restricts who may request. ' + summary + '. The request was NOT refused' +
+           (eligibility.reviews.length ? ', but a human should confirm eligibility before it advances.' : '.')]);
+      } catch (e) { console.error('[requestCreate] eligibility note failed:', e && e.message); }
+    }
+  }
+
   // The DEADLINE comes from the jurisdiction, not from a hardcoded table. startClocksForRequest is
   // idempotent and writes requests.deadline_date via tolling.writebackDeadline().
   // THE STATUTORY CLOCK IS A PARENT OBJECT (§4.2) — one legal deadline per citizen request, never one per
@@ -325,7 +370,8 @@ async function createRequest(fields, opts) {
   return {
     id: childId, requestNumber: requestNumber,
     parentId: wrap ? parentId : null, childId: childId,
-    childIds: childIds, childCount: childIds.length, isMrr: !!parentIsMrr
+    childIds: childIds, childCount: childIds.length, isMrr: !!parentIsMrr,
+    eligibility: eligibility
   };
 }
 

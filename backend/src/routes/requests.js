@@ -16,6 +16,32 @@ async function activeExemptionModel() {
   } catch (e) { return 'self_court'; }
 }
 
+// PHASE 7 / WS2 — WHICH DENIAL PATH DOES THIS STATE ACTUALLY HAVE?
+//
+// Until now this was decided by ONE hand-set column, `jurisdiction_profiles.exemption_model`: set it to
+// `pre_clearance` and asserting an exemption goes to the AG; leave it anything else and it goes to staff
+// review. The column has no provenance and nothing checks it against the state's law — a fresh
+// jurisdiction defaults to `self_court` simply because that is the fallback string.
+//
+// The imported branch profile does have provenance: TX carries all eight AG-band nodes with the § 552.301
+// rules behind them, OH carries none. So the profile is now the AUTHORITY and the column is the fallback:
+//
+//   band active + pre_clearance  -> AG referral   (TX: the band REPLACES staff denial)
+//   band explicitly inactive     -> staff review  (OH: the AG stage does not exist, whatever the column says)
+//   band active, column not set  -> AG referral   (the researched profile beats an unset default)
+//   no branch profile at all     -> the column decides, exactly as before
+//
+// The last line is the compatibility guarantee: nineteen seeded jurisdictions have no profile and are
+// unaffected.
+async function agBandDecision(jid, model) {
+  var BP = require('../services/branchProfile');
+  var band = null;
+  try { band = await BP.isActive(jid, 'ag_referral'); } catch (e) { band = null; }
+  if (band === false) return { stage: 'exemption_review', band: false, source: 'branch_profile' };
+  if (band === true) return { stage: 'ag_review', band: true, source: model === 'pre_clearance' ? 'branch_profile+model' : 'branch_profile' };
+  return { stage: model === 'pre_clearance' ? 'ag_review' : 'exemption_review', band: null, source: 'exemption_model' };
+}
+
 async function logHistory(requestId, actorId, actorName, action, notes) {
   await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?, ?, ?, ?, ?, ?)',
     [uuidv4(), requestId, actorId, actorName, action, notes || null]);
@@ -339,7 +365,9 @@ router.post('/:id/assert-exemption', requireAuth, async function(req, res) {
   var model = await activeExemptionModel();
   var actor = (req.user && req.user.name) || 'Staff';
   var note = (req.body && req.body.note) || '';
-  if (model === 'pre_clearance') {
+  var jidNow = (await get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'") || {}).value || null;
+  var band = await agBandDecision(jidNow, model);
+  if (band.stage === 'ag_review') {
     try { await T.startClocksForRequest(request.id); } catch (e) {}
     var primary = await get("SELECT id FROM request_clocks WHERE request_id = (SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?) AND is_primary = 1 ORDER BY created_at LIMIT 1", [request.id]);
     if (primary) { try { await T.toll(primary.id, 'ag_ruling_pending', 'Awaiting AG pre-clearance ruling' + (note ? ' - ' + note : '')); } catch (e) {} }
@@ -349,12 +377,15 @@ router.post('/:id/assert-exemption', requireAuth, async function(req, res) {
     await require('../services/taskRouting').applyStageTransition(request.id, 'ag_review', {
       actorId: req.user.sub, actorName: actor, action: 'AG_PRECLEARANCE_SUBMITTED',
       notes: 'Submitted for Attorney General pre-clearance; response clock tolled.' + (note ? ' ' + note : ''), createdBy: req.user.sub });
-    return res.json({ model: model, stage: 'ag_review', tolled: !!primary, agClockId: agId });
+    return res.json({ model: model, stage: 'ag_review', tolled: !!primary, agClockId: agId, agBand: band });
   }
+  // Staff denial / internal review. In a state whose branch profile HAS the AG band this line is
+  // unreachable — that is what "the band replaces staff denial" means.
   await require('../services/taskRouting').applyStageTransition(request.id, 'exemption_review', {
     actorId: req.user.sub, actorName: actor, action: 'EXEMPTION_ASSERTED',
-    notes: 'Exemption asserted (internal review).' + (note ? ' ' + note : ''), createdBy: req.user.sub });
-  return res.json({ model: model, stage: 'exemption_review', tolled: false });
+    notes: 'Exemption asserted (internal review).' + (note ? ' ' + note : '') +
+           (band.band === false ? ' This state has no Attorney-General referral band.' : ''), createdBy: req.user.sub });
+  return res.json({ model: model, stage: 'exemption_review', tolled: false, agBand: band });
 });
 
 // THE TWIN OF assert-exemption, and it must land on the SAME row. A ruling closes the act the assertion

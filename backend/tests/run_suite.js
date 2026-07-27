@@ -30,6 +30,7 @@ const ALL = [
   'verify_task_timing', 'verify_request_timeline', 'verify_time_budget', 'verify_work_timer',
   'verify_timecapture_config', 'verify_estimate_reconcile', 'verify_concurrent_tolls', 'verify_wrap_parent', 'verify_mrr_children',
   'verify_queue_parent_child', 'verify_legal_review', 'verify_fresh_install', 'verify_component_charged', 'verify_release_coverage', 'verify_revenue_allocation', 'verify_erp_line_items', 'verify_v1_retirement', 'verify_qa_routing', 'verify_nonpayment_scope',
+  'verify_branch_profile',
 ];
 
 const args = process.argv.slice(2);

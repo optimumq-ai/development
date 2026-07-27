@@ -8,14 +8,25 @@ const router = express.Router();
 const { requireAuth } = require('../middleware/auth');
 const stages = require('../services/stages');
 
-router.get('/', requireAuth, function (req, res) {
+router.get('/', requireAuth, async function (req, res) {
   var nextMap = {};
   stages.ORDER.forEach(function (s) { nextMap[s] = stages.next(s); });
-  // `order` is the full vocabulary (all ten). `sequence` is the linear walk, and `branch` the two stages
-  // reachable only by asserting an exemption — see services/stages.js. Both are served so the frontend
-  // mirror can be parity-checked on the distinction, not just on the stage list.
+  // WS2: the VOCABULARY is universal and stays universal — `stages` / `order` / `sequence` / `branch` are
+  // unchanged, so the frontend mirror's parity check still compares like with like. What a given state
+  // actually HAS is a separate, additive fact: `unavailable` lists the stages this jurisdiction's imported
+  // branch profile switches off (OH has no AG band), and `available` is the vocabulary minus those. A
+  // jurisdiction with no branch profile reports nothing unavailable.
+  var unavailable = [];
+  try {
+    var BP = require('../services/branchProfile');
+    for (var i = 0; i < stages.ORDER.length; i++) {
+      if (await BP.stageBlocked(null, stages.ORDER[i])) unavailable.push(stages.ORDER[i]);
+    }
+  } catch (e) { unavailable = []; }
   res.json({ stages: stages.STAGES, order: stages.ORDER, labels: stages.LABELS, next: nextMap,
-             sequence: stages.SEQUENCE, branch: stages.BRANCH });
+             sequence: stages.SEQUENCE, branch: stages.BRANCH,
+             unavailable: unavailable,
+             available: stages.ORDER.filter(function (s) { return unavailable.indexOf(s) < 0; }) });
 });
 
 module.exports = router;
