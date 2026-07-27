@@ -45,6 +45,7 @@ var JR = require('./jurisdictionRules');
 var clarificationPolicy = require('./clarificationPolicy');
 var paymentClockPolicy = require('./paymentClockPolicy');
 var feeWaiverPolicy = require('./feeWaiverPolicy');
+var CM = require('./clockMatrix');
 
 var IMPORTER = 'stateTemplateImport@1';
 var TEMPLATE_DIR = path.join(__dirname, '..', '..', '..', 'docs', 'rules_research', 'workflow', 'templates');
@@ -164,23 +165,10 @@ var POLICED = {
   fee_waiver: feeWaiverPolicy
 };
 
-// The named timers that can become a `deadline` clock, and what the clock is called. Order is the
-// primary-clock preference: the request-level answer date beats the production date beats the denial
-// date; an acknowledgment is never primary.
-var DEADLINE_TIMERS = [
-  { timer: 'initial_decision', clock: 'respond', label: 'Determine & respond' },
-  { timer: 'completion', clock: 'complete', label: 'Complete / produce' },
-  { timer: 'denial_deadline', clock: 'deny', label: 'Issue denial' },
-  { timer: 'acknowledgment', clock: 'acknowledge', label: 'Acknowledge', neverPrimary: true }
-];
 // Engine defaults, NOT statutory findings: which pause reasons the clock engine may honour. Each one is
 // separately gated by its own policy module's `enabled` flag (false on import), so listing them here is
 // inert until a city turns that policy on and attests it.
 var ENGINE_TOLL_REASONS = ['clarification_pending', 'payment_pending', 'extension', 'ag_ruling_pending'];
-// configIntegrity.js rejects a base clock duration outside this band. A timer that parses to something
-// longer is a requestor-response or terminal window, not a base response deadline — WS3 gives those
-// their own taxonomy. Until then they stay in the `clock_matrix` domain and out of `deadline`.
-var MAX_BASE_DURATION_DAYS = 45;
 
 // ---------------------------------------------------------------------------------------------------
 // Template reading
@@ -390,59 +378,19 @@ function clockMatrixDomain(meta, tpl, report) {
   return evidenceDomain(meta, null, { timers: timers });
 }
 
-// The `deadline` config, derived from the clock matrix — and derived CONSERVATIVELY.
-//
-// A timer becomes a clock only if its sets-deadline rules agree on exactly ONE (duration, basis) pair
-// inside the plausible base-deadline band. Two rules disagreeing (AL's 10 business vs 10 calendar; SC's
-// 10 vs 20; UT's 5 vs 10) is a legal question, not a tie to break in code — those are reported and left
-// for WS3 / a human. A state where nothing resolves gets NO deadline row at all, rather than an empty
-// one that would shadow the engine's fallback, and its `deadlines` section stays not_configured.
-function deadlineDomain(meta, tpl, holidays, report) {
-  var clocks = {}, primaryAssigned = false;
-  DEADLINE_TIMERS.forEach(function (d) {
-    var t = (tpl.clock_matrix || {})[d.timer];
-    if (!t || t.present !== true) return;
-    var pairs = {}, cites = [], ids = [];
-    Object.keys(t.statutory || {}).forEach(function (c) {
-      (t.statutory[c] || []).forEach(function (r) {
-        if (['sets-deadline', 'deadline'].indexOf(r.clock_effect) < 0) return;
-        var p = parseClockSpec(r.clock_spec);
-        if (!p || p.soft || p.days == null || !p.basis) return;
-        if (p.days < 1 || p.days > MAX_BASE_DURATION_DAYS) {
-          report.outOfBand.push({ timer: d.timer, rule_id: r.rule_id, days: p.days, basis: p.basis });
-          return;
-        }
-        pairs[p.days + ':' + p.basis] = { days: p.days, basis: p.basis };
-        cites.push(r.authority); ids.push(r.rule_id);
-      });
-    });
-    var keys = Object.keys(pairs);
-    if (keys.length === 0) { report.unresolvedTimers.push({ timer: d.timer, why: 'no numeric statutory duration' }); return; }
-    if (keys.length > 1) {
-      report.unresolvedTimers.push({ timer: d.timer, why: 'statutes disagree: ' + keys.join(' vs ') + ' — a legal call, not a tie-break' });
-      return;
-    }
-    var pick = pairs[keys[0]];
-    var isPrimary = !primaryAssigned && !d.neverPrimary;
-    if (isPrimary) primaryAssigned = true;
-    clocks[d.clock] = {
-      label: d.label, basis: pick.basis, duration: pick.days, startOn: 'intake', primary: isPrimary,
-      tollReasons: ENGINE_TOLL_REASONS.slice(),
-      timer: d.timer, citation: uniqSorted(cites).join('; ').slice(0, 500), source_rule_ids: uniqSorted(ids)
-    };
-  });
-  if (!Object.keys(clocks).length) return null;
-  return {
-    version: 1,
-    note: 'Imported from the Phase-6 template ' + meta.file + ' (' + IMPORTER + '). Only timers whose ' +
-          'statutory rules agree on a single duration are here; every named timer, including the soft ' +
-          'standards, is in the `clock_matrix` domain for WS3 reconciliation. Holiday set inherited from ' +
-          'the active jurisdiction at import time — VERIFY against the state calendar before relying on ' +
-          'business-day arithmetic.',
-    weekend: [0, 6],
-    holidays: holidays || [],
-    clocks: clocks
-  };
+// The `deadline` config. WS1 derived this itself, conservatively and by hand; WS3 replaced that with the
+// real named-timer taxonomy in services/clockMatrix.js, so there is ONE reconciler and the importer and
+// the re-reconcile CLI cannot drift apart. Everything about how a timer becomes a clock — the four kinds,
+// the slot assignment, exposures, the soft-standard service targets — lives there.
+function deadlineDomain(meta, clockMatrixDomainCfg, holidays, report) {
+  var built = CM.deadlineConfig(clockMatrixDomainCfg, { holidays: holidays || [], tollReasons: ENGINE_TOLL_REASONS });
+  (built.report.unresolved || []).forEach(function (u) { report.unresolvedTimers.push(u); });
+  report.targets = (built.report.targets || []).slice();
+  report.exposures = (built.report.exposures || []).slice();
+  report.primaryClock = built.report.primary || null;
+  if (!Object.keys(built.config.clocks).length) return null;
+  built.config.note = 'Reconciled from ' + meta.file + ' (' + IMPORTER + '). ' + built.config.note;
+  return built.config;
 }
 
 // A closed-schema policy domain. Values stay at the module's safe-manual defaults (`enabled: false`);
@@ -525,7 +473,7 @@ function unmappedConcepts(tpl) {
 function buildConfigs(meta, opts) {
   opts = opts || {};
   var tpl = meta.tpl;
-  var report = { cityKnobs: [], softTimers: [], unresolvedTimers: [], outOfBand: [], emptyPoliced: [] };
+  var report = { cityKnobs: [], softTimers: [], unresolvedTimers: [], outOfBand: [], emptyPoliced: [], targets: [], exposures: [], primaryClock: null };
   var knobs = knobsByDomain(tpl, report);
   var domains = {};
 
@@ -552,7 +500,7 @@ function buildConfigs(meta, opts) {
 
   Object.keys(POLICED).forEach(function (d) { domains[d] = policedDomain(d, POLICED[d], tpl, report); });
 
-  var dl = deadlineDomain(meta, tpl, opts.holidays, report);
+  var dl = deadlineDomain(meta, domains.clock_matrix, opts.holidays, report);
   if (dl) domains.deadline = dl;
 
   // The manifest: what came in, what it hashed to, and everything that did NOT map cleanly.
@@ -563,7 +511,12 @@ function buildConfigs(meta, opts) {
     city_config_knobs: report.cityKnobs.map(function (c) { return c.domain + '/' + c.node; }).sort(),
     unmapped: unmappedConcepts(tpl),
     unresolved_timers: report.unresolvedTimers,
-    out_of_band_timers: report.outOfBand,
+    // WS3: what the clock matrix reconciled into. `service_targets` are the soft standards a city must
+    // supply a number for; `exposures` are deemed-denial / deemed-disclosure consequences, recorded as
+    // warnings against the duty they hang off and never run as clocks.
+    primary_clock: report.primaryClock,
+    service_targets: report.targets,
+    exposures: report.exposures,
     soft_standard_timers: report.softTimers.slice().sort(),
     program_setup: evidence(tpl.program_setup).concepts
   };
@@ -646,6 +599,11 @@ function mergeDeadline(current, proposed) {
     if (!c.timer && p.timer) c.timer = p.timer;
     if (!c.citation && p.citation) c.citation = p.citation;
     if (!c.source_rule_ids && p.source_rule_ids) c.source_rule_ids = p.source_rule_ids;
+    // WS3: a clock written before the kind taxonomy existed defaults to `response`, which is the strict
+    // reading. Where the reconciler knows better (ag_ruling is an agency_action, not a response deadline)
+    // adopt its kind — it changes no duration, only what the clock is understood to BE.
+    if (!c.kind && p.kind) c.kind = p.kind;
+    if (!c.exposures && p.exposures) c.exposures = p.exposures;
   });
   return out;
 }

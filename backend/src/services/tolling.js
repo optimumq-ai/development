@@ -7,6 +7,7 @@ var db = require('../db');
 var all = db.all, get = db.get, run = db.run;
 var calc = require('./deadlineCalc');
 var JR = require('./jurisdictionRules');
+var CM = require('./clockMatrix');
 var uuidv4 = require('uuid').v4;
 
 // Resolve a request id to its PARENT inline, in ONE bound parameter. The statutory clock is a parent object
@@ -53,6 +54,7 @@ function unionDays(intervals, basis, H, W) {
 
 // Derived status for one clock given its toll ledger.
 function computeStatus(clock, tolls, rules) {
+  var def = (rules && rules.clocks && rules.clocks[clock.clock_type]) || null;
   var basis = clock.basis, dur = Number(clock.duration), start = clock.started_at;
   var W = rules.weekend || [0, 6], H = rules.holidays || [];
   var now = nowStr();
@@ -77,11 +79,29 @@ function computeStatus(clock, tolls, rules) {
   var satisfied = clock.status === 'satisfied';
   var isOverdue = !satisfied && !currentlyTolled && remaining < 0;
   var state = satisfied ? 'satisfied' : (currentlyTolled ? 'tolled' : (isOverdue ? 'expired' : 'running'));
+  // WS3 — WHAT KIND OF DATE IS THIS? Every caller that renders a due date needs to know, and until now
+  // none of them could: a city service target, a requestor's collection window and a statutory response
+  // deadline all came back as the same shape. `legalDeadline: false` is the one field a UI must consult
+  // before writing the words "the law requires" next to a date. `exposures` are the deemed-denial /
+  // deemed-disclosure consequences hanging off this duty — WARNINGS, never countdowns of their own.
+  var kind = CM.kindOf(def);
   return {
     clockId: clock.id, requestId: clock.request_id, type: clock.clock_type, label: clock.label,
     basis: basis, duration: dur, startedAt: start, dueDate: dueDate, remainingDays: remaining,
     consumedDays: consumed, tolledDays: tolled, currentlyTolled: currentlyTolled, isOverdue: isOverdue,
-    state: state, isPrimary: !!clock.is_primary, satisfiedAt: clock.satisfied_at || null
+    state: state, isPrimary: !!clock.is_primary, satisfiedAt: clock.satisfied_at || null,
+    kind: kind,
+    operationalTarget: CM.isOperationalTarget(def),
+    legalDeadline: def ? CM.isLegalDeadline(def) : true,
+    timer: (def && def.timer) || null,
+    citation: (def && def.citation) || null,
+    exposures: (def && def.exposures) || [],
+    // The overdue banner for a service target must not read as a compliance failure. It is the city
+    // missing its own target, which is worth knowing and is not a breach of anything.
+    overdueMeaning: !isOverdue ? null
+      : (kind === 'operational_target' ? 'past the CITY SERVICE TARGET — not a legal deadline'
+        : kind === 'requestor_window' ? 'the requestor\'s window has lapsed — act on the lapse (withdrawal / closure)'
+        : 'past a STATUTORY deadline')
   };
 }
 
@@ -89,6 +109,20 @@ function durationFor(def, classification) {
   if (def.durationByClassification && def.durationByClassification[classification] != null) return def.durationByClassification[classification];
   if (def.default != null) return def.default;
   return def.duration != null ? def.duration : 10;
+}
+
+// PHASE 7 / WS3 — does this clock definition carry a length at all?
+//
+// The `|| 10` fallback in durationFor() above is a reasonable last resort for a malformed config, but it
+// is a DISASTER for a soft-standard state. Ohio's response duty is "within a reasonable period of time"
+// and Texas's production duty is "promptly": the reconciler writes those as operational targets with
+// `duration: null` precisely because there is no lawful number to write, and letting durationFor() answer
+// 10 would put a fabricated ten-day deadline on every request in a state whose legislature declined to set
+// one. So a clock with no agreed length is never STARTED; the city sets its service target first.
+function hasUsableDuration(def) {
+  if (!def) return false;
+  if (def.durationByClassification && Object.keys(def.durationByClassification).some(function (k) { return def.durationByClassification[k] != null; })) return true;
+  return def.default != null || def.duration != null;
 }
 
 async function writebackDeadline(requestId, rules) {
@@ -139,11 +173,16 @@ async function startClocksForRequest(requestId) {
   for (var i = 0; i < types.length; i++) {
     var type = types[i], def = rules.clocks[type];
     if (def.startOn !== 'intake') continue;
+    if (!hasUsableDuration(def)) continue; // an unset service target has no length to count down — see above
     var existing = await get("SELECT id FROM request_clocks WHERE request_id = ? AND clock_type = ?", [requestId, type]);
     if (existing) continue;
     var dur = durationFor(def, req.classification || 'standard');
+    // Only a statutory response clock is PRIMARY. A service target that claimed the primary slot would
+    // become `requests.deadline_date` — the city's own pacing number, rendered to a requestor as the date
+    // the law requires. See services/clockMatrix.js on pattern S-002.
+    var primary = (def.primary && !CM.isOperationalTarget(def)) ? 1 : 0;
     await run("INSERT INTO request_clocks (id, request_id, clock_type, label, basis, duration, started_at, status, is_primary, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-      [cid(), requestId, type, def.label || type, def.basis || 'calendar_days', dur, req.created_at || nowStr(), 'running', def.primary ? 1 : 0, nowStr(), nowStr()]);
+      [cid(), requestId, type, def.label || type, def.basis || 'calendar_days', dur, req.created_at || nowStr(), 'running', primary, nowStr(), nowStr()]);
     created++;
   }
   await writebackDeadline(requestId, rules);

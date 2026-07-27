@@ -35,19 +35,30 @@ function report(r) {
     console.log('  ! named timers left OUT of the deadline config (WS3 / a human resolves these):');
     rep.unresolvedTimers.forEach(function (t) { console.log('      ' + pad(t.timer, 22) + t.why); });
   }
-  if (r.written.indexOf('deadline') < 0 && r.proposed.every(function (p) { return p.domain !== 'deadline'; })) {
-    console.log('  ! NO deadline config: no named timer resolved to a single statutory duration. Until WS3 /');
-    console.log('    a human sets one, jurisdictionRules.read() falls back to the LEGACY GLOBAL deadline_rules');
-    console.log('    key — i.e. this state would inherit another state\'s clock. Do not go live on it.');
+  if (!rep.primaryClock) {
+    console.log('  ! NO STATUTORY RESPONSE CLOCK resolved for this state. Any due date shown for the response');
+    console.log('    is a CITY SERVICE TARGET — it must never be described to a requestor as the legal deadline.');
   }
-  if ((rep.outOfBand || []).length) {
-    console.log('  ! timers longer than a base response deadline — kept in `clock_matrix`, not `deadline`:');
-    rep.outOfBand.forEach(function (t) { console.log('      ' + pad(t.timer, 22) + t.rule_id + '  ' + t.days + ' ' + t.basis); });
+  if (r.written.indexOf('deadline') < 0 && r.proposed.every(function (p) { return p.domain !== 'deadline'; }) && !r.unchanged.length) {
+    console.log('  ! NO deadline config at all: not one named timer reconciled. jurisdictionRules.read() then');
+    console.log('    falls back to the LEGACY GLOBAL deadline_rules key — i.e. this state would inherit');
+    console.log('    another state\'s clock. Do not go live on it.');
   }
-  if ((rep.softTimers || []).length) {
-    console.log('  · statutory but undefined-soft — a duty with no number ("promptly", "reasonable time"),');
-    console.log('    so it becomes a city operational target, not a legal deadline (S-002): ' + rep.softTimers.join(' '));
+  if ((rep.targets || []).length) {
+    console.log('  ! SERVICE TARGETS — this state sets no number here, so the city must. NOT legal deadlines (S-002):');
+    rep.targets.forEach(function (t) {
+      console.log('      ' + pad(t.clock, 22) + 'from timer ' + t.timer +
+        (t.statutoryDutyPresent ? '  (the statute states the duty but no time limit)' : '  (the statute states no timer at all)'));
+    });
   }
+  if ((rep.exposures || []).length) {
+    console.log('  · deemed-denial / deemed-disclosure exposure — recorded as a WARNING on the duty clock,');
+    console.log('    never run as a countdown (the job is to respond in time, not to time the default):');
+    rep.exposures.forEach(function (e) {
+      console.log('      ' + pad(e.timer, 22) + e.rule_id + '  ' + (e.days != null ? e.days + ' ' + e.basis : '(no number)') + '  ' + (e.authority || ''));
+    });
+  }
+  if (rep.primaryClock) console.log('  · primary (statutory) clock: ' + rep.primaryClock);
   if ((rep.cityKnobs || []).length) {
     console.log('  · ' + rep.cityKnobs.length + ' city-config knob(s) imported UNCONFIRMED — every one must be confirmed');
     console.log('    before its section can be attested: ' + rep.cityKnobs.map(function (c) { return c.node; }).join(' '));

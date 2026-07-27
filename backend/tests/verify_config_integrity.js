@@ -49,8 +49,11 @@ function findingsAt(res, where, re) {
     cfg.clocks.respond.durationByClassification.standard = 77;
     await db.run("UPDATE jurisdiction_rules SET config_json = ? WHERE jurisdiction_id = 'jur-tx' AND domain = 'deadline'", [JSON.stringify(cfg)]);
     var r1 = await CI.check();
+    // WS3 made the band kind-aware, so the message now names the kind. Asserting on `(response)` is the
+    // point: the widened bands for requestor windows and service targets must never reach a clock that
+    // is — or defaults to — a base response deadline, which is where the 77 lived.
     ok('a 77-day "standard" clock is CAUGHT (the exact value found in production)',
-      findingsAt(r1, 'jur-tx/deadline', /implausible base duration/).length === 1);
+      findingsAt(r1, 'jur-tx/deadline', /\(response\) has an implausible duration/).length === 1);
     ok('...as an ERROR, not a warning', r1.clean === false && r1.errors >= 1);
     await restore('jur-tx', 'deadline');
 
