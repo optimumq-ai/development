@@ -20,7 +20,7 @@ function stable(o) {
 }
 function hashOf(o) { return crypto.createHash('sha256').update(stable(o || {}), 'utf8').digest('hex').slice(0, 32); }
 
-var SECTIONS = [
+var CORE_SECTIONS = [
   { key: 'identity',  label: 'Jurisdiction identity & statutes', editor: '/config' },
   { key: 'fees',      label: 'Fee & cost schedule',              editor: '/fee-config' },
   { key: 'deadlines', label: 'Response deadlines & tolling',     editor: '/tickler' },
@@ -32,8 +32,84 @@ var SECTIONS = [
   { key: 'taxonomy',  label: 'Record types & taxonomy',          editor: '/taxonomy' }
 ];
 
+// PHASE 7 / WS1 — the config surfaces a Phase-6 state template brings with it. They appear for a
+// jurisdiction ONLY once its template has been imported (i.e. it holds a `template_import` rule row), so
+// a city that has never run the importer sees exactly the nine sections it saw before.
+//
+// Each one reads its live config out of `jurisdiction_rules` and is `configured` only when every ⚠
+// city-config knob on it has been confirmed. That is the go-live gate: `attest()` refuses a
+// not_configured section, so a state cannot be signed off while a knob the statute leaves to local
+// policy is still sitting on an unconfirmed suggested default.
+var TEMPLATE_SECTIONS = [
+  { key: 'intake',      label: 'Intake channels & acknowledgment', editor: '/config', domain: 'intake' },
+  { key: 'eligibility', label: 'Requester eligibility gate',       editor: '/config', domain: 'eligibility' },
+  { key: 'branches',    label: 'State branch profile',             editor: '/config', domain: 'branches' },
+  { key: 'disposition', label: 'Delivery format & release hold',   editor: '/config', domain: 'disposition' },
+  { key: 'ledger',      label: 'Requestor ledger',                 editor: '/config', domain: 'ledger' },
+  { key: 'template_import', label: 'State template — city-config knobs', editor: '/config', domain: 'template_import' }
+];
+var TEMPLATE_BY_KEY = {};
+TEMPLATE_SECTIONS.forEach(function (s) { TEMPLATE_BY_KEY[s.key] = s; });
+
+// Back-compat: callers that iterate SECTIONS get the core nine, unchanged.
+var SECTIONS = CORE_SECTIONS;
+
+// The sections that apply to THIS jurisdiction: the core nine, plus the template surfaces once a
+// template has actually been imported.
+async function sectionsFor(jid) {
+  if (!jid) return CORE_SECTIONS;
+  var imported = null;
+  try { imported = await get("SELECT id FROM jurisdiction_rules WHERE jurisdiction_id = ? AND domain = 'template_import'", [jid]); } catch (e) {}
+  return imported ? CORE_SECTIONS.concat(TEMPLATE_SECTIONS) : CORE_SECTIONS;
+}
+
+// Every ⚠ city-config knob in a template-imported config that a human has not yet confirmed. The knobs
+// hang off nodes (`knobs`/`branches`), off dimension entries (eligibility), or off the config root.
+function pendingCityKnobs(cfg) {
+  var pending = [];
+  var visit = function (label, o) {
+    if (!o || typeof o !== 'object') return;
+    if (o.city_config && typeof o.city_config === 'object' && o.city_config.confirmed !== true) pending.push(label);
+    if (o.confirmed === false && o.gated === true) pending.push(label); // eligibility dimensions
+  };
+  ['knobs', 'branches'].forEach(function (sec) {
+    Object.keys((cfg && cfg[sec]) || {}).forEach(function (k) { visit(sec + '/' + k, cfg[sec][k]); });
+  });
+  Object.keys((cfg && cfg.dimensions) || {}).forEach(function (k) { visit('dimensions/' + k, cfg.dimensions[k]); });
+  ['hold', 'caps_branch'].forEach(function (k) { if (cfg && cfg[k]) visit(k, cfg[k]); });
+  if (cfg && cfg.city_config) visit('city_config', cfg);
+  return pending;
+}
+
 // A hashable signature of a section's CURRENT live config, read from its area store.
 async function signature(jid, section) {
+  var tsec = TEMPLATE_BY_KEY[section];
+  if (tsec) {
+    var cfg = null;
+    try { cfg = await require('./jurisdictionRules').read(jid, tsec.domain); } catch (e) {}
+    if (!cfg) return {};
+    if (section !== 'template_import') return { config: cfg, pending: pendingCityKnobs(cfg) };
+    // The manifest section is the WHOLE-TEMPLATE gate: it is configured only when every city-config
+    // knob on every imported surface has been confirmed, wherever that knob lives. Rolling it up here
+    // means one attestation cannot be signed while another surface still has an open knob.
+    var pending = [];
+    for (var i = 0; i < TEMPLATE_SECTIONS.length; i++) {
+      var d = TEMPLATE_SECTIONS[i];
+      if (d.key === 'template_import') continue;
+      var c = null;
+      try { c = await require('./jurisdictionRules').read(jid, d.domain); } catch (e) {}
+      if (c) pendingCityKnobs(c).forEach(function (p) { pending.push(d.key + '/' + p); });
+    }
+    // Knobs also live on surfaces owned by a pre-existing section (fee, exemption, redaction,
+    // clarification, payment). Sweep those domains too — they are listed in the manifest.
+    var extra = ['fee', 'exemption', 'redaction'];
+    for (var j = 0; j < extra.length; j++) {
+      var ec = null;
+      try { ec = await require('./jurisdictionRules').read(jid, extra[j]); } catch (e) {}
+      if (ec && ec._import) pendingCityKnobs(ec).forEach(function (p) { pending.push(extra[j] + '/' + p); });
+    }
+    return { manifest: cfg, pending: pending.sort() };
+  }
   if (section === 'identity') { return (await get("SELECT name, code, statute_name, statute_citation, exemption_model FROM jurisdiction_profiles WHERE id = ?", [jid])) || {}; }
   if (section === 'fees') { try { return await CE.adapter('fee').current(jid); } catch (e) { return {}; } }
   if (section === 'deadlines') { try { return await CE.adapter('deadline').current(jid); } catch (e) { return {}; } }
@@ -54,6 +130,12 @@ async function signature(jid, section) {
 
 function isConfigured(section, sig) {
   if (!sig) return false;
+  if (TEMPLATE_BY_KEY[section]) {
+    // Imported, but not yet CONFIGURED: an unconfirmed city-config knob is a decision the statute left
+    // to the city and nobody has made. Holding the section at not_configured is what blocks attest().
+    var body = sig.config || sig.manifest;
+    return !!body && Array.isArray(sig.pending) && sig.pending.length === 0;
+  }
   if (section === 'identity') return !!sig.name;
   if (section === 'fees') return !!(sig.labor || sig.duplication);
   if (section === 'deadlines') return !!(sig.clocks && Object.keys(sig.clocks).length);
@@ -70,8 +152,9 @@ function isConfigured(section, sig) {
 async function sync(jid, opts) {
   opts = opts || {};
   if (!jid) return [];
-  for (var i = 0; i < SECTIONS.length; i++) {
-    var sec = SECTIONS[i];
+  var secs = await sectionsFor(jid);
+  for (var i = 0; i < secs.length; i++) {
+    var sec = secs[i];
     var sig = await signature(jid, sec.key);
     var hash = hashOf(sig);
     var configured = isConfigured(sec.key, sig);
@@ -93,7 +176,7 @@ async function sync(jid, opts) {
 async function rows(jid) {
   var list = await all("SELECT * FROM jurisdiction_profile_sections WHERE jurisdiction_id = ? ORDER BY section", [jid]);
   var byKey = {}; (list || []).forEach(function (r) { byKey[r.section] = r; });
-  return SECTIONS.map(function (sec) {
+  return (await sectionsFor(jid)).map(function (sec) {
     var r = byKey[sec.key] || { section: sec.key, label: sec.label, version: 0, status: 'not_configured', content_hash: null };
     var attested = !!(r.attested_hash);
     var drift = attested && r.attested_hash !== r.content_hash;
@@ -139,4 +222,4 @@ async function sectionState(jid, section) {
   for (var i = 0; i < list.length; i++) { if (list[i].section === section) return list[i]; }
   return null;
 }
-module.exports = { SECTIONS: SECTIONS, sync: sync, getProfile: getProfile, signature: signature, hashOf: hashOf, attest: attest, unattest: unattest, sectionState: sectionState };
+module.exports = { SECTIONS: SECTIONS, CORE_SECTIONS: CORE_SECTIONS, TEMPLATE_SECTIONS: TEMPLATE_SECTIONS, sectionsFor: sectionsFor, pendingCityKnobs: pendingCityKnobs, sync: sync, getProfile: getProfile, signature: signature, hashOf: hashOf, attest: attest, unattest: unattest, sectionState: sectionState };

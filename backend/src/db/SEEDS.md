@@ -57,3 +57,27 @@ corpus. A fixture that ships 126 requests and 3,200 demo emails is a backup, not
 **Never:** secrets. `gen_fixture_seed.js` writes `NULL` for password hashes and MFA secrets, and blanks any
 credential-shaped `system_config` value (the key survives so the installer knows the slot exists; the value is
 set locally). This file goes into git.
+
+## `import_state_template.js` — not a seed
+
+`import_state_template.js` stands a state up from its Phase-6 research template
+(`docs/rules_research/workflow/templates/<ST>.json`) rather than from a hand-written seed, so it belongs to a
+different category from everything above and is subject to different rules:
+
+```bash
+node src/db/import_state_template.js TX OH        # import these states
+node src/db/import_state_template.js OH --dry-run # report only, write nothing
+node src/db/import_state_template.js --all        # all 32 gathered states
+```
+
+- It **never overwrites** a config that already exists. A domain that differs is staged as a pending
+  `config_proposals` row, and what it proposes is the MERGE — the city's values are preserved and the
+  template only contributes citations, rule ids, and surfaces the config did not have.
+- It is **idempotent**: same template + same database = no writes and no new proposals on the second run.
+- It **does not set legal values it cannot derive**. `clarification`, `payment` and `fee_waiver` arrive at
+  their safe-manual defaults (`enabled: false`) with the statute filed as provenance; a human sets the enums.
+  Every ⚠ city-config knob arrives `confirmed: false`, and its profile section cannot be attested until
+  someone confirms it.
+- It makes a state **available (`status = 'library'`), not active**. Switching the city over is a separate act.
+
+See `../services/stateTemplateImport.js` for the mapping and the reasoning behind each of those rules.

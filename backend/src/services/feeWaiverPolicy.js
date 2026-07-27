@@ -163,6 +163,12 @@ function validate(raw) {
         citation: p.citation ? String(p.citation).slice(0, 500) : '',
         confidence: (typeof p.confidence === 'number' && p.confidence >= 0 && p.confidence <= 1) ? p.confidence : 0
       };
+      // WS1 (Phase 7): the state-template importer files the statutory RULE IDS that bear on this field
+      // next to the citation, so an imported config can be traced back to the rules it came from. Written
+      // only when non-empty, so configs that predate the importer normalize byte-identically.
+      if (Array.isArray(p.source_rule_ids) && p.source_rule_ids.length) {
+        out.provenance[f.key].source_rule_ids = p.source_rule_ids.map(String).slice(0, 200);
+      }
     }
   });
   return out;
