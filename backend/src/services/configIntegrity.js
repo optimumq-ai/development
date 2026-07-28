@@ -235,6 +235,74 @@ async function check() {
     });
   }
 
+  // 8. WS6 — EVERY ⚠ CITY-CONFIG KNOB HAS A VALUE OR AN ATTESTED DEFAULT.
+  //
+  // WS1 imports each of the template's config-not-law edges with `confirmed: false` and a suggested
+  // default. A knob left that way is a decision the statute handed to the city and nobody made — the
+  // system will use the suggestion, and no one signed for it. That is a WARNING and not an error on
+  // purpose: a city mid-setup is not broken, and the hard gate is attestation
+  // (jurisdictionProfile.attest refuses a section while any knob is unconfirmed). One finding per
+  // (jurisdiction, domain), listing the knobs, because thirty separate warnings would bury everything
+  // else in this report.
+  var JPmod = require('./jurisdictionProfile');
+  var knobRows = await db.all("SELECT jurisdiction_id, domain, config_json FROM jurisdiction_rules ORDER BY jurisdiction_id, domain");
+  for (var k = 0; k < knobRows.length; k++) {
+    var kr = knobRows[k], kcfg = null;
+    try { kcfg = JSON.parse(kr.config_json); } catch (e) { continue; }
+    if (!kcfg || !kcfg._import) continue;                 // only template-imported surfaces carry these
+    var pending = [];
+    try { pending = JPmod.pendingCityKnobs(kcfg); } catch (e) { pending = []; }
+    if (!pending.length) continue;
+    findings.push({
+      severity: 'warn', where: kr.jurisdiction_id + '/' + kr.domain,
+      issue: pending.length + ' city-config knob(s) still carry the imported suggestion rather than a ' +
+             'decision: ' + pending.join(', ') + '.',
+      fix: 'Confirm each one on its jurisdiction-profile section, then attest the section. Until then the ' +
+           'section cannot be attested and go-live is blocked on it.'
+    });
+  }
+
+  // 9. WS6 — EVERY ACTIVE BRANCH HAS ITS REQUIRED PARAMS.
+  //
+  // A branch the state's research switches ON is a step the engine may take; the template says which of
+  // its parameters remain local policy. An ACTIVE branch with an unconfirmed parameter is worse than an
+  // inactive one, because the step will run on a value nobody chose. Reported per jurisdiction, naming
+  // the branches.
+  var brRows = await db.all("SELECT jurisdiction_id, config_json FROM jurisdiction_rules WHERE domain = 'branches' ORDER BY jurisdiction_id");
+  for (var b = 0; b < brRows.length; b++) {
+    var br = brRows[b], bcfg = null;
+    try { bcfg = JSON.parse(br.config_json); } catch (e) { continue; }
+    var unset = [];
+    Object.keys((bcfg && bcfg.branches) || {}).forEach(function (key) {
+      var e = bcfg.branches[key];
+      if (e.active !== true) return;                       // an inactive branch never runs; its params are moot
+      if (e.city_config && e.city_config.confirmed !== true) unset.push(key);
+    });
+    if (unset.length) {
+      findings.push({
+        severity: 'warn', where: br.jurisdiction_id + '/branches',
+        issue: unset.length + ' ACTIVE branch(es) have an unconfirmed parameter: ' + unset.join(', ') + '. ' +
+               'These steps can run, and they would run on the imported suggestion.',
+        fix: 'Confirm the parameter on each active branch before this state goes live.'
+      });
+    }
+    // The two branches WS4 actually acts on: an active waiver / commercial branch with no module row
+    // means the engine falls to defaults for a program the state definitely has.
+    var AMx = require('./approvalModules');
+    var amRow = await db.get("SELECT config_json FROM jurisdiction_rules WHERE jurisdiction_id = ? AND domain = 'approval_modules'", [br.jurisdiction_id]);
+    AMx.MODULES.forEach(function (m) {
+      var caps = { fee_waiver: ['Master.s1', 'Estimate-Fee.dwv', 'Estimate-Fee.wrev'], commercial_rate: ['Master.s2'] }[m] || [];
+      var on = caps.some(function (n) { return ((bcfg.branches || {})[n] || {}).active === true; });
+      if (on && !amRow) {
+        findings.push({
+          severity: 'warn', where: br.jurisdiction_id + '/approval_modules',
+          issue: 'This state HAS a ' + m.replace('_', ' ') + ' program (its branch is active) but the city has not configured the module, so it runs on defaults.',
+          fix: 'Set the module mode and, in routed_task mode, the assignee role and task name.'
+        });
+      }
+    });
+  }
+
   // 5. The ACTIVE jurisdiction must actually have a usable clock.
   var act = await db.get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'");
   var jid = act && act.value;
