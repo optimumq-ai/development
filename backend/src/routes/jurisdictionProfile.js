@@ -77,6 +77,36 @@ router.put('/approval-modules', requireAuth, ROLE, async function (req, res) {
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
+// PHASE 7 / WS5 — the requestor-ledger. GET shows the effective config (the state's prior-balance rule,
+// its threshold, and whether the city has elected the permissive authority at all); PUT saves the knobs
+// while preserving the imported statutory evidence underneath.
+router.get('/ledger', requireAuth, async function (req, res) {
+  try {
+    var RL = require('../services/requestorLedger');
+    var jid = req.query.jid || await activeJid();
+    res.json({ config: await RL.config(jid), rules: RL.PRIOR_BALANCE_RULES, gates: RL.GATES });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+router.put('/ledger', requireAuth, ROLE, async function (req, res) {
+  try {
+    var RL = require('../services/requestorLedger');
+    var jid = await activeJid();
+    await RL.writeConfig(jid, req.body || {}, (req.user && req.user.name) || 'staff');
+    res.json({ config: await RL.config(jid) });
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+// What the ledger holds for the requestor behind a given request — balance, flags, and the identity
+// basis it was anchored on. Returns `anonymous` rather than a balance when there is no affirmative
+// anchor, which is the answer for an ordinary anonymous request and must stay the answer.
+router.get('/ledger/request/:requestId', requireAuth, async function (req, res) {
+  try {
+    var RL = require('../services/requestorLedger');
+    var pid = await RL.profileForRequest(req.params.requestId);
+    if (!pid) return res.json({ anonymous: true, reason: 'no affirmative identity anchor — no adverse trigger can fire', balance: null, flags: [] });
+    res.json({ anonymous: false, profileId: pid, balance: await RL.balance(pid), flags: await RL.activeFlags(pid) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // --- wildcard LAST ---
 router.get('/:jid', requireAuth, async function (req, res) {
   try { res.json(await JP.getProfile(req.params.jid)); } catch (e) { res.status(500).json({ error: e.message }); }

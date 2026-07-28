@@ -340,6 +340,19 @@ async function createRequest(fields, opts) {
     }
   }
 
+  // PHASE 7 / WS5 — anchor the request to a requestor profile, or record that it could not be. The link
+  // row is written EITHER WAY: "we looked and this one is anonymous" is the reason no adverse ledger
+  // trigger will fire on it, and that belongs in the record rather than being inferred later from an
+  // absence. Never fuzzy — see services/requestorLedger.js.
+  for (var li = 0; li < childIds.length; li++) {
+    try { await require('./requestorLedger').linkRequest(childIds[li], { identityConfirmed: opts.identityConfirmed === true }); }
+    catch (e) { console.error('[requestCreate] ledger link failed:', e && e.message); }
+  }
+  if (wrap) {
+    try { await require('./requestorLedger').linkRequest(parentId, { identityConfirmed: opts.identityConfirmed === true }); }
+    catch (e) { console.error('[requestCreate] ledger link failed (parent):', e && e.message); }
+  }
+
   // The DEADLINE comes from the jurisdiction, not from a hardcoded table. startClocksForRequest is
   // idempotent and writes requests.deadline_date via tolling.writebackDeadline().
   // THE STATUTORY CLOCK IS A PARENT OBJECT (§4.2) — one legal deadline per citizen request, never one per

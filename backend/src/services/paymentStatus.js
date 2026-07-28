@@ -144,10 +144,18 @@ async function recordEvent(rid, evt) {
   evt = evt || {};
   var status = await deriveCurrent(rid);
   await promoteOnRelease(rid);
+  var peId = 'pe-' + uuidv4().slice(0, 8);
   try {
     await db.run("INSERT INTO request_payment_events (id, request_id, type, amount, reason, reference, actor, approver, status_current, status_label, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
-      ['pe-' + uuidv4().slice(0, 8), rid, evt.type || 'event', (evt.amount != null ? Number(evt.amount) : null), evt.reason || null, evt.reference || null, evt.actor || null, evt.approver || null, status.current, status.label, nowStr()]);
+      [peId, rid, evt.type || 'event', (evt.amount != null ? Number(evt.amount) : null), evt.reason || null, evt.reference || null, evt.actor || null, evt.approver || null, status.current, status.label, nowStr()]);
   } catch (e) { console.error('[paymentStatus recordEvent]', e.message); }
+  // PHASE 7 / WS5 — feed the REQUESTOR-level ledger from the one chokepoint every money event already
+  // passes through. The cross-request A/R balance a deposit demand rests on (TX § 552.263(c): unpaid prior
+  // amounts over $100) has to be EVENTED and reconstructable, not re-summed at read time over request rows
+  // that keep moving. Idempotent on this event's id, and a no-op for an anonymous requestor — see
+  // services/requestorLedger.js on why an unverified email is not an identity.
+  try { await require('./requestorLedger').onMoneyEvent(rid, evt, peId); }
+  catch (e) { console.error('[paymentStatus ledger]', e && e.message); }
   return status;
 }
 

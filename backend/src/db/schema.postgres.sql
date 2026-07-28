@@ -1149,3 +1149,112 @@ ALTER TABLE tasks ADD COLUMN IF NOT EXISTS work_seconds INTEGER DEFAULT 0;
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS work_measured_seconds INTEGER;
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS work_adjust_reason TEXT;
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS work_finalized INTEGER DEFAULT 0;
+
+-- =====================================================================================================
+-- PHASE 7 / WS5 — THE REQUESTOR-LEDGER (docs/rules_research/workflow/DESIGN_requestor_ledger.md).
+--
+-- The parent request is a PER-REQUEST financial processor, and a family of statutes is about state that
+-- CROSSES requests: "unpaid fees from previous requests" (TX § 552.263(c) > $100, OK, GA, MA, MI, UT, WI),
+-- "36 hours of free staff time per requestor per 12 months" (TX § 552.275), "at least 7 requests in the
+-- last 7 days" (IL recurrent), "10 physical deliveries per month" (OH). A per-request parent cannot hold
+-- any of it. These tables are that one mechanism, sitting BESIDE the parent processors, never above them.
+--
+-- MVP is CLASS A — the balance ledger — built fully and fed by events from the parent processor. Classes
+-- B/C/D (allowances, counters/history, flags) ship as config stubs with manual values: every knob, notice
+-- and timer exists, so a staff-entered number produces fully compliant output; only the automatic COUNTING
+-- is deferred until a city elects those regimes (Kevin, 2026-07-26, decision 2).
+-- =====================================================================================================
+
+-- The identity anchor. Created lazily, and ONLY on an affirmative anchor — a portal account, a verified
+-- email, or a staff-confirmed walk-in. Never fuzzy-matched: most states forbid conditioning access on
+-- identity, so an adverse trigger fired on a guessed match would deny a right on a coincidence of names.
+CREATE TABLE IF NOT EXISTS requestor_profiles (
+  id TEXT PRIMARY KEY,
+  display_name TEXT,
+  primary_email TEXT,
+  portal_account_id TEXT,
+  identity_basis TEXT,                 -- portal_account | verified_email | staff_confirmed
+  class_attestations TEXT,             -- JSON: news_media / elected_official / legal_aid / scholar (+ artifact)
+  created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')),
+  updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_requestor_email ON requestor_profiles (lower(primary_email)) WHERE primary_email IS NOT NULL;
+CREATE UNIQUE INDEX IF NOT EXISTS ux_requestor_portal ON requestor_profiles (portal_account_id) WHERE portal_account_id IS NOT NULL;
+
+-- Which profile a request was anchored to, and HOW — or that it was not anchored at all. The row is
+-- written either way: "we looked and this request is anonymous" is a fact worth keeping, because it is the
+-- reason no adverse trigger fired.
+CREATE TABLE IF NOT EXISTS requestor_request_links (
+  request_id TEXT PRIMARY KEY,
+  profile_id TEXT,                     -- NULL = anonymous / no affirmative anchor
+  identity_basis TEXT,
+  reason TEXT,
+  linked_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+CREATE INDEX IF NOT EXISTS idx_rrl_profile ON requestor_request_links (profile_id);
+
+-- CLASS A. The balance is EVENTED, never recomputed from the parents at read time: an A/R figure that a
+-- deposit demand is based on has to be reconstructable, and a live SUM over mutable request rows is not.
+CREATE TABLE IF NOT EXISTS requestor_ledger_events (
+  id TEXT PRIMARY KEY,
+  profile_id TEXT NOT NULL,
+  request_id TEXT,
+  type TEXT NOT NULL,                  -- invoiced | paid | credited | waived | written_off | closed_nonpayment
+  amount NUMERIC,
+  reason TEXT,
+  source TEXT,                         -- the payment event that produced it
+  created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+CREATE INDEX IF NOT EXISTS idx_rle_profile ON requestor_ledger_events (profile_id, created_at);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_rle_source ON requestor_ledger_events (source) WHERE source IS NOT NULL;
+
+-- CLASS B stub — named period accumulators (TX § 552.275: >= 36 hrs / 12 months, >= 15 hrs / month).
+CREATE TABLE IF NOT EXISTS requestor_allowances (
+  id TEXT PRIMARY KEY,
+  profile_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  unit TEXT,                           -- hours | records | requests
+  -- `window` is a RESERVED WORD in Postgres (the window-function clause), so it cannot be a bare column
+  -- name here. Named `window_spec` rather than quoted, so nothing downstream has to remember to quote it.
+  window_spec TEXT,                    -- rolling_12_months | calendar_month | rolling_n_days
+  allowance NUMERIC,
+  consumed NUMERIC DEFAULT 0,
+  period_start TEXT,
+  source TEXT DEFAULT 'manual',        -- manual until a city elects the regime; then 'evented'
+  updated_by TEXT,
+  updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_req_allowance ON requestor_allowances (profile_id, name);
+
+-- CLASS C stub — request-frequency counters (IL recurrent 12mo/30d/7d, OH 10 deliveries/month).
+CREATE TABLE IF NOT EXISTS requestor_counters (
+  id TEXT PRIMARY KEY,
+  profile_id TEXT NOT NULL,
+  name TEXT NOT NULL,
+  window_spec TEXT,                    -- see the note on requestor_allowances: `window` is reserved
+  count INTEGER DEFAULT 0,
+  period_start TEXT,
+  source TEXT DEFAULT 'manual',
+  updated_by TEXT,
+  updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS ux_req_counter ON requestor_counters (profile_id, name);
+
+-- CLASS D stub — time-boxed status flags. The system RECORDS and APPLIES an externally-established status
+-- until it expires or its clearing event arrives; it never decides one. The OH vexatious list is the
+-- court's, the UT designation is the director's order, and MI's increased deposit MUST stop the moment the
+-- requestor proves payment — which is why `clearing_event` is a column and not a comment.
+CREATE TABLE IF NOT EXISTS requestor_flags (
+  id TEXT PRIMARY KEY,
+  profile_id TEXT NOT NULL,
+  flag TEXT NOT NULL,                  -- vexatious | increased_deposit | recurrent | prisoner
+  source TEXT,                         -- court_order | director_order | proof_of_nonpayment | computed
+  citation TEXT,
+  set_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')),
+  expires_at TEXT,
+  cleared_at TEXT,
+  clearing_event TEXT,
+  note TEXT,
+  set_by TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_req_flag ON requestor_flags (profile_id, flag);

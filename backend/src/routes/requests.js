@@ -444,6 +444,10 @@ router.post('/:id/fee-waiver-decision', requireAuth, async function(req, res) {
     await run("UPDATE requests SET fee_waiver_status='granted', fee_waiver_decided_by=?, fee_waiver_decided_at=datetime('now'), updated_at=datetime('now') WHERE id=?", [actor, request.id]);
     await run(closeWaiverTask, [request.id]);
     await logHistory(request.id, req.user.sub, actor, 'FEE_WAIVER_GRANTED', 'Fee waiver granted');
+    // WS5: a granted waiver removes what was invoiced for this request from the requestor's A/R. Without
+    // this the waived amount would keep counting as an unpaid prior balance and could trigger a deposit
+    // demand on their NEXT request — for money the city has just decided it is not owed.
+    try { await require('../services/requestorLedger').onWaiverGranted(request.id, 'fee waiver granted'); } catch (e) {}
     return res.json({ decision: 'granted' });
   }
 

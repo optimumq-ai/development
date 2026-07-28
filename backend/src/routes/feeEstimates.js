@@ -226,7 +226,15 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
     // It also landed on the ADDRESSED row (a child today), making it a money fact on the work row (§4.3).
 
     await require('../services/paymentStatus').recordEvent(req.params.requestId, { type: 'estimate_issued', amount: R.total, reason: 'estimate calculated', actor: (req.user && req.user.name) || (req.user && req.user.sub) || 'system' });
-    res.json({ estimate: { id: id, total: R.total, depositDue: R.depositDue, notify: R.estimateNotifyTriggered, feeContext: feeContext, configProfile: { id: cfgRow.id, name: cfgRow.name } } });
+    // PHASE 7 / WS5 — the REQUESTOR-LEDGER gate (design doc: "Estimate / deposit decision"). This is where
+    // a cross-request unpaid balance becomes a deposit demand (TX § 552.263(c) over $100) or an
+    // advance-payment gate (OK). It is COMPUTED here and issues through the ordinary estimate
+    // communication — it does not silently alter the amount, and it returns nothing at all for an
+    // anonymous requestor, who by design can never be adverse-matched.
+    var ledger = null;
+    try { ledger = await require('../services/requestorLedger').evaluateEstimate(null, req.params.requestId, { estimateTotal: R.total }); }
+    catch (e) { console.error('[fee-estimate ledger]', e && e.message); }
+    res.json({ estimate: { id: id, total: R.total, depositDue: R.depositDue, notify: R.estimateNotifyTriggered, feeContext: feeContext, configProfile: { id: cfgRow.id, name: cfgRow.name } }, ledger: ledger });
   } catch (e) { res.status(500).json({ error: 'Could not compute estimate: ' + (e && e.message) }); }
 });
 
