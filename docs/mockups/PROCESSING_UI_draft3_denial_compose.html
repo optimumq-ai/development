@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Processing UI — Draft 3 — Denial Compose (for markup)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#D8E0E8; --surface-2:#F2F6F9; --surface:#FFFFFF; --blue:#1E6091;
+    --ink:#1F2937; --muted:#5B6B7A; --line:#C3CFDA;
+    --navy:#143D5C; --amber-ink:#9A6700; --amber-line:#D4A72C; --amber-bg:#FFF8E5;
+    --ghost:#8A97A3; --statute:#2F6B4F; --statute-bg:#EAF4EF; --warn:#8C3A2B;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--ink); font:13.5px/1.45 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; padding:24px 18px 60px;}
+  .wrap{max-width:1060px; margin:0 auto;}
+
+  .draftbar{background:var(--navy); color:#fff; border-radius:8px; padding:12px 16px; margin-bottom:14px;}
+  .draftbar h1{font-size:15px; font-weight:600;}
+  .draftbar p{font-size:12px; opacity:.85; margin-top:3px;}
+  .citytabs{display:flex; gap:8px; margin:16px 0 10px;}
+  .citytabs button{font:inherit; font-weight:600; padding:7px 16px; border-radius:6px 6px 0 0; border:1px solid var(--line); border-bottom:none; background:var(--surface-2); color:var(--muted); cursor:pointer;}
+  .citytabs button.on{background:var(--surface); color:var(--navy); box-shadow:0 -2px 0 var(--blue) inset;}
+  .screenlabel{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:22px 2px 6px; font-weight:700;}
+  .note{font-size:12px; color:var(--muted); margin:6px 2px 0;}
+  .callout{display:inline-block; min-width:17px; height:17px; line-height:17px; text-align:center; border-radius:50%; background:var(--blue); color:#fff; font-size:11px; font-weight:700; vertical-align:2px; margin-left:4px;}
+
+  .app{background:var(--surface); border:1px solid var(--line); border-radius:8px; overflow:hidden; box-shadow:0 1px 3px rgba(20,61,92,.12);}
+  .appbar{background:var(--surface-2); border-bottom:1px solid var(--line); padding:9px 14px; display:flex; align-items:center; gap:12px;}
+  .appbar .brand{font-weight:700; color:var(--navy);}
+  .appbar .role{font-size:12px; color:var(--muted);}
+  .appbar .who{margin-left:auto; font-size:12px; color:var(--muted);}
+  .appbody{padding:14px;}
+  h3.panel{font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin-bottom:7px;}
+
+  .btn{font:inherit; font-size:13px; background:var(--blue); color:#fff; border:none; border-radius:5px; padding:6px 14px; cursor:pointer; font-weight:600;}
+  .btn.sec{background:var(--surface); color:var(--blue); border:1px solid var(--blue); font-weight:600;}
+  .btn.quiet{background:var(--surface-2); color:var(--ink); border:1px solid var(--line); font-weight:500;}
+  .btn.danger-quiet{background:var(--surface); color:#8C3A2B; border:1px solid #C08A7E;}
+  .btn[disabled]{opacity:.45; cursor:not-allowed;}
+
+  .chip{display:inline-block; font-size:12px; border-radius:4px; padding:3px 9px; white-space:nowrap;}
+  .chip .k{display:block; font-size:9.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;}
+  .clock-legal{background:var(--surface); border-left:4px solid var(--navy); border-top:1px solid var(--line); border-right:1px solid var(--line); border-bottom:1px solid var(--line); color:var(--navy); font-weight:700;}
+  .clock-legal .k{color:var(--navy);}
+  .clock-none{font-size:12.5px; color:var(--muted); font-style:italic;}
+  .cite{font-size:11px; color:var(--muted); font-weight:400;}
+  .exposure{display:block; font-size:11px; color:var(--warn); font-weight:600; margin-top:2px;}
+
+  .by{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; border-radius:3px; padding:2px 7px; vertical-align:1px;}
+  .by-system{background:var(--surface-2); color:var(--navy); border:1px solid var(--line);}
+  .by-statute{background:var(--statute-bg); color:var(--statute); border:1px solid var(--statute);}
+  .by-person{background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line);}
+  .recorded{background:var(--surface); color:var(--ghost); border:1px dashed var(--ghost);}
+
+  .parentstrip{background:var(--surface-2); border:1px solid var(--line); border-radius:6px; padding:8px 12px; display:flex; gap:14px; align-items:baseline; margin-bottom:10px; flex-wrap:wrap;}
+  .parentstrip .pn{font-weight:700; color:var(--navy);}
+  .clockstrip{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:10px 0 12px;}
+  .cols{display:flex; gap:14px; align-items:flex-start;}
+  .main{flex:1 1 auto; min-width:0;}
+  .rail{flex:0 0 250px; display:flex; flex-direction:column; gap:8px;}
+  .panelbox{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:11px 13px; margin-bottom:11px;}
+  .panelbox.tinted{background:var(--surface-2);}
+  .panelbox.gate{background:var(--amber-bg); border-color:var(--amber-line);}
+  .rail .panelbox{margin-bottom:0;}
+  .kv{font-size:12.5px; color:var(--muted);}
+  .kv b{color:var(--ink); font-weight:600;}
+  .amberline{border-left:3px solid var(--amber-line); padding-left:10px;}
+  .ghostline{border-left:3px dashed var(--ghost); padding-left:10px; color:var(--muted);}
+  .railhead{font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-bottom:6px;}
+  .rail .btn{width:100%; margin-bottom:6px;}
+  hr.soft{border:none; border-top:1px solid var(--surface-2); margin:9px 0;}
+  .tag{display:inline-block; font-size:11px; background:var(--surface-2); border:1px solid var(--line); border-radius:3px; padding:1px 7px; color:var(--muted);}
+
+  /* ground picker */
+  .ground{display:flex; gap:10px; align-items:flex-start; padding:8px 10px; border:1px solid var(--line); border-radius:5px; margin-bottom:7px; background:var(--surface);}
+  .ground.on{border-color:var(--blue); background:#EDF3F8;}
+  .ground.ghosted{border-style:dashed; color:var(--muted); background:var(--surface);}
+  .ground input{margin-top:3px;}
+  .ground .gt{font-weight:600;}
+  .ground .gd{font-size:12px; color:var(--muted); margin-top:1px;}
+
+  /* checklist */
+  .ck{font-size:12.5px; padding:4px 0; color:var(--ink);}
+  .ck::before{content:"☑ "; color:var(--statute); font-weight:700;}
+  .ck.open::before{content:"☐ "; color:var(--amber-ink);}
+
+  /* file rows */
+  .frow{display:flex; gap:10px; align-items:center; padding:8px 10px; border:1px solid var(--line); border-radius:5px; margin-bottom:7px;}
+  .frow .fn{font-weight:600; min-width:0; flex:1;}
+  .disp{font-size:11px; font-weight:700; border-radius:3px; padding:2px 8px;}
+  .disp.withhold{background:#F7E9E5; color:var(--warn); border:1px solid #C08A7E;}
+  .disp.redact{background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line);}
+  .disp.release{background:var(--statute-bg); color:var(--statute); border:1px solid var(--statute);}
+
+  .letter{background:var(--surface); border:1px solid var(--line); border-radius:5px; padding:12px 14px; font-size:12.5px; line-height:1.55;}
+  .letter .lh{color:var(--muted); font-size:11px; margin-bottom:8px;}
+
+  .legend{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:26px;}
+  .legend h2{font-size:14px; color:var(--navy); margin-bottom:10px;}
+  .legend ol{margin-left:20px;}
+  .legend li{margin-bottom:9px; font-size:12.5px;}
+  .legend li b{color:var(--navy);}
+  .rule{font-size:10px; font-weight:800; color:#fff; background:var(--statute); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
+  .decided{font-size:10px; font-weight:800; color:#fff; background:var(--blue); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="draftbar">
+    <h1>Processing UI — Draft 3 · Denial Compose (for your markup — nothing is built)</h1>
+    <p>Not a routed task: a compose surface <b>opened from a task and returning to it</b> — legal review, redaction,
+    intake review (OH deny-too-vague), or a prefilled draft raised by an advisory. The two tabs are nearly two different
+    screens, which is the point: <b>Ohio</b> is the full compose (grounds → per-record disposition → required elements →
+    letter), while <b>Texas</b> shows what a pre-clearance state does to it — staff denial on exemption grounds does not
+    exist there, and the screen says so and becomes the AG referral gate instead.</p>
+  </div>
+
+  <div class="citytabs">
+    <button id="tab-oh" class="on" onclick="show('oh')">Columbus, OH — the full compose</button>
+    <button id="tab-tx" onclick="show('tx')">Austin, TX — the pre-clearance gate</button>
+  </div>
+
+<!-- ══════════════════════════════ OHIO ══════════════════════════════ -->
+<div id="city-oh">
+
+  <div class="screenlabel">Denial compose — R-1079, opened from the Redaction task (exemption found during redaction)</div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">Denial compose · R-1079 — City of Columbus, OH</span><span class="who">A. Whitmore · Senior Legal</span></div>
+    <div class="appbody">
+
+      <div class="parentstrip">
+        <span class="pn">R-1079</span>
+        <span class="kv">Internal-affairs investigation file — Officer badge #4471 · received Jul 20 · written request (portal)</span>
+        <span class="kv"><b>M. Castillo</b> · delivery: email</span>
+        <span class="kv" style="margin-left:auto;">Opened from: <b>Redaction task</b> (returns there) <span class="callout">1</span></span>
+      </div>
+
+      <div class="clockstrip">
+        <span class="clock-none">No statutory response deadline in Ohio; the city service target for this request (Aug 1) keeps aging it — a denial letter is a response, not an escape from the target.</span>
+      </div>
+
+      <div class="cols">
+        <div class="main">
+
+          <div class="panelbox">
+            <h3 class="panel">What is being denied — per record <span class="callout">2</span></h3>
+            <div class="frow"><span class="fn">IA-2026-044_investigation_summary.pdf</span><span class="disp withhold">Withhold in full</span><span class="kv">ground A</span></div>
+            <div class="frow"><span class="fn">IA-2026-044_interview_transcripts.pdf</span><span class="disp redact">Release with redactions</span><span class="kv">ground B on redacted portions</span></div>
+            <div class="frow"><span class="fn">complaint_intake_form.pdf</span><span class="disp release">Release in full</span><span class="kv">no ground</span></div>
+            <div class="kv">A partial denial is the normal case: the letter must account for every withheld record and every redaction, and the released records still flow to delivery. Dispositions here are per record; the child's terminal disposition rolls up after delivery.</div>
+          </div>
+
+          <div class="panelbox">
+            <h3 class="panel">Grounds — Ohio's reason library <span class="callout">3</span></h3>
+            <div class="ground on"><input type="checkbox" checked><div><div class="gt">A · Confidential law-enforcement investigatory records — ongoing investigation</div>
+              <div class="gd">Release would create a high probability of disclosure of specific investigatory work product. <span class="cite">R.C. 149.43(A)(1)(h), (A)(2)</span> · library text v3, used 12× <span class="callout">4</span></div></div></div>
+            <div class="ground on"><input type="checkbox" checked><div><div class="gt">B · Uncharged-suspect identity (redacted portions)</div>
+              <div class="gd">Identity of an uncharged suspect within investigatory records. <span class="cite">R.C. 149.43(A)(2)(a)</span> · library text v2, used 7×</div></div></div>
+            <div class="ground"><input type="checkbox"><div><div class="gt">Ambiguous / overly broad request</div>
+              <div class="gd">Available in Ohio — vagueness is itself a denial ground here. Selecting it adds its own required element:
+              inform the requester how the records are maintained and <b>invite a revised request</b>. <span class="cite">R.C. 149.43(B)(2)</span></div></div></div>
+            <div class="ghostline" style="margin-top:6px;">Grounds this state does not have are not listed at all — the library is per-state config with citations, and an unresearched ground ships <b>absent</b>, same fail-closed rule as every denial-shaped setting. <span class="callout">3</span></div>
+          </div>
+
+          <div class="panelbox">
+            <h3 class="panel">Required elements — this state's checklist <span class="callout">5</span></h3>
+            <div class="ck">Explanation with <b>legal authority</b> for each ground — assembled from the library texts above <span class="cite">R.C. 149.43(B)(3)</span></div>
+            <div class="ck">Denial <b>in writing</b> — the request was written (portal) <span class="cite">R.C. 149.43(B)(3)</span></div>
+            <div class="ck">Redaction notice — each redaction identified, with authority <span class="cite">R.C. 149.43(B)(1)</span></div>
+            <div class="ck open">Remedy language (mandamus) — <b>city template not yet confirmed</b>; Send stays disabled until this element is resolved <span class="callout">5</span></div>
+          </div>
+
+          <div class="panelbox tinted">
+            <h3 class="panel">The letter <span class="callout">6</span></h3>
+            <div class="letter">
+              <div class="lh">Assembled from the library texts + required elements · fully editable before send · re-generates if grounds change</div>
+              Dear M. Castillo,<br><br>
+              The City of Columbus has completed its review of your request R-1079 for the internal-affairs investigation
+              file concerning Officer badge #4471. One record is being withheld in full and one record is released with
+              redactions; one record is released in full and accompanies this letter.<br><br>
+              <b>IA-2026-044_investigation_summary.pdf — withheld in full.</b> This record is a confidential law-enforcement
+              investigatory record; release would create a high probability of disclosure of specific investigatory work
+              product in an ongoing investigation. <i>R.C. 149.43(A)(1)(h), (A)(2).</i> …<br><br>
+              <span class="kv">[ + uncharged-suspect paragraph · redaction inventory · remedy language — <b>pending</b> ]</span>
+            </div>
+            <div class="kv" style="margin-top:8px;">Decision recorded as: <span class="by by-person">Denied in part by A. Whitmore · Senior Legal</span> — never “denied by the system.” <span class="callout">7</span></div>
+          </div>
+
+        </div>
+
+        <div class="rail">
+          <div class="panelbox">
+            <div class="railhead">Resolve <span class="callout">8</span></div>
+            <button class="btn" disabled>Send denial letter</button>
+            <p class="kv" style="margin-top:-2px; margin-bottom:8px;">Disabled: 1 required element open (remedy language). The button says why, in words.</p>
+            <button class="btn quiet">Preview letter…</button>
+            <button class="btn quiet">Save draft &amp; return to task</button>
+            <hr class="soft">
+            <div class="railhead">Authority</div>
+            <p class="kv">You hold denial authority (Senior Legal). A composer without it — e.g. a redaction worker who
+            drafted this far — gets <b>Route for signature</b> here instead of Send. <span class="callout">9</span></p>
+            <hr class="soft">
+            <div class="railhead">Step back</div>
+            <button class="btn quiet">Confer with supervisor</button>
+            <button class="btn quiet">Release instead — withdraw grounds…</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <p class="note">On send: the letter goes by the request's delivery method (email, or a printable postal letter — the same
+  outreach pattern clarification uses), a <code>DENIED</code>/<code>DENIED_IN_PART</code> history row records grounds +
+  citations + decider, withheld records keep their grounds attached (the Vaughn-style trail), and released files continue
+  to delivery. The compose returns to the task it came from.</p>
+
+</div>
+
+<!-- ══════════════════════════════ TEXAS ══════════════════════════════ -->
+<div id="city-tx" style="display:none;">
+
+  <div class="screenlabel">Denial compose — R-2417, opened from the Legal Review task (exemption asserted at redaction)</div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">Denial compose · R-2417 — City of Austin, TX</span><span class="who">R. Vance · Senior Legal</span></div>
+    <div class="appbody">
+
+      <div class="parentstrip">
+        <span class="pn">R-2417</span>
+        <span class="kv">Email correspondence — Public Works ↔ Lakeline Paving LLC · received Jul 28</span>
+        <span class="kv"><b>D. Alvarez</b> · delivery: email</span>
+        <span class="kv" style="margin-left:auto;">Opened from: <b>Legal Review task</b> (returns there) <span class="callout">1</span></span>
+      </div>
+
+      <div class="clockstrip">
+        <span class="chip clock-legal"><span class="k">Statutory deadline</span>Respond by <b>Mon Aug 11</b> &nbsp;<span class="cite">§552.221</span></span>
+      </div>
+
+      <div class="cols">
+        <div class="main">
+
+          <div class="panelbox">
+            <h3 class="panel">Grounds — Texas's reason library <span class="callout">3</span></h3>
+            <div class="ground on"><input type="checkbox" checked><div><div class="gt">Litigation exception</div>
+              <div class="gd">Information relating to litigation to which the city is or may be a party. <span class="cite">Tex. Gov't Code §552.103</span></div></div></div>
+            <div class="ground"><input type="checkbox"><div><div class="gt">Attorney-client privilege</div>
+              <div class="gd"><span class="cite">§552.107</span></div></div></div>
+            <div class="ground ghosted"><div><div class="gt">Vague / overly broad</div>
+              <div class="gd">Not a denial ground in Texas — vagueness goes through clarification, volume through the estimate.
+              These do not appear as selectable grounds here.</div></div></div>
+          </div>
+
+          <div class="panelbox gate">
+            <h3 class="panel" style="color:var(--amber-ink);">Texas is a pre-clearance state — you cannot send this denial <span class="callout">10</span></h3>
+            <p style="font-size:12.5px; margin-bottom:8px;"><b>Staff denial on exemption grounds does not exist here.</b> To withhold,
+            the city must request an Attorney General ruling within 10 business days of receipt, and notify the requestor it has
+            done so. <span class="cite">§552.301(b), (d)</span></p>
+            <div class="kv" style="margin-bottom:8px;">Checked automatically: <b>no previous determination</b> covers this
+            information (the narrow exception that permits withholding without a new ruling). <span class="by by-system">System · none found</span> — <a href="#">view search</a></div>
+            <div class="clockstrip" style="margin:0 0 8px;">
+              <span class="chip clock-legal"><span class="k">Agency duty — statutory</span>Ask the AG by <b>Aug 11</b> · 10 business days <span class="cite">§552.301(b)</span>
+                <span class="exposure">⚠ Past this date the information is PRESUMED PUBLIC (§552.302) — a warning on this clock, never a countdown of its own</span></span>
+              <span class="chip clock-legal"><span class="k">Agency duty — statutory</span>Brief the AG by <b>Aug 18</b> · 15 business days <span class="cite">§552.301(e)</span></span>
+            </div>
+            <button class="btn">Refer to the Attorney General → <span class="callout">11</span></button>
+            <span class="kv" style="margin-left:8px;">Starts the AG band on the Legal Review task: briefing package, requestor notice, ruling tracker.</span>
+          </div>
+
+          <div class="panelbox">
+            <h3 class="panel">After the ruling</h3>
+            <div class="ghostline">If the AG rules for the city, this screen reopens with the ruling attached and composes the
+            withholding letter <b>citing the ruling</b> — the Ohio tab shows what that full compose looks like. If the AG rules
+            for release, the records flow back to redaction/delivery and no denial exists to compose.</div>
+          </div>
+
+        </div>
+
+        <div class="rail">
+          <div class="panelbox">
+            <div class="railhead">Resolve</div>
+            <button class="btn">Refer to the AG →</button>
+            <button class="btn quiet">Release instead — withdraw assertion</button>
+            <button class="btn quiet">Save draft &amp; return to task</button>
+            <hr class="soft">
+            <div class="railhead">Step back</div>
+            <button class="btn quiet">Confer with supervisor</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <p class="note">The AG referral itself (briefing package, ruling tracker, release-or-withhold on decision) lives on the
+  <b>Legal Review task screen</b> — an extend item drafted separately. This compose screen's job in Texas is the gate: make
+  the unlawful path impossible and the lawful one one click away.</p>
+
+</div>
+
+  <!-- ══════════ annotations ══════════ -->
+  <div class="legend">
+    <h2>Design annotations</h2>
+    <ol>
+      <li><b>A compose surface, not a routed task.</b> Opened from legal review, redaction, intake review (OH deny-too-vague), or the estimate screen's clarification path; <b>Save draft &amp; return</b> keeps the task as home. Denial-shaped advisories arrive here as <b>prefilled drafts</b>: the MA unpaid-balance advisory, a vexatious flag, or an abandonment closure in a via-denial state pre-select the ground with citation — <span class="by by-system">system · raised it</span>, <span class="by by-person">a person · decides it</span>. Auto-denial stays out of scope by decision.</li>
+      <li><b>Per-record disposition is the spine.</b> Withhold in full / release with redactions / release in full, each carrying its ground. The letter must account for every withheld record and redaction; released records continue to delivery unaffected. (Open question: how partial denials map onto the child's eight terminal dispositions.)</li>
+      <li><b><span class="rule">RULE B adjacent</span> The reason library is per-state config, cited, fail-closed.</b> Binds to the existing <code>decision_reasons</code> substrate (categorized, most-used-first) + the exemption domain. A ground the state lacks is <i>absent</i>, not greyed: OH lists vagueness (with its invite-to-revise duty attached); TX does not list it at all. An unresearched ground ships absent — same rule as <code>overbroad_is_denial_ground</code> in the record-search spec: an unresearched denial ground is legal exposure.</li>
+      <li><b>Library texts are versioned and usage-counted</b> (v3, used 12×) so counsel can tune the standard paragraph once and every future denial improves. Editing the letter never edits the library.</li>
+      <li><b>Required elements are a per-state checklist that gates Send.</b> Ohio: explanation with legal authority (B)(3), written denial, per-redaction notice (B)(1), remedy language. An unresolved element disables Send <i>and says why in words</i> — same gate pattern as WAIVER_UNDECIDED and the record-search Found gate. Selecting the vagueness ground adds its own element (inform how records are maintained + invite revision, (B)(2)).</li>
+      <li><b>The letter is assembled, then owned by a person</b> — generated from library texts and the disposition list, fully editable, re-generated if grounds change (with edits flagged for re-review rather than silently discarded).</li>
+      <li><b><span class="rule">RULE C</span> Decided-by, again.</b> The record reads “Denied in part by A. Whitmore · Senior Legal” — with grounds, citations, and the withheld-record trail (Vaughn-style) attached. Never “denied by the system,” even when the draft arrived prefilled.</li>
+      <li><b>Send</b> delivers by the request's channel (email / printable postal letter — the clarification outreach pattern), writes the history row, and returns to the originating task.</li>
+      <li><b>Authority routing.</b> Senior Legal owns exemption denials (role model §5). A composer without authority drafts everything and gets <b>Route for signature</b> instead of Send — the draft lands on the authorized role's list. Whether OH's procedural vagueness denial needs legal sign-off or stays with the intake reviewer is an open question for Kevin.</li>
+      <li><b><span class="rule">RULE A + C</span> The Texas gate.</b> In a pre-clearance state the compose screen's real job is refusing to be a denial screen: exemption grounds route to the AG (10-bd duty clock, § 552.302 presumed-public <b>exposure rendered as a warning on that clock — never its own countdown</b>), with the previous-determination exception checked and shown. The unlawful path isn't disabled — it doesn't exist.</li>
+      <li><b>The AG band itself lives on Legal Review</b> (extend item, drafted separately): briefing package, requestor notice, ruling tracker, and the reopen-to-compose-citing-the-ruling flow sketched in the ghost panel.</li>
+      <li><b>Illinois, not tabbed but binding:</b> a burden (unduly-burdensome) denial ground carries the prerequisite <i>conference to narrow, offered first</i> (<code>clarification_duty: required_before_burden_denial</code>, seeded, still uncalled) — on this screen that's a required element that gates Send exactly like OH's remedy language, with the estimate attached as the burden evidence. And the forfeiture rule renders as a hard stop: a response past the deadline <b>cannot</b> be denied as unduly burdensome at all — the ground greys out with the reason.</li>
+    </ol>
+    <p class="note" style="margin-top:10px;">Flagged for later drafts: the Legal Review / AG-band screen (the referral workflow this
+    screen launches in TX); the refund/credit path when a denial shrinks a paid deliverable (parent financial view); disposition
+    roll-up rules for partial denials.</p>
+  </div>
+
+</div>
+<script>
+function show(c){
+  document.getElementById('city-tx').style.display = c==='tx' ? '' : 'none';
+  document.getElementById('city-oh').style.display = c==='oh' ? '' : 'none';
+  document.getElementById('tab-tx').className = c==='tx' ? 'on' : '';
+  document.getElementById('tab-oh').className = c==='oh' ? 'on' : '';
+}
+</script>
+</body>
+</html>

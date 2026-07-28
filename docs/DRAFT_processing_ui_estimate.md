@@ -93,9 +93,9 @@ forbids (OH: no labor lines, actual cost only, R.C. 149.43(B)(1); TX: personnel 
 
 1. **The first-look banner** — right tone/prominence? It makes "nobody has reviewed this" impossible
    to miss, at the cost of amber real estate on every auto-routed task (which is most of them).
-2. **Pause semantics**: marking Vague pauses the estimate task. Should Mark Overly Broad pause too,
-   or immediately open the narrowing/estimate conversation instead (since the estimate IS the
-   response to volume)? Drafted as: pause for vague, stay-and-estimate for overly broad.
+2. ~~**Pause semantics**~~ — **RESOLVED (Kevin, 2026-07-28): stay-and-estimate for overly broad is
+   right.** Vague pauses the estimate task; Overly Broad stays on-screen and the estimate itself is
+   the response to volume.
 3. **De-minimis waive** — keep as a rail action? Threshold config per city, or pure judgment?
 4. **"Path here" column** — enough provenance, or should the queue also show what intake decided
    (drafted only on the row that had a waiver denial)?
