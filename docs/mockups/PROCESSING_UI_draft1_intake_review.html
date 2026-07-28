@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Processing UI — Draft 1c — Intake Reviewer (for markup)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#D8E0E8; --surface-2:#F2F6F9; --surface:#FFFFFF; --blue:#1E6091;
+    --ink:#1F2937; --muted:#5B6B7A; --line:#C3CFDA;
+    --navy:#143D5C; --amber-ink:#9A6700; --amber-line:#D4A72C; --amber-bg:#FFF8E5;
+    --ghost:#8A97A3; --statute:#2F6B4F; --statute-bg:#EAF4EF;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--ink); font:13.5px/1.45 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; padding:24px 18px 60px;}
+  .wrap{max-width:1060px; margin:0 auto;}
+
+  /* ---------- draft chrome (not part of the product UI) ---------- */
+  .draftbar{background:var(--navy); color:#fff; border-radius:8px; padding:12px 16px; margin-bottom:14px;}
+  .draftbar h1{font-size:15px; font-weight:600;}
+  .draftbar p{font-size:12px; opacity:.85; margin-top:3px;}
+  .citytabs{display:flex; gap:8px; margin:16px 0 10px;}
+  .citytabs button{font:inherit; font-weight:600; padding:7px 16px; border-radius:6px 6px 0 0; border:1px solid var(--line); border-bottom:none; background:var(--surface-2); color:var(--muted); cursor:pointer;}
+  .citytabs button.on{background:var(--surface); color:var(--navy); box-shadow:0 -2px 0 var(--blue) inset;}
+  .screenlabel{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:22px 2px 6px; font-weight:700;}
+  .note{font-size:12px; color:var(--muted); margin:6px 2px 0;}
+  .callout{display:inline-block; min-width:17px; height:17px; line-height:17px; text-align:center; border-radius:50%; background:var(--blue); color:#fff; font-size:11px; font-weight:700; vertical-align:2px; margin-left:4px;}
+
+  /* ---------- product frame ---------- */
+  .app{background:var(--surface); border:1px solid var(--line); border-radius:8px; overflow:hidden; box-shadow:0 1px 3px rgba(20,61,92,.12);}
+  .appbar{background:var(--surface-2); border-bottom:1px solid var(--line); padding:9px 14px; display:flex; align-items:center; gap:12px;}
+  .appbar .brand{font-weight:700; color:var(--navy);}
+  .appbar .role{font-size:12px; color:var(--muted);}
+  .appbar .who{margin-left:auto; font-size:12px; color:var(--muted);}
+  .appbody{padding:14px;}
+
+  h2.scr{font-size:14px; font-weight:600; color:var(--navy); margin-bottom:10px;}
+  h3.panel{font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin-bottom:7px;}
+
+  /* ---------- buttons ---------- */
+  .btn{font:inherit; font-size:13px; background:var(--blue); color:#fff; border:none; border-radius:5px; padding:6px 14px; cursor:pointer; font-weight:600;}
+  .btn.sec{background:var(--surface); color:var(--blue); border:1px solid var(--blue); font-weight:600;}
+  .btn.quiet{background:var(--surface-2); color:var(--ink); border:1px solid var(--line); font-weight:500;}
+  .btn.danger-quiet{background:var(--surface); color:#8C3A2B; border:1px solid #C08A7E;}
+
+  /* ---------- queue table ---------- */
+  table.q{width:100%; border-collapse:collapse; background:var(--surface);}
+  table.q th{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); text-align:left; padding:7px 10px; border-bottom:2px solid var(--line); font-weight:700;}
+  table.q td{padding:9px 10px; border-bottom:1px solid var(--surface-2); vertical-align:top;}
+  table.q tr.sel td{background:#EDF3F8;}
+  .reqno{font-weight:700; color:var(--blue);}
+  .qdesc{color:var(--muted); font-size:12.5px; max-width:330px;}
+  .pool{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; border-radius:3px; padding:2px 7px; background:var(--surface-2); border:1px solid var(--line); color:var(--muted);}
+
+  /* ---------- chips: clocks ---------- */
+  .chip{display:inline-block; font-size:12px; border-radius:4px; padding:3px 9px; white-space:nowrap;}
+  .chip .k{display:block; font-size:9.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;}
+  .clock-legal{background:var(--surface); border-left:4px solid var(--navy); border-top:1px solid var(--line); border-right:1px solid var(--line); border-bottom:1px solid var(--line); color:var(--navy); font-weight:700;}
+  .clock-legal .k{color:var(--navy);}
+  .clock-target{background:var(--surface-2); border:1.5px dashed var(--ghost); color:var(--ink); font-weight:600;}
+  .clock-target .k{color:var(--ghost);}
+  .clock-window{background:var(--surface); border:1px solid var(--line); color:var(--muted); font-weight:600;}
+  .clock-window .k{color:var(--ghost);}
+  .clock-none{font-size:12.5px; color:var(--muted); font-style:italic;}
+  .cite{font-size:11px; color:var(--muted); font-weight:400;}
+
+  /* ---------- badges: whose decision ---------- */
+  .by{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; border-radius:3px; padding:2px 7px; vertical-align:1px;}
+  .by-system{background:var(--surface-2); color:var(--navy); border:1px solid var(--line);}
+  .by-statute{background:var(--statute-bg); color:var(--statute); border:1px solid var(--statute);}
+  .by-person{background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line);}
+  .recorded{background:var(--surface); color:var(--ghost); border:1px dashed var(--ghost);}
+
+  /* ---------- layout: task screen ---------- */
+  .parentstrip{background:var(--surface-2); border:1px solid var(--line); border-radius:6px; padding:8px 12px; display:flex; gap:14px; align-items:baseline; margin-bottom:10px; flex-wrap:wrap;}
+  .parentstrip .pn{font-weight:700; color:var(--navy);}
+  .clockstrip{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:10px 0 12px;}
+  .cols{display:flex; gap:14px; align-items:flex-start;}
+  .main{flex:1 1 auto; min-width:0;}
+  .rail{flex:0 0 250px; display:flex; flex-direction:column; gap:8px;}
+  .panelbox{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:11px 13px; margin-bottom:11px;}
+  .panelbox.tinted{background:var(--surface-2);}
+  .rail .panelbox{margin-bottom:0;}
+  .kv{font-size:12.5px; color:var(--muted);}
+  .kv b{color:var(--ink); font-weight:600;}
+  .row{display:flex; gap:10px; align-items:flex-start; padding:7px 0; border-top:1px solid var(--surface-2);}
+  .row:first-of-type{border-top:none;}
+  .field{background:var(--surface); border:1px solid var(--line); border-radius:4px; padding:5px 9px; font:inherit; width:100%;}
+  .amberline{border-left:3px solid var(--amber-line); padding-left:10px;}
+  .ghostline{border-left:3px dashed var(--ghost); padding-left:10px; color:var(--muted);}
+  .railhead{font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-bottom:6px;}
+  .rail .btn{width:100%; margin-bottom:6px;}
+  hr.soft{border:none; border-top:1px solid var(--surface-2); margin:9px 0;}
+
+  /* child record — expandable (native details/summary; actually clickable in this mockup) */
+  details.child{border:1px solid var(--line); border-radius:6px; margin-bottom:11px; background:var(--surface); overflow:hidden;}
+  details.child > summary{cursor:pointer; list-style:none; background:var(--surface-2); padding:9px 12px; display:flex; gap:10px; align-items:baseline; flex-wrap:wrap;}
+  details.child > summary::-webkit-details-marker{display:none;}
+  details.child > summary .tw{font-weight:700; color:var(--navy); font-size:12.5px;}
+  details.child > summary .tw::before{content:"▸ "; color:var(--blue);}
+  details.child[open] > summary .tw::before{content:"▾ ";}
+  details.child .childbody{padding:11px 13px; border-top:1px solid var(--line);}
+  .tag{display:inline-block; font-size:11px; background:var(--surface-2); border:1px solid var(--line); border-radius:3px; padding:1px 7px; color:var(--muted);}
+
+  /* annotations legend */
+  .legend{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:26px;}
+  .legend h2{font-size:14px; color:var(--navy); margin-bottom:10px;}
+  .legend ol{margin-left:20px;}
+  .legend li{margin-bottom:9px; font-size:12.5px;}
+  .legend li b{color:var(--navy);}
+  .rule{font-size:10px; font-weight:800; color:#fff; background:var(--statute); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
+  .decided{font-size:10px; font-weight:800; color:#fff; background:var(--blue); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="draftbar">
+    <h1>Processing UI — Draft 1c · Intake Reviewer, end to end (for your markup — nothing is built)</h1>
+    <p>One role, both screens: the My Tasks queue and the Intake Review task screen. The city tabs switch the whole install —
+    Austin TX (hard statutory clock, AG state, fee-waiver program, identified requestor) vs
+    Columbus OH (no statutory clock, no AG band, no waiver program, anonymous requestor).
+    Revised per Kevin 7/28: <b>intake_review is a parent-level task for non-MRR requests, spawned ONLY WHEN NEEDED</b>
+    (default; “always” is a city setup option) — ORO Associate, pool assignment with smart routing, child record info
+    behind a click-to-expand (the ▸ blocks below really expand — try them). Every task in the queue now says
+    <i>why it exists</i>, because most requests route straight to their team and never stop here.
+    Blue numbered dots &nbsp;<span class="callout">1</span>&nbsp; are design annotations — legend at the bottom.</p>
+  </div>
+
+  <div class="citytabs">
+    <button id="tab-tx" class="on" onclick="show('tx')">Austin, TX</button>
+    <button id="tab-oh" onclick="show('oh')">Columbus, OH</button>
+  </div>
+
+<!-- ══════════════════════════════ TEXAS ══════════════════════════════ -->
+<div id="city-tx">
+
+  <div class="screenlabel">Screen 1 · My Tasks — the intake reviewer's view (the only router)</div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">ORO Associate · Intake — City of Austin, TX</span><span class="who">M. Reyes</span></div>
+    <div class="appbody">
+      <h2 class="scr">My Tasks — Intake Review <span class="callout">1</span></h2>
+      <table class="q">
+        <tr><th>Request</th><th>Requestor</th><th>Description</th><th>Clock <span class="callout">2</span></th><th>Why it's here <span class="callout">1</span></th><th></th></tr>
+        <tr class="sel">
+          <td><span class="reqno">R-2417</span><br><span class="kv">recv 7/28</span></td>
+          <td>D. Alvarez<br><span class="kv">identity: staff-confirmed</span></td>
+          <td class="qdesc">All email correspondence between the Public Works director and Lakeline Paving LLC, Jan–Jun 2026</td>
+          <td><span class="chip clock-legal"><span class="k">Statutory deadline</span>Aug 11</span></td>
+          <td><span class="by by-person">Fee-waiver decision</span><br><span class="by by-system" style="margin-top:3px;">Ledger · deposit rule</span></td>
+          <td><button class="btn">Review →</button></td>
+        </tr>
+        <tr>
+          <td><span class="reqno">R-2416</span><br><span class="kv">recv 7/28</span></td>
+          <td>Anonymous</td>
+          <td class="qdesc">Records about “the thing the city did on Congress Ave last year”</td>
+          <td><span class="chip clock-legal"><span class="k">Statutory deadline</span>Aug 10</span></td>
+          <td><span class="by by-person">Can't determine team</span><br><span class="pool" style="margin-top:3px;">Pool — unassigned</span></td>
+          <td><button class="btn sec">Claim</button></td>
+        </tr>
+        <tr>
+          <td><span class="reqno">R-2415</span><br><span class="kv">recv 7/27</span></td>
+          <td>K. Osei</td>
+          <td class="qdesc">Signed contract and change orders for the Barton Springs bathhouse renovation</td>
+          <td><span class="chip clock-legal"><span class="k">Statutory deadline</span>Aug 8</span></td>
+          <td><span class="by by-person">Sensitivity flag — hold</span></td>
+          <td><button class="btn sec">Review →</button></td>
+        </tr>
+      </table>
+      <p class="note">This queue is the <b>exceptions</b>, not the traffic: with intake review set to <b>only when needed</b> (the default), a confidently-classified, clean request routes straight to its team and never appears here. Each row says which trigger stopped it. Assignment is the standard pool model: smart routing auto-assigns when one associate's specialization clearly matches; otherwise the task waits in the pool to claim (R-2416). Sorted by clock, earliest first; requests with no clock (see the Ohio tab) sort by age. <b>Also never in this list:</b> portal requests whose requestor said an attached record fulfills the search (their task auto-completes) <span class="callout">13</span> and MRR requests — intake review is a non-MRR task. <span class="callout">3</span></p>
+    </div>
+  </div>
+
+  <div class="screenlabel">Screen 2 · Intake Review — R-2417 (parent-level task; the record item expands below)</div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">Intake Review · R-2417 — City of Austin, TX</span><span class="who">M. Reyes</span></div>
+    <div class="appbody">
+
+      <div class="parentstrip">
+        <span class="pn">R-2417</span> <span class="callout">3</span>
+        <span class="kv">Single record request · received Jul 28, 2026 · portal</span>
+        <span class="kv"><b>D. Alvarez</b> · d.alvarez@…net · delivery: email</span>
+        <span class="kv" style="margin-left:auto;">Stage: <b>Intake</b></span>
+        <span class="kv" style="flex-basis:100%;">Here because: <b>fee-waiver decision pending</b> — otherwise this request would have routed straight to the Open Records Fulfillment Team. <span class="callout">1</span></span>
+      </div>
+
+      <div class="clockstrip">
+        <span class="chip clock-legal"><span class="k">Statutory deadline</span>Respond by <b>Mon Aug 11</b> · 10 business days &nbsp;<span class="cite">Tex. Gov't Code §552.221</span></span> <span class="callout">2</span>
+        <span class="chip clock-window"><span class="k">Requestor's window</span>60-day unclaimed window · not started</span>
+        <span class="kv">+1 more · <a href="#">all clocks</a></span>
+      </div>
+
+      <div class="cols">
+        <div class="main">
+
+          <details class="child" open>
+            <summary>
+              <span class="tw">Record item</span> <span class="callout">11</span>
+              <span class="kv">All email correspondence between the Public Works director and Lakeline Paving LLC…</span>
+              <span class="tag">Email correspondence · 84</span>
+              <span class="tag">→ Open Records Fulfillment Team</span>
+            </summary>
+            <div class="childbody">
+              <p style="margin-bottom:8px;">All email correspondence between the Public Works director and Lakeline Paving LLC, January–June 2026.</p>
+              <div class="kv" style="margin-bottom:9px;">Classified: <b>Email correspondence</b> (confidence 84) · Record owner: <b>Public Works</b> · Routes to: <b>Open Records Fulfillment Team</b> &nbsp;<button class="btn quiet">Change route</button> &nbsp;<button class="btn quiet">Mark Vague</button> <button class="btn quiet">Mark Overly Broad</button></div>
+              <hr class="soft">
+              <h3 class="panel">Preliminary search <span class="callout">4</span></h3>
+              <div class="row" style="border:none; padding-top:0;">
+                <span class="kv">Self Service Portal Search Results:</span>
+                <button class="btn quiet">Selected Records (0)</button>
+                <button class="btn quiet">Records Not Selected (8)</button>
+                <span class="kv">Portal already tried: “Lakeline Paving emails”, “public works contracts Lakeline”</span>
+              </div>
+              <div class="row">
+                <input class="field" value="Lakeline Paving correspondence" readonly>
+                <button class="btn sec">Search</button>
+              </div>
+              <div class="kv" style="margin-top:6px;">2 candidates in the released library — <a href="#">view</a>. If either answers the request, attach and this request can move straight toward delivery.</div>
+            </div>
+          </details>
+
+          <div class="panelbox">
+            <h3 class="panel">Requester eligibility <span class="callout">5</span></h3>
+            <div class="ghostline">
+              <b>Incarcerated requester</b> — Texas statute reaches this dimension (imported, unconfirmed). The submission carries no fact either way, so this is <b>recorded only</b>; the request proceeds. <span class="by recorded">Recorded — nothing to decide</span>
+            </div>
+          </div>
+
+          <div class="panelbox">
+            <h3 class="panel">Requestor history — ledger <span class="callout">6</span></h3>
+            <div class="kv" style="margin-bottom:7px;">Identity anchor: <b>staff-confirmed walk-in</b> (J. Whitfield, Jul 12) · 3 prior requests</div>
+            <div class="amberline" style="border-left-color:var(--navy);">
+              <b>Unpaid prior balance $132.50</b> — exceeds the $100 threshold: the city <b>may require a deposit or bond</b> before further work.
+              <span class="cite">Tex. Gov't Code §552.263(c)</span><br>
+              <span class="by by-system">System · statute-triggered</span> <span class="kv">— computed automatically; the demand issues with the estimate notice. Nothing for you to decide here.</span>
+            </div>
+          </div>
+
+          <div class="panelbox tinted">
+            <h3 class="panel">Fee waiver — decide now (inline) <span class="callout">7</span></h3>
+            <div class="kv" style="margin-bottom:7px;">Requested at submission: <b>yes — cannot afford fees</b>. Evidence on file: <b>none</b>. Program: discretionary public-interest waiver <span class="cite">Tex. Gov't Code §552.267</span></div>
+            <div class="row" style="border:none;">
+              <button class="btn">Grant waiver</button>
+              <button class="btn sec">Deny waiver</button>
+              <span class="kv">A denial <b>folds into the estimate notice</b> — no separate letter. The estimate cannot be sent while this is undecided.</span>
+            </div>
+            <div class="kv" style="margin-top:7px;"><span class="by by-person">Your decision</span> — recorded as decided by <b>M. Reyes</b>. A statutory-mandatory waiver (verified evidence on file) would instead show <span class="by by-statute">Granted by statute</span> and fires whether or not this program is enabled. <span class="callout">8</span></div>
+          </div>
+
+        </div>
+
+        <div class="rail">
+          <div class="panelbox">
+            <div class="railhead">Work the request</div>
+            <button class="btn quiet">Confer with supervisor</button>
+            <button class="btn quiet">Log a phone call</button>
+            <hr class="soft">
+            <div class="railhead">Clarification</div>
+            <button class="btn quiet">Request clarification…</button>
+            <hr class="soft">
+            <div class="railhead">Redirect</div>
+            <button class="btn quiet">Refer to proper custodian…</button>
+          </div>
+          <div class="panelbox">
+            <div class="railhead">Resolve intake <span class="callout">9</span></div>
+            <button class="btn">Proceed → Fulfillment</button>
+            <button class="btn quiet">Place on hold…</button>
+            <p class="kv" style="margin-top:5px;">Proceed routes the item to Record Search on the Open Records Fulfillment Team. Blocked while the fee-waiver decision above is open.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <p class="note">Not on this screen for Austin: <b>commercial-rate classification</b> — the TX branch profile says <code>commercial_rate: false</code>, so the panel does not exist here. In New Jersey or Illinois it would sit <i>above the clock strip</i>, because classifying the request as commercial changes the deadline before it is quoted. <span class="callout">10</span></p>
+
+</div>
+
+<!-- ══════════════════════════════ OHIO ══════════════════════════════ -->
+<div id="city-oh" style="display:none;">
+
+  <div class="screenlabel">Screen 1 · My Tasks — the intake reviewer's view (the only router)</div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">ORO Associate · Intake — City of Columbus, OH</span><span class="who">T. Nakamura</span></div>
+    <div class="appbody">
+      <h2 class="scr">My Tasks — Intake Review <span class="callout">1</span></h2>
+      <table class="q">
+        <tr><th>Request</th><th>Requestor</th><th>Description</th><th>Clock <span class="callout">2</span></th><th>Why it's here <span class="callout">1</span></th><th></th></tr>
+        <tr class="sel">
+          <td><span class="reqno">R-1083</span><br><span class="kv">recv 7/27</span></td>
+          <td>Anonymous</td>
+          <td class="qdesc">Body-worn camera footage — traffic stop at Cleveland Ave &amp; Hudson St, evening of June 14</td>
+          <td><span class="clock-none">no deadline — no city target set</span></td>
+          <td><span class="by by-person">Eligibility review — identity</span></td>
+          <td><button class="btn">Review →</button></td>
+        </tr>
+        <tr>
+          <td><span class="reqno">R-1082</span><br><span class="kv">recv 7/25</span></td>
+          <td>Anonymous</td>
+          <td class="qdesc">“Everything about code enforcement” — no address, no timeframe</td>
+          <td><span class="chip clock-target"><span class="k">City service target</span>Aug 4</span></td>
+          <td><span class="by by-person">Can't determine team</span><br><span class="pool" style="margin-top:3px;">Pool — unassigned</span></td>
+          <td><button class="btn sec">Claim</button></td>
+        </tr>
+      </table>
+      <p class="note">Same only-when-needed rule as the Texas tab: this queue is the exceptions. Ohio has <b>no statutory response clock</b> — every date in this column is the city's own service target, and it renders in the dashed “city target” treatment, never the navy statutory one. A request with no target set shows an honest “no deadline” and sorts by age. Note R-1082: a request too vague to classify is usually also one the AI can't route — <b>vagueness and unroutability arrive together</b>, which is why the only-when-needed stop still catches most defective requests at intake. <span class="callout">14</span></p>
+    </div>
+  </div>
+
+  <div class="screenlabel">Screen 2 · Intake Review — R-1083 (parent-level task; the record item is shown collapsed — click ▸ to expand)</div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">Intake Review · R-1083 — City of Columbus, OH</span><span class="who">T. Nakamura</span></div>
+    <div class="appbody">
+
+      <div class="parentstrip">
+        <span class="pn">R-1083</span> <span class="callout">3</span>
+        <span class="kv">Single record request · received Jul 27, 2026 · portal</span>
+        <span class="kv"><b>Anonymous</b> · reply-to: kx91@…com (unverified) · delivery: email</span>
+        <span class="kv" style="margin-left:auto;">Stage: <b>Intake</b></span>
+        <span class="kv" style="flex-basis:100%;">Here because: <b>eligibility review — identity</b> — otherwise this request would have routed straight to the Police Records Fulfillment Team. <span class="callout">1</span></span>
+      </div>
+
+      <div class="clockstrip">
+        <span class="clock-none">No statutory response deadline in Ohio — R.C. 149.43(B): records “promptly”, copies “within a reasonable period of time.” No city service target is set for this request, so <b>no date shows anywhere</b> until one is. <span class="callout">2</span></span>
+      </div>
+
+      <div class="cols">
+        <div class="main">
+
+          <details class="child">
+            <summary>
+              <span class="tw">Record item</span> <span class="callout">11</span>
+              <span class="kv">Body-worn camera footage — traffic stop at Cleveland Ave &amp; Hudson St, evening of June 14</span>
+              <span class="tag">BWC video · 91</span>
+              <span class="tag">→ Police Records Fulfillment Team</span>
+            </summary>
+            <div class="childbody">
+              <p style="margin-bottom:8px;">Body-worn camera footage of a traffic stop at Cleveland Ave &amp; Hudson St, the evening of June 14, 2026.</p>
+              <div class="kv" style="margin-bottom:9px;">Classified: <b>BWC video</b> (confidence 91) · Routes to: <b>Police Records Fulfillment Team</b> &nbsp;<button class="btn quiet">Change route</button> &nbsp;<button class="btn quiet">Mark Vague</button> <button class="btn quiet">Mark Overly Broad</button></div>
+              <hr class="soft">
+              <h3 class="panel">Preliminary search <span class="callout">4</span></h3>
+              <div class="kv">Not applicable — the asset lives in the evidence system (located by metadata in the Record Search task). The intake AI's scoping detail (date, time, location) travels with the item.</div>
+            </div>
+          </details>
+
+          <div class="panelbox">
+            <h3 class="panel">Requester eligibility <span class="callout">5</span></h3>
+            <div class="amberline" style="margin-bottom:8px;">
+              <b>Identity</b> — Ohio permits limited identification requirements; this city has confirmed the dimension and chose <b>review</b>. The request proceeds, but a person confirms before it advances. <span class="by by-person">Needs your confirmation</span><br>
+              <button class="btn quiet" style="margin-top:5px;">Confirm — proceed as anonymous</button>
+              <span class="kv">(drafted as if Columbus confirmed this dimension — a freshly imported state is advisory-only by construction)</span>
+            </div>
+            <div class="ghostline" style="margin-bottom:8px;">
+              <b>Incarcerated requester</b> — statute reaches it; no fact submitted. <span class="by recorded">Recorded — nothing to decide</span>
+            </div>
+            <div class="ghostline">
+              <b>Vexatious litigator</b> (R.C. 2323.52) — the designation is <b>the court's decision, never this system's</b>; an anonymous request is never adverse-matched, so there is nothing to check here. <span class="by recorded">Recorded — nothing to decide</span>
+            </div>
+          </div>
+
+          <div class="panelbox">
+            <h3 class="panel">Requestor history — ledger <span class="callout">6</span></h3>
+            <p class="kv"><b>Anonymous request.</b> There is no identity anchor, so requestor history <b>does not apply</b> — no balance exists for this request, and none is being withheld. Ohio may demand identification only on a reasonable vexatious belief (R.C. 2323.52(J)(2)).</p>
+          </div>
+
+        </div>
+
+        <div class="rail">
+          <div class="panelbox">
+            <div class="railhead">Work the request</div>
+            <button class="btn quiet">Confer with supervisor</button>
+            <button class="btn quiet">Log a phone call</button>
+            <hr class="soft">
+            <div class="railhead">Clarification</div>
+            <button class="btn quiet">Request clarification…</button>
+            <button class="btn danger-quiet">Deny — too vague to process… <span class="callout">12</span></button>
+            <p class="kv" style="margin-top:4px;">Ohio: an ambiguous or overly-broad request may itself be denied, with an invitation to revise. Opens Denial compose — your decision, never automatic.</p>
+            <hr class="soft">
+            <div class="railhead">Redirect</div>
+            <button class="btn quiet">Refer to proper custodian…</button>
+          </div>
+          <div class="panelbox">
+            <div class="railhead">Resolve intake <span class="callout">9</span></div>
+            <button class="btn">Proceed → Fulfillment</button>
+            <button class="btn quiet">Place on hold…</button>
+            <p class="kv" style="margin-top:5px;">Proceed routes the item to Record Search on the Police Records Fulfillment Team. Blocked while the eligibility review above is unconfirmed.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <p class="note">Not on this screen for Columbus: <b>fee-waiver panel</b> (no statutory waiver program — <code>fee_waiver: false</code>), <b>commercial-rate panel</b> (<code>false</code>), and nothing anywhere in this install ever mentions the Attorney General — <code>ag_review</code> is in <code>unavailableStages</code>. These are hidden by an explicit <code>false</code> from the branch profile. In the 19 seeded cities nobody has researched yet the capabilities are <code>null</code> = <b>unknown</b>, and every panel renders exactly as it does today — only an explicit <code>false</code> may hide anything. <span class="callout">10</span></p>
+
+</div>
+
+  <!-- ══════════ annotations ══════════ -->
+  <div class="legend">
+    <h2>Design annotations</h2>
+    <ol>
+      <li><b><span class="decided">DECIDED 7/28</span> intake_review is a real task, spawned ONLY WHEN NEEDED (default).</b> A new routable task type <code>intake_review</code>, owned by <b>ORO Associate</b>, on My Tasks (the only router); pool assignment, smart routing considered. It spawns only when a trigger fires: <b>(i)</b> the AI can't determine the fulfillment team · <b>(ii)</b> an eligibility review came back · <b>(iii)</b> a waiver/commercial decision is pending in <code>intake_review</code> mode · <b>(iv)</b> a sensitivity flag. Everything else routes straight to its team with no stop. A city can flip a setup option to <b>always</b> (every non-MRR request pauses here). Trigger (i) absorbs today's separate <code>routing_review</code> task — “can't route” becomes one trigger of this task rather than a task of its own. The queue's “Why it's here” column and the task screen's “Here because:” line surface the trigger, because on an exceptions queue the reviewer's first question is <i>which</i> exception. Shared pieces (clock chips, decision badges, portal-results bar) ship as a component library, not a shared screen.</li>
+      <li><b><span class="rule">RULE A</span> A due date is not automatically a deadline.</b> Two visual grammars, never interchangeable: navy solid left-bar = <i>statutory deadline</i> (kind <code>response</code>/<code>agency_action</code>, with citation); grey dashed = <i>city service target — not a legal deadline</i>; thin outline = <i>requestor's window</i>. Copy comes from <code>computeStatus.overdueMeaning</code>, never hardcoded. Ohio shows an honest “no deadline” rather than inventing a date.</li>
+      <li><b><span class="decided">DECIDED 7/28</span> Parent-level task, non-MRR only.</b> Intake review is a <b>parent-level</b> task: the screen leads with parent-level info (requestor, clocks, eligibility, ledger, waiver) and the single record item's detail sits behind a click-to-expand (drawn expanded on the Texas tab, collapsed on the Ohio tab — both really toggle). This path never carries more than one record item; <b>MRR requests do not spawn intake_review</b> and follow their own Request-Manager flow (separate draft).</li>
+      <li><b>Prelim search</b> lives inside the record item's expand, reusing the record-search screen's portal-results bar (Selected / Not Selected + queries already tried). Intake's version answers one question: <i>can the library already answer this?</i> The deep search stays in the Record Search task.</li>
+      <li><b><span class="rule">RULE C</span> Advisory ≠ automatic — eligibility.</b> Three treatments: ghost/dashed “<i>Recorded — nothing to decide</i>” (advisories), amber “<i>Needs your confirmation</i>” (reviews, with the confirm control), and blocks never appear here — a blocked submission is refused at the portal. External decisions always name their decider and citation (the vexatious list is the court's).</li>
+      <li><b><span class="rule">RULE C + E</span> Ledger.</b> Money triggers (TX deposit rule) are <b>system-computed per statute</b> — shown with the navy “System · statute-triggered” badge, citation, and an explicit “nothing for you to decide.” Denial-shaped ledger findings would appear amber, a person confirms. Anonymous requests state plainly that history <b>does not apply</b> — never “balance hidden.”</li>
+      <li><b>Inline approval (mode: <code>intake_review</code>).</b> The fee-waiver decision lives on this screen with no extra hop. In <code>routed_task</code> mode (today's live default) this panel is absent and a Fee-Waiver Approval task routes to ORO Finance instead. Sequencing is enforced either way: the estimate cannot be sent while the waiver is undecided, and a denial folds into the estimate notice.</li>
+      <li><b><span class="rule">RULE C</span> Decided-by is first-class.</b> Every decision surface carries a badge: <span class="by by-person">a person</span> (named), <span class="by by-statute">by statute</span> (mandatory categories on verified evidence — fires even if the program is off), <span class="by by-system">system · statute-triggered</span> (money math), <span class="by recorded">recorded only</span>. The system records and applies; it is never shown as having decided a judgment call.</li>
+      <li><b>Resolution gates.</b> “Proceed → Fulfillment” is the stage transition (central <code>applyStageTransition</code>); it stays blocked while an inline decision (waiver, eligibility review) is open, and says why — same pattern as the record-search screen's Found gate.</li>
+      <li><b><span class="rule">RULE B</span> Panels are branch-gated, three-valued.</b> Only an explicit <code>false</code> hides a panel (Austin: commercial-rate; Columbus: waiver, commercial, anything AG). <code>null</code> = unknown = render everything as today — 19 of 21 seeded cities are <code>null</code>, and this screen must not strip panels from them.</li>
+      <li><b>Defect marking lives on the record item — and doesn't depend on this screen.</b> Vague / Overly Broad are distinct legal defects (per the record-search spec), visible on the item's row inside the expand. For the majority of requests that <i>skip</i> intake review under only-when-needed, the same markers already exist on the Record Search task screen (built 7/14), wired to the full per-jurisdiction clarification machinery — so a defect discovered after team assignment fires the identical process, just from the first fulfillment task instead of from intake.</li>
+      <li><b>Branch-gated denial ground.</b> “Deny — too vague” appears only where <code>clarification_denial: true</code> (Ohio). It is denial-shaped, so it is a person's act through Denial compose — never automatic.</li>
+      <li><b><span class="decided">DECIDED 7/28</span> Auto-complete.</b> A portal request whose requestor indicated that an attached/selected record <b>fulfills</b> the search never stops here: under only-when-needed it's simply one more no-trigger case (and in <b>always</b> mode the task is spawned and completed automatically, audit trail intact). Binds to the portal's selected-records + search-intent <code>complete</code> substrate (R9).</li>
+      <li><b>The trade only-when-needed makes, stated honestly.</b> In a hard-clock state, a vague request that slips past intake (confidently classified, no triggers) is discovered by the searcher on day 3–6 of Texas's 10 business days rather than day 1 — a tighter clarification window. Mitigations: vagueness and unroutability usually arrive together (R-1082 on the Ohio tab — the vague ones mostly <i>are</i> the can't-route ones, so they stop here anyway), and the downstream markers fire the identical clarification process. Cities that want day-1 defect review flip the setup option to <b>always</b>.</li>
+    </ol>
+    <p class="note" style="margin-top:10px;">Out of scope for this role (drafted next, separately): the MRR / Request-Manager intake flow, the go-live confirm-each-knob checklist (rule D — an admin surface, TX and OH each carry 9 unconfirmed knobs today), the estimate/waiver interaction on EstimateTaskPage, Denial compose, and the parent financial view.</p>
+  </div>
+
+</div>
+<script>
+function show(c){
+  document.getElementById('city-tx').style.display = c==='tx' ? '' : 'none';
+  document.getElementById('city-oh').style.display = c==='oh' ? '' : 'none';
+  document.getElementById('tab-tx').className = c==='tx' ? 'on' : '';
+  document.getElementById('tab-oh').className = c==='oh' ? 'on' : '';
+}
+</script>
+</body>
+</html>

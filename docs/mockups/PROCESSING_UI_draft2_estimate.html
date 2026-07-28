@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Processing UI — Draft 2 — Estimate Task Screen (for markup)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#D8E0E8; --surface-2:#F2F6F9; --surface:#FFFFFF; --blue:#1E6091;
+    --ink:#1F2937; --muted:#5B6B7A; --line:#C3CFDA;
+    --navy:#143D5C; --amber-ink:#9A6700; --amber-line:#D4A72C; --amber-bg:#FFF8E5;
+    --ghost:#8A97A3; --statute:#2F6B4F; --statute-bg:#EAF4EF;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--ink); font:13.5px/1.45 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; padding:24px 18px 60px;}
+  .wrap{max-width:1060px; margin:0 auto;}
+
+  .draftbar{background:var(--navy); color:#fff; border-radius:8px; padding:12px 16px; margin-bottom:14px;}
+  .draftbar h1{font-size:15px; font-weight:600;}
+  .draftbar p{font-size:12px; opacity:.85; margin-top:3px;}
+  .citytabs{display:flex; gap:8px; margin:16px 0 10px;}
+  .citytabs button{font:inherit; font-weight:600; padding:7px 16px; border-radius:6px 6px 0 0; border:1px solid var(--line); border-bottom:none; background:var(--surface-2); color:var(--muted); cursor:pointer;}
+  .citytabs button.on{background:var(--surface); color:var(--navy); box-shadow:0 -2px 0 var(--blue) inset;}
+  .screenlabel{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:22px 2px 6px; font-weight:700;}
+  .note{font-size:12px; color:var(--muted); margin:6px 2px 0;}
+  .callout{display:inline-block; min-width:17px; height:17px; line-height:17px; text-align:center; border-radius:50%; background:var(--blue); color:#fff; font-size:11px; font-weight:700; vertical-align:2px; margin-left:4px;}
+
+  .app{background:var(--surface); border:1px solid var(--line); border-radius:8px; overflow:hidden; box-shadow:0 1px 3px rgba(20,61,92,.12);}
+  .appbar{background:var(--surface-2); border-bottom:1px solid var(--line); padding:9px 14px; display:flex; align-items:center; gap:12px;}
+  .appbar .brand{font-weight:700; color:var(--navy);}
+  .appbar .role{font-size:12px; color:var(--muted);}
+  .appbar .who{margin-left:auto; font-size:12px; color:var(--muted);}
+  .appbody{padding:14px;}
+  h2.scr{font-size:14px; font-weight:600; color:var(--navy); margin-bottom:10px;}
+  h3.panel{font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin-bottom:7px;}
+
+  .btn{font:inherit; font-size:13px; background:var(--blue); color:#fff; border:none; border-radius:5px; padding:6px 14px; cursor:pointer; font-weight:600;}
+  .btn.sec{background:var(--surface); color:var(--blue); border:1px solid var(--blue); font-weight:600;}
+  .btn.quiet{background:var(--surface-2); color:var(--ink); border:1px solid var(--line); font-weight:500;}
+
+  table.q{width:100%; border-collapse:collapse; background:var(--surface);}
+  table.q th{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); text-align:left; padding:7px 10px; border-bottom:2px solid var(--line); font-weight:700;}
+  table.q td{padding:9px 10px; border-bottom:1px solid var(--surface-2); vertical-align:top;}
+  table.q tr.sel td{background:#EDF3F8;}
+  .reqno{font-weight:700; color:var(--blue);}
+  .qdesc{color:var(--muted); font-size:12.5px; max-width:300px;}
+  .pool{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; border-radius:3px; padding:2px 7px; background:var(--surface-2); border:1px solid var(--line); color:var(--muted);}
+
+  .chip{display:inline-block; font-size:12px; border-radius:4px; padding:3px 9px; white-space:nowrap;}
+  .chip .k{display:block; font-size:9.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;}
+  .clock-legal{background:var(--surface); border-left:4px solid var(--navy); border-top:1px solid var(--line); border-right:1px solid var(--line); border-bottom:1px solid var(--line); color:var(--navy); font-weight:700;}
+  .clock-legal .k{color:var(--navy);}
+  .clock-target{background:var(--surface-2); border:1.5px dashed var(--ghost); color:var(--ink); font-weight:600;}
+  .clock-target .k{color:var(--ghost);}
+  .clock-window{background:var(--surface); border:1px solid var(--line); color:var(--muted); font-weight:600;}
+  .clock-window .k{color:var(--ghost);}
+  .clock-none{font-size:12.5px; color:var(--muted); font-style:italic;}
+  .cite{font-size:11px; color:var(--muted); font-weight:400;}
+
+  .by{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; border-radius:3px; padding:2px 7px; vertical-align:1px;}
+  .by-system{background:var(--surface-2); color:var(--navy); border:1px solid var(--line);}
+  .by-statute{background:var(--statute-bg); color:var(--statute); border:1px solid var(--statute);}
+  .by-person{background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line);}
+  .recorded{background:var(--surface); color:var(--ghost); border:1px dashed var(--ghost);}
+
+  .parentstrip{background:var(--surface-2); border:1px solid var(--line); border-radius:6px; padding:8px 12px; display:flex; gap:14px; align-items:baseline; margin-bottom:10px; flex-wrap:wrap;}
+  .parentstrip .pn{font-weight:700; color:var(--navy);}
+  .clockstrip{display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin:10px 0 12px;}
+  .cols{display:flex; gap:14px; align-items:flex-start;}
+  .main{flex:1 1 auto; min-width:0;}
+  .rail{flex:0 0 250px; display:flex; flex-direction:column; gap:8px;}
+  .panelbox{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:11px 13px; margin-bottom:11px;}
+  .panelbox.tinted{background:var(--surface-2);}
+  .rail .panelbox{margin-bottom:0;}
+  .kv{font-size:12.5px; color:var(--muted);}
+  .kv b{color:var(--ink); font-weight:600;}
+  .row{display:flex; gap:10px; align-items:flex-start; padding:7px 0; border-top:1px solid var(--surface-2);}
+  .row:first-of-type{border-top:none;}
+  .amberline{border-left:3px solid var(--amber-line); padding-left:10px;}
+  .ghostline{border-left:3px dashed var(--ghost); padding-left:10px; color:var(--muted);}
+  .railhead{font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-bottom:6px;}
+  .rail .btn{width:100%; margin-bottom:6px;}
+  hr.soft{border:none; border-top:1px solid var(--surface-2); margin:9px 0;}
+
+  .firstlook{background:var(--amber-bg); border:1px solid var(--amber-line); border-radius:6px; padding:9px 12px; margin-bottom:11px; font-size:12.5px;}
+  .firstlook b{color:var(--amber-ink);}
+
+  details.child{border:1px solid var(--line); border-radius:6px; margin-bottom:11px; background:var(--surface); overflow:hidden;}
+  details.child > summary{cursor:pointer; list-style:none; background:var(--surface-2); padding:9px 12px; display:flex; gap:10px; align-items:baseline; flex-wrap:wrap;}
+  details.child > summary::-webkit-details-marker{display:none;}
+  details.child > summary .tw{font-weight:700; color:var(--navy); font-size:12.5px;}
+  details.child > summary .tw::before{content:"▸ "; color:var(--blue);}
+  details.child[open] > summary .tw::before{content:"▾ ";}
+  details.child .childbody{padding:11px 13px; border-top:1px solid var(--line);}
+  .tag{display:inline-block; font-size:11px; background:var(--surface-2); border:1px solid var(--line); border-radius:3px; padding:1px 7px; color:var(--muted);}
+
+  table.est{width:100%; border-collapse:collapse; margin:6px 0;}
+  table.est td{padding:5px 8px; border-bottom:1px solid var(--surface-2); font-size:12.5px;}
+  table.est td.amt{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  table.est tr.total td{border-top:2px solid var(--line); border-bottom:none; font-weight:700; color:var(--navy);}
+
+  .legend{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:26px;}
+  .legend h2{font-size:14px; color:var(--navy); margin-bottom:10px;}
+  .legend ol{margin-left:20px;}
+  .legend li{margin-bottom:9px; font-size:12.5px;}
+  .legend li b{color:var(--navy);}
+  .rule{font-size:10px; font-weight:800; color:#fff; background:var(--statute); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
+  .decided{font-size:10px; font-weight:800; color:#fff; background:var(--blue); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="draftbar">
+    <h1>Processing UI — Draft 2 · Estimate Task Screen (for your markup — nothing is built)</h1>
+    <p>Extends the existing, working <code>EstimateTaskPage</code> — this draft adds what the design session decided it must carry:
+    the <b>first-human-checkpoint</b> role on auto-routed requests (defect markers + clarification), the <b>fee-waiver gate</b>,
+    the <b>deposit gate</b>, and the honest clock treatments. Role: [Team] Fulfillment Staff with the Estimate Creation subset.
+    Same city toggle: Austin TX (chargeable labor, waiver program, deposit rule, hard clock) vs Columbus OH
+    (actual-cost copies only, no waiver program, no clock, delivery caps). The ▸ record block really expands.</p>
+  </div>
+
+  <div class="citytabs">
+    <button id="tab-tx" class="on" onclick="show('tx')">Austin, TX</button>
+    <button id="tab-oh" onclick="show('oh')">Columbus, OH</button>
+  </div>
+
+<!-- ══════════════════════════════ TEXAS ══════════════════════════════ -->
+<div id="city-tx">
+
+  <div class="screenlabel">Screen 1 · My Tasks — estimate work on the fulfillment team</div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">Fulfillment Staff · Estimates — Open Records Team, City of Austin, TX</span><span class="who">S. Bell</span></div>
+    <div class="appbody">
+      <h2 class="scr">My Tasks — Estimates <span class="callout">1</span></h2>
+      <table class="q">
+        <tr><th>Request</th><th>Requestor</th><th>Description</th><th>Clock</th><th>Path here <span class="callout">2</span></th><th></th></tr>
+        <tr class="sel">
+          <td><span class="reqno">R-2419</span><br><span class="kv">recv 7/28</span></td>
+          <td>D. Alvarez<br><span class="kv">identity: staff-confirmed</span></td>
+          <td class="qdesc">All communications regarding the Red River St closure, March–June 2026</td>
+          <td><span class="chip clock-legal"><span class="k">Statutory deadline</span>Aug 11</span></td>
+          <td><span class="by by-person">Auto-routed — first human review</span></td>
+          <td><button class="btn">Estimate →</button></td>
+        </tr>
+        <tr>
+          <td><span class="reqno">R-2417</span><br><span class="kv">recv 7/28</span></td>
+          <td>D. Alvarez</td>
+          <td class="qdesc">All email correspondence between the Public Works director and Lakeline Paving LLC…</td>
+          <td><span class="chip clock-legal"><span class="k">Statutory deadline</span>Aug 11</span></td>
+          <td><span class="kv">Via Intake Review (M. Reyes)<br>waiver <b>denied</b> at intake</span></td>
+          <td><button class="btn sec">Estimate →</button></td>
+        </tr>
+        <tr>
+          <td><span class="reqno">R-2414</span><br><span class="kv">recv 7/26</span></td>
+          <td>L. Tran</td>
+          <td class="qdesc">Crash report, I-35 &amp; Riverside, July 2 — report #26-118834</td>
+          <td><span class="chip clock-legal"><span class="k">Statutory deadline</span>Aug 7</span></td>
+          <td><span class="by by-person">Auto-routed — first human review</span><br><span class="pool" style="margin-top:3px;">Pool — unassigned</span></td>
+          <td><button class="btn sec">Claim</button></td>
+        </tr>
+      </table>
+      <p class="note">Estimate precedes record search on the auto path, so this queue is where most requests meet their first person. The <b>Path here</b> column says whether anyone has vetted the request yet: “Auto-routed — first human review” means <i>nobody has</i> — reading the description for defects is part of this task, not someone else's finished work.</p>
+    </div>
+  </div>
+
+  <div class="screenlabel">Screen 2 · Estimate — R-2419 (auto-routed: the first-human-checkpoint case)</div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">Estimate · R-2419 — City of Austin, TX</span><span class="who">S. Bell</span></div>
+    <div class="appbody">
+
+      <div class="parentstrip">
+        <span class="pn">R-2419</span>
+        <span class="kv">Single record request · received Jul 28, 2026 · portal</span>
+        <span class="kv"><b>D. Alvarez</b> · d.alvarez@…net · delivery: email</span>
+        <span class="kv" style="margin-left:auto;">Stage: <b>Fee review</b></span>
+      </div>
+
+      <div class="clockstrip">
+        <span class="chip clock-legal"><span class="k">Statutory deadline</span>Respond by <b>Mon Aug 11</b> · 10 business days &nbsp;<span class="cite">Tex. Gov't Code §552.221</span></span>
+        <span class="chip clock-window"><span class="k">Requestor's window</span>60-day unclaimed window · starts if estimate goes unanswered</span>
+      </div>
+
+      <div class="cols">
+        <div class="main">
+
+          <div class="firstlook">
+            <b>You are the first person to review this request.</b> <span class="callout">3</span> The AI routed it here directly
+            (Email correspondence, confidence 91 → Open Records Team) with no intake stop. Before estimating, read the
+            description as a reviewer: if it can't be scoped, that is a defect to raise — not a bad estimate to force.
+          </div>
+
+          <details class="child" open>
+            <summary>
+              <span class="tw">Record item</span>
+              <span class="kv">All communications regarding the Red River St closure, March–June 2026</span>
+              <span class="tag">Email correspondence · 91</span>
+              <span class="tag">→ Open Records Team</span>
+            </summary>
+            <div class="childbody">
+              <p style="margin-bottom:8px;">All communications regarding the Red River Street closure, March–June 2026.</p>
+              <div class="kv">Classified: <b>Email correspondence</b> (confidence 91) · Record owner: <b>Public Works</b>
+                &nbsp;<button class="btn quiet">Change route</button>
+                &nbsp;<button class="btn quiet">Mark Vague</button>
+                <button class="btn quiet">Mark Overly Broad</button> <span class="callout">3</span></div>
+              <div class="kv" style="margin-top:6px;">Marking a defect <b>pauses this estimate task</b> and starts the clarification
+                process for this state (clock effect per jurisdiction — Texas: the response clock keeps running).</div>
+            </div>
+          </details>
+
+          <div class="panelbox">
+            <h3 class="panel">Estimate <span class="callout">4</span></h3>
+            <div class="kv" style="margin-bottom:4px;">Predicted from the estimate profile for <b>Email correspondence</b> (pre-search — typical volume 300–600 pages). Basis is editable; the search has not happened yet.</div>
+            <table class="est">
+              <tr><td>Personnel time (predicted)</td><td class="kv">3.0 h × $15.00</td><td class="amt">$45.00</td></tr>
+              <tr><td>Copies (predicted)</td><td class="kv">400 pp × $0.10</td><td class="amt">$40.00</td></tr>
+              <tr class="total"><td>Estimated total</td><td></td><td class="amt">$85.00</td></tr>
+            </table>
+            <div class="kv"><b>Itemized statement required</b> — estimated charges exceed $40 <span class="cite">Tex. Gov't Code §552.2615</span>. The notice includes the line items above automatically.</div>
+            <hr class="soft">
+            <div class="kv">Requestor's personnel-time this 12 months: <b>14.5 h of the 36 h cap</b> used <span class="cite">§552.275</span> <span class="by recorded">staff-entered — automatic counting deferred</span> <span class="callout">5</span></div>
+          </div>
+
+          <div class="panelbox">
+            <h3 class="panel">Fee waiver <span class="callout">6</span></h3>
+            <div class="kv">Not requested on this submission. Statutory-mandatory categories stay <b>armed</b>: verified evidence on file (e.g. an indigency affidavit) grants <span class="by by-statute">by statute</span> regardless of the city's discretionary program or anyone's decision.</div>
+          </div>
+
+          <div class="panelbox">
+            <h3 class="panel">Deposit — prior unpaid balance <span class="callout">7</span></h3>
+            <div class="amberline" style="border-left-color:var(--navy);">
+              <b>$132.50 unpaid across 2 prior requests</b> — over the $100 threshold, the city may require a deposit or bond before further work. The demand is <b>included in the estimate notice</b> below; work pauses until it is met.
+              <span class="cite">Tex. Gov't Code §552.263(c)</span><br>
+              <span class="by by-system">System · statute-triggered</span> <span class="kv">— computed from the ledger; nothing for you to decide.</span>
+            </div>
+          </div>
+
+          <div class="panelbox tinted">
+            <h3 class="panel">Estimate notice — ready to send <span class="callout">8</span></h3>
+            <div class="kv" style="margin-bottom:6px;">One communication, assembled automatically: itemized estimate · deposit demand ·
+              “please confirm you would like us to proceed” · the respond-or-withdrawn window. A waiver decision, had there been one,
+              folds in here too — never a separate letter.</div>
+            <div class="kv" style="margin-bottom:8px;">Send gate: <b>clear</b> — no waiver decision pending, itemization attached.
+              (If a waiver were undecided, Send is blocked: <i>409 WAIVER_UNDECIDED</i>.)</div>
+            <button class="btn">Preview notice…</button> <button class="btn">Send estimate</button>
+          </div>
+
+        </div>
+
+        <div class="rail">
+          <div class="panelbox">
+            <div class="railhead">Work the request</div>
+            <button class="btn quiet">Confer with supervisor</button>
+            <button class="btn quiet">Log a phone call</button>
+            <hr class="soft">
+            <div class="railhead">Clarification</div>
+            <button class="btn quiet">Request clarification…</button>
+            <hr class="soft">
+            <div class="railhead">No charge?</div>
+            <button class="btn quiet">Waive as de&nbsp;minimis &amp; advance</button>
+            <p class="kv" style="margin-top:4px;">Zero the estimate and advance to record search without a notice cycle — your decision, recorded.</p>
+          </div>
+          <div class="panelbox">
+            <div class="railhead">After sending <span class="callout">9</span></div>
+            <p class="kv">The requestor keeps control at the acceptance gate: <b>proceed · narrow · withdraw</b>. “Too large” is not a
+            mark on this screen — it is this estimate, and the narrowing conversation it starts. Silence runs the respond-or-withdrawn
+            window; payment releases the search.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <p class="note">R-2417 (second queue row) shows the other arrival path: it stopped at Intake Review, the waiver was <b>denied there by M. Reyes</b>, and its estimate notice will carry that denial folded in — <span class="by by-person">a person</span> badge with the decider's name, next to the denial text. Same screen, different provenance. <span class="callout">2</span></p>
+
+</div>
+
+<!-- ══════════════════════════════ OHIO ══════════════════════════════ -->
+<div id="city-oh" style="display:none;">
+
+  <div class="screenlabel">Screen 1 · My Tasks — estimate work on the fulfillment team</div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">Fulfillment Staff · Estimates — Records Team, City of Columbus, OH</span><span class="who">J. Okafor</span></div>
+    <div class="appbody">
+      <h2 class="scr">My Tasks — Estimates <span class="callout">1</span></h2>
+      <table class="q">
+        <tr><th>Request</th><th>Requestor</th><th>Description</th><th>Clock</th><th>Path here <span class="callout">2</span></th><th></th></tr>
+        <tr class="sel">
+          <td><span class="reqno">R-1085</span><br><span class="kv">recv 7/28</span></td>
+          <td>Anonymous</td>
+          <td class="qdesc">Building permits issued on Parsons Ave, June 2026 — paper copies by mail</td>
+          <td><span class="chip clock-target"><span class="k">City service target</span>Aug 6</span></td>
+          <td><span class="by by-person">Auto-routed — first human review</span></td>
+          <td><button class="btn">Estimate →</button></td>
+        </tr>
+        <tr>
+          <td><span class="reqno">R-1083</span><br><span class="kv">recv 7/27</span></td>
+          <td>Anonymous</td>
+          <td class="qdesc">Body-worn camera footage — traffic stop at Cleveland Ave &amp; Hudson St…</td>
+          <td><span class="clock-none">no deadline — no target set</span></td>
+          <td><span class="kv">Via Intake Review (T. Nakamura)<br>eligibility confirmed</span></td>
+          <td><button class="btn sec">Estimate →</button></td>
+        </tr>
+      </table>
+      <p class="note">Every date here is a <b>city service target</b> (dashed treatment) — Ohio has no statutory response clock. The Path-here column works exactly as in Texas: “first human review” means the defect check is part of this task.</p>
+    </div>
+  </div>
+
+  <div class="screenlabel">Screen 2 · Estimate — R-1085 (auto-routed, anonymous, actual-cost state)</div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">Estimate · R-1085 — City of Columbus, OH</span><span class="who">J. Okafor</span></div>
+    <div class="appbody">
+
+      <div class="parentstrip">
+        <span class="pn">R-1085</span>
+        <span class="kv">Single record request · received Jul 28, 2026 · portal</span>
+        <span class="kv"><b>Anonymous</b> · reply-to: mg44@…com (unverified) · delivery: <b>mail</b></span>
+        <span class="kv" style="margin-left:auto;">Stage: <b>Fee review</b></span>
+      </div>
+
+      <div class="clockstrip">
+        <span class="chip clock-target"><span class="k">City service target — not a legal deadline</span>Aug 6 · set by the city</span>
+        <span class="kv">Ohio R.C. 149.43(B): “promptly” / “within a reasonable period of time” — no statutory number exists.</span>
+      </div>
+
+      <div class="cols">
+        <div class="main">
+
+          <div class="firstlook">
+            <b>You are the first person to review this request.</b> <span class="callout">3</span> The AI routed it here directly
+            (Building permits, confidence 89 → Records Team) with no intake stop. Read the description as a reviewer before estimating.
+          </div>
+
+          <details class="child">
+            <summary>
+              <span class="tw">Record item</span>
+              <span class="kv">Building permits issued on Parsons Ave, June 2026 — paper copies by mail</span>
+              <span class="tag">Building permits · 89</span>
+              <span class="tag">→ Records Team</span>
+            </summary>
+            <div class="childbody">
+              <p style="margin-bottom:8px;">Building permits issued on Parsons Avenue during June 2026, requested as paper copies by mail.</p>
+              <div class="kv">Classified: <b>Building permits</b> (confidence 89) · Record owner: <b>Building &amp; Zoning</b>
+                &nbsp;<button class="btn quiet">Change route</button>
+                &nbsp;<button class="btn quiet">Mark Vague</button>
+                <button class="btn quiet">Mark Overly Broad</button></div>
+              <div class="kv" style="margin-top:6px;">Ohio note: if marked vague, this state treats an ambiguous request as itself
+                deniable — the clarification drawer offers <b>Deny — too vague</b> alongside the revise invitation (a person's act,
+                via Denial compose).</div>
+            </div>
+          </details>
+
+          <div class="panelbox">
+            <h3 class="panel">Estimate <span class="callout">4</span></h3>
+            <div class="kv" style="margin-bottom:4px;"><b>Actual cost only</b> — Ohio permits charging the actual cost of copies and
+              postage; <b>staff time is not chargeable</b> <span class="cite">R.C. 149.43(B)(1)</span>. Labor lines are not available
+              in this install. <span class="callout">10</span></div>
+            <table class="est">
+              <tr><td>Copies (predicted)</td><td class="kv">120 pp × $0.05 actual cost</td><td class="amt">$6.00</td></tr>
+              <tr><td>Postage</td><td class="kv">actual</td><td class="amt">$4.80</td></tr>
+              <tr class="total"><td>Estimated total</td><td></td><td class="amt">$10.80</td></tr>
+            </table>
+            <div class="kv">Advance payment for copies may be required before they are made <span class="cite">R.C. 149.43(B)(6)</span>.</div>
+            <hr class="soft">
+            <div class="kv"><b>Physical delivery cap:</b> this city limits paper-copy transmissions to <b>10 per requestor per month</b>
+              — but this request is <b>anonymous</b>, so no per-requestor count applies (and none is implied). The cap surfaces only
+              on identity-anchored requests. <span class="by recorded">config stub — manual values</span> <span class="callout">11</span></div>
+          </div>
+
+          <div class="panelbox">
+            <h3 class="panel">Requestor history — ledger</h3>
+            <p class="kv"><b>Anonymous request.</b> No identity anchor — no balance exists for this request and no deposit rule can
+              apply. Not hidden; genuinely not applicable.</p>
+          </div>
+
+          <div class="panelbox tinted">
+            <h3 class="panel">Estimate notice — ready to send <span class="callout">8</span></h3>
+            <div class="kv" style="margin-bottom:8px;">One communication: itemized costs · advance-payment line ·
+              “please confirm you would like us to proceed.” Send gate: <b>clear</b> — no approval modules exist in this install
+              (no waiver program, no commercial rate), so nothing can pend.</div>
+            <button class="btn">Preview notice…</button> <button class="btn">Send estimate</button>
+          </div>
+
+        </div>
+
+        <div class="rail">
+          <div class="panelbox">
+            <div class="railhead">Work the request</div>
+            <button class="btn quiet">Confer with supervisor</button>
+            <button class="btn quiet">Log a phone call</button>
+            <hr class="soft">
+            <div class="railhead">Clarification</div>
+            <button class="btn quiet">Request clarification…</button>
+            <hr class="soft">
+            <div class="railhead">No charge?</div>
+            <button class="btn quiet">Waive as de&nbsp;minimis &amp; advance</button>
+            <p class="kv" style="margin-top:4px;">$10.80 is a judgment call — many offices absorb it. Your decision, recorded.</p>
+          </div>
+          <div class="panelbox">
+            <div class="railhead">After sending <span class="callout">9</span></div>
+            <p class="kv">Acceptance gate: <b>proceed · narrow · withdraw</b>. No statutory clock is affected either way — only the
+            city's own service target ages this work.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <p class="note">Hidden in this install by explicit <code>false</code>: the fee-waiver panel and anything commercial-rate. The deposit panel is absent for a different reason — the requestor is anonymous, so the ledger has nothing to compute (an identified requestor with a balance would see it, since prior-balance rules are seeded per state). Same three-valued gating rule as Draft 1: <code>null</code> = unknown = render as today.</p>
+
+</div>
+
+  <!-- ══════════ annotations ══════════ -->
+  <div class="legend">
+    <h2>Design annotations</h2>
+    <ol>
+      <li><b>Role and queue.</b> Estimate tasks belong to [Team] Fulfillment Staff holding the <i>Estimate Creation</i> subset (ORO Associate for MRR — out of scope here, same as Draft 1). Team-scoped pool + smart routing, same as every routable type. This queue is <i>normal traffic</i>, not exceptions — under only-when-needed intake, most requests come here first.</li>
+      <li><b>Provenance is a column.</b> “Path here” says whether a human has vetted the request: <b>Auto-routed — first human review</b> (nobody has) vs <b>Via Intake Review (name)</b> (with what was decided there, e.g. a waiver denial that will fold into this estimate's notice). The estimator's duty changes with it, so it is queue-level information, not fine print.</li>
+      <li><b><span class="decided">DECIDED 7/28</span> The estimate task is the auto path's checkpoint.</b> The first-look banner + the same defect markers as intake review (Mark Vague / Mark Overly Broad) on the record item. Marking a defect <b>pauses the estimate task</b> and fires the per-state clarification machinery (clock effect per jurisdiction; the banner never claims the clock stops where it doesn't). “You can't price what you can't parse” — raising the defect is part of this task, not a failure of it.</li>
+      <li><b>The estimate is built pre-search from the estimate profile</b> (auto path: estimate precedes record search — already how the engine sequences it). Predicted basis is shown and editable; nothing pretends the search happened. Where the profile assessment is <code>automated</code>, the task arrives as “Review auto-generated estimate” instead of “Create estimate”.</li>
+      <li><b>Caps and allowances render as staff-entered facts</b> (ledger classes B/C are config stubs by decision): the TX 36-hour tracker shows its value with a <span class="by recorded">staff-entered</span> badge — never implying the system counted it.</li>
+      <li><b>Waiver panel has four states, all provenance-labeled:</b> not requested (statutory categories still armed, <span class="by by-statute">by statute</span> fires on verified evidence regardless of program or confirmation) · decided at intake (<span class="by by-person">person</span> badge with name; denial folds into this notice) · pending in <code>routed_task</code> mode (ORO Finance task open — <b>Send blocked, 409 WAIVER_UNDECIDED</b>, and the gate says so in words) · granted (fees zeroed at notice time, notice says so).</li>
+      <li><b><span class="rule">RULE C+E</span> Deposit gate.</b> Prior-balance demands are system-computed per statute with citation and “nothing for you to decide” — and they ride the estimate notice, never a separate letter. Anonymous requests: the panel is absent because nothing applies, and the ledger panel says so plainly.</li>
+      <li><b>One notice.</b> Estimate + itemization + deposit demand + waiver outcome + respond-or-withdrawn window assemble into a single communication (the built <code>feeNotice</code> behavior). The send gate lists what's blocking in words, not just a disabled button.</li>
+      <li><b>“Too large” is not a mark on this screen — it's the estimate.</b> After send, the requestor keeps control at the acceptance gate (proceed / narrow / withdraw). In the states where a burden <i>denial</i> exists (IL), the conference-to-narrow gate lives on Denial compose, not here — this screen's estimate is the evidence that conversation uses.</li>
+      <li><b><span class="rule">RULE A adjacent</span> Chargeability is jurisdiction config, rendered as law, cited.</b> Ohio's estimate builder simply has no labor lines (actual cost only, R.C. 149.43(B)(1)); Texas has personnel time at the AG-schedule rate. The builder never offers a line the state forbids.</li>
+      <li><b>Delivery caps (OH)</b> surface at estimate/delivery time as a per-requestor monthly count — identity-anchored only; an anonymous request shows no count and implies none. Config-stub honesty: <span class="by recorded">manual values</span> until a city elects automatic counting.</li>
+    </ol>
+    <p class="note" style="margin-top:10px;">Flagged for a later draft, not designed here: the <b>refund/credit path</b> when a later exemption denial shrinks a paid deliverable (belongs to the parent financial view, a BUILD item); the Denial-compose prerequisite gates (IL conference-before-burden-denial); and the MRR estimate flow.</p>
+  </div>
+
+</div>
+<script>
+function show(c){
+  document.getElementById('city-tx').style.display = c==='tx' ? '' : 'none';
+  document.getElementById('city-oh').style.display = c==='oh' ? '' : 'none';
+  document.getElementById('tab-tx').className = c==='tx' ? 'on' : '';
+  document.getElementById('tab-oh').className = c==='oh' ? 'on' : '';
+}
+</script>
+</body>
+</html>

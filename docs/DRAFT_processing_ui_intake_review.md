@@ -3,8 +3,9 @@
 **Status:** DESIGN DRAFT for Kevin's markup, 2026-07-28 (rev 1c — Kevin's rounds 1 and 2 folded in,
 same day). Not a spec, not for build. Becomes (part of) `SPEC_processing_ui.md` only after Kevin
 settles the shape.
-**Mockup:** `exchange/PROCESSING_UI_draft1_intake_review.html` — Austin TX / Columbus OH toggle, blue
-numbered annotations, legend at the bottom; the record-item blocks really expand/collapse. Uses the
+**Mockup:** `docs/mockups/PROCESSING_UI_draft1_intake_review.html` (tracked; a copy lives in the
+`/home/optimumq/exchange` drop for WinSCP viewing) — Austin TX / Columbus OH toggle, blue numbered
+annotations, legend at the bottom; the record-item blocks really expand/collapse. Uses the
 portal palette Kevin chose for the record-search mockup (`lib/theme.js` tokens; adopting them for a new
 screen is still Kevin's call — `SPEC_record_search_task_screen.md` §9).
 

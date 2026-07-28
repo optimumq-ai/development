@@ -3,7 +3,8 @@
 **Status:** DESIGN DRAFT for Kevin's markup, 2026-07-28. Not a spec, not for build. Sibling of
 `DRAFT_processing_ui_intake_review.md` (Draft 1c); becomes part of `SPEC_processing_ui.md` when the
 shape settles.
-**Mockup:** `exchange/PROCESSING_UI_draft2_estimate.html` — Austin TX / Columbus OH toggle, annotated,
+**Mockup:** `docs/mockups/PROCESSING_UI_draft2_estimate.html` (tracked; a copy lives in the
+`/home/optimumq/exchange` drop for WinSCP viewing) — Austin TX / Columbus OH toggle, annotated,
 same design language and component vocabulary as Draft 1.
 
 This screen **extends the built `EstimateTaskPage`** (the proven task-screen pattern the precedent
