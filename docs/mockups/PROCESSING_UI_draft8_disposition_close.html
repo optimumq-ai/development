@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Processing UI — Draft 8 — Disposition / Close (for markup)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#D8E0E8; --surface-2:#F2F6F9; --surface:#FFFFFF; --blue:#1E6091;
+    --ink:#1F2937; --muted:#5B6B7A; --line:#C3CFDA;
+    --navy:#143D5C; --amber-ink:#9A6700; --amber-line:#D4A72C; --amber-bg:#FFF8E5;
+    --ghost:#8A97A3; --statute:#2F6B4F; --statute-bg:#EAF4EF; --warn:#8C3A2B;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--ink); font:13.5px/1.45 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; padding:24px 18px 60px;}
+  .wrap{max-width:1080px; margin:0 auto;}
+
+  .draftbar{background:var(--navy); color:#fff; border-radius:8px; padding:12px 16px; margin-bottom:14px;}
+  .draftbar h1{font-size:15px; font-weight:600;}
+  .draftbar p{font-size:12px; opacity:.85; margin-top:3px;}
+  .screenlabel{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:22px 2px 6px; font-weight:700;}
+  .note{font-size:12px; color:var(--muted); margin:6px 2px 0;}
+  .callout{display:inline-block; min-width:17px; height:17px; line-height:17px; text-align:center; border-radius:50%; background:var(--blue); color:#fff; font-size:11px; font-weight:700; vertical-align:2px; margin-left:4px;}
+
+  .app{background:var(--surface); border:1px solid var(--line); border-radius:8px; overflow:hidden; box-shadow:0 1px 3px rgba(20,61,92,.12);}
+  .appbar{background:var(--surface-2); border-bottom:1px solid var(--line); padding:9px 14px; display:flex; align-items:center; gap:12px;}
+  .appbar .brand{font-weight:700; color:var(--navy);}
+  .appbar .role{font-size:12px; color:var(--muted);}
+  .appbar .who{margin-left:auto; font-size:12px; color:var(--muted);}
+  .appbody{padding:14px;}
+  h3.panel{font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin-bottom:7px;}
+
+  .btn{font:inherit; font-size:13px; background:var(--blue); color:#fff; border:none; border-radius:5px; padding:6px 14px; cursor:pointer; font-weight:600;}
+  .btn.sec{background:var(--surface); color:var(--blue); border:1px solid var(--blue); font-weight:600;}
+  .btn.quiet{background:var(--surface-2); color:var(--ink); border:1px solid var(--line); font-weight:500;}
+  .btn.sm{font-size:12px; padding:4px 10px;}
+  .btn[disabled]{opacity:.45; cursor:not-allowed;}
+
+  .kv{font-size:12.5px; color:var(--muted);}
+  .kv b{color:var(--ink); font-weight:600;}
+
+  .by{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; border-radius:3px; padding:2px 7px; vertical-align:1px;}
+  .by-system{background:var(--surface-2); color:var(--navy); border:1px solid var(--line);}
+  .by-person{background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line);}
+  .recorded{background:var(--surface); color:var(--ghost); border:1px dashed var(--ghost);}
+
+  .parentstrip{background:var(--surface-2); border:1px solid var(--line); border-radius:6px; padding:8px 12px; display:flex; gap:14px; align-items:baseline; margin-bottom:10px; flex-wrap:wrap;}
+  .parentstrip .pn{font-weight:700; color:var(--navy);}
+
+  .cols{display:flex; gap:14px; align-items:flex-start;}
+  .main{flex:1 1 auto; min-width:0;}
+  .rail{flex:0 0 255px; display:flex; flex-direction:column; gap:10px;}
+  .panelbox{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:11px 13px; margin-bottom:11px;}
+  .panelbox.tinted{background:var(--surface-2);}
+  .rail .panelbox{margin-bottom:0;}
+  .railhead{font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-bottom:6px;}
+  .rail .btn{width:100%; margin-bottom:6px;}
+  hr.soft{border:none; border-top:1px solid var(--surface-2); margin:9px 0;}
+  .warnline{border-left:3px solid #C08A7E; padding-left:10px; font-size:12.5px;}
+  .ghostline{border-left:3px dashed var(--ghost); padding-left:10px; color:var(--muted); font-size:12.5px;}
+
+  /* disposition picker */
+  .disp{display:flex; gap:10px; align-items:flex-start; padding:8px 10px; border:1px solid var(--line); border-radius:5px; margin-bottom:7px; background:var(--surface);}
+  .disp.on{border-color:var(--blue); background:#EDF3F8;}
+  .disp.locked{border-style:dashed; color:var(--muted);}
+  .disp input{margin-top:3px;}
+  .disp .dt{font-weight:600;}
+  .disp .dd{font-size:12px; color:var(--muted); margin-top:1px;}
+  .gatechip{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; border-radius:3px; padding:1px 7px; margin-left:5px;}
+  .gatechip.need{background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line);}
+  .gatechip.ok{background:var(--statute-bg); color:var(--statute); border:1px solid var(--statute);}
+  .gatechip.via{background:var(--surface-2); color:var(--navy); border:1px solid var(--line);}
+
+  .ck{font-size:12.5px; padding:3px 0;}
+  .ck::before{content:"☑ "; color:var(--statute); font-weight:700;}
+  .ck.open::before{content:"☐ "; color:var(--amber-ink);}
+
+  .ev{display:flex; gap:10px; padding:6px 0; border-top:1px solid var(--surface-2); font-size:12.5px;}
+  .ev:first-of-type{border-top:none;}
+  .ev .d{flex:0 0 44px; color:var(--muted);}
+
+  .legend{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:26px;}
+  .legend h2{font-size:14px; color:var(--navy); margin-bottom:10px;}
+  .legend ol{margin-left:20px;}
+  .legend li{margin-bottom:9px; font-size:12.5px;}
+  .legend li b{color:var(--navy);}
+  .rule{font-size:10px; font-weight:800; color:#fff; background:var(--statute); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
+  .decided{font-size:10px; font-weight:800; color:#fff; background:var(--blue); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="draftbar">
+    <h1>Processing UI — Draft 8 · Disposition / Close (for your markup — nothing is built)</h1>
+    <p>The record's ending, done properly: the <b>eight §5.8 dispositions as a picker where every choice carries its own
+    evidence gate</b> — some reachable only through their own machinery (Denied via Denial compose, sweeps via config), none
+    reachable bare. Frame A is the close surface on the no-records path (the evidence-gate worked example); Frame B is the
+    Delivered path (delivery + notice); the rail carries what auto-closure looks like when a sweep did it. Single city
+    (Austin, TX). <b>The parent never appears here as something to close</b> — it derives Complete when the last child ends.</p>
+  </div>
+
+  <div class="screenlabel">Frame A · Close record — R-2419 (opened from the Record Search task; returns to it) <span class="callout">1</span></div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">Close record · R-2419 — City of Austin, TX</span><span class="who">S. Bell · Fulfillment Staff</span></div>
+    <div class="appbody">
+
+      <div class="parentstrip">
+        <span class="pn">R-2419</span>
+        <span class="kv">All communications regarding the Red River St closure, March–June 2026</span>
+        <span class="kv"><b>D. Alvarez</b> · delivery: email</span>
+        <span class="kv" style="margin-left:auto;">Statutory deadline: <b>Aug 11</b> — a closure IS the response</span>
+      </div>
+
+      <div class="cols">
+        <div class="main">
+
+          <div class="panelbox">
+            <h3 class="panel">Disposition — every ending has its own evidence gate <span class="callout">2</span></h3>
+
+            <div class="disp on"><input type="radio" checked><div>
+              <div class="dt">Closed – No records located <span class="gatechip need">Gate: effort trail + open descriptions</span></div>
+              <div class="dd">The assertion that nothing exists — unevidenced, it is indistinguishable from never having looked.
+              Gates below.</div>
+            </div></div>
+
+            <div class="disp"><input type="radio"><div>
+              <div class="dt">Closed – Withdrawn by requestor <span class="gatechip need">Gate: withdrawal on file</span></div>
+              <div class="dd">Voluntary — a choice, not silence. Requires the requestor's communication attached.</div>
+            </div></div>
+
+            <div class="disp"><input type="radio"><div>
+              <div class="dt">Closed – Previously furnished <span class="gatechip need">Gate: certification</span></div>
+              <div class="dd">Tex. Gov't Code §552.232 — certify the same records were already provided (prior request #, date,
+              records match), in lieu of re-copying. A real outcome, <b>not a denial</b>. <span class="callout">5</span></div>
+            </div></div>
+
+            <div class="disp"><input type="radio"><div>
+              <div class="dt">Closed – Not in our custody / referred <span class="gatechip need">Gate: referral record</span></div>
+              <div class="dd">Names the proper custodian; pairs with the referral letter (custodian_referral capability).</div>
+            </div></div>
+
+            <div class="disp locked"><input type="radio" disabled><div>
+              <div class="dt">Closed – Denied <span class="gatechip via">Only via Denial compose</span></div>
+              <div class="dd">Withheld in full under an exemption — requires citations and the letter, so it is <b>set by
+              Draft 3's compose (or the AG band), never picked bare here</b>. <span class="callout">4</span></div>
+            </div></div>
+
+            <div class="disp locked"><input type="radio" disabled><div>
+              <div class="dt">Closed – Delivered <span class="gatechip via">Set by the release event</span></div>
+              <div class="dd">Recorded when the records actually go out (Frame B) — not a thing staff assert separately.</div>
+            </div></div>
+
+            <div class="disp locked"><input type="radio" disabled><div>
+              <div class="dt">Closed – No response &nbsp;·&nbsp; Closed – Non-payment <span class="gatechip via">Normally the sweeps</span></div>
+              <div class="dd">Clarification unanswered / payment window lapsed — the config-gated daily sweeps close these with
+              the full trail. Manual use requires the same evidence the sweep would have had. <span class="callout">6</span></div>
+            </div></div>
+          </div>
+
+          <div class="panelbox">
+            <h3 class="panel">The gate for “No records located” <span class="callout">3</span></h3>
+            <div class="ck">Effort trail is non-empty — searched: email archive (2 queries), Public Works shared drive · 1 call logged</div>
+            <div class="ck">Every duty-carrying portal description answered — blanket “nothing further”, note required</div>
+            <div class="ck open">Closure note — <i>why the search is exhaustive</i> (required; the trail is the evidence, the note is the reasoning)</div>
+            <div class="kv" style="margin-top:6px;">⚠ The two gates never feed each other: answering a description “nothing
+            further” is a <b>claim</b>, and it does not count as effort — otherwise a closure could evidence itself.</div>
+          </div>
+
+          <div class="panelbox tinted">
+            <h3 class="panel">Closure notice <span class="callout">7</span></h3>
+            <div class="kv" style="margin-bottom:6px;">Every closure owes the requestor an answer. Content is per-disposition
+            (a no-records notice states what was searched; a denial's content — exemption, citation, application — is an
+            invariant and comes from Denial compose). Delivery by the request's channel; the letter previews before send.</div>
+            <button class="btn" disabled>Close &amp; send notice</button>
+            <span class="kv" style="margin-left:8px;">blocked: closure note missing (named above)</span>
+          </div>
+
+        </div>
+
+        <div class="rail">
+          <div class="panelbox">
+            <div class="railhead">What a sweep closure looks like <span class="callout">6</span></div>
+            <div class="ev"><span class="d">7/14</span><span>R-2377 · <b>Closed – No response</b> — clarification unanswered 32 days (grace 30 + buffer 2) <span class="by by-system">Sweep · per attested config</span> · notice owed → sent 7/14</span></div>
+            <div class="ev"><span class="d">7/02</span><span>R-2340 · <b>Closed – Non-payment</b> — 60-day unclaimed window lapsed <span class="by by-system">Sweep · TX-S05</span></span></div>
+            <p class="kv" style="margin-top:5px;">Auto-closures are records, not surprises: reason, config basis, and the
+            notice trail, all on the child's history.</p>
+          </div>
+          <div class="panelbox">
+            <div class="railhead">Step back</div>
+            <button class="btn quiet">Return to the task</button>
+            <button class="btn quiet">Confer with supervisor</button>
+            <hr class="soft">
+            <div class="railhead">After closing</div>
+            <p class="kv">Reopening a closed record is Director-authority with a required note — and the build must add the
+            from-closed guard the transition engine currently lacks. <span class="callout">11</span></p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="screenlabel">Frame B · Delivered — R-2417 (the release event writes the disposition) <span class="callout">8</span></div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">Deliver &amp; close · R-2417 — City of Austin, TX</span><span class="who">S. Bell · Fulfillment Staff</span></div>
+    <div class="appbody">
+      <div class="parentstrip">
+        <span class="pn">R-2417</span>
+        <span class="kv">Email correspondence — Public Works ↔ Lakeline Paving LLC</span>
+        <span class="kv"><b>D. Alvarez</b> · delivery: email</span>
+      </div>
+      <div class="cols">
+        <div class="main">
+          <div class="panelbox">
+            <h3 class="panel">Release</h3>
+            <div class="ck">Released set: 214 pages (redacted) — <b>a redacted release is still Delivered</b>; the withholding log carries every redaction with its authority <span class="callout">8</span></div>
+            <div class="ck">Funds check passed — its own quoted share is covered (Draft 7's gate)</div>
+            <div class="ck">Notice assembled: delivery letter + redaction inventory with citations (content invariant)</div>
+            <div class="kv" style="margin-top:7px;"><button class="btn">Release &amp; send</button> &nbsp;— writes
+            <code>Closed – Delivered</code>, <code>delivered_at</code>, <code>installment_no</code>, and the notice, as one event.</div>
+          </div>
+          <div class="panelbox tinted">
+            <h3 class="panel">MRR packaging &amp; timing — the city's two blank rows <span class="callout">9</span></h3>
+            <div class="kv"><b>delivery_mode</b> (as_ready · hold_all) and <b>notice_packaging</b> (per_child · combined) are
+            MRR Rule-Matrix rows <b>shipped blank</b> — the city answers them with counsel before MRR unlocks, and they are
+            presented together because answering them inconsistently reads awkwardly. For a single-record request both produce
+            one record, one shipment, one notice — n = 1 degenerates correctly. Where statute makes installments an entitlement
+            (WA), <code>hold_all</code> is not selectable.</div>
+            <div class="warnline" style="margin-top:6px;"><b>RM hold of a ready record (MRR):</b> requires a note, and in an
+            entitlement jurisdiction a requestor's request for installments overrides it — <b>drafted per the recommended
+            guard, which is flagged OPEN and unratified</b>; the override does not build until it is resolved. Never a payment
+            hold (§5.9). <span class="callout">10</span></div>
+          </div>
+        </div>
+        <div class="rail">
+          <div class="panelbox">
+            <div class="railhead">When the last child ends <span class="callout">12</span></div>
+            <p class="kv">The parent derives <b>Complete</b> — no parent disposition exists, whatever the children's mix; each
+            child keeps its own ending. On an MRR, the last child reaching <i>ready</i> already triggered Draft 7's settlement;
+            the last closure completes the parent and ends the MRR Management task.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════ annotations ══════════ -->
+  <div class="legend">
+    <h2>Design annotations</h2>
+    <ol>
+      <li><b>A close surface opened from a task, returning to it</b> — same pattern as Denial compose. Dispositions are
+      <b>child-level, the eight §5.8 endings, verbatim</b>; nothing else is offerable and the parent is never closable.</li>
+      <li><b>Every ending has its own evidence gate, named on the option.</b> Withdrawn needs the withdrawal on file (a choice,
+      not silence — the distinction from No response is the point of having both); referral needs the custodian named;
+      the gate chips say what is missing before anyone commits to an ending.</li>
+      <li><b><span class="rule">RULE-pattern</span> The no-records gate is the worked example:</b> non-empty effort trail +
+      every duty-carrying description answered + a required reasoning note — and the two gates never feed each other (an
+      intent answer is a claim, not evidence), the record-search spec's own firewall, restated where it bites.</li>
+      <li><b>Denied is visible but locked</b> — reachable only through Denial compose or the AG band, because its content
+      requirements (citation, explanation, letter) live there. Showing it locked teaches the path; hiding it would just get it
+      asked for.</li>
+      <li><b>Previously furnished is an ending, not a denial</b> (TX §552.232) — gated on the certification (prior request
+      reference, date, match). State-specific endings appear only where their state provides them (rule-b posture).</li>
+      <li><b><span class="rule">RULE C</span> Sweep closures are records, not surprises.</b> No response / Non-payment normally
+      close by the config-gated sweeps — shown with the system-per-attested-config badge, the numeric basis (grace + buffer;
+      the 60-day window), and the notice trail. Manual use of either demands the same evidence the sweep would have had.</li>
+      <li><b>Every closure owes a notice.</b> Content is per-disposition and — for denials — invariant (exemption, citation,
+      application). The close button is one act: disposition + notice, never a silent end. Blocked-with-reason, as everywhere.</li>
+      <li><b>Delivered is written by the release event</b>, not asserted: release + funds check + notice + `delivered_at` +
+      `installment_no` as one event. A redacted release is still Delivered — the withholding log (§5.7) carries the detail,
+      which is why no “partially granted” disposition exists or is needed.</li>
+      <li><b><span class="decided">§15</span> The two MRR matrix rows ship blank and are presented together</b> (delivery_mode ×
+      notice_packaging): a shipped default here would be the vendor making policy for a government. n = 1 degenerates
+      correctly; WA's entitlement removes hold_all from the menu (constraint, not default).</li>
+      <li><b>⚠ The RM-hold guard is drafted but OPEN.</b> Note-required + requestor-override-in-entitlement-jurisdictions is
+      the spec's recommended, unratified guard — the mockup encodes it so Kevin can ratify or reverse; the override does not
+      build until resolved. It is never a payment hold (§5.9).</li>
+      <li><b>Reopen needs a real guard.</b> The transition engine currently has no from-closed guard (flagged doc-debt);
+      drafted as Director-authority + required note, and the guard becomes part of this build, not a later fix.</li>
+      <li><b>The parent's ending is derived, never chosen.</b> All children terminal → Complete; mixed endings stay per-child
+      (the retired “partially granted” roll-up stays retired); the mixed-outcome <i>notice</i> question remains with the
+      notices field-design pass, deliberately not answered by this screen.</li>
+    </ol>
+    <p class="note" style="margin-top:10px;"><b>Columbus, OH in one line:</b> no Previously-furnished certification path
+    (TX-specific), vagueness closures arrive via the OH denial ground instead of clarification timeout where the city so
+    chooses, and no statutory deadline chip — everything else, including every gate, is identical. <b>This is the eighth and
+    final screen of the session-1 set.</b></p>
+  </div>
+
+</div>
+</body>
+</html>
