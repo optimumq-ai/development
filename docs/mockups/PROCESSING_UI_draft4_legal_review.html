@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Processing UI — Draft 4 — Legal Review / AG Band (for markup)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#D8E0E8; --surface-2:#F2F6F9; --surface:#FFFFFF; --blue:#1E6091;
+    --ink:#1F2937; --muted:#5B6B7A; --line:#C3CFDA;
+    --navy:#143D5C; --amber-ink:#9A6700; --amber-line:#D4A72C; --amber-bg:#FFF8E5;
+    --ghost:#8A97A3; --statute:#2F6B4F; --statute-bg:#EAF4EF; --warn:#8C3A2B;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--ink); font:13.5px/1.45 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; padding:24px 18px 60px;}
+  .wrap{max-width:1060px; margin:0 auto;}
+
+  .draftbar{background:var(--navy); color:#fff; border-radius:8px; padding:12px 16px; margin-bottom:14px;}
+  .draftbar h1{font-size:15px; font-weight:600;}
+  .draftbar p{font-size:12px; opacity:.85; margin-top:3px;}
+  .citytabs{display:flex; gap:8px; margin:16px 0 10px;}
+  .citytabs button{font:inherit; font-weight:600; padding:7px 16px; border-radius:6px 6px 0 0; border:1px solid var(--line); border-bottom:none; background:var(--surface-2); color:var(--muted); cursor:pointer;}
+  .citytabs button.on{background:var(--surface); color:var(--navy); box-shadow:0 -2px 0 var(--blue) inset;}
+  .screenlabel{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:22px 2px 6px; font-weight:700;}
+  .note{font-size:12px; color:var(--muted); margin:6px 2px 0;}
+  .callout{display:inline-block; min-width:17px; height:17px; line-height:17px; text-align:center; border-radius:50%; background:var(--blue); color:#fff; font-size:11px; font-weight:700; vertical-align:2px; margin-left:4px;}
+
+  .app{background:var(--surface); border:1px solid var(--line); border-radius:8px; overflow:hidden; box-shadow:0 1px 3px rgba(20,61,92,.12);}
+  .appbar{background:var(--surface-2); border-bottom:1px solid var(--line); padding:9px 14px; display:flex; align-items:center; gap:12px;}
+  .appbar .brand{font-weight:700; color:var(--navy);}
+  .appbar .role{font-size:12px; color:var(--muted);}
+  .appbar .who{margin-left:auto; font-size:12px; color:var(--muted);}
+  .appbody{padding:14px;}
+  h2.scr{font-size:14px; font-weight:600; color:var(--navy); margin-bottom:10px;}
+  h3.panel{font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin-bottom:7px;}
+
+  .btn{font:inherit; font-size:13px; background:var(--blue); color:#fff; border:none; border-radius:5px; padding:6px 14px; cursor:pointer; font-weight:600;}
+  .btn.sec{background:var(--surface); color:var(--blue); border:1px solid var(--blue); font-weight:600;}
+  .btn.quiet{background:var(--surface-2); color:var(--ink); border:1px solid var(--line); font-weight:500;}
+
+  table.q{width:100%; border-collapse:collapse; background:var(--surface);}
+  table.q th{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); text-align:left; padding:7px 10px; border-bottom:2px solid var(--line); font-weight:700;}
+  table.q td{padding:9px 10px; border-bottom:1px solid var(--surface-2); vertical-align:top;}
+  table.q tr.sel td{background:#EDF3F8;}
+  .reqno{font-weight:700; color:var(--blue);}
+  .qdesc{color:var(--muted); font-size:12.5px; max-width:300px;}
+  .pool{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; border-radius:3px; padding:2px 7px; background:var(--surface-2); border:1px solid var(--line); color:var(--muted);}
+
+  .chip{display:inline-block; font-size:12px; border-radius:4px; padding:3px 9px; white-space:normal;}
+  .chip .k{display:block; font-size:9.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;}
+  .clock-legal{background:var(--surface); border-left:4px solid var(--navy); border-top:1px solid var(--line); border-right:1px solid var(--line); border-bottom:1px solid var(--line); color:var(--navy); font-weight:700;}
+  .clock-legal .k{color:var(--navy);}
+  .clock-tolled{background:var(--surface-2); border-left:4px solid var(--ghost); border-top:1px solid var(--line); border-right:1px solid var(--line); border-bottom:1px solid var(--line); color:var(--muted); font-weight:600;}
+  .clock-tolled .k{color:var(--ghost);}
+  .clock-info{background:var(--surface); border:1px dashed var(--ghost); color:var(--muted); font-weight:600;}
+  .clock-info .k{color:var(--ghost);}
+  .clock-none{font-size:12.5px; color:var(--muted); font-style:italic;}
+  .cite{font-size:11px; color:var(--muted); font-weight:400;}
+  .exposure{display:block; font-size:11px; color:var(--warn); font-weight:600; margin-top:2px;}
+
+  .by{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; border-radius:3px; padding:2px 7px; vertical-align:1px;}
+  .by-system{background:var(--surface-2); color:var(--navy); border:1px solid var(--line);}
+  .by-person{background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line);}
+  .by-external{background:#EDE9F5; color:#4A3A75; border:1px solid #8E7CC3;}
+  .recorded{background:var(--surface); color:var(--ghost); border:1px dashed var(--ghost);}
+
+  .parentstrip{background:var(--surface-2); border:1px solid var(--line); border-radius:6px; padding:8px 12px; display:flex; gap:14px; align-items:baseline; margin-bottom:10px; flex-wrap:wrap;}
+  .parentstrip .pn{font-weight:700; color:var(--navy);}
+  .clockstrip{display:flex; gap:10px; align-items:flex-start; flex-wrap:wrap; margin:10px 0 12px;}
+  .cols{display:flex; gap:14px; align-items:flex-start;}
+  .main{flex:1 1 auto; min-width:0;}
+  .rail{flex:0 0 250px; display:flex; flex-direction:column; gap:8px;}
+  .panelbox{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:11px 13px; margin-bottom:11px;}
+  .panelbox.tinted{background:var(--surface-2);}
+  .rail .panelbox{margin-bottom:0;}
+  .kv{font-size:12.5px; color:var(--muted);}
+  .kv b{color:var(--ink); font-weight:600;}
+  .ghostline{border-left:3px dashed var(--ghost); padding-left:10px; color:var(--muted);}
+  .railhead{font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-bottom:6px;}
+  .rail .btn{width:100%; margin-bottom:6px;}
+  hr.soft{border:none; border-top:1px solid var(--surface-2); margin:9px 0;}
+  .tag{display:inline-block; font-size:11px; background:var(--surface-2); border:1px solid var(--line); border-radius:3px; padding:1px 7px; color:var(--muted);}
+
+  /* band timeline */
+  .step{display:flex; gap:11px; padding:9px 0; border-top:1px solid var(--surface-2);}
+  .step:first-of-type{border-top:none; padding-top:2px;}
+  .step .dot{flex:0 0 20px; height:20px; border-radius:50%; text-align:center; line-height:20px; font-size:11px; font-weight:800; margin-top:1px;}
+  .step.done .dot{background:var(--statute-bg); color:var(--statute); border:1px solid var(--statute);}
+  .step.now .dot{background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line);}
+  .step.later .dot{background:var(--surface-2); color:var(--ghost); border:1px dashed var(--ghost);}
+  .step .st{font-weight:600;}
+  .step .sd{font-size:12px; color:var(--muted); margin-top:1px;}
+  .ck{font-size:12px; padding:2px 0; color:var(--ink);}
+  .ck::before{content:"☑ "; color:var(--statute); font-weight:700;}
+  .ck.open::before{content:"☐ "; color:var(--amber-ink);}
+
+  .frow{display:flex; gap:10px; align-items:center; padding:7px 10px; border:1px solid var(--line); border-radius:5px; margin-bottom:6px;}
+  .frow .fn{font-weight:600; min-width:0; flex:1;}
+
+  .legend{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:26px;}
+  .legend h2{font-size:14px; color:var(--navy); margin-bottom:10px;}
+  .legend ol{margin-left:20px;}
+  .legend li{margin-bottom:9px; font-size:12.5px;}
+  .legend li b{color:var(--navy);}
+  .rule{font-size:10px; font-weight:800; color:#fff; background:var(--statute); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="draftbar">
+    <h1>Processing UI — Draft 4 · Legal Review / the AG Band (for your markup — nothing is built)</h1>
+    <p>The <code>legal_review</code> task screen — office-level, team-agnostic, ORO Senior Legal (Legal Associate in support).
+    One task type, two very different jobs, branch-gated: in <b>Texas</b> the screen is the <b>AG band</b> — a statutory
+    tracker for the referral the Denial-compose gate (Draft 3) launched. In <b>Ohio</b> the stage <code>ag_review</code>
+    does not exist at all, and legal review is where a staff-denial state decides — ending in Draft 3's compose.
+    Backend for the TX band is BUILT (assert-exemption → ag_review + toll + 10-bd clock; ag-ruling → resume + advance);
+    this draft is the screen over it.</p>
+  </div>
+
+  <div class="citytabs">
+    <button id="tab-tx" class="on" onclick="show('tx')">Austin, TX — the AG band</button>
+    <button id="tab-oh" onclick="show('oh')">Columbus, OH — staff-denial legal review</button>
+  </div>
+
+<!-- ══════════════════════════════ TEXAS ══════════════════════════════ -->
+<div id="city-tx">
+
+  <div class="screenlabel">Screen 1 · My Tasks — legal review (office-level pool, all teams)</div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">ORO Senior Legal — City of Austin, TX</span><span class="who">R. Vance</span></div>
+    <div class="appbody">
+      <h2 class="scr">My Tasks — Legal Review <span class="callout">1</span></h2>
+      <table class="q">
+        <tr><th>Request</th><th>Stage</th><th>Description</th><th>Duty clock <span class="callout">2</span></th><th>State of play</th><th></th></tr>
+        <tr class="sel">
+          <td><span class="reqno">R-2417</span></td>
+          <td><span class="tag">AG review</span></td>
+          <td class="qdesc">Email correspondence — Public Works ↔ Lakeline Paving LLC</td>
+          <td><span class="chip clock-legal"><span class="k">Statutory duty</span>Brief the AG by <b>Aug 18</b></span></td>
+          <td><span class="kv">Referred Jul 30 · requestor notified · briefing package open</span></td>
+          <td><button class="btn">Open →</button></td>
+        </tr>
+        <tr>
+          <td><span class="reqno">R-2409</span></td>
+          <td><span class="tag">Exemption review</span></td>
+          <td class="qdesc">Personnel file excerpts — assistant city manager</td>
+          <td><span class="chip clock-legal"><span class="k">Statutory duty</span>Refer by <b>Aug 5</b> or release<span class="exposure">⚠ past this: presumed public (§552.302)</span></span></td>
+          <td><span class="kv">Exemption asserted at redaction · not yet referred</span><br><span class="pool" style="margin-top:3px;">Pool — unassigned</span></td>
+          <td><button class="btn sec">Claim</button></td>
+        </tr>
+      </table>
+      <p class="note">Legal review is an office-level pool — tasks from every fulfillment team land here, and the duty-clock
+      column is the sort key: these are the only tasks in the product whose deadlines carry automatic statutory consequences
+      for missing them.</p>
+    </div>
+  </div>
+
+  <div class="screenlabel">Screen 2 · Legal Review — R-2417, stage AG review (the band as a statutory tracker)</div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">Legal Review · R-2417 — City of Austin, TX</span><span class="who">R. Vance</span></div>
+    <div class="appbody">
+
+      <div class="parentstrip">
+        <span class="pn">R-2417</span>
+        <span class="kv">Email correspondence — Public Works ↔ Lakeline Paving LLC · received Jul 28</span>
+        <span class="kv"><b>D. Alvarez</b> · delivery: email</span>
+        <span class="kv" style="margin-left:auto;">Stage: <b>AG review</b></span>
+      </div>
+
+      <div class="clockstrip">
+        <span class="chip clock-tolled"><span class="k">Statutory deadline — tolled</span>Respond · <b>paused while the AG holds it</b> · resumes on the ruling <span class="cite">toll: ag_ruling_pending</span></span> <span class="callout">3</span>
+        <span class="chip clock-legal"><span class="k">Statutory duty — met</span>Ask the AG · done <b>Jul 30</b> (was due Aug 11) <span class="cite">§552.301(b)</span>
+          <span class="exposure">⚠ §552.302 presumed-public exposure: cleared by the timely referral</span></span>
+        <span class="chip clock-legal"><span class="k">Statutory duty</span>Brief the AG by <b>Aug 18</b> · 15 business days <span class="cite">§552.301(e)</span></span>
+        <span class="chip clock-info"><span class="k">The AG's clock — informational</span>Ruling expected within 45 business days <span class="cite">§552.306</span></span> <span class="callout">4</span>
+      </div>
+
+      <div class="cols">
+        <div class="main">
+
+          <div class="panelbox">
+            <h3 class="panel">What was asserted <span class="callout">5</span></h3>
+            <div class="frow"><span class="fn">PW_director_lakeline_emails_mar-jun.pdf</span><span class="tag">Litigation exception · §552.103</span></div>
+            <div class="kv">Asserted at redaction · <span class="by by-person">R. Vance · Senior Legal</span> · via the Denial-compose gate (staff denial unavailable in Texas — the assertion became this referral).</div>
+          </div>
+
+          <div class="panelbox">
+            <h3 class="panel">The Attorney-General band <span class="callout">6</span></h3>
+
+            <div class="step done"><div class="dot">✓</div><div>
+              <div class="st">Request a ruling from the AG</div>
+              <div class="sd">Done Jul 30 — within the 10-business-day window (was due Aug 11). <span class="cite">§552.301(b)</span> · logged, letter on file</div>
+            </div></div>
+
+            <div class="step done"><div class="dot">✓</div><div>
+              <div class="st">Notify the requestor of the referral</div>
+              <div class="sd">Done Jul 30 — statement + copy of the written request. <span class="cite">§552.301(d)</span> · sent by email (requestor's channel)</div>
+            </div></div>
+
+            <div class="step now"><div class="dot">3</div><div>
+              <div class="st">Briefing package to the AG — due Aug 18</div>
+              <div class="sd">Required contents, each attached here: <span class="cite">§552.301(e)</span></div>
+              <div class="ck">Written comments — why the exception applies</div>
+              <div class="ck">Copy of the written request</div>
+              <div class="ck open">Signed statement of the date the request was received</div>
+              <div class="ck open">Copy or representative sample of the information at issue, <b>labeled</b></div>
+              <div class="sd" style="margin-top:4px;"><button class="btn sec">Assemble &amp; submit package…</button> &nbsp;<span class="kv">copy to requestor of the comments (redacted as needed) <span class="cite">§552.301(e-1)</span></span></div>
+            </div></div>
+
+            <div class="step later"><div class="dot">4</div><div>
+              <div class="st">Await the ruling</div>
+              <div class="sd">The response clock stays tolled. When the ruling arrives, record it below — that is the step that moves the request.</div>
+            </div></div>
+          </div>
+
+          <div class="panelbox">
+            <h3 class="panel">Third-party proprietary interest <span class="callout">7</span></h3>
+            <div class="kv">None identified for this request. If the withholding rested on a third party's proprietary
+            information (Lakeline Paving's, here), Texas requires notifying them so they may brief the AG directly
+            <span class="cite">§552.305</span>. <button class="btn quiet">Identify a third party…</button></div>
+          </div>
+
+          <div class="panelbox tinted">
+            <h3 class="panel">Record the ruling <span class="callout">8</span></h3>
+            <div class="kv" style="margin-bottom:8px;">The ruling is <b>the Attorney General's decision, not this office's</b> —
+            recording it here applies it: <span class="by by-external">Decided by · Office of the Attorney General</span> with the
+            ruling number and letter attached.</div>
+            <div class="kv" style="margin-bottom:8px;">
+              <b>Sustained (withhold)</b> → the response clock resumes, the stage advances, and Denial compose reopens with the
+              ruling attached — the letter cites it (Draft 3's ghost panel).<br>
+              <b>Overruled (release)</b> → the response clock resumes and the records return to redaction → delivery. Nothing to
+              compose; the release is the response.
+            </div>
+            <button class="btn">Record AG ruling…</button>
+          </div>
+
+        </div>
+
+        <div class="rail">
+          <div class="panelbox">
+            <div class="railhead">Resolve</div>
+            <button class="btn">Record AG ruling…</button>
+            <button class="btn quiet">Withdraw assertion — release instead</button>
+            <p class="kv" style="margin-top:-2px; margin-bottom:6px;">Release is never blocked: withdrawing the assertion resumes the clock and sends the records back to redaction → delivery. <span class="callout">9</span></p>
+            <hr class="soft">
+            <div class="railhead">Work the request</div>
+            <button class="btn quiet">Confer with supervisor</button>
+            <button class="btn quiet">Log a phone call</button>
+            <button class="btn quiet">View withheld records</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════ OHIO ══════════════════════════════ -->
+<div id="city-oh" style="display:none;">
+
+  <div class="screenlabel">Screen 1 · My Tasks — legal review (office-level pool, all teams)</div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">ORO Senior Legal — City of Columbus, OH</span><span class="who">A. Whitmore</span></div>
+    <div class="appbody">
+      <h2 class="scr">My Tasks — Legal Review <span class="callout">1</span></h2>
+      <table class="q">
+        <tr><th>Request</th><th>Stage</th><th>Description</th><th>Clock</th><th>State of play</th><th></th></tr>
+        <tr class="sel">
+          <td><span class="reqno">R-1079</span></td>
+          <td><span class="tag">Exemption review</span></td>
+          <td class="qdesc">Internal-affairs investigation file — Officer badge #4471</td>
+          <td><span class="clock-none">city target Aug 1 — not a legal deadline</span></td>
+          <td><span class="kv">Escalated from redaction · CLEIR question</span></td>
+          <td><button class="btn">Open →</button></td>
+        </tr>
+      </table>
+      <p class="note">No AG column and no referral chips anywhere in this install: <code>ag_review</code> is in
+      <code>unavailableStages</code> for Ohio — the band is not hidden, it <b>does not exist</b>. Legal review here is the
+      decision point a pre-clearance state doesn't have. <span class="callout">10</span></p>
+    </div>
+  </div>
+
+  <div class="screenlabel">Screen 2 · Legal Review — R-1079, stage exemption review (the staff-denial decision point)</div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">Legal Review · R-1079 — City of Columbus, OH</span><span class="who">A. Whitmore</span></div>
+    <div class="appbody">
+
+      <div class="parentstrip">
+        <span class="pn">R-1079</span>
+        <span class="kv">Internal-affairs investigation file — Officer badge #4471 · received Jul 20 · written request</span>
+        <span class="kv"><b>M. Castillo</b> · delivery: email</span>
+        <span class="kv" style="margin-left:auto;">Stage: <b>Exemption review</b></span>
+      </div>
+
+      <div class="clockstrip">
+        <span class="clock-none">No statutory response deadline in Ohio. City service target Aug 1 — the target keeps aging this task; a denial is a response, not an escape from it.</span>
+      </div>
+
+      <div class="cols">
+        <div class="main">
+
+          <div class="panelbox">
+            <h3 class="panel">Escalation — why this is on your desk <span class="callout">11</span></h3>
+            <div class="kv">Escalated from the <b>Redaction task</b> by K. Brandt (Jul 27): <i>“Summary and transcripts look like
+            CLEIR — ongoing IA investigation, uncharged suspect named throughout. Requesting legal determination before any
+            release.”</i> The redaction task is paused pending this decision.</div>
+          </div>
+
+          <div class="panelbox">
+            <h3 class="panel">Records at issue — proposed treatment <span class="callout">5</span></h3>
+            <div class="frow"><span class="fn">IA-2026-044_investigation_summary.pdf</span><span class="tag">proposed: withhold — CLEIR (A)(1)(h)</span></div>
+            <div class="frow"><span class="fn">IA-2026-044_interview_transcripts.pdf</span><span class="tag">proposed: redact — uncharged suspect (A)(2)(a)</span></div>
+            <div class="frow"><span class="fn">complaint_intake_form.pdf</span><span class="tag">proposed: release in full</span></div>
+            <div class="kv">Your decision sets the treatment per record; it flows into Denial compose (grounds pre-selected from
+            what you uphold) or back to redaction (for what you release).</div>
+          </div>
+
+          <div class="panelbox tinted">
+            <h3 class="panel">Decide <span class="callout">12</span></h3>
+            <div class="kv" style="margin-bottom:8px;">Ohio is a staff-denial state: this decision is the city's own —
+            <span class="by by-person">A. Whitmore · Senior Legal</span> — subject to mandamus, not pre-clearance. There is no
+            AG to ask and no referral to track.</div>
+            <button class="btn">Uphold — open Denial compose →</button>
+            <button class="btn quiet">Release all — return to redaction</button>
+            <button class="btn quiet">Adjust per record…</button>
+            <p class="kv" style="margin-top:6px;">Uphold opens Draft 3's compose with these records and grounds carried in;
+            the required-elements checklist and the letter live there, not here.</p>
+          </div>
+
+        </div>
+
+        <div class="rail">
+          <div class="panelbox">
+            <div class="railhead">Work the request</div>
+            <button class="btn quiet">Confer with supervisor</button>
+            <button class="btn quiet">Log a phone call</button>
+            <button class="btn quiet">View records</button>
+            <hr class="soft">
+            <div class="railhead">Step back</div>
+            <button class="btn quiet">Return to redaction with guidance…</button>
+            <p class="kv" style="margin-top:4px;">Answer the escalation without deciding — guidance lands on the redaction task as a note, and this task closes.</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+  <!-- ══════════ annotations ══════════ -->
+  <div class="legend">
+    <h2>Design annotations</h2>
+    <ol>
+      <li><b>One task type, office-level.</b> <code>legal_review</code> is team-agnostic (routing built): tasks from every
+      fulfillment team pool to Senior Legal / Legal Associate by task subset. The same screen serves both stages that spawn it —
+      <code>exemption_review</code> and <code>ag_review</code> — with the work surface swapping by stage and branch profile.
+      <code>legal_redaction</code> stays on the redaction screen (separate task family).</li>
+      <li><b>The duty-clock column is the queue's sort key.</b> These are the only tasks whose deadlines carry automatic statutory
+      consequences (§552.302 presumed-public), so the queue leads with the duty and its exposure — not with age or team.</li>
+      <li><b><span class="rule">RULE A</span> A tolled clock is shown tolled, with its reason.</b> The response clock renders in a
+      paused treatment (“tolled while the AG holds it · resumes on the ruling”, reason <code>ag_ruling_pending</code>) — never
+      silently hidden, never still counting. The engine already tolls and resumes; the UI's job is to say so.</li>
+      <li><b>Not every date is the city's duty.</b> The AG's own 45-business-day ruling window (§552.306) renders in a fourth,
+      <i>informational</i> treatment — dashed, “the AG's clock” — distinct from statutory duties, city targets, and requestor
+      windows. It ages expectations, not obligations.</li>
+      <li><b>What-was-asserted / records-at-issue</b> carries each record with its ground and citation — the same per-record
+      spine as Denial compose, arriving pre-filled from the assertion (TX) or the escalation (OH).</li>
+      <li><b>The band is a statutory tracker, not a to-do list.</b> Each step is a §552.301 duty with its own date, evidence
+      (letter on file), and history row; the briefing step carries the statute's required-contents checklist (§552.301(e),
+      requestor copy (e-1)). Steps that are met show <i>met, and when</i> — a cleared exposure says so rather than disappearing.</li>
+      <li><b>Third-party notice is its own branch-gated panel</b> (§552.305, capability <code>third_party_notice</code>): where
+      active, identifying a third party adds their notice + their right to brief the AG to the band. Null-capability cities render
+      the panel; only explicit <code>false</code> hides it.</li>
+      <li><b><span class="rule">RULE C</span> The ruling is an external decision, recorded — not made — here.</b> New badge in the
+      decided-by vocabulary: <span class="by by-external">Decided by · Office of the Attorney General</span> with ruling number and
+      letter attached (same pattern as the OH vexatious list being the court's). Sustained → clock resumes + Denial compose reopens
+      citing the ruling; overruled → clock resumes + records return to redaction → delivery. Both recorded by a person, decided by
+      the AG.</li>
+      <li><b>Release is never blocked.</b> Withdraw-assertion-and-release is always available and needs no ruling, no gate, no
+      signature — the asymmetry (blocking needs process, releasing doesn't) runs the whole product and holds here.</li>
+      <li><b><span class="rule">RULE B</span> Ohio's tab is the gating proof.</b> No AG column, no referral chips, no band panel —
+      <code>ag_review</code> is in <code>unavailableStages</code>, so the band doesn't exist rather than being hidden per-panel.
+      The legal task becomes the decision point itself: uphold → Draft 3's compose (grounds carried in), release → back to
+      redaction. Unresearched cities (<code>null</code>) render the TX-shaped screen minus state-specific copy.</li>
+      <li><b>Escalation provenance</b> (who escalated, why, from which task — which is paused waiting) opens the OH screen, the
+      same way “Path here” opens the estimate: the reviewer's first question is why it's on their desk.</li>
+      <li><b>Answer-without-deciding.</b> “Return to redaction with guidance” closes the legal task with advice instead of a
+      determination — most escalations are questions, not denials, and forcing a formal decision on each would manufacture
+      denials. The decision path stays one click away when it is warranted.</li>
+    </ol>
+    <p class="note" style="margin-top:10px;">Flagged for later drafts: the briefing-package assembler (document picker +
+    labeling + submission record) if Kevin wants it richer than attach-and-check; ruling-library / previous-determination
+    capture on Record-AG-ruling (feeds Draft 3's TX previous-determination check); disposition roll-up (shared with Draft 3).</p>
+  </div>
+
+</div>
+<script>
+function show(c){
+  document.getElementById('city-tx').style.display = c==='tx' ? '' : 'none';
+  document.getElementById('city-oh').style.display = c==='oh' ? '' : 'none';
+  document.getElementById('tab-tx').className = c==='tx' ? 'on' : '';
+  document.getElementById('tab-oh').className = c==='oh' ? 'on' : '';
+}
+</script>
+</body>
+</html>
