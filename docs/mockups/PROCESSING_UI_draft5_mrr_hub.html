@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>Processing UI — Draft 5 — MRR Intake / the Hub (for markup)</title>
+<title>Processing UI — Draft 5b — MRR Management (for markup)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
   :root{
@@ -34,14 +34,18 @@
   .btn{font:inherit; font-size:13px; background:var(--blue); color:#fff; border:none; border-radius:5px; padding:6px 14px; cursor:pointer; font-weight:600;}
   .btn.sec{background:var(--surface); color:var(--blue); border:1px solid var(--blue); font-weight:600;}
   .btn.quiet{background:var(--surface-2); color:var(--ink); border:1px solid var(--line); font-weight:500;}
+  .btn.danger-quiet{background:var(--surface); color:#8C3A2B; border:1px solid #C08A7E;}
   .btn.sm{font-size:12px; padding:4px 10px;}
+  .btn.hot{box-shadow:0 0 0 3px var(--amber-bg); border:1px solid var(--amber-line);}
+  .btn[disabled]{opacity:.45; cursor:not-allowed;}
 
   table.q{width:100%; border-collapse:collapse; background:var(--surface);}
   table.q th{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); text-align:left; padding:7px 10px; border-bottom:2px solid var(--line); font-weight:700;}
   table.q td{padding:9px 10px; border-bottom:1px solid var(--surface-2); vertical-align:top;}
   table.q tr.sel td{background:#EDF3F8;}
   .reqno{font-weight:700; color:var(--blue);}
-  .qdesc{color:var(--muted); font-size:12.5px; max-width:320px;}
+  .qdesc{color:var(--muted); font-size:12.5px; max-width:300px;}
+  .group{background:var(--surface-2); font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--navy); padding:6px 10px; border-bottom:1px solid var(--line);}
 
   .chip{display:inline-block; font-size:12px; border-radius:4px; padding:3px 9px; white-space:nowrap;}
   .chip .k{display:block; font-size:9.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;}
@@ -54,49 +58,53 @@
   .by-person{background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line);}
   .recorded{background:var(--surface); color:var(--ghost); border:1px dashed var(--ghost);}
 
-  .parentcard{background:var(--surface-2); border:1px solid var(--line); border-radius:6px; padding:10px 13px; margin-bottom:12px;}
-  .parentcard .row1{display:flex; gap:14px; align-items:baseline; flex-wrap:wrap;}
-  .parentcard .pn{font-weight:700; color:var(--navy); font-size:14px;}
   .kv{font-size:12.5px; color:var(--muted);}
   .kv b{color:var(--ink); font-weight:600;}
-  .hifl{font-size:10px; font-weight:800; letter-spacing:.06em; border-radius:3px; padding:2px 8px; background:#F7E9E5; color:var(--warn); border:1px solid #C08A7E;}
 
-  .child{border:1px solid var(--line); border-radius:6px; margin-bottom:9px; background:var(--surface);}
-  .childhead{padding:8px 12px; display:flex; gap:10px; align-items:baseline; flex-wrap:wrap; background:var(--surface-2); border-bottom:1px solid var(--surface-2);}
-  .childhead .cl{font-weight:700; color:var(--navy); font-size:12.5px; white-space:nowrap;}
-  .childbody{padding:8px 12px;}
-  .tag{display:inline-block; font-size:11px; background:var(--surface-2); border:1px solid var(--line); border-radius:3px; padding:1px 7px; color:var(--muted);}
-  .sug{display:inline-block; font-size:11px; font-weight:700; border-radius:3px; padding:2px 8px;}
-  .sug.pending{background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line);}
-  .sug.committed{background:var(--statute-bg); color:var(--statute); border:1px solid var(--statute);}
-  .sug.personal{background:#EDF3F8; color:var(--blue); border:1px solid var(--blue);}
-  .sug.external{background:#EDE9F5; color:#4A3A75; border:1px solid #8E7CC3;}
+  .mastercard{background:var(--surface-2); border:1px solid var(--line); border-radius:6px; padding:10px 13px; margin-bottom:12px;}
+  .mastercard .row1{display:flex; gap:14px; align-items:baseline; flex-wrap:wrap;}
+  .mastercard .pn{font-weight:700; color:var(--navy); font-size:14px;}
 
-  .ws{display:flex; gap:6px; flex-wrap:wrap; margin-top:6px;}
-  .ws span{font-size:10.5px; border:1px solid var(--line); background:var(--surface); border-radius:3px; padding:1px 7px; color:var(--muted);}
-  .ws span b{font-weight:700; color:var(--ink);}
-  .ws span.behind{border-color:#C08A7E; background:#F7E9E5; color:var(--warn);}
-  .ws span.ahead{border-color:var(--statute); background:var(--statute-bg); color:var(--statute);}
+  /* child bars */
+  .bar{display:flex; gap:10px; align-items:center; border:1px solid var(--line); border-radius:6px; background:var(--surface); padding:8px 12px; margin-bottom:7px; flex-wrap:wrap; cursor:pointer;}
+  .bar:hover{border-color:var(--blue);}
+  .bar .bl{font-weight:700; color:var(--navy); font-size:12.5px; white-space:nowrap;}
+  .bar .bd{color:var(--muted); font-size:12.5px; flex:1 1 220px; min-width:180px;}
+  .st{display:inline-block; font-size:10.5px; font-weight:700; border-radius:3px; padding:2px 8px; border:1px solid var(--line); background:var(--surface-2); color:var(--muted); white-space:nowrap;}
+  .st b{font-weight:800;}
+  .st.q{border-color:var(--line);}
+  .st.ip{border-color:var(--amber-line); background:var(--amber-bg); color:var(--amber-ink);}
+  .st.done{border-color:var(--statute); background:var(--statute-bg); color:var(--statute);}
+  .st.na{border-style:dashed; background:var(--surface); color:var(--ghost);}
+  .tagx{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; border-radius:3px; padding:2px 7px; white-space:nowrap;}
+  .tagx.vague{background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line);}
+  .tagx.denial{background:#F7E9E5; color:var(--warn); border:1px solid #C08A7E;}
+  .tagx.ext{background:#EDE9F5; color:#4A3A75; border:1px solid #8E7CC3;}
 
   .cols{display:flex; gap:14px; align-items:flex-start;}
   .main{flex:1 1 auto; min-width:0;}
   .rail{flex:0 0 250px; display:flex; flex-direction:column; gap:8px;}
   .panelbox{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:11px 13px; margin-bottom:11px;}
   .panelbox.tinted{background:var(--surface-2);}
-  .panelbox.ghostbox{border-style:dashed; background:var(--surface);}
   .rail .panelbox{margin-bottom:0;}
   .railhead{font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-bottom:6px;}
   .rail .btn{width:100%; margin-bottom:6px;}
   hr.soft{border:none; border-top:1px solid var(--surface-2); margin:9px 0;}
-  .ghostline{border-left:3px dashed var(--ghost); padding-left:10px; color:var(--muted);}
-  .warnline{border-left:3px solid #C08A7E; padding-left:10px;}
+  .ghostline{border-left:3px dashed var(--ghost); padding-left:10px; color:var(--muted); font-size:12.5px;}
+
+  /* activity blocks (child view) */
+  .act{border:1px solid var(--line); border-radius:6px; padding:10px 12px; margin-bottom:9px; background:var(--surface);}
+  .act .ah{display:flex; gap:10px; align-items:baseline; flex-wrap:wrap;}
+  .act .an{font-weight:700; color:var(--navy);}
+
+  .meter{display:inline-block; font-size:12px; font-weight:700; border-radius:4px; padding:3px 10px; background:var(--surface); border:1px solid var(--line);}
+  .meter b{color:var(--navy);}
 
   .legend{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:26px;}
   .legend h2{font-size:14px; color:var(--navy); margin-bottom:10px;}
   .legend ol{margin-left:20px;}
   .legend li{margin-bottom:9px; font-size:12.5px;}
   .legend li b{color:var(--navy);}
-  .rule{font-size:10px; font-weight:800; color:#fff; background:var(--statute); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
   .decided{font-size:10px; font-weight:800; color:#fff; background:var(--blue); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
 </style>
 </head>
@@ -104,213 +112,276 @@
 <div class="wrap">
 
   <div class="draftbar">
-    <h1>Processing UI — Draft 5 · MRR Intake — the Request Manager's Hub (for your markup — nothing is built)</h1>
-    <p>This is the design direction §14.3 of <code>SPEC_parent_child_lifecycle.md</code> has been waiting for — drafted faithful
-    to everything that section already decided: one screen, parent line + child lines, suggest-and-confirm routing (§14.2),
-    RM owns the tree at the parent, RM is the sole communicator, Verify ≠ Approve, HOLD not early-release.
-    Shown at <b>intake</b> (this IS the MRR intake flow — intake review is bypassed because the parent is already with an
-    Open Records team member), plus the six-weeks-later readout the screen ultimately exists for. Single city (Austin, TX);
-    the Ohio differences are one annotation, not a tab — this screen is about orchestration, not branch gating.</p>
+    <h1>Processing UI — Draft 5b · MRR Management (for your markup — nothing is built)</h1>
+    <p>Redrawn to your 7/28 direction — the first actual MRR UI direction on record (the earlier 5a leaned on a spec
+    attribution that wasn't yours; superseded). The shape: a new <b>MRR Management</b> task → ORO, eligible ORO Associate,
+    grouped on My Tasks, <b>parent stays assigned until every child is terminal</b>. Four levels here:
+    ① My Tasks with the MRR grouping · ② the MRR overview (all in process) · ③ a master record — summary on top, one
+    <b>bar per child</b> with task statuses and tags · ④ a child record — do or assign Search / Estimate data / Redaction,
+    each a standalone <b>MRR task</b> that never advances a stage. Single city (Austin, TX).</p>
   </div>
 
-  <div class="screenlabel">Screen 1 · My Tasks — ORO Associate (Request Manager)</div>
+  <div class="screenlabel">Screen 1 · My Tasks — the MRR grouping <span class="callout">1</span></div>
   <div class="app">
     <div class="appbar"><span class="brand">OptimumQ</span><span class="role">ORO Associate — City of Austin, TX</span><span class="who">M. Reyes</span></div>
     <div class="appbody">
-      <h2 class="scr">My Tasks — MRR Processing <span class="callout">1</span></h2>
       <table class="q">
-        <tr><th>Request</th><th>Items</th><th>Requestor</th><th>Description</th><th>Clock</th><th></th></tr>
+        <tr><td colspan="6" class="group">MRR Management (2)</td></tr>
         <tr class="sel">
-          <td><span class="reqno">R-2421</span><br><span class="kv">recv 7/28</span></td>
-          <td><b>4</b></td>
-          <td>K. Osei<br><span class="kv">portal · email verified: no</span></td>
-          <td class="qdesc">Records relating to the Barton Creek trail rebuild — minutes, contract, drone footage, permits</td>
+          <td><span class="reqno">R-2421</span><br><span class="kv">recv 7/28 · 4 items</span></td>
+          <td>K. Osei</td>
+          <td class="qdesc">Records relating to the Barton Creek trail rebuild</td>
           <td><span class="chip clock-legal"><span class="k">Statutory deadline</span>Aug 11</span></td>
-          <td><button class="btn">Open hub →</button></td>
+          <td><span class="meter">Estimate data <b>2 / 4</b></span></td>
+          <td><button class="btn">Open →</button></td>
         </tr>
         <tr>
-          <td><span class="reqno">R-2408</span><br><span class="kv">recv 7/24</span></td>
-          <td><b>3</b></td>
-          <td>Statesman-Ledger<br><span class="kv">media</span></td>
+          <td><span class="reqno">R-2408</span><br><span class="kv">recv 7/24 · 3 items</span></td>
+          <td>Statesman-Ledger</td>
           <td class="qdesc">Force-review board records — three incidents, 2025</td>
           <td><span class="chip clock-legal"><span class="k">Statutory deadline</span>Aug 7</span></td>
-          <td><button class="btn sec">Open hub →</button></td>
+          <td><span class="meter">Estimate data <b>3 / 3 ✓</b></span></td>
+          <td><button class="btn sec">Open →</button></td>
         </tr>
+        <tr><td colspan="6" class="group">Intake Review (1) · collapsed</td></tr>
+        <tr><td colspan="6" class="group">MRR Search — assigned to me (1) · collapsed <span class="callout">2</span></td></tr>
       </table>
-      <p class="note">Only parents with <code>child_count &gt; 1</code> appear — <code>is_mrr</code> is derived, never a flag.
-      A single-item request never lands here (it takes the Draft-1c path). The <code>mrr_processing</code> task is
-      system-routed to an ORO Associate with eligibility, exactly as the catalog designed it — re-adding the key alongside
-      the code that spawns it, per the deletion note. <span class="callout">1</span></p>
+      <p class="note">The MRR Management task routes to ORO and pool-assigns to an <b>eligible ORO Associate</b>; it stays
+      on this list until <b>all child records are terminal</b>. Child-level MRR tasks (Search / Estimate / Redaction) appear
+      on their assignee's My Tasks under their own names — including this manager's own list when they take one (last group).</p>
     </div>
   </div>
 
-  <div class="screenlabel">Screen 2 · The hub — R-2421 at intake (parent line + child lines; the queue renders this same shape)</div>
+  <div class="screenlabel">Screen 2 · MRR overview — everything in process <span class="callout">3</span></div>
   <div class="app">
-    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">MRR Hub · R-2421 — City of Austin, TX</span><span class="who">M. Reyes · Request Manager</span></div>
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">MRR Management — City of Austin, TX</span><span class="who">M. Reyes</span></div>
+    <div class="appbody">
+      <table class="q">
+        <tr><th>Master record</th><th>Requestor</th><th>Items</th><th>Clock</th><th>Estimate data</th><th>Flags</th><th>Manager</th></tr>
+        <tr class="sel">
+          <td><span class="reqno">R-2421</span></td><td>K. Osei</td><td>4</td>
+          <td><span class="chip clock-legal"><span class="k">Statutory</span>Aug 11</span></td>
+          <td><span class="meter">2 / 4</span></td>
+          <td><span class="tagx vague">Vague ×1</span> <span class="tagx denial">Denial → legal ×1</span></td>
+          <td class="kv">M. Reyes</td>
+        </tr>
+        <tr>
+          <td><span class="reqno">R-2408</span></td><td>Statesman-Ledger</td><td>3</td>
+          <td><span class="chip clock-legal"><span class="k">Statutory</span>Aug 7</span></td>
+          <td><span class="meter">3 / 3 ✓ <b>ready</b></span></td>
+          <td></td>
+          <td class="kv">M. Reyes</td>
+        </tr>
+        <tr>
+          <td><span class="reqno">R-2390</span></td><td>D. Alvarez</td><td>6</td>
+          <td><span class="chip clock-legal"><span class="k">Statutory</span>Aug 1</span></td>
+          <td><span class="meter">6 / 6 ✓ sent</span></td>
+          <td><span class="tagx ext">External ×1</span></td>
+          <td class="kv">T. Boyd</td>
+        </tr>
+      </table>
+      <p class="note">All MRRs in process, not just mine — the manager column says whose they are. Clicking a master record
+      opens Screen 3.</p>
+    </div>
+  </div>
+
+  <div class="screenlabel">Screen 3 · Master record — R-2421: summary on top, one bar per child <span class="callout">4</span></div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">MRR Management · R-2421 — City of Austin, TX</span><span class="who">M. Reyes</span></div>
     <div class="appbody">
 
-      <div class="parentcard">
+      <div class="mastercard">
         <div class="row1">
-          <span class="pn">R-2421 — Multi-record request · 4 items</span> <span class="callout">2</span>
-          <span class="kv"><b>K. Osei</b> · k.osei@…org · delivery: email</span>
-          <span class="kv">received Jul 28 · portal</span>
-          <span class="hifl">☆ Mark high priority</span>
-          <span class="kv" style="margin-left:auto;">Parent state: <b>In Process</b></span>
+          <span class="pn">R-2421 — 4 items · Barton Creek trail rebuild</span>
+          <span class="kv"><b>K. Osei</b> · k.osei@…org · delivery: email · received Jul 28 (portal)</span>
+          <span class="kv" style="margin-left:auto;">Manager: <b>M. Reyes</b> · assigned until all items terminal</span>
         </div>
         <div class="row1" style="margin-top:7px;">
-          <span class="chip clock-legal"><span class="k">Statutory deadline — parent</span>Respond by <b>Mon Aug 11</b> · 10 business days &nbsp;<span class="cite">§552.221</span></span>
-          <span class="kv">tolled: 0 days · payment: none yet · <b>the statutory clock lives only here — children carry budget clocks</b> <span class="callout">3</span></span>
-        </div>
-        <div class="row1" style="margin-top:7px;">
-          <span class="kv">Requestor-level checks (no intake-review stop for MRR — they live here): <span class="callout">4</span></span>
+          <span class="chip clock-legal"><span class="k">Statutory deadline — master</span>Respond by <b>Mon Aug 11</b> <span class="cite">§552.221</span></span>
+          <span class="kv">tolled 0 days · payment: none yet</span>
           <span class="by recorded">Eligibility · advisory recorded</span>
           <span class="by by-system">Ledger · no prior balance</span>
-          <span class="by recorded">Waiver · not requested — statutory categories armed</span>
+          <span class="by recorded">Waiver · not requested</span> <span class="callout">5</span>
+        </div>
+        <div class="row1" style="margin-top:8px;">
+          <span class="meter">Estimate data: <b>2 of 4 items complete</b></span>
+          <button class="btn" disabled>Generate estimate</button>
+          <span class="kv">— activates and highlights when 4 of 4 are complete <span class="callout">6</span></span>
+        </div>
+        <div class="row1" style="margin-top:4px;">
+          <span class="ghostline">When ready it looks like: &nbsp;<button class="btn hot sm">Generate estimate</button>&nbsp; one estimate for the master record, through the standard engine — staff <b>Verify</b>, the <b>requestor approves</b>.</span>
+        </div>
+      </div>
+
+      <h3 class="panel">Items — click a bar to open the child record <span class="callout">7</span></h3>
+
+      <div class="bar">
+        <span class="bl">Item 1</span>
+        <span class="bd">Council meeting minutes &amp; agenda items — trail rebuild, 2024–2026</span>
+        <span class="st done">Search <b>Complete</b></span>
+        <span class="st done">Estimate <b>Complete</b></span>
+        <span class="st na">Redaction <b>Not required</b></span>
+        <span class="kv">M. Reyes</span>
+      </div>
+
+      <div class="bar">
+        <span class="bl">Item 2</span>
+        <span class="bd">Construction contract + change orders — Parks &amp; Recreation</span>
+        <span class="st ip">Search <b>In Process</b></span>
+        <span class="st done">Estimate <b>Complete</b></span>
+        <span class="st q">Redaction <b>Queued</b></span>
+        <span class="kv">J. Patel</span>
+        <span class="tagx denial">Denial designated → Legal Review</span> <span class="callout">8</span>
+      </div>
+
+      <div class="bar">
+        <span class="bl">Item 3</span>
+        <span class="bd">Drone survey footage of the trail corridor (Watershed Dept.)</span>
+        <span class="st q">Search <b>Queued</b></span>
+        <span class="st ip">Estimate <b>In Process</b></span>
+        <span class="st na">Redaction <b>Not started</b></span>
+        <span class="kv">R. Ellis (external)</span>
+        <span class="tagx ext">External · link sent 7/28</span> <span class="callout">9</span>
+      </div>
+
+      <div class="bar">
+        <span class="bl">Item 4</span>
+        <span class="bd">Permit &amp; inspection records — trail structures</span>
+        <span class="st na">Search <b>Not started</b></span>
+        <span class="st na">Estimate <b>Not started</b></span>
+        <span class="st na">Redaction <b>Not started</b></span>
+        <span class="kv">—</span>
+        <span class="tagx vague">Vague — clarification out 7/28</span>
+      </div>
+
+      <div class="cols" style="margin-top:10px;">
+        <div class="main"></div>
+        <div class="rail">
+          <div class="panelbox">
+            <div class="railhead">One request, one voice <span class="callout">10</span></div>
+            <button class="btn">Contact requestor…</button>
+            <button class="btn quiet">Request clarification…</button>
+            <hr class="soft">
+            <div class="railhead">Master record</div>
+            <button class="btn quiet">Financial view</button>
+            <button class="btn quiet">History</button>
+            <button class="btn quiet">Mark high priority</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="screenlabel">Screen 4 · Child record — Item 2 (do it, or assign it — activity by activity) <span class="callout">11</span></div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">MRR Management · R-2421 · Item 2 — City of Austin, TX</span><span class="who">M. Reyes</span></div>
+    <div class="appbody">
+
+      <div class="mastercard" style="margin-bottom:12px;">
+        <div class="row1">
+          <span class="pn">Item 2 of 4 — Construction contract + change orders (Parks &amp; Recreation)</span>
+          <span class="kv" style="margin-left:auto;">Classified: <b>Contract file</b> (confidence 71) · <a href="#">← back to master record</a></span>
         </div>
       </div>
 
       <div class="cols">
         <div class="main">
 
-          <h3 class="panel">Items — the classifier suggested; you commit <span class="callout">5</span> &nbsp;<button class="btn sm sec">Accept all suggestions</button></h3>
-
-          <div class="child">
-            <div class="childhead"><span class="cl">Item 1</span><span class="kv">Council meeting minutes &amp; agenda items — trail rebuild, 2024–2026</span>
-              <span class="sug committed" style="margin-left:auto;">Committed → City Clerk Records Team</span></div>
-            <div class="childbody">
-              <span class="kv">Council minutes · confidence 93 · accepted by you, just now</span>
-              <div class="ws"><span>Estimate: <b>Queue</b></span><span>Search: <b>Queue</b></span><span>Redaction: <b>Not Required?</b></span><span>Budget: <b>—</b></span></div>
+          <div class="act">
+            <div class="ah"><span class="an">Record search</span>
+              <span class="st ip">In Process</span>
+              <span class="kv">Assigned to: <b>J. Patel</b> — sees “<b>MRR SEARCH</b> · R-2421 · Item 2” on their My Tasks</span>
+              <span style="margin-left:auto;"><button class="btn sm quiet">Reassign…</button> <button class="btn sm quiet">Do it myself</button></span>
             </div>
           </div>
 
-          <div class="child">
-            <div class="childhead"><span class="cl">Item 2</span><span class="kv">Construction contract + change orders — Parks &amp; Recreation</span>
-              <span class="sug pending" style="margin-left:auto;">Suggested → Parks Records Team · 71</span></div>
-            <div class="childbody">
-              <button class="btn sm">Accept</button>
-              <button class="btn sm quiet">Override — team / person…</button>
-              <button class="btn sm quiet">Take it myself</button>
-              <span class="kv" style="margin-left:6px;">· <button class="btn sm quiet">Mark Vague</button> <button class="btn sm quiet">Mark Overly Broad</button></span>
-              <div class="ws"><span>Estimate: <b>Not Started</b></span><span>Search: <b>Not Started</b></span></div>
+          <div class="act">
+            <div class="ah"><span class="an">Estimate data gathering</span>
+              <span class="st done">Complete</span>
+              <span class="kv">Entered by: <b>M. Reyes</b> · 7/28 · $210 est. labor + copies</span>
+              <span style="margin-left:auto;"><button class="btn sm quiet">View / edit data</button></span>
             </div>
           </div>
 
-          <div class="child">
-            <div class="childhead"><span class="cl">Item 3</span><span class="kv">Drone survey footage of the trail corridor (Watershed Dept.)</span>
-              <span class="sug external" style="margin-left:auto;">Estimate → external contributor (token link)</span></div>
-            <div class="childbody">
-              <span class="kv">Classifier confidence 44 — suggestion withheld. You assigned the <b>estimate-gathering</b> to the Watershed
-              AV specialist, who has no login: a <b>secure, expiring, single-use link</b> goes by email; their submitted costs complete
-              the task. <span class="callout">6</span> &nbsp;<span class="tag">link sent Jul 28 · expires Aug 4 · not yet opened</span></span>
-              <div class="ws"><span>Estimate: <b>In Process (external)</b></span><span>Search: <b>Not Started</b></span></div>
+          <div class="act">
+            <div class="ah"><span class="an">Redaction</span>
+              <span class="st q">Queued</span>
+              <span class="kv">Assigned to: <b>J. Patel</b> — “<b>MRR REDACTION</b>” appears on their list when search completes</span>
+              <span style="margin-left:auto;"><button class="btn sm quiet">Reassign…</button> <button class="btn sm quiet">Do it myself</button></span>
             </div>
           </div>
 
-          <div class="child">
-            <div class="childhead"><span class="cl">Item 4</span><span class="kv">Permit &amp; inspection records — trail structures</span>
-              <span class="sug personal" style="margin-left:auto;">Taken personally — task self-assigned to you</span></div>
-            <div class="childbody">
-              <span class="kv">Processing it yourself still spawns the task, self-assigned — work with no task is invisible to the
-              budget clock, which is the one signal that catches a child stalling. <span class="callout">7</span></span>
-              <div class="ws"><span>Estimate: <b>In Process (you)</b></span><span>Search: <b>Not Started</b></span></div>
-            </div>
-          </div>
-
-          <div class="panelbox tinted" style="margin-top:12px;">
-            <h3 class="panel">Multi-record estimate — one estimate, per-item inputs <span class="callout">8</span></h3>
-            <div class="kv">Per-item costs accrue here as they arrive (item 1 from its profile · item 3 from the external contributor ·
-            item 4 from you) → <b>one parent estimate</b> through the standard engine, one notice to the requestor. Staff
-            <b>Verify</b> the estimate before it goes out; only the <b>requestor approves</b> it — in some states approval is the
-            event that begins processing, so these are two different words on two different buttons, always. <span class="callout">9</span></div>
-            <div style="margin-top:7px;"><button class="btn sec">Open estimate worksheet…</button> &nbsp;<button class="btn" disabled>Verify &amp; send estimate</button> <span class="kv">— waiting on items 2–4 inputs</span></div>
-          </div>
-
-          <div class="panelbox ghostbox">
-            <h3 class="panel">Six weeks later — the readout this screen exists for <span class="callout">10</span></h3>
-            <div class="ghostline" style="margin-bottom:7px;">Items 1, 2, 3 · <b>Complete</b> — released as they finished (<code>as_ready</code> is the default; nothing waits for siblings).</div>
-            <div class="warnline">Item 4 · Redaction <b>In Process — 3 days behind budget</b> · <span class="ws" style="display:inline-flex;"><span class="behind">Budget: −3 days</span></span><br>
-            <span class="kv"><b>Critical path:</b> this item alone is holding the parent from completing — which holds estimate
-            reconciliation and final billing. The parent is not “ahead” because three of four items are: parent budget variance
-            IS the critical-path child.</span></div>
-            <div class="kv" style="margin-top:7px;">Controls that appear on a completed item: <b>Hold release…</b> — the inverse of the
-            old early-release idea. Releases happen on their own; holding one is the deliberate act, guarded, and <b>never because a
-            sibling is unpaid</b> — the payment gate is a coverage test per item. <span class="callout">11</span></div>
+          <div class="panelbox tinted">
+            <h3 class="panel">What the assignee sees <span class="callout">12</span></h3>
+            <div class="kv">J. Patel's My Tasks: &nbsp;<span class="st ip">MRR SEARCH — R-2421 · Item 2 · construction contract…</span>&nbsp;
+            Completing it updates this screen's status bar and nothing else — <b>MRR tasks never advance a stage</b>. The pipeline
+            (search → redaction → delivery) is the manager's orchestration here, not the workflow engine's.</div>
           </div>
 
         </div>
 
         <div class="rail">
           <div class="panelbox">
-            <div class="railhead">One request, one voice <span class="callout">12</span></div>
-            <button class="btn">Contact requestor…</button>
-            <p class="kv" style="margin-top:-2px; margin-bottom:6px;">This button exists <b>only here</b>. Every task screen on this
-            request's items says “email the Request Manager” instead — five staff never write one citizen separately.</p>
-            <button class="btn quiet">Request clarification…</button>
+            <div class="railhead">Child-record actions <span class="callout">8</span></div>
+            <button class="btn quiet">Mark Vague</button>
+            <button class="btn quiet">Mark Overly Broad</button>
+            <button class="btn danger-quiet">Designate denial → submit for Legal Review…</button>
+            <p class="kv" style="margin-top:4px;">Designation is not a denial: it sends this item to Legal Review (Draft 4) with your
+            grounds attached; if upheld, the letter is composed in Denial Compose (Draft 3). The bar shows the tag meanwhile.</p>
             <hr class="soft">
-            <div class="railhead">Work the request</div>
-            <button class="btn quiet">Confer with supervisor</button>
-            <button class="btn quiet">Log a phone call</button>
-            <hr class="soft">
-            <div class="railhead">Parent</div>
-            <button class="btn quiet">Financial view (parent)</button>
-            <button class="btn quiet">History</button>
+            <div class="railhead">Requestor</div>
+            <button class="btn quiet">Email the Request Manager</button>
+            <p class="kv" style="margin-top:4px;">(You are the RM — assignees see this button instead of any contact-requestor control.)</p>
           </div>
         </div>
       </div>
 
     </div>
   </div>
-  <p class="note"><b>Columbus, OH, in one line instead of a tab:</b> the parent card's clock strip shows the honest
-  “no statutory deadline — city service target only” treatment from Drafts 1–2, the waiver chip is absent (explicit
-  <code>false</code>), and the ledger chip reads “anonymous — does not apply” when unanchored. Everything else on this screen —
-  suggest-and-confirm, the workstream grid, the critical-path readout — is jurisdiction-independent.</p>
 
   <!-- ══════════ annotations ══════════ -->
   <div class="legend">
     <h2>Design annotations</h2>
     <ol>
-      <li><b>`mrr_processing` comes back with its spawner.</b> System-routed to an ORO Associate when intake detects
-      <code>child_count &gt; 1</code>, eligibility applies — exactly the catalog design; the 2026-07-19 deletion note says re-add the
-      key alongside the code that spawns it, and this screen is that code's reason. <code>is_mrr</code> stays derived — a fact,
-      never a mode.</li>
-      <li><b>Parent line + child lines, and the queue renders the same shape</b> — §14.3's rule that the hub and the queue are one
-      design, not two screens. The disabled “Hub —” placeholder on parent lines in today's queue becomes this link.</li>
-      <li><b><span class="rule">RULE A</span> The statutory clock lives only on the parent.</b> Children carry <i>budget</i> clocks
-      (named <code>budget_clock</code>, never “tolling”) with days ahead/behind from estimate-profile budgeted dates. The parent chip
-      is the only navy statutory treatment on the screen.</li>
-      <li><b>MRR bypasses intake review, so the requestor-level checks render here</b> — the same eligibility / ledger / waiver
-      components from Draft 1, as compact chips on the parent card (expand on click). Nothing requestor-level lives on a child.</li>
-      <li><b><span class="decided">DECIDED §14.2</span> Suggest-and-confirm.</b> The classifier runs identically on every child;
-      on an MRR the result is <b>suggested</b>, and the RM accepts (one click / accept-all), overrides (team or person — manual
-      assignment bypasses eligibility by design), or takes it personally. Low-confidence suggestions arrive withheld (item 3).
-      This is also the answer to the per-child <code>routing_review</code> “duplication”: three routing <i>decisions</i> are correct;
-      three <i>tasks in a worklist</i> was the presentation problem, and these child lines are the designed presentation.</li>
-      <li><b>Non-system contributor</b> (§14.4.2): estimate-gathering assigned by email to someone with no login — secure, expiring,
-      single-use token link; their submission completes the task. Link state (sent / opened / expired) is visible on the child line.
-      Needs the token substrate; nothing else in any spec covers this case.</li>
-      <li><b>“Take it myself” still spawns a self-assigned task.</b> Work with no task is invisible to the budget clock — the one
-      signal that catches a stalling child. ⚠️ The spec flags this as Claude's call, not Kevin's — <b>ratify or reverse it here</b>.</li>
-      <li><b>One parent estimate from per-item inputs</b> (§14.4.1): items feed costs (profile / external / RM-entered); the parent
-      creates one estimate through the standard engine and one notice — consistent with the parent being the financial processor
-      and the RM the sole communicator.</li>
-      <li><b><span class="rule">RULE C adjacent</span> Verify ≠ Approve, structurally.</b> Staff <b>Verify</b>; the <b>requestor
-      approves</b> — in some states approval is the statutory event that begins processing. Two words, two buttons, two actors;
-      the UI never offers staff an “Approve”.</li>
-      <li><b>The critical-path readout is the point</b> (Kevin's scenario, §14.3): the item blocking the parent — and therefore
-      reconciliation and final billing — is named, with its days-behind. The parent is never “ahead” because most items are;
-      parent variance is the critical-path child. Drafted as the ghost panel so the intake-time and later-life faces of the same
-      screen are both visible.</li>
-      <li><b>HOLD, not early release</b> (§14.4.5 inverted): <code>as_ready</code> releases each completed item on its own; the
-      deliberate act is holding one, guarded, and <b>never because a sibling is unpaid</b> — §5.9's coverage test is per item.</li>
-      <li><b>One request, one voice</b> (§14.1): Contact-requestor exists only on the hub; item task screens carry “email the
-      Request Manager”. Draft 1–4 screens comply already for MRR children — their clarification buttons route through the RM when
-      the parent is an MRR.</li>
-      <li><b>High priority</b> (§14.4.6): the parent flag feeds the AI report monitoring all high-priority MRRs — flag here,
-      report drafted with the reporting surfaces, not this session.</li>
+      <li><b><span class="decided">KEVIN 7/28</span> MRR Management is the task.</b> Routes to ORO, pool-assigns to an eligible
+      ORO Associate, lands in a <b>My Tasks MRR grouping</b>, and stays assigned until <b>every child record is terminal</b>.
+      Replaces the never-built <code>mrr_processing</code> key (new name, new entry, with its spawner this time).</li>
+      <li><b>The manager's own child-task assignments appear as their own My Tasks groups</b> — taking a search yourself puts
+      “MRR Search — assigned to me” on your list like anyone else's. Everything worked has a task; nothing is invisible.</li>
+      <li><b>The overview is all MRRs in process, not a personal queue</b> — manager column says whose each is. Supervisors and
+      Directors get the same screen read-only through their oversight authority.</li>
+      <li><b>Master record view: summary on top, one bar per child below</b> — statutory clock (master-only, navy), tolled days,
+      payment, and the estimate-readiness meter in the summary; each child as a single scannable bar.</li>
+      <li><b>Requestor-level checks live on the master card</b> (no intake-review stop for MRR): the same eligibility / ledger /
+      waiver chips as Drafts 1–2, expandable.</li>
+      <li><b><span class="decided">KEVIN 7/28</span> Estimate readiness drives one button.</b> The master card counts
+      “Estimate data: n of m complete”; at m of m, <b>Generate estimate</b> activates and highlights — one estimate for the
+      master record through the standard engine. Staff <b>Verify</b>; the <b>requestor approves</b> (two words, two actors —
+      approval is a statutory trigger in some states).</li>
+      <li><b>The bars carry exactly what you said:</b> per-activity status (<i>Queued · In Process · Complete</i>, plus honest
+      <i>Not started / Not required</i>), <b>Assigned to</b>, and tags (Vague, Denial designated → Legal Review, External…).
+      Click a bar to open the child record.</li>
+      <li><b><span class="decided">KEVIN 7/28</span> Child-level defect + denial designation.</b> Mark Vague at the child level
+      (clarification goes out through the RM — one voice); <b>Designate denial → submit for Legal Review</b> sends the item to
+      Draft 4's legal task with grounds attached — designation is not a denial; legal decides, Draft 3 composes the letter.</li>
+      <li><b>External contributor</b>: estimate-gathering assigned by email to a non-user via a secure, expiring, single-use
+      link; link state shows on the bar. (Carried from the standing §14.4 design — the AV-specialist case.)</li>
+      <li><b>One request, one voice:</b> Contact-requestor exists only on the MRR screens; every assignee-facing task says
+      “email the Request Manager”.</li>
+      <li><b><span class="decided">KEVIN 7/28</span> MRR tasks are NOT flow tasks.</b> <code>mrr_search</code>,
+      <code>mrr_estimate</code>, <code>mrr_redaction</code> (redaction is new to the catalog) are hand-assigned to any person —
+      no team filter, no smart routing, no stage advance. Completing one updates the bar; the manager, not the engine, moves the
+      work along. This is the structural distinction from the non-MRR estimate/search/redaction task types, kept as separate
+      task-type keys so the two can never blur.</li>
+      <li><b>The assignee inset</b> makes the distinction visible where it matters: the person doing the work sees a normal-looking
+      task; the difference is what completing it does (updates the bar; advances nothing).</li>
     </ol>
-    <p class="note" style="margin-top:10px;">Flagged, not designed here: the estimate worksheet's own layout (per-item grid);
-    the token substrate; the mixed-outcome <i>notice</i> question (§14.5 — which letter a citizen gets when one item is delivered
-    and another denied — belongs to the notices field-design pass); the org-wide bottleneck report.</p>
+    <p class="note" style="margin-top:10px;"><b>Columbus, OH in one line:</b> the master card's clock strip shows the honest
+    “no statutory deadline” treatment, waiver chip absent (explicit <code>false</code>), ledger chip “anonymous — does not
+    apply” when unanchored; the bars and orchestration are jurisdiction-independent. &nbsp;<b>Superseded from 5a:</b> the
+    suggest-and-confirm team-routing emphasis and the “Kevin's shape (2026-07-16)” attribution in
+    <code>SPEC_parent_child_lifecycle.md</code> §14.3 — flagged for correction when this design is ratified.</p>
   </div>
 
 </div>
