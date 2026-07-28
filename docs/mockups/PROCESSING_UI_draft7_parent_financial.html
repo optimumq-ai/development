@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Processing UI — Draft 7 — Parent Financial View (for markup)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#D8E0E8; --surface-2:#F2F6F9; --surface:#FFFFFF; --blue:#1E6091;
+    --ink:#1F2937; --muted:#5B6B7A; --line:#C3CFDA;
+    --navy:#143D5C; --amber-ink:#9A6700; --amber-line:#D4A72C; --amber-bg:#FFF8E5;
+    --ghost:#8A97A3; --statute:#2F6B4F; --statute-bg:#EAF4EF; --warn:#8C3A2B;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--ink); font:13.5px/1.45 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; padding:24px 18px 60px;}
+  .wrap{max-width:1080px; margin:0 auto;}
+
+  .draftbar{background:var(--navy); color:#fff; border-radius:8px; padding:12px 16px; margin-bottom:14px;}
+  .draftbar h1{font-size:15px; font-weight:600;}
+  .draftbar p{font-size:12px; opacity:.85; margin-top:3px;}
+  .screenlabel{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:22px 2px 6px; font-weight:700;}
+  .note{font-size:12px; color:var(--muted); margin:6px 2px 0;}
+  .callout{display:inline-block; min-width:17px; height:17px; line-height:17px; text-align:center; border-radius:50%; background:var(--blue); color:#fff; font-size:11px; font-weight:700; vertical-align:2px; margin-left:4px;}
+
+  .app{background:var(--surface); border:1px solid var(--line); border-radius:8px; overflow:hidden; box-shadow:0 1px 3px rgba(20,61,92,.12);}
+  .appbar{background:var(--surface-2); border-bottom:1px solid var(--line); padding:9px 14px; display:flex; align-items:center; gap:12px;}
+  .appbar .brand{font-weight:700; color:var(--navy);}
+  .appbar .role{font-size:12px; color:var(--muted);}
+  .appbar .who{margin-left:auto; font-size:12px; color:var(--muted);}
+  .appbody{padding:14px;}
+  h3.panel{font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin-bottom:7px;}
+
+  .btn{font:inherit; font-size:13px; background:var(--blue); color:#fff; border:none; border-radius:5px; padding:6px 14px; cursor:pointer; font-weight:600;}
+  .btn.sec{background:var(--surface); color:var(--blue); border:1px solid var(--blue); font-weight:600;}
+  .btn.quiet{background:var(--surface-2); color:var(--ink); border:1px solid var(--line); font-weight:500;}
+  .btn.sm{font-size:12px; padding:4px 10px;}
+  .btn[disabled]{opacity:.45; cursor:not-allowed;}
+
+  .kv{font-size:12.5px; color:var(--muted);}
+  .kv b{color:var(--ink); font-weight:600;}
+
+  .chip{display:inline-block; font-size:12px; border-radius:4px; padding:3px 9px; white-space:nowrap;}
+  .chip .k{display:block; font-size:9.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase;}
+  .clock-window{background:var(--surface); border:1px solid var(--line); color:var(--muted); font-weight:600;}
+  .clock-window .k{color:var(--ghost);}
+
+  .by{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; border-radius:3px; padding:2px 7px; vertical-align:1px;}
+  .by-system{background:var(--surface-2); color:var(--navy); border:1px solid var(--line);}
+  .by-person{background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line);}
+  .by-req{background:#EDE9F5; color:#4A3A75; border:1px solid #8E7CC3;}
+  .recorded{background:var(--surface); color:var(--ghost); border:1px dashed var(--ghost);}
+
+  .parentcard{background:var(--surface-2); border:1px solid var(--line); border-radius:6px; padding:10px 13px; margin-bottom:12px;}
+  .parentcard .row1{display:flex; gap:14px; align-items:baseline; flex-wrap:wrap;}
+  .parentcard .pn{font-weight:700; color:var(--navy); font-size:14px;}
+
+  .cols{display:flex; gap:14px; align-items:flex-start;}
+  .main{flex:1 1 auto; min-width:0;}
+  .rail{flex:0 0 260px; display:flex; flex-direction:column; gap:10px;}
+  .panelbox{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:11px 13px; margin-bottom:11px;}
+  .panelbox.tinted{background:var(--surface-2);}
+  .rail .panelbox{margin-bottom:0;}
+  .railhead{font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-bottom:6px;}
+  .rail .btn{width:100%; margin-bottom:6px;}
+  hr.soft{border:none; border-top:1px solid var(--surface-2); margin:9px 0;}
+  .warnline{border-left:3px solid #C08A7E; padding-left:10px; font-size:12.5px;}
+  .ghostline{border-left:3px dashed var(--ghost); padding-left:10px; color:var(--muted); font-size:12.5px;}
+
+  /* statement */
+  .ev{display:flex; gap:10px; padding:7px 0; border-top:1px solid var(--surface-2); font-size:12.5px;}
+  .ev:first-of-type{border-top:none;}
+  .ev .d{flex:0 0 44px; color:var(--muted); font-variant-numeric:tabular-nums;}
+  .ev .amt{margin-left:auto; font-variant-numeric:tabular-nums; font-weight:700; color:var(--navy); white-space:nowrap;}
+  .ev .amt.neg{color:var(--statute);}
+
+  table.alloc{width:100%; border-collapse:collapse; background:var(--surface); font-size:12.5px;}
+  table.alloc th{font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); text-align:left; padding:6px 8px; border-bottom:2px solid var(--line); font-weight:700;}
+  table.alloc td{padding:7px 8px; border-bottom:1px solid var(--surface-2); vertical-align:top;}
+  table.alloc td.num{text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap;}
+  .cov{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.05em; text-transform:uppercase; border-radius:3px; padding:2px 7px; white-space:nowrap;}
+  .cov.ok{background:var(--statute-bg); color:var(--statute); border:1px solid var(--statute);}
+  .cov.no{background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line);}
+  .rel{font-size:11px; color:var(--muted);}
+  .rel b{color:var(--ink);}
+
+  .legend{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:26px;}
+  .legend h2{font-size:14px; color:var(--navy); margin-bottom:10px;}
+  .legend ol{margin-left:20px;}
+  .legend li{margin-bottom:9px; font-size:12.5px;}
+  .legend li b{color:var(--navy);}
+  .rule{font-size:10px; font-weight:800; color:#fff; background:var(--statute); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
+  .decided{font-size:10px; font-weight:800; color:#fff; background:var(--blue); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="draftbar">
+    <h1>Processing UI — Draft 7 · Parent Financial View (for your markup — nothing is built)</h1>
+    <p>The parent is the request's financial processor — this is its ledger made visible: the statement, the per-item
+    allocation and coverage table (§5.10.2 prorata · §5.9 coverage), reconciliation, and the <b>refund/credit path</b> Draft 2
+    flagged (a later denial shrinking a paid deliverable). Opened from the MRR hub's “Financial view” or a request header;
+    <b>CashDrawerPage stays the place money is taken</b> — this screen links to it, never duplicates it. Continues R-2421
+    (4 items, estimate approved, partially paid). Single city (Austin, TX); WA / OH / IL differences are annotations.</p>
+  </div>
+
+  <div class="screenlabel">The financial view — R-2421 <span class="callout">1</span></div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">Financial view · R-2421 — City of Austin, TX</span><span class="who">M. Reyes · Request Manager</span></div>
+    <div class="appbody">
+
+      <div class="parentcard">
+        <div class="row1">
+          <span class="pn">R-2421 — 4 items · Barton Creek trail rebuild</span>
+          <span class="kv"><b>K. Osei</b> · identity: portal (unverified)</span>
+          <span class="kv">Release rule: <b>pay in full</b> (TX) <span class="callout">2</span></span>
+          <span class="kv" style="margin-left:auto;">Balance due: <b>$110.00</b></span>
+        </div>
+        <div class="row1" style="margin-top:7px;">
+          <span class="chip clock-window"><span class="k">Requestor's window</span>60-day unclaimed window · starts if copies go unclaimed <span class="cite">TX-S05</span></span>
+          <span class="by by-system">Cross-request ledger · no prior balance</span>
+        </div>
+      </div>
+
+      <div class="cols">
+        <div class="main">
+
+          <div class="panelbox">
+            <h3 class="panel">Statement — evented, never recomputed <span class="callout">3</span></h3>
+            <div class="ev"><span class="d">8/01</span><span>Estimate v1 sent — itemized (charges &gt; $40, §552.2615) · waiver: not requested</span><span class="amt">$310.00</span></div>
+            <div class="ev"><span class="d">8/04</span><span>Estimate <b>approved by the requestor</b> <span class="by by-req">K. Osei · requestor's act</span> — in some states this approval is what begins processing; staff only ever <i>Verify</i> <span class="callout">4</span></span><span class="amt"></span></div>
+            <div class="ev"><span class="d">8/06</span><span>Payment received — card, receipt #4417 · <a href="#">Cash Drawer</a></span><span class="amt neg">−$200.00</span></div>
+            <div class="ev"><span class="d">8/12</span><span>Credit — item 2 partial withholding upheld at legal review: 40 pages never delivered <span class="by by-person">credit approved · D. Okonkwo · ORO Finance</span></span><span class="amt neg">−$18.00</span></div>
+            <div class="ev"><span class="d"></span><span><b>Balance due</b> (charges $310.00 − credit $18.00 − paid $200.00)</span><span class="amt">$92.00</span></div>
+          </div>
+
+          <div class="panelbox">
+            <h3 class="panel">Per-item allocation &amp; coverage <span class="callout">5</span></h3>
+            <table class="alloc">
+              <tr><th>Item</th><th class="num">Gross</th><th class="num">Charged (×0.80)</th><th>Covered?</th><th>Release</th></tr>
+              <tr>
+                <td><b>1</b> · Council minutes</td><td class="num">$80.00</td><td class="num">$64.00</td>
+                <td><span class="cov ok">Covered</span></td>
+                <td class="rel"><b>Released 8/8</b> — while the request was NOT paid in full <span class="callout">6</span></td>
+              </tr>
+              <tr>
+                <td><b>2</b> · Construction contract</td><td class="num">$120.00 → $102.00</td><td class="num">$96.00 → $78.00</td>
+                <td><span class="cov ok">Covered</span></td>
+                <td class="rel"><b>Released 8/12</b> (redacted set) — reduced after partial withholding; the delta is the credit above <span class="callout">7</span></td>
+              </tr>
+              <tr>
+                <td><b>3</b> · Drone survey footage</td><td class="num">$150.00</td><td class="num">$120.00</td>
+                <td><span class="cov no">Not covered</span></td>
+                <td class="rel">Ready · <b>held for ITS OWN share</b> ($42 of the remaining balance covers it) — never for a sibling's</td>
+              </tr>
+              <tr>
+                <td><b>4</b> · Permit &amp; inspection records</td><td class="num">$37.50</td><td class="num">$30.00</td>
+                <td><span class="cov no">Not covered</span></td>
+                <td class="rel">Still in redaction — coverage gates <b>release</b>, never work</td>
+              </tr>
+            </table>
+            <p class="kv" style="margin-top:7px;">Charged = gross × (total ÷ gross&nbsp;subtotal) — one ratio, both directions,
+            no per-vehicle rules (§5.10.2, the ERP answer). The row explains itself to a requestor: <i>“your $150 item was billed
+            $120 because the request total was capped by aggregate pricing.”</i> Coverage is <b>cumulative FIFO</b> across
+            released items, so three $20 items can never all release against $50 paid. <span class="callout">8</span></p>
+          </div>
+
+          <div class="panelbox">
+            <h3 class="panel">Reconciliation — measured vs estimated <span class="callout">9</span></h3>
+            <div class="kv" style="margin-bottom:6px;">When the last billable task finalized, measured actuals existed, so a
+            reconciliation <b>draft</b> was auto-computed: labor <b>2.1 h measured vs 3.0 h estimated</b> (page counts carried
+            forward) → revised total <b>$290.00</b>. <span class="by recorded">auto-draft — no notice sent</span></div>
+            <div class="kv"><button class="btn sm sec">Review &amp; send revised notice…</button> — the SEND is always a person's
+            act; sending folds the $20 labor difference into one revised communication with the credit above, not a second
+            letter.</div>
+          </div>
+
+          <div class="panelbox tinted">
+            <h3 class="panel">Refunds &amp; credits — the path Draft 2 flagged <span class="callout">7</span></h3>
+            <div class="kv" style="margin-bottom:6px;">When withholding or reconciliation shrinks what was delivered
+            <b>after money was taken</b>, the recompute posts a <b>credit</b> (evented, cited to its cause — “item 2: 40 pages
+            withheld per legal determination”). While a balance remains, credits net against it — nothing to decide. Only when
+            credits exceed the balance does a <b>refund</b> exist:</div>
+            <div class="warnline">Refund due: <b>$0.00</b> today ($18 credit absorbed by the $110 balance). If the requestor had
+            paid in full: <b>Issue refund… (ORO Finance)</b> — a person's act, method recorded (card reversal / check request),
+            never automatic.</div>
+          </div>
+
+        </div>
+
+        <div class="rail">
+          <div class="panelbox">
+            <div class="railhead">Money actions</div>
+            <button class="btn">Take payment → Cash Drawer</button>
+            <button class="btn quiet">Review &amp; send revised notice…</button>
+            <button class="btn quiet" disabled>Issue refund… (none due)</button>
+            <p class="kv" style="margin-top:-2px; margin-bottom:6px;">Refunds require ORO Finance; this viewer (RM) sees the
+            state but not the button enabled. <span class="callout">10</span></p>
+            <hr class="soft">
+            <div class="railhead">Release controls</div>
+            <button class="btn quiet">Hold release of an item…</button>
+            <p class="kv" style="margin-top:-2px;">Guarded (§5.8); a payment hold is never manufacturable here — coverage is
+            computed, not chosen.</p>
+            <hr class="soft">
+            <div class="railhead">Records</div>
+            <button class="btn quiet">Estimate versions (v1, reconciliation draft)</button>
+            <button class="btn quiet">Event log</button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══════════ annotations ══════════ -->
+  <div class="legend">
+    <h2>Design annotations</h2>
+    <ol>
+      <li><b>One screen, one code path.</b> For a single-item request the allocation table is one row where
+      <code>charged = total</code> and the screen reads as a plain statement — the §5.9 no-op identity, visually. Opened from
+      the MRR hub, the request header, or Cash Drawer's receipt line.</li>
+      <li><b>The release rule is state config, shown by name.</b> TX: <code>pay_in_full</code> — once charges are paid, anything
+      ready releases. WA (<code>per_installment</code>, the only real one): each installment prices at its own cost and releases
+      on its own coverage — with the sharp statutory edge (an unclaimed installment can close the whole request) modeled and
+      labeled, and the model-rules rewrite flagged for re-check before hard-coding.</li>
+      <li><b><span class="rule">RULE C adjacent</span> The statement is evented, never recomputed</b> — same discipline as the
+      class-A ledger: a figure a demand rests on must be reconstructable. Every line carries its actor badge: requestor acts
+      (approval), person acts (credit approval, revised-notice send), system computations (allocation, coverage) with their
+      basis.</li>
+      <li><b>Verify ≠ Approve, again.</b> The approval line is the <i>requestor's</i> — purple badge, same family as the AG
+      ruling in Draft 4: an external actor's decision, recorded here. Staff verification never appears as “approved”.</li>
+      <li><b><span class="decided">DECIDED §5.10.2</span> Generalized prorata is the allocation.</b> One ratio
+      (total ÷ gross subtotal) scales every item, savings and surcharges alike, no per-vehicle rulebook — and each row carries
+      the requestor-explainable sentence. Gross stays visible beside charged so the delta is never hidden.</li>
+      <li><b><span class="rule">§5.9</span> A row is only ever held for its OWN share.</b> Item 1 released while the request was
+      unpaid overall; item 3 is held for the $42 that covers <i>it</i>. The table states the sibling rule on the row where it
+      bites, because this is the line staff will be tempted to “fix” at the counter.</li>
+      <li><b>The refund/credit path (new design, closing Draft 2's flag):</b> recompute → evented credit cited to its cause →
+      net against balance while one exists → refund only when credits exceed balance, issued by ORO Finance with method
+      recorded. Credits fold into the next communication (revised notice), never a standalone letter — the one-notice principle
+      applied to money going the other way.</li>
+      <li><b>Cumulative FIFO coverage is stated on the screen</b> because it is flagged in-code as a prerequisite for the money
+      axis moving to the parent — the UI asserts the correct rule so the build can't quietly ship the per-row version that
+      triple-releases against one payment.</li>
+      <li><b>Reconciliation: auto-draft, human send.</b> The draft computes itself when the last billable task finalizes
+      (measured labor over quoted quantities); the revised notice send stays a person's act, and the labor delta rides the same
+      communication as any credits.</li>
+      <li><b>Authority is visible, not hidden.</b> The RM sees refund state with the button disabled and labeled for ORO
+      Finance — the same worked/decided split as everywhere else: seeing money is the manager's job, moving it out of the city
+      is Finance's.</li>
+      <li><b>Other jurisdictions in one line each:</b> OH — actual-cost lines only, no labor anywhere in gross or charged;
+      anonymous requests show no cross-request chip (“does not apply”, rule e). IL — the fee-forfeiture guardrail surfaces here
+      as a warning banner when a response is late: <i>charges may no longer be collectible</i> — money the screen must refuse to
+      demand, not merely note.</li>
+      <li><b>Not duplicated here:</b> taking payment (Cash Drawer), estimate line-item editing (Draft 2's screen), the waiver
+      decision (Drafts 1–2), disposition (next draft). This screen is the money's single source of truth, not a second home for
+      any of those acts.</li>
+    </ol>
+    <p class="note" style="margin-top:10px;">Flagged, not designed here: the refund execution mechanics (card reversal vs
+    check request — city finance-system integration); WA per-installment pricing UI; the org-wide revenue/receivables report.</p>
+  </div>
+
+</div>
+</body>
+</html>
