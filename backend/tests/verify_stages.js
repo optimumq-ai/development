@@ -16,11 +16,30 @@ var http = require('http');
 var db = require('/opt/optimumq/backend/src/db');
 var auth = require('/opt/optimumq/backend/src/services/auth');
 var stages = require('/opt/optimumq/backend/src/services/stages');
-var { chromium } = require('/tmp/claude-998/-opt-optimumq/ca3c2235-853d-497f-915f-725470b8726d/scratchpad/node_modules/playwright');
+
+// PLAYWRIGHT IS OPTIONAL, AND THAT IS THE FIX.
+//
+// This line used to be a hard `require` of an ABSOLUTE PATH INTO A THROWAWAY SCRATCH DIRECTORY
+// (/tmp/claude-998/.../scratchpad/node_modules/playwright), committed that way in 42fe74b on 2026-07-14.
+// The directory was deleted, and from that day the harness could not even LOAD: it threw
+// MODULE_NOT_FOUND before its first assertion, so the runner reported "did not complete" and the suite
+// never went green again. Nine months of stage-vocabulary coverage — the thing that keeps the frontend
+// mirror from drifting back into a ghost stage — was silently absent, and the only visible symptom was
+// one warning line among forty-odd green ones.
+//
+// So two changes, and the second matters more than the first:
+//   1. require the package by NAME (it is a devDependency now), never a path outside the repo.
+//   2. make it OPTIONAL. The browser leg is ~7 of this harness's assertions; the other ~28 are source,
+//      DB and API checks that need no browser at all. A missing optional dev dependency must degrade to
+//      "the UI leg was skipped, and here is why" — with a printed summary, so the runner still gets its
+//      count — rather than taking the whole harness (and the suite's green banner) down with it.
+var chromium = null, playwrightWhy = null;
+try { chromium = require('playwright').chromium; }
+catch (e) { playwrightWhy = 'playwright is not installed (npm i -D playwright && npx playwright install chromium)'; }
 
 var FE = '/opt/optimumq/frontend/src';
 var TAG = 'STAGES-' + Date.now();
-var pass = 0, fail = 0, TOKEN = null, created = [];
+var pass = 0, fail = 0, TOKEN = null, created = [], skipped = [];
 function ok(l, c) { (c ? pass++ : fail++); console.log((c ? '  PASS  ' : '  FAIL  ') + l); }
 function sleep(ms) { return new Promise(function (r) { setTimeout(r, ms); }); }
 function submit(d) {
@@ -192,6 +211,9 @@ async function api(method, path, body) {
     }
 
     // ---- 6. THE UI: the Advance button must offer the canonical next stage, not the legacy one.
+    if (!chromium) {
+      skipped.push('UI parity (Advance button / ghost stage / page errors): ' + playwrightWhy);
+    } else {
     browser = await chromium.launch();
     var ctx = await browser.newContext({ viewport: { width: 1500, height: 950 } });
 
@@ -246,7 +268,13 @@ async function api(method, path, body) {
       !(stageNow === 'intake' && body.indexOf('Advance to Fee Review') >= 0));
     ok('the page renders no ghost stage', body.indexOf('Custodian Retrieval') < 0);
     ok('no runtime errors on the workspace page' + (errs.length ? ': ' + errs.join('; ') : ''), errs.length === 0);
-    await page.screenshot({ path: '/home/optimumq/.claude/jobs/605a0134/tmp/stages_workspace.png' });
+    // Best-effort, and into the repo-local artifacts directory rather than a scratch path that will be
+    // deleted out from under it — the same rot that took this harness out in the first place.
+    try {
+      var shotDir = '/opt/optimumq/backend/tests/artifacts';
+      if (!fs.existsSync(shotDir)) fs.mkdirSync(shotDir, { recursive: true });
+      await page.screenshot({ path: shotDir + '/stages_workspace.png' });
+    } catch (e) { console.log('  (screenshot skipped: ' + (e && e.message) + ')'); }
 
     // and the advance actually WORKS end-to-end through the real endpoint
     var adv = await api('PATCH', '/requests/' + req.id + '/stage', { stage: stages.next(stageNow), notes: 'stage vocabulary harness' });
@@ -256,7 +284,8 @@ async function api(method, path, body) {
     var h = await db.get("SELECT stage_from, stage_to FROM request_history WHERE request_id = ? AND stage_to = ? ORDER BY created_at DESC LIMIT 1", [req.id, after.stage]);
     ok('history recorded ' + h.stage_from + ' → ' + h.stage_to, h.stage_from === stageNow && h.stage_to === after.stage);
 
-    console.log('\n  shot: stages_workspace.png');
+    console.log('\n  shot: tests/artifacts/stages_workspace.png');
+    } // end of the browser leg
 
     // =====================================================================================
     // ADVANCING IS PROCESSING, SO IT LANDS ON THE CHILD (Kevin, 2026-07-19).
@@ -320,6 +349,12 @@ async function api(method, path, body) {
       ok('cleanup: 0 test requests remain', Number(left.n) === 0);
     } catch (e) { console.error('CLEANUP ERR', e.message); fail++; }
   }
-  console.log('\n' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
+  // A skip has to be LOUD. The whole reason this harness was dead for nine months is that its absence
+  // looked like one quiet warning line, so say plainly what was not checked and how to get it back.
+  if (skipped.length) {
+    console.log('\n  ⚠ SKIPPED (not failures — coverage that did NOT run):');
+    skipped.forEach(function (sk) { console.log('     - ' + sk); });
+  }
+  console.log('\n' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail' + (skipped.length ? ', ' + skipped.length + ' skipped' : ''));
   process.exit(fail ? 1 : 0);
 })();
