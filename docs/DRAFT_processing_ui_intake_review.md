@@ -1,8 +1,8 @@
 # DRAFT — Processing UI, session 1: the Intake Reviewer end to end
 
-**Status:** DESIGN DRAFT for Kevin's markup, 2026-07-28 (rev 1b — Kevin's first round of decisions
-folded in, same day). Not a spec, not for build. Becomes (part of) `SPEC_processing_ui.md` only after
-Kevin settles the shape.
+**Status:** DESIGN DRAFT for Kevin's markup, 2026-07-28 (rev 1c — Kevin's rounds 1 and 2 folded in,
+same day). Not a spec, not for build. Becomes (part of) `SPEC_processing_ui.md` only after Kevin
+settles the shape.
 **Mockup:** `exchange/PROCESSING_UI_draft1_intake_review.html` — Austin TX / Columbus OH toggle, blue
 numbered annotations, legend at the bottom; the record-item blocks really expand/collapse. Uses the
 portal palette Kevin chose for the record-search mockup (`lib/theme.js` tokens; adopting them for a new
@@ -27,11 +27,29 @@ intake reviewer is the densest (hosts the inline waiver/commercial decision when
    record **fulfills** the search, the intake_review task is **marked completed automatically** (spawn +
    auto-complete so the audit trail is intact; the request proceeds without a stop, and the queue never
    shows it).
+5. **(round 2) Only-when-needed is the DEFAULT.** The original intent — intake review only when the AI
+   can't determine the routing team — generalizes to a trigger list, and becomes a **setup option**:
+   - **only when needed** (default): the task spawns only when a trigger fires —
+     (i) team undeterminable (absorbs today's `routing_review` task; "can't route" becomes a trigger of
+     this task rather than a task of its own) · (ii) an eligibility review returned ·
+     (iii) a waiver/commercial decision pending in `intake_review` mode · (iv) a sensitivity flag.
+     Everything else routes straight to its team with no intake stop.
+   - **always**: every non-MRR request pauses at intake review (cities that want day-1 defect review).
+   The queue is therefore an **exceptions queue**, and both the queue ("Why it's here" column) and the
+   task screen ("Here because:" line) surface the trigger.
+   **The vague/overly-broad consequence Kevin flagged is already handled downstream:** the Record
+   Search task screen carries the same Mark Vague / Mark Overly Broad markers (built 2026-07-14), wired
+   to the full per-jurisdiction clarification machinery — a defect discovered after team assignment
+   fires the identical process, just from the first fulfillment task. Mitigating the timing cost:
+   vagueness and unroutability usually arrive together, so most defective requests still stop at intake
+   via trigger (i). The honest residual trade (a vague-but-confidently-classified request in a
+   hard-clock state is discovered mid-window rather than day 1) is stated in mockup annotation 14.
 
 ## 1. The shape being tested
 
-- **Two screens make the role UI:** My Tasks filtered to intake work (the only router), and the Intake
-  Review task screen. No global hub; no shared task shell. Cross-cutting pieces — clock chips,
+- **Two screens make the role UI:** My Tasks filtered to intake work (the only router — under
+  only-when-needed it is an *exceptions* queue, and every row says which trigger stopped it), and the
+  Intake Review task screen. No global hub; no shared task shell. Cross-cutting pieces — clock chips,
   decided-by badges, the portal-results bar, the comms log — are proposed as a **component library**,
   drafted here inside one screen first.
 - **Parent-scoped screen** (decision 2): parent strip, clock strip, eligibility, ledger, and the inline
@@ -72,30 +90,35 @@ intake reviewer is the densest (hosts the inline waiver/commercial decision when
 
 ## 4. What this draft forces (build implications, if the shape survives)
 
-1. **The `intake_review` task type** (decision 1): catalog entry (`MASTER` A1, owner ORO Associate),
-   `STAGE_TASK` mapping for stage `intake` (none exists today), My Tasks routing (`Intake →`),
-   eligibility via `user_task_types` so pool + smart routing work unchanged. Non-MRR spawn guard
-   (decision 3): only single-child parents spawn it.
-2. **Auto-complete path** (decision 4): on spawn, if the request is portal-born and the requestor's
-   selection carries the fulfills/`complete` intent, complete the task immediately (history row, no
-   assignee) and let the request advance. Note the adjacency to the *unbuilt* skip-gating recipe in
-   `SPEC_record_search_task_screen.md` §1 (`wfr-selected-public` / `wfr-selected-private`) — same
-   signal, two consumers; build once.
-3. **Structured eligibility findings read.** Findings currently persist as prose history notes; the
+1. **The `intake_review` task type** (decisions 1 + 5): catalog entry (`MASTER` A1, owner ORO
+   Associate), My Tasks routing (`Intake →`), eligibility via `user_task_types` so pool + smart
+   routing work unchanged. Spawn is **trigger-driven, not stage-driven**: the trigger list of
+   decision 5 in only-when-needed mode; every non-MRR request in always mode. Non-MRR spawn guard
+   (decision 3): only single-child parents spawn it. The task must record **which trigger(s)** spawned
+   it (the queue and screen display it).
+2. **`routing_review` consolidation** (decision 5.i): "can't determine team" becomes a trigger of
+   `intake_review`; the separate `routing_review` task type retires (catalog + `ROUTABLE_TASK_TYPES` +
+   its auto-close-on-route behavior moves onto this task). One stop, not two overlapping ones.
+3. **The setup option** lives with the other city workflow config (a `jurisdiction_rules` `intake`
+   domain knob or sibling): `intake_review_mode: 'when_needed' | 'always'`, default `when_needed`.
+4. **Auto-complete path** (decision 4): portal-born + requestor's selection carries the
+   fulfills/`complete` intent → in when-needed mode it's simply a no-trigger case; in always mode the
+   task is spawned and completed immediately (history row, no assignee). Note the adjacency to the
+   *unbuilt* skip-gating recipe in `SPEC_record_search_task_screen.md` §1 (`wfr-selected-public` /
+   `wfr-selected-private`) — same signal, two consumers; build once.
+5. **Structured eligibility findings read.** Findings currently persist as prose history notes; the
    panel needs the structured `{blocks, reviews, advisories}` (+ a confirm action for `reviews` that
-   the Proceed gate checks).
-4. **Proceed gate.** Resolution blocked (with the reason) while an inline waiver decision or an
+   the Proceed gate checks). In when-needed mode the reviews array is also a spawn trigger, so the
+   structured read is needed at spawn time, not just render time.
+6. **Proceed gate.** Resolution blocked (with the reason) while an inline waiver decision or an
    eligibility review is open — same pattern as the record-search Found gate (422 with a named cause).
-5. **Component library seeds:** ClockChip (4 kinds + exposure warning), DecidedByBadge (4 values),
-   PortalResultsBar, ParentStrip, RecordItemExpand.
+7. **Component library seeds:** ClockChip (4 kinds + exposure warning), DecidedByBadge (4 values),
+   PortalResultsBar, ParentStrip, RecordItemExpand, TriggerBadge ("why it's here").
 
 ## 5. Open questions for Kevin (remaining)
 
-1. **Does every non-MRR request get an intake-review stop?** Auto-complete (decision 4) answers it for
-   portal-fulfilled requests. For the rest: today's workflow rules send confident classifications
-   straight to `record_search`. Options: (a) every remaining request pauses at intake review; (b) only
-   `wfr-uncertain`/`wfr-fallback` ones do. The draft assumes (a) for waiver/eligibility visibility —
-   (b) preserves today's throughput. This changes how much traffic the screen sees.
+1. **The trigger list** (decision 5) — is the four-trigger set right, and is anything missing (e.g.
+   should a request the requestor marked "search for more" beyond their picks ever stop here)?
 2. **The visual grammars** — clock chips (navy solid vs grey dashed vs outline) and decided-by badges:
    right instinct? Colors are provisional per the §9 rule ("settle the color as we refine").
 3. **Inline waiver at intake** — drafted with `fee_waiver` in `intake_review` mode to show the point of
