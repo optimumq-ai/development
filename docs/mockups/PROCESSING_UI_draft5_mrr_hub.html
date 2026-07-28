@@ -146,42 +146,37 @@
         <tr><td colspan="6" class="group">Intake Review (1) · collapsed</td></tr>
         <tr><td colspan="6" class="group">MRR Search — assigned to me (1) · collapsed <span class="callout">2</span></td></tr>
       </table>
-      <p class="note">The MRR Management task routes to ORO and pool-assigns to an <b>eligible ORO Associate</b>; it stays
-      on this list until <b>all child records are terminal</b>. Child-level MRR tasks (Search / Estimate / Redaction) appear
-      on their assignee's My Tasks under their own names — including this manager's own list when they take one (last group).</p>
+      <p class="note">The MRR Management task always routes to the <b>Open Records Office</b> — the trigger is MRR status
+      (<code>child_count &gt; 1</code>), never the classifier's department call. Assignment among eligible ORO Associates uses
+      the <b>same smart-routing / pool machinery as record search</b>: a clear specialization match auto-assigns, otherwise the
+      task waits in the pool to claim. Each associate holds <b>only their own MRRs</b>, and the task stays on this list until
+      <b>all child records are terminal</b>. Child-level MRR tasks (Search / Estimate / Redaction) appear on their assignee's
+      My Tasks under their own names — including this manager's own list when they take one (last group).</p>
     </div>
   </div>
 
-  <div class="screenlabel">Screen 2 · MRR overview — everything in process <span class="callout">3</span></div>
+  <div class="screenlabel">Screen 2 · MRR overview — my MRRs in process <span class="callout">3</span></div>
   <div class="app">
     <div class="appbar"><span class="brand">OptimumQ</span><span class="role">MRR Management — City of Austin, TX</span><span class="who">M. Reyes</span></div>
     <div class="appbody">
       <table class="q">
-        <tr><th>Master record</th><th>Requestor</th><th>Items</th><th>Clock</th><th>Estimate data</th><th>Flags</th><th>Manager</th></tr>
+        <tr><th>Master record</th><th>Requestor</th><th>Items</th><th>Clock</th><th>Estimate data</th><th>Flags</th></tr>
         <tr class="sel">
           <td><span class="reqno">R-2421</span></td><td>K. Osei</td><td>4</td>
           <td><span class="chip clock-legal"><span class="k">Statutory</span>Aug 11</span></td>
           <td><span class="meter">2 / 4</span></td>
           <td><span class="tagx vague">Vague ×1</span> <span class="tagx denial">Denial → legal ×1</span></td>
-          <td class="kv">M. Reyes</td>
         </tr>
         <tr>
           <td><span class="reqno">R-2408</span></td><td>Statesman-Ledger</td><td>3</td>
           <td><span class="chip clock-legal"><span class="k">Statutory</span>Aug 7</span></td>
           <td><span class="meter">3 / 3 ✓ <b>ready</b></span></td>
           <td></td>
-          <td class="kv">M. Reyes</td>
-        </tr>
-        <tr>
-          <td><span class="reqno">R-2390</span></td><td>D. Alvarez</td><td>6</td>
-          <td><span class="chip clock-legal"><span class="k">Statutory</span>Aug 1</span></td>
-          <td><span class="meter">6 / 6 ✓ sent</span></td>
-          <td><span class="tagx ext">External ×1</span></td>
-          <td class="kv">T. Boyd</td>
         </tr>
       </table>
-      <p class="note">All MRRs in process, not just mine — the manager column says whose they are. Clicking a master record
-      opens Screen 3.</p>
+      <p class="note">Scoped to <b>my assigned MRRs</b> — with several eligible associates in the office, each sees only their
+      own here. An all-office view (with a manager column) exists for <b>oversight authority</b> only — ORO Supervisor /
+      Director — not as a tab on this screen. Clicking a master record opens Screen 3.</p>
     </div>
   </div>
 
@@ -344,13 +339,17 @@
   <div class="legend">
     <h2>Design annotations</h2>
     <ol>
-      <li><b><span class="decided">KEVIN 7/28</span> MRR Management is the task.</b> Routes to ORO, pool-assigns to an eligible
-      ORO Associate, lands in a <b>My Tasks MRR grouping</b>, and stays assigned until <b>every child record is terminal</b>.
-      Replaces the never-built <code>mrr_processing</code> key (new name, new entry, with its spawner this time).</li>
+      <li><b><span class="decided">KEVIN 7/28</span> MRR Management is the task.</b> Department routing is <b>always ORO,
+      triggered by MRR status</b> — the classifier's department call plays no part in routing the parent. Assignment among
+      eligible ORO Associates uses the <b>same smart-routing / pool machinery as non-MRR tasks</b> (specialization auto-assign,
+      else claim from pool); each associate holds only their own MRRs. Lands in a <b>My Tasks MRR grouping</b> and stays
+      assigned until <b>every child record is terminal</b>. Replaces the never-built <code>mrr_processing</code> key (new name,
+      new entry, with its spawner this time).</li>
       <li><b>The manager's own child-task assignments appear as their own My Tasks groups</b> — taking a search yourself puts
       “MRR Search — assigned to me” on your list like anyone else's. Everything worked has a task; nothing is invisible.</li>
-      <li><b>The overview is all MRRs in process, not a personal queue</b> — manager column says whose each is. Supervisors and
-      Directors get the same screen read-only through their oversight authority.</li>
+      <li><b><span class="decided">KEVIN 7/28</span> The overview is scoped to the manager's own MRRs.</b> With several eligible
+      associates, each sees only theirs. The all-office view (manager column, read-only) belongs to oversight authority —
+      ORO Supervisor / Director — not to this screen.</li>
       <li><b>Master record view: summary on top, one bar per child below</b> — statutory clock (master-only, navy), tolled days,
       payment, and the estimate-readiness meter in the summary; each child as a single scannable bar.</li>
       <li><b>Requestor-level checks live on the master card</b> (no intake-review stop for MRR): the same eligibility / ledger /

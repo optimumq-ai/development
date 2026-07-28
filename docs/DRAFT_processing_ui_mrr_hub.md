@@ -31,6 +31,13 @@ view · child record view. Single city (Austin TX; OH is one annotation).
    for Legal Review**.
 7. **Parent-level estimate readiness:** the screen indicates whether all child estimate data is
    complete, and then the **Generate Estimate button becomes active and highlighted**.
+8. **(round 2) Assignment & scoping:** with more than one eligible person in the Open Records
+   Office, **each holds only their assigned MRRs**. Assignment uses the **same smart-routing /
+   pool machinery as non-MRR tasks** (record search etc.): specialization auto-assign, else claim
+   from pool. **Department routing is always ORO, triggered by MRR status** — the classifier's
+   department call plays no part in routing the parent. (The overview is therefore scoped to the
+   manager's own MRRs; the all-office view with a manager column is oversight authority —
+   Supervisor / Director — not a tab on the working screen.)
 
 ## 1. Design choices made in the draft (first pass, per "design what you feel is best")
 
@@ -68,10 +75,11 @@ view · child record view. Single city (Austin TX; OH is one annotation).
 
 ## 3. Open questions for Kevin
 
-1. **Overview scope** — drafted as *all* MRRs in process with a manager column (oversight sees the
-   same screen read-only). Or should it be my-MRRs-only with an explicit all-office toggle?
-2. **Does the classifier still suggest?** The draft drops suggest-and-confirm as the centerpiece;
-   should the child assign-picker at least show the classifier's team/person hint, or stay clean?
+1. ~~**Overview scope**~~ — **RESOLVED (round 2): my-MRRs-only**; all-office view is oversight
+   authority (Supervisor / Director), not a tab here.
+2. **Does the classifier still suggest on CHILD assignment?** MRR Management itself now uses smart
+   routing (round 2) — but child MRR tasks remain pure hand-assignment (MASTER A2). Should the
+   child assign-picker show the classifier's team/person hint as a passive aid, or stay clean?
 3. **Activity ordering** — drafted with no enforced order (manager orchestrates; Redaction shows
    "Queued … when search completes" as convention, not a gate). Should the system enforce
    search-before-redaction on MRR items, or trust the manager?
