@@ -728,6 +728,12 @@ CREATE INDEX IF NOT EXISTS idx_request_clocks_req ON request_clocks(request_id);
 CREATE TABLE IF NOT EXISTS clock_tolls (id TEXT PRIMARY KEY, clock_id TEXT NOT NULL, reason TEXT, tolled_from TEXT, tolled_until TEXT, note TEXT, created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
 CREATE INDEX IF NOT EXISTS idx_clock_tolls_clock ON clock_tolls(clock_id);
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS purpose TEXT DEFAULT 'standard';
+-- PHASE 7 / WS4 — evidence a requester supplied and STAFF VERIFIED, as a JSON array of evidence keys
+-- ('indigency_affidavit', 'appointment_letter', 'victim_status', ...). It is the firing condition for a
+-- statutorily MANDATORY fee waiver (services/approvalModules.js): those waivers are compelled by statute,
+-- so they fire regardless of whether the city runs a discretionary program — but only on VERIFIED
+-- evidence, never on the request alone. Nothing infers this from free text; a person ticks it.
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS verified_evidence TEXT;
 ALTER TABLE jurisdiction_profiles ADD COLUMN IF NOT EXISTS exemption_model TEXT;
 CREATE TABLE IF NOT EXISTS config_sources ( id text PRIMARY KEY, jurisdiction_id text, domain text, label text, url text, active integer DEFAULT 1, last_checked_at text, last_change_at text, last_version_hash text, notes text, created_at text DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS') );
 CREATE TABLE IF NOT EXISTS config_proposals ( id text PRIMARY KEY, jurisdiction_id text, domain text, status text DEFAULT 'pending', summary text, proposed_json text, source_ref text, created_by text, created_at text DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS'), reviewed_by text, reviewed_at text );

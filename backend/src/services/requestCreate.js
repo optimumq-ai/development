@@ -78,7 +78,7 @@ async function nextRequestNumber(year) {
 var COLUMNS = [
   'requestor_name', 'requestor_email', 'requestor_phone', 'requestor_type', 'delivery_method',
   'description', 'record_types', 'classification', 'department_id', 'record_type_id',
-  'fee_waiver_requested', 'fee_waiver_reason', 'purpose',
+  'fee_waiver_requested', 'fee_waiver_reason', 'purpose', 'verified_evidence',
   'mailing_street1', 'mailing_street2', 'mailing_city', 'mailing_state', 'mailing_zip',
   'certification_requested', 'email_verification_method', 'is_mrr', 'submission_channel',
   'component_label'
@@ -133,6 +133,9 @@ function normalize(f) {
     record_type_id: f.recordTypeId || null,
     fee_waiver_requested: f.feeWaiverRequested ? 1 : 0,
     fee_waiver_reason: f.feeWaiverReason || null,
+    // WS4: staff-verified evidence keys, stored as a JSON array. Never inferred — see the column comment
+    // in schema.postgres.sql and services/approvalModules.js.
+    verified_evidence: Array.isArray(f.verifiedEvidence) && f.verifiedEvidence.length ? JSON.stringify(f.verifiedEvidence.map(String)) : null,
     // §5 — a commercial requester implies commercial purpose, so the staff estimate opens on commercial
     // rates (staff confirm). Explicit f.purpose still wins. Derived in the ONE creation helper so every
     // path (portal wizard, form, connectors) is covered, not just the portal.

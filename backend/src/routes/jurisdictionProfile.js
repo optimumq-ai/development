@@ -57,6 +57,26 @@ router.get('/eligibility', requireAuth, async function (req, res) {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// PHASE 7 / WS4 — the fee-waiver and commercial-rate approval modules. GET shows the effective config
+// (including the statutory-mandatory categories, which fire regardless of the toggle); PUT saves it and
+// REFUSES a routed_task pointed at a role nobody holds — that task would sit in an empty pool and block
+// every estimate behind it.
+router.get('/approval-modules', requireAuth, async function (req, res) {
+  try {
+    var AM = require('../services/approvalModules');
+    var jid = req.query.jid || await activeJid();
+    res.json({ config: await AM.config(jid), modes: AM.MODES, routableRoles: AM.ROUTABLE_ROLES });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+router.put('/approval-modules', requireAuth, ROLE, async function (req, res) {
+  try {
+    var AM = require('../services/approvalModules');
+    var jid = await activeJid();
+    await AM.write(jid, req.body || {}, (req.user && req.user.name) || 'staff');
+    res.json({ config: await AM.config(jid) });
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+
 // --- wildcard LAST ---
 router.get('/:jid', requireAuth, async function (req, res) {
   try { res.json(await JP.getProfile(req.params.jid)); } catch (e) { res.status(500).json({ error: e.message }); }

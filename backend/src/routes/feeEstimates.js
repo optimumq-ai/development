@@ -233,7 +233,7 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
 // build the requestor-facing notice (preview) from the latest saved estimate
 router.get('/request/:requestId/notice', requireAuth, async function (req, res) {
   try {
-    var reqRow = await get('SELECT id, request_number, requestor_name, requestor_email, fee_waiver_status FROM requests WHERE id = ?', [req.params.requestId]);
+    var reqRow = await get('SELECT id, request_number, requestor_name, requestor_email, fee_waiver_requested, fee_waiver_status, fee_waiver_reason FROM requests WHERE id = ?', [req.params.requestId]);
     if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
     var snap = await latestEstimate(req.params.requestId);
     if (!snap) return res.status(400).json({ error: 'No saved estimate yet - calculate an estimate first.' });
@@ -244,9 +244,18 @@ router.get('/request/:requestId/notice', requireAuth, async function (req, res) 
     var noticePlan = await planForSnapshot(snap);
     var R = feeContext.requestLevel || {};
     var waiverGranted = reqRow.fee_waiver_status === 'granted';
+    // WS4: the waiver DENIAL folds into this notice — one communication, no new document type (design doc
+    // §Policy defaults). `notOffered` is the other half: a requester who asked for a waiver in a city with
+    // no discretionary program is told so here rather than never hearing back about it.
+    var AMn = require('../services/approvalModules');
+    var amCfg = await AMn.config(null);
+    var wvNotice = AMn.denialNoticeText(reqRow, amCfg.modules.fee_waiver);
+    var wvGateN = await AMn.estimateCommunicationGate(null, reqRow);
     var method = waiverGranted ? 'Fee waiver approved' : ((R.purposeApplied && R.purpose && R.purpose !== 'standard') ? (R.purpose === 'commercial' ? 'Commercial rates' : (R.purpose === 'inspection' ? 'Inspection (no fee)' : (String(R.purpose).charAt(0).toUpperCase() + String(R.purpose).slice(1)))) : 'Standard');
-    var notice = feeNotice.buildNotice(reqRow, feeContext, { agencyName: agency, responseDays: responseDays, paymentPlan: noticePlan.plan, paymentMode: paymentMode, computationMethod: method, feeWaiver: { granted: waiverGranted } });
-    res.json({ to: reqRow.requestor_email || null, requestorName: reqRow.requestor_name || null, subject: notice.subject, text: notice.text, total: R.total || 0, depositDue: R.depositDue || 0, notifyTriggered: !!R.estimateNotifyTriggered, notifiedAt: snap.notified_at || null, notifiedTo: snap.notified_to || null });
+    var notice = feeNotice.buildNotice(reqRow, feeContext, { agencyName: agency, responseDays: responseDays, paymentPlan: noticePlan.plan, paymentMode: paymentMode, computationMethod: method,
+      feeWaiver: { granted: waiverGranted, deniedText: wvNotice, notOffered: !!wvGateN.notOffered && !!reqRow.fee_waiver_requested } });
+    res.json({ to: reqRow.requestor_email || null, requestorName: reqRow.requestor_name || null, subject: notice.subject, text: notice.text, total: R.total || 0, depositDue: R.depositDue || 0, notifyTriggered: !!R.estimateNotifyTriggered, notifiedAt: snap.notified_at || null, notifiedTo: snap.notified_to || null,
+      feeWaiverGate: wvGateN.blocked ? { blocked: true, code: wvGateN.code, reason: wvGateN.reason } : { blocked: false } });
   } catch (e) { res.status(500).json({ error: 'Could not build the notice.' }); }
 });
 
@@ -259,6 +268,12 @@ router.post('/request/:requestId/notice/send', requireAuth, async function (req,
     // attestation gate. If the city may not lawfully charge, nothing else about this request matters.
     var ffSend = await feeForfeiture.check(req.params.requestId);
     if (ffSend.blocked) return res.status(409).json({ error: ffSend.reason, code: 'FEE_FORFEITED', citation: ffSend.citation, clock: ffSend.clock });
+    // PHASE 7 / WS4 — THE SEQUENCING CONSTRAINT (DESIGN_fee_waiver_commercial.md §Sequencing): a waiver is
+    // always resolved BEFORE the estimate is communicated. Sending first would put one figure in front of
+    // a requester and a different one behind it, on the same request, days apart — and the second would
+    // arrive looking like a correction the city had to be chased for.
+    var wvGate = await require('../services/approvalModules').estimateCommunicationGate(null, await get('SELECT id, fee_waiver_requested, fee_waiver_status FROM requests WHERE id = ?', [req.params.requestId]));
+    if (wvGate.blocked) return res.status(409).json({ error: wvGate.reason, code: wvGate.code });
     var to = (req.body && req.body.to) || reqRow.requestor_email;
     if (!to) return res.status(400).json({ error: 'No requestor email address on this request.' });
     var snap = await latestEstimate(req.params.requestId);

@@ -100,6 +100,18 @@ function buildNotice(request, feeContext, opts) {
   body += (waiverGranted ? 'Computed cost: ' + money(total) + ' (waived)\n\n' : 'Estimated cost: ' + money(total) + '\n\n');
   if (lines.length) body += 'This estimate is based on:\n' + lines.join('\n') + '\n\n';
   if (traceRel.length) body += 'How your total was determined:\n' + traceRel.map(function (t) { return '- ' + t.plainLine; }).join('\n') + '\n\n';
+  // WS4 — the waiver answer lives INSIDE the estimate notice (DESIGN_fee_waiver_commercial.md §Policy
+  // defaults): "waiver reviewed and not granted + itemized estimate" is one communication. A separate
+  // denial letter would arrive first, say nothing about the amount, and leave the requester waiting for a
+  // second message to find out what any of it costs.
+  var waiverDenied = (opts.feeWaiver && opts.feeWaiver.deniedText) || null;
+  var waiverNotOffered = !!(opts.feeWaiver && opts.feeWaiver.notOffered);
+  if (waiverDenied) body += waiverDenied + '\n\n';
+  else if (waiverNotOffered) {
+    body += 'You asked us to waive the fees for this request. This jurisdiction does not operate a ' +
+            'discretionary fee-waiver program, so there is no waiver we can apply. Your request continues ' +
+            'as normal — see the estimate below.\n\n';
+  }
   if (waiverGranted) {
     body += 'These fees have been waived. No payment is required, and we will proceed with your request.\n\n';
   } else if (opts.paymentMode === 'erp') {

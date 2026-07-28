@@ -179,20 +179,65 @@ async function onIntake(requestId, matcherResult){
     } catch (e) { console.error('[workflowEngine] estimate task spawn failed:', e && e.message); }
   }
 
-  // Fee-waiver approval: a requested waiver needs a human financial-authority decision. Spawn a
-  // cross-cutting approval task (team-agnostic, role FINANCE) onto every approver's list. Independent
+  // Fee-waiver approval: a requested waiver needs a decision before any amount is invoiced. Independent
   // of the record-type routing above; the estimate still proceeds (a granted waiver zeroes fees at notice
-  // time). Idempotent, and skipped once a decision has been recorded. Resolved by /fee-waiver-decision.
+  // time). Idempotent, and skipped once a decision has been recorded. Resolved by /fee-waiver-decision,
+  // or by the estimate notice, which cannot be SENT while the decision is outstanding.
+  //
+  // The module config is read ONCE and shared by both approval modules below: intake runs on every
+  // request, so a second identical read is pure latency on the front door.
+  var amConfig = null;
   if (request.fee_waiver_requested && !request.fee_waiver_status) {
     try {
+      // PHASE 7 / WS4 — the fee-waiver APPROVAL MODULE decides what happens here, not a hardcoded spawn.
+      // See services/approvalModules.js (DESIGN_fee_waiver_commercial.md, decided). Three outcomes:
+      //   auto_granted   a statutorily MANDATORY category matched verified evidence (CT indigency, MI's
+      //                  first $20, an AZ crime victim...). It is granted on the spot — no task, no
+      //                  judgment call, and it fires whether or not the discretionary program is on.
+      //   needs_decision routed_task -> spawn the configured task to the configured role;
+      //                  intake_review -> spawn NOTHING, because the intake reviewer decides inline.
+      //                  That is the whole point of the mode: no extra hop.
+      //   not_offered    this state (or this city) has no discretionary waiver. Nothing stops — the
+      //                  requester is told in the estimate notice.
+      var AM = require('./approvalModules');
       var trw = require('./taskRouting');
-      var existingW = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'fee_waiver' AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [requestId]);
-      if (!existingW) {
-        var wtask = await trw.createTask({ requestId: requestId, type: 'fee_waiver', title: 'Decide fee-waiver request', teamId: null, createdBy: 'workflow' });
-        await trw.autoRouteOrPool(wtask.id, request.description, {});
+      amConfig = amConfig || await AM.config(null);
+      var wv = await AM.evaluateWaiver(null, request, { config: amConfig });
+      if (wv.outcome === 'auto_granted') {
+        await db.run("UPDATE requests SET fee_waiver_status = 'granted', fee_waiver_reason = ?, fee_waiver_decided_by = ?, fee_waiver_decided_at = datetime('now'), updated_at = datetime('now') WHERE id = ?",
+          [wv.reason, 'statute', requestId]);
+        await db.run("INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)",
+          [require('uuid').v4(), requestId, null, 'Statutory Waiver', 'FEE_WAIVER_GRANTED', wv.reason]);
+      } else if (wv.outcome === 'needs_decision' && wv.route && wv.route.mode === 'routed_task') {
+        var existingW = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'fee_waiver' AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [requestId]);
+        if (!existingW) {
+          var wtask = await trw.createTask({ requestId: requestId, type: 'fee_waiver', title: wv.route.task_name,
+            teamId: null, roleRequired: wv.route.assignee_role, createdBy: 'workflow' });
+          await trw.autoRouteOrPool(wtask.id, request.description, {});
+        }
       }
-    } catch (e) { console.error('[workflowEngine] fee-waiver task spawn failed:', e && e.message); }
+    } catch (e) { console.error('[workflowEngine] fee-waiver module failed:', e && e.message); }
   }
+
+  // COMMERCIAL-RATE CLASSIFICATION, at intake and nowhere else. New Jersey gives a commercial request a
+  // 14-business-day window and Illinois a separate track, so the classification changes the DEADLINE —
+  // decide it before anything quotes one. v1 records what the requester declared and, in routed_task
+  // mode, raises the decision; it never reclassifies on its own, because overriding a self-declaration
+  // changes the invoice and must be a human act that gets communicated.
+  try {
+    var AMc = require('./approvalModules');
+    amConfig = amConfig || await AMc.config(null);
+    var cm = await AMc.evaluateCommercial(null, request, { config: amConfig });
+    if (cm.enabled && cm.outcome === 'needs_decision' && cm.route && cm.route.mode === 'routed_task') {
+      var trc = require('./taskRouting');
+      var existingC = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'fee_waiver' AND title = ? AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [requestId, cm.route.task_name]);
+      if (!existingC) {
+        var ctask = await trc.createTask({ requestId: requestId, type: 'fee_waiver', title: cm.route.task_name,
+          teamId: null, roleRequired: cm.route.assignee_role, createdBy: 'workflow' });
+        await trc.autoRouteOrPool(ctask.id, request.description, {});
+      }
+    }
+  } catch (e) { console.error('[workflowEngine] commercial-rate module failed:', e && e.message); }
 
   // Unroutable at intake: the classifier could not determine a fulfillment team (teamId null). Rather than
   // leaving the request silently Unassigned — or dumping it on the Open Records fulfillment team — spawn a

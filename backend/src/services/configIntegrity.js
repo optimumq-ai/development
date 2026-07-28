@@ -211,6 +211,30 @@ async function check() {
     });
   }
 
+  // 7. WS4 — an approval module routed at a role nobody can hold. The task spawns, pools to an empty
+  // eligibility set, and NOTHING surfaces it: the request simply never gets its waiver decision, and the
+  // estimate is blocked behind a decision that can never be made. Silent, and indistinguishable from a
+  // slow week.
+  var amRows = await db.all("SELECT jurisdiction_id, config_json FROM jurisdiction_rules WHERE domain = 'approval_modules' ORDER BY jurisdiction_id");
+  for (var a = 0; a < amRows.length; a++) {
+    var ar = amRows[a], amc = null;
+    try { amc = JSON.parse(ar.config_json); } catch (e) { continue; }
+    var AM = require('./approvalModules');
+    AM.MODULES.forEach(function (m) {
+      var n = AM.normalizeModule(m, amc[m]);
+      if (n.unroutableRole) {
+        findings.push({ severity: 'error', where: ar.jurisdiction_id + '/approval_modules',
+          issue: 'The ' + m + ' module routes its task to "' + n.unroutableRole + '", which no one is eligible for. ' +
+                 'The task would pool to nobody and block the estimate behind it.',
+          fix: 'Route it to one of: ' + AM.ROUTABLE_ROLES.join(', ') + '.' });
+      }
+      if (n.mode === 'routed_task' && !n.routed_task.task_name) {
+        findings.push({ severity: 'warn', where: ar.jurisdiction_id + '/approval_modules',
+          issue: 'The ' + m + ' module spawns a task with no name.', fix: 'Give the task a name staff will recognise.' });
+      }
+    });
+  }
+
   // 5. The ACTIVE jurisdiction must actually have a usable clock.
   var act = await db.get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'");
   var jid = act && act.value;

@@ -463,10 +463,27 @@ router.post('/:id/fee-waiver-decision', requireAuth, async function(req, res) {
   await run(closeWaiverTask, [request.id]);
   await logHistory(request.id, req.user.sub, actor, 'FEE_WAIVER_DENIED', 'Denied: ' + reasonText);
 
-  var mail = { sent: false };
-  try { mail = await email.sendFeeWaiverDenial(request, reasonText); } catch (e) { console.error('[fee-waiver] denial email failed:', e.message); }
+  // PHASE 7 / WS4 — a denial does NOT get its own letter by default. DESIGN_fee_waiver_commercial.md
+  // decides that "waiver reviewed and not granted + itemized estimate" is ONE communication: the denial
+  // folds into the estimate notice (feeNotice.buildNotice), which is also what satisfies the thirteen
+  // states' itemized-estimate duties. A separate letter arrives first, says nothing about the amount, and
+  // leaves the requester waiting for a second message to learn what it costs. Cities that want the
+  // separate letter set `denial_notice: 'separate_letter'`.
+  //
+  // Either way processing does not stop: the request goes to the ordinary estimate-acceptance gate, where
+  // the requester chooses to proceed, narrow, or withdraw.
+  var mail = { sent: false, reason: null };
+  var amCfg = null;
+  try { amCfg = await require('../services/approvalModules').config(null); } catch (e) {}
+  var separate = !!(amCfg && amCfg.modules.fee_waiver.denial_notice === 'separate_letter');
+  if (separate) {
+    try { mail = await email.sendFeeWaiverDenial(request, reasonText); } catch (e) { console.error('[fee-waiver] denial email failed:', e.message); }
+  } else {
+    mail.reason = 'Folded into the estimate notice (denial_notice = fold_into_estimate).';
+  }
 
-  res.json({ decision: 'denied', reason: reasonText, emailed: !!mail.sent, emailReason: mail.reason || null });
+  res.json({ decision: 'denied', reason: reasonText, emailed: !!mail.sent, emailReason: mail.reason || null,
+    denialNotice: separate ? 'separate_letter' : 'fold_into_estimate', processingContinues: true });
 });
 
 // Director escalation: flag a request for legal (advanced) redaction. Sets requests.legal_flag so the

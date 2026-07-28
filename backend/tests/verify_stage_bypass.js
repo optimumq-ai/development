@@ -56,6 +56,13 @@ async function newRequestWithEstimate(label) {
   // The notice-send path is a separate, already-verified feature and is not the code under test.
   await db.run("UPDATE request_fee_estimates SET notified_at = ?, notified_to = ? WHERE request_id = ?",
     [nowStr(), 'harness@example.com', req.id]);
+  // WAIT FOR THE TASK, not just the row. Intake spawns the task on a BACKGROUND chain, and this fixture
+  // polled only for the request — so every assertion of the form "there is an open task before the sweep"
+  // was racing that chain and passing on timing. Phase-7 WS4 added two config reads to intake, which was
+  // enough to lose the race and turn assertion 3 red while assertion 1 (identical shape) stayed green —
+  // the tell that this was the harness, not the product. Bounded, so a genuinely missing task still fails
+  // the assertion below rather than hanging the suite.
+  for (var t = 0; t < 60 && (await openTasks(req.id)) === 0; t++) await sleep(250);
   return req;
 }
 async function openTasks(rid) {

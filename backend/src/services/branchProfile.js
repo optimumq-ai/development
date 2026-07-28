@@ -29,12 +29,14 @@ var DOMAIN = 'branches';
 // capability -> the branch nodes that switch it on. A capability is ACTIVE if ANY of its nodes is active:
 // the nodes of a band are the steps within it, and the band exists as soon as the state has any of them.
 //
-// `wired` is deliberately explicit, and it is TRUE for exactly one entry. WS2 gates the one branch that has
-// an engine object to gate: the AG band owns the `ag_review` stage and its legal_review task. The other
-// twelve are steps in the Phase-6 flow design that the engine does not model yet — there is no
+// `wired` is deliberately explicit, and it says which capabilities the engine actually ACTS on today:
+// `ag_referral` (WS2 — the AG band owns the `ag_review` stage and its legal_review task) and the two
+// approval modules (WS4 — the outer switch on the discretionary waiver / commercial programs). The rest
+// are steps in the Phase-6 flow design that the engine does not model yet — there is no
 // third-party-notice object to suppress — so here they are READ-ONLY facts: correct, queryable, and
-// consumed by WS3-WS6 and the processing UI as those get built. A table that implied the profile enforces
-// thirteen things when it enforces one would be the more comfortable lie and the more expensive one.
+// consumed by later workstreams and the processing UI as those get built. A table that implied the
+// profile enforces fourteen things when it enforces three would be the more comfortable lie and the more
+// expensive one.
 var CAPABILITIES = {
   ag_referral: {
     label: 'Attorney-General referral band',
@@ -58,16 +60,18 @@ var CAPABILITIES = {
   fee_waiver: {
     label: 'Fee-waiver program',
     nodes: ['Master.s1', 'Estimate-Fee.dwv', 'Estimate-Fee.wrev'],
-    gates: 'Whether the state HAS a statutory waiver at all; WS4 builds the approval module on top of it. ' +
-           'Deliberately NOT gating the fee_waiver task: suppressing it would leave a requester who asked ' +
-           'for a waiver with nobody assigned to answer them, which is worse than a superfluous task.',
-    wired: false
+    gates: 'Whether the state HAS a statutory waiver at all. WS4 reads it as the OUTER switch on the ' +
+           'discretionary program: a state whose research says it has no waiver cannot have a ' +
+           'discretionary one, whatever the city toggle says. It still does not suppress the task blindly ' +
+           '— services/approvalModules.js decides that, and a mandatory statutory category fires either way.',
+    wired: true
   },
   commercial_rate: {
     label: 'Commercial-rate classification',
     nodes: ['Master.s2'],
-    gates: 'Commercial classification at intake (NJ/IL clock effects). WS4.',
-    wired: false
+    gates: 'Commercial classification at intake (NJ/IL clock effects). Read by approvalModules.config() as ' +
+           'the outer switch on the commercial-rate module.',
+    wired: true
   },
   third_party_notice: {
     label: 'Third-party notice / proprietary claim',
