@@ -135,34 +135,50 @@
           </div>
 
           <div class="panelbox">
-            <h3 class="panel">Per-item allocation &amp; coverage <span class="callout">5</span></h3>
+            <h3 class="panel">Per-item allocation &amp; release — Kevin's method <span class="callout">5</span></h3>
             <table class="alloc">
-              <tr><th>Item</th><th class="num">Gross</th><th class="num">Charged (×0.80)</th><th>Covered?</th><th>Release</th></tr>
+              <tr><th>Item</th><th class="num">Gross</th><th class="num">Quoted share (×0.80) <span class="callout">8</span></th><th>Funds check</th><th>Release</th></tr>
               <tr>
                 <td><b>1</b> · Council minutes</td><td class="num">$80.00</td><td class="num">$64.00</td>
-                <td><span class="cov ok">Covered</span></td>
-                <td class="rel"><b>Released 8/8</b> — while the request was NOT paid in full <span class="callout">6</span></td>
+                <td><span class="cov ok">$200 → $136</span></td>
+                <td class="rel"><b>Released 8/8</b> — while the request was NOT paid in full <span class="callout">6</span>. Actual labor ran high; <b>the variance never touches this gate</b></td>
               </tr>
               <tr>
                 <td><b>2</b> · Construction contract</td><td class="num">$120.00 → $102.00</td><td class="num">$96.00 → $78.00</td>
-                <td><span class="cov ok">Covered</span></td>
-                <td class="rel"><b>Released 8/12</b> (redacted set) — reduced after partial withholding; the delta is the credit above <span class="callout">7</span></td>
+                <td><span class="cov ok">$136 → $58</span></td>
+                <td class="rel"><b>Released 8/12</b> (redacted set) — share reduced by the withholding credit above, valued in <b>quoted</b> numbers <span class="callout">7</span></td>
               </tr>
               <tr>
                 <td><b>3</b> · Drone survey footage</td><td class="num">$150.00</td><td class="num">$120.00</td>
-                <td><span class="cov no">Not covered</span></td>
-                <td class="rel">Ready · <b>held for ITS OWN share</b> ($42 of the remaining balance covers it) — never for a sibling's</td>
+                <td><span class="cov no">$58 remaining</span></td>
+                <td class="rel">Ready · <b>held — remaining funds $58 &lt; its $120 quoted share</b>; $62 more releases it. Held only for its own share, never a sibling's</td>
               </tr>
               <tr>
                 <td><b>4</b> · Permit &amp; inspection records</td><td class="num">$37.50</td><td class="num">$30.00</td>
-                <td><span class="cov no">Not covered</span></td>
-                <td class="rel">Still in redaction — coverage gates <b>release</b>, never work</td>
+                <td><span class="cov no">—</span></td>
+                <td class="rel">Still in redaction — the funds check gates <b>release</b>, never work</td>
               </tr>
             </table>
-            <p class="kv" style="margin-top:7px;">Charged = gross × (total ÷ gross&nbsp;subtotal) — one ratio, both directions,
-            no per-vehicle rules (§5.10.2, the ERP answer). The row explains itself to a requestor: <i>“your $150 item was billed
-            $120 because the request total was capped by aggregate pricing.”</i> Coverage is <b>cumulative FIFO</b> across
-            released items, so three $20 items can never all release against $50 paid. <span class="callout">8</span></p>
+            <p class="kv" style="margin-top:7px;"><b>The gate speaks only in quoted numbers.</b> Quoted share = gross ×
+            (total ÷ gross&nbsp;subtotal) — one ratio, both directions, no per-vehicle rules (§5.10.2) — <b>fixed at estimate
+            acceptance</b> and never revised mid-flight. Each ready record ships when the <b>running funds balance</b> (paid −
+            quoted shares of records already shipped) covers its quoted share; actual costs accumulate silently for the end.
+            A denied or never-shipped record's share never consumes funds — a denial frees money for its siblings.
+            The row still explains itself to a requestor: <i>“your $150 item was billed $120 because the request total was
+            capped by aggregate pricing.”</i></p>
+          </div>
+
+          <div class="panelbox">
+            <h3 class="panel">The last record settles the request <span class="callout">13</span></h3>
+            <div class="kv">When item 4 becomes the <b>last record ready</b>, every sibling is terminal and its own actuals
+            exist — so the aggregate adjustment is finally computable. Actuals run through the same engine (caps and all) →
+            the <b>adjusted final invoice or refund, exactly as for a non-MRR request</b>:</div>
+            <div class="warnline" style="margin-top:6px;"><b>Balance due</b> → the last record is held until the adjusted
+            invoice is paid — final delivery against final payment, the regime deposits were designed for. Collectible overage
+            is capped by the <b>20% updated-statement rule</b> (§552.2615): if the mid-flight watchdog never sent an updated
+            statement, the excess is forfeited, and this screen refuses to bill it.</div>
+            <div class="ghostline" style="margin-top:6px;"><b>Refund or zero</b> → the last record <b>releases immediately</b>
+            and the refund issues (ORO Finance) — the method never holds a finished record from a requestor who has overpaid.</div>
           </div>
 
           <div class="panelbox">
@@ -229,9 +245,11 @@
       basis.</li>
       <li><b>Verify ≠ Approve, again.</b> The approval line is the <i>requestor's</i> — purple badge, same family as the AG
       ruling in Draft 4: an external actor's decision, recorded here. Staff verification never appears as “approved”.</li>
-      <li><b><span class="decided">DECIDED §5.10.2</span> Generalized prorata is the allocation.</b> One ratio
-      (total ÷ gross subtotal) scales every item, savings and surcharges alike, no per-vehicle rulebook — and each row carries
-      the requestor-explainable sentence. Gross stays visible beside charged so the delta is never hidden.</li>
+      <li><b><span class="decided">DECIDED §5.10.2</span> Generalized prorata is the allocation — and it is FROZEN at estimate
+      acceptance.</b> One ratio (total ÷ gross subtotal) scales every item, savings and surcharges alike, no per-vehicle
+      rulebook — and each row carries the requestor-explainable sentence. Gross stays visible beside the quoted share so the
+      delta is never hidden. A page-weighted or vehicle-aware allocation was considered and declined: half the vehicles are
+      surcharges or step functions, and with the gate frozen on quoted numbers, allocation precision no longer affects release.</li>
       <li><b><span class="rule">§5.9</span> A row is only ever held for its OWN share.</b> Item 1 released while the request was
       unpaid overall; item 3 is held for the $42 that covers <i>it</i>. The table states the sibling rule on the row where it
       bites, because this is the line staff will be tempted to “fix” at the counter.</li>
@@ -239,9 +257,9 @@
       net against balance while one exists → refund only when credits exceed balance, issued by ORO Finance with method
       recorded. Credits fold into the next communication (revised notice), never a standalone letter — the one-notice principle
       applied to money going the other way.</li>
-      <li><b>Cumulative FIFO coverage is stated on the screen</b> because it is flagged in-code as a prerequisite for the money
-      axis moving to the parent — the UI asserts the correct rule so the build can't quietly ship the per-row version that
-      triple-releases against one payment.</li>
+      <li><b>The running funds balance IS cumulative FIFO</b> — paid minus quoted shares of records already shipped, stated on
+      the screen because it is flagged in-code as a prerequisite for the money axis moving to the parent: three $20 items can
+      never all release against $50 paid, and the UI asserts the rule so the build can't quietly ship the per-row version.</li>
       <li><b>Reconciliation: auto-draft, human send.</b> The draft computes itself when the last billable task finalizes
       (measured labor over quoted quantities); the revised notice send stays a person's act, and the labor delta rides the same
       communication as any credits.</li>
@@ -255,6 +273,15 @@
       <li><b>Not duplicated here:</b> taking payment (Cash Drawer), estimate line-item editing (Draft 2's screen), the waiver
       decision (Drafts 1–2), disposition (next draft). This screen is the money's single source of truth, not a second home for
       any of those acts.</li>
+      <li><b><span class="decided">KEVIN 7/28</span> The MRR settlement method.</b> Quoted pro-rata shares govern every release;
+      actuals never touch the gate; variances accumulate silently. When the <b>last record becomes ready</b> (all siblings
+      terminal, its own actuals in), the aggregate adjustment runs once — the same adjusted invoice/refund as a non-MRR — and
+      the last record is held for that payment, or <b>releases immediately when the adjustment nets to refund or zero</b>.
+      Mid-flight, the only running number is the parent-level 20% overage watchdog feeding the updated-statement (reissue)
+      machinery, which also caps what the final invoice may collect. Honest footnote: a purist §5.9 reading would hold the last
+      record only for its own adjusted share — final-delivery-against-final-payment is the standard regime deposits were
+      designed around, the invoice issues the moment the record is ready, and the 20% rule bounds the exposure, so the method
+      is documented and adopted.</li>
     </ol>
     <p class="note" style="margin-top:10px;">Flagged, not designed here: the refund execution mechanics (card reversal vs
     check request — city finance-system integration); WA per-installment pricing UI; the org-wide revenue/receivables report.</p>

@@ -12,6 +12,37 @@ deliverable). The parent is the request's financial processor; this is its ledge
 
 ---
 
+## 0. THE MRR SETTLEMENT METHOD — decided with Kevin, 2026-07-28 (round 2)
+
+Kevin caught the real problem with per-item allocation on an MRR: the aggregate pricing vehicles
+mean a per-item "actual" cost does not exist until every child has actuals — so a release gate that
+consults actuals is provisional, order-dependent, and an accounting method no city runs. The
+decided method ("simple, not perfect, adequate"):
+
+1. **Quoted shares are frozen at estimate acceptance** (§5.10.2 prorata, computed once). Actuals
+   never touch the release gate; variances accumulate silently for the end.
+2. **Release check = running funds balance.** paid − Σ quoted shares of records already shipped;
+   a ready record ships when the balance covers its quoted share (this IS the cumulative-FIFO rule
+   the code flags as required). A denied / never-shipped record's share never consumes funds.
+3. **The last record settles the request.** Trigger: the last record becomes *ready* (all siblings
+   terminal, its own actuals in). Aggregate actuals run through the same engine once → the adjusted
+   final invoice or refund, **exactly as for a non-MRR** — the last record is held until that
+   payment, or **releases immediately when the adjustment nets to refund or zero**.
+4. **The only mid-flight running number is parent-level:** the 20% overage watchdog (§552.2615)
+   feeding the existing updated-statement/reissue machinery — which also **caps what the final
+   invoice may collect** (unnotified overage is forfeited; the screen refuses to bill it).
+5. **Allocation basis stays dollar-prorata** (page-weighted / vehicle-aware allocation considered
+   and declined: half the vehicles are surcharges or step functions, and with the gate frozen,
+   allocation precision no longer affects release). Per-category ratios remain a possible later
+   refinement, out of v1.
+6. **Credit classes:** credits valued purely in quoted numbers (e.g. withheld pages at the quoted
+   allocation) post when their cause occurs; anything derived from measured actuals waits for the
+   terminal settlement.
+7. **Documented §5.9 footnote:** a purist reading would hold the last record only for its own
+   adjusted share; final-delivery-against-final-payment is the standard regime deposits were
+   designed around, the invoice issues the moment the record is ready, and the 20% rule bounds the
+   exposure. Adopted with the reasoning recorded.
+
 ## 1. The shape
 
 - **Parent card:** balance due, release rule by name (`pay_in_full` TX / `per_installment` WA —
@@ -21,14 +52,12 @@ deliverable). The parent is the request's financial processor; this is its ledge
   must be reconstructable). Every line carries its actor: requestor approval (purple external-actor
   badge — Verify ≠ Approve), person acts (credit approval, revised-notice send), system
   computations with basis.
-- **Per-item allocation & coverage table** — the centerpiece:
-  - `charged = gross × (total ÷ gross subtotal)` (§5.10.2 generalized prorata, decided) with gross
-    kept visible and the requestor-explainable sentence on the row.
-  - Coverage per item (§5.9, built): a row is held only for **its own** share — the sibling rule
-    stated on the row where staff will be tempted to override it; released-while-unpaid shown.
-  - **Cumulative FIFO coverage asserted on-screen** (the in-code flag: prerequisite before the
-    money axis moves to the parent — three $20 items must never all release against $50).
-  - Coverage gates **release, never work** (item still in redaction while uncovered).
+- **Per-item allocation & release table** — the centerpiece, now running Kevin's method (§0):
+  quoted shares (frozen, ×ratio, gross visible, requestor-explainable sentence), the running funds
+  balance shown per row ($200 → $136 → $58), variances explicitly not touching the gate, the
+  own-share-only rule stated where staff will be tempted to override it, and the funds check
+  gating **release, never work**. A "last record settles the request" panel shows both settlement
+  branches (balance-due hold / refund-releases-immediately) and the 20% collection cap.
 - **Reconciliation:** auto-draft when the last billable task finalizes (measured 2.1 h vs estimated
   3.0 h → revised total); the send is a person's act; the delta rides one revised communication.
 - **Refund/credit path (new design):** recompute → evented credit cited to its cause ("item 2: 40
