@@ -64,9 +64,12 @@ intake reviewer is the densest (hosts the inline waiver/commercial decision when
    holds the request automatically pending the requestor's response; every other stop condition
    already blocks Proceed with a named reason. A manual hold returns only if a real case emerges,
    and then with a required reason.
-5. **Pending (step-3 rework):** replace the lone Change-route button with an "Edit info below"
-   frame — Classified-as / Record owner / Routes-to each editable via dropdown (taxonomy record
-   types · Departments · Fulfillment Teams). These feed smart routing, so corrections matter.
+5. **Applied 2026-07-29:** the lone Change-route button is replaced by an **"Edit info below"
+   frame** — Classified-as / Record owner / Will-route-to each editable via dropdown backed by a
+   real list (record-type taxonomy · City Departments · Fulfillment Teams). The TX tab draws the
+   editing state, the OH tab the display state. These feed smart routing (the specialization
+   match runs against the eligible staff of the chosen team), so corrections matter downstream;
+   the classification also travels with the item as context for whoever searches.
 
 ## 1. The shape being tested
 
@@ -136,7 +139,9 @@ intake reviewer is the densest (hosts the inline waiver/commercial decision when
 6. **Proceed gate.** Resolution blocked (with the reason) while an inline waiver decision or an
    eligibility review is open — same pattern as the record-search Found gate (422 with a named cause).
 7. **Component library seeds:** ClockChip (4 kinds + exposure warning), DecidedByBadge (4 values),
-   PortalResultsBar, ParentStrip, RecordItemExpand, TriggerBadge ("why it's here").
+   PortalResultsBar, ParentStrip, RecordItemExpand, TriggerBadge ("why it's here"),
+   EditInfoFrame (§0b.5 — three dropdowns from taxonomy / Departments / Teams; writes
+   classification, record owner, and routed team on the child).
 
 ## 5. Open questions for Kevin (remaining)
 

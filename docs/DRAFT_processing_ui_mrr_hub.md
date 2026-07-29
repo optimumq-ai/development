@@ -39,15 +39,18 @@ view · child record view. Single city (Austin TX; OH is one annotation).
    manager's own MRRs; the all-office view with a manager column is oversight authority —
    Supervisor / Director — not a tab on the working screen.)
 
-## 0b. Kevin's markup round — 2026-07-29 (accepted, pending redraw)
+## 0b. Kevin's markup round — 2026-07-29 (APPLIED to the mockup)
 
-- **Full verbatim description on the detail screens**: master card carries the parent-level
-  submission text; each child click-through carries that item's verbatim description — same
-  "Request Description as Submitted" treatment as Draft 1 §0b.
-- **Per-item requestor attachments**: MRRs submitted through the portal can attach records to
-  each request item; the child view gets an attachments strip (same selected-records substrate
-  that drives the non-MRR auto-complete).
-- "Classified:" → "Classified as:" applied to the mockup.
+- **Full verbatim description on the detail screens**: the master card carries the parent-level
+  "Request Description as Submitted" (the requestor's own words); the child view leads with that
+  item's submitted wording. Mark Vague / Mark Overly Broad moved off the child rail into the
+  defect box beside the description (Draft 1 §0b global layout); the bar's one-liner is a
+  truncation of the verbatim text, not a summary.
+- **Per-item requestor attachments**: bars carry a 📎 count; the child view lists the files with
+  the requestor's note, and attachments ride the item into its MRR SEARCH task. A library record
+  the requestor marked as *fulfilling* an item auto-completes that item's search on arrival —
+  the same selected-records substrate as the non-MRR auto-complete, applied per item.
+- "Classified:" → "Classified as:" applied.
 
 ## 1. Design choices made in the draft (first pass, per "design what you feel is best")
 

@@ -106,6 +106,13 @@
   .legend li{margin-bottom:9px; font-size:12.5px;}
   .legend li b{color:var(--navy);}
   .decided{font-size:10px; font-weight:800; color:#fff; background:var(--blue); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
+/* Kevin markup 7/29 — verbatim descriptions on master + child; per-item requestor attachments */
+.desctitle{font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); margin-bottom:3px; font-weight:700;}
+.desctext{font-size:14.5px; font-weight:600; line-height:1.45; margin:0;}
+.descrow{display:flex; gap:10px; align-items:flex-start; margin-bottom:9px;}
+.defectbox{display:flex; flex-direction:column; gap:5px; padding:7px 8px; border:1px solid var(--line); border-radius:6px; flex:0 0 auto; background:var(--surface-2);}
+.clip{display:inline-block; font-size:11px; border:1px solid var(--line); border-radius:4px; padding:1px 7px; background:var(--surface-2); color:var(--muted); font-weight:600; white-space:nowrap;}
+.filerow{display:flex; align-items:center; gap:9px; padding:6px 0; border-bottom:1px solid var(--surface-2); font-size:12.5px;}
 </style>
 </head>
 <body>
@@ -191,6 +198,11 @@
           <span class="kv"><b>K. Osei</b> · k.osei@…org · delivery: email · received Jul 28 (portal)</span>
           <span class="kv" style="margin-left:auto;">Manager: <b>M. Reyes</b> · assigned until all items terminal</span>
         </div>
+        <div style="margin-top:8px;">
+          <div class="desctitle">Request Description as Submitted <span class="callout">13</span></div>
+          <p class="desctext">I am requesting records relating to the rebuild of the Barton Creek greenbelt trail, 2024 to present: the council minutes and agenda items where it was discussed, the construction contract and any change orders, the drone survey footage of the corridor, and the permit and inspection records for the trail structures.</p>
+          <span class="kv">Itemized by the requestor in the portal as the 4 record items below — each item carries its own submitted wording.</span>
+        </div>
         <div class="row1" style="margin-top:7px;">
           <span class="chip clock-legal"><span class="k">Statutory deadline — master</span>Respond by <b>Mon Aug 11</b> <span class="cite">§552.221</span></span>
           <span class="kv">tolled 0 days · payment: none yet</span>
@@ -212,7 +224,7 @@
 
       <div class="bar">
         <span class="bl">Item 1</span>
-        <span class="bd">Council meeting minutes &amp; agenda items — trail rebuild, 2024–2026</span>
+        <span class="bd">Council meeting minutes &amp; agenda items — trail rebuild, 2024–2026 <span class="clip">📎 2</span></span>
         <span class="st done">Search <b>Complete</b></span>
         <span class="st done">Estimate <b>Complete</b></span>
         <span class="st na">Redaction <b>Not required</b></span>
@@ -221,7 +233,7 @@
 
       <div class="bar">
         <span class="bl">Item 2</span>
-        <span class="bd">Construction contract + change orders — Parks &amp; Recreation</span>
+        <span class="bd">Construction contract + change orders — Parks &amp; Recreation <span class="clip">📎 1</span></span>
         <span class="st ip">Search <b>In Process</b></span>
         <span class="st done">Estimate <b>Complete</b></span>
         <span class="st q">Redaction <b>Queued</b></span>
@@ -278,10 +290,26 @@
           <span class="pn">Item 2 of 4 — Construction contract + change orders (Parks &amp; Recreation)</span>
           <span class="kv" style="margin-left:auto;">Classified as: <b>Contract file</b> (confidence 71) · <a href="#">← back to master record</a></span>
         </div>
+        <div class="descrow" style="margin-top:8px; margin-bottom:0;">
+          <div class="defectbox">
+            <button class="btn quiet">Mark Vague</button>
+            <button class="btn quiet">Mark Overly Broad</button>
+          </div>
+          <div>
+            <div class="desctitle">Item Description as Submitted</div>
+            <p class="desctext">The construction contract for the trail rebuild awarded by Parks &amp; Recreation, together with all change orders issued under it.</p>
+          </div>
+        </div>
       </div>
 
       <div class="cols">
         <div class="main">
+
+          <div class="panelbox">
+            <h3 class="panel">Attached by the requestor — this item <span class="callout">14</span></h3>
+            <div class="filerow">📄 <b>award_notice_2024-117.pdf</b> <span class="kv">· uploaded at submission · “the contract I mean is the one this notice announces”</span> <button class="btn sm quiet" style="margin-left:auto;">View</button></div>
+            <div class="kv" style="margin-top:5px;">Attachments ride the item, not the master record — the searcher sees them inside the MRR SEARCH task. A library record the requestor marked as <i>fulfilling</i> an item would instead complete that item's search on arrival (the Draft-1 auto-complete rule, per item here).</div>
+          </div>
 
           <div class="act">
             <div class="ah"><span class="an">Record search</span>
@@ -319,9 +347,8 @@
         <div class="rail">
           <div class="panelbox">
             <div class="railhead">Child-record actions <span class="callout">8</span></div>
-            <button class="btn quiet">Mark Vague</button>
-            <button class="btn quiet">Mark Overly Broad</button>
             <button class="btn danger-quiet">Designate denial → submit for Legal Review…</button>
+            <p class="kv" style="margin-top:4px;">Mark Vague / Mark Overly Broad sit beside the item description (global layout, Draft 1 §0b).</p>
             <p class="kv" style="margin-top:4px;">Designation is not a denial: it sends this item to Legal Review (Draft 4) with your
             grounds attached; if upheld, the letter is composed in Denial Compose (Draft 3). The bar shows the tag meanwhile.</p>
             <hr class="soft">
@@ -375,6 +402,14 @@
       task-type keys so the two can never blur.</li>
       <li><b>The assignee inset</b> makes the distinction visible where it matters: the person doing the work sees a normal-looking
       task; the difference is what completing it does (updates the bar; advances nothing).</li>
+      <li><b><span class="decided">KEVIN 7/29</span> Verbatim descriptions, both levels.</b> The master card carries the full
+      <i>Request Description as Submitted</i> (the requestor's own words, never a paraphrase — Draft 1 §0b's global layout);
+      each child view leads with that item's submitted wording, with Mark Vague / Mark Overly Broad boxed beside it. The bar's
+      one-line text is a truncation of the item's verbatim text, not a summary.</li>
+      <li><b><span class="decided">KEVIN 7/29</span> Per-item requestor attachments.</b> A portal MRR can attach records to each
+      request item; the bars carry a 📎 count and the child view lists the files with the requestor's note. Attachments ride the
+      item into its MRR SEARCH task. A library record marked as <i>fulfilling</i> an item auto-completes that item's search on
+      arrival — the same selected-records substrate as Draft 1's auto-complete, applied per item.</li>
     </ol>
     <p class="note" style="margin-top:10px;"><b>Columbus, OH in one line:</b> the master card's clock strip shows the honest
     “no statutory deadline” treatment, waiver chip absent (explicit <code>false</code>), ledger chip “anonymous — does not

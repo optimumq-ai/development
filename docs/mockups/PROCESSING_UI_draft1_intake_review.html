@@ -115,6 +115,13 @@
 .defectbox{display:flex; flex-direction:column; gap:5px; padding:7px 8px; border:1px solid var(--line); border-radius:6px; flex:0 0 auto; background:#fafafa;}
 .desctitle{font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:#767b83; margin-bottom:3px;}
 .desctext{font-size:14.5px; font-weight:600; line-height:1.45; margin:0;}
+/* Kevin markup 7/29 — "Edit info below": classification / owner / routing corrected via dropdowns */
+.editframe{border:1px solid var(--line); border-radius:6px; padding:8px 10px; margin-bottom:9px; background:var(--surface);}
+.efhead{display:flex; align-items:center; gap:10px;}
+.efhead .kv{flex:1;}
+.efrow{display:flex; align-items:center; gap:10px; margin-top:7px;}
+.efrow label{font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); flex:0 0 180px; font-weight:700;}
+.efrow select{font:inherit; font-size:13px; padding:5px 8px; border:1px solid var(--line); border-radius:5px; background:var(--surface); color:var(--ink); max-width:360px;}
 </style>
 </head>
 <body>
@@ -216,7 +223,22 @@
                   <p class="desctext">All email correspondence between the Public Works director and Lakeline Paving LLC, January–June 2026.</p>
                 </div>
               </div>
-              <div class="kv" style="margin-bottom:9px;">Classified as: <b>Email correspondence</b> (confidence 84) · Record owner: <b>Public Works</b> · Will route to (on Proceed): <b>Open Records Fulfillment Team</b> &nbsp;<button class="btn quiet">Change route</button></div>
+              <div class="editframe">
+                <div class="efhead">
+                  <span class="kv">AI-generated from the request text — correct anything that's wrong before Proceed <span class="callout">15</span></span>
+                  <button class="btn sec" style="font-size:12px; padding:4px 10px;">Done editing</button>
+                </div>
+                <div class="efrow"><label>Classified as</label>
+                  <select><option selected>Email correspondence &nbsp;(AI · confidence 84)</option><option>Contract file</option><option>Meeting minutes &amp; agendas</option><option>Permit records</option><option>… record-type taxonomy</option></select>
+                </div>
+                <div class="efrow"><label>Record owner</label>
+                  <select><option selected>Public Works &nbsp;(AI)</option><option>City Clerk's Office</option><option>Parks &amp; Recreation</option><option>Building &amp; Zoning</option><option>… City Departments</option></select>
+                </div>
+                <div class="efrow"><label>Will route to (on Proceed)</label>
+                  <select><option selected>Open Records Fulfillment Team &nbsp;(AI)</option><option>Police Records Fulfillment Team</option><option>… Fulfillment Teams</option></select>
+                </div>
+                <div class="kv" style="margin-top:7px;">These three feed <b>smart routing</b> — the specialization match runs against the eligible staff of the team chosen here, so a correction changes who can be matched downstream.</div>
+              </div>
               <hr class="soft">
               <h3 class="panel">Preliminary search <span class="callout">4</span></h3>
               <div class="row" style="border:none; padding-top:0;">
@@ -355,7 +377,12 @@
                   <p class="desctext">Body-worn camera footage of a traffic stop at Cleveland Ave &amp; Hudson St, the evening of June 14, 2026.</p>
                 </div>
               </div>
-              <div class="kv" style="margin-bottom:9px;">Classified as: <b>BWC video</b> (confidence 91) · Will route to (on Proceed): <b>Police Records Fulfillment Team</b> &nbsp;<button class="btn quiet">Change route</button></div>
+              <div class="editframe">
+                <div class="efhead">
+                  <span class="kv">Classified as: <b>BWC video</b> (confidence 91) · Record owner: <b>Police Department</b> · Will route to (on Proceed): <b>Police Records Fulfillment Team</b> <span class="callout">15</span></span>
+                  <button class="btn quiet" style="font-size:12px; padding:4px 10px;">Edit info below</button>
+                </div>
+              </div>
               <hr class="soft">
               <h3 class="panel">Preliminary search <span class="callout">4</span></h3>
               <div class="kv">Not applicable — the asset lives in the evidence system (located by metadata in the Record Search task). The intake AI's scoping detail (date, time, location) travels with the item.</div>
@@ -427,6 +454,7 @@
       <li><b>Branch-gated denial ground.</b> “Deny — too vague” appears only where <code>clarification_denial: true</code> (Ohio). It is denial-shaped, so it is a person's act through Denial compose — never automatic.</li>
       <li><b><span class="decided">DECIDED 7/28</span> Auto-complete.</b> A portal request whose requestor indicated that an attached/selected record <b>fulfills</b> the search never stops here: under only-when-needed it's simply one more no-trigger case (and in <b>always</b> mode the task is spawned and completed automatically, audit trail intact). Binds to the portal's selected-records + search-intent <code>complete</code> substrate (R9).</li>
       <li><b>The trade only-when-needed makes, stated honestly.</b> In a hard-clock state, a vague request that slips past intake (confidently classified, no triggers) is discovered by the searcher on day 3–6 of Texas's 10 business days rather than day 1 — a tighter clarification window. Mitigations: vagueness and unroutability usually arrive together (R-1082 on the Ohio tab — the vague ones mostly <i>are</i> the can't-route ones, so they stop here anyway), and the downstream markers fire the identical clarification process. Cities that want day-1 defect review flip the setup option to <b>always</b>.</li>
+      <li><b><span class="decided">KEVIN 7/29</span> The AI's three routing facts are editable in place.</b> Classified-as / Record owner / Will-route-to sit in one "Edit info below" frame: display state (Ohio tab) shows the values with the edit button; editing (Texas tab) turns each into a dropdown backed by a real list — the record-type taxonomy · City Departments · Fulfillment Teams. Corrections matter beyond this screen: smart routing matches specialization against the <i>eligible staff of the chosen team</i>, and the classification travels with the item as search context for whoever fulfills it. Replaces the lone Change-route button.</li>
     </ol>
     <p class="note" style="margin-top:10px;">Out of scope for this role (drafted next, separately): the MRR / Request-Manager intake flow, the go-live confirm-each-knob checklist (rule D — an admin surface, TX and OH each carry 9 unconfirmed knobs today), the estimate/waiver interaction on EstimateTaskPage, Denial compose, and the parent financial view.</p>
   </div>
