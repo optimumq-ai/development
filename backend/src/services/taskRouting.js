@@ -215,6 +215,53 @@ async function suggestAssignee(requestText, teamId, roleName, k) {
 
 async function getTask(taskId) { return await get('SELECT * FROM tasks WHERE id = ?', [taskId]); }
 
+// ══ TWO EYES (BW2; SPEC_processing_ui §5 / Draft 9) ══════════════════════════════════════════════════
+//
+// A release review exists to be a SECOND look. If it can land on the person who just did the work, it is
+// a first look wearing a second hat: the reviewer's own judgement is what is being checked, and self-
+// review is exactly the control a release gate is supposed to provide.
+//
+// So the rule is stated at ASSIGNMENT time, not at screen time — a task that reaches the wrong person's
+// queue has already failed, and telling them at the last click makes the failure the reviewer's problem.
+// It applies to every route INTO a person: smart routing, load balancing, and claiming from the pool.
+//
+// "The completer of the request's most recent flow task" = the assignee of the most recently COMPLETED
+// task on this request, excluding two-eyes tasks themselves (a previous release review is a review, not
+// the work being reviewed). Ordering prefers `done_at`, falling back to `updated_at` for rows that
+// predate the timing columns.
+//
+// SCOPE IS DELIBERATELY NARROW (Draft 9 marks two-eyes scope as open pending Kevin): the last completer,
+// not everyone who ever touched the request. A wider exclusion can empty a small city's pool entirely,
+// and an empty pool is a worse failure than a reviewer who also did an earlier step — it stops the
+// request, and it stops it silently.
+var TWO_EYES_TYPES = { release_review: 1 };
+
+async function twoEyesExclusions(task) {
+  if (!task || !TWO_EYES_TYPES[task.type] || !task.request_id) return [];
+  var typeKeys = Object.keys(TWO_EYES_TYPES);
+  var ph = typeKeys.map(function () { return '?'; }).join(',');
+  var row = await get(
+    "SELECT assigned_to FROM tasks WHERE request_id = ? AND id <> ? AND status = 'done' " +
+    'AND assigned_to IS NOT NULL AND type NOT IN (' + ph + ') ' +
+    'ORDER BY COALESCE(done_at, updated_at) DESC LIMIT 1',
+    [task.request_id, task.id].concat(typeKeys));
+  return (row && row.assigned_to) ? [row.assigned_to] : [];
+}
+
+// May this person take this task? Encodes the two-eyes rule as a question with a REASON, so every caller
+// (claim now, manual assignment and the screen later) refuses for the same stated cause.
+async function assignmentBlocked(task, userId) {
+  var ex = await twoEyesExclusions(task);
+  if (ex.indexOf(userId) >= 0) {
+    return {
+      blocked: true, code: 'TWO_EYES',
+      reason: 'You completed the last step on this request, so you cannot also review its release. ' +
+              'A release review has to be a second person.'
+    };
+  }
+  return { blocked: false };
+}
+
 // ⚠️ A TASK WITHOUT A REQUIRED ROLE WAS WORLD-CLAIMABLE (brief §3.5, fixed 2026-07-19).
 //
 // `role_required` NULL meant "everyone eligible" in BOTH readers: the claim-pool predicate listed it to
@@ -277,6 +324,9 @@ async function claim(taskId, userId) {
   if (elig.filter(function (u) { return u.id === userId; }).length === 0) {
     return { error: 'You are not eligible to claim this task' };
   }
+  // TWO EYES: eligible is not the same as permitted on a review of your own work.
+  var blocked = await assignmentBlocked(task, userId);
+  if (blocked.blocked) return { error: blocked.reason, code: blocked.code };
   await run(
     "UPDATE tasks SET assigned_to = ?, status = 'assigned', assignment_basis = 'claim', claimed_at = datetime('now'), updated_at = datetime('now') " +
     "WHERE id = ? AND status = 'open' AND assigned_to IS NULL",
@@ -307,8 +357,11 @@ async function workloadCounts(userIds) {
 }
 
 // Pick the eligible user with the smallest current workload (ties -> first by name for stability).
-async function leastLoaded(teamId, roleName) {
+async function leastLoaded(teamId, roleName, excludeIds) {
   var elig = await eligibleUsers(teamId, roleName);
+  if (excludeIds && excludeIds.length) {
+    elig = elig.filter(function (u) { return excludeIds.indexOf(u.id) < 0; });
+  }
   if (!elig.length) return null;
   var counts = await workloadCounts(elig.map(function (u) { return u.id; }));
   elig.sort(function (a, b) {
@@ -326,7 +379,12 @@ async function autoRouteOrPool(taskId, requestText, opts) {
   if (!task) return { error: 'Task not found' };
   var floor = (opts.floor != null) ? opts.floor : SMART_ROUTING_FLOOR;
   var margin = (opts.margin != null) ? opts.margin : SMART_ROUTING_MARGIN;
-  var suggestions = await suggestAssignee(requestText, task.team_id, task.role_required, 5);
+  // TWO EYES applies to every route INTO a person, so it is enforced here — before smart routing and
+  // before load balancing — not only at claim time. Otherwise the rule would be honoured by the one path
+  // a human chooses and bypassed by the two the system chooses.
+  var excluded = await twoEyesExclusions(task);
+  var suggestions = (await suggestAssignee(requestText, task.team_id, task.role_required, 5))
+    .filter(function (s0) { return excluded.indexOf(s0.userId) < 0; });
   var scored = suggestions.filter(function (s2) { return s2.score != null; });
   var top = scored[0];
   var second = scored[1];
@@ -338,7 +396,7 @@ async function autoRouteOrPool(taskId, requestText, opts) {
   // No confident specialist. If the owning team runs Auto Load Balancing, hand it to the least-loaded
   // eligible person; otherwise leave it in the pool to claim. (Priority: smart match -> load balance -> pool.)
   if (await teamLoadBalancing(task.team_id)) {
-    var lb = await leastLoaded(task.team_id, task.role_required);
+    var lb = await leastLoaded(task.team_id, task.role_required, excluded);
     if (lb) {
       var assignedLb = await assign(taskId, lb.userId, 'load_balanced', null);
       return { assigned: true, via: 'load_balanced', user: lb, task: assignedLb, suggestions: suggestions };
@@ -368,11 +426,25 @@ var POOL_ELIGIBILITY_SQL =
   "AND (t.role_required IN (SELECT pr.name FROM user_permission_roles upr JOIN permission_roles pr ON pr.id = upr.permission_role_id WHERE upr.user_id = ?) " +
   "  OR t.role_required IN (SELECT task_type FROM user_task_types WHERE user_id = ?))";
 
+// TWO EYES IN THE POOL. A task this person may not take must not be OFFERED to them: showing it and then
+// refusing the claim makes the rule look like a bug at the moment they act on it. One filter, used by both
+// pool readers (this and GET /tasks/pool), so the list and the claim guard cannot disagree.
+async function filterTwoEyes(rows, userId) {
+  var out = [];
+  for (var i = 0; i < rows.length; i++) {
+    if (!TWO_EYES_TYPES[rows[i].type]) { out.push(rows[i]); continue; }
+    var b = await assignmentBlocked(rows[i], userId);
+    if (!b.blocked) out.push(rows[i]);
+  }
+  return out;
+}
+
 async function poolForUser(userId) {
-  return await all(
+  var rows = await all(
     "SELECT t.* FROM tasks t WHERE " + POOL_ELIGIBILITY_SQL + " ORDER BY t.created_at",
     [userId, userId, userId]
   );
+  return await filterTwoEyes(rows, userId);
 }
 
 // Is anyone actually carrying this task type yet? The v3 cutover is scoped per (team, task type): a team
@@ -451,6 +523,17 @@ async function spawnForStage(requestId, stage, createdBy) {
   // Legal work is office-level (team-agnostic); team fulfillment work stays on the request's team.
   var teamId = LEGAL_TYPES[ttype] ? null : reqRow.department_id;
   var task = await createTask({ requestId: requestId, type: ttype, teamId: teamId, createdBy: createdBy || 'system' });
+  // THE COVERAGE GAP (BW2). A task whose eligible set is EMPTY is a request stopping silently at a stage
+  // nobody in the city can act on — nothing looks broken from any screen, and the first symptom is a
+  // missed deadline. Check it HERE, where the task is born, and tell the team's Fulfillment Manager.
+  // Never blocks the spawn: the task is still the right row to create, it just has nobody yet.
+  try {
+    var elig = await eligibleUsers(teamId, task.role_required);
+    if (!elig.length) {
+      require('./coverageGap').notifyEmptyPool(task, {})
+        .catch(function (e) { console.error('[spawnForStage coverage]', e && e.message); });
+    }
+  } catch (e) { console.error('[spawnForStage coverage]', e && e.message); }
   autoRouteOrPool(task.id, reqRow.description, {}).catch(function (e) { console.error('[spawnForStage route]', e.message); });
   return task;
 }
@@ -678,6 +761,10 @@ module.exports = {
   claim: claim,
   autoRouteOrPool: autoRouteOrPool,
   poolForUser: poolForUser,
+  filterTwoEyes: filterTwoEyes,
+  TWO_EYES_TYPES: TWO_EYES_TYPES,
+  twoEyesExclusions: twoEyesExclusions,
+  assignmentBlocked: assignmentBlocked,
   POOL_ELIGIBILITY_SQL: POOL_ELIGIBILITY_SQL,
   hasSeededType: hasSeededType,
   mine: mine,

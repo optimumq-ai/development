@@ -23,7 +23,9 @@ router.get('/pool', requireAuth, async function (req, res) {
   // legal_redaction, routing_review — was invisible here while taskRouting.poolForUser listed it (§3.5).
   var rows = await all(withReq("WHERE " + tr.POOL_ELIGIBILITY_SQL + " ORDER BY t.created_at"),
     [req.user.sub, req.user.sub, req.user.sub]);
-  res.json({ tasks: rows });
+  // TWO EYES (BW2): a release review of your own last step is not claimable, so it is not offered here
+  // either — the same filter poolForUser applies, so the list and the claim guard cannot disagree.
+  res.json({ tasks: await tr.filterTwoEyes(rows, req.user.sub) });
 });
 
 // Tasks assigned to the current user, each with its live timing (elapsed in the current state + phase totals,
