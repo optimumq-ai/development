@@ -1535,3 +1535,29 @@ ALTER TABLE requests ADD COLUMN IF NOT EXISTS mrr_denial_grounds TEXT;
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS mrr_denial_by TEXT;
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS mrr_denial_at TEXT;
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS mrr_denial_legal_task_id TEXT;
+
+-- ── PHASE 7 / BW7 — THE CREDIT / REFUND RAIL'S AUDIT FIELDS ──────────────────────────────────────
+--
+-- `fee_adjustments` carried an amount and prose. A credit reducing a public receivable, and a refund of
+-- public money, both have to answer WHY and WHICH ONE later — so the cause and its citation get columns
+-- rather than living inside a sentence somebody has to parse. All nullable and additive: every existing row
+-- stays valid and every existing query keeps working.
+--   cause_kind / cause_ref  the determination, reconciliation or objection that caused a credit (required by
+--                           services/parentFinance.credit — an unexplained reduction is not writable)
+--   method / reference      how a refund was issued and the number the city's finance system knows it by.
+--                           v1 is RECORD-ONLY: the funds move over there, this records the authorization.
+--   approver                the second person, where one was required.
+ALTER TABLE fee_adjustments ADD COLUMN IF NOT EXISTS cause_kind TEXT;
+ALTER TABLE fee_adjustments ADD COLUMN IF NOT EXISTS cause_ref TEXT;
+ALTER TABLE fee_adjustments ADD COLUMN IF NOT EXISTS method TEXT;
+ALTER TABLE fee_adjustments ADD COLUMN IF NOT EXISTS reference TEXT;
+ALTER TABLE fee_adjustments ADD COLUMN IF NOT EXISTS approver TEXT;
+
+-- The terminal settlement of an MRR (Draft 7 §0.3): the LAST record settles the request, once. Recorded on
+-- the PARENT because that is where the money axis lives (§4.3), and recorded at all because "we already
+-- settled this" must be a fact rather than an inference from the shape of the estimate table.
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS settlement_at TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS settlement_by TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS settlement_outcome TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS settlement_reconciliation_id TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS settlement_amount REAL;

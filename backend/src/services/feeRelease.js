@@ -70,11 +70,155 @@ async function pricedSnapshot(rid) {
   return (recon && recon.total != null) ? recon : est;
 }
 
+function r2(n) { return Math.round((Number(n) || 0) * 100) / 100; }
+
+// ── PHASE 7 / BW7 — CUMULATIVE FIFO COVERAGE (§5.10.3), AND THE FROZEN QUOTE IT RUNS ON ─────────
+//
+// This is the upgrade the footer of this file has flagged since `bd9befa`, now required because the parent
+// financial view (Draft 7 §0, decided with Kevin 2026-07-28) reads coverage per item off ONE funds pool.
+//
+// KEVIN'S DECIDED SETTLEMENT METHOD, and the two halves of it that live in this function:
+//
+//   1. QUOTED SHARES ARE FROZEN AT ESTIMATE ACCEPTANCE. The gate reads the ACCEPTED estimate snapshot's
+//      §5.10.2 prorata shares — never a reconciliation's. Actuals NEVER touch the release gate; a per-item
+//      "actual" does not exist until every sibling has actuals, so a gate that consulted them would be
+//      provisional and ORDER-DEPENDENT — the exact property §5.10.2 was designed to kill.
+//   2. THE CHECK IS A RUNNING FUNDS BALANCE. available − Σ quoted shares of records ALREADY SHIPPED, and a
+//      ready record ships when what is left covers its own quoted share. Three $20 items against $50 paid
+//      release two and hold the third. A DENIED / NEVER-SHIPPED item's share NEVER consumes funds.
+//
+// THIS IS STILL NOT "WITHHELD BECAUSE A SIBLING IS UNPAID" (§5.9, which is a legal line). The money was not
+// withheld by anybody — it was SPENT, on records the citizen has already received. The predicate is still
+// "is THIS record's own share covered", asked of a pool that earlier releases have drawn down.
+//
+// ══ WHY IT CANNOT CHANGE A LIVE OUTCOME, WHICH IS THE HARD CONSTRAINT ══
+//
+// It applies ONLY when ONE priced snapshot names MORE THAN ONE request row — i.e. genuinely one pool funding
+// n records. Today every UI path writes the estimate on the row it is looking at, so a single-record request
+// (and each self-funded child) has exactly one component naming itself, `others` is empty, and this function
+// returns `applies: false` before reading anything else. The gate then runs the code it ran yesterday, to
+// the character — including recon-supersedes-estimate, which stays the basis on the single-pool path
+// precisely BECAUSE changing it there would release records against an unpaid overage. §0's frozen-quote
+// rule is applied where §0 applies, and nowhere else.
+//
+// AVAILABLE FUNDS = paid − refunds + credits. A credit is a dollar the citizen no longer owes; against a
+// FROZEN quoted requirement, crediting the pool is arithmetically identical to shrinking the frozen share
+// and does not require un-freezing it. So a withholding credit on item 2 correctly frees item 3.
+
+// The ACCEPTED quote — the frozen basis. Falls back to the latest estimate when nothing is accepted yet: an
+// un-accepted quote is still the quote, the freeze marker is simply absent, and reported as such.
+async function acceptedQuote(rid) {
+  var q = await db.get(
+    "SELECT * FROM request_fee_estimates WHERE " + COVERING + " AND kind = 'estimate' AND accepted_at IS NOT NULL " +
+    "ORDER BY accepted_at DESC LIMIT 1", [rid, rid]);
+  return q || null;
+}
+
+// AFFIRMATIVE EVIDENCE ONLY. A record consumes funds when there is positive proof it went out the door:
+// a released fulfilled_record, or the delivery stage (the reading `paymentStatus.computeSituation` already
+// uses for `delivered`). Closure ALONE is never proof — a closure is just as likely a denial, a withdrawal
+// or a no-records finding, and §0 is explicit that those shares never consume. The unknown case therefore
+// resolves to "did not consume", which is also the direction that can only ever RELEASE a finished record
+// rather than withhold one: over-counting consumption is the §5.9 failure, and it is the worse one.
+async function shippedAmong(ids) {
+  var out = {};
+  if (!ids || !ids.length) return out;
+  var ph = ids.map(function () { return '?'; }).join(',');
+  var rows = [];
+  try {
+    rows = await db.all(
+      "SELECT r.id, r.stage, r.status, r.closure_reason, " +
+      "  (SELECT COUNT(*) FROM fulfilled_records fr WHERE fr.request_id = r.id AND fr.status = 'released') AS released_count " +
+      "FROM requests r WHERE r.id IN (" + ph + ")", ids);
+  } catch (e) { rows = []; }
+  rows.forEach(function (r) {
+    if (Number(r.released_count) > 0) out[r.id] = { shipped: true, evidence: 'a released record output' };
+    else if (r.stage === 'delivery') out[r.id] = { shipped: true, evidence: 'the delivery stage' };
+    else if (r.status === 'closed') out[r.id] = { shipped: false, evidence: 'closed without delivery (' + (r.closure_reason || 'no reason recorded') + ') — its share never consumes funds' };
+    else out[r.id] = { shipped: false, evidence: 'not yet delivered' };
+  });
+  ids.forEach(function (id) { if (!out[id]) out[id] = { shipped: false, evidence: 'row not found — treated as never shipped' }; });
+  return out;
+}
+
+// The FUNDS POOL for one request tree: what was actually received, net of refunds, plus credits.
+async function poolFunds(rid) {
+  var ids = [rid];
+  try { ids = await require('./paymentStatus').moneyTreeIds(rid); } catch (e) { ids = [rid]; }
+  var ph = ids.map(function () { return '?'; }).join(',');
+  var paid = 0;
+  try {
+    var estRows = await db.all(
+      "SELECT DISTINCT ON (request_id) request_id, deposit_paid_amount, final_paid_amount FROM request_fee_estimates " +
+      "WHERE request_id IN (" + ph + ") AND kind = 'estimate' ORDER BY request_id, created_at DESC", ids);
+    estRows.forEach(function (e) { paid = r2(paid + (Number(e.deposit_paid_amount) || 0) + (Number(e.final_paid_amount) || 0)); });
+  } catch (e) { paid = 0; }
+  var credits = 0, refunds = 0;
+  try {
+    var a = await db.get("SELECT COALESCE(SUM(CASE WHEN type = 'credit' THEN amount ELSE 0 END),0) AS c, " +
+      "COALESCE(SUM(CASE WHEN type = 'refund' THEN amount ELSE 0 END),0) AS r FROM fee_adjustments " +
+      "WHERE request_id IN (" + ph + ") AND COALESCE(voided,0) = 0", ids);
+    credits = r2(a && a.c); refunds = r2(a && a.r);
+  } catch (e) { credits = 0; refunds = 0; }
+  var objCred = 0;
+  try {
+    var o = await db.get("SELECT COALESCE(SUM(resolution_amount),0) AS c FROM objections WHERE request_id IN (" + ph + ") " +
+      "AND status = 'resolved' AND approval_status = 'approved' AND resolution_type IN ('reduction','waiver','write_off')", ids);
+    objCred = r2(o && o.c);
+  } catch (e) { objCred = 0; }
+  credits = r2(credits + objCred);
+  return { paid: paid, credits: credits, refunds: refunds, available: r2(paid - refunds + credits), treeIds: ids };
+}
+
+// Does one pool fund several records, and if so what does this one need? Returns `applies: false` for every
+// single-pool request, which is every request in the system until the money axis moves to the parent.
+async function cumulative(rid, ownShareFallback) {
+  var out = { applies: false, reason: 'one priced snapshot, one record — coverage is self-contained' };
+  var quote = await acceptedQuote(rid);
+  var fallbackQuote = false;
+  if (!quote) { quote = await snapshot(rid, 'estimate'); fallbackQuote = true; }
+  if (!quote) return out;
+  var qfc = {}; try { qfc = JSON.parse(quote.fee_context_json || '{}'); } catch (e) { return out; }
+  var comps = (qfc.components || []).filter(function (c) { return c && c.id && typeof c.componentCharged === 'number'; });
+  var mine = null, others = [];
+  comps.forEach(function (c) { if (c.id === rid) mine = c; else others.push(c); });
+  if (!mine || !others.length) return out;
+
+  var shipped = await shippedAmong(others.map(function (c) { return c.id; }));
+  var consumed = 0;
+  var ledger = others.map(function (c) {
+    var s = shipped[c.id] || { shipped: false, evidence: 'unknown' };
+    if (s.shipped) consumed = r2(consumed + c.componentCharged);
+    return { id: c.id, label: c.label || null, quotedShare: r2(c.componentCharged),
+             shipped: !!s.shipped, consumes: !!s.shipped, evidence: s.evidence };
+  });
+  var funds = await poolFunds(rid);
+  var own = r2(mine.componentCharged);
+  return {
+    applies: true,
+    reason: 'one accepted quote prices ' + (others.length + 1) + ' records from ONE funds pool, so coverage is cumulative (§5.10.3).',
+    quoteEstimateId: quote.id, frozenAt: quote.accepted_at || null, frozenBy: quote.accepted_by || null,
+    quoteFrozen: !fallbackQuote && !!quote.accepted_at,
+    quoteBasisNote: (!fallbackQuote && quote.accepted_at)
+      ? 'Quoted shares frozen at estimate acceptance. Actuals never move this gate.'
+      : 'No accepted estimate yet — the latest quote is the basis, and the freeze marker is absent.',
+    ownQuotedShare: own,
+    siblings: ledger, consumedByShipped: consumed,
+    required: r2(consumed + own),
+    funds: funds, available: funds.available,
+    ownShareOnly: 'The test is still this record’s OWN share against what is left in the pool. A sibling’s ' +
+      'unpaid balance is never a reason to withhold this one (§5.9); already-shipped siblings drew the pool ' +
+      'down because the citizen received those records.',
+    fallbackOwnShare: r2(ownShareFallback)
+  };
+}
+
 async function releaseGate(rid) {
   var est = await snapshot(rid, 'estimate');
   if (!est) {
     return { hasEstimate: false, requiresPaymentBeforeRelease: false, covered: true, paidInFull: true,
-             balanceDue: 0, componentCharged: null, coverageBasis: 'no_estimate', plan: null, paymentInstructions: null };
+             balanceDue: 0, componentCharged: null, coverageBasis: 'no_estimate', cumulative: null,
+             plan: null, paymentInstructions: null };
   }
   var prof = est.config_profile_id
     ? await db.get('SELECT config_json FROM fee_profiles WHERE id = ?', [est.config_profile_id])
@@ -98,18 +242,35 @@ async function releaseGate(rid) {
   var basis = share ? 'component' : 'request_total';
 
   var paid = (Number(est.deposit_paid_amount) || 0) + (Number(est.final_paid_amount) || 0);
+
+  // ── CUMULATIVE FIFO, WHEN AND ONLY WHEN ONE POOL FUNDS SEVERAL RECORDS (§5.10.3 / Draft 7 §0.2) ──
+  // `applies: false` on every single-pool request, and then `required`/`funds` below are yesterday's
+  // figures unchanged. See the block above cumulative() for why this cannot move a live outcome.
+  var cum = null;
+  try { cum = await cumulative(rid, charged); } catch (e) { console.error('[feeRelease cumulative]', e && e.message); cum = null; }
+  var fifo = !!(cum && cum.applies);
+  var required = fifo ? cum.required : charged;
+  var funds = fifo ? cum.available : paid;
+  if (fifo) basis = 'component_cumulative';
+
   // Cent-tolerant: an off-by-$0.01 rounding artefact must not withhold a finished record.
-  var covered = paid + 0.005 >= charged;
-  var shortfall = covered ? 0 : Math.round((charged - paid) * 100) / 100;
+  var covered = funds + 0.005 >= required;
+  var shortfall = covered ? 0 : r2(required - funds);
 
   return {
     hasEstimate: true,
     requiresPaymentBeforeRelease: pt.requiresPaymentBeforeRelease(plan),
     // §5.9 coverage — THIS record's share, and what is owed on it alone.
     covered: covered,
-    componentCharged: share ? share.amount : null,
+    componentCharged: fifo ? cum.ownQuotedShare : (share ? share.amount : null),
     coverageBasis: basis,
     balanceDue: shortfall,
+    // The cumulative-FIFO picture, present only when it applied. `coverageRequired` is what the pool had to
+    // cover for THIS release; `coverageAvailable` is what was in it. Both are here so the financial view can
+    // show the running balance per row without recomputing the rule.
+    cumulative: fifo ? cum : null,
+    coverageRequired: r2(required),
+    coverageAvailable: r2(funds),
     unpricedActuals: !!(share && share.unpricedActuals),
     // Request-level figures, retained for display and for the fallback path.
     paidInFull: bal.paidInFull, requestBalanceDue: bal.balanceDue, effectiveTotal: bal.effectiveTotal,
@@ -117,13 +278,16 @@ async function releaseGate(rid) {
   };
 }
 
-// ⚠️ NOT YET REQUIRED, BUT REQUIRED BEFORE THE MONEY AXIS MOVES TO THE PARENT.
-// Today each child carries its own estimate and therefore its own payment pool, so per-child coverage is
-// self-contained. Once one parent-level estimate funds n children from ONE pool, coverage must become
-// CUMULATIVE over already-released siblings (§5.10.3: "a deposit already collected is credited FIFO against
-// the earliest installments"), i.e.
-//     required = Σ componentCharged(already released) + componentCharged(this one)
-// Releasing three $20 children against $50 paid must release two and hold the third — not release all three
-// because each is individually under $50. Note this is still not "withheld because a sibling is unpaid": the
-// money was spent on records the citizen already received.
-module.exports = { releaseGate: releaseGate, pricedSnapshot: pricedSnapshot };
+// ✅ BUILT (BW7, 2026-07-29). The cumulative-FIFO rule this footer flagged from `bd9befa` onward is now in
+// `cumulative()` above:
+//     required = Σ quotedShare(already SHIPPED siblings) + quotedShare(this one)
+// against available funds (paid − refunds + credits). Three $20 children against $50 paid release two and
+// hold the third. A denied / never-shipped sibling's share never consumes. Dormant on every single-pool
+// request, which is every request until the money axis moves to the parent (§4.3).
+module.exports = {
+  releaseGate: releaseGate, pricedSnapshot: pricedSnapshot,
+  // Exported for the parent financial view (services/parentFinance) and its harness. They MUST read the rule
+  // from here rather than restate it — a screen that shows one running balance while the gate uses another is
+  // a defect nobody would find from either side alone (the same reason `pricedSnapshot` is shared).
+  acceptedQuote: acceptedQuote, cumulative: cumulative, poolFunds: poolFunds, shippedAmong: shippedAmong
+};

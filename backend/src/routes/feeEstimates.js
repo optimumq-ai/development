@@ -439,6 +439,12 @@ router.post('/request/:requestId/estimate/accept', requireAuth, async function (
   var now = nowStr();
   var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'system';
   await run('UPDATE request_fee_estimates SET accepted_at = ?, accepted_by = ? WHERE id = ?', [now, actor, snap.id]);
+  // PHASE 7 / BW7 — ACCEPTANCE IS WHAT FREEZES THE QUOTED SHARES (Draft 7 §0.1). The accepted snapshot IS
+  // the freeze (this table is append-only, so nothing has to be copied); this posts the EVENT that names it,
+  // so the freeze is visible on the parent's statement rather than inferable from a timestamp elsewhere.
+  // Never throws — a bookkeeping event must not be able to fail an acceptance.
+  try { await require('../services/parentFinance').freezeQuote(rid, { actorName: actor, actorId: req.user && req.user.sub }); }
+  catch (e) { console.error('[estimate accept freezeQuote]', e && e.message); }
   var depositDue = Number(snap.deposit_due) || 0;
   var acceptPlan = (await planForSnapshot(snap)).plan;
   var newStage = pt.gateToStage(acceptPlan.gate);
