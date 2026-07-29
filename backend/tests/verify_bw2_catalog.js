@@ -162,9 +162,13 @@ var UNROUTABLE_MATCH = { classification: 'standard', recordTypeConfidence: 0, fl
     // WHICH flags should stop a request — turned out to be already answered by the rulebook, where
     // `wfr-sensitive` has always forced human intake on LEGAL_HOLD / ONGOING_INVESTIGATION / SENSITIVE. So
     // that wiring changes the DESTINATION of a stop that already existed, not the set of requests that stop.
-    // `reopen_retriage` is still BW5's. verify_bw3 / verify_bw4 own the wiring proofs.
-    ok('C1 only the triggers whose signals exist today are wired',
-      IR.WIRED_TRIGGERS.join('|') === 'unroutable|approval_pending|eligibility_review|sensitivity_flag');
+    // BW5 added `reopen_retriage` (Draft 8 rev-2 §3.3): the Director's reopen popup's second landing raises
+    // the stop through `disposition.reopen`, so the enum stub BW2 registered now has its own spawner. It is
+    // safe by default in the strongest available sense — it cannot fire without a Director deliberately
+    // choosing the non-default door on an already-closed request, so no install reaches it by sitting still.
+    // verify_bw3 / verify_bw4 / verify_bw5 own the wiring proofs.
+    ok('C1 every trigger whose signal now exists is wired — the list grows with its spawners, never ahead of them',
+      IR.WIRED_TRIGGERS.join('|') === 'unroutable|approval_pending|eligibility_review|sensitivity_flag|reopen_retriage');
 
     var r3 = await makeRequest('req-' + TAG + '-C'); created.requests.push(r3);
     var s1 = await IR.spawn(r3, ['unroutable'], { createdBy: 'harness', awaitRouting: true });

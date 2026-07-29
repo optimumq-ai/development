@@ -323,9 +323,16 @@ async function release(requestId, opts) {
 // conditions that raised it still hold. It re-arms when the item has MOVED since the return: any history
 // row newer than the return means real work landed. No new column; the history already knows.
 async function reArmed(requestId) {
-  var ret = await get("SELECT created_at FROM request_history WHERE request_id = ? AND action = 'RELEASE_REVIEW_RETURNED' ORDER BY created_at DESC LIMIT 1", [requestId]);
+  var ret = await get("SELECT id, created_at FROM request_history WHERE request_id = ? AND action = 'RELEASE_REVIEW_RETURNED' ORDER BY created_at DESC LIMIT 1", [requestId]);
   if (!ret) return true;
-  var newer = await get("SELECT count(*)::int AS n FROM request_history WHERE request_id = ? AND created_at > ? AND action <> 'RELEASE_REVIEW_RETURNED'", [requestId, ret.created_at]);
+  // `>=`, NOT `>`, and the direction of the imprecision is the reason. request_history timestamps have
+  // one-second resolution, so work landing in the same second as the return would read as older than it and
+  // the review would never re-arm — a permanently stuck item. Comparing `>=` (excluding the return itself
+  // and the raise it would trigger) can instead re-arm one second early, which at worst re-raises a review
+  // somebody has to click through. Between a stuck request and a redundant review, take the redundant review.
+  var newer = await get(
+    "SELECT count(*)::int AS n FROM request_history WHERE request_id = ? AND created_at >= ? AND id <> ? " +
+    "AND action NOT IN ('RELEASE_REVIEW_RETURNED','RELEASE_REVIEW_RAISED')", [requestId, ret.created_at, ret.id]);
   return !!(newer && newer.n > 0);
 }
 
