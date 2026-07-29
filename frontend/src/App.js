@@ -39,6 +39,7 @@ import IntakeReviewTaskPage from './pages/IntakeReviewTaskPage';
 // per-activity view. The manager's three screens are one page tree; the assignee's is deliberately separate.
 import MrrActivityTaskPage from './pages/MrrActivityTaskPage';
 import MrrMasterPage from './pages/MrrMasterPage';
+import MrrChildPage from './pages/MrrChildPage';
 import StructuredRedactionFieldsPage from './pages/StructuredRedactionFieldsPage';
 import ReleasedRecordsPage from './pages/ReleasedRecordsPage';
 import PublicLibraryMapPage from './pages/PublicLibraryMapPage';
@@ -107,6 +108,7 @@ export default function App() {
           <Route path="intake-review/:taskId" element={<IntakeReviewTaskPage />} />
           <Route path="mrr-activity/:taskId" element={<MrrActivityTaskPage />} />
           <Route path="mrr/:taskId" element={<MrrMasterPage />} />
+          <Route path="mrr/:taskId/item/:childId" element={<MrrChildPage />} />
           <Route path="tickler" element={<TicklerPage />} />
           <Route path="rule-updates" element={<RuleUpdatesPage />} />
           <Route path="jurisdiction-profile" element={<JurisdictionProfilePage />} />
