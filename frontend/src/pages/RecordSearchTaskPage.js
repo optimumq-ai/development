@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../lib/api';
 import { C } from '../lib/theme';
 import { useWorkTimer, WorkTimerBadge, WorkTimerCompleteModal, useTimeCaptureMode } from '../components/ui/WorkTimer';
-import { SubmittedDescription, PortalResultsBar } from '../components/primitives';
+import { SubmittedDescription, PortalResultsBar, ConfirmPopup, GateRow, DecidedByBadge } from '../components/primitives';
 
 // RECORD-SEARCH TASK SCREEN — SPEC_record_search_task_screen.md
 //
@@ -81,6 +81,15 @@ export default function RecordSearchTaskPage() {
   var tcm = useTimeCaptureMode('search');   // city's per-UI capture mode (Slice E): off|discretion|always
   var [laborModal, setLaborModal] = useState(null);
   var [notes, setNotes] = useState({});       // per-description: what the searcher actually searched
+  // BW5 — the close popup's state. `closeGate` is the SERVER's gate, never a client-side guess.
+  var [closeEnding, setCloseEnding] = useState(null);
+  var [closeGate, setCloseGate] = useState(null);
+  var [closeNote, setCloseNote] = useState('');
+  var [custodianName, setCustodianName] = useState('');
+  var [custodianContact, setCustodianContact] = useState('');
+  var [referralNote, setReferralNote] = useState('');
+  var [closeErr, setCloseErr] = useState('');
+  var [pendingClose, setPendingClose] = useState(null);
 
   function loadTrail(rid) {
     return api.get('/requests/' + rid).then(function (r) {
@@ -222,6 +231,66 @@ export default function RecordSearchTaskPage() {
       })
       .then(function () { setBusy(''); });
   }
+
+  // --- PHASE 7 / BW5 — CLOSING FROM THIS TASK (Draft 8 rev 2, Frames A + A′) -------------------------
+  //
+  // Kevin's 7/28 direction: the item ends where the evidence lives, from a confirm popup that STATES WHAT
+  // WILL BE WRITTEN AND SENT. Nothing closes on a single click, and the popup never draws its own gate —
+  // it renders `GET /tasks/:id/close-gate`, the same evaluator `POST /close` refuses on, so the screen
+  // cannot permit what the endpoint will reject.
+  function openClose(ending) {
+    setCloseEnding(ending);
+    setCloseGate(null);
+    setCloseErr('');
+  }
+  function refreshGate(ending, fields) {
+    var q = '/tasks/' + taskId + '/close-gate?ending=' + encodeURIComponent(ending) +
+      '&note=' + encodeURIComponent(fields.note || '') +
+      '&custodianName=' + encodeURIComponent(fields.custodianName || '') +
+      '&custodianContact=' + encodeURIComponent(fields.custodianContact || '') +
+      '&referralNote=' + encodeURIComponent(fields.referralNote || '');
+    return api.get(q).then(function (r) { setCloseGate(r.data); }).catch(function () {});
+  }
+  function commitClose(mode) {
+    setBusy('close');
+    setCloseErr('');
+    api.post('/tasks/' + taskId + '/close', {
+      ending: closeEnding, mode: mode, note: closeNote,
+      custodianName: custodianName, custodianContact: custodianContact, referralNote: referralNote
+    })
+      .then(function (r) {
+        setCloseEnding(null);
+        if (r.data && r.data.pending) {
+          setPendingClose(r.data);
+          setFlash({ tone: 'ok', text: 'Close pending approval — ' + r.data.label +
+            '. The disposition and its notice fire when the supervisor approves; the close is recorded as their act.' });
+        } else {
+          setResolved({ outcome: 'closed', label: r.data && r.data.label });
+          setFlash({ tone: 'ok', text: (r.data && r.data.label) + ' — closed, and the closure notice ' +
+            (r.data && r.data.notice && r.data.notice.outcome === 'sent' ? 'was sent to the requester.'
+              : (r.data && r.data.notice && r.data.notice.outcome === 'not_applicable'
+                ? 'does not apply (no address on file).' : 'is still owed — delivery failed.')) });
+        }
+        return loadTrail(task.request_id);
+      })
+      .catch(function (e) {
+        var d = e.response && e.response.data;
+        setCloseErr((d && d.error) || 'Could not close this item.');
+        if (d && d.gate) setCloseGate(Object.assign({}, closeGate, { gate: d.gate }));
+      })
+      .then(function () { setBusy(''); });
+  }
+
+  // The gate ticks LIVE as the closer types — the popup's checklist is the server's answer to the payload
+  // as it stands, not a hopeful client-side mirror of it.
+  useEffect(function () {
+    if (!closeEnding) return;
+    var h = setTimeout(function () {
+      refreshGate(closeEnding, { note: closeNote, custodianName: custodianName,
+        custodianContact: custodianContact, referralNote: referralNote });
+    }, 200);
+    return function () { clearTimeout(h); };
+  }, [closeEnding, closeNote, custodianName, custodianContact, referralNote]); // eslint-disable-line
 
   if (err) return <div style={{ padding: 32, color: C.crit }}>{err}</div>;
   if (!task) return <div style={{ padding: 32, color: C.muted }}>Loading…</div>;
@@ -673,21 +742,54 @@ export default function RecordSearchTaskPage() {
                     fulfilling from their own selection alone would close a request they consider OPEN.
                   </div>
                 )}
-                <button type="button" disabled={!!busy} onClick={function () { requestComplete('no_records'); }}
-                  style={{ width: '100%', cursor: busy ? 'not-allowed' : 'pointer', background: C.surface,
-                    color: C.muted, border: '1px solid ' + C.hairStrong, borderRadius: 9,
-                    padding: '10px 12px', fontSize: 13.5, fontWeight: 650 }}>
-                  {busy === 'no_records' ? 'Closing…' : 'No responsive records'}
-                </button>
                 <div style={{ fontSize: 11.5, color: C.faint, marginTop: 8, lineHeight: 1.5 }}>
                   {includedCount < 1
-                    ? 'Include at least one record to finish. Closing with no records is a legal act — it must be evidenced by the effort trail below.'
-                    : 'Closing with no records is a legal act — it must be evidenced by the effort trail below.'}
+                    ? 'Include at least one record to hand this on. If there is nothing to hand on, end the item below.'
+                    : 'Handing on sends the located records to Redaction Review.'}
                 </div>
               </>
             )}
           </div>
         </section>
+
+        {/* ===== END THIS ITEM (BW5 · Draft 8 rev 2, Frame A) =====================================
+            Closing happens where the evidence lives. Two endings live on this rail; denial is NOT one
+            of them — an exemption discovered during a search is Legal Review's determination, not the
+            searcher's. Each opens a confirm popup: nothing closes on a single click. */}
+        {!resolved && (
+        <section style={{ background: C.surface, border: '1px solid ' + C.hair, borderRadius: 10, marginBottom: 16 }}>
+          <div style={{ padding: '12px 14px', borderBottom: '1px solid ' + C.hair, fontSize: 12.5, fontWeight: 700,
+            textTransform: 'uppercase', letterSpacing: '.05em', color: C.muted }}>End this item</div>
+          <div style={{ padding: 14 }}>
+            {pendingClose ? (
+              <div style={{ fontSize: 12.5, lineHeight: 1.5, color: C.amber, background: C.amberTint,
+                border: '1px solid ' + C.amber, borderRadius: 8, padding: '9px 11px' }}>
+                <b>Close pending approval</b> — {pendingClose.label}. The disposition and its notice fire when the
+                supervisor approves, and the close is recorded as their act.
+              </div>
+            ) : (
+              <>
+                <button type="button" disabled={!!busy} onClick={function () { openClose('no_records'); }}
+                  style={{ width: '100%', cursor: busy ? 'not-allowed' : 'pointer', background: C.surface,
+                    color: C.ink, border: '1px solid ' + C.hairStrong, borderRadius: 9,
+                    padding: '10px 12px', fontSize: 13.5, fontWeight: 650, marginBottom: 8 }}>
+                  No records found — close…
+                </button>
+                <button type="button" disabled={!!busy} onClick={function () { openClose('not_in_custody'); }}
+                  style={{ width: '100%', cursor: busy ? 'not-allowed' : 'pointer', background: C.surface,
+                    color: C.muted, border: '1px solid ' + C.hairStrong, borderRadius: 9,
+                    padding: '10px 12px', fontSize: 13.5, fontWeight: 650 }}>
+                  Not our records — refer &amp; close…
+                </button>
+                <div style={{ fontSize: 11.5, color: C.faint, marginTop: 8, lineHeight: 1.5 }}>
+                  Each opens a confirm popup stating what will be written and sent. A closure is a legal act —
+                  it must be evidenced by the effort trail below, and it always owes the requester a notice.
+                </div>
+              </>
+            )}
+          </div>
+        </section>
+        )}
 
         {/* The effort trail. Not decoration — it is the evidence that supports a "no responsive records"
             closure, and the place a city looks when someone asks what it actually DID. */}
@@ -716,6 +818,92 @@ export default function RecordSearchTaskPage() {
         </section>
        </div>
       </div>
+      {/* ===== THE CONFIRM POPUP (Frame A′) — one act: close + notify ==========================
+          It states what will be WRITTEN and what will be SENT, renders the server's gate rows, and
+          draws only the commit buttons this department's `close_approval` config left open. */}
+      <ConfirmPopup open={!!closeEnding} onClose={function () { setCloseEnding(null); }}
+        title={closeEnding === 'not_in_custody'
+          ? 'Not in our custody — refer and close this item?'
+          : 'No records located — close this item?'}
+        actions={closeGate ? (
+          <>
+            {closeGate.approval && closeGate.approval.canSubmit && (
+              <button type="button" disabled={busy === 'close' || (closeGate.gate && closeGate.gate.blocked)}
+                onClick={function () { commitClose('submit'); }}
+                style={{ cursor: (closeGate.gate && closeGate.gate.blocked) ? 'not-allowed' : 'pointer',
+                  background: (closeGate.gate && closeGate.gate.blocked) ? C.surface2 : C.blue,
+                  color: (closeGate.gate && closeGate.gate.blocked) ? C.faint : '#fff',
+                  border: '1px solid ' + ((closeGate.gate && closeGate.gate.blocked) ? C.hair : C.blue),
+                  borderRadius: 8, padding: '8px 14px', fontSize: 13, fontWeight: 650 }}>
+                {busy === 'close' ? 'Closing…' : 'Submit — close & notify'}
+              </button>
+            )}
+            {closeGate.approval && closeGate.approval.canRoute && (
+              <button type="button" disabled={busy === 'close' || (closeGate.gate && closeGate.gate.blocked)}
+                onClick={function () { commitClose('route'); }}
+                style={{ cursor: 'pointer', background: C.surface, color: C.blue,
+                  border: '1px solid ' + C.blue, borderRadius: 8, padding: '8px 14px', fontSize: 13, fontWeight: 650 }}>
+                Route to supervisor for approval…
+              </button>
+            )}
+            <button type="button" onClick={function () { setCloseEnding(null); }}
+              style={{ cursor: 'pointer', background: C.surface, color: C.muted, border: '1px solid ' + C.hairStrong,
+                borderRadius: 8, padding: '8px 14px', fontSize: 13, fontWeight: 650 }}>
+              Cancel — back to the task
+            </button>
+          </>
+        ) : null}>
+        {!closeGate ? <div style={{ fontSize: 12.5, color: C.muted }}>Checking the evidence…</div> : (
+          <>
+            {(closeGate.gate.rows || []).map(function (row) {
+              return <GateRow key={row.code} ok={row.ok}>{row.text}</GateRow>;
+            })}
+
+            {closeEnding === 'not_in_custody' && (
+              <div style={{ marginTop: 8 }}>
+                <input value={custodianName} onChange={function (e) { setCustodianName(e.target.value); }}
+                  placeholder="Custodian who holds these records (required)"
+                  style={{ width: '100%', font: 'inherit', fontSize: 13, padding: '6px 8px', marginBottom: 6,
+                    border: '1px solid ' + C.hairStrong, borderRadius: 5 }} />
+                <input value={custodianContact} onChange={function (e) { setCustodianContact(e.target.value); }}
+                  placeholder="How to reach them (optional — it rides the referral letter)"
+                  style={{ width: '100%', font: 'inherit', fontSize: 13, padding: '6px 8px', marginBottom: 6,
+                    border: '1px solid ' + C.hairStrong, borderRadius: 5 }} />
+                <textarea rows={2} value={referralNote} onChange={function (e) { setReferralNote(e.target.value); }}
+                  placeholder="The referral record (required) — why these records are not ours, and where the requester should go"
+                  style={{ width: '100%', font: 'inherit', fontSize: 13, padding: '6px 8px',
+                    border: '1px solid ' + C.hairStrong, borderRadius: 5 }} />
+              </div>
+            )}
+
+            <textarea rows={2} value={closeNote} onChange={function (e) { setCloseNote(e.target.value); }}
+              placeholder={closeEnding === 'not_in_custody'
+                ? 'Closure note (required) — how you determined these records are not in this office’s custody'
+                : 'Closure note (required) — why this search is exhaustive'}
+              style={{ width: '100%', font: 'inherit', fontSize: 13, padding: '6px 8px', marginTop: 8,
+                border: '1px solid ' + C.hairStrong, borderRadius: 5 }} />
+
+            <div style={{ fontSize: 12.5, color: C.muted, lineHeight: 1.5, margin: '8px 0 0' }}>
+              Submitting writes <b>{closeEnding === 'not_in_custody'
+                ? 'Closed – Not in our custody (referred)' : 'Closed – No records located'}</b> and sends the
+              closure notice to the requester — <b>one act</b>, never a silent end.
+              {closeEnding === 'no_records' && (
+                <> ⚠ The two gates never feed each other: an “answered description” is a claim, not effort.</>
+              )}
+            </div>
+            <div style={{ fontSize: 11.5, color: C.faint, marginTop: 6 }}>
+              Which commit buttons appear is department-level config (<code>close_approval</code> ={' '}
+              {closeGate.approval && closeGate.approval.mode}).{' '}
+              <DecidedByBadge by="person">a person</DecidedByBadge>
+            </div>
+            {closeErr ? (
+              <div style={{ marginTop: 8, fontSize: 12.5, color: C.crit, background: C.critTint,
+                border: '1px solid ' + C.crit, borderRadius: 6, padding: '7px 9px', lineHeight: 1.5 }}>{closeErr}</div>
+            ) : null}
+          </>
+        )}
+      </ConfirmPopup>
+
       {laborModal ? <WorkTimerCompleteModal open taskId={taskId} seconds={timer.seconds} allowSkip={tcm.mode === 'discretion'}
         contextLabel={'Record search · ' + (task.request_number || '')}
         confirmLabel={laborModal.outcome === 'found' ? 'Log time & hand off' : 'Log time & close'}

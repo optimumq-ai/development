@@ -53,6 +53,12 @@ var DEFAULT_CLOSE_APPROVAL = 'either';
 // then to the office default — so a new ending is never silently `approval_required`.
 var ENDINGS = {
   no_records: { label: 'No responsive records', evidence: 'The diligent-search effort trail (already enforced at resolve: a no-records close is refused on an empty one).' },
+  // BW5 additions, exactly as the ⚠ above invited: two evidence-gated endings the disposition model
+  // finalizes from a task rail and from the disposition record. Additive by construction — an ending with
+  // no stored setting resolves to the department default and then the office default, so neither of these
+  // is silently `approval_required` on any existing install.
+  not_in_custody: { label: 'Not in our custody — referred', evidence: 'The named custodian and the referral record that rides the closure notice.' },
+  previously_furnished: { label: 'Previously furnished', evidence: 'The §552.232 certification: prior request number, date, and the match attestation.' },
   denial: { label: 'Denied / withheld', evidence: 'The asserted exemption, its citation, and the legal review that recorded it.' },
   fulfilled: { label: 'Fulfilled and delivered', evidence: 'The delivery record for the released files.' },
   withdrawn: { label: 'Withdrawn by the requester', evidence: "The requester's instruction, recorded on the request." },

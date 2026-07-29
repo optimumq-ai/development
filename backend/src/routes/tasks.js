@@ -6,6 +6,7 @@ const tr = require('../services/taskRouting');
 const scope = require('../services/requestScope');
 const SI = require('../services/searchIntents');
 const laborActuals = require('../services/laborActuals');
+const DISP = require('../services/disposition');
 const uuidv4 = require('uuid').v4;
 
 function withReq(sql) {
@@ -676,23 +677,162 @@ router.post('/:id/resolve', requireAuth, async function (req, res) {
       // once. It does not need the gate (the effort trail above is its evidence), but it must not leave the
       // per-description ledger half-written: every open description is answered BY this closure, and the
       // audit trail should say so rather than showing descriptions that were never dispositioned.
-      var closedOut = await SI.resolveAllOpen(rid, {
-        actorName: actor.actorName,
-        note: 'Closed with the request: no responsive records found.' + (notes ? ' ' + notes : '')
-      });
-
+      //
+      // ══ BW5: THIS IS NOW THE LEGACY DOOR, AND IT KEEPS ITS EXACT PRE-BW5 GATE ══
+      //
+      // Draft 8 rev 2 puts the FULL gate on the popup — effort trail AND every duty-carrying description
+      // answered AND a required closure note, three independent conditions that never feed each other. That
+      // gate lives on `POST /tasks/:id/close` below, which is what the Record Search rail calls.
+      //
+      // This path is deliberately NOT tightened to match. It has two live semantics the popup deliberately
+      // reverses — open descriptions are ANSWERED BY the closure here rather than blocking it, and no note
+      // is demanded — and changing them would refuse closures that work today, from an endpoint whose
+      // callers we do not control. What it DOES gain is the half that is a compliance rule rather than a
+      // gate: the close now goes through `disposition.close`, so it writes the ending through the ONE close
+      // act, SENDS THE CLOSURE NOTICE (rule 1: every close owes one — this path sent nothing before), and
+      // derives the parent. Strictly additive; nothing that closed before stops closing.
       await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [req.params.id]);
-      await run("UPDATE requests SET closure_reason = 'no_records' WHERE id = ?", [rid]);
-      await tr.applyStageTransition(rid, 'closed', Object.assign({
-        action: 'CLOSED_NO_RECORDS',
-        notes: 'Closed — no responsive records. Diligent search evidenced by ' + eff.n + ' logged action(s).' + (notes ? ' ' + notes : '')
+      var legacyClose = await DISP.close(rid, 'no_records', Object.assign({
+        skipGate: true, payload: { note: notes }
       }, actor));
-      return res.json({ ok: true, outcome: 'no_records', effortEntries: eff.n, intentsClosed: closedOut });
+      return res.json({ ok: true, outcome: 'no_records', effortEntries: eff.n,
+                        intentsClosed: legacyClose.intentsClosed, notice: legacyClose.notice });
     }
 
     return res.status(400).json({ error: 'Unknown outcome' });
   } catch (e) {
     console.error('resolve failed:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// ============================================================================================
+// PHASE 7 / BW5 — CLOSING FROM THE TASK (DRAFT_processing_ui_disposition_close.md rev 2, Frame A/A′).
+//
+// Kevin's 7/28 direction: the person doing the work ends the item from their OWN task UI, via a small
+// confirm popup that states what will be written and sent. Two endings live on the Record Search rail —
+// "No records found — close…" and "Not our records — refer & close…" — and both are one act.
+//
+// THE GATE IS READ AND ENFORCED BY THE SAME FUNCTION. `GET /close-gate` renders the popup's checklist,
+// `POST /close` refuses on it. One evaluator, two readers (services/disposition.gateFor) — the rule the
+// proceed gate and the Found gate already follow, because a screen that permits what the endpoint refuses
+// is a screen that lies.
+// ============================================================================================
+
+// What the popup needs to draw itself: the gate rows AS THEY STAND, and which commit buttons exist.
+router.get('/:id/close-gate', requireAuth, async function (req, res) {
+  try {
+    var t = await get('SELECT * FROM tasks WHERE id = ?', [req.params.id]);
+    if (!t) return res.status(404).json({ error: 'Task not found' });
+    var ending = String(req.query.ending || 'no_records');
+    if (DISP.TASK_CLOSE_ENDINGS.indexOf(ending) < 0) {
+      return res.status(400).json({ error: 'That ending is not finalized from a task rail.', code: 'UNKNOWN_ENDING' });
+    }
+    // The gate is evaluated against the payload the popup has SO FAR, so the note/custodian rows tick live
+    // as the closer types. Passed as query params; absent means "not yet supplied", which reads as open.
+    var payload = { note: req.query.note, custodianName: req.query.custodianName,
+                    custodianContact: req.query.custodianContact, referralNote: req.query.referralNote };
+    var gate = await DISP.gateFor(t.request_id, ending, payload);
+    var approval = await DISP.approvalModeFor(t.request_id, ending);
+    var pend = await DISP.pending(t.request_id);
+    res.json({
+      taskId: t.id, requestId: t.request_id, ending: ending, gate: gate, approval: approval,
+      pendingApproval: pend ? { id: pend.id, ending: pend.ending, requestedByName: pend.requested_by_name,
+                                requestedAt: pend.requested_at } : null,
+      effortTrail: await DISP.effortTrail(t.request_id)
+    });
+  } catch (e) {
+    console.error('close-gate failed:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// THE CLOSE ITSELF. `mode` picks the door the department's `close_approval` config left open:
+//   submit — the closer closes it (allowed under `direct` and `either`)
+//   route  — a lightweight approval task goes to the supervisor and the item shows "Close pending
+//            approval" (allowed under `approval_required` and `either`)
+// A door the config did not open is refused 403 with the resolved mode named, so a stale screen cannot
+// close around a city's policy.
+router.post('/:id/close', requireAuth, async function (req, res) {
+  try {
+    var t = await get('SELECT * FROM tasks WHERE id = ?', [req.params.id]);
+    if (!t) return res.status(404).json({ error: 'Task not found' });
+    if (!tr.isActionable(t.status)) {
+      return res.status(409).json({ error: 'This task is ' + t.status + ' and can no longer close its item.',
+                                    code: 'TASK_NOT_ACTIONABLE', status: t.status });
+    }
+    var b = req.body || {};
+    var ending = String(b.ending || '');
+    if (DISP.TASK_CLOSE_ENDINGS.indexOf(ending) < 0) {
+      return res.status(400).json({
+        error: 'That ending is not finalized from a task rail. A denial goes to Legal Review; delivery is written by the release event.',
+        code: 'UNKNOWN_ENDING' });
+    }
+    var mode = String(b.mode || 'submit');
+    var actor = { actorId: req.user && req.user.sub, actorName: (req.user && req.user.name) || 'Staff' };
+    var payload = { note: b.note, custodianName: b.custodianName, custodianContact: b.custodianContact,
+                    referralNote: b.referralNote };
+    var approval = await DISP.approvalModeFor(t.request_id, ending);
+
+    if (mode === 'route') {
+      if (!approval.canRoute) {
+        return res.status(403).json({ error: 'This department closes ' + ending + ' directly (close_approval = ' +
+          approval.mode + '), so there is no approval to route to.', code: 'ROUTE_NOT_ALLOWED', approval: approval });
+      }
+      var routed = await DISP.requestApproval(t.request_id, ending, Object.assign({ payload: payload, taskId: t.id }, actor));
+      // The originating task goes to awaiting_review, not done: the work is not finished until someone
+      // approves, and a done task would drop the item out of its owner's list while it still needs them.
+      await run("UPDATE tasks SET status = 'awaiting_review', updated_at = datetime('now') WHERE id = ?", [t.id]);
+      return res.json(Object.assign({ mode: 'route', approval: approval }, routed));
+    }
+
+    if (!approval.canSubmit) {
+      return res.status(403).json({ error: 'This department requires a supervisor’s approval to close ' + ending +
+        ' (close_approval = ' + approval.mode + '). Route it for approval instead.', code: 'APPROVAL_REQUIRED', approval: approval });
+    }
+    var out = await DISP.close(t.request_id, ending, Object.assign({ payload: payload, taskId: t.id }, actor));
+    await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [t.id]);
+    return res.json(Object.assign({ mode: 'submit', approval: approval }, out));
+  } catch (e) {
+    if (e && e.status) {
+      return res.status(e.status).json({ error: e.message, code: e.code, reasons: e.reasons, gate: e.gate });
+    }
+    console.error('close failed:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// The supervisor's side. The approval task carries the pending row; approving EXECUTES the close and it is
+// recorded as the approver's act (rev 2). Refusing needs a note — the closer has to know what to do next.
+router.get('/:id/close-approval', requireAuth, async function (req, res) {
+  try {
+    var row = await DISP.byApprovalTask(req.params.id);
+    if (!row) return res.status(404).json({ error: 'This task is not a close approval.' });
+    var gate = {}; try { gate = JSON.parse(row.gate_json || '{}'); } catch (e) {}
+    var payload = {}; try { payload = JSON.parse(row.payload_json || '{}'); } catch (e) {}
+    var def = DISP.ENDINGS[row.ending] || {};
+    res.json({
+      approvalId: row.id, requestId: row.request_id, ending: row.ending, label: def.label,
+      evidence: def.evidence, status: row.status, gate: gate, payload: payload,
+      requestedBy: row.requested_by, requestedByName: row.requested_by_name, requestedAt: row.requested_at,
+      // The one conflict rule that applies here — self-approval. NOT two-eyes (see disposition.js).
+      selfApproval: DISP.selfApproval(row, req.user && req.user.sub)
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.post('/:id/close-approval/:decision', requireAuth, async function (req, res) {
+  try {
+    var row = await DISP.byApprovalTask(req.params.id);
+    if (!row) return res.status(404).json({ error: 'This task is not a close approval.' });
+    var actor = { actorId: req.user && req.user.sub, actorName: (req.user && req.user.name) || 'Staff',
+                  note: (req.body && req.body.note) || '' };
+    if (req.params.decision === 'approve') return res.json(await DISP.approve(row.id, actor));
+    if (req.params.decision === 'reject') return res.json(await DISP.reject(row.id, actor));
+    return res.status(400).json({ error: 'Decision must be approve or reject.' });
+  } catch (e) {
+    if (e && e.status) return res.status(e.status).json({ error: e.message, code: e.code, reasons: e.reasons });
+    console.error('close-approval failed:', e.message);
     res.status(500).json({ error: e.message });
   }
 });

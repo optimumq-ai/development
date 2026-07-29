@@ -1368,3 +1368,77 @@ ALTER TABLE requests ADD COLUMN IF NOT EXISTS commercial_classification_note TEX
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS paused_at TEXT;
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS paused_reason TEXT;
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS paused_by TEXT;
+
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════════
+-- PHASE 7 / BW5 — CLOSE, DISPOSITION, THE AUTO-RELEASE PIPELINE, REOPEN, AND THE RM-HOLD GUARD.
+-- (docs/DRAFT_processing_ui_disposition_close.md rev 2 · docs/SPEC_processing_ui.md §4)
+--
+-- Every column below is nullable or defaulted, and every default is TODAY'S BEHAVIOUR. A live install that
+-- deploys this and confirms nothing behaves exactly as it did: no request auto-ships, no hold changes, no
+-- close is refused that was not already refused.
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════════
+
+-- THE RELEASE EVENT'S THREE FACTS. `Closed – Delivered` is WRITTEN BY the release event and never asserted
+-- by a person (rev 2 constant), so the event's own record has to live on the row: when it shipped, and as
+-- which installment. `installment_no` is 1 for the ordinary single-delivery request — n>1 exists because
+-- WA/TX/CA installment production is per-record, and a notice that says "installment 2" has to be able to
+-- prove which one it was.
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS delivered_at TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS installment_no INTEGER;
+
+-- REOPEN (Director authority, required note, resume-point choice). Counted, not just flagged: a request
+-- reopened four times is a fact a city should be able to see. CLOCKS ARE NEVER RESET — there is deliberately
+-- no clock column here, and the original history stands (decided 7/29).
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS reopened_at TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS reopen_count INTEGER DEFAULT 0;
+
+-- THE RM HOLD OF A READY RECORD (§5.9 — NEVER a payment hold; feeRelease owns money gating and is not
+-- double-gated here). A hold is a named state with a note, exactly like every other stop in the product:
+-- spec §2.4's "no manual hold anywhere" bans the UNNAMED hold, not the recorded one.
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS release_hold INTEGER DEFAULT 0;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS release_hold_note TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS release_hold_by TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS release_hold_at TEXT;
+
+-- THE INSTALLMENT REQUEST ON FILE. This is the fact the prevention guard turns on: in a jurisdiction with
+-- the installment ENTITLEMENT, a requester who has asked for installments cannot lawfully be made to wait
+-- for the whole production, so the hold control is disabled with the citation shown — and an installment
+-- request arriving mid-hold AUTO-LIFTS the hold and notifies the RM. Statute on verified facts (the same
+-- asymmetry as the mandatory fee waiver), which is why it may act without a person.
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS installment_requested_at TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS installment_requested_note TEXT;
+
+-- A TASK THAT WAS BYPASSED IS STILL A RECORD, NEVER A SILENT SKIP (rev 2 §2, the pipeline's hard rule).
+-- The auto-release evaluator may only treat a step as terminal if it was completed by a person OR bypassed
+-- WITH A BASIS. These two columns are that basis: `bypass_kind` is the DecidedByBadge value (rule c —
+-- 'statute' | 'system_condition' | 'recorded'), `bypass_basis` the sentence a later reader needs.
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS bypass_kind TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS bypass_basis TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS bypassed_at TEXT;
+
+-- CLOSE PENDING APPROVAL — the visible state, not just a task.
+--
+-- The lightweight approval TASK is how the close reaches a supervisor; this row is what makes "Close
+-- pending approval" a thing the queue, the bars and the disposition record can all render, and what
+-- carries the evidence snapshot so the approver sees the gate AS IT STOOD when the close was requested.
+-- `requested_by` exists for one rule: the approver must differ from the requester (a weaker, different rule
+-- than two-eyes — see services/disposition.js).
+CREATE TABLE IF NOT EXISTS request_close_approvals (
+  id TEXT PRIMARY KEY,
+  request_id TEXT NOT NULL REFERENCES requests(id) ON DELETE CASCADE,
+  task_id TEXT,
+  approval_task_id TEXT,
+  ending TEXT NOT NULL,
+  payload_json TEXT,
+  gate_json TEXT,
+  status TEXT NOT NULL DEFAULT 'pending',
+  requested_by TEXT,
+  requested_by_name TEXT,
+  requested_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')),
+  decided_by TEXT,
+  decided_by_name TEXT,
+  decided_at TEXT,
+  decision_note TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_close_approvals_request ON request_close_approvals(request_id, status);
+CREATE INDEX IF NOT EXISTS idx_close_approvals_task ON request_close_approvals(approval_task_id);

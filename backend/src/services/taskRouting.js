@@ -57,6 +57,20 @@ var TASK_ROLES = {
   //                 knob is written for it yet — that lands with the pipeline that reads it, so nothing
   //                 stores a role nothing consults.
   release_review: 'release_review',
+  // close_approval  the lightweight second signature on a CLOSE (BW5; spec §8 "close-approval, spawned by
+  //                 close_approval routing"). Spawned only when the resolved `close_approval` mode routes —
+  //                 `approval_required`, or `either` when the closer chose the second door. Its own key is
+  //                 the eligibility token, so a city grants it to whoever it calls a supervisor.
+  //
+  //                 ⚠️ NOT a TWO_EYES_TYPES member, and that is a decision rather than an omission. Two-eyes
+  //                 excludes whoever completed the item's last FLOW task, because a release review checks
+  //                 the WORK. A close approval checks the DECISION TO END, so the only conflict is
+  //                 self-approval — enforced in services/disposition.js, which knows who requested it.
+  close_approval: 'close_approval',
+  // process_withdrawal  spawned ad hoc when a communication is logged as a withdrawal (decided 7/29). Not a
+  //                 standing type: it exists only when a withdrawal actually arrives, and it closes the
+  //                 forgotten-withdrawal gap — the clock otherwise keeps running on a request nobody wants.
+  process_withdrawal: 'process_withdrawal',
   // ── HAND-ASSIGNED MRR CHILD WORK ────────────────────────────────────────────────────────────────
   // NOT routable: the Request Manager assigns these per child to any person (possibly a non-user via a
   // secure link) with no eligibility check — `assign()` does not check, only `claim()` does. They need a
@@ -96,7 +110,10 @@ var TASK_ROLES = {
 // pipeline that spawns it, so between BW2 and BW5 it is a routable type nothing spawns. It is registered
 // early on purpose — a city has to be able to GRANT it and configure its role before the pipeline that
 // uses it exists — but the empty-pool caveat above applies until BW5 lands, and the picker entry says so.
-var ROUTABLE_TASK_TYPES = ['estimate', 'record_search', 'redaction', 'redaction_qa', 'legal_redaction', 'legal_review', 'fee_waiver', 'routing_review', 'intake_review', 'mrr_management', 'release_review'];
+// BW5 adds `close_approval` and `process_withdrawal`. Both arrive WITH their spawners in this workstream
+// (the close-approval router and the withdrawal-communication spawner), so the promise above holds for
+// both: a city that grants either token will actually receive that work.
+var ROUTABLE_TASK_TYPES = ['estimate', 'record_search', 'redaction', 'redaction_qa', 'legal_redaction', 'legal_review', 'fee_waiver', 'routing_review', 'intake_review', 'mrr_management', 'release_review', 'close_approval', 'process_withdrawal'];
 // Task types the Request Manager hand-assigns per MRR child. Deliberately NOT routable (see TASK_ROLES):
 // no eligibility, no team filter, no smart routing, never offered in the per-person picker.
 var HAND_ASSIGNED_TASK_TYPES = ['mrr_search', 'mrr_estimate', 'mrr_redaction'];
