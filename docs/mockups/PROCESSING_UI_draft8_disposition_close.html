@@ -146,9 +146,9 @@
     <button class="btn sec">Route to supervisor for approval…</button>
     <button class="btn quiet">Cancel — back to the task</button>
     <div class="kv" style="margin-top:8px;">Which commit buttons appear is <b>department-level config</b> <span class="callout">4</span>:
-    <b>direct</b> (Submit only) · <b>either</b> (both, drawn here) · <b>approval required</b> (Route only). Routed: the item shows
-    <i>Close pending approval</i>, the supervisor approves from My Tasks, and disposition + notice fire on approval — the close is
-    the approver's recorded act.</div>
+    <b>direct</b> (Submit only) · <b>either</b> (both, drawn here — <b>the default, decided 7/29</b>) · <b>approval required</b>
+    (Route only). Routed: the item shows <i>Close pending approval</i>, the supervisor approves from My Tasks, and disposition +
+    notice fire on approval — the close is the approver's recorded act.</div>
   </div>
   <div class="note" style="max-width:640px; margin:6px auto 0;">Pending state, as the queue and bars show it:&nbsp;
   <b>R-2432 · Close pending approval</b> — No records located · requested by S. Bell 8/2 → J. Whitfield (supervisor).</div>
@@ -176,7 +176,7 @@
             <h3 class="panel">When auto-release fires — the four conditions <span class="callout">6</span></h3>
             <div class="ck">Every flow task terminal — completed by a person, or <b>auto-bypassed with its basis recorded</b></div>
             <div class="ck">Funds check: outstanding balance ≤ 0 (payment received, waived, or nothing chargeable)</div>
-            <div class="ck">No pre-send review gate — a city/state may require human review before release (config; default none) <span class="callout">9</span></div>
+            <div class="ck">No pre-send review gate — default OFF, shipped as an unconfirmed ⚠ go-live knob a named person must confirm; when ON, a <b>release_review</b> task spawns instead (cleared at speed in power mode — Draft 9) <span class="callout">9</span></div>
             <div class="ck">Non-MRR — an MRR release stays the manager's orchestration behind Draft 7's funds gate</div>
             <div class="kv" style="margin-top:6px;"><b>Payment-due variant:</b> R-2420 sits at <i>pending — balance $36.20 &gt; 0</i>;
             the moment payment brings it to ≤ 0, it ships and closes with no one touching it. A redacted release is still
@@ -223,13 +223,19 @@
             <div class="kv" style="margin-top:7px;">Withdrawn requires the requestor's communication attached — a choice, not
             silence (that distinction from No-response is why both exist). Previously furnished (TX only) certifies prior
             request #, date, and match — an ending, <b>not a denial</b>.</div>
+            <div class="kv" style="margin-top:6px;"><b>Rights (decided 7/29):</b> Withdrawn — ORO Associate+ <b>and</b> the item's
+            current task-holder (same popup, communication attached); Previously furnished — ORO Associate+ only. And a logged
+            withdrawal communication <b>spawns a "Process withdrawal" task</b> to the RM/ORO pool, so one can never sit
+            unprocessed while the clock runs.</div>
           </div>
           <div class="panelbox tinted">
             <h3 class="panel">MRR packaging &amp; timing — the city's two blank rows</h3>
             <div class="kv"><b>delivery_mode</b> (as_ready · hold_all) and <b>notice_packaging</b> (per_child · combined) ship
             <b>blank</b> — the city answers them with counsel before MRR unlocks; presented together; n = 1 degenerates
-            correctly; WA's installment entitlement removes <code>hold_all</code>. <span class="warnline" style="display:block; margin-top:6px;"><b>RM hold of a ready record:</b> note required; requestor's installment request overrides in
-            entitlement jurisdictions — <b>drafted, OPEN, unratified</b>; never a payment hold (§5.9).</span></div>
+            correctly; WA's installment entitlement removes <code>hold_all</code>. <span class="warnline" style="display:block; margin-top:6px; border-left-color:var(--statute);"><b>RM hold of a ready record — RATIFIED 7/29, prevention refinement:</b> note always required; in an
+            entitlement jurisdiction with an installment request on file the hold control is <b>disabled with the reason and
+            citation shown</b>; an installment request arriving mid-hold <b>auto-lifts it and notifies the RM</b> (statute on
+            verified facts — the mandatory-waiver asymmetry). Never a payment hold (§5.9). The guard now builds.</span></div>
           </div>
         </div>
         <div class="rail">
@@ -243,7 +249,9 @@
             <div class="railhead">Reopen</div>
             <button class="btn quiet">Reopen item… (Director)</button>
             <p class="kv" style="margin-top:4px;">Director authority + required note; the from-closed transition guard the
-            engine lacks is part of this build. Reopen lands the item back at its prior stage (drafted — see open questions).</p>
+            engine lacks is part of this build. <b>Decided 7/29 — the hybrid:</b> the popup also asks where the item resumes —
+            <b>prior stage (default)</b> or <b>intake review for re-triage</b> (trigger (v) on Draft 1c's list). Reopen is
+            silent; the outcome speaks. Clocks never reset — exposures show honestly; a reopened child un-derives the parent.</p>
           </div>
         </div>
       </div>
@@ -266,7 +274,7 @@
       <li><b><span class="decided">KEVIN 7/28</span> Supervisor approval is department config:</b> <code>close_approval:
       direct | either | approval_required</code> per department (per evidence-gated ending). “Either” draws both buttons and
       lets the closer choose — your two-button sketch; “approval required” makes the supervisor's approval the recorded act.
-      Pending closes are visible states, not limbo. <b>Default is an open question below.</b></li>
+      Pending closes are visible states, not limbo. <b><span class="decided">DECIDED 7/29</span> Default: <code>either</code>.</b></li>
       <li><b>Not-in-custody closes from the search task too</b> (your “tbd” — drafted yes): the searcher who discovers the
       records belong elsewhere names the custodian in the popup; referral record + letter ride the close.</li>
       <li><b><span class="decided">KEVIN 7/28</span> Delivery is condition-triggered, never asserted.</b> Four conditions:
@@ -279,9 +287,12 @@
       <li><b>Delivered is written by the release event</b> — release + funds check + notice + <code>delivered_at</code> +
       <code>installment_no</code>, one event; a redacted release is still Delivered (withholding log carries the detail; no
       “partially granted” disposition exists). Unchanged from rev 1; what changed is that the event now usually fires itself.</li>
-      <li><b>The pre-send review gate is config, default none.</b> Where a city (or a statute research surfaces) requires a
-      human look before release, the pipeline pauses at a review task instead of shipping — the hook exists so compliance
-      never has to fight the automation. It is off unless someone turns it on.</li>
+      <li><b><span class="decided">DECIDED 7/29</span> The pre-send review gate defaults OFF — as a mandatory go-live
+      decision.</b> It ships as an unconfirmed ⚠ checklist knob a named person must consciously confirm (rule-d machinery):
+      no city gets silent automation nobody chose — confirming the knob IS the human decision to automate. Statutory
+      pre-release steps (legal review, AG band, third-party notice) already ride the flow as tasks, so this gate is city
+      policy, not law. When ON, work lands on the new <code>release_review</code> task type, cleared at speed in
+      <b>power mode — Draft 9</b>.</li>
       <li><b><span class="decided">KEVIN 7/28</span> No-response and Non-payment are sweep-only now.</b> The rev-1 manual path
       is removed: they close from data (grace + buffer; the 60-day window), with the numeric basis, the attested-config badge,
       and the notice trail on the record. Resolves rev 1's open question 3.</li>
@@ -300,10 +311,11 @@
     </ol>
     <p class="note" style="margin-top:10px;"><b>Columbus, OH in one line:</b> no Previously-furnished path (TX-specific), the
     vagueness ending arrives via OH's denial ground instead of a clarification timeout where the city so chooses, no statutory
-    deadline chip — every gate and the whole pipeline identical. <b>Open for Kevin (rev 2):</b> ① the <code>close_approval</code>
-    default (direct / either / approval-required); ② rights + wording for the two manual endings (RM / Associate+?);
-    ③ reopen lands at prior stage or always re-triages at intake; ④ the RM-hold guard (carried, still unratified);
-    ⑤ any pre-send-review requirement you know of that should ship ON by default.</p>
+    deadline chip — every gate and the whole pipeline identical. <b>All five rev-2 questions DECIDED with Kevin 7/29</b>
+    (item-by-item session): ① <code>close_approval</code> default <code>either</code> · ② Withdrawn = Associate+ AND current
+    task-holder, Previously-furnished = Associate+ only, + the Process-withdrawal spawner · ③ reopen hybrid (popup picks
+    prior-stage default / intake re-triage; silent reopen) · ④ RM-hold guard ratified w/ prevention refinement ·
+    ⑤ pre-send gate off-by-default as a mandatory go-live confirmation, w/ <code>release_review</code> + power mode (Draft 9).</p>
   </div>
 
 </div>

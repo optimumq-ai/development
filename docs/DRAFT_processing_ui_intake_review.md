@@ -33,7 +33,8 @@ intake reviewer is the densest (hosts the inline waiver/commercial decision when
    - **only when needed** (default): the task spawns only when a trigger fires —
      (i) team undeterminable (absorbs today's `routing_review` task; "can't route" becomes a trigger of
      this task rather than a task of its own) · (ii) an eligibility review returned ·
-     (iii) a waiver/commercial decision pending in `intake_review` mode · (iv) a sensitivity flag.
+     (iii) a waiver/commercial decision pending in `intake_review` mode · (iv) a sensitivity flag ·
+     (v, added 2026-07-29) a Director's reopen sent here for re-triage (the Draft 8 rev-2 hybrid).
      Everything else routes straight to its team with no intake stop.
    - **always**: every non-MRR request pauses at intake review (cities that want day-1 defect review).
    The queue is therefore an **exceptions queue**, and both the queue ("Why it's here" column) and the

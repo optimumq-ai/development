@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Processing UI — Draft 9 — Release Review &amp; Power Mode (for markup)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+  :root{
+    --bg:#D8E0E8; --surface-2:#F2F6F9; --surface:#FFFFFF; --blue:#1E6091;
+    --ink:#1F2937; --muted:#5B6B7A; --line:#C3CFDA;
+    --navy:#143D5C; --amber-ink:#9A6700; --amber-line:#D4A72C; --amber-bg:#FFF8E5;
+    --ghost:#8A97A3; --statute:#2F6B4F; --statute-bg:#EAF4EF; --warn:#8C3A2B;
+  }
+  *{box-sizing:border-box; margin:0; padding:0;}
+  body{background:var(--bg); color:var(--ink); font:13.5px/1.45 -apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif; padding:24px 18px 60px;}
+  .wrap{max-width:1080px; margin:0 auto;}
+
+  .draftbar{background:var(--navy); color:#fff; border-radius:8px; padding:12px 16px; margin-bottom:14px;}
+  .draftbar h1{font-size:15px; font-weight:600;}
+  .draftbar p{font-size:12px; opacity:.85; margin-top:3px;}
+  .screenlabel{font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin:22px 2px 6px; font-weight:700;}
+  .note{font-size:12px; color:var(--muted); margin:6px 2px 0;}
+  .callout{display:inline-block; min-width:17px; height:17px; line-height:17px; text-align:center; border-radius:50%; background:var(--blue); color:#fff; font-size:11px; font-weight:700; vertical-align:2px; margin-left:4px;}
+
+  .app{background:var(--surface); border:1px solid var(--line); border-radius:8px; overflow:hidden; box-shadow:0 1px 3px rgba(20,61,92,.12);}
+  .appbar{background:var(--surface-2); border-bottom:1px solid var(--line); padding:9px 14px; display:flex; align-items:center; gap:12px;}
+  .appbar .brand{font-weight:700; color:var(--navy);}
+  .appbar .role{font-size:12px; color:var(--muted);}
+  .appbar .who{margin-left:auto; font-size:12px; color:var(--muted);}
+  .appbody{padding:14px;}
+  h3.panel{font-size:12px; font-weight:700; letter-spacing:.04em; text-transform:uppercase; color:var(--muted); margin-bottom:7px;}
+
+  .btn{font:inherit; font-size:13px; background:var(--blue); color:#fff; border:none; border-radius:5px; padding:6px 14px; cursor:pointer; font-weight:600;}
+  .btn.sec{background:var(--surface); color:var(--blue); border:1px solid var(--blue); font-weight:600;}
+  .btn.quiet{background:var(--surface-2); color:var(--ink); border:1px solid var(--line); font-weight:500;}
+  .btn.sm{font-size:12px; padding:4px 10px;}
+  .key{display:inline-block; font-size:10.5px; font-weight:800; border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:0 5px; background:var(--surface-2); color:var(--muted); margin-left:6px; vertical-align:1px;}
+
+  .kv{font-size:12.5px; color:var(--muted);}
+  .kv b{color:var(--ink); font-weight:600;}
+
+  .by{display:inline-block; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; border-radius:3px; padding:2px 7px; vertical-align:1px;}
+  .by-system{background:var(--surface-2); color:var(--navy); border:1px solid var(--line);}
+  .by-person{background:var(--amber-bg); color:var(--amber-ink); border:1px solid var(--amber-line);}
+  .by-statute{background:var(--statute-bg); color:var(--statute); border:1px solid var(--statute);}
+  .recorded{background:var(--surface); color:var(--ghost); border:1px dashed var(--ghost);}
+
+  .parentstrip{background:var(--surface-2); border:1px solid var(--line); border-radius:6px; padding:8px 12px; display:flex; gap:14px; align-items:baseline; margin-bottom:10px; flex-wrap:wrap;}
+  .parentstrip .pn{font-weight:700; color:var(--navy);}
+
+  .cols{display:flex; gap:14px; align-items:flex-start;}
+  .main{flex:1 1 auto; min-width:0;}
+  .rail{flex:0 0 255px; display:flex; flex-direction:column; gap:10px;}
+  .panelbox{background:var(--surface); border:1px solid var(--line); border-radius:6px; padding:11px 13px; margin-bottom:11px;}
+  .panelbox.tinted{background:var(--surface-2);}
+  .rail .panelbox{margin-bottom:0;}
+  .railhead{font-size:10.5px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; color:var(--muted); margin-bottom:6px;}
+  .rail .btn{width:100%; margin-bottom:6px;}
+  hr.soft{border:none; border-top:1px solid var(--surface-2); margin:9px 0;}
+  .ghostline{border-left:3px dashed var(--ghost); padding-left:10px; color:var(--muted); font-size:12.5px;}
+
+  table.q{width:100%; border-collapse:collapse; background:var(--surface);}
+  table.q th{font-size:11px; text-transform:uppercase; letter-spacing:.05em; color:var(--muted); text-align:left; padding:7px 10px; border-bottom:2px solid var(--line); font-weight:700;}
+  table.q td{padding:9px 10px; border-bottom:1px solid var(--surface-2); vertical-align:top;}
+  .group{background:var(--surface-2); font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; color:var(--navy); padding:6px 10px; border-bottom:1px solid var(--line);}
+  .reqno{font-weight:700; color:var(--blue);}
+
+  /* power mode */
+  .powerbar{background:var(--navy); color:#fff; padding:8px 14px; display:flex; align-items:center; gap:14px;}
+  .powerbar .pt{font-weight:700; letter-spacing:.04em;}
+  .powerbar .prog{margin-left:auto; font-size:12px; opacity:.9;}
+  .actrow{display:flex; gap:10px; align-items:center; background:var(--surface-2); border-top:1px solid var(--line); padding:10px 14px; position:sticky; bottom:0;}
+  .wl{display:flex; gap:10px; padding:5px 0; border-top:1px solid var(--surface-2); font-size:12.5px;}
+  .wl:first-of-type{border-top:none;}
+  .wl .n{flex:0 0 70px; color:var(--muted);}
+
+  .modal{border:2px solid var(--navy); box-shadow:0 10px 34px rgba(20,61,92,.35); border-radius:8px; background:var(--surface); padding:14px 16px; max-width:560px; margin:14px auto;}
+  .modal h4{font-size:13.5px; color:var(--navy); margin-bottom:8px;}
+  .modal textarea{width:100%; font:inherit; font-size:12.5px; border:1px solid var(--line); border-radius:5px; padding:7px 9px; margin-top:4px; background:var(--surface); color:var(--ink); resize:vertical;}
+
+  .legend{background:var(--surface); border:1px solid var(--line); border-radius:8px; padding:16px 18px; margin-top:26px;}
+  .legend h2{font-size:14px; color:var(--navy); margin-bottom:10px;}
+  .legend ol{margin-left:20px;}
+  .legend li{margin-bottom:9px; font-size:12.5px;}
+  .legend li b{color:var(--navy);}
+  .rule{font-size:10px; font-weight:800; color:#fff; background:var(--statute); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
+  .decided{font-size:10px; font-weight:800; color:#fff; background:var(--blue); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="draftbar">
+    <h1>Processing UI — Draft 9 · Release Review &amp; Power Mode (for your markup — nothing is built)</h1>
+    <p>Born from the 7/29 session: when the pre-send review gate is ON, a real task type — <b>release_review</b> — carries
+    the work (Frame A), and <b>POWER MODE</b> clears it without navigation: approve, the item's data disappears, the next
+    populates in place (Frame B). Approving fires the release event with the reviewer recorded; returning sends the item
+    back with a note (Frame C). The normal one-at-a-time task path always exists — power mode is an accelerator, not a
+    replacement. Single city (Austin, TX); the gate is city policy, so Columbus renders identically.</p>
+  </div>
+
+  <div class="screenlabel">Frame A · My Tasks — the Release Review group and its power-mode entry <span class="callout">1</span></div>
+  <div class="app">
+    <div class="appbar"><span class="brand">OptimumQ</span><span class="role">My Tasks — City of Austin, TX</span><span class="who">J. Whitfield · ORO Supervisor</span></div>
+    <div class="appbody">
+      <table class="q">
+        <tr><td colspan="5" class="group">Release Review (12) &nbsp;·&nbsp; <button class="btn sm">Power mode (12) →</button> <span class="callout">2</span></td></tr>
+        <tr>
+          <td><span class="reqno">R-2417</span></td><td>D. Alvarez</td>
+          <td class="kv">Email correspondence — Public Works ↔ Lakeline Paving · 214 pp, redacted</td>
+          <td class="kv">Statutory: <b>Aug 11</b></td>
+          <td><button class="btn sm sec">Open →</button></td>
+        </tr>
+        <tr>
+          <td><span class="reqno">R-2405</span></td><td>Statesman-Ledger</td>
+          <td class="kv">Force-review board minutes · 48 pp, redacted</td>
+          <td class="kv">Statutory: <b>Aug 6</b></td>
+          <td><button class="btn sm sec">Open →</button></td>
+        </tr>
+        <tr><td colspan="5" class="kv" style="padding:7px 10px;">…10 more · clock-aware order (nearest deadline first)</td></tr>
+      </table>
+      <p class="note">The task spawns only where the city confirmed the pre-send gate ON (the go-live checklist knob —
+      Draft 8 rev 2). Routing is config — <b>suggested default: ORO Supervisor</b>; never the person who completed the
+      item's last flow task (the two-eyes rule, enforced at assignment). <span class="callout">3</span></p>
+    </div>
+  </div>
+
+  <div class="screenlabel">Frame B · POWER MODE — approve and next, without leaving the screen <span class="callout">4</span></div>
+  <div class="app">
+    <div class="powerbar"><span class="pt">⚡ POWER MODE — Release Review</span><span class="kv" style="color:#fff; opacity:.85;">City of Austin, TX · J. Whitfield</span><span class="prog">#3 of 12 · 9 remaining · 2 skipped <span class="callout">8</span></span></div>
+    <div class="appbody">
+      <div class="parentstrip">
+        <span class="pn">R-2417</span>
+        <span class="kv">Email correspondence — Public Works ↔ Lakeline Paving LLC</span>
+        <span class="kv"><b>D. Alvarez</b> · delivery: email</span>
+        <span class="kv" style="margin-left:auto;">Statutory deadline: <b>Aug 11</b> · pipeline: all tasks terminal · balance $0.00</span>
+      </div>
+      <div class="cols">
+        <div class="main">
+          <div class="panelbox">
+            <h3 class="panel">Released set — 214 pages (redacted) <span class="callout">5</span></h3>
+            <div class="kv">📄 correspondence_2026-01_06.pdf · 214 pp · <a href="#">preview</a> — assembled from 3 source batches; redaction complete 8/1 (T. Okafor)</div>
+          </div>
+          <div class="panelbox">
+            <h3 class="panel">Withholding log — what needs your eyes, on the surface <span class="callout">5</span></h3>
+            <div class="wl"><span class="n">pp. 44–46</span><span>Personnel-file information redacted <span class="kv">· Tex. Gov't Code §552.102</span></span></div>
+            <div class="wl"><span class="n">p. 121</span><span>Personal email address of a private citizen <span class="kv">· §552.137</span></span></div>
+            <div class="wl"><span class="n">pp. 180–202</span><span>Draft bid tabulation — competitive matter <span class="kv">· §552.104 · flagged by Legal Review 7/30 (K. Tran)</span></span></div>
+            <div class="kv" style="margin-top:5px;">3 withholdings · every one carries its authority · full inventory rides the notice.</div>
+          </div>
+          <div class="panelbox">
+            <h3 class="panel">The notice, as the requestor receives it</h3>
+            <div class="kv">Delivery letter + redaction inventory with citations — <a href="#">read the letter</a>. One communication; sending is part of the release event.</div>
+          </div>
+        </div>
+        <div class="rail">
+          <div class="panelbox">
+            <div class="railhead">Flags on this item</div>
+            <p class="kv"><span class="by recorded">Eligibility · advisory recorded</span><br><span class="by by-system">Ledger · no prior balance</span><br>Nothing amber — nothing pending anywhere on this item.</p>
+          </div>
+          <div class="panelbox">
+            <div class="railhead">This act is yours <span class="callout">7</span></div>
+            <p class="kv">Approving fires the release event — <b>Closed – Delivered</b>, <code>delivered_at</code>, the notice —
+            recorded as <b>J. Whitfield</b>, this item, this moment. Audit-identical to opening the task the slow way. No
+            bulk-approve exists; the unit of action is one item, always.</p>
+          </div>
+        </div>
+      </div>
+      <div class="actrow">
+        <button class="btn">Approve &amp; send → next <span class="key">A</span></button>
+        <button class="btn quiet">Skip → <span class="key">S</span></button>
+        <button class="btn quiet">Return with note… <span class="key">R</span></button>
+        <span class="kv" style="margin-left:auto;">approved: the data clears, #4 populates here <span class="callout">6</span></span>
+        <button class="btn sm sec">Exit power mode</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="screenlabel">Frame C · Return with note — the button that makes review real <span class="callout">9</span></div>
+  <div class="modal">
+    <h4>Return R-2417 — do not release</h4>
+    <div class="kv" style="margin-bottom:4px;">Sends the item back to <b>Redaction (T. Okafor, Open Records Fulfillment Team)</b>
+    with your note; the release pipeline re-arms when the fix lands and conditions re-satisfy. The requestor is not notified —
+    nothing has been promised.</div>
+    <textarea rows="2">P. 121 — second personal email address visible in the quoted thread, bottom margin. Redact to match the §552.137 treatment above.</textarea>
+    <div style="margin-top:9px;">
+      <button class="btn">Return to redaction</button>
+      <button class="btn quiet">Cancel — back to review</button>
+    </div>
+  </div>
+
+  <!-- ══════════ annotations ══════════ -->
+  <div class="legend">
+    <h2>Design annotations</h2>
+    <ol>
+      <li><b><span class="decided">KEVIN 7/29</span> A real task type: <code>release_review</code>.</b> Spawned by the
+      pipeline's gate branch (conditions met + gate ON → task instead of shipment); routed by config in the approval-modules
+      pattern — suggested default <b>ORO Supervisor</b>; "Release Review" joins the Supervisor / Director task menus
+      (optionally team supervisors). Eligibility via <code>user_task_types</code>; pool + smart routing unchanged.</li>
+      <li><b>Two entries, one queue.</b> The group header carries "Power mode (n) →"; every row still opens one-at-a-time.
+      Power mode is an accelerator, not a replacement — the slow path is always there.</li>
+      <li><b>The two-eyes rule:</b> the reviewer is never the person who completed the item's last flow task — enforced at
+      assignment, not etiquette. (Open question: widen to <i>any</i> flow task on the item? Small-city reality argues narrow.)</li>
+      <li><b><span class="decided">KEVIN 7/29</span> Power mode is populate-in-place:</b> approve → the item's data disappears,
+      the next request's data fills the same screen. No My-Tasks round-trips. Keyboard-driven (A / S / R). Ordering is the
+      queue's clock-aware order, nearest deadline first.</li>
+      <li><b>The substance sits on the surface.</b> Released set, the withholding log with citations, the notice as the
+      requestor receives it, and the item's flags — nothing reviewable hides behind a click, so speed never equals blindness.</li>
+      <li><b>Skip is honest:</b> the task stays in the queue untouched (for the one that needs a phone call); skipped items
+      resurface at the end of the pass (open question: or hold until next session?).</li>
+      <li><b><span class="rule">RULE C</span> No rubber-stamp mechanics.</b> Every approval is an individually recorded act —
+      this reviewer, this item, this timestamp, audit-identical to the one-task path. No bulk-approve, no select-all; the unit
+      of action is one item, always. Drafted metrics for oversight: counts only, no per-reviewer timing (open question).</li>
+      <li><b>The progress strip</b> keeps the pass honest: position, remaining, skipped — the reviewer always knows what the
+      session has and hasn't covered.</li>
+      <li><b>Return-with-note is the review's teeth</b> (Draft 4's return-with-guidance pattern): required note, lands on the
+      producing task, pipeline re-arms on the fix. Silent to the requestor — nothing has been promised. Without this button
+      the review would be ceremony.</li>
+      <li><b>The pattern is deliberately scoped</b> (first-build lesson): PowerQueue is a component-library shell
+      (progress strip + act row + populate-in-place) instanced per task type — release review first. Future candidates, each
+      its own tuned variant, none in v1: the <code>close_approval = approval_required</code> supervisor queue, routed waiver
+      decisions.</li>
+    </ol>
+    <p class="note" style="margin-top:10px;"><b>Columbus, OH in one line:</b> identical — the gate is city policy (the go-live
+    knob), not law; the withholding log simply cites R.C. exemptions instead. <b>Open for Kevin:</b> ① default role
+    (ORO Supervisor?) · ② two-eyes scope (last task vs any task) · ③ skip resurfacing · ④ oversight metrics (counts only
+    drafted) · ⑤ the A / S / R keys.</p>
+  </div>
+
+</div>
+</body>
+</html>
