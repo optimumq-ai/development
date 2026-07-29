@@ -103,6 +103,139 @@ router.get('/intake-queue', requireAuth, async function (req, res) {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ============================================================================================
+// THE INTAKE REVIEW SCREEN'S CONTEXT (PHASE 7 / BW3 — mockup screen 2).
+//
+// Everything the screen needs that is NOT already a general-purpose endpoint, in one read. The general ones
+// stay general and the screen calls them directly: `/requests/:id`, `/requests/:id/eligibility-findings`,
+// `/requests/:id/search-intents`, `/jurisdiction-profile/ledger/request/:id`,
+// `/jurisdiction-profile/branch-profile`. What is HERE is the part that is specific to this task:
+//
+//   * the trigger keys, LABELLED (the "Here because:" line)
+//   * the PARENT (the screen is parent-scoped; the task hangs off the work row, which for a non-MRR
+//     request is the single child — see SPEC_parent_child_lifecycle §4.1)
+//   * the PROCEED GATE, from the same function the resolve route refuses on, so the Resolve panel's words
+//     and the 422's words cannot drift
+//   * the two approval modules' evaluations, so the inline panels know whether they exist AT ALL
+//
+// THE INLINE PANEL'S EXISTENCE RULE (rule b + draft §2): a panel exists only when the module's `mode` is
+// `intake_review` AND the branch capability is not explicitly `false`. `null` (unknown — 19 of 21 seeded
+// cities) RENDERS. approvalModules.config already folds `branchAvailable` in, and it is passed through
+// verbatim rather than re-derived here.
+// ============================================================================================
+router.get('/:id/intake-context', requireAuth, async function (req, res) {
+  try {
+    var t = await get('SELECT * FROM tasks WHERE id = ?', [req.params.id]);
+    if (!t) return res.status(404).json({ error: 'Task not found' });
+    if (t.type !== 'intake_review') return res.status(400).json({ error: 'Not an intake review task.' });
+    var IR = require('../services/intakeReview');
+    var keys = IR.triggersOf(t);
+    var reqRow = await get('SELECT * FROM requests WHERE id = ?', [t.request_id]);
+    var parent = (reqRow && reqRow.master_request_id) ? await get('SELECT * FROM requests WHERE id = ?', [reqRow.master_request_id]) : null;
+
+    var waiver = null, commercial = null;
+    try {
+      var AM = require('../services/approvalModules');
+      var amCfg = await AM.config(null);
+      waiver = await AM.evaluateWaiver(null, reqRow, { config: amCfg });
+      commercial = await AM.evaluateCommercial(null, reqRow, { config: amCfg });
+    } catch (e) { console.error('[intake-context approval modules]', e && e.message); }
+
+    // Clocks, all of them, in the clock strip's own vocabulary. Read-only and computed from the PARENT,
+    // which is where the statutory clock lives (§4.2 — one legal deadline per citizen request).
+    var clocks = [];
+    try {
+      var owner = (reqRow && reqRow.master_request_id) || t.request_id;
+      var rules = await require('../services/tolling').loadRules();
+      var rows = await all('SELECT * FROM request_clocks WHERE request_id = ? ORDER BY is_primary DESC, created_at', [owner]);
+      for (var i = 0; i < rows.length; i++) {
+        var tolls = await all('SELECT * FROM clock_tolls WHERE clock_id = ? ORDER BY created_at', [rows[i].id]);
+        var st = require('../services/tolling').computeStatus(rows[i], tolls, rules);
+        clocks.push({ kind: st.kind, label: st.label, dueDate: st.dueDate, citation: st.citation,
+          legalDeadline: st.legalDeadline, operationalTarget: st.operationalTarget, isOverdue: st.isOverdue,
+          overdueMeaning: st.overdueMeaning, exposures: st.exposures, state: st.state, isPrimary: st.isPrimary });
+      }
+    } catch (e) { console.error('[intake-context clocks]', e && e.message); }
+
+    res.json({
+      task: t,
+      triggers: keys.map(function (k) { return { key: k, label: IR.TRIGGER_LABELS[k] || k }; }),
+      alwaysMode: !keys.length && t.spawn_triggers != null,
+      triggerUnrecorded: !keys.length && t.spawn_triggers == null,
+      request: reqRow, parent: parent,
+      clocks: clocks,
+      gate: await IR.proceedGate(t.request_id),
+      waiver: waiver, commercial: commercial
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// THE EDIT-INFO FRAME'S WRITE (draft §0b.5). Three AI-produced facts, corrected in place: classification,
+// record owner, and the team the item will route to on Proceed.
+//
+// WHY NOT `PATCH /requests/:id/route`. That endpoint does a re-routing CONSOLIDATION — moves every open work
+// task onto the new team, re-runs Smart Routing on each, spawns an estimate if none exists, and closes the
+// unroutable trigger. At intake there is no open work task to move (the unroutable path spawns none), and
+// the stop is about to be closed by Proceed anyway; running that machinery here would spawn an estimate task
+// the reviewer never asked for. Proceed's applyStageTransition spawns the fulfillment task onto whatever
+// team this wrote, which is the correction actually taking effect.
+//
+// Authorized to the TASK'S ASSIGNEE (this is their job — trigger (i) is literally "you decide the team") or
+// to the roles that could already re-route. The task must be actionable: correcting the routing of a request
+// through a finished task is the stale-task class of bug the resolve route's 409 exists for.
+router.patch('/:id/intake-routing', requireAuth, async function (req, res) {
+  try {
+    var t = await get('SELECT * FROM tasks WHERE id = ?', [req.params.id]);
+    if (!t) return res.status(404).json({ error: 'Task not found' });
+    if (t.type !== 'intake_review') return res.status(400).json({ error: 'Not an intake review task.' });
+    if (!tr.isActionable(t.status)) {
+      return res.status(409).json({ error: 'This task is ' + t.status + ' and can no longer be edited.', code: 'TASK_NOT_ACTIONABLE' });
+    }
+    var roles = (req.user && req.user.roles) || [];
+    var mayRoute = ['SUPERVISOR', 'DIRECTOR', 'SYSTEM_ADMIN', 'DEPT_MANAGER', 'COORDINATOR'].some(function (r) { return roles.indexOf(r) !== -1; });
+    if (t.assigned_to !== (req.user && req.user.sub) && !mayRoute) {
+      return res.status(403).json({ error: 'This intake review is not yours.' });
+    }
+    var b = req.body || {};
+    var reqRow = await get('SELECT * FROM requests WHERE id = ?', [t.request_id]);
+    if (!reqRow) return res.status(404).json({ error: 'Request not found' });
+
+    var sets = [], vals = [], said = [];
+    // Each field is validated against the list it claims to come from — the taxonomy, City Departments,
+    // Fulfillment Teams. A dropdown is not a guarantee; a request routed to a department id that is not a
+    // team would sit in a pool that cannot exist.
+    if (Object.prototype.hasOwnProperty.call(b, 'recordTypeId')) {
+      var rt = b.recordTypeId ? await get('SELECT id, name FROM record_types WHERE id = ?', [b.recordTypeId]) : null;
+      if (b.recordTypeId && !rt) return res.status(400).json({ error: 'That is not a record type in this taxonomy.' });
+      sets.push('record_type_id = ?'); vals.push(rt ? rt.id : null);
+      if ((reqRow.record_type_id || null) !== (rt ? rt.id : null)) said.push('classified as ' + (rt ? rt.name : 'unclassified'));
+    }
+    if (Object.prototype.hasOwnProperty.call(b, 'ownerDepartmentId')) {
+      var od = b.ownerDepartmentId ? await get("SELECT id, name FROM departments WHERE id = ? AND active = 1", [b.ownerDepartmentId]) : null;
+      if (b.ownerDepartmentId && !od) return res.status(400).json({ error: 'That is not an active city department.' });
+      sets.push('record_owner_department_id = ?'); vals.push(od ? od.id : null);
+      if ((reqRow.record_owner_department_id || null) !== (od ? od.id : null)) said.push('record owner ' + (od ? od.name : 'cleared'));
+    }
+    if (Object.prototype.hasOwnProperty.call(b, 'teamId')) {
+      var tm = b.teamId ? await get("SELECT id, name FROM departments WHERE id = ? AND kind = 'team' AND active = 1", [b.teamId]) : null;
+      if (b.teamId && !tm) return res.status(400).json({ error: 'That is not an active fulfillment team.' });
+      sets.push('department_id = ?'); vals.push(tm ? tm.id : null);
+      if ((reqRow.department_id || null) !== (tm ? tm.id : null)) said.push('will route to ' + (tm ? tm.name : 'no team'));
+    }
+    if (!sets.length) return res.status(400).json({ error: 'Nothing to change.' });
+    vals.push(t.request_id);
+    await run("UPDATE requests SET " + sets.join(', ') + ", updated_at = datetime('now') WHERE id = ?", vals);
+    // Only when something actually MOVED. A history row saying a reviewer confirmed what the AI already
+    // said is noise in the trail the city may one day have to read.
+    if (said.length) {
+      await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+        [uuidv4(), t.request_id, req.user && req.user.sub, (req.user && req.user.name) || 'Staff', 'INTAKE_INFO_CORRECTED',
+         'Intake review corrected the item: ' + said.join('; ') + '.']);
+    }
+    res.json({ ok: true, changed: said, request: await get('SELECT * FROM requests WHERE id = ?', [t.request_id]) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // Claim an open task from the pool.
 router.post('/:id/claim', requireAuth, async function (req, res) {
   var r = await tr.claim(req.params.id, req.user.sub);

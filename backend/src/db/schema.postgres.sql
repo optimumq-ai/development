@@ -1313,3 +1313,17 @@ CREATE INDEX IF NOT EXISTS idx_elig_finding_request ON request_eligibility_findi
 -- One row per dimension per request: re-evaluating a request updates its findings rather than stacking a
 -- second opinion beside the first.
 CREATE UNIQUE INDEX IF NOT EXISTS idx_elig_finding_req_dim ON request_eligibility_findings (request_id, dimension);
+
+-- PHASE 7 / BW3 — THE RECORD OWNER, per request (DRAFT_processing_ui_intake_review.md §0b.5).
+--
+-- The EditInfoFrame's three dropdowns correct three AI-produced facts: the classification
+-- (`record_type_id`, already a column), the routed fulfillment TEAM (`department_id`, already a column) and
+-- the OWNING CITY DEPARTMENT — which had nowhere to live. The taxonomy carries an owner per record TYPE
+-- (`record_type_departments.role = 'owner'`, read by services/classifier.js), but that is the type's
+-- default, not this request's fact: a reviewer correcting "Public Works, not Parks" on ONE request must not
+-- rewrite the taxonomy for every future request of that type.
+--
+-- Nullable, and read by nothing else yet: it is context that travels with the item (it shows on the item
+-- for whoever searches it) plus the reviewer's correction of it, recorded. When a later workstream wants a
+-- request-level owner, this is it — rather than a second column meaning the same thing.
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS record_owner_department_id TEXT;
