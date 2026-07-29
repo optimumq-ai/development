@@ -233,7 +233,7 @@ async function completeActivity(childId, activity, opts) {
 
   if (row.task_id) {
     try {
-      await run("UPDATE tasks SET status = 'done', completed_at = datetime('now'), updated_at = datetime('now') WHERE id = ? AND status NOT IN ('done','cancelled')", [row.task_id]);
+      await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ? AND status NOT IN ('done','cancelled')", [row.task_id]);
     } catch (e) { console.error('[mrrHub complete task]', e && e.message); }
   }
 
@@ -290,7 +290,7 @@ async function autoCompleteFulfilledSearch(childId, opts) {
     'completed_by_name = ?, updated_at = ? WHERE id = ?',
     ['complete', nowStr(), 'fulfilling_record', 'System · requestor’s selection', nowStr(), row.id]);
   if (row.task_id) {
-    await run("UPDATE tasks SET status = 'done', completed_at = datetime('now'), updated_at = datetime('now') WHERE id = ? AND status NOT IN ('done','cancelled')", [row.task_id]);
+    await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ? AND status NOT IN ('done','cancelled')", [row.task_id]);
   }
   await history(childId, opts, 'MRR_SEARCH_AUTO_COMPLETED',
     'Record search for this item completed automatically: the requestor marked ' +
@@ -340,7 +340,7 @@ async function saveEstimateData(childId, values, opts) {
         'completion_basis = ?, updated_at = ? WHERE id = ?',
         ['complete', nowStr(), opts.actorId || null, opts.actorName || null, 'person', nowStr(), row.id]);
       if (row.task_id) {
-        await run("UPDATE tasks SET status = 'done', completed_at = datetime('now'), updated_at = datetime('now') WHERE id = ? AND status NOT IN ('done','cancelled')", [row.task_id]);
+        await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ? AND status NOT IN ('done','cancelled')", [row.task_id]);
       }
     }
   }
