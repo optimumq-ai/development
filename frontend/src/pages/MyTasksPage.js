@@ -11,11 +11,16 @@ import { useAuthStore } from '../store/authStore';
 var TYPE_LABEL = {
   record_search: 'Record Search', redaction: 'Redaction', legal_redaction: 'Legal Redaction',
   redaction_qa: 'Redaction Review', review_auto_redaction: 'Auto-Redaction Review',
-  estimate: 'Estimate', fee_waiver: 'Fee Waiver', legal_review: 'Legal Review', routing_review: 'Routing Review'
+  estimate: 'Estimate', fee_waiver: 'Fee Waiver', legal_review: 'Legal Review', routing_review: 'Routing Review',
+  // BW2 catalog (docs/SPEC_processing_ui.md §8). None has a dedicated screen yet — screenFor() falls back
+  // to the request, which is openable work, just not the purpose-built UI (BW3 / BW6 / BW8).
+  intake_review: 'Intake Review', mrr_management: 'MRR Coordination', release_review: 'Release Review',
+  mrr_search: 'MRR Search', mrr_estimate: 'MRR Estimate', mrr_redaction: 'MRR Redaction'
 };
 // Order boxes appear in: front-line fulfillment first, then approvals/office work.
-var TYPE_ORDER = ['record_search', 'redaction', 'legal_redaction', 'redaction_qa', 'review_auto_redaction',
-  'estimate', 'fee_waiver', 'legal_review', 'routing_review'];
+var TYPE_ORDER = ['intake_review', 'record_search', 'redaction', 'legal_redaction', 'redaction_qa', 'review_auto_redaction',
+  'mrr_search', 'mrr_estimate', 'mrr_redaction',
+  'estimate', 'fee_waiver', 'legal_review', 'release_review', 'mrr_management', 'routing_review'];
 
 // The ONE place a task type becomes a screen; anything else falls back to the request (or a sensible home
 // for request-independent work).

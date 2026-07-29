@@ -16,7 +16,15 @@ const TASK_TYPES = [
   { key:'legal_redaction', label:'Legal Redaction' },
   { key:'legal_review', label:'Legal Review' },
   { key:'fee_waiver', label:'Fee-Waiver Approval' },
-  { key:'routing_review', label:'Routing Review' },
+  { key:'routing_review', label:'Routing Review (retired — legacy tasks only)' },
+  // BW2 (2026-07-29), docs/SPEC_processing_ui.md §8. `intake_review` REPLACES routing_review: same
+  // unroutable trigger, same ORO Associate, one screen for the whole first look.
+  { key:'intake_review', label:'Intake Review' },
+  { key:'mrr_management', label:'MRR Coordination (parent hub)' },
+  // ⚠️ Registered ahead of its pipeline: BW5 spawns release reviews, BW8 builds the screen. Granting it
+  // now is deliberate (a city configures who reviews before the reviews start arriving), but until BW5
+  // lands nothing will pool to it.
+  { key:'release_review', label:'Release Review (pipeline lands in BW5)' },
   // `commercial_rate` and `mrr_processing` were REMOVED 2026-07-19 (brief §5.4). Nothing spawns either, so
   // granting them to a person promised work that could never arrive — a permanently empty pool. This list
   // must stay in step with ROUTABLE_TASK_TYPES in backend/src/services/taskRouting.js; a harness checks it.

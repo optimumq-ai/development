@@ -36,7 +36,38 @@ var TASK_ROLES = {
   legal_redaction: 'legal_redaction',
   // Routing review: when the classifier can't determine a fulfillment team, an ORO Associate reviews and
   // corrects the routing. Office-level, team-agnostic; eligibility via the per-person subset.
+  // ⚠️ RETIRED BY BW2 stage 2 — `intake_review` trigger (i) replaces it 1:1 on the unroutable path. The
+  // entry stays so legacy rows already in flight remain claimable and resolvable.
   routing_review: 'routing_review',
+  // ── PHASE 7 / BW2 — PROCESSING-UI CATALOG (docs/SPEC_processing_ui.md §8) ────────────────────────
+  // All of these are v3 task types: their own key IS the eligibility token, resolved through the
+  // per-person subset (user_task_types). None carries a legacy permission role.
+  //
+  // intake_review   the ORO Associate's first look. Office-level, team-agnostic. Spawned by TRIGGER, not
+  //                 by stage — trigger (i) "can't determine a team" is what routing_review used to be.
+  intake_review: 'intake_review',
+  // mrr_management  the MRR parent hub. The `mrr_processing` design (MASTER §A2) under the name the
+  //                 processing-UI spec settled on. System-routed to an ORO Associate; spawned on the
+  //                 PARENT when a submission described more than one record.
+  mrr_management: 'mrr_management',
+  // release_review  second-eyes review before release. REGISTERED ONLY here — BW5 owns the pipeline that
+  //                 spawns it, and BW8 the screen. The eligible ROLE is meant to be city-configurable
+  //                 (spec §8 "config role"); the suggested default is ORO Supervisor, which in the v3
+  //                 model means "the people a supervisor granted `release_review` to". No jurisdiction
+  //                 knob is written for it yet — that lands with the pipeline that reads it, so nothing
+  //                 stores a role nothing consults.
+  release_review: 'release_review',
+  // ── HAND-ASSIGNED MRR CHILD WORK ────────────────────────────────────────────────────────────────
+  // NOT routable: the Request Manager assigns these per child to any person (possibly a non-user via a
+  // secure link) with no eligibility check — `assign()` does not check, only `claim()` does. They need a
+  // TASK_ROLES entry anyway because createTask REFUSES a role-less task (a NULL role was world-claimable,
+  // brief §3.5). Pointing each at its own key gives exactly the right behaviour: nobody can hold the
+  // token (it is not in ROUTABLE_TASK_TYPES, so the picker cannot grant it), so the task is invisible in
+  // every claim pool and unclaimable — reachable only by the RM's deliberate hand-assignment.
+  mrr_search: 'mrr_search',
+  mrr_estimate: 'mrr_estimate',
+  // mrr_redaction joins the pair above: redaction of one child's records, same assignment model.
+  mrr_redaction: 'mrr_redaction',
   // Reviewing an auto-redaction import batch is redaction work and needs redaction competence. It had NO
   // entry here, which meant `role_required` came out NULL — and NULL was treated as "everyone eligible"
   // (brief §3.5). See the fail-closed guard in createTask below.
@@ -57,7 +88,18 @@ var TASK_ROLES = {
 // if the hub is built, re-add the key alongside the code that actually spawns it. The MRR CHILD tasks
 // (mrr_estimate / mrr_search) were never here anyway — the Request Manager hand-assigns those with no
 // eligibility rules, so they never gate through user_task_types.
-var ROUTABLE_TASK_TYPES = ['estimate', 'record_search', 'redaction', 'redaction_qa', 'legal_redaction', 'legal_review', 'fee_waiver', 'routing_review'];
+//
+// BW2 (2026-07-29) adds `intake_review`, `mrr_management` and `release_review`. The first two arrive WITH
+// their spawners in this same workstream (intake_review on the unroutable path — the retirement of
+// routing_review; mrr_management on the parent of a multi-record submission), so the promise above holds
+// for both. `release_review` is the deliberate exception: the spec makes BW5 the owner of the release
+// pipeline that spawns it, so between BW2 and BW5 it is a routable type nothing spawns. It is registered
+// early on purpose — a city has to be able to GRANT it and configure its role before the pipeline that
+// uses it exists — but the empty-pool caveat above applies until BW5 lands, and the picker entry says so.
+var ROUTABLE_TASK_TYPES = ['estimate', 'record_search', 'redaction', 'redaction_qa', 'legal_redaction', 'legal_review', 'fee_waiver', 'routing_review', 'intake_review', 'mrr_management', 'release_review'];
+// Task types the Request Manager hand-assigns per MRR child. Deliberately NOT routable (see TASK_ROLES):
+// no eligibility, no team filter, no smart routing, never offered in the per-person picker.
+var HAND_ASSIGNED_TASK_TYPES = ['mrr_search', 'mrr_estimate', 'mrr_redaction'];
 // Reverse of TASK_ROLES: legacy permission-role name -> task type, used to translate existing callers
 // (which pass task.role_required) onto the new task-type model during the cutover.
 var ROLE_TO_TYPE = { FEE_MANAGER: 'estimate', SEARCH_AND_TRIAGE: 'record_search', REDACTION_WORKER: 'redaction', FINANCE: 'fee_waiver' };
@@ -618,6 +660,7 @@ module.exports = {
   ACTIONABLE_STATUSES: ACTIONABLE_STATUSES,
   isActionable: isActionable,
   ROUTABLE_TASK_TYPES: ROUTABLE_TASK_TYPES,
+  HAND_ASSIGNED_TASK_TYPES: HAND_ASSIGNED_TASK_TYPES,
   SMART_ROUTING_FLOOR: SMART_ROUTING_FLOOR,
   SMART_ROUTING_MARGIN: SMART_ROUTING_MARGIN,
   eligibleUsers: eligibleUsers,

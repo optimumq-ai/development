@@ -22,9 +22,19 @@ A "task type" is one kind of human stop in request processing. Two flavours (des
 | `legal_redaction` | Legal Redaction (advanced) | *(new — task-type key)* | ORO Legal Associate; ORO Senior Legal | trigger: `legal_flag` (Director escalation) or `SENSITIVE`/`LEGAL_HOLD` in latest `workflow_decisions.flags`; replaces `redaction` at the redaction stage | routing `[BUILT 2026-07-09]` (team-agnostic, pools to legal staff by subset); dedicated screen `[NOT BUILT]` |
 | `legal_review` | Legal Review | *(new — task-type key)* | ORO Senior Legal (+ Legal Associate support) | stage `exemption_review` / `ag_review` | routing `[BUILT 2026-07-09]` (team-agnostic); dedicated screen `[NOT BUILT]` |
 | `fee_waiver` | Fee-Waiver Approval | **`FINANCE`** | **ORO Finance** | trigger `fee_waiver_requested`; spawned `onIntake`; team-agnostic (`team_id=NULL`) | task + routing + resolution `[BUILT 2026-07-09]`; role reconciled `FEE_AUTHORITY`→`FINANCE`, orphan `FEE_WAIVER_APPROVER` retired `[2026-07-15]` |
-| `routing_review` | Routing Review | *(new — task-type key)* | **ORO Associate** | trigger: classifier could not determine a fulfillment team (`teamId` null); team-agnostic; closed automatically on `PATCH /requests/:id/route` | routing `[BUILT 2026-07-09]` |
+| ~~`routing_review`~~ | Routing Review | *(new — task-type key)* | **ORO Associate** | trigger: classifier could not determine a fulfillment team (`teamId` null); team-agnostic; closed automatically on `PATCH /requests/:id/route` | ⚠️ **RETIRED 2026-07-29 (BW2)** — replaced 1:1 by `intake_review` trigger `unroutable`, same trigger, same role, same auto-close. The key stays in `TASK_ROLES` + the catalog so tasks already in flight remain claimable and resolvable; nothing spawns it any more |
+| `intake_review` | Intake Review | *(task-type key)* | **ORO Associate** | trigger-spawned, team-agnostic. Triggers (enum `unroutable` \| `eligibility_review` \| `approval_pending` \| `sensitivity_flag` \| `reopen_retriage`) recorded on the task; `intake_review_mode` = `when_needed` (default) \| `always` | routing `[BUILT 2026-07-29 BW2]`; screen `[NOT BUILT]` (BW3) |
+| `mrr_management` | MRR Coordination (parent hub) | *(task-type key)* | **ORO Associate** | spawned on the PARENT at intake when `child_count > 1`; team-agnostic. This is the `mrr_processing` design below, under the name SPEC_processing_ui §8 settled on | routing `[BUILT 2026-07-29 BW2]`; screen `[NOT BUILT]` (BW6 — My Tasks falls back to the request route) |
+| `release_review` | Release Review | *(task-type key)* | **ORO Supervisor** *(suggested default; role is meant to be city-configurable)* | ⚠️ **REGISTERED ONLY** — BW5 owns the pipeline that spawns it, BW8 the screen. Assignment excludes the completer of the request's most recent flow task (two-eyes, BW2) | catalog `[BUILT 2026-07-29 BW2]`; spawner `[NOT BUILT]` (BW5) |
 | ~~`commercial_rate`~~ | Commercial-Rate Approval | `FINANCE` (target) | **ORO Finance** | trigger `purpose='commercial'` | ✅ **DELETED FROM THE CATALOG 2026-07-19** (`ff32305`, brief §5.4). Was `[DEFERRED]` with the trigger unwired — so it was offerable in the per-person picker and produced a **permanently empty pool**. The design below stands; re-add the key *with* the code that spawns it |
 
+> **`[revised 2026-07-29, BW2]` `ROUTABLE_TASK_TYPES` is now eleven** — the eight below plus `intake_review`,
+> `mrr_management` and `release_review` (SPEC_processing_ui §8). The first two ship WITH their spawners in
+> BW2, so the "an entry here is a promise the router can deliver that type" rule holds. `release_review` is
+> the deliberate exception: its pipeline is BW5's, so between BW2 and BW5 it is routable and unspawned. It
+> was registered early so a city can grant and configure it before reviews start arriving; the staff picker
+> labels it accordingly. **Retired in the same commit:** `routing_review` (see the row above).
+>
 > **`[revised 2026-07-19]` `ROUTABLE_TASK_TYPES` is now exactly seven:** `estimate`, `record_search`, `redaction`, `legal_redaction`, `legal_review`, `fee_waiver`, `routing_review`. `commercial_rate` and `mrr_processing` were deleted (§5.4) — an entry there is a **promise the router can deliver that type**, and neither could. A harness (`verify_v1_retirement` §E) now asserts the Staff Management picker offers nothing the router cannot route, because the three catalogs drifted apart precisely by never being compared. **Still unreconciled:** `redaction_qa` is real but absent from `ROUTABLE_TASK_TYPES`.
 >
 > Note: wired keys in `taskRouting.js` are `estimate`, `record_search`, `redaction`, `fee_waiver`, plus (2026-07-09) `legal_review` and `legal_redaction`. `STAGE_TASK` now maps `record_search→record_search`, `redaction_review|redaction→redaction` (→ `legal_redaction` when the request is legally flagged), and `exemption_review|ag_review→legal_review`. Legal task types are office-level (team-agnostic) and resolve eligibility via `user_task_types`. Remaining unwired: `commercial_rate` (deferred) and the `mrr_*` set.
@@ -37,7 +47,8 @@ The MRR parent is **routed by the system**; the MRR children are **hand-assigned
 |---|---|---|---|---|
 | ~~`mrr_processing`~~ | MRR Processing (parent management) | **System-routed** to an ORO Associate (Request Manager) when intake detects MRR — eligibility applies | ~~Yes~~ **removed from `ROUTABLE_TASK_TYPES`** | ⚠️ **DELETED FROM THE CATALOG 2026-07-19** (`ff32305`) — **the DESIGN below is unchanged and still governs.** The hub is brief §5 decision 3 and is **still open**; if it is built, re-add this key alongside the code that spawns it. It was removed because nothing spawned it, not because the design was rejected |
 | `mrr_estimate` | Multi-Record Request Estimate | **Hand-assigned** by the RM to any person per child (may be a non-user via secure link) — **no eligibility, no team filter, no smart routing** | **No** | `[NOT BUILT]` |
-| `mrr_search` | Multi-Record Search | **Hand-assigned** by the RM to any person per child — no routing rules | **No** | `[NOT BUILT]` |
+| `mrr_search` | Multi-Record Search | **Hand-assigned** by the RM to any person per child — no routing rules | **No** | task type `[REGISTERED 2026-07-29 BW2]`; screen `[NOT BUILT]` (BW6) |
+| `mrr_redaction` | Multi-Record Redaction | **Hand-assigned** by the RM per child — joins the two above, same model | **No** | task type `[REGISTERED 2026-07-29 BW2]`; screen `[NOT BUILT]` (BW6) |
 
 Mechanics: a manual `assign(taskId, userId)` sets the assignee with **no eligibility check** (only *claim-from-pool* checks eligibility), so RM hand-assignment of child tasks needs no special machinery — it simply bypasses the eligibility path. (SPEC §7, §12.1.)
 
@@ -78,10 +89,10 @@ Cross-reference of the design §4 catalog against the enumerations above. "Task 
 | City Management | *(none)* | Reporting |
 | ORO System Administrator | *(none / optional)* | System Administration, Workflow & Taxonomy, Fee Configuration, Reporting — **not** Legal Rules |
 | ORO Director / Manager | *(oversight; may act on any)* | Workflow & Taxonomy, Fee Configuration, Legal Rules (may), Reporting, staff/team management |
-| ORO Supervisor | *(oversight; may act)* | Reporting |
+| ORO Supervisor | *(oversight; may act)* + `release_review` *(suggested default holder; BW2 registers the type, BW5 spawns it)* | Reporting |
 | ORO Senior Legal | `legal_review`, `legal_redaction` | **Legal Rules (OWNER)**, Reporting |
 | ORO Legal Associate | `legal_redaction`, `legal_review` (support) | Reporting |
-| ORO Associate | `mrr_processing`, `mrr_estimate`, `mrr_search` (coordination) | Reporting |
+| ORO Associate | `intake_review`, `mrr_management` (routable, BW2) + `mrr_estimate`, `mrr_search`, `mrr_redaction` (hand-assigned coordination work) | Reporting |
 | **ORO Finance** | `fee_waiver`, `commercial_rate` | Reporting |
 
 ### Team-level (per fulfillment team)

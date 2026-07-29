@@ -353,6 +353,33 @@ async function createRequest(fields, opts) {
     catch (e) { console.error('[requestCreate] ledger link failed (parent):', e && e.message); }
   }
 
+  // PHASE 7 / BW2 — THE MRR PARENT HUB TASK (docs/SPEC_processing_ui.md §8; MASTER §A2's `mrr_processing`
+  // design under the name the spec settled on).
+  //
+  // Spawned on `child_count > 1` AT INTAKE, on the PARENT — which is exactly the derivation of `is_mrr`
+  // above (§4.1: a fact, not a mode). One submission describing five records is one coordination job, and
+  // it has had no owner: the children each route themselves, and nobody holds the whole. The task is the
+  // ORO Associate's handle on it.
+  //
+  // Team-agnostic (office work) and routed with NO text: the parent carries no description by design
+  // (PARENT_NULL), so Smart Routing has nothing to match on and it lands in the ORO claim pool — which is
+  // the right default for a coordination job anyway. Idempotent by construction (one creation, one task),
+  // and never fatal: a submission must not fail because a coordination task could not be raised.
+  //
+  // ⚠️ NO SCREEN YET. BW6 builds the MRR hub. Until then My Tasks falls back to the request route for a
+  // type it has no entry for, so the task is visible and openable, just not yet on a purpose-built screen.
+  if (wrap && parentIsMrr) {
+    try {
+      var trm = require('./taskRouting');
+      var mtask = await trm.createTask({
+        requestId: parentId, type: 'mrr_management',
+        title: 'Coordinate multi-record request (' + kids.length + ' records)',
+        teamId: null, createdBy: opts.actorId || 'system'
+      });
+      await trm.autoRouteOrPool(mtask.id, null, {});
+    } catch (e) { console.error('[requestCreate] mrr_management task spawn failed:', e && e.message); }
+  }
+
   // The DEADLINE comes from the jurisdiction, not from a hardcoded table. startClocksForRequest is
   // idempotent and writes requests.deadline_date via tolling.writebackDeadline().
   // THE STATUTORY CLOCK IS A PARENT OBJECT (§4.2) — one legal deadline per citizen request, never one per
