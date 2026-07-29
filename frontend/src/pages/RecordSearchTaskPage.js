@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../lib/api';
 import { C } from '../lib/theme';
 import { useWorkTimer, WorkTimerBadge, WorkTimerCompleteModal, useTimeCaptureMode } from '../components/ui/WorkTimer';
+import { SubmittedDescription, PortalResultsBar } from '../components/primitives';
 
 // RECORD-SEARCH TASK SCREEN — SPEC_record_search_task_screen.md
 //
@@ -236,39 +237,7 @@ export default function RecordSearchTaskPage() {
   var passedOver = groups.reduce(function (a, g) { return a.concat(g.notSelected || []); }, []);
   var selectedAll = groups.reduce(function (a, g) { return a.concat(g.selected || []); }, []).concat(ungrouped);
 
-  function Bar() {
-    var tabs = [
-      { k: 'selected', label: 'Selected Records', n: totals.selected },
-      { k: 'not', label: 'Records Not Selected', n: totals.notSelected }
-    ];
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap',
-        background: C.surface2, border: '1px solid ' + C.hair, borderRadius: 9, padding: '9px 12px' }}>
-        <span style={{ fontSize: 12.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.06em', color: C.muted }}>
-          Self Service Portal Search Results
-        </span>
-        {tabs.map(function (t) {
-          var on = view === t.k;
-          return (
-            <button key={t.k} type="button" onClick={function () { setView(t.k); }}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer',
-                border: '1px solid ' + C.blue, borderRadius: 8, padding: '6px 10px', fontSize: 13, fontWeight: 600,
-                background: on ? C.blue : C.blueTint, color: on ? '#fff' : C.blue }}>
-              {t.label}
-              <span style={{ display: 'inline-grid', placeItems: 'center', minWidth: 20, height: 20, padding: '0 6px',
-                borderRadius: 999, fontFamily: C.mono, fontSize: 12, fontWeight: 700,
-                background: on ? '#fff' : C.blue, color: on ? C.blue : '#fff' }}>{t.n}</span>
-            </button>
-          );
-        })}
-        {totals.shown > 0 && (
-          <span style={{ marginLeft: 'auto', fontSize: 13, color: C.faint }}>
-            The portal showed them <b style={{ color: C.ink }}>{totals.shown}</b>; they took <b style={{ color: C.ink }}>{totals.selected}</b>.
-          </span>
-        )}
-      </div>
-    );
-  }
+  // Bar() moved to components/primitives PortalResultsBar (BW1) — same pixels, now importable.
 
   function Rec(props) {
     var r = props.r, dim = props.dim;
@@ -305,6 +274,13 @@ export default function RecordSearchTaskPage() {
   var openIntents = groups.filter(function (g) { return g.open; });
   var clockStops = effect === 'toll_pause_resume' || effect === 'toll_and_restart'
                 || effect === 'start_gate' || effect === 'operational_hold';
+
+  // The stacked defect-marker buttons in the description box (global layout, spec §2.2).
+  function defBtn(on) {
+    return { cursor: busy ? 'not-allowed' : 'pointer', fontSize: 12.5, fontWeight: 650, textAlign: 'left',
+      background: on ? C.blueTint : C.surface, color: on ? C.blue : C.ink,
+      border: '1px solid ' + (on ? C.blue : C.hairStrong), borderRadius: 6, padding: '6px 10px' };
+  }
 
   function Act(props) {
     return (
@@ -346,7 +322,78 @@ export default function RecordSearchTaskPage() {
           </div>
 
           <div style={{ padding: 18 }}>
-            <p style={{ margin: '0 0 12px', fontSize: 14.5, lineHeight: 1.5, maxWidth: '72ch' }}>{task.request_description}</p>
+            {/* Global record-item layout (SPEC_processing_ui.md §2, Kevin 7/28): the verbatim text
+                first, titled; the two defect markers boxed to its LEFT. Marking machinery unchanged
+                (markDefect) — only where the triggers live moved. */}
+            <SubmittedDescription actions={
+              <>
+                <button type="button" disabled={!!busy}
+                  onClick={function () { setDefect(defect === 'vague' ? null : 'vague'); }}
+                  style={defBtn(defect === 'vague')}>Mark Vague</button>
+                <button type="button" disabled={!!busy}
+                  onClick={function () { setDefect(defect === 'overly_broad' ? null : 'overly_broad'); }}
+                  style={defBtn(defect === 'overly_broad')}>Mark Overly Broad</button>
+              </>
+            }>{task.request_description}</SubmittedDescription>
+
+            {policy && !policy.enabled && defect && (
+              <div style={{ fontSize: 11.5, color: C.faint, margin: '-6px 0 8px' }}>
+                The jurisdiction's clarification policy is off or un-attested — marking records the
+                effort trail but changes no clock.
+              </div>
+            )}
+            {defect === 'vague' && (
+              <div style={{ fontSize: 12.5, lineHeight: 1.5, color: C.muted, background: C.surface2,
+                border: '1px solid ' + C.hair, borderRadius: 8, padding: '10px 12px', margin: '0 0 12px' }}>
+                Sends a clarification request. This jurisdiction’s clock rule is <code style={{ fontFamily: C.mono }}>{effect || '—'}</code>
+                {clockStops ? ' — the response clock will PAUSE.' : ' — the response clock KEEPS RUNNING.'}
+                <button type="button" disabled={!!busy} onClick={function () { markDefect('vague'); }}
+                  style={{ marginTop: 9, display: 'block', cursor: 'pointer', background: C.blue, color: '#fff',
+                    border: '1px solid ' + C.blue, borderRadius: 8, padding: '8px 14px', fontSize: 13, fontWeight: 650 }}>
+                  {busy === 'vague' ? 'Sending…' : 'Send clarification request'}
+                </button>
+              </div>
+            )}
+            {defect === 'overly_broad' && (
+              <div style={{ fontSize: 12.5, lineHeight: 1.5, borderRadius: 8, padding: '10px 12px', margin: '0 0 12px',
+                background: conferenceOwed ? C.critTint : C.surface2,
+                border: '1px solid ' + (conferenceOwed ? C.crit : C.hair), color: C.ink }}>
+                {conferenceOwed ? (
+                  <>
+                    <b>This jurisdiction requires a conference.</b> Before this request can be denied as unduly
+                    burdensome, the agency <b>shall</b> offer the requestor an opportunity to confer and reduce it to
+                    manageable proportions.
+                    <div style={{ marginTop: 9, paddingTop: 8, borderTop: '1px solid ' + C.crit }}>
+                      <span style={{ display: 'block', fontWeight: 700, color: C.crit, marginBottom: 3 }}>
+                        ⚠ The clock does not stop for the conference.
+                      </span>
+                      Failing to respond on time means the request <b>may not be treated as unduly burdensome at all</b>.
+                      Waiting silently <b>forfeits the burden defense</b>.
+                      {task.deadline_date && (
+                        <span style={{ display: 'block', marginTop: 7, fontFamily: C.mono, fontSize: 12,
+                          color: C.crit, fontWeight: 700 }}>
+                          Response due {task.deadline_date}{dLeft !== null ? ' · ' + (overdue ? Math.abs(dLeft) + ' days OVERDUE' : dLeft + ' days left') : ''}
+                        </span>
+                      )}
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    Records the request as <b>overly broad</b> and sends a clarification. <b>This jurisdiction imposes no
+                    conference duty</b> (<code style={{ fontFamily: C.mono }}>duty={duty || 'none'}</code>), so conferring
+                    is discretionary here.
+                  </>
+                )}
+                <button type="button" disabled={!!busy} onClick={function () { markDefect('overly_broad'); }}
+                  style={{ marginTop: 9, display: 'block', cursor: 'pointer', color: '#fff',
+                    background: conferenceOwed ? C.crit : C.blue,
+                    border: '1px solid ' + (conferenceOwed ? C.crit : C.blue),
+                    borderRadius: 8, padding: '8px 14px', fontSize: 13, fontWeight: 650 }}>
+                  {busy === 'overly_broad' ? 'Sending…' : (conferenceOwed ? 'Offer the conference' : 'Send clarification request')}
+                </button>
+              </div>
+            )}
+
             <div style={{ fontSize: 13, color: C.faint, marginBottom: 16 }}>
               <b style={{ color: C.muted }}>Requestor</b> {task.requestor_name}
               {task.requestor_email ? ' · ' + task.requestor_email : ''}
@@ -355,7 +402,7 @@ export default function RecordSearchTaskPage() {
             </div>
 
             {/* --- the bar (spec §2.3) --- */}
-            <Bar />
+            <PortalResultsBar totals={totals} view={view} onView={setView} />
 
             {/* --- what the portal already did, per description (R9) --- */}
             {view === 'selected' ? (
@@ -586,80 +633,9 @@ export default function RecordSearchTaskPage() {
           </div>
         </section>
 
-        {/* ===== IS THE REQUEST DEFECTIVE? (spec §5b-2) =====
-            Two defects, VISIBLE, never one checkbox. What each one DOES is decided by the jurisdiction's
-            own clarification rules — which is the entire reason they cannot be collapsed. */}
-        <section style={{ background: C.surface, border: '1px solid ' + C.hair, borderRadius: 10, marginBottom: 16 }}>
-          <div style={{ padding: '12px 14px', borderBottom: '1px solid ' + C.hair, display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 12.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '.05em', color: C.muted }}>
-              Is the request defective?
-            </span>
-            {policy && !policy.enabled && (
-              <span title="The jurisdiction's clarification policy is off or un-attested, so marking a defect records the effort trail but changes no clock."
-                style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, borderRadius: 999, padding: '2px 8px',
-                  background: C.surface2, color: C.faint }}>policy off</span>
-            )}
-          </div>
-          <div style={{ padding: 14, paddingBottom: 8 }}>
-
-            <Act k="vague" title="Mark Vague" sub="Unclear WHAT is being asked" on={defect === 'vague'}
-              onClick={function () { setDefect(defect === 'vague' ? null : 'vague'); }} />
-            {defect === 'vague' && (
-              <div style={{ fontSize: 12.5, lineHeight: 1.5, color: C.muted, background: C.surface2,
-                border: '1px solid ' + C.hair, borderRadius: 8, padding: '10px 12px', margin: '-2px 0 10px' }}>
-                Sends a clarification request. This jurisdiction’s clock rule is <code style={{ fontFamily: C.mono }}>{effect || '—'}</code>
-                {clockStops ? ' — the response clock will PAUSE.' : ' — the response clock KEEPS RUNNING.'}
-                <button type="button" disabled={!!busy} onClick={function () { markDefect('vague'); }}
-                  style={{ marginTop: 9, width: '100%', cursor: 'pointer', background: C.blue, color: '#fff',
-                    border: '1px solid ' + C.blue, borderRadius: 8, padding: '8px 10px', fontSize: 13, fontWeight: 650 }}>
-                  {busy === 'vague' ? 'Sending…' : 'Send clarification request'}
-                </button>
-              </div>
-            )}
-
-            <Act k="overly_broad" title="Mark Overly Broad" sub="Clear, but unduly burdensome" on={defect === 'overly_broad'}
-              onClick={function () { setDefect(defect === 'overly_broad' ? null : 'overly_broad'); }} />
-            {defect === 'overly_broad' && (
-              <div style={{ fontSize: 12.5, lineHeight: 1.5, borderRadius: 8, padding: '10px 12px', margin: '-2px 0 10px',
-                background: conferenceOwed ? C.critTint : C.surface2,
-                border: '1px solid ' + (conferenceOwed ? C.crit : C.hair), color: C.ink }}>
-                {conferenceOwed ? (
-                  <>
-                    <b>This jurisdiction requires a conference.</b> Before this request can be denied as unduly
-                    burdensome, the agency <b>shall</b> offer the requestor an opportunity to confer and reduce it to
-                    manageable proportions.
-                    <div style={{ marginTop: 9, paddingTop: 8, borderTop: '1px solid ' + C.crit }}>
-                      <span style={{ display: 'block', fontWeight: 700, color: C.crit, marginBottom: 3 }}>
-                        ⚠ The clock does not stop for the conference.
-                      </span>
-                      Failing to respond on time means the request <b>may not be treated as unduly burdensome at all</b>.
-                      Waiting silently <b>forfeits the burden defense</b>.
-                      {task.deadline_date && (
-                        <span style={{ display: 'block', marginTop: 7, fontFamily: C.mono, fontSize: 12,
-                          color: C.crit, fontWeight: 700 }}>
-                          Response due {task.deadline_date}{dLeft !== null ? ' · ' + (overdue ? Math.abs(dLeft) + ' days OVERDUE' : dLeft + ' days left') : ''}
-                        </span>
-                      )}
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    Records the request as <b>overly broad</b> and sends a clarification. <b>This jurisdiction imposes no
-                    conference duty</b> (<code style={{ fontFamily: C.mono }}>duty={duty || 'none'}</code>), so conferring
-                    is discretionary here.
-                  </>
-                )}
-                <button type="button" disabled={!!busy} onClick={function () { markDefect('overly_broad'); }}
-                  style={{ marginTop: 9, width: '100%', cursor: 'pointer', color: '#fff',
-                    background: conferenceOwed ? C.crit : C.blue,
-                    border: '1px solid ' + (conferenceOwed ? C.crit : C.blue),
-                    borderRadius: 8, padding: '8px 10px', fontSize: 13, fontWeight: 650 }}>
-                  {busy === 'overly_broad' ? 'Sending…' : (conferenceOwed ? 'Offer the conference' : 'Send clarification request')}
-                </button>
-              </div>
-            )}
-          </div>
-        </section>
+        {/* Defect markers moved onto the record item itself (global layout, spec §2.2 — Kevin 7/28):
+            the buttons live in the description's defect box in Zone 1; the jurisdiction-aware
+            explainers render beneath it. Same markDefect machinery, different home. */}
 
         {/* ===== RESOLUTION (§5d) — two ways out, and they are NOT symmetrical ===== */}
         <section style={{ background: C.surface, border: '1px solid ' + C.hair, borderRadius: 10, marginBottom: 16 }}>

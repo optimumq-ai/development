@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../lib/api';
 import FeeEstimatePanel from '../components/ui/FeeEstimatePanel';
 import { useWorkTimer, WorkTimerBadge, useTimeCaptureMode } from '../components/ui/WorkTimer';
+import { SubmittedDescription } from '../components/primitives';
 
 export default function EstimateTaskPage() {
   var params = useParams();
@@ -37,7 +38,12 @@ export default function EstimateTaskPage() {
       <p style={{ color: '#6B7280', fontSize: '14px', margin: '0 0 6px' }}>
         {task.request_number ? task.request_number + ' · ' : ''}{task.requestor_name ? 'for ' + task.requestor_name : ''}{task.record_type_name ? ' · ' + task.record_type_name : ''}
       </p>
-      {task.request_description ? <p style={{ color: '#9CA3AF', fontSize: '13px', margin: '0 0 18px', maxWidth: '720px', fontStyle: 'italic' }}>&ldquo;{task.request_description}&rdquo;</p> : null}
+      {/* Global record-item layout (SPEC_processing_ui.md §2): verbatim text first, titled — never an
+          italic aside. The Mark Vague / Mark Overly Broad defect box arrives with BW4 (markers +
+          estimate-task pause ship together; Draft 2 §4.1). */}
+      {task.request_description
+        ? <SubmittedDescription margin="0 0 18px">{task.request_description}</SubmittedDescription>
+        : null}
       <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px' }}>
         <FeeEstimatePanel requestId={task.request_id} />
       </div>

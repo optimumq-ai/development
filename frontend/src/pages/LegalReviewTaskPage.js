@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api from '../lib/api';
 import { C } from '../lib/theme';
+import { SubmittedDescription } from '../components/primitives';
 import { STAGE_LABELS } from '../lib/stages';
 import { useWorkTimer, WorkTimerBadge, useTimeCaptureMode } from '../components/ui/WorkTimer';
 
@@ -177,7 +178,7 @@ export default function LegalReviewTaskPage() {
         {task.record_type_name ? ' · ' + task.record_type_name : ''}
       </p>
       {task.request_description
-        ? <p style={{ color: C.faint, fontSize: 13, margin: '0 0 14px', maxWidth: 720, fontStyle: 'italic' }}>&ldquo;{task.request_description}&rdquo;</p>
+        ? <SubmittedDescription margin="0 0 14px">{task.request_description}</SubmittedDescription>
         : null}
 
       {days != null ? (
