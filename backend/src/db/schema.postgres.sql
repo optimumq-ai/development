@@ -1442,3 +1442,96 @@ CREATE TABLE IF NOT EXISTS request_close_approvals (
 );
 CREATE INDEX IF NOT EXISTS idx_close_approvals_request ON request_close_approvals(request_id, status);
 CREATE INDEX IF NOT EXISTS idx_close_approvals_task ON request_close_approvals(approval_task_id);
+
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════════
+-- PHASE 7 / BW6 — THE MRR MANAGEMENT HUB.
+-- (docs/DRAFT_processing_ui_mrr_hub.md rev 5b + §0b · docs/SPEC_processing_ui.md §3 screen 5)
+--
+-- `mrr_management` tasks ALREADY EXIST on live installs (requestCreate spawns one on child_count > 1);
+-- what they have never had is a screen. Everything below gives them one. Every column is nullable or
+-- defaulted and nothing here changes an existing row's meaning: a live install that deploys this and
+-- opens nothing behaves exactly as it did.
+-- ═══════════════════════════════════════════════════════════════════════════════════════════════════
+
+-- ── THE CHILD ACTIVITY RECORD, AND WHY IT IS NOT A FLOW TASK ─────────────────────────────────────
+--
+-- Kevin, 7/28: the MRR search / estimate / redaction work "does not move forward in a process". That is
+-- a STRUCTURAL claim, not a UI one, so it is enforced by where the row lives: an `mrr_tasks` row is an
+-- ACTIVITY on one child record, and completing it writes here and nowhere else. It is deliberately NOT
+-- an `applyStageTransition` consumer — no stage advance, no spawnForStage, no pipeline read. The
+-- manager, not the engine, moves an MRR along.
+--
+-- `task_id` points at the ordinary hand-assigned `tasks` row (type mrr_search / mrr_estimate /
+-- mrr_redaction) that puts the work on the assignee's My Tasks. Two rows for one activity is on purpose:
+-- the `tasks` row is how a person FINDS the work; this row is what the work MEANS. Completing the
+-- activity closes the task; closing the task does not advance anything.
+--
+-- `status` is the honest five-value set the bars render: not_started · queued · in_process · complete ·
+-- not_required. `not_started` and `not_required` are different facts and the draft is explicit that both
+-- must show — "nothing has been asked for yet" is not "nothing is needed".
+CREATE TABLE IF NOT EXISTS mrr_tasks (
+  id TEXT PRIMARY KEY,
+  request_id TEXT NOT NULL REFERENCES requests(id) ON DELETE CASCADE,  -- the CHILD record (the item)
+  parent_request_id TEXT,                                              -- its master, denormalised for the hub read
+  activity TEXT NOT NULL,                                              -- 'search' | 'estimate' | 'redaction'
+  status TEXT NOT NULL DEFAULT 'not_started',
+  task_id TEXT,                                                        -- the hand-assigned tasks row, if spawned
+  assignee_id TEXT,
+  assignee_name TEXT,
+  assignment_basis TEXT,                                               -- 'manual' | 'self' | 'external'
+  external_email TEXT,                                                 -- external contributor, if that is the shape
+  not_required_reason TEXT,
+  note TEXT,
+  spawned_at TEXT,
+  started_at TEXT,
+  completed_at TEXT,
+  completed_by TEXT,
+  completed_by_name TEXT,
+  completion_basis TEXT,                                               -- 'person' | 'fulfilling_record'
+  created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')),
+  updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mrr_tasks_item_activity ON mrr_tasks(request_id, activity);
+CREATE INDEX IF NOT EXISTS idx_mrr_tasks_parent ON mrr_tasks(parent_request_id);
+CREATE INDEX IF NOT EXISTS idx_mrr_tasks_task ON mrr_tasks(task_id);
+
+-- ── ESTIMATE DATA, PER CHILD — THE READINESS METER'S NUMERATOR ───────────────────────────────────
+--
+-- Kevin, 7/28 item 7: the master card says whether ALL child estimate data is complete, and only then
+-- does Generate Estimate arm. So "complete" has to be a per-child FACT somebody wrote, not an inference
+-- from an activity status — a searcher marking their activity done is not the same as the estimate
+-- numbers existing. One row per child; `complete` is the meter's unit.
+--
+-- These figures feed the STANDARD estimate engine at the master level (§6.4). Nothing here prices
+-- anything by itself: this is gathered data, and one estimate is generated for the master record.
+CREATE TABLE IF NOT EXISTS mrr_estimate_data (
+  id TEXT PRIMARY KEY,
+  request_id TEXT NOT NULL REFERENCES requests(id) ON DELETE CASCADE,  -- the CHILD record
+  parent_request_id TEXT,
+  labor_minutes INTEGER,
+  page_count INTEGER,
+  media_count INTEGER,
+  other_cost NUMERIC,
+  estimated_cost NUMERIC,
+  notes TEXT,
+  complete INTEGER DEFAULT 0,
+  entered_by TEXT,
+  entered_by_name TEXT,
+  entered_at TEXT,
+  created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')),
+  updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+CREATE UNIQUE INDEX IF NOT EXISTS idx_mrr_estdata_item ON mrr_estimate_data(request_id);
+CREATE INDEX IF NOT EXISTS idx_mrr_estdata_parent ON mrr_estimate_data(parent_request_id);
+
+-- ── DENIAL DESIGNATION AT THE CHILD LEVEL — A FLAG, NEVER AN ENDING ──────────────────────────────
+--
+-- Kevin, 7/28 item 6: "designate denial at the child level AND submit for Legal Review". The draft is
+-- emphatic that DESIGNATION IS NOT A DENIAL — it spawns `legal_review` with the manager's grounds
+-- attached, legal decides, and BW5's deny-close-notify writes the ending if it is upheld. These columns
+-- therefore record a REFERRAL, and there is deliberately no column here that could close anything.
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS mrr_denial_designated INTEGER DEFAULT 0;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS mrr_denial_grounds TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS mrr_denial_by TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS mrr_denial_at TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS mrr_denial_legal_task_id TEXT;

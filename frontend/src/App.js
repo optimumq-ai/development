@@ -35,6 +35,9 @@ import RecordSearchTaskPage from './pages/RecordSearchTaskPage';
 import DispositionsPage from './pages/DispositionsPage';
 import LegalReviewTaskPage from './pages/LegalReviewTaskPage';
 import IntakeReviewTaskPage from './pages/IntakeReviewTaskPage';
+// BW6 — the MRR hub. Four levels: overview → master record → child record, plus the assignee's thin
+// per-activity view. The manager's three screens are one page tree; the assignee's is deliberately separate.
+import MrrActivityTaskPage from './pages/MrrActivityTaskPage';
 import StructuredRedactionFieldsPage from './pages/StructuredRedactionFieldsPage';
 import ReleasedRecordsPage from './pages/ReleasedRecordsPage';
 import PublicLibraryMapPage from './pages/PublicLibraryMapPage';
@@ -101,6 +104,7 @@ export default function App() {
           {/* Intake review (BW3). Inside the app shell for the same reason record search is: the ORO
               Associate works alongside their exceptions queue. */}
           <Route path="intake-review/:taskId" element={<IntakeReviewTaskPage />} />
+          <Route path="mrr-activity/:taskId" element={<MrrActivityTaskPage />} />
           <Route path="tickler" element={<TicklerPage />} />
           <Route path="rule-updates" element={<RuleUpdatesPage />} />
           <Route path="jurisdiction-profile" element={<JurisdictionProfilePage />} />

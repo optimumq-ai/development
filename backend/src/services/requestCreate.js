@@ -375,8 +375,8 @@ async function createRequest(fields, opts) {
   // the right default for a coordination job anyway. Idempotent by construction (one creation, one task),
   // and never fatal: a submission must not fail because a coordination task could not be raised.
   //
-  // ⚠️ NO SCREEN YET. BW6 builds the MRR hub. Until then My Tasks falls back to the request route for a
-  // type it has no entry for, so the task is visible and openable, just not yet on a purpose-built screen.
+  // BW6 (2026-07-29) BUILT THE SCREEN. `/mrr/:taskId` is now the task's home; the spawn below is unchanged,
+  // which is the point — the hub gave an existing task a screen, it did not change when the task appears.
   if (wrap && parentIsMrr) {
     try {
       var trm = require('./taskRouting');
@@ -387,6 +387,20 @@ async function createRequest(fields, opts) {
       });
       await trm.autoRouteOrPool(mtask.id, null, {});
     } catch (e) { console.error('[requestCreate] mrr_management task spawn failed:', e && e.message); }
+
+    // PHASE 7 / BW6 — THE FULFILLING-RECORD AUTO-COMPLETE, PER ITEM (draft §0b).
+    //
+    // "A library record the requestor marked as FULFILLING an item auto-completes that item's search on
+    // arrival." Draft 1's rule, applied per item, on the SAME signal intake review reads
+    // (`request_search_intents.intent = 'complete'` — the requestor's own words at submit). Nobody should be
+    // asked to search for what the requestor already handed over.
+    //
+    // Non-fatal and per child: one item's selection never speaks for another's, and a submission must not
+    // fail because a convenience did not apply.
+    for (var ai = 0; ai < childIds.length; ai++) {
+      try { await require('./mrrHub').autoCompleteFulfilledSearch(childIds[ai], { actorName: 'System' }); }
+      catch (e) { console.error('[requestCreate] mrr fulfilling auto-complete failed:', childIds[ai], e && e.message); }
+    }
   }
 
   // The DEADLINE comes from the jurisdiction, not from a hardcoded table. startClocksForRequest is

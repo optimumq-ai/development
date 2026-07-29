@@ -43,6 +43,14 @@ var TASK_SCREEN = {
   // which has no Proceed control and no eligibility panel: a backend resolution path with no entry in THIS
   // map is unreachable work (the lesson legal_review left above).
   intake_review: function (t) { return '/intake-review/' + t.id; },
+  // BW6 — the MRR hub. `mrr_management` tasks have existed on live installs since BW2 and had NO screen:
+  // they fell through to `/requests/:id`, which coordinates nothing. This entry is the home they never had.
+  // The three child activity types get the thin assignee view, which is a DIFFERENT screen on purpose — the
+  // manager orchestrates on the hub; the assignee does one activity and advances nothing.
+  mrr_management: function (t) { return '/mrr/' + t.id; },
+  mrr_search: function (t) { return '/mrr-activity/' + t.id; },
+  mrr_estimate: function (t) { return '/mrr-activity/' + t.id; },
+  mrr_redaction: function (t) { return '/mrr-activity/' + t.id; },
   review_auto_redaction: function () { return '/mass-redaction'; }
 };
 function screenFor(t) { var f = TASK_SCREEN[t.type]; return f ? f(t) : (t.request_id ? '/requests/' + t.request_id : '/mass-redaction'); }
@@ -50,6 +58,10 @@ function actionLabel(t) {
   return t.type === 'record_search' ? 'Search →' : t.type === 'redaction' || t.type === 'legal_redaction' ? 'Redact →'
     : t.type === 'estimate' ? 'Estimate →' : t.type === 'redaction_qa' || t.type === 'review_auto_redaction' ? 'Review →'
     : t.type === 'legal_review' || t.type === 'intake_review' ? 'Review →'
+    // BW6. The manager COORDINATES an MRR (they never "work" it — the items are the work); the assignee
+    // opens ONE activity. Two verbs, because they are two jobs.
+    : t.type === 'mrr_management' ? 'Coordinate →'
+    : t.type === 'mrr_search' || t.type === 'mrr_estimate' || t.type === 'mrr_redaction' ? 'Open item →'
     : t.status === 'in_progress' ? 'Continue →' : 'Open →';
 }
 
