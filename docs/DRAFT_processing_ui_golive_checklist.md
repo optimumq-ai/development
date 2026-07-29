@@ -16,6 +16,18 @@ pre-Phase-7 clocks) and the **configIntegrity invariants** (born from the 77-day
 
 ---
 
+## 0b. Kevin's markup round — 2026-07-29
+
+- Kevin's question ("do we have mockups for each section corresponding to the rules-engine
+  build?") answered honestly (no) and **decided: draft them now** → **Draft 10,
+  `DRAFT_processing_ui_rule_editors.md`** — each readiness-index row opens a section screen
+  (content · knobs · provenance · proposals). **This draft's screen 2 (the knob cards) becomes
+  the City-knobs zone of Draft 10's section screen** — one surface per section, not two screens;
+  the confirm flow and the attest gate are unchanged.
+- New knob decided 7/29 (Draft 8 rev 2 §3.5): the **pre-send review gate** ships as an
+  unconfirmed ⚠ knob, `suggested_default: off` — a named person must consciously confirm the
+  automation decision before its section attests.
+
 ## 1. The shape
 
 - **Screen 1 — readiness index.** A computed gate summary (unconfirmed knobs · pending proposals ·
