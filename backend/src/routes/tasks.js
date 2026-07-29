@@ -527,14 +527,44 @@ router.post('/:id/resolve', requireAuth, async function (req, res) {
         overruled: { stage: 'delivery',         label: 'must release' }
       };
       var decision = LEGAL_OUTCOMES[outcome];
-      if (!decision) {
-        return res.status(400).json({ error: 'Outcome must be one of: sustained, partial, overruled.', code: 'UNKNOWN_OUTCOME' });
+      if (!decision && outcome !== 'denied') {
+        return res.status(400).json({ error: 'Outcome must be one of: sustained, partial, overruled, denied.', code: 'UNKNOWN_OUTCOME' });
       }
       if (!notes) {
         return res.status(422).json({
           error: 'A note is required to record a legal review. Say what was withheld or released, and on what basis.',
           code: 'NOTE_REQUIRED'
         });
+      }
+
+      // ══ PHASE 7 / BW5 — DENY-CLOSE-NOTIFY IS ONE ACT, IN THE DECIDING FLOW ══
+      //
+      // Kevin's 7/28 direction item 3: "denial finalizes in the deciding UI — no extra hop." The three
+      // outcomes above all move the request ONWARD; none of them ENDS it, so a determination that the whole
+      // item is withheld had nowhere to land and the disposition was never written. This is that landing.
+      //
+      // NO NEW SCREEN. The vocabulary the deciding flow already uses gains a fourth value, and the
+      // disposition write is wired into the send — deny + `Closed – Denied` + the determination notice, one
+      // act, blocked-with-reason. The letter's CONTENT still belongs to Denial compose (Draft 3, unchanged
+      // by Kevin); what could not exist before was the ENDING.
+      //
+      // close_approval IS HONOURED, BUT ONLY WHERE IT CAN STOP SOMETHING. A department configured
+      // `approval_required` for `denial` routes instead of closing — ignoring that would let a city's own
+      // policy be walked around. `direct` and `either` close directly, which is exactly today's behaviour
+      // (nothing anywhere routes a close today), so no install changes by deploying this.
+      if (outcome === 'denied') {
+        var dApproval = await DISP.approvalModeFor(rid, 'denial');
+        await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [req.params.id]);
+        if (dApproval.mode === 'approval_required') {
+          var dRouted = await DISP.requestApproval(rid, 'denial', Object.assign({ payload: { note: notes }, taskId: req.params.id }, actor));
+          await run("UPDATE tasks SET status = 'awaiting_review', updated_at = datetime('now') WHERE id = ?", [req.params.id]);
+          return res.json(Object.assign({ ok: true, outcome: 'denied', approval: dApproval }, dRouted));
+        }
+        var denied = await DISP.close(rid, 'denial', Object.assign({
+          payload: { note: notes },
+          basisText: 'Denied on legal review: ' + notes
+        }, actor));
+        return res.json(Object.assign({ ok: true, outcome: 'denied', approval: dApproval }, denied));
       }
       await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [req.params.id]);
       await tr.applyStageTransition(rid, decision.stage, Object.assign({

@@ -69,6 +69,9 @@ async function reopen(rid, actor) {
   // awaiting_payment with NO stage task, so it was live again but invisible to every worklist.
   await db.run("UPDATE requests SET closure_reason = NULL, nonpayment_dunning_at = NULL WHERE id = ?", [rid]);
   await require('./taskRouting').applyStageTransition(rid, 'awaiting_payment', {
+    // BW5's from-closed guard: this IS a reopen, and a narrow one — the read above already refuses
+    // anything not closed FOR nonpayment, so the flag cannot widen into a general revive.
+    reopen: true,
     actorName: actor || 'Staff', action: 'REOPENED_NONPAYMENT',
     notes: 'Reopened after closure for nonpayment.'
   });

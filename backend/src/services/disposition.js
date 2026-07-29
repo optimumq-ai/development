@@ -276,6 +276,9 @@ async function deriveParent(childId) {
   // At least one child is live. If the parent had derived Complete, it must UN-derive.
   if (parent.status === 'closed') {
     await require('./taskRouting').applyStageTransition(pid, 'record_search', {
+      // Past the from-closed guard: a derived state following its children is not a decision, and the
+      // parent was never closed by an act in the first place.
+      reopen: true,
       actorName: 'System', action: 'PARENT_UNDERIVED',
       notes: openKids.length + ' item(s) are live again, so the request is back In Process. Derived completion is not a decision — it follows the items.'
     });
@@ -503,7 +506,86 @@ async function reject(approvalId, opts) {
   return { ok: true, rejected: true, approvalId: approvalId, note: note };
 }
 
+// ── REOPEN — the Director's act, and the only door out of `closed` ────────────────────────────────
+//
+// Decided 7/29 (Draft 8 rev 2 §3.3), and every clause of it is load-bearing:
+//
+//   DIRECTOR AUTHORITY      enforced at the route. Reopening reverses a recorded public act.
+//   A REQUIRED NOTE         the reason IS the record. "It was reopened" answers nothing.
+//   A RESUME POINT          prior stage (DEFAULT) or intake review for re-triage. The hybrid, because
+//                           the two real cases differ: "we missed a repository" resumes the search;
+//                           "this was never the right team / the classification was wrong" needs the
+//                           first look again, which is trigger (v) on Draft 1c's list — no new machinery.
+//   CLOCKS ARE NEVER RESET  the original history stands and exposures show honestly. There is deliberately
+//                           no clock write anywhere in this function. A city that reopens a request three
+//                           weeks late is three weeks late, and a reopen that quietly restarted the
+//                           statutory clock would be the system laundering a missed deadline.
+//   SILENT                  no requestor notice. The subsequent OUTCOME speaks — a reopen followed by a
+//                           release says more than a letter announcing an internal change of mind.
+//   UN-DERIVES THE PARENT   a live child means the parent is In Process again, and its MRR Management task
+//                           comes back (deriveParent, above).
+//
+//   opts: { actorId, actorName, note, resumePoint: 'prior_stage' | 'intake_retriage' }
+async function reopen(requestId, opts) {
+  opts = opts || {};
+  var note = s(opts.note);
+  if (!note) { var e0 = new Error('A note is required to reopen a closed request. Say why it is being reopened — the reason is the record.'); e0.code = 'NOTE_REQUIRED'; e0.status = 422; throw e0; }
+  var resumePoint = opts.resumePoint === 'intake_retriage' ? 'intake_retriage' : 'prior_stage';
+
+  var r = await get('SELECT * FROM requests WHERE id = ?', [requestId]);
+  if (!r) { var e1 = new Error('Request not found.'); e1.code = 'NOT_FOUND'; e1.status = 404; throw e1; }
+  if (r.stage !== 'closed' && r.status !== 'closed') {
+    var e2 = new Error('This request is not closed, so there is nothing to reopen.'); e2.code = 'NOT_CLOSED'; e2.status = 409; throw e2;
+  }
+
+  // THE PRIOR STAGE IS A FACT IN THE HISTORY, not a guess. The last transition INTO closed knows where the
+  // request came from; if there is none (a legacy row closed before the central transition existed) the
+  // fallback is `record_search`, the fulfillment entry — never `intake`, which would silently re-triage a
+  // request whose Director asked for the other door.
+  var prior = await get(
+    "SELECT stage_from FROM request_history WHERE request_id = ? AND stage_to = 'closed' AND stage_from IS NOT NULL " +
+    'ORDER BY created_at DESC LIMIT 1', [requestId]);
+  var priorStage = (prior && prior.stage_from && prior.stage_from !== 'closed') ? prior.stage_from : 'record_search';
+  var target = resumePoint === 'intake_retriage' ? 'intake' : priorStage;
+
+  var closureWas = endingOf(r.closure_reason);
+  await run("UPDATE requests SET closure_reason = NULL, reopened_at = ?, reopen_count = COALESCE(reopen_count, 0) + 1, updated_at = ? WHERE id = ?",
+    [nowStr(), nowStr(), requestId]);
+
+  var moved = await require('./taskRouting').applyStageTransition(requestId, target, {
+    reopen: true, actorId: opts.actorId || null, actorName: opts.actorName || 'Director',
+    action: 'REQUEST_REOPENED',
+    notes: 'Reopened by ' + (opts.actorName || 'a Director') + ' — ' + note +
+      ' Resuming at ' + (resumePoint === 'intake_retriage' ? 'intake review for re-triage' : 'the prior stage (' + priorStage + ')') +
+      '. Previously ' + ((closureWas && closureWas.label) || 'closed') +
+      '. Clocks are NOT reset: the original history stands and any exposure it created still shows.'
+  });
+
+  var intake = null;
+  if (resumePoint === 'intake_retriage') {
+    // Trigger (v) on Draft 1c's list — the enum stub BW2 registered, now wired by its owner.
+    try {
+      intake = await require('./intakeReview').spawn(requestId, ['reopen_retriage'], {
+        createdBy: opts.actorId || 'system'
+      });
+    } catch (e) { console.error('[disposition reopen intake]', e && e.message); }
+  }
+
+  var parent = await deriveParent(requestId);
+  return {
+    ok: true, reopened: true, requestId: requestId, resumePoint: resumePoint,
+    stage: (moved && moved.toStage) || target, priorStage: priorStage,
+    previousEnding: closureWas ? closureWas.key : (r.closure_reason || null),
+    intakeReviewTaskId: intake && intake.task ? intake.task.id : null,
+    parent: parent,
+    // Said out loud in the response because a screen must not offer to "notify the requestor of the reopen".
+    requestorNotified: false,
+    clocksReset: false
+  };
+}
+
 module.exports = {
+  reopen: reopen,
   ENDINGS: ENDINGS, ENDING_KEYS: ENDING_KEYS,
   TASK_CLOSE_ENDINGS: TASK_CLOSE_ENDINGS, MANUAL_RECORD_ENDINGS: MANUAL_RECORD_ENDINGS,
   EFFORT_ACTIONS: EFFORT_ACTIONS,

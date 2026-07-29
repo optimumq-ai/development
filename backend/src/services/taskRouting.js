@@ -598,6 +598,34 @@ async function applyStageTransition(requestId, toStage, opts) {
       throw e;
     }
   }
+  // ══ PHASE 7 / BW5 — THE FROM-CLOSED GUARD (the one the engine has never had) ══
+  //
+  // `closed` is terminal, and until now NOTHING said so. Every other stage is protected by the branch
+  // backstop above and by callers that check where they are; a CLOSED request could be moved anywhere by
+  // any caller that handed this function a stage — reviving a terminal request, un-cancelling nothing (the
+  // tasks stay cancelled), and leaving no record that a reopen had occurred. It was a live shape, not a
+  // theoretical one: workflowEngine carries its own from-closed guard at the background router with the
+  // comment "applyStageTransition has no from-closed guard, so the guard belongs here", and a manual stage
+  // change on a closed request went straight through.
+  //
+  // A CLOSED REQUEST IS REOPENED, NOT MOVED. Reopening is a DIRECTOR's act with a required note and a
+  // resume-point choice (Draft 8 rev 2 §3.3), and it is the only door: `disposition.reopen` passes
+  // `reopen: true`, which is the ONLY way past this guard. Two other legitimate reopens pre-date that
+  // route and pass the same flag: the nonpayment reopen (`feeNonpayment.reopen` — the money flow's own
+  // door, reachable only from a request closed FOR nonpayment) and the parent un-derivation
+  // (`disposition.deriveParent` — a derived state following its children, never a decision).
+  //
+  // It THROWS, for the reason the branch backstop above throws: several callers ignore the return value,
+  // so a silent null would leave the request where it was with no record of why.
+  if (fromStage === 'closed' && toStage && toStage !== 'closed' && !opts.reopen) {
+    var ec = new Error('This request is closed. A closed request is reopened through the reopen route — ' +
+      'Director authority, a required note, and a resume point — not by a stage change.');
+    ec.code = 'FROM_CLOSED';
+    ec.status = 409;
+    ec.fromStage = 'closed';
+    ec.attemptedStage = toStage;
+    throw ec;
+  }
   if (toStage == null || toStage === fromStage) {
     // No actual stage change: nothing to log, nothing new to spawn. (spawnForStage is idempotent and
     // the reconciler covers a missing task for the current stage.)

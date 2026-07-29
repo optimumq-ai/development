@@ -46,8 +46,12 @@
 //                     that matched had a condition on `flags`, which is the rule's own definition of the
 //                     flag set rather than a second copy of it here. The set of requests that stop is
 //                     unchanged; what changes is that the stop is now a task somebody can see.
-//   reopen_retriage   ENUM STUB ONLY. The Director's reopen-to-retriage path is BW5's (Draft 8 rev-2
-//                     hybrid); the key exists so BW5 records it rather than inventing a sixth spelling.
+//   reopen_retriage   WIRED IN BW5 (Draft 8 rev-2 §3.3, the reopen hybrid). The Director's reopen popup
+//                     asks where the item resumes — prior stage (the DEFAULT) or intake review for
+//                     re-triage — and the second choice raises this stop through `disposition.reopen`.
+//                     Safe by default in the strongest sense available: it cannot fire without a Director
+//                     deliberately choosing the non-default door on a request that is already closed, so
+//                     no install can reach it by sitting still. The stub is now its own spawner.
 //
 // ══ MRR ══
 //
@@ -64,7 +68,7 @@ var TYPE = 'intake_review';
 // The decided trigger vocabulary (draft §0 decision 5). Order is the draft's (i)…(v).
 var TRIGGERS = ['unroutable', 'eligibility_review', 'approval_pending', 'sensitivity_flag', 'reopen_retriage'];
 // Wired today — see the header. Everything else is recordable but nothing raises it yet.
-var WIRED_TRIGGERS = ['unroutable', 'approval_pending', 'eligibility_review', 'sensitivity_flag'];
+var WIRED_TRIGGERS = ['unroutable', 'approval_pending', 'eligibility_review', 'sensitivity_flag', 'reopen_retriage'];
 var TRIGGER_LABELS = {
   unroutable: 'The fulfillment team could not be determined',
   eligibility_review: 'An eligibility finding needs a human decision',

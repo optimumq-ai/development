@@ -218,10 +218,63 @@ router.patch('/:id/stage', requireAuth, async function(req, res) {
       actorId: req.user.sub, actorName: req.user.name, action: 'STAGE_ADVANCED', notes: req.body.notes, createdBy: req.user.sub
     });
   } catch (e) {
+    // A GUARD'S REFUSAL IS NOT A SERVER FAULT. The branch backstop and BW5's from-closed guard both throw
+    // with a `status` and a `code` a screen can act on; flattening them to 500 would tell the user the
+    // system broke when in fact it declined, and would hide the one sentence that says what to do instead.
+    if (e && e.status) {
+      return res.status(e.status).json({ error: e.message, code: e.code, stage: e.attemptedStage || stage });
+    }
     console.error('[stage transition]', e.message);
     return res.status(500).json({ error: 'The stage could not be advanced. ' + e.message });
   }
   res.json({ success: true, stage: stage, requestId: workId });
+});
+
+// ══ PHASE 7 / BW5 — REOPEN (Draft 8 rev 2 §3.3, decided 7/29) ═══════════════════════════════════════
+//
+// The only door out of `closed`, and the twin of the from-closed guard that now refuses every other one.
+//
+// DIRECTOR AUTHORITY is enforced here rather than in the service, the same division every other authority
+// check in this file uses: the service knows what a reopen IS, the route knows who may ask for one.
+// SYSTEM_ADMIN passes through requireRole by construction.
+//
+// THE POPUP'S TWO QUESTIONS ARE THIS ROUTE'S TWO FIELDS: `note` (required — the reason is the record) and
+// `resumePoint` ('prior_stage', the DEFAULT, or 'intake_retriage'). Nothing else: reopening is not an
+// opportunity to re-decide anything, and in particular it does not touch the clocks (see the service).
+//
+// SILENT BY DESIGN. No requestor notice fires and the response says so (`requestorNotified: false`), so a
+// screen cannot offer to send one on the strength of a hopeful assumption.
+router.post('/:id/reopen', requireAuth, async function (req, res) {
+  var roles = req.user.roles || [];
+  if (['SYSTEM_ADMIN', 'DIRECTOR'].every(function (r) { return roles.indexOf(r) === -1; })) {
+    return res.status(403).json({
+      error: 'Reopening a closed request is a Director’s act. It reverses a recorded public response, so it ' +
+             'sits with the authority that answers for one.',
+      code: 'DIRECTOR_REQUIRED'
+    });
+  }
+  try {
+    var resolved = await scope.workRow(req.params.id);
+    if (!resolved.addressed) return res.status(404).json({ error: 'Request not found' });
+    if (resolved.ambiguous) {
+      return res.status(409).json({
+        error: 'This request has ' + resolved.ambiguous.length + ' records. A reopen acts on ONE ended item — say which.',
+        code: 'AMBIGUOUS_WORK_ROW',
+        components: resolved.ambiguous.map(function (c) {
+          return { id: c.id, requestNumber: c.request_number, label: c.component_label, description: c.description, stage: c.stage };
+        })
+      });
+    }
+    var out = await require('../services/disposition').reopen(resolved.row.id, {
+      actorId: req.user.sub, actorName: req.user.name || 'Director',
+      note: (req.body && req.body.note) || '', resumePoint: (req.body && req.body.resumePoint) || 'prior_stage'
+    });
+    res.json(out);
+  } catch (e) {
+    if (e && e.status) return res.status(e.status).json({ error: e.message, code: e.code });
+    console.error('[reopen]', e && e.message);
+    res.status(500).json({ error: e.message });
+  }
 });
 
 
