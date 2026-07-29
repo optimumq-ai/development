@@ -37,11 +37,15 @@
 //                     becomes a REVIEW where the city has CONFIRMED the dimension and chosen review (or
 //                     chose block on a fact the submission does not carry), and a freshly imported state is
 //                     advisory-only by construction — so a default install raises none of these.
-//   sensitivity_flag  NOT WIRED. The signal exists (workflow_decisions.flags — SENSITIVE / LEGAL_HOLD /
-//                     ONGOING_INVESTIGATION, the same list legal redaction escalates on), but those flags
-//                     are common, so wiring it would stop a meaningful share of ordinary traffic at a
-//                     screen that does not exist yet. WHICH flags should stop a request is a Kevin
-//                     question, not an inference. BW3.
+//   sensitivity_flag  WIRED IN BW4 (Kevin, 2026-07-29). BW3 left this unwired because "which flags should
+//                     stop a request is a Kevin question, not an inference" — and the answer turned out to
+//                     be that the question was already answered, by the rulebook. `wfr-sensitive` (priority
+//                     5, the highest) ALREADY forces human intake on LEGAL_HOLD / ONGOING_INVESTIGATION /
+//                     SENSITIVE; it just left the request sitting at intake with no task on it. So this is
+//                     a DESTINATION change, not a new stop: workflowEngine raises the trigger when the rule
+//                     that matched had a condition on `flags`, which is the rule's own definition of the
+//                     flag set rather than a second copy of it here. The set of requests that stop is
+//                     unchanged; what changes is that the stop is now a task somebody can see.
 //   reopen_retriage   ENUM STUB ONLY. The Director's reopen-to-retriage path is BW5's (Draft 8 rev-2
 //                     hybrid); the key exists so BW5 records it rather than inventing a sixth spelling.
 //
@@ -60,7 +64,7 @@ var TYPE = 'intake_review';
 // The decided trigger vocabulary (draft §0 decision 5). Order is the draft's (i)…(v).
 var TRIGGERS = ['unroutable', 'eligibility_review', 'approval_pending', 'sensitivity_flag', 'reopen_retriage'];
 // Wired today — see the header. Everything else is recordable but nothing raises it yet.
-var WIRED_TRIGGERS = ['unroutable', 'approval_pending', 'eligibility_review'];
+var WIRED_TRIGGERS = ['unroutable', 'approval_pending', 'eligibility_review', 'sensitivity_flag'];
 var TRIGGER_LABELS = {
   unroutable: 'The fulfillment team could not be determined',
   eligibility_review: 'An eligibility finding needs a human decision',

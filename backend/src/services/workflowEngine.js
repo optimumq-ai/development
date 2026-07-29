@@ -179,6 +179,43 @@ async function onIntake(requestId, matcherResult){
     } catch (e) { console.error('[workflowEngine] estimate task spawn failed:', e && e.message); }
   }
 
+  // ══ TRIGGER (iv) sensitivity_flag — BW4, Kevin 2026-07-29. BEHAVIOUR-PRESERVING BY CONSTRUCTION. ══
+  //
+  // `wfr-sensitive` is the highest-priority rule in the seeded rulebook (priority 5): "if the request is
+  // flagged as a legal hold, an active investigation, or otherwise sensitive, keep it at intake for a human
+  // — even if the match looks confident." It ALREADY forces human intake today. What it does not do is give
+  // that human anything to pick up: the rule sets stage=intake / team=open_records and spawns no task, so
+  // the request sits at intake and someone has to notice it. This changes WHERE the stop lands, not WHICH
+  // requests stop — an intake_review task carrying the `sensitivity_flag` trigger, which the reviewer's
+  // screen already knows how to render ("Here because: the request carries a sensitivity flag").
+  //
+  // THE CONDITION IS THE RULE'S OWN, NOT A SECOND COPY OF IT. It fires when the rule that MATCHED had a
+  // condition on `flags` — i.e. the request stopped BECAUSE of its flags. Three things follow, and each is
+  // the reason it is written this way:
+  //   * it cannot widen the stop set. Two other seeded rules also carry `stop: true` (wfr-uncertain,
+  //     wfr-fallback) and between them catch a large share of ordinary traffic; keying on `stop` would have
+  //     turned "sensitive matters stay with a person" into "everything becomes an intake review".
+  //   * it cannot narrow the flag kinds. The rule's own value list (LEGAL_HOLD / ONGOING_INVESTIGATION /
+  //     SENSITIVE) decides what counts, and re-listing them here would be a second definition free to drift
+  //     from the one that actually fired.
+  //   * a city that renamed or re-tuned its sensitivity rule keeps working; a city that disabled it stops
+  //     stopping, exactly as it does today.
+  //
+  // MRR is excluded (draft decision 3: a multi-record submission's intake is the Request-Manager flow, and
+  // it has its own mrr_management task). Skipped when the request moved under us, for the same reason the
+  // estimate spawn above is: this task belongs to the opening move the engine just declined to make.
+  try {
+    var firedOnFlags = !!(hit && parseJSON(hit.rule.conditions, []).some(function (c) { return c && c.field === 'flags'; }));
+    if (firedOnFlags && (signals.flags || []).length && !movedUnderUs) {
+      var IRs = require('./intakeReview');
+      if (!(await IRs.isMrr(requestId))) {
+        await IRs.spawn(requestId, ['sensitivity_flag'], {
+          createdBy: 'workflow', requestText: request.description, awaitRouting: true
+        });
+      }
+    }
+  } catch (e) { console.error('[workflowEngine] sensitivity intake review failed:', e && e.message); }
+
   // Fee-waiver approval: a requested waiver needs a decision before any amount is invoiced. Independent
   // of the record-type routing above; the estimate still proceeds (a granted waiver zeroes fees at notice
   // time). Idempotent, and skipped once a decision has been recorded. Resolved by /fee-waiver-decision,
