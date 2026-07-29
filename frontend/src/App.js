@@ -32,6 +32,7 @@ import RedactionRulesPage from './pages/RedactionRulesPage';
 import RedactionWorkspacePage from './pages/RedactionWorkspacePage';
 import RedactionTaskPage from './pages/RedactionTaskPage';
 import RecordSearchTaskPage from './pages/RecordSearchTaskPage';
+import DispositionsPage from './pages/DispositionsPage';
 import LegalReviewTaskPage from './pages/LegalReviewTaskPage';
 import IntakeReviewTaskPage from './pages/IntakeReviewTaskPage';
 import StructuredRedactionFieldsPage from './pages/StructuredRedactionFieldsPage';
@@ -88,6 +89,8 @@ export default function App() {
           <Route path="requests" element={<RequestQueuePage />} />
           <Route path="requests/new" element={<NewRequestPage />} />
           <Route path="requests/:id" element={<RequestWorkspacePage />} />
+          {/* BW5 — the Disposition record. Informational, reached from the request header. */}
+          <Route path="requests/:id/dispositions" element={<DispositionsPage />} />
           <Route path="org" element={<OrgPage />} />
           <Route path="my-tasks" element={<MyTasksPage />} />
           <Route path="estimate/:taskId" element={<EstimateTaskPage />} />

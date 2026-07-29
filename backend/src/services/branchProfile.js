@@ -121,6 +121,31 @@ var CAPABILITIES = {
     gates: 'Advisory: this state does not make prepayment statutory. Does not gate a stage.',
     wired: false
   },
+  // ── PHASE 7 / BW5 additions (Draft 8 rev 2) ──────────────────────────────────────────────────
+  //
+  // installment_entitlement  WIRED. The one capability in this table that can REFUSE a staff action: in a
+  //                          state whose research says the requester is ENTITLED to installment production
+  //                          (WA RCW 42.56.080(2) is the strongest), a requester with an installment
+  //                          request on file cannot lawfully be made to wait for the whole production, so
+  //                          the RM's hold control is disabled with the reason and the citation shown, and
+  //                          an installment request arriving mid-hold auto-lifts it. The fallback rule does
+  //                          the safety work: unknown is NOT an entitlement, so the guard fires only where
+  //                          a state's own imported research says the entitlement exists.
+  installment_entitlement: {
+    label: 'Requester entitlement to installment production',
+    nodes: ['Disposition.inst', 'Records-Search.inst'],
+    gates: 'Whether a requester may demand records as they become ready rather than in one final delivery (WA RCW 42.56.080(2)).',
+    wired: true
+  },
+  // previously_furnished     READ-ONLY fact, and the rule-(b) treatment is the point: only an explicit
+  //                          FALSE hides the certification. A state that has never been imported does not
+  //                          get an ending removed from its staff on the strength of a missing config.
+  previously_furnished: {
+    label: 'Previously-furnished certification',
+    nodes: ['Disposition.prevfurn'],
+    gates: 'Whether the state has a certify-and-close path for records already provided (Tex. Gov’t Code § 552.232).',
+    wired: false
+  },
   delivery_caps: {
     label: 'Delivery-volume caps / recurrent-requester tracks',
     nodes: ['Disposition.caps'],

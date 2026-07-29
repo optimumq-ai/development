@@ -506,6 +506,167 @@ async function reject(approvalId, opts) {
   return { ok: true, rejected: true, approvalId: approvalId, note: note };
 }
 
+// ── RIGHTS FOR THE TWO MANUAL ENDINGS (decided 7/29, §3.2) ────────────────────────────────────────
+//
+// "ORO Associate+" is not a role name in this codebase — the v3 model expresses office-level competence as
+// the TASK-TYPE TOKENS a person holds (`user_task_types`), which is how `intake_review` / `mrr_management`
+// route to "an ORO Associate" everywhere else. So the check is: a management function role, OR one of the
+// office-level ORO tokens. Written once here so both endings and the screen ask the same question.
+var ORO_TOKENS = ['intake_review', 'mrr_management', 'release_review'];
+
+async function isOroAssociatePlus(user) {
+  if (!user) return false;
+  var roles = user.roles || [];
+  if (['SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR'].some(function (r) { return roles.indexOf(r) >= 0; })) return true;
+  if (!user.sub) return false;
+  var ph = ORO_TOKENS.map(function () { return '?'; }).join(',');
+  var row = await get('SELECT 1 AS x FROM user_task_types WHERE user_id = ? AND task_type IN (' + ph + ') LIMIT 1',
+    [user.sub].concat(ORO_TOKENS));
+  return !!row;
+}
+
+// Is this person the item's CURRENT task-holder? The second door on Withdrawn, and only on Withdrawn:
+// attaching the requester's own withdrawal and closing on it is the same trust level as closing no-records,
+// which the task-holder already has. Previously furnished is a formal CROSS-REQUEST certification about a
+// different request's contents, so it stays an office-level act — a searcher has no way to verify it.
+async function isCurrentTaskHolder(requestId, userId) {
+  if (!userId) return false;
+  var row = await get("SELECT 1 AS x FROM tasks WHERE request_id = ? AND assigned_to = ? AND status IN " +
+    "('open','assigned','in_progress','returned','awaiting_review') LIMIT 1", [requestId, userId]);
+  return !!row;
+}
+
+async function manualEndingRights(requestId, user) {
+  var oro = await isOroAssociatePlus(user);
+  var holder = await isCurrentTaskHolder(requestId, user && user.sub);
+  var pf = null;
+  try { pf = await require('./branchProfile').isActive(null, 'previously_furnished'); } catch (e) { pf = null; }
+  // RULE (b): only an EXPLICIT false hides a capability. An un-imported state does not lose an ending on
+  // the strength of a missing config — it is offered, and the certification names its authority honestly.
+  var pfAvailable = pf !== false;
+  return {
+    withdrawn: {
+      allowed: oro || holder, viaOro: oro, viaTaskHolder: holder,
+      reason: (oro || holder) ? null
+        : 'Withdrawn is closeable by an ORO Associate or above, or by the person currently holding the item’s task.'
+    },
+    previously_furnished: {
+      allowed: oro && pfAvailable, viaOro: oro, capability: pf, available: pfAvailable,
+      reason: !pfAvailable
+        ? 'This state’s imported branch profile says it has no previously-furnished certification path.'
+        : (oro ? null : 'Previously furnished is a formal cross-request certification, so it is an ORO Associate (or above) act only.')
+    }
+  };
+}
+
+// ── THE WITHDRAWAL COMMUNICATION, AND ITS SPAWNER (decided 7/29) ──────────────────────────────────
+//
+// "A communication logged as a withdrawal spawns a small task to the RM/ORO pool — no standing task type,
+// it exists only when a withdrawal actually arrives." It closes the forgotten-withdrawal gap: without it
+// the clock keeps running on a request nobody wants, and the only thing standing between the city and a
+// blown deadline is whoever read the email remembering to act on it.
+async function logWithdrawalCommunication(requestId, opts) {
+  opts = opts || {};
+  var body = s(opts.body);
+  if (!body) { var e0 = new Error('Record what the requester actually said. A withdrawal is a choice they made — the words are the evidence.'); e0.code = 'BODY_REQUIRED'; e0.status = 422; throw e0; }
+  var r = await get('SELECT id, status FROM requests WHERE id = ?', [requestId]);
+  if (!r) { var e1 = new Error('Request not found.'); e1.code = 'NOT_FOUND'; e1.status = 404; throw e1; }
+  var id = uuidv4();
+  await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes, created_at) VALUES (?,?,?,?,?,?,?)',
+    [id, requestId, opts.actorId || null, opts.actorName || 'Staff', 'WITHDRAWAL_COMMUNICATION',
+     'Withdrawal received from the requester' + (opts.channel ? ' by ' + s(opts.channel) : '') + ': ' + body, nowStr()]);
+
+  var task = null;
+  if (r.status !== 'closed') {
+    try {
+      var tr = require('./taskRouting');
+      var open = await get("SELECT id FROM tasks WHERE request_id = ? AND type = 'process_withdrawal' AND status IN " +
+        "('open','assigned','in_progress','returned','awaiting_review') LIMIT 1", [requestId]);
+      if (open) { task = { id: open.id, existing: true }; }
+      else {
+        task = await tr.createTask({ requestId: requestId, type: 'process_withdrawal', teamId: null,
+          title: 'Process withdrawal — the requester asked to withdraw this item',
+          createdBy: opts.actorId || 'system' });
+        tr.autoRouteOrPool(task.id, 'Process withdrawal', {})
+          .catch(function (e) { console.error('[withdrawal spawner route]', e && e.message); });
+      }
+    } catch (e) { console.error('[logWithdrawalCommunication spawn]', e && e.message); }
+  }
+  return { ok: true, communicationId: id, taskId: task ? task.id : null,
+           spawned: !!(task && !task.existing),
+           note: r.status === 'closed' ? 'The item is already closed, so no processing task was raised.' : null };
+}
+
+// ── THE DISPOSITION RECORD (Frame C — informational) ──────────────────────────────────────────────
+//
+// "Written elsewhere, displayed here." Per-child: the ending, WHO wrote it and WHERE, the evidence links,
+// and the sweep badge where a sweep did it. The parent's state is DERIVED and labelled as such — it is
+// never closable by hand, and the screen must not offer to.
+async function record(requestId) {
+  var addressed = await get('SELECT * FROM requests WHERE id = ?', [requestId]);
+  if (!addressed) return null;
+  var parentId = addressed.master_request_id || addressed.id;
+  var parent = await get('SELECT * FROM requests WHERE id = ?', [parentId]);
+  var kids = await all('SELECT * FROM requests WHERE master_request_id = ? ORDER BY component_label, request_number', [parentId]);
+  var rows = kids.length ? kids : [parent];
+
+  var items = [];
+  for (var i = 0; i < rows.length; i++) {
+    var r = rows[i];
+    var def = endingOf(r.closure_reason);
+    var closed = r.status === 'closed' || r.stage === 'closed';
+    // WHO AND WHERE. Read from the history row the close itself wrote — the audit trail is the source, so
+    // this screen cannot disagree with it.
+    var h = def ? await get('SELECT actor_name, action, notes, created_at FROM request_history WHERE request_id = ? AND action = ? ORDER BY created_at DESC LIMIT 1', [r.id, def.action]) : null;
+    var notice = await get("SELECT action, notes, created_at FROM request_history WHERE request_id = ? AND action IN " +
+      "('CLOSURE_NOTICE_SENT','CLOSURE_NOTICE_NA','CLOSURE_NOTICE_FAILED') ORDER BY created_at DESC LIMIT 1", [r.id]);
+    var appr = await get("SELECT * FROM request_close_approvals WHERE request_id = ? ORDER BY requested_at DESC LIMIT 1", [r.id]);
+    var bypasses = await all("SELECT id, type, bypass_kind, bypass_basis, bypassed_at FROM tasks WHERE request_id = ? AND bypass_kind IS NOT NULL ORDER BY bypassed_at", [r.id]);
+    items.push({
+      id: r.id, requestNumber: r.request_number, label: r.component_label, description: r.description,
+      closed: closed, stage: r.stage, status: r.status,
+      ending: def ? def.key : null,
+      endingLabel: def ? def.label : (closed ? 'Closed' : null),
+      // An open item has nothing to display, and saying so is the honest render — never a blank that reads
+      // like a missing record.
+      openText: closed ? null : 'Open — nothing to display; nothing is closable from here.',
+      writtenWhere: def ? def.where : null,
+      decidedBy: def ? def.decidedBy : null,
+      sweep: !!(def && def.sweep),
+      evidence: def ? def.evidence : null,
+      closedBy: h ? h.actor_name : null,
+      closedAt: h ? h.created_at : (closed ? r.updated_at : null),
+      closeNotes: h ? h.notes : null,
+      notice: notice ? { outcome: notice.action === 'CLOSURE_NOTICE_SENT' ? 'sent'
+                          : (notice.action === 'CLOSURE_NOTICE_NA' ? 'not_applicable' : 'failed'),
+                         text: notice.notes, at: notice.created_at } : null,
+      approval: appr ? { id: appr.id, status: appr.status, requestedByName: appr.requested_by_name,
+                         decidedByName: appr.decided_by_name, decidedAt: appr.decided_at } : null,
+      deliveredAt: r.delivered_at || null, installmentNo: r.installment_no || null,
+      reopenCount: Number(r.reopen_count) || 0, reopenedAt: r.reopened_at || null,
+      bypasses: bypasses
+    });
+  }
+
+  var openItems = items.filter(function (it) { return !it.closed; });
+  return {
+    requestId: addressed.id, parentId: parentId, parentNumber: parent && parent.request_number,
+    isMrr: kids.length > 1,
+    items: items,
+    parentState: {
+      // DERIVED, and labelled. A parent is never closed by hand (§5.8) and this screen must not imply it can be.
+      derived: true,
+      state: openItems.length === 0 ? 'Complete' : 'In Process',
+      openItems: openItems.length,
+      text: openItems.length === 0
+        ? 'Complete — derived from the items. A parent is never closed by hand.'
+        : 'In Process — ' + openItems.length + ' item(s) still open. The parent derives Complete when the last one ends.'
+    },
+    hold: await require('./releaseHold').holdState(addressed.id),
+    withdrawalCommunications: await withdrawalCommunications(addressed.id)
+  };
+}
+
 // ── REOPEN — the Director's act, and the only door out of `closed` ────────────────────────────────
 //
 // Decided 7/29 (Draft 8 rev 2 §3.3), and every clause of it is load-bearing:
@@ -585,7 +746,9 @@ async function reopen(requestId, opts) {
 }
 
 module.exports = {
-  reopen: reopen,
+  reopen: reopen, record: record,
+  ORO_TOKENS: ORO_TOKENS, isOroAssociatePlus: isOroAssociatePlus, isCurrentTaskHolder: isCurrentTaskHolder,
+  manualEndingRights: manualEndingRights, logWithdrawalCommunication: logWithdrawalCommunication,
   ENDINGS: ENDINGS, ENDING_KEYS: ENDING_KEYS,
   TASK_CLOSE_ENDINGS: TASK_CLOSE_ENDINGS, MANUAL_RECORD_ENDINGS: MANUAL_RECORD_ENDINGS,
   EFFORT_ACTIONS: EFFORT_ACTIONS,

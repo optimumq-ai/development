@@ -165,7 +165,12 @@ export default function RequestWorkspacePage() {
               {od?<span style={{background:'#FEF2F2',color:'#DC2626',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>⚠ OVERDUE</span>:null}
               {isComplete?<span style={{background:'#F0FDF4',color:'#166534',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>✓ CLOSED</span>:null}
             </div>
-            <p style={{color:'#9CA3AF',fontSize:'13px',margin:'4px 0 0'}}>Submitted {new Date(request.created_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})} · {prettyChannel(request.submission_channel)}</p>
+            <p style={{color:'#9CA3AF',fontSize:'13px',margin:'4px 0 0'}}>Submitted {new Date(request.created_at).toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'})} · {prettyChannel(request.submission_channel)}
+              {/* BW5 — the Disposition record's ONLY entry point (Draft 8 rev 2: "reached from the request
+                  header anywhere, read-only for anyone who can see the request; no task type"). */}
+              {' · '}<span onClick={function(){nav('/requests/'+request.id+'/dispositions');}}
+                style={{color:'#1F4E79',cursor:'pointer',fontWeight:600}}>Dispositions</span>
+            </p>
           </div>
         </div>
         {!isComplete&&nextStage(request.stage)&&(
