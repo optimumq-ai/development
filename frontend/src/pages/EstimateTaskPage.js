@@ -3,7 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import api from '../lib/api';
 import FeeEstimatePanel from '../components/ui/FeeEstimatePanel';
 import { useWorkTimer, WorkTimerBadge, useTimeCaptureMode } from '../components/ui/WorkTimer';
-import { SubmittedDescription } from '../components/primitives';
+import { SubmittedDescription, DecidedByBadge, ConfirmPopup, G } from '../components/primitives';
 import CommercialRatePanel from '../components/ui/CommercialRatePanel';
 
 // The stacked defect buttons that live in SubmittedDescription's box (spec §2.2).
@@ -17,6 +17,8 @@ export default function EstimateTaskPage() {
   var [ctx, setCtx] = useState(null);          // BW4: /tasks/:id/estimate-context
   var [flash, setFlash] = useState('');
   var [busy, setBusy] = useState('');
+  var [dmOpen, setDmOpen] = useState(false);
+  var [dmNote, setDmNote] = useState('');
   var [err, setErr] = useState('');
   var timer = useWorkTimer(taskId);
   var tcm = useTimeCaptureMode('estimate');   // Slice E: badge visibility only here — the estimate finalize
@@ -80,6 +82,22 @@ export default function EstimateTaskPage() {
       .then(function () { setBusy(''); });
   }
 
+  // DE MINIMIS — WAIVE AND ADVANCE. A rail action behind a ConfirmPopup, because it waives money the city
+  // could have charged on this person's judgment and skips the requester's notice entirely: every close-like
+  // act in this spec states what will be written before it is written (spec §4).
+  function deMinimisWaive() {
+    if (!ctx) return;
+    setBusy('deminimis');
+    return api.post('/fee-estimates/request/' + ctx.task.request_id + '/de-minimis-waive', { note: dmNote.trim() })
+      .then(function (r) {
+        setDmOpen(false); setDmNote('');
+        setFlash('Waived to $0.00 and recorded against your name' + (r.data && r.data.advanced ? ' — the request advanced to record search.' : '.'));
+        return loadCtx();
+      })
+      .catch(function (e) { setFlash((e.response && e.response.data && e.response.data.error) || 'Could not record the waive.'); })
+      .then(function () { setBusy(''); });
+  }
+
   function classify(value) {
     if (!ctx) return;
     setBusy('classify');
@@ -101,6 +119,7 @@ export default function EstimateTaskPage() {
   var done = task.status === 'done';
   var paused = !!(ctx && ctx.paused && ctx.paused.paused);
   var prov = (ctx && ctx.provenance) || null;
+  var wp = (ctx && ctx.waiverPanel) || null;
 
   return (
     <div style={{ maxWidth: '1100px' }}>
@@ -169,13 +188,97 @@ export default function EstimateTaskPage() {
       {/* BW4 — the classification is the ESTIMATOR's business too: it is their invoice that carries the
           rate. Same component, same endpoint, same single stored fact as the intake screen. */}
       {ctx ? <CommercialRatePanel commercial={ctx.commercial} busy={!!busy} onClassify={classify} /> : null}
+      {/* ── FEE WAIVER (Draft 2 §0b) ──
+          HIDDEN when there is nothing to show: not requested, nothing pending, nothing decided, no
+          statutory category armed. The four visible states come from the SERVER
+          (approvalModules.waiverPanelState) — a screen deciding for itself whether a mandatory category is
+          armed would be a second reading of the statute list, free to disagree with the one that acts. */}
+      {wp && wp.state !== 'hidden' ? (
+        <div style={{ background: '#F7F9FB', border: '1px solid ' + G.line, borderRadius: '8px', padding: '12px 14px', marginBottom: '14px' }}>
+          <div style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '.04em', textTransform: 'uppercase', color: '#6B7280', marginBottom: '7px' }}>Fee waiver</div>
+          <div style={{ fontSize: '13px', color: '#1A2230' }}>
+            {wp.text}{' '}
+            {wp.state === 'by_statute' ? <DecidedByBadge by="statute">Waived by statute</DecidedByBadge> : null}
+            {wp.state === 'decided' ? <DecidedByBadge by={wp.decidedBy === 'statute' ? 'statute' : 'person'}>{wp.decidedBy === 'statute' ? 'By statute' : ('Decided by ' + (wp.decidedBy || 'a person'))}</DecidedByBadge> : null}
+            {wp.state === 'decision' ? <DecidedByBadge by="person">A person decides</DecidedByBadge> : null}
+            {wp.state === 'not_offered' ? <DecidedByBadge by="recorded">Recorded — nothing to decide</DecidedByBadge> : null}
+          </div>
+          {wp.state === 'by_statute' ? (
+            <div style={{ fontSize: '12.5px', color: '#6B7280', marginTop: '5px' }}>
+              {wp.note}
+              {wp.category ? <div style={{ marginTop: '3px' }}>{wp.category.label} — {wp.category.citation} (on verified {String(wp.category.evidence || '').replace(/_/g, ' ')})</div> : null}
+            </div>
+          ) : null}
+          {wp.state === 'decided' && wp.reason ? <div style={{ fontSize: '12.5px', color: '#6B7280', marginTop: '4px' }}>Reason recorded: {wp.reason}</div> : null}
+        </div>
+      ) : null}
+
+      {/* THE SEND GATE, IN WORDS, FROM THE SERVER (Draft 2 §4.3). The same 409 WAIVER_UNDECIDED sentence the
+          send route refuses with — not a frontend re-derivation, so the greyed button and the refusal can
+          never disagree. */}
+      {ctx && ctx.waiverGate && ctx.waiverGate.blocked ? (
+        <div style={{ fontSize: '13px', color: '#92400E', background: '#FFF8E5', border: '1px solid #D4A72C', borderRadius: '8px', padding: '11px 13px', marginBottom: '14px' }}>
+          <b>The estimate cannot be sent yet.</b> {ctx.waiverGate.reason}
+        </div>
+      ) : null}
+
       {/* HELD, NOT HIDDEN. A paused estimate keeps showing whatever was already computed — the figures are
           evidence and removing them would look like data loss — but nothing on it can be changed or sent
           while the request's MEANING is in the post. */}
-      <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px',
-        opacity: paused ? 0.5 : 1, pointerEvents: paused ? 'none' : 'auto' }}>
-        <FeeEstimatePanel requestId={task.request_id} />
+      <div style={{ display: 'flex', gap: '14px', alignItems: 'flex-start' }}>
+        <div style={{ flex: '1 1 auto', minWidth: 0, background: 'white', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px',
+          opacity: paused ? 0.5 : 1, pointerEvents: paused ? 'none' : 'auto' }}>
+          <FeeEstimatePanel requestId={task.request_id} />
+        </div>
+
+        {/* ── ACTIONS RAIL (spec §2.3 — "Actions", never "Work the request") ── */}
+        <div style={{ flex: '0 0 236px' }}>
+          <div style={{ background: 'white', border: '1px solid #E5E7EB', borderRadius: '8px', padding: '11px 13px' }}>
+            <div style={{ fontSize: '10.5px', fontWeight: 800, letterSpacing: '.07em', textTransform: 'uppercase', color: '#6B7280', marginBottom: '7px' }}>Actions</div>
+            <button type="button" disabled={!!busy || done || paused} onClick={function () { setDmOpen(true); }}
+              style={{ font: 'inherit', width: '100%', fontSize: '13px', fontWeight: 600, padding: '6px 12px', borderRadius: '5px',
+                background: '#F7F9FB', color: '#101A2A', border: '1px solid ' + G.line, cursor: (busy || done || paused) ? 'not-allowed' : 'pointer', opacity: (busy || done || paused) ? 0.55 : 1 }}>
+              De minimis — waive &amp; advance
+            </button>
+            <div style={{ fontSize: '11.5px', color: '#6B7280', marginTop: '6px' }}>
+              Zeroes the estimate, skips the notice cycle and advances the request. Your judgment, your name on
+              it — this is not the configured de-minimis rule, which zeroes by threshold and still notifies.
+            </div>
+          </div>
+        </div>
       </div>
+
+      <ConfirmPopup open={dmOpen} onClose={function () { setDmOpen(false); }}
+        title="De minimis — waive the fee and advance"
+        actions={
+          <>
+            <button type="button" disabled={!!busy || !dmNote.trim()} onClick={deMinimisWaive}
+              style={{ font: 'inherit', fontSize: '13px', fontWeight: 700, padding: '7px 16px', borderRadius: '6px', border: 'none',
+                background: (busy || !dmNote.trim()) ? '#9CB4CC' : '#1F4E79', color: 'white', cursor: (busy || !dmNote.trim()) ? 'default' : 'pointer' }}>
+              {busy === 'deminimis' ? 'Recording…' : 'Waive and advance'}
+            </button>
+            <button type="button" onClick={function () { setDmOpen(false); }}
+              style={{ font: 'inherit', fontSize: '13px', fontWeight: 600, padding: '7px 14px', borderRadius: '6px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', cursor: 'pointer' }}>Cancel</button>
+          </>
+        }>
+        {/* Nothing closes on a single click, and every one-act popup states what will be WRITTEN and what
+            will be SENT (spec §4). What is sent here is nothing, and that is the point worth stating. */}
+        <div style={{ fontSize: '13px', color: '#1A2230', lineHeight: 1.5 }}>
+          <p style={{ margin: '0 0 7px' }}>This will:</p>
+          <ul style={{ margin: '0 0 9px 18px', padding: 0 }}>
+            <li>record a $0.00 estimate against your name, keeping the computed one beside it as evidence of what the fees would have been;</li>
+            <li>send the requestor <b>nothing</b> — no estimate notice, no acceptance gate, no payment;</li>
+            <li>close this estimate task and advance the request to record search.</li>
+          </ul>
+          <p style={{ margin: '0 0 7px', color: '#92400E' }}>
+            This is your judgment that the amount is not worth putting a citizen through the notice cycle for —
+            not the configured de-minimis rule. A reason is required.
+          </p>
+          <textarea value={dmNote} onChange={function (e) { setDmNote(e.target.value); }} rows={3}
+            placeholder="Why this is de minimis (required)"
+            style={{ width: '100%', font: 'inherit', fontSize: '13px', padding: '7px 9px', borderRadius: '6px', border: '1px solid #E5E7EB', boxSizing: 'border-box', resize: 'vertical' }} />
+        </div>
+      </ConfirmPopup>
       <p style={{ color: '#9CA3AF', fontSize: '12px', marginTop: '12px' }}>Sending the estimate to the requestor marks this task complete.</p>
     </div>
   );

@@ -318,6 +318,100 @@ router.post('/request/:requestId/notice/send', requireAuth, async function (req,
 });
 
 
+// ==================================================================================================
+// DE MINIMIS — WAIVE AND ADVANCE (PHASE 7 / BW4; DRAFT_processing_ui_estimate.md §4.4, §0b).
+//
+// "A zero-estimate path that skips the notice cycle — person-decided, recorded." Kevin asked for it as a
+// rail action and confirmed the shape in session on 7/29.
+//
+// IT IS NOT THE ENGINE'S DE MINIMIS, and the two must not be confused. feeEngine already applies a
+// CONFIGURED de-minimis (`rules.deMinimis`): a total at or under the threshold computes to $0.00 by rule,
+// and that estimate still goes round the notice cycle like any other. THIS is the judgment version — a
+// person looking at a small number and deciding it is not worth putting a citizen through an estimate
+// notice, an acceptance gate and a payment for. So it is recorded as a PERSON's act, with their name on it,
+// and never fires by itself.
+//
+// ⚠ CONFIG-NOT-LAW, AND DELIBERATELY UNTHRESHOLDED. Draft 2 §5 open question 3 ("threshold config per city,
+// or pure judgment?") is NOT answered. Inventing a threshold here would be this build deciding a question
+// Kevin was asked and has not answered, and a wrong one silently blocks or silently permits. So: pure
+// judgment, a REQUIRED note, and the configured engine threshold reported alongside as context where one
+// exists. When Kevin answers, the threshold has one place to land.
+//
+// WHAT IT WRITES, and why each piece:
+//   a NEW $0 snapshot          the engine's computed context is never rewritten — it is the engine's answer
+//                              and the evidence of what the fees WOULD have been. The waive is a new
+//                              snapshot beside it carrying the original total, the person and the reason.
+//   accepted, not notified     skipping the notice cycle means there is nothing to accept: a $0 estimate
+//                              asks the requester for nothing. Marking it accepted (by the STAFF MEMBER,
+//                              named) is what lets the ordinary downstream — payment state, balance, the
+//                              release gate — see a settled $0 request instead of an unanswered estimate.
+//                              `notified_at` stays NULL: nothing was sent, and claiming otherwise would put
+//                              a notice in the audit trail that never existed.
+//   the estimate task closes   the work is finished, by this act rather than by a send.
+//   the stage advances         to record_search, and ONLY forward. A request already past record_search is
+//                              left where it is: dragging it backwards is the class of bug the workflow
+//                              engine's opening-position guard exists to prevent.
+// ==================================================================================================
+router.post('/request/:requestId/de-minimis-waive', requireAuth, async function (req, res) {
+  try {
+    var rid = req.params.requestId;
+    var reqRow = await get('SELECT id, stage, request_number FROM requests WHERE id = ?', [rid]);
+    if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
+    var note = ((req.body && req.body.note) || '').trim();
+    if (!note) {
+      return res.status(400).json({ code: 'NOTE_REQUIRED',
+        error: 'A reason is required. This waives money the city could have charged, on your judgment rather ' +
+               'than on a rule, so the trail has to carry why.' });
+    }
+    var snap = await latestEstimate(rid);
+    if (!snap) return res.status(400).json({ error: 'Calculate an estimate first — there is nothing to waive yet.' });
+    if (snap.notified_at) {
+      return res.status(409).json({ code: 'ALREADY_NOTIFIED',
+        error: 'This estimate has already been sent to the requestor. The notice cycle cannot be skipped after ' +
+               'the notice went out — the requester is holding a figure. Grant a fee waiver instead, which ' +
+               'communicates the change.' });
+    }
+    var feeContext = {}; try { feeContext = JSON.parse(snap.fee_context_json || '{}'); } catch (e) { feeContext = {}; }
+    var originalTotal = Number(snap.total) || 0;
+    var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'Staff';
+    var now = nowStr();
+
+    feeContext.deMinimisWaive = { waivedBy: actor, waivedAt: now, note: note, originalTotal: originalTotal };
+    if (feeContext.requestLevel) {
+      feeContext.requestLevel.total = 0;
+      feeContext.requestLevel.depositDue = 0;
+      feeContext.requestLevel.deMinimisWaived = true;
+      feeContext.requestLevel.estimateNotifyTriggered = false;
+    }
+    var id = 'fe-' + uuidv4().substring(0, 8);
+    await run('INSERT INTO request_fee_estimates (id, request_id, kind, config_profile_id, input_json, fee_context_json, total, deposit_due, notify_flag, created_by, created_at, accepted_at, accepted_by) ' +
+      'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)',
+      [id, rid, 'estimate', snap.config_profile_id || null, snap.input_json || '{}', JSON.stringify(feeContext),
+       0, 0, 0, 'de-minimis waive — ' + actor, now, now, actor]);
+
+    await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE request_id = ? AND type = 'estimate' " +
+      "AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [rid]);
+
+    var notes = 'De minimis: the estimate of $' + originalTotal.toFixed(2) + ' was waived to $0.00 by ' + actor +
+      ' and the notice cycle skipped. Reason: ' + note +
+      ' This is a person’s judgment, not the configured de-minimis rule — no notice was sent and the requester ' +
+      'was asked for nothing.';
+    var advanced = false;
+    var ORDER = require('../services/stages').ORDER;
+    if (ORDER.indexOf(reqRow.stage) >= 0 && ORDER.indexOf('record_search') > ORDER.indexOf(reqRow.stage)) {
+      await require('../services/taskRouting').applyStageTransition(rid, 'record_search', {
+        actorId: req.user && req.user.sub, actorName: actor, action: 'FEE_DE_MINIMIS_WAIVED',
+        notes: notes, createdBy: req.user && req.user.sub });
+      advanced = true;
+    } else {
+      await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+        [uuidv4(), rid, req.user && req.user.sub, actor, 'FEE_DE_MINIMIS_WAIVED',
+         notes + ' The request had already moved past record search, so its stage was left as it was found.']);
+    }
+    res.json({ waived: true, estimateId: id, originalTotal: originalTotal, total: 0, advanced: advanced, by: actor, at: now });
+  } catch (e) { res.status(500).json({ error: 'Could not record the de-minimis waive: ' + (e && e.message) }); }
+});
+
 // --- Estimate response lifecycle: accept / decline / deposit ---
 
 // Record requestor ACCEPTANCE of the latest sent estimate. Deposit due -> awaiting_payment;

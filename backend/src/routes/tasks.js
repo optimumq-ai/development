@@ -233,12 +233,21 @@ router.get('/:id/estimate-context', requireAuth, async function (req, res) {
     try { provenance = await require('../services/intakeReview').provenance(t.request_id); }
     catch (e) { console.error('[estimate-context provenance]', e && e.message); }
 
+    var waiverGate = { blocked: false };
+    try { waiverGate = await require('../services/approvalModules').estimateCommunicationGate(null, reqRow); }
+    catch (e) { console.error('[estimate-context waiver gate]', e && e.message); }
+
     res.json({
       task: t, request: reqRow, parent: parent,
       paused: require('../services/taskPause').stateOf(t),
       provenance: provenance,
       commercial: commercial,
-      waiver: waiver
+      waiver: waiver,
+      // The panel's states, decided server-side. A screen that derived "is a mandatory waiver armed here"
+      // for itself would be a second reading of the statute list, free to disagree with the one that acts.
+      waiverPanel: require('../services/approvalModules').waiverPanelState(waiver, reqRow),
+      waiverGate: waiverGate.blocked ? { blocked: true, code: waiverGate.code, reason: waiverGate.reason }
+        : { blocked: false, notOffered: !!waiverGate.notOffered }
     });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

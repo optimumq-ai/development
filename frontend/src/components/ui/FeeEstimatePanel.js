@@ -32,6 +32,7 @@ export default function FeeEstimatePanel(props) {
   var [noticeText, setNoticeText] = useState('');
   var [noticeNotifiedAt, setNoticeNotifiedAt] = useState(null);
   var [noticeNotifyTriggered, setNoticeNotifyTriggered] = useState(false);
+  var [waiverGate, setWaiverGate] = useState({ blocked: false });   // BW4: 409 WAIVER_UNDECIDED, pre-rendered
   var [sending, setSending] = useState(false);
   var [sendMsg, setSendMsg] = useState('');
   var [payMethod, setPayMethod] = useState('cash');
@@ -108,6 +109,8 @@ export default function FeeEstimatePanel(props) {
       var r = await api.get('/fee-estimates/request/' + requestId + '/notice');
       setNoticeTo(r.data.to || ''); setNoticeSubject(r.data.subject || ''); setNoticeText(r.data.text || '');
       setNoticeNotifiedAt(r.data.notifiedAt || null); setNoticeNotifyTriggered(!!r.data.notifyTriggered);
+      // BW4 — the send gate travels WITH the notice preview and is rendered in the server's words below.
+      setWaiverGate(r.data.feeWaiverGate || { blocked: false });
     } catch (e) { /* no saved estimate yet */ }
   }
   useEffect(function () { if (result) loadNotice(); }, [result]);
@@ -450,8 +453,17 @@ export default function FeeEstimatePanel(props) {
             <div style={{ marginBottom: '8px' }}><label style={lbl}>To</label><input type="text" value={noticeTo} onChange={function (e) { setNoticeTo(e.target.value); }} style={inp} /></div>
             <div style={{ marginBottom: '8px' }}><label style={lbl}>Subject</label><input type="text" value={noticeSubject} onChange={function (e) { setNoticeSubject(e.target.value); }} style={inp} /></div>
             <div style={{ marginBottom: '8px' }}><label style={lbl}>Message</label><textarea value={noticeText} onChange={function (e) { setNoticeText(e.target.value); }} rows={14} style={Object.assign({}, inp, { fontFamily: 'inherit', resize: 'vertical', lineHeight: '1.5' })} /></div>
+            {/* PHASE 7 / BW4 — THE SEND GATE, IN WORDS. `feeWaiverGate` comes from the same
+                approvalModules.estimateCommunicationGate the send route refuses on (409 WAIVER_UNDECIDED),
+                so the greyed button and the refusal are one sentence. A waiver changes the amount, and a
+                requester must not receive one figure and then another. */}
+            {waiverGate.blocked ? (
+              <div style={{ fontSize: '12.5px', color: '#92400E', background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '8px', padding: '9px 12px', marginBottom: '9px' }}>
+                <b>Cannot send yet.</b> {waiverGate.reason}
+              </div>
+            ) : null}
             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-              <button onClick={sendNotice} disabled={sending || !noticeTo} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: (sending || !noticeTo) ? '#9CB4CC' : NAVY, color: 'white', fontSize: '13px', fontWeight: 700, cursor: (sending || !noticeTo) ? 'default' : 'pointer' }}>{sending ? 'Sending...' : (noticeNotifiedAt ? 'Resend to requestor' : 'Send to requestor')}</button>
+              <button onClick={sendNotice} disabled={sending || !noticeTo || waiverGate.blocked} style={{ padding: '9px 18px', borderRadius: '8px', border: 'none', background: (sending || !noticeTo || waiverGate.blocked) ? '#9CB4CC' : NAVY, color: 'white', fontSize: '13px', fontWeight: 700, cursor: (sending || !noticeTo || waiverGate.blocked) ? 'not-allowed' : 'pointer' }}>{sending ? 'Sending...' : (noticeNotifiedAt ? 'Resend to requestor' : 'Send to requestor')}</button>
               {sendMsg ? <span style={{ fontSize: '12.5px', color: sendMsg.indexOf('Sent') === 0 ? '#03543F' : '#9B1C1C' }}>{sendMsg}</span> : null}
             </div>
           </div>

@@ -356,6 +356,68 @@ async function estimateCommunicationGate(jid, request) {
   };
 }
 
+// ---------------------------------------------------------------------------------------------------
+// THE WAIVER PANEL'S STATE (PHASE 7 / BW4 — DRAFT_processing_ui_estimate.md §0b).
+//
+// Kevin's 7/29 markup: "Fee-waiver panel HIDDEN when there is nothing to show (not requested, nothing
+// pending or decided). Statutory-mandatory categories stay armed regardless — verified evidence makes the
+// panel appear with the by-statute grant even if no waiver was requested and the program is off."
+//
+// That last sentence is the ASYMMETRY THIS FILE'S HEADER ALREADY DESCRIBES, surfaced rather than
+// reimplemented: `evaluateWaiver` returns `auto_granted` on verified evidence regardless of `enabled` and
+// regardless of whether anyone confirmed the category, because withholding a mandatory waiver charges a
+// citizen a fee the legislature forbade. This function does not re-derive that — it reads the outcome and
+// decides what a screen draws.
+//
+//   hidden        nothing requested, nothing pending, nothing decided, no category fired. Draw no panel.
+//   by_statute    a mandatory category matched verified evidence. NOT this person's decision — the badge is
+//                 `statute` and there is no control. Fires with the program off. Fires with the request
+//                 never having asked.
+//   decision      the discretionary program is on and the decision is open. Grant / deny live here, and the
+//                 estimate cannot be sent either way until it lands.
+//   decided       granted or denied by a person, shown with their name (rule c).
+//   not_offered   the requester ASKED and this city (or state) has no discretionary program. Never hidden:
+//                 a request that asked and got nothing back is the one case where silence is the failure.
+//                 Processing does not stop; the notice tells them.
+function waiverPanelState(waiver, request) {
+  var w = waiver || {}, r = request || {};
+  var status = r.fee_waiver_status || null;
+  if (w.outcome === 'auto_granted' || status === 'granted' && r.fee_waiver_decided_by === 'statute') {
+    return {
+      state: 'by_statute', decidedBy: 'statute',
+      text: w.reason || 'Waived by statute on verified evidence.',
+      category: w.mandatoryFired || null,
+      note: 'This fires on verified evidence whether or not the discretionary program is switched on, and ' +
+            'whether or not anyone confirmed the category. Nothing here is yours to decide.'
+    };
+  }
+  if (status === 'granted' || status === 'denied') {
+    return {
+      state: 'decided', decision: status, decidedBy: r.fee_waiver_decided_by || null, decidedAt: r.fee_waiver_decided_at || null,
+      reason: r.fee_waiver_reason || null,
+      text: status === 'granted'
+        ? 'The fee waiver was granted. The estimate reflects it.'
+        : 'The fee waiver was denied. This does not stop the request — the denial folds into the estimate ' +
+          'notice, and the requester keeps control at the acceptance gate (proceed / narrow / withdraw).'
+    };
+  }
+  if (w.outcome === 'needs_decision') {
+    return {
+      state: 'decision', mode: w.mode || null, route: w.route || null,
+      text: w.route && w.route.mode === 'routed_task'
+        ? 'A fee waiver was requested and is with the "' + w.route.task_name + '" task (' + w.route.assignee_role +
+          '). The estimate cannot be sent until it closes — a waiver changes the amount, and a requester must ' +
+          'not receive one figure and then another.'
+        : 'A fee waiver was requested and this city decides it inline at Intake Review. The estimate cannot be ' +
+          'sent until it is decided, either way.'
+    };
+  }
+  if (w.outcome === 'not_offered' && w.requested) {
+    return { state: 'not_offered', text: w.reason || 'This city has no discretionary fee-waiver program. The request continues to the ordinary estimate.' };
+  }
+  return { state: 'hidden' };
+}
+
 // The waiver paragraph that folds into the estimate notice (design doc: one communication, no new
 // document type). Returns null when there is nothing to say.
 function denialNoticeText(request, mod) {
@@ -374,5 +436,6 @@ module.exports = {
   config: config, write: write,
   verifiedEvidence: verifiedEvidence,
   evaluateWaiver: evaluateWaiver, evaluateCommercial: evaluateCommercial,
-  estimateCommunicationGate: estimateCommunicationGate, denialNoticeText: denialNoticeText
+  estimateCommunicationGate: estimateCommunicationGate, denialNoticeText: denialNoticeText,
+  waiverPanelState: waiverPanelState
 };
