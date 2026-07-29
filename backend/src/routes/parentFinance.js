@@ -75,6 +75,21 @@ router.get('/:id/adjustments', requireAuth, async function (req, res) {
   } catch (e) { fail(res, e); }
 });
 
+// The last-record settlement picture, and the 20% watchdog that caps what a final invoice may collect.
+router.get('/:id/settlement', requireAuth, async function (req, res) {
+  try {
+    var pid = await PF.parentOf(req.params.id);
+    if (!(await canRead(req.user, pid))) return res.status(403).json({ error: 'Not your request.' });
+    var st = await PF.settlementState(pid);
+    st.watchdog = await PF.overageWatchdog(pid);
+    st.collectionCap = await PF.collectionCap(pid);
+    st.canSettle = canAct(req.user) && st.ready && !st.settled;
+    st.settleDisabledReason = canAct(req.user) ? (st.ready && !st.settled ? null : st.reason)
+      : 'Settling the request is ORO Finance’s act. You can see whether it is ready.';
+    res.json(st);
+  } catch (e) { fail(res, e); }
+});
+
 // ── ACTS — FINANCE ───────────────────────────────────────────────────────────────────────────────
 //
 // The service refuses on the same grounds independently of this gate (no cause, no method, no reference, no
@@ -107,6 +122,15 @@ router.post('/:id/withholding-credit', requireAuth, FINANCE_ACT, async function 
       itemRequestId: b.itemRequestId, determinationRef: b.determinationRef,
       withheldUnits: b.withheldUnits, totalUnits: b.totalUnits, unitLabel: b.unitLabel, fraction: b.fraction,
       approver: b.approver, actorName: actorName(req), actorId: req.user && req.user.sub }));
+  } catch (e) { fail(res, e); }
+});
+
+// SETTLE. The one act that re-prices a request, so it is gated hard and refuses hard: not an MRR, more than
+// one item still live, or already settled, and it declines. There is no automatic caller anywhere — a person
+// settles, and the system runs the engine once.
+router.post('/:id/settle', requireAuth, FINANCE_ACT, async function (req, res) {
+  try {
+    res.json(await PF.settle(req.params.id, { actorName: actorName(req), actorId: req.user && req.user.sub }));
   } catch (e) { fail(res, e); }
 });
 

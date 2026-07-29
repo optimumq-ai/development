@@ -348,10 +348,305 @@ async function adjustments(rid) {
   });
 }
 
+// ═════════════════════════════════════════════════════════════════════════════════════════════════
+// THE LAST RECORD SETTLES THE REQUEST (§0.3)
+//
+// Kevin's decision, and the reason for it: on an MRR the pricing vehicles are AGGREGATE, so a per-item
+// "actual" does not exist until every child has actuals. There is therefore exactly one honest moment to
+// reconcile — when the last one is ready — and at that moment the request behaves EXACTLY like a non-MRR:
+// aggregate actuals run through the same engine once, producing the adjusted final invoice or a refund.
+// The last record is held until that payment, or RELEASES IMMEDIATELY when the adjustment nets to refund or
+// zero (a city does not sit on a finished record while it owes the citizen money).
+//
+// §5.9 FOOTNOTE, RECORDED (Draft 7 §0.7): a purist reading would hold the last record only for its own
+// ADJUSTED share. Final-delivery-against-final-payment is the standard regime deposits were designed around,
+// the invoice issues the moment the record is ready, and the 20% rule bounds the exposure. Adopted with the
+// reasoning on the record rather than silently.
+//
+// THE TRIGGER IS NARROW ON PURPOSE. `settle()` refuses on anything that is not a real MRR at a real terminal
+// state: no children, more than one item still live, or an already-recorded settlement. A settlement that
+// could fire early would rewrite a request's bill in the middle of the work.
+
+var TERMINAL_STATUSES = ['closed', 'withdrawn', 'abandoned'];
+
+// Is an item DONE — nothing further will happen to it? Shipped, or ended without shipping. Both are terminal;
+// only one of them consumed funds, which is why `shipped` is reported separately rather than collapsed in.
+async function itemStates(pid) {
+  var kids = await db.all('SELECT id, request_number, stage, status, closure_reason FROM requests WHERE master_request_id = ? ORDER BY request_number ASC, id ASC', [pid]);
+  if (!kids.length) return { isMrr: false, items: [] };
+  var shipped = await FR.shippedAmong(kids.map(function (k) { return k.id; }));
+  var items = kids.map(function (k) {
+    var sh = shipped[k.id] || { shipped: false, evidence: 'unknown' };
+    var ended = TERMINAL_STATUSES.indexOf(k.status) !== -1;
+    return {
+      id: k.id, label: k.request_number || k.id, stage: k.stage, status: k.status,
+      closureReason: k.closure_reason || null,
+      shipped: !!sh.shipped, shipEvidence: sh.evidence,
+      terminal: !!sh.shipped || ended,
+      endedWithoutShipping: ended && !sh.shipped
+    };
+  });
+  return { isMrr: true, items: items };
+}
+
+// Are the last record's OWN actuals in? "In" means no billable work task on it is still in flight — not that
+// a stopwatch produced a number, because capture is a city-owned toggle and may legitimately be off. Whether
+// measured labor EXISTS is reported separately so the settlement can fall back to the manual path honestly.
+async function actualsIn(rid) {
+  var LA = require('./laborActuals');
+  var remaining = 0, roll = null;
+  try { remaining = await LA.remainingBillableCount(rid, null); } catch (e) { remaining = 0; }
+  try { roll = await LA.rollup(rid); } catch (e) { roll = null; }
+  return { in: remaining === 0, remainingBillableTasks: remaining, hasMeasured: !!(roll && roll.hasActuals), rollup: roll };
+}
+
+async function settlementState(rid) {
+  var pid = await parentOf(rid);
+  var p = await db.get('SELECT id, request_number, settlement_at, settlement_by, settlement_outcome, ' +
+    'settlement_reconciliation_id, settlement_amount FROM requests WHERE id = ?', [pid]);
+  var st = await itemStates(pid);
+  var settled = (p && p.settlement_at) ? {
+    at: p.settlement_at, by: p.settlement_by, outcome: p.settlement_outcome,
+    reconciliationId: p.settlement_reconciliation_id, amount: r2(p.settlement_amount)
+  } : null;
+
+  if (!st.isMrr) {
+    return { requestId: pid, isMrr: false, ready: false, settled: settled, items: [],
+      reason: 'This is not a multi-record request. It settles through the ordinary reconcile-and-invoice path; ' +
+        'the last-record settlement exists only because an MRR has no honest per-item actual until every item is done.' };
+  }
+
+  var live = st.items.filter(function (i) { return !i.terminal; });
+  var lastRecord = null, own = null;
+  if (live.length === 1) { lastRecord = live[0]; own = await actualsIn(lastRecord.id); }
+  var ready = false, reason;
+  if (settled) { reason = 'Already settled on ' + settled.at + ' (' + settled.outcome + ').'; }
+  else if (live.length > 1) {
+    reason = live.length + ' items are still live. The request settles once, when the LAST one is ready — ' +
+      'aggregate pricing means a per-item actual does not exist before that.';
+  } else if (live.length === 0) {
+    ready = true;
+    reason = 'Every item is terminal and the request has never been settled. Settle it now — the aggregate ' +
+      'reconciliation is overdue rather than early.';
+  } else if (!own.in) {
+    reason = 'The last item (' + lastRecord.label + ') still has ' + own.remainingBillableTasks +
+      ' billable task(s) in flight. Its own actuals have to be in before the aggregate can be run.';
+  } else {
+    ready = true;
+    reason = 'The last item (' + lastRecord.label + ') is ready and every sibling is terminal. ' +
+      'This is the moment the request settles.';
+  }
+
+  return {
+    requestId: pid, requestNumber: (p && p.request_number) || null, isMrr: true,
+    items: st.items, itemCount: st.items.length,
+    terminalCount: st.items.filter(function (i) { return i.terminal; }).length,
+    shippedCount: st.items.filter(function (i) { return i.shipped; }).length,
+    neverShippedCount: st.items.filter(function (i) { return i.endedWithoutShipping; }).length,
+    lastRecord: lastRecord, lastRecordActuals: own,
+    ready: ready, settled: settled, reason: reason,
+    branches: 'A balance due HOLDS the last record until it is paid. A refund or a zero adjustment RELEASES it ' +
+      'immediately — the city does not sit on a finished record while it owes the citizen money.',
+    footnote: 'A purist reading would hold the last record only for its own adjusted share. ' +
+      'Final-delivery-against-final-payment is the regime deposits were designed around, the invoice issues the ' +
+      'moment the record is ready, and the 20% rule bounds the exposure (§5.9 footnote, adopted with the reasoning recorded).'
+  };
+}
+
+// ── THE 20% OVERAGE WATCHDOG (§552.2615) — THE ONLY MID-FLIGHT RUNNING NUMBER (§0.4) ────────────
+//
+// Two jobs, and the second is the one that has teeth:
+//   (a) it feeds the EXISTING updated-statement / reissue machinery (services/feeReissue), which already
+//       implements § 552.2615(b)-(c). Nothing is reimplemented here.
+//   (b) it CAPS what a final invoice may collect. An overage the requestor was never told about is forfeited,
+//       and this screen refuses to bill it.
+//
+// (b) IS ALWAYS ON, and that is consistent with feeReissue's own asymmetry rather than a departure from it:
+// feeReissue's counter gate is policy-opt-in because BLOCKING A PAYMENT has a real cost with a real clerk
+// standing there. Refusing to GENERATE a demand for an amount the requestor was never sent costs nothing —
+// the city cures it by sending the revised statement, which it has to do anyway. Block for free, never block
+// at a cost the city did not agree to.
+async function overageWatchdog(rid) {
+  var pid = await parentOf(rid);
+  var RI = require('./feeReissue');
+  var pending = { pending: false }, lastNotified = null;
+  try { pending = await RI.pending(pid); } catch (e) { pending = { pending: false }; }
+  try { lastNotified = await RI.lastNotifiedTotal(pid); } catch (e) { lastNotified = null; }
+  // Fall back through the tree: on an MRR the notice may have been sent against the row the estimate lives on.
+  if (!lastNotified || !pending.pending) {
+    var ids = await require('./paymentStatus').moneyTreeIds(pid);
+    for (var i = 0; i < ids.length && !pending.pending; i++) {
+      if (ids[i] === pid) continue;
+      try { var p2 = await RI.pending(ids[i]); if (p2.pending) { pending = p2; pending._row = ids[i]; } } catch (e) {}
+      if (!lastNotified) { try { lastNotified = await RI.lastNotifiedTotal(ids[i]); } catch (e) {} }
+    }
+  }
+  var net = await netting(pid);
+  var ceiling = lastNotified ? r2(lastNotified.total) : null;
+  var collectible = (pending.pending && ceiling != null) ? Math.max(0, r2(ceiling - net.paidGross)) : null;
+  var forfeited = (collectible != null) ? Math.max(0, r2(net.balanceDue - collectible)) : 0;
+  return {
+    requestId: pid,
+    revisedStatementOutstanding: !!pending.pending,
+    variancePct: pending.variancePct != null ? pending.variancePct : null,
+    actualTotal: pending.actualTotal != null ? r2(pending.actualTotal) : null,
+    estimateTotal: pending.estimateTotal != null ? r2(pending.estimateTotal) : null,
+    lastNotifiedTotal: ceiling, lastNotifiedAt: lastNotified ? lastNotified.notifiedAt : null,
+    balanceDue: net.balanceDue,
+    collectionCap: collectible,
+    forfeitedUnlessNotified: forfeited,
+    citation: "Tex. Gov't Code § 552.2615(b)-(c)",
+    reason: pending.pending
+      ? ('The actual cost came in ' + (pending.variancePct != null ? pending.variancePct + '% ' : '') +
+         'above the estimate the requestor accepted and the updated itemized statement has NOT been sent. ' +
+         'The requestor has not agreed to the higher number, so the city may not collect above $' +
+         (ceiling != null ? ceiling.toFixed(2) : '?') + ' on this request' +
+         (forfeited > 0 ? (' — $' + forfeited.toFixed(2) + ' of the balance is not billable until the revised ' +
+           'statement goes out, and this screen will not bill it.') : '.') +
+         ' Sending the revised statement cures it, and also restarts the requestor’s response window.')
+      : 'No updated statement is outstanding. Nothing caps the final invoice.',
+    // Pointer, not a duplicate. The send is a person's act through the reissue machinery.
+    sendVia: 'services/feeReissue — the revised itemized statement. The SEND is a person’s act; this only measures.'
+  };
+}
+
+// ── SETTLE. Runs the aggregate ONCE, exactly as a non-MRR reconcile does. ────────────────────────
+async function settle(rid, opts) {
+  opts = opts || {};
+  var actor = s(opts.actorName);
+  if (!actor) throw bad('Settlement is a person’s act and is recorded against them. The system runs the engine; ' +
+    'it does not decide to bill anybody.', 'ACTOR_REQUIRED');
+  var pid = await parentOf(rid);
+  var state = await settlementState(pid);
+  if (!state.isMrr) throw bad(state.reason, 'NOT_MRR', 409);
+  if (state.settled) throw bad('This request was already settled on ' + state.settled.at + ' (' + state.settled.outcome +
+    '). A request settles once; a second run would rewrite a bill the citizen has already been given.', 'ALREADY_SETTLED', 409);
+  if (!state.ready) throw bad(state.reason, 'NOT_READY', 409);
+
+  var LA = require('./laborActuals');
+  var engine = require('./feeEngine');
+  var PS = require('./paymentStatus');
+  var ids = await PS.moneyTreeIds(pid);
+
+  // AGGREGATE THE ACTUALS ACROSS THE WHOLE TREE. `laborActuals.rollup` is per-row (its own header says
+  // per-child attribution is deferred); the aggregate is the sum, which is exactly the figure the engine
+  // reconciles at the request level anyway.
+  var hours = { searchHours: 0, reviewHours: 0, programmingHours: 0 };
+  var counted = [], measured = false;
+  for (var i = 0; i < ids.length; i++) {
+    var roll = await LA.rollup(ids[i]);
+    ['searchHours', 'reviewHours', 'programmingHours'].forEach(function (k) { hours[k] = Math.round((hours[k] + (Number(roll.hours[k]) || 0)) * 10000) / 10000; });
+    counted = counted.concat(roll.counted || []);
+    if (roll.hasActuals) measured = true;
+  }
+
+  var quote = await FR.acceptedQuote(pid);
+  if (!quote) quote = await db.get("SELECT * FROM request_fee_estimates WHERE request_id IN (" +
+    ids.map(function () { return '?'; }).join(',') + ") AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", ids);
+  if (!quote) throw bad('There is no estimate to settle against on this request.', 'NO_ESTIMATE', 409);
+  var input = {}; try { input = JSON.parse(quote.input_json || '{}'); } catch (e) { input = {}; }
+  if (!input.components || !input.components.length) throw bad('The estimate on this request has no priced components, ' +
+    'so there is nothing for the engine to re-run.', 'NO_COMPONENTS', 409);
+
+  var cfgRow = quote.config_profile_id
+    ? await db.get('SELECT * FROM fee_profiles WHERE id = ?', [quote.config_profile_id])
+    : await db.get("SELECT * FROM fee_profiles WHERE status = 'active' ORDER BY updated_at DESC LIMIT 1");
+  var config = {}; try { config = JSON.parse((cfgRow && cfgRow.config_json) || '{}'); } catch (e) { config = {}; }
+  var pol = (config.estimatePolicy && typeof config.estimatePolicy.revisionNotifyPercent === 'number')
+    ? config.estimatePolicy.revisionNotifyPercent : 20;
+
+  // ONE RUN, THE SAME ENGINE. `measured` false means capture was off or skipped everywhere — then the quoted
+  // quantities stand and the "aggregate" is the quote, which is the honest answer rather than zero hours.
+  var settleInput = measured ? LA.applyMeasuredLabor(input, hours) : JSON.parse(JSON.stringify(input));
+  settleInput._mrrSettlement = true;
+  settleInput._aggregateLabor = { hours: hours, tasks: counted.length, measured: measured };
+  var feeContext = engine.compute(config, settleInput);
+
+  var recon = await LA.writeReconciliation({
+    rid: quote.request_id, configProfileId: cfgRow && cfgRow.id, input: settleInput, feeContext: feeContext,
+    estTotal: quote.total != null ? Number(quote.total) : null, revisionNotifyPercent: pol,
+    createdBy: actor + ' (mrr settlement)'
+  });
+
+  // THE POSITION AFTER THE RUN. netting() reads the reconciliation we just wrote — evented, not recomputed.
+  var net = await netting(pid);
+  var watch = await overageWatchdog(pid);
+  var outcome, finalInvoice = 0, refundOut = 0;
+  if (net.refundOutstanding > 0.005) { outcome = 'refund'; refundOut = net.refundOutstanding; }
+  else if (net.balanceDue > 0.005) {
+    outcome = 'balance_due';
+    finalInvoice = (watch.collectionCap != null) ? Math.min(net.balanceDue, watch.collectionCap) : net.balanceDue;
+    finalInvoice = r2(finalInvoice);
+  } else { outcome = 'zero'; }
+
+  await db.run('UPDATE requests SET settlement_at = ?, settlement_by = ?, settlement_outcome = ?, ' +
+    'settlement_reconciliation_id = ?, settlement_amount = ?, updated_at = ? WHERE id = ?',
+    [nowStr(), actor, outcome, recon.id, outcome === 'refund' ? refundOut : finalInvoice, nowStr(), pid]);
+
+  var words = outcome === 'refund'
+    ? ('nets to a refund of $' + refundOut.toFixed(2) + ' — the last record RELEASES immediately; the refund itself ' +
+       'is Finance’s act and is never automatic')
+    : outcome === 'zero'
+      ? 'nets to zero — the last record RELEASES immediately'
+      : ('leaves $' + net.balanceDue.toFixed(2) + ' due' +
+         (watch.forfeitedUnlessNotified > 0
+           ? (', of which only $' + finalInvoice.toFixed(2) + ' is billable: $' + watch.forfeitedUnlessNotified.toFixed(2) +
+              ' is unnotified overage and is forfeited unless the updated itemized statement goes out (' + watch.citation + ')')
+           : '') +
+         '. The last record is held until that payment');
+
+  try {
+    await db.run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes, details, created_at) VALUES (?,?,?,?,?,?,?,?)',
+      ['rh-' + uuidv4().slice(0, 8), pid, opts.actorId || null, actor, 'MRR_SETTLED',
+       'Request settled on the last record: aggregate actuals run through the fee engine once ($' +
+       Number(recon.actualTotal || 0).toFixed(2) + ' against the accepted estimate $' +
+       (recon.estimateTotal != null ? Number(recon.estimateTotal).toFixed(2) : '?') + '), which ' + words + '.',
+       JSON.stringify({ reconciliationId: recon.id, outcome: outcome, hours: hours, measured: measured,
+         finalInvoice: finalInvoice, refundOutstanding: refundOut, cap: watch.collectionCap,
+         forfeited: watch.forfeitedUnlessNotified }), nowStr()]);
+  } catch (e) { /* best effort */ }
+  try {
+    await PS.recordEvent(pid, { type: 'settlement', amount: outcome === 'refund' ? refundOut : finalInvoice,
+      reason: 'MRR terminal settlement — ' + words + '.', reference: recon.id, actor: actor });
+  } catch (e) { console.error('[parentFinance settle]', e && e.message); }
+
+  return {
+    ok: true, outcome: outcome, reconciliation: recon, netting: net, watchdog: watch,
+    finalInvoice: finalInvoice, refundOutstanding: refundOut,
+    aggregate: { hours: hours, tasks: counted.length, measured: measured },
+    releasesLastRecordImmediately: outcome !== 'balance_due',
+    lastRecord: state.lastRecord,
+    note: 'Settled once, through the same engine a single-record request uses. ' +
+      (outcome === 'balance_due'
+        ? 'The last record is held against the final payment.'
+        : 'The last record’s coverage is satisfied by the settlement — nothing is held.'),
+    forfeited: watch.forfeitedUnlessNotified,
+    forfeitedReason: watch.forfeitedUnlessNotified > 0 ? watch.reason : null
+  };
+}
+
+// What may a final invoice actually collect right now? The cap read on its own, for the screen and for any
+// caller about to generate a demand. `refuse` is the answer to "can I bill the whole balance": no, and why.
+async function collectionCap(rid) {
+  var pid = await parentOf(rid);
+  var watch = await overageWatchdog(pid);
+  var billable = (watch.collectionCap != null) ? Math.min(watch.balanceDue, watch.collectionCap) : watch.balanceDue;
+  return {
+    requestId: pid, balanceDue: watch.balanceDue, billable: r2(billable),
+    refuse: watch.forfeitedUnlessNotified > 0,
+    forfeited: watch.forfeitedUnlessNotified,
+    reason: watch.forfeitedUnlessNotified > 0 ? watch.reason : null,
+    citation: watch.forfeitedUnlessNotified > 0 ? watch.citation : null,
+    sendVia: watch.sendVia
+  };
+}
+
 module.exports = {
-  CREDIT_CAUSES: CREDIT_CAUSES,
+  CREDIT_CAUSES: CREDIT_CAUSES, TERMINAL_STATUSES: TERMINAL_STATUSES,
   parentOf: parentOf,
   quotedShares: quotedShares, freezeQuote: freezeQuote,
   netting: netting, credit: credit, refund: refund,
-  withholdingCredit: withholdingCredit, adjustments: adjustments
+  withholdingCredit: withholdingCredit, adjustments: adjustments,
+  itemStates: itemStates, actualsIn: actualsIn, settlementState: settlementState,
+  overageWatchdog: overageWatchdog, settle: settle, collectionCap: collectionCap
 };

@@ -174,6 +174,46 @@ async function poolFunds(rid) {
 // single-pool request, which is every request in the system until the money axis moves to the parent.
 async function cumulative(rid, ownShareFallback) {
   var out = { applies: false, reason: 'one priced snapshot, one record — coverage is self-contained' };
+
+  // ── AFTER TERMINAL SETTLEMENT, THE FROZEN SHARES STOP GOVERNING (Draft 7 §0.3) ──
+  //
+  // The last record settles the request, and at that moment the request is ONE BILL again — exactly the
+  // regime a single-record request has always run: final delivery against final payment. So the basis
+  // switches from "your share of a frozen quote" to "the settled balance", which is the only reading under
+  // which "held until that payment, or releases IMMEDIATELY when the adjustment nets to refund or zero" is
+  // true. Holding the last record against frozen shares that a downward reconciliation has just superseded
+  // would withhold a finished record over money nobody owes.
+  //
+  // UNREACHABLE OUTSIDE AN MRR. `settlement_at` is written by exactly one function — parentFinance.settle —
+  // which refuses anything that is not a multi-record request at a real terminal state.
+  var settleRow = null;
+  try {
+    settleRow = await db.get('SELECT settlement_at, settlement_outcome FROM requests WHERE id = ' +
+      '(SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?)', [rid]);
+  } catch (e) { settleRow = null; }
+  if (settleRow && settleRow.settlement_at) {
+    var net = null;
+    try { net = await require('./parentFinance').netting(rid); } catch (e) { net = null; }
+    var due = net ? Math.max(0, Number(net.balanceDue) || 0) : 0;
+    return {
+      applies: true, settled: true,
+      settlementAt: settleRow.settlement_at, settlementOutcome: settleRow.settlement_outcome || null,
+      // Expressed as required-against-available so the caller's one coverage comparison stays the only one in
+      // the file: nothing is available to draw on, and what is required is what is still owed on the request.
+      required: r2(due), available: 0, ownQuotedShare: null, siblings: [], consumedByShipped: 0,
+      funds: net ? { paid: net.paidGross, credits: net.credits, refunds: net.refundsIssued, available: r2(net.paidGross - net.refundsIssued + net.credits) } : null,
+      reason: due > 0
+        ? ('This request has been settled and $' + due.toFixed(2) + ' is still due on it. The last record is held ' +
+           'against that final payment — the same final-delivery-against-final-payment regime a single-record ' +
+           'request runs (§0.3, and the §5.9 footnote records why it is the whole balance rather than one share).')
+        : ('This request has been settled and nothing is owed' +
+           (settleRow.settlement_outcome === 'refund' ? ' — it nets to a refund' : '') +
+           '. Coverage is satisfied; nothing is held.'),
+      ownShareOnly: 'Frozen per-item shares governed until settlement. After it the request is one bill again, ' +
+        'which is what makes "releases immediately when the adjustment nets to refund or zero" true.'
+    };
+  }
+
   var quote = await acceptedQuote(rid);
   var fallbackQuote = false;
   if (!quote) { quote = await snapshot(rid, 'estimate'); fallbackQuote = true; }
@@ -251,7 +291,7 @@ async function releaseGate(rid) {
   var fifo = !!(cum && cum.applies);
   var required = fifo ? cum.required : charged;
   var funds = fifo ? cum.available : paid;
-  if (fifo) basis = 'component_cumulative';
+  if (fifo) basis = cum.settled ? 'settled' : 'component_cumulative';
 
   // Cent-tolerant: an off-by-$0.01 rounding artefact must not withhold a finished record.
   var covered = funds + 0.005 >= required;
@@ -262,7 +302,7 @@ async function releaseGate(rid) {
     requiresPaymentBeforeRelease: pt.requiresPaymentBeforeRelease(plan),
     // §5.9 coverage — THIS record's share, and what is owed on it alone.
     covered: covered,
-    componentCharged: fifo ? cum.ownQuotedShare : (share ? share.amount : null),
+    componentCharged: (fifo && cum.ownQuotedShare != null) ? cum.ownQuotedShare : (share ? share.amount : null),
     coverageBasis: basis,
     balanceDue: shortfall,
     // The cumulative-FIFO picture, present only when it applied. `coverageRequired` is what the pool had to
