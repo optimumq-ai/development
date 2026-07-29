@@ -323,8 +323,17 @@ async function createRequest(fields, opts) {
   // mode is indistinguishable from no gate at all, and an intake reviewer never learns that the state has
   // a residency condition this submission does not answer. Written on the work row (the child), where
   // intake staff actually look, and never fatal.
+  //
+  // PHASE 7 / BW3 — the same evaluation is ALSO written STRUCTURED (services/eligibilityFindings.js), on the
+  // same rows, because the note cannot answer "did a review come back?" at spawn time or carry a reviewer's
+  // confirmation. The note stays: it is the audit trail, and the structure is a read model beside it, not a
+  // replacement for it.
   if (eligibility && (eligibility.advisories.length || eligibility.reviews.length)) {
     var findings = eligibility.reviews.concat(eligibility.advisories);
+    for (var sf = 0; sf < childIds.length; sf++) {
+      try { await require('./eligibilityFindings').record(childIds[sf], eligibility); }
+      catch (e) { console.error('[requestCreate] structured eligibility findings failed:', e && e.message); }
+    }
     var summary = findings.map(function (f) {
       return f.label + ' — ' + (f.action === 'route_review' || eligibility.reviews.indexOf(f) >= 0 ? 'needs review' : 'advisory') +
              (f.source_rule_ids.length ? ' [' + f.source_rule_ids.join(', ') + ']' : '');

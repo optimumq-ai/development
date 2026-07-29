@@ -6,6 +6,7 @@ const tr = require('../services/taskRouting');
 const scope = require('../services/requestScope');
 const SI = require('../services/searchIntents');
 const laborActuals = require('../services/laborActuals');
+const uuidv4 = require('uuid').v4;
 
 function withReq(sql) {
   // A task hangs off the WORK row, but request_number is a PARENT field — the number the citizen quotes.
@@ -194,7 +195,7 @@ router.post('/:id/resolve', requireAuth, async function (req, res) {
   try {
     var t = await get('SELECT * FROM tasks WHERE id = ?', [req.params.id]);
     if (!t) return res.status(404).json({ error: 'Task not found' });
-    if (t.type !== 'record_search' && t.type !== 'legal_review') {
+    if (t.type !== 'record_search' && t.type !== 'legal_review' && t.type !== 'intake_review') {
       return res.status(400).json({ error: 'This task type has no resolution path here.' });
     }
 
@@ -265,6 +266,80 @@ router.post('/:id/resolve', requireAuth, async function (req, res) {
         notes: 'Legal review recorded (' + decision.label + '). ' + notes
       }, actor));
       return res.json({ ok: true, outcome: outcome, stage: decision.stage });
+    }
+
+    // ==========================================================================================
+    // RESOLVE AN INTAKE REVIEW (PHASE 7 / BW3 — DRAFT_processing_ui_intake_review.md §4.6).
+    //
+    // ONE outcome: `proceed`. That asymmetry is the design, not an omission — every OTHER way an intake
+    // review can end already has its own act, and each of them ends the task through the machinery that
+    // performs it rather than through here:
+    //
+    //   marked Vague / Overly Broad  -> clarificationAction holds the request pending the requestor
+    //   referred to another custodian -> the custodian-referral act
+    //   denied (OH "too vague")       -> Denial compose, an empowered role's act
+    //   re-routed to the right team   -> intakeReview.closeForResolvedTrigger('unroutable')
+    //
+    // There is deliberately NO manual hold (spec §2.4, Kevin 7/29): hold is a system state with a named
+    // cause. A "Hold" outcome here would be exactly the unnamed stop that decision removed.
+    //
+    // THE GATE IS SHARED (services/intakeReview.proceedGate): this route refuses on it and the screen
+    // renders it. 422 with a named cause, the record-search Found gate's pattern.
+    // ==========================================================================================
+    if (t.type === 'intake_review') {
+      if (outcome !== 'proceed') {
+        return res.status(400).json({
+          error: 'An intake review resolves by proceeding. Marking the request vague or overly broad, ' +
+                 'referring it to another custodian, or denying it are their own acts and end this task themselves.',
+          code: 'UNKNOWN_OUTCOME'
+        });
+      }
+      var IR = require('../services/intakeReview');
+      var gate = await IR.proceedGate(rid);
+      if (gate.blocked) {
+        return res.status(422).json({
+          error: gate.reasons.map(function (r) { return r.text; }).join(' '),
+          // The FIRST open cause is the code, so a caller that switches on one still gets a true answer;
+          // `reasons` carries all of them, because a reviewer should see every stop at once rather than
+          // clearing one and discovering the next.
+          code: gate.reasons[0].code,
+          reasons: gate.reasons
+        });
+      }
+      // Proceed → Fulfillment through the ONE central transition. `record_search` is the fulfillment entry
+      // the mockup's Resolve panel names ("Proceed routes the item to Record Search on the … Team").
+      //
+      // BUT ONLY FORWARD. Two live shapes put an open intake review on a request that is already moving:
+      //   * the ordinary `approval_pending` case — the classifier routed it confidently and only the waiver
+      //     stopped it, so the request is ALREADY at record_search;
+      //   * `always` mode — every non-MRR request gets a stop, including ones that then advance under it.
+      // Handing 'record_search' to applyStageTransition in the first case is a harmless no-op (same stage
+      // in, `changed:false` out). In the second it would DRAG THE REQUEST BACKWARDS out of redaction or
+      // delivery, cancel that stage's task and re-spawn a search — a silent regression of real work. So the
+      // stage is only offered when the request has not passed it; otherwise the task completes and says so.
+      var STAGE_ORDER = require('../services/stages').ORDER;
+      var cur = await get('SELECT stage FROM requests WHERE id = ?', [rid]);
+      var curIdx = STAGE_ORDER.indexOf(cur && cur.stage);
+      var targetIdx = STAGE_ORDER.indexOf('record_search');
+      var behind = curIdx === -1 || curIdx < targetIdx;
+      await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [req.params.id]);
+      var moved = null;
+      if (behind) {
+        moved = await tr.applyStageTransition(rid, 'record_search', Object.assign({
+          action: 'INTAKE_REVIEW_COMPLETE',
+          notes: 'Intake review complete — proceeding to fulfillment.' + (notes ? ' ' + notes : '')
+        }, actor));
+      } else {
+        // Still recorded: the review happened and was cleared, which is the fact the audit trail needs. The
+        // stage is simply not this task's to change any more.
+        await run(
+          'INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+          [uuidv4(), rid, actor.actorId || null, actor.actorName, 'INTAKE_REVIEW_COMPLETE',
+           'Intake review complete — the request had already advanced to ' + (cur && cur.stage) +
+           ', so its stage was left as it was found.' + (notes ? ' ' + notes : '')]);
+      }
+      return res.json({ ok: true, outcome: 'proceed', stage: behind ? 'record_search' : (cur && cur.stage),
+                        stageChanged: !!(moved && moved.changed) });
     }
 
     if (outcome === 'found') {

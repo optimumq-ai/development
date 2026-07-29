@@ -269,6 +269,26 @@ async function onIntake(requestId, matcherResult){
     });
   }
 
+  // BW3 (2026-07-29): trigger (ii) `eligibility_review`. An eligibility dimension the CITY has confirmed and
+  // set to `route_review` — or set to `block` on a fact the submission does not carry — lets the request
+  // through and asks for a person before it advances (services/eligibilityGate.js). Until BW3 there was
+  // nowhere for that person to be asked: the finding was a prose history note nobody was routed to.
+  //
+  // WHY THIS DOES NOT CHANGE A DEFAULT INSTALL. A finding only becomes a `review` when the city has
+  // CONFIRMED the dimension (gate 2 of the four), and a freshly imported state is advisory-only by
+  // construction — so on every install that has not deliberately confirmed and configured a dimension, this
+  // reads zero rows and spawns nothing. Where it does fire, the alternative was a review nobody performed.
+  //
+  // The findings are written by requestCreate BEFORE intake is kicked, so they are readable here. A request
+  // created by a path that does not evaluate eligibility simply has none.
+  try {
+    if (await require('./eligibilityFindings').hasReview(requestId)) {
+      await require('./intakeReview').spawn(requestId, ['eligibility_review'], {
+        createdBy: 'workflow', requestText: request.description, awaitRouting: true
+      });
+    }
+  } catch (e) { console.error('[workflowEngine] eligibility_review trigger failed:', e && e.message); }
+
   // `intake_review_mode: 'always'` — a city that wants every non-MRR request to pause for a day-1 look
   // (BW2 knob, services/processingConfig.js). LAST, after every trigger evaluation above, so a request
   // that already stopped for a reason keeps that reason on its task. Default (`when_needed`) is a no-op,

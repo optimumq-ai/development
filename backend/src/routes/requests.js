@@ -439,6 +439,25 @@ router.post('/:id/fee-waiver-decision', requireAuth, async function(req, res) {
   // financial-authority capability (D4 §8; renamed from FEE_AUTHORITY, retiring the orphan FEE_WAIVER_APPROVER).
   var fRoles = req.user.roles || [], perms = req.user.perms || [];
   var canDecide = ['SYSTEM_ADMIN','DIRECTOR','SUPERVISOR'].some(function(r){ return fRoles.indexOf(r) !== -1; }) || perms.indexOf('FINANCE') !== -1;
+  // PHASE 7 / BW3 — THE INLINE DECIDER. `mode: 'intake_review'` means "the intake reviewer decides the
+  // waiver inline, no extra hop" (DESIGN_fee_waiver_commercial.md; WS4). That is a promise this route was
+  // quietly breaking: the ORO Associate who holds the intake_review task holds none of the roles above, so
+  // the panel the mode exists to provide would have rendered a Grant button that 403s. The narrow fix is
+  // narrow on purpose — the ASSIGNEE of an OPEN intake_review on THIS request, and only while the module is
+  // actually in that mode. It cannot widen a routed_task install (the shipped default), where the decision
+  // belongs to the Fee-Waiver Approval task and its FINANCE holder.
+  if (!canDecide) {
+    try {
+      var openIntake = await get(
+        "SELECT id FROM tasks WHERE request_id = (SELECT id FROM requests WHERE id = ? OR request_number = ?) " +
+        "AND type = 'intake_review' AND assigned_to = ? AND status IN ('open','assigned','in_progress','returned','awaiting_review')",
+        [req.params.id, req.params.id, req.user && req.user.sub]);
+      if (openIntake) {
+        var amMode = await require('../services/approvalModules').config(null);
+        if (amMode && amMode.modules && amMode.modules.fee_waiver && amMode.modules.fee_waiver.mode === 'intake_review') canDecide = true;
+      }
+    } catch (e) { console.error('[fee-waiver-decision] inline-decider check failed:', e && e.message); }
+  }
   if (!canDecide) return res.status(403).json({ error: 'Insufficient role' });
   var b = req.body || {};
   var decision = b.decision;
@@ -591,6 +610,39 @@ router.post('/:id/search-intents/:intentId/resolve', requireAuth, async function
       verb + ' — "' + row.description + '"' + (row.resolution_note ? ': ' + row.resolution_note : ''));
 
     res.json({ ok: true, intent: row, openCount: (await SI.openIntents(req.params.id)).length });
+  } catch (e) {
+    if (e.status) return res.status(e.status).json({ error: e.message, code: e.code });
+    res.status(500).json({ error: e.message });
+  }
+});
+
+// PHASE 7 / BW3 — THE STRUCTURED ELIGIBILITY FINDINGS (DRAFT_processing_ui_intake_review.md §4.5).
+//
+// What the requester-eligibility panel draws, and what the Proceed gate checks. The evaluation happened at
+// SUBMIT time (requestCreate -> eligibilityGate.evaluate); this reads what it decided, it never re-runs it.
+// See services/eligibilityFindings.js for why re-evaluating on render would be wrong.
+//
+// `blocks` is always empty in practice — a blocked submission is refused at the portal and never becomes a
+// request — but the key is present so a screen never has to distinguish "no blocks" from "this endpoint
+// does not report blocks".
+router.get('/:id/eligibility-findings', requireAuth, async function(req, res) {
+  try {
+    res.json(await require('../services/eligibilityFindings').read(req.params.id));
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// THE CONFIRM (rule c — advisory ≠ automatic). A review is cleared by a NAMED PERSON and nothing else: the
+// system recorded the finding, and it must never be shown as having decided it. The reviewer's name is
+// taken from the token, not the body, so a confirmation cannot be attributed to somebody who did not make it.
+router.post('/:id/eligibility-findings/:findingId/confirm', requireAuth, async function(req, res) {
+  try {
+    var EF = require('../services/eligibilityFindings');
+    var finding = await EF.confirm(req.params.findingId, {
+      actorId: req.user && req.user.sub,
+      actorName: (req.user && req.user.name) || 'Staff',
+      note: (req.body && req.body.note) || ''
+    });
+    res.json({ ok: true, finding: finding, openReviews: (await EF.openReviews(req.params.id)).length });
   } catch (e) {
     if (e.status) return res.status(e.status).json({ error: e.message, code: e.code });
     res.status(500).json({ error: e.message });

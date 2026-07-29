@@ -30,10 +30,13 @@
 //                     it on. So the decision was being dropped. Safe by default: the shipped defaults are
 //                     fee_waiver=routed_task and commercial_rate=disabled, so this fires only where a city
 //                     explicitly chose intake_review mode.
-//   eligibility_review NOT WIRED. The findings persist as PROSE history notes today; draft §4.5 makes the
-//                     structured {blocks, reviews, advisories} read a BW3 deliverable, and it is needed at
-//                     SPAWN time, not just render time. Wiring it against a history-note action string
-//                     would be a guess dressed as a signal.
+//   eligibility_review WIRED IN BW3. The structured read it was waiting for now exists
+//                     (services/eligibilityFindings.js — a real table written beside the prose note), so
+//                     workflowEngine.onIntake asks `hasReview(requestId)` instead of regex-ing an English
+//                     sentence. Safe by default in the same way `approval_pending` is: a finding only
+//                     becomes a REVIEW where the city has CONFIRMED the dimension and chosen review (or
+//                     chose block on a fact the submission does not carry), and a freshly imported state is
+//                     advisory-only by construction — so a default install raises none of these.
 //   sensitivity_flag  NOT WIRED. The signal exists (workflow_decisions.flags — SENSITIVE / LEGAL_HOLD /
 //                     ONGOING_INVESTIGATION, the same list legal redaction escalates on), but those flags
 //                     are common, so wiring it would stop a meaningful share of ordinary traffic at a
@@ -57,7 +60,7 @@ var TYPE = 'intake_review';
 // The decided trigger vocabulary (draft §0 decision 5). Order is the draft's (i)…(v).
 var TRIGGERS = ['unroutable', 'eligibility_review', 'approval_pending', 'sensitivity_flag', 'reopen_retriage'];
 // Wired today — see the header. Everything else is recordable but nothing raises it yet.
-var WIRED_TRIGGERS = ['unroutable', 'approval_pending'];
+var WIRED_TRIGGERS = ['unroutable', 'approval_pending', 'eligibility_review'];
 var TRIGGER_LABELS = {
   unroutable: 'The fulfillment team could not be determined',
   eligibility_review: 'An eligibility finding needs a human decision',
@@ -245,6 +248,74 @@ async function closeForResolvedTrigger(requestId, trigger, opts) {
   return closed;
 }
 
+// ══ THE PROCEED GATE (draft §4.6) ══
+//
+// "Resolution blocked (with the reason) while an inline waiver decision or an eligibility review is open —
+// same pattern as the record-search Found gate (422 with a named cause)."
+//
+// ONE function, TWO consumers, and that is deliberate: `POST /tasks/:id/resolve` refuses on it, and the
+// screen's Resolve panel RENDERS it. A gate the screen computes for itself is a gate that eventually
+// disagrees with the one that enforces — the record-search Found gate learned that the expensive way, and
+// its comment in routes/tasks.js says so.
+//
+// The reasons are SENTENCES, not codes with a lookup table on the far side. A reviewer staring at a
+// greyed-out Proceed needs to be told what to do about it, and the words belong next to the condition they
+// describe rather than in a frontend switch statement that drifts.
+//
+// ⚠ WHAT IS DELIBERATELY NOT GATED, and why (conservative on ambiguity — recorded here rather than
+// discovered later):
+//
+//   COMMERCIAL-RATE CLASSIFICATION. `approvalModules.evaluateCommercial` returns `needs_decision` for as
+//   long as no `classifyAs` is supplied — and NOTHING PERSISTS a classification anywhere (there is no
+//   column, no history action, no task outcome that records one; see the grep in the BW3 commit). A gate on
+//   it would therefore be a stop no act in the system can clear: every request in a city that enables the
+//   module in intake_review mode would be permanently un-proceedable. The panel renders (it is a real
+//   pending decision the reviewer should see); the gate waits for BW4 to give the classification somewhere
+//   to live.
+//
+//   LEGACY PROSE ELIGIBILITY NOTES. A request created before the structured findings table has notes and no
+//   confirmable rows. Gating on them would strand every in-flight request across the deploy behind a
+//   confirm button that has nothing to confirm. See services/eligibilityFindings.js.
+async function proceedGate(requestId) {
+  var out = { blocked: false, reasons: [] };
+  if (!requestId) return out;
+
+  // (a) An eligibility review nobody has put their name to. Rule (c): the system never confirms its own
+  // finding, so this clears only when a PERSON does.
+  try {
+    var open = await require('./eligibilityFindings').openReviews(requestId);
+    open.forEach(function (f) {
+      out.reasons.push({
+        code: 'ELIGIBILITY_REVIEW_OPEN',
+        finding: f.dimension,
+        text: 'The ' + String(f.label || f.dimension).toLowerCase() + ' finding still needs your confirmation. ' +
+              'Confirm it in the Requester eligibility panel — the request proceeds, but a person has to say so.'
+      });
+    });
+  } catch (e) { console.error('[intakeReview proceedGate eligibility]', e && e.message); }
+
+  // (b) An inline fee-waiver decision. Only in `intake_review` mode: in `routed_task` mode (the shipped
+  // default) the decision belongs to a Fee-Waiver Approval task and gating intake on it would block a
+  // request behind somebody else's queue. The estimate-communication gate already holds that line.
+  try {
+    var req = await get('SELECT * FROM requests WHERE id = ?', [requestId]);
+    if (req) {
+      var AM = require('./approvalModules');
+      var wv = await AM.evaluateWaiver(null, req, {});
+      if (wv.outcome === 'needs_decision' && wv.route && wv.route.mode === 'intake_review') {
+        out.reasons.push({
+          code: 'WAIVER_UNDECIDED',
+          text: 'The requester asked for a fee waiver and this city decides it here. Grant or deny it in the ' +
+                'Fee waiver panel before proceeding — the estimate cannot be sent while it is open either way.'
+        });
+      }
+    }
+  } catch (e) { console.error('[intakeReview proceedGate waiver]', e && e.message); }
+
+  out.blocked = out.reasons.length > 0;
+  return out;
+}
+
 // Every open intake stop on a request, legacy included — used by callers that must not treat the intake
 // task as ordinary team work (the re-route path moves WORK tasks onto the new team; this is office work).
 async function openStops(requestId) {
@@ -266,5 +337,6 @@ module.exports = {
   isMrr: isMrr,
   spawn: spawn,
   spawnForMode: spawnForMode,
-  closeForResolvedTrigger: closeForResolvedTrigger
+  closeForResolvedTrigger: closeForResolvedTrigger,
+  proceedGate: proceedGate
 };

@@ -157,8 +157,11 @@ var UNROUTABLE_MATCH = { classification: 'standard', recordTypeConfidence: 0, fl
     console.log('\n=== C. TRIGGERS ARE A LIST ON ONE TASK, NOT A TASK EACH ===');
     ok('C0 the decided enum is exactly the five keys, in draft order',
       IR.TRIGGERS.join('|') === 'unroutable|eligibility_review|approval_pending|sensitivity_flag|reopen_retriage');
+    // BW3 added `eligibility_review` — its structured signal now exists (services/eligibilityFindings.js).
+    // `sensitivity_flag` stays deliberately unwired (which flags should stop a request is Kevin's question,
+    // not an inference) and `reopen_retriage` is BW5's. verify_bw3_intake_review owns the wiring proof.
     ok('C1 only the triggers whose signals exist today are wired',
-      IR.WIRED_TRIGGERS.join('|') === 'unroutable|approval_pending');
+      IR.WIRED_TRIGGERS.join('|') === 'unroutable|approval_pending|eligibility_review');
 
     var r3 = await makeRequest('req-' + TAG + '-C'); created.requests.push(r3);
     var s1 = await IR.spawn(r3, ['unroutable'], { createdBy: 'harness', awaitRouting: true });

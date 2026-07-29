@@ -1270,3 +1270,46 @@ CREATE INDEX IF NOT EXISTS idx_req_flag ON requestor_flags (profile_id, flag);
 -- Nullable and generic on purpose: any future trigger-spawned type can use the same column rather than
 -- growing a parallel one, and every existing row keeps meaning exactly what it meant (no trigger recorded).
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS spawn_triggers TEXT;
+
+-- PHASE 7 / BW3 — THE STRUCTURED ELIGIBILITY FINDING (DRAFT_processing_ui_intake_review.md §4.5).
+--
+-- Until now an eligibility evaluation persisted ONLY as a prose `request_history` note
+-- (ELIGIBILITY_REVIEW / ELIGIBILITY_ADVISORY, written by services/requestCreate.js). Prose is fine for an
+-- audit trail and useless for three things the intake screen needs:
+--   * SPAWN TIME — "did a review come back?" is trigger (ii) of intake_review, and it has to be answerable
+--     without regex-ing an English sentence written for a human.
+--   * RENDER TIME — the panel draws advisories ghost/dashed and reviews amber-with-a-confirm-button
+--     (rule c). That is a per-dimension distinction the summary string flattens.
+--   * THE CONFIRM — a review is CLOSED by a named person. There is nowhere on a history row to record that
+--     against the finding it answers.
+-- So the evaluation is written here as rows AS WELL AS the note. The note is not replaced: it is the audit
+-- trail, and rewriting history for a new read model would be the wrong trade.
+--
+-- `finding_class` is the evaluator's own three-way split (blocks / reviews / advisories). A `block` never
+-- reaches this table today — a blocked submission is refused at the portal before a row exists — but the
+-- class is stored rather than inferred so a future recorded-block has a home and nothing has to guess.
+--
+-- CONFIRMATION IS THE PERSON'S, NOT THE CONFIG'S. `config_confirmed` is whether the CITY confirmed the
+-- dimension (eligibilityGate's gate-4 test); `confirmed_at`/`confirmed_by` are whether a REVIEWER cleared
+-- this finding on this request. Two different facts that a single `confirmed` column would silently merge.
+CREATE TABLE IF NOT EXISTS request_eligibility_findings (
+  id TEXT PRIMARY KEY,
+  request_id TEXT NOT NULL,
+  dimension TEXT NOT NULL,             -- residency | identity | purpose | requester_class | incarceration | vexatious
+  finding_class TEXT NOT NULL,         -- block | review | advisory
+  label TEXT,
+  action TEXT,                         -- the city's configured action: advise | route_review | block
+  config_confirmed INTEGER DEFAULT 0,  -- did the CITY confirm the dimension
+  fact_known INTEGER DEFAULT 0,        -- did the submission carry the fact at all
+  why TEXT,                            -- the evaluator's sentence for this finding
+  note TEXT,                           -- the dimension's standing help text
+  source_rule_ids TEXT,                -- JSON array of imported rule ids
+  evaluated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')),
+  confirmed_at TEXT,                   -- the REVIEWER's act (reviews only)
+  confirmed_by TEXT,
+  confirm_note TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_elig_finding_request ON request_eligibility_findings (request_id);
+-- One row per dimension per request: re-evaluating a request updates its findings rather than stacking a
+-- second opinion beside the first.
+CREATE UNIQUE INDEX IF NOT EXISTS idx_elig_finding_req_dim ON request_eligibility_findings (request_id, dimension);
