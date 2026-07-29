@@ -130,10 +130,27 @@ async function kidsOf(parentId) {
     ok('...and the parent was never routed (' + pdecs.length + ') — it has no description to route on', pdecs.length === 0);
     var tasks = [];
     for (var t = 0; t < PK.length; t++) tasks.push((await db.all('SELECT id, request_id FROM tasks WHERE request_id = ?', [PK[t].id])).length);
-    var ptasks = await db.all('SELECT id FROM tasks WHERE request_id = ?', [pRow.id]);
-    ok('the parent has NO tasks (' + ptasks.length + ') — it is not a unit of work', ptasks.length === 0);
-    ok('every task intake produced hangs off a CHILD (' + tasks.join(' / ') + ')',
-      (await db.all('SELECT request_id FROM tasks WHERE request_id = ANY($1::text[])', [[pRow.id].concat(PK.map(function (k) { return k.id; }))]))
+    // THE PARENT CARRIES NO FULFILLMENT WORK — narrowed 2026-07-29 (BW2), and the narrowing is the point.
+    //
+    // The original assertion was "the parent has NO tasks", which stated two things at once: the parent is
+    // not a unit of FULFILLMENT work (permanent — searching, redacting and estimating happen per record,
+    // which is why worklists never union two shapes), and the parent has no task of any kind (incidental —
+    // true only while nothing coordinated an MRR).
+    //
+    // BW2 gives it exactly one: `mrr_management`, the parent hub, spawned on child_count > 1 (MASTER §A2,
+    // "the MRR parent is routed by the system"; SPEC_processing_ui §8). One submission of five records is
+    // one coordination job, and before this it had no owner — the children each routed themselves and
+    // nobody held the whole. So the invariant is restated precisely rather than deleted: coordination is
+    // parent-level, fulfillment is child-level, and nothing else may appear on a parent.
+    var ptasks = await db.all('SELECT id, type FROM tasks WHERE request_id = ?', [pRow.id]);
+    var pWork = ptasks.filter(function (x) { return x.type !== 'mrr_management'; });
+    ok('the parent carries NO fulfillment work (' + pWork.length + ') — it is not a unit of work',
+      pWork.length === 0);
+    ok('...and the ONLY task it may carry is the MRR coordination hub (' +
+       ptasks.map(function (x) { return x.type; }).join(',') + ')',
+      ptasks.every(function (x) { return x.type === 'mrr_management'; }));
+    ok('every WORK task intake produced hangs off a CHILD (' + tasks.join(' / ') + ')',
+      (await db.all("SELECT request_id FROM tasks WHERE type <> 'mrr_management' AND request_id = ANY($1::text[])", [[pRow.id].concat(PK.map(function (k) { return k.id; }))]))
         .every(function (x) { return x.request_id !== pRow.id; }));
 
     // ---- 7. n = 1 is NOT a special case: the same path, the same shape

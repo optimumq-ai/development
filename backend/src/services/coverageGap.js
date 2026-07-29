@@ -118,7 +118,12 @@ async function notifyEmptyPool(task, opts) {
     // precisely the situation where nobody is looking at the queue. The sender already exists
     // (services/email.js — Resend or SMTP); when neither is configured it returns { sent:false } and this
     // degrades to the in-app notification alone, which is the correct behaviour, not an error.
-    if (opts.email !== false && firstRaise.length) {
+    //
+    // ⚠️ NEVER FROM A TEST RUN. The test database is a CLONE OF LIVE — including `system_config`, including
+    // the Resend key and the real staff email addresses. A harness that exercises this path would otherwise
+    // mail an actual manager about a fabricated request. testEnv guards the DATABASE; this guards the
+    // OUTBOUND SIDE EFFECT, which no database check can catch.
+    if (opts.email !== false && firstRaise.length && !/_test(\?|$)|_test\//.test(String(process.env.DATABASE_URL || ''))) {
       var to = firstRaise.map(function (u) { return u.email; }).filter(Boolean);
       if (to.length) {
         try {
