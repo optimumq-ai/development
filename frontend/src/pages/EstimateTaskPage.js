@@ -100,6 +100,7 @@ export default function EstimateTaskPage() {
   var review = (task.title || '').toLowerCase().indexOf('review') >= 0;
   var done = task.status === 'done';
   var paused = !!(ctx && ctx.paused && ctx.paused.paused);
+  var prov = (ctx && ctx.provenance) || null;
 
   return (
     <div style={{ maxWidth: '1100px' }}>
@@ -113,6 +114,27 @@ export default function EstimateTaskPage() {
       <p style={{ color: '#6B7280', fontSize: '14px', margin: '0 0 6px' }}>
         {task.request_number ? task.request_number + ' · ' : ''}{task.requestor_name ? 'for ' + task.requestor_name : ''}{task.record_type_name ? ' · ' + task.record_type_name : ''}
       </p>
+      {/* ── THE FIRST-LOOK BANNER (Draft 2 §1, §4.2) ──
+          Auto-routed only. On that path the estimate task is the first human checkpoint — the engine
+          sequences estimate before record search on a confident match, so under only-when-needed intake
+          (the default) the estimator is the first person to read most requests. The banner makes "nobody
+          has reviewed this" impossible to miss; it is deliberately absent when an ORO Associate already
+          scoped the request, because then it would be false.
+          An auto-COMPLETED intake review is NOT a human review (draft decision 4: no assignee, no
+          reviewer), so it renders here too, saying which it was. */}
+      {prov && prov.firstHumanReview ? (
+        <div style={{ fontSize: '13px', color: '#92400E', background: '#FFF8E5', border: '1px solid #D4A72C', borderRadius: '8px', padding: '11px 13px', margin: '0 0 14px' }}>
+          <b>First human review.</b> This request was routed automatically and no one has read it yet — you are
+          the first. Check that it says what the classification claims before you price it; if it does not,
+          the defect markers beside the description are how you say so.
+          {prov.detail ? <div style={{ marginTop: '4px', color: '#B45309' }}>{prov.detail}</div> : null}
+          {prov.openStop ? <div style={{ marginTop: '4px', color: '#B45309' }}>An intake review is OPEN on this request and has not been decided.</div> : null}
+        </div>
+      ) : prov ? (
+        <div style={{ fontSize: '12.5px', color: '#6B7280', margin: '0 0 14px' }}>
+          Path here: <b>{prov.label}</b>{prov.detail ? ' — ' + prov.detail : ''}
+        </div>
+      ) : null}
       {/* Global record-item layout (SPEC_processing_ui.md §2): verbatim text first, titled — never an
           italic aside; the defect buttons stacked in a small box to its LEFT (§2.2), the same pair the
           intake screen and the record-search rail carry. BW4. */}

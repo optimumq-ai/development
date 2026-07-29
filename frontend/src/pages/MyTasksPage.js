@@ -220,6 +220,18 @@ export default function MyTasksPage() {
           <div style={{ fontSize: '13px', color: '#1A2230', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.record_type_name || t.request_description || t.title || TYPE_LABEL[t.type] || t.type}</div>
           <div style={{ fontSize: '11.5px', color: C.muted }}>{clockLabel(t)}{(function () { var bi = budgetInfo(t); return bi ? <span> · <span style={{ color: bi.color, fontWeight: bi.weight }}>{bi.text}</span></span> : null; })()}{t.team_name ? ' · ' + t.team_name : ''}</div>
         </div>
+        {/* "PATH HERE" (BW4; Draft 2 §1) — an ESTIMATE-only column, because it is the only queue where the
+            answer changes the holder's duty. `Auto-routed — first human review` means literally nobody has
+            read this request: on a confident auto-route the engine sequences estimate BEFORE record search,
+            so under only-when-needed intake (the default) most requests meet their first human here. */}
+        {t.pathHere ? (
+          <div style={{ minWidth: '186px', fontSize: '11.5px', lineHeight: 1.35 }}>
+            <div style={{ fontWeight: 700, color: t.pathHere.firstHumanReview ? '#92400E' : C.muted }}>
+              {t.pathHere.label}
+            </div>
+            {t.paused && t.paused.paused ? <div style={{ color: '#92400E', fontWeight: 700 }}>Paused — clarification sent</div> : null}
+          </div>
+        ) : null}
         <div style={{ fontSize: '12.5px', textAlign: 'right', minWidth: '92px', color: ds === 'over' ? C.crit : ds === 'soon' ? C.warn : C.muted, fontWeight: ds ? 700 : 400 }}>{deadlineLabel(t.deadline_date)}</div>
         <Link to={screenFor(t)} style={{ fontSize: '12.5px', fontWeight: 600, color: C.accent, background: C.accentSoft, border: '1px solid #E5E7EB', borderRadius: '7px', padding: '5px 11px', textDecoration: 'none', whiteSpace: 'nowrap' }}>{actionLabel(t)}</Link>
       </div>

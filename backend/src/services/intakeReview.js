@@ -410,6 +410,82 @@ async function proceedGate(requestId) {
   return out;
 }
 
+// ══ PROVENANCE (PHASE 7 / BW4 — DRAFT_processing_ui_estimate.md §4.2) ══
+//
+// "Was there an intake_review stop on this request, and what was decided there?" — asked as one small,
+// queryable fact rather than reconstructed from history prose by each caller that wants it.
+//
+// It has THREE consumers and they must all agree: the estimate queue's "Path here" column, the estimate
+// screen's first-look banner, and (later) the waiver panel's tone. The estimator's DUTY changes with the
+// answer: on the auto-routed path they are the first person to read the request at all — the engine
+// sequences estimate before record search on `wfr-confident`, so under only-when-needed intake (the
+// default) most requests reach a human here first.
+//
+// WHAT COUNTS AS "VIA INTAKE REVIEW": a COMPLETED intake_review (or legacy routing_review) task. An OPEN
+// one is not provenance — nobody has decided anything yet, and calling that "reviewed" would tell the
+// estimator a stop happened that is in fact still happening. It is reported separately (`openStop`) so a
+// screen can say so rather than mislabel it.
+//
+// AUTO-COMPLETED IS NOT A HUMAN REVIEW, and the distinction is the whole point. A task raised and closed on
+// the spot because the requestor marked their portal selection as fulfilling (draft decision 4) had no
+// assignee and no reviewer. Reporting that as "Via Intake Review (name)" would name nobody, or worse name
+// the system — rule (c). It reports as auto-routed, with the auto-completion stated.
+//
+// Never throws: an unreadable substrate answers "auto-routed", which is the conservative answer — it tells
+// the estimator to look harder, not less hard.
+async function provenance(requestId) {
+  var out = {
+    viaIntakeReview: false, taskId: null, decidedBy: null, decidedAt: null, triggers: [],
+    autoCompleted: false, openStop: false, firstHumanReview: true,
+    label: 'Auto-routed — first human review', detail: null
+  };
+  if (!requestId) return out;
+  try {
+    var open = await get("SELECT id FROM tasks WHERE request_id = ? AND type IN ('" + TYPE + "','routing_review') AND status IN " +
+      ACTIONABLE + ' ORDER BY created_at LIMIT 1', [requestId]);
+    out.openStop = !!open;
+
+    var doneRow = await get("SELECT * FROM tasks WHERE request_id = ? AND type IN ('" + TYPE + "','routing_review') AND status = 'done' " +
+      'ORDER BY updated_at DESC LIMIT 1', [requestId]);
+    if (!doneRow) {
+      if (out.openStop) out.detail = 'An intake review is open on this request and has not been decided yet.';
+      return out;
+    }
+
+    // The auto-complete path writes its own history action and leaves no assignee. Both are checked: the
+    // history row is the record of WHY, and a missing assignee is the fact that no person held it.
+    var ac = await get("SELECT id FROM request_history WHERE request_id = ? AND action = 'INTAKE_REVIEW_AUTO_COMPLETED' LIMIT 1", [requestId]);
+    out.taskId = doneRow.id;
+    out.triggers = triggersOf(doneRow).map(function (k) { return { key: k, label: TRIGGER_LABELS[k] || k }; });
+    out.decidedAt = doneRow.updated_at || null;
+    if (ac || !doneRow.assigned_to) {
+      out.autoCompleted = !!ac;
+      out.detail = ac
+        ? 'An intake review was raised and closed automatically — the requestor marked their portal selection ' +
+          'as fulfilling the request and asked for nothing further. No person reviewed it.'
+        : 'An intake review task was closed with no assignee, so no person is recorded as having reviewed it.';
+      return out; // still first human review
+    }
+
+    var who = null;
+    try {
+      var u = await get('SELECT name FROM users WHERE id = ?', [doneRow.assigned_to]);
+      who = (u && u.name) || doneRow.assigned_to;
+    } catch (e) { who = doneRow.assigned_to; }
+    out.viaIntakeReview = true;
+    out.firstHumanReview = false;
+    out.decidedBy = who;
+    out.label = 'Via Intake Review (' + (who || 'unnamed') + ')';
+    out.detail = out.triggers.length
+      ? 'Reviewed at intake because: ' + out.triggers.map(function (t) { return t.label.toLowerCase(); }).join('; ') + '.'
+      : 'Reviewed at intake (this city reviews every request at intake).';
+    return out;
+  } catch (e) {
+    console.error('[intakeReview provenance]', requestId, e && e.message);
+    return out;
+  }
+}
+
 // Every open intake stop on a request, legacy included — used by callers that must not treat the intake
 // task as ordinary team work (the re-route path moves WORK tasks onto the new team; this is office work).
 async function openStops(requestId) {
@@ -433,5 +509,6 @@ module.exports = {
   spawnForMode: spawnForMode,
   closeForResolvedTrigger: closeForResolvedTrigger,
   proceedGate: proceedGate,
+  provenance: provenance,
   autoCompletes: autoCompletes
 };

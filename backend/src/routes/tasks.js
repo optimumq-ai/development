@@ -36,6 +36,19 @@ router.get('/mine', requireAuth, async function (req, res) {
   var timing = await require('../services/taskTiming').forTasks(rows);
   var budget = await require('../services/taskBudget').forTasks(rows, timing);
   rows.forEach(function (t) { t.timing = timing[t.id] || null; t.budget = budget[t.id] || null; });
+  // PHASE 7 / BW4 — "PATH HERE" on the estimate rows only (Draft 2 §1). The estimator's duty changes with
+  // the answer: `Auto-routed — first human review` means nobody has read this request yet, because the
+  // engine sequences estimate before record search on a confident auto-route. It is computed HERE rather
+  // than in a queue endpoint of its own because it is two indexed reads per row and only estimate rows ask
+  // for it — unlike the intake queue's per-request clock resolution, which earned its own endpoint.
+  try {
+    var IRp = require('../services/intakeReview');
+    var est = rows.filter(function (t) { return t.type === 'estimate' || t.type === 'mrr_estimate'; });
+    for (var i = 0; i < est.length; i++) {
+      est[i].pathHere = await IRp.provenance(est[i].request_id);
+      est[i].paused = require('../services/taskPause').stateOf(est[i]);
+    }
+  } catch (e) { console.error('[tasks/mine pathHere]', e && e.message); }
   res.json({ tasks: rows });
 });
 
@@ -216,9 +229,14 @@ router.get('/:id/estimate-context', requireAuth, async function (req, res) {
       waiver = await AM.evaluateWaiver(null, reqRow, { config: amCfg });
     } catch (e) { console.error('[estimate-context approval modules]', e && e.message); }
 
+    var provenance = null;
+    try { provenance = await require('../services/intakeReview').provenance(t.request_id); }
+    catch (e) { console.error('[estimate-context provenance]', e && e.message); }
+
     res.json({
       task: t, request: reqRow, parent: parent,
       paused: require('../services/taskPause').stateOf(t),
+      provenance: provenance,
       commercial: commercial,
       waiver: waiver
     });
