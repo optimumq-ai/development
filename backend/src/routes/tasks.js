@@ -39,6 +39,70 @@ router.get('/mine', requireAuth, async function (req, res) {
   res.json({ tasks: rows });
 });
 
+// ============================================================================================
+// THE INTAKE EXCEPTIONS QUEUE (PHASE 7 / BW3 — DRAFT_processing_ui_intake_review.md §1, mockup screen 1).
+//
+// Under `when_needed` (the default) intake review is not a stage everything passes through — it is the
+// EXCEPTIONS. A confidently-classified, clean request routes straight to its team and never appears here.
+// So the queue's first job is answering "which exception?", and its second is showing an HONEST clock.
+//
+// WHY ITS OWN ENDPOINT rather than enriching /tasks/mine. Two of the three columns need work no other task
+// type wants: the trigger keys have to be labelled, and each row needs its request's PARENT clock resolved
+// through the clock matrix (kind + citation + overdueMeaning). Doing that for every redaction and estimate
+// row on My Tasks would be per-request clock computation on a page that never renders it.
+//
+// ⚠ RULE (a) IS ENFORCED BY WHAT THIS RETURNS, not by the frontend's taste. `kind` comes from
+// tolling.computeStatus via the clock matrix, `citation` is present only where the definition carries one,
+// and the words come from `overdueMeaning`. A city service target and a statutory deadline are different
+// `kind` values here, and a request with no clock at all comes back `kind: 'none'` with a null date — the
+// honest Ohio state. Nothing in this payload lets a screen dress a target up as law, and nothing in it
+// invents a date.
+// ============================================================================================
+router.get('/intake-queue', requireAuth, async function (req, res) {
+  try {
+    var IR = require('../services/intakeReview');
+    var mine = await all(withReq("WHERE t.type = 'intake_review' AND t.assigned_to = ? AND t.status IN ('assigned','in_progress','returned','awaiting_review') ORDER BY t.created_at"), [req.user.sub]);
+    // The pool half: the same eligibility predicate /tasks/pool uses, so the queue and the claim guard
+    // cannot disagree about what this person may take.
+    var pool = await all(withReq("WHERE t.type = 'intake_review' AND " + tr.POOL_ELIGIBILITY_SQL + " ORDER BY t.created_at"),
+      [req.user.sub, req.user.sub, req.user.sub]);
+    var rows = mine.map(function (t) { t.mine = true; return t; })
+      .concat(pool.filter(function (p) { return !mine.some(function (m) { return m.id === p.id; }); })
+        .map(function (t) { t.mine = false; return t; }));
+
+    var rules = null;
+    try { rules = await require('../services/tolling').loadRules(); } catch (e) { rules = null; }
+
+    for (var i = 0; i < rows.length; i++) {
+      var t = rows[i];
+      var keys = IR.triggersOf(t);
+      t.triggers = keys.map(function (k) { return { key: k, label: IR.TRIGGER_LABELS[k] || k }; });
+      // The three states of "why it's here", and they are NOT the same thing:
+      //   triggers      — a trigger fired and named itself
+      //   always mode   — the city asked for a stop on every request (spawn_triggers = '[]')
+      //   unrecorded    — a row that predates the column. "No recorded trigger" must never read as
+      //                   "some trigger I do not know about", so it says exactly what it knows.
+      t.alwaysMode = !keys.length && t.spawn_triggers != null;
+      t.triggerUnrecorded = !keys.length && t.spawn_triggers == null;
+      t.clock = null;
+      try {
+        var pr = await get('SELECT master_request_id FROM requests WHERE id = ?', [t.request_id]);
+        var clockOwner = (pr && pr.master_request_id) || t.request_id; // clocks are PARENT objects (§4.2)
+        var clocks = rules ? await all("SELECT * FROM request_clocks WHERE request_id = ? AND status <> 'satisfied' ORDER BY is_primary DESC, created_at", [clockOwner]) : [];
+        if (clocks.length) {
+          var tolls = await all('SELECT * FROM clock_tolls WHERE clock_id = ? ORDER BY created_at', [clocks[0].id]);
+          var st = require('../services/tolling').computeStatus(clocks[0], tolls, rules);
+          t.clock = { kind: st.kind, label: st.label, dueDate: st.dueDate, citation: st.citation,
+                      legalDeadline: st.legalDeadline, operationalTarget: st.operationalTarget,
+                      isOverdue: st.isOverdue, overdueMeaning: st.overdueMeaning, exposures: st.exposures,
+                      remainingDays: st.remainingDays, state: st.state, more: clocks.length - 1 };
+        }
+      } catch (e) { console.error('[intake-queue clock]', t.id, e && e.message); }
+    }
+    res.json({ tasks: await tr.filterTwoEyes(rows, req.user.sub) });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // Claim an open task from the pool.
 router.post('/:id/claim', requireAuth, async function (req, res) {
   var r = await tr.claim(req.params.id, req.user.sub);

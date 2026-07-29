@@ -2,6 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../lib/api';
 import { useAuthStore } from '../store/authStore';
+// ⚠ The primitives are imported as COMPONENTS only. This file declares its own local `var C` palette
+// (below) that predates lib/theme's — importing the theme's `C` here would shadow or be shadowed by it and
+// silently repaint the whole page. The primitives carry their own tokens internally; that is the point of
+// them being a library.
+import { ClockChip } from '../components/primitives';
 
 // Task-centric My Tasks (Tasks spec §5; SPEC_tasks_roles_mrr_fees §5). One box per task TYPE the user holds
 // work in (no empty boxes), Queued (assigned) then In Process (in_progress). A claim pool + a notifications
@@ -34,14 +39,56 @@ var TASK_SCREEN = {
   // task fell through to `/requests/:id`, which has no resolution control, and a legal review was completable
   // only by curl. A backend resolution path with no entry in THIS map is unreachable work.
   legal_review: function (t) { return '/legal-review/' + t.id; },
+  // BW3 — the intake reviewer's task screen. Without this entry the task fell through to `/requests/:id`,
+  // which has no Proceed control and no eligibility panel: a backend resolution path with no entry in THIS
+  // map is unreachable work (the lesson legal_review left above).
+  intake_review: function (t) { return '/intake-review/' + t.id; },
   review_auto_redaction: function () { return '/mass-redaction'; }
 };
 function screenFor(t) { var f = TASK_SCREEN[t.type]; return f ? f(t) : (t.request_id ? '/requests/' + t.request_id : '/mass-redaction'); }
 function actionLabel(t) {
   return t.type === 'record_search' ? 'Search →' : t.type === 'redaction' || t.type === 'legal_redaction' ? 'Redact →'
     : t.type === 'estimate' ? 'Estimate →' : t.type === 'redaction_qa' || t.type === 'review_auto_redaction' ? 'Review →'
-    : t.type === 'legal_review' ? 'Decide →'
+    : t.type === 'legal_review' || t.type === 'intake_review' ? 'Review →'
     : t.status === 'in_progress' ? 'Continue →' : 'Open →';
+}
+
+// ── THE INTAKE EXCEPTIONS QUEUE (BW3; DRAFT_processing_ui_intake_review.md §1, mockup screen 1) ──
+//
+// Its own surface, not a box of ordinary rows, because under `when_needed` (the default) this queue is the
+// EXCEPTIONS: most requests route straight to their team and never appear. The reviewer's first question is
+// therefore "which exception?", so "Why it's here" is a COLUMN, not a hover.
+//
+// RULE (a) LIVES HERE. Every date in the Clock column is drawn by ClockChip from the server's `kind` — a
+// city service target renders dashed and labelled "not a legal deadline", a statutory deadline navy with
+// its citation, and a request with NO clock renders the honest "no deadline" rather than a fabricated date.
+// The frontend never picks the treatment from a due date; it picks it from the kind.
+var CLOCK_KICKER = {
+  response: 'Statutory deadline', agency_action: 'Statutory deadline',
+  operational_target: 'City service target', requestor_window: "Requestor's window"
+};
+function QueueClock(props) {
+  var c = props.clock;
+  // No clock row at all. Never invent one — and say WHY there is no date, because "blank" reads as a bug.
+  if (!c || !c.dueDate) {
+    return <ClockChip kind="none">no deadline — no city target set</ClockChip>;
+  }
+  return (
+    <ClockChip kind={c.kind || 'none'} k={CLOCK_KICKER[c.kind] || null}
+      citation={c.citation || null}
+      exposure={c.isOverdue ? (c.overdueMeaning || null) : null}>
+      {String(c.dueDate).slice(0, 10)}
+    </ClockChip>
+  );
+}
+// Clock-first, earliest first; a row with no clock sorts by AGE (mockup screen-1 note) — it is not "least
+// urgent", it is "no date exists to sort it by", and age is the only honest substitute.
+function queueSort(a, b) {
+  var ad = a.clock && a.clock.dueDate, bd = b.clock && b.clock.dueDate;
+  if (ad && bd) return String(ad) < String(bd) ? -1 : String(ad) > String(bd) ? 1 : 0;
+  if (ad) return -1;
+  if (bd) return 1;
+  return String(a.request_created_at || a.created_at || '') < String(b.request_created_at || b.created_at || '') ? -1 : 1;
 }
 
 // Humanize a duration (ms) adaptively: 4h · 3d 2h · 5d · <1m. (Slice B: raw calendar elapsed.)
@@ -95,6 +142,7 @@ export default function MyTasksPage() {
   var canApprove = store.hasAnyRole('SYSTEM_ADMIN', 'DIRECTOR') || store.hasAnyPerm('FINANCE');
   var [mine, setMine] = useState([]);
   var [pool, setPool] = useState([]);
+  var [intake, setIntake] = useState([]);
   var [notes, setNotes] = useState([]);
   var [myObjs, setMyObjs] = useState([]);
   var [pendingObjs, setPendingObjs] = useState([]);
@@ -108,6 +156,9 @@ export default function MyTasksPage() {
     try {
       var m = await api.get('/tasks/mine'); setMine(m.data.tasks || []);
       var p = await api.get('/tasks/pool'); setPool(p.data.tasks || []);
+      // Its own fetch: the trigger labels and the per-request clock resolution are work no other task type
+      // wants done. Tolerated failure — an intake queue that cannot load must not blank My Tasks.
+      try { var iq = await api.get('/tasks/intake-queue'); setIntake(iq.data.tasks || []); } catch (e3) { setIntake([]); }
       try { var n = await api.get('/notifications'); setNotes(n.data.notifications || []); } catch (e0) {}
       try { var mo = await api.get('/objections/mine'); setMyObjs(mo.data.objections || []); } catch (e1) {}
       if (canApprove) { try { var pa = await api.get('/objections/pending-approval'); setPendingObjs(pa.data.objections || []); } catch (e2) {} }
@@ -128,9 +179,11 @@ export default function MyTasksPage() {
   var returned = mine.filter(function (t) { return t.return_reason; }).length;
   var overBudget = mine.filter(function (t) { return t.budget && t.budget.state === 'over'; }).length;
 
-  // group my tasks by type
+  // group my tasks by type. `intake_review` is lifted OUT — it has its own exceptions queue below, and
+  // rendering it twice would be two answers to "what intake work do I hold".
   var byType = {};
-  mine.forEach(function (t) { (byType[t.type] = byType[t.type] || []).push(t); });
+  mine.forEach(function (t) { if (t.type !== 'intake_review') (byType[t.type] = byType[t.type] || []).push(t); });
+  var poolOther = pool.filter(function (t) { return t.type !== 'intake_review'; });
   var boxTypes = TYPE_ORDER.filter(function (ty) { return byType[ty]; })
     .concat(Object.keys(byType).filter(function (ty) { return TYPE_ORDER.indexOf(ty) < 0; }));
 
@@ -286,10 +339,64 @@ export default function MyTasksPage() {
         </section>
       ) : null}
 
+      {/* ── Intake Review — the exceptions queue (BW3) ── */}
+      {intake.length ? (
+        <>
+          {sectionHead('Intake Review · the exceptions')}
+          <section style={C.card}>
+            <div style={{ overflowX: 'auto' }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', background: 'white' }}>
+                <thead>
+                  <tr>
+                    {['Request', 'Requestor', 'Description', 'Clock', "Why it's here", ''].map(function (h) {
+                      return <th key={h} style={{ fontSize: '11px', textTransform: 'uppercase', letterSpacing: '.05em', color: C.muted, textAlign: 'left', padding: '7px 10px', borderBottom: '2px solid #C3CFDA', fontWeight: 700 }}>{h}</th>;
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {intake.slice().sort(queueSort).map(function (t) {
+                    return (
+                      <tr key={t.id}>
+                        <td style={{ padding: '9px 10px', borderBottom: '1px solid #F2F6F9', verticalAlign: 'top' }}>
+                          <div style={{ fontFamily: 'monospace', fontWeight: 700, color: C.accent, fontSize: '12.5px' }}>{t.request_number || '—'}</div>
+                          <div style={{ fontSize: '11.5px', color: C.muted }}>{'recv ' + String(t.request_created_at || '').slice(0, 10)}</div>
+                        </td>
+                        <td style={{ padding: '9px 10px', borderBottom: '1px solid #F2F6F9', verticalAlign: 'top', fontSize: '12.5px' }}>{t.requestor_name || 'Anonymous'}</td>
+                        <td style={{ padding: '9px 10px', borderBottom: '1px solid #F2F6F9', verticalAlign: 'top', fontSize: '12.5px', color: C.muted, maxWidth: '330px' }}>{t.request_description || t.title || '—'}</td>
+                        <td style={{ padding: '9px 10px', borderBottom: '1px solid #F2F6F9', verticalAlign: 'top' }}><QueueClock clock={t.clock} /></td>
+                        <td style={{ padding: '9px 10px', borderBottom: '1px solid #F2F6F9', verticalAlign: 'top', fontSize: '12.5px' }}>
+                          {(t.triggers || []).map(function (g) {
+                            return <div key={g.key} style={{ marginBottom: '3px' }}>{g.label}</div>;
+                          })}
+                          {/* Three DIFFERENT facts, never collapsed into one another. */}
+                          {t.alwaysMode ? <div style={{ color: C.muted }}>Every request stops here — this city set intake review to “always”.</div> : null}
+                          {t.triggerUnrecorded ? <div style={{ color: C.faint, fontStyle: 'italic' }}>No trigger recorded on this task.</div> : null}
+                          {!t.mine ? <div style={{ display: 'inline-block', marginTop: '3px', fontSize: '10px', fontWeight: 800, letterSpacing: '.06em', textTransform: 'uppercase', borderRadius: '3px', padding: '2px 7px', background: '#F2F6F9', border: '1px solid #C3CFDA', color: C.muted }}>Pool — unassigned</div> : null}
+                        </td>
+                        <td style={{ padding: '9px 10px', borderBottom: '1px solid #F2F6F9', verticalAlign: 'top', textAlign: 'right' }}>
+                          {t.mine
+                            ? <Link to={screenFor(t)} style={{ fontSize: '12.5px', fontWeight: 600, color: C.accent, background: C.accentSoft, border: '1px solid #E5E7EB', borderRadius: '7px', padding: '5px 11px', textDecoration: 'none', whiteSpace: 'nowrap' }}>Review →</Link>
+                            : <button onClick={function () { claim(t.id); }} disabled={busy === t.id} style={{ fontSize: '12.5px', fontWeight: 600, color: C.good, background: C.goodSoft, border: 'none', borderRadius: '7px', padding: '6px 13px', cursor: 'pointer', opacity: busy === t.id ? 0.6 : 1 }}>{busy === t.id ? 'Claiming…' : 'Claim'}</button>}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+            <p style={{ fontSize: '11.5px', color: C.faint, padding: '9px 12px', margin: 0, borderTop: '1px solid #F3F4F6' }}>
+              These are the exceptions, not the traffic: with intake review set to “only when needed” (the default), a
+              confidently-classified, clean request routes straight to its team and never appears here. Sorted by clock,
+              earliest first; a request with no clock sorts by age.
+            </p>
+          </section>
+        </>
+      ) : null}
+
       {!loading && boxTypes.length ? sectionHead('Your work') : null}
       {boxTypes.map(box)}
 
-      {!loading && !boxTypes.length && !myObjs.length ? (
+      {!loading && !boxTypes.length && !myObjs.length && !intake.length ? (
         <div style={Object.assign({}, C.card, { padding: '56px', textAlign: 'center' })}>
           <div style={{ fontSize: '40px', marginBottom: '10px' }}>✅</div>
           <div style={{ fontSize: '17px', fontWeight: 600, color: '#4B5563' }}>No tasks assigned to you</div>
@@ -297,12 +404,13 @@ export default function MyTasksPage() {
         </div>
       ) : null}
 
-      {/* Claim pool */}
-      {pool.length ? (
+      {/* Claim pool. `intake_review` is excluded — its claimable rows are already in the exceptions queue
+          above, with the trigger and the clock the generic row cannot show. */}
+      {poolOther.length ? (
         <>
           {sectionHead("Claim pool · work you're eligible for")}
           <section style={C.card}>
-            {pool.map(function (t, i) {
+            {poolOther.map(function (t, i) {
               return (
                 <div key={t.id} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '10px 16px', borderTop: i ? '1px solid #F3F4F6' : 'none' }}>
                   <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: C.good, flexShrink: 0 }} />
