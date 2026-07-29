@@ -291,7 +291,12 @@ async function openTasks(rid, type) {
 
   // Derive the accepted types from the route itself, so the check cannot go stale against the backend.
   var tasksRoute = fs.readFileSync('/opt/optimumq/backend/src/routes/tasks.js', 'utf8');
-  var guard = (tasksRoute.match(/if \(t\.type !== [\s\S]*?\) \{/) || [''])[0];
+  // ANCHOR ON THE RESOLVE HANDLER FIRST (2026-07-29, BW3). This used to scan the whole file for the first
+  // `if (t.type !== …)`, which was the resolve guard right up until other task-scoped routes grew their own
+  // type checks — and then it derived the accepted list from an unrelated route and reported one type.
+  // The check is about ONE route, so it reads only that route.
+  var resolveSrc = tasksRoute.slice(tasksRoute.indexOf("router.post('/:id/resolve'"));
+  var guard = (resolveSrc.match(/if \(t\.type !== [\s\S]*?\) \{/) || [''])[0];
   var accepted = (guard.match(/t\.type !== '([a-z_]+)'/g) || []).map(function (m) { return m.split("'")[1]; });
   var unreachable = accepted.filter(function (ty) {
     return !new RegExp('(^|[^a-z_])' + ty + ':\\s*function').test(screenMap);

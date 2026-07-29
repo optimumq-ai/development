@@ -182,12 +182,71 @@ async function isMrr(requestId) {
 // nothing is dropped, because the MRR parent has an owner either way.
 //
 // `when_needed` (the default, and today's behaviour) returns null and touches nothing.
+// ══ AUTO-COMPLETE (draft §0 decision 4 + §4.4) ══
+//
+// "If the request came from the portal and the requestor indicated that an attached record FULFILLS the
+// search, the intake_review task is marked completed automatically (spawn + auto-complete so the audit
+// trail is intact; the request proceeds without a stop, and the queue never shows it)."
+//
+// THE SIGNAL IS R9's, NOT A NEW ONE. `request_search_intents.intent = 'complete'` is precisely "this
+// selection is everything I want for this description" — the requestor's own words, captured at submit.
+// The adjacency the draft flags (SPEC_record_search_task_screen §1's unbuilt `wfr-selected-*` skip recipe)
+// is the same signal with a second consumer; this is the first, and it reads the substrate rather than
+// inventing a flag beside it.
+//
+// THE CONDITION IS DELIBERATELY CONJUNCTIVE, and each half matters:
+//   at least one `complete` intent   — the requestor actually said "this answers it". A request with no
+//                                      intents at all is an ordinary request, not a fulfilled one.
+//   NO open duty-carrying intent     — `search_more` / `no_match_search` mean the requestor asked the team
+//                                      to keep looking. Auto-completing THAT would close, as answered, a
+//                                      request the requestor considers open — the exact failure the R9 gate
+//                                      in routes/tasks.js exists to prevent, arriving through a side door.
+//
+// Never throws; an unreadable substrate answers "no", which costs a stop rather than skipping one.
+async function autoCompletes(requestId) {
+  try {
+    var SI = require('./searchIntents');
+    var rows = await all("SELECT intent FROM request_search_intents WHERE request_id = ? AND intent = 'complete'", [requestId]);
+    if (!rows.length) return false;
+    var open = await SI.openIntents(requestId);
+    return open.length === 0;
+  } catch (e) { console.error('[intakeReview autoCompletes]', requestId, e && e.message); return false; }
+}
+
 async function spawnForMode(requestId, opts) {
   opts = opts || {};
   try {
     var PC = require('./processingConfig');
     if (!(await PC.intakeReviewAlways(opts.jurisdictionId || null))) return null;
     if (await isMrr(requestId)) return null;
+
+    // AUTO-COMPLETE, always mode. The task is still CREATED — the audit trail must show that this city's
+    // every-request review happened and why it needed no person — and then completed on the spot with no
+    // assignee, so it never reaches anybody's queue.
+    //
+    // In `when_needed` (the default) there is nothing to do here at all: no trigger fired, so no task was
+    // ever going to be raised. That is the draft's "simply a no-trigger case", and it is why this check
+    // lives AFTER the mode gate rather than before it — a fulfilled request in default mode must not cause
+    // a task to be created purely so it can be closed again.
+    if (await autoCompletes(requestId)) {
+      var existingAC = await openTask(requestId);
+      if (existingAC) return { task: existingAC, created: false, addedTriggers: [], autoCompleted: false };
+      var trAC = require('./taskRouting');
+      var acTask = await trAC.createTask({
+        requestId: requestId, type: TYPE,
+        title: 'Intake review — auto-completed (the requestor’s selection fulfills the request)',
+        teamId: null, createdBy: opts.createdBy || 'system', spawnTriggers: []
+      });
+      await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [acTask.id]);
+      try {
+        await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+          [require('uuid').v4(), requestId, null, 'System', 'INTAKE_REVIEW_AUTO_COMPLETED',
+           'This city reviews every request at intake, but the requestor marked their portal selection as ' +
+           'fulfilling the request and asked for nothing further — so the review task was raised and closed ' +
+           'automatically. No person was assigned and the request was not stopped.']);
+      } catch (e) { console.error('[intakeReview auto-complete history]', e && e.message); }
+      return { task: await trAC.getTask(acTask.id), created: true, addedTriggers: [], autoCompleted: true };
+    }
     // No trigger fired — the city asked for the stop, and that is recorded as an EMPTY trigger list
     // rather than a missing one, so the queue can say "always mode" and the close rule can tell the two
     // apart.
@@ -338,5 +397,6 @@ module.exports = {
   spawn: spawn,
   spawnForMode: spawnForMode,
   closeForResolvedTrigger: closeForResolvedTrigger,
-  proceedGate: proceedGate
+  proceedGate: proceedGate,
+  autoCompletes: autoCompletes
 };

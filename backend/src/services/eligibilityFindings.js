@@ -65,10 +65,12 @@ function shape(r) {
 async function record(requestId, result) {
   if (!requestId || !result) return 0;
   var rows = [];
-  ['block', 'review', 'advisory'].forEach(function (cls) {
-    var list = result[cls + 's'];
+  // The evaluator's key names are irregular (`advisories`, not `advisorys`), so they are LISTED rather
+  // than derived — a pluralisation rule here silently drops a whole class.
+  [['block', 'blocks'], ['review', 'reviews'], ['advisory', 'advisories']].forEach(function (pair) {
+    var list = result[pair[1]];
     if (!Array.isArray(list)) return;
-    list.forEach(function (f) { rows.push({ cls: cls, f: f }); });
+    list.forEach(function (f) { rows.push({ cls: pair[0], f: f }); });
   });
   if (!rows.length) return 0;
   var n = 0;
