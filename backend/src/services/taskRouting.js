@@ -240,7 +240,10 @@ async function createTask(opts) {
   var role = requiredRoleFor(opts);
   // WHY the task exists, when the answer is not "the stage said so" (BW2). A trigger-spawned type records
   // its trigger key(s) here; everything else leaves it NULL and reads exactly as it always has.
-  var triggers = Array.isArray(opts.spawnTriggers) && opts.spawnTriggers.length ? JSON.stringify(opts.spawnTriggers) : null;
+  // An EMPTY array is stored as `[]`, not collapsed to NULL: "raised with no trigger" (a city running
+  // intake review in `always` mode) and "predates this column" are different facts, and the auto-close
+  // rule distinguishes them — see intakeReview.closeForResolvedTrigger.
+  var triggers = Array.isArray(opts.spawnTriggers) ? JSON.stringify(opts.spawnTriggers) : null;
   await run(
     "INSERT INTO tasks (id, request_id, type, title, team_id, role_required, status, created_by, spawn_triggers) " +
     "VALUES (?,?,?,?,?,?, 'open', ?,?)",

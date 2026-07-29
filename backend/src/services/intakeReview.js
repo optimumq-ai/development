@@ -121,7 +121,8 @@ function titleFor(triggers, override) {
 async function spawn(requestId, triggers, opts) {
   opts = opts || {};
   var want = normalizeTriggers(triggers);
-  if (!requestId || !want.length) return null;
+  // No trigger and no `always` mode means nothing asked for this stop.
+  if (!requestId || (!want.length && !opts.allowNoTrigger)) return null;
   try {
     var legacy = await openLegacyRoutingReview(requestId);
     if (legacy) return { task: legacy, created: false, addedTriggers: [], legacy: true };
@@ -155,6 +156,45 @@ async function spawn(requestId, triggers, opts) {
   }
 }
 
+// Is this request part of a multi-record submission? `is_mrr` is DERIVED and PARENT-level (§4.1) — a
+// child always carries 0 — so the question has to be asked of the parent.
+async function isMrr(requestId) {
+  var r = await get('SELECT is_mrr, master_request_id FROM requests WHERE id = ?', [requestId]);
+  if (!r) return false;
+  if (Number(r.is_mrr) === 1) return true;
+  if (!r.master_request_id) return false;
+  var p = await get('SELECT is_mrr FROM requests WHERE id = ?', [r.master_request_id]);
+  return !!(p && Number(p.is_mrr) === 1);
+}
+
+// THE `always` MODE (knob `intake_review_mode`, services/processingConfig.js).
+//
+// "Every non-MRR request pauses at intake review" (draft decision 5 + decision 3). Called at the end of
+// intake, AFTER the trigger evaluations, so a request that already has a stop simply keeps it — spawn()
+// is additive and idempotent, and a triggered task must not be replaced by an untriggered one that would
+// lose the "why it's here" line.
+//
+// MRR is excluded here (decision 3): a multi-record submission's intake is the Request-Manager flow, and
+// it now has its own `mrr_management` task. That exclusion is safe in a way the `unroutable` one is not —
+// nothing is dropped, because the MRR parent has an owner either way.
+//
+// `when_needed` (the default, and today's behaviour) returns null and touches nothing.
+async function spawnForMode(requestId, opts) {
+  opts = opts || {};
+  try {
+    var PC = require('./processingConfig');
+    if (!(await PC.intakeReviewAlways(opts.jurisdictionId || null))) return null;
+    if (await isMrr(requestId)) return null;
+    // No trigger fired — the city asked for the stop, and that is recorded as an EMPTY trigger list
+    // rather than a missing one, so the queue can say "always mode" and the close rule can tell the two
+    // apart.
+    return await spawn(requestId, [], Object.assign({ allowNoTrigger: true, title: 'Intake review' }, opts));
+  } catch (e) {
+    console.error('[intakeReview spawnForMode]', requestId, e && e.message);
+    return null;
+  }
+}
+
 // THE AUTO-CLOSE INHERITED FROM `routing_review`.
 //
 // routing_review closed the moment the request was re-routed, because routing it WAS the work. Intake
@@ -179,7 +219,17 @@ async function closeForResolvedTrigger(requestId, trigger, opts) {
     var t = await openTask(requestId);
     if (t) {
       var have = triggersOf(t);
-      var onlyReason = have.length === 0 ? trigger === 'unroutable' : (have.length === 1 && have[0] === trigger);
+      // No recorded trigger has TWO meanings, and they close differently:
+      //   spawn_triggers NULL  — the row predates the column. Every task that can be in that state was
+      //                          raised by the unroutable path (the only wired spawner then), so routing
+      //                          the request finishes it, exactly as routing_review behaved.
+      //   spawn_triggers '[]'  — raised by `always` mode, which is not a trigger and is not resolved by
+      //                          routing. The city asked for a stop on every request; giving it one that
+      //                          disappears the moment the team is corrected would not be that.
+      var legacyRow = t.spawn_triggers == null;
+      var onlyReason = have.length === 0
+        ? (legacyRow && trigger === 'unroutable')
+        : (have.length === 1 && have[0] === trigger);
       if (onlyReason) {
         await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [t.id]);
         closed++;
@@ -213,6 +263,8 @@ module.exports = {
   openTask: openTask,
   openLegacyRoutingReview: openLegacyRoutingReview,
   openStops: openStops,
+  isMrr: isMrr,
   spawn: spawn,
+  spawnForMode: spawnForMode,
   closeForResolvedTrigger: closeForResolvedTrigger
 };

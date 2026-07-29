@@ -269,6 +269,12 @@ async function onIntake(requestId, matcherResult){
     });
   }
 
+  // `intake_review_mode: 'always'` — a city that wants every non-MRR request to pause for a day-1 look
+  // (BW2 knob, services/processingConfig.js). LAST, after every trigger evaluation above, so a request
+  // that already stopped for a reason keeps that reason on its task. Default (`when_needed`) is a no-op,
+  // which is today's behaviour exactly.
+  await require('./intakeReview').spawnForMode(requestId, { createdBy: 'workflow', requestText: request.description, awaitRouting: true });
+
   // Statutory clocks: create the jurisdiction intake clocks (idempotent) + sync primary clock -> deadline_date.
   try { await require('./tolling').startClocksForRequest(requestId); } catch (e) { console.error('[workflowEngine] clock start failed:', e && e.message); }
 
