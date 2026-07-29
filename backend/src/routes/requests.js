@@ -681,5 +681,60 @@ router.post('/:id/clarification/resolve', requireAuth, async function(req, res) 
   } catch (e) { res.status(e.message === 'Request not found' ? 404 : 500).json({ error: e.message }); }
 });
 
+// ==================================================================================================
+// PHASE 7 / BW4 — RECORD THE COMMERCIAL-RATE CLASSIFICATION.
+//
+// The act BW3's panel confessed did not exist. Two screens post here — the intake reviewer's commercial
+// panel (mode `intake_review`) and the estimate screen (where the rate actually bites) — because the
+// classification is ONE fact with one home, not two half-decisions in two places.
+//
+// AUTHORIZATION mirrors /fee-waiver-decision deliberately, including its narrow inline-decider carve-out:
+// the whole point of `mode: 'intake_review'` is that the ORO Associate holding the intake task decides
+// without an extra hop, and that Associate holds none of the manager roles. So the assignee of an OPEN
+// task on THIS request (intake_review or estimate) may classify while the module is in that mode — and
+// cannot in `routed_task` mode, where the decision belongs to the routed task's holder.
+// ==================================================================================================
+router.post('/:id/commercial-classification', requireAuth, async function (req, res) {
+  try {
+    var request = await get('SELECT * FROM requests WHERE id = ? OR request_number = ?', [req.params.id, req.params.id]);
+    if (!request) return res.status(404).json({ error: 'Request not found' });
+    var fRoles = (req.user && req.user.roles) || [], perms = (req.user && req.user.perms) || [];
+    var canDecide = ['SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR'].some(function (r) { return fRoles.indexOf(r) !== -1; }) ||
+      perms.indexOf('FINANCE') !== -1;
+    var AM = require('../services/approvalModules');
+    var cfg = await AM.config(null);
+    var mod = (cfg && cfg.modules && cfg.modules.commercial_rate) || {};
+    if (!canDecide) {
+      try {
+        var openTask = await get(
+          "SELECT id FROM tasks WHERE request_id = ? AND type IN ('intake_review','estimate') AND assigned_to = ? " +
+          "AND status IN ('open','assigned','in_progress','returned','awaiting_review')",
+          [request.id, req.user && req.user.sub]);
+        if (openTask && mod.mode === 'intake_review') canDecide = true;
+      } catch (e) { console.error('[commercial-classification] inline-decider check failed:', e && e.message); }
+    }
+    if (!canDecide) return res.status(403).json({ error: 'Insufficient role' });
+    // A module a city has switched OFF has nothing to classify — recording one anyway would put a rate
+    // decision on a request in a city (or a state, via the branch profile) that has no commercial rate.
+    if (!mod.enabled) {
+      return res.status(409).json({
+        code: 'COMMERCIAL_NOT_OFFERED',
+        error: mod.branchAvailable === false
+          ? 'This state has no statutory commercial rate, so there is nothing to classify.'
+          : 'This city has not switched on commercial-rate classification, so there is nothing to classify.'
+      });
+    }
+    var CC = require('../services/commercialClassification');
+    var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'Staff';
+    var out = await CC.record(request.id, (req.body || {}).classifyAs, actor,
+      { note: (req.body || {}).note, actorId: req.user && req.user.sub });
+    return res.json(out);
+  } catch (e) {
+    if (e && e.code === 'BAD_CLASSIFICATION') return res.status(400).json({ error: e.message, code: e.code });
+    if (e && e.code === 'NOT_FOUND') return res.status(404).json({ error: e.message });
+    return res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = router;
 

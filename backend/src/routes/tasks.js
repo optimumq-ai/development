@@ -183,6 +183,47 @@ router.get('/:id/intake-context', requireAuth, async function (req, res) {
 // Authorized to the TASK'S ASSIGNEE (this is their job — trigger (i) is literally "you decide the team") or
 // to the roles that could already re-route. The task must be actionable: correcting the routing of a request
 // through a finished task is the stale-task class of bug the resolve route's 409 exists for.
+// ============================================================================================
+// THE ESTIMATE TASK SCREEN'S CONTEXT (PHASE 7 / BW4 — DRAFT_processing_ui_estimate.md).
+//
+// Same device as `/intake-context`: one read for the facts that are specific to THIS task, while the
+// general-purpose endpoints the screen already calls stay general (`/fee-estimates/request/:id` builds the
+// estimate itself and is untouched here).
+//
+// What is here:
+//   * PROVENANCE — "was there an intake stop on this request, and what did it decide" (§4.2). This is the
+//     fact the whole screen's tone hangs on: on the auto-routed path the estimator is the FIRST person to
+//     read the request, and their duty is different from an estimator picking up a request an ORO Associate
+//     has already scoped.
+//   * the COMMERCIAL classification, evaluated + as recorded (BW4 stage 1)
+//   * the WAIVER panel's state and the send gate, in the server's words (BW4 stage 4)
+//   * the estimate task's PAUSE state (BW4 stage 2)
+//   * CHARGEABILITY — which line kinds this state's fee config permits, each with its citation (stage 5)
+// ============================================================================================
+router.get('/:id/estimate-context', requireAuth, async function (req, res) {
+  try {
+    var t = await get('SELECT * FROM tasks WHERE id = ?', [req.params.id]);
+    if (!t) return res.status(404).json({ error: 'Task not found' });
+    if (t.type !== 'estimate' && t.type !== 'mrr_estimate') return res.status(400).json({ error: 'Not an estimate task.' });
+    var reqRow = await get('SELECT * FROM requests WHERE id = ?', [t.request_id]);
+    var parent = (reqRow && reqRow.master_request_id) ? await get('SELECT * FROM requests WHERE id = ?', [reqRow.master_request_id]) : null;
+
+    var commercial = null, waiver = null;
+    try {
+      var AM = require('../services/approvalModules');
+      var amCfg = await AM.config(null);
+      commercial = await AM.evaluateCommercial(null, reqRow, { config: amCfg });
+      waiver = await AM.evaluateWaiver(null, reqRow, { config: amCfg });
+    } catch (e) { console.error('[estimate-context approval modules]', e && e.message); }
+
+    res.json({
+      task: t, request: reqRow, parent: parent,
+      commercial: commercial,
+      waiver: waiver
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 router.patch('/:id/intake-routing', requireAuth, async function (req, res) {
   try {
     var t = await get('SELECT * FROM tasks WHERE id = ?', [req.params.id]);

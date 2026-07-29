@@ -291,11 +291,23 @@ async function evaluateCommercial(jid, request, opts) {
   var cfg = opts.config || await config(jid);
   var mod = cfg.modules.commercial_rate;
   var declared = (request && (request.purpose || request.requestorType || request.requestor_type)) || 'standard';
-  var proposed = opts.classifyAs || null;
+  // PHASE 7 / BW4 — the STORED classification is now a first-class input. Before BW4 the only way to get a
+  // classification in here was `opts.classifyAs` on a single call, which is why `needs_decision` was
+  // permanent and why the proceed gate refused to read it. A recorded classification is a person's act and
+  // outranks a caller's proposal only in the sense that it PERSISTS: an explicit `classifyAs` (the "what
+  // would happen if I classified it this way" preview) still wins for this evaluation.
+  var stored = (request && (request.commercial_classification || null)) || null;
+  var proposed = opts.classifyAs || stored || null;
   var out = {
     module: 'commercial_rate', enabled: mod.enabled, mode: mod.mode, branchAvailable: mod.branchAvailable,
     declared: declared, classified: null, overridesDeclaration: false, mustCommunicate: false,
-    outcome: 'not_offered', route: null, clockEffect: null
+    outcome: 'not_offered', route: null, clockEffect: null,
+    // Who recorded it, when — surfaced so a screen can draw the DecidedByBadge without a second read. Null
+    // for a preview (`classifyAs` with nothing stored): nobody has decided that yet.
+    decidedBy: (request && request.commercial_classified_by) || null,
+    decidedAt: (request && request.commercial_classified_at) || null,
+    note: (request && request.commercial_classification_note) || null,
+    recorded: !!stored
   };
   if (!mod.enabled) {
     out.reason = mod.branchAvailable === false

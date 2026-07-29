@@ -169,6 +169,21 @@ export default function IntakeReviewTaskPage() {
       .then(function () { setBusy(''); });
   }
 
+  // BW4 — the commercial classification, recorded. One endpoint, shared with the estimate screen, because
+  // this is ONE fact about the request rather than a per-screen opinion.
+  function classify(value) {
+    setBusy('classify');
+    return api.post('/requests/' + ctx.task.request_id + '/commercial-classification', { classifyAs: value })
+      .then(function (r) {
+        setFlash({ tone: 'ok', text: r.data && r.data.overridesDeclaration
+          ? 'Classified as ' + value + ' — this overrides the requester’s declaration and must be communicated; it folds into the estimate notice.'
+          : 'Classified as ' + value + ' — recorded against your name.' });
+        return loadContext();
+      })
+      .catch(function (e) { fail(e, 'Could not record that classification.'); })
+      .then(function () { setBusy(''); });
+  }
+
   function saveInfo(patch) {
     setBusy('info');
     return api.patch('/tasks/' + taskId + '/intake-routing', patch)
@@ -222,8 +237,10 @@ export default function IntakeReviewTaskPage() {
   var showWaiver = !hidden('fee_waiver') && wv.mode === 'intake_review' &&
     (wv.outcome === 'needs_decision' || wv.outcome === 'auto_granted');
   var cm = ctx.commercial || {};
+  // BW4: `classified` is a state worth rendering too — the reviewer should see the decision that was
+  // recorded (and by whom) rather than watching the panel vanish the moment they click.
   var showCommercial = !hidden('commercial_rate') && cm.mode === 'intake_review' && cm.enabled &&
-    cm.outcome === 'needs_decision';
+    (cm.outcome === 'needs_decision' || cm.outcome === 'classified');
 
   var totals = (intents && intents.totals) || { selected: 0, notSelected: 0, shown: 0 };
   var groups = (intents && intents.groups) || [];
@@ -479,14 +496,42 @@ export default function IntakeReviewTaskPage() {
                 The requester declared <b>{cm.declared}</b>. {cm.clockEffect ? cm.clockEffect + ' ' : ''}
                 <DecidedByBadge by="person">A person decides</DecidedByBadge>
               </div>
-              {/* HONEST ABOUT WHAT IS NOT BUILT. Nothing in the system persists a commercial classification
-                  yet (no column, no history action, no task outcome), so there is nothing here to click and
-                  — deliberately — nothing gating Proceed on it. A button that recorded nothing would be
-                  worse than saying so. BW4 owns the classification's home. */}
-              <div style={Object.assign({}, kv, { marginTop: 6 })}>
-                Recording a classification is not built yet, so this does not block Proceed. The declared value
-                travels with the request; overriding it is a person's act that must be communicated.
-              </div>
+              {/* BW4 — the classification now HAS a home (`requests.commercial_classification`), so this is a
+                  real act rather than the confession BW3 printed here. It is also a proceed-gate cause, but
+                  only in this exact configuration: module enabled AND mode `intake_review`. */}
+              {cm.recorded ? (
+                <div style={{ marginTop: 7, fontSize: 13 }}>
+                  Classified as <b>{cm.classified}</b>{' '}
+                  <DecidedByBadge by="person">{cm.decidedBy ? 'Recorded by ' + cm.decidedBy : 'A person decided'}</DecidedByBadge>
+                  {cm.overridesDeclaration ? (
+                    <div style={Object.assign({}, kv, { marginTop: 4, color: G.amberInk })}>
+                      This OVERRIDES what the requester declared — it changes the invoice, and in a state with a
+                      commercial clock it can change the deadline. It must be communicated; the estimate notice
+                      is where that lands.
+                    </div>
+                  ) : null}
+                  <div style={{ marginTop: 6 }}>
+                    <button type="button" disabled={!!busy || resolved} style={btn('quiet')}
+                      onClick={function () { classify(cm.classified === 'commercial' ? 'standard' : 'commercial'); }}>
+                      Change to {cm.classified === 'commercial' ? 'standard' : 'commercial'}
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div style={{ marginTop: 7 }}>
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <button type="button" disabled={!!busy || resolved} style={btn()}
+                      onClick={function () { classify('commercial'); }}>Classify as commercial</button>
+                    <button type="button" disabled={!!busy || resolved} style={btn('sec')}
+                      onClick={function () { classify('standard'); }}>Classify as standard</button>
+                  </div>
+                  <div style={Object.assign({}, kv, { marginTop: 6 })}>
+                    Recording this is your act, against your name. Proceed is blocked until it is recorded —
+                    the classification changes the invoice, and where a state gives commercial requests their
+                    own window it changes the deadline too, so it has to land before one is quoted.
+                  </div>
+                </div>
+              )}
             </div>
           ) : null}
         </div>

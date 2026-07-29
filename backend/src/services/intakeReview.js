@@ -324,13 +324,12 @@ async function closeForResolvedTrigger(requestId, trigger, opts) {
 // ⚠ WHAT IS DELIBERATELY NOT GATED, and why (conservative on ambiguity — recorded here rather than
 // discovered later):
 //
-//   COMMERCIAL-RATE CLASSIFICATION. `approvalModules.evaluateCommercial` returns `needs_decision` for as
-//   long as no `classifyAs` is supplied — and NOTHING PERSISTS a classification anywhere (there is no
-//   column, no history action, no task outcome that records one; see the grep in the BW3 commit). A gate on
-//   it would therefore be a stop no act in the system can clear: every request in a city that enables the
-//   module in intake_review mode would be permanently un-proceedable. The panel renders (it is a real
-//   pending decision the reviewer should see); the gate waits for BW4 to give the classification somewhere
-//   to live.
+//   COMMERCIAL-RATE CLASSIFICATION — NO LONGER UNGATED AS OF BW4, and the reason it WAS ungated is worth
+//   keeping: until BW4 nothing persisted a classification anywhere, so a gate on it would have been a stop
+//   no act in the system could clear. `requests.commercial_classification` +
+//   services/commercialClassification.js is that act, so cause (c) below is now safe to raise. It is still
+//   raised in exactly ONE configuration — the module ENABLED and in `intake_review` mode — and
+//   `commercial_rate` ships DISABLED, so no default install grows a new stop.
 //
 //   LEGACY PROSE ELIGIBILITY NOTES. A request created before the structured findings table has notes and no
 //   confirmable rows. Gating on them would strand every in-flight request across the deploy behind a
@@ -370,6 +369,38 @@ async function proceedGate(requestId) {
       }
     }
   } catch (e) { console.error('[intakeReview proceedGate waiver]', e && e.message); }
+
+  // (c) AN UNRECORDED COMMERCIAL CLASSIFICATION (BW4). Narrow by construction, and every clause of the
+  // condition is load-bearing:
+  //
+  //   enabled          `commercial_rate` ships DISABLED (approvalModules.defaultsFor: nothing spawns
+  //                    commercial work today, so ON is the change and OFF is the preservation). A default
+  //                    install therefore never reaches this reason at all.
+  //   mode intake_review  in `routed_task` mode the decision belongs to somebody else's queue, and gating
+  //                    intake on it would block a request behind a task this reviewer cannot do — the same
+  //                    line the waiver cause (b) holds.
+  //   outcome needs_decision  satisfied by RECORDING one, which is now possible. `evaluateCommercial`
+  //                    returns `classified` the moment `requests.commercial_classification` is set.
+  //
+  // WHY IT IS WORTH A STOP AT ALL: this classification changes the response clock in NJ (14 business days
+  // for commercial) and IL (recurrent/commercial track). Proceeding without it means quoting a deadline
+  // that the classification may then move — telling a citizen one date and later another.
+  try {
+    var reqRow2 = await get('SELECT * FROM requests WHERE id = ?', [requestId]);
+    if (reqRow2) {
+      var AM2 = require('./approvalModules');
+      var cm = await AM2.evaluateCommercial(null, reqRow2, {});
+      if (cm.enabled && cm.outcome === 'needs_decision' && cm.route && cm.route.mode === 'intake_review') {
+        out.reasons.push({
+          code: 'COMMERCIAL_UNCLASSIFIED',
+          text: 'This city classifies commercial requests here, and this one has not been classified. ' +
+                'Record it in the Commercial-rate panel before proceeding' +
+                (cm.clockEffect ? ' — this state changes the response clock for commercial requests, so the ' +
+                  'classification has to land before a deadline is quoted.' : '.')
+        });
+      }
+    }
+  } catch (e) { console.error('[intakeReview proceedGate commercial]', e && e.message); }
 
   out.blocked = out.reasons.length > 0;
   return out;

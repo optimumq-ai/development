@@ -1327,3 +1327,44 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_elig_finding_req_dim ON request_eligibilit
 -- for whoever searches it) plus the reviewer's correction of it, recorded. When a later workstream wants a
 -- request-level owner, this is it — rather than a second column meaning the same thing.
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS record_owner_department_id TEXT;
+
+-- PHASE 7 / BW4 — THE COMMERCIAL-RATE CLASSIFICATION, PERSISTED.
+--
+-- BW3 shipped the intake screen's commercial panel with an honest confession printed on it: "recording a
+-- classification is not built yet, so this does not block Proceed." That was literally true — nothing in
+-- the system persisted a classification (no column, no history action, no task outcome), so
+-- `approvalModules.evaluateCommercial` returned `needs_decision` forever and a gate on it would have been a
+-- stop no act could clear. See the ⚠ block in services/intakeReview.proceedGate.
+--
+-- This is the classification's home. Four facts, deliberately separate:
+--   commercial_classification       what the CITY concluded: 'commercial' | 'standard'. NULL = undecided,
+--                                   which is not the same as 'standard' — the requester's own DECLARATION
+--                                   lives in `purpose` and is not overwritten here. Overriding a
+--                                   declaration must be communicated (design doc), and that comparison is
+--                                   only possible while both values survive.
+--   commercial_classified_by/_at    a PERSON's act, named and dated (rule c: the system never decides a
+--                                   judgment call). NJ/IL change the response clock on this classification,
+--                                   so "who said so, and when" is the audit answer to a moved deadline.
+--   commercial_classification_note  why — travels to the requester when the classification overrides what
+--                                   they declared.
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS commercial_classification TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS commercial_classified_by TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS commercial_classified_at TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS commercial_classification_note TEXT;
+
+-- PHASE 7 / BW4 — THE ESTIMATE TASK'S PAUSE (DRAFT_processing_ui_estimate.md §4.1).
+--
+-- Marking a request VAGUE pauses the estimate task: you cannot price what you cannot parse, and the
+-- estimator who could not scope it has just discovered the vagueness. The reply resumes it. (Overly Broad
+-- deliberately does NOT pause — "too large is not a mark, it IS the estimate", Kevin 2026-07-28.)
+--
+-- WHY A COLUMN AND NOT A `paused` STATUS. Every actionable-task query in this codebase is spelled
+-- `status IN ('open','assigned','in_progress','returned','awaiting_review')` — twenty-odd of them, in the
+-- queue, the router, the close-on-route path, the notice/send sweep that closes the estimate task. A new
+-- status value would silently drop a paused task out of ALL of them, including the sweep that closes it,
+-- which is exactly the "stranded estimate task" the hard rule forbids. A nullable marker beside the status
+-- changes nothing anywhere that does not read it: every existing row is `paused_at IS NULL` = not paused,
+-- and a task paused by a deploy of this column is still claimable, still closable, still routable.
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS paused_at TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS paused_reason TEXT;
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS paused_by TEXT;

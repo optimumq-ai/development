@@ -4,21 +4,48 @@ import api from '../lib/api';
 import FeeEstimatePanel from '../components/ui/FeeEstimatePanel';
 import { useWorkTimer, WorkTimerBadge, useTimeCaptureMode } from '../components/ui/WorkTimer';
 import { SubmittedDescription } from '../components/primitives';
+import CommercialRatePanel from '../components/ui/CommercialRatePanel';
 
 export default function EstimateTaskPage() {
   var params = useParams();
   var taskId = params.taskId;
   var [task, setTask] = useState(null);
+  var [ctx, setCtx] = useState(null);          // BW4: /tasks/:id/estimate-context
+  var [flash, setFlash] = useState('');
+  var [busy, setBusy] = useState('');
   var [err, setErr] = useState('');
   var timer = useWorkTimer(taskId);
   var tcm = useTimeCaptureMode('estimate');   // Slice E: badge visibility only here — the estimate finalize
                                               // ceremony isn't consolidated yet, so the Complete modal rides along later.
 
+  // BW4 — the screen-specific facts, in one read, from the same functions the guards use. Failure is not
+  // fatal: the estimate builder is the pre-existing screen and must keep working if a context read breaks.
+  function loadCtx() {
+    return api.get('/tasks/' + taskId + '/estimate-context')
+      .then(function (r) { setCtx(r.data); })
+      .catch(function () {});
+  }
+
   useEffect(function () {
     api.get('/tasks/' + taskId)
       .then(function (r) { setTask(r.data.task); api.post('/tasks/' + taskId + '/begin').catch(function () {}); }) // begin-work: owner-gated (Slice A)
       .catch(function () { setErr('Could not load this task.'); });
+    loadCtx();
   }, [taskId]);
+
+  function classify(value) {
+    if (!ctx) return;
+    setBusy('classify');
+    return api.post('/requests/' + ctx.task.request_id + '/commercial-classification', { classifyAs: value })
+      .then(function (r) {
+        setFlash(r.data && r.data.overridesDeclaration
+          ? 'Classified as ' + value + ' — this overrides the requester’s declaration and must be communicated.'
+          : 'Classified as ' + value + ' — recorded against your name.');
+        return loadCtx();
+      })
+      .catch(function (e) { setFlash((e.response && e.response.data && e.response.data.error) || 'Could not record that classification.'); })
+      .then(function () { setBusy(''); });
+  }
 
   if (err) return <div style={{ padding: '24px', color: '#9B1C1C', fontSize: '14px' }}>{err}</div>;
   if (!task) return <div style={{ padding: '24px', color: '#9CA3AF', fontSize: '14px' }}>Loading...</div>;
@@ -44,6 +71,10 @@ export default function EstimateTaskPage() {
       {task.request_description
         ? <SubmittedDescription margin="0 0 18px">{task.request_description}</SubmittedDescription>
         : null}
+      {flash ? <div style={{ fontSize: '13px', color: '#03543F', background: '#DEF7EC', border: '1px solid #BCF0DA', borderRadius: '8px', padding: '9px 12px', marginBottom: '12px' }}>{flash}</div> : null}
+      {/* BW4 — the classification is the ESTIMATOR's business too: it is their invoice that carries the
+          rate. Same component, same endpoint, same single stored fact as the intake screen. */}
+      {ctx ? <CommercialRatePanel commercial={ctx.commercial} busy={!!busy} onClassify={classify} /> : null}
       <div style={{ background: 'white', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '24px' }}>
         <FeeEstimatePanel requestId={task.request_id} />
       </div>
