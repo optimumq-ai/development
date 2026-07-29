@@ -237,6 +237,14 @@ router.get('/:id/estimate-context', requireAuth, async function (req, res) {
     try { waiverGate = await require('../services/approvalModules').estimateCommunicationGate(null, reqRow); }
     catch (e) { console.error('[estimate-context waiver gate]', e && e.message); }
 
+    // The de-minimis threshold knob, evaluated against the latest saved estimate — the SAME function the
+    // waive route refuses on, so the rail cannot offer an action the endpoint will reject.
+    var deMinimis = null;
+    try {
+      var lastSnap = await get("SELECT total FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [t.request_id]);
+      deMinimis = await require('../services/deMinimisPolicy').offerFor(lastSnap ? lastSnap.total : null, null);
+    } catch (e) { console.error('[estimate-context de minimis]', e && e.message); }
+
     res.json({
       task: t, request: reqRow, parent: parent,
       paused: require('../services/taskPause').stateOf(t),
@@ -247,7 +255,8 @@ router.get('/:id/estimate-context', requireAuth, async function (req, res) {
       // for itself would be a second reading of the statute list, free to disagree with the one that acts.
       waiverPanel: require('../services/approvalModules').waiverPanelState(waiver, reqRow),
       waiverGate: waiverGate.blocked ? { blocked: true, code: waiverGate.code, reason: waiverGate.reason }
-        : { blocked: false, notOffered: !!waiverGate.notOffered }
+        : { blocked: false, notOffered: !!waiverGate.notOffered },
+      deMinimis: deMinimis
     });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

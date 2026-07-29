@@ -120,6 +120,7 @@ export default function EstimateTaskPage() {
   var paused = !!(ctx && ctx.paused && ctx.paused.paused);
   var prov = (ctx && ctx.provenance) || null;
   var wp = (ctx && ctx.waiverPanel) || null;
+  var dm = (ctx && ctx.deMinimis) || null;
 
   return (
     <div style={{ maxWidth: '1100px' }}>
@@ -231,19 +232,44 @@ export default function EstimateTaskPage() {
           <FeeEstimatePanel requestId={task.request_id} />
         </div>
 
+        {/* ⚠ NOT BUILT: THE TX 36-HOUR CAP TRACKER (Draft 2 §2, § 552.275).
+            The draft binds it to "ledger class B allowance — config stub, staff-entered value, `recorded`
+            badge". The class-B stub is genuinely a stub: services/requestorLedger has setAllowance() and
+            the requestor_allowances table, and NOTHING reads them back — there is no endpoint, anywhere,
+            that returns a requestor's allowance state. A tracker drawn on top of that would either invent a
+            number or render an empty box labelled with a statute, and a statutory cap displaying a figure
+            nobody entered is worse than no tracker. Omitted, per the build brief's own "else omit, note
+            it". When the class-B stub gains a reader, this is where the line goes. */}
+
         {/* ── ACTIONS RAIL (spec §2.3 — "Actions", never "Work the request") ── */}
         <div style={{ flex: '0 0 236px' }}>
           <div style={{ background: 'white', border: '1px solid #E5E7EB', borderRadius: '8px', padding: '11px 13px' }}>
             <div style={{ fontSize: '10.5px', fontWeight: 800, letterSpacing: '.07em', textTransform: 'uppercase', color: '#6B7280', marginBottom: '7px' }}>Actions</div>
-            <button type="button" disabled={!!busy || done || paused} onClick={function () { setDmOpen(true); }}
-              style={{ font: 'inherit', width: '100%', fontSize: '13px', fontWeight: 600, padding: '6px 12px', borderRadius: '5px',
-                background: '#F7F9FB', color: '#101A2A', border: '1px solid ' + G.line, cursor: (busy || done || paused) ? 'not-allowed' : 'pointer', opacity: (busy || done || paused) ? 0.55 : 1 }}>
-              De minimis — waive &amp; advance
-            </button>
-            <div style={{ fontSize: '11.5px', color: '#6B7280', marginTop: '6px' }}>
-              Zeroes the estimate, skips the notice cycle and advances the request. Your judgment, your name on
-              it — this is not the configured de-minimis rule, which zeroes by threshold and still notifies.
-            </div>
+            {/* THE THRESHOLD KNOB (Kevin 7/29). The action renders only where the server says it is on
+                offer, from the SAME function the waive route refuses on — an action offered here and
+                rejected there is worse than no action. While the knob is unconfirmed the server offers it
+                regardless of the total, which is exactly today's behaviour. */}
+            {dm && dm.offered ? (
+              <>
+                <button type="button" disabled={!!busy || done || paused} onClick={function () { setDmOpen(true); }}
+                  style={{ font: 'inherit', width: '100%', fontSize: '13px', fontWeight: 600, padding: '6px 12px', borderRadius: '5px',
+                    background: '#F7F9FB', color: '#101A2A', border: '1px solid ' + G.line, cursor: (busy || done || paused) ? 'not-allowed' : 'pointer', opacity: (busy || done || paused) ? 0.55 : 1 }}>
+                  De minimis — waive &amp; advance
+                </button>
+                <div style={{ fontSize: '11.5px', color: '#6B7280', marginTop: '6px' }}>
+                  Zeroes the estimate, skips the notice cycle and advances the request. Your judgment, your name
+                  on it — this is not the configured de-minimis rule, which zeroes by threshold and still notifies.
+                  {dm.reason === 'within_threshold' ? ' ' + dm.text : ''}
+                  {dm.reason === 'unconfirmed' ? ' This city has set no de-minimis threshold (⚠ unconfirmed city knob).' : ''}
+                </div>
+              </>
+            ) : dm ? (
+              <div style={{ fontSize: '11.5px', color: '#6B7280' }}>
+                {/* NOT OFFERED, AND SAID SO. A rail that simply lost a button reads as a bug; naming the
+                    threshold that closed it is the difference between a policy and a glitch. */}
+                <b style={{ color: '#101A2A' }}>De minimis — not available.</b> {dm.text}
+              </div>
+            ) : null}
           </div>
         </div>
       </div>

@@ -318,6 +318,15 @@ export default function FeeEstimatePanel(props) {
       return n;
     });
   }
+  // BW4 — chargeability lookups. `kinds` is keyed by the builder's own field names, so the filter below is
+  // a direct question ("may this state charge for this box?") rather than a mapping table to keep in sync.
+  var chKinds = (ctx.chargeability && ctx.chargeability.kinds) || [];
+  function kindFor(field) { return chKinds.filter(function (k) { return k.field === field; })[0] || null; }
+  // Unknown field (or an unreadable config) => chargeable. The builder must never LOSE a box because a
+  // config could not be read; it loses one only on a declared prohibition.
+  function chargeable(field) { var k = kindFor(field); return !k || k.permitted !== false; }
+  var forbidden = (ctx.chargeability && ctx.chargeability.forbidden) || [];
+
   var R = result && result.requestLevel;
   return (
     <div>
@@ -332,15 +341,28 @@ export default function FeeEstimatePanel(props) {
               <div key={c.id} style={{ border: '1px solid #E5E7EB', borderRadius: '10px', padding: '14px', marginBottom: '12px' }}>
                 <div style={{ fontSize: '13px', fontWeight: 700, color: '#111', marginBottom: '10px' }}>{c.label}{c.recordTypeName ? <span style={{ fontWeight: 400, color: '#9CA3AF' }}> &middot; {c.recordTypeName}</span> : null}</div>
                 {prefilled[c.id] ? <div style={{ fontSize: '11px', color: '#92400E', background: '#FEF3C7', border: '1px solid #FDE68A', borderRadius: '6px', padding: '5px 9px', marginBottom: '10px' }}>Pre-filled from the estimate profile &mdash; review &amp; adjust before sending.</div> : null}
+                {forbidden.length ? (
+                  <div style={{ fontSize: '11px', color: '#03543F', background: '#EAF4EF', border: '1px solid #2F6B4F', borderRadius: '6px', padding: '6px 9px', marginBottom: '10px' }}>
+                    Not chargeable here, so not offered: {forbidden.map(function (k) { return k.label + (k.citation ? ' (' + k.citation + ')' : ''); }).join(' · ')}.
+                    {forbidden[0].text ? ' ' + forbidden[0].text : ''}
+                  </div>
+                ) : null}
                 {c.suggested && c.suggested.hasKnown ? (
                   <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px', background: '#EFF6FF', border: '1px solid #DBEAFE', borderRadius: '8px', padding: '7px 10px', marginBottom: '10px', fontSize: '11.5px', color: '#1F4E79' }}>
                     <span>Known page count: <strong>{c.suggested.knownPages}</strong> &middot; {c.suggested.basis}</span>
                     <button onClick={function () { setQ(c.id, 'bwPages', c.suggested.knownPages); }} style={{ padding: '4px 10px', borderRadius: '6px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '11px', fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap' }}>Use</button>
                   </div>
                 ) : null}
+                {/* PHASE 7 / BW4 — CHARGEABILITY-AWARE. A line kind this state FORBIDS is not offered: in
+                    Ohio the engine has always zeroed labor (R.C. 149.43(B)(1) — actual cost of the medium
+                    only), but the box was still there to type into, so a clerk entered hours the estimate
+                    then silently dropped. What is removed is replaced by the prohibition and its citation,
+                    because a vanished field reads as a bug. Only an EXPLICIT prohibition filters — an
+                    unconfigured rate still renders (see services/chargeability.js). */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                  {[['searchHours', 'Search hrs'], ['reviewHours', 'Review/redaction hrs'], ['bwPages', 'B&W pages'], ['colorPages', 'Color pages'], ['oversizedPages', 'Oversized pages']].map(function (f) {
-                    return <div key={f[0]}><label style={lbl}>{f[1]}</label><input type="number" step="any" value={q[f[0]]} onChange={function (e) { setQ(c.id, f[0], e.target.value === '' ? 0 : parseFloat(e.target.value)); }} style={inp} /></div>;
+                  {[['searchHours', 'Search hrs'], ['reviewHours', 'Review/redaction hrs'], ['bwPages', 'B&W pages'], ['colorPages', 'Color pages'], ['oversizedPages', 'Oversized pages']].filter(function (f) { return chargeable(f[0]); }).map(function (f) {
+                    var ck = kindFor(f[0]);
+                    return <div key={f[0]}><label style={lbl}>{f[1]}</label><input type="number" step="any" value={q[f[0]]} onChange={function (e) { setQ(c.id, f[0], e.target.value === '' ? 0 : parseFloat(e.target.value)); }} style={inp} />{ck && ck.reason === 'conditional' ? <div style={{ fontSize: '10px', color: '#92400E', marginTop: '2px' }}>{ck.text}{ck.citation ? ' (' + ck.citation + ')' : ''}</div> : null}</div>;
                   })}
                   <div><label style={lbl}>Media</label>
                     <div style={{ display: 'flex', gap: '4px' }}>

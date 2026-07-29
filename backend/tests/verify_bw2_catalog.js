@@ -158,10 +158,13 @@ var UNROUTABLE_MATCH = { classification: 'standard', recordTypeConfidence: 0, fl
     ok('C0 the decided enum is exactly the five keys, in draft order',
       IR.TRIGGERS.join('|') === 'unroutable|eligibility_review|approval_pending|sensitivity_flag|reopen_retriage');
     // BW3 added `eligibility_review` — its structured signal now exists (services/eligibilityFindings.js).
-    // `sensitivity_flag` stays deliberately unwired (which flags should stop a request is Kevin's question,
-    // not an inference) and `reopen_retriage` is BW5's. verify_bw3_intake_review owns the wiring proof.
+    // BW4 added `sensitivity_flag` (Kevin, 2026-07-29): the question BW3 declined to answer for itself —
+    // WHICH flags should stop a request — turned out to be already answered by the rulebook, where
+    // `wfr-sensitive` has always forced human intake on LEGAL_HOLD / ONGOING_INVESTIGATION / SENSITIVE. So
+    // that wiring changes the DESTINATION of a stop that already existed, not the set of requests that stop.
+    // `reopen_retriage` is still BW5's. verify_bw3 / verify_bw4 own the wiring proofs.
     ok('C1 only the triggers whose signals exist today are wired',
-      IR.WIRED_TRIGGERS.join('|') === 'unroutable|approval_pending|eligibility_review');
+      IR.WIRED_TRIGGERS.join('|') === 'unroutable|approval_pending|eligibility_review|sensitivity_flag');
 
     var r3 = await makeRequest('req-' + TAG + '-C'); created.requests.push(r3);
     var s1 = await IR.spawn(r3, ['unroutable'], { createdBy: 'harness', awaitRouting: true });

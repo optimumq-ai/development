@@ -178,7 +178,10 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
       actualRateDrivers: actualRateDrivers, laborRates: laborRates,
       latest: hydrate(latest),
       paymentPlan: planCtx ? planCtx.plan : null, paymentTimingSource: planCtx ? planCtx.source : null,
-      paymentState: payState, paymentMode: paymentMode, laborActuals: laborOut
+      paymentState: payState, paymentMode: paymentMode, laborActuals: laborOut,
+      // PHASE 7 / BW4 — which line kinds this state's fee config PERMITS, each with its citation. The
+      // builder stops offering a box the engine will refuse to charge (Ohio: no labor, actual cost only).
+      chargeability: await require('../services/chargeability').forActiveJurisdiction(jid)
     });
   } catch (e) { res.status(500).json({ error: 'Could not load estimate context.' }); }
 });
@@ -373,6 +376,15 @@ router.post('/request/:requestId/de-minimis-waive', requireAuth, async function 
     }
     var feeContext = {}; try { feeContext = JSON.parse(snap.fee_context_json || '{}'); } catch (e) { feeContext = {}; }
     var originalTotal = Number(snap.total) || 0;
+    // THE THRESHOLD KNOB (Kevin 2026-07-29). One function decides, and both the rail and this route read
+    // it: a ceiling the screen honoured but the endpoint did not would be a policy anyone could step around
+    // with a single request. While the knob is UNCONFIRMED this always offers — a city that has not chosen
+    // a ceiling has not chosen one, and inventing it here would silently withdraw an action staff have.
+    var offer = await require('../services/deMinimisPolicy').offerFor(originalTotal, null);
+    if (!offer.offered) {
+      return res.status(409).json({ code: 'ABOVE_DE_MINIMIS_THRESHOLD', error: offer.text,
+        thresholdUsd: offer.thresholdUsd, total: originalTotal });
+    }
     var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'Staff';
     var now = nowStr();
 
