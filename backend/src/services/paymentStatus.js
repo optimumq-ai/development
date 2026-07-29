@@ -156,6 +156,18 @@ async function recordEvent(rid, evt) {
   // services/requestorLedger.js on why an unverified email is not an identity.
   try { await require('./requestorLedger').onMoneyEvent(rid, evt, peId); }
   catch (e) { console.error('[paymentStatus ledger]', e && e.message); }
+  // PHASE 7 / BW5 — THE PAYMENT-RECEIVED HOOK for the auto-release pipeline. "Payment due ⇒ pending until
+  // balance ≤ 0, then ships untouched" (Draft 8 rev 2 Frame B). Wired HERE for the same reason the ledger
+  // is: this is the one chokepoint every money event already passes through — counter, ERP webhook, portal
+  // — so no channel can clear a balance without the pipeline noticing.
+  //
+  // INERT BY DEFAULT: `run` refuses on the unconfirmed `auto_release` knob before it writes anything, so on
+  // an install that has not switched the pipeline on this hook evaluates and returns. It also never throws
+  // (see autoRelease.run), because a release must never be able to fail a payment.
+  if (evt.type === 'payment' || evt.type === 'credit' || evt.type === 'refund') {
+    try { await require('./autoRelease').onPaymentReceived(rid); }
+    catch (e) { console.error('[paymentStatus autoRelease]', e && e.message); }
+  }
   return status;
 }
 

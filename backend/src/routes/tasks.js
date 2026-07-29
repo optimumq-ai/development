@@ -867,4 +867,71 @@ router.post('/:id/close-approval/:decision', requireAuth, async function (req, r
   }
 });
 
+// ============================================================================================
+// PHASE 7 / BW5 — RELEASE REVIEW (the pipeline's gate branch; SPEC §5 / Draft 9's task type).
+//
+// BW2 registered `release_review` and said outright it was "a routable type nothing spawns" until BW5.
+// Here is the other half: the pipeline raises it instead of shipping when the city's pre-send knob is ON,
+// and APPROVING IT FIRES THE RELEASE — the approver recorded on the event.
+//
+// TWO-EYES IS REAL HERE (unlike close approval). taskRouting.TWO_EYES_TYPES already excludes the person who
+// completed the item's last flow task at assignment and in the pool; this route re-asks the same question
+// rather than trusting that the assignment was made under the rule, because a task can be hand-assigned.
+//
+// The full power-mode surface is Draft 9 / BW8. These three endpoints are its substrate.
+// ============================================================================================
+router.get('/:id/release-review', requireAuth, async function (req, res) {
+  try {
+    var t = await get("SELECT * FROM tasks WHERE id = ? AND type = 'release_review'", [req.params.id]);
+    if (!t) return res.status(404).json({ error: 'This task is not a release review.' });
+    var AR = require('../services/autoRelease');
+    var blocked = await tr.assignmentBlocked(t, req.user && req.user.sub);
+    res.json({
+      taskId: t.id, requestId: t.request_id, status: t.status,
+      twoEyes: blocked,
+      evaluation: await AR.evaluate(t.request_id)
+    });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.post('/:id/release-review/:decision', requireAuth, async function (req, res) {
+  try {
+    var t = await get("SELECT * FROM tasks WHERE id = ? AND type = 'release_review'", [req.params.id]);
+    if (!t) return res.status(404).json({ error: 'This task is not a release review.' });
+    if (!tr.isActionable(t.status)) {
+      return res.status(409).json({ error: 'This release review is ' + t.status + ' and can no longer be decided.',
+                                    code: 'TASK_NOT_ACTIONABLE' });
+    }
+    var AR = require('../services/autoRelease');
+    var actor = { actorId: req.user && req.user.sub, actorName: (req.user && req.user.name) || 'Staff',
+                  note: (req.body && req.body.note) || '' };
+
+    if (req.params.decision === 'return') return res.json(await AR.returnReview(t.id, actor));
+
+    if (req.params.decision === 'approve') {
+      var blocked = await tr.assignmentBlocked(t, actor.actorId);
+      if (blocked.blocked) return res.status(403).json({ error: blocked.reason, code: blocked.code });
+      await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE id = ?", [t.id]);
+      // `force`: the knob asks whether releases fire WITH NOBODY TOUCHING THEM. Somebody just touched this
+      // one — a named person approved the package — so the release proceeds on their act, not on the
+      // automation setting. The conditions are still re-evaluated: an approval is not a bypass of the
+      // funds gate or the hold.
+      var out = await AR.run(t.request_id, { force: true, actorId: actor.actorId,
+                                             actorName: actor.actorName, approverName: actor.actorName });
+      if (!out.acted || out.reason !== 'released') {
+        // Put the review back: approving something that could not ship must not silently consume the task.
+        await run("UPDATE tasks SET status = 'open', updated_at = datetime('now') WHERE id = ?", [t.id]);
+        return res.status(409).json({ error: 'The release could not fire: ' + (out.text || out.reason) + '.',
+                                      code: 'RELEASE_BLOCKED', result: out });
+      }
+      return res.json(Object.assign({ approvedBy: actor.actorName }, out));
+    }
+    return res.status(400).json({ error: 'Decision must be approve or return.' });
+  } catch (e) {
+    if (e && e.status) return res.status(e.status).json({ error: e.message, code: e.code });
+    console.error('release-review failed:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 module.exports = router;

@@ -684,6 +684,20 @@ async function applyStageTransition(requestId, toStage, opts) {
       }
     } catch (e) { console.error('[applyStageTransition triage]', e && e.message); }
   }
+  // PHASE 7 / BW5 — THE AUTO-RELEASE PIPELINE'S TRIGGER. `delivery` is the stage that MEANS "the work is
+  // done and the package is ready", so it is the one place worth asking the four conditions. Deliberately
+  // narrow: hooking every transition would run the evaluator on requests that are nowhere near shipping,
+  // and the pipeline's job is to notice a ready item, not to poll.
+  //
+  // BACKGROUND AND INERT BY DEFAULT. `autoRelease.run` refuses on the unconfirmed `auto_release` knob
+  // before it writes anything, so on an install that has not switched the pipeline on this is an evaluate
+  // and a return. It never throws (by construction), and it is not awaited, so it can neither fail nor slow
+  // this transition — the same discipline the redaction triage kick above follows.
+  if (toStage === 'delivery') {
+    try {
+      require('./embedIndex').bg(require('./autoRelease').run(requestId, {}), 'auto-release ' + requestId);
+    } catch (e) { console.error('[applyStageTransition autoRelease]', e && e.message); }
+  }
   return { fromStage: fromStage, toStage: toStage, changed: true, task: task };
 }
 
