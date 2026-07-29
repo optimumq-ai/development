@@ -256,6 +256,63 @@ router.get('/:id/readiness', requireAuth, async function (req, res) {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── GENERATE ESTIMATE — THE ONE BUTTON READINESS ARMS ────────────────────────────────────────────
+//
+// Kevin 7/28 item 7: at m of m, Generate estimate "becomes active and highlighted". What it does is ARM THE
+// STANDARD ENGINE on the MASTER record — one estimate for the whole request, not a sum of item prices.
+//
+// IT DELIBERATELY DOES NOT PRICE ANYTHING HERE. The fee engine (routes/feeEstimates) owns pricing: the
+// jurisdiction's config, the Illinois forfeiture guardrail, the component split, the notice. A second
+// pricing path in this router would be a second answer to "what does this cost", and the two would
+// disagree the first time a rate changed. So this finds-or-raises the parent's ORDINARY `estimate` task
+// and hands the manager to it — the gathered per-item figures ride along in the history as the worksheet's
+// starting facts.
+//
+// VERIFY ≠ APPROVE survives untouched because it was never this endpoint's: staff VERIFY on the estimate
+// screen, the REQUESTOR approves through the acceptance gate. Two acts, two actors — requestor approval is
+// a statutory trigger in some states, and collapsing them here would forge one.
+router.post('/:id/generate-estimate', requireAuth, async function (req, res) {
+  try {
+    var r = await resolveParent(req.params.id);
+    if (!r.parentId) return res.status(404).json({ error: 'Master record not found.' });
+    var auth = await manages(req.user, r.parentId);
+    if (!auth.ok) return res.status(403).json({ error: 'Only this record’s Request Manager generates its estimate.', code: 'NOT_THE_MANAGER' });
+
+    var ready = await HUB.readiness(r.parentId);
+    if (!ready.ready) {
+      return res.status(409).json({
+        error: 'Estimate data is complete for ' + ready.n + ' of ' + ready.m + ' items. One estimate is generated ' +
+               'for the master record, so it waits until every item’s data is in.',
+        code: 'NOT_READY', readiness: ready });
+    }
+
+    var tr = require('../services/taskRouting');
+    var existing = await get("SELECT * FROM tasks WHERE request_id = ? AND type = 'estimate' AND status NOT IN ('done','cancelled') ORDER BY created_at DESC LIMIT 1", [r.parentId]);
+    var task = existing;
+    if (!task) {
+      task = await tr.createTask({ requestId: r.parentId, type: 'estimate',
+        title: 'Estimate — multi-record request (' + ready.m + ' items)', teamId: null, createdBy: req.user.id });
+      await tr.assign(task.id, req.user.id, 'manual', null);
+    }
+
+    var data = await all('SELECT * FROM mrr_estimate_data WHERE parent_request_id = ?', [r.parentId]);
+    var lines = data.map(function (d) {
+      return '· item ' + d.request_id + ': ' + (d.page_count || 0) + ' pages, ' + (d.labor_minutes || 0) +
+        ' min labour' + (d.estimated_cost != null ? ', est. $' + d.estimated_cost : '') +
+        ' (entered by ' + (d.entered_by_name || 'unknown') + ')';
+    }).join('\n');
+    await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes, created_at) VALUES (?,?,?,?,?,?,?)',
+      [require('uuid').v4(), r.parentId, req.user.id, req.user.name || 'Request Manager', 'MRR_ESTIMATE_ARMED',
+       'Estimate data complete for all ' + ready.m + ' items; one estimate generated for the master record through ' +
+       'the standard engine. Gathered figures:\n' + lines +
+       '\nStaff VERIFY this estimate; the REQUESTOR approves it — two acts by two people.',
+       new Date().toISOString().slice(0, 19).replace('T', ' ')]);
+
+    res.json({ armed: true, estimateTaskId: task.id, readiness: ready,
+      note: 'One estimate for the master record, through the standard engine. Staff verify it; the requestor approves it.' });
+  } catch (e) { res.status(e.status || 500).json({ error: e.message, code: e.code }); }
+});
+
 // ── DENIAL DESIGNATION ───────────────────────────────────────────────────────────────────────────
 router.post('/item/:childId/designate-denial', requireAuth, async function (req, res) {
   try {
