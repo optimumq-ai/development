@@ -261,6 +261,9 @@ export default function MrrMasterPage() {
         <div style={{ marginTop: 8, display: 'flex', gap: 8, flexWrap: 'wrap' }}>
           <Link to={'/requests/' + p.id} style={Object.assign({}, btnQuiet, { textDecoration: 'none' })}>Master record</Link>
           <Link to={'/requests/' + p.id + '/dispositions'} style={Object.assign({}, btnQuiet, { textDecoration: 'none' })}>Dispositions</Link>
+          {/* BW7 — THE FINANCIAL VIEW. Routed on the PARENT id rather than the hub task, because money is a
+              parent fact (§4.3): one request, one ledger, however it is reached. */}
+          <Link to={'/requests/' + p.id + '/financial'} style={Object.assign({}, btnQuiet, { textDecoration: 'none' })}>Financial view</Link>
         </div>
         {/* NO CLOSE CONTROL. A parent is never closed by hand (§5.8) — the absence is the design. */}
       </div>

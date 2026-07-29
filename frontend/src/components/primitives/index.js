@@ -60,12 +60,20 @@ export function ClockChip(props) {
 }
 
 // ---------------------------------------------------------------------------------------------
-// DecidedByBadge — who decided (spec rule c). by: 'person' | 'statute' | 'system' | 'recorded'
+// DecidedByBadge — who decided (spec rule c).
+//   by: 'person' | 'statute' | 'system' | 'recorded' | 'external'
+//
+// `external` (BW7, additive) is the PURPLE EXTERNAL-ACTOR family from Draft 4, needed the moment a money
+// statement has to render the REQUESTOR'S own acts beside the city's. A requestor accepting an estimate is
+// not the city deciding and not the system deciding: in several states it is a statutory trigger, and
+// flattening it into `person` would make the city look like the author of a decision it did not make.
+// Verify ≠ Approve. Same tint as MrrMasterPage's `ext` tag, so the two read as one family.
 var BY = {
   person:  { bg: '#FFF8E5', fg: '#9A6700', bd: '#D4A72C', dash: false },
   statute: { bg: '#EAF4EF', fg: '#2F6B4F', bd: '#2F6B4F', dash: false },
   system:  { bg: '#F2F6F9', fg: '#143D5C', bd: '#C3CFDA', dash: false },
-  recorded:{ bg: '#FFFFFF', fg: '#8A97A3', bd: '#8A97A3', dash: true }
+  recorded:{ bg: '#FFFFFF', fg: '#8A97A3', bd: '#8A97A3', dash: true },
+  external:{ bg: '#EDE9F5', fg: '#4A3A75', bd: '#8E7CC3', dash: false }
 };
 export function DecidedByBadge(props) {
   var t = BY[props.by] || BY.recorded;

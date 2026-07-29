@@ -170,6 +170,10 @@ export default function RequestWorkspacePage() {
                   header anywhere, read-only for anyone who can see the request; no task type"). */}
               {' · '}<span onClick={function(){nav('/requests/'+request.id+'/dispositions');}}
                 style={{color:'#1F4E79',cursor:'pointer',fontWeight:600}}>Dispositions</span>
+              {/* BW7 — the parent financial view's other door. Reached from the request header on ANY request;
+                  the route resolves to the parent, so a child link and a parent link show one ledger. */}
+              {' · '}<span onClick={function(){nav('/requests/'+request.id+'/financial');}}
+                style={{color:'#1F4E79',cursor:'pointer',fontWeight:600}}>Financial view</span>
             </p>
           </div>
         </div>

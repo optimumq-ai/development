@@ -44,6 +44,23 @@ function fail(res, e) {
 }
 
 // ── READS ────────────────────────────────────────────────────────────────────────────────────────
+// THE SCREEN'S ONE READ. Every figure is computed in the service — the page's job is layout, and a page that
+// recomputes a money figure is a second implementation of the rule.
+router.get('/:id/view', requireAuth, async function (req, res) {
+  try {
+    var pid = await PF.parentOf(req.params.id);
+    if (!(await canRead(req.user, pid))) return res.status(403).json({ error: 'Not your request.' });
+    var v = await PF.financialView(pid);
+    v.canAct = canAct(req.user);
+    v.actNote = canAct(req.user) ? null
+      : 'You can read this ledger. Credits, refunds and the settlement are ORO Finance’s acts — the controls stay ' +
+        'visible so you can tell a citizen who to ask, and stay disabled because the authority is not yours.';
+    v.refundEnabled = canAct(req.user) && v.netting.refundOutstanding > 0;
+    v.canSettle = canAct(req.user) && v.settlement.ready && !v.settlement.settled;
+    res.json(v);
+  } catch (e) { fail(res, e); }
+});
+
 router.get('/:id/quoted-shares', requireAuth, async function (req, res) {
   try {
     var pid = await PF.parentOf(req.params.id);

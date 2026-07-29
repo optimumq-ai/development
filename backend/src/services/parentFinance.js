@@ -641,8 +641,245 @@ async function collectionCap(rid) {
   };
 }
 
+// ═════════════════════════════════════════════════════════════════════════════════════════════════
+// THE VIEW — ONE READ THE SCREEN RENDERS WITHOUT DOING ARITHMETIC
+//
+// Every number on the financial view is computed HERE, because a screen that recomputes a money figure is a
+// second implementation of the rule and the two will disagree eventually. The page's job is layout.
+
+// THE RELEASE RULE, BY NAME (Draft 7 §1). The draft names a per-jurisdiction `payment_release_rule`
+// (`pay_in_full` TX / `per_installment` WA). There is no such config key, and INVENTING one would be a
+// silent default nobody attested. So the name is DERIVED from two facts the system already has and both of
+// which are researched: the resolved payment plan's delivery trigger, and the branch profile's
+// `installment_entitlement` (whose fallback rule is that unknown is not an entitlement). A jurisdiction that
+// has not been researched therefore reads as `pay_in_full` — the stricter, existing behaviour — and says so.
+async function releaseRule(rid) {
+  var pid = await parentOf(rid);
+  var pt = require('./paymentTiming');
+  var gate = await FR.releaseGate(pid);
+  var plan = gate && gate.plan;
+  var entitlement = null;
+  try { entitlement = await require('./branchProfile').isActive(null, 'installment_entitlement'); } catch (e) { entitlement = null; }
+  var payInFull = !!(plan && pt.requiresPaymentBeforeRelease(plan));
+  var name = entitlement === true ? 'per_installment' : (payInFull ? 'pay_in_full' : 'invoice_on_release');
+  var LABEL = { pay_in_full: 'pay_in_full', per_installment: 'per_installment', invoice_on_release: 'invoice_on_release' };
+  return {
+    name: name, label: LABEL[name],
+    requiresPaymentBeforeRelease: payInFull,
+    installmentEntitlement: entitlement,
+    basis: plan ? (plan.deliveryTrigger || plan.gate || null) : null,
+    note: name === 'per_installment'
+      ? 'This state gives the requester the entitlement to receive records as they become ready, so release is ' +
+        'per installment rather than against the whole fee. The unclaimed-installment edge is modelled and ' +
+        'labelled; it is flagged for re-check rather than treated as settled.'
+      : name === 'pay_in_full'
+        ? 'Records are released against payment. Coverage is per record — this record’s own share (§5.9) — never ' +
+          'the request’s whole balance.'
+        : 'No payment is required before release; the requestor is invoiced.',
+    derivedNote: 'Derived from the resolved payment plan and the state’s researched installment entitlement. ' +
+      'An un-researched jurisdiction reads pay_in_full, which is the stricter existing behaviour.'
+  };
+}
+
+// THE STATEMENT — EVENTED, NEVER RECOMPUTED, AND EVERY LINE CARRIES ITS ACTOR.
+//
+// THE REQUESTOR IS AN EXTERNAL ACTOR (rule c, and this is the distinction Draft 4 drew): their approval of an
+// estimate is not the city deciding anything, and it is not the system deciding anything either. It gets its
+// own badge family, `external`, rather than being flattened into `person` — Verify ≠ Approve.
+var EXTERNAL_ACTOR_TYPES = { quote_frozen: true, accepted: true, estimate_accepted: true, declined: true };
+function actorClass(ev) {
+  var t = String(ev.type || '');
+  var actor = String(ev.actor || '');
+  if (EXTERNAL_ACTOR_TYPES[t] || /requestor|requester/i.test(actor)) return 'external';
+  if (t === 'credit' || t === 'refund' || t === 'settlement' || t === 'payment' || t === 'waiver') return 'person';
+  if (/^system|auto-draft|\(auto/i.test(actor)) return 'system';
+  return 'recorded';
+}
+async function statement(rid) {
+  var pid = await parentOf(rid);
+  var PS = require('./paymentStatus');
+  var ids = await PS.moneyTreeIds(pid);
+  var ph = ids.map(function () { return '?'; }).join(',');
+  var rows = await db.all('SELECT id, request_id, type, amount, reason, reference, actor, approver, status_current, ' +
+    'status_label, created_at FROM request_payment_events WHERE request_id IN (' + ph + ') ORDER BY created_at ASC, id ASC', ids);
+  return {
+    rows: rows.map(function (e) {
+      var cls = actorClass(e);
+      return {
+        id: e.id, requestId: e.request_id, type: e.type, amount: e.amount != null ? r2(e.amount) : null,
+        reason: e.reason || null, reference: e.reference || null,
+        actor: e.actor || null, approver: e.approver || null,
+        statusCurrent: e.status_current, statusLabel: e.status_label, at: e.created_at,
+        decidedBy: cls,
+        actorNote: cls === 'external'
+          ? 'The requestor’s own act — an external actor. Staff verify; the requestor approves. Two words, two actors.'
+          : cls === 'system' ? 'Computed. The basis is on the line; nothing was decided here.' : null
+      };
+    }),
+    discipline: 'This statement is the EVENT STREAM, not a recomputation. A figure a demand rests on has to be ' +
+      'reconstructable from what was recorded at the time — so nothing here is re-derived on read, and a line that ' +
+      'looks wrong is evidence rather than a bug to be papered over.'
+  };
+}
+
+// THE PER-ITEM ALLOCATION AND RELEASE TABLE — the centrepiece. Frozen share, the running funds balance as it
+// stood for that row, whether it consumed, and the release verdict from the gates that actually decide.
+async function allocation(rid) {
+  var pid = await parentOf(rid);
+  var q = await quotedShares(pid);
+  var st = await itemStates(pid);
+  var funds = await FR.poolFunds(pid);
+  var byId = {}; st.items.forEach(function (i) { byId[i.id] = i; });
+
+  // The running balance is walked in SHIP ORDER, which is what FIFO means. Rows that never shipped do not
+  // draw the balance down at all, and the row says so where staff will be tempted to net them anyway.
+  var order = q.components.slice().sort(function (a, b) {
+    var sa = byId[a.id], sb = byId[b.id];
+    var ka = (sa && sa.shipped) ? 0 : 1, kb = (sb && sb.shipped) ? 0 : 1;
+    return ka - kb;
+  });
+  var running = funds.available;
+  var rows = [];
+  for (var i = 0; i < order.length; i++) {
+    var c = order[i];
+    var item = byId[c.id] || null;
+    var before = running;
+    var consumed = !!(item && item.shipped);
+    if (consumed) running = r2(running - (c.quotedShare || 0));
+    var gate = null;
+    try { gate = await FR.releaseGate(c.id); } catch (e) { gate = null; }
+    rows.push({
+      id: c.id, label: item ? item.label : (c.label || c.id), componentLabel: c.label || null,
+      componentGross: c.componentGross, quotedShare: c.quotedShare,
+      hasUnpricedActuals: c.hasUnpricedActuals,
+      shipped: consumed, shipEvidence: item ? item.shipEvidence : null,
+      endedWithoutShipping: !!(item && item.endedWithoutShipping),
+      fundsBefore: r2(before), fundsAfter: r2(running), consumesFunds: consumed,
+      covered: gate ? !!gate.covered : null,
+      coverageBasis: gate ? gate.coverageBasis : null,
+      balanceOnThisItem: gate ? r2(gate.balanceDue) : null,
+      requiresPaymentBeforeRelease: gate ? !!gate.requiresPaymentBeforeRelease : null,
+      ownShareRule: 'Covered against this item’s OWN share only. A sibling’s unpaid balance is never a reason to ' +
+        'withhold this one (§5.9); an already-shipped sibling drew the pool down because the citizen received it.',
+      neverShippedRule: (item && item.endedWithoutShipping)
+        ? 'Ended without shipping, so its share never consumed funds and never will — do not net it against the pool.'
+        : null
+    });
+  }
+  return {
+    hasQuote: q.hasQuote, frozen: q.frozen, frozenAt: q.frozenAt, ratio: q.ratio,
+    quotedTotal: q.total, grossSubtotal: q.grossSubtotal, explain: q.explain, frozenNote: q.frozenNote,
+    funds: funds, rows: rows,
+    varianceRule: 'Measured variances are shown wherever they are known and they GATE NOTHING. Actuals never touch ' +
+      'the release gate — they settle once, on the last record (§0.1, §0.3).',
+    gatesWorkNote: 'The funds check gates RELEASE, never WORK. Staff keep working an item whose money has not arrived.'
+  };
+}
+
+// THE RECONCILIATION PANEL — the auto-draft, visible, with its measured-vs-estimated delta. The SEND is a
+// person's act and stays with the reissue machinery; nothing here notifies anybody.
+async function reconciliation(rid) {
+  var pid = await parentOf(rid);
+  var ids = await require('./paymentStatus').moneyTreeIds(pid);
+  var ph = ids.map(function () { return '?'; }).join(',');
+  var recon = await db.get("SELECT * FROM request_fee_estimates WHERE request_id IN (" + ph + ") AND kind = 'reconciliation' " +
+    "ORDER BY created_at DESC LIMIT 1", ids);
+  var LA = require('./laborActuals');
+  var hours = { searchHours: 0, reviewHours: 0, programmingHours: 0 }, measured = false;
+  for (var i = 0; i < ids.length; i++) {
+    var roll = await LA.rollup(ids[i]);
+    ['searchHours', 'reviewHours', 'programmingHours'].forEach(function (k) { hours[k] = Math.round((hours[k] + (Number(roll.hours[k]) || 0)) * 10000) / 10000; });
+    if (roll.hasActuals) measured = true;
+  }
+  var quote = await FR.acceptedQuote(pid);
+  var estHours = null;
+  if (quote) { var inp = {}; try { inp = JSON.parse(quote.input_json || '{}'); } catch (e) { inp = {}; } estHours = LA.estimatedHoursFromInput(inp); }
+  var RI = require('./feeReissue');
+  var pendingNotice = { pending: false };
+  try { pendingNotice = await RI.pending(recon ? recon.request_id : pid); } catch (e) {}
+  var isAutoDraft = !!(recon && /auto-draft/i.test(recon.created_by || '') && !recon.notified_at);
+  return {
+    has: !!recon,
+    id: recon ? recon.id : null, requestId: recon ? recon.request_id : null,
+    createdBy: recon ? recon.created_by : null, createdAt: recon ? recon.created_at : null,
+    notifiedAt: recon ? recon.notified_at : null,
+    autoDraft: isAutoDraft,
+    total: recon ? r2(recon.total) : null,
+    baselineTotal: recon && recon.baseline_total != null ? r2(recon.baseline_total) : null,
+    variancePct: recon && recon.variance_pct != null ? Number(recon.variance_pct) : null,
+    reNotifyRequired: !!(recon && Number(recon.renotify_required) === 1),
+    revisedNoticeOutstanding: !!pendingNotice.pending,
+    measuredHours: hours, estimatedHours: estHours, hasMeasured: measured,
+    sendNote: 'The SEND is a person’s act. The draft is staged; the delta rides ONE revised communication (the ' +
+      'one-notice principle), through the reissue machinery — this panel never notifies a requestor.',
+    autoDraftNote: isAutoDraft
+      ? 'Auto-drafted from measured labor when the last billable task finalized. Nobody has been told yet: ' +
+        'created_by carries "(auto-draft)" and notified_at is empty, which is exactly what makes it a draft.'
+      : null
+  };
+}
+
+async function financialView(rid) {
+  var pid = await parentOf(rid);
+  var p = await db.get('SELECT id, request_number, requestor_name, requestor_email, stage, status, ' +
+    'master_request_id FROM requests WHERE id = ?', [pid]);
+  if (!p) throw bad('Request not found.', 'NOT_FOUND', 404);
+  // ANONYMITY IS THE LEDGER'S ANSWER, NOT A COLUMN ON THE REQUEST (rule e). `requestorLedger` decides it from
+  // whether an AFFIRMATIVE identity anchor exists — an unverified email is not an identity — and this screen
+  // must not second-guess that with a flag of its own.
+  var anon = true, ledgerProfileId = null;
+  try {
+    var RL = require('./requestorLedger');
+    ledgerProfileId = await RL.profileForRequest(pid);
+    anon = !ledgerProfileId;
+  } catch (e) { anon = true; }
+  var kidCount = await db.get('SELECT COUNT(*)::int AS n FROM requests WHERE master_request_id = ?', [pid]);
+  var forfeiture = { blocked: false };
+  try { forfeiture = await require('./feeForfeiture').check(pid); } catch (e) { forfeiture = { blocked: false }; }
+  var clocks = [];
+  try {
+    clocks = (await require('./mrrHub').parentClocks(pid)).filter(function (c) { return c.kind === 'requestor_window'; });
+  } catch (e) { clocks = []; }
+  return {
+    parent: {
+      id: p.id, requestNumber: p.request_number, requestorName: p.requestor_name || null,
+      requestorEmail: p.requestor_email || null, anonymous: anon, ledgerProfileId: ledgerProfileId,
+      stage: p.stage, status: p.status, itemCount: Number(kidCount && kidCount.n) || 0,
+      isMrr: (Number(kidCount && kidCount.n) || 0) > 0
+    },
+    netting: await netting(pid),
+    releaseRule: await releaseRule(pid),
+    clocks: clocks,
+    statement: await statement(pid),
+    allocation: await allocation(pid),
+    reconciliation: await reconciliation(pid),
+    settlement: await settlementState(pid),
+    watchdog: await overageWatchdog(pid),
+    collectionCap: await collectionCap(pid),
+    adjustments: await adjustments(pid),
+    // IL FEE FORFEITURE — WARNING ONLY on this screen (Draft 7 open question 5, drafted position). The HARD
+    // block stays where it already lives (services/feeForfeiture, armed by its flag alone because in Illinois
+    // the fee is lost by operation of law the moment the clock blows). This banner tells the person at the
+    // counter WHY the invoice they are looking at may not be collectable; it does not add a second gate, and
+    // a second gate drawn in JSX is the kind that drifts from the one that decides.
+    forfeiture: {
+      warning: !!forfeiture.blocked, reason: forfeiture.reason || null, citation: forfeiture.citation || null,
+      posture: 'Warning only here. The assessment block itself lives in services/feeForfeiture and is not ' +
+        'duplicated on this screen — charges this screen must refuse to demand, said once.'
+    },
+    cashDrawer: { path: '/cash-drawer', note: 'Payment is taken at the Cash Drawer. This screen links to it and ' +
+      'never duplicates it — a second place to take money is a second cash-handling procedure.' },
+    anonymousNote: anon
+      ? 'Anonymous request — the cross-request ledger DOES NOT APPLY (rule e). Not hidden: an anonymous requestor ' +
+        'has no identity for a history to attach to, and "hidden" would read as something withheld from you.'
+      : null
+  };
+}
+
 module.exports = {
   CREDIT_CAUSES: CREDIT_CAUSES, TERMINAL_STATUSES: TERMINAL_STATUSES,
+  releaseRule: releaseRule, statement: statement, allocation: allocation,
+  reconciliation: reconciliation, financialView: financialView,
   parentOf: parentOf,
   quotedShares: quotedShares, freezeQuote: freezeQuote,
   netting: netting, credit: credit, refund: refund,

@@ -47,6 +47,7 @@ import PublicLibraryMapPage from './pages/PublicLibraryMapPage';
 import MassRedactionPage from './pages/MassRedactionPage';
 import FeeConfigPage from './pages/FeeConfigPage';
 import CashDrawerPage from './pages/CashDrawerPage';
+import ParentFinancialPage from './pages/ParentFinancialPage';
 import AvWorkbenchPage from './pages/AvWorkbenchPage';
 import PublicPortalPage from './pages/PublicPortalPage';
 import PublicPortalV2Page from './pages/PublicPortalV2Page';
@@ -97,6 +98,10 @@ export default function App() {
           <Route path="requests/:id" element={<RequestWorkspacePage />} />
           {/* BW5 — the Disposition record. Informational, reached from the request header. */}
           <Route path="requests/:id/dispositions" element={<DispositionsPage />} />
+          {/* BW7 — the parent financial view. TWO DOORS, ONE SCREEN: the request header (any request), and
+              the MRR hub's Financial-view button. Both resolve to the PARENT, because money is a parent
+              fact (§4.3) and a child route would give the same request two different ledgers. */}
+          <Route path="requests/:requestId/financial" element={<ParentFinancialPage />} />
           <Route path="org" element={<OrgPage />} />
           <Route path="my-tasks" element={<MyTasksPage />} />
           <Route path="estimate/:taskId" element={<EstimateTaskPage />} />
