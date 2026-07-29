@@ -17,15 +17,30 @@ var TYPE_LABEL = {
   record_search: 'Record Search', redaction: 'Redaction', legal_redaction: 'Legal Redaction',
   redaction_qa: 'Redaction Review', review_auto_redaction: 'Auto-Redaction Review',
   estimate: 'Estimate', fee_waiver: 'Fee Waiver', legal_review: 'Legal Review', routing_review: 'Routing Review',
-  // BW2 catalog (docs/SPEC_processing_ui.md §8). None has a dedicated screen yet — screenFor() falls back
-  // to the request, which is openable work, just not the purpose-built UI (BW3 / BW6 / BW8).
-  intake_review: 'Intake Review', mrr_management: 'MRR Coordination', release_review: 'Release Review',
+  // BW2 catalog (docs/SPEC_processing_ui.md §8). BW3 gave intake_review its screen and BW6 gave the four
+  // MRR types theirs; release_review still falls back to the request (BW8).
+  //
+  // "MRR Management", not "MRR Coordination": the label a person reads has to be the task type's name, and
+  // Kevin named it (7/28 item 1). Two names for one thing is how a queue and a screen start disagreeing.
+  intake_review: 'Intake Review', mrr_management: 'MRR Management', release_review: 'Release Review',
   mrr_search: 'MRR Search', mrr_estimate: 'MRR Estimate', mrr_redaction: 'MRR Redaction'
 };
 // Order boxes appear in: front-line fulfillment first, then approvals/office work.
-var TYPE_ORDER = ['intake_review', 'record_search', 'redaction', 'legal_redaction', 'redaction_qa', 'review_auto_redaction',
+//
+// BW6 MOVED `mrr_management` TO THE FRONT, and it is not a cosmetic reshuffle. An MRR Management task is a
+// COORDINATION job that stays assigned until every item is terminal (Kevin 7/28 item 2), so its holder is
+// the person other people's items are waiting on. Burying it below single-item work inverted the order in
+// which the day should be worked. The three child activity types keep their own boxes right after it —
+// "MRR Search — assigned to me" is a group like any other, including on the manager's own list when they
+// take one (annotation 2).
+var TYPE_ORDER = ['mrr_management', 'intake_review', 'record_search', 'redaction', 'legal_redaction', 'redaction_qa', 'review_auto_redaction',
   'mrr_search', 'mrr_estimate', 'mrr_redaction',
-  'estimate', 'fee_waiver', 'legal_review', 'release_review', 'mrr_management', 'routing_review'];
+  'estimate', 'fee_waiver', 'legal_review', 'release_review', 'routing_review'];
+
+// The MRR family, for the grouping banner. `mrr_management` is the coordination job; the other three are
+// the items' activities, which NEVER advance a stage — the banner says so once, where the boxes meet, so
+// the distinction is stated on the page a person actually starts their day on.
+var MRR_TYPES = ['mrr_management', 'mrr_search', 'mrr_estimate', 'mrr_redaction'];
 
 // The ONE place a task type becomes a screen; anything else falls back to the request (or a sensible home
 // for request-independent work).
@@ -418,6 +433,22 @@ export default function MyTasksPage() {
       ) : null}
 
       {!loading && boxTypes.length ? sectionHead('Your work') : null}
+      {/* THE MRR GROUPING (BW6; mockup screen 1). The MRR boxes are ordinary boxes — the banner exists to
+          say ONCE, on the page a person starts their day on, what makes the child activities different:
+          completing one updates the manager's MRR screen and advances no stage. Without that line the
+          three MRR boxes look like ordinary fulfillment work, and an assignee reasonably assumes finishing
+          theirs moved the request along. */}
+      {!loading && boxTypes.filter(function (ty) { return MRR_TYPES.indexOf(ty) >= 0; }).length ? (
+        <div style={{ fontSize: '12px', color: C.faint, padding: '0 2px 8px' }}>
+          <b style={{ color: '#1A2230' }}>Multi-record requests.</b>{' '}
+          MRR Management is a coordination job and stays assigned until every item is terminal.
+          MRR Search / Estimate / Redaction are one item's activities — completing one updates the Request
+          Manager's MRR screen and advances no stage.
+          {/* The overview is a LEVEL of the MRR navigation (group → overview → master → child), reached
+              from the group — not a global nav item. My Tasks stays the only router (spec §1). */}
+          {byType.mrr_management ? <> <Link to="/mrr" style={{ color: C.accent, fontWeight: 600 }}>All my MRRs →</Link></> : null}
+        </div>
+      ) : null}
       {boxTypes.map(box)}
 
       {!loading && !boxTypes.length && !myObjs.length && !intake.length ? (

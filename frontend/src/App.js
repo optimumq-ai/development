@@ -40,6 +40,7 @@ import IntakeReviewTaskPage from './pages/IntakeReviewTaskPage';
 import MrrActivityTaskPage from './pages/MrrActivityTaskPage';
 import MrrMasterPage from './pages/MrrMasterPage';
 import MrrChildPage from './pages/MrrChildPage';
+import MrrOverviewPage from './pages/MrrOverviewPage';
 import StructuredRedactionFieldsPage from './pages/StructuredRedactionFieldsPage';
 import ReleasedRecordsPage from './pages/ReleasedRecordsPage';
 import PublicLibraryMapPage from './pages/PublicLibraryMapPage';
@@ -107,6 +108,7 @@ export default function App() {
               Associate works alongside their exceptions queue. */}
           <Route path="intake-review/:taskId" element={<IntakeReviewTaskPage />} />
           <Route path="mrr-activity/:taskId" element={<MrrActivityTaskPage />} />
+          <Route path="mrr" element={<MrrOverviewPage />} />
           <Route path="mrr/:taskId" element={<MrrMasterPage />} />
           <Route path="mrr/:taskId/item/:childId" element={<MrrChildPage />} />
           <Route path="tickler" element={<TicklerPage />} />
