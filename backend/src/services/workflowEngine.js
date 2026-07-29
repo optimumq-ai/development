@@ -208,6 +208,15 @@ async function onIntake(requestId, matcherResult){
           [wv.reason, 'statute', requestId]);
         await db.run("INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)",
           [require('uuid').v4(), requestId, null, 'Statutory Waiver', 'FEE_WAIVER_GRANTED', wv.reason]);
+      } else if (wv.outcome === 'needs_decision' && wv.route && wv.route.mode === 'intake_review') {
+        // BW2, trigger (iii) `approval_pending`. `intake_review` mode means "the intake reviewer decides
+        // inline, no extra hop" — which presupposes there IS an intake review. Until this task type
+        // existed there was none, so a city on this mode had its waiver decision dropped on the floor:
+        // nothing spawned, and the estimate-communication gate then blocked the estimate behind a
+        // decision nobody had been asked to make. Raising the stop is what the mode always meant.
+        await require('./intakeReview').spawn(requestId, ['approval_pending'], {
+          createdBy: 'workflow', requestText: request.description, awaitRouting: true
+        });
       } else if (wv.outcome === 'needs_decision' && wv.route && wv.route.mode === 'routed_task') {
         var existingW = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'fee_waiver' AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [requestId]);
         if (!existingW) {
@@ -228,7 +237,14 @@ async function onIntake(requestId, matcherResult){
     var AMc = require('./approvalModules');
     amConfig = amConfig || await AMc.config(null);
     var cm = await AMc.evaluateCommercial(null, request, { config: amConfig });
-    if (cm.enabled && cm.outcome === 'needs_decision' && cm.route && cm.route.mode === 'routed_task') {
+    if (cm.enabled && cm.outcome === 'needs_decision' && cm.route && cm.route.mode === 'intake_review') {
+      // Same reasoning as the waiver branch above (BW2, trigger `approval_pending`): inline-decide mode
+      // needs a stop to decide it at. If the waiver already raised one, this ADDS its key rather than
+      // stacking a second task.
+      await require('./intakeReview').spawn(requestId, ['approval_pending'], {
+        createdBy: 'workflow', requestText: request.description, awaitRouting: true
+      });
+    } else if (cm.enabled && cm.outcome === 'needs_decision' && cm.route && cm.route.mode === 'routed_task') {
       var trc = require('./taskRouting');
       var existingC = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'fee_waiver' AND title = ? AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [requestId, cm.route.task_name]);
       if (!existingC) {
@@ -241,17 +257,16 @@ async function onIntake(requestId, matcherResult){
 
   // Unroutable at intake: the classifier could not determine a fulfillment team (teamId null). Rather than
   // leaving the request silently Unassigned — or dumping it on the Open Records fulfillment team — spawn a
-  // team-agnostic ROUTING-REVIEW task so an ORO Associate reviews it and corrects the routing. The task is
-  // closed automatically when the request is re-routed (PATCH /requests/:id/route). Idempotent.
+  // team-agnostic task so an ORO Associate reviews it and corrects the routing. Closed automatically when
+  // the request is re-routed (PATCH /requests/:id/route). Idempotent.
+  //
+  // BW2 (2026-07-29): this is now trigger (i) `unroutable` of INTAKE REVIEW rather than a `routing_review`
+  // task of its own (DRAFT_processing_ui_intake_review §0.5). Same condition, same role, same auto-close —
+  // one stop instead of two overlapping ones. services/intakeReview.js owns the spawn and never throws.
   if (!teamId) {
-    try {
-      var trr = require('./taskRouting');
-      var existingR = await db.get("SELECT id FROM tasks WHERE request_id = ? AND type = 'routing_review' AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [requestId]);
-      if (!existingR) {
-        var rtask = await trr.createTask({ requestId: requestId, type: 'routing_review', title: 'Review & route — team could not be determined', teamId: null, createdBy: 'workflow' });
-        await trr.autoRouteOrPool(rtask.id, request.description, {});
-      }
-    } catch (e) { console.error('[workflowEngine] routing-review task spawn failed:', e && e.message); }
+    await require('./intakeReview').spawn(requestId, ['unroutable'], {
+      createdBy: 'workflow', requestText: request.description, awaitRouting: true
+    });
   }
 
   // Statutory clocks: create the jurisdiction intake clocks (idempotent) + sync primary clock -> deadline_date.

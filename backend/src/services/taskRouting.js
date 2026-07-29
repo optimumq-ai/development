@@ -238,10 +238,13 @@ function requiredRoleFor(opts) {
 async function createTask(opts) {
   var id = 't-' + uuidv4().substring(0, 8);
   var role = requiredRoleFor(opts);
+  // WHY the task exists, when the answer is not "the stage said so" (BW2). A trigger-spawned type records
+  // its trigger key(s) here; everything else leaves it NULL and reads exactly as it always has.
+  var triggers = Array.isArray(opts.spawnTriggers) && opts.spawnTriggers.length ? JSON.stringify(opts.spawnTriggers) : null;
   await run(
-    "INSERT INTO tasks (id, request_id, type, title, team_id, role_required, status, created_by) " +
-    "VALUES (?,?,?,?,?,?, 'open', ?)",
-    [id, opts.requestId || null, opts.type, opts.title || null, opts.teamId || null, role, opts.createdBy || null]
+    "INSERT INTO tasks (id, request_id, type, title, team_id, role_required, status, created_by, spawn_triggers) " +
+    "VALUES (?,?,?,?,?,?, 'open', ?,?)",
+    [id, opts.requestId || null, opts.type, opts.title || null, opts.teamId || null, role, opts.createdBy || null, triggers]
   );
   return await getTask(id);
 }

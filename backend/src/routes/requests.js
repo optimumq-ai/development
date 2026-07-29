@@ -259,10 +259,19 @@ router.patch('/:id/route', requireAuth, async function(req, res) {
   var rerouteError = null;
   try {
     var tr = require('../services/taskRouting');
-    // The correction itself resolves any open routing-review task (the ORO Associate just did the review).
-    await run("UPDATE tasks SET status = 'done', updated_at = datetime('now') WHERE request_id = ? AND type = 'routing_review' AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [req.params.id]);
-    // Move/re-route the actual WORK tasks onto the new team (exclude the routing-review task, now closed).
-    var openTasks = await all("SELECT id, assigned_to FROM tasks WHERE request_id = ? AND type != 'routing_review' AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [req.params.id]);
+    // The correction itself resolves the intake stop raised because the team could not be determined (the
+    // ORO Associate just did the review).
+    //
+    // BW2 (2026-07-29): that stop is now INTAKE REVIEW, which — unlike routing_review — can carry more
+    // than one reason. So the close is conditional: it closes when `unroutable` is the ONLY reason the
+    // task exists, and otherwise just drops that reason and leaves the stop standing. A request routed
+    // while its waiver decision is still pending must not have the waiver stop closed underneath it.
+    // Legacy routing_review rows still open are closed exactly as before.
+    await require('../services/intakeReview').closeForResolvedTrigger(req.params.id, 'unroutable');
+    // Move/re-route the actual WORK tasks onto the new team. The intake stops are office-level and
+    // team-agnostic (team_id NULL by design) — stamping them onto the new team would put office work in a
+    // fulfillment team's pool, so they are excluded here as routing_review always was.
+    var openTasks = await all("SELECT id, assigned_to FROM tasks WHERE request_id = ? AND type NOT IN ('routing_review','intake_review') AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [req.params.id]);
     for (var oti = 0; oti < openTasks.length; oti++) {
       var ot = openTasks[oti];
       await run("UPDATE tasks SET team_id = ?, updated_at = datetime('now') WHERE id = ?", [teamId, ot.id]);

@@ -470,13 +470,13 @@ router.post('/submit', async function(req, res) {
       // its siblings.
       console.error('[publicChat] auto-classify failed for ' + childId + ':', ce.message);
       try {
-        var trc = require('../services/taskRouting');
-        var openRt = await get("SELECT id FROM tasks WHERE request_id = ? AND type = 'routing_review' AND status IN ('open','assigned','in_progress','returned','awaiting_review')", [childId]);
-        if (!openRt) {
-          var rt = await trc.createTask({ requestId: childId, type: 'routing_review',
-            title: 'Review & route — automatic classification was unavailable', teamId: null, createdBy: 'system' });
-          await trc.autoRouteOrPool(rt.id, childDescription, {});
-        }
+        // BW2 (2026-07-29): the human stop this degrades to is now INTAKE REVIEW, trigger (i)
+        // `unroutable` — a classifier that never ran cannot have determined a team, so it is the same
+        // condition under the same trigger. Same pool, same auto-close on re-route.
+        await require('../services/intakeReview').spawn(childId, ['unroutable'], {
+          createdBy: 'system', requestText: childDescription, awaitRouting: true,
+          title: 'Intake review — automatic classification was unavailable'
+        });
         await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
           [uuidv4(), childId, 'system', 'System', 'CLASSIFICATION_UNAVAILABLE',
            'Automatic classification could not run (' + String(ce.message).slice(0, 160) + '). Routed to a person for review so the request is not left unattended.']);

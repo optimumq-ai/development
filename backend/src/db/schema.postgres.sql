@@ -1258,3 +1258,15 @@ CREATE TABLE IF NOT EXISTS requestor_flags (
   set_by TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_req_flag ON requestor_flags (profile_id, flag);
+
+-- PHASE 7 / BW2 — WHY A TASK EXISTS, recorded on the task itself.
+--
+-- `intake_review` is TRIGGER-spawned, not stage-spawned (DRAFT_processing_ui_intake_review §0.5): a JSON
+-- array of trigger keys from services/intakeReview.js TRIGGERS. The queue's "Why it's here" column and the
+-- screen's "Here because:" line read it, and the auto-close-on-route inherited from `routing_review` reads
+-- it too — a task raised ONLY because the team could not be determined is finished when the team is
+-- determined; one raised for other reasons as well is not.
+--
+-- Nullable and generic on purpose: any future trigger-spawned type can use the same column rather than
+-- growing a parallel one, and every existing row keeps meaning exactly what it meant (no trigger recorded).
+ALTER TABLE tasks ADD COLUMN IF NOT EXISTS spawn_triggers TEXT;
