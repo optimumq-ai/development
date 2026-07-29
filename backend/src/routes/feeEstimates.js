@@ -282,6 +282,21 @@ router.post('/request/:requestId/notice/send', requireAuth, async function (req,
     // arrive looking like a correction the city had to be chased for.
     var wvGate = await require('../services/approvalModules').estimateCommunicationGate(null, await get('SELECT id, fee_waiver_requested, fee_waiver_status FROM requests WHERE id = ?', [req.params.requestId]));
     if (wvGate.blocked) return res.status(409).json({ error: wvGate.reason, code: wvGate.code });
+    // PHASE 7 / BW4 — a PAUSED estimate cannot be sent. Marking the request vague put a clarification in the
+    // post; sending a priced estimate for a request whose meaning is still in question quotes the requestor
+    // a figure for something nobody has agreed the request means. The screen greys the builder out, and this
+    // is the guard behind it — a screen-only hold is theatre. No pre-existing row is paused, so nothing that
+    // could be sent yesterday is blocked today.
+    var pausedTask = await get("SELECT paused_reason, paused_at FROM tasks WHERE request_id = ? AND type IN ('estimate','mrr_estimate') " +
+      "AND status IN ('open','assigned','in_progress','returned','awaiting_review') AND paused_at IS NOT NULL LIMIT 1", [req.params.requestId]);
+    if (pausedTask) {
+      return res.status(409).json({
+        code: 'ESTIMATE_PAUSED',
+        error: 'This estimate is paused: the request was marked ' + (pausedTask.paused_reason === 'vague' ? 'vague' : 'defective') +
+               ' and a clarification is with the requestor. Record their reply first — the estimate resumes then, ' +
+               'and the reply also applies this jurisdiction’s clock rule.'
+      });
+    }
     var to = (req.body && req.body.to) || reqRow.requestor_email;
     if (!to) return res.status(400).json({ error: 'No requestor email address on this request.' });
     var snap = await latestEstimate(req.params.requestId);

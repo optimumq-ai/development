@@ -213,7 +213,25 @@ async function send(idOrNumber, opts) {
     + (opts.note ? '. ' + opts.note : '');
   await logHistory(reqRow.id, opts, 'CLARIFICATION_REQUESTED', notes);
 
+  // PHASE 7 / BW4 — THE ESTIMATE-TASK PAUSE, and it is keyed on the DEFECT, not on the clarification.
+  //
+  //   vague        pauses the estimate task. You cannot price what you cannot parse.
+  //   overly_broad does NOT. "Too large is not a mark — it IS the estimate" (Kevin 2026-07-28): the
+  //                estimator stays on the screen and prices it, and the acceptance gate (proceed / narrow /
+  //                withdraw) is the narrowing conversation. Pausing here would remove the response.
+  //   null         a clarification with no recorded defect (the pre-existing record-search "Contact
+  //                requestor" caller passes none) pauses nothing. Behaviour for every existing caller is
+  //                therefore byte-for-byte what it was.
+  //
+  // See services/taskPause.js for why this is a marker beside the status rather than a `paused` status.
+  var paused = 0;
+  if (reason === 'vague') {
+    paused = await require('./taskPause').pauseForRequest(reqRow.id, 'vague',
+      { actorId: opts.actorId, actorName: opts.actorName });
+  }
+
   return { requestId: reqRow.id, requestNumber: reqRow.request_number, deliveryMethod: deliveryMethod,
+    estimateTasksPaused: paused,
     automationActive: st.active, effect: effect,
     reason: reason, vague: reason === 'vague',   // `vague` kept for pre-existing callers
     duty: duty, conferenceRequired: conferenceRequired,
@@ -256,8 +274,15 @@ async function resolve(idOrNumber, opts) {
     + (opts.note ? '. ' + opts.note : '');
   await logHistory(reqRow.id, opts, 'CLARIFICATION_RECEIVED', notes);
 
+  // BW4 — the reply RESUMES the estimate task. Unconditional on how it was paused and by whom: a task
+  // paused before this shipped, or by a different person, or through a different screen, still resumes
+  // here. "Nothing may be left paused with no way back" is the whole safety requirement, and a
+  // resume that only undid this process's own pause would not be it.
+  var resumed = await require('./taskPause').resumeForRequest(reqRow.id,
+    { actorId: opts.actorId, actorName: opts.actorName, note: 'the requestor replied.' });
+
   return { requestId: reqRow.id, requestNumber: reqRow.request_number,
-    automationActive: st.active, effect: effect, clock: clock };
+    automationActive: st.active, effect: effect, clock: clock, estimateTasksResumed: resumed };
 }
 
 module.exports = { send: send, resolve: resolve, preview: preview, effectPlan: effectPlan, automationState: automationState };

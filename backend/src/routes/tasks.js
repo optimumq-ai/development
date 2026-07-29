@@ -218,6 +218,7 @@ router.get('/:id/estimate-context', requireAuth, async function (req, res) {
 
     res.json({
       task: t, request: reqRow, parent: parent,
+      paused: require('../services/taskPause').stateOf(t),
       commercial: commercial,
       waiver: waiver
     });
