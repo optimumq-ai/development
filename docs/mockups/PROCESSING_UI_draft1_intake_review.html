@@ -110,6 +110,11 @@
   .legend li b{color:var(--navy);}
   .rule{font-size:10px; font-weight:800; color:#fff; background:var(--statute); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
   .decided{font-size:10px; font-weight:800; color:#fff; background:var(--blue); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
+/* Kevin markup 7/29 — verbatim description first, titled; defect buttons boxed left */
+.descrow{display:flex; gap:10px; align-items:flex-start; margin-bottom:9px;}
+.defectbox{display:flex; flex-direction:column; gap:5px; padding:7px 8px; border:1px solid var(--line); border-radius:6px; flex:0 0 auto; background:#fafafa;}
+.desctitle{font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:#767b83; margin-bottom:3px;}
+.desctext{font-size:14.5px; font-weight:600; line-height:1.45; margin:0;}
 </style>
 </head>
 <body>
@@ -201,8 +206,17 @@
               <span class="tag">→ Open Records Fulfillment Team</span>
             </summary>
             <div class="childbody">
-              <p style="margin-bottom:8px;">All email correspondence between the Public Works director and Lakeline Paving LLC, January–June 2026.</p>
-              <div class="kv" style="margin-bottom:9px;">Classified: <b>Email correspondence</b> (confidence 84) · Record owner: <b>Public Works</b> · Routes to: <b>Open Records Fulfillment Team</b> &nbsp;<button class="btn quiet">Change route</button> &nbsp;<button class="btn quiet">Mark Vague</button> <button class="btn quiet">Mark Overly Broad</button></div>
+              <div class="descrow">
+                <div class="defectbox">
+                  <button class="btn quiet">Mark Vague</button>
+                  <button class="btn quiet">Mark Overly Broad</button>
+                </div>
+                <div>
+                  <div class="desctitle">Request Description as Submitted</div>
+                  <p class="desctext">All email correspondence between the Public Works director and Lakeline Paving LLC, January–June 2026.</p>
+                </div>
+              </div>
+              <div class="kv" style="margin-bottom:9px;">Classified as: <b>Email correspondence</b> (confidence 84) · Record owner: <b>Public Works</b> · Will route to (on Proceed): <b>Open Records Fulfillment Team</b> &nbsp;<button class="btn quiet">Change route</button></div>
               <hr class="soft">
               <h3 class="panel">Preliminary search <span class="callout">4</span></h3>
               <div class="row" style="border:none; padding-top:0;">
@@ -251,21 +265,17 @@
 
         <div class="rail">
           <div class="panelbox">
-            <div class="railhead">Work the request</div>
+            <div class="railhead">Actions</div>
             <button class="btn quiet">Confer with supervisor</button>
             <button class="btn quiet">Log a phone call</button>
-            <hr class="soft">
-            <div class="railhead">Clarification</div>
             <button class="btn quiet">Request clarification…</button>
-            <hr class="soft">
-            <div class="railhead">Redirect</div>
             <button class="btn quiet">Refer to proper custodian…</button>
           </div>
           <div class="panelbox">
             <div class="railhead">Resolve intake <span class="callout">9</span></div>
             <button class="btn">Proceed → Fulfillment</button>
-            <button class="btn quiet">Place on hold…</button>
             <p class="kv" style="margin-top:5px;">Proceed routes the item to Record Search on the Open Records Fulfillment Team. Blocked while the fee-waiver decision above is open.</p>
+            <p class="kv" style="margin-top:4px;">No manual hold: marking Vague or Overly Broad places the request on hold automatically, pending the requestor's response.</p>
           </div>
         </div>
       </div>
@@ -335,8 +345,17 @@
               <span class="tag">→ Police Records Fulfillment Team</span>
             </summary>
             <div class="childbody">
-              <p style="margin-bottom:8px;">Body-worn camera footage of a traffic stop at Cleveland Ave &amp; Hudson St, the evening of June 14, 2026.</p>
-              <div class="kv" style="margin-bottom:9px;">Classified: <b>BWC video</b> (confidence 91) · Routes to: <b>Police Records Fulfillment Team</b> &nbsp;<button class="btn quiet">Change route</button> &nbsp;<button class="btn quiet">Mark Vague</button> <button class="btn quiet">Mark Overly Broad</button></div>
+              <div class="descrow">
+                <div class="defectbox">
+                  <button class="btn quiet">Mark Vague</button>
+                  <button class="btn quiet">Mark Overly Broad</button>
+                </div>
+                <div>
+                  <div class="desctitle">Request Description as Submitted</div>
+                  <p class="desctext">Body-worn camera footage of a traffic stop at Cleveland Ave &amp; Hudson St, the evening of June 14, 2026.</p>
+                </div>
+              </div>
+              <div class="kv" style="margin-bottom:9px;">Classified as: <b>BWC video</b> (confidence 91) · Will route to (on Proceed): <b>Police Records Fulfillment Team</b> &nbsp;<button class="btn quiet">Change route</button></div>
               <hr class="soft">
               <h3 class="panel">Preliminary search <span class="callout">4</span></h3>
               <div class="kv">Not applicable — the asset lives in the evidence system (located by metadata in the Record Search task). The intake AI's scoping detail (date, time, location) travels with the item.</div>
@@ -367,23 +386,19 @@
 
         <div class="rail">
           <div class="panelbox">
-            <div class="railhead">Work the request</div>
+            <div class="railhead">Actions</div>
             <button class="btn quiet">Confer with supervisor</button>
             <button class="btn quiet">Log a phone call</button>
-            <hr class="soft">
-            <div class="railhead">Clarification</div>
             <button class="btn quiet">Request clarification…</button>
             <button class="btn danger-quiet">Deny — too vague to process… <span class="callout">12</span></button>
             <p class="kv" style="margin-top:4px;">Ohio: an ambiguous or overly-broad request may itself be denied, with an invitation to revise. Opens Denial compose — your decision, never automatic.</p>
-            <hr class="soft">
-            <div class="railhead">Redirect</div>
             <button class="btn quiet">Refer to proper custodian…</button>
           </div>
           <div class="panelbox">
             <div class="railhead">Resolve intake <span class="callout">9</span></div>
             <button class="btn">Proceed → Fulfillment</button>
-            <button class="btn quiet">Place on hold…</button>
             <p class="kv" style="margin-top:5px;">Proceed routes the item to Record Search on the Police Records Fulfillment Team. Blocked while the eligibility review above is unconfirmed.</p>
+            <p class="kv" style="margin-top:4px;">No manual hold: marking Vague or Overly Broad places the request on hold automatically, pending the requestor's response.</p>
           </div>
         </div>
       </div>
@@ -406,7 +421,7 @@
       <li><b><span class="rule">RULE C + E</span> Ledger.</b> Money triggers (TX deposit rule) are <b>system-computed per statute</b> — shown with the navy “System · statute-triggered” badge, citation, and an explicit “nothing for you to decide.” Denial-shaped ledger findings would appear amber, a person confirms. Anonymous requests state plainly that history <b>does not apply</b> — never “balance hidden.”</li>
       <li><b>Inline approval (mode: <code>intake_review</code>).</b> The fee-waiver decision lives on this screen with no extra hop. In <code>routed_task</code> mode (today's live default) this panel is absent and a Fee-Waiver Approval task routes to ORO Finance instead. Sequencing is enforced either way: the estimate cannot be sent while the waiver is undecided, and a denial folds into the estimate notice.</li>
       <li><b><span class="rule">RULE C</span> Decided-by is first-class.</b> Every decision surface carries a badge: <span class="by by-person">a person</span> (named), <span class="by by-statute">by statute</span> (mandatory categories on verified evidence — fires even if the program is off), <span class="by by-system">system · statute-triggered</span> (money math), <span class="by recorded">recorded only</span>. The system records and applies; it is never shown as having decided a judgment call.</li>
-      <li><b>Resolution gates.</b> “Proceed → Fulfillment” is the stage transition (central <code>applyStageTransition</code>); it stays blocked while an inline decision (waiver, eligibility review) is open, and says why — same pattern as the record-search screen's Found gate.</li>
+      <li><b>Resolution gates.</b> “Proceed → Fulfillment” is the stage transition (central <code>applyStageTransition</code>); it stays blocked while an inline decision (waiver, eligibility review) is open, and says why — same pattern as the record-search screen's Found gate. <span class="decided">DECIDED 7/29</span> <b>No manual hold button.</b> Hold is a system state with a named cause: marking Vague / Overly Broad holds the request automatically pending the requestor's response; everything else that should stop a request already blocks Proceed with its reason. If a genuine manual case emerges it returns with a required reason.</li>
       <li><b><span class="rule">RULE B</span> Panels are branch-gated, three-valued.</b> Only an explicit <code>false</code> hides a panel (Austin: commercial-rate; Columbus: waiver, commercial, anything AG). <code>null</code> = unknown = render everything as today — 19 of 21 seeded cities are <code>null</code>, and this screen must not strip panels from them.</li>
       <li><b>Defect marking lives on the record item — and doesn't depend on this screen.</b> Vague / Overly Broad are distinct legal defects (per the record-search spec), visible on the item's row inside the expand. For the majority of requests that <i>skip</i> intake review under only-when-needed, the same markers already exist on the Record Search task screen (built 7/14), wired to the full per-jurisdiction clarification machinery — so a defect discovered after team assignment fires the identical process, just from the first fulfillment task instead of from intake.</li>
       <li><b>Branch-gated denial ground.</b> “Deny — too vague” appears only where <code>clarification_denial: true</code> (Ohio). It is denial-shaped, so it is a person's act through Denial compose — never automatic.</li>

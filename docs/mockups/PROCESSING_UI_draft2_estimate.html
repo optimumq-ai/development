@@ -106,6 +106,11 @@
   .legend li b{color:var(--navy);}
   .rule{font-size:10px; font-weight:800; color:#fff; background:var(--statute); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
   .decided{font-size:10px; font-weight:800; color:#fff; background:var(--blue); border-radius:3px; padding:1px 6px; letter-spacing:.05em;}
+/* Kevin markup 7/29 — verbatim description first, titled; defect buttons boxed left */
+.descrow{display:flex; gap:10px; align-items:flex-start; margin-bottom:9px;}
+.defectbox{display:flex; flex-direction:column; gap:5px; padding:7px 8px; border:1px solid var(--line); border-radius:6px; flex:0 0 auto; background:#fafafa;}
+.desctitle{font-size:10.5px; text-transform:uppercase; letter-spacing:.05em; color:#767b83; margin-bottom:3px;}
+.desctext{font-size:14.5px; font-weight:600; line-height:1.45; margin:0;}
 </style>
 </head>
 <body>
@@ -198,11 +203,19 @@
               <span class="tag">→ Open Records Team</span>
             </summary>
             <div class="childbody">
-              <p style="margin-bottom:8px;">All communications regarding the Red River Street closure, March–June 2026.</p>
-              <div class="kv">Classified: <b>Email correspondence</b> (confidence 91) · Record owner: <b>Public Works</b>
-                &nbsp;<button class="btn quiet">Change route</button>
-                &nbsp;<button class="btn quiet">Mark Vague</button>
-                <button class="btn quiet">Mark Overly Broad</button> <span class="callout">3</span></div>
+              <div class="descrow">
+                <div class="defectbox">
+                  <button class="btn quiet">Mark Vague</button>
+                  <button class="btn quiet">Mark Overly Broad</button>
+                  <span class="callout">3</span>
+                </div>
+                <div>
+                  <div class="desctitle">Request Description as Submitted</div>
+                  <p class="desctext">All communications regarding the Red River Street closure, March–June 2026.</p>
+                </div>
+              </div>
+              <div class="kv">Classified as: <b>Email correspondence</b> (confidence 91) · Record owner: <b>Public Works</b>
+                &nbsp;<button class="btn quiet">Change route</button></div>
               <div class="kv" style="margin-top:6px;">Marking a defect <b>pauses this estimate task</b> and starts the clarification
                 process for this state (clock effect per jurisdiction — Texas: the response clock keeps running).</div>
             </div>
@@ -221,10 +234,9 @@
             <div class="kv">Requestor's personnel-time this 12 months: <b>14.5 h of the 36 h cap</b> used <span class="cite">§552.275</span> <span class="by recorded">staff-entered — automatic counting deferred</span> <span class="callout">5</span></div>
           </div>
 
-          <div class="panelbox">
-            <h3 class="panel">Fee waiver <span class="callout">6</span></h3>
-            <div class="kv">Not requested on this submission. Statutory-mandatory categories stay <b>armed</b>: verified evidence on file (e.g. an indigency affidavit) grants <span class="by by-statute">by statute</span> regardless of the city's discretionary program or anyone's decision.</div>
-          </div>
+          <!-- Fee-waiver panel: HIDDEN — not requested on this submission (Kevin 7/29: no panel when there is
+               nothing to show). It appears only when a waiver was requested, decided, pending, or granted by
+               statute — and statutory-mandatory categories stay armed either way (annotation 6). -->
 
           <div class="panelbox">
             <h3 class="panel">Deposit — prior unpaid balance <span class="callout">7</span></h3>
@@ -249,11 +261,9 @@
 
         <div class="rail">
           <div class="panelbox">
-            <div class="railhead">Work the request</div>
+            <div class="railhead">Actions</div>
             <button class="btn quiet">Confer with supervisor</button>
             <button class="btn quiet">Log a phone call</button>
-            <hr class="soft">
-            <div class="railhead">Clarification</div>
             <button class="btn quiet">Request clarification…</button>
             <hr class="soft">
             <div class="railhead">No charge?</div>
@@ -339,11 +349,18 @@
               <span class="tag">→ Records Team</span>
             </summary>
             <div class="childbody">
-              <p style="margin-bottom:8px;">Building permits issued on Parsons Avenue during June 2026, requested as paper copies by mail.</p>
-              <div class="kv">Classified: <b>Building permits</b> (confidence 89) · Record owner: <b>Building &amp; Zoning</b>
-                &nbsp;<button class="btn quiet">Change route</button>
-                &nbsp;<button class="btn quiet">Mark Vague</button>
-                <button class="btn quiet">Mark Overly Broad</button></div>
+              <div class="descrow">
+                <div class="defectbox">
+                  <button class="btn quiet">Mark Vague</button>
+                  <button class="btn quiet">Mark Overly Broad</button>
+                </div>
+                <div>
+                  <div class="desctitle">Request Description as Submitted</div>
+                  <p class="desctext">Building permits issued on Parsons Avenue during June 2026, requested as paper copies by mail.</p>
+                </div>
+              </div>
+              <div class="kv">Classified as: <b>Building permits</b> (confidence 89) · Record owner: <b>Building &amp; Zoning</b>
+                &nbsp;<button class="btn quiet">Change route</button></div>
               <div class="kv" style="margin-top:6px;">Ohio note: if marked vague, this state treats an ambiguous request as itself
                 deniable — the clarification drawer offers <b>Deny — too vague</b> alongside the revise invitation (a person's act,
                 via Denial compose).</div>
@@ -385,11 +402,9 @@
 
         <div class="rail">
           <div class="panelbox">
-            <div class="railhead">Work the request</div>
+            <div class="railhead">Actions</div>
             <button class="btn quiet">Confer with supervisor</button>
             <button class="btn quiet">Log a phone call</button>
-            <hr class="soft">
-            <div class="railhead">Clarification</div>
             <button class="btn quiet">Request clarification…</button>
             <hr class="soft">
             <div class="railhead">No charge?</div>
@@ -419,7 +434,7 @@
       <li><b><span class="decided">DECIDED 7/28</span> The estimate task is the auto path's checkpoint.</b> The first-look banner + the same defect markers as intake review (Mark Vague / Mark Overly Broad) on the record item. Marking a defect <b>pauses the estimate task</b> and fires the per-state clarification machinery (clock effect per jurisdiction; the banner never claims the clock stops where it doesn't). “You can't price what you can't parse” — raising the defect is part of this task, not a failure of it.</li>
       <li><b>The estimate is built pre-search from the estimate profile</b> (auto path: estimate precedes record search — already how the engine sequences it). Predicted basis is shown and editable; nothing pretends the search happened. Where the profile assessment is <code>automated</code>, the task arrives as “Review auto-generated estimate” instead of “Create estimate”.</li>
       <li><b>Caps and allowances render as staff-entered facts</b> (ledger classes B/C are config stubs by decision): the TX 36-hour tracker shows its value with a <span class="by recorded">staff-entered</span> badge — never implying the system counted it.</li>
-      <li><b>Waiver panel has four states, all provenance-labeled:</b> not requested (statutory categories still armed, <span class="by by-statute">by statute</span> fires on verified evidence regardless of program or confirmation) · decided at intake (<span class="by by-person">person</span> badge with name; denial folds into this notice) · pending in <code>routed_task</code> mode (ORO Finance task open — <b>Send blocked, 409 WAIVER_UNDECIDED</b>, and the gate says so in words) · granted (fees zeroed at notice time, notice says so).</li>
+      <li><b>Waiver panel has four states, all provenance-labeled</b> — decided at intake (<span class="by by-person">person</span> badge with name; denial folds into this notice) · pending in <code>routed_task</code> mode (ORO Finance task open — <b>Send blocked, 409 WAIVER_UNDECIDED</b>, and the gate says so in words) · granted (fees zeroed at notice time, notice says so) · granted <span class="by by-statute">by statute</span>. <span class="decided">DECIDED 7/29</span> <b>The not-requested state renders no panel at all</b> (this tab): statutory-mandatory categories stay armed regardless — verified evidence (e.g. an indigency affidavit) makes the panel appear with the by-statute grant, whether or not a waiver was ever requested or the program is enabled.</li>
       <li><b><span class="rule">RULE C+E</span> Deposit gate.</b> Prior-balance demands are system-computed per statute with citation and “nothing for you to decide” — and they ride the estimate notice, never a separate letter. Anonymous requests: the panel is absent because nothing applies, and the ledger panel says so plainly.</li>
       <li><b>One notice.</b> Estimate + itemization + deposit demand + waiver outcome + respond-or-withdrawn window assemble into a single communication (the built <code>feeNotice</code> behavior). The send gate lists what's blocking in words, not just a disabled button.</li>
       <li><b>“Too large” is not a mark on this screen — it's the estimate.</b> After send, the requestor keeps control at the acceptance gate (proceed / narrow / withdraw). In the states where a burden <i>denial</i> exists (IL), the conference-to-narrow gate lives on Denial compose, not here — this screen's estimate is the evidence that conversation uses.</li>

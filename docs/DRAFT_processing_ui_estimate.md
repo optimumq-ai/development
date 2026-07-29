@@ -35,6 +35,16 @@ first person to read most requests. Therefore:
   **refund/credit path when withholding shrinks a paid deliverable** (parent financial view — flagged,
   not designed here).
 
+## 0b. Kevin's markup round — 2026-07-29 (docx markup, applied to the mockup)
+
+- Global record-item layout + renames applied (see Draft 1 §0b: "Request Description as
+  Submitted" first, defect buttons boxed left, "Classified as:", rail → "Actions").
+- **Fee-waiver panel hidden when there is nothing to show** (not requested, nothing pending or
+  decided). Statutory-mandatory categories stay armed regardless — verified evidence makes the
+  panel appear with the by-statute grant even if no waiver was requested and the program is off.
+- Kevin's two explain-this items (§552.275 36-hour cap tracker; de-minimis waive & advance)
+  answered in-session 7/29 — no design change requested.
+
 ## 1. The shape
 
 - **Queue:** My Tasks → estimate type, [Team] Fulfillment Staff with the *Estimate Creation* subset;

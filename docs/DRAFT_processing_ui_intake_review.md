@@ -46,6 +46,28 @@ intake reviewer is the densest (hosts the inline waiver/commercial decision when
    via trigger (i). The honest residual trade (a vague-but-confidently-classified request in a
    hard-clock state is discovered mid-window rather than day 1) is stated in mockup annotation 14.
 
+## 0b. Kevin's markup round — 2026-07-29 (docx markup, applied to the mockup)
+
+1. **Global record-item layout** (applies to every screen with this layout): the verbatim
+   description is the first line under Record item, bolder/larger, under a small title
+   **"Request Description as Submitted"**; Mark Vague / Mark Overly Broad sit stacked in a small
+   box to its left. The text beside the collapsed Record item header is a truncation of the same
+   verbatim text (no separate AI summary exists).
+2. **Global renames:** "Classified:" → "Classified as:"; rail "Work the request" → "Actions";
+   Request Clarification loses its own heading and lists as an Action; the "Redirect" heading is
+   dropped ("Refer to proper custodian…" stands alone — it is the custodian-referral act, not
+   person reassignment).
+3. **"Routes to:" relabeled "Will route to (on Proceed):"** — it is the classifier's proposed
+   downstream destination the reviewer is vetting, not where this task went (the task itself
+   routes to ORO / ORO Associate, per Kevin's org model: ORO manages, fulfillment teams process).
+4. **No manual hold** (decided): the Place-on-hold button is removed. Marking Vague / Overly Broad
+   holds the request automatically pending the requestor's response; every other stop condition
+   already blocks Proceed with a named reason. A manual hold returns only if a real case emerges,
+   and then with a required reason.
+5. **Pending (step-3 rework):** replace the lone Change-route button with an "Edit info below"
+   frame — Classified-as / Record owner / Routes-to each editable via dropdown (taxonomy record
+   types · Departments · Fulfillment Teams). These feed smart routing, so corrections matter.
+
 ## 1. The shape being tested
 
 - **Two screens make the role UI:** My Tasks filtered to intake work (the only router — under

@@ -39,6 +39,16 @@ view · child record view. Single city (Austin TX; OH is one annotation).
    manager's own MRRs; the all-office view with a manager column is oversight authority —
    Supervisor / Director — not a tab on the working screen.)
 
+## 0b. Kevin's markup round — 2026-07-29 (accepted, pending redraw)
+
+- **Full verbatim description on the detail screens**: master card carries the parent-level
+  submission text; each child click-through carries that item's verbatim description — same
+  "Request Description as Submitted" treatment as Draft 1 §0b.
+- **Per-item requestor attachments**: MRRs submitted through the portal can attach records to
+  each request item; the child view gets an attachments strip (same selected-records substrate
+  that drives the non-MRR auto-complete).
+- "Classified:" → "Classified as:" applied to the mockup.
+
 ## 1. Design choices made in the draft (first pass, per "design what you feel is best")
 
 - **Four-level navigation:** My Tasks group → overview (all MRRs, manager column — oversight roles
