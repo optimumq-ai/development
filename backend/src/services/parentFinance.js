@@ -120,12 +120,20 @@ async function freezeQuote(rid, opts) {
 //
 //   balance before credits  = max(0, base − paid gross)
 //   credits absorbed        = min(credits, balance before credits)      ← credits reduce the balance FIRST
-//   refund due              = credits − credits absorbed                 = max(0, credits − balance)
+//   balance due             = max(0, base − credits − paid gross)
+//   refund due              = max(0, paid gross + credits − base)
 //   refund outstanding      = max(0, refund due − refunds already issued)
 //
-// A REFUND EXISTS ONLY WHEN CREDITS EXCEED THE BALANCE. That ordering is the whole point: a city does not
-// mail a cheque to somebody who still owes it money, and a credit that merely cancels an open balance is
-// not a refund and must not be presented as one.
+// A REFUND EXISTS ONLY WHEN THE CITIZEN'S MONEY AND CREDITS EXCEED WHAT THEY OWE. That ordering is the whole
+// point: a city does not mail a cheque to somebody who still owes it money, and a credit that merely cancels
+// an open balance is not a refund and must not be presented as one.
+//
+// THE FORMULA IS THE DRAFT'S, GENERALIZED BY ONE CASE. Draft 7 §4.1 writes refund-due as
+// `max(0, credits − balance-after-payments)`, which is the same number whenever paid ≤ base. It is SHORT by
+// the overpayment case: a downward reconciliation on a request already paid in full owes money back with no
+// credit involved at all — which is exactly what §0.3's "or refund" settlement branch produces, and what
+// `paymentStatus.deriveStatus` has always called `refund_due`. `max(0, paid + credits − base)` is both, and
+// reduces to the draft's expression wherever the draft's expression is defined.
 async function netting(rid) {
   var pid = await parentOf(rid);
   var PS = require('./paymentStatus');
@@ -136,17 +144,20 @@ async function netting(rid) {
              note: 'No estimate on this request, so there is no receivable and nothing to net.' };
   }
   var ids = await PS.moneyTreeIds(pid);
-  var ph = ids.map(function () { return '?'; }).join(',');
-  var refRow = await db.get("SELECT COALESCE(SUM(amount),0) AS r FROM fee_adjustments WHERE request_id IN (" + ph + ") AND type = 'refund' AND COALESCE(voided,0) = 0", ids);
-  var refundsIssued = r2(refRow && refRow.r);
+  // PAID GROSS AND REFUNDS COME FROM THE SAME READER THE RELEASE GATE USES (`feeRelease.poolFunds`), not from
+  // reconstructing them out of `computeSituation.totalPaid`, which is already NET of refunds and floored at
+  // zero — a reconstruction would be wrong in exactly the case that matters (refunds exceeding receipts). One
+  // reader, so the screen's pool and the gate's pool cannot differ.
+  var funds = await FR.poolFunds(pid);
+  var refundsIssued = r2(funds.refunds);
   var base = r2(sit.base);
   var credits = r2(sit.credits);
-  var paidGross = r2((Number(sit.totalPaid) || 0) + refundsIssued); // computeSituation reports paid NET of refunds
+  var paidGross = r2(funds.paid);
   var balanceBeforeCredits = Math.max(0, r2(base - paidGross));
   var creditsAbsorbed = r2(Math.min(credits, balanceBeforeCredits));
-  var refundDue = r2(credits - creditsAbsorbed);
+  var balanceDue = Math.max(0, r2(base - credits - paidGross));
+  var refundDue = Math.max(0, r2(paidGross + credits - base));
   var refundOutstanding = Math.max(0, r2(refundDue - refundsIssued));
-  var balanceDue = Math.max(0, r2(balanceBeforeCredits - creditsAbsorbed));
   return {
     hasEstimate: true, requestId: pid, treeIds: ids,
     base: base, credits: credits, paidGross: paidGross, paidNet: r2(sit.totalPaid),

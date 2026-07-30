@@ -362,8 +362,11 @@ export default function ParentFinancialPage() {
             {rec.autoDraftNote ? <div style={Object.assign({}, kv, { marginTop: 4, maxWidth: '96ch' })}>{rec.autoDraftNote}</div> : null}
             <div style={Object.assign({}, kv, { marginTop: 4, maxWidth: '96ch' })}>{rec.sendNote}</div>
             <div style={{ marginTop: 8 }}>
-              <Link to={'/requests/' + p.id + '/estimate'} style={Object.assign({}, btnQuiet, { textDecoration: 'none' })}>
-                Estimate versions &amp; revised notice…
+              {/* THE SEND LIVES WITH THE ESTIMATE (open question 1, drafted the conservative way): this panel
+                  points at the request's Fees surface, where the estimate versions and the revised-notice send
+                  already are. Two send buttons for one notice is how a citizen gets told twice. */}
+              <Link to={'/requests/' + p.id} style={Object.assign({}, btnQuiet, { textDecoration: 'none' })}>
+                Estimate versions &amp; the revised notice → the request’s Fees tab
               </Link>
             </div>
           </div>
@@ -451,9 +454,12 @@ export default function ParentFinancialPage() {
       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
         {/* PAYMENT IS TAKEN AT THE CASH DRAWER. A link, never a second till. */}
         <Link to={v.cashDrawer.path} style={Object.assign({}, btn, { textDecoration: 'none' })}>Take payment → Cash Drawer</Link>
-        <Link to={'/requests/' + p.id} style={Object.assign({}, btnQuiet, { textDecoration: 'none' })}>Request record</Link>
-        <Link to={'/requests/' + p.id + '/estimate'} style={Object.assign({}, btnQuiet, { textDecoration: 'none' })}>Estimate versions</Link>
-        <Link to={'/requests/' + p.id + '/history'} style={Object.assign({}, btnQuiet, { textDecoration: 'none' })}>Event log</Link>
+        {/* The estimate versions and the event log are TABS on the request workspace (Fees / Audit History),
+            not routes of their own — so this is one honest link rather than three that pretend otherwise. */}
+        <Link to={'/requests/' + p.id} style={Object.assign({}, btnQuiet, { textDecoration: 'none' })}>
+          Request record — estimate versions &amp; event log
+        </Link>
+        <Link to={'/requests/' + p.id + '/dispositions'} style={Object.assign({}, btnQuiet, { textDecoration: 'none' })}>Dispositions</Link>
       </div>
       <div style={Object.assign({}, kv, { marginTop: 6, maxWidth: '96ch' })}>{v.cashDrawer.note}</div>
       {msg ? <div style={{ fontSize: 12.5, color: '#8C3A2B', marginTop: 8, maxWidth: '96ch' }}>{msg}</div> : null}

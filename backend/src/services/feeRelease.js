@@ -257,7 +257,7 @@ async function releaseGate(rid) {
   var est = await snapshot(rid, 'estimate');
   if (!est) {
     return { hasEstimate: false, requiresPaymentBeforeRelease: false, covered: true, paidInFull: true,
-             balanceDue: 0, componentCharged: null, coverageBasis: 'no_estimate', cumulative: null,
+             balanceDue: 0, componentCharged: null, coverageBasis: 'no_estimate', coverageMode: 'self', cumulative: null,
              plan: null, paymentInstructions: null };
   }
   var prof = est.config_profile_id
@@ -291,7 +291,11 @@ async function releaseGate(rid) {
   var fifo = !!(cum && cum.applies);
   var required = fifo ? cum.required : charged;
   var funds = fifo ? cum.available : paid;
-  if (fifo) basis = cum.settled ? 'settled' : 'component_cumulative';
+  // `coverageBasis` DELIBERATELY DOES NOT CHANGE. It answers "where did this record's share come from" —
+  // a component, or the whole-request fallback — and existing callers and harnesses read it for exactly that.
+  // WHICH RULE was applied is a different question and gets its own field, `coverageMode`. Overloading the
+  // one string would have quietly broken every reader of it to say something it was never asked.
+  var mode = fifo ? (cum.settled ? 'settled' : 'cumulative') : 'self';
 
   // Cent-tolerant: an off-by-$0.01 rounding artefact must not withhold a finished record.
   var covered = funds + 0.005 >= required;
@@ -309,6 +313,7 @@ async function releaseGate(rid) {
     // cover for THIS release; `coverageAvailable` is what was in it. Both are here so the financial view can
     // show the running balance per row without recomputing the rule.
     cumulative: fifo ? cum : null,
+    coverageMode: mode,
     coverageRequired: r2(required),
     coverageAvailable: r2(funds),
     unpricedActuals: !!(share && share.unpricedActuals),

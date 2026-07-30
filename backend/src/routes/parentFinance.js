@@ -35,7 +35,11 @@ async function canRead(user, pid) {
   if (OVERSIGHT.some(function (r) { return roles.indexOf(r) !== -1; })) return true;
   var t = await get("SELECT assigned_to FROM tasks WHERE request_id = ? AND type IN ('mrr_management','request_management') ORDER BY created_at DESC LIMIT 1", [pid]);
   if (t && t.assigned_to === (user && user.sub)) return true;
-  var any = await get('SELECT COUNT(*)::int AS n FROM tasks WHERE request_id = ? AND assigned_to = ?', [pid, user && user.sub]);
+  // ANY task on the TREE, not only on the parent. On an MRR the person working item 3 holds a task on the
+  // CHILD; scoping this to the parent row would have locked them out of the ledger for the request they are
+  // working, which is the same parent/child scoping defect `paymentStatus` documents at length.
+  var any = await get('SELECT COUNT(*)::int AS n FROM tasks t JOIN requests r ON r.id = t.request_id ' +
+    'WHERE (r.id = ? OR r.master_request_id = ?) AND t.assigned_to = ?', [pid, pid, user && user.sub]);
   return !!(any && Number(any.n) > 0);
 }
 function fail(res, e) {
