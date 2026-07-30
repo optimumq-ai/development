@@ -101,6 +101,15 @@ function r2(n) { return Math.round((Number(n) || 0) * 100) / 100; }
 // precisely BECAUSE changing it there would release records against an unpaid overage. §0's frozen-quote
 // rule is applied where §0 applies, and nowhere else.
 //
+// THE GATE'S REQUIREMENT AND THE BILL ARE NOW DIFFERENT QUESTIONS, AND THAT IS NOT THE DEFECT THIS FILE'S
+// HEADER WARNS ABOUT. The header's rule — release against one split and bill against another is a defect —
+// still holds for the BILLED figure, and `componentCharged` below still carries it, resolved from the same
+// governing snapshot `erpSettlement` and `revenueAllocation` use. What changes is that the gate's REQUIREMENT
+// is deliberately frozen while the bill quite properly moves: a record that shipped against an accepted quote
+// cannot be retroactively re-based, or an honest earlier release becomes an overdraw. So the two figures are
+// reported separately and neither is allowed to masquerade as the other. At settlement the gate switches to
+// the settled balance, which is the moment the bill becomes final — the divergence closes where it began.
+//
 // AVAILABLE FUNDS = paid − refunds + credits. A credit is a dollar the citizen no longer owes; against a
 // FROZEN quoted requirement, crediting the pool is arithmetically identical to shrinking the frozen share
 // and does not require un-freezing it. So a withholding credit on item 2 correctly frees item 3.
@@ -306,7 +315,13 @@ async function releaseGate(rid) {
     requiresPaymentBeforeRelease: pt.requiresPaymentBeforeRelease(plan),
     // §5.9 coverage — THIS record's share, and what is owed on it alone.
     covered: covered,
-    componentCharged: (fifo && cum.ownQuotedShare != null) ? cum.ownQuotedShare : (share ? share.amount : null),
+    // `componentCharged` KEEPS ITS MEANING TOO: this record's share of what the request is ACTUALLY CHARGED,
+    // read off the governing (reconciliation-superseded) snapshot. It is the BILLING figure, and
+    // `erpSettlement` / `revenueAllocation` bill against exactly the same number — the agreement this file's
+    // header demands. What the gate REQUIRED is a different question after §0 and is reported separately
+    // (`coverageRequired`, `cumulative.ownQuotedShare`), because the frozen quote is what may not move
+    // retroactively while the bill quite properly does.
+    componentCharged: share ? share.amount : null,
     coverageBasis: basis,
     balanceDue: shortfall,
     // The cumulative-FIFO picture, present only when it applied. `coverageRequired` is what the pool had to
