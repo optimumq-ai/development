@@ -90,7 +90,9 @@ Screen-level decisions worth restating normatively:
   acceptance; release gate = running funds balance (cumulative FIFO); the last record settles the
   request (aggregate actuals once; refund-or-zero releases immediately); 20% overage watchdog is
   the only mid-flight running number and caps final collection; credits are quoted-number events;
-  refunds exist only when credits exceed balance, Finance-issued, never automatic. Reconciliation
+  refund-due = `max(0, paid + credits − base)` (BW7 generalization of the draft's
+  credits-exceed-balance rule — the draft's formula missed the plain-overpayment case; reduces to
+  it wherever it was defined), Finance-issued, never automatic. Reconciliation
   auto-drafts on the last billable task and is visible on screen; sending it is a person's act.
 
 ## 4. The disposition model (Draft 8 rev 2 — all DECIDED 7/29)
