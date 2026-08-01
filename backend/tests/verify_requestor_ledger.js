@@ -28,9 +28,9 @@ async function setActive(jid) {
   await db.run("INSERT INTO system_config (key, value) VALUES ('jurisdiction_profile', ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [jid]);
 }
 // A request created through the real path. `verified` decides whether it gets an identity anchor at all.
-// Uses the STAFF-CONFIRMED anchor, because it is the only one the product can currently produce: the
-// portal's two "verified" buttons are clicked by the requester themselves and are self-assertions, not
-// verifications — see VERIFIED_EMAIL_METHODS in services/requestorLedger.js.
+// Uses the STAFF-CONFIRMED anchor. (Since 2026-08-01 the product also produces the verified-email anchor
+// via the wizard's link click — see verify_identity_anchors; this harness keeps testing the ledger's
+// behaviour, not the producers.)
 async function makeRequest(email, verified, label, created) {
   var made = await RC.createRequest({
     requestorName: 'Ledger Harness', requestorEmail: email,
