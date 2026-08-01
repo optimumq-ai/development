@@ -19,8 +19,8 @@
 // importable; it does not decide who may import them. A NEW screen adopting this palette is still Kevin's
 // call, not a consequence of this refactor.
 //
-// ⚠️ PROVENANCE — THIS IS A TRANSCRIPTION, NOT THE SOURCE. The tokens originate as CSS custom properties in
-// PublicPortalV2Page.js (`.scv`), which is the fuller set: it is DARK-MODE AWARE
+// ⚠️ PROVENANCE — THIS IS A TRANSCRIPTION. The tokens originated as CSS custom properties in
+// PublicPortalV2Page.js (`.scv`) — RETIRED 2026-08-01 (recoverable from git history) — which was the fuller set: DARK-MODE AWARE
 // (`@media (prefers-color-scheme:dark)`) and also defines --blue-strong, --shadow, --radius, --font-ui,
 // --font-mono, --field-border and --chat-ground. What follows is the light-mode JS subset that
 // RecordSearchTaskPage actually consumed, moved verbatim. The two are NOT unified and can still drift —

@@ -50,7 +50,6 @@ import CashDrawerPage from './pages/CashDrawerPage';
 import ParentFinancialPage from './pages/ParentFinancialPage';
 import AvWorkbenchPage from './pages/AvWorkbenchPage';
 import PublicPortalPage from './pages/PublicPortalPage';
-import PublicPortalV2Page from './pages/PublicPortalV2Page';
 import PublicPortalWizardPage from './pages/PublicPortalWizardPage';
 import ContributePage from './pages/ContributePage';
 import PaperFormPage from './pages/PaperFormPage';
@@ -80,12 +79,14 @@ export default function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/portal" element={<PublicPortalPage />} />
-        {/* Split-canvas intake is the live request flow (cut over 2026-07-10). /portal/v2 kept as a redirect. */}
-        {/* CUTOVER 2026-07-18 (SPEC §2c): /portal/request now serves the wizard. Split-canvas kept at
-            /portal/split-canvas for instant rollback. /portal/wizard + /portal/v2 redirect to canonical. */}
+        {/* CUTOVER 2026-07-18 (SPEC §2c): /portal/request serves the wizard. The split-canvas intake,
+            kept at /portal/split-canvas for instant rollback, was RETIRED 2026-08-01 (Kevin) — two weeks
+            live on the wizard, and the wizard has since grown things a rollback would lose (the token
+            verification the ledger anchors on). Its route redirects home like the other legacy paths;
+            its form role is covered by the paper form (/portal/form) + staff multi-item entry. */}
         <Route path="/portal/request" element={<PublicPortalWizardPage />} />
         <Route path="/portal/wizard" element={<Navigate to="/portal/request" replace />} />
-        <Route path="/portal/split-canvas" element={<PublicPortalV2Page />} />
+        <Route path="/portal/split-canvas" element={<Navigate to="/portal/request" replace />} />
         <Route path="/portal/v2" element={<Navigate to="/portal/request" replace />} />
         <Route path="/contribute/:token" element={<ContributePage />} />
         <Route path="/portal/form" element={<PaperFormPage />} />
