@@ -98,9 +98,15 @@ async function issue(childId, activity, email, opts) {
 }
 
 // The link state for an (item, activity), for the bar and the child view. Never the token.
+//
+// THE ROW THAT MATTERS is chosen by STATUS, not by timestamp: created_at is second-granular, so a
+// re-issued link and the row it superseded routinely share a second, and "newest first" then falls to
+// the id — a uuid, i.e. a coin flip. The harness caught the flip. Active beats completed beats revoked;
+// the timestamp only breaks ties within a status.
 async function stateFor(childId, activity) {
   var row = await get('SELECT * FROM mrr_external_links WHERE request_id = ? AND activity = ? ' +
-    'ORDER BY created_at DESC, id DESC LIMIT 1', [childId, activity]);
+    "ORDER BY CASE status WHEN 'active' THEN 0 WHEN 'completed' THEN 1 ELSE 2 END, created_at DESC, id DESC LIMIT 1",
+    [childId, activity]);
   if (!row) return null;
   return { email: row.email, linkState: stateOf(row), expiresAt: row.expires_at,
     firstOpenedAt: row.first_opened_at, lastOpenedAt: row.last_opened_at, openCount: Number(row.open_count) || 0,

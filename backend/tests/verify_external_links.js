@@ -118,8 +118,8 @@ function tokenFromUrl(url) { return String(url || '').split('/contribute/')[1]; 
     rows = await linkRows(fx.kid);
     var active = rows.filter(function (r) { return r.status === 'active'; });
     ok('A3 re-send RE-ISSUES: the returned URL\'s token hashes to the NEW row; exactly one active link; the old one reads "superseded"',
-      !!RAW && active.length === 1 && sha(RAW) === active[0].token_hash &&
-      rows.length === 2 && rows[0].status === 'revoked' && /superseded/.test(rows[0].revoked_by || ''));
+      !!RAW && active.length === 1 && sha(RAW) === active[0].token_hash && rows.length === 2 &&
+      rows.some(function (r) { return r.status === 'revoked' && /superseded/.test(r.revoked_by || ''); }));
     ok('A4 no mail leaves a test run (the coverageGap rule) — reason says so',
       a3.body.mail && a3.body.mail.sent === false && a3.body.mail.reason === 'test_db');
     var a5 = await req('POST', '/api/mrr/item/' + fx.kid + '/activity/search/external-link/resend', {}, STRANGER_TOKEN);
