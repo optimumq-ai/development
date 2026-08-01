@@ -76,6 +76,8 @@ export default function MrrChildPage() {
   var [err, setErr] = useState(null);
   var [staff, setStaff] = useState([]);
   var [assignFor, setAssignFor] = useState(null);   // activity key while the picker is open
+  var [extEmail, setExtEmail] = useState('');       // external-contributor email in the open picker
+  var [linkUrl, setLinkUrl] = useState('');         // the re-issued secure URL, for copy-by-hand
   var [pick, setPick] = useState('');
   var [denyOpen, setDenyOpen] = useState(false);
   var [grounds, setGrounds] = useState('');
@@ -124,6 +126,23 @@ export default function MrrChildPage() {
     var body = self ? { self: true } : { assigneeId: pick };
     if (!self && !pick) { setMsg('Name the person — MRR activities are hand-assigned.'); return; }
     post('/mrr/item/' + childId + '/activity/' + activity + '/assign', body, function () { setAssignFor(null); setPick(''); });
+  }
+  function assignExternal(activity) {
+    var em = extEmail.trim();
+    if (!em || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(em)) { setMsg('Enter the external contributor’s email address.'); return; }
+    post('/mrr/item/' + childId + '/activity/' + activity + '/assign', { externalEmail: em },
+      function () { setAssignFor(null); setExtEmail(''); });
+  }
+  function resendLink(activity) {
+    setBusy(true); setLinkUrl('');
+    api.post('/mrr/item/' + childId + '/activity/' + activity + '/external-link/resend', {})
+      .then(function (r) { setLinkUrl(r.data.url || ''); setMsg(r.data.mail && r.data.mail.sent ? 'Link re-sent by email.' : 'New link issued — copy it below (no mail provider configured).'); load(); })
+      .catch(function (e) { setMsg((e.response && e.response.data && e.response.data.error) || 'Could not re-issue.'); })
+      .finally(function () { setBusy(false); });
+  }
+  function revokeLink(activity) {
+    if (!window.confirm('Revoke the secure link? The contributor can no longer open it.')) return;
+    post('/mrr/item/' + childId + '/activity/' + activity + '/external-link/revoke', {});
   }
 
   function saveEstimate(complete) {
@@ -249,8 +268,35 @@ export default function MrrChildPage() {
                       {staff.map(function (u) { return <option key={u.id} value={u.id}>{u.display_name || u.name}</option>; })}
                     </select>
                     <button style={btn} disabled={busy} onClick={function () { assign(a.activity, false); }}>Assign</button>
+                    <span style={kv}>or an external contributor:</span>
+                    <input type="email" value={extEmail} onChange={function (e) { setExtEmail(e.target.value); }}
+                      placeholder="records@otheragency.gov"
+                      style={{ fontSize: 13, padding: '5px 8px', border: '1px solid ' + G.line, borderRadius: 5, minWidth: 190 }} />
+                    <button style={btnSm} disabled={busy} onClick={function () { assignExternal(a.activity); }}>Send secure link</button>
                     <button style={btnSm} onClick={function () { setAssignFor(null); }}>Cancel</button>
                     <span style={kv}>Hand-assigned to any person — no team filter, no smart routing.</span>
+                  </div>
+                ) : null}
+                {a.external ? (
+                  <div style={{ marginTop: 8, display: 'flex', gap: 8, alignItems: 'center', flexWrap: 'wrap',
+                    borderTop: '1px dashed ' + G.line, paddingTop: 8 }}>
+                    <span style={kv}>Secure link to <b style={{ color: C.ink }}>{a.external.email}</b> — {' '}
+                      <b style={{ color: a.external.linkState === 'expired' || a.external.linkState === 'revoked' ? '#8C3A2B' : C.ink }}>
+                        {{ sent: 'sent, not yet opened', opened: 'opened ' + (a.external.openCount || 0) + '×, last ' + (a.external.lastOpenedAt || ''),
+                           completed: 'their part is COMPLETE', expired: 'EXPIRED unused — re-send it', revoked: 'revoked' }[a.external.linkState] || a.external.linkState}
+                      </b>{a.external.linkState === 'sent' || a.external.linkState === 'opened' ? ' · expires ' + a.external.expiresAt : ''}</span>
+                    {d.canManage && a.external.linkState !== 'completed' ? (
+                      <span style={{ marginLeft: 'auto', display: 'flex', gap: 6 }}>
+                        <button style={btnSm} disabled={busy} onClick={function () { resendLink(a.activity); }}>Re-send link</button>
+                        {a.external.linkState !== 'revoked' && a.external.linkState !== 'expired'
+                          ? <button style={btnSm} disabled={busy} onClick={function () { revokeLink(a.activity); }}>Revoke</button> : null}
+                      </span>
+                    ) : null}
+                    {linkUrl && assignFor === null ? (
+                      <span style={Object.assign({}, kv, { width: '100%', wordBreak: 'break-all' })}>
+                        New link (hand it over yourself if no email arrived): <b style={{ color: C.ink }}>{linkUrl}</b>
+                      </span>
+                    ) : null}
                   </div>
                 ) : null}
               </div>

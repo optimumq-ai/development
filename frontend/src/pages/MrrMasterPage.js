@@ -240,7 +240,9 @@ export default function MrrMasterPage() {
             {it.defect ? <Tag kind="vague" title={'Clarification outstanding since ' + it.defect.at}>{it.defect.label}</Tag> : null}
             {it.denial && it.denial.designated
               ? <Tag kind="denial" title={it.denial.grounds}>Denial designated → Legal Review</Tag> : null}
-            {it.external ? <Tag kind="ext" title={it.external.placeholder}>External · link not implemented</Tag> : null}
+            {it.external ? <Tag kind="ext" title={'Secure link to ' + it.external.email + (it.external.expiresAt ? ' · expires ' + it.external.expiresAt : '')}>
+              {'External · ' + ({ sent: 'link sent', opened: 'link opened', completed: 'complete', expired: 'link EXPIRED', revoked: 'link revoked' }[it.external.linkState] || it.external.linkState)}
+            </Tag> : null}
             {it.status === 'closed' ? <Tag kind="closed">{it.closureReason || 'Ended'}</Tag> : null}
           </div>
         );
