@@ -419,7 +419,9 @@ export default function PublicPortalWizardPage() {
       requestorName: name.trim(), requestorEmail: email.trim(), requestorPhone: phone.trim(),
       deliveryMethod: deliv, requestorType: fee === 'commercial' ? 'commercial' : 'individual',
       feeWaiverRequested: fee === 'waiver', feeWaiverReason: fee === 'waiver' ? waiverReason.trim() : '',
-      certificationRequested: cert, emailVerificationMethod: 'link',
+      // The TOKEN, not a claim. The server checks its own email_verifications row for the click;
+      // the old `emailVerificationMethod: 'link'` assertion was rightly discarded as unprovable.
+      certificationRequested: cert, emailVerificationToken: token,
       description: descText, records: items.map(function (it) { return { description: it.desc }; }),
       selectedRecords: sel, searchIntents: searchIntents,
       isMrr: items.length > 1, submissionChannel: 'portal',

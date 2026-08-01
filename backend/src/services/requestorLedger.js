@@ -164,18 +164,19 @@ async function writeConfig(jid, cfg, actor) {
 // `email_verification_method` values that represent an ACTUAL verification event, as opposed to the
 // requester asserting their own address.
 //
-// ⚠ THIS SET IS EMPTY OF EVERYTHING THE PRODUCT CURRENTLY WRITES, and that is deliberate. The public
-// portal offers two buttons — "Email address verified" (`attested`) and "Visually verified" (`visual`) —
-// and BOTH are clicked by the requester themselves; no link is sent and no staffer is involved. The
-// wizard separately sets `emailVerificationMethod: 'link'` unconditionally at submit, without any link
-// having been sent (requestCreate's whitelist discards it today). Treating any of those as a verified
-// identity would let one person's unpaid balance gate a different person who typed the same address —
-// the precise failure the affirmative-match rule exists to prevent.
+// 'link_clicked' (IDENTITY ANCHORS, 2026-08-01) is SERVER-DERIVED: requestCreate.trustedEmailMethod()
+// writes it only after checking our own email_verifications row — the link was emailed, the requester
+// clicked it in time, and the verified address is the address the request names. It can never arrive
+// as a client claim; the claims a client can send ('link', 'attested', 'visual') are stored as the
+// untrusted assertions they are and remain OUTSIDE this set. 'staff_verified' stays: a staffer who
+// checked the address is an actual verification event, whenever a producer for it ships.
 //
-// So: until a real verification producer exists (portal accounts, or an emailed confirmation link that
-// is actually clicked), the email channel yields NO anchor and class A is inert in production. That is
-// the correct inert, not a gap to paper over — see the header.
-var VERIFIED_EMAIL_METHODS = ['staff_verified'];
+// The old inert-by-design note (WS5): the portal's self-clicked buttons and the wizard's unconditional
+// 'link' claim were the only things the product wrote, so this set excluded everything and class A was
+// deliberately inert — matching on an unverified email would let one person's unpaid balance gate a
+// different person who typed the same address. That rule is unchanged; what changed is that a real
+// producer now exists.
+var VERIFIED_EMAIL_METHODS = ['staff_verified', 'link_clicked'];
 
 // THE ANCHOR TEST. Returns the basis, or null for "no affirmative identity" — which is the answer for an
 // ordinary anonymous request and must stay the answer.

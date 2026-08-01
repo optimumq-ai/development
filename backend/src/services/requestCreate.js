@@ -117,6 +117,37 @@ function childrenOf(fields) {
   });
 }
 
+// IDENTITY ANCHORS (2026-08-01) — the SERVER-DERIVED email trust the ledger was waiting for.
+//
+// The wizard has run a real link-verify gate since 2026-07-18 (§2c G5): it emails a link via
+// POST /api/public/request-verification, the requester clicks it, GET /verify/:token records
+// `verified_at`, and the wizard refuses to submit until its poll sees the click. A genuine
+// verification event — which then went NOWHERE, because the wizard announced it by CLAIMING
+// `emailVerificationMethod: 'link'` in the POST body, and a claim in a public POST body proves
+// nothing: anyone can send that string without any link having been sent. normalize() rightly
+// discards it, so requestorLedger's anchor test found no verified email on any live request and
+// class A sat inert (the WS5 finding).
+//
+// The fix is to stop listening to the claim and consult our own record. The client passes the
+// TOKEN it already holds; this helper answers with 'link_clicked' only when the token's row says
+// the link was actually clicked (the verify route refuses expired clicks, so `verified_at` implies
+// a timely one) AND the verified address is the address the request names. A token for someone
+// else's email, an unclicked token, or no token at all answers null — exactly the untrusted state
+// normalize() stores today. The value 'link_clicked' is chosen so it can NEVER collide with a
+// client claim: 'link' (the wizard's old claim), 'attested' and 'visual' remain requester
+// assertions, stored as the untrusted facts they are.
+async function trustedEmailMethod(f) {
+  var token = f && f.emailVerificationToken;
+  if (!token || typeof token !== 'string') return null;
+  var row = null;
+  try { row = await get('SELECT email, verified_at FROM email_verifications WHERE token = ?', [token]); }
+  catch (e) { console.error('[requestCreate] verification lookup failed:', e && e.message); return null; }
+  if (!row || !row.verified_at) return null;
+  var verified = String(row.email || '').trim().toLowerCase();
+  var named = String(f.requestorEmail || '').trim().toLowerCase();
+  return (verified && verified === named) ? 'link_clicked' : null;
+}
+
 // Map an intake payload (camelCase, from any of the three paths) onto the column set, with the defaults
 // that used to be repeated at every site.
 function normalize(f) {
@@ -220,6 +251,9 @@ async function createRequest(fields, opts) {
   }
 
   var cols = normalize(fields);
+  // Server-derived email trust overrides whatever the client claimed — see trustedEmailMethod().
+  var trustedMethod = await trustedEmailMethod(fields);
+  if (trustedMethod) cols.email_verification_method = trustedMethod;
   var kids = childrenOf(fields);
   var parentId = uuidv4();
   var wrap = opts.wrap !== false;
@@ -347,6 +381,18 @@ async function createRequest(fields, opts) {
            (eligibility.reviews.length ? ', but a human should confirm eligibility before it advances.' : '.')]);
       } catch (e) { console.error('[requestCreate] eligibility note failed:', e && e.message); }
     }
+  }
+
+  // The verification is a citizen-identity fact, so its history row lives at the citizen level (the
+  // parent; the child on the unwrapped infrastructure path). Written BEFORE the ledger link below, so
+  // a reader of the trail sees the evidence before the conclusion drawn from it.
+  if (trustedMethod) {
+    try {
+      await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+        [uuidv4(), wrap ? parentId : childId, null, 'Email Verification', 'EMAIL_VERIFIED',
+         'The requestor clicked the emailed verification link for ' + cols.requestor_email + ' before submitting. ' +
+         'Recorded server-side from the verification token — never from the client\'s claim.']);
+    } catch (e) { console.error('[requestCreate] verification history failed:', e && e.message); }
   }
 
   // PHASE 7 / WS5 — anchor the request to a requestor profile, or record that it could not be. The link

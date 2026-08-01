@@ -385,6 +385,8 @@ router.post('/submit', async function(req, res) {
     mailingStreet1: b.mailingStreet1, mailingStreet2: b.mailingStreet2, mailingCity: b.mailingCity,
     mailingState: b.mailingState, mailingZip: b.mailingZip,
     certificationRequested: b.certificationRequested, emailVerificationMethod: b.emailVerificationMethod,
+    emailVerificationToken: b.emailVerificationToken, // server-verified against email_verifications — see requestCreate.trustedEmailMethod
+
     isMrr: b.isMrr, submissionChannel: b.submissionChannel || 'chat_agent'
   }, {
     actorId: 'public',
