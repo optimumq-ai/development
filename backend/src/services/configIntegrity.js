@@ -262,6 +262,53 @@ async function check() {
     });
   }
 
+  // 8b. BW4/BW5 — THE CODE-DEFINED CITY KNOBS, which no row sweep can see.
+  //
+  // Check 8 walks jurisdiction_rules rows and skips anything without `_import`, and for template
+  // surfaces that is right. But the de-minimis threshold (BW4) and the release-pipeline pair (BW5)
+  // are declared in CODE under the rule-(d) convention: defaults are supplied at READ time and a row
+  // is written only when a city answers. An unconfirmed knob is therefore usually a row that DOES NOT
+  // EXIST — invisible to any sweep of what is stored. Each service's reader answers "unconfirmed" for
+  // the missing row, so this check asks the services, not the table.
+  //
+  // Swept for the ACTIVE jurisdiction plus every template-imported one (the go-live candidates) —
+  // these knobs govern behaviour wherever the app runs, not only where a template landed. Same
+  // severity and shape as check 8: a WARNING, one finding per (jurisdiction, domain), because
+  // unconfirmed is behaviour-preserving by construction and the hard gate is attestation. BW9's
+  // readiness surface reads THIS report; neither domain has a profile section yet (that wiring is
+  // BW9's, gated on Draft 10 markup), so until then this warning is the only place the open decision
+  // surfaces.
+  var DMP = require('./deMinimisPolicy');
+  var ARL = require('./autoRelease');
+  var codeKnobJids = {};
+  (await db.all("SELECT jurisdiction_id FROM jurisdiction_rules WHERE domain = 'template_import'"))
+    .forEach(function (r) { codeKnobJids[r.jurisdiction_id] = true; });
+  var actRow = await db.get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'");
+  if (actRow && actRow.value) codeKnobJids[actRow.value] = true;
+  var codeKnobDomains = [
+    { domain: DMP.DOMAIN, knobs: [DMP.KNOB], state: function (name, j) { return DMP.read(j); },
+      fixText: 'Confirm the threshold on the go-live checklist knob card (there is no route yet — the card is BW9).' },
+    { domain: ARL.DOMAIN, knobs: Object.keys(ARL.KNOBS), state: function (name, j) { return ARL.knob(name, j); },
+      fixText: 'A Director confirms it: PUT /api/dispositions/knobs/<knob> — the confirming act IS the decision to automate.' }
+  ];
+  var codeJidList = Object.keys(codeKnobJids).sort();
+  for (var cj = 0; cj < codeJidList.length; cj++) {
+    for (var cd = 0; cd < codeKnobDomains.length; cd++) {
+      var dom = codeKnobDomains[cd], open = [];
+      for (var ck = 0; ck < dom.knobs.length; ck++) {
+        var st = await dom.state(dom.knobs[ck], codeJidList[cj]);
+        if (!st || st.confirmed !== true) open.push(dom.knobs[ck]);
+      }
+      if (!open.length) continue;
+      findings.push({
+        severity: 'warn', where: codeJidList[cj] + '/' + dom.domain,
+        issue: open.length + ' city-config knob(s) nobody has decided: ' + open.join(', ') + '. Unconfirmed ' +
+               'preserves today’s behaviour, but the decision the statute left to the city is still open.',
+        fix: dom.fixText
+      });
+    }
+  }
+
   // 9. WS6 — EVERY ACTIVE BRANCH HAS ITS REQUIRED PARAMS.
   //
   // A branch the state's research switches ON is a step the engine may take; the template says which of

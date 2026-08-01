@@ -28,6 +28,13 @@ async function restore(jid, domain) {
   await db.run('UPDATE jurisdiction_rules SET config_json = ?, updated_by = ? WHERE jurisdiction_id = ? AND domain = ?',
     [r.config_json, r.updated_by, jid, domain]);
 }
+// For the code-defined knob domains the pre-test state is usually NO ROW AT ALL (rule-(d): defaults at
+// read time, a row only once a city answers). restore() on a snapshot of nothing is a no-op, which would
+// leave the harness's write behind — so absence restores as a DELETE.
+async function restoreOrDelete(jid, domain) {
+  if (SAVED[jid + '/' + domain]) return restore(jid, domain);
+  await db.run('DELETE FROM jurisdiction_rules WHERE jurisdiction_id = ? AND domain = ?', [jid, domain]);
+}
 function findingsAt(res, where, re) {
   return res.findings.filter(function (f) { return f.where === where && re.test(f.issue); });
 }
@@ -102,11 +109,36 @@ function findingsAt(res, where, re) {
     try { require('/opt/optimumq/backend/src/routes/configIntegrity'); } catch (e) { routeOk = false; }
     ok('GET /api/config-integrity is mounted and loadable', routeOk);
 
+    // ---- 8. BW4/BW5 — the CODE-DEFINED city knobs (check 8b). The unconfirmed state is usually a row
+    // that does not exist, which the row sweeps of checks 8/9 can never see; only asking the services
+    // finds it. This was the fee_de_minimis gap flagged in BW4 and handed to the BW9 prep.
+    await snapshot('jur-tx', 'fee_de_minimis');
+    var r8 = await CI.check();
+    ok('the NEVER-WRITTEN de-minimis knob is CAUGHT for the active jurisdiction — no row exists to sweep',
+      findingsAt(r8, 'jur-tx/fee_de_minimis', /de_minimis_threshold/).length === 1);
+    ok('...and both release-pipeline knobs with it, from the same rowless state',
+      findingsAt(r8, 'jur-tx/release_pipeline', /auto_release, pre_send_review/).length === 1);
+    ok('...as WARNINGS, not errors — unconfirmed preserves today’s behaviour; the hard gate is attestation',
+      r8.clean === true && r8.findings
+        .filter(function (f) { return /\/(fee_de_minimis|release_pipeline)$/.test(f.where); })
+        .every(function (f) { return f.severity === 'warn' && !!f.fix; }));
+    var DMP = require('/opt/optimumq/backend/src/services/deMinimisPolicy');
+    await DMP.write('jur-tx', { confirmed: true, value: 25 }, 'city-clerk');
+    var r8b = await CI.check();
+    ok('a threshold CONFIRMED WITH A VALUE clears the warning',
+      findingsAt(r8b, 'jur-tx/fee_de_minimis', /de_minimis_threshold/).length === 0);
+    await DMP.write('jur-tx', { confirmed: true, value: null }, 'city-clerk');
+    var r8c = await CI.check();
+    ok('confirmed WITHOUT a value is a half-decision and still warns — nobody set a ceiling',
+      findingsAt(r8c, 'jur-tx/fee_de_minimis', /de_minimis_threshold/).length === 1);
+    await restoreOrDelete('jur-tx', 'fee_de_minimis');
+
   } catch (e) { console.error('ERR', (e && e.stack) || e); fail++; }
   finally {
     try {
       await restore('jur-tx', 'deadline');
       await restore('jur-tx', 'clarification');
+      await restoreOrDelete('jur-tx', 'fee_de_minimis');
       var final = await CI.check();
       ok('cleanup: the live config is left exactly as found — CLEAN', final.clean === true && final.errors === 0);
     } catch (e) { console.error('CLEANUP ERR', e.message); fail++; }
