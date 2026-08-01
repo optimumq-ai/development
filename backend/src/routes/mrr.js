@@ -149,12 +149,40 @@ router.post('/item/:childId/activity/:activity/assign', requireAuth, async funct
   try {
     if (!(await requireManager(req, res, req.params.childId))) return;
     var b = req.body || {};
-    var opts = Object.assign(actor(req), { assigneeId: b.assigneeId || null, externalEmail: b.externalEmail || null });
+    var opts = Object.assign(actor(req), { assigneeId: b.assigneeId || null, externalEmail: b.externalEmail || null,
+      // The secure-link URL is built from the STAFF's own origin — same host nginx serves the SPA on,
+      // which is where /contribute/:token lives.
+      baseUrl: req.protocol + '://' + req.get('host') });
     // "Do it myself" is not a special path — it is the manager naming themselves, and it produces a REAL
     // task on their own My Tasks. Annotation 2: everything worked has a task; nothing is invisible.
     if (b.self) opts.assigneeId = req.user.id;
     res.json({ activities: await HUB.spawnActivity(req.params.childId, req.params.activity, opts) });
   } catch (e) { res.status(e.status || 500).json({ error: e.message, code: e.code }); }
+});
+
+// ── THE EXTERNAL LINK, RM-OPERATED (2026-08-01) ─────────────────────────────────────────────────
+// Re-send RE-ISSUES (new token, old one superseded — one active link per assignment, always) and
+// answers with the URL so the RM can hand it over themselves when the city has no mail provider.
+// This is the only place the raw token reaches a staff screen.
+router.post('/item/:childId/activity/:activity/external-link/resend', requireAuth, async function (req, res) {
+  try {
+    if (!(await requireManager(req, res, req.params.childId))) return;
+    var XC = require('../services/externalContributor');
+    var st = await XC.stateFor(req.params.childId, req.params.activity);
+    var email = (req.body || {}).email || (st && st.email);
+    if (!email) return res.status(422).json({ error: 'No external contributor is on this activity — assign one first.' });
+    var out = await XC.issue(req.params.childId, req.params.activity, email,
+      Object.assign(actor(req), { baseUrl: req.protocol + '://' + req.get('host') }));
+    res.json(out);
+  } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
+});
+
+router.post('/item/:childId/activity/:activity/external-link/revoke', requireAuth, async function (req, res) {
+  try {
+    if (!(await requireManager(req, res, req.params.childId))) return;
+    var XC = require('../services/externalContributor');
+    res.json({ external: await XC.revoke(req.params.childId, req.params.activity, actor(req)) });
+  } catch (e) { res.status(e.status || 500).json({ error: e.message }); }
 });
 
 router.post('/item/:childId/activity/:activity/not-required', requireAuth, async function (req, res) {

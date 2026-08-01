@@ -77,13 +77,22 @@ async function activities(childId) {
   var rows = await all('SELECT * FROM mrr_tasks WHERE request_id = ? ORDER BY activity', [childId]);
   var byAct = {};
   rows.forEach(function (r) { byAct[r.activity] = r; });
-  return ACTIVITIES.map(function (a) {
+  var out = ACTIVITIES.map(function (a) {
     var r = byAct[a];
     if (r) return decorate(r);
     // The honest empty. `not_started` is a real answer, not a missing row — see the schema comment.
     return { id: null, activity: a, name: ACTIVITY_NAME[a], label: LABEL[a], status: 'not_started',
       statusLabel: 'Not started', assignee_name: null, task_id: null, materialised: false };
   });
+  // The secure-link substrate exists now (2026-08-01) — an externally-assigned activity carries its REAL
+  // link state, read from the token store, never fabricated here.
+  for (var i = 0; i < out.length; i++) {
+    if (out[i].external_email) {
+      try { out[i].external = await require('./externalContributor').stateFor(childId, out[i].activity); }
+      catch (e) { out[i].external = null; }
+    }
+  }
+  return out;
 }
 
 var STATUS_LABEL = { not_started: 'Not started', queued: 'Queued', in_process: 'In Process',
@@ -178,9 +187,23 @@ async function spawnActivity(childId, activity, opts) {
       external ? 'external' : (opts.actorId && opts.actorId === assigneeId ? 'self' : 'manual'),
       external || null, nowStr(), nowStr(), childId, activity]);
 
+  // THE SECURE LINK (2026-08-01, replacing BW6's labelled placeholder). Assigning externally ISSUES the
+  // link (superseding any prior one — one active link per assignment); assigning to a PERSON revokes an
+  // outstanding external link, because the person it was cut for no longer holds the work.
+  var XC = require('./externalContributor');
+  if (external) {
+    try { await XC.issue(childId, activity, external, { actorId: opts.actorId, actorName: opts.actorName, baseUrl: opts.baseUrl }); }
+    catch (e) { console.error('[mrrHub external link]', e && e.message); }
+  } else if (row && row.external_email) {
+    try { await XC.revoke(childId, activity, { actorName: (opts.actorName || 'staff') + ' (reassigned to ' + assigneeName + ')' }); }
+    catch (e) { console.error('[mrrHub external revoke]', e && e.message); }
+  }
+
   await history(childId, opts, 'MRR_ACTIVITY_ASSIGNED',
-    ACTIVITY_NAME[activity] + ' assigned to ' + assigneeName + '. The assignee sees “' + LABEL[activity] +
-    '” on their My Tasks; completing it updates the MRR hub and advances no stage.');
+    ACTIVITY_NAME[activity] + ' assigned to ' + assigneeName + '. ' +
+    (external
+      ? 'A secure expiring link was emailed to them; their uploads and completion land in this hub and advance no stage.'
+      : 'The assignee sees “' + LABEL[activity] + '” on their My Tasks; completing it updates the MRR hub and advances no stage.'));
 
   return await activities(childId);
 }
@@ -486,9 +509,9 @@ async function master(parentId) {
         ? { designated: true, grounds: k.mrr_denial_grounds, by: k.mrr_denial_by, at: k.mrr_denial_at, legalTaskId: k.mrr_denial_legal_task_id }
         : { designated: false },
       defect: defect,
-      // NO TOKEN SUBSTRATE EXISTS. The bar shows a labelled placeholder rather than a fabricated link state.
-      external: ext ? { email: ext.external_email, linkState: 'not_implemented',
-        placeholder: 'External contributor — the secure expiring link substrate is not built yet; this records who was asked.' } : null
+      // The token substrate is REAL now (2026-08-01) — the bar shows the link's actual state, read from
+      // the token store by activities() above.
+      external: ext ? (ext.external || { email: ext.external_email, linkState: 'sent' }) : null
     });
   }
 

@@ -65,6 +65,7 @@ app.use('/api/files', require('./src/routes/files'));
 app.use('/api/av-redaction', require('./src/routes/avRedaction'));
 app.use('/api/semantic-search', require('./src/routes/semanticSearch'));
 app.use('/api/public', require('./src/routes/publicChat'));
+app.use('/api/contribute', require('./src/routes/externalContributor')); // token-authenticated, no requireAuth by design
 app.use('/api/agent-rules', require('./src/routes/agentRules'));
 app.use('/api/help', require('./src/routes/help'));
 app.use('/api/reports', require('./src/routes/reports'));

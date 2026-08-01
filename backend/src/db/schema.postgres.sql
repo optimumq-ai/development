@@ -537,6 +537,26 @@ ALTER TABLE requests ADD COLUMN IF NOT EXISTS email_verification_method TEXT;
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS identity_confirmed INTEGER DEFAULT 0;
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS identity_confirmed_by TEXT;
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS identity_confirmed_at TEXT;
+-- EXTERNAL-CONTRIBUTOR SECURE LINKS (2026-08-01) — the token substrate BW6's MRR hub labelled as
+-- missing. One row per issued link; the RAW token is never stored (token_hash = sha256 hex), so a
+-- database read cannot mint a working link. "Single-use" per the standing design is read as
+-- SINGLE-ASSIGNMENT: exactly one active link per (request, activity), superseded on re-issue,
+-- revoked on reassignment, closed on completion — multi-visit until then because the page's own
+-- API calls authenticate with the token. Every open is counted.
+CREATE TABLE IF NOT EXISTS mrr_external_links (
+  id TEXT PRIMARY KEY,
+  request_id TEXT NOT NULL,
+  activity TEXT NOT NULL,
+  email TEXT NOT NULL,
+  token_hash TEXT NOT NULL UNIQUE,
+  status TEXT NOT NULL DEFAULT 'active',
+  created_by TEXT, created_by_name TEXT,
+  created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')),
+  expires_at TEXT NOT NULL,
+  first_opened_at TEXT, last_opened_at TEXT, open_count INTEGER DEFAULT 0,
+  completed_at TEXT, revoked_at TEXT, revoked_by TEXT
+);
+CREATE INDEX IF NOT EXISTS idx_extlinks_req ON mrr_external_links(request_id, activity);
 CREATE TABLE IF NOT EXISTS decision_reasons (
   id TEXT PRIMARY KEY, category TEXT NOT NULL, text TEXT NOT NULL,
   is_active INTEGER DEFAULT 1, usage_count INTEGER DEFAULT 0,
