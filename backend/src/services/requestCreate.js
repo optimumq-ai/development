@@ -498,6 +498,23 @@ async function createRequest(fields, opts) {
     })(), 'intake ' + requestNumber + ' (' + childIds.length + (childIds.length === 1 ? ' child)' : ' children)'));
   }
 
+  // THE ACKNOWLEDGMENT FOLLOWS THE CITIZEN, NOT THE CHANNEL (Kevin, 2026-08-01, deciding intake knob
+  // Master.g4). A request logged by staff from paper or a phone call acknowledges exactly like a portal
+  // submission — same email, same immediacy — whenever an address exists. Living in the ONE creation
+  // helper (ARCHITECTURE item 5) it covers every path at once, and two fixes ride along: the email cites
+  // the CITIZEN's number (the parent's — the portal route used to pass the CHILD row, so citizens saw
+  // the "-1" component suffix), and an MRR acknowledges ONCE with every described record, not per
+  // component. wrap:false infrastructure rows and explicit opt-outs (opts.sendConfirmation === false)
+  // stay silent. Fire-and-forget: a mail outage must not fail a submission.
+  if (wrap && opts.sendConfirmation !== false && cols.requestor_email) {
+    try {
+      require('./email').sendSubmissionConfirmation({
+        request_number: requestNumber, requestor_email: cols.requestor_email,
+        description: kids.map(function (k) { return k.description; }).join('\n\n')
+      }).catch(function (e) { console.error('[requestCreate] confirmation email failed:', e && e.message); });
+    } catch (e) { console.error('[requestCreate] confirmation email failed:', e && e.message); }
+  }
+
   return {
     id: childId, requestNumber: requestNumber,
     parentId: wrap ? parentId : null, childId: childId,

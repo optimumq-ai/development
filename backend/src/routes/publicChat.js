@@ -494,7 +494,9 @@ router.post('/submit', async function(req, res) {
 
   var newReq = await get('SELECT * FROM requests WHERE id = ?', [id]);
   if (newReq) {
-    emailService.sendSubmissionConfirmation(newReq).catch(function(e){ console.error('confirmation email failed:', e.message); });
+    // The requestor's confirmation now sends from createRequest itself — every intake path, one sender,
+    // citing the CITIZEN's number (this call used to pass the CHILD row, so citizens saw "-1").
+    // The internal new-request alert stays portal-only: staff don't need an alert about their own typing.
     emailService.sendNewRequestAlert(newReq).catch(function(e){ console.error('alert email failed:', e.message); });
   }
   res.status(201).json({ success: true, requestNumber: requestNumber, requestId: id });
