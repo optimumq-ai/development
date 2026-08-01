@@ -383,6 +383,25 @@ async function createRequest(fields, opts) {
     }
   }
 
+  // IDENTITY ANCHORS (2026-08-01) — persist the staff-confirmed act. Until now opts.identityConfirmed
+  // reached linkRequest only in memory: the link row came out right, but the fact itself was written
+  // nowhere, so any later re-resolution read a request row that had never heard of it. The columns
+  // carry who and when — an identity confirmation with no author is an assertion, not an act.
+  if (opts.identityConfirmed === true) {
+    var markIds = wrap ? [parentId].concat(childIds) : [childId];
+    for (var mi = 0; mi < markIds.length; mi++) {
+      try {
+        await run("UPDATE requests SET identity_confirmed = 1, identity_confirmed_by = ?, identity_confirmed_at = datetime('now') WHERE id = ?",
+          [opts.actorName || 'staff', markIds[mi]]);
+      } catch (e) { console.error('[requestCreate] identity_confirmed persist failed:', e && e.message); }
+    }
+    try {
+      await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+        [uuidv4(), wrap ? parentId : childId, opts.actorId || null, opts.actorName || 'Staff', 'IDENTITY_CONFIRMED',
+         'Requestor identity confirmed in person at intake by ' + (opts.actorName || 'staff') + '.']);
+    } catch (e) { console.error('[requestCreate] identity history failed:', e && e.message); }
+  }
+
   // The verification is a citizen-identity fact, so its history row lives at the citizen level (the
   // parent; the child on the unwrapped infrastructure path). Written BEFORE the ledger link below, so
   // a reader of the trail sees the evidence before the conclusion drawn from it.

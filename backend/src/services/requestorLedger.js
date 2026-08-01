@@ -223,7 +223,7 @@ async function resolveProfile(request, opts) {
 // an absence.
 async function linkRequest(requestId, opts) {
   opts = opts || {};
-  var request = await db.get('SELECT id, requestor_name, requestor_email, email_verification_method, submission_channel FROM requests WHERE id = ?', [requestId]);
+  var request = await db.get('SELECT id, requestor_name, requestor_email, email_verification_method, submission_channel, identity_confirmed FROM requests WHERE id = ?', [requestId]);
   if (!request) return null;
   if (opts.identityConfirmed) request.identity_confirmed = true;
   var r = await resolveProfile(request, { create: true });
@@ -238,7 +238,7 @@ async function profileForRequest(requestId) {
   if (l && l.profile_id) return l.profile_id;
   // Not linked yet (an older request, or intake has not run): resolve WITHOUT creating, so a read never
   // mints a profile as a side effect.
-  var request = await db.get('SELECT id, requestor_name, requestor_email, email_verification_method FROM requests WHERE id = ?', [requestId]);
+  var request = await db.get('SELECT id, requestor_name, requestor_email, email_verification_method, identity_confirmed FROM requests WHERE id = ?', [requestId]);
   var r = await resolveProfile(request, { create: false });
   return r.profile ? r.profile.id : null;
 }

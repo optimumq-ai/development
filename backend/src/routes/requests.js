@@ -157,9 +157,60 @@ router.post('/', requireAuth, async function(req, res) {
   // live there once, instead of being re-implemented at every intake path.
   var made = await requestCreate.createRequest(b, {
     actorId: req.user.sub, actorName: req.user.name,
-    historyAction: 'REQUEST_CREATED', historyNote: 'Request created by staff.'
+    historyAction: 'REQUEST_CREATED', historyNote: 'Request created by staff.',
+    // The walk-in anchor: the creating staffer ticked "identity confirmed in person" — an explicit
+    // act by a named person, which is what requestorLedger.anchorFor requires of staff_confirmed.
+    identityConfirmed: b.identityConfirmed === true
   });
   res.status(201).json({ requestId: made.id, requestNumber: made.requestNumber, success: true });
+});
+
+// IDENTITY ANCHORS (2026-08-01) — the staff-confirmed anchor, as an act on an EXISTING request.
+// The create-time checkbox covers the walk-in who is standing there at intake; this covers the one who
+// shows up later — to pay, to collect, to argue — and gets checked at the counter then. Identity is a
+// citizen-level fact, so the act marks the whole cluster (parent + every child): the person who asked
+// is the same person on every component, and profileForRequest may be asked about any of them.
+router.post('/:id/confirm-identity', requireAuth, async function (req, res) {
+  const row = await get('SELECT id, master_request_id FROM requests WHERE id = ? OR request_number = ?', [req.params.id, req.params.id]);
+  if (!row) return res.status(404).json({ error: 'Request not found' });
+  const parentId = row.master_request_id || row.id;
+  const cluster = [parentId].concat(
+    (await all('SELECT id FROM requests WHERE master_request_id = ?', [parentId])).map(function (r) { return r.id; }));
+  const note = String((req.body || {}).note || '').trim();
+  for (const cid of cluster) {
+    await run("UPDATE requests SET identity_confirmed = 1, identity_confirmed_by = ?, identity_confirmed_at = datetime('now') WHERE id = ?",
+      [req.user.name || 'staff', cid]);
+  }
+  await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+    [uuidv4(), parentId, req.user.sub || null, req.user.name || 'Staff', 'IDENTITY_CONFIRMED',
+     'Requestor identity confirmed in person by ' + (req.user.name || 'staff') + (note ? ' — ' + note : '') + '.']);
+  // Re-anchor NOW, not at the next gate: the link row is the record of how this request is (or is not)
+  // anchored, and it just changed. linkRequest re-resolves and updates in place.
+  const RL = require('../services/requestorLedger');
+  let link = null;
+  for (const cid of cluster) {
+    try { link = await RL.linkRequest(cid) || link; }
+    catch (e) { console.error('[confirm-identity] re-link failed for ' + cid + ':', e && e.message); }
+  }
+  res.json({ success: true, identityConfirmed: true, confirmedBy: req.user.name || 'staff', anchor: link });
+});
+
+// The anchor state, for the workspace to render: how (and whether) this request is anchored to a
+// requestor profile, and the facts that produced the answer. Read-only; never mints a profile.
+router.get('/:id/identity', requireAuth, async function (req, res) {
+  const r = await get('SELECT id, master_request_id, requestor_email, email_verification_method, identity_confirmed, identity_confirmed_by, identity_confirmed_at FROM requests WHERE id = ? OR request_number = ?',
+    [req.params.id, req.params.id]);
+  if (!r) return res.status(404).json({ error: 'Request not found' });
+  const link = await get('SELECT profile_id, identity_basis, reason, linked_at FROM requestor_request_links WHERE request_id = ?', [r.id]);
+  res.json({
+    requestId: r.id,
+    emailVerificationMethod: r.email_verification_method || null,
+    identityConfirmed: r.identity_confirmed === 1 || r.identity_confirmed === true,
+    identityConfirmedBy: r.identity_confirmed_by || null,
+    identityConfirmedAt: r.identity_confirmed_at || null,
+    anchor: link ? { profileId: link.profile_id, basis: link.identity_basis, reason: link.reason, linkedAt: link.linked_at }
+                 : { profileId: null, basis: null, reason: 'not yet evaluated', linkedAt: null }
+  });
 });
 
 // ADVANCING IS PROCESSING, SO IT LANDS ON THE CHILD (Kevin's ruling, 2026-07-19 — see requestScope.workRow).

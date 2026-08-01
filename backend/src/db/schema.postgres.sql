@@ -530,6 +530,13 @@ ALTER TABLE requests ADD COLUMN IF NOT EXISTS mailing_zip     TEXT;
 -- Certification opt-in + email-accuracy method (split-canvas intake, slice 5). Both captured on the Phase-0 form.
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS certification_requested INTEGER DEFAULT 0;
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS email_verification_method TEXT;
+-- IDENTITY ANCHORS (2026-08-01): the staff-confirmed anchor, persisted. An EXPLICIT staff act — a clerk
+-- who checked who is standing at the counter — never inferred from the submission channel ("arrived by
+-- paper" is not the same fact as "somebody checked"). requestorLedger.anchorFor reads it; who and when
+-- travel with it so the act has an author.
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS identity_confirmed INTEGER DEFAULT 0;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS identity_confirmed_by TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS identity_confirmed_at TEXT;
 CREATE TABLE IF NOT EXISTS decision_reasons (
   id TEXT PRIMARY KEY, category TEXT NOT NULL, text TEXT NOT NULL,
   is_active INTEGER DEFAULT 1, usage_count INTEGER DEFAULT 0,
