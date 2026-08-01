@@ -103,9 +103,11 @@ async function cluster(childId) {
         try { await db.run('DELETE FROM ' + tabs[t].table_name + ' WHERE request_id=?', [created[c]]); } catch (e) {}
       }
       for (var c2i = 0; c2i < created.length; c2i++) { try { await db.run('DELETE FROM requests WHERE id=?', [created[c2i]]); } catch (e) {} }
-      // The anchors this harness minted ride requestor_profiles keyed by the harness emails.
-      await db.run("DELETE FROM requestor_request_links WHERE profile_id IN (SELECT id FROM requestor_profiles WHERE primary_email LIKE ?)", ['%' + TAG + '%']);
-      await db.run('DELETE FROM requestor_profiles WHERE primary_email LIKE ?', ['%' + TAG + '%']);
+      // The anchors this harness minted ride requestor_profiles keyed by the harness emails — which the
+      // ledger LOWERCASES on mint (anchorFor's key), so match case-insensitively or the profile survives
+      // (it did: Postgres LIKE is case-sensitive, and 'FORM-' never matched 'form-').
+      await db.run("DELETE FROM requestor_request_links WHERE profile_id IN (SELECT id FROM requestor_profiles WHERE lower(primary_email) LIKE ?)", ['%' + TAG.toLowerCase() + '%']);
+      await db.run('DELETE FROM requestor_profiles WHERE lower(primary_email) LIKE ?', ['%' + TAG.toLowerCase() + '%']);
       var left = await db.get('SELECT COUNT(*)::int AS n FROM requests WHERE requestor_email LIKE ?', ['%' + TAG + '%']);
       ok('cleanup: 0 harness requests left', Number(left.n) === 0);
     } catch (e) { console.error('CLEANUP ERR', e && e.message); fail++; }
