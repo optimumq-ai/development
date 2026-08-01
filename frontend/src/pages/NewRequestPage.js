@@ -29,6 +29,10 @@ export default function NewRequestPage() {
   const [departments, setDepartments] = useState([]);
   const [err, setErr] = useState('');
   const [form, setForm] = useState(EMPTY_FORM);
+  // FORM BUILD (2026-08-01): one description per described record (§5.1). The main description is
+  // Record 1 — every AI-assist flow keeps working on it — and these are Records 2..10, so a paper
+  // form's items log in exactly the portal's parent/child shape. is_mrr is derived, never a checkbox.
+  const [extraItems, setExtraItems] = useState([]);
 
   useEffect(function() {
     api.get('/departments').then(function(r){ setDepartments(r.data.departments); }).catch(function(){});
@@ -107,7 +111,14 @@ export default function NewRequestPage() {
     if (!form.requestorName || !form.requestorEmail || !form.description) { setErr('Please fill in all required fields'); return; }
     setLoading(true);
     try {
-      var r = await api.post('/requests', form);
+      var extras = extraItems.map(function (t) { return t.trim(); }).filter(Boolean);
+      var payload = form;
+      if (extras.length) {
+        payload = Object.assign({}, form, {
+          children: [{ description: form.description }].concat(extras.map(function (t) { return { description: t }; }))
+        });
+      }
+      var r = await api.post('/requests', payload);
       nav('/requests/' + r.data.requestId);
     } catch(e) { setErr(e.response && e.response.data ? e.response.data.error : 'Failed to create request'); }
     setLoading(false);
@@ -277,7 +288,27 @@ export default function NewRequestPage() {
                   <div style={{fontSize:'12px',color:'#374151',fontStyle:'italic'}}>"{aiSuggestion.reasoning}"</div>
                 </div>
               )}
-              <textarea value={form.description} onChange={function(e){setF('description',e.target.value);}} style={Object.assign({},lowConfidenceFields.description?inpLow:inp,{minHeight:'120px',resize:'vertical',fontFamily:'inherit'})} placeholder="Describe the records being requested..." required/>
+              <textarea value={form.description} onChange={function(e){setF('description',e.target.value);}} style={Object.assign({},lowConfidenceFields.description?inpLow:inp,{minHeight:'120px',resize:'vertical',fontFamily:'inherit'})} placeholder={extraItems.length?'Record 1 — describe the first record being requested...':'Describe the records being requested...'} required/>
+              {extraItems.map(function(txt, i){
+                return (
+                  <div key={i} style={{marginTop:'10px'}}>
+                    <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:'4px'}}>
+                      <span style={{fontSize:'12px',fontWeight:'600',color:'#374151'}}>Record {i+2}</span>
+                      <button type="button" onClick={function(){setExtraItems(function(p){return p.filter(function(_,j){return j!==i;});});}}
+                        style={{background:'none',border:'none',color:'#DC2626',fontSize:'12px',cursor:'pointer',fontWeight:'600'}}>Remove</button>
+                    </div>
+                    <textarea value={txt} onChange={function(e){var v=e.target.value;setExtraItems(function(p){return p.map(function(t,j){return j===i?v:t;});});}}
+                      style={Object.assign({},inp,{minHeight:'80px',resize:'vertical',fontFamily:'inherit'})}
+                      placeholder={'Describe record '+(i+2)+' in the requestor’s own words...'}/>
+                  </div>
+                );
+              })}
+              {extraItems.length < 9 ? (
+                <button type="button" onClick={function(){setExtraItems(function(p){return p.concat(['']);});}}
+                  style={{marginTop:'10px',padding:'8px 14px',background:'white',color:'#1F4E79',border:'1px dashed #1F4E79',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>
+                  + Add another record (each record is tracked and delivered individually)
+                </button>
+              ) : <div style={{marginTop:'10px',fontSize:'12px',color:'#9CA3AF'}}>A request can include at most 10 records.</div>}
             </div>
             <div>
               <label style={lbl}>Request Fulfillment Team</label>
@@ -297,10 +328,8 @@ export default function NewRequestPage() {
                 <input type="checkbox" checked={form.feeWaiverRequested} onChange={function(e){setF('feeWaiverRequested',e.target.checked);}} style={{width:'16px',height:'16px'}}/>
                 <div><div style={{fontSize:'14px',fontWeight:'600'}}>Fee Waiver Requested</div><div style={{fontSize:'12px',color:'#9CA3AF'}}>News media, nonprofit, or researcher status</div></div>
               </label>
-              <label style={{display:'flex',alignItems:'center',gap:'10px',cursor:'pointer'}}>
-                <input type="checkbox" checked={form.isMrr} onChange={function(e){setF('isMrr',e.target.checked);}} style={{width:'16px',height:'16px'}}/>
-                <div><div style={{fontSize:'14px',fontWeight:'600'}}>Multi-Record Request</div><div style={{fontSize:'12px',color:'#9CA3AF'}}>Two or more distinct record types</div></div>
-              </label>
+              {/* The old Multi-Record checkbox is gone: is_mrr is DERIVED from how many records are
+                  actually described (§4.1 — a fact, not a mode). Add records below instead. */}
             </div>
           </div>
 

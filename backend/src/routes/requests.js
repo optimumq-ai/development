@@ -152,7 +152,11 @@ router.get('/:id', requireAuth, async function(req, res) {
 
 router.post('/', requireAuth, async function(req, res) {
   const b = req.body;
-  if (!b.requestorName || !b.requestorEmail || !b.description) return res.status(400).json({ error: 'Name, email, and description required' });
+  // FORM BUILD (2026-08-01): staff entry accepts children[] — one description per described record —
+  // so a 10-item paper form logs in exactly the shape a portal submission takes (§5.1). A single
+  // description remains the n=1 case, unchanged.
+  const kids = Array.isArray(b.children) ? b.children.filter(function (c) { return c && String(c.description || '').trim(); }) : [];
+  if (!b.requestorName || !b.requestorEmail || (!b.description && !kids.length)) return res.status(400).json({ error: 'Name, email, and at least one record description required' });
   // ONE creation helper (ARCHITECTURE item 5) — numbering, defaults and the jurisdiction-derived deadline
   // live there once, instead of being re-implemented at every intake path.
   var made = await requestCreate.createRequest(b, {

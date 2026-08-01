@@ -57,6 +57,12 @@ export default function PublicPortalPage() {
             </p>
             <button onClick={startRequest} style={buttonStyle}>Create an Open Records Request</button>
           </div>
+          {/* The paper channel (Kevin, 2026-08-01): the printable twin of the wizard — page 1 requestor
+              info + one page per record, so a mailed or walked-in form logs in the same shape. */}
+          <div style={{ marginTop: '18px', fontSize: '13px', color: '#4B5563' }}>
+            Prefer paper? <a href="/portal/form" style={{ color: '#1F4E79', fontWeight: '600' }}>Download a printable request form</a>
+            {' '}— complete it and mail or deliver it to our office.
+          </div>
         </div>
       </div>
     </div>
