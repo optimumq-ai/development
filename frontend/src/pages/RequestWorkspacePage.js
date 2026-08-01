@@ -47,10 +47,23 @@ export default function RequestWorkspacePage() {
   const [clockBusy, setClockBusy] = useState(false);
   const [reasonByClock, setReasonByClock] = useState({});
   const [escalating, setEscalating] = useState(false);
+  const [identity, setIdentity] = useState(null);
+  const [identityBusy, setIdentityBusy] = useState(false);
   const user = useAuthStore(function(s){ return s.user; });
   const isDirector = !!(user && user.functionRoles && (user.functionRoles.indexOf('DIRECTOR') !== -1 || user.functionRoles.indexOf('SYSTEM_ADMIN') !== -1));
 
-  useEffect(function() { load(); loadStaff(); loadTeams(); loadRecords(); loadClocks(); }, [id]);
+  useEffect(function() { load(); loadStaff(); loadTeams(); loadRecords(); loadClocks(); loadIdentity(); }, [id]);
+
+  async function loadIdentity() {
+    try { var r = await api.get('/requests/' + id + '/identity'); setIdentity(r.data); } catch(e) {}
+  }
+  async function confirmIdentity() {
+    // The confirming act is the anchor — make the staffer say it out loud before it is recorded.
+    if (!window.confirm('Confirm you verified WHO THIS PERSON IS, in person. This is recorded under your name and anchors the request to their requestor profile.')) return;
+    setIdentityBusy(true);
+    try { await api.post('/requests/' + id + '/confirm-identity', {}); await loadIdentity(); await load(); } catch(e) {}
+    setIdentityBusy(false);
+  }
 
   async function loadStaff() {
     try { var r = await api.get('/staff'); setStaff(r.data.staff); } catch(e) {}
@@ -239,6 +252,23 @@ export default function RequestWorkspacePage() {
             {[['Name',request.requestor_name],['Email',request.requestor_email],['Phone',request.requestor_phone||'—'],['Type',request.requestor_type],['Delivery',request.delivery_method]].map(function(item){
               return <div key={item[0]}><div style={{fontSize:'11px',fontWeight:'600',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.05em'}}>{item[0]}</div><div style={{fontSize:'14px',color:'#111',textTransform:'capitalize',marginTop:'2px'}}>{item[1]}</div></div>;
             })}
+            {identity && (function(){
+              var basisLabel = { portal_account:'Portal account', verified_email:'Verified email (link clicked)', staff_confirmed:'Staff-confirmed identity' }[identity.anchor && identity.anchor.basis];
+              var anchored = !!basisLabel;
+              return (
+                <div style={{borderTop:'1px solid #F3F4F6',paddingTop:'12px'}}>
+                  <div style={{fontSize:'11px',fontWeight:'600',color:'#9CA3AF',textTransform:'uppercase',letterSpacing:'.05em',marginBottom:'6px'}}>Identity</div>
+                  <div style={{display:'flex',alignItems:'center',gap:'8px',flexWrap:'wrap'}}>
+                    <span style={{background:anchored?'#F0FDF4':'#F3F4F6',color:anchored?'#166534':'#6B7280',fontSize:'11px',fontWeight:'700',padding:'3px 10px',borderRadius:'20px'}}>
+                      {anchored?('Anchored — '+basisLabel):'Not anchored — anonymous for ledger purposes'}
+                    </span>
+                    {identity.identityConfirmed
+                      ? <span style={{fontSize:'12px',color:'#6B7280'}}>Confirmed in person by {identity.identityConfirmedBy||'staff'}</span>
+                      : <button onClick={confirmIdentity} disabled={identityBusy} style={{padding:'5px 12px',borderRadius:'8px',border:'1px solid #E5E7EB',background:'white',color:'#1F4E79',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>Confirm identity (in person)</button>}
+                  </div>
+                </div>
+              );
+            })()}
           </div>
           <div style={{background:'white',borderRadius:'12px',border:'1px solid #E5E7EB',padding:'24px',display:'flex',flexDirection:'column',gap:'16px'}}>
             <div style={{fontSize:'15px',fontWeight:'700',paddingBottom:'12px',borderBottom:'1px solid #F3F4F6'}}>Request Information</div>

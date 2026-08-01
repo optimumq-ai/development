@@ -12,7 +12,7 @@ const CHANNELS = [{ value: 'portal', label: 'Public Portal' },{ value: 'phone', 
 const REQUESTOR_TYPES = [{ value: 'individual', label: 'Individual' },{ value: 'journalist', label: 'Journalist / News Media' },{ value: 'nonprofit', label: 'Nonprofit Organization' },{ value: 'attorney', label: 'Attorney' },{ value: 'researcher', label: 'Researcher' },{ value: 'business', label: 'Business' }];
 const DELIVERY = [{ value: 'email', label: 'Email' },{ value: 'mail', label: 'Physical Mail' },{ value: 'pickup', label: 'In-Person Pickup' }];
 
-const EMPTY_FORM = { requestorName:'', requestorEmail:'', requestorPhone:'', requestorType:'individual', deliveryMethod:'email', description:'', classification:'standard', departmentId:'', feeWaiverRequested:false, submissionChannel:'phone', isMrr:false };
+const EMPTY_FORM = { requestorName:'', requestorEmail:'', requestorPhone:'', requestorType:'individual', deliveryMethod:'email', description:'', classification:'standard', departmentId:'', feeWaiverRequested:false, submissionChannel:'phone', isMrr:false, identityConfirmed:false };
 
 export default function NewRequestPage() {
   const nav = useNavigate();
@@ -245,6 +245,14 @@ export default function NewRequestPage() {
                 {DELIVERY.map(function(d){var active=form.deliveryMethod===d.value;return <button key={d.value} type="button" onClick={function(){setF('deliveryMethod',d.value);}} style={{padding:'8px 16px',borderRadius:'8px',border:'2px solid '+(active?'#1F4E79':'#E5E7EB'),background:active?'#EBF3FB':'white',color:active?'#1F4E79':'#6B7280',fontSize:'13px',fontWeight:active?'700':'500',cursor:'pointer'}}>{d.label}</button>;})}
               </div>
             </div>
+            {/* The walk-in identity anchor. An EXPLICIT act by the staffer logging the request — never
+                inferred from the channel ("arrived by paper" is not "somebody checked"). Recorded with
+                the staffer's name; it is what lets the requestor ledger anchor this request. */}
+            <label style={{display:'flex',alignItems:'flex-start',gap:'10px',fontSize:'13px',color:'#374151',cursor:'pointer',background:'#F9FAFB',border:'1px solid #E5E7EB',borderRadius:'8px',padding:'12px 14px'}}>
+              <input type="checkbox" checked={form.identityConfirmed===true} onChange={function(e){setF('identityConfirmed',e.target.checked);}} style={{marginTop:'2px'}}/>
+              <span><strong>I confirmed this requestor's identity in person.</strong><br/>
+                <span style={{color:'#6B7280',fontSize:'12px'}}>Check only if you verified who this person is (e.g., at the counter). Recorded under your name.</span></span>
+            </label>
           </div>
 
           <div style={section}>
