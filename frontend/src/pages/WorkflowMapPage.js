@@ -19,7 +19,7 @@ export default function WorkflowMapPage(){
   return (
     <div style={{ maxWidth:'1200px', margin:'0 auto', padding:'24px' }}>
       <h1 style={{ fontSize:'22px', fontWeight:'700', color:'#111', margin:'0 0 4px' }}>Process Map</h1>
-      <p style={{ fontSize:'14px', color:'#6B7280', margin:'0 0 16px', lineHeight:'1.6' }}>Every decision a request passes through, in order. Color shows who decides; the badge shows what is built today. Click any decision to see the criteria it uses and the one-time configuration that automates it. This is the map the interactive simulator will walk.</p>
+      <p style={{ fontSize:'14px', color:'#6B7280', margin:'0 0 16px', lineHeight:'1.6' }}>Every decision a request passes through, in order. Color shows who decides; the badge shows what is built today. Click any decision to see the criteria it uses and the one-time configuration that automates it.</p>
 
       <div style={{ display:'flex', gap:'14px', flexWrap:'wrap', alignItems:'center', marginBottom:'8px' }}>
         {Object.keys(D).map(function(k){ return <span key={k} style={{ display:'flex', alignItems:'center', gap:'6px', fontSize:'12px', color:'#374151' }}><span style={{ width:'12px', height:'12px', borderRadius:'3px', background:D[k].color, display:'inline-block' }}></span>{D[k].label}</span>; })}

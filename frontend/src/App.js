@@ -10,25 +10,12 @@ import RequestWorkspacePage from './pages/RequestWorkspacePage';
 import StaffManagementPage from './pages/StaffManagementPage';
 import DepartmentsPage from './pages/DepartmentsPage';
 import OrgPage from './pages/OrgPage';
-import SetupPage from './pages/SetupPage';
-import TaxonomyPage from './pages/TaxonomyPage';
-import WorkflowPage from './pages/WorkflowPage';
-import WorkflowMapPage from './pages/WorkflowMapPage';
-import WorkflowSimulatorPage from './pages/WorkflowSimulatorPage';
+import AdministrationPage from './pages/AdministrationPage';
+import ReportsHubPage from './pages/ReportsHubPage';
 import SchemaDiscoveryPage from './pages/SchemaDiscoveryPage';
 import MyTasksPage from './pages/MyTasksPage';
 import EstimateTaskPage from './pages/EstimateTaskPage';
 import TicklerPage from './pages/TicklerPage';
-import RuleUpdatesPage from './pages/RuleUpdatesPage';
-import JurisdictionProfilePage from './pages/JurisdictionProfilePage';
-import ConfigurationPage from './pages/ConfigurationPage';
-import SourcesPage from './pages/SourcesPage';
-import ARIAReportsPage from './pages/ARIAReportsPage';
-import AIReportingPage from './pages/AIReportingPage';
-import IntegrationsPage from './pages/IntegrationsPage';
-import AIDataFlowPage from './pages/AIDataFlowPage';
-import SecurityPage from './pages/SecurityPage';
-import RedactionRulesPage from './pages/RedactionRulesPage';
 import RedactionWorkspacePage from './pages/RedactionWorkspacePage';
 import RedactionTaskPage from './pages/RedactionTaskPage';
 import RecordSearchTaskPage from './pages/RecordSearchTaskPage';
@@ -45,7 +32,6 @@ import StructuredRedactionFieldsPage from './pages/StructuredRedactionFieldsPage
 import ReleasedRecordsPage from './pages/ReleasedRecordsPage';
 import PublicLibraryMapPage from './pages/PublicLibraryMapPage';
 import MassRedactionPage from './pages/MassRedactionPage';
-import FeeConfigPage from './pages/FeeConfigPage';
 import CashDrawerPage from './pages/CashDrawerPage';
 import ParentFinancialPage from './pages/ParentFinancialPage';
 import AvWorkbenchPage from './pages/AvWorkbenchPage';
@@ -122,23 +108,27 @@ export default function App() {
           <Route path="mrr/:taskId" element={<MrrMasterPage />} />
           <Route path="mrr/:taskId/item/:childId" element={<MrrChildPage />} />
           <Route path="tickler" element={<TicklerPage />} />
-          <Route path="rule-updates" element={<RuleUpdatesPage />} />
-          <Route path="jurisdiction-profile" element={<JurisdictionProfilePage />} />
-          <Route path="reports" element={<ARIAReportsPage />} />
-          <Route path="ai-reporting" element={<AIReportingPage />} />
-          <Route path="integrations" element={<IntegrationsPage />} />
-          <Route path="ai-data-flow" element={<AIDataFlowPage />} />
-          <Route path="portal-security" element={<SecurityPage />} />
+          <Route path="rule-updates" element={<Navigate to="/admin?tab=updates" replace />} />
+          <Route path="jurisdiction-profile" element={<Navigate to="/admin?tab=jurisdiction" replace />} />
+          {/* MENU REORGANIZATION 2026-08-01 (Kevin): Reports unified under one item with top tabs;
+              the 13 technical-setup screens live under /admin as tabs. Old URLs redirect in, so
+              bookmarks and help-assistant deep links survive. The Simulator is DELETED (page, route,
+              backend /simulate) — it was far from functional and its menu slot cost more than it paid. */}
+          <Route path="reports" element={<ReportsHubPage />} />
+          <Route path="ai-reporting" element={<Navigate to="/reports?tab=ai" replace />} />
+          <Route path="admin" element={<AdministrationPage />} />
+          <Route path="integrations" element={<Navigate to="/admin?tab=integrations" replace />} />
+          <Route path="ai-data-flow" element={<Navigate to="/admin?tab=ai-data" replace />} />
+          <Route path="portal-security" element={<Navigate to="/admin?tab=security" replace />} />
           <Route path="staff" element={<StaffManagementPage />} />
           <Route path="departments" element={<DepartmentsPage />} />
-          <Route path="setup" element={<SetupPage />} />
-          <Route path="taxonomy" element={<TaxonomyPage />} />
-          <Route path="workflow" element={<WorkflowPage />} />
-          <Route path="workflow-map" element={<WorkflowMapPage />} />
-          <Route path="workflow-sim" element={<WorkflowSimulatorPage />} />
+          <Route path="setup" element={<Navigate to="/admin?tab=setup" replace />} />
+          <Route path="taxonomy" element={<Navigate to="/admin?tab=taxonomy" replace />} />
+          <Route path="workflow" element={<Navigate to="/admin?tab=workflow" replace />} />
+          <Route path="workflow-map" element={<Navigate to="/admin?tab=map" replace />} />
           <Route path="discovery" element={<SchemaDiscoveryPage />} />
-          <Route path="sources" element={<SourcesPage />} />
-          <Route path="redaction-rules" element={<RedactionRulesPage />} />
+          <Route path="sources" element={<Navigate to="/admin?tab=sources" replace />} />
+          <Route path="redaction-rules" element={<Navigate to="/admin?tab=redaction" replace />} />
           {/* Redaction TEMPLATE authoring — samples on the SYS-TEMPLATE-SAMPLES pseudo-request, which has
               no task and never will. Citizen records are redacted through /redaction/:taskId instead. */}
           <Route path="redact/:fileId" element={<RedactionWorkspacePage />} />
@@ -146,9 +136,9 @@ export default function App() {
           <Route path="redact-fields/:fileId" element={<StructuredRedactionFieldsPage />} />
           <Route path="released" element={<ReleasedRecordsPage />} />
           <Route path="mass-redaction" element={<MassRedactionPage />} />
-          <Route path="fee-config" element={<FeeConfigPage />} />
+          <Route path="fee-config" element={<Navigate to="/admin?tab=fees" replace />} />
           <Route path="cash-drawer" element={<CashDrawerPage />} />
-          <Route path="config" element={<ConfigurationPage />} />
+          <Route path="config" element={<Navigate to="/admin?tab=config" replace />} />
           <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Route>
       </Routes>

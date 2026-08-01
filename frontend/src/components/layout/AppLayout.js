@@ -14,33 +14,23 @@ export default function AppLayout() {
   const [overdueCount, setOverdueCount] = useState(0);
   const user = store.user;
   const agencyName = store.agencyName;
-  const isAdmin = store.hasAnyRole('SYSTEM_ADMIN');
   const isElev = store.hasAnyRole('SYSTEM_ADMIN','DIRECTOR','SUPERVISOR','DEPT_MANAGER');
+  // MENU REORGANIZATION 2026-08-01 (Kevin): 24 links were overwhelming. Daily work stays visible;
+  // the two report surfaces became ONE item (top tabs inside), the 13 technical-setup screens live
+  // under Administration (tabbed; admin-only tabs hidden per role there), and the Simulator is
+  // deleted. Every old URL redirects, so nothing anyone bookmarked breaks. Final grouping awaits
+  // real third-party user feedback — this is the dramatic-improvement pass, not the last word.
   const items = [
     { to: '/dashboard', label: 'Dashboard', show: true },
     { to: '/requests', label: 'Request Queue', show: true },
-    { to: '/setup', label: 'Setup', show: isElev },
-    { to: '/reports', label: 'Reports (ARIA)', show: isElev },
-    { to: '/ai-reporting', label: 'AI Reporting', show: isElev },
+    { to: '/reports', label: 'Reports', show: isElev },
     { to: '/org', label: 'Organization', show: isElev },
-    { to: '/taxonomy', label: 'Taxonomy', show: isElev },
-    { to: '/workflow', label: 'Workflow', show: isElev },
-    { to: '/workflow-map', label: 'Process Map', show: isElev },
-    { to: '/workflow-sim', label: 'Simulator', show: isElev },
-    { to: '/sources', label: 'Sources', show: isElev },
-    { to: '/redaction-rules', label: 'Redaction Rules', show: isElev },
     { to: '/mass-redaction', label: 'Mass Redaction', show: isElev },
     { to: '/released', label: 'Released Records', show: isElev },
     { to: '/library-map', label: 'Records Map', show: isElev },
-    { to: '/fee-config', label: 'Fee Configuration', show: isElev },
     { to: '/cash-drawer', label: 'Cash Drawer', show: isElev },
     { to: '/tickler', label: 'Tickler', show: isElev },
-    { to: '/rule-updates', label: 'Update Configuration', show: isElev },
-    { to: '/jurisdiction-profile', label: 'Jurisdiction Profile', show: isElev },
-    { to: '/integrations', label: 'Integrations & API Keys', show: isAdmin },
-    { to: '/ai-data-flow', label: 'AI Data Flow & Compliance', show: isAdmin },
-    { to: '/portal-security', label: 'Portal Agent Security', show: isAdmin },
-    { to: '/config', label: 'Configuration', show: isAdmin },
+    { to: '/admin', label: 'Administration', show: isElev },
   ].filter(x => x.show);
 
   const uid = user && user.id;

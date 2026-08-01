@@ -3,13 +3,12 @@ import { useLocation } from 'react-router-dom';
 import api from '../lib/api';
 
 var PAGE_LABELS = {
-  '/dashboard': 'Dashboard', '/requests': 'Request Queue', '/my-tasks': 'My Tasks', '/setup': 'Setup',
-  '/reports': 'Reports (ARIA)', '/staff': 'Staff Management', '/departments': 'City Departments & Teams',
-  '/taxonomy': 'Taxonomy', '/workflow-map': 'Process Map', '/workflow-sim': 'Simulator', '/workflow': 'Workflow',
-  '/sources': 'Sources', '/redaction-rules': 'Redaction Rules', '/mass-redaction': 'Mass Redaction',
-  '/released': 'Released Records', '/library-map': 'Records Map', '/fee-config': 'Fee Configuration',
-  '/cash-drawer': 'Cash Drawer', '/tickler': 'Tickler', '/rule-updates': 'Update Configuration',
-  '/jurisdiction-profile': 'Jurisdiction Profile', '/config': 'Configuration'
+  '/dashboard': 'Dashboard', '/requests': 'Request Queue', '/my-tasks': 'My Tasks',
+  '/reports': 'Reports', '/staff': 'Staff Management', '/departments': 'City Departments & Teams',
+  '/mass-redaction': 'Mass Redaction',
+  '/released': 'Released Records', '/library-map': 'Records Map',
+  '/cash-drawer': 'Cash Drawer', '/tickler': 'Tickler',
+  '/admin': 'Administration' // the 13 technical-setup screens, tabbed (menu reorganization 2026-08-01)
 };
 var EXAMPLES = [
   'How do I bulk-redact a set of records?',
