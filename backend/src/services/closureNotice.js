@@ -129,12 +129,35 @@ var SUBJECTS = {
   abandoned: 'Request closed —'
 };
 
+// THE CITIZEN'S FACTS COME THROUGH THE PARENT (BW8; same class as the acknowledgment fix `ac1c44b`).
+// The release pipeline closes the WORK row, whose request_number carries a component suffix
+// ("2026-000003-1") the citizen has never seen; requestor identity is a PARENT fact too. Precedence
+// matches requestScope.parentFact: the parent's value wins where a parent exists, the row answers for
+// itself where it doesn't. Never throws — a letter with the row's own facts beats no letter.
+async function citizenFacts(request) {
+  var out = { request_number: request && request.request_number, requestor_name: request && request.requestor_name,
+              requestor_email: request && request.requestor_email };
+  try {
+    if (request && request.master_request_id) {
+      var p = await db.get('SELECT request_number, requestor_name, requestor_email FROM requests WHERE id = ?',
+        [request.master_request_id]);
+      if (p) {
+        out.request_number = p.request_number || out.request_number;
+        out.requestor_name = p.requestor_name || out.requestor_name;
+        out.requestor_email = p.requestor_email || out.requestor_email;
+      }
+    }
+  } catch (e) { console.error('[closureNotice citizenFacts]', e && e.message); }
+  return out;
+}
+
 async function build(ending, request, ctx) {
   var agency = await agencyName();
-  var num = (request && request.request_number) || (request && request.id) || '';
+  var who = await citizenFacts(request);
+  var num = who.request_number || (request && request.id) || '';
   var subject = (SUBJECTS[ending] || 'Request closed —') + ' ' + num;
   var body = bodyFor(ending, request, ctx);
-  var text = 'Dear ' + ((request && request.requestor_name) || 'Requester') + ',\n\n' +
+  var text = 'Dear ' + (who.requestor_name || 'Requester') + ',\n\n' +
     body.join('\n\n') + '\n\n' +
     'If you have questions about this response, reply to this message.\n\n' + agency + '\n' +
     'Reference: ' + num;
@@ -157,7 +180,8 @@ async function send(requestId, ending, ctx, actor) {
     if (!request) { out.reason = 'request not found'; return out; }
     var notice = await build(ending, request, ctx);
     out.subject = notice.subject;
-    var to = (request.requestor_email || '').trim();
+    // The address follows the citizen too — a child row's copy must not outrank the parent's.
+    var to = ((await citizenFacts(request)).requestor_email || '').trim();
     if (!to) {
       out.outcome = 'not_applicable';
       out.reason = 'No address is on file for this requester, so a mailed/emailed closure notice does not apply. ' +
@@ -189,4 +213,4 @@ async function send(requestId, ending, ctx, actor) {
   return out;
 }
 
-module.exports = { build: build, send: send, SUBJECTS: SUBJECTS };
+module.exports = { build: build, send: send, citizenFacts: citizenFacts, SUBJECTS: SUBJECTS };
