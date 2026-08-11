@@ -260,7 +260,7 @@ export default function EstimateTaskPage() {
                   Zeroes the estimate, skips the notice cycle and advances the request. Your judgment, your name
                   on it — this is not the configured de-minimis rule, which zeroes by threshold and still notifies.
                   {dm.reason === 'within_threshold' ? ' ' + dm.text : ''}
-                  {dm.reason === 'unconfirmed' ? ' This city has set no de-minimis threshold (⚠ unconfirmed city knob).' : ''}
+                  {dm.reason === 'unconfirmed' ? ' This city has set no de-minimis threshold (⚠ unconfirmed local policy setting).' : ''}
                 </div>
               </>
             ) : dm ? (

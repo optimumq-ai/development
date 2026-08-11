@@ -60,7 +60,7 @@ function report(r) {
   }
   if (rep.primaryClock) console.log('  · primary (statutory) clock: ' + rep.primaryClock);
   if ((rep.cityKnobs || []).length) {
-    console.log('  · ' + rep.cityKnobs.length + ' city-config knob(s) imported UNCONFIRMED — every one must be confirmed');
+    console.log('  · ' + rep.cityKnobs.length + ' local policy setting(s) imported UNCONFIRMED — every one must be confirmed');
     console.log('    before its section can be attested: ' + rep.cityKnobs.map(function (c) { return c.node; }).join(' '));
   }
   if ((rep.emptyPoliced || []).length) {

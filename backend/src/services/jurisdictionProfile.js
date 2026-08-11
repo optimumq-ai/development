@@ -46,7 +46,7 @@ var TEMPLATE_SECTIONS = [
   { key: 'branches',    label: 'State branch profile',             editor: '/config', domain: 'branches' },
   { key: 'disposition', label: 'Delivery format & release hold',   editor: '/config', domain: 'disposition' },
   { key: 'ledger',      label: 'Requestor ledger',                 editor: '/config', domain: 'ledger' },
-  { key: 'template_import', label: 'State template — city-config knobs', editor: '/config', domain: 'template_import' }
+  { key: 'template_import', label: 'State template — local policy settings', editor: '/config', domain: 'template_import' }
 ];
 var TEMPLATE_BY_KEY = {};
 TEMPLATE_SECTIONS.forEach(function (s) { TEMPLATE_BY_KEY[s.key] = s; });

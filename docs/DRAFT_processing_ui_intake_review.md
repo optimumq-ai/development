@@ -112,7 +112,7 @@ intake reviewer is the densest (hosts the inline waiver/commercial decision when
   statute-triggered` (money math, with citation and an explicit "nothing for you to decide") ·
   `recorded only` (ghost/dashed). External decisions name the decider (OH vexatious list = the court's).
 - **(e) Anonymous** ledger panel states history *does not apply*; no implication of a hidden balance.
-- **(d)** is deliberately **not** on this role's screens — the confirm-each-knob go-live checklist is an
+- **(d)** is deliberately **not** on this role's screens — the confirm-each-policy-setting go-live checklist is an
   admin surface, proposed as the next draft.
 
 ## 4. What this draft forces (build implications, if the shape survives)
@@ -127,7 +127,7 @@ intake reviewer is the densest (hosts the inline waiver/commercial decision when
    `intake_review`; the separate `routing_review` task type retires (catalog + `ROUTABLE_TASK_TYPES` +
    its auto-close-on-route behavior moves onto this task). One stop, not two overlapping ones.
 3. **The setup option** lives with the other city workflow config (a `jurisdiction_rules` `intake`
-   domain knob or sibling): `intake_review_mode: 'when_needed' | 'always'`, default `when_needed`.
+   domain policy setting or sibling): `intake_review_mode: 'when_needed' | 'always'`, default `when_needed`.
 4. **Auto-complete path** (decision 4): portal-born + requestor's selection carries the
    fulfills/`complete` intent → in when-needed mode it's simply a no-trigger case; in always mode the
    task is spawned and completed immediately (history row, no assignee). Note the adjacency to the

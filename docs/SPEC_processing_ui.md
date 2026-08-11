@@ -29,7 +29,7 @@ keep the layouts). Where this spec is silent, the draft doc governs.
   (c) advisory ≠ automatic — DecidedByBadge vocabulary on every decision surface: `a person`
   (named) · `by statute` · `system · statute-triggered` · `recorded only`; external deciders
   named with citation.
-  (d) unconfirmed ⚠ knobs block attest; the go-live checklist is their surface.
+  (d) unconfirmed ⚠ policy settings block attest; the go-live checklist is their surface.
   (e) anonymous = "does not apply", never "hidden".
 
 ## 2. Global layout rules (Kevin 7/28–29, all DECIDED, applied to mockups)
@@ -57,7 +57,7 @@ keep the layouts). Where this spec is silent, the draft doc governs.
 | 3 | Denial compose | empowered roles | `DRAFT_processing_ui_denial_compose.md` (no changes — Kevin) |
 | 4 | Legal Review / AG band | Sr. Legal | `DRAFT_processing_ui_legal_review.md` (no changes — Kevin) |
 | 5 | MRR Management (4-level: group → overview → master → child) | ORO Associate | `DRAFT_processing_ui_mrr_hub.md` (5b + 0b) |
-| 6 | Go-live checklist (readiness index; knob cards fold into Draft 10) | Director | `DRAFT_processing_ui_golive_checklist.md` |
+| 6 | Go-live checklist (readiness index; policy-setting cards fold into Draft 10) | Director | `DRAFT_processing_ui_golive_checklist.md` |
 | 7 | Parent financial view | RM read / ORO Finance act | `DRAFT_processing_ui_parent_financial.md` (MRR settlement method §0) |
 | 8 | Disposition record + distributed closes | (see §5) | `DRAFT_processing_ui_disposition_close.md` (rev 2 + §3 decisions) |
 | 9 | Release Review + power mode | ORO Supervisor (suggested) | `DRAFT_processing_ui_release_review.md` — PROVISIONAL |
@@ -118,7 +118,7 @@ unchanged; only *where* moved:
   or **auto-bypassed with recorded basis** (by-statute / system-condition / recorded badges;
   never a silent skip) · (ii) balance ≤ 0 · (iii) pre-send gate off or its review passed ·
   (iv) non-MRR. Payment due ⇒ pending until balance clears, then ships untouched.
-- **Pre-send review gate**: default OFF, shipped as an unconfirmed ⚠ go-live knob a named person
+- **Pre-send review gate**: default OFF, shipped as an unconfirmed ⚠ go-live policy setting a named person
   must confirm; when ON, spawns `release_review` (§ Draft 9). Statutory pre-release steps already
   ride the flow as tasks — the gate is city policy.
 - **Process-withdrawal spawner**: a communication logged as a withdrawal spawns a small task to
@@ -147,11 +147,11 @@ unchanged; only *where* moved:
 
 ## 6. Rule-content editors (Draft 10 — PROVISIONAL pending Kevin's markup)
 
-- Section screen per `jurisdiction_rules` domain: Content · City knobs (Draft 6's confirm cards
+- Section screen per `jurisdiction_rules` domain: Content · Local Policy Settings (Draft 6's confirm cards
   fold in — one surface) · Provenance (incl. research-text drill-down) · Pending proposals.
 - **THE RULE:** statute-derived facts (navy edge, cited) edit **only via proposal** (citation +
   note required) through the existing review/apply flow; applying recomputes `content_hash` →
-  attested sections drift → re-attest. City-policy knobs (dashed amber) set-and-confirm freely.
+  attested sections drift → re-attest. Local policy settings (dashed amber) set-and-confirm freely.
 - Ownership = permission groups (drafted: Legal Rules — exemption/redaction/deadline/clock_matrix;
   Fee Configuration — fee/payment/fee_waiver/approval_modules/ledger; Workflow & Taxonomy —
   intake/branches/disposition/clarification/eligibility; template_import read-only).
@@ -163,7 +163,7 @@ unchanged; only *where* moved:
 ClockChip (4 kinds + exposures) · DecidedByBadge (4 values) · ParentStrip · RecordItemExpand +
 descrow/defectbox (§2.1–2) · EditInfoFrame · TriggerBadge ("why it's here") · PortalResultsBar ·
 GateChecklist + ConfirmPopup (the close/gate popup pattern) · PowerQueue shell · statuschips +
-fact/knob row treatments (Draft 10) · filerow/clip (attachments).
+fact/policy setting row treatments (Draft 10) · filerow/clip (attachments).
 
 ## 8. Catalog & config deltas (consolidated)
 
@@ -173,11 +173,11 @@ ORO) · `mrr_redaction` (hand-assigned, joins `mrr_search`/`mrr_estimate`) · `r
 spawned by `close_approval` routing). **Retired:** `routing_review` (becomes trigger i).
 MASTER task-type list updates at ratification.
 
-**Config knobs — new:** `intake_review_mode` (`when_needed` default) · `close_approval`
+**Config policy settings — new:** `intake_review_mode` (`when_needed` default) · `close_approval`
 (`either` default) · pre-send review gate (`off`, mandatory go-live confirmation) · the two MRR
 matrix rows stay blank-by-design (`delivery_mode`, `notice_packaging`; WA constraint).
 
-**Endpoints/plumbing the drafts force** (each named in its draft's build-implications): knob
+**Endpoints/plumbing the drafts force** (each named in its draft's build-implications): policy setting
 confirm setter (Draft 6) · structured eligibility findings read (Draft 1) · intake-provenance
 read (Draft 2) · estimate-task pause/resume (Draft 2) · close popups + approval flow (Draft 8) ·
 auto-release condition watcher + auto-bypass writer (Draft 8) · release-event preview (Draft 9) ·
@@ -191,7 +191,7 @@ coverage-gap manager email (role model §6, unbuilt).
 1. **BW1 — Component library + global layout retrofit** (§2 + §7; includes the two built task
    screens adopting descrow/Actions).
 2. **BW2 — Catalog & routing**: new task types, `routing_review` retirement, `close_approval` +
-   `intake_review_mode` knobs, two-eyes rule, coverage-gap email.
+   `intake_review_mode` policy settings, two-eyes rule, coverage-gap email.
 3. **BW3 — Intake Review** (screen + triggers + auto-complete + EditInfoFrame + structured
    eligibility read).
 4. **BW4 — Estimate extensions** (defect markers/pause, provenance, waiver gate surfacing,
@@ -225,4 +225,16 @@ source for templates.
 
 *Decision log: 2026-07-28 Kevin docx markup (steps 1–4 applied `8ce9965`→`06b329e`) ·
 2026-07-29 item-by-item session (five rev-2 decisions, `7eccebe`) · 2026-07-29 Draft 6 scope
-(editors drafted now, `4beb375`) · this spec v1.*
+(editors drafted now, `4beb375`) · this spec v1 · 2026-08-11 terminology (below).*
+
+**Terminology (Kevin, 2026-08-11): "Local Policy Settings" replaces "city knobs".** The old
+term read as primitive next to the rest of the application's vocabulary. Applies to ALL
+user-facing copy and to this doc set (spec, drafts, mockups): zone headers say **Local Policy
+Settings**; a single item is a **local policy setting** (or "policy setting" where the local
+scope is already established); the go-live cards are **policy-setting cards**. UNCHANGED, by
+design: internal code identifiers (`AR.KNOBS`, `writeKnob`, `pendingCityKnobs`), the API route
+`/api/dispositions/knobs`, machine reason codes (`knob_unconfirmed`), the template schema key
+`knobs`/`city_config`, and the historical term inside `docs/rules_research/` and pre-8/11
+process docs — renaming wire formats buys nothing and breaks importers/clients. The concept is
+unchanged: what the statute left to the city, dashed-amber grammar, suggested default,
+unconfirmed blocks attestation (rule d).

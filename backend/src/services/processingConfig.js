@@ -1,5 +1,6 @@
 'use strict';
-// PHASE 7 / BW2 — THE PROCESSING-UI CITY KNOBS (docs/SPEC_processing_ui.md §8, "Config knobs — new").
+// PHASE 7 / BW2 — THE PROCESSING-UI LOCAL POLICY SETTINGS (docs/SPEC_processing_ui.md §8,
+// "Config policy settings — new"; the term was "city knobs" until Kevin's 2026-08-11 rename).
 //
 // Two settings, one `jurisdiction_rules` domain (`processing`), following the WS1/WS2/WS4 convention
 // exactly: defaults are supplied at READ time by the normalizers, never written into the stored config, so

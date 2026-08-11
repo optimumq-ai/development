@@ -66,7 +66,7 @@ rule).
 ## 4. Build implications (if the shape survives)
 
 1. **A per-state denial config** (required elements, remedy language, ground availability) — the one
-   genuinely new domain this screen needs; ships fail-closed and unconfirmed knobs behave per rule (d).
+   genuinely new domain this screen needs; ships fail-closed and unconfirmed policy settings behave per rule (d).
 2. **Reason library extensions**: per-state scoping + citation + versioned template text on
    `decision_reasons` (substrate exists, fields don't).
 3. **Previous-determination lookup** (TX): store + search past AG rulings/determinations by

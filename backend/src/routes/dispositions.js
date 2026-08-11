@@ -32,11 +32,11 @@ router.put('/knobs/:knob', requireAuth, async function (req, res) {
   var roles = req.user.roles || [];
   if (['SYSTEM_ADMIN', 'DIRECTOR'].every(function (r) { return roles.indexOf(r) === -1; })) {
     return res.status(403).json({
-      error: 'Confirming a release knob is a Director’s act — the confirming act IS the decision to automate.',
+      error: 'Confirming a release policy setting is a Director’s act — the confirming act IS the decision to automate.',
       code: 'DIRECTOR_REQUIRED' });
   }
   try {
-    if (!AR.KNOBS[req.params.knob]) return res.status(404).json({ error: 'No such release-pipeline knob.' });
+    if (!AR.KNOBS[req.params.knob]) return res.status(404).json({ error: 'No such release-pipeline policy setting.' });
     var out = await AR.writeKnob(req.params.knob, req.body || {}, null, req.user.name || 'Director');
     res.json(out);
   } catch (e) { res.status(500).json({ error: e.message }); }

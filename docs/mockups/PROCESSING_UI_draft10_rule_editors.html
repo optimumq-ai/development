@@ -101,8 +101,8 @@
   <div class="draftbar">
     <h1>Processing UI — Draft 10 · Rule-Content Editors (for your markup — nothing is built)</h1>
     <p>Your Draft-6 question answered by building it: each readiness-index row opens a <b>section screen</b> — content ·
-    city knobs (Draft 6's confirm cards, embedded) · provenance · proposals. The organizing rule: <b>statute-derived facts
-    (navy edge, cited) edit only through a proposal with citation + note; city-policy knobs (dashed amber) confirm freely</b>.
+    local policy settings (Draft 6's confirm cards, embedded) · provenance · proposals. The organizing rule: <b>statute-derived facts
+    (navy edge, cited) edit only through a proposal with citation + note; local policy settings (dashed amber) confirm freely</b>.
     A reader always knows which kind they're looking at — that distinction is what keeps a city from accidentally “editing
     the law.” Frame A: the pattern (Fee section). Frame B: Exemptions (Legal Rules ownership + the proposal composer).
     Frame C: Deadlines &amp; Clocks (the compliance-heavy one). Single city (Austin, TX).</p>
@@ -116,9 +116,9 @@
         <b style="color:var(--navy);">Fee</b>
         <span class="statuschip st-imported">Imported — 2 unconfirmed</span>
         <span class="kv">Owner: <b>Fee Configuration</b> (your types carry it — you may edit) <span class="callout">2</span></span>
-        <span class="kv" style="margin-left:auto;"><a href="#">← readiness index</a> · Attest <button class="btn sm" disabled>Attest</button> <span class="kv">blocked: 2 knobs unconfirmed</span></span>
+        <span class="kv" style="margin-left:auto;"><a href="#">← readiness index</a> · Attest <button class="btn sm" disabled>Attest</button> <span class="kv">blocked: 2 policy settings unconfirmed</span></span>
       </div>
-      <div class="zone"><a class="on" href="#">Content</a><a href="#">City knobs (2⚠)</a><a href="#">Provenance</a><a href="#">Proposals (1)</a></div>
+      <div class="zone"><a class="on" href="#">Content</a><a href="#">Local Policy Settings (2⚠)</a><a href="#">Provenance</a><a href="#">Proposals (1)</a></div>
 
       <div class="fact">
         <div class="ft">Personnel time is chargeable at the AG-schedule rate <span class="cite">Tex. Gov't Code §552.261 · AG schedule</span> <span class="callout">3</span></div>
@@ -130,7 +130,7 @@
       </div>
       <div class="knobrow">
         <div class="ft">Standard copy rate: <b>$0.10 / page</b> — suggested default $0.10 (AG schedule ceiling) <span class="callout">4</span></div>
-        <div class="fd">City-policy knob ⚠ unconfirmed — the statute permits up to the schedule; the city chooses its rate. Confirm records name + date (Draft 6 flow). <button class="btn sm sec">Set &amp; confirm…</button></div>
+        <div class="fd">Local policy setting ⚠ unconfirmed — the statute permits up to the schedule; the city chooses its rate. Confirm records name + date (Draft 6 flow). <button class="btn sm sec">Set &amp; confirm…</button></div>
       </div>
       <div class="kv" style="margin-top:8px;">Navy solid edge = statute-derived, cited, proposal-to-edit · dashed amber = the city's to set, confirm-to-go-live. Same grammar on every section.</div>
     </div>
@@ -145,7 +145,7 @@
         <span class="statuschip st-attested">Attested ✓ · 4/22</span>
         <span class="kv">Owner: <b>Legal Rules</b> — Senior Legal owns; Director may propose; SysAdmin technical-only</span>
       </div>
-      <div class="zone"><a class="on" href="#">Content</a><a href="#">City knobs (0)</a><a href="#">Provenance</a><a href="#">Proposals</a></div>
+      <div class="zone"><a class="on" href="#">Content</a><a href="#">Local Policy Settings (0)</a><a href="#">Provenance</a><a href="#">Proposals</a></div>
 
       <div class="fact">
         <div class="ft">Personnel-file information <span class="cite">§552.102</span> &nbsp;<span class="wired">wired</span></div>
@@ -193,21 +193,21 @@
         <span class="statuschip st-drift">Proposal pending</span>
         <span class="kv">Owner: <b>Legal Rules</b> (drafted — open question) · the WS3 reconciled-clock proposal is still pending on live</span>
       </div>
-      <div class="zone"><a class="on" href="#">Content</a><a href="#">City knobs (1⚠)</a><a href="#">Provenance</a><a href="#">Proposals (1)</a></div>
+      <div class="zone"><a class="on" href="#">Content</a><a href="#">Local Policy Settings (1⚠)</a><a href="#">Provenance</a><a href="#">Proposals (1)</a></div>
 
       <table class="t">
-        <tr><th>Timer</th><th>Kind <span class="callout">9</span></th><th>Duration</th><th>Citation</th><th></th></tr>
-        <tr><td><b>respond</b> (primary)</td><td><span class="kindchip k-legal">response — statutory</span></td><td>10 business days</td><td><span class="cite">§552.221</span></td><td><button class="btn sm quiet">Propose…</button></td></tr>
-        <tr><td>ag_referral</td><td><span class="kindchip k-legal">agency_action</span></td><td>10 bd</td><td><span class="cite">§552.301(b)</span></td><td><button class="btn sm quiet">Propose…</button></td></tr>
-        <tr><td>clarification_reply</td><td><span class="kindchip k-window">requestor_window</span></td><td>61 days</td><td><span class="cite">§552.222(f)</span></td><td><button class="btn sm quiet">Propose…</button></td></tr>
-        <tr><td>unclaimed_withdrawal</td><td><span class="kindchip k-window">requestor_window</span></td><td>60 days</td><td><span class="cite">§552.221(e)</span></td><td><button class="btn sm quiet">Propose…</button></td></tr>
-        <tr><td>service_target</td><td><span class="kindchip k-target">operational_target — NOT a legal deadline</span></td><td><b>7 days</b> ⚠ unconfirmed</td><td class="kv">city policy</td><td><button class="btn sm sec">Set &amp; confirm…</button></td></tr>
+        <tr><th>Timer</th><th>Use case <span class="callout">9</span></th><th>Duration</th><th>Citation</th><th></th></tr>
+        <tr><td><b>Response</b> (primary)</td><td><span class="kindchip k-legal">Response — statutory</span><div class="kv" style="margin-top:3px; max-width:340px;">The legal deadline for the city’s first response to the request.</div></td><td>10 business days</td><td><span class="cite">§552.221</span></td><td><button class="btn sm quiet">Propose…</button></td></tr>
+        <tr><td>AG referral</td><td><span class="kindchip k-legal">Agency action</span><div class="kv" style="margin-top:3px; max-width:340px;">The deadline to ask the state Attorney General for permission to withhold records.</div></td><td>10 bd</td><td><span class="cite">§552.301(b)</span></td><td><button class="btn sm quiet">Propose…</button></td></tr>
+        <tr><td>Clarification reply</td><td><span class="kindchip k-window">Requestor window</span><div class="kv" style="margin-top:3px; max-width:340px;">How long the requestor has to answer the city’s request to clarify what they want. No answer in time = the request is treated as withdrawn.</div></td><td>61 days</td><td><span class="cite">§552.222(f)</span></td><td><button class="btn sm quiet">Propose…</button></td></tr>
+        <tr><td>Unclaimed withdrawal</td><td><span class="kindchip k-window">Requestor window</span><div class="kv" style="margin-top:3px; max-width:340px;">How long the requestor has to claim their finished records. Unclaimed past this window = the request is treated as withdrawn.</div></td><td>60 days</td><td><span class="cite">§552.221(e)</span></td><td><button class="btn sm quiet">Propose…</button></td></tr>
+        <tr><td>Service target</td><td><span class="kindchip k-target">Operational target — NOT a legal deadline</span><div class="kv" style="margin-top:3px; max-width:340px;">The city’s own goal for how fast to finish — a promise to itself, not a legal deadline.</div></td><td><b>7 days</b> ⚠ unconfirmed</td><td class="kv">city policy</td><td><button class="btn sm sec">Set &amp; confirm…</button></td></tr>
       </table>
 
       <div class="warnline" style="margin-top:10px;"><b>The editor refuses what the engine would refuse</b> <span class="callout">10</span> —
       attempting a 46-business-day <i>response</i> duration: “Outside the reconciler's band (1–45 bd). This would put a 46-day
       statutory deadline on every request. Check the citation — response clocks beyond 45 bd exist in no researched state.”
-      Every timer must carry a <b>kind</b>; a denial deadline can never be primary; policed domains never accept a guessed value.</div>
+      Every timer must carry a <b>use case</b>; a denial deadline can never be primary; policed domains never accept a guessed value.</div>
       <div class="kv" style="margin-top:8px;"><b>Columbus on this screen:</b> timers exist, none statutory — every row is a
       dashed city target or a window; the screen cannot be used to invent a deadline Ohio doesn't have.</div>
     </div>
@@ -218,7 +218,7 @@
     <h2>Design annotations</h2>
     <ol>
       <li><b><span class="decided">KEVIN 7/29</span> Each readiness-index row opens a section screen</b> — content · city
-      knobs (Draft 6's confirm cards embedded as a zone, not a separate screen) · provenance · pending proposals. One surface
+      policy settings (Draft 6's confirm cards embedded as a zone, not a separate screen) · provenance · pending proposals. One surface
       per domain; the 15 renderers share the shell.</li>
       <li><b>Ownership is the permission groups, displayed and enforced:</b> Legal Rules (exemption · redaction · deadline ·
       clock_matrix — Senior Legal owns, Director may propose, SysAdmin technical-only) · Fee Configuration (fee · payment ·
@@ -226,9 +226,9 @@
       eligibility) · template_import read-only. Mapping is drafted — open question 1.</li>
       <li><b><span class="rule">THE RULE</span> Two kinds of content, two edit paths, one visual grammar.</b> Statute-derived
       facts: navy solid edge + citation; editing requires citation + note and <b>always creates a proposal</b>. City-policy
-      knobs: dashed amber + suggested-default chip; the owner sets and confirms freely (Draft 6 flow). A reader never wonders
+      policy settings: dashed amber + suggested-default chip; the owner sets and confirms freely (Draft 6 flow). A reader never wonders
       which kind they face — that confusion is how a city “edits the law.”</li>
-      <li><b>Knobs keep the Draft-6 contract:</b> unconfirmed ⚠ blocks attest; confirming the default is still a decision,
+      <li><b>Policy settings keep the Draft-6 contract:</b> unconfirmed ⚠ blocks attest; confirming the default is still a decision,
       recorded as one; the suggestion chip stays visible after confirming.</li>
       <li><b>Wiring is shown, honestly:</b> <span class="wired">wired</span> = redaction rules / engine consume this content;
       <i>content-only</i> = a correct, queryable fact nothing consumes yet — the branch-profile vocabulary applied to content,
@@ -239,13 +239,13 @@
       the same act; a Director-may edit on a Legal domain routes to Senior Legal (open question 2). Applying recomputes the
       content hash → an attested section <b>drifts</b> and demands re-attestation. The drift machinery Draft 6 renders now has
       its cause.</li>
-      <li><b>Deadlines &amp; Clocks is the section where the editor earns its keep:</b> the named-timer table renders kinds in
+      <li><b>Deadlines &amp; Clocks is the section where the editor earns its keep:</b> the named-timer table renders use cases in
       the ClockChip grammar so an operational target can never masquerade as a statutory deadline — even here, in admin-land,
       where the mistake would be born.</li>
-      <li><b><span class="rule">RULE A</span> Kind is not editable prose</b> — it is the compliance taxonomy (response ·
-      agency_action · requestor_window · operational_target). Changing a kind is a statute-assertion edit (proposal + citation);
-      the target row is the city's knob.</li>
-      <li><b>The editor refuses what the engine would refuse</b> — the WS1–WS3 police rules (response band 1–45 bd, kind
+      <li><b><span class="rule">RULE A</span> Use case is not editable prose</b> — it is the compliance taxonomy (Response ·
+      Agency action · Requestor window · Operational target). Changing a use case is a statute-assertion edit (proposal + citation);
+      the target row is the city's policy setting.</li>
+      <li><b>The editor refuses what the engine would refuse</b> — the WS1–WS3 police rules (response band 1–45 bd, use case
       required, no primary denial deadline, policed domains never accept guessed enums, unroutable roles refused) run at
       compose time, with worded refusals, not just red borders.</li>
       <li><b>Empty is honest:</b> a never-imported domain says “No content — import a state template or add the first rule,”

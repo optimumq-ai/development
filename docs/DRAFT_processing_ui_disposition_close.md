@@ -65,7 +65,7 @@ trigger (v)); reopen itself is silent — the subsequent outcome speaks (decided
 | `close_approval` config | per department: `direct \| either \| approval_required` (per evidence-gated ending); **default `either`** (decided 7/29); pending-approval is a visible child state; lightweight approval task to the supervisor; on approval the close is the approver's recorded act |
 | Deny-close-notify in Legal Review / compose | Draft 3/4 gain the finalize act (they already own content); disposition written on send |
 | **Auto-release pipeline** | condition watcher on: flow-task terminality (with auto-bypass writer), funds balance (Draft 7 gate), pre-send review gate (config, default none), non-MRR guard. Auto-bypass completes the skipped task as a record with basis + badge (statute / system-condition / recorded) — never a silent omission |
-| Pre-send review gate | default off, shipped as an **unconfirmed ⚠ go-live-checklist knob** a named person must confirm (rule-d machinery; decided 7/29). When ON: spawns the new **`release_review` task type** instead of shipping — routed per config (suggested default: ORO Supervisor; never the person who completed the item's last flow task); approve fires the release event with the approver recorded. Reviewed at speed via **power mode** — see Draft 9 |
+| Pre-send review gate | default off, shipped as an **unconfirmed ⚠ go-live-checklist policy setting** a named person must confirm (rule-d machinery; decided 7/29). When ON: spawns the new **`release_review` task type** instead of shipping — routed per config (suggested default: ORO Supervisor; never the person who completed the item's last flow task); approve fires the release event with the approver recorded. Reviewed at speed via **power mode** — see Draft 9 |
 | Disposition record screen | read from `disposition` + history + event/evidence links; route from the request header; no task type |
 | Manual-endings popups | withdrawal-attach + close; §552.232 certification form (TX-gated). **Rights (decided 7/29):** Withdrawn — ORO Associate+ *and* the item's current task-holder (communication attached, same popup); Previously furnished — ORO Associate+ only (cross-request certification is an office-level act) |
 | `Process withdrawal` spawner | decided 7/29: when a communication is logged as a withdrawal, spawn a small task to the RM / ORO pool — no standing task type, exists only when a withdrawal actually arrives; closes the forgotten-withdrawal gap (clock otherwise keeps running on a request nobody wants) |
@@ -100,7 +100,7 @@ last-record-ready; derived `parent_state = Complete` ends the MRR Management tas
    waiver, so rule (c) is not breached). Never a payment hold (§5.9, unchanged). The override
    now builds.
 5. **Pre-send review default = off, as a mandatory go-live decision:** ships as an unconfirmed
-   ⚠ checklist knob (`suggested_default: off`) that a named person must consciously confirm —
+   ⚠ checklist policy setting (`suggested_default: off`) that a named person must consciously confirm —
    no city gets silent automation nobody chose; the confirming act IS the human decision to
    automate. Statutory pre-release steps (legal review, AG band, third-party notice) already
    ride the flow as tasks, so the gate is city policy, not law. When ON, work lands on the new

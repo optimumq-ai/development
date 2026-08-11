@@ -108,10 +108,10 @@ system takes. This distinction is load-bearing and needs a visual language:
 - a class-D ledger flag is **recorded and applied, never decided here** — the OH vexatious list is the
   court's, the UT designation is the director's. Show whose decision it was (`source`, `citation`).
 
-**(d) Unconfirmed knobs block go-live.** Every ⚠ city-config knob imported from the template carries
+**(d) Unconfirmed policy settings block go-live.** Every ⚠ local policy setting imported from the template carries
 `confirmed: false` + a `suggested_default`. A section cannot reach `configured` — and `attest()` refuses
-it — while any knob on it is unconfirmed. `configIntegrity` reports them per domain. **TX currently has 9
-such warnings and OH 9** (see §4). The UI needs a confirm-each-knob surface; it is the go-live checklist.
+it — while any policy setting on it is unconfirmed. `configIntegrity` reports them per domain. **TX currently has 9
+such warnings and OH 9** (see §4). The UI needs a confirm-each-policy-setting surface; it is the go-live checklist.
 
 **(e) Anonymous requests are never adverse-matched.** `/ledger/request/:id` returns `{anonymous: true}`
 when there is no affirmative identity anchor, and no balance is disclosed. Do not design a screen that

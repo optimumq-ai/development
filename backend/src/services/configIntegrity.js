@@ -255,7 +255,7 @@ async function check() {
     if (!pending.length) continue;
     findings.push({
       severity: 'warn', where: kr.jurisdiction_id + '/' + kr.domain,
-      issue: pending.length + ' city-config knob(s) still carry the imported suggestion rather than a ' +
+      issue: pending.length + ' local policy setting(s) still carry the imported suggestion rather than a ' +
              'decision: ' + pending.join(', ') + '.',
       fix: 'Confirm each one on its jurisdiction-profile section, then attest the section. Until then the ' +
            'section cannot be attested and go-live is blocked on it.'
@@ -287,7 +287,7 @@ async function check() {
   if (actRow && actRow.value) codeKnobJids[actRow.value] = true;
   var codeKnobDomains = [
     { domain: DMP.DOMAIN, knobs: [DMP.KNOB], state: function (name, j) { return DMP.read(j); },
-      fixText: 'Confirm the threshold on the go-live checklist knob card (there is no route yet — the card is BW9).' },
+      fixText: 'Confirm the threshold on the go-live checklist policy-setting card (there is no route yet — the card is BW9).' },
     { domain: ARL.DOMAIN, knobs: Object.keys(ARL.KNOBS), state: function (name, j) { return ARL.knob(name, j); },
       fixText: 'A Director confirms it: PUT /api/dispositions/knobs/<knob> — the confirming act IS the decision to automate.' }
   ];
@@ -302,7 +302,7 @@ async function check() {
       if (!open.length) continue;
       findings.push({
         severity: 'warn', where: codeJidList[cj] + '/' + dom.domain,
-        issue: open.length + ' city-config knob(s) nobody has decided: ' + open.join(', ') + '. Unconfirmed ' +
+        issue: open.length + ' local policy setting(s) nobody has decided: ' + open.join(', ') + '. Unconfirmed ' +
                'preserves today’s behaviour, but the decision the statute left to the city is still open.',
         fix: dom.fixText
       });

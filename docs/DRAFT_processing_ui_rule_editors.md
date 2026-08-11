@@ -14,9 +14,9 @@ the Deadlines & Clocks editor (the compliance-heavy one). Single city (Austin, T
 ## 0. What this is — and the two-kinds-of-content rule that shapes everything
 
 Draft 6's readiness index lists the 15 `jurisdiction_rules` domains; its screen 2 confirmed ⚠
-knobs. These editors are the rest of the answer: **each section row opens a section screen**
-where the domain's actual rule content is read and edited. Draft 6's knob cards become the
-**City knobs zone** of this screen (one surface per section, not two screens).
+policy settings. These editors are the rest of the answer: **each section row opens a section screen**
+where the domain's actual rule content is read and edited. Draft 6's policy-setting cards become the
+**Local Policy Settings zone** of this screen (one surface per section, not two screens).
 
 **The rule that shapes everything: a section holds two kinds of content, and they edit
 differently.**
@@ -24,10 +24,10 @@ differently.**
 | Kind | Examples | Edit behavior |
 |---|---|---|
 | **Statute-derived facts** (imported from the research, citation + provenance attached) | an exemption and its citation; a statutory clock's duration and kind; chargeability ("no labor lines in OH — R.C. 149.43(B)(1)") | Editing asserts *the law says otherwise*: requires a citation + note, and **always creates a proposal** through the existing config-proposal review flow — never a silent in-place write |
-| **City-policy values** (the ⚠ knobs — what the statute left to the city) | operational targets; grace windows; thresholds the city may set; `close_approval`; the pre-send gate | Freely settable by the owner; the Draft-6 **confirm** flow (value + `confirmed:true` + who/when); no proposal needed |
+| **City-policy values** (the ⚠ policy settings — what the statute left to the city) | operational targets; grace windows; thresholds the city may set; `close_approval`; the pre-send gate | Freely settable by the owner; the Draft-6 **confirm** flow (value + `confirmed:true` + who/when); no proposal needed |
 
 The visual grammar mirrors the clock chips: statute-derived rows carry a **navy solid left edge +
-citation chip**; city knobs carry the **dashed amber** treatment with their suggested-default
+citation chip**; local policy settings carry the **dashed amber** treatment with their suggested-default
 chip. A reader should never wonder which kind they are looking at — that confusion is how a city
 accidentally "edits the law."
 
@@ -37,7 +37,7 @@ accidentally "edits the law."
   **section screen** per domain. Read-only for oversight; editable only when the user's type
   carries the domain's permission group.
 - **Section screen zones** (Frame A): header (domain · status chip · owner group · attest state ·
-  drift) · **Content** (the rules, read-first, every row cited) · **City knobs** (Draft 6's
+  drift) · **Content** (the rules, read-first, every row cited) · **Local Policy Settings** (Draft 6's
   confirm cards, embedded) · **Provenance** (template-import manifest, `source_rule_ids` →
   research text) · **Pending proposals** (the existing review/apply flow, inline).
 - **Ownership by permission group** (drafted mapping — open question 1):
@@ -63,7 +63,7 @@ accidentally "edits the law."
 ## 2. The three worked frames
 
 - **Frame A — Fee section** (the pattern demo): statutory chargeability facts (navy, cited: TX
-  personnel time per AG schedule; the §552.2615 itemization trigger) beside city knobs (dashed
+  personnel time per AG schedule; the §552.2615 itemization trigger) beside local policy settings (dashed
   amber: the copy rate the city charges within the allowed method, confirm flow). Shows both
   kinds on one screen, plus provenance and a pending proposal inline.
 - **Frame B — Exemptions** (Legal Rules): the exemption list, each row citation-chipped and
@@ -71,10 +71,13 @@ accidentally "edits the law."
   vocabulary). Edit modal = the proposal composer: change + citation + note, preview of what
   drifts. Read-only banner as a team supervisor would see it ("Legal Rules — you can do the
   redaction task; you cannot change its rules").
-- **Frame C — Deadlines & Clocks** (the compliance-heavy one): the named-timer table (name ·
-  kind · duration · citation), kinds rendered in the ClockChip grammar so `operational_target`
+- **Frame C — Deadlines & Clocks** (the compliance-heavy one): the named-timer table (timer ·
+  use case · duration · citation — Kevin 2026-08-11: the column reads **"Use case"**, not "Kind",
+  and both columns display humanized labels ("AG referral", "Requestor window"), never the
+  snake_case data keys, which stay unchanged in `request_clocks.clock_type` and the templates),
+  use cases rendered in the ClockChip grammar so `operational_target`
   can never masquerade as statutory; the band guard shown refusing a 46-day response edit; the
-  OH one-liner (timers exist, none statutory, targets are city knobs).
+  OH one-liner (timers exist, none statutory, targets are local policy settings).
 
 ## 3. Bindings
 
@@ -84,7 +87,7 @@ accidentally "edits the law."
 | Content zone | domain config JSON rendered per-domain (each domain gets its renderer — the pattern is shared, the content templates are per-domain) |
 | Cited facts | `provenance` + `source_rule_ids` → research rule text (drill-down = Draft 6 open q4, drafted IN) |
 | Edit-as-proposal | `config_proposals` + `effectiveConfig.applyConfig` (BUILT — the same flow template imports use); apply → `content_hash` recompute → drift vs `attested_hash` |
-| Knob zone | Draft 6's confirm endpoint (NEW there, shared here) |
+| Policy setting zone | Draft 6's confirm endpoint (NEW there, shared here) |
 | Police rules | the WS1–WS3 validators (`clockMatrix` reconciler band, policed-domain rule, kind requirement) run at proposal-compose time, not just apply time |
 | Wiring indicators | `branchProfile` capabilities `wired` flag; redaction-rule consumption for exemptions |
 | Permissions | permission groups per §5 of the role model (`DESIGN_user_type_role_model.md`) |
@@ -92,7 +95,7 @@ accidentally "edits the law."
 ## 4. Build implications (if the shape survives)
 
 1. **Per-domain content renderers** (15, most trivial — a cited list or a small table); the
-   section-screen shell, knob zone, and proposal composer are shared components.
+   section-screen shell, policy setting zone, and proposal composer are shared components.
 2. **Proposal composer for hand edits** — today proposals are born from template imports; this
    adds a UI author path (same table, same review/apply, new `origin: 'editor'`).
 3. **Validator surfacing** — the WS1–WS3 police rules need callable-at-compose-time form with
@@ -116,7 +119,7 @@ accidentally "edits the law."
 
 ## 6. Not re-opened
 
-The attest/refuse mechanics, drift hashing, the proposal review/apply flow, the knob-confirm
+The attest/refuse mechanics, drift hashing, the proposal review/apply flow, the policy-setting-confirm
 design (Draft 6), rule-(d) gating, permission groups themselves (role model §5), the
 never-hand-edit-generated-templates rule (that rule is about the Phase-6 pipeline files; the
 live `jurisdiction_rules` config is exactly what these editors legitimately edit).

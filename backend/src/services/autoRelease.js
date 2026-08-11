@@ -245,7 +245,7 @@ async function evaluate(requestId, opts) {
   conditions.push({ code: 'PRE_SEND_REVIEW', ok: gateOff || reviewApproved, decidedBy: reviewKnob.confirmed ? 'person' : 'system',
     text: gateOff
       ? (reviewKnob.confirmed ? 'This city has decided against a pre-send review — the package ships without one.'
-                              : 'No pre-send review: the knob is unconfirmed, which means OFF — today’s behaviour, and nobody has chosen otherwise.')
+                              : 'No pre-send review: the policy setting is unconfirmed, which means OFF — today’s behaviour, and nobody has chosen otherwise.')
       : (reviewApproved ? 'The pre-send review was approved — the release may fire.'
                         : 'This city requires a second person to review the package before it ships. A release review is raised instead of shipping.'),
     knob: reviewKnob });

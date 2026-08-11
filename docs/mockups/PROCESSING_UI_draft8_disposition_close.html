@@ -176,7 +176,7 @@
             <h3 class="panel">When auto-release fires — the four conditions <span class="callout">6</span></h3>
             <div class="ck">Every flow task terminal — completed by a person, or <b>auto-bypassed with its basis recorded</b></div>
             <div class="ck">Funds check: outstanding balance ≤ 0 (payment received, waived, or nothing chargeable)</div>
-            <div class="ck">No pre-send review gate — default OFF, shipped as an unconfirmed ⚠ go-live knob a named person must confirm; when ON, a <b>release_review</b> task spawns instead (cleared at speed in power mode — Draft 9) <span class="callout">9</span></div>
+            <div class="ck">No pre-send review gate — default OFF, shipped as an unconfirmed ⚠ go-live policy setting a named person must confirm; when ON, a <b>release_review</b> task spawns instead (cleared at speed in power mode — Draft 9) <span class="callout">9</span></div>
             <div class="ck">Non-MRR — an MRR release stays the manager's orchestration behind Draft 7's funds gate</div>
             <div class="kv" style="margin-top:6px;"><b>Payment-due variant:</b> R-2420 sits at <i>pending — balance $36.20 &gt; 0</i>;
             the moment payment brings it to ≤ 0, it ships and closes with no one touching it. A redacted release is still
@@ -288,8 +288,8 @@
       <code>installment_no</code>, one event; a redacted release is still Delivered (withholding log carries the detail; no
       “partially granted” disposition exists). Unchanged from rev 1; what changed is that the event now usually fires itself.</li>
       <li><b><span class="decided">DECIDED 7/29</span> The pre-send review gate defaults OFF — as a mandatory go-live
-      decision.</b> It ships as an unconfirmed ⚠ checklist knob a named person must consciously confirm (rule-d machinery):
-      no city gets silent automation nobody chose — confirming the knob IS the human decision to automate. Statutory
+      decision.</b> It ships as an unconfirmed ⚠ checklist policy setting a named person must consciously confirm (rule-d machinery):
+      no city gets silent automation nobody chose — confirming the policy setting IS the human decision to automate. Statutory
       pre-release steps (legal review, AG band, third-party notice) already ride the flow as tasks, so this gate is city
       policy, not law. When ON, work lands on the new <code>release_review</code> task type, cleared at speed in
       <b>power mode — Draft 9</b>.</li>

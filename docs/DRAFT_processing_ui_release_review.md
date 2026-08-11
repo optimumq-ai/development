@@ -63,7 +63,7 @@ identically.
 | Surface | Binds to |
 |---|---|
 | Task type | NEW `release_review` catalog entry (MASTER A1 addendum at ratification); spawner = the pipeline's gate branch |
-| Gate knob | the Draft 8 rev-2 go-live checklist knob (`suggested_default: off`, unconfirmed ⚠, rule-d machinery) |
+| Gate policy setting | the Draft 8 rev-2 go-live checklist policy setting (`suggested_default: off`, unconfirmed ⚠, rule-d machinery) |
 | Routing config | approval-modules `{assignee_role, task_name}` pattern; `user_task_types` eligibility; two-eyes rule checked against the item's last flow-task completer |
 | Package panel | release-event preview: `fulfilled_records`, withholding log (§5.7 citations), assembled notice (`feeNotice` / closure-notice content) |
 | Approve | the release event, verbatim (Draft 8 rev 2 §1) — approver recorded |
@@ -92,6 +92,6 @@ queue (Draft 8), routed waiver decisions (Draft 2). None of those build in v1.
 
 ## 6. Not re-opened
 
-The gate's default and knob treatment (decided 7/29, Draft 8 rev 2 §3.5); the release event's
+The gate's default and policy setting treatment (decided 7/29, Draft 8 rev 2 §3.5); the release event's
 content and one-act rule; the pipeline's four conditions; §5.8 vocabulary; the per-user-type UI
 direction.
