@@ -118,6 +118,47 @@ router.get('/intake-queue', requireAuth, async function (req, res) {
 });
 
 // ============================================================================================
+// PHASE 7 / BW8 — THE RELEASE-REVIEW QUEUE (Draft 9 Frame A; SPEC §5, DECIDED 2026-08-11).
+//
+// The same mine + pool + two-eyes shape as the intake queue, because the group header and power mode
+// must agree with the claim guard about what this reviewer may touch — a queue that lists a task the
+// approve route will 403 is a trap. Ordering is CLOCK-AWARE, nearest deadline first (Draft 9 §2):
+// resolved through the parent clock like every other queue; a request with no clock sorts last and
+// says kind:'none' rather than inventing a date (rule a).
+// ============================================================================================
+router.get('/release-review-queue', requireAuth, async function (req, res) {
+  try {
+    var RRP = require('../services/releaseReviewPackage');
+    var mine = await all(withReq("WHERE t.type = 'release_review' AND t.assigned_to = ? AND t.status IN ('assigned','in_progress','returned','awaiting_review') ORDER BY t.created_at"), [req.user.sub]);
+    var pool = await all(withReq("WHERE t.type = 'release_review' AND " + tr.POOL_ELIGIBILITY_SQL + " ORDER BY t.created_at"),
+      [req.user.sub, req.user.sub, req.user.sub]);
+    var rows = mine.map(function (t) { t.mine = true; return t; })
+      .concat(pool.filter(function (p) { return !mine.some(function (m) { return m.id === p.id; }); })
+        .map(function (t) { t.mine = false; return t; }));
+    rows = await tr.filterTwoEyes(rows, req.user.sub);
+
+    for (var i = 0; i < rows.length; i++) {
+      var t = rows[i];
+      t.clock = await RRP.clockFor(t.request_id);
+      try {
+        var fc = await get('SELECT count(*)::int AS n FROM request_files WHERE request_id = ? AND responsive = 1', [t.request_id]);
+        var zc = await get('SELECT count(*)::int AS n FROM redaction_zones z JOIN redaction_jobs j ON j.id = z.job_id WHERE j.request_id = ?', [t.request_id]);
+        t.recordCount = fc ? fc.n : 0;
+        t.redactedZoneCount = zc ? zc.n : 0;
+      } catch (e) { t.recordCount = null; t.redactedZoneCount = null; }
+    }
+    // Nearest deadline first; no clock sorts last; created_at breaks ties so the walk is stable.
+    rows.sort(function (a, b) {
+      var ad = a.clock && a.clock.dueDate ? a.clock.dueDate : '9999-12-31';
+      var bd = b.clock && b.clock.dueDate ? b.clock.dueDate : '9999-12-31';
+      if (ad !== bd) return ad < bd ? -1 : 1;
+      return (a.created_at || '') < (b.created_at || '') ? -1 : 1;
+    });
+    res.json({ tasks: rows, count: rows.length });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// ============================================================================================
 // THE INTAKE REVIEW SCREEN'S CONTEXT (PHASE 7 / BW3 — mockup screen 2).
 //
 // Everything the screen needs that is NOT already a general-purpose endpoint, in one read. The general ones
@@ -891,6 +932,22 @@ router.get('/:id/release-review', requireAuth, async function (req, res) {
       twoEyes: blocked,
       evaluation: await AR.evaluate(t.request_id)
     });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// PHASE 7 / BW8 — the power-mode package: everything Draft 9 Frame B renders, in one read. The screen
+// adds NOTHING to this payload — the released set, the withholding log with citations, the notice from
+// the real builder, the flags and the pipeline state all come assembled, so the reviewable substance is
+// on the surface by construction rather than by frontend diligence.
+router.get('/:id/release-package', requireAuth, async function (req, res) {
+  try {
+    var t = await get("SELECT * FROM tasks WHERE id = ? AND type = 'release_review'", [req.params.id]);
+    if (!t) return res.status(404).json({ error: 'This task is not a release review.' });
+    var RRP = require('../services/releaseReviewPackage');
+    var pkg = await RRP.packageFor(t.request_id);
+    if (!pkg) return res.status(404).json({ error: 'The request behind this review no longer exists.' });
+    var blocked = await tr.assignmentBlocked(t, req.user && req.user.sub);
+    res.json(Object.assign({ taskId: t.id, taskStatus: t.status, twoEyes: blocked }, pkg));
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
