@@ -222,7 +222,6 @@ source for templates.
 | Draft 1 residuals: trigger-list completeness · visual grammars confirmation · inline-waiver conditional · default expand state · queue columns | Draft 1 §5 |
 | Draft 2 residuals: first-look banner tone · de-minimis threshold config vs judgment · "Path here" depth · profile visibility | Draft 2 §5 |
 | Draft 5 residuals: classifier hint on child assign · activity ordering enforcement · per-child release control location · estimate-data entry form location · MRR task label set | Draft 5 §3 |
-| Draft 6 residuals: who attests legal sections · dashboard banner · dev-mode ceremony · re-open friction | Draft 6 §5 |
 | Draft 7 residuals: revised-notice home · refund execution record-only · item-hold two doors · requestor-facing allocation · IL forfeiture hard-disable | Draft 7 §5 |
 | Portal identity anchors (WS5 blocker — ledger inert until it ships; separate workstream, not this spec) | `requestorLedger.js` header |
 
@@ -233,7 +232,10 @@ source for templates.
 (editors drafted now, `4beb375`) · this spec v1 · 2026-08-11 terminology (below) ·
 2026-08-11 Draft 9 ratified as drafted (§5 → DECIDED, BW8 unblocked) ·
 2026-08-11 Draft 10 ratified as drafted (all five §5 questions — ownership · no Director
-self-apply on Legal · high-touch six · drill-down IN · drift-warn — §6 → DECIDED, BW9 unblocked).*
+self-apply on Legal · high-touch six · drill-down IN · drift-warn — §6 → DECIDED, BW9 unblocked) ·
+2026-08-11 Draft 6 residuals decided (Senior Legal attests Legal domains, ATTEST role widens ·
+dashboard banner until ready · guided go-live ceremony via GateChecklist+ConfirmPopup ·
+unattest confirm-dialog friction; policy-setting evidence drill-down stays later work).*
 
 **Terminology (Kevin, 2026-08-11): "Local Policy Settings" replaces "city knobs".** The old
 term read as primitive next to the rest of the application's vocabulary. Applies to ALL

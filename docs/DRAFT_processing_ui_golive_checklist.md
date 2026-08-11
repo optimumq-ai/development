@@ -76,19 +76,24 @@ engine enforces, never asserted by the UI.
    question 1).
 5. **Checklist route + screens** under the Director's UI; oversight read for Supervisor.
 
-## 5. Open questions for Kevin
+## 5. Open questions — **residuals DECIDED (Kevin, 2026-08-11)**
 
-1. **Who attests the legal sections?** Content owner is Senior Legal (permission groups), but the
-   ATTEST role today is System Admin | Director. Drafted with Senior Legal attesting
-   exemption/redaction — requires widening the role. Confirm or keep Director-only.
-2. **Where does this live?** Drafted as the Director's "Jurisdiction Configuration" area. Should
-   the gate summary also surface as a banner on the Director's home/dashboard until ready?
-3. **Dev-mode framing** — drafted as the last pill + a rail card ("turning it off is the go-live
-   act"). Strong enough, or do you want an explicit guided go-live ceremony (checklist → confirm →
-   flip) once all pills are green?
-4. **Policy setting evidence drill-down** — the note is on the card; should clicking through show the
-   template rule ids / research text behind the policy setting (flagged as later work in the mockup)?
-5. **Re-open/unattest** — drafted as a quiet per-row action with a confirmation. Enough friction?
+1. **Who attests the legal sections?** — **DECIDED: Senior Legal attests the Legal Rules domains**
+   (exemption, redaction, deadline, clock_matrix — consistent with Draft 10's ownership ruling the
+   same day). Requires widening the ATTEST role for Legal domains; Director/SysAdmin still attest
+   the rest.
+2. **Where does this live?** — Director's "Jurisdiction Configuration" area, and **DECIDED: the
+   gate summary ALSO surfaces as a banner on the Director's home/dashboard until the city is ready**
+   (unconfirmed/unattested/dev-mode counts, click-through to the checklist; disappears when green).
+3. **Dev-mode framing** — **DECIDED: an explicit guided go-live ceremony.** When all pills are
+   green the checklist offers review-the-green-checklist → typed confirmation → flip, reusing the
+   GateChecklist + ConfirmPopup pattern. The flip stays the SADMIN endpoint underneath.
+4. **Policy setting evidence drill-down** — not asked 2026-08-11; stays **later work** as the
+   mockup flags. (Draft 10's research-text drill-down component will exist; wiring it to policy-setting
+   cards is cheap when wanted, but it is NOT required for v1.)
+5. **Re-open/unattest** — **DECIDED: the quiet per-row action with a confirmation dialog is
+   enough**, with the consequence stated in words (section leaves attested state; the go-live gate
+   reopens). No reason note required.
 
 ## 6. Not re-opened
 
