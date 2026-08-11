@@ -17,8 +17,8 @@ var TYPE_LABEL = {
   record_search: 'Record Search', redaction: 'Redaction', legal_redaction: 'Legal Redaction',
   redaction_qa: 'Redaction Review', review_auto_redaction: 'Auto-Redaction Review',
   estimate: 'Estimate', fee_waiver: 'Fee Waiver', legal_review: 'Legal Review', routing_review: 'Routing Review',
-  // BW2 catalog (docs/SPEC_processing_ui.md §8). BW3 gave intake_review its screen and BW6 gave the four
-  // MRR types theirs; release_review still falls back to the request (BW8).
+  // BW2 catalog (docs/SPEC_processing_ui.md §8). BW3 gave intake_review its screen, BW6 the four MRR
+  // types theirs, and BW8 gave release_review its two paths (task screen + power mode).
   //
   // "MRR Management", not "MRR Coordination": the label a person reads has to be the task type's name, and
   // Kevin named it (7/28 item 1). Two names for one thing is how a queue and a screen start disagreeing.
@@ -66,6 +66,9 @@ var TASK_SCREEN = {
   mrr_search: function (t) { return '/mrr-activity/' + t.id; },
   mrr_estimate: function (t) { return '/mrr-activity/' + t.id; },
   mrr_redaction: function (t) { return '/mrr-activity/' + t.id; },
+  // BW8 — the release-review task screen (one-at-a-time path; power mode is the group-header button).
+  // Until this entry existed the task fell through to /requests/:id, which can approve nothing.
+  release_review: function (t) { return '/release-review/' + t.id; },
   review_auto_redaction: function () { return '/mass-redaction'; }
 };
 function screenFor(t) { var f = TASK_SCREEN[t.type]; return f ? f(t) : (t.request_id ? '/requests/' + t.request_id : '/mass-redaction'); }
@@ -283,6 +286,13 @@ export default function MyTasksPage() {
           <div style={{ width: '30px', height: '30px', borderRadius: '8px', background: C.accentSoft, color: C.accent, display: 'grid', placeItems: 'center', fontWeight: 800, fontSize: '13px', flexShrink: 0 }}>{(TYPE_LABEL[ty] || ty).slice(0, 1)}</div>
           <span style={{ fontSize: '14.5px', fontWeight: 700 }}>{TYPE_LABEL[ty] || ty}</span>
           <span style={{ fontSize: '12px', fontWeight: 700, color: C.accent, background: C.accentSoft, borderRadius: '999px', padding: '1px 9px' }}>{tasks.length}</span>
+          {/* BW8 — Draft 9 Frame A: the power-mode entry lives on the group header. The count is this
+              group's; the power page loads the live queue (incl. claimable pool) itself. */}
+          {ty === 'release_review' ? (
+            <Link to="/release-review-power" style={{ fontSize: '12px', fontWeight: 700, color: '#fff', background: '#143D5C', borderRadius: '6px', padding: '3px 11px', textDecoration: 'none' }}>
+              Power mode ({tasks.length}) →
+            </Link>
+          ) : null}
           <div style={{ marginLeft: 'auto', display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
             {rtn ? chip(rtn + ' returned', 'crit') : null}
             {queued.length ? chip(queued.length + ' queued', 'q') : null}

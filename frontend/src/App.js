@@ -22,6 +22,8 @@ import RecordSearchTaskPage from './pages/RecordSearchTaskPage';
 import DispositionsPage from './pages/DispositionsPage';
 import LegalReviewTaskPage from './pages/LegalReviewTaskPage';
 import IntakeReviewTaskPage from './pages/IntakeReviewTaskPage';
+import ReleaseReviewTaskPage from './pages/ReleaseReviewTaskPage';
+import ReleaseReviewPowerModePage from './pages/ReleaseReviewPowerModePage';
 // BW6 — the MRR hub. Four levels: overview → master record → child record, plus the assignee's thin
 // per-activity view. The manager's three screens are one page tree; the assignee's is deliberately separate.
 import MrrActivityTaskPage from './pages/MrrActivityTaskPage';
@@ -103,6 +105,11 @@ export default function App() {
           {/* Intake review (BW3). Inside the app shell for the same reason record search is: the ORO
               Associate works alongside their exceptions queue. */}
           <Route path="intake-review/:taskId" element={<IntakeReviewTaskPage />} />
+          {/* BW8 — release review. TWO PATHS, ONE REVIEW: the one-at-a-time task screen, and power
+              mode (approve-and-next, populate-in-place). Both render the same package panels — the
+              accelerator is never a thinner review. */}
+          <Route path="release-review/:taskId" element={<ReleaseReviewTaskPage />} />
+          <Route path="release-review-power" element={<ReleaseReviewPowerModePage />} />
           <Route path="mrr-activity/:taskId" element={<MrrActivityTaskPage />} />
           <Route path="mrr" element={<MrrOverviewPage />} />
           <Route path="mrr/:taskId" element={<MrrMasterPage />} />

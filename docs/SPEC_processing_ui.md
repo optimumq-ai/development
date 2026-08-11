@@ -203,7 +203,9 @@ coverage-gap manager email (role model §6, unbuilt).
 6. **BW6 — MRR hub** (screens + `mrr_tasks` substrate + attachments strip).
 7. **BW7 — Parent financial** (statement, allocation table w/ settlement method, credits/refunds,
    reconciliation surfacing).
-8. **BW8 — Release review + power mode** (after Draft 9 markup).
+8. **BW8 — Release review + power mode** (after Draft 9 markup). **[BUILT 2026-08-11]** — queue +
+   package endpoints, PowerQueue library shell (first instance), task screen + power mode, My Tasks
+   group entry; includes the citizen-facts fix on `closureNotice` (parent number/name/address).
 9. **BW9 — Admin: go-live checklist + rule editors** (after Draft 10 markup).
 BW3–BW7 depend on BW1+BW2; BW8/BW9 gate on markup. Never hand-edit generated templates — the
 live `jurisdiction_rules` config is what BW9's editors edit; the Phase-6 pipeline stays the
