@@ -147,14 +147,17 @@ counts-only metrics · A/S/R keys. BW8 is unblocked.)
   component-library shell instanced per task type; release review is the first instance (future:
   close-approval queue, routed waivers — not v1).
 
-## 6. Rule-content editors (Draft 10 — PROVISIONAL pending Kevin's markup)
+## 6. Rule-content editors (Draft 10 — **DECIDED**: Kevin ratified all five §5 questions as
+drafted, 2026-08-11 — Legal Rules owns deadline/clock_matrix · Director routes to Senior Legal,
+no self-apply on Legal domains · v1 = high-touch six renderers, rest read-only pretty views ·
+drill-down IN · drift-warn only, no strict re-attest. BW9 unblocked.)
 
 - Section screen per `jurisdiction_rules` domain: Content · Local Policy Settings (Draft 6's confirm cards
   fold in — one surface) · Provenance (incl. research-text drill-down) · Pending proposals.
 - **THE RULE:** statute-derived facts (navy edge, cited) edit **only via proposal** (citation +
   note required) through the existing review/apply flow; applying recomputes `content_hash` →
   attested sections drift → re-attest. Local policy settings (dashed amber) set-and-confirm freely.
-- Ownership = permission groups (drafted: Legal Rules — exemption/redaction/deadline/clock_matrix;
+- Ownership = permission groups (DECIDED: Legal Rules — exemption/redaction/deadline/clock_matrix;
   Fee Configuration — fee/payment/fee_waiver/approval_modules/ledger; Workflow & Taxonomy —
   intake/branches/disposition/clarification/eligibility; template_import read-only).
 - **The editor refuses what the engine would refuse** — WS1–WS3 police rules at compose time,
@@ -206,7 +209,7 @@ coverage-gap manager email (role model §6, unbuilt).
 8. **BW8 — Release review + power mode** (after Draft 9 markup). **[BUILT 2026-08-11]** — queue +
    package endpoints, PowerQueue library shell (first instance), task screen + power mode, My Tasks
    group entry; includes the citizen-facts fix on `closureNotice` (parent number/name/address).
-9. **BW9 — Admin: go-live checklist + rule editors** (after Draft 10 markup).
+9. **BW9 — Admin: go-live checklist + rule editors** (Draft 10 §5 ratified 2026-08-11 — unblocked).
 BW3–BW7 depend on BW1+BW2; BW8/BW9 gate on markup. Never hand-edit generated templates — the
 live `jurisdiction_rules` config is what BW9's editors edit; the Phase-6 pipeline stays the
 source for templates.
@@ -216,7 +219,6 @@ source for templates.
 | Item | Where |
 |---|---|
 | Kevin's full screen-by-screen pass (docx was pre-review notes) | all drafts |
-| Draft 10 markup: ownership mapping · Director-may propose-vs-apply · v1 depth (all 15 vs high-touch 6) · drill-down in v1 · strict re-attest vs drift-warn | Draft 10 §5 |
 | Draft 1 residuals: trigger-list completeness · visual grammars confirmation · inline-waiver conditional · default expand state · queue columns | Draft 1 §5 |
 | Draft 2 residuals: first-look banner tone · de-minimis threshold config vs judgment · "Path here" depth · profile visibility | Draft 2 §5 |
 | Draft 5 residuals: classifier hint on child assign · activity ordering enforcement · per-child release control location · estimate-data entry form location · MRR task label set | Draft 5 §3 |
@@ -229,7 +231,9 @@ source for templates.
 *Decision log: 2026-07-28 Kevin docx markup (steps 1–4 applied `8ce9965`→`06b329e`) ·
 2026-07-29 item-by-item session (five rev-2 decisions, `7eccebe`) · 2026-07-29 Draft 6 scope
 (editors drafted now, `4beb375`) · this spec v1 · 2026-08-11 terminology (below) ·
-2026-08-11 Draft 9 ratified as drafted (§5 → DECIDED, BW8 unblocked).*
+2026-08-11 Draft 9 ratified as drafted (§5 → DECIDED, BW8 unblocked) ·
+2026-08-11 Draft 10 ratified as drafted (all five §5 questions — ownership · no Director
+self-apply on Legal · high-touch six · drill-down IN · drift-warn — §6 → DECIDED, BW9 unblocked).*
 
 **Terminology (Kevin, 2026-08-11): "Local Policy Settings" replaces "city knobs".** The old
 term read as primitive next to the rest of the application's vocabulary. Applies to ALL

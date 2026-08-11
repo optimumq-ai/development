@@ -104,18 +104,22 @@ accidentally "edits the law."
 5. **Research-text drill-down** (provenance → rule text) — the gather's rules become viewable
    from the editor.
 
-## 5. Open questions for Kevin
+## 5. Open questions — **all five DECIDED (Kevin, 2026-08-11): as drafted on every point**
 
-1. **The ownership mapping** — is Legal Rules owning `deadline` + `clock_matrix` right (they are
-   statutory timing), or should those sit with Workflow & Taxonomy?
-2. **Director-may on Legal domains** — drafted as Director edits create a proposal routed to
-   Senior Legal (may not self-apply). Or may the Director apply directly on Legal domains too?
-3. **Per-domain depth for v1** — all 15 renderers, or the high-touch six first (exemption,
-   redaction, fee, deadline, clock_matrix, clarification) with the rest read-only JSON-pretty
-   views until needed?
-4. **Research-text drill-down** — drafted IN (provenance zone). Keep for v1, or link-out later?
-5. **Should applying any Legal-domain proposal require the section to re-attest before the
-   engine uses it** (strict), or drift-warn only (drafted — matches current WS1 behavior)?
+1. **The ownership mapping** — **DECIDED: Legal Rules owns `deadline` + `clock_matrix`** (they are
+   statutory timing; a wrong edit misstates the law, so they get the Legal edit-as-proposal
+   discipline).
+2. **Director-may on Legal domains** — **DECIDED: Director edits create a proposal routed to
+   Senior Legal; the Director may NOT self-apply on Legal domains.** Two sets of eyes on anything
+   that asserts what the law says.
+3. **Per-domain depth for v1** — **DECIDED: the high-touch six first** (exemption, redaction, fee,
+   deadline, clock_matrix, clarification) with full renderers; the other 9 domains render a
+   read-only pretty view of their config until a real need appears.
+4. **Research-text drill-down** — **DECIDED: IN for v1** (provenance zone opens the gathered rule
+   text behind a cited fact; read-only, data already exists).
+5. **Re-attest after a Legal-domain apply** — **DECIDED: drift-warn only** (matches current WS1
+   behavior). The applied rule takes effect immediately; the section shows drift until re-attested.
+   No mid-request outage from an edit.
 
 ## 6. Not re-opened
 
