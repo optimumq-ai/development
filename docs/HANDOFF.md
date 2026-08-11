@@ -6401,3 +6401,34 @@ paths, which need injected failures.
    what "alert someone" means; 5–6 depend on the city's config posture.
 4. **Cheap and worth doing:** register `docs/tests/swallow_scan.js` as a harness so a new
    write-swallow-then-200 fails the suite, plus a harness that injects failures into the three paths above.
+
+---
+
+## 2026-08-11 — Kevin's markup session: the knobs get a grown-up name, Frame C speaks plainly (`c2c7eb5`)
+
+**NOTE THE GAP FIRST:** no handoff entries exist for 2026-07-26 → 2026-08-01, though a lot happened.
+The record for that stretch lives in the commit log and the docs themselves: design session 1 produced
+`SPEC_processing_ui.md` v1 + ten `DRAFT_processing_ui_*` docs; **BW1–BW7 are ALL BUILT** (their harnesses —
+`verify_bw2_catalog` through `verify_bw7_financial` — run green in the suite, 1790 assertions total);
+the 2026-08-01 session added identity anchors, the external secure-link substrate, the paper form,
+per-citizen acknowledgment, and the 24→10 menu reorg (`048c9dc`..`af71e56`). BW8/BW9 remain, gated on
+Draft 9/10 markup.
+
+### This session (design/markup, no pipeline work)
+1. **Terminology (Kevin): "Local Policy Settings" replaces "city knobs"** in everything a person reads —
+   UI copy, API error strings, integrity findings, attestation label, importer CLI, spec + drafts +
+   mockups (both copies). Wire formats deliberately keep their names (`AR.KNOBS`, `/api/dispositions/knobs`,
+   `knob_unconfirmed`, template key `knobs`, rules_research corpus). Mapping recorded in
+   `SPEC_processing_ui.md` decision log. Suite green, live untouched, bundle verified clean of the old term.
+2. **Draft 10 Frame C markup (Kevin):** "Kind" column → **"Use case"**; humanized labels in both columns
+   (never snake_case keys — those stay in `request_clocks.clock_type` and the templates); every use case
+   carries a plain-language description incl. the run-out consequence. Recorded in
+   `DRAFT_processing_ui_rule_editors.md`.
+3. **Kevin said "Draft 9 looks good."** Recorded as stated — but whether that ratifies Draft 9 §5's five
+   drafted defaults (ORO Supervisor default · narrow two-eyes · resurface-at-end · counts-only metrics ·
+   A/S/R keys) was NOT explicitly confirmed. **Get an explicit yes before BW8 builds on it.**
+
+### Next
+- Draft 10 §5's five questions are still open (ownership mapping · Director propose-vs-apply · v1 depth ·
+  drill-down · re-attest vs drift-warn) — today's markup didn't touch them.
+- Then BW8 (release review + power mode) and BW9 (go-live checklist + rule editors).
