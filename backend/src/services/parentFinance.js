@@ -573,6 +573,15 @@ async function settle(rid, opts) {
   settleInput._aggregateLabor = { hours: hours, tasks: counted.length, measured: measured };
   var feeContext = engine.compute(config, settleInput);
 
+  // THE § 552.2615 CAP IS JUDGED ON THE PRE-SETTLEMENT STATE — read it BEFORE writing the settle
+  // run's own reconciliation. The watchdog's "revised statement outstanding" reads the NEWEST
+  // reconciliation, and the row this settlement is about to write would shadow the flagged one:
+  // the settle run itself notified nobody, so letting it count would silently clear the
+  // outstanding-statement flag and bill the very overage the cap exists to forfeit. (Whether it
+  // actually shadowed depended on a same-second created_at tie — a race, and the losing side of
+  // it was a compliance bug, not a display bug.)
+  var watch = await overageWatchdog(pid);
+
   var recon = await LA.writeReconciliation({
     rid: quote.request_id, configProfileId: cfgRow && cfgRow.id, input: settleInput, feeContext: feeContext,
     estTotal: quote.total != null ? Number(quote.total) : null, revisionNotifyPercent: pol,
@@ -581,7 +590,6 @@ async function settle(rid, opts) {
 
   // THE POSITION AFTER THE RUN. netting() reads the reconciliation we just wrote — evented, not recomputed.
   var net = await netting(pid);
-  var watch = await overageWatchdog(pid);
   var outcome, finalInvoice = 0, refundOut = 0;
   if (net.refundOutstanding > 0.005) { outcome = 'refund'; refundOut = net.refundOutstanding; }
   else if (net.balanceDue > 0.005) {
