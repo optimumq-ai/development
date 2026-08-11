@@ -6436,3 +6436,42 @@ Draft 9/10 markup.
 **Addendum, same session:** Kevin explicitly confirmed — **Draft 9's five drafted defaults are approved
 as-is.** §5 → DECIDED in the spec and draft; **BW8 is unblocked.** Draft 10's five §5 questions remain the
 only open markup.
+
+---
+
+## 2026-08-11 (b) — BW8: release review has its two paths, and the closure letter follows the citizen (`6d00d2e`..`448feed`)
+
+### What was built (same session as the terminology ruling above)
+1. **`fix(notice)` — the citizen-facts fix, found by building the preview.** `closureNotice` used the raw
+   WORK row: a released child mailed "Reference: 2026-000003-1" (the component suffix the citizen has
+   never seen) and addressed the child row's email copy. `citizenFacts()` resolves number/name/address
+   through the parent (requestScope precedence); `build()` and `send()` both read it. Same class as the
+   acknowledgment fix `ac1c44b`. Asserted at build() AND on the real send path.
+2. **BW8 backend** — `/tasks/release-review-queue` (mine + pool + two-eyes, nearest-deadline-first via the
+   parent clock, clockless sorts last and answers null; counts only, NO timing — §5.4 declined) and
+   `/tasks/:id/release-package` (`services/releaseReviewPackage.js`: released set · withholding log
+   resolved zone → rule → legal-source citation, absence shown as absence · the notice from the REAL
+   builder · flags · pipeline state from the same `evaluate()` the approve refuses on).
+3. **BW8 frontend** — `PowerQueue` library shell (first instance; close-approval + waivers are future
+   customers, NOT built), `ReleaseReviewPackagePanels` (shared by both paths), power-mode page (A/S/R,
+   populate-in-place, skip-resurfaces-at-end, return dialog with required note), single-task screen,
+   `TASK_SCREEN` entry (the task no longer falls through to /requests/:id), My Tasks group-header
+   "Power mode (n) →".
+
+### Evidence
+`verify_bw8_release_review` 27/27; **full suite 1817/1817, live untouched**; visual verification against
+the TEST stack via the verify_stages route-interception technique (screenshots: power mode Frame B with
+the withholding log + citation chips, A-key approve closed the item fulfilled + delivered_at and populated
+item 2 in place, My Tasks Frame A with the power-mode button; zero page errors).
+
+### A trap stepped in and out of, recorded so nobody repeats it
+`npm run build 2>&1 | tail` reports **tail's exit code, not npm's**. A first build FAILED (this project's
+ESLint config lacks `react-hooks/exhaustive-deps`, and a disable-comment naming an unknown rule is itself
+a compile error), the pipe said 0, and nginx served 403 from an empty `build/` until `verify_stages`
+caught it. Check `build/index.html` exists + `curl localhost` = 200 after every build.
+
+### Where this leaves the waves
+BW1–BW8 all BUILT. **BW9 (go-live checklist + rule editors) is the last wave**, gated on Draft 10 §5's
+five open questions (ownership mapping · Director propose-vs-apply · v1 depth · drill-down · re-attest
+vs drift-warn). The pre-send gate itself remains an unconfirmed ⚠ policy setting on live — correctly:
+turning it on is a Director's act, on the go-live checklist BW9 builds.
