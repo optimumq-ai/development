@@ -108,6 +108,23 @@ async function signature(jid, section) {
       try { ec = await require('./jurisdictionRules').read(jid, extra[j]); } catch (e) {}
       if (ec && ec._import) pendingCityKnobs(ec).forEach(function (p) { pending.push(extra[j] + '/' + p); });
     }
+    // BW9a: the two CODE-DEFINED knob domains (BW4 de-minimis, BW5 release pipeline) follow rule
+    // (d) — defaults at read time, a row written only when a city answers — so an unconfirmed knob
+    // there is usually a row that DOES NOT EXIST, invisible to any sweep of what is stored. Ask
+    // each service's reader (the same move configIntegrity check 8b makes). Without this the
+    // whole-template gate could be signed while the pre-send-review decision is still nobody's.
+    // Only unconfirmed knobs enter the signature, so a fully-confirmed install hashes unchanged.
+    try {
+      var DMPx = require('./deMinimisPolicy');
+      if ((await DMPx.read(jid)).confirmed !== true) pending.push(DMPx.DOMAIN + '/knobs/' + DMPx.KNOB);
+    } catch (e) {}
+    try {
+      var ARLx = require('./autoRelease');
+      var arNames = Object.keys(ARLx.KNOBS);
+      for (var an = 0; an < arNames.length; an++) {
+        if ((await ARLx.knob(arNames[an], jid)).confirmed !== true) pending.push(ARLx.DOMAIN + '/knobs/' + arNames[an]);
+      }
+    } catch (e) {}
     return { manifest: cfg, pending: pending.sort() };
   }
   if (section === 'identity') { return (await get("SELECT name, code, statute_name, statute_citation, exemption_model FROM jurisdiction_profiles WHERE id = ?", [jid])) || {}; }

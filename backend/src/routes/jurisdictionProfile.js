@@ -6,8 +6,30 @@ const { get } = require('../db');
 const JP = require('../services/jurisdictionProfile');
 const enforcement = require('../services/enforcement');
 const ROLE = requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER');
-const ATTEST = requireRole('SYSTEM_ADMIN', 'DIRECTOR');
+// BW9a (Kevin 2026-08-11): Senior Legal — function role ATTORNEY_REVIEWER — attests the Legal
+// Rules sections (exemption, redaction, deadlines); everything else stays Director | System
+// Admin. requireRole lets SYSTEM_ADMIN through unconditionally, so the per-section line is drawn
+// by attestScopeError below, and the refusal is worded, not just a 403.
+const ATTEST = requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'ATTORNEY_REVIEWER');
 const SADMIN = requireRole('SYSTEM_ADMIN');
+const GL = require('../services/goLive');
+function attestScopeError(req, section) {
+  var roles = (req.user && req.user.roles) || [];
+  if (roles.indexOf('SYSTEM_ADMIN') !== -1 || roles.indexOf('DIRECTOR') !== -1) return null;
+  if (section && GL.LEGAL_SECTIONS[section]) return null;
+  return 'Senior Legal attests the Legal Rules sections (exemption, redaction, deadlines). The ' +
+         (section || 'requested') + ' section is attested by the Director or a System Administrator.';
+}
+// Confirming a local policy setting follows the same ownership line, by DOMAIN: Senior Legal
+// confirms settings on the Legal Rules domains; the Director everywhere.
+var LEGAL_DOMAINS = { exemption: 1, redaction: 1, deadline: 1, clock_matrix: 1 };
+function confirmScopeError(req, domain) {
+  var roles = (req.user && req.user.roles) || [];
+  if (roles.indexOf('SYSTEM_ADMIN') !== -1 || roles.indexOf('DIRECTOR') !== -1) return null;
+  if (domain && LEGAL_DOMAINS[domain]) return null;
+  return 'Senior Legal confirms settings on the Legal Rules domains. Settings on ' +
+         (domain || 'this domain') + ' are confirmed by the Director or a System Administrator.';
+}
 
 async function activeJid() { var r = await get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'"); return (r && r.value) || null; }
 
@@ -19,10 +41,35 @@ router.post('/sync', requireAuth, ROLE, async function (req, res) {
   try { var jid = await activeJid(); await JP.sync(jid, { actor: req.user && req.user.name }); res.json(await JP.getProfile(jid)); } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.post('/attest', requireAuth, ATTEST, async function (req, res) {
+  var scope = attestScopeError(req, req.body && req.body.section);
+  if (scope) return res.status(403).json({ error: scope });
   try { var jid = await activeJid(); await JP.attest(jid, req.body && req.body.section, req.user && req.user.name); res.json(await JP.getProfile(jid)); } catch (e) { res.status(400).json({ error: e.message }); }
 });
 router.post('/unattest', requireAuth, ATTEST, async function (req, res) {
+  var scope = attestScopeError(req, req.body && req.body.section);
+  if (scope) return res.status(403).json({ error: scope });
   try { var jid = await activeJid(); await JP.unattest(jid, req.body && req.body.section); res.json(await JP.getProfile(jid)); } catch (e) { res.status(400).json({ error: e.message }); }
+});
+// BW9a — the go-live checklist's three reads/writes (Draft 6, residuals decided 2026-08-11).
+// Every local policy setting, grouped by profile section, with who/when on the confirmed ones.
+router.get('/policy-settings', requireAuth, ROLE, async function (req, res) {
+  try { res.json(await GL.settings(await activeJid())); } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// The one genuinely missing piece of plumbing Draft 6 named: set value + confirmed + who/when.
+// Never creates a setting — an unknown path is refused in words.
+router.post('/policy-settings/confirm', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'ATTORNEY_REVIEWER'), async function (req, res) {
+  var b = req.body || {};
+  var scope = confirmScopeError(req, b.domain);
+  if (scope) return res.status(403).json({ error: scope });
+  try {
+    var jid = await activeJid();
+    var out = await GL.confirm(jid, b.domain, b.path, b.value, req.user && req.user.name);
+    res.json({ confirmed: out, settings: await GL.settings(jid) });
+  } catch (e) { res.status(400).json({ error: e.message }); }
+});
+// The computed gate summary — the checklist's headline and the Director's dashboard banner.
+router.get('/go-live', requireAuth, ROLE, async function (req, res) {
+  try { res.json(await GL.summary(await activeJid())); } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.get('/enforcement', requireAuth, async function (req, res) {
   try { res.json({ devMode: await enforcement.devMode() }); } catch (e) { res.status(500).json({ error: e.message }); }

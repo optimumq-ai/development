@@ -90,6 +90,11 @@ async function write(jid, patch, actor) {
       suggested_default: SUGGESTED_DEFAULT_USD
     }
   };
+  // Confirming is a person's recorded act (Draft 6: name + date on the setting itself).
+  if ((patch || {}).confirmed === true) {
+    raw.knobs[KNOB].city_config.confirmed_by = actor || 'staff';
+    raw.knobs[KNOB].city_config.confirmed_at = new Date().toISOString().slice(0, 19).replace('T', ' ');
+  }
   await JR.write(jid, DOMAIN, raw, actor || 'staff');
   return await read(jid);
 }
