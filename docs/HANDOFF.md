@@ -6432,3 +6432,7 @@ Draft 9/10 markup.
 - Draft 10 §5's five questions are still open (ownership mapping · Director propose-vs-apply · v1 depth ·
   drill-down · re-attest vs drift-warn) — today's markup didn't touch them.
 - Then BW8 (release review + power mode) and BW9 (go-live checklist + rule editors).
+
+**Addendum, same session:** Kevin explicitly confirmed — **Draft 9's five drafted defaults are approved
+as-is.** §5 → DECIDED in the spec and draft; **BW8 is unblocked.** Draft 10's five §5 questions remain the
+only open markup.

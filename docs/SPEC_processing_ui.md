@@ -134,11 +134,13 @@ unchanged; only *where* moved:
 - **Disposition record screen**: informational (who/where/evidence per ending); reached from the
   request header; read-only for anyone with the request; **no task type**.
 
-## 5. Release Review & power mode (Draft 9 — PROVISIONAL pending Kevin's markup)
+## 5. Release Review & power mode (Draft 9 — **DECIDED**: Kevin approved the drafted defaults
+as-is, 2026-08-11 — ORO Supervisor default · narrow two-eyes · skips resurface at end of pass ·
+counts-only metrics · A/S/R keys. BW8 is unblocked.)
 
 - Task type `release_review`: spawned by the pipeline's gate branch; approval-modules routing
-  pattern; suggested default ORO Supervisor; **two-eyes rule** (never the item's last flow-task
-  completer, enforced at assignment). Approve fires the release event, approver recorded.
+  pattern; default ORO Supervisor (city-configurable); **two-eyes rule** (never the item's last
+  flow-task completer, enforced at assignment). Approve fires the release event, approver recorded.
 - **Power mode**: populate-in-place queue walker — Approve&next / Skip / Return-with-note
   (A/S/R), clock-aware order, progress strip, substance (withholding log w/ citations, notice,
   flags) on the surface; per-item recorded acts; **no bulk approve**. PowerQueue is a
@@ -212,7 +214,6 @@ source for templates.
 | Item | Where |
 |---|---|
 | Kevin's full screen-by-screen pass (docx was pre-review notes) | all drafts |
-| Draft 9 markup: role default · two-eyes scope · skip resurfacing · metrics (counts-only drafted) · A/S/R keys | Draft 9 §5 |
 | Draft 10 markup: ownership mapping · Director-may propose-vs-apply · v1 depth (all 15 vs high-touch 6) · drill-down in v1 · strict re-attest vs drift-warn | Draft 10 §5 |
 | Draft 1 residuals: trigger-list completeness · visual grammars confirmation · inline-waiver conditional · default expand state · queue columns | Draft 1 §5 |
 | Draft 2 residuals: first-look banner tone · de-minimis threshold config vs judgment · "Path here" depth · profile visibility | Draft 2 §5 |
@@ -225,7 +226,8 @@ source for templates.
 
 *Decision log: 2026-07-28 Kevin docx markup (steps 1–4 applied `8ce9965`→`06b329e`) ·
 2026-07-29 item-by-item session (five rev-2 decisions, `7eccebe`) · 2026-07-29 Draft 6 scope
-(editors drafted now, `4beb375`) · this spec v1 · 2026-08-11 terminology (below).*
+(editors drafted now, `4beb375`) · this spec v1 · 2026-08-11 terminology (below) ·
+2026-08-11 Draft 9 ratified as drafted (§5 → DECIDED, BW8 unblocked).*
 
 **Terminology (Kevin, 2026-08-11): "Local Policy Settings" replaces "city knobs".** The old
 term read as primitive next to the rest of the application's vocabulary. Applies to ALL

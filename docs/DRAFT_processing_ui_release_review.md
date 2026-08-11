@@ -1,6 +1,8 @@
 # DRAFT — Processing UI, session 1 (screen 9): Release Review & Power Mode
 
-**Status:** DESIGN DRAFT for Kevin's markup, 2026-07-29. Not a spec, not for build. Ninth screen,
+**Status:** RATIFIED 2026-08-11 — Kevin approved the §5 drafted defaults as-is ("Draft 9 looks
+good", confirmed explicitly). All five §5 questions are answered by their drafted positions;
+BW8 may build. Originally: DESIGN DRAFT for Kevin's markup, 2026-07-29. Ninth screen,
 born from the 7/29 item-by-item session on Draft 8 rev 2's pre-send review gate; becomes part of
 `SPEC_processing_ui.md` with the rest when the shape settles.
 **Mockup:** `docs/mockups/PROCESSING_UI_draft9_release_review.html` (tracked; viewing copy in
@@ -78,7 +80,9 @@ gets crammed into. Release review is the first instance. Obvious future customer
 its own tuned variant when its turn comes: the `close_approval = approval_required` supervisor
 queue (Draft 8), routed waiver decisions (Draft 2). None of those build in v1.
 
-## 5. Open questions for Kevin
+## 5. Open questions for Kevin — **ALL ANSWERED 2026-08-11: approved as drafted** (1: ORO
+Supervisor suggested default · 2: narrow scope, last-completer only · 3: resurface at end of
+pass · 4: counts only, no timing · 5: A/S/R stand)
 
 1. **Default role** — ORO Supervisor as suggested default, or Director-configurable-only with no
    suggestion?
