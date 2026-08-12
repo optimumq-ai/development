@@ -44,6 +44,11 @@ Task lifecycle, routing (smart/pool/load-balance), roles, My Tasks, notification
 
 Stages, workflow rules/nodes, triage, assignment, history, clocks/deadlines/tolling, tickler.
 `requests.js, workflow.js, workflowModel.js, clocks.js, tickler.js; workflowEngine, deadlineCalc, tolling, tickler` · Pages: RequestQueuePage, RequestWorkspacePage, NewRequestPage, WorkflowPage, WorkflowMapPage, WorkflowSimulatorPage, TicklerPage, DashboardPage
+**Operational dashboard revision (SPECCED 2026-08-12, NOT BUILT):** `SPEC_operational_dashboard.md` —
+configurable panes (per-user, role defaults), budget-lateness buckets (simple model DECIDED by Kevin:
+one editable budget value per task type, 1d/2d/>2d overrun buckets, paused tasks excluded), the budget
+editor the deferred "Slice I brain" never delivered, one ops-summary aggregation endpoint, Recent
+Requests retired. Verified first: measurement built, config surface never was (Kevin's recall correct).
 
 ## 6. ✅ Fees, Estimates & Payments — `SPEC_tasks_roles_mrr_fees.md` (intake/waiver) 
 Fee engine (jurisdiction rules), estimate profiles, notices, accept/decline/deposit, payments/settlement/cash drawer, objections, nonpayment, waiver.
