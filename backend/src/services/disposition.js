@@ -271,6 +271,11 @@ async function deriveParent(childId) {
       actorName: 'System', action: 'PARENT_DERIVED_COMPLETE',
       notes: 'All ' + kids.length + ' item(s) have ended, so the request derives Complete. A parent is never closed by hand.'
     });
+    // Certification sheet (SPEC_record_verification.md §2.4): the sheet covers the WHOLE request, so it is
+    // generated exactly here — at completion, regardless of the last child's disposition. Idempotent inside;
+    // fails open (a sheet fault must never block the derivation that already happened).
+    try { await require('./certificationSheet').onParentComplete(pid); }
+    catch (eC) { console.error('[certification sheet]', eC && eC.message); }
     return { derived: true, parentId: pid, parentState: 'complete', openChildren: 0 };
   }
   // At least one child is live. If the parent had derived Complete, it must UN-derive.

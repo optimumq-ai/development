@@ -98,6 +98,14 @@ async function paymentState(rid) {
 async function loadComponents(requestId) {
   var reqRow = await get('SELECT * FROM requests WHERE id = ?', [requestId]);
   if (!reqRow) return null;
+  // `certification_requested` is a PARENT fact (children carry a forced 0 since 2026-08-12, exactly like
+  // is_mrr) — and estimates run per WORK ROW, so reading it off the addressed row silently dropped a
+  // requested certification from every child-keyed estimate. Resolve it through the parent, in the one
+  // place both readers (defaultCertification, the panel's `certification.requested`) load the row.
+  if (reqRow.master_request_id) {
+    var pRow = await get('SELECT certification_requested FROM requests WHERE id = ?', [reqRow.master_request_id]);
+    if (pRow) reqRow.certification_requested = pRow.certification_requested;
+  }
   var rows;
   if (reqRow.is_mrr && !reqRow.master_request_id) {
     var kids = await all('SELECT * FROM requests WHERE master_request_id = ?', [requestId]);

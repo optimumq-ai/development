@@ -174,6 +174,7 @@ export default function RequestWorkspacePage() {
               <h1 style={{fontSize:'22px',fontWeight:'700',margin:'0',fontFamily:'monospace'}}>{request.request_number}</h1>
               {sc&&<span style={{background:sc.bg,color:sc.color,fontSize:'12px',fontWeight:'600',padding:'4px 12px',borderRadius:'20px'}}>{STAGE_LABELS[request.stage]||request.stage}</span>}
               {request.is_mrr?<span style={{background:'#CCFBF1',color:'#0F766E',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>MRR</span>:null}
+              {request.certification_requested?<span title="The requestor asked for certified copies. A certification sheet is generated when the request completes." style={{background:'#EEF2FF',color:'#3730A3',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>✓ CERTIFICATION REQUESTED</span>:null}
               {request.legal_flag?<span style={{background:'#FEF2F2',color:'#DC2626',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>⚖ LEGAL HOLD</span>:null}
               {od?<span style={{background:'#FEF2F2',color:'#DC2626',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>⚠ OVERDUE</span>:null}
               {isComplete?<span style={{background:'#F0FDF4',color:'#166534',fontSize:'12px',fontWeight:'700',padding:'4px 10px',borderRadius:'20px'}}>✓ CLOSED</span>:null}

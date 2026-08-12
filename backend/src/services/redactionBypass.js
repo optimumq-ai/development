@@ -69,10 +69,12 @@ async function recordBypass(file, basis, reuse, ctx) {
   await run('DELETE FROM fulfilled_records WHERE source_file_id = ?', [file.id]);
   var frId = uuidv4();
   var baseTitle = reuse.title || (file.original_name || 'Released record').replace(/\.[a-z0-9]+$/i, '');
+  // The verification anchor (§2.2). No buffer in memory on the reuse path — hash the stored output file.
+  var contentSha = await require('./fileHash').ofRequestFile(reuse.outputFileId);
   await run(
-    'INSERT INTO fulfilled_records (id, request_id, source_file_id, output_file_id, title, summary, record_type_id, department_id, keywords, public_availability, page_count, released_by, released_at, status) ' +
-    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),?)",
-    [frId, file.request_id || null, file.id, reuse.outputFileId, baseTitle, reuse.summary || baseTitle, reuse.recordTypeId || null, null, baseTitle, 'released', reuse.pageCount || null, ctx.actorName || 'System', 'released']
+    'INSERT INTO fulfilled_records (id, request_id, source_file_id, output_file_id, title, summary, record_type_id, department_id, keywords, public_availability, page_count, released_by, released_at, status, content_sha256) ' +
+    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),?,?)",
+    [frId, file.request_id || null, file.id, reuse.outputFileId, baseTitle, reuse.summary || baseTitle, reuse.recordTypeId || null, null, baseTitle, 'released', reuse.pageCount || null, ctx.actorName || 'System', 'released', contentSha]
   );
   // A published source stays public-ready on reuse; a private prior release stays unpublished.
   if (reuse.published) {

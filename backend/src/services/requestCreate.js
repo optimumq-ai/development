@@ -301,6 +301,11 @@ async function createRequest(fields, opts) {
             'VALUES (?, ?, ?, ?, ?, ?, ' + placeholders + ')',
             [childIds[k], requestNumber + '-' + (k + 1), 'intake', 'active', parentId, k + 1]
               .concat(COLUMNS.map(function (c) {
+                // `certification_requested` is a PARENT fact (§5.1) — the citizen certifies the REQUEST,
+                // once. Children used to inherit the copy-down, which let a per-child estimate price
+                // certification once per child (found 2026-08-12, SPEC_record_verification.md §1.4).
+                // Forced 0 here exactly as is_mrr is; readers resolve it through the parent.
+                if (c === 'certification_requested') return 0;
                 return Object.prototype.hasOwnProperty.call(kids[k], c) ? kids[k][c] : cols[c];
               }))
           );

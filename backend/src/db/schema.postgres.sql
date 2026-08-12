@@ -1588,3 +1588,8 @@ ALTER TABLE requests ADD COLUMN IF NOT EXISTS settlement_by TEXT;
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS settlement_outcome TEXT;
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS settlement_reconciliation_id TEXT;
 ALTER TABLE requests ADD COLUMN IF NOT EXISTS settlement_amount REAL;
+
+-- Verification anchor (SPEC_record_verification.md §2.2, 2026-08-12): SHA-256 of the delivered output file,
+-- computed at release for EVERY record — certification gates what is PRESENTED, not what is RECORDED
+-- (measure-always). The typeable verification code is DERIVED (first 16 hex), never stored separately.
+ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS content_sha256 TEXT;

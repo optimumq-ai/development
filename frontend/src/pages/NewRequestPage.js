@@ -12,7 +12,7 @@ const CHANNELS = [{ value: 'portal', label: 'Public Portal' },{ value: 'phone', 
 const REQUESTOR_TYPES = [{ value: 'individual', label: 'Individual' },{ value: 'journalist', label: 'Journalist / News Media' },{ value: 'nonprofit', label: 'Nonprofit Organization' },{ value: 'attorney', label: 'Attorney' },{ value: 'researcher', label: 'Researcher' },{ value: 'business', label: 'Business' }];
 const DELIVERY = [{ value: 'email', label: 'Email' },{ value: 'mail', label: 'Physical Mail' },{ value: 'pickup', label: 'In-Person Pickup' }];
 
-const EMPTY_FORM = { requestorName:'', requestorEmail:'', requestorPhone:'', requestorType:'individual', deliveryMethod:'email', description:'', classification:'standard', departmentId:'', feeWaiverRequested:false, submissionChannel:'phone', isMrr:false, identityConfirmed:false };
+const EMPTY_FORM = { requestorName:'', requestorEmail:'', requestorPhone:'', requestorType:'individual', deliveryMethod:'email', description:'', classification:'standard', departmentId:'', feeWaiverRequested:false, certificationRequested:false, submissionChannel:'phone', isMrr:false, identityConfirmed:false };
 
 export default function NewRequestPage() {
   const nav = useNavigate();
@@ -327,6 +327,12 @@ export default function NewRequestPage() {
               <label style={{display:'flex',alignItems:'center',gap:'10px',cursor:'pointer'}}>
                 <input type="checkbox" checked={form.feeWaiverRequested} onChange={function(e){setF('feeWaiverRequested',e.target.checked);}} style={{width:'16px',height:'16px'}}/>
                 <div><div style={{fontSize:'14px',fontWeight:'600'}}>Fee Waiver Requested</div><div style={{fontSize:'12px',color:'#9CA3AF'}}>News media, nonprofit, or researcher status</div></div>
+              </label>
+              {/* Parity with the portal wizard's certification opt-in — staff intake used to drop it
+                  silently (SPEC_record_verification.md §1.5). Parent fact; feeds the fee engine. */}
+              <label style={{display:'flex',alignItems:'center',gap:'10px',cursor:'pointer'}}>
+                <input type="checkbox" checked={form.certificationRequested} onChange={function(e){setF('certificationRequested',e.target.checked);}} style={{width:'16px',height:'16px'}}/>
+                <div><div style={{fontSize:'14px',fontWeight:'600'}}>Certification Requested</div><div style={{fontSize:'12px',color:'#9CA3AF'}}>Include a page attesting the records are true and accurate. Additional fees may apply.</div></div>
               </label>
               {/* The old Multi-Record checkbox is gone: is_mrr is DERIVED from how many records are
                   actually described (§4.1 — a fact, not a mode). Add records below instead. */}

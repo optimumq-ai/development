@@ -135,6 +135,9 @@ router.get('/:id', requireAuth, async function(req, res) {
     'SELECT r.*, ' +
     scope.numberExpr('r') + ' AS request_number, ' +
     scope.parentFact('is_mrr', 'r') + ' AS is_mrr, ' +
+    // Parent fact like is_mrr (children carry a forced 0 since 2026-08-12): fulfillment staff must see
+    // that the requestor asked for certification — the opt-in previously reached no human at all.
+    scope.parentFact('certification_requested', 'r') + ' AS certification_requested, ' +
     'r.master_request_id AS parent_id, ' +
     'd.name as department_name, d.color as department_color ' +
     'FROM requests r' + scope.numberJoin('r') +

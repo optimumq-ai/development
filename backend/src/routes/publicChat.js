@@ -756,7 +756,11 @@ router.get('/library/map', async function(req, res) {
 router.get('/file/:id', async function(req, res) {
   try {
     var fileId = req.params.id;
-    var ok = await all("SELECT 1 FROM fulfilled_records WHERE output_file_id = ? AND status = 'released' LIMIT 1", [fileId]);
+    // released + PUBLISHED, like every sibling library query. This route omitted the published gate
+    // (found 2026-08-12, SPEC_record_verification.md §5): released-to-requestor ≠ public
+    // (SPEC_public_library), and a record the city chose not to publish must not be served to anyone
+    // holding the file UUID. The verification viewer gets its own code-gated door, not this one.
+    var ok = await all("SELECT 1 FROM fulfilled_records WHERE output_file_id = ? AND status = 'released' AND COALESCE(published,0) = 1 LIMIT 1", [fileId]);
     if (!ok.length) return res.status(404).send('Not found');
     var rows = await all("SELECT filename, original_name, mimetype FROM request_files WHERE id = ? LIMIT 1", [fileId]);
     if (!rows.length) return res.status(404).send('Not found');
