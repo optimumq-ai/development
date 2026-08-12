@@ -6763,3 +6763,41 @@ Slice 3 remains: the portal Verify a Certified Record flow (SPEC §3–§4 — l
 verify, the code-gated visual viewer, the second portal-home button). Design decisions all made; the
 anchors it needs (hashes, sheet, parent fact) are now live. Also still open: §6.2 stage glosses,
 §2.6/§8.3 page stamping, and Kevin's testing/demo list.
+
+---
+
+## 2026-08-12 (h) — slice 3: the verification portal BUILT — both portal features COMPLETE (`98cbb72`)
+
+### What was built (SPEC_record_verification.md §3–§4, §8.1)
+Three public doors with three deliberate disclosure levels (all `checkRate`-limited, read-only):
+`POST /verify/lookup` (number → certified-existence + record list, the feature note's exact refusal
+wordings, never a hash/file-id/name) · `POST /verify/code` (number+code → prefix match on
+`content_sha256`, scoped to the request, normalization-tolerant) · `GET /verify-view` (number+code →
+streams the certified PDF; §8.1: the code IS the access key, so content — including
+certified-but-unpublished records — is never enumerable; non-documents answer in words and point at file
+verification). Portal home carries both buttons; `VerifyRecordModal` (v2 idiom) walks
+number → gate → file-or-visual → code → verdict or viewer.
+
+### Traps stepped in and recorded
+1. **Route shadow**: `GET /verify/view` was captured by the earlier `GET /verify/:token`
+   (email verification) — the viewer answered "Invalid Link". Renamed `/verify-view` (the
+   `verify-status` idiom). Caught by the harness.
+2. **Suite flake**: one full run failed 1935/1936 — the harness closed children while the portal
+   submit's background intake-advance was mid-flight. Hardened with the wait-for-workflow-decision
+   idiom (verify_mrr_children); two subsequent full runs green.
+3. **A session restart orphaned a running suite** — `npm test` survived detached; the fresh session
+   must CHECK for a live `run_suite` process before launching another (two suites fight over
+   `optimumq_test` and :3101). An until-loop watcher on the log picked up the result.
+
+### Evidence
+`verify_record_verification` 28/28; **full suite 1951/1951, live untouched** (twice). Seven UI states
+screenshotted on the deployed build, zero page errors, sent to Kevin (`exchange/verify_*.png`; viewer
+frame blank in headless shots only — no PDF plugin; the endpoint's 200/%PDF is harness-asserted). Live
+after deploy: unknown number → no_match, real uncertified request → not_certified, both with the spec'd
+sentences. Kevin approved the status-check visuals earlier; verify visuals delivered.
+
+### Where this leaves things
+**Both features from Kevin's note are BUILT, tested, deployed.** The full loop is live: certified
+request → release hashes files → sheet at completion → citizen verifies by code or side-by-side view.
+Open: §6.2 stage glosses, §2.6/§8.3 page stamping (both OPEN — Kevin), the erpSettlement 'none'-mode
+actualCost note, Kevin's screen-by-screen pass, the go-live flip, and his testing/demo list.
