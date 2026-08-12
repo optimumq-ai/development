@@ -6607,3 +6607,46 @@ jurisdiction card and the help assistant's menu knowledge now name Jurisdiction 
 `?tab=jurisdiction` links · both redirects asserted). Evidence: retirement harness 22/22; **full
 suite 1892/1892, live untouched**; redirects verified in the browser (old tab absent, both legacy
 URLs land on the checklist, zero page errors).
+
+---
+
+## 2026-08-12 (d) — the pre-go-live smoke: five beats green, two real bugs caught and fixed (`a7db704`)
+
+### The smoke (Kevin asked; the standing definition: submit → route → estimate → search → deliver)
+Request `2026-000005`, created through the REAL portal path on live and **purged after — the live
+census matches the pre-smoke counts exactly on all seven touched tables**. Actors were the demo
+staff (Steve Russ drove the flow, Kerri Russ approved), never Kevin.
+1. **Submit** — parent+child wrapped right; the primary 5-calendar-day `respond` clock +
+   `certify_delay` running ON THE PARENT; classified "Building permits" @100% and auto-routed.
+2. **Route** — the workflow engine advanced intake → record_search itself; `record_search` +
+   `estimate` tasks spawned.
+3. **Estimate** — $0.30 (3 pages; TX ≤50-page rule correctly strips labor); **de-minimis waived**
+   under the confirmed $25 threshold, reason required, recorded by name.
+4. **Search** — real file uploaded, marked Include in Response, the found gate enforced,
+   auto-advance to redaction_review.
+5. **Deliver** — the pre-send review RAISED, two-eyes approve by a second person, release fired:
+   Closed – Delivered, closure letter to the citizen carrying the PARENT's number
+   (`mkhargrove+smoke@gmail.com` holds the letter), parent derived Complete.
+
+### The two bugs (`a7db704`) — both invisible to the suite, both day-one landmines
+1. **A de-minimis waive never satisfied §5.9.** The waive zeroes the request-level total but
+   preserves component pricing as evidence; the release gate read the share off that preserved
+   arithmetic — payment_due forever, and a release-review approve refusing to ship a record a
+   person had decided owes nothing. Gate now reads the DECISION (recon still supersedes).
+2. **The pre-send gate was mute in live's exact configuration.** With `auto_release` OFF the
+   pipeline returned before its divert branch, so the review the confirmed knob promises was never
+   raised — a finished single-record request sat at delivery forever. The unarmed pipeline now
+   raises the review: a task, nothing shipped, no bypasses written, idempotent.
+   WHY THE SUITE MISSED BOTH: every harness ran the pipeline armed, and none crossed the waive
+   into the release gate. Regression assertions added where each belongs (bw4 G9, bw8 F1–F4).
+   **Full suite 1897/1897, live untouched.**
+
+### Noted for a later pass (not fixed here)
+`releaseGate.componentCharged` still reports the pre-waive share on a waived estimate; whether
+erpSettlement/revenueAllocation should read the waive the same way deserves its own look before
+any real money flows through a waived MRR.
+
+### Where this leaves go-live
+Every pill green, integrity clean, smoke green end to end. **The one remaining act is Kevin's:
+the enforcement flip, via the ceremony on Jurisdiction Configuration.** Next session (Kevin):
+things to build in for TESTING and DEMO — his list, to be defined.
