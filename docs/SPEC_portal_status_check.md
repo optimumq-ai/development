@@ -40,7 +40,6 @@ Clicking **Check Request Status** opens a modal (no navigation away from the lan
 │  confirmation email and looks like 2026-000123.       │
 │                                                       │
 │  Request number   [ 2026-______ ]                     │
-│  Email address    [ ____________ ]   (see §6.1)       │
 │                                                       │
 │                       [ Cancel ]  [ Check Status ]    │
 └───────────────────────────────────────────────────────┘
@@ -67,9 +66,10 @@ the suffix and answering for the parent — a citizen who somehow holds a compon
 **MRR (n > 1)** — returns:
 - Requestor name, parent request number, and the parent roll-up the queue shows (`N records`,
   `Complete` / `In Process` from `parentState()`).
-- One line per child, exactly as the queue's Request Number column renders children: the `–{child_no}`
-  subrequest marker (never the internal full suffixed number), the summarized description
-  (`component_label`, else the 60-character description snippet), and that child's stage label.
+- One line per child, in the queue's Request Number column grammar: the `–{child_no}` subrequest marker
+  (never the internal full suffixed number), the summarized label (`component_label`; when absent, the
+  generic "Record item n" — NOT the staff queue's raw-description fallback, per §6.1), and that child's
+  stage label.
 
 ```
 ┌─ Request 2026-000123 ─────────────────────────────────┐
@@ -83,8 +83,7 @@ the suffix and answering for the parent — a citizen who somehow holds a compon
 └───────────────────────────────────────────────────────┘
 ```
 
-**No match** — one uniform answer regardless of WHY (number unknown, or identity check failed — see §6.1),
-so the endpoint is not an oracle for which numbers exist:
+**No match** — one uniform answer:
 > "We could not find a request matching what you entered. Check the number against your confirmation email,
 > or contact {agency contact} for help."
 
@@ -94,7 +93,7 @@ so the endpoint is not an oracle for which numbers exist:
 (`publicChat.js`), **rate-limited per IP with the existing `checkRate`** (the same guard as
 `/api/public/chat`; sequential numbers make unthrottled lookup a scraping surface).
 
-Request: `{ requestNumber, email }` (email per §6.1).
+Request: `{ requestNumber }` (number only — §6.1 decision).
 Response: always `200`.
 - `{ found: false, message }` — the uniform no-match answer.
 - `{ found: true, requestNumber, requestorName, isMrr, processStatus, stage, stageLabel, children: [ { childNo, label, stage, stageLabel } ] }`
@@ -110,26 +109,35 @@ money, files, staff names, teams, deadlines, or internal ids is ever returned.
   these can be a later additive decision; each is a disclosure decision Kevin has not made.)
 - Notifying staff that a lookup happened.
 
-## 6. Open decisions `[OPEN — Kevin]`
+## 6. Decisions
 
-### 6.1 The identity gate — what unlocks the answer
-Request numbers are **sequential** (`2026-000005`, `nextRequestNumber`), and the prior design position is
-explicit: *"Do NOT verify by the raw request number — it is sequential / guessable… Human reference ≠ access
-key"* (`DESIGN_split_canvas_intake.md`, certification section). A lookup keyed on the number alone returns
-the **requestor's name** to anyone who types consecutive numbers — i.e. a harvestable list of who is asking
-the city for what.
+### 6.1 The identity gate `[DECIDED 2026-08-12 — Kevin: number only]`
+Kevin's call, fact-checked the same day: **the lookup is keyed on the request number alone and may display
+the requestor's name.** Records requests are themselves public records essentially everywhere — federal FOIA
+treats a received request as a public record (requester PII redactable under Exemption 6), no state statute
+was found making a request or requester identity confidential wholesale, and competitor products publish
+entire request logs publicly. The earlier "human reference ≠ access key" note governs ACCESS TO RECORD
+CONTENT (see `SPEC_record_verification.md` §8.1), not status metadata.
 
-| Option | Citizen enters | Anyone-with-a-number sees | Friction |
-|---|---|---|---|
-| A (as written in the feature note) | number | name + stages | none |
-| **B (recommended)** | number + the email on the request | nothing (uniform no-match unless both match) | one extra field the requestor certainly has |
-| C | number + a per-request lookup token printed in the confirmation email | nothing | citizen must find the token; confirmation email must change |
+The fact-check DID surface three narrow lines the lookup must respect:
 
-Recommendation: **B.** It discloses status only to someone who already knows both facts, costs one field,
-and needs no schema or email changes. (TX makes requestor identity largely public on paper, but serving it
-as a free bulk-enumeration API is a different act than answering a records request about requestors.)
+1. **Never display contact PII.** TX Gov't Code §552.137 makes a member of the public's email address
+   confidential; NJ's 2024 OPRA amendments exempt personal email, home address, and birth date as PII. The
+   response allowlist (§4) already contains none of these — this is now a contract, not an accident.
+2. **Anonymous requests exist** (FL/CA/OH may not require identity), so the name field must render an absent
+   or pseudonymous name gracefully.
+3. **Rate limiting is the enumeration answer.** Bulk harvesting by data brokers is exactly what NJ's 2024
+   amendments legislated against (and WA RCW 42.56.070 bars giving lists of individuals for commercial
+   purposes). A human checking their request is a handful of lookups; `checkRate` stays mandatory.
 
-### 6.2 Stage labels, citizen-facing glosses
+Residual nuance, decided conservatively (reversible presentation choice): for MRR child lines the public
+modal shows `component_label` (the summarized label) or, when absent, a generic "Record item n" — NOT the
+raw description snippet the staff queue falls back to. Raw request text can itself contain sensitive
+personal content ("records about my …"); competitor public logs are staff-curated summaries for the same
+reason. The requestor loses nothing (they wrote the descriptions); a stranger sees stage progress, not
+request prose.
+
+### 6.2 Stage labels, citizen-facing glosses `[OPEN — Kevin]`
 Kevin's note: stage "as displayed on request queue page" — honored verbatim in §3. Optional refinement: a
 one-line plain-language gloss under the pill (e.g. Record Search → "Staff are locating the records you
 asked for"), per the terminology register (plain names, consequences stated simply). Default if undecided:
@@ -140,7 +148,6 @@ labels only, no glosses.
 `backend/tests/verify_status_check.js` (via `npm test` only, `testEnv.enforce()`):
 - n=1 lookup returns name + stage label; MRR lookup returns children with `–n` markers, labels, per-child
   stages, and the parent roll-up; child-suffixed input resolves to the parent.
-- Identity gate (per §6.1 decision): wrong email → the SAME uniform no-match body as an unknown number
-  (assert byte-equal messages — the no-oracle property).
-- Rate limit fires; response never contains money/deadline/staff/internal-id fields (schema allowlist
-  assertion).
+- Child lines carry `component_label` or the generic "Record item n" — NEVER raw description text (§6.1).
+- Rate limit fires; response never contains email/phone/address/money/deadline/staff/internal-id fields
+  (schema allowlist assertion — §6.1's PII contract).
