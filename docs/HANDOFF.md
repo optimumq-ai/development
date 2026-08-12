@@ -6475,3 +6475,63 @@ BW1–BW8 all BUILT. **BW9 (go-live checklist + rule editors) is the last wave**
 five open questions (ownership mapping · Director propose-vs-apply · v1 depth · drill-down · re-attest
 vs drift-warn). The pre-send gate itself remains an unconfirmed ⚠ policy setting on live — correctly:
 turning it on is a Director's act, on the go-live checklist BW9 builds.
+
+---
+
+## 2026-08-11 (c) → 08-12 — decisions cleared, BW9a built: the go-live checklist end to end (`ff8f39c`..`1b89add`)
+
+### Decisions (Kevin, all recorded in spec + drafts, two docs commits)
+1. **Draft 10 §5 — all five ratified as drafted:** Legal Rules owns `deadline`+`clock_matrix` · Director
+   edits on Legal domains route to Senior Legal (no self-apply) · v1 = the high-touch six renderers ·
+   research-text drill-down IN · drift-warn only. **BW9 unblocked.**
+2. **Draft 6 residuals — all four decided:** Senior Legal attests the Legal sections (ATTEST widens) ·
+   gate summary banners the Director's home until ready · go-live gets a **guided ceremony**
+   (GateChecklist → typed confirm → SADMIN flip) · unattest keeps confirm-dialog friction, no reason
+   note. (Policy-setting evidence drill-down stays later work — not asked.)
+
+### A live-state correction the record needs
+The BW8 handoff's claim "the pre-send gate remains an unconfirmed ⚠ policy setting on live" is **stale**:
+on live, **every policy setting was confirmed by Kevin on 2026-08-01** (the gap-week session), including
+`pre_send_review: confirmed ON` and all 15 sections attested. Live TX reads READY; only dev-mode is still
+ON — i.e. live sits exactly at the ceremony this wave built.
+
+### fix(finance) `335e302` — a §552.2615 compliance bug found by the suite going red
+`settle()` wrote its own reconciliation BEFORE asking the overage watchdog; since `feeReissue.pending`
+reads the NEWEST reconciliation, the settle run's own (nobody-notified) row could shadow the flagged one
+and the final invoice would bill the unnotified overage the cap forfeits. Same-second created_at ties
+usually hid it; my extra sync reads shifted suite phase and bw7 F4/F5 flipped red in full runs only
+(green alone, green in every subset — the stash bisect + prefix run pinned it). Fix: judge the cap on
+the pre-settlement state. Lesson recorded: **a harness that fails only in the full suite can be a real
+race in PRODUCT code, not test pollution — bisect before blaming the harness.**
+
+### BW9a — the go-live checklist (backend `c7689b7`, frontend `1b89add`)
+- **`services/goLive.js`**: `settings()` enumerates every local policy setting by profile section —
+  template `city_config` edges, eligibility dimensions, and the CODE-DEFINED knob domains asked from
+  their readers (rule d: the row may not exist; a row sweep cannot see the open decision). `confirm()`
+  is Draft 6's missing plumbing: value + confirmed + who/when on the setting, never creates one,
+  validates before writing. `summary()` computes the gate pills.
+- **The whole-template gate now sweeps `release_pipeline` + `fee_de_minimis`** — before this, attest
+  could sign a city whose pre-send decision was nobody's. Pending-only in the signature, so a
+  fully-confirmed install hashes unchanged (live TX verified: no drift).
+- **ATTEST widened**: ATTORNEY_REVIEWER attests exemption/redaction/deadlines only, worded refusal
+  elsewhere; same line scopes confirm by domain; READ includes the attorney (can't attest what you
+  can't see).
+- **Screens**: readiness index (computed pills + StatusChip rows + owner labels) · section detail
+  (policy-setting cards, suggestion chip stays after confirm, attest panel refuses in words) · rails
+  (proposals → /admin?tab=updates, integrity, enforcement) · **guided ceremony** (typed GO LIVE) ·
+  dashboard GoLiveBanner. New primitives: StatusChip, GateChecklist.
+
+### Evidence
+`verify_bw9_golive` 35/35 — imports TX fresh and WALKS the checklist with the API's own enumeration;
+snapshot/restore so e2e TX/OH are undisturbed. **Full suite 1852/1852, live untouched.** Visual: test
+stack via route interception — NOT-READY index, disposition detail (the release-pipeline pair),
+de-minimis confirmed through a real UI click (who/when chip renders), banner, ceremony popup, LIVE
+state after the flip; zero page errors (`backend/tests/artifacts/bw9_*.png`, untracked).
+
+### Where this leaves the waves
+**BW9a BUILT.** The last remaining slice is **BW9b — the rule editors** (Draft 10, fully decided):
+section-screen content zones, edit-as-proposal composer (`origin:'editor'`), compose-time WS1–WS3
+validators with worded refusals, the high-touch six renderers (exemption · redaction · fee · deadline ·
+clock_matrix · clarification; rest read-only pretty views), research-text drill-down. Note for BW9b: the
+v1 `/admin?tab=jurisdiction` (JurisdictionProfilePage) still exists alongside the new checklist — retire
+or redirect it in that pass.
