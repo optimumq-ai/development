@@ -19,6 +19,10 @@ Derived 2026-07-08 from a structural scan of ALL backend routes (36), services (
 ## 1. ✅ Public Portal & Intake Agent
 Citizen-facing entry: landing, AI chat agent (phases, quick replies, MRR detection, fee capture), form fallback, portal search.
 `publicChat.js, requests.js(/public)` · Pages: PublicPortalPage · Related: classify
+**Portal status check + record verification (SPECCED 2026-08-12, NOT BUILT):** `SPEC_portal_status_check.md`
+(citizen status lookup by parent number) and `SPEC_record_verification.md` (certified-record authenticity —
+finishes the half-built certification first: parent-fact placement, release-time SHA-256, the certification
+sheet the wizard already promises; then the portal verify flow). Both DRAFT pending Kevin's marked decisions.
 
 ## 2. ✅ Public Ready Records Library
 Public browse/search/map of released records; auto-publish path.
