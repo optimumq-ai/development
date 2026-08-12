@@ -6801,3 +6801,49 @@ sentences. Kevin approved the status-check visuals earlier; verify visuals deliv
 request → release hashes files → sheet at completion → citizen verifies by code or side-by-side view.
 Open: §6.2 stage glosses, §2.6/§8.3 page stamping (both OPEN — Kevin), the erpSettlement 'none'-mode
 actualCost note, Kevin's screen-by-screen pass, the go-live flip, and his testing/demo list.
+
+---
+
+## 2026-08-12 (i) — the smoke: seven beats green end to end, TWO real bugs caught and fixed (`6514c8c`, `294fac6`)
+
+### The smoke (Kevin asked; the standing definition PLUS today's builds, all live)
+Request `2026-000005`, real portal path, WITH the certification opt-in, driven by a scripted harness
+(scratchpad smoke.js) at machine speed. Steve Russ drove, Kerri Russ approved. All 27 assertions green:
+1. **Submit** — parent+child wrapped; certification parent-only (child forced 0); statutory clocks on the
+   parent (respond 5cd primary + certify_delay 10bd).
+2. **Route** — the engine advanced intake → record_search itself; both tasks spawned; the PUBLIC STATUS
+   CHECK reported the request mid-flight.
+3. **Estimate** — $0.30 (3 pages, TX ≤50-page labor strip); de-minimis waived by name; the waived snapshot
+   carried componentCharged 0 IN THE ARITHMETIC (slice (e), live).
+4. **Search** — real PDF uploaded, Include in Response, found gate, auto-advance.
+5. **Redact** — job → apply (0 zones, Vaughn); the release carried `content_sha256` (slice 2, live);
+   §5.9 gate read the waive at the delivery advance.
+6. **Deliver** — pre-send review RAISED itself; Kerri approved; Closed – Delivered; parent derived
+   Complete; closure letter SENT (mkhargrove+smoke@gmail.com); **the CERTIFICATION SHEET generated**.
+7. **Verify** — lookup answered certified; the sheet's code VERIFIED the file; number+code opened the
+   viewer (%PDF); wrong code never did; status check answered Complete.
+Purged after; **census parity on all 21 counted tables** (one manual assist — below).
+
+### The two bugs (both invisible at human speed, both fixed and regression-locked same-day)
+1. **`6514c8c` — snapshot order was a coin flip.** created_at is second-granular; the scripted flow wrote
+   the estimate and the waive in ONE second, and every latest-snapshot read resolved the tie arbitrarily —
+   the pipeline read the PRE-WAIVE snapshot and demanded the waived $0.30 (§5.9 resurrected by timestamp
+   collision). `request_fee_estimates.seq` (monotonic, backfilled, sequence bumped) + tiebreak on every
+   read. bw4 G9g forces identical timestamps and demands the waive win.
+2. **`294fac6` — the triage race duplicated releases.** The redaction triage sweep auto-bypassed the clean
+   file in the same second the manual job applied: DELETE-by-source interleaved, both inserted, one file
+   carried TWO released records. `ux_fulfilled_source` unique partial index + all three writers upsert ON
+   CONFLICT. Harness proves the constraint bites.
+
+### Census learnings (for the next smoke)
+- `task_events` (trigger audit) rows do NOT cascade with requests — the purge must delete them by
+  request_id first (smoke.js fixed; run 6 needed a surgical 8-row cleanup, ids verified by task lifecycle).
+- **Live carries ~74 PRE-EXISTING orphaned task_events** from older deletions (incl. earlier smoke runs'
+  purges before this was understood) — harmless audit debris; a cleanup pass candidate, maybe with a
+  task_id FK. Recorded, not acted on.
+- Smoke runs 1–5 fell to driver bugs (route mounts, races my own script had), each purged before retry;
+  only runs 4 and 5 surfaced the real defects above.
+
+### Where this leaves go-live
+Every beat green at machine speed, both features from Kevin's note exercised live end to end, suite at
+**1954/1954**. The enforcement flip remains Kevin's act. His testing/demo list remains open.
