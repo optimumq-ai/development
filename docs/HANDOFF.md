@@ -6535,3 +6535,62 @@ validators with worded refusals, the high-touch six renderers (exemption · reda
 clock_matrix · clarification; rest read-only pretty views), research-text drill-down. Note for BW9b: the
 v1 `/admin?tab=jurisdiction` (JurisdictionProfilePage) still exists alongside the new checklist — retire
 or redirect it in that pass.
+
+---
+
+## 2026-08-12 (b) — BW9b: the rule editors — ALL NINE WAVES BUILT (`0d68758`..`dcb42c9`)
+
+### What was built (Draft 10, every §5 question already decided)
+1. **The section screens grew their zones** (Content · Local Policy Settings · Provenance ·
+   Proposals) over BW9a's detail page. Two kinds of content, one grammar: statute-derived facts
+   (navy edge, cited) edit ONLY through the proposal composer; the dashed-amber settings live one
+   zone over. Renderers: **deadlines** — the Frame C named-timer table joining the `deadline` +
+   `clock_matrix` domains (humanized labels and use cases per Kevin's markup, plain-language
+   run-out consequences, ClockChip grammar so a target can never masquerade as statutory);
+   **fee** — cited schedule facts; **clarification/payment/fee_waiver** — labeled fields with
+   per-field provenance; **exemption/redaction** — the `redaction_rules` + `legal_sources` store
+   with honest `wired`/`content-only`; the rest render an honest raw view.
+2. **The composer, one audit path.** Citation + note required (editing statute-derived content
+   asserts what the law provides); the WS1–WS3 police rules run at COMPOSE time via
+   `configIntegrity.validateDomainConfig`/`validateClockMatrix` — **factored pure from check()**,
+   so the editor refuses with literally the engine's code and wording (the 46-day response clock
+   gets the reconciler band's own sentence) — and run AGAIN at apply (an editedConfig cannot
+   smuggle past the second door). Proposals land `source_ref='editor'` in the existing
+   review/apply flow; applying writes the `jurisdiction_rules` row + re-syncs → an attested
+   section DRIFTS (drift-warn, as decided).
+3. **The ownership line holds at every door.** A Director's edit on a Legal Rules domain files and
+   routes to Senior Legal — apply-now answers a worded refusal, the review flow refuses the same
+   way; Senior Legal (the owner) applies in the same act, and is scoped OFF non-Legal proposals in
+   words. Supervisors read, with the reason on the banner. `configFreshness`'s REVIEW gate now
+   includes ATTORNEY_REVIEWER.
+4. **Research drill-down** (decided IN): `services/rulesResearch.js` resolves
+   `docs/rules_research/pruned/pruned_discovery.json` (1117 rules, lazy-indexed) —
+   `GET /rules-research/:ruleId` serves the full record incl. VERBATIM statute language; an
+   unknown id answers absence in words.
+
+### v1 lines drawn (recorded in spec §6)
+- Exemption/redaction ROW edits stay in the Redaction Rules area's existing draft→legal-approval
+  flow (its own audit path; Draft 10 §6 not-reopened). The composer here edits the domain configs.
+- Editor applies are immediate-only: the scheduler's promotion path applies through adapters,
+  which these domains lack.
+
+### Evidence
+`verify_bw9b_editors` 35/35 (incl. the WS3 template proposal applying through the untouched
+adapter path); **full suite 1887/1887, live untouched**. Visual verification on the test stack
+(route interception): Frame C with real TX data · the composer refusing the 46-day clock in the
+band's own words · the research drill-down with verbatim §552.221 text · the Proposals zone
+carrying an editor proposal · Frame B exemptions with wired badges · fee facts · the Supervisor
+read-only banner. Zero page errors (`backend/tests/artifacts/bw9b_*.png`).
+
+### A build trap stepped in and out of
+Generated JSX carried literal `←`-style escapes — **JSX text nodes do not interpret unicode
+escapes** (JS string literals do), so they rendered as raw text. Caught by LOOKING at the
+screenshot, decoded to real characters, rebuilt clean. Screenshots are not optional.
+
+### Where this leaves the project
+**BW1–BW9 (a+b): every wave of `SPEC_processing_ui.md` §9 is BUILT.** Live TX sits READY at the
+go-live ceremony with dev-mode ON — the flip is Kevin's act, on the Jurisdiction Configuration
+screen. Still open elsewhere (spec §10): Kevin's full screen-by-screen pass, Draft 1/2/5/7
+residuals, portal identity anchors (WS5), MRR §14 items from the parent/child spec — and the v1
+`/admin?tab=jurisdiction` tab, which now duplicates the checklist and should be retired or
+redirected in a cleanup pass.
