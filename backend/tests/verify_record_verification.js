@@ -113,6 +113,16 @@ function req(method, p, body, raw) {
       writers.every(function (s) { return /INSERT INTO fulfilled_records[^;]*content_sha256/.test(s); }));
 
     console.log('\n=== D. THE SHEET, AT PARENT-COMPLETE, REGARDLESS OF THE LAST DISPOSITION ===');
+    // The portal submit advances each child through intake IN THE BACKGROUND (classifier → workflow
+    // engine). Closing a child while that advance is mid-flight is a stage-transition race that flapped
+    // the suite once (1935/1936, 2026-08-12) — so wait for the engine's per-child decision to land first,
+    // the verify_mrr_children idiom. The decision row is the deterministic witness that intake finished.
+    for (var wD = 0; wD < 80; wD++) {
+      var decs = await db.all('SELECT request_id FROM workflow_decisions WHERE request_id = ANY($1::text[])',
+        [kids.map(function (k) { return k.id; })]);
+      if (decs.length >= 2) break;
+      await new Promise(function (r) { setTimeout(r, 500); });
+    }
     await disposition.close(kids[0].id, 'withdrawn', { skipGate: true, actorName: 'RV Harness', payload: { note: 'harness' } });
     var midSheet = await db.get("SELECT id FROM request_files WHERE request_id = ? AND status = 'certification'", [P.id]);
     ok('no sheet while a child is still open — the sheet covers the WHOLE request', !midSheet);
@@ -138,9 +148,62 @@ function req(method, p, body, raw) {
     });
     var P2 = await db.get('SELECT id FROM requests WHERE request_number = ?', [sub2.body.requestNumber]);
     var k2 = await db.get('SELECT id FROM requests WHERE master_request_id = ?', [P2.id]);
+    for (var wD2 = 0; wD2 < 80; wD2++) { // same submit-vs-close race guard as section D
+      if ((await db.all('SELECT 1 FROM workflow_decisions WHERE request_id = ?', [k2.id])).length) break;
+      await new Promise(function (r) { setTimeout(r, 500); });
+    }
     await disposition.close(k2.id, 'no_records', { skipGate: true, actorName: 'RV Harness', payload: { note: 'harness' } });
     var noSheet = await db.get("SELECT id FROM request_files WHERE request_id = ? AND status = 'certification'", [P2.id]);
     ok('an UNCERTIFIED request completes with no sheet — certification gates presentation', !noSheet);
+
+    console.log('\n=== F. THE VERIFY LOOKUP STATE MACHINE (§3) ===');
+    var fUnknown = await req('POST', '/api/public/verify/lookup', { requestNumber: '2091-999999' });
+    ok('an unknown number: "' + fUnknown.body.message + '"',
+      fUnknown.body.state === 'no_match' && fUnknown.body.message === 'The number entered has no matching request.');
+    var fUncert = await req('POST', '/api/public/verify/lookup', { requestNumber: sub2.body.requestNumber });
+    ok('a real but UNCERTIFIED request: "' + fUncert.body.message + '"',
+      fUncert.body.state === 'not_certified' && fUncert.body.message === 'Verification is available only for certified records.');
+    // A second released record on child 1, a NON-document kind, for the visual gate below.
+    var vidRfId = 'rf-' + uuidv4().slice(0, 8);
+    var vidSha = crypto.createHash('sha256').update('video-bytes-' + TAG).digest('hex');
+    await db.run("INSERT INTO request_files (id, request_id, filename, original_name, mimetype, size, status, uploaded_at) VALUES (?,?,?,?,?,?,?,datetime('now'))",
+      [vidRfId, kids[0].id, 'rv-video-' + TAG + '.mp4', 'Body camera clip.mp4', 'video/mp4', 100, 'redacted']);
+    await db.run("INSERT INTO fulfilled_records (id, request_id, source_file_id, output_file_id, title, status, released_by, released_at, content_sha256) VALUES (?,?,?,?,?,?,?,datetime('now'),?)",
+      ['fr-' + uuidv4().slice(0, 8), kids[0].id, vidRfId, vidRfId, 'Body camera clip', 'released', 'RV Harness', vidSha]);
+    var fCert = await req('POST', '/api/public/verify/lookup', { requestNumber: sub.body.requestNumber });
+    ok('a certified request answers its released records — markers, labels, file kinds',
+      fCert.body.state === 'certified' && fCert.body.records.length === 2 &&
+      fCert.body.records.some(function (r) { return r.fileKind === 'document'; }) &&
+      fCert.body.records.some(function (r) { return r.fileKind === 'other'; }));
+    ok('...and never a hash, a file id, or an email',
+      fCert.raw.indexOf(expected.slice(0, 12)) < 0 && fCert.raw.indexOf(outId) < 0 && fCert.raw.indexOf('@') < 0);
+
+    console.log('\n=== G. CODE VERIFICATION AND THE CODE-GATED VIEWER (§3, §8.1) ===');
+    var goodCode = fileHash.verificationCode(expected);
+    var gRight = await req('POST', '/api/public/verify/code', { requestNumber: sub.body.requestNumber, childNo: 1, code: goodCode });
+    ok('the right code verifies: "' + gRight.body.message + '"',
+      gRight.body.verified === true && gRight.body.fileKind === 'document');
+    var gLoose = await req('POST', '/api/public/verify/code', { requestNumber: sub.body.requestNumber, childNo: 1, code: expected.slice(0, 16) });
+    ok('entry is dash/case-insensitive (raw lowercase hex verifies too)', gLoose.body.verified === true);
+    var gWrong = await req('POST', '/api/public/verify/code', { requestNumber: sub.body.requestNumber, childNo: 1, code: 'AAAA-BBBB-CCCC-DDDD' });
+    ok('a wrong code does not: "' + gWrong.body.message + '"',
+      gWrong.body.verified === false && gWrong.body.message === 'The code entered does not match this record.');
+    var gCross = await req('POST', '/api/public/verify/code', { requestNumber: sub.body.requestNumber, childNo: 2, code: goodCode });
+    ok('the right code against the WRONG record does not — the match is scoped', gCross.body.verified === false);
+    var vOk = await req('GET', '/api/public/verify-view?number=' + sub.body.requestNumber + '&childNo=1&code=' + goodCode, null);
+    ok('number + code opens the visual viewer (the code IS the access key, §8.1)',
+      vOk.status === 200 && vOk.raw.slice(0, 4) === '%PDF');
+    var vBad = await req('GET', '/api/public/verify-view?number=' + sub.body.requestNumber + '&childNo=1&code=AAAA-BBBB-CCCC-DDDD', null);
+    ok('number alone (a wrong code) NEVER opens record content', vBad.status === 404);
+    var vVid = await req('GET', '/api/public/verify-view?number=' + sub.body.requestNumber + '&childNo=1&code=' + fileHash.verificationCode(vidSha), null);
+    ok('a non-document kind answers in words and points at file verification (Kevin\'s body-cam case)',
+      vVid.status === 415 && /documents only/.test(vVid.raw) && /digital file verification/.test(vVid.raw));
+    var srcPC = fs.readFileSync('/opt/optimumq/backend/src/routes/publicChat.js', 'utf8');
+    ok('all three verify doors open with the rate limiter (source-scan)',
+      ["router.post('/verify/lookup'", "router.post('/verify/code'", "router.get('/verify-view'"].every(function (a) {
+        var seg = srcPC.slice(srcPC.indexOf(a), srcPC.indexOf(a) + 300);
+        return seg.indexOf('checkRate(req.ip)') >= 0;
+      }));
 
     console.log('\n=== E. THE PUBLISHED GATE ON THE PUBLIC FILE DOOR (§5) ===');
     var unpub = await req('GET', '/api/public/file/' + outId, null);

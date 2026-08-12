@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import StatusCheckModal from '../components/StatusCheckModal';
+import VerifyRecordModal from '../components/VerifyRecordModal';
 
 const API = (process.env.REACT_APP_API_URL || '/api');
 
@@ -12,6 +13,7 @@ export default function PublicPortalPage() {
   const [agencyName, setAgencyName] = useState('');
   const [contact, setContact] = useState({ email: '', phone: '' });
   const [statusOpen, setStatusOpen] = useState(false);
+  const [verifyOpen, setVerifyOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(function () {
@@ -62,14 +64,19 @@ export default function PublicPortalPage() {
             <button onClick={startRequest} style={buttonStyle}>Create an Open Records Request</button>
           </div>
           {/* Third row (SPEC_portal_status_check.md §2): follow-up actions for a request that already
-              exists. The Verify a Certified Record button joins this row in the verification slice
-              (SPEC_record_verification.md §9) — no dead buttons on the public portal. */}
+              exists — status by request number, and authenticity verification for certified records
+              (SPEC_record_verification.md §3). */}
           <div style={rowStyle}>
             <p style={blurbStyle}>
               Already submitted a request? <strong>Check Request Status</strong> shows where it is in the
-              process. You will need the request number from your confirmation email.
+              process — you will need the request number from your confirmation email. Holding a certified
+              record? <strong>Verify a Certified Record</strong> confirms it is a true copy, using the
+              verification code on the certification sheet.
             </p>
-            <button onClick={function () { setStatusOpen(true); }} style={buttonStyle}>Check Request Status</button>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button onClick={function () { setStatusOpen(true); }} style={buttonStyle}>Check Request Status</button>
+              <button onClick={function () { setVerifyOpen(true); }} style={buttonStyle}>Verify a Certified Record</button>
+            </div>
           </div>
           {/* The paper channel (Kevin, 2026-08-01): the printable twin of the wizard — page 1 requestor
               info + one page per record, so a mailed or walked-in form logs in the same shape. */}
@@ -82,6 +89,9 @@ export default function PublicPortalPage() {
       {statusOpen && (
         <StatusCheckModal contactEmail={contact.email} contactPhone={contact.phone}
           onClose={function () { setStatusOpen(false); }} />
+      )}
+      {verifyOpen && (
+        <VerifyRecordModal onClose={function () { setVerifyOpen(false); }} />
       )}
     </div>
   );

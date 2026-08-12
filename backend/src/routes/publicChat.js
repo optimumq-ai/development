@@ -628,6 +628,110 @@ router.post('/request-status', async function (req, res) {
   }
 });
 
+// ==================================================================================================
+// RECORD VERIFICATION — SPEC_record_verification.md §3–§4, decided 2026-08-12.
+//
+// Three doors, three different disclosure levels, deliberately:
+//   lookup  (number only)    → certified-existence yes/no, and for a certified request the record LIST —
+//                              child markers, labels, file kinds. Never file ids, hashes, or names.
+//   code    (number + code)  → does this code match a certified record here. The code comes off the
+//                              certification sheet; comparison is a prefix match against content_sha256,
+//                              scoped to THIS request's released records, dash/case/space-insensitive.
+//   view    (number + code)  → the stored certified DOCUMENT itself, for side-by-side comparison. §8.1:
+//                              the code IS the access key ("human reference ≠ access key") — record
+//                              content, including certified-but-unpublished records, is never reachable
+//                              by enumerating request numbers. PDF only; other kinds answer in words.
+// All rate-limited (checkRate). All read-only.
+function verifyParentSql() {
+  return "SELECT id, request_number, certification_requested FROM requests " +
+         "WHERE request_number = ? AND master_request_id IS NULL AND request_number != 'LIBRARY' AND request_number NOT LIKE 'SYS-%'";
+}
+async function verifyResolve(requestNumber) {
+  var raw = String(requestNumber || '').replace(/\s+/g, '');
+  var m = raw.match(/^(\d{4}-\d{6})(?:-\d+)?$/);
+  if (!m) return { state: 'no_match' };
+  var parent = await get(verifyParentSql(), [m[1]]);
+  if (!parent) return { state: 'no_match' };
+  if (!Number(parent.certification_requested)) return { state: 'not_certified' };
+  return { state: 'certified', parent: parent };
+}
+// The released records of one certified request, with what the verifier may see of each.
+async function verifyRecords(parentId) {
+  return await all(
+    "SELECT r.child_no, r.component_label, fr.title, fr.content_sha256, fr.output_file_id, rf.mimetype " +
+    "FROM requests r JOIN fulfilled_records fr ON fr.request_id = r.id AND fr.status = 'released' " +
+    "LEFT JOIN request_files rf ON rf.id = fr.output_file_id " +
+    "WHERE r.master_request_id = ? ORDER BY r.child_no, fr.released_at", [parentId]);
+}
+function kindOf(mimetype) { return (String(mimetype || '').toLowerCase() === 'application/pdf') ? 'document' : 'other'; }
+
+router.post('/verify/lookup', async function (req, res) {
+  var rate = checkRate(req.ip);
+  if (!rate.ok) return res.status(429).json({ error: 'Too many lookups. Please wait a moment and try again.', rateLimited: true });
+  try {
+    var v = await verifyResolve(req.body && req.body.requestNumber);
+    if (v.state === 'no_match') return res.json({ state: 'no_match', message: 'The number entered has no matching request.' });
+    if (v.state === 'not_certified') return res.json({ state: 'not_certified', message: 'Verification is available only for certified records.' });
+    var rows = await verifyRecords(v.parent.id);
+    res.json({ state: 'certified', requestNumber: v.parent.request_number,
+      records: rows.map(function (r) {
+        return { childNo: r.child_no, label: r.title || r.component_label || ('Record item ' + r.child_no),
+                 fileKind: kindOf(r.mimetype), verifiable: !!r.content_sha256 };
+      }) });
+  } catch (e) { console.error('[verify lookup]', e && e.message); res.json({ state: 'no_match', message: 'The number entered has no matching request.' }); }
+});
+
+// One matcher for the code and view doors: the released record of this request whose hash the code opens.
+async function verifyMatch(requestNumber, childNo, code) {
+  var v = await verifyResolve(requestNumber);
+  if (v.state !== 'certified') return { state: v.state };
+  var norm = require('../services/fileHash').normalizeCode(code);
+  if (norm.length < 16) return { state: 'certified', match: null };
+  var rows = await verifyRecords(v.parent.id);
+  var match = rows.filter(function (r) {
+    if (childNo != null && String(r.child_no) !== String(childNo)) return false;
+    return !!r.content_sha256 && r.content_sha256.toLowerCase().indexOf(norm) === 0;
+  })[0] || null;
+  return { state: 'certified', match: match };
+}
+
+router.post('/verify/code', async function (req, res) {
+  var rate = checkRate(req.ip);
+  if (!rate.ok) return res.status(429).json({ error: 'Too many attempts. Please wait a moment and try again.', rateLimited: true });
+  try {
+    var b = req.body || {};
+    var v = await verifyMatch(b.requestNumber, b.childNo, b.code);
+    if (v.state === 'no_match') return res.json({ verified: false, message: 'The number entered has no matching request.' });
+    if (v.state === 'not_certified') return res.json({ verified: false, message: 'Verification is available only for certified records.' });
+    if (!v.match) return res.json({ verified: false, message: 'The code entered does not match this record.' });
+    res.json({ verified: true, message: 'Verified — this code matches the certified record.',
+               fileKind: kindOf(v.match.mimetype),
+               label: v.match.title || v.match.component_label || ('Record item ' + v.match.child_no) });
+  } catch (e) { console.error('[verify code]', e && e.message); res.json({ verified: false, message: 'The code entered does not match this record.' }); }
+});
+
+// The visual-comparison stream. Gated on number + code (§8.1) — never the number alone.
+// `/verify-view`, NOT `/verify/view`: the email-verification route GET /verify/:token is registered
+// above and would capture "view" as a token (found by the harness — the viewer answered "Invalid Link").
+router.get('/verify-view', async function (req, res) {
+  var rate = checkRate(req.ip);
+  if (!rate.ok) return res.status(429).send('Too many attempts.');
+  try {
+    var v = await verifyMatch(req.query.number, req.query.childNo || null, req.query.code);
+    if (v.state !== 'certified' || !v.match) return res.status(404).send('Not found');
+    if (kindOf(v.match.mimetype) !== 'document') {
+      return res.status(415).send('Visual comparison is available for documents only. For this file type, use digital file verification instead.');
+    }
+    var rf = await get('SELECT filename, original_name FROM request_files WHERE id = ?', [v.match.output_file_id]);
+    if (!rf) return res.status(404).send('Not found');
+    var p = require('path').join(__dirname, '../../../uploads', rf.filename);
+    if (!require('fs').existsSync(p)) return res.status(404).send('File missing');
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'inline; filename="' + String(rf.original_name || 'record.pdf').replace(/[^\w.\- ]/g, '_') + '"');
+    require('fs').createReadStream(p).pipe(res);
+  } catch (e) { console.error('[verify view]', e && e.message); res.status(404).send('Not found'); }
+});
+
 // R9 — the refine loop. The results canvas owns an EDITABLE query and a "Search again" button, so the
 // requestor can re-describe and re-run WITHOUT going back through the chat agent (the agent narrates the
 // re-run; it does not own the control — DESIGN_split_canvas_intake §R9.1).
