@@ -24,6 +24,7 @@ import LegalReviewTaskPage from './pages/LegalReviewTaskPage';
 import IntakeReviewTaskPage from './pages/IntakeReviewTaskPage';
 import ReleaseReviewTaskPage from './pages/ReleaseReviewTaskPage';
 import ReleaseReviewPowerModePage from './pages/ReleaseReviewPowerModePage';
+import JurisdictionConfigPage from './pages/JurisdictionConfigPage';
 // BW6 — the MRR hub. Four levels: overview → master record → child record, plus the assignee's thin
 // per-activity view. The manager's three screens are one page tree; the assignee's is deliberately separate.
 import MrrActivityTaskPage from './pages/MrrActivityTaskPage';
@@ -115,6 +116,11 @@ export default function App() {
           <Route path="mrr/:taskId" element={<MrrMasterPage />} />
           <Route path="mrr/:taskId/item/:childId" element={<MrrChildPage />} />
           <Route path="tickler" element={<TicklerPage />} />
+          {/* BW9a — the go-live checklist (Draft 6, decided 2026-08-11): the readiness index and the
+              per-section policy-setting detail. Role-gated inside the page; nav shows it to the
+              Director, SysAdmin, Supervisor (read) and Senior Legal (their sections). */}
+          <Route path="jurisdiction-config" element={<JurisdictionConfigPage />} />
+          <Route path="jurisdiction-config/:section" element={<JurisdictionConfigPage />} />
           <Route path="rule-updates" element={<Navigate to="/admin?tab=updates" replace />} />
           <Route path="jurisdiction-profile" element={<Navigate to="/admin?tab=jurisdiction" replace />} />
           {/* MENU REORGANIZATION 2026-08-01 (Kevin): Reports unified under one item with top tabs;

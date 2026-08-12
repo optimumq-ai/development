@@ -157,6 +157,9 @@ function isOpen(s) { return s.kind === 'dimension' ? (s.gated && !s.confirmed) :
       sectionByKey(ps.json, 'template_import').owner.group === 'System Administration');
     ok('A6 oversight read: a Supervisor may GET the checklist',
       (await req('GET', '/api/jurisdiction-profile/policy-settings', null, TSUP)).status === 200);
+    ok('A7 Senior Legal may GET the checklist too — nobody attests what they cannot see',
+      (await req('GET', '/api/jurisdiction-profile/policy-settings', null, TATT)).status === 200 &&
+      (await req('GET', '/api/jurisdiction-profile/go-live', null, TATT)).status === 200);
 
     // ==============================================================================================
     console.log('\n=== C1. THE WHOLE-TEMPLATE GATE covers the code-defined domains (the closed gap) ===');

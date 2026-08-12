@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import api from '../lib/api';
 import { STAGE_LABELS as STAGES, STAGE_COLORS as SC } from '../lib/stages';
+import GoLiveBanner from '../components/ui/GoLiveBanner';
 
 
 export default function DashboardPage() {
@@ -40,6 +41,7 @@ export default function DashboardPage() {
         <h1 style={{ fontSize: '24px', fontWeight: '700', margin: '0 0 4px' }}>{greet()}, {user?.display_name?.split(' ')[0]}</h1>
         <p style={{ color: '#9CA3AF', fontSize: '14px', margin: '0' }}>{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
       </div>
+      <GoLiveBanner />
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: '16px' }}>
         {cards.map(({ label, value, bg, color, link }) => (
           <Link key={label} to={link} style={{ display: 'flex', alignItems: 'center', gap: '16px', background: 'white', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '20px', textDecoration: 'none', boxShadow: '0 1px 3px rgba(0,0,0,.06)' }}>

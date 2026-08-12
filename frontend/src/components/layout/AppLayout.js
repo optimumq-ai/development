@@ -30,6 +30,10 @@ export default function AppLayout() {
     { to: '/library-map', label: 'Records Map', show: isElev },
     { to: '/cash-drawer', label: 'Cash Drawer', show: isElev },
     { to: '/tickler', label: 'Tickler', show: isElev },
+    // BW9a: the go-live checklist. Senior Legal (ATTORNEY_REVIEWER) sees it too — they attest the
+    // Legal Rules sections and cannot attest what they cannot see.
+    { to: '/jurisdiction-config', label: 'Jurisdiction Configuration',
+      show: store.hasAnyRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'ATTORNEY_REVIEWER') },
     { to: '/admin', label: 'Administration', show: isElev },
   ].filter(x => x.show);
 

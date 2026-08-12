@@ -210,6 +210,12 @@ coverage-gap manager email (role model §6, unbuilt).
    package endpoints, PowerQueue library shell (first instance), task screen + power mode, My Tasks
    group entry; includes the citizen-facts fix on `closureNotice` (parent number/name/address).
 9. **BW9 — Admin: go-live checklist + rule editors** (Draft 10 §5 ratified 2026-08-11 — unblocked).
+   Split into two slices: **BW9a — the go-live checklist [BUILT 2026-08-12]** (policy-setting
+   enumeration incl. the code-defined knob domains, the confirm setter with who/when, the computed
+   gate summary + Director dashboard banner, Senior Legal attest widening, the readiness index +
+   section detail screens, and the guided go-live ceremony); **BW9b — the rule editors** (Draft 10:
+   section-screen content zones, edit-as-proposal composer, compose-time validators, the high-touch
+   six renderers, research-text drill-down) remains.
 BW3–BW7 depend on BW1+BW2; BW8/BW9 gate on markup. Never hand-edit generated templates — the
 live `jurisdiction_rules` config is what BW9's editors edit; the Phase-6 pipeline stays the
 source for templates.

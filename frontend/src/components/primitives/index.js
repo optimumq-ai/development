@@ -133,6 +133,45 @@ export function TriggerBadge(props) {
 }
 
 // ---------------------------------------------------------------------------------------------
+// StatusChip — the section-status grammar from the Draft 6/10 mockups (`.stx`), BW9a.
+//   tone: 'attested' | 'configured' | 'unconf' | 'bad' | 'empty'
+// attested = green solid · configured = quiet navy · unconf = dashed-amber family (an imported
+// suggestion nobody has decided) · bad = the red family (ACTIVE-on-unconfirmed, drift — the only
+// alarms) · empty = ghost dashed (honest absence, never an alarm — spec rule b).
+var STX = {
+  attested:   { bg: G.statuteBg, fg: G.statute, bd: G.statute, dash: false },
+  configured: { bg: C.surface2, fg: G.navy, bd: G.line, dash: false },
+  unconf:     { bg: G.amberBg, fg: G.amberInk, bd: G.amberLine, dash: false },
+  bad:        { bg: '#F7E9E5', fg: '#8C3A2B', bd: '#C08A7E', dash: false },
+  empty:      { bg: C.surface, fg: G.ghost, bd: G.ghost, dash: true }
+};
+export function StatusChip(props) {
+  var t = STX[props.tone] || STX.empty;
+  return (
+    <span style={{ display: 'inline-block', fontSize: 10.5, fontWeight: 800, letterSpacing: '.05em',
+      textTransform: 'uppercase', borderRadius: 3, padding: '2px 8px', whiteSpace: 'nowrap',
+      background: t.bg, color: t.fg, border: '1px ' + (t.dash ? 'dashed ' : 'solid ') + t.bd }}>
+      {props.children}
+    </span>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------
+// GateChecklist — the checklist container over GateRow (spec §7; first instanced by BW9a's
+// go-live ceremony). `title` optional; `rows`: [{ ok, label }] or compose GateRow children.
+export function GateChecklist(props) {
+  return (
+    <div style={{ border: '1px solid ' + G.line, borderRadius: 6, padding: '9px 12px',
+      background: C.surface2 }}>
+      {props.title ? <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.07em',
+        textTransform: 'uppercase', color: C.muted, marginBottom: 5 }}>{props.title}</div> : null}
+      {(props.rows || []).map(function (r, i) { return <GateRow key={i} ok={r.ok}>{r.label}</GateRow>; })}
+      {props.children}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------------------------
 // GateRow — one line of an evidence-gate checklist (☑ satisfied / ☐ open, amber).
 export function GateRow(props) {
   return (

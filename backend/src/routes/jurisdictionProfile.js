@@ -51,8 +51,11 @@ router.post('/unattest', requireAuth, ATTEST, async function (req, res) {
   try { var jid = await activeJid(); await JP.unattest(jid, req.body && req.body.section); res.json(await JP.getProfile(jid)); } catch (e) { res.status(400).json({ error: e.message }); }
 });
 // BW9a — the go-live checklist's three reads/writes (Draft 6, residuals decided 2026-08-11).
+// READ includes ATTORNEY_REVIEWER: Senior Legal attests the Legal sections, and nobody can attest
+// a checklist they cannot see.
+const READ = requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER', 'ATTORNEY_REVIEWER');
 // Every local policy setting, grouped by profile section, with who/when on the confirmed ones.
-router.get('/policy-settings', requireAuth, ROLE, async function (req, res) {
+router.get('/policy-settings', requireAuth, READ, async function (req, res) {
   try { res.json(await GL.settings(await activeJid())); } catch (e) { res.status(500).json({ error: e.message }); }
 });
 // The one genuinely missing piece of plumbing Draft 6 named: set value + confirmed + who/when.
@@ -68,7 +71,7 @@ router.post('/policy-settings/confirm', requireAuth, requireRole('SYSTEM_ADMIN',
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
 // The computed gate summary — the checklist's headline and the Director's dashboard banner.
-router.get('/go-live', requireAuth, ROLE, async function (req, res) {
+router.get('/go-live', requireAuth, READ, async function (req, res) {
   try { res.json(await GL.summary(await activeJid())); } catch (e) { res.status(500).json({ error: e.message }); }
 });
 router.get('/enforcement', requireAuth, async function (req, res) {
