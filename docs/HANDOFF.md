@@ -6691,3 +6691,40 @@ exit code matters; read the `SUITE GREEN/NOT GREEN` line.
 Unchanged from (d): every pill green, smoke green, and the one remaining act is Kevin's enforcement flip on
 Jurisdiction Configuration. The (d) list — things to build for TESTING and DEMO — is still to be defined by
 Kevin.
+
+---
+
+## 2026-08-12 (f) — the two "lost" portal features: specced, decided, and slice 1 BUILT (`3d72627`..`0eee2c1`)
+
+### Kevin's feature note (exchange/statuscheckandverification.txt): status check + verify authenticity
+Research first (two full-codebase sweeps). The big find: **certification is a fee input and a promise** —
+the wizard sells "a page attesting the records are true and accurate" that nothing generates; only the fee
+estimator reads the opt-in; no hash column exists anywhere; the flag is copied onto every MRR child against
+spec §5.1 (which also lets an MRR price certification once per child); two intake paths drop it silently.
+Also: `GET /api/public/file/:id` omits the `published=1` gate every sibling applies (contradicts
+SPEC_public_library — prerequisite hardening recorded for the verification slice).
+
+### Specs written and DECIDED (all marked in-doc)
+`SPEC_portal_status_check.md` + `SPEC_record_verification.md`, registered in DOMAIN_MAP Domain 1.
+- **Status gate: number only, names displayable** (Kevin; fact-checked — requests are public records
+  essentially everywhere; the narrow lines: no contact PII ever (TX §552.137, NJ 2024), anonymous names
+  render gracefully, rate limiting stays, child lines never carry raw request prose).
+- **Verification viewer: number + verification code** (content ≠ status metadata; "human reference ≠
+  access key" upheld; certified-existence yes/no stays number-only).
+- **Certification design**: parent fact; SHA-256 of every release (`content_sha256`, measure-always);
+  code = first 16 hex grouped 4×4; sheet generated at parent-Complete regardless of last child's
+  disposition (Kevin's assumption ratified); Vaughn-builder precedent.
+- **Build order: three slices** (status · certification Part A · verification Part B).
+
+### Slice 1 BUILT (`0eee2c1`)
+`POST /api/public/request-status` (rate-limited, read-only, allowlist response, uniform byte-identical
+no-match, fail-closed) + portal-home third row + v2-idiom modal (`StatusCheckModal.js`).
+Evidence: `verify_status_check` 21/21 via the REAL portal submit path; **full suite 1923/1923, live
+untouched**; visuals verified on the deployed build (route interception, zero page errors) and the five
+states sent to Kevin; live end-to-end lookup answered correctly after API restart. Harness gotchas
+recorded in-file: `db.initDb()` required; don't brute the shared per-IP rate buckets (source-scan idiom);
+`requestor_name` is NOT NULL so anonymity = empty string.
+
+### Open
+Kevin's design sign-off on the shipped modal (screenshots delivered — iterate on his notes); §6.2 stage
+glosses and §2.6/§8.3 page stamping remain OPEN; slices 2–3 next; then his testing/demo list.
