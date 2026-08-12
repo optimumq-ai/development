@@ -71,9 +71,11 @@ async function recordBypass(file, basis, reuse, ctx) {
   var baseTitle = reuse.title || (file.original_name || 'Released record').replace(/\.[a-z0-9]+$/i, '');
   // The verification anchor (§2.2). No buffer in memory on the reuse path — hash the stored output file.
   var contentSha = await require('./fileHash').ofRequestFile(reuse.outputFileId);
+  // ON CONFLICT: concurrent-writer guard (smoke run 5) — see redactionApply for the full note.
   await run(
     'INSERT INTO fulfilled_records (id, request_id, source_file_id, output_file_id, title, summary, record_type_id, department_id, keywords, public_availability, page_count, released_by, released_at, status, content_sha256) ' +
-    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),?,?)",
+    "VALUES (?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),?,?) " +
+    'ON CONFLICT (source_file_id) WHERE source_file_id IS NOT NULL DO UPDATE SET output_file_id = EXCLUDED.output_file_id, title = EXCLUDED.title, summary = EXCLUDED.summary, record_type_id = EXCLUDED.record_type_id, department_id = EXCLUDED.department_id, keywords = EXCLUDED.keywords, public_availability = EXCLUDED.public_availability, page_count = EXCLUDED.page_count, released_by = EXCLUDED.released_by, released_at = EXCLUDED.released_at, status = EXCLUDED.status, content_sha256 = EXCLUDED.content_sha256',
     [frId, file.request_id || null, file.id, reuse.outputFileId, baseTitle, reuse.summary || baseTitle, reuse.recordTypeId || null, null, baseTitle, 'released', reuse.pageCount || null, ctx.actorName || 'System', 'released', contentSha]
   );
   // A published source stays public-ready on reuse; a private prior release stays unpublished.

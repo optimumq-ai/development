@@ -1610,3 +1610,12 @@ UPDATE request_fee_estimates t SET seq = s.rn
   WHERE t.id = s.id AND t.seq IS NULL;
 SELECT setval('request_fee_estimates_seq_seq',
               GREATEST((SELECT COALESCE(MAX(seq), 1) FROM request_fee_estimates), 1));
+
+-- ONE FULFILLED RECORD PER SOURCE FILE IS A CONSTRAINT, NOT A HOPE (found by the 2026-08-12 smoke, run 5).
+-- Every release writer does DELETE-by-source then INSERT — correct sequentially, but the redaction triage
+-- sweep and a manual job apply ran in the SAME second and interleaved: both deleted nothing, both inserted,
+-- and one clean file carried two released records (duplicate library/verify entries). The unique index makes
+-- the invariant structural; the writers upsert on conflict so the last completed writer's content wins,
+-- exactly the sequential semantics.
+CREATE UNIQUE INDEX IF NOT EXISTS ux_fulfilled_source ON fulfilled_records(source_file_id)
+  WHERE source_file_id IS NOT NULL;

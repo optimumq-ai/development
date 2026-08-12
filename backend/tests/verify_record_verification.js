@@ -111,6 +111,16 @@ function req(method, p, body, raw) {
     });
     ok('all THREE fulfilled_records writers carry the column (source-scan completeness)',
       writers.every(function (s) { return /INSERT INTO fulfilled_records[^;]*content_sha256/.test(s); }));
+    // THE TRIAGE RACE (smoke run 5): the triage sweep and a manual apply interleaved within one second and
+    // one source file carried TWO released records. One-per-source is a database constraint now.
+    var dupHit = false;
+    try {
+      await db.run("INSERT INTO fulfilled_records (id, request_id, source_file_id, output_file_id, title, status) VALUES (?,?,?,?,?,'released')",
+        ['fr-dup-' + TAG, kids[0].id, srcId, outId, 'dup attempt']);
+    } catch (eD) { dupHit = /duplicate key|unique/i.test(String(eD && eD.message)); }
+    ok('one fulfilled record per source file is a database CONSTRAINT (the smoke run-5 triage race)', dupHit);
+    ok('...and every writer upserts on conflict rather than duplicating (source-scan)',
+      writers.every(function (s) { return /ON CONFLICT \(source_file_id\)/.test(s); }));
 
     console.log('\n=== D. THE SHEET, AT PARENT-COMPLETE, REGARDLESS OF THE LAST DISPOSITION ===');
     // The portal submit advances each child through intake IN THE BACKGROUND (classifier → workflow
