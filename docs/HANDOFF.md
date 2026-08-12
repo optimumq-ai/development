@@ -6594,3 +6594,16 @@ screen. Still open elsewhere (spec §10): Kevin's full screen-by-screen pass, Dr
 residuals, portal identity anchors (WS5), MRR §14 items from the parent/child spec — and the v1
 `/admin?tab=jurisdiction` tab, which now duplicates the checklist and should be retired or
 redirected in a cleanup pass.
+
+---
+
+## 2026-08-12 (c) — the v1 Jurisdiction Profile tab retired (`597f47e`)
+
+Kevin's call. `JurisdictionProfilePage` DELETED; the Administration tab list drops it; every old
+door lands somewhere real — `/jurisdiction-profile` and `/admin?tab=jurisdiction` both redirect to
+`/jurisdiction-config` (never a silent fall to the first admin tab); the Setup wizard's
+jurisdiction card and the help assistant's menu knowledge now name Jurisdiction Configuration.
+`verify_v1_retirement` grew section F in its own source-scan idiom (page gone · no imports · no
+`?tab=jurisdiction` links · both redirects asserted). Evidence: retirement harness 22/22; **full
+suite 1892/1892, live untouched**; redirects verified in the browser (old tab absent, both legacy
+URLs land on the checklist, zero page errors).
