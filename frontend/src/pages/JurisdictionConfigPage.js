@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 import { C } from '../lib/theme';
-import { G, StatusChip, GateChecklist, ConfirmPopup } from '../components/primitives';
+import { G, StatusChip, GateChecklist, ConfirmPopup, ClockChip } from '../components/primitives';
 import { useAuthStore } from '../store/authStore';
 
 // BW9a — JURISDICTION CONFIGURATION: THE GO-LIVE CHECKLIST (Draft 6, residuals decided 2026-08-11).
@@ -181,6 +181,180 @@ function SettingCard(props) {
   );
 }
 
+// ═══════════════════════════════ BW9b — THE RULE-CONTENT EDITORS ═══════════════════════════════
+// Draft 10 as decided 2026-08-11: each section screen holds four zones — Content · Local Policy
+// Settings · Provenance · Proposals. Two kinds of content, one visual grammar: statute-derived
+// facts carry the navy solid edge + citation chip and edit ONLY through the proposal composer
+// (citation + note required); local policy settings are the dashed-amber cards of the zone next
+// door. A reader never wonders which kind they face.
+
+function CiteChip(props) {
+  if (!props.children) return null;
+  return <span style={{ display: 'inline-block', fontSize: 10.5, color: G.navy, background: C.surface2,
+    border: '1px solid ' + G.line, borderRadius: 3, padding: '0 6px', fontWeight: 600,
+    whiteSpace: 'nowrap', maxWidth: 340, overflow: 'hidden', textOverflow: 'ellipsis', verticalAlign: 'bottom' }}>{props.children}</span>;
+}
+function WiredBadge(props) {
+  return props.wired
+    ? <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 800, letterSpacing: '.05em', textTransform: 'uppercase',
+        background: G.statuteBg, color: G.statute, border: '1px solid ' + G.statute, borderRadius: 3, padding: '1px 6px' }}>wired</span>
+    : <span style={{ display: 'inline-block', fontSize: 10, fontWeight: 800, letterSpacing: '.05em', textTransform: 'uppercase',
+        background: C.surface, color: G.ghost, border: '1px dashed ' + G.ghost, borderRadius: 3, padding: '1px 6px' }}>content-only</span>;
+}
+// A statute-derived fact row: navy solid edge, cited — editing it is asserting the law.
+function FactRow(props) {
+  return (
+    <div style={{ border: '1px solid ' + G.line, borderLeft: '4px solid ' + G.navy, borderRadius: 5,
+      padding: '8px 11px', marginBottom: 7, background: C.surface }}>
+      <div style={{ fontWeight: 600, color: C.ink, display: 'flex', gap: 8, alignItems: 'baseline', flexWrap: 'wrap' }}>{props.title}</div>
+      {props.children ? <div style={{ fontSize: 12, color: C.muted, marginTop: 2 }}>{props.children}</div> : null}
+    </div>
+  );
+}
+
+// The research-text drill-down (decided IN): the full record behind a cited fact.
+function ResearchPopup(props) {
+  var [rec, setRec] = useState(null);
+  var [err, setErr] = useState('');
+  useEffect(function () {
+    if (!props.ruleId) return undefined;
+    var alive = true;
+    setRec(null); setErr('');
+    api.get('/jurisdiction-profile/rules-research/' + props.ruleId)
+      .then(function (r) { if (alive) setRec(r.data.rule); })
+      .catch(function (e) { if (alive) setErr((e.response && e.response.data && e.response.data.error) || 'Unavailable.'); });
+    return function () { alive = false; };
+  }, [props.ruleId]);
+  return (
+    <ConfirmPopup open={!!props.ruleId} onClose={props.onClose} title={'Research record — ' + (props.ruleId || '')}
+      actions={[<button key="c" type="button" style={btnQuiet} onClick={props.onClose}>Close</button>]}>
+      {err ? <div style={{ color: C.muted, fontSize: 12.5 }}>{err}</div> : null}
+      {rec ? (
+        <div style={{ fontSize: 12.5, maxHeight: '58vh', overflowY: 'auto' }}>
+          <div style={{ fontWeight: 700, color: G.navy }}>{rec.legal_concept}</div>
+          <div style={{ margin: '4px 0' }}><CiteChip>{rec.source_authority || rec.concept_key}</CiteChip> <span style={kv}>{rec.rule_type}{rec.category ? ' · ' + rec.category : ''}</span></div>
+          <div style={{ margin: '7px 0' }}><b>The rule:</b> {rec.atomic_rule}</div>
+          {rec.trigger ? <div style={Object.assign({}, kv, { margin: '5px 0' })}><b style={{ color: C.ink }}>Trigger:</b> {rec.trigger}</div> : null}
+          {rec.source_language ? (
+            <div style={{ borderLeft: '4px solid ' + G.navy, background: C.surface2, borderRadius: 4, padding: '7px 10px', margin: '8px 0' }}>
+              <div style={{ fontSize: 10.5, fontWeight: 800, letterSpacing: '.05em', textTransform: 'uppercase', color: C.muted, marginBottom: 3 }}>
+                Statute language{rec.is_paraphrase ? ' (paraphrase)' : ' (verbatim)'}</div>
+              <div style={{ fontStyle: 'italic' }}>{rec.source_language}</div>
+            </div>
+          ) : null}
+          {rec.official_link ? <div style={kv}>Official source: <a href={rec.official_link} target="_blank" rel="noreferrer" style={{ color: C.blue }}>{rec.official_link}</a></div> : null}
+        </div>
+      ) : (!err ? <div style={kv}>Loading…</div> : null)}
+    </ConfirmPopup>
+  );
+}
+
+// The proposal composer — every content edit is a proposal, one audit path, no exceptions.
+// `seed` shapes the form: {clockType, row} → the structured Frame C editor; {field} → a policy
+// field editor; otherwise the full-config JSON editor. Submit builds the FULL proposed config.
+function ComposerPopup(props) {
+  var seed = props.seed || {};
+  var cur = props.currentConfig || {};
+  var [duration, setDuration] = useState(seed.row && seed.row.durationRaw != null ? String(seed.row.durationRaw) : '');
+  var [basis, setBasis] = useState((seed.row && seed.row.basis) || 'business_days');
+  var [fieldVal, setFieldVal] = useState(seed.field ? String(seed.field.value != null ? seed.field.value : '') : '');
+  var [jsonText, setJsonText] = useState(JSON.stringify(cur, null, 2));
+  var [citation, setCitation] = useState(seed.row && seed.row.citation ? seed.row.citation : (seed.field && seed.field.citation) || '');
+  var [note, setNote] = useState('');
+  var [busy, setBusy] = useState(false);
+  var [err, setErr] = useState('');
+  var [filed, setFiled] = useState(null);
+
+  function buildConfig() {
+    if (seed.clockType) {
+      var cfg = JSON.parse(JSON.stringify(cur));
+      var def = (cfg.clocks || {})[seed.clockType] || {};
+      var n = Number(duration);
+      if (!isFinite(n)) throw new Error('The duration must be a number of days.');
+      delete def.durationByClassification; delete def.default;
+      def.duration = n; def.basis = basis;
+      def.citation = citation || def.citation;
+      cfg.clocks[seed.clockType] = def;
+      return cfg;
+    }
+    if (seed.field) {
+      var c2 = JSON.parse(JSON.stringify(cur));
+      var v = fieldVal;
+      if (seed.field.type === 'number') v = Number(fieldVal);
+      if (seed.field.type === 'boolean') v = fieldVal === 'true';
+      c2[seed.field.key] = v;
+      return c2;
+    }
+    return JSON.parse(jsonText);
+  }
+  function submit(applyNow) {
+    setErr(''); setBusy(true);
+    var cfg;
+    try { cfg = buildConfig(); }
+    catch (e) { setErr(e.message); setBusy(false); return; }
+    api.post('/jurisdiction-profile/rules/' + props.section + '/propose',
+      { domain: props.domain, config: cfg, citation: citation, note: note, applyNow: applyNow })
+      .then(function (r) {
+        if (r.data.applied) { props.onDone(r.data); }
+        else if (r.data.refusal) { setFiled('Filed for review. ' + r.data.refusal); }
+        else { setFiled('Filed for review — it appears in this section’s Proposals zone and the review queue.'); }
+      })
+      .catch(function (e) { setErr((e.response && e.response.data && e.response.data.error) || 'Refused.'); })
+      .then(function () { setBusy(false); });
+  }
+  var inputStyle = { width: '100%', font: 'inherit', fontSize: 12.5, border: '1px solid ' + G.line, borderRadius: 5, padding: '7px 9px', marginTop: 4, background: C.surface, color: C.ink };
+  return (
+    <ConfirmPopup open={props.open} onClose={props.onClose} title={props.title}
+      actions={filed ? [<button key="c" type="button" style={btnQuiet} onClick={function () { props.onDone(null); }}>Close</button>]
+        : [
+        props.canApply ? <button key="a" type="button" disabled={busy} style={busy ? btnOff : btn} onClick={function () { submit(true); }}>Submit &amp; apply (owner)</button> : null,
+        <button key="r" type="button" disabled={busy} style={busy ? btnOff : btnSec} onClick={function () { submit(false); }}>Submit for review{props.canApply ? ' only' : ''}</button>,
+        <button key="x" type="button" style={btnQuiet} onClick={props.onClose}>Cancel</button>
+      ].filter(Boolean)}>
+      {filed ? <div style={{ fontSize: 12.5, color: C.ink }}>{filed}</div> : (
+        <div>
+          {seed.clockType ? (
+            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'flex-end' }}>
+              <div><div style={kv}>Duration (days)</div>
+                <input style={Object.assign({}, inputStyle, { width: 110 })} value={duration} onChange={function (e) { setDuration(e.target.value); }} /></div>
+              <div><div style={kv}>Basis</div>
+                <select style={Object.assign({}, inputStyle, { width: 170 })} value={basis} onChange={function (e) { setBasis(e.target.value); }}>
+                  <option value="business_days">business days</option>
+                  <option value="calendar_days">calendar days</option>
+                </select></div>
+            </div>
+          ) : seed.field ? (
+            <div>
+              <div style={kv}>{seed.field.label} — new value</div>
+              {seed.field.values ? (
+                <select style={inputStyle} value={fieldVal} onChange={function (e) { setFieldVal(e.target.value); }}>
+                  {seed.field.values.map(function (v) { return <option key={v} value={v}>{v}</option>; })}
+                </select>
+              ) : <input style={inputStyle} value={fieldVal} onChange={function (e) { setFieldVal(e.target.value); }} />}
+            </div>
+          ) : (
+            <div>
+              <div style={kv}>The full {props.domain} configuration (JSON) — edit in place</div>
+              <textarea rows={10} style={Object.assign({}, inputStyle, { fontFamily: C.mono, fontSize: 11.5 })}
+                value={jsonText} onChange={function (e) { setJsonText(e.target.value); }} />
+            </div>
+          )}
+          <div style={Object.assign({}, kv, { marginTop: 8 })}>Citation for the change <i>(required — you are asserting what the law provides)</i></div>
+          <input style={inputStyle} value={citation} onChange={function (e) { setCitation(e.target.value); }} />
+          <div style={Object.assign({}, kv, { marginTop: 7 })}>Note <i>(required — the next reader needs why)</i></div>
+          <textarea rows={2} style={inputStyle} value={note} onChange={function (e) { setNote(e.target.value); }} />
+          <div style={Object.assign({}, kv, { margin: '9px 0 0' })}>
+            This lands as a <b style={{ color: C.ink }}>proposal</b> in the existing review/apply flow.
+            {props.canApply ? ' You are the owner — you may apply it in the same act.' : (props.legal ? ' Legal Rules content applies under Senior Legal — your proposal routes to them.' : '')}
+            {' '}Applying recomputes the section’s content hash: an attested section will <b style={{ color: C.ink }}>drift</b> and demand re-attestation. Nothing edits silently.
+          </div>
+          {err ? <div style={{ color: C.crit, fontSize: 12.5, marginTop: 7 }}>{err}</div> : null}
+        </div>
+      )}
+    </ConfirmPopup>
+  );
+}
+
 export default function JurisdictionConfigPage() {
   var params = useParams();
   var nav = useNavigate();
@@ -197,22 +371,29 @@ export default function JurisdictionConfigPage() {
   var isDir = store.hasAnyRole('SYSTEM_ADMIN', 'DIRECTOR');
   var isLegal = store.hasAnyRole('ATTORNEY_REVIEWER');
 
+  var [rules, setRules] = useState(null);       // BW9b: the section's Content/Provenance/Proposals payload
+  var [zone, setZone] = useState('content');
+  var [composer, setComposer] = useState(null); // {domain, title, seed}
+  var [drill, setDrill] = useState(null);       // ruleId for the research popup
+
   useEffect(function () {
     var alive = true;
     setErr('');
     Promise.all([
       api.get('/jurisdiction-profile/policy-settings'),
       api.get('/jurisdiction-profile/go-live'),
-      api.get('/config-integrity').catch(function () { return null; })
+      api.get('/config-integrity').catch(function () { return null; }),
+      params.section ? api.get('/jurisdiction-profile/rules/' + params.section).catch(function () { return null; }) : Promise.resolve(null)
     ]).then(function (r) {
       if (!alive) return;
       setData(r[0].data); setSummary(r[1].data);
       setIntegrity(r[2] && r[2].data ? r[2].data : null);
+      setRules(r[3] && r[3].data ? r[3].data : null);
     }).catch(function (e) {
       if (alive) setErr((e.response && e.response.data && e.response.data.error) || 'This screen could not load.');
     });
     return function () { alive = false; };
-  }, [tick]);
+  }, [tick, params.section]);
 
   function reload() { setTick(function (t) { return t + 1; }); }
   function canAttest(sectionKey) { return isDir || (isLegal && LEGAL_SECTIONS[sectionKey]); }
@@ -232,14 +413,36 @@ export default function JurisdictionConfigPage() {
   var jur = data.jurisdiction || {};
   var findings = (integrity && (integrity.findings || integrity.issues)) || [];
 
-  // ── SCREEN 2 — section detail ────────────────────────────────────────────────────────────────
+  // ── SCREEN 2 — the SECTION SCREEN (BW9b: Draft 10 zones over the BW9a detail) ───────────────
   if (params.section) {
     var sec = (data.sections || []).filter(function (s) { return s.section === params.section; })[0];
     if (!sec) return <div style={page}><div style={panel}>Unknown section.</div></div>;
     var status = rowStatus(sec, summary);
     var openCount = sec.unconfirmed;
     var attestable = sec.status !== 'not_configured' && openCount === 0;
-    var secFindings = findings.filter(function (f) { return String(f.where || '').indexOf('/' + (sec.section === 'fees' ? 'fee' : sec.section)) >= 0 || String(f.where || '').indexOf(sec.section) >= 0; });
+    var body = rules && rules.content;
+    var isLegalSection = rules ? rules.legal : !!LEGAL_SECTIONS[sec.section];
+    // Edit rights mirror the server: Director/SysAdmin everywhere; Senior Legal on Legal domains.
+    var canPropose = isDir || (isLegal && isLegalSection);
+    var canApplyContent = isSA || (isLegalSection ? isLegal : isDir);
+    var proposals = (rules && rules.proposals) || [];
+    var secFindings = findings.filter(function (f) { return String(f.where || '').indexOf(sec.section) >= 0 ||
+      ((rules ? rules.domains : []) || []).some(function (d) { return String(f.where || '').indexOf('/' + d) >= 0; }); });
+    var zones = [
+      { k: 'content', label: 'Content' },
+      { k: 'settings', label: 'Local Policy Settings' + (openCount > 0 ? ' (' + openCount + '⚠)' : ' (' + sec.settings.length + ')') },
+      { k: 'provenance', label: 'Provenance' },
+      { k: 'proposals', label: 'Proposals' + (proposals.length ? ' (' + proposals.length + ')' : '') }
+    ];
+    var openComposer = function (domain, title, seed) { setComposer({ domain: domain, title: title, seed: seed || {} }); };
+    var ruleChips = function (ids) {
+      return (ids || []).map(function (id) {
+        return <button key={id} type="button" onClick={function () { setDrill(id); }}
+          style={{ cursor: 'pointer', font: 'inherit', fontSize: 10.5, color: C.blue, background: C.surface2,
+            border: '1px solid ' + G.line, borderRadius: 3, padding: '0 6px', fontWeight: 600 }}>{id}</button>;
+      });
+    };
+
     return (
       <div style={page}>
         <div style={{ marginBottom: 10 }}>
@@ -251,25 +454,203 @@ export default function JurisdictionConfigPage() {
           <span style={{ marginLeft: 10 }}>Owner: <b style={{ color: C.ink }}>{sec.owner && sec.owner.label}</b></span>
           {sec.attested ? <span style={{ marginLeft: 10 }}>attested {String(sec.attestedAt || '').slice(0, 10)} · {sec.attestedBy}</span> : null}
         </p>
+        {!canPropose ? (
+          <div style={{ background: G.amberBg, border: '1px solid ' + G.amberLine, borderRadius: 5, padding: '7px 11px',
+            fontSize: 12.5, marginBottom: 10 }}>
+            <b>Read-only for you.</b> {isLegalSection
+              ? 'Legal Rules — you can do the work its rules route to you; changing the rules belongs to Senior Legal (the Director may propose).'
+              : 'This section’s content is edited by its owner (' + ((sec.owner && sec.owner.label) || 'the Director') + ').'}
+          </div>
+        ) : null}
+
+        <div style={{ display: 'flex', gap: 2, borderBottom: '2px solid ' + G.line, marginBottom: 11 }}>
+          {zones.map(function (z) {
+            var on = zone === z.k;
+            return <button key={z.k} type="button" onClick={function () { setZone(z.k); }}
+              style={{ cursor: 'pointer', font: 'inherit', fontSize: 12, fontWeight: 700, padding: '6px 13px',
+                color: on ? G.navy : C.muted, background: on ? C.surface2 : 'transparent',
+                border: on ? '1px solid ' + G.line : '1px solid transparent', borderBottom: 'none',
+                borderRadius: '5px 5px 0 0' }}>{z.label}</button>;
+          })}
+        </div>
+
         <div style={{ display: 'flex', gap: 14, alignItems: 'flex-start', flexWrap: 'wrap' }}>
           <div style={{ flex: '1 1 560px', minWidth: 0 }}>
-            <div style={Object.assign({}, panel, { background: C.surface2 })}>
-              <p style={Object.assign({}, kv, { margin: 0 })}>
-                <b style={{ color: C.ink }}>What the statute decided is already config</b> — imported with citations,
-                edited only through its own rule editors. <b style={{ color: C.ink }}>What the statute left to the
-                city</b> is below{sec.settings.length
-                  ? ': each setting carries the template’s suggested default — a starting point, never an answer. The section cannot be attested until each is confirmed.'
-                  : ' — and this section has no such settings.'}
-              </p>
-            </div>
-            {sec.settings.length === 0 ? (
-              <div style={panel}><span style={kv}>No local policy settings on this section. {sec.status === 'not_configured'
-                ? 'The section itself is not configured yet — configure it in its own editor; nothing here is an alarm.'
-                : 'Its configuration is statute-derived or lives in its own editor.'}</span></div>
-            ) : sec.settings.map(function (st) {
-              return <SettingCard key={st.domain + '/' + st.path} setting={st} onChanged={reload}
-                canConfirm={canConfirm(st.domain)} ownerLabel={sec.owner && sec.owner.label} />;
-            })}
+
+            {zone === 'content' ? (
+              !body ? <div style={panel}><span style={kv}>No content payload — this section renders its policy settings only.</span></div>
+              : body.kind === 'timerTable' ? (
+                <div>
+                  <div style={Object.assign({}, panel, { padding: 0, overflowX: 'auto' })}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
+                      <thead><tr>{['Timer', 'Use case', 'Duration', 'Citation', ''].map(function (h, i) {
+                        return <th key={i} style={{ fontSize: 10.5, textTransform: 'uppercase', letterSpacing: '.05em', color: C.muted,
+                          textAlign: 'left', padding: '6px 8px', borderBottom: '2px solid ' + G.line }}>{h}</th>; })}</tr></thead>
+                      <tbody>
+                        {body.rows.map(function (r) {
+                          return (
+                            <tr key={r.clockType}>
+                              <td style={{ padding: '7px 8px', borderBottom: '1px solid ' + C.surface2, verticalAlign: 'top', fontWeight: r.primary ? 700 : 500 }}>
+                                {r.label}{r.primary ? ' (primary)' : ''}
+                              </td>
+                              <td style={{ padding: '7px 8px', borderBottom: '1px solid ' + C.surface2, verticalAlign: 'top', maxWidth: 360 }}>
+                                <ClockChip kind={r.kind}>{r.kindLabel}</ClockChip>
+                                {r.useCase ? <div style={Object.assign({}, kv, { marginTop: 3 })}>{r.useCase}</div> : null}
+                              </td>
+                              <td style={{ padding: '7px 8px', borderBottom: '1px solid ' + C.surface2, verticalAlign: 'top', whiteSpace: 'nowrap' }}>
+                                {r.duration || <span style={{ color: G.amberInk, fontWeight: 700 }}>⚠ not set</span>}
+                              </td>
+                              <td style={{ padding: '7px 8px', borderBottom: '1px solid ' + C.surface2, verticalAlign: 'top' }}>
+                                {r.citation ? <CiteChip>{r.citation}</CiteChip> : <span style={kv}>{r.kind === 'operational_target' ? 'city policy' : '—'}</span>}
+                                {r.sourceRuleIds.length ? <div style={{ marginTop: 3, display: 'flex', gap: 4, flexWrap: 'wrap' }}>{ruleChips(r.sourceRuleIds)}</div> : null}
+                              </td>
+                              <td style={{ padding: '7px 8px', borderBottom: '1px solid ' + C.surface2, verticalAlign: 'top', whiteSpace: 'nowrap' }}>
+                                {r.kind === 'operational_target'
+                                  ? <Link to={'/jurisdiction-config/' + sec.section} onClick={function () { setZone('settings'); }} style={{ fontSize: 12, color: C.blue }}>Set &amp; confirm →</Link>
+                                  : (canPropose ? <button type="button" style={btnQuiet}
+                                      onClick={function () { openComposer('deadline', 'Propose change — ' + r.label, { clockType: r.clockType, row: r }); }}>Propose…</button> : null)}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                  {body.noStatutoryDeadlines ? (
+                    <div style={Object.assign({}, panel, { background: C.surface2 })}>
+                      <span style={kv}><b style={{ color: C.ink }}>No statutory deadlines in this state.</b> Timers exist, none are legal
+                      deadlines — every row above is a city target or a requestor window, and this screen cannot be used to invent a
+                      deadline the law does not set.</span>
+                    </div>
+                  ) : null}
+                  {(body.unlandedTimers || []).length ? (
+                    <div style={panel}>
+                      <div style={railHead}>Named timers that resolved to no clock</div>
+                      {body.unlandedTimers.map(function (t) {
+                        return <div key={t.timer} style={{ borderLeft: '3px dashed ' + G.ghost, paddingLeft: 10, fontSize: 12.5, color: C.muted, marginBottom: 5 }}>
+                          {t.timerLabel} — present in the research, not landed as a clock. {ruleChips(t.sourceRuleIds)}
+                        </div>;
+                      })}
+                    </div>
+                  ) : null}
+                </div>
+              ) : body.kind === 'facts' ? (
+                <div>
+                  {body.facts.length === 0 ? <div style={panel}><span style={kv}>No content — import a state template or add the first rule.</span></div>
+                    : body.facts.map(function (f, i) {
+                      return <FactRow key={i} title={<span>{f.summary} {f.citation ? <CiteChip>{f.citation}</CiteChip> : null} {f.ruleId ? ruleChips([f.ruleId]) : null}</span>}>
+                        Statute-derived fact ({f.concept}). Editing asserts the law says otherwise — it opens the proposal composer, citation required.
+                      </FactRow>;
+                    })}
+                  {canPropose ? <button type="button" style={btnSec}
+                    onClick={function () { openComposer(rules.domains[0], 'Propose change — ' + sec.label, {}); }}>Propose change…</button> : null}
+                </div>
+              ) : body.kind === 'fields' ? (
+                <div>
+                  {!body.enabled ? <div style={Object.assign({}, panel, { background: C.surface2 })}><span style={kv}>This policy is not enabled — the fields below are what the import carried; nothing acts on them yet.</span></div> : null}
+                  {body.fields.map(function (f) {
+                    return (
+                      <div key={f.key} style={f.statuteDerived
+                        ? { border: '1px solid ' + G.line, borderLeft: '4px solid ' + G.navy, borderRadius: 5, padding: '8px 11px', marginBottom: 7, background: C.surface }
+                        : { border: '1px dashed ' + G.amberLine, borderLeft: '4px solid ' + G.amberLine, borderRadius: 5, padding: '8px 11px', marginBottom: 7, background: G.amberBg }}>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', flexWrap: 'wrap' }}>
+                          <span style={{ fontWeight: 600 }}>{f.label}:</span>
+                          <b style={{ color: G.navy }}>{f.value == null ? '—' : String(f.value)}</b>
+                          {f.citation ? <CiteChip>{f.citation}</CiteChip> : <span style={kv}>city policy</span>}
+                          {ruleChips(f.sourceRuleIds)}
+                          {canPropose ? <button type="button" style={Object.assign({}, btnQuiet, { marginLeft: 'auto' })}
+                            onClick={function () { openComposer(rules.domains[0], 'Propose change — ' + f.label, { field: f }); }}>Propose…</button> : null}
+                        </div>
+                        {f.help ? <div style={Object.assign({}, kv, { marginTop: 2 })}>{f.help}</div> : null}
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : body.kind === 'exemptionList' ? (
+                <div>
+                  <div style={Object.assign({}, panel, { background: C.surface2 })}>
+                    <span style={kv}><b style={{ color: C.ink }}>Exemption model: {body.exemptionModel || '—'}</b>. {body.areaEditorNote}{' '}
+                      <Link to={body.areaEditor} style={{ color: C.blue }}>Open the Redaction Rules area →</Link></span>
+                  </div>
+                  {body.exemptions.length === 0 ? <div style={panel}><span style={kv}>No rules yet — add the first one in the Redaction Rules area.</span></div>
+                    : body.exemptions.map(function (x) {
+                      return <FactRow key={x.id} title={<span>{x.title} {x.citations.map(function (c, i) { return <CiteChip key={i}>{c.citation || c.name}</CiteChip>; })} <WiredBadge wired={x.wired} /></span>}>
+                        {x.wiredWhy}{x.category ? ' · ' + x.category : ''}{x.status !== 'approved' ? ' · status: ' + x.status : ''}
+                      </FactRow>;
+                    })}
+                  {canPropose ? <button type="button" style={btnSec}
+                    onClick={function () { openComposer(rules.domains[0], 'Propose change — ' + sec.label + ' configuration', {}); }}>Propose configuration change…</button> : null}
+                </div>
+              ) : (
+                <div>
+                  <div style={Object.assign({}, panel, { padding: 0 })}>
+                    {body.config == null
+                      ? <div style={{ padding: '11px 13px' }}><span style={kv}>No content — import a state template or add the first rule. (Nothing here is an alarm.)</span></div>
+                      : <pre style={{ margin: 0, padding: '11px 13px', fontFamily: C.mono, fontSize: 11.5, overflowX: 'auto', maxHeight: 420 }}>{JSON.stringify(body.config, null, 2)}</pre>}
+                  </div>
+                  {canPropose && body.config != null && rules.editable.length ? <button type="button" style={btnSec}
+                    onClick={function () { openComposer(rules.editable[0], 'Propose change — ' + sec.label, {}); }}>Propose change…</button> : null}
+                </div>
+              )
+            ) : null}
+
+            {zone === 'settings' ? (
+              <div>
+                <div style={Object.assign({}, panel, { background: C.surface2 })}>
+                  <p style={Object.assign({}, kv, { margin: 0 })}>
+                    <b style={{ color: C.ink }}>What the statute left to the city.</b>{' '}
+                    {sec.settings.length ? 'Each setting carries the template’s suggested default — a starting point, never an answer. The section cannot be attested until each is confirmed.' : 'This section has no local policy settings.'}
+                  </p>
+                </div>
+                {sec.settings.map(function (st) {
+                  return <SettingCard key={st.domain + '/' + st.path} setting={st} onChanged={reload}
+                    canConfirm={canConfirm(st.domain)} ownerLabel={sec.owner && sec.owner.label} />;
+                })}
+              </div>
+            ) : null}
+
+            {zone === 'provenance' ? (
+              <div>
+                {(rules && rules.provenance ? rules.provenance.imported : []).map(function (im) {
+                  return (
+                    <div key={im.domain} style={panel}>
+                      <div style={railHead}>{im.domain}</div>
+                      {im.imported
+                        ? <div style={kv}>Imported from the state template{im.importInfo && im.importInfo.state ? ' (' + im.importInfo.state + ')' : ''}{im.importInfo && im.importInfo.imported_at ? ' · ' + String(im.importInfo.imported_at).slice(0, 10) : ''}. The import wrote the statute-derived content; the city’s decisions live in Local Policy Settings.</div>
+                        : <div style={kv}>Not template-imported — this configuration was seeded or hand-entered; provenance rides its fields where it exists.</div>}
+                    </div>
+                  );
+                })}
+                <div style={panel}>
+                  <div style={railHead}>Research records behind this section’s content</div>
+                  {rules && rules.provenance && rules.provenance.sourceRuleIds.length
+                    ? <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>{ruleChips(rules.provenance.sourceRuleIds)}</div>
+                    : <div style={kv}>None referenced — absence shown as absence.</div>}
+                  <div style={Object.assign({}, kv, { marginTop: 6 })}>Click an id to read the full research record — the rule, its trigger, and the statute’s own words.</div>
+                </div>
+              </div>
+            ) : null}
+
+            {zone === 'proposals' ? (
+              <div>
+                {proposals.length === 0 ? <div style={panel}><span style={kv}>No pending proposals on this section.</span></div>
+                  : proposals.map(function (p) {
+                    return (
+                      <div key={p.id} style={panel}>
+                        <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', flexWrap: 'wrap' }}>
+                          <b style={{ color: G.navy }}>{p.domain}</b>
+                          <StatusChip tone={p.source_ref === 'editor' ? 'configured' : 'unconf'}>{p.source_ref === 'editor' ? 'editor' : 'import/extract'}</StatusChip>
+                          <span style={kv}>{p.created_by} · {String(p.created_at || '').slice(0, 10)}</span>
+                        </div>
+                        <div style={{ fontSize: 12.5, marginTop: 4 }}>{p.summary}</div>
+                      </div>
+                    );
+                  })}
+                <div style={kv}>Review and apply happen in the ordinary flow: <Link to="/admin?tab=updates" style={{ color: C.blue }}>open the review queue →</Link>
+                  {isLegalSection ? ' Editor proposals on Legal Rules domains apply under Senior Legal.' : ''}</div>
+              </div>
+            ) : null}
+
             <div style={panel}>
               <div style={railHead}>Attest this section</div>
               <div style={Object.assign({}, kv, { marginBottom: 7 })}>
@@ -277,7 +658,7 @@ export default function JurisdictionConfigPage() {
                   ? <span><b>{openCount}</b> policy setting(s) unconfirmed — <b>attestation refuses until every one is</b> (the attest() gate, not a UI nicety).</span>
                   : sec.status === 'not_configured'
                     ? <span>This section has no configuration yet, so there is nothing to sign off on.</span>
-                    : <span>When you attest, the section's content hash is recorded under your name; any later edit shows as drift until re-attested.</span>}
+                    : <span>When you attest, the section’s content hash is recorded under your name; any later edit — including an applied proposal — shows as drift until re-attested.</span>}
               </div>
               {sec.attested && !sec.drift ? (
                 <button type="button" style={canAttest(sec.section) ? btnQuiet : btnOff} disabled={!canAttest(sec.section)}
@@ -296,19 +677,20 @@ export default function JurisdictionConfigPage() {
               ) : null}
             </div>
           </div>
+
           <div style={{ flex: '0 0 280px' }}>
             <div style={panel}>
               <div style={railHead}>Pending proposals</div>
               <div style={kv}>
-                {summary.proposalsPending > 0
-                  ? <span><b style={{ color: G.amberInk }}>{summary.proposalsPending}</b> configuration proposal(s) await review — until approved, the engine runs the previous configuration. </span>
-                  : <span>None pending. </span>}
+                {proposals.length > 0
+                  ? <span><b style={{ color: G.amberInk }}>{proposals.length}</b> on this section — until approved, the engine runs the previous configuration. </span>
+                  : <span>None on this section. </span>}
                 <Link to="/admin?tab=updates" style={{ color: C.blue }}>Open the review queue →</Link>
               </div>
             </div>
             <div style={Object.assign({}, panel, { marginTop: 10 })}>
               <div style={railHead}>Integrity findings</div>
-              {secFindings.length === 0 ? <div style={kv}>None touching this section. The invariants (clock bands, provenance, no unknown keys) hold regardless of attestation.</div>
+              {secFindings.length === 0 ? <div style={kv}>None touching this section. The invariants (clock bands, provenance, no unknown keys) hold regardless of attestation — and the composer refuses what they refuse, before anything is written.</div>
                 : secFindings.slice(0, 4).map(function (f, i) {
                   return <div key={i} style={{ borderLeft: '3px solid #C08A7E', paddingLeft: 10, fontSize: 12.5, marginBottom: 7 }}>
                     <b>{f.where}:</b> {f.issue}
@@ -317,10 +699,24 @@ export default function JurisdictionConfigPage() {
             </div>
             <div style={Object.assign({}, panel, { marginTop: 10 })}>
               <div style={railHead}>Enforcement</div>
-              <div style={kv}>Dev mode: <b style={{ color: summary.devMode ? '#8C3A2B' : G.statute }}>{summary.devMode ? 'ON — gates simulated' : 'OFF — live'}</b>. Turning it off is the go-live act, on the checklist's front page.</div>
+              <div style={kv}>Dev mode: <b style={{ color: summary.devMode ? '#8C3A2B' : G.statute }}>{summary.devMode ? 'ON — gates simulated' : 'OFF — live'}</b>. Turning it off is the go-live act, on the checklist’s front page.</div>
             </div>
           </div>
         </div>
+
+        {composer ? (
+          <ComposerPopup open={true} onClose={function () { setComposer(null); }}
+            section={sec.section} domain={composer.domain} title={composer.title} seed={composer.seed}
+            currentConfig={(rules && rules.configs && rules.configs[composer.domain]) || {}}
+            legal={isLegalSection} canApply={canApplyContent}
+            onDone={function (r) {
+              setComposer(null);
+              if (r && r.drifted && r.driftNote) setErr(r.driftNote);
+              reload();
+            }} />
+        ) : null}
+        <ResearchPopup ruleId={drill} onClose={function () { setDrill(null); }} />
+        {err ? <div style={{ color: G.amberInk, fontSize: 12.5, marginTop: 8, background: G.amberBg, border: '1px solid ' + G.amberLine, borderRadius: 5, padding: '7px 10px' }}>{err}</div> : null}
         <ConfirmPopup open={!!popup && popup.kind === 'attest'} onClose={function () { setPopup(null); }}
           title={'Attest ' + (popup ? popup.section : '')}
           actions={[

@@ -151,6 +151,21 @@ counts-only metrics · A/S/R keys. BW8 is unblocked.)
 drafted, 2026-08-11 — Legal Rules owns deadline/clock_matrix · Director routes to Senior Legal,
 no self-apply on Legal domains · v1 = high-touch six renderers, rest read-only pretty views ·
 drill-down IN · drift-warn only, no strict re-attest. BW9 unblocked.)
+**[BW9b BUILT 2026-08-12]** — zoned section screen (Content · Local Policy Settings · Provenance ·
+Proposals) over the BW9a detail; renderers: deadlines (Frame C named-timer table joining the
+deadline + clock_matrix domains, humanized use cases with run-out consequences), fee (cited
+schedule facts), clarification/payment/fee_waiver (labeled fields w/ per-field provenance),
+exemption/redaction (the redaction_rules + legal_sources store w/ honest wired/content-only),
+rest read-only raw. Composer: citation + note required; compose-time validators are
+configIntegrity's OWN `validateDomainConfig`/`validateClockMatrix` (factored pure — same code,
+same wording, re-run at apply); proposals land `source_ref='editor'` in the existing review/apply
+flow; editor applies write the jurisdiction_rules row + re-sync (drift-warn). Senior Legal
+applies/dismisses Legal-domain editor proposals (a Director's edit routes, never self-applies);
+research drill-down serves `pruned_discovery.json` incl. verbatim statute text.
+**v1 lines drawn:** exemption/redaction ROW edits stay in the Redaction Rules area's existing
+draft→legal-approval flow (its own audit path, §6 not-reopened) — the composer here edits the
+domain configs; editor applies are immediate-only (the scheduler promotes through adapters, which
+these domains lack).
 
 - Section screen per `jurisdiction_rules` domain: Content · Local Policy Settings (Draft 6's confirm cards
   fold in — one surface) · Provenance (incl. research-text drill-down) · Pending proposals.
@@ -213,9 +228,10 @@ coverage-gap manager email (role model §6, unbuilt).
    Split into two slices: **BW9a — the go-live checklist [BUILT 2026-08-12]** (policy-setting
    enumeration incl. the code-defined knob domains, the confirm setter with who/when, the computed
    gate summary + Director dashboard banner, Senior Legal attest widening, the readiness index +
-   section detail screens, and the guided go-live ceremony); **BW9b — the rule editors** (Draft 10:
+   section detail screens, and the guided go-live ceremony); **BW9b — the rule editors [BUILT
+   2026-08-12]** (Draft 10:
    section-screen content zones, edit-as-proposal composer, compose-time validators, the high-touch
-   six renderers, research-text drill-down) remains.
+   six renderers, research-text drill-down). **All nine build waves are BUILT.**
 BW3–BW7 depend on BW1+BW2; BW8/BW9 gate on markup. Never hand-edit generated templates — the
 live `jurisdiction_rules` config is what BW9's editors edit; the Phase-6 pipeline stays the
 source for templates.
