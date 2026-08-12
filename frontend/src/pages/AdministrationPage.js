@@ -1,9 +1,8 @@
 import React from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import SetupPage from './SetupPage';
 import ConfigurationPage from './ConfigurationPage';
-import JurisdictionProfilePage from './JurisdictionProfilePage';
 import RuleUpdatesPage from './RuleUpdatesPage';
 import FeeConfigPage from './FeeConfigPage';
 import TaxonomyPage from './TaxonomyPage';
@@ -23,7 +22,6 @@ import SecurityPage from './SecurityPage';
 const TABS = [
   { key: 'setup',        label: 'Setup',                el: SetupPage },
   { key: 'config',       label: 'Configuration',        el: ConfigurationPage, admin: true },
-  { key: 'jurisdiction', label: 'Jurisdiction Profile', el: JurisdictionProfilePage },
   { key: 'updates',      label: 'Update Configuration', el: RuleUpdatesPage },
   { key: 'fees',         label: 'Fee Configuration',    el: FeeConfigPage },
   { key: 'taxonomy',     label: 'Taxonomy',             el: TaxonomyPage },
@@ -42,6 +40,10 @@ export default function AdministrationPage() {
   const isAdmin = store.hasAnyRole('SYSTEM_ADMIN');
   const tabs = TABS.filter(function (t) { return !t.admin || isAdmin; });
   const activeKey = params.get('tab') || tabs[0].key;
+  // RETIRED 2026-08-12: the v1 Jurisdiction Profile tab. BW9a/BW9b replaced it wholesale — the
+  // go-live checklist, section screens and rule editors live at /jurisdiction-config. Deep links
+  // (help assistant, bookmarks) land there instead of silently falling to the first tab.
+  if (activeKey === 'jurisdiction') return <Navigate to="/jurisdiction-config" replace />;
   const active = tabs.find(function (t) { return t.key === activeKey; }) || tabs[0];
   const Body = active.el;
   return (

@@ -4,7 +4,7 @@ import api from '../lib/api';
 import FeeSandboxPanel from '../components/FeeSandboxPanel';
 
 const PHASE_META = {
-  jurisdiction: { link: '/jurisdiction-profile', linkLabel: 'Open Jurisdiction Profile', guide: "Select your state's jurisdiction profile. This sets statutory response deadlines, tolling rules, and the exemption basis used for redaction." },
+  jurisdiction: { link: '/jurisdiction-config', linkLabel: 'Open Jurisdiction Configuration', guide: "Review your state's jurisdiction configuration — statutory response deadlines, tolling rules, and the exemption basis used for redaction — and confirm each local policy setting on the go-live checklist." },
   departments:  { link: '/departments', linkLabel: 'Open City Departments', guide: "Confirm your city's departments so they match your org chart \u2014 add, remove, or rename as needed." },
   teams:        { link: '/departments', linkLabel: 'Open Fulfillment Teams', guide: "Define your Request Fulfillment Teams and select which departments each one serves." },
   ownership:    { link: '/taxonomy', linkLabel: 'Open Taxonomy', guide: "Confirm the owning City Department for each record type. AI proposes sensible defaults; you adjust." },

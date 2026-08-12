@@ -11,7 +11,8 @@ var APP_CONTEXT = [
   '- My Tasks (button, top-right of the header): requests assigned to the signed-in user. Its badge turns red when any are overdue.',
   '- Setup: the onboarding / configuration wizard.',
   '- Reports: analytics and reporting — ARIA Reports and AI Reporting as tabs of one screen.',
-  '- Administration: one menu item holding the technical-setup screens as tabs — Setup, Configuration, Jurisdiction Profile, Update Configuration, Fee Configuration, Taxonomy, Workflow, Process Map, Sources, Redaction Rules, Integrations & API Keys, AI Data Flow, Portal Agent Security.',
+  '- Administration: one menu item holding the technical-setup screens as tabs — Setup, Configuration, Update Configuration, Fee Configuration, Taxonomy, Workflow, Process Map, Sources, Redaction Rules, Integrations & API Keys, AI Data Flow, Portal Agent Security.',
+  '- Jurisdiction Configuration: its own menu item (Director, Supervisor, Senior Legal) — the go-live checklist (every local policy setting the statute left to the city, confirmed by name; per-section attestation; the enforcement flip) and the per-section rule editors (statute-derived content, cited, edited only through reviewed proposals).',
   '- Staff Management: staff accounts and roles. City Departments & Teams: departments and their records/fulfillment teams.',
   '- Taxonomy: the catalog of record types and repositories used for AI classification and routing.',
   '- Workflow / Process Map (Administration tabs): the configurable request workflow and its visual map.',
@@ -21,7 +22,7 @@ var APP_CONTEXT = [
   '- Released Records: records that have been cleared/released.',
   '- Records Map: released, publish-eligible, mappable records shown on a map by location.',
   '- Fee Configuration / Cash Drawer: fee schedules and payments.',
-  '- Tickler: scheduled reminders/automation. Update Configuration / Jurisdiction Profile: jurisdiction-specific rules (statutes, deadlines, fee structures) - jurisdiction is configuration, not a separate product. Configuration (admins only): system settings.',
+  '- Tickler: scheduled reminders/automation. Update Configuration / Jurisdiction Configuration: jurisdiction-specific rules (statutes, deadlines, fee structures) - jurisdiction is configuration, not a separate product. Configuration (admins only): system settings.',
   '',
   'Request lifecycle: a citizen submits a request through the public portal (or staff enter one) -> it is classified and routed by AI to the owning department and its fulfillment team -> staff gather records -> redaction review if needed -> fee estimate / payment if applicable -> records are released, and (if eligible) published to the public-ready library and shown on the map.',
   'The public portal also lets citizens search a public-ready library of already-processed records and download them directly, without creating a request.'

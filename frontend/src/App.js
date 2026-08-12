@@ -122,7 +122,8 @@ export default function App() {
           <Route path="jurisdiction-config" element={<JurisdictionConfigPage />} />
           <Route path="jurisdiction-config/:section" element={<JurisdictionConfigPage />} />
           <Route path="rule-updates" element={<Navigate to="/admin?tab=updates" replace />} />
-          <Route path="jurisdiction-profile" element={<Navigate to="/admin?tab=jurisdiction" replace />} />
+          {/* RETIRED 2026-08-12: the v1 Jurisdiction Profile tab — superseded by the BW9 checklist + editors. */}
+          <Route path="jurisdiction-profile" element={<Navigate to="/jurisdiction-config" replace />} />
           {/* MENU REORGANIZATION 2026-08-01 (Kevin): Reports unified under one item with top tabs;
               the 13 technical-setup screens live under /admin as tabs. Old URLs redirect in, so
               bookmarks and help-assistant deep links survive. The Simulator is DELETED (page, route,

@@ -130,6 +130,24 @@ function codeHits(re) {
     "SELECT count(*)::int AS n FROM user_task_types WHERE task_type IN ('commercial_rate','mrr_processing')");
   ok('E5 no person still holds a removed task type', orphans.n === 0);
 
+  console.log('\n=== F. THE v1 JURISDICTION PROFILE TAB IS RETIRED (2026-08-12) ===');
+  // BW9a/BW9b replaced it wholesale: the go-live checklist, section screens and rule editors live
+  // at /jurisdiction-config. Same idiom as section A: the defect is a link that exists.
+  ok('F1 pages/JurisdictionProfilePage.js no longer exists', !fs.existsSync(FE + '/pages/JurisdictionProfilePage.js'));
+  var jpRefs = codeHits(/JurisdictionProfilePage/);
+  ok('F2 nothing imports or routes it' + (jpRefs.length ? ' — found ' + jpRefs.join(', ') : ''), jpRefs.length === 0);
+  var tabRefs = codeHits(/tab=jurisdiction'|tab=jurisdiction"/);
+  ok('F3 nothing links to the retired ?tab=jurisdiction' + (tabRefs.length ? ' — found ' + tabRefs.join(', ') : ''),
+    tabRefs.length === 0);
+  // The old URLs must LAND SOMEWHERE REAL, not silently fall to the first admin tab: bookmarks and
+  // the help assistant's deep links survive retirement by redirecting to the successor.
+  var appSrc = fs.readFileSync(FE + '/App.js', 'utf8');
+  ok('F4 /jurisdiction-profile redirects to the checklist',
+    /path="jurisdiction-profile"[^\n]*to="\/jurisdiction-config"/.test(appSrc));
+  var adminSrc = fs.readFileSync(FE + '/pages/AdministrationPage.js', 'utf8');
+  ok('F5 a ?tab=jurisdiction deep link redirects to the checklist instead of falling to the first tab',
+    /activeKey === 'jurisdiction'[^\n]*\n?[^\n]*\/jurisdiction-config/.test(adminSrc));
+
   console.log('\n  ' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
   process.exit(fail ? 1 : 0);
 })().catch(function (e) { console.error('HARNESS ERROR:', e); process.exit(1); });
