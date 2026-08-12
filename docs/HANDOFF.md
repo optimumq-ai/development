@@ -6650,3 +6650,44 @@ any real money flows through a waived MRR.
 Every pill green, integrity clean, smoke green end to end. **The one remaining act is Kevin's:
 the enforcement flip, via the ceremony on Jurisdiction Configuration.** Next session (Kevin):
 things to build in for TESTING and DEMO — his list, to be defined.
+
+---
+
+## 2026-08-12 (e) — waive-accounting: the de-minimis waive writes its decision into the arithmetic (`4b4b2fc`)
+
+### The slice (the item (d) deferred)
+(d) noted that `releaseGate.componentCharged` still reported the PRE-WAIVE share on a waived estimate, and
+asked whether erpSettlement/revenueAllocation should read the waive too. The look found it was one defect,
+not three: the $0 waive snapshot is the GOVERNING priced snapshot for every reader of `componentCharged`,
+and it carried pre-waive dollars. a7db704's flag read fixed only the gate's SELF path — the cumulative /
+frozen-quote path never looked at the flag (a dormant §5.9-class landmine for the day one accepted quote
+prices several records, i.e. the MRR money-axis move), and ERP line items, revenue attribution and the
+parent financial view's quoted shares all read the stale arithmetic.
+
+### The fix — at the write, not in four more readers
+The waive route now writes the exact shape the engine's own CONFIGURED de-minimis produces (the §5.10.2
+ratio at total = 0): every `componentCharged` zeroed, `allocation.ratio` 0. Evidence preserved three ways —
+`componentGross` untouched, pre-waive shares recorded in the snapshot's `deMinimisWaive.preWaiveShares`,
+and the engine's original snapshot beside it never rewritten. Downstream needed NO changes: revenue
+attribution's documented `sum <= 0` branch keeps money whole (`request_total` basis), ERP charges go
+scalar-only rather than fabricating a split, the frozen quote freezes at $0 by construction. The gate keeps
+the flag read (covers pre-2026-08-12 snapshots) and its reported `componentCharged` now honors the decision.
+A reconciliation still supersedes on both axes, so re-priced money is collected and allocated normally.
+Spec: `SPEC_parent_child_lifecycle.md` §5.10.2 records the decision, same commit.
+
+### Evidence
+`verify_bw4_estimate` G9b–G9f added (the G-case synthetic estimate now carries a priced component as the
+engine really writes, backdated so the waive snapshot is strictly latest — same-second `created_at` ties
+made "the governing snapshot" arbitrary). **Full suite 1902/1902, live untouched.** Break-test after
+committing: with the zeroing line disabled, exactly G9b/G9e/G9f fail (G9d survives on the gate's flag
+guard, which is that guard's job) — the assertions bite.
+
+### A trap re-stepped-in (recorded in memory)
+`npm test 2>&1 | tail` reports TAIL's exit code — the break-test run "exited 0" with 3 failures. The runner
+itself exits 1 correctly (`run_suite.js:166`). Same lesson as the frontend build: never pipe a command whose
+exit code matters; read the `SUITE GREEN/NOT GREEN` line.
+
+### Where this leaves go-live
+Unchanged from (d): every pill green, smoke green, and the one remaining act is Kevin's enforcement flip on
+Jurisdiction Configuration. The (d) list — things to build for TESTING and DEMO — is still to be defined by
+Kevin.
