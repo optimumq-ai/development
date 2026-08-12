@@ -31,7 +31,7 @@ async function hist(requestId, actor, action, details, stageFrom, stageTo) {
 
 function escapeHtml(s) { return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
 async function sysCfg(key, def) { var r = await get('SELECT value FROM system_config WHERE key = ?', [key]); return (r && r.value != null && r.value !== '') ? r.value : def; }
-async function latestEstimate(requestId) { return await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [requestId]); }
+async function latestEstimate(requestId) { return await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [requestId]); }
 
 // Projection ladder, rung 1: derive KNOWN page counts for a component (request/child id) from records
 // already in hand - paginated attached documents + selected records that resolve to a page count.
@@ -77,9 +77,9 @@ async function planForSnapshot(snap, extra) {
 // Payment state (4e): effective total (reconciled actual if present, else the estimate), deposit +
 // final paid to date, and the resulting balance / paid-in-full flag. Drives the release gate (4d).
 async function paymentState(rid) {
-  var est = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [rid]);
+  var est = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [rid]);
   if (!est) return null;
-  var recon = await get("SELECT total FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC LIMIT 1", [rid]);
+  var recon = await get("SELECT total FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [rid]);
   var base = (recon && recon.total != null) ? Number(recon.total) : (Number(est.total) || 0);
   var credRow = await get("SELECT COALESCE(SUM(resolution_amount),0) AS credits FROM objections WHERE request_id = ? AND status = 'resolved' AND approval_status = 'approved' AND resolution_type IN ('reduction','waiver','write_off')", [rid]);
   var manualCredRow = await get("SELECT COALESCE(SUM(amount),0) AS c FROM fee_adjustments WHERE request_id = ? AND type = 'credit' AND COALESCE(voided,0) = 0", [rid]);
@@ -154,7 +154,7 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
     if (ff.blocked) return res.status(409).json({ error: ff.reason, code: 'FEE_FORFEITED', citation: ff.citation, clock: ff.clock });
     var jid = await activeJurisdiction();
     var cfg = await pickConfig(jid);
-    var latest = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [req.params.requestId]);
+    var latest = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [req.params.requestId]);
     for (var ci = 0; ci < loaded.components.length; ci++) {
       loaded.components[ci].suggested = await knownQuantities(loaded.components[ci].id);
       var rtid = loaded.components[ci].recordType;
@@ -174,7 +174,7 @@ router.get('/request/:requestId', requireAuth, async function (req, res) {
       var roll = await laborActuals.rollup(req.params.requestId);
       var estInput = {}; try { estInput = latest ? JSON.parse(latest.input_json || '{}') : {}; } catch (e) { estInput = {}; }
       var estHours = laborActuals.estimatedHoursFromInput(estInput);
-      var recon = await get("SELECT id, created_by, variance_pct, renotify_required, notified_at, created_at FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC LIMIT 1", [req.params.requestId]);
+      var recon = await get("SELECT id, created_by, variance_pct, renotify_required, notified_at, created_at FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [req.params.requestId]);
       var autoDraft = (recon && /auto-draft/i.test(recon.created_by || '') && !recon.notified_at) ? { id: recon.id, variancePct: recon.variance_pct, reNotifyRequired: !!recon.renotify_required, createdAt: recon.created_at } : null;
       laborOut = { hasActuals: roll.hasActuals, measured: roll.hours, estimated: estHours, counted: roll.counted, excluded: roll.excluded, autoDraft: autoDraft };
     } catch (e) { laborOut = null; }
@@ -528,7 +528,7 @@ router.post('/request/:requestId/final-payment/record', requireAuth, async funct
   var rid = req.params.requestId;
   var reqRow = await get('SELECT id, stage FROM requests WHERE id = ?', [rid]);
   if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
-  var est = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [rid]);
+  var est = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [rid]);
   if (!est) return res.status(400).json({ error: 'No estimate on this request.' });
   var before = await paymentState(rid);
   var amount = (req.body && req.body.amount != null) ? Number(req.body.amount) : (before ? before.balanceDue : 0);
@@ -568,7 +568,7 @@ router.post('/request/:requestId/reconcile', requireAuth, async function (req, r
     // recomputes against it. Unguarded: nothing is persisted before this line, so the outer catch's 500 is honest.
     if (b.purpose) await run("UPDATE requests SET purpose = ? WHERE id = ?", [b.purpose, rid]);
     var feeContext = engine.compute(config, request);
-    var base = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [rid]);
+    var base = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [rid]);
     var estTotal = base ? (Number(base.total) || 0) : null;
     var pol = (config.estimatePolicy && typeof config.estimatePolicy.revisionNotifyPercent === 'number') ? config.estimatePolicy.revisionNotifyPercent : 20;
     // The staff-confirmed manual path DOES fold actuals into the record-type profiles (Welford) \u2014 the auto-draft
@@ -616,7 +616,7 @@ router.post('/request/:requestId/payment/record', requireAuth, async function (r
     var rid = req.params.requestId;
     var reqRow = await get('SELECT id, stage FROM requests WHERE id = ?', [rid]);
     if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
-    var est = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [rid]);
+    var est = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [rid]);
     if (!est) return res.status(400).json({ error: 'No estimate on this request.' });
     var b = req.body || {};
     var target = (b.target === 'deposit') ? 'deposit' : 'balance';
@@ -676,7 +676,7 @@ router.get('/request/:requestId/adjustment-notice', requireAuth, async function 
     var reqRow = await get('SELECT id, request_number, requestor_name, requestor_email, fee_waiver_status FROM requests WHERE id = ?', [rid]);
     if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
     var est = await latestEstimate(rid);
-    var recon = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC LIMIT 1", [rid]);
+    var recon = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [rid]);
     if (!recon) return res.status(400).json({ error: 'No reconciliation yet - record the actuals first.' });
     var estFc = {}; try { estFc = JSON.parse((est && est.fee_context_json) || '{}'); } catch (e) {}
     var actFc = {}; try { actFc = JSON.parse(recon.fee_context_json || '{}'); } catch (e) {}
@@ -699,7 +699,7 @@ router.post('/request/:requestId/adjustment-notice/send', requireAuth, async fun
     if (!reqRow) return res.status(404).json({ error: 'Request not found.' });
     var to = (req.body && req.body.to) || reqRow.requestor_email;
     if (!to) return res.status(400).json({ error: 'No requestor email address on this request.' });
-    var recon = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC LIMIT 1", [rid]);
+    var recon = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [rid]);
     if (!recon) return res.status(400).json({ error: 'No reconciliation to send.' });
     var subject = (req.body && req.body.subject) || 'Final cost for your public records request';
     var text = (req.body && req.body.text) || '';
@@ -789,7 +789,7 @@ router.get('/request/:requestId/financial-profile', requireAuth, async function 
         configProfile: eSnap.profRow ? { id: eSnap.profRow.id, name: eSnap.profRow.name, version: eSnap.profRow.version } : null };
     }
 
-    var recon = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC LIMIT 1", [rid]);
+    var recon = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'reconciliation' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [rid]);
     var actualOut = null;
     if (recon) {
       var rSnap = await computeSnapshot(recon, cfgRow);

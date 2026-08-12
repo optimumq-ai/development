@@ -283,7 +283,7 @@ router.get('/:id/estimate-context', requireAuth, async function (req, res) {
     // waive route refuses on, so the rail cannot offer an action the endpoint will reject.
     var deMinimis = null;
     try {
-      var lastSnap = await get("SELECT total FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [t.request_id]);
+      var lastSnap = await get("SELECT total FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [t.request_id]);
       deMinimis = await require('../services/deMinimisPolicy').offerFor(lastSnap ? lastSnap.total : null, null);
     } catch (e) { console.error('[estimate-context de minimis]', e && e.message); }
 

@@ -37,7 +37,7 @@ var COVERING = "request_id IN (?, (SELECT COALESCE(master_request_id, id) FROM r
 
 async function snapshot(rid, kind) {
   return await db.get(
-    "SELECT * FROM request_fee_estimates WHERE " + COVERING + " AND kind = ? ORDER BY created_at DESC LIMIT 1",
+    "SELECT * FROM request_fee_estimates WHERE " + COVERING + " AND kind = ? ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1",
     [rid, rid, kind]);
 }
 
@@ -119,7 +119,7 @@ function r2(n) { return Math.round((Number(n) || 0) * 100) / 100; }
 async function acceptedQuote(rid) {
   var q = await db.get(
     "SELECT * FROM request_fee_estimates WHERE " + COVERING + " AND kind = 'estimate' AND accepted_at IS NOT NULL " +
-    "ORDER BY accepted_at DESC LIMIT 1", [rid, rid]);
+    "ORDER BY accepted_at DESC, seq DESC NULLS LAST LIMIT 1", [rid, rid]);
   return q || null;
 }
 
@@ -159,7 +159,7 @@ async function poolFunds(rid) {
   try {
     var estRows = await db.all(
       "SELECT DISTINCT ON (request_id) request_id, deposit_paid_amount, final_paid_amount FROM request_fee_estimates " +
-      "WHERE request_id IN (" + ph + ") AND kind = 'estimate' ORDER BY request_id, created_at DESC", ids);
+      "WHERE request_id IN (" + ph + ") AND kind = 'estimate' ORDER BY request_id, created_at DESC, seq DESC NULLS LAST", ids);
     estRows.forEach(function (e) { paid = r2(paid + (Number(e.deposit_paid_amount) || 0) + (Number(e.final_paid_amount) || 0)); });
   } catch (e) { paid = 0; }
   var credits = 0, refunds = 0;

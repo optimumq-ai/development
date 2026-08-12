@@ -1593,3 +1593,20 @@ ALTER TABLE requests ADD COLUMN IF NOT EXISTS settlement_amount REAL;
 -- computed at release for EVERY record — certification gates what is PRESENTED, not what is RECORDED
 -- (measure-always). The typeable verification code is DERIVED (first 16 hex), never stored separately.
 ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS content_sha256 TEXT;
+
+-- SNAPSHOT ORDER IS A DECISION, NOT A COIN FLIP (found by the 2026-08-12 smoke, run 4). created_at has
+-- SECOND granularity, and a scripted flow can write the engine estimate and the de-minimis waive within one
+-- second — then every "latest snapshot" read (ORDER BY created_at DESC LIMIT 1) resolved the tie
+-- arbitrarily, and the release gate read the PRE-WAIVE snapshot: payment_due $0.30 on a request a person
+-- had waived, the §5.9 failure resurrected by timestamp collision. `seq` is monotonic insertion order;
+-- every latest-read now tiebreaks on it. Backfill is ordered and idempotent; the sequence is bumped above
+-- the backfilled max so new rows always sort after old ones.
+ALTER TABLE request_fee_estimates ADD COLUMN IF NOT EXISTS seq BIGINT;
+CREATE SEQUENCE IF NOT EXISTS request_fee_estimates_seq_seq;
+ALTER TABLE request_fee_estimates ALTER COLUMN seq SET DEFAULT nextval('request_fee_estimates_seq_seq');
+UPDATE request_fee_estimates t SET seq = s.rn
+  FROM (SELECT id, row_number() OVER (ORDER BY created_at, id) AS rn
+        FROM request_fee_estimates WHERE seq IS NULL) s
+  WHERE t.id = s.id AND t.seq IS NULL;
+SELECT setval('request_fee_estimates_seq_seq',
+              GREATEST((SELECT COALESCE(MAX(seq), 1) FROM request_fee_estimates), 1));

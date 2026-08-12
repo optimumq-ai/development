@@ -153,7 +153,7 @@ async function bypassReasonFor(task, ctx) {
   if (t === 'estimate' || t === 'mrr_estimate') {
     // A ZERO ESTIMATE IS NOT AN ESTIMATE TO SEND. Two distinct bases, and they are not the same badge:
     // a statutorily-mandatory waiver is the LAW zeroing the fee; a $0 computed total is a system fact.
-    var est = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [task.request_id]);
+    var est = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [task.request_id]);
     var reqRow = ctx.request || await get('SELECT fee_waiver_status FROM requests WHERE id = ?', [task.request_id]);
     var total = est ? Number(est.total) || 0 : null;
     var waived = reqRow && /grant/i.test(reqRow.fee_waiver_status || '');

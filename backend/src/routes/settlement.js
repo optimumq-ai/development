@@ -23,7 +23,7 @@ router.post('/request/:requestId/charge', requireAuth, async function (req, res)
     var target = b.target === 'deposit' ? 'deposit' : 'balance';
     var amount = Number(b.amount);
     if (!(amount > 0)) return res.status(400).json({ error: 'Enter a charge amount.' });
-    var est = await get("SELECT id FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [rid]);
+    var est = await get("SELECT id FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [rid]);
     var out = await erp.emitCharge({ requestId: rid, estimateId: est && est.id, target: target, amount: amount, dueDate: b.dueDate, gatingSemantic: b.gatingSemantic, description: b.description, by: (req.user && req.user.name) || req.user.sub });
     await hist(rid, req.user, 'ERP_CHARGE_SENT', 'Sent ' + target + ' charge of $' + amount.toFixed(2) + ' to the ERP (' + out.erpChargeId + ').');
     res.json({ ok: true, charge: out });
@@ -49,7 +49,7 @@ router.post('/payment-applied', async function (req, res) {
     var now = nowStr();
     var newPaid = Math.round(((Number(track.paid_amount) || 0) + amountApplied) * 100) / 100;
     await run("UPDATE erp_charges SET paid_amount = ?, status = ?, method = ?, paid_at = ?, updated_at = ? WHERE id = ?", [newPaid, b.status || 'partial', b.method || null, now, now, track.id]);
-    var est = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [track.request_id]);
+    var est = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [track.request_id]);
     if (est) {
       await run("INSERT INTO fee_payments (id, request_id, estimate_id, target, method, amount, reference, clerk, drawer_date, created_at) VALUES (?,?,?,?,?,?,?,?,?,?)",
         ['feepay-' + uuidv4().slice(0, 8), track.request_id, est.id, track.target, 'erp:' + (b.method || 'ext'), amountApplied, erpChargeId, 'ERP', now.slice(0, 10), now]);

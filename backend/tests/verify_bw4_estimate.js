@@ -365,6 +365,17 @@ async function makeRequest(id, fields) {
     ok('G9f …and ERP line items are never fabricated from waived shares: the charge goes as a scalar alone',
       liG === null);
 
+    // THE TIMESTAMP TIE (found by the 2026-08-12 live smoke, run 4). created_at is SECOND-granular, and a
+    // scripted flow writes the engine estimate and the waive within one second — the latest-snapshot reads
+    // then resolved the tie arbitrarily, and the release gate read the PRE-WAIVE snapshot: payment_due
+    // $0.30 on a record a person had waived. `request_fee_estimates.seq` (monotonic insertion order) is the
+    // tiebreak now. Forced deterministically here: make the two snapshots' created_at IDENTICAL.
+    await db.run('UPDATE request_fee_estimates SET created_at = (SELECT created_at FROM request_fee_estimates WHERE id = ?) WHERE id = ?',
+      [dm.body.estimateId, snapId]);
+    var gateTie = await require('/opt/optimumq/backend/src/services/feeRelease').releaseGate(rG);
+    ok('G9g a same-second estimate/waive tie still resolves to the WAIVE — seq decides, never the coin flip',
+      gateTie.covered === true && gateTie.balanceDue === 0 && Number(gateTie.effectiveTotal) === 0);
+
     // Already-notified: the requester is holding a figure, so the notice cycle can no longer be skipped.
     var rG2 = await makeRequest('req-' + TAG + '-G2', { departmentId: TEAM });
     var snap2 = 'fe-bw4b' + Date.now().toString().slice(-6);

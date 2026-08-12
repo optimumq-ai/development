@@ -80,7 +80,7 @@ async function runSweep(opts) {
     "WHERE e.kind = 'estimate' AND e.notified_at IS NOT NULL AND e.accepted_at IS NULL AND e.declined_at IS NULL " +
     "AND e.lapsed_at IS NULL AND r.status = 'active' " +
     "AND NOT EXISTS (SELECT 1 FROM objections o WHERE o.request_id = r.id AND o.status IN ('open','tentative') AND o.clock_frozen = 1) " +
-    "AND e.id = (SELECT id FROM request_fee_estimates WHERE request_id = r.id AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1)");
+    "AND e.id = (SELECT id FROM request_fee_estimates WHERE request_id = r.id AND kind = 'estimate' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1)");
   for (var i = 0; i < lapseCandidates.length; i++) {
     var lr = lapseCandidates[i];
     var lw = windowFromPlan(await planForEstimate(lr), T.requesterResponseDays);
@@ -125,7 +125,7 @@ async function runSweep(opts) {
     "AND COALESCE(e.deposit_due, 0) > 0 " +
     "AND COALESCE(r.tickler_flag, '') <> 'deposit_overdue' " +
     "AND NOT EXISTS (SELECT 1 FROM objections o WHERE o.request_id = r.id AND o.status IN ('open','tentative') AND o.clock_frozen = 1) " +
-    "AND e.id = (SELECT id FROM request_fee_estimates WHERE request_id = r.id AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1)");
+    "AND e.id = (SELECT id FROM request_fee_estimates WHERE request_id = r.id AND kind = 'estimate' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1)");
   for (var j = 0; j < depCandidates.length; j++) {
     var dr = depCandidates[j];
     var drCfg = await cfgForEstimate(dr);

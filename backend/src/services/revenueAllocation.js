@@ -47,7 +47,7 @@ function num(n) { return Number(n) || 0; }
 async function snapshots() {
   var rows = await db.all(
     "SELECT id, request_id, kind, total, fee_context_json, deposit_paid_amount, final_paid_amount, created_at " +
-    "FROM request_fee_estimates WHERE kind IN ('estimate','reconciliation') ORDER BY created_at ASC, id ASC");
+    "FROM request_fee_estimates WHERE kind IN ('estimate','reconciliation') ORDER BY created_at ASC, seq ASC NULLS FIRST, id ASC");
   var byReq = {};
   rows.forEach(function (row) {
     var k = row.request_id;

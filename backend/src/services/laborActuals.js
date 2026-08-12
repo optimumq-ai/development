@@ -162,7 +162,7 @@ async function pickConfig(jid) {
 async function autoDraftReconcile(requestId, actor) {
   var roll = await rollup(requestId);
   if (!roll.hasActuals) return { skipped: true, reason: 'no measured labor actuals', rollup: roll };
-  var est = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC LIMIT 1", [requestId]);
+  var est = await get("SELECT * FROM request_fee_estimates WHERE request_id = ? AND kind = 'estimate' ORDER BY created_at DESC, seq DESC NULLS LAST LIMIT 1", [requestId]);
   if (!est) return { skipped: true, reason: 'no estimate to reconcile against', rollup: roll };
   var input = {}; try { input = JSON.parse(est.input_json || '{}'); } catch (e) { input = {}; }
   if (!input.components || !input.components.length) return { skipped: true, reason: 'estimate has no priced components', rollup: roll };
