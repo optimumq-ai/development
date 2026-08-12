@@ -389,6 +389,23 @@ router.post('/request/:requestId/de-minimis-waive', requireAuth, async function 
     var now = nowStr();
 
     feeContext.deMinimisWaive = { waivedBy: actor, waivedAt: now, note: note, originalTotal: originalTotal };
+    // THE WAIVE IS WRITTEN INTO THE ARITHMETIC, not just flagged beside it (2026-08-12, the deferred half of
+    // the pre-go-live smoke finding). This $0 snapshot becomes the GOVERNING priced snapshot, and everything
+    // downstream reads `componentCharged` off it — the §5.9 release gate (self AND cumulative paths), the
+    // frozen quote, ERP line items, revenue attribution, the parent financial view. The engine's CONFIGURED
+    // de-minimis already prices every component at 0 (the §5.10.2 ratio at total = 0), so a person's waive
+    // writes the same shape rather than asking each reader to know the flag: charged shares of a $0 request
+    // are $0. `componentGross` stays untouched (the raw per-record pricing), the pre-waive shares move into
+    // the waive block, and the engine's original snapshot beside this one remains the full evidence of what
+    // the fees would have been.
+    if (Array.isArray(feeContext.components) && feeContext.components.length) {
+      feeContext.deMinimisWaive.preWaiveShares = feeContext.components.map(function (c) {
+        return { id: c.id, label: c.label || null,
+                 componentCharged: (typeof c.componentCharged === 'number') ? c.componentCharged : null };
+      });
+      feeContext.components.forEach(function (c) { c.componentCharged = 0; });
+      feeContext.allocation = { basis: 'prorata', ratio: 0 };
+    }
     if (feeContext.requestLevel) {
       feeContext.requestLevel.total = 0;
       feeContext.requestLevel.depositDue = 0;

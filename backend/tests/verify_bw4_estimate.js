@@ -303,9 +303,15 @@ async function makeRequest(id, fields) {
     var tG = await tr.createTask({ requestId: rG, type: 'estimate', title: 'Create estimate', teamId: TEAM, createdBy: 'harness' });
     await db.run("UPDATE tasks SET assigned_to = ?, status = 'assigned' WHERE id = ?", [user.id, tG.id]);
     var snapId = 'fe-bw4' + Date.now().toString().slice(-6);
+    // Shaped as the engine really writes it — a priced component carrying componentCharged — and backdated
+    // ten seconds so the waive's $0 snapshot is STRICTLY the latest (same-second ties in created_at would
+    // make "the governing snapshot" arbitrary).
     await db.run("INSERT INTO request_fee_estimates (id, request_id, kind, input_json, fee_context_json, total, deposit_due, notify_flag, created_by, created_at) " +
-      "VALUES (?,?,'estimate','{}',?,?,0,0,'harness',to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))",
-      [snapId, rG, JSON.stringify({ requestLevel: { total: 1.75, depositDue: 0 } }), 1.75]);
+      "VALUES (?,?,'estimate','{}',?,?,0,0,'harness',to_char(now() AT TIME ZONE 'UTC' - interval '10 seconds','YYYY-MM-DD HH24:MI:SS'))",
+      [snapId, rG, JSON.stringify({
+        components: [{ id: rG, label: 'Building permit file', componentGross: 1.75, componentCharged: 1.75 }],
+        allocation: { basis: 'prorata', ratio: 1 },
+        requestLevel: { total: 1.75, depositDue: 0 } }), 1.75]);
 
     var noNote = await req('POST', '/api/fee-estimates/request/' + rG + '/de-minimis-waive', {});
     ok('G1 a reason is REQUIRED — this waives money on judgment rather than on a rule',
@@ -334,6 +340,30 @@ async function makeRequest(id, fields) {
     var gateG = await require('/opt/optimumq/backend/src/services/feeRelease').releaseGate(rG);
     ok('G9 the release gate honors the waive: nothing is owed on a de-minimis-waived record',
       gateG.covered === true && gateG.balanceDue === 0);
+
+    // THE WAIVE IS WRITTEN INTO THE ARITHMETIC (2026-08-12, the deferred half of the smoke finding). The $0
+    // snapshot is the GOVERNING one for every reader of componentCharged — the gate's self and cumulative
+    // paths, ERP line items, revenue attribution, the parent financial view — so it carries zeroed shares
+    // ITSELF (the exact shape the engine's configured de-minimis produces), and each consumer answers the
+    // decision with no special case of its own.
+    var wSnap = await db.get('SELECT fee_context_json FROM request_fee_estimates WHERE id = ?', [dm.body.estimateId]);
+    var wFc = JSON.parse(wSnap.fee_context_json);
+    ok('G9b the waive snapshot writes the decision into the arithmetic: every componentCharged is 0, ratio 0',
+      wFc.components.length === 1 && wFc.components.every(function (c) { return c.componentCharged === 0; }) &&
+      wFc.allocation.ratio === 0);
+    ok('G9c …preserving the evidence: componentGross untouched, the pre-waive shares in the waive block',
+      wFc.components[0].componentGross === 1.75 &&
+      wFc.deMinimisWaive.preWaiveShares.length === 1 &&
+      wFc.deMinimisWaive.preWaiveShares[0].componentCharged === 1.75);
+    ok('G9d …the gate reports the BILLED figure as $0 — this record\'s share of what is actually charged',
+      gateG.componentCharged === 0 && gateG.coverageBasis === 'component');
+    var splitG = require('/opt/optimumq/backend/src/services/revenueAllocation').splitOne(rG, 5, wFc.components);
+    ok('G9e …revenue attribution refuses to split money by a waived split — it stays whole, honestly',
+      splitG.length === 1 && splitG[0].basis === 'request_total' && splitG[0].amount === 5);
+    var liG = await require('/opt/optimumq/backend/src/services/erpSettlement').buildLineItems(
+      { requestId: rG, estimateId: dm.body.estimateId, amount: 5 }, 'prorata');
+    ok('G9f …and ERP line items are never fabricated from waived shares: the charge goes as a scalar alone',
+      liG === null);
 
     // Already-notified: the requester is holding a figure, so the notice cycle can no longer be skipped.
     var rG2 = await makeRequest('req-' + TAG + '-G2', { departmentId: TEAM });

@@ -476,6 +476,18 @@ delta — saving *or* surcharge — is distributed in proportion to each record'
    in the live TX profile**, so this is live. Either resolve actuals before allocating, or exclude
    `needsActual` components from the ratio and charge them separately.
 
+**The MANUAL de-minimis waive writes the same arithmetic `[DECIDED 2026-08-12]`.** The BW4 waive-and-advance
+rail act writes a $0 snapshot, and that snapshot is the *governing* one for every reader of
+`componentCharged` — the §5.9 release gate (self and cumulative paths), the frozen quote (§0.1), ERP line
+items (§5.10.5), revenue attribution, the parent financial view. It therefore carries the decision **in the
+arithmetic, not just in a flag**: every `componentCharged` is 0 (the §5.10.2 ratio at `total = 0`, the exact
+shape the engine's configured de-minimis produces) and `allocation.ratio` is 0. Evidence is preserved
+three ways: `componentGross` stays untouched on each component, the pre-waive shares move into the snapshot's
+`deMinimisWaive.preWaiveShares` block, and the engine's original snapshot beside it is never rewritten. The
+release gate additionally honors the `requestLevel.deMinimisWaived` flag, covering snapshots written before
+this date. A later reconciliation supersedes the waived snapshot on both axes, so re-priced money is still
+collected and allocated normally.
+
 ### 5.10.3 What this replaces, and why `[the running-cap rule is RETIRED]`
 
 The previous default said *"the ceiling is a running cap on cumulative billing"* — charge each child its actual

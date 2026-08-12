@@ -228,6 +228,9 @@ async function cumulative(rid, ownShareFallback) {
   if (!quote) { quote = await snapshot(rid, 'estimate'); fallbackQuote = true; }
   if (!quote) return out;
   var qfc = {}; try { qfc = JSON.parse(quote.fee_context_json || '{}'); } catch (e) { return out; }
+  // A de-minimis-waived quote needs no special case HERE: the waive route writes the decision into the
+  // arithmetic (every componentCharged zeroed, since 2026-08-12), so a waived accepted quote freezes at $0
+  // shares by construction and `required` computes to 0 below.
   var comps = (qfc.components || []).filter(function (c) { return c && c.id && typeof c.componentCharged === 'number'; });
   var mine = null, others = [];
   comps.forEach(function (c) { if (c.id === rid) mine = c; else others.push(c); });
@@ -331,7 +334,10 @@ async function releaseGate(rid) {
     // header demands. What the gate REQUIRED is a different question after §0 and is reported separately
     // (`coverageRequired`, `cumulative.ownQuotedShare`), because the frozen quote is what may not move
     // retroactively while the bill quite properly does.
-    componentCharged: share ? share.amount : null,
+    // A de-minimis-waived request is ACTUALLY CHARGED $0, so the decision governs this figure exactly as it
+    // governs the gate. Waive snapshots written since 2026-08-12 carry zeroed shares in the arithmetic
+    // itself (the waive route writes them); this guard covers any snapshot written before that.
+    componentCharged: share ? (deMinimisWaived ? 0 : share.amount) : null,
     coverageBasis: basis,
     balanceDue: shortfall,
     // The cumulative-FIFO picture, present only when it applied. `coverageRequired` is what the pool had to
