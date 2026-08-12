@@ -391,6 +391,19 @@ async function run_(requestId, opts) {
     // THE KNOB. First real gate, before anything is written — including the bypasses, which are records on
     // a live request and must not appear on an install that never asked for this pipeline.
     if (!ev.armed && !opts.force) {
+      // THE PRE-SEND GATE STILL SPEAKS WHEN THE PIPELINE IS OFF (found by the 2026-08-12 pre-go-live
+      // smoke). A city with auto_release OFF and pre_send_review confirmed ON had NO path that ever
+      // raised the review: this return fired before the divert branch, so a finished single-record
+      // request sat at delivery forever — the knob's own note promises "a release_review task is
+      // raised instead of shipping", and the only install shape that promise was broken in was the
+      // conservative one every real city starts with. Raising the review here is honoring a decision
+      // the city confirmed, not automating a shipment: it is judged on the UNBYPASSED evaluation
+      // (every flow task finished by a person, balance clear — nothing below has been written), it
+      // creates a task, and it ships nothing.
+      if (ev.divertToReview) {
+        var spUnarmed = await spawnReview(requestId, opts);
+        return { acted: true, reason: 'release_review', bypassed: [], review: spUnarmed, evaluation: ev };
+      }
       return { acted: false, reason: 'knob_unconfirmed', knob: ev.knob, evaluation: ev,
                text: 'The auto-release pipeline is not switched on for this city (unconfirmed = off). Nothing shipped, ' +
                      'nothing was bypassed — this is exactly what the product does today.' };

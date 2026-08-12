@@ -222,6 +222,34 @@ async function makeClock(requestId, startedDaysAgo, durationDays) {
     var pkg404 = await req('GET', '/api/tasks/' + flow.id + '/release-package', null, T1);
     ok('E4 the package endpoint refuses a non-review task (404, not a leak)', pkg404.status === 404);
 
+    // ================================================================================================
+    console.log('\n=== F. THE GATE SPEAKS WITH THE PIPELINE OFF (2026-08-12 pre-go-live smoke) ===');
+    // The conservative install every real city starts with: auto_release confirmed OFF, pre-send review
+    // confirmed ON. The unarmed pipeline used to return before its divert branch, so the review the city
+    // asked for was NEVER raised and a finished item sat at delivery forever. Raising the review is
+    // honoring the confirmed decision — it must happen with the pipeline off, and it must ship nothing.
+    var AR = require('/opt/optimumq/backend/src/services/autoRelease');
+    var jidF = await JR.activeJid();
+    var savedRP = await db.get("SELECT config_json FROM jurisdiction_rules WHERE jurisdiction_id = ? AND domain = 'release_pipeline'", [jidF]);
+    try {
+      await AR.writeKnob('auto_release', { confirmed: true, value: 'off' }, jidF, 'bw8-F');
+      await AR.writeKnob('pre_send_review', { confirmed: true, value: 'on' }, jidF, 'bw8-F');
+      var rF = await makeRequest('req-' + TAG + '-unarmed', { stage: 'delivery' });
+      var runOut = await AR.run(rF, {});
+      ok('F1 the UNARMED pipeline raises the review when every condition holds',
+        runOut.acted === true && runOut.reason === 'release_review' && !!(runOut.review && runOut.review.taskId));
+      var childF = await db.get('SELECT stage, status FROM requests WHERE id = ?', [rF]);
+      ok('F2 …and ships NOTHING: the item stays open at delivery', childF.status !== 'closed' && childF.stage === 'delivery');
+      ok('F3 …and writes no auto-bypasses (the knob still withholds every write except the task)',
+        (runOut.bypassed || []).length === 0);
+      var runAgain = await AR.run(rF, {});
+      ok('F4 idempotent: a second unarmed run does not raise a second review',
+        !(runAgain.acted === true && runAgain.reason === 'release_review' && runAgain.review && runAgain.review.taskId !== runOut.review.taskId));
+    } finally {
+      if (savedRP) await db.run("UPDATE jurisdiction_rules SET config_json = ? WHERE jurisdiction_id = ? AND domain = 'release_pipeline'", [savedRP.config_json, jidF]);
+      else await db.run("DELETE FROM jurisdiction_rules WHERE jurisdiction_id = ? AND domain = 'release_pipeline'", [jidF]);
+    }
+
     console.log('\n' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
     process.exit(fail ? 1 : 0);
   } catch (e) {

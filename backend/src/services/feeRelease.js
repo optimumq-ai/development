@@ -287,7 +287,17 @@ async function releaseGate(rid) {
   // FALLBACK — an estimate priced before componentCharged existed, or one whose components do not name this
   // row. Fall back to the whole-request test, which is the PREVIOUS behaviour: stricter than §5.9 requires,
   // never more permissive. Reported honestly as `coverageBasis` so a caller can tell the two apart.
-  var charged = share ? share.amount : effectiveTotal;
+  //
+  // THE DE-MINIMIS WAIVE ZEROES THE DECISION, NOT THE ARITHMETIC (found by the 2026-08-12 pre-go-live
+  // smoke). BW4's waive writes a snapshot with requestLevel.total = 0 and the flag below, but it COPIES the
+  // per-component pricing untouched — deliberately, as the record of what was waived. Reading the share off
+  // that preserved arithmetic made §5.9 demand the waived amount anyway: the pipeline reported payment_due
+  // forever and a release-review approve refused to ship a record on which a person had already decided
+  // nothing is owed. The waive decision governs; a later reconciliation supersedes the snapshot (and with
+  // it this flag), so re-priced money is still collected.
+  var pricedFc = {}; try { pricedFc = JSON.parse(priced.fee_context_json || '{}'); } catch (e) { pricedFc = {}; }
+  var deMinimisWaived = !!(pricedFc.requestLevel && pricedFc.requestLevel.deMinimisWaived);
+  var charged = deMinimisWaived ? 0 : (share ? share.amount : effectiveTotal);
   var basis = share ? 'component' : 'request_total';
 
   var paid = (Number(est.deposit_paid_amount) || 0) + (Number(est.final_paid_amount) || 0);

@@ -327,6 +327,13 @@ async function makeRequest(id, fields) {
     var histG = await db.get("SELECT notes FROM request_history WHERE request_id = ? AND action = 'FEE_DE_MINIMIS_WAIVED'", [rG]);
     ok('G8 …recorded as a PERSON\'s judgment, distinguished from the configured de-minimis rule',
       !!histG && /judgment/.test(histG.notes));
+    // THE WAIVE MUST CLEAR §5.9 (found by the 2026-08-12 pre-go-live smoke). The $0 snapshot keeps the
+    // per-component pricing as evidence, and the release gate used to read the share off that preserved
+    // arithmetic — so a waived record demanded its waived dollars forever: payment_due in the pipeline,
+    // and a release-review approve refusing to ship. The gate now reads the DECISION.
+    var gateG = await require('/opt/optimumq/backend/src/services/feeRelease').releaseGate(rG);
+    ok('G9 the release gate honors the waive: nothing is owed on a de-minimis-waived record',
+      gateG.covered === true && gateG.balanceDue === 0);
 
     // Already-notified: the requester is holding a figure, so the notice cycle can no longer be skipped.
     var rG2 = await makeRequest('req-' + TAG + '-G2', { departmentId: TEAM });
