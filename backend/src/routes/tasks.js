@@ -178,6 +178,24 @@ router.get('/release-review-queue', requireAuth, async function (req, res) {
 // cities) RENDERS. approvalModules.config already folds `branchAvailable` in, and it is passed through
 // verbatim rather than re-derived here.
 // ============================================================================================
+// OPS SUMMARY (SPEC_operational_dashboard.md §2 slice 2) — the one read behind every dashboard pane.
+// Scoping mirrors /requests/stats/dashboard: non-elevated users see their own team only; elevated users
+// see all teams and may narrow with ?team=. Registered ABOVE the /:id routes, which would otherwise
+// capture "ops-summary" as a task id.
+router.get('/ops-summary', requireAuth, async function (req, res) {
+  try {
+    var userRoles = req.user.roles || [];
+    var elevated = ['SUPERVISOR', 'DIRECTOR', 'SYSTEM_ADMIN', 'DEPT_MANAGER', 'ATTORNEY_REVIEWER']
+      .some(function (r) { return userRoles.indexOf(r) !== -1; });
+    // A non-elevated user with no department must not widen to all teams — scope to an impossible id.
+    var teamId = elevated ? (req.query.team || null) : (req.user.dept || '__none__');
+    res.json(await require('../services/opsSummary').summary({ teamId: teamId || null }));
+  } catch (e) {
+    console.error('ops-summary failed:', e.message);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 router.get('/:id/intake-context', requireAuth, async function (req, res) {
   try {
     var t = await get('SELECT * FROM tasks WHERE id = ?', [req.params.id]);

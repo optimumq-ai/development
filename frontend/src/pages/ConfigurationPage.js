@@ -21,6 +21,27 @@ export default function ConfigurationPage() {
     api.get('/config/time-capture').then(function(r){ setTc((r.data && r.data.config) || {}); setTcUis((r.data && r.data.uis) || []); }).catch(function(){});
   }, []);
   function setTcMode(key, mode) { setTc(function(c){ return Object.assign({}, c || {}, { [key]: mode }); }); }
+  // Task time budgets (SPEC_operational_dashboard.md slice 1) — its own endpoint, like time-capture.
+  const [budgets, setBudgets] = useState([]);
+  const [budgetEdits, setBudgetEdits] = useState({});
+  const [budgetMsg, setBudgetMsg] = useState('');
+  React.useEffect(function(){
+    api.get('/config/time-budgets').then(function(r){ setBudgets((r.data && r.data.budgets) || []); }).catch(function(){});
+  }, []);
+  async function saveBudget(taskType) {
+    setBudgetMsg('');
+    try {
+      var r = await api.put('/config/time-budgets', { taskType: taskType, budgetDays: Number(budgetEdits[taskType]) });
+      setBudgets(function(list){ return list.map(function(b){ return b.task_type === taskType ? r.data.budget : b; }); });
+      setBudgetEdits(function(e){ var n = Object.assign({}, e); delete n[taskType]; return n; });
+      setBudgetMsg('Budget for ' + budgetLabel(taskType) + ' saved.');
+    } catch(e){ setBudgetMsg((e.response && e.response.data && e.response.data.error) || 'Failed to save.'); }
+  }
+  function budgetLabel(t){
+    return ({ estimate:'Estimate', record_search:'Record Search', redaction:'Redaction', legal_redaction:'Legal Redaction',
+      legal_review:'Legal Review', redaction_qa:'Redaction QA', fee_waiver:'Fee Waiver Review', routing_review:'Routing Review' })[t]
+      || t.replace(/_/g,' ').replace(/\b\w/g, function(c){ return c.toUpperCase(); });
+  }
   async function saveTc() {
     setTcSaving(true); setTcMsg('');
     try { var r = await api.put('/config/time-capture', { config: tc }); setTc(r.data.config); setTcMsg('Time-tracking settings saved.'); }
@@ -89,6 +110,7 @@ export default function ConfigurationPage() {
     { key:'email', label:'Email' },
     { key:'redaction', label:'Redaction' },
     { key:'timecapture', label:'Time Tracking' },
+    { key:'budgets', label:'Task Time Budgets' },
     { key:'agent', label:'Agent Rules' },
   ];
 
@@ -383,6 +405,42 @@ export default function ConfigurationPage() {
               <button type="button" onClick={saveTc} disabled={tcSaving} style={{padding:'11px 32px',background:'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'14px',fontWeight:'600',cursor:'pointer'}}>
                 {tcSaving ? 'Saving…' : 'Save Time-Tracking Settings'}
               </button>
+            </div>
+          </div>
+        )}
+        {activeTab === 'budgets' && (
+          <div style={section}>
+            <div style={sectionTitle}>Task Time Budgets</div>
+            <p style={{fontSize:'13px',color:'#6B7280',margin:'0 0 4px',lineHeight:'1.5'}}>
+              How many days each kind of task should take. When a task runs past its budget, it shows as late
+              on the dashboard — an early warning that a slow early step is eating the legal deadline, long
+              before the legal deadline itself is at risk. These are working targets your office sets, not
+              legal deadlines; the statutory clock is tracked separately and is never affected by these numbers.
+            </p>
+            {budgetMsg && <div style={{background: budgetMsg.indexOf('saved')>=0 ? '#F0FDF4':'#FEF2F2', border:'1px solid '+(budgetMsg.indexOf('saved')>=0 ? '#86EFAC':'#FCA5A5'), borderRadius:'8px', padding:'10px 12px', fontSize:'13px', color: budgetMsg.indexOf('saved')>=0 ? '#166534':'#DC2626'}}>{budgetMsg}</div>}
+            {budgets.map(function(b){
+              var edited = budgetEdits[b.task_type] !== undefined;
+              var val = edited ? budgetEdits[b.task_type] : String(b.budget_days);
+              return (
+                <div key={b.task_type} style={{display:'flex',alignItems:'center',gap:'14px',borderBottom:'1px solid #F3F4F6',paddingBottom:'12px'}}>
+                  <div style={{flex:1}}>
+                    <div style={{fontSize:'13px',fontWeight:'600',color:'#374151'}}>{budgetLabel(b.task_type)}</div>
+                    <div style={{fontSize:'11px',color:'#9CA3AF'}}>
+                      {b.source === 'supervisor' && b.updated_by ? ('Set by ' + b.updated_by) : 'Provisional default — not yet reviewed by your office'}
+                    </div>
+                  </div>
+                  <input type="number" min="0.5" max="365" step="0.5" value={val}
+                    onChange={function(e){ setBudgetEdits(function(ed){ return Object.assign({}, ed, { [b.task_type]: e.target.value }); }); }}
+                    style={{width:'90px',padding:'9px 10px',border:'1px solid #E5E7EB',borderRadius:'8px',fontSize:'14px',textAlign:'right'}} />
+                  <span style={{fontSize:'12px',color:'#6B7280',width:'34px'}}>days</span>
+                  <button type="button" onClick={function(){ saveBudget(b.task_type); }} disabled={!edited}
+                    style={{padding:'9px 18px',background: edited ? '#1F4E79' : '#E5E7EB',color: edited ? 'white' : '#9CA3AF',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor: edited ? 'pointer' : 'default'}}>Save</button>
+                </div>
+              );
+            })}
+            <div style={{fontSize:'12px',color:'#9CA3AF',lineHeight:'1.5'}}>
+              Example: with a 3-day budget on Record Search, a search still unfinished on day 4 shows as
+              1 day late on the dashboard — even if the request's legal deadline is still comfortably away.
             </div>
           </div>
         )}

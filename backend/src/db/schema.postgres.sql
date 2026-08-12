@@ -1619,3 +1619,17 @@ SELECT setval('request_fee_estimates_seq_seq',
 -- exactly the sequential semantics.
 CREATE UNIQUE INDEX IF NOT EXISTS ux_fulfilled_source ON fulfilled_records(source_file_id)
   WHERE source_file_id IS NOT NULL;
+
+-- Task time budgets become EDITABLE (SPEC_operational_dashboard.md §2 slice 1, decided 2026-08-12): the
+-- "budget brain" (Slice I) stayed deferred, so this is its manual forerunner — one value per task type,
+-- edited by a named person. Confirming is a person's recorded act (the Draft 6 convention).
+ALTER TABLE time_budgets ADD COLUMN IF NOT EXISTS updated_by TEXT;
+
+-- Per-user dashboard pane layout (SPEC_operational_dashboard.md §2 slice 3). First per-user preference
+-- store in the system — the timeCaptureConfig JSON-blob pattern, keyed by user. Role-based defaults are
+-- COMPUTED when no row exists (config route), so nobody configures anything to get a sensible screen.
+CREATE TABLE IF NOT EXISTS user_dashboard_panes (
+  user_id TEXT PRIMARY KEY,
+  panes_json TEXT NOT NULL,
+  updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);

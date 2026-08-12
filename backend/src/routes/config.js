@@ -44,4 +44,96 @@ router.put('/time-capture', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR')
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// TASK TIME BUDGETS (SPEC_operational_dashboard.md §2 slice 1, decided 2026-08-12). The measurement
+// machinery has existed since Slice C; the editing surface was "Slice I, the budget brain", deferred and
+// never built — so the eight values have only ever been a SQL seed. This is the manual forerunner:
+// ONE value per task type (Kevin: simple, attention-catching; the per-record-type dimension stays in the
+// schema for the future brain and is deliberately NOT exposed here).
+//
+// The editor EDITS values; it never adds or removes task types — the catalog-drift guard
+// (verify_v1_retirement §E) keeps time_budgets aligned with the task catalogs, and an editor that could
+// add rows would be a second, ungoverned catalog door.
+router.get('/time-budgets', requireAuth, async function (req, res) {
+  try {
+    var rows = await all(
+      'SELECT task_type, budget_days, source, updated_by, updated_at FROM time_budgets ' +
+      'WHERE record_type_id IS NULL ORDER BY task_type');
+    res.json({ budgets: rows });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.put('/time-budgets', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR'), async function (req, res) {
+  try {
+    var t = String((req.body && req.body.taskType) || '').trim();
+    var d = Number(req.body && req.body.budgetDays);
+    var row = await get('SELECT task_type FROM time_budgets WHERE record_type_id IS NULL AND task_type = ?', [t]);
+    if (!row) {
+      return res.status(404).json({ error: 'There is no budgeted task type called "' + t + '". The editor changes existing budgets; task types are managed by the task catalog.' });
+    }
+    if (!(d > 0) || d > 365 || !isFinite(d)) {
+      return res.status(422).json({ error: 'A budget must be a number of days greater than 0 and at most 365. Fractions are fine (0.5 = half a day).' });
+    }
+    await run("UPDATE time_budgets SET budget_days = ?, source = 'supervisor', updated_by = ?, updated_at = datetime('now') WHERE record_type_id IS NULL AND task_type = ?",
+      [d, (req.user && req.user.name) || req.user.sub, t]);
+    var out = await get('SELECT task_type, budget_days, source, updated_by, updated_at FROM time_budgets WHERE record_type_id IS NULL AND task_type = ?', [t]);
+    res.json({ ok: true, budget: out });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// DASHBOARD PANES (SPEC_operational_dashboard.md §2 slice 3). Per-user layout — each user edits their
+// OWN row, nothing else, so the only gate is authentication. When no row exists, ROLE DEFAULTS are
+// computed here (one place), so a fresh user gets a sensible screen without configuring anything:
+// team-scoped supervision → their team's panes · org-wide roles → the consolidated attention map ·
+// everyone else → the generic KPI view. `scope` on a team pane is 'own' | 'all' (resolved to the
+// viewer's department client-side; panes group by team, never name teams).
+var PANE_LIBRARY = [
+  { key: 'teamInProcess', label: 'Requests in Process', scopable: true,
+    description: 'Stage counts for one team, or all teams.' },
+  { key: 'taskNodes', label: 'Task Nodes — where the time is going', scopable: true,
+    description: 'Per task node: in queue, in process, waiting on requestor, and how late against the task budget (1 day / 2 days / more than 2 days).' },
+  { key: 'lateByTeam', label: 'Late by Team — attention map', scopable: false,
+    description: 'Every fulfillment team with its late-task counts. Org-wide roles only.' },
+  { key: 'finance', label: 'Finance', scopable: false,
+    description: 'Outstanding balances, billed and unpaid, collected and waived to date.' },
+  { key: 'statutory', label: 'Legal Clock', scopable: false,
+    description: 'Requests past their statutory deadline — the legal clock, separate from task budgets.' },
+  { key: 'generic', label: 'Overview', scopable: false,
+    description: 'The simple agency-wide counts.' }
+];
+function defaultPanes(roles, dept) {
+  var r = roles || [];
+  var orgWide = r.indexOf('DIRECTOR') >= 0 || r.indexOf('SYSTEM_ADMIN') >= 0;
+  var teamLead = r.indexOf('SUPERVISOR') >= 0 || r.indexOf('DEPT_MANAGER') >= 0;
+  if (orgWide) return [{ key: 'lateByTeam' }, { key: 'finance' }, { key: 'taskNodes', scope: 'all' }, { key: 'statutory' }];
+  if (teamLead && dept) return [{ key: 'teamInProcess', scope: 'own' }, { key: 'taskNodes', scope: 'own' }, { key: 'statutory' }];
+  return [{ key: 'generic' }, { key: 'statutory' }];
+}
+router.get('/dashboard-panes', requireAuth, async function (req, res) {
+  try {
+    var row = await get('SELECT panes_json FROM user_dashboard_panes WHERE user_id = ?', [req.user.sub]);
+    var panes = null;
+    if (row) { try { panes = JSON.parse(row.panes_json); } catch (e) { panes = null; } }
+    var defaulted = !Array.isArray(panes) || !panes.length;
+    if (defaulted) panes = defaultPanes(req.user.roles, req.user.dept);
+    res.json({ panes: panes, defaultsApplied: defaulted, library: PANE_LIBRARY });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+router.put('/dashboard-panes', requireAuth, async function (req, res) {
+  try {
+    var known = {}; PANE_LIBRARY.forEach(function (p) { known[p.key] = p; });
+    var panes = (Array.isArray(req.body && req.body.panes) ? req.body.panes : [])
+      .filter(function (p) { return p && known[p.key]; })
+      .map(function (p) {
+        var out = { key: p.key };
+        if (known[p.key].scopable) out.scope = (p.scope === 'all') ? 'all' : 'own';
+        return out;
+      });
+    if (!panes.length) return res.status(422).json({ error: 'Keep at least one pane — an empty dashboard tells you nothing.' });
+    await run('INSERT INTO user_dashboard_panes (user_id, panes_json, updated_at) VALUES (?,?,datetime(\'now\')) ' +
+      'ON CONFLICT (user_id) DO UPDATE SET panes_json = EXCLUDED.panes_json, updated_at = EXCLUDED.updated_at',
+      [req.user.sub, JSON.stringify(panes)]);
+    res.json({ panes: panes, defaultsApplied: false, library: PANE_LIBRARY });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 module.exports = router;
