@@ -1,7 +1,7 @@
 # SPEC — Operational Dashboard (configurable panes + budget lateness)
 
-**Status: DRAFT 2026-08-12 — model DECIDED by Kevin (below); pane design direction pending his reaction
-to the mockups (UI rule).**
+**Status: BUILT 2026-08-12 — model decided and mockups approved by Kevin; all three slices shipped
+(`verify_ops_dashboard` 21/21, full suite 1975/1975).**
 Source: Kevin's note `/home/optimumq/exchange/dashboardrevision.doc` + his in-session clarification.
 Foundation verified 2026-08-12 (full sweep): measurement is BUILT (task_events trail, queue/process
 phase math, `time_budgets` table, ok/warn/over), the budget EDITOR and any lateness AGGREGATION are not.

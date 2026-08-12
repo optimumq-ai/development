@@ -6847,3 +6847,44 @@ Purged after; **census parity on all 21 counted tables** (one manual assist — 
 ### Where this leaves go-live
 Every beat green at machine speed, both features from Kevin's note exercised live end to end, suite at
 **1954/1954**. The enforcement flip remains Kevin's act. His testing/demo list remains open.
+
+---
+
+## 2026-08-12 (j) — the operational dashboard: verified, decided, BUILT (`f032a30`, `f053fb4`)
+
+### Kevin's enhancement (exchange/dashboardrevision.doc) — verify budgeted time first, then revise the dashboard
+**Verification (full sweep):** budgeted time was fully COMPUTED since Slice C (task_events trail,
+queue/process math, `time_budgets` keyed (record_type, task_type), ok/warn/over) but had NO editing
+surface — "Slice I, the budget brain" was deferred by Kevin 2026-07-15 and never built; the 8 values only
+ever existed as a SQL seed. No lateness aggregation existed anywhere (everything "overdue" = statutory).
+Kevin's recall was exactly right. Latent find: the decided pause-not-reset budget rule was unimplemented.
+
+### The decided model (Kevin, in-session — recorded in SPEC_operational_dashboard.md §1)
+Simple and attention-catching, a go-to-market differentiator: ONE editable budget value per task type;
+late = budget overrun bucketed 1d (≤24h) / 2d (≤48h) / >2d; paused tasks excluded from late (own
+"waiting" column — simple reading of §757); statutory clock untouched; health scoring (#13) and the AI
+brain stay deferred. Refine from customer feedback.
+
+### Built (design approved from mockups; screenshots of the LIVE result delivered)
+1. **Budget editor** — Configuration ▸ Task Time Budgets, supervisor+ gated, name recorded
+   (`time_budgets.updated_by`). Edits values, never the catalog.
+2. **`services/opsSummary` + `GET /api/tasks/ops-summary`** — team × task node grid (queued / in-process /
+   in-review / paused / late buckets / unbudgeted) + per-team stage counts + the Finance block
+   (outstanding, billed-unpaid, collected, waived), derived on read; teams follow `departments` live.
+   Scoping mirrors stats/dashboard; non-elevated never sees another team.
+3. **DashboardPage rebuilt** (v2 idiom, per the approved mockups): per-user panes
+   (`user_dashboard_panes`, the system's first per-user preference store), role defaults computed
+   server-side, customize modal, Recent Requests RETIRED. Legal clock is its own clearly-labeled pane.
+
+### Evidence
+`verify_ops_dashboard` 21/21 (editor round-trip/name/refusals; bucket edges at exactly 24h/48h; paused
+lands nowhere but paused; unbudgeted never late; scoping; role defaults; layout round-trip; empty layout
+refused). **Full suite 1975/1975, live untouched.** Deployed (API restarted, build verified); live
+screenshots: the admin view already flags 4 seeded tasks >2 days over budget — the attention layer works
+on day one. One verify_stages timeout during a PARALLEL CRA build was CPU contention (green on quiet
+rerun) — don't run the suite and a frontend build simultaneously.
+
+### Open
+Full-suite runtime is growing (~46 harnesses); Kevin's testing/demo list; the go-live flip; deferred:
+health scoring #13, the budget brain, per-record-type budget UI, parent budget roll-up, historical pause
+subtraction.
