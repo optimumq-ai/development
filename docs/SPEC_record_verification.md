@@ -161,23 +161,17 @@ Complete, listing non-delivering children; lookup state machine (no_match / not_
 byte-exact messages); code verify match + mismatch + cross-child mismatch; visual gate (PDF renders only
 under §8.1's rule; non-PDF gets the redirect message); the §5 published gate.
 
-## 8. Open decisions `[OPEN — Kevin]`
+## 8. Decisions
 
-### 8.1 What unlocks the visual viewer
-The feature note opens the viewer from the request number alone. The prior design decided the opposite:
-*"Do NOT verify by the raw request number — sequential/guessable… Human reference ≠ access key"*
-(`DESIGN_split_canvas_intake.md`). Numbers are enumerable, so number-alone means anyone can page through
-requests and READ every certified record, published or not.
-
-| Option | Viewer opens on | Exposure |
-|---|---|---|
-| A (feature note) | request number alone | certified records readable by enumeration |
-| **B (recommended)** | request number + that record's verification code | only holders of the certified copy/sheet can view — the code IS the access key, which is exactly what the sheet prints it for |
-
-Recommendation: **B.** It keeps Kevin's exact flow shape (the code field simply sits at the top of the
-viewer step), honors the recorded "human reference ≠ access key" decision, and costs a verifier nothing —
-anyone comparing visually is holding the sheet with the code on it. File verification already requires the
-code by definition. Certified-existence (Step 1's yes/no) stays number-only per the feature note.
+### 8.1 What unlocks the visual viewer `[DECIDED 2026-08-12 — Kevin: number + code]`
+The viewer opens on the request number PLUS that record's verification code — the code printed on the
+certification sheet IS the access key ("human reference ≠ access key", `DESIGN_split_canvas_intake.md`,
+upheld). Anyone comparing visually is holding the sheet, so this costs a real verifier nothing, and record
+CONTENT — including certified-but-unpublished records — can never be browsed by typing consecutive request
+numbers, preserving the city's publication control (`SPEC_public_library.md`: released-to-requestor ≠
+public). Certified-existence (Step 1's yes/no) stays number-only per the feature note. Note the
+distinction from the status check's §6.1 number-only decision: status METADATA is public-record territory;
+this gate is about content.
 
 ### 8.2 Certification-only scope
 The note leans toward verification only for certified records. §2.2 hashes EVERY release regardless
@@ -186,11 +180,9 @@ schema change. Default: certified-only, as written.
 
 ### 8.3 Page stamping now or later — §2.6.
 
-## 9. Build order recommendation
+## 9. Build order `[DECIDED 2026-08-12 — Kevin: three slices]`
 
-NOT one pass with the status check. Status check is one endpoint + one modal against existing data —
-shippable alone. Verification carries schema change, release-path hashing, sheet generation, parent-fact
-migration, staff surface, and a viewer. Recommended: **slice 1 = status check; slice 2 = Part A
-(certification finished); slice 3 = Part B (verification portal)** — each verified and committed on its own,
-per the process rules. The portal-home row ships in slice 1 with the Verify button present but opening a
-"coming soon"-free path: the button simply ships in slice 3 (no dead buttons on the public portal).
+**Slice 1 = status check; slice 2 = Part A (certification finished); slice 3 = Part B (verification
+portal)** — each verified and committed on its own, per the process rules. The portal-home row ships in
+slice 1; the Verify a Certified Record button simply ships in slice 3 (no dead buttons on the public
+portal).
