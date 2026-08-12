@@ -15,6 +15,18 @@ const upload = multer({ dest: _upDir, limits: { fileSize: 15 * 1024 * 1024 } });
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 const ROLE = requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER');
+// BW9b: Senior Legal (ATTORNEY_REVIEWER) reviews proposals too — editor proposals on the Legal
+// Rules domains route to them (Kevin 2026-08-11), and a reviewer who cannot reach the review
+// queue reviews nothing. Scope: an attorney without a broader role acts ONLY on Legal domains.
+const REVIEW = requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER', 'ATTORNEY_REVIEWER');
+function attorneyScopeError(req, domain) {
+  var roles = (req.user && req.user.roles) || [];
+  var broader = ['SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER'].some(function (r) { return roles.indexOf(r) !== -1; });
+  if (broader) return null;
+  var RE = require('../services/ruleEditors');
+  if (RE.LEGAL_DOMAINS[domain]) return null;
+  return 'Senior Legal reviews the Legal Rules domains; proposals on ' + domain + ' are reviewed by the Director.';
+}
 
 router.get('/status', requireAuth, async function (req, res) {
   try {
@@ -63,8 +75,14 @@ router.get('/proposals', requireAuth, async function (req, res) {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-router.post('/proposals/:id/dismiss', requireAuth, ROLE, async function (req, res) {
-  try { await run("UPDATE config_proposals SET status='dismissed', reviewed_by=?, reviewed_at=? WHERE id=?", [(req.user && req.user.name) || 'staff', nowStr(), req.params.id]); res.json({ dismissed: true }); } catch (e) { res.status(500).json({ error: e.message }); }
+router.post('/proposals/:id/dismiss', requireAuth, REVIEW, async function (req, res) {
+  try {
+    var pr = await get("SELECT domain FROM config_proposals WHERE id = ?", [req.params.id]);
+    if (!pr) return res.status(404).json({ error: 'not found' });
+    var scope = attorneyScopeError(req, pr.domain);
+    if (scope) return res.status(403).json({ error: scope });
+    await run("UPDATE config_proposals SET status='dismissed', reviewed_by=?, reviewed_at=? WHERE id=?", [(req.user && req.user.name) || 'staff', nowStr(), req.params.id]); res.json({ dismissed: true });
+  } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 async function runCheck(jid, source, rawText, domain, actor) {
@@ -102,13 +120,32 @@ router.get('/proposals/:id', requireAuth, async function (req, res) {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-router.post('/proposals/:id/apply', requireAuth, ROLE, async function (req, res) {
+router.post('/proposals/:id/apply', requireAuth, REVIEW, async function (req, res) {
   try {
     var b = req.body || {};
     if (!b.attested) return res.status(400).json({ error: 'attestation is required before applying' });
     var pr = await get("SELECT * FROM config_proposals WHERE id = ?", [req.params.id]);
     if (!pr) return res.status(404).json({ error: 'not found' });
     if (pr.status !== 'pending') return res.status(400).json({ error: 'proposal already ' + pr.status });
+    // BW9b — EDITOR proposals (source_ref 'editor') apply to the jurisdiction_rules row itself:
+    // the adapters target their own live stores and clock_matrix has none, but what the editors
+    // legitimately edit IS the rules row (Draft 10 §6). Legal Rules domains apply only under
+    // Senior Legal (Kevin 2026-08-11 — a Director's edit routes to them, never self-applied).
+    // Editor applies are immediate-only in v1: the scheduler's promotion path applies through the
+    // adapters, which these domains do not have.
+    if (pr.source_ref === 'editor') {
+      var RE = require('../services/ruleEditors');
+      var refusal = RE.mayApplyEditor((req.user && req.user.roles) || [], pr.domain);
+      if (refusal) return res.status(403).json({ error: refusal });
+      if (b.editedConfig != null) pr.proposed_json = JSON.stringify(b.editedConfig);
+      try {
+        var er = await RE.applyEditorProposal(pr, (req.user && req.user.name) || 'staff');
+        return res.json({ applied: true, target: 'jurisdiction_rules:' + pr.jurisdiction_id + ':' + pr.domain,
+          drifted: er.drifted, driftNote: er.driftNote });
+      } catch (e2) { return res.status(400).json({ error: e2.message }); }
+    }
+    var scope = attorneyScopeError(req, pr.domain);
+    if (scope) return res.status(403).json({ error: scope });
     var ad = CE.adapter(pr.domain);
     if (!ad || !ad.apply) return res.status(400).json({ error: 'This domain is review-only; apply the change in its area editor.', reviewOnly: true });
     var cfg = b.editedConfig; if (cfg == null) { try { cfg = JSON.parse(pr.proposed_json || '{}'); } catch (e) { cfg = {}; } }

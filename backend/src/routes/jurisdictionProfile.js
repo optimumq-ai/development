@@ -70,6 +70,39 @@ router.post('/policy-settings/confirm', requireAuth, requireRole('SYSTEM_ADMIN',
     res.json({ confirmed: out, settings: await GL.settings(jid) });
   } catch (e) { res.status(400).json({ error: e.message }); }
 });
+// BW9b — the rule-content editors (Draft 10, all five §5 questions decided 2026-08-11).
+// The section screen's Content + Provenance + Proposals zones, assembled server-side.
+router.get('/rules/:section', requireAuth, READ, async function (req, res) {
+  try { res.json(await require('../services/ruleEditors').content(await activeJid(), req.params.section)); }
+  catch (e) { res.status(400).json({ error: e.message }); }
+});
+// Research-text drill-down (decided IN): the full record behind a cited fact — verbatim statute
+// language included. Read-only; the gather's output is never edited here.
+router.get('/rules-research/:ruleId', requireAuth, READ, async function (req, res) {
+  try {
+    var r = require('../services/rulesResearch').rule(req.params.ruleId);
+    if (!r) return res.status(404).json({ error: 'No research record for ' + req.params.ruleId + ' — the citation and summary on the fact are all the corpus carries for it.' });
+    res.json({ rule: r });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+// The proposal composer: every content edit lands as a proposal — citation + note required, the
+// WS1–WS3 police rules run BEFORE anything is written, and the owner may apply in the same act
+// (a Director's edit on a Legal Rules domain files for Senior Legal instead — never self-applied).
+router.post('/rules/:section/propose', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'ATTORNEY_REVIEWER'), async function (req, res) {
+  var b = req.body || {};
+  var roles = (req.user && req.user.roles) || [];
+  if (roles.indexOf('SYSTEM_ADMIN') === -1 && roles.indexOf('DIRECTOR') === -1 &&
+      !(b.domain && require('../services/ruleEditors').LEGAL_DOMAINS[b.domain])) {
+    return res.status(403).json({ error: 'Senior Legal proposes changes on the Legal Rules domains; content on ' + (b.domain || 'this domain') + ' is proposed by the Director.' });
+  }
+  try {
+    var out = await require('../services/ruleEditors').propose(await activeJid(), req.params.section, b.domain, b.config, {
+      citation: b.citation, note: b.note, applyNow: b.applyNow === true,
+      actor: req.user && req.user.name, roles: (req.user && req.user.roles) || []
+    });
+    res.json(out);
+  } catch (e) { res.status(400).json({ error: e.message, refusals: e.refusals || undefined }); }
+});
 // The computed gate summary — the checklist's headline and the Director's dashboard banner.
 router.get('/go-live', requireAuth, READ, async function (req, res) {
   try { res.json(await GL.summary(await activeJid())); } catch (e) { res.status(500).json({ error: e.message }); }

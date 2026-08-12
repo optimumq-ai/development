@@ -52,6 +52,152 @@ function citableKeys(domain) {
   return k.filter(function (x) { return x !== 'enabled' && x !== 'provenance'; });
 }
 
+// ── THE DOMAIN-SCOPED INVARIANTS, AS A PURE FUNCTION (BW9b) ──────────────────────────────────────
+//
+// Checks 2–4 operate on a single (domain, config) pair, so they are callable on a CANDIDATE config
+// BEFORE it is written — "the editor refuses what the engine would refuse" (Draft 10), with the
+// SAME code and the SAME wording, not a parallel implementation that can drift. check() below runs
+// this exact function over every stored row and attaches the `where`.
+function validateDomainConfig(domain, cfg) {
+  var findings = [];
+  if (!cfg || typeof cfg !== 'object') {
+    return [{ severity: 'error', issue: 'The configuration is not an object.', fix: 'Send the full domain config as JSON.' }];
+  }
+
+  // 2. Keys the schema does not define — this is how `__probe` survived.
+  var known = schemaKeys(domain);
+  if (known) {
+    Object.keys(cfg).forEach(function (k) {
+      if (known.indexOf(k) < 0) {
+        findings.push({
+          severity: 'error',
+          issue: 'Unknown config key "' + k + '" — not part of the ' + domain + ' schema. This is what a test probe looks like.',
+          fix: 'Remove the key and re-run the seed.'
+        });
+      }
+    });
+  }
+
+  // 3. An ENABLED policy with no provenance was not configured by a human.
+  if (cfg.enabled === true) {
+      var cites = citableKeys(domain);
+      var prov = cfg.provenance || {};
+      var missing = cites.filter(function (k) { return !prov[k] || !prov[k].citation; });
+      if (cites.length && missing.length === cites.length) {
+        findings.push({
+          severity: 'error',
+          issue: 'This policy is SWITCHED ON but carries no citation on any field. A rule a city actually adopted has provenance; this looks like a test write.',
+          fix: 'Re-run the seed, or have the city re-enter and attest the policy.'
+        });
+      } else if (missing.length) {
+        findings.push({
+          severity: 'warn',
+          issue: 'Enabled, but ' + missing.length + ' field(s) carry no citation: ' + missing.join(', ') + '.',
+          fix: 'Add provenance before relying on these in a citizen-facing notice.'
+        });
+      }
+    }
+
+    // 4. Clock durations must be sane. 77 was not.
+    if (domain === 'deadline' && cfg.clocks) {
+      var primaries = [];
+      Object.keys(cfg.clocks).forEach(function (type) {
+        var def = cfg.clocks[type] || {};
+        // WS3 — THE BAND DEPENDS ON WHAT KIND OF CLOCK THIS IS, and the default is the strict one.
+        //
+        // The 1..45 band was written for base RESPONSE deadlines and it must stay exactly that tight
+        // there: it exists because a 77-day "standard" clock sat in live config for months looking
+        // plausible. But the reconciled matrix also carries duties that are legitimately longer — Texas's
+        // 61-day clarification window (§ 552.222(d)), its 60-day unclaimed-records window (§ 552.221(e)),
+        // Missouri's 90/150-day fee windows — and rejecting those would either fail the check or, worse,
+        // push someone to widen the response band to make it pass.
+        //
+        // A config with no `kind` is treated as `response`, so every clock written before WS3 is policed
+        // exactly as it was. Widening is opt-in and per clock, never global.
+        var kind = require('./clockMatrix').kindOf(def);
+        var band = kind === 'response' ? MAX_BASE_DURATION_DAYS
+                 : kind === 'agency_action' ? MAX_AGENCY_ACTION_DAYS
+                 : MAX_LONG_WINDOW_DAYS;
+        if (def.kind != null && require('./clockMatrix').KINDS.indexOf(def.kind) < 0) {
+          findings.push({ severity: 'error', issue: 'Clock "' + type + '" has an unknown kind: "' + def.kind + '".',
+            fix: 'One of: ' + require('./clockMatrix').KINDS.join(', ') + '.' });
+        }
+        if (def.primary) primaries.push(type);
+        // A SERVICE TARGET MAY NEVER BE PRIMARY. The primary clock becomes requests.deadline_date, which
+        // is what a requestor is told. Letting a city's own pacing number occupy that slot presents a
+        // target as the date the law requires — pattern S-002's exact failure.
+        if (def.primary && kind === 'operational_target') {
+          findings.push({ severity: 'error',
+            issue: 'Clock "' + type + '" is an operational TARGET but is marked primary, so the city\'s own service target would be published as the statutory deadline.',
+            fix: 'Clear `primary` on the target, or give this state a real statutory response clock.' });
+        }
+        if (kind === 'operational_target' && def.default == null && def.duration == null && !def.durationByClassification) {
+          findings.push({ severity: 'warn',
+            issue: 'Operational target "' + type + '" has no value, so nothing paces this work. (' +
+                   'This state sets no statutory time limit here — the city chooses one.)',
+            fix: 'Set a service target on the deadlines section, then attest it.' });
+        }
+        var durs = [];
+        if (def.default != null) durs.push(['default', def.default]);
+        if (def.duration != null) durs.push(['duration', def.duration]);
+        if (def.durationByClassification) {
+          Object.keys(def.durationByClassification).forEach(function (c) { durs.push([c, def.durationByClassification[c]]); });
+        }
+        durs.forEach(function (d) {
+          var n = Number(d[1]);
+          // BASE durations only — an extension grows `request_clocks.duration`, never the config. So the
+          // plausible band is tight: the longest base deadline we have anywhere is TX `redaction_required`
+          // at 30 days. 45 leaves headroom for a state we have not seen.
+          //
+          // ⚠️ The first version of this check used 1..90 — which would have MISSED the 77-day clock it was
+          // written to catch. The bound has to be tight enough to catch a plausible-looking wrong number,
+          // not just an absurd one.
+          if (!isFinite(n) || n < 1 || n > band) {
+            findings.push({
+              severity: 'error',
+              issue: 'Clock "' + type + '" (' + kind + ') has an implausible duration: ' + d[0] + ' = ' + d[1] + ' day(s), ' +
+                     'outside the 1-' + band + ' day band for that kind. ' +
+                     (kind === 'response'
+                       ? 'No US public-records statute sets a base response deadline outside 1-' + MAX_BASE_DURATION_DAYS + ' days ' +
+                         '(the longest we have is 30). Extensions grow the request\'s clock, never this config.'
+                       : 'If this duration is real, it belongs to a different kind of clock — check the reconciled ' +
+                         'kind before widening anything.'),
+              fix: 'Re-run the deadline seed. (A 77-day "standard" clock was found in production on 2026-07-14 — a test probe value that had been cemented by a harness restore.)'
+            });
+          }
+        });
+        if (def.basis && ['business_days', 'calendar_days'].indexOf(def.basis) < 0) {
+          findings.push({ severity: 'error', issue: 'Clock "' + type + '" has an invalid basis: "' + def.basis + '".', fix: 'business_days or calendar_days.' });
+        }
+      });
+      // TWO PRIMARY CLOCKS IS TWO LEGAL DEADLINES FOR ONE REQUEST. tolling picks "the" primary with an
+      // ORDER BY created_at LIMIT 1, so a second one does not error — it just silently loses, and which
+      // one wins depends on insertion order. That is a due date decided by accident.
+      if (primaries.length > 1) {
+        findings.push({ severity: 'error',
+          issue: primaries.length + ' clocks are marked primary (' + primaries.join(', ') + '). A request has ONE legal due date, and the engine resolves the tie by row age.',
+          fix: 'Leave `primary` on the statutory response clock only.' });
+      }
+    }
+  return findings;
+}
+
+// A candidate CLOCK MATRIX, validated the same way check 6 validates the stored one — reconcile it
+// and surface what did not land, before it is written.
+function validateClockMatrix(matrix) {
+  var findings = [];
+  var rec;
+  try { rec = require('./clockMatrix').reconcile(matrix || {}, {}); } catch (e) {
+    return [{ severity: 'error', issue: 'The clock matrix does not reconcile: ' + e.message, fix: 'Re-import the state template.' }];
+  }
+  (rec.unresolved || []).forEach(function (u) {
+    findings.push({ severity: 'warn',
+      issue: 'Named timer "' + u.timer + '" did not resolve to a clock: ' + u.why,
+      fix: 'Name the extra duty in clockMatrix.TIMERS (or add a rule-id SLOT_OVERRIDE) — do not let it be guessed.' });
+  });
+  return findings;
+}
+
 async function check() {
   var findings = [];
   var rows = await db.all('SELECT jurisdiction_id, domain, config_json, updated_by, updated_at FROM jurisdiction_rules ORDER BY jurisdiction_id, domain');
@@ -75,121 +221,10 @@ async function check() {
       });
     }
 
-    // 2. Keys the schema does not define — this is how `__probe` survived.
-    var known = schemaKeys(r.domain);
-    if (known) {
-      Object.keys(cfg).forEach(function (k) {
-        if (known.indexOf(k) < 0) {
-          findings.push({
-            severity: 'error', where: where,
-            issue: 'Unknown config key "' + k + '" — not part of the ' + r.domain + ' schema. This is what a test probe looks like.',
-            fix: 'Remove the key and re-run the seed.'
-          });
-        }
-      });
-    }
-
-    // 3. An ENABLED policy with no provenance was not configured by a human.
-    if (cfg.enabled === true) {
-      var cites = citableKeys(r.domain);
-      var prov = cfg.provenance || {};
-      var missing = cites.filter(function (k) { return !prov[k] || !prov[k].citation; });
-      if (cites.length && missing.length === cites.length) {
-        findings.push({
-          severity: 'error', where: where,
-          issue: 'This policy is SWITCHED ON but carries no citation on any field. A rule a city actually adopted has provenance; this looks like a test write.',
-          fix: 'Re-run the seed, or have the city re-enter and attest the policy.'
-        });
-      } else if (missing.length) {
-        findings.push({
-          severity: 'warn', where: where,
-          issue: 'Enabled, but ' + missing.length + ' field(s) carry no citation: ' + missing.join(', ') + '.',
-          fix: 'Add provenance before relying on these in a citizen-facing notice.'
-        });
-      }
-    }
-
-    // 4. Clock durations must be sane. 77 was not.
-    if (r.domain === 'deadline' && cfg.clocks) {
-      var primaries = [];
-      Object.keys(cfg.clocks).forEach(function (type) {
-        var def = cfg.clocks[type] || {};
-        // WS3 — THE BAND DEPENDS ON WHAT KIND OF CLOCK THIS IS, and the default is the strict one.
-        //
-        // The 1..45 band was written for base RESPONSE deadlines and it must stay exactly that tight
-        // there: it exists because a 77-day "standard" clock sat in live config for months looking
-        // plausible. But the reconciled matrix also carries duties that are legitimately longer — Texas's
-        // 61-day clarification window (§ 552.222(d)), its 60-day unclaimed-records window (§ 552.221(e)),
-        // Missouri's 90/150-day fee windows — and rejecting those would either fail the check or, worse,
-        // push someone to widen the response band to make it pass.
-        //
-        // A config with no `kind` is treated as `response`, so every clock written before WS3 is policed
-        // exactly as it was. Widening is opt-in and per clock, never global.
-        var kind = require('./clockMatrix').kindOf(def);
-        var band = kind === 'response' ? MAX_BASE_DURATION_DAYS
-                 : kind === 'agency_action' ? MAX_AGENCY_ACTION_DAYS
-                 : MAX_LONG_WINDOW_DAYS;
-        if (def.kind != null && require('./clockMatrix').KINDS.indexOf(def.kind) < 0) {
-          findings.push({ severity: 'error', where: where, issue: 'Clock "' + type + '" has an unknown kind: "' + def.kind + '".',
-            fix: 'One of: ' + require('./clockMatrix').KINDS.join(', ') + '.' });
-        }
-        if (def.primary) primaries.push(type);
-        // A SERVICE TARGET MAY NEVER BE PRIMARY. The primary clock becomes requests.deadline_date, which
-        // is what a requestor is told. Letting a city's own pacing number occupy that slot presents a
-        // target as the date the law requires — pattern S-002's exact failure.
-        if (def.primary && kind === 'operational_target') {
-          findings.push({ severity: 'error', where: where,
-            issue: 'Clock "' + type + '" is an operational TARGET but is marked primary, so the city\'s own service target would be published as the statutory deadline.',
-            fix: 'Clear `primary` on the target, or give this state a real statutory response clock.' });
-        }
-        if (kind === 'operational_target' && def.default == null && def.duration == null && !def.durationByClassification) {
-          findings.push({ severity: 'warn', where: where,
-            issue: 'Operational target "' + type + '" has no value, so nothing paces this work. (' +
-                   'This state sets no statutory time limit here — the city chooses one.)',
-            fix: 'Set a service target on the deadlines section, then attest it.' });
-        }
-        var durs = [];
-        if (def.default != null) durs.push(['default', def.default]);
-        if (def.duration != null) durs.push(['duration', def.duration]);
-        if (def.durationByClassification) {
-          Object.keys(def.durationByClassification).forEach(function (c) { durs.push([c, def.durationByClassification[c]]); });
-        }
-        durs.forEach(function (d) {
-          var n = Number(d[1]);
-          // BASE durations only — an extension grows `request_clocks.duration`, never the config. So the
-          // plausible band is tight: the longest base deadline we have anywhere is TX `redaction_required`
-          // at 30 days. 45 leaves headroom for a state we have not seen.
-          //
-          // ⚠️ The first version of this check used 1..90 — which would have MISSED the 77-day clock it was
-          // written to catch. The bound has to be tight enough to catch a plausible-looking wrong number,
-          // not just an absurd one.
-          if (!isFinite(n) || n < 1 || n > band) {
-            findings.push({
-              severity: 'error', where: where,
-              issue: 'Clock "' + type + '" (' + kind + ') has an implausible duration: ' + d[0] + ' = ' + d[1] + ' day(s), ' +
-                     'outside the 1-' + band + ' day band for that kind. ' +
-                     (kind === 'response'
-                       ? 'No US public-records statute sets a base response deadline outside 1-' + MAX_BASE_DURATION_DAYS + ' days ' +
-                         '(the longest we have is 30). Extensions grow the request\'s clock, never this config.'
-                       : 'If this duration is real, it belongs to a different kind of clock — check the reconciled ' +
-                         'kind before widening anything.'),
-              fix: 'Re-run the deadline seed. (A 77-day "standard" clock was found in production on 2026-07-14 — a test probe value that had been cemented by a harness restore.)'
-            });
-          }
-        });
-        if (def.basis && ['business_days', 'calendar_days'].indexOf(def.basis) < 0) {
-          findings.push({ severity: 'error', where: where, issue: 'Clock "' + type + '" has an invalid basis: "' + def.basis + '".', fix: 'business_days or calendar_days.' });
-        }
-      });
-      // TWO PRIMARY CLOCKS IS TWO LEGAL DEADLINES FOR ONE REQUEST. tolling picks "the" primary with an
-      // ORDER BY created_at LIMIT 1, so a second one does not error — it just silently loses, and which
-      // one wins depends on insertion order. That is a due date decided by accident.
-      if (primaries.length > 1) {
-        findings.push({ severity: 'error', where: where,
-          issue: primaries.length + ' clocks are marked primary (' + primaries.join(', ') + '). A request has ONE legal due date, and the engine resolves the tie by row age.',
-          fix: 'Leave `primary` on the statutory response clock only.' });
-      }
-    }
+    // 2–4. The domain-scoped invariants — the same pure function the BW9b editor runs at compose time.
+    validateDomainConfig(r.domain, cfg).forEach(function (f) {
+      findings.push(Object.assign({ where: where }, f));
+    });
   }
 
   // 6. WS3 — every NAMED TIMER the state's research carries must have landed somewhere. A timer that
@@ -379,4 +414,4 @@ async function check() {
   };
 }
 
-module.exports = { check: check };
+module.exports = { check: check, validateDomainConfig: validateDomainConfig, validateClockMatrix: validateClockMatrix };
