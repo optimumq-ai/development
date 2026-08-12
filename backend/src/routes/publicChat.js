@@ -563,6 +563,71 @@ router.get('/verify/:token', async function(req, res) {
   res.send('<html><head><title>Email Verified</title></head><body style="font-family:Arial,sans-serif;background:#F9FAFB;margin:0;padding:60px 20px"><div style="max-width:480px;margin:0 auto;background:white;border-radius:12px;padding:40px;text-align:center;box-shadow:0 4px 24px rgba(0,0,0,0.08)"><div style="font-size:64px;margin-bottom:16px">✅</div><h1 style="color:#1F4E79;font-size:24px;margin:0 0 12px">Email Verified</h1><p style="color:#374151;font-size:15px;line-height:1.5;margin:0 0 8px">Your email address <strong>' + row.email + '</strong> has been verified for ' + agencyName + '.</p><p style="color:#6B7280;font-size:14px;margin-top:24px">You can now return to the records request chat. It will continue automatically.</p></div></body></html>');
 });
 
+// ==================================================================================================
+// PORTAL STATUS CHECK — SPEC_portal_status_check.md (decided 2026-08-12).
+//
+// Keyed on the PARENT request number alone (Kevin's decision, §6.1: records requests are themselves public
+// records; the fact-check and its three narrow lines live in the spec). The response is an ALLOWLIST, and
+// the lines it must never cross are contractual:
+//   - No contact PII, ever — TX Gov't Code §552.137 makes a citizen's email confidential even where the
+//     request itself is public. No email, phone, address, money, deadlines, staff names, internal ids.
+//   - Child lines carry component_label or a generic "Record item n" — NEVER raw request prose (§6.1).
+//   - One uniform no-match answer for every failure shape, so the endpoint is not an oracle.
+// Read-only: a citizen lookup writes nothing anywhere. Rate-limited: bulk name-harvesting by data brokers
+// is the abuse NJ's 2024 OPRA amendments legislated against; checkRate is the answer for a lookup a real
+// requestor performs a handful of times.
+router.post('/request-status', async function (req, res) {
+  var rate = checkRate(req.ip);
+  if (!rate.ok) {
+    return res.status(429).json({ error: 'Too many lookups. Please wait a moment and try again.', rateLimited: true });
+  }
+  var NO_MATCH = { found: false, message: 'We could not find a request matching what you entered. ' +
+    'Check the number against your confirmation email, or contact us for help.' };
+  try {
+    // Forgiving input: whitespace stripped, and a child-suffixed number (2026-000123-2) answers for its
+    // parent — a citizen holding a component number must not be told "no match" for a request that exists.
+    var raw = String((req.body && req.body.requestNumber) || '').replace(/\s+/g, '');
+    var m = raw.match(/^(\d{4}-\d{6})(?:-\d+)?$/);
+    if (!m) return res.json(NO_MATCH);
+    var parent = await get(
+      "SELECT id, request_number, requestor_name, is_mrr FROM requests " +
+      "WHERE request_number = ? AND master_request_id IS NULL AND request_number != 'LIBRARY' AND request_number NOT LIKE 'SYS-%'",
+      [m[1]]);
+    if (!parent) return res.json(NO_MATCH);
+    var stages = require('../services/stages');
+    var kids = await all(
+      'SELECT child_no, component_label, stage FROM requests WHERE master_request_id = ? ORDER BY child_no',
+      [parent.id]);
+    // §6.1 of SPEC_parent_child_lifecycle: a parent has NO stage — stage is a child concept. The parent
+    // gets the queue's derived two-value process status; the single-record shape reads its one work row.
+    var complete = kids.length > 0 && kids.every(function (k) { return stages.isTerminal(k.stage); });
+    var out = {
+      found: true,
+      requestNumber: parent.request_number,
+      requestorName: parent.requestor_name || null, // anonymous/pseudonymous requests render gracefully
+      isMrr: !!Number(parent.is_mrr),
+      processStatus: complete ? 'Complete' : 'In Process'
+    };
+    if (kids.length > 1) {
+      out.children = kids.map(function (k) {
+        return { childNo: k.child_no,
+                 label: k.component_label || ('Record item ' + k.child_no),
+                 stage: k.stage, stageLabel: stages.LABELS[k.stage] || k.stage };
+      });
+    } else {
+      var work = kids[0] || null; // a legacy pre-wrap row is its own work row
+      var stage = work ? work.stage : null;
+      if (!stage) { var self = await get('SELECT stage FROM requests WHERE id = ?', [parent.id]); stage = self && self.stage; }
+      out.stage = stage;
+      out.stageLabel = stages.LABELS[stage] || stage;
+    }
+    res.json(out);
+  } catch (e) {
+    console.error('[request-status]', e && e.message);
+    res.json(NO_MATCH); // fail closed to the uniform answer — an error page is also an oracle
+  }
+});
+
 // R9 — the refine loop. The results canvas owns an EDITABLE query and a "Search again" button, so the
 // requestor can re-describe and re-run WITHOUT going back through the chat agent (the agent narrates the
 // re-run; it does not own the control — DESIGN_split_canvas_intake §R9.1).

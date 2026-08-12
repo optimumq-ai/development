@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import StatusCheckModal from '../components/StatusCheckModal';
 
 const API = (process.env.REACT_APP_API_URL || '/api');
 
@@ -9,11 +10,14 @@ const API = (process.env.REACT_APP_API_URL || '/api');
 // in-page chat-first request flow was retired — see SPEC_public_portal_intake.md §2 / §2b).
 export default function PublicPortalPage() {
   const [agencyName, setAgencyName] = useState('');
+  const [contact, setContact] = useState({ email: '', phone: '' });
+  const [statusOpen, setStatusOpen] = useState(false);
   const navigate = useNavigate();
 
   useEffect(function () {
     axios.get(API + '/requests/public/config').then(function (r) {
       setAgencyName(r.data.agency_name || 'this Agency');
+      setContact({ email: r.data.contact_email || '', phone: r.data.contact_phone || '' });
     }).catch(function () { setAgencyName('this Agency'); });
   }, []);
 
@@ -57,6 +61,16 @@ export default function PublicPortalPage() {
             </p>
             <button onClick={startRequest} style={buttonStyle}>Create an Open Records Request</button>
           </div>
+          {/* Third row (SPEC_portal_status_check.md §2): follow-up actions for a request that already
+              exists. The Verify a Certified Record button joins this row in the verification slice
+              (SPEC_record_verification.md §9) — no dead buttons on the public portal. */}
+          <div style={rowStyle}>
+            <p style={blurbStyle}>
+              Already submitted a request? <strong>Check Request Status</strong> shows where it is in the
+              process. You will need the request number from your confirmation email.
+            </p>
+            <button onClick={function () { setStatusOpen(true); }} style={buttonStyle}>Check Request Status</button>
+          </div>
           {/* The paper channel (Kevin, 2026-08-01): the printable twin of the wizard — page 1 requestor
               info + one page per record, so a mailed or walked-in form logs in the same shape. */}
           <div style={{ marginTop: '18px', fontSize: '13px', color: '#4B5563' }}>
@@ -65,6 +79,10 @@ export default function PublicPortalPage() {
           </div>
         </div>
       </div>
+      {statusOpen && (
+        <StatusCheckModal contactEmail={contact.email} contactPhone={contact.phone}
+          onClose={function () { setStatusOpen(false); }} />
+      )}
     </div>
   );
 }
