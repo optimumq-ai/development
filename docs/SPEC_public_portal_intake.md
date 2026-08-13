@@ -96,11 +96,15 @@ Submit inserts the request (`submission_channel` recorded), sets classification-
 ## 5. Fee-choice intake — default-forward `[BUILT 2026-07-18 as part of the wizard; VERIFIED + regression-locked 2026-08-13, verify_fee_choice_intake 11/11]`
 Built into the wizard's **Your Information** step (Kevin-approved mockups, §2c slice 2), which supersedes this section's older chat-widget framing ("just type", QUICK_REPLIES) — the agent is description-only now, so the fee choice is a form control, not a chat turn. As shipped: three-option radio group, **standard rates the checked default**, with described opt-ins **Request a fee waiver** (reason follow-up appears on select) and **I'm a commercial requester** ("Subject to review"). Waiver → `fee_waiver_requested` + reason on the PARENT → `onIntake` spawns the team-agnostic `fee_waiver` task (§9 flow). Commercial → `requestor_type='commercial'` AND **`purpose='commercial'` derived in `requestCreate` (the ONE creation helper, `97a0764`)** so the staff estimate opens on commercial rates from EVERY intake path, not just the portal; `feeEngine` applies the purpose-override schedule. Commercial approval remains `[DEFERRED — on customer demand]`.
 
-## 6. MRR item-by-item intake `[NOT BUILT — DECISION]`
-Agent elicits ONE description per child: detect-and-propose from free text, validate each item back individually, then "anything else?" catch-all. >1 item at handoff → MRR. (Full processing: MRR spec §12.)
+## 6. MRR item-by-item intake `[BUILT 2026-08-13 — verify_mrr_intake_prompt 12/12; live-probed against the real agent]`
+The spec §13 contract — **AI proposes, a human decides** (detect-and-propose → validate-each → "anything else?") — is now fully implemented across the wizard's structure and the agent's prompt:
+- **Detect-and-propose** `[BUILT 2026-08-13]`: the wizard agent's prompt instructs that a message mixing SEVERAL record types ("the police report, the 911 call, and any emails about it") is never worked as one item and never split silently — the agent lists each type back as a numbered item, asks confirmation (`[[QUICK_REPLIES: Yes, work through them one at a time | No, I meant one record]]`), then works the queue in order, naming the next item at each hand-off. Details (dates/locations/persons) of one type are explicitly NOT items. Live-probed on the deployed agent: 3-type description → 3-item proposal with the exact quick replies; single type with qualifiers → no split, normal refine; accept → starts item 1.
+- **Validate-each** = the existing per-item refine/search/select loop; **"anything else?"** = the existing another-record ask + Submit-or-Continue step.
+- **>1 item at handoff ⇒ MRR** = parent wrap emitting n children + `mrr_management` on the parent (BUILT, parent/child workstream).
+The prompt contract is regression-locked by `verify_mrr_intake_prompt` (asserts on the exported `WIZARD_PROMPT` string, not on nondeterministic model output). (Full processing: MRR spec §14.)
 
 ## 7. Known gaps / open
 - Quick Reply rich widgets (choices with descriptions, date/time modes) — designed, `[NOT BUILT]`; §5 no longer needs them (the wizard's form controls carry the fee choice), so this stands only if a future chat surface wants it.
 - Chat banner too tall / auto-scroll fix — committed UX backlog.
-- ~~Phase-4 fee capture (§5)~~ built with the wizard (verified 2026-08-13); **MRR intake (§6) is THE intake build pending.**
+- ~~Phase-4 fee capture (§5)~~ built with the wizard (verified 2026-08-13); ~~MRR intake (§6)~~ built 2026-08-13 — **no intake builds pending.**
 - Search quality stack (floor, AI relevance judge, taxonomy router) lives in Domain 3/7 specs.

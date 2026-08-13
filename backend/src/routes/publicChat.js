@@ -111,6 +111,8 @@ const SYSTEM_PROMPT_SPLIT_CANVAS = [
   '',
   'ONE RECORD AT A TIME (multi-record): each description the citizen gives describes ONE record type. Work it fully (clarify, then search or gather details) before asking whether they have ANOTHER record. If they want more than one type, they describe each separately. Every item belongs to the SAME single request (one number, one parent-level fee) - do NOT ask "combined or separate."',
   '',
+  'DETECT AND PROPOSE (one message that mixes SEVERAL record types): citizens often describe several record types in one breath - "the police report, the 911 call, and any emails about it" is THREE record types. When that happens, do not work it as one item and do not split it silently. Propose the split: list each record type back as its own short numbered item in plain words, say you will work through them one at a time on this same request, and ask if that matches what they want. End that message with, on its own line: [[QUICK_REPLIES: Yes, work through them one at a time | No, I meant one record]]. You propose, the citizen decides - if they meant one record, ask them to describe it and continue normally. If they agree, work the FIRST item through the full flow; when it is handled, instead of the generic another-record question, name the NEXT proposed item ("Next up: the 911 call audio - ready?") and continue until every proposed item is handled. Only then ask the usual would-you-like-another-record question. A date range, location, or person attached to one record type is a detail of that item, not a separate item.',
+  '',
   'FLOW for each record:',
   '- Description: elicit and refine one clear description. Ask clarifying questions ONE at a time (date range, department, specific people or events, format). When it reads clear and complete, confirm it back briefly - "Your request is as follows: <final description>. Is that right?" - before searching.',
   '- Format fork (judge the FORMAT of the record they want):',
@@ -878,3 +880,6 @@ router.get('/file/:id', async function(req, res) {
 });
 
 module.exports = router;
+// Exported for the prompt-contract harness (verify_mrr_intake_prompt) — the wizard agent's behavioral
+// contract lives in this string, and a silent edit is otherwise invisible to the suite.
+module.exports.WIZARD_PROMPT = SYSTEM_PROMPT_SPLIT_CANVAS;
