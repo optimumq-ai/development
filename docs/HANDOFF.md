@@ -7094,3 +7094,47 @@ routing cutover (#9), legal-redaction gate (#10), fee-choice verification lock (
 Open: Kevin's testing/demo list, the go-live flip, §6.2 stage glosses, §2.6/§8.3 page stamping, and
 Tier 3's big remaining items (MRR hub §14.3 — deferred by Kevin; health scoring #13; taxonomy variants
 #14; sources redesign #15).
+
+---
+
+## 2026-08-13 (f) — item 13 un-deferred and SHIPPED: workload health scoring (`c077a24`)
+
+### Kevin's call, design-first
+Health scoring was deferred by Kevin yesterday when the dashboard shipped its counting model; today he
+called it as the next slice — an un-defer by the person who deferred it. Per the decisions-visual rule,
+design led: mockups in the shipped dashboard idiom (`exchange/health_mockups.png`) with two dashboard
+variants + the My Tasks composite + the formula spelled out in user-facing words. **Kevin approved BOTH
+variants and the formula as proposed, same-day.**
+
+### The model (SPEC_operational_dashboard §2.5 — now the binding spec; D4 §4 points there)
+- **Points** (the §4 exponential penalty, expressed in the already-decided buckets): 1 day over budget
+  = 1 · 2 days = 2 · >2 days = 4. One badly stuck task outweighs several slightly-late ones.
+- **Status**: 0 = On track · 1–3 = Needs attention · 4+ = Falling behind (wire values snake_case;
+  display names frontend-side). Thresholds fixed v1 — refine from customer feedback.
+- Paused and unbudgeted tasks NEVER score. Bucket edges moved INTO `workloadHealth.bucketOf` so
+  ops-summary and the personal composite bucket identically by construction.
+
+### One pure module, four consumers (score and screen can never disagree)
+1. **ops-summary** — health on every node, team, and totals.
+2. **Dashboard** — Health columns in Late-by-Team + Task Nodes, and the new **Workload health pane**
+   (teams × nodes heat grid, composite chip in the header, scopable, FIRST in org-wide and team-lead
+   role defaults).
+3. **My Tasks** — personal composite off `/tasks/mine` (now returns `health` + buckets); the page says
+   the WHY in plain words.
+4. **AI reporting** — new `workload_health` report metric (engine + report-agent catalog): per-team
+   table off the same read; the note explains the formula and disclaims the legal clock.
+
+### Evidence
+`verify_health_scoring` 21/21 (formula boundaries; controlled-ledger ops integration; paused moved no
+needle; the real `/tasks/mine`; report number == dashboard number; pane defaults; world restored).
+`verify_ops_dashboard` C1 updated for the new default order — first full run caught it (20/21), fixed,
+then **full suite 2057/2057, live untouched, exit 0.** Deployed (build + nginx 200, API restart 200).
+Live screenshots delivered: `exchange/health_1_dashboard.png` (health pane leads; Falling behind · 32,
+matching the 8 known over-budget tasks) · `exchange/health_2_mytasks.png` (Kevin's composite: Falling
+behind · 12 points, "3 are more than 2 days over. Start with the oldest.").
+
+### Open
+Kevin's testing/demo list; go-live flip; §6.2 stage glosses; §2.6/§8.3 page stamping. Deferred by
+design: health-threshold configurability, the AI budget "brain", per-record-type budget UI, parent
+budget roll-up. Tier 3 remaining: MRR hub §14.3 (Kevin-deferred) · taxonomy variants #14 · sources
+redesign #15.
