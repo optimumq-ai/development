@@ -1104,6 +1104,28 @@ CREATE TABLE IF NOT EXISTS task_events (
 CREATE INDEX IF NOT EXISTS idx_task_events_task ON task_events(task_id);
 CREATE INDEX IF NOT EXISTS idx_task_events_request ON task_events(request_id);
 
+-- task_events.task_id was an UNENFORCED reference: the trigger below is the only writer, but nothing
+-- took the bookmarks with their task when the task went away (request purges cascade tasks via
+-- fk_tasks_request_id; the bookmarks stayed). 74 such orphans had accumulated live by 2026-08-12 from
+-- test/smoke purges, and every purge script had to sweep them by hand. The FK closes the source:
+-- bookmarks are per-task timing audit — a bookmark for a task that no longer exists times nothing.
+-- Tasks are never deleted by any production path (they finish as status='done'); deletion only happens
+-- when a request cascades away, so CASCADE here extends the already-decided request->tasks cascade one
+-- level down, not a new deletion policy. One-time backfill: the orphans are deleted in the same guarded
+-- block, or the ALTER itself would fail at boot.
+DO $$
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_constraint
+    WHERE conrelid = 'task_events'::regclass AND conname = 'fk_task_events_task_id'
+  ) THEN
+    DELETE FROM task_events te WHERE NOT EXISTS (SELECT 1 FROM tasks t WHERE t.id = te.task_id);
+    ALTER TABLE task_events
+      ADD CONSTRAINT fk_task_events_task_id
+      FOREIGN KEY (task_id) REFERENCES tasks(id) ON DELETE CASCADE;
+  END IF;
+END $$;
+
 -- Denormalized convenience stamps (latest of each) for cheap current-state reads; the log is the source of truth.
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS assigned_at TEXT;
 ALTER TABLE tasks ADD COLUMN IF NOT EXISTS in_progress_at TEXT;

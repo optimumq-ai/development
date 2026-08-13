@@ -37,7 +37,15 @@ function sum(segs, pred) { return segs.filter(pred || function () { return true;
   await hist('STAGE_ADVANCED', 'record_search', 'awaiting_payment', 3);   // hold starts
   await hist('STAGE_ADVANCED', 'awaiting_payment', 'redaction', 6);        // 3h hold
   await hist('STAGE_ADVANCED', 'redaction', 'delivery', 14);
-  // task events (direct, with pinned times — no FK on task_events)
+  // task events (direct, with pinned times). fk_task_events_task_id (2026-08-13) means the task rows must
+  // really exist; inserting them fires the bookmark trigger with wall-clock stamps, so those trigger rows are
+  // cleared before the pinned trail is laid down.
+  async function mkTask(taskId, type) {
+    await db.run("INSERT INTO tasks (id, request_id, type, status) VALUES (?,?,?,'open') ON CONFLICT (id) DO NOTHING", [taskId, rid, type]);
+    await db.run('DELETE FROM task_events WHERE task_id = ?', [taskId]);
+  }
+  await mkTask('tk-rs', 'record_search');
+  await mkTask('tk-rd', 'redaction');
   async function ev(taskId, type, to, h) {
     await db.run("INSERT INTO task_events (task_id, request_id, task_type, from_status, to_status, at) VALUES (?,?,?,?,?,?)",
       [taskId, rid, type, null, to, at(h)]);

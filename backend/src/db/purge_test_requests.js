@@ -14,10 +14,12 @@
 // renumber_request_numbers, requestCreate), all as `request_number != 'LIBRARY' AND NOT LIKE 'SYS-%'`.
 // This script uses the SAME predicate, inverted, and then asserts the protected ids are not in the target set.
 //
-// WHY EXPLICIT INDIRECT CLEANUP: 18 tables CASCADE from requests, but SIX ledgers reference a request only
+// WHY EXPLICIT INDIRECT CLEANUP: 18 tables CASCADE from requests, but these ledgers reference a request only
 // INDIRECTLY and have NO declared FK — deleting the requests would silently strand them:
-//   clock_tolls / clock_extensions -> request_clocks.id     task_events -> tasks.id (and a bare request_id)
+//   clock_tolls / clock_extensions -> request_clocks.id
 //   redaction_zones -> redaction_jobs.id / request_files.id  embeddings -> fulfilled_records / document_pages
+// task_events USED to be on this list; since 2026-08-13 it cascades (fk_task_events_task_id -> tasks, which
+// cascade from requests). Its sweep rules below are retained as belt-and-braces and should delete 0 rows.
 //
 // Usage:  node src/db/purge_test_requests.js            (DRY RUN — prints the plan, changes nothing)
 //         node src/db/purge_test_requests.js --apply    (executes, in ONE transaction)
