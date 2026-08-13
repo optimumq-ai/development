@@ -90,18 +90,17 @@ Kevin's wizard / one-item-at-a-time portal redesign (mockups `uploads/screen*.xl
 ## 3. Handoff → request `[BUILT]`
 Submit inserts the request (`submission_channel` recorded), sets classification-based deadline days, persists selected records, then AI classification + workflow routing run (Domain 5). Fee-waiver flag stored. `is_mrr` stored.
 
-## 4. Form fallback `[BUILT]`
-"Prefer a form?" link swaps chat for a traditional form (contact, description, delivery). `[GAP: no fee-choice field — see §5; no commercial field]`
+## 4. Form fallback `[SUPERSEDED by the wizard (§2c)]`
+"Prefer a form?" belonged to the retired chat-first flow. The wizard IS the structured form now — contact, delivery, certification and the §5 fee choice all live on its steps, so the old `[GAP: no fee-choice field]` is closed by construction.
 
-## 5. Fee-choice intake — default-forward `[NOT BUILT — replaces Phase 4 design]`
-Prominent "Continue with standard rates" default; under an "only if one applies" divider, two opt-ins with descriptions: **Request a fee waiver** and **I'm a commercial requester** ("subject to review"); "you can also just type." Waiver → reason follow-up → `fee_waiver_requested`. Commercial → sets `purpose='commercial'` so the staff estimate opens on commercial (staff confirm). Commercial approval `[DEFERRED — on customer demand]`. Applies to chat AND form. Needs a richer widget than `[[QUICK_REPLIES]]`.
-**Current gap:** nothing captures commercial today; `purpose` set only by staff.
+## 5. Fee-choice intake — default-forward `[BUILT 2026-07-18 as part of the wizard; VERIFIED + regression-locked 2026-08-13, verify_fee_choice_intake 11/11]`
+Built into the wizard's **Your Information** step (Kevin-approved mockups, §2c slice 2), which supersedes this section's older chat-widget framing ("just type", QUICK_REPLIES) — the agent is description-only now, so the fee choice is a form control, not a chat turn. As shipped: three-option radio group, **standard rates the checked default**, with described opt-ins **Request a fee waiver** (reason follow-up appears on select) and **I'm a commercial requester** ("Subject to review"). Waiver → `fee_waiver_requested` + reason on the PARENT → `onIntake` spawns the team-agnostic `fee_waiver` task (§9 flow). Commercial → `requestor_type='commercial'` AND **`purpose='commercial'` derived in `requestCreate` (the ONE creation helper, `97a0764`)** so the staff estimate opens on commercial rates from EVERY intake path, not just the portal; `feeEngine` applies the purpose-override schedule. Commercial approval remains `[DEFERRED — on customer demand]`.
 
 ## 6. MRR item-by-item intake `[NOT BUILT — DECISION]`
 Agent elicits ONE description per child: detect-and-propose from free text, validate each item back individually, then "anything else?" catch-all. >1 item at handoff → MRR. (Full processing: MRR spec §12.)
 
 ## 7. Known gaps / open
-- Quick Reply rich widgets (choices with descriptions, date/time modes) — designed, `[NOT BUILT]`; needed by §5.
+- Quick Reply rich widgets (choices with descriptions, date/time modes) — designed, `[NOT BUILT]`; §5 no longer needs them (the wizard's form controls carry the fee choice), so this stands only if a future chat surface wants it.
 - Chat banner too tall / auto-scroll fix — committed UX backlog.
-- Phase-4 fee capture (§5) and MRR intake (§6) are THE two intake builds pending.
+- ~~Phase-4 fee capture (§5)~~ built with the wizard (verified 2026-08-13); **MRR intake (§6) is THE intake build pending.**
 - Search quality stack (floor, AI relevance judge, taxonomy router) lives in Domain 3/7 specs.

@@ -102,7 +102,7 @@ MRR tasks are role-agnostic (no MRR-specific roles).
 **Built:** grant/deny endpoint; denial requires a reason from a reusable statutory-reason library (`decision_reasons`/`fee_waiver_denial`); denial sends a mandatory notice, then the request continues as normal (not closed); granted → fee computed then marked **waived** (notice "waived", balance $0). `[BUILT]`
 **Gaps:** ~~NO auto-routing of a waiver request to the approver / no fee-waiver task on My Tasks~~ **BUILT 2026-07-09** (interim `FEE_AUTHORITY` routing; §5). NO "denial / response-window-active" status or requestor-reply flow `[NOT BUILT — compare against jurisdiction law before speccing]`.
 
-## 10. Fee-intake capture (portal Phase 4) — default-forward `[NOT BUILT]`
+## 10. Fee-intake capture (portal Phase 4) — default-forward `[BUILT 2026-07-18 in the wizard's Your Information step; VERIFIED + regression-locked 2026-08-13 — verify_fee_choice_intake 11/11. The chat-specific framing below ("just type", quick replies) is superseded by the wizard form controls; see SPEC_public_portal_intake §5.]`
 Replaces the current yes/no waiver question. **Standard rates are the prominent default** ("Continue with standard rates"); below an "only if one applies" divider, two optional opt-ins: **Request a fee waiver** (desc) and **I'm a commercial requester** (desc, "subject to review"); plus "you can also just type to continue."
 - Continue → `purpose=standard`.
 - Fee waiver → follow-up reason → `fee_waiver_requested` → §9.

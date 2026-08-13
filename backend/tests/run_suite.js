@@ -23,7 +23,7 @@ const BACKEND = path.join(__dirname, '..');
 const ALL = [
   'verify_stage_bypass', 'verify_stages', 'verify_request_create', 'verify_form_intake', 'verify_config_integrity',
   'verify_deposit_clock', 'verify_scope', 'verify_extend', 'verify_reissue',
-  'verify_survey_seed', 'verify_fee_waiver', 'verify_jurrules', 'verify_deadline_rules',
+  'verify_survey_seed', 'verify_fee_waiver', 'verify_fee_choice_intake', 'verify_jurrules', 'verify_deadline_rules',
   'verify_search_intents', 'verify_request_defect', 'verify_search_resolve',
   'verify_search_intent_gate', 'verify_fee_labor_gate', 'verify_estimate_profiles',
   'verify_role_reconciliation', 'verify_routing_cutover', 'verify_notifications', 'verify_returned_rework', 'verify_task_lifecycle',
