@@ -7138,3 +7138,41 @@ Kevin's testing/demo list; go-live flip; §6.2 stage glosses; §2.6/§8.3 page s
 design: health-threshold configurability, the AI budget "brain", per-record-type budget UI, parent
 budget roll-up. Tier 3 remaining: MRR hub §14.3 (Kevin-deferred) · taxonomy variants #14 · sources
 redesign #15.
+
+---
+
+## 2026-08-13 (g) — item 14 decided + slice 1 built: taxonomy variants (`7fb2f50`)
+
+### The design session (this was KEVIN'S open design, parked since July)
+Mockups first (`exchange/variant_mockups.png`): nested variants on the Taxonomy page, inheritance in
+the editor, and his auto-discovery counting concept with mass-redaction candidate flags. Kevin initially
+didn't recognize the jargon-framed ask — plain-words re-explanation ("one catalog entry can have
+sub-entries; sub-entries only spell out what's different; the AI can suggest sub-entries from your real
+files, with counts") landed, and he approved the direction. **Decided: a variant IS a record type with a
+parent** — one new field, no second catalog, one level only.
+
+### Built (slice 1 — the backbone)
+- `record_types.parent_record_type_id` + shape guards at the routes (no grandchildren, no
+  self-reference, busy buckets can't demote, bucket deletion refused while variants exist, category
+  server-aligned to the parent).
+- **Inheritance** where behavior attaches: estimate profile (read-time fallback; writes untouched),
+  time budgets (variant → parent → generic), the legal gate (parent ON binds variants — never loosens
+  silently), classifier owner/fulfiller (COALESCE walk-up).
+- **Classifier**: catalog extracted as exported `catalogRows()` (suite-assertable without a model
+  call); variants shown as "Bucket — Variant"; instruction: most specific when clear, else the bucket.
+- **UI**: nested variant rows + bucket pills on TaxonomyPage; Parent field in the editor with a
+  12-year-old-simple explanation; category locks to the parent's.
+
+### Slice 2 — NEXT (design already approved, mockup 3)
+Auto-discovery groupings: scan a bucket's real holdings across its linked sources, propose variants
+WITH document counts, flag consistent-layout groupings as mass-redaction candidates. Needs its own scan
+machinery + verification pass; deliberately its own session.
+
+### Evidence
+`verify_taxonomy_variants` 14/14; **full suite 2071/2071, live untouched, exit 0.** Deployed (build +
+nginx 200, API restart 200); editor Parent field verified live (`exchange/rt_editor_parent_field.png`).
+Live catalog untouched — 84 types, all parentless until Kevin creates variants.
+
+### Open
+Kevin's testing/demo list; go-live flip; §6.2 stage glosses; §2.6/§8.3 page stamping; variants slice 2
+(discovery groupings); sources redesign #15 (decision pending); MRR hub §14.3 (Kevin-deferred).
