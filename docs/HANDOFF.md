@@ -7376,3 +7376,34 @@ Follow-on list shrinks again: legal task screens DONE (was already done). Remain
 chat-agent model upgrade · v3 collapse · search-activity tracking. Plus §14 legal-hours-in-estimate
 (open design), pre-production hardening, Kevin's testing/demo, go-live flip, §6.2 glosses,
 §2.6/§8.3 stamping.
+
+## 2026-08-13 (n) — legal hours in the estimate: DESIGN PASS DONE (design only, no code)
+
+### What the pass found (mapped the as-built engine before designing)
+Kevin's July sketch was half-built already: classifier flags route flagged requests to the
+open-records team at intake (`wfr-sensitive`, priority 5) and spawn `intake_review`
+(`sensitivity_flag`). The genuinely missing mechanics: (1) no way for legal expertise to contribute
+EXPECTED hours to a quote (the estimate snapshot is append-only, one author per POST; the MRR
+roll-up rides numbers as prose — the recorded anti-pattern); (2) no legal labor category in the
+engine (three drivers; legal ACTUALS fold into `review`); (3) `legal_redaction_required` fires only
+at redaction stage, invisible at pricing time.
+
+### The design (docs/DESIGN_legal_hours_estimate.md — the binding record)
+Hand-assigned `legal_estimate` task (eligibility = existing `legal_review` token; joins
+HAND_ASSIGNED_TASK_TYPES) spawned from the estimate screen ("Ask legal for hours") or the MRR hub
+master (parent-level, deliberately not per-child); structured answer in new `legal_estimate_inputs`
++ history row; estimator Accept-pre-fills `legalHours` (stays the single author). Engine: fourth
+labor line "Legal review", config inherits the `review` driver parent-ward unless the city sets
+`labor.legal.*` (measure-always/gate-chargeability, the variant-inheritance pattern); free-hours
+order search → review → legal → programming; reconciliation compares estimated (review+legal) vs
+actual review. New deterministic intake trigger `legal_rt` off `legal_redaction_required` with
+parent walk-up. Four build slices with named harnesses.
+
+### Kevin's decisions (AskUserQuestion, notice-line previews)
+1. **Soft block** — an open legal ask warns but does not stop the estimate send; revisions handle a
+   late answer. 2. **Own notice line** — "Legal review (N hrs @ rate)", not folded into review.
+
+### The board
+§14's open legal design is now DECIDED (build is 4 slices, unscheduled). Remaining follow-ons:
+chat-agent model upgrade · v3 collapse · search-activity tracking. Plus pre-production hardening,
+Kevin's testing/demo, go-live flip, §6.2 glosses, §2.6/§8.3 stamping.
