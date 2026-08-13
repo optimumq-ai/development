@@ -72,4 +72,101 @@ async function scanRepository(repo) {
   return { created: created, matched: matched, linked: linked, scanned: samples.length };
 }
 
-module.exports = { scanRepository: scanRepository };
+// ============================================================================================
+// VARIANT GROUPINGS (#14 slice 2 — Kevin's counting concept, design approved 2026-08-13, mockup 3).
+//
+// Scan a BUCKET type's real holdings across its linked sources, and have the AI propose variant
+// GROUPINGS with document counts — the big consistent-layout piles get flagged as mass-redaction
+// candidates. Two halves, deliberately split:
+//   discoverVariantGroupings — read-only: samples + AI proposal. INSERTS NOTHING; the result is
+//     shown to a human. Counts are honest: share-of-sample × the source's REAL total when the
+//     connector can count (filestore can), else the sample count labeled as such.
+//   applyGroupingProposal — inserts ONE approved proposal as a DRAFT variant under the bucket
+//     (status='draft', source='discovered', parent + category aligned). Drafts don't classify;
+//     activation stays the human act it already is. Pure data-shaping, testable without a model.
+// ============================================================================================
+async function discoverVariantGroupings(bucketId) {
+  var bucket = await get('SELECT * FROM record_types WHERE id = ?', [bucketId]);
+  if (!bucket) return { error: 'Record type not found' };
+  if (bucket.parent_record_type_id) return { error: 'That type is itself a variant — run discovery on its parent bucket instead' };
+  var repos = await all(
+    "SELECT rp.* FROM record_type_repositories rr JOIN record_repositories rp ON rp.id = rr.repository_id " +
+    "WHERE rr.record_type_id = ? AND rp.status = 'active'", [bucketId]);
+  var samples = [], totalDocs = 0, totalKnown = false, scannedRepos = [];
+  repos.forEach(function (repo) {
+    var connector = connectors[repo.connector_type];
+    if (!connector || !connector.scan) return;
+    var config = {};
+    try { config = repo.config ? JSON.parse(repo.config) : {}; } catch (e) {}
+    var s = connector.scan(config) || [];
+    s.forEach(function (x) { samples.push({ filename: x.filename, text: x.text, source: repo.name }); });
+    if (connector.countAll) { totalDocs += connector.countAll(config); totalKnown = true; }
+    scannedRepos.push(repo.name);
+  });
+  if (!samples.length) return { error: 'No scannable documents found in the sources linked to this type', repos: scannedRepos };
+
+  var existingVariants = await all('SELECT name, code FROM record_types WHERE parent_record_type_id = ?', [bucketId]);
+  var digest = samples.map(function (s) { return '=== FILE: ' + s.filename + ' (' + s.source + ') ===\n' + s.text; }).join('\n\n').substring(0, 14000);
+  var prompt = 'You are a records-management taxonomy expert. The agency catalog has a record type "' + bucket.name + '"'
+    + (bucket.intent ? ' (' + bucket.intent + ')' : '') + ' that may really be a family of distinct sub-kinds.\n'
+    + 'Below are sample documents of this type from the agency\'s own holdings. Group them into the DISTINCT sub-kinds you can '
+    + 'see evidence for, and return ONLY a JSON array, one element per grouping.\n\n'
+    + 'Rules:\n'
+    + '- Only propose a grouping the samples actually support; leave unclear documents ungrouped.\n'
+    + (existingVariants.length ? '- These variants already exist — do not re-propose them: ' + existingVariants.map(function (v) { return v.name; }).join('; ') + '\n' : '')
+    + '- sample_share: the fraction (0-1) of the samples that belong to this grouping.\n'
+    + '- layout: "uniform" when the documents share one consistent layout, "few_layouts" when a small number of layouts cover nearly all, "varied" otherwise.\n'
+    + '- mass_redaction_candidate: true only for uniform or few_layouts groupings — the kind where one redaction template fits the pile.\n'
+    + '- code: short kebab-case.\n\n'
+    + 'Element shape:\n'
+    + '{"name": "", "code": "", "intent": "", "expected_content": "", "synonyms": [], "keywords": [], "identifying_facets": [], "formats": ["document"], "confidence": 0, "sample_share": 0, "layout": "varied", "mass_redaction_candidate": false, "example_files": [], "reasoning": ""}\n\n'
+    + 'SAMPLE DOCUMENTS:\n' + digest;
+  var client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  var message = await client.messages.create({ model: 'claude-sonnet-4-5', max_tokens: 3000, messages: [{ role: 'user', content: prompt }] });
+  var raw = message.content[0].text.trim().replace(/```json|```/g, '').trim();
+  var groupings = [];
+  try { groupings = JSON.parse(raw); } catch (e) { return { error: 'The AI response could not be read — try the scan again' }; }
+  if (!Array.isArray(groupings)) groupings = [];
+  var groupedShare = 0;
+  groupings.forEach(function (g) {
+    var share = Math.max(0, Math.min(1, Number(g.sample_share) || 0));
+    groupedShare += share;
+    g.sample_share = share;
+    g.estimated_count = totalKnown ? Math.round(share * totalDocs) : null;
+    g.mass_redaction_candidate = !!g.mass_redaction_candidate && (g.layout === 'uniform' || g.layout === 'few_layouts');
+  });
+  return {
+    bucket: { id: bucket.id, name: bucket.name },
+    repos: scannedRepos, sampled: samples.length,
+    totalDocuments: totalKnown ? totalDocs : null,
+    ungroupedShare: Math.max(0, Math.round((1 - groupedShare) * 100)) / 100,
+    groupings: groupings
+  };
+}
+
+async function applyGroupingProposal(bucketId, p) {
+  var bucket = await get('SELECT * FROM record_types WHERE id = ?', [bucketId]);
+  if (!bucket) throw new Error('Record type not found');
+  if (bucket.parent_record_type_id) throw new Error('That type is itself a variant — variants go one level deep');
+  if (!p || !(p.name || '').trim()) throw new Error('A proposal needs a name');
+  var code = (p.code || p.name).toString().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').substring(0, 48) || 'variant';
+  var dup = await get('SELECT id FROM record_types WHERE code = ?', [code]);
+  if (dup) code = code + '-' + uuidv4().substring(0, 4);
+  var id = nid('rt');
+  // Provenance lives in the description — visible, editable, honest about being an estimate.
+  var provenance = 'Proposed by auto-discovery' +
+    (p.estimated_count != null ? ' — about ' + p.estimated_count + ' documents in the holdings' : (p.sample_share ? ' — ' + Math.round(p.sample_share * 100) + '% of the scanned sample' : '')) +
+    (p.mass_redaction_candidate ? '. Consistent layout — a mass-redaction candidate.' : '.');
+  var cols = 'id, category_id, parent_record_type_id, name, code, description, intent, expected_content, synonyms, keywords, identifying_facets, formats, public_availability, status, source, confidence, sort_order';
+  var ph = '?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?';
+  await run('INSERT INTO record_types (' + cols + ') VALUES (' + ph + ')', [
+    id, bucket.category_id, bucket.id, (p.name || '').toString().substring(0, 200), code, provenance,
+    p.intent || null, p.expected_content || null, packArray(p.synonyms), packArray(p.keywords),
+    packArray(p.identifying_facets), packArray(p.formats && p.formats.length ? p.formats : ['document']),
+    bucket.public_availability || 'review_required', 'draft', 'discovered',
+    (typeof p.confidence === 'number' ? p.confidence : null), 900]);
+  embedIndex.bg(embedIndex.reindexRecordTypes([id]), 'discover-variant');
+  return await get('SELECT * FROM record_types WHERE id = ?', [id]);
+}
+
+module.exports = { scanRepository: scanRepository, discoverVariantGroupings: discoverVariantGroupings, applyGroupingProposal: applyGroupingProposal };

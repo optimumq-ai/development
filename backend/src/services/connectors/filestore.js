@@ -17,6 +17,14 @@ function scan(config) {
   return out;
 }
 
+// Total matching documents in the source — NOT a sample (#14 slice 2: variant-grouping counts are
+// honest "share of sample × total" estimates, so the total must be the real holding size).
+function countAll(config) {
+  var dir = (config && config.path) ? config.path : null;
+  if (!dir || !fs.existsSync(dir)) return 0;
+  return fs.readdirSync(dir).filter(function(f){ return /\.pdf$/i.test(f); }).length;
+}
+
 function makeSnippet(text, matched) {
   if (!text) return '';
   var low = text.toLowerCase();
@@ -52,4 +60,4 @@ function nativeSearch(query, config) {
   return out.slice(0, 8);
 }
 
-module.exports = { scan: scan, nativeSearch: nativeSearch };
+module.exports = { scan: scan, countAll: countAll, nativeSearch: nativeSearch };

@@ -289,6 +289,23 @@ router.delete('/record-types/:id/repositories/:linkId', requireAuth, async funct
 });
 
 // ===== AI-ASSISTED SCHEMA DISCOVERY =====
+// VARIANT GROUPINGS (#14 slice 2). Scan is READ-ONLY — it proposes, a human approves; nothing is
+// inserted until the apply endpoint is called with one approved proposal.
+router.post('/record-types/:id/discover-variants', requireAuth, async function(req, res) {
+  try {
+    var out = await require('../services/schemaDiscovery').discoverVariantGroupings(req.params.id);
+    if (out.error) return res.status(422).json(out);
+    res.json(out);
+  } catch (e) { res.status(500).json({ error: 'Variant discovery failed: ' + (e && e.message) }); }
+});
+router.post('/record-types/:id/variants', requireAuth, async function(req, res) {
+  try {
+    var rt = await require('../services/schemaDiscovery').applyGroupingProposal(req.params.id, req.body || {});
+    await audit('record_type', rt.id, 'discover_variant', req, { name: rt.name, code: rt.code, parent: req.params.id });
+    res.json(hydrate(rt));
+  } catch (e) { res.status(422).json({ error: e.message }); }
+});
+
 router.post('/discover', requireAuth, async function(req, res) {
   var text = (req.body && req.body.text ? String(req.body.text) : '').trim();
   if (!text) return res.status(400).json({ error: 'text is required' });

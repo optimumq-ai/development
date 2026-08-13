@@ -28,6 +28,32 @@ export default function TaxonomyPage() {
   var [editor, setEditor] = useState(null);
   var [semQ, setSemQ] = useState('');
   var [semResults, setSemResults] = useState(null);
+  // VARIANT GROUPINGS (#14 slice 2): scan a bucket's holdings, show proposals, approve as drafts.
+  var [scanning, setScanning] = useState(null);        // record type id being scanned
+  var [scanResult, setScanResult] = useState(null);    // { bucket, groupings, ... }
+  var [scanErr, setScanErr] = useState('');
+  var [applied, setApplied] = useState({});            // proposal code -> 'done' | 'busy'
+
+  async function findVariants(t) {
+    setScanning(t.id); setScanErr(''); setScanResult(null); setApplied({});
+    try {
+      var r = await api.post('/taxonomy/record-types/' + t.id + '/discover-variants');
+      setScanResult(r.data);
+    } catch (e) {
+      setScanErr((e.response && e.response.data && e.response.data.error) || 'The scan failed.');
+    }
+  }
+  async function approveProposal(g) {
+    setApplied(function (a) { return { ...a, [g.code]: 'busy' }; });
+    try {
+      await api.post('/taxonomy/record-types/' + scanResult.bucket.id + '/variants', g);
+      setApplied(function (a) { return { ...a, [g.code]: 'done' }; });
+      load();
+    } catch (e) {
+      setApplied(function (a) { return { ...a, [g.code]: undefined }; });
+      setScanErr((e.response && e.response.data && e.response.data.error) || 'Could not add the variant.');
+    }
+  }
   var [semLoading, setSemLoading] = useState(false);
   var [semErr, setSemErr] = useState('');
 
@@ -234,6 +260,8 @@ export default function TaxonomyPage() {
                               {t.auto_release_eligible === 1 ? pill('#E1EFFE', '#1E429F', 'Auto-release') : null}
                               {pill(av.bg, av.fg, av.label)}
                               {t.fulfillment_method && t.fulfillment_method !== 'electronic_search' ? pill('#F5F3FF', '#6D28D9', t.fulfillment_method === 'paper_index' ? 'Paper \u00b7 on-site' : (t.fulfillment_method === 'bulk_export' ? 'Bulk export' : 'Manual collection')) : null}
+                              {!isVariant ? <button onClick={function(){ findVariants(t); }} title="Scan this type's holdings and let the AI propose variants, with document counts"
+                                style={{ marginLeft: '4px', padding: '2px 10px', borderRadius: '20px', border: '1px solid #C9D6E2', background: '#EBF3FB', color: '#1F4E79', fontSize: '11px', fontWeight: '600', cursor: 'pointer' }}>Find variants</button> : null}
                               <button onClick={function(){ setEditor({ mode: 'edit', initial: t }); }} style={{ marginLeft: '4px', padding: '2px 10px', borderRadius: '20px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '11px', fontWeight: '600', cursor: 'pointer' }}>Edit</button>
                             </div>
                           </div>
@@ -260,6 +288,65 @@ export default function TaxonomyPage() {
         </div>
       )}
       {editor ? <RecordTypeEditor mode={editor.mode} initial={editor.initial} categories={cats} allTypes={types} onClose={function(){ setEditor(null); }} onSaved={function(){ setEditor(null); load(); }} /> : null}
+
+      {scanning ? (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(20,32,43,.45)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '30px 16px', zIndex: 60, overflowY: 'auto' }}
+          onMouseDown={function(e){ if (e.target === e.currentTarget) { setScanning(null); setScanResult(null); } }}>
+          <div style={{ width: '100%', maxWidth: '760px', background: 'white', border: '1px solid #C9D6E2', borderRadius: '14px', boxShadow: '0 10px 32px rgba(20,32,43,.18)', padding: '24px 26px' }} role="dialog" aria-modal="true">
+            {!scanResult && !scanErr ? (
+              <div style={{ padding: '30px', textAlign: 'center', color: '#5B6B7A', fontSize: '14px' }}>
+                Scanning this type's holdings and asking the AI to group them… this can take up to a minute.
+              </div>
+            ) : null}
+            {scanErr ? <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: '#DC2626', marginBottom: '12px' }}>{scanErr}</div> : null}
+            {scanResult ? (
+              <div>
+                <div style={{ fontWeight: 800, fontSize: '18px', color: '#1F4E79' }}>Discovered groupings in "{scanResult.bucket.name}"</div>
+                <div style={{ fontSize: '13px', color: '#5B6B7A', margin: '4px 0 16px' }}>
+                  Sampled {scanResult.sampled} documents from {scanResult.repos.join(', ')}
+                  {scanResult.totalDocuments != null ? ' · about ' + scanResult.totalDocuments + ' documents in the holdings' : ' · totals unavailable for these sources'}
+                  · the AI proposes, you approve — nothing changes until you say so.
+                </div>
+                {(scanResult.groupings || []).length === 0 ? (
+                  <div style={{ color: '#5B6B7A', fontSize: '14px', padding: '10px 0' }}>No clear groupings — the samples look like one kind of document.</div>
+                ) : scanResult.groupings.map(function (g) {
+                  return (
+                    <div key={g.code} style={{ display: 'flex', gap: '14px', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '14px 16px', marginBottom: '10px', alignItems: 'flex-start' }}>
+                      <div style={{ minWidth: '86px', textAlign: 'right' }}>
+                        <div style={{ fontSize: '20px', fontWeight: 800, color: '#1F4E79' }}>{g.estimated_count != null ? g.estimated_count.toLocaleString() : Math.round((g.sample_share || 0) * 100) + '%'}</div>
+                        <div style={{ fontSize: '11px', color: '#8A97A5', fontWeight: 600 }}>{g.estimated_count != null ? 'documents (est.)' : 'of the sample'}</div>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 700, fontSize: '14.5px' }}>{g.name}</div>
+                        <div style={{ fontSize: '12.5px', color: '#5B6B7A', marginTop: '2px' }}>{g.reasoning || g.intent}</div>
+                        {g.mass_redaction_candidate
+                          ? <div style={{ marginTop: '7px', display: 'inline-block', fontSize: '12.5px', fontWeight: 700, color: '#B23A3A', background: '#F9E4E4', borderRadius: '8px', padding: '4px 10px' }}>⚡ Mass-redaction candidate — consistent layout</div>
+                          : <div style={{ marginTop: '7px', fontSize: '12px', color: '#8A97A5' }}>Varied layouts — per-document review.</div>}
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                        {applied[g.code] === 'done'
+                          ? <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#17803D', background: '#E6F4EC', borderRadius: '8px', padding: '8px 14px' }}>Added as draft ✓</span>
+                          : <button disabled={applied[g.code] === 'busy'} onClick={function(){ approveProposal(g); }}
+                              style={{ background: '#1F4E79', color: 'white', border: 'none', borderRadius: '8px', fontSize: '12.5px', fontWeight: 700, padding: '8px 14px', cursor: 'pointer', opacity: applied[g.code] === 'busy' ? .6 : 1 }}>
+                              {applied[g.code] === 'busy' ? 'Adding…' : 'Approve as draft variant'}</button>}
+                      </div>
+                    </div>
+                  );
+                })}
+                {scanResult.ungroupedShare > 0 ? (
+                  <div style={{ fontSize: '12px', color: '#8A97A5', marginTop: '4px' }}>
+                    About {Math.round(scanResult.ungroupedShare * 100)}% of the sample didn't fit any grouping and stays on "{scanResult.bucket.name}".
+                  </div>
+                ) : null}
+                <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '14px' }}>
+                  <button onClick={function(){ setScanning(null); setScanResult(null); }}
+                    style={{ background: 'white', color: '#1F4E79', border: '1px solid #C9D6E2', borderRadius: '8px', fontSize: '13px', fontWeight: 700, padding: '9px 16px', cursor: 'pointer' }}>Close</button>
+                </div>
+              </div>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
