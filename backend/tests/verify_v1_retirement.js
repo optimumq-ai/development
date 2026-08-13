@@ -82,7 +82,9 @@ function codeHits(re) {
   ok('C2 and says, at the top, that it is template authoring rather than a record workstation',
     /TEMPLATE AUTHORING/.test(wsSrc.slice(0, 1200)));
   // Its one legitimate caller: a template SAMPLE upload, which has no task to open instead.
-  var sampleLink = codeHits(/navigate\('\/redact\/' \+ fid\)/);
+  // (`+ q` is the optional ?for_type= carried from a "waiting for a template" suggestion —
+  // still the same single call site.)
+  var sampleLink = codeHits(/navigate\('\/redact\/' \+ fid \+ q\)/);
   ok('C3 MassRedactionPage still reaches it for a template sample', sampleLink.length === 1);
 
   console.log('\n=== D. WHY IT CANNOT BE FOLDED INTO THE TASK SCREEN ===');

@@ -39,6 +39,8 @@ export default function MassRedactionPage() {
   var [newTplOpen, setNewTplOpen] = useState(false);
   var [uploading, setUploading] = useState(false);
   var [uploadErr, setUploadErr] = useState('');
+  var [opps, setOpps] = useState([]);
+  var [pendingType, setPendingType] = useState(null); // opportunity the New-template flow was started from
   var navigate = useNavigate();
 
   useEffect(function () { load(); }, []);
@@ -47,7 +49,14 @@ export default function MassRedactionPage() {
   async function load() {
     setLoading(true);
     try { var r = await api.get('/redaction-templates'); setTemplates(r.data.templates || []); } catch (e) { console.error(e); }
+    try { var o = await api.get('/redaction-templates/opportunities'); setOpps(o.data.opportunities || []); } catch (e) { setOpps([]); }
     setLoading(false);
+  }
+  function startFromOpp(o) { setUploadErr(''); setPendingType(o); setNewTplOpen(true); }
+  async function dismissOpp(o) {
+    if (!window.confirm('Remove the suggestion for "' + o.name + '"? The variant itself stays in the taxonomy.')) return;
+    try { await api.post('/redaction-templates/opportunities/' + o.record_type_id + '/dismiss'); load(); }
+    catch (e) { alert('Could not remove the suggestion.'); }
   }
   async function remove(t) {
     if (!window.confirm('Delete the template "' + t.name + '"? This does not affect any documents already redacted with it.')) return;
@@ -121,8 +130,11 @@ export default function MassRedactionPage() {
       var r = await api.post('/files/upload/req-template-samples', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       var fid = r.data.fileId;
       var name = (file.name || '').toLowerCase();
-      if (name.slice(-4) === '.csv' || name.slice(-4) === '.tsv') navigate('/redact-fields/' + fid);
-      else navigate('/redact/' + fid);
+      // Started from a "waiting for a template" card: carry the variant along so the saved
+      // template links to it and the suggestion clears itself.
+      var q = pendingType ? '?for_type=' + encodeURIComponent(pendingType.record_type_id) : '';
+      if (name.slice(-4) === '.csv' || name.slice(-4) === '.tsv') navigate('/redact-fields/' + fid + q);
+      else navigate('/redact/' + fid + q);
     } catch (err) { setUploadErr('Could not upload the sample. ' + ((err.response && err.response.data && err.response.data.error) || '')); setUploading(false); }
   }
 
@@ -185,9 +197,50 @@ export default function MassRedactionPage() {
 
       <MassJobsPanel reloadKey={jobsReload} />
 
+      {opps.length > 0 ? (
+        <div style={{ marginBottom: '22px' }}>
+          <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '6px' }}>Waiting for a template ({opps.length})</div>
+          <p style={{ fontSize: '12.5px', color: '#6B7280', lineHeight: 1.5, margin: '0 0 10px' }}>
+            The variant scan on the Taxonomy page found piles of documents that share one layout &mdash; the kind one template can cover.
+            Each suggestion below disappears on its own once a template exists for it.
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {opps.map(function (o) {
+              var where = (o.repos && o.repos.length) ? o.repos.join(', ') : 'the linked sources';
+              var layoutPhrase = o.layout === 'few_layouts' ? 'a small number of layouts' : 'one consistent layout';
+              var subParts = [];
+              if (o.parent_name) subParts.push('Variant of ' + o.parent_name);
+              if (o.example_files && o.example_files.length) subParts.push('examples: ' + o.example_files.slice(0, 3).join(', '));
+              if (o.found_at) subParts.push('found ' + o.found_at);
+              return (
+                <div key={o.record_type_id} style={{ background: 'white', border: '1px solid #E5E7EB', borderLeft: '4px solid #B23A3A', borderRadius: '12px', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
+                      <span style={{ fontWeight: '700', fontSize: '14.5px', color: '#1F4E79' }}>{o.name}</span>
+                      <span style={{ fontSize: '10px', fontWeight: '700', letterSpacing: '.03em', padding: '1px 7px', borderRadius: '999px', color: '#B23A3A', background: '#F9E4E4' }}>FROM THE VARIANT SCAN</span>
+                    </div>
+                    <div style={{ fontSize: '12.5px', color: '#374151', marginBottom: '3px', lineHeight: 1.45 }}>
+                      {o.estimated_count != null
+                        ? <span>About <strong>{o.estimated_count.toLocaleString()} documents</strong> in <strong>{where}</strong> share {layoutPhrase}.</span>
+                        : <span><strong>{Math.round((o.sample_share || 0) * 100)}% of the scanned sample</strong> in <strong>{where}</strong> shares {layoutPhrase} (the source can't report an exact total).</span>}
+                      {o.layout === 'few_layouts'
+                        ? <span> A template with the safety check on will cover the matching ones and hold the rest.</span>
+                        : <span> One template should fit the whole pile.</span>}
+                    </div>
+                    {subParts.length ? <div style={{ fontSize: '12px', color: '#9CA3AF' }}>{subParts.join(' · ')}</div> : null}
+                  </div>
+                  <button onClick={function () { startFromOpp(o); }} style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: 'none', background: '#1F4E79', color: 'white', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>Start a template</button>
+                  <button onClick={function () { dismissOpp(o); }} style={{ flexShrink: 0, padding: '7px 12px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Not needed</button>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      ) : null}
+
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '10px' }}>
         <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151' }}>Templates ({templates.length})</div>
-        <button onClick={function () { setUploadErr(''); setNewTplOpen(true); }} style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>+ New template</button>
+        <button onClick={function () { setUploadErr(''); setPendingType(null); setNewTplOpen(true); }} style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '12.5px', fontWeight: '700', cursor: 'pointer' }}>+ New template</button>
       </div>
       {loading ? (
         <div style={{ padding: '40px', textAlign: 'center', color: '#9CA3AF' }}>Loading templates...</div>
@@ -224,9 +277,15 @@ export default function MassRedactionPage() {
       )}
 
       {newTplOpen ? (
-        <div onClick={function () { if (!uploading) setNewTplOpen(false); }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '20px' }}>
+        <div onClick={function () { if (!uploading) { setNewTplOpen(false); setPendingType(null); } }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '20px' }}>
           <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '14px', width: '520px', maxWidth: '100%', padding: '24px' }}>
             <div style={{ fontWeight: '700', fontSize: '16px', marginBottom: '6px' }}>New redaction template</div>
+            {pendingType ? (
+              <div style={{ background: '#F9E4E4', border: '1px solid #F3C7C7', borderRadius: '8px', padding: '9px 12px', marginBottom: '12px', fontSize: '12.5px', color: '#7A2E2E', lineHeight: 1.45 }}>
+                The saved template will be linked to <strong>{pendingType.name}</strong>, so its suggestion below clears itself.
+                Upload one of that pile&rsquo;s documents as the sample{pendingType.example_files && pendingType.example_files.length ? <span> (for example {pendingType.example_files[0]})</span> : null}.
+              </div>
+            ) : null}
             <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.55, marginBottom: '16px' }}>
               A template is built from one <strong>sample record</strong>. Upload a sample and we&rsquo;ll open the redaction workspace, where you mark what to redact and save it as a reusable template.
               <ul style={{ margin: '10px 0 0', paddingLeft: '18px', color: '#6B7280' }}>
@@ -239,7 +298,7 @@ export default function MassRedactionPage() {
               {uploading ? 'Uploading\u2026' : 'Upload a sample (CSV or PDF)'}
               <input type="file" accept=".csv,.tsv,.pdf" disabled={uploading} onChange={handleSampleUpload} style={{ display: 'none' }} />
             </label>
-            <button onClick={function () { if (!uploading) setNewTplOpen(false); }} style={{ marginLeft: '10px', padding: '11px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
+            <button onClick={function () { if (!uploading) { setNewTplOpen(false); setPendingType(null); } }} style={{ marginLeft: '10px', padding: '11px 16px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
           </div>
         </div>
       ) : null}

@@ -1043,6 +1043,15 @@ ALTER TABLE requests ADD COLUMN IF NOT EXISTS high_priority_set_at TEXT;
 -- Descriptive fields (name, synonyms, intent, …) are always the variant's own — they define it.
 ALTER TABLE record_types ADD COLUMN IF NOT EXISTS parent_record_type_id TEXT;
 
+-- Hand-off from variant discovery into Mass Redaction (SPEC_taxonomy_classification §1). When an
+-- approved discovery proposal was flagged consistent-layout, the flag is stored HERE — machine-readable,
+-- not just prose in the description — and the Mass Redaction page lists the type as "waiting for a
+-- template" until an active layout_profile names it (query-driven; no state to go stale). discovery_meta
+-- is the honest evidence for that card as JSON: estimated_count OR sample_share (never both dressed as
+-- fact), layout, example_files, source repo names, found_at.
+ALTER TABLE record_types ADD COLUMN IF NOT EXISTS mass_redaction_candidate INTEGER DEFAULT 0;
+ALTER TABLE record_types ADD COLUMN IF NOT EXISTS discovery_meta TEXT;
+
 -- Legal-redaction gate at the RECORD-TYPE level (D4 §7, item 10). A city marks a record type whose
 -- redaction must ALWAYS be done by legal staff (internal-affairs files, personnel investigations, …).
 -- Deterministic, unlike the classifier's SENSITIVE flag — that is an AI judgment on the request TEXT and

@@ -185,8 +185,12 @@ export default function RedactionWorkspacePage() {
   async function saveTemplate() {
     setSavingTpl(true); setTplMsg(null);
     try {
+      // ?for_type=<record_type_id>: arrived from a "waiting for a template" suggestion on Mass
+      // Redaction — link the template to that variant so the suggestion clears itself.
+      var forType = new URLSearchParams(window.location.search).get('for_type');
       await api.post('/redaction-templates', {
         name: tplName.trim(), description: tplDesc.trim() || null, source_file_id: fileId,
+        record_type_id: forType || null,
         zones: zones.map(function (z) { var r = ruleOf(z.rule_id); return { page_no: z.page_no, x: z.x, y: z.y, w: z.w, h: z.h, rule_id: z.rule_id || null, label: r ? r.title : null }; })
       });
       setTplMsg({ ok: true, text: 'Template saved. Find it under Mass Redaction.' });

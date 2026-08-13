@@ -46,7 +46,8 @@ export default function TaxonomyPage() {
   async function approveProposal(g) {
     setApplied(function (a) { return { ...a, [g.code]: 'busy' }; });
     try {
-      await api.post('/taxonomy/record-types/' + scanResult.bucket.id + '/variants', g);
+      // repos ride along so a mass-redaction candidate's Mass-Redaction card can say WHERE the pile lives.
+      await api.post('/taxonomy/record-types/' + scanResult.bucket.id + '/variants', Object.assign({}, g, { repos: scanResult.repos || [] }));
       setApplied(function (a) { return { ...a, [g.code]: 'done' }; });
       load();
     } catch (e) {
@@ -325,7 +326,7 @@ export default function TaxonomyPage() {
                       </div>
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
                         {applied[g.code] === 'done'
-                          ? <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#17803D', background: '#E6F4EC', borderRadius: '8px', padding: '8px 14px' }}>Added as draft ✓</span>
+                          ? <span style={{ fontSize: '12.5px', fontWeight: 700, color: '#17803D', background: '#E6F4EC', borderRadius: '8px', padding: '8px 14px' }}>{g.mass_redaction_candidate ? 'Added as draft — suggested on Mass Redaction ✓' : 'Added as draft ✓'}</span>
                           : <button disabled={applied[g.code] === 'busy'} onClick={function(){ approveProposal(g); }}
                               style={{ background: '#1F4E79', color: 'white', border: 'none', borderRadius: '8px', fontSize: '12.5px', fontWeight: 700, padding: '8px 14px', cursor: 'pointer', opacity: applied[g.code] === 'busy' ? .6 : 1 }}>
                               {applied[g.code] === 'busy' ? 'Adding…' : 'Approve as draft variant'}</button>}

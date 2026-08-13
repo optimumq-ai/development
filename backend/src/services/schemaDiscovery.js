@@ -157,14 +157,25 @@ async function applyGroupingProposal(bucketId, p) {
   var provenance = 'Proposed by auto-discovery' +
     (p.estimated_count != null ? ' — about ' + p.estimated_count + ' documents in the holdings' : (p.sample_share ? ' — ' + Math.round(p.sample_share * 100) + '% of the scanned sample' : '')) +
     (p.mass_redaction_candidate ? '. Consistent layout — a mass-redaction candidate.' : '.');
-  var cols = 'id, category_id, parent_record_type_id, name, code, description, intent, expected_content, synonyms, keywords, identifying_facets, formats, public_availability, status, source, confidence, sort_order';
-  var ph = '?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?';
+  // The flag also lands machine-readable: the Mass Redaction page lists this variant as "waiting
+  // for a template" until an active template names it. discovery_meta is the card's evidence.
+  var massCand = p.mass_redaction_candidate ? 1 : 0;
+  var meta = massCand ? JSON.stringify({
+    estimated_count: p.estimated_count != null ? p.estimated_count : null,
+    sample_share: p.sample_share || null,
+    layout: p.layout || null,
+    example_files: Array.isArray(p.example_files) ? p.example_files.slice(0, 5) : [],
+    repos: Array.isArray(p.repos) ? p.repos.slice(0, 5) : [],
+    found_at: new Date().toISOString().slice(0, 10)
+  }) : null;
+  var cols = 'id, category_id, parent_record_type_id, name, code, description, intent, expected_content, synonyms, keywords, identifying_facets, formats, public_availability, status, source, confidence, sort_order, mass_redaction_candidate, discovery_meta';
+  var ph = '?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?';
   await run('INSERT INTO record_types (' + cols + ') VALUES (' + ph + ')', [
     id, bucket.category_id, bucket.id, (p.name || '').toString().substring(0, 200), code, provenance,
     p.intent || null, p.expected_content || null, packArray(p.synonyms), packArray(p.keywords),
     packArray(p.identifying_facets), packArray(p.formats && p.formats.length ? p.formats : ['document']),
     bucket.public_availability || 'review_required', 'draft', 'discovered',
-    (typeof p.confidence === 'number' ? p.confidence : null), 900]);
+    (typeof p.confidence === 'number' ? p.confidence : null), 900, massCand, meta]);
   embedIndex.bg(embedIndex.reindexRecordTypes([id]), 'discover-variant');
   return await get('SELECT * FROM record_types WHERE id = ?', [id]);
 }

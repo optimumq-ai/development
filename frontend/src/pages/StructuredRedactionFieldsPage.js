@@ -53,7 +53,10 @@ export default function StructuredRedactionFieldsPage() {
     setSavingTpl(true); setTplMsg(null);
     try {
       var field_map = withheld.map(function (c) { return { field: c, rule_id: fieldMap[c].rule_id || null }; });
-      await api.post('/redaction-templates', { name: tplName.trim(), description: tplDesc.trim() || null, kind: 'fields', source_file_id: fileId, field_map: field_map });
+      // ?for_type=<record_type_id>: arrived from a "waiting for a template" suggestion on Mass
+      // Redaction — link the template to that variant so the suggestion clears itself.
+      var forType = new URLSearchParams(window.location.search).get('for_type');
+      await api.post('/redaction-templates', { name: tplName.trim(), description: tplDesc.trim() || null, kind: 'fields', source_file_id: fileId, record_type_id: forType || null, field_map: field_map });
       setTplMsg({ ok: true, text: 'Template saved. Find it under Mass Redaction.' });
       setTimeout(function () { setTplOpen(false); setTplMsg(null); setTplName(''); setTplDesc(''); }, 1300);
     } catch (e) { setTplMsg({ ok: false, text: (e.response && e.response.data && e.response.data.error) || 'Could not save template.' }); }

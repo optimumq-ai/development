@@ -7302,3 +7302,41 @@ master_request_id columns) — which caught `requestor_request_links`, a site no
 missed. Also learned: `notifications` has NO request_id — it scopes by `context_type`/`context_id`.
 Post-purge census: every family reference site 0 rows, incl. the gone child's orphaned tasks/history
 and task_events/tolls by captured ids. Live DB otherwise untouched.
+
+## 2026-08-13 (l) — Mass Redaction hand-off: the follow-on from item 14 is closed
+
+### The gap and the design (Kevin approved from mockup, `exchange/mass_handoff_mock.png`)
+The variant scan's mass-redaction flag survived only as PROSE in the draft variant's description —
+machine-unreadable, invisible on /mass-redaction. Now: `applyGroupingProposal` stores it on the
+variant (`record_types.mass_redaction_candidate` + `discovery_meta` JSON: estimated_count OR
+sample_share, layout, example_files, source repos — the approve call passes the scan's repo names
+along — and found_at). The Mass Redaction page grew a **"Waiting for a template"** section
+(`GET /redaction-templates/opportunities`): every flagged variant with no un-deleted template naming
+it, as a card with the honest count sentence. **Query-driven, zero bookkeeping**: "Start a template"
+runs the existing sample-upload flow carrying `?for_type=<variant>` so BOTH save paths (pages +
+fields) link the new template to the variant — which clears the card; deleting that template brings
+the card honestly back; "Not needed" (elevated-only dismiss) clears the flag and leaves the variant.
+Suggestions are cards on the page where the work happens, never tasks (the R10 rule). The
+Find-variants modal's approved state now says "suggested on Mass Redaction" for flagged cards.
+
+### One suite guard tripped, correctly
+`verify_v1_retirement` C3 pins MassRedactionPage's ONE legitimate `navigate('/redact/'...)` call by
+literal regex; adding `+ q` (the for_type carry) broke the literal, not the invariant. Regex updated
+to the new single-call-site form.
+
+### Evidence
+`verify_mass_handoff` **14/14** (flag machine-readable with honest meta; unflagged stores nothing;
+card appears with parent/count/source; sample-share never fabricates a count; linked template clears
+the card; deleting it brings the card back; dismiss is elevated-gated, 404s when already gone, and
+leaves the variant). **Full suite 2115/2115, live untouched, exit 0** (first run 2114/1 — the C3
+literal). Deployed (build + nginx 200, API restart 200). **Live-probed via the real approve path**:
+flagged variant → card rendered exactly per mock (`exchange/mass_handoff_live.png`), Start-a-template
+modal shows the pre-link banner (`exchange/mass_handoff_live_modal.png`), probe rows deleted via the
+API, opportunities back to 0.
+
+### The board
+Follow-on list shrinks: Mass-Redaction hand-off DONE. Remaining follow-ons: legal task screens ·
+chat-agent model upgrade · v3 collapse · search-activity tracking. Plus pre-production hardening,
+Kevin's testing/demo, go-live flip, §6.2 glosses, §2.6/§8.3 stamping. BACKLOG's mass-redaction TODO
+still holds: manager email alert on held/mismatch · Deep Scan · batch via fresh upload ·
+record-type filtering of batch candidates.

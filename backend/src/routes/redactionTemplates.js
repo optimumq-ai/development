@@ -120,6 +120,36 @@ router.get('/', requireAuth, async function(req, res) {
   res.json({ templates: rows.map(function(t){ return { id: t.id, name: t.name, description: t.description, kind: t.kind || 'pages', record_type_id: t.record_type_id, record_type_name: t.record_type_name, zone_count: parseZones(t).length, field_count: parseFieldMap(t).length, source_filename: t.source_filename, safety_threshold: t.safety_threshold, status: t.status, created_at: t.created_at }; }) });
 });
 
+// GET /opportunities -> variants the discovery scan flagged as mass-redaction candidates that still
+// have NO template. Query-driven: a card exists exactly while the flag is set and no un-deleted
+// layout_profile names the record type — saving a linked template clears it with no bookkeeping.
+// (Registered before /:id so the literal path isn't swallowed by the param route.)
+router.get('/opportunities', requireAuth, async function(req, res) {
+  var rows = await all(
+    "SELECT rt.id, rt.name, rt.discovery_meta, p.name AS parent_name FROM record_types rt " +
+    "LEFT JOIN record_types p ON p.id = rt.parent_record_type_id " +
+    "WHERE rt.mass_redaction_candidate = 1 " +
+    "AND NOT EXISTS (SELECT 1 FROM layout_profiles lp WHERE lp.record_type_id = rt.id AND lp.status != 'deleted') " +
+    "ORDER BY rt.name");
+  res.json({ opportunities: rows.map(function (r) {
+    var meta = {}; try { meta = JSON.parse(r.discovery_meta || '{}') || {}; } catch (e) {}
+    return { record_type_id: r.id, name: r.name, parent_name: r.parent_name,
+      estimated_count: meta.estimated_count != null ? meta.estimated_count : null,
+      sample_share: meta.sample_share || null, layout: meta.layout || null,
+      example_files: meta.example_files || [], repos: meta.repos || [], found_at: meta.found_at || null };
+  }) });
+});
+
+// POST /opportunities/:recordTypeId/dismiss -> "Not needed": clear the flag by hand (elevated, same
+// bar as creating a template). The variant itself is untouched — only the suggestion goes away.
+router.post('/opportunities/:recordTypeId/dismiss', requireAuth, async function(req, res) {
+  if (!isElevated(req)) return res.status(403).json({ error: 'Only a supervisor can dismiss a suggestion' });
+  var rt = await get('SELECT id, mass_redaction_candidate FROM record_types WHERE id = ?', [req.params.recordTypeId]);
+  if (!rt || !rt.mass_redaction_candidate) return res.status(404).json({ error: 'No open suggestion for that record type' });
+  await run('UPDATE record_types SET mass_redaction_candidate = 0 WHERE id = ?', [rt.id]);
+  res.json({ success: true });
+});
+
 // GET /:id -> full template incl zones
 router.get('/:id', requireAuth, async function(req, res) {
   var t = await get('SELECT * FROM layout_profiles WHERE id = ?', [req.params.id]);
