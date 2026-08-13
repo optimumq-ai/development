@@ -7207,3 +7207,41 @@ sources redesign #15 (decision pending, Kevin), MRR hub §14.3 (Kevin-deferred),
 follow-ons (Mass Redaction hand-off; legal task screens; chat-agent model upgrade; v3 full collapse),
 and the pre-production hardening list. Everything else is Kevin's: testing/demo, go-live flip,
 §6.2 glosses, §2.6/§8.3 stamping.
+
+---
+
+## 2026-08-13 (i) — item 15: the Sources screen reads like English now (`952c0d3`)
+
+### Kevin's July flag, closed
+Before/after mockups (`exchange/sources_current.png` / `sources_redesign_mock.png`); Kevin reviewed
+from the exchange folder and said build it. Four behavior groups replace the flat connector list —
+**Searched the moment someone asks · Watched folders (files brought in on a schedule) · Counted only
+(never opened) · Paper & physical (findable, not fetchable)** — each with a plain-sentence group
+explanation. Cards say what each source HOLDS by record-type name and show status in words ("Checked
+by hand · Last run 2026-07-07 09:39 · 3 files brought in · 0 errors"). "Run ingestion" is now "Check
+now" (editor copy aligned). `GET /repositories` gained `linked_types` + `paper_index_count`.
+
+### Honesty decisions
+No "last searched" timestamps for live systems — no tracking exists, and the screen never invents
+data (follow-on recorded). Paper locations with an empty index warn "No index yet" instead of looking
+fine.
+
+### Repo-hook lesson (second occurrence — now understood)
+A hook escapes non-ASCII in JSX TEXT to literal `\uXXXX`, which renders as-is (this is what produced
+the editor modal's `×` wart, and briefly a `● Connected` chip here). Rule: no non-ASCII
+glyphs in JSX text nodes — use CSS shapes (the status dot is a border-radius span) or JS string
+expressions.
+
+### Evidence
+`verify_sources_list` 3/3; **full suite 2086/2086, live untouched, exit 0.** Deployed; both halves of
+the live page screenshotted (`exchange/sources_live_redesigned.png`, `_2.png`).
+
+### Data note for Kevin (not code)
+The "Test Import Drop" source's own stored description still says "the ingestion pipeline is being
+built" — it shipped weeks ago. Editable via the source's Edit button.
+
+### The board
+Items 1–15 are now ALL closed or Kevin-deferred. Remaining: MRR hub §14.3 (Kevin-deferred) ·
+follow-ons (Mass-Redaction hand-off, legal task screens, chat-agent model upgrade, v3 collapse,
+search-activity tracking) · pre-production hardening · Kevin's testing/demo list · the go-live flip ·
+§6.2 glosses · §2.6/§8.3 stamping.
