@@ -7051,3 +7051,46 @@ changed — nothing to deploy.
 #9 routing cutover and #10 legal gate shipped today). Remaining open: Kevin's testing/demo list, the
 go-live flip, §6.2 stage glosses, §2.6/§8.3 page stamping, erpSettlement 'none'-mode note, and Tier 3
 (MRR intake §6 is the next real intake build, design-decided but gated on Kevin's MRR-hub sequencing).
+
+---
+
+## 2026-08-13 (e) — item 12: MRR item-by-item intake, the last missing intake piece (`7cce079`)
+
+### What was actually missing
+Spec §13's decided intake contract — "AI proposes, a human decides" (detect-and-propose →
+validate-each → "anything else?") — was two-thirds structural already: the wizard's per-item loop IS
+validate-each, Submit-or-Continue IS the anything-else, and >1 item ⇒ MRR shipped with parent/child.
+The gap was **detect-and-propose**: a citizen writing "the police report, the 911 call, and any emails
+about it" in ONE message got one muddled item. The agent's prompt said one-record-at-a-time but had no
+behavior for a description that mixes several record types.
+
+### Built (prompt-only; loaded the claude-api skill first per its trigger rule)
+`SYSTEM_PROMPT_SPLIT_CANVAS` gains a DETECT AND PROPOSE block: never work a multi-type description as
+one item, never split silently — list each type back as a numbered item, confirm via
+`[[QUICK_REPLIES: Yes, work through them one at a time | No, I meant one record]]`, work the queue in
+order naming the next item at each hand-off; a date/location/person on one type is a DETAIL, not an
+item. Combined-vs-separate stays retired. No API-parameter changes.
+
+### Two-layer verification (model output is nondeterministic — the suite must not depend on it)
+1. **Prompt contract locked:** `verify_mrr_intake_prompt` 12/12 asserts the load-bearing clauses on the
+   newly exported `WIZARD_PROMPT` string — a silent prompt edit now goes red in the suite.
+2. **Live probes against the REAL deployed agent** (`/api/public/chat` writes NOTHING until Submit —
+   §0 — so probing live is data-safe; Anthropic credits confirmed working): 3-type description →
+   3-item proposal with the exact quick replies · single type + qualifiers → NOT split, normal refine
+   questions · accept path → starts item 1 ("Let's start with the police report…").
+
+### Evidence
+`verify_mrr_intake_prompt` 12/12; **full suite 2036/2036, live untouched, exit 0.** API deployed
+before probing (health 200).
+
+### Observation recorded, not acted on
+The portal chat agent runs `claude-sonnet-4-5` (a legacy-but-active model). A model upgrade is a
+worthwhile future slice but needs its own verification pass over the whole agent behavior — not a
+ride-along on a prompt change.
+
+### Where this leaves the board
+Intake is DONE: portal spec §7 lists no pending intake builds. Today's five slices: task_events FK,
+routing cutover (#9), legal-redaction gate (#10), fee-choice verification lock (#6), MRR intake (#12).
+Open: Kevin's testing/demo list, the go-live flip, §6.2 stage glosses, §2.6/§8.3 page stamping, and
+Tier 3's big remaining items (MRR hub §14.3 — deferred by Kevin; health scoring #13; taxonomy variants
+#14; sources redesign #15).
