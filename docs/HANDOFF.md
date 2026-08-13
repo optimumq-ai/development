@@ -7245,3 +7245,49 @@ Items 1–15 are now ALL closed or Kevin-deferred. Remaining: MRR hub §14.3 (Ke
 follow-ons (Mass-Redaction hand-off, legal task screens, chat-agent model upgrade, v3 collapse,
 search-activity tracking) · pre-production hardening · Kevin's testing/demo list · the go-live flip ·
 §6.2 glosses · §2.6/§8.3 stamping.
+
+## 2026-08-13 (j) — MRR hub slice: hub verified BUILT; HIGH PRIORITY flag shipped; latent auth bug fixed (`1df974a`)
+
+### What the slice turned into (verify-before-building, again)
+"MRR hub" (§14.3) was already BUILT by BW6 — `verify_bw6_mrr` 75/75 covers it. Reconciliation of
+§14/CLAUDE.md landed earlier as `2875219`. Kevin chose the one genuinely unbuilt piece
+(AskUserQuestion): **the HIGH PRIORITY flag + AI watch report (§14.4 item 6)**. The five Draft-5 §3
+residual design questions stay parked with Kevin.
+
+### What shipped
+- **Flag**: `POST /api/mrr/:id/priority` (`{on:bool}`), gated by `manages()` — the Request Manager
+  (hub-task holder) or oversight. Writes `requests.high_priority/_set_by/_set_at` on the PARENT only
+  and a `request_history` row (`HIGH_PRIORITY_SET`/`_CLEARED`). Children never carry it.
+- **Surfaces**: hub master header chip + Set/Clear button (manage-gated); overview row tag.
+- **Watch report**: `high_priority_mrrs` metric in the report engine + AI catalog — every flagged
+  open MRR, one row: items open · estimate readiness · respond-by date · who flagged it, soonest-due
+  first. `workload_health` also registered (item 13 follow-through).
+- **Latent bug found & fixed (real one)**: the JWT carries the user id as `sub`, but routes have
+  repeatedly written `req.user.id` — every such read in `mrr.js` was `undefined`, so
+  manager-by-task-holder and assignee gates never matched and "My MRRs" was empty for its own
+  manager. Masked in BW6 tests because oversight roles pass every gate; caught when the new harness
+  used a PLAIN user as manager. Fixed once in `middleware/auth.js` (alias `id = sub`).
+- **Second bug caught by a live check**: the report queried a stored `request_clocks.due_date` —
+  no such column exists (due dates are COMPUTED from started_at + duration through tolls). The
+  `.catch` swallowed it, so the report showed no deadline and the soonest-due sort no-oped. Now goes
+  through `mrrHub.parentClocks` — the same computation the hub master renders — and the harness
+  asserts the respond-by date (C1b).
+
+### Evidence
+`verify_mrr_priority` 15/15 (submit → wrap → flag gated/recorded → both surfaces → report with
+readiness + respond-by → oversight clear → world restored). Full suite green, live untouched.
+Live screenshot: `exchange/mrr_priority_live.png` (request 2026-000005, flagged by Kerri).
+
+### LIVE DEMO DATA STILL IN PLACE (deliberate — Kevin wrapping session to view it)
+Demo MRR **2026-000005** (parent `e9c0f8dd-28e6-470a-941a-0116d55ed75f`, requestor
+mkhargrove+hubdemo@gmail.com) is still live and flagged HIGH PRIORITY. One of its three children
+(`3ec53d63-…`, item -1 "Complaints") was already deleted by a mistaken purge that used a stale id, so
+the family is INCONSISTENT — purge it before any demo: delete workflow_decisions / notifications /
+fee_estimates / clock_tolls+request_clocks / request_history / tasks for the family ids (incl. the
+gone child's id — its tasks/history may be orphaned), then children, then parent; verify zero
+orphans. task_events cascade via the new FK.
+
+### Spec ownership (RESOLVED in-session)
+`docs/SPEC_reporting_ai_help.md` was root-owned; Kevin chowned it to `optimumq` during wrap-up.
+The spec now documents the full metric catalog and strikes both its Known Gaps (health dashboard,
+high-priority MRR report) as BUILT — included in `1df974a`.
