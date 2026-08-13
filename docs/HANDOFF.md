@@ -6888,3 +6888,40 @@ rerun) — don't run the suite and a frontend build simultaneously.
 Full-suite runtime is growing (~46 harnesses); Kevin's testing/demo list; the go-live flip; deferred:
 health scoring #13, the budget brain, per-record-type budget UI, parent budget roll-up, historical pause
 subtraction.
+
+---
+
+## 2026-08-13 (a) — task_events orphan debris: source closed with an FK, live cleaned (`661a87e`)
+
+### The slice (Kevin picked from the session-start options)
+The (i) handoff recorded ~74 pre-existing orphaned `task_events` live — bookmark rows whose tasks were
+purged with their test/smoke requests, "a cleanup pass candidate, maybe with a task_id FK." Both halves
+done: `fk_task_events_task_id -> tasks(id) ON DELETE CASCADE`, added via the same guarded-DO-block
+pattern as `fk_tasks_request_id`, with the orphans deleted in the same block (one-time backfill —
+otherwise the ALTER itself would fail at boot). Not a new deletion policy: tasks are never deleted by any
+production path (they finish as `done`), so this extends the already-decided request->tasks purge cascade
+one level down. request -> tasks -> bookmarks is now ONE chain; purge scripts no longer need hand-sweeps
+(`purge_test_requests` keeps its two task_events rules as belt-and-braces, expected to delete 0).
+
+### The FK caught its first offender before it ever reached live
+First full-suite run: "1 harness did not complete." **`verify_request_timeline` fabricated bookmark rows
+for tasks that never existed** — its own comment relied on "no FK on task_events." Exactly the write the
+FK exists to refuse. Fixed: the harness creates real task rows, then clears the trigger's wall-clock
+bookmarks before laying down its pinned trail (the AFTER-INSERT trigger stamps now(), which would pollute
+the pinned timeline). A grep confirmed no other harness or src path inserts task_events directly.
+
+### Process note (self-inflicted, worth remembering)
+The first suite run was piped through `tail`, which (a) lied about the exit code and (b) discarded all
+but the last 25 lines — so WHICH harness died was unrecoverable and cost a full rerun. The standing
+frontend-build rule generalizes: never pipe a verdict-bearing command through tail; redirect to a file.
+
+### Evidence
+`verify_task_events_fk` 9/9 (constraint + cascade chain incl. bystander no-over-delete + orphan-insert
+refusal + zero orphans at both ends); **full suite 1984/1984, live untouched, exit 0**. Applied live via
+API restart: `task_events` 88 -> 14 (the 74 orphans removed, legit rows intact), zero orphans by task_id
+AND by request_id, constraint present, health 200.
+
+### Open (unchanged)
+Kevin's testing/demo list; the go-live flip; §6.2 stage glosses; §2.6/§8.3 page stamping; the
+erpSettlement 'none'-mode actualCost note; Tier 2 backlog (#6 fee-choice intake, #9 role catalog, #10
+legal review wiring).
