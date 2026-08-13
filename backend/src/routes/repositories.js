@@ -57,6 +57,14 @@ router.get('/catalog', requireAuth, function(req, res){ res.json({ catalog: cata
 router.get('/', requireAuth, async function(req, res){
   var rows = await all('SELECT * FROM record_repositories ORDER BY sort_order, name');
   rows.forEach(function(r){ try { r.config = r.config ? JSON.parse(r.config) : {}; } catch(e){ r.config = {}; } });
+  // Sources redesign (#15): every card says what the source HOLDS and, for paper, how big its
+  // index is — two grouped queries, not per-row lookups.
+  var links = await all("SELECT rr.repository_id, rt.name FROM record_type_repositories rr JOIN record_types rt ON rt.id = rr.record_type_id WHERE rt.status = 'active' ORDER BY rt.name");
+  var byRepo = {};
+  links.forEach(function(l){ (byRepo[l.repository_id] = byRepo[l.repository_id] || []).push(l.name); });
+  var paper = await all('SELECT repository_id, COUNT(*)::int AS n FROM paper_index_items GROUP BY repository_id');
+  var paperBy = {}; paper.forEach(function(p){ paperBy[p.repository_id] = Number(p.n); });
+  rows.forEach(function(r){ r.linked_types = byRepo[r.id] || []; r.paper_index_count = paperBy[r.id] || 0; });
   res.json({ repositories: rows });
 });
 

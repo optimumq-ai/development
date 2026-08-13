@@ -29,6 +29,8 @@ export default function SourcesConfig() {
     setLoading(true);
     try {
       var sr = await api.get('/repositories'); setSources(sr.data.repositories);
+      // #15: watched-folder cards show their last run without a click — load status up front.
+      (sr.data.repositories || []).filter(function(s){ return s.connector_type === 'import'; }).forEach(function(s){ loadIngestStatus(s.id); });
       var cr = await api.get('/repositories/catalog'); setCatalog(cr.data.catalog);
       try { var tr = await api.get('/redaction-templates'); setTemplates((tr.data && tr.data.templates) || []); } catch(e){}
       try { var stf = await api.get('/staff'); setStaff((stf.data && stf.data.staff) || []); } catch(e){}
@@ -169,7 +171,7 @@ export default function SourcesConfig() {
           <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'4px' }}>{meta.description}</div>
           {d.connector_type==='import' ? (
             <div style={{ background:'#FFFBEB', border:'1px solid #FDE68A', borderRadius:'8px', padding:'9px 12px', marginTop:'8px', fontSize:'12px', color:'#92400E', lineHeight:'1.5' }}>
-              <strong>Import source.</strong> Place files in the drop folder, then use <strong>Run ingestion</strong> on this source (in the list) to bring them in &mdash; each file is copied in, its text extracted, and indexed. Re-running picks up only new files; the source folder is never modified.
+              <strong>Import source.</strong> Place files in the drop folder, then use <strong>Check now</strong> on this source (in the list) to bring them in &mdash; each file is copied in, its text extracted, and indexed. Re-running picks up only new files; the source folder is never modified.
             </div>
           ) : null}
         </div>
@@ -312,30 +314,68 @@ export default function SourcesConfig() {
       loadIngestStatus(s.id);
     } catch(e){ setIngest(function(p){ var n=Object.assign({},p); n[s.id]={busy:false, msg:'Ingestion failed to run.', ok:false}; return n; }); }
   }
+  // SOURCES REDESIGN (#15, approved by Kevin 2026-08-13 from the before/after mockups). Every card
+  // answers "what does the system do with this place" in a sentence, says what it HOLDS, and shows
+  // status as words. Same data, same buttons \u2014 only the presentation changed.
+  function dotChip(label){
+    return (
+      <span style={Object.assign({}, badge('#E6F4EC','#17803D'), { display:'inline-flex', alignItems:'center', gap:'5px' })}>
+        <span style={{ width:'7px', height:'7px', borderRadius:'50%', background:'#17803D', display:'inline-block' }} />{label}
+      </span>
+    );
+  }
+  function statusChip(s){
+    if (s.status !== 'active') return <span style={badge('#F3F4F6','#6B7280')}>Inactive</span>;
+    if (s.connector_type === 'import') {
+      var sch = (s.config && s.config.schedule) || 'manual';
+      return dotChip(sch === 'daily' ? 'Checked nightly' : (sch === 'watch' ? 'Watching for new files' : 'Checked by hand'));
+    }
+    if (s.connector_type === 'paper-index') {
+      return s.paper_index_count > 0
+        ? <span style={badge('#F0F2F5','#5B6B7A')}>{s.paper_index_count.toLocaleString()} entries indexed</span>
+        : <span style={badge('#FBEFD7','#C77A0A')}>No index yet</span>;
+    }
+    return dotChip('Connected');
+  }
+  function holdsLine(s){
+    var names = s.linked_types || [];
+    if (!names.length) return null;
+    var shown = names.slice(0, 3).join(', ');
+    var more = names.length - 3;
+    return (
+      <div style={{ fontSize:'12.5px', color:'#5B6B7A', marginTop:'6px' }}>
+        {s.connector_type === 'import' ? 'Feeds: ' : 'Holds: '}
+        <span style={{ color:'#374151', fontWeight:'600' }}>{shown}</span>
+        {more > 0 ? ' + ' + more + ' more record type' + (more > 1 ? 's' : '') : ''}
+      </div>
+    );
+  }
   function renderSourceRow(s){
     var meta = typeMeta(s.connector_type);
+    var ig = ingest[s.id] || {};
     return (
-      <div key={s.id} style={{ display:'flex', alignItems:'center', gap:'14px', background:'white', border:'1px solid #E5E7EB', borderRadius:'10px', padding:'12px 16px' }}>
+      <div key={s.id} style={{ display:'flex', alignItems:'flex-start', gap:'16px', background:'white', border:'1px solid #E5E7EB', borderRadius:'12px', padding:'15px 18px' }}>
         <div style={{ flex:1, minWidth:0 }}>
-          <div style={{ display:'flex', alignItems:'center', gap:'8px', flexWrap:'wrap' }}>
-            <span style={{ fontWeight:'700', fontSize:'14px', color:'#111' }}>{s.name}</span>
-            {(meta.capabilities||[]).indexOf('scan')>=0 ? <span style={badge('#ECFDF5','#065F46')}>Scannable</span> : null}
-            {(meta.capabilities||[]).indexOf('search')>=0 ? <span style={badge('#EFF6FF','#1E40AF')}>Searchable</span> : null}
-            {s.connector_type==='import' ? ((s.config && s.config.schedule==='daily') ? <span style={badge('#EEF2FF','#4338CA')}>Import &middot; scheduled</span> : <span style={badge('#F3F4F6','#6B7280')}>Import &middot; single</span>) : null}
-            {s.status!=='active' ? <span style={badge('#F3F4F6','#6B7280')}>Inactive</span> : null}
-          </div>
-          <div style={{ fontSize:'12px', color:'#9CA3AF', marginTop:'2px' }}>{meta.label}</div>
-          {s.description ? <div style={{ fontSize:'12px', color:'#6B7280', marginTop:'4px', lineHeight:'1.4' }}>{s.description}</div> : null}
+          <div style={{ fontWeight:'700', fontSize:'15px', color:'#111' }}>{s.name}</div>
+          <div style={{ fontSize:'13px', color:'#4B5563', marginTop:'3px', lineHeight:'1.4' }}>{s.description || meta.description || meta.label}</div>
+          {holdsLine(s)}
         </div>
-        {s.connector_type==='paper-index' ? <button onClick={function(){ openPaperImport(s); }} style={btnGhostSm}>Import index</button> : null}
-        {s.connector_type==='import' ? (function(){ var ig=ingest[s.id]||{}; return (
-          <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'2px' }}>
-            <button onClick={function(){ runIngestNow(s); }} disabled={ig.busy} style={btnGhostSm}>{ig.busy?'Running...':'Run ingestion'}</button>
-            {ig.msg ? <span style={{ fontSize:'11px', color: ig.ok?'#065F46':'#DC2626' }}>{ig.msg}</span> : (ig.status ? <span style={{ fontSize:'11px', color:'#9CA3AF' }}>{ig.status.ingested} ingested{ig.status.lastRun?(' \u00b7 '+String(ig.status.lastRun).slice(0,10)):''}</span> : null)}
+        <div style={{ display:'flex', flexDirection:'column', alignItems:'flex-end', gap:'7px', minWidth:'215px' }}>
+          {statusChip(s)}
+          {s.connector_type === 'import' ? (
+            ig.msg ? <span style={{ fontSize:'11.5px', color: ig.ok ? '#17803D' : '#DC2626' }}>{ig.msg}</span>
+              : (ig.status ? <span style={{ fontSize:'11.5px', color:'#8A97A5' }}>
+                  {ig.status.lastRun ? 'Last run ' + String(ig.status.lastRun).slice(0,16).replace('T',' ') + ' \u00b7 ' : ''}
+                  {ig.status.ingested} file{ig.status.ingested === 1 ? '' : 's'} brought in{ig.status.errors ? ' \u00b7 ' + ig.status.errors + ' error' + (ig.status.errors > 1 ? 's' : '') : ' \u00b7 0 errors'}
+                </span> : null)
+          ) : null}
+          <div style={{ display:'flex', gap:'6px' }}>
+            {s.connector_type === 'import' ? <button onClick={function(){ runIngestNow(s); }} disabled={ig.busy} style={Object.assign({},btnGhostSm,{background:'#EBF3FB',color:'#1F4E79'})}>{ig.busy ? 'Checking\u2026' : 'Check now'}</button> : null}
+            {s.connector_type === 'paper-index' ? <button onClick={function(){ openPaperImport(s); }} style={Object.assign({},btnGhostSm,{background:'#EBF3FB',color:'#1F4E79'})}>{s.paper_index_count > 0 ? 'Update index' : 'Import index'}</button> : null}
+            <button onClick={function(){ openEdit(s); }} style={btnGhostSm}>Edit</button>
+            <button onClick={function(){ del(s); }} style={Object.assign({},btnGhostSm,{color:'#DC2626'})}>Delete</button>
           </div>
-        ); })() : null}
-        <button onClick={function(){ openEdit(s); }} style={btnGhostSm}>Edit</button>
-        <button onClick={function(){ del(s); }} style={Object.assign({},btnGhostSm,{color:'#DC2626'})}>Delete</button>
+        </div>
       </div>
     );
   }
@@ -363,22 +403,40 @@ export default function SourcesConfig() {
         {ai ? renderAiPanel() : null}
         {paperImport ? renderPaperImport() : null}
       </div>
-      {loading ? <div style={{ color:'#9CA3AF', fontSize:'14px' }}>Loading sources...</div> : (
-        <div>
-          <div style={{ marginBottom:'26px' }}>
-            {sectionHeader('Digital record connectors', 'Live links to systems and document stores - searched and scanned automatically. Add one from the connector library, or let AI configure it for you.', '+ Add connector', openCreate, (!editor && !ai && !paperImport))}
-            <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
-              {sources.filter(function(s){ return s.connector_type !== 'paper-index'; }).length===0 ? <div style={{ color:'#9CA3AF', fontSize:'14px', padding:'6px 0' }}>No digital connectors yet.</div> : sources.filter(function(s){ return s.connector_type !== 'paper-index'; }).map(renderSourceRow)}
+      {loading ? <div style={{ color:'#9CA3AF', fontSize:'14px' }}>Loading sources...</div> : (function(){
+        var searched = sources.filter(function(s){ return ['import','paper-index','email'].indexOf(s.connector_type) < 0; });
+        var watched  = sources.filter(function(s){ return s.connector_type === 'import'; });
+        var counted  = sources.filter(function(s){ return s.connector_type === 'email'; });
+        var paper    = sources.filter(function(s){ return s.connector_type === 'paper-index'; });
+        var canAdd = (!editor && !ai && !paperImport);
+        function group(title, subtitle, list, addLabel, addFn, empty){
+          if (!list.length && !addFn) return null;
+          return (
+            <div style={{ marginBottom:'26px' }}>
+              {sectionHeader(title + (list.length ? '' : ''), subtitle, addLabel, addFn, addFn ? canAdd : false)}
+              <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
+                {list.length === 0 ? <div style={{ color:'#9CA3AF', fontSize:'14px', padding:'6px 0' }}>{empty}</div> : list.map(renderSourceRow)}
+              </div>
             </div>
-          </div>
+          );
+        }
+        return (
           <div>
-            {sectionHeader('Paper / physical records locations', 'One entry per place the city keeps paper records (a records center, an offsite vault, a department file room). Import an index of what is stored there; a search returns the physical location of a record.', '+ Add paper location', openCreatePaper, (!editor && !ai && !paperImport))}
-            <div style={{ display:'flex', flexDirection:'column', gap:'10px' }}>
-              {sources.filter(function(s){ return s.connector_type === 'paper-index'; }).length===0 ? <div style={{ color:'#9CA3AF', fontSize:'14px', padding:'6px 0' }}>No paper records locations yet - add one for each place the city stores paper records.</div> : sources.filter(function(s){ return s.connector_type === 'paper-index'; }).map(renderSourceRow)}
-            </div>
+            {group('Searched the moment someone asks',
+              'Connected systems the portal and staff search instantly. If it’s in here, a citizen’s search can find it right away. Add one from the connector library, or let AI configure it for you.',
+              searched, '+ Add connector', openCreate, 'No connected systems yet.')}
+            {group('Watched folders — files brought in on a schedule',
+              'The system checks these folders, copies new files in (originals are never touched), and routes them through redaction toward the public library.',
+              watched, null, null, null)}
+            {group('Counted only — never opened',
+              'For privacy, the system only ever reports HOW MANY items match — never contents, subjects, or names. Staff review happens before anything is released.',
+              counted, null, null, null)}
+            {group('Paper & physical — findable, not fetchable',
+              'Places where the city keeps physical records. The system can say WHERE a record is (building, room, box) so staff can go pull it — it can’t retrieve the paper itself.',
+              paper, '+ Add paper location', openCreatePaper, 'No paper records locations yet — add one for each place the city stores paper records.')}
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 }
