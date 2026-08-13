@@ -7340,3 +7340,39 @@ chat-agent model upgrade · v3 collapse · search-activity tracking. Plus pre-pr
 Kevin's testing/demo, go-live flip, §6.2 glosses, §2.6/§8.3 stamping. BACKLOG's mass-redaction TODO
 still holds: manager email alert on held/mismatch · Deep Scan · batch via fresh upload ·
 record-type filtering of batch candidates.
+
+## 2026-08-13 (m) — "legal task screens": verified ALREADY BUILT; three stale records corrected
+
+### Verification-first, fourth time it's paid for a slice
+Kevin picked the "legal task screens" follow-on. It traces to item 10's note ("Dedicated legal task
+screens remain NOT BUILT") and SPEC_tasks_roles_mrr_fees §7's two `[NOT BUILT]` tags — all three
+predate what's on disk:
+- **legal_review** has had a DEDICATED screen since 2026-07-19 (ac): LegalReviewTaskPage at
+  `/legal-review/:taskId` — assertion evidence trail, AG-vs-internal toll banner derived from the
+  assertion (not the stage row), three outcomes, required note, cancelled-task guard, `legal`
+  time-capture mode (`available: true` since the same day). Built, and verified end-to-end in the
+  running UI, in the (ac) session itself.
+- **legal_redaction** opens the full redaction WORKSTATION (`/redaction/:taskId`), which is
+  explicitly legal-aware: "Legal (advanced) redaction" header, the `legal` disposition's mandatory
+  second-reviewer gate, send-for-legal-review hand-off, `legal_redaction` time-capture mode. One
+  workstation for the redaction family is the design — legal redaction is the same work at a higher
+  review bar, rendered from the job's disposition.
+- Reachability is HARNESS-LOCKED (the lesson that built this screen): verify_legal_review §H fails
+  if a resolvable type lacks a TASK_SCREEN entry. Suite ran 2115/2115 green earlier today.
+
+### Corrected (docs only, no code)
+SPEC_tasks_roles_mrr_fees §7 (both tags now describe the built screens) · BUILD_PRIORITY item 10
+(strikethrough + pointer). No build, no restart needed.
+
+### Observations recorded, NOT acted on
+- Time-capture UIS still has `mrr: available: false` — MrrActivityTaskPage exists since BW6, so that
+  row may now be wireable. MRR scope, its own slice.
+- The genuinely OPEN legal item is §14's "legal hours in the estimate" (Kevin's 2026-07-15 sketch;
+  needs a routing/task-spawn design pass before build). THAT is the real successor to this follow-on
+  if legal work is to continue.
+
+### The board
+Follow-on list shrinks again: legal task screens DONE (was already done). Remaining follow-ons:
+chat-agent model upgrade · v3 collapse · search-activity tracking. Plus §14 legal-hours-in-estimate
+(open design), pre-production hardening, Kevin's testing/demo, go-live flip, §6.2 glosses,
+§2.6/§8.3 stamping.
