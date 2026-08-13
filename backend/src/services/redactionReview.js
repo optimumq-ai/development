@@ -45,20 +45,13 @@ async function spawnReviewTask(job, ctx) {
   var isLegal = job.disposition === 'legal';
   var teamId = isLegal ? null : (reqRow && reqRow.department_id) || null; // legal = office-level; elevated = team
   var taskRouting = require('./taskRouting'); // lazy require avoids any load-order coupling
-  // ELEVATED REVIEW: `redaction_qa` if the team has actually been granted it, else the legacy
-  // REDACTION_WORKER role (2026-07-19, brief §3.5). `redaction_qa` was excluded from ROUTABLE_TASK_TYPES, so
-  // it was pinned to legacy routing forever while its Legal sibling used the v3 model — and reviewing
-  // someone else's redaction resolved to the SAME token as doing one, conflating "can redact" with "can
-  // review another's redaction".
-  //
-  // Choosing the token at SPAWN time is what makes the cutover safe. Granting a person `redaction_qa` now
-  // takes effect; granting nobody changes nothing, so this cannot strand the mandatory second review —
-  // which, if it stranded, would block release of every Elevated redaction.
-  var role = isLegal
-    ? 'legal_redaction'
-    : ((await taskRouting.hasSeededType('redaction_qa', teamId)) ? 'redaction_qa' : 'REDACTION_WORKER');
+  // ELEVATED REVIEW: the spawn-time token pick (`redaction_qa` if the team has been granted it, else the
+  // legacy REDACTION_WORKER role — 2026-07-19, brief §3.5) moved INTO createTask when item 9 generalized
+  // it to every legacy-routed type (2026-08-13), so this spawner only overrides for the Legal path.
+  // Granting a person `redaction_qa` takes effect; granting nobody changes nothing, so this cannot strand
+  // the mandatory second review — which, if it stranded, would block release of every Elevated redaction.
   return await taskRouting.createTask({
-    requestId: job.request_id, type: 'redaction_qa', roleRequired: role, teamId: teamId,
+    requestId: job.request_id, type: 'redaction_qa', roleRequired: isLegal ? 'legal_redaction' : null, teamId: teamId,
     title: (isLegal ? 'Legal review before release' : 'Review redaction before release'),
     createdBy: ctx.actor || 'system'
   });

@@ -302,6 +302,17 @@ function requiredRoleFor(opts) {
 async function createTask(opts) {
   var id = 't-' + uuidv4().substring(0, 8);
   var role = requiredRoleFor(opts);
+  // V3 SPAWN-TIME TOKEN SWITCH (D4 §8, item 9 — the routing-side cutover). When the catalog points a
+  // type at a LEGACY permission role but this (team, type) is seeded in user_task_types, the task
+  // carries its own type key instead. This has to happen HERE, in the one spawn path, because the two
+  // eligibility readers treat the tag differently: eligibleUsers() translates legacy names via
+  // ROLE_TO_TYPE, but POOL_ELIGIBILITY_SQL matches role_required against the user's grants VERBATIM —
+  // so a legacy-tagged task on a seeded team would be LISTED to legacy-role holders while claim()
+  // consulted the v3 grants: the pool and the claim guard disagreeing, the exact class §3.5 fixed.
+  // An explicit opts.roleRequired (legal overrides, redaction_qa's reviewer pick) is always respected.
+  if (!opts.roleRequired && role !== opts.type && ROUTABLE_TASK_TYPES.indexOf(opts.type) !== -1) {
+    if (await hasSeededType(opts.type, opts.teamId || null)) role = opts.type;
+  }
   // WHY the task exists, when the answer is not "the stage said so" (BW2). A trigger-spawned type records
   // its trigger key(s) here; everything else leaves it NULL and reads exactly as it always has.
   // An EMPTY array is stored as `[]`, not collapsed to NULL: "raised with no trigger" (a city running

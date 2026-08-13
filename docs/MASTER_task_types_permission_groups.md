@@ -28,6 +28,13 @@ A "task type" is one kind of human stop in request processing. Two flavours (des
 | `release_review` | Release Review | *(task-type key)* | **ORO Supervisor** *(suggested default — ratified 2026-08-11; role is city-configurable)* | Spawned by the auto-release pipeline's gate branch when the pre-send review policy setting is ON. Assignment excludes the completer of the request's most recent flow task (two-eyes, BW2, ratified narrow 2026-08-11) | catalog `[BUILT 2026-07-29 BW2]`; spawner `[BUILT 2026-07-30 BW5]`; screens `[BUILT 2026-08-11 BW8]` — task screen + power mode, `verify_bw8_release_review` 27 assertions |
 | ~~`commercial_rate`~~ | Commercial-Rate Approval | `FINANCE` (target) | **ORO Finance** | trigger `purpose='commercial'` | ✅ **DELETED FROM THE CATALOG 2026-07-19** (`ff32305`, brief §5.4). Was `[DEFERRED]` with the trigger unwired — so it was offerable in the per-person picker and produced a **permanently empty pool**. The design below stands; re-add the key *with* the code that spawns it |
 
+> **`[revised 2026-08-13, item 9 cutover]` The "Code role today" column is now HISTORY for the four
+> legacy-routed types:** routing runs on the v3 per-person subset everywhere it was legacy — every legacy
+> holder was mirror-granted the equivalent task types (1:1, behavior-preserving; `seed_task_type_grants.js`
+> via the real staff API), and `createTask` tags a seeded (team, type) with its own type key at spawn (the
+> switch `redaction_qa`'s spawner carried alone, made central). Permission roles remain as endpoint
+> capability gates only. `verify_routing_cutover` 17/17. See SPEC_tasks_roles_mrr_fees §8.
+>
 > **`[revised 2026-07-29, BW2]` `ROUTABLE_TASK_TYPES` is now eleven** — the eight below plus `intake_review`,
 > `mrr_management` and `release_review` (SPEC_processing_ui §8). The first two ship WITH their spawners in
 > BW2, so the "an entry here is a promise the router can deliver that type" rule holds. `release_review` is
