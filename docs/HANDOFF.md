@@ -6925,3 +6925,53 @@ AND by request_id, constraint present, health 200.
 Kevin's testing/demo list; the go-live flip; §6.2 stage glosses; §2.6/§8.3 page stamping; the
 erpSettlement 'none'-mode actualCost note; Tier 2 backlog (#6 fee-choice intake, #9 role catalog, #10
 legal review wiring).
+
+---
+
+## 2026-08-13 (b) — item 9 finished: routing runs on ONE catalog (`2f8d8bb`)
+
+### What "role catalog reconciliation" turned out to mean
+Verification first (the dashboard lesson): item 9's second half — FEE_WAIVER_APPROVER→FINANCE + the
+financial-authority reconciliation — was BUILT 2026-07-15 (`verify_role_reconciliation` 15/15), and the
+full auth/routing one-catalog collapse is a deliberate v3-era deferral (spec §8). The REMAINING substance:
+task routing itself still ran on legacy permission-role tags (`FEE_MANAGER`, `SEARCH_AND_TRIAGE`,
+`REDACTION_WORKER`, `FINANCE`) with the v3 per-person subset (`user_task_types`) seeded for almost
+nothing (ONE grant live). The cutover mechanism existed (per-(team,type) seeding, `hasSeededType`) but
+only `redaction_qa`'s spawner ever used it.
+
+### The trap the audit caught BEFORE building
+The two eligibility readers treat the role tag differently: `eligibleUsers()` TRANSLATES legacy names
+onto the v3 model when seeded, but `POOL_ELIGIBILITY_SQL` matches `role_required` against grants
+VERBATIM. So "just seed the grants" — the naive reading of the slice — would have made the pool list and
+the claim guard disagree (§3.5 class: work offered to people who cannot take it). The switch and the
+seed only work together, which is why they shipped together.
+
+### Built
+1. **Spawn-time token switch, central** — `createTask` tags a legacy-mapped type with its own type key
+   when the (team, type) is seeded. `redactionReview`'s private copy of the switch removed (it now only
+   overrides for the legal path); explicit `roleRequired` always respected.
+2. **`src/db/seed_task_type_grants.js`** — one-time 1:1 mirror of legacy holders into grants, THROUGH
+   `PATCH /api/staff/:id/task-types` as SYSTEM_ADMIN (real path, replace-semantics honoured by unioning
+   with existing grants). Dry-run default; re-run is a no-op. REDACTION_WORKER maps to redaction AND
+   redaction_qa because that is what holding it already meant.
+3. Docs: spec §7/§8 (the §7 "rename" flags dissolve — the eligibility token IS the task type),
+   MASTER doc, BUILD_PRIORITY item 9 struck.
+
+### Suite hygiene lesson (cost one full-suite rerun)
+First full run: `verify_qa_routing` 18/20 — MY harness had left mirror grants in the shared test DB, and
+qa_routing §C legitimately asserts the UNSEEDED fixture. Harnesses that mutate global state must leave
+the world as found: `verify_routing_cutover` §E now deletes its tasks and grants and asserts the fixture
+is unseeded again.
+
+### Evidence
+`verify_routing_cutover` 18/18; **full suite 2002/2002, live untouched, exit 0.** Applied live through
+the deployed API: dry-run plan eyeballed (staff→doer set; supers/admins→full set; Tom Jones kept his
+pre-existing routing_review), then --apply → 21 users, 92 grants. Read-only live check: **all 33
+(team,type) pairs set-equal legacy vs v3** — nobody gained or lost work. Narrowing anyone's subset is
+now a deliberate Staff Management act, exactly where Kevin wants that control.
+
+### Open
+Kevin's testing/demo list; go-live flip; §6.2 stage glosses; §2.6/§8.3 page stamping; erpSettlement
+'none'-mode actualCost note; Tier 2: #6 fee-choice intake, #10 legal review wiring. The legacy routing
+fallback in `eligibleUsers` stays for in-flight tagged tasks + approval-module routed_task role targets
+(REQUEST_MANAGER / DENIAL_AND_LEGAL / ESCALATION_HANDLER) — retiring it is the v3-era collapse.
