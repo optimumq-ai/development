@@ -21,7 +21,14 @@ function num(x){ x = Number(x); return isFinite(x) ? x : 0; }
 function nowStr(){ return new Date().toISOString().replace('T',' ').slice(0,19); }
 
 async function getRow(recordTypeId){
-  return await db.get('SELECT * FROM record_type_estimate_profiles WHERE record_type_id = ?', [recordTypeId]);
+  var row = await db.get('SELECT * FROM record_type_estimate_profiles WHERE record_type_id = ?', [recordTypeId]);
+  if (row) return row;
+  // VARIANT INHERITANCE (#14): a variant without its own profile prices like its parent bucket —
+  // read-time fallback, so seeding a variant's own profile later needs no migration. Writes are
+  // untouched: learning/seeding always lands on the id it was called with.
+  var rt = await db.get('SELECT parent_record_type_id AS pid FROM record_types WHERE id = ?', [recordTypeId]);
+  if (rt && rt.pid) return await db.get('SELECT * FROM record_type_estimate_profiles WHERE record_type_id = ?', [rt.pid]);
+  return null;
 }
 
 // Per-driver {mean,std,cv,n} computed from the Welford stats.

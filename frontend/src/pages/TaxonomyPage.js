@@ -189,6 +189,17 @@ export default function TaxonomyPage() {
           {cats.map(function(cat) {
             var catTypes = shown.filter(function(t){ return t.category_id === cat.id; });
             if (catTypes.length === 0) return null;
+            // TAXONOMY VARIANTS (#14): variants ride directly under their bucket. A variant whose
+            // bucket is filtered out (search matched only the child) still shows, styled as a variant.
+            var kidsOf = {};
+            catTypes.forEach(function(t){ if (t.parent_record_type_id) { (kidsOf[t.parent_record_type_id] = kidsOf[t.parent_record_type_id] || []).push(t); } });
+            var ordered = [];
+            catTypes.forEach(function(t){
+              if (t.parent_record_type_id && catTypes.some(function(p){ return p.id === t.parent_record_type_id; })) return;
+              ordered.push(t);
+              (kidsOf[t.id] || []).forEach(function(k){ ordered.push(k); });
+            });
+            catTypes = ordered;
             var isCollapsed = collapsed[cat.id];
             var owner = ownerFor(cat.id);
             return (
@@ -209,10 +220,16 @@ export default function TaxonomyPage() {
                   <div style={{ borderTop: '1px solid #F3F4F6' }}>
                     {catTypes.map(function(t) {
                       var av = AVAIL[t.public_availability] || { label: t.public_availability, bg: '#F3F4F6', fg: '#6B7280' };
+                      var isVariant = !!t.parent_record_type_id;
+                      var kidCount = (kidsOf[t.id] || []).length;
+                      var parentName = isVariant ? (types.filter(function(p){ return p.id === t.parent_record_type_id; })[0] || {}).name : null;
                       return (
-                        <div key={t.id} style={{ padding: '14px 20px', borderBottom: '1px solid #F9FAFB' }}>
+                        <div key={t.id} style={{ padding: '14px 20px', borderBottom: '1px solid #F9FAFB',
+                          ...(isVariant ? { paddingLeft: '38px', borderLeft: '4px solid #C9D6E2', background: '#FAFCFE' } : {}) }}>
+                          {isVariant ? <div style={{ fontSize: '10.5px', letterSpacing: '.07em', color: '#6B7280', fontWeight: '700', marginBottom: '2px' }}>VARIANT{parentName ? ' OF ' + parentName.toUpperCase() : ''}</div> : null}
                           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '12px' }}>
-                            <div style={{ fontWeight: '600', fontSize: '14px', color: '#111' }}>{t.name}</div>
+                            <div style={{ fontWeight: '600', fontSize: '14px', color: '#111' }}>{t.name}
+                              {kidCount ? <span style={{ marginLeft: '8px' }}>{pill('#1F4E79', '#FFFFFF', 'Bucket · ' + kidCount + ' variant' + (kidCount > 1 ? 's' : ''))}</span> : null}</div>
                             <div style={{ display: 'flex', gap: '6px', flexShrink: 0, flexWrap: 'wrap', justifyContent: 'flex-end' }}>
                               {t.auto_release_eligible === 1 ? pill('#E1EFFE', '#1E429F', 'Auto-release') : null}
                               {pill(av.bg, av.fg, av.label)}
@@ -242,7 +259,7 @@ export default function TaxonomyPage() {
           {shown.length === 0 ? <div style={{ padding: '48px', textAlign: 'center', color: '#9CA3AF' }}>No record types match your search or filter.</div> : null}
         </div>
       )}
-      {editor ? <RecordTypeEditor mode={editor.mode} initial={editor.initial} categories={cats} onClose={function(){ setEditor(null); }} onSaved={function(){ setEditor(null); load(); }} /> : null}
+      {editor ? <RecordTypeEditor mode={editor.mode} initial={editor.initial} categories={cats} allTypes={types} onClose={function(){ setEditor(null); }} onSaved={function(){ setEditor(null); load(); }} /> : null}
     </div>
   );
 }

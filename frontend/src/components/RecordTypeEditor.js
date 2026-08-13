@@ -11,6 +11,7 @@ export default function RecordTypeEditor(props) {
   var init = props.initial || {};
   var [f, setF] = useState({
     category_id: init.category_id || (props.categories[0] && props.categories[0].id) || '',
+    parent_record_type_id: init.parent_record_type_id || '',
     name: init.name || '',
     code: init.code || '',
     intent: init.intent || '',
@@ -67,6 +68,7 @@ export default function RecordTypeEditor(props) {
     setSaving(true); setErr('');
     var payload = {
       category_id: f.category_id, name: f.name.trim(), intent: f.intent,
+      parent_record_type_id: f.parent_record_type_id || null,
       expected_content: f.expected_content, typical_request_reason: f.typical_request_reason,
       public_availability: f.public_availability, auto_release_eligible: f.auto_release_eligible, auto_publish: f.auto_publish, mappable: f.mappable,
       legal_redaction_required: f.legal_redaction_required,
@@ -114,8 +116,18 @@ export default function RecordTypeEditor(props) {
           <h2 style={{ fontSize: '18px', fontWeight: '700', margin: 0 }}>{props.mode === 'create' ? 'New record type' : 'Edit record type'}</h2>
           <button onClick={props.onClose} style={{ border: 'none', background: 'none', fontSize: '22px', color: '#9CA3AF', cursor: 'pointer', lineHeight: 1 }}>\u00d7</button>
         </div>
-        <label style={lab}>Category</label>
-        <select value={f.category_id} onChange={function(e){ set('category_id', e.target.value); }} style={inp}>
+        <label style={lab}>Parent type <span style={{ fontWeight: 400, color: '#9CA3AF' }}>· optional — makes this a variant</span></label>
+        <div style={{ fontSize: '11px', color: '#9CA3AF', marginBottom: '4px', marginTop: '-2px' }}>
+          A variant is a more specific kind of its parent (an electrical permit is a kind of building permit).
+          It uses the parent's category, routing, time budgets, cost settings and redaction settings unless you set its own here.
+        </div>
+        <select value={f.parent_record_type_id} onChange={function(e){ set('parent_record_type_id', e.target.value); }} style={inp}>
+          <option value="">- None (a standalone type) -</option>
+          {(props.allTypes || []).filter(function(t){ return !t.parent_record_type_id && t.id !== init.id; })
+            .map(function(t){ return <option key={t.id} value={t.id}>{t.name}</option>; })}
+        </select>
+        <label style={lab}>Category{f.parent_record_type_id ? <span style={{ fontWeight: 400, color: '#9CA3AF' }}> · follows the parent's category</span> : null}</label>
+        <select value={f.category_id} disabled={!!f.parent_record_type_id} onChange={function(e){ set('category_id', e.target.value); }} style={inp}>
           {props.categories.map(function(c){ return <option key={c.id} value={c.id}>{c.name}</option>; })}
         </select>
         <label style={lab}>Owning City Department</label>

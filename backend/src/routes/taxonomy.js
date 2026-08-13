@@ -120,24 +120,47 @@ router.get('/record-types/:id', requireAuth, async function(req, res) {
   res.json(rt);
 });
 
+// TAXONOMY VARIANTS (#14): a record type may name a parent, becoming a VARIANT of that bucket.
+// One level only, no self-reference, and a bucket with variants cannot itself become a variant.
+// A variant always sits in its parent's category — aligned here, not trusted from the client.
+// Returns: undefined (field untouched) · null (explicit clear) · the parent row.
+async function resolveParent(b, selfId) {
+  if (b.parent_record_type_id === undefined) return undefined;
+  if (!b.parent_record_type_id) return null;
+  var p = await get('SELECT id, category_id, parent_record_type_id FROM record_types WHERE id = ?', [b.parent_record_type_id]);
+  if (!p) throw new Error('Parent record type not found');
+  if (selfId && p.id === selfId) throw new Error('A record type cannot be its own parent');
+  if (p.parent_record_type_id) throw new Error('That type is itself a variant — variants go one level deep, so pick its parent instead');
+  if (selfId) {
+    var kid = await get('SELECT id FROM record_types WHERE parent_record_type_id = ? LIMIT 1', [selfId]);
+    if (kid) throw new Error('This type has variants of its own — a bucket cannot also become a variant');
+  }
+  return p;
+}
+
 router.post('/record-types', requireAuth, async function(req, res) {
   var b = req.body;
   var name = (b.name || '').trim();
   var code = (b.code || '').trim();
-  if (!b.category_id || !name || !code) return res.status(400).json({ error: 'category_id, name and code are required' });
+  if (!b.category_id && !b.parent_record_type_id) return res.status(400).json({ error: 'category_id, name and code are required' });
+  if (!name || !code) return res.status(400).json({ error: 'category_id, name and code are required' });
+  var parent;
+  try { parent = await resolveParent(b, null); } catch (pe) { return res.status(422).json({ error: pe.message }); }
+  if (parent) b.category_id = parent.category_id; // a variant lives in its parent's category
   var cat = await get('SELECT id FROM categories WHERE id = ?', [b.category_id]);
   if (!cat) return res.status(400).json({ error: 'category_id does not exist' });
   var dup = await get('SELECT id FROM record_types WHERE code = ?', [code]);
   if (dup) return res.status(400).json({ error: 'A record type with that code already exists' });
   var id = nid('rt');
-  var cols = 'id, category_id, name, code, description, intent, expected_content, typical_request_reason, synonyms, disambiguators, keywords, identifying_facets, formats, is_structured_data, public_availability, auto_release_eligible, redaction_profile_id, fee_estimate_low, fee_estimate_high, fee_estimate_note, is_canonical, status, source, confidence, sort_order, fulfillment_method, medium, legal_redaction_required';
-  var ph = '?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?';
+  var cols = 'id, category_id, name, code, description, intent, expected_content, typical_request_reason, synonyms, disambiguators, keywords, identifying_facets, formats, is_structured_data, public_availability, auto_release_eligible, redaction_profile_id, fee_estimate_low, fee_estimate_high, fee_estimate_note, is_canonical, status, source, confidence, sort_order, fulfillment_method, medium, legal_redaction_required, parent_record_type_id';
+  var ph = '?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?';
   var vals = [id, b.category_id, name, code, b.description || null, b.intent || null, b.expected_content || null, b.typical_request_reason || null,
     packArray(b.synonyms) || '[]', packArray(b.disambiguators) || '[]', packArray(b.keywords) || '[]', packArray(b.identifying_facets) || '[]', packArray(b.formats) || '[]',
     b.is_structured_data ? 1 : 0, b.public_availability || 'review_required', b.auto_release_eligible ? 1 : 0, b.redaction_profile_id || null,
     b.fee_estimate_low || 0, b.fee_estimate_high || 0, b.fee_estimate_note || null, b.is_canonical ? 1 : 0,
     b.status || 'active', b.source || 'manual', b.confidence !== undefined ? b.confidence : null, b.sort_order || 100,
-    b.fulfillment_method || 'electronic_search', b.medium || 'electronic', b.legal_redaction_required ? 1 : 0];
+    b.fulfillment_method || 'electronic_search', b.medium || 'electronic', b.legal_redaction_required ? 1 : 0,
+    parent ? parent.id : null];
   await run('INSERT INTO record_types (' + cols + ') VALUES (' + ph + ')', vals);
   await audit('record_type', id, 'create', req, { name: name, code: code, source: b.source || 'manual' });
   embedIndex.bg(embedIndex.reindexRecordType(id), 'rt-create ' + id);
@@ -150,6 +173,14 @@ router.patch('/record-types/:id', requireAuth, async function(req, res) {
   var b = req.body;
   var fields = ['category_id','name','code','description','intent','expected_content','typical_request_reason','public_availability','redaction_profile_id','fee_estimate_note','status','source','confidence','sort_order','fee_estimate_low','fee_estimate_high','fulfillment_method','medium','auto_publish','mappable'];
   var sets = [], params = [];
+  // #14 — parent changes are validated, never blind-set; a variant follows its parent's category.
+  try {
+    var parent = await resolveParent(b, rt.id);
+    if (parent !== undefined) {
+      sets.push('parent_record_type_id = ?'); params.push(parent ? parent.id : null);
+      if (parent) { b.category_id = parent.category_id; }
+    }
+  } catch (pe) { return res.status(422).json({ error: pe.message }); }
   fields.forEach(function(f) { if (b[f] !== undefined) { sets.push(f + ' = ?'); params.push(b[f]); } });
   ARRAY_FIELDS.forEach(function(f) { if (b[f] !== undefined) { sets.push(f + ' = ?'); params.push(packArray(b[f])); } });
   BOOL_FIELDS.forEach(function(f) { if (b[f] !== undefined) { sets.push(f + ' = ?'); params.push(b[f] ? 1 : 0); } });
@@ -165,6 +196,11 @@ router.patch('/record-types/:id', requireAuth, async function(req, res) {
 router.delete('/record-types/:id', requireAuth, async function(req, res) {
   var rt = await get('SELECT id FROM record_types WHERE id = ?', [req.params.id]);
   if (!rt) return res.status(404).json({ error: 'Record type not found' });
+  // #14 — deleting a bucket would orphan its variants' inheritance; refuse in words.
+  var kids = await get('SELECT count(*)::int AS n FROM record_types WHERE parent_record_type_id = ?', [req.params.id]);
+  if (kids && Number(kids.n) > 0) {
+    return res.status(422).json({ error: 'This type has ' + kids.n + ' variant' + (Number(kids.n) === 1 ? '' : 's') + ' — remove or reassign them first.' });
+  }
   await run('DELETE FROM record_type_departments WHERE record_type_id = ?', [req.params.id]);
   await run('DELETE FROM record_type_repositories WHERE record_type_id = ?', [req.params.id]);
   await run('DELETE FROM record_types WHERE id = ?', [req.params.id]);

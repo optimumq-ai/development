@@ -516,8 +516,12 @@ async function requestNeedsLegalRedaction(requestId, reqRow) {
   // (a bare call used to silently skip the director-escalation branch).
   if (!reqRow) reqRow = await get('SELECT legal_flag FROM requests WHERE id = ?', [requestId]);
   if (reqRow && Number(reqRow.legal_flag) === 1) return true;
+  // Variant inheritance (#14): a parent bucket's legal-redaction flag binds every variant under it —
+  // a legal gate never loosens silently at a more specific level.
   var rt = await get(
-    'SELECT rt.legal_redaction_required AS lrr FROM requests r JOIN record_types rt ON rt.id = r.record_type_id WHERE r.id = ?',
+    'SELECT (CASE WHEN rt.legal_redaction_required = 1 OR pt.legal_redaction_required = 1 THEN 1 ELSE 0 END) AS lrr ' +
+    'FROM requests r JOIN record_types rt ON rt.id = r.record_type_id ' +
+    'LEFT JOIN record_types pt ON pt.id = rt.parent_record_type_id WHERE r.id = ?',
     [requestId]);
   if (rt && Number(rt.lrr) === 1) return true;
   var d = await get("SELECT flags FROM workflow_decisions WHERE request_id = ? AND flags IS NOT NULL ORDER BY created_at DESC LIMIT 1", [requestId]);

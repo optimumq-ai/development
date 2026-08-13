@@ -1026,6 +1026,15 @@ ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS geocoded_at TEXT;
 ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS geocode_source TEXT;
 ALTER TABLE record_types ADD COLUMN IF NOT EXISTS mappable INTEGER DEFAULT 1;
 
+-- TAXONOMY VARIANTS (item 14 slice 1 — model approved by Kevin 2026-08-13 from mockups). A record
+-- type may name a PARENT, making it a VARIANT of that bucket type (the building-permit sub-types
+-- problem). ONE level only — a parent cannot itself have a parent — enforced at the taxonomy routes.
+-- Behavioral attachments INHERIT parent-ward when the variant hasn't set its own: estimate profile,
+-- time budgets, legal_redaction_required (parent ON forces variants ON — a legal gate never loosens
+-- silently), owner/fulfiller routing, and redaction_profile_id when it gains a behavioral consumer.
+-- Descriptive fields (name, synonyms, intent, …) are always the variant's own — they define it.
+ALTER TABLE record_types ADD COLUMN IF NOT EXISTS parent_record_type_id TEXT;
+
 -- Legal-redaction gate at the RECORD-TYPE level (D4 §7, item 10). A city marks a record type whose
 -- redaction must ALWAYS be done by legal staff (internal-affairs files, personnel investigations, …).
 -- Deterministic, unlike the classifier's SENSITIVE flag — that is an AI judgment on the request TEXT and

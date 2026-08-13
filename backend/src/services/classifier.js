@@ -12,6 +12,18 @@ var TAXONOMY_CONFIDENCE = 70; // >= this on the record-type match => route by ta
 
 function parseArr(v) { try { var a = JSON.parse(v || '[]'); return Array.isArray(a) ? a : []; } catch (e) { return []; } }
 
+// The catalog the classifier matches against. Exported so the suite can assert the variant contract
+// without a model call. VARIANT INHERITANCE (#14): a variant with no routing rows of its own routes
+// like its parent bucket (COALESCE walks up), and `parent_name` lets the prompt show variants as
+// "Bucket — Variant" so the model picks the specific one only when the request supports it.
+async function catalogRows() {
+  return await all("SELECT rt.id, rt.code, rt.name, c.name AS category_name, rt.synonyms, rt.keywords, pt.name AS parent_name, " +
+    "COALESCE((SELECT department_id FROM record_type_departments WHERE record_type_id = rt.id AND role = 'owner' ORDER BY sort_order LIMIT 1), (SELECT department_id FROM record_type_departments WHERE record_type_id = rt.parent_record_type_id AND role = 'owner' ORDER BY sort_order LIMIT 1)) AS owner_department_id, " +
+    "COALESCE((SELECT department_id FROM record_type_departments WHERE record_type_id = rt.id AND role = 'fulfiller' ORDER BY sort_order LIMIT 1), (SELECT department_id FROM record_type_departments WHERE record_type_id = rt.parent_record_type_id AND role = 'fulfiller' ORDER BY sort_order LIMIT 1)) AS fulfiller_team_id " +
+    "FROM record_types rt LEFT JOIN categories c ON c.id = rt.category_id LEFT JOIN record_types pt ON pt.id = rt.parent_record_type_id " +
+    "WHERE rt.status = 'active' ORDER BY c.sort_order, rt.sort_order");
+}
+
 async function classifyAndRoute(description) {
   if (!description || description.trim().length < 10) throw new Error('Description too short to classify');
 
@@ -21,12 +33,13 @@ async function classifyAndRoute(description) {
   var deptById = {}; depts.forEach(function(d){ deptById[d.id] = d; });
   var teamById = {}; teams.forEach(function(t){ teamById[t.id] = t; });
 
-  var rts = await all("SELECT rt.id, rt.code, rt.name, c.name AS category_name, rt.synonyms, rt.keywords, (SELECT department_id FROM record_type_departments WHERE record_type_id = rt.id AND role = 'owner' ORDER BY sort_order LIMIT 1) AS owner_department_id, (SELECT department_id FROM record_type_departments WHERE record_type_id = rt.id AND role = 'fulfiller' ORDER BY sort_order LIMIT 1) AS fulfiller_team_id FROM record_types rt LEFT JOIN categories c ON c.id = rt.category_id WHERE rt.status = 'active' ORDER BY c.sort_order, rt.sort_order");
+  var rts = await catalogRows();
   var rtByCode = {}; rts.forEach(function(rt){ rtByCode[rt.code] = rt; });
 
   var taxoLines = rts.map(function(rt){
     var also = parseArr(rt.synonyms).concat(parseArr(rt.keywords)).slice(0, 8).join(', ');
-    return rt.code + ' | ' + rt.name + ' | ' + (rt.category_name || '') + (also ? ' | also called: ' + also : '');
+    var shown = (rt.parent_name ? rt.parent_name + ' — ' : '') + rt.name;
+    return rt.code + ' | ' + shown + ' | ' + (rt.category_name || '') + (also ? ' | also called: ' + also : '');
   }).join('\n');
   var deptList = depts.map(function(d){ return d.code + ': ' + d.name; }).join(', ');
   var agencyRow = await get('SELECT value FROM system_config WHERE key = ?', ['agency_name']);
@@ -34,7 +47,7 @@ async function classifyAndRoute(description) {
 
   var prompt = 'You are a public records classification assistant for ' + agency + '. Analyze the request and return ONLY a JSON object.\n\n'
     + 'Request: "' + description + '"\n\n'
-    + 'STEP 1 - Match to the agency record-type catalog below. Pick the ONE record type whose meaning best fits the request. Use the record type names and their "also called" terms together with your understanding of what the request is asking for. If nothing in the catalog is a reasonable fit, set record_type_code to null.\n\n'
+    + 'STEP 1 - Match to the agency record-type catalog below. Pick the ONE record type whose meaning best fits the request. Use the record type names and their "also called" terms together with your understanding of what the request is asking for. Some entries are variants of a broader type, shown as "Broader type — Variant": pick the variant when the request clearly indicates it, and the broader type when the request does not say which variant. If nothing in the catalog is a reasonable fit, set record_type_code to null.\n\n'
     + 'RECORD TYPE CATALOG (code | name | category | also called):\n' + taxoLines + '\n\n'
     + 'STEP 2 - Independently, using general knowledge of how a city is organized, say which department this request belongs to. If the request is off-topic, nonsensical, or too vague to place with any confidence, set department_code to null instead of guessing. Departments: ' + deptList + '\n\n'
     + 'Classifications: simple (single clean digital record, 5d), standard (1-3 items, 10d), complex (4+ items or complex, 20d), redaction_required (any redaction review needed, 30d).\n\n'
@@ -92,4 +105,4 @@ async function classifyAndRoute(description) {
   };
 }
 
-module.exports = { classifyAndRoute: classifyAndRoute, DEADLINE_DAYS: DEADLINE_DAYS, TAXONOMY_CONFIDENCE: TAXONOMY_CONFIDENCE };
+module.exports = { classifyAndRoute: classifyAndRoute, catalogRows: catalogRows, DEADLINE_DAYS: DEADLINE_DAYS, TAXONOMY_CONFIDENCE: TAXONOMY_CONFIDENCE };

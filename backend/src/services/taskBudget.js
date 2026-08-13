@@ -23,22 +23,33 @@ async function loadBudgetMap() {
   rows.forEach(function (b) { map[(b.record_type_id || '') + '|' + b.task_type] = Number(b.budget_days); });
   return map;
 }
-// budget days for a (record_type, task_type): prefer the specific row, fall back to the generic default.
-function lookup(map, recordTypeId, taskType) {
+// budget days for a (record_type, task_type): the specific row, else the PARENT bucket's row
+// (variant inheritance, #14), else the generic default.
+function lookup(map, recordTypeId, taskType, parentRecordTypeId) {
   var v = map[(recordTypeId || '') + '|' + taskType];
+  if (v == null && parentRecordTypeId) v = map[parentRecordTypeId + '|' + taskType];
   if (v == null) v = map['|' + taskType];
   return v == null ? null : v;
+}
+
+// id -> parent id for every variant (small — variants only). One query per forTasks call.
+async function loadParentMap() {
+  var rows = await all('SELECT id, parent_record_type_id FROM record_types WHERE parent_record_type_id IS NOT NULL');
+  var map = {};
+  rows.forEach(function (r) { map[r.id] = r.parent_record_type_id; });
+  return map;
 }
 
 // Attach a budget status to task rows (each with type, record_type_id) using the Slice-B timing map (taskId ->
 // timing) so budget and clock share one elapsed. One budgets query.
 async function forTasks(taskRows, timingMap) {
   var map = await loadBudgetMap();
+  var parents = await loadParentMap();
   var out = {};
   (taskRows || []).forEach(function (t) {
-    out[t.id] = statusFor(lookup(map, t.record_type_id, t.type), activeElapsed(timingMap && timingMap[t.id]));
+    out[t.id] = statusFor(lookup(map, t.record_type_id, t.type, parents[t.record_type_id]), activeElapsed(timingMap && timingMap[t.id]));
   });
   return out;
 }
 
-module.exports = { statusFor: statusFor, activeElapsed: activeElapsed, loadBudgetMap: loadBudgetMap, lookup: lookup, forTasks: forTasks };
+module.exports = { statusFor: statusFor, activeElapsed: activeElapsed, loadBudgetMap: loadBudgetMap, loadParentMap: loadParentMap, lookup: lookup, forTasks: forTasks };
