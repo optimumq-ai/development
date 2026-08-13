@@ -31,7 +31,7 @@ const ALL = [
   'verify_timecapture_config', 'verify_estimate_reconcile', 'verify_concurrent_tolls', 'verify_wrap_parent', 'verify_mrr_children',
   'verify_queue_parent_child', 'verify_legal_review', 'verify_rt_legal_gate', 'verify_fresh_install', 'verify_component_charged', 'verify_release_coverage', 'verify_revenue_allocation', 'verify_erp_line_items', 'verify_v1_retirement', 'verify_qa_routing', 'verify_nonpayment_scope',
   'verify_branch_profile', 'verify_clock_matrix', 'verify_approval_modules', 'verify_requestor_ledger', 'verify_identity_anchors',
-  'verify_bw2_catalog', 'verify_bw3_intake_review', 'verify_bw4_estimate', 'verify_bw5_close', 'verify_bw6_mrr', 'verify_external_links', 'verify_bw7_financial',
+  'verify_bw2_catalog', 'verify_bw3_intake_review', 'verify_bw4_estimate', 'verify_bw5_close', 'verify_bw6_mrr', 'verify_mrr_priority', 'verify_external_links', 'verify_bw7_financial',
   'verify_bw8_release_review', 'verify_bw9_golive', 'verify_bw9b_editors', 'verify_status_check',
   'verify_record_verification', 'verify_ops_dashboard', 'verify_health_scoring',
   'verify_e2e_tx', 'verify_e2e_oh',

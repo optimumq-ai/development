@@ -100,6 +100,14 @@ export default function MrrMasterPage() {
   }
   useEffect(load, [id]);
 
+  function togglePriority() {
+    var on = !(m.parent.highPriority && m.parent.highPriority.on);
+    setBusy(true); setMsg(null);
+    api.post('/mrr/' + id + '/priority', { on: on })
+      .then(function () { setBusy(false); load(); })
+      .catch(function (e) { setBusy(false); setMsg((e.response && e.response.data && e.response.data.error) || e.message); });
+  }
+
   function generateEstimate() {
     setBusy(true); setMsg(null);
     api.post('/mrr/' + id + '/generate-estimate', {})
@@ -127,6 +135,19 @@ export default function MrrMasterPage() {
         <div style={{ display: 'flex', gap: 14, alignItems: 'baseline', flexWrap: 'wrap' }}>
           <span style={{ fontWeight: 700, color: G.navy, fontSize: 14, fontFamily: C.mono }}>{p.requestNumber}</span>
           <span style={{ fontWeight: 700, color: G.navy, fontSize: 14 }}>{m.itemCount} items</span>
+          {/* HIGH PRIORITY (§14.4 item 6): the manager's watch flag. Set/clear is a recorded act; the
+              AI report "high-priority MRRs" lists every flagged request. */}
+          {p.highPriority && p.highPriority.on ? (
+            <span title={'Flagged by ' + (p.highPriority.setBy || 'staff') + (p.highPriority.setAt ? ' on ' + String(p.highPriority.setAt).slice(0, 10) : '')}
+              style={{ background: '#F9E4E4', color: '#B23A3A', fontWeight: 800, fontSize: 11.5, borderRadius: 12, padding: '3px 10px', letterSpacing: '.04em' }}>
+              HIGH PRIORITY</span>
+          ) : null}
+          {m.canManage ? (
+            <button onClick={togglePriority} disabled={busy}
+              style={{ border: '1px solid ' + G.line, background: 'white', color: (p.highPriority && p.highPriority.on) ? C.muted : '#B23A3A',
+                fontSize: 11, fontWeight: 700, borderRadius: 12, padding: '3px 10px', cursor: 'pointer' }}>
+              {(p.highPriority && p.highPriority.on) ? 'Clear priority' : 'Mark HIGH PRIORITY'}</button>
+          ) : null}
           <span style={kv}><b style={{ color: C.ink }}>{p.requestorName}</b> · {p.requestorEmail} ·
             delivery: {p.deliveryMethod || 'email'} · received {String(p.createdAt || '').slice(0, 10)}
             {p.submissionChannel ? ' (' + p.submissionChannel + ')' : ''}</span>

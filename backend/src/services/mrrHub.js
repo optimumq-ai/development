@@ -524,6 +524,8 @@ async function master(parentId) {
       requestorName: parent.requestor_name, requestorEmail: parent.requestor_email,
       requestorType: parent.requestor_type, deliveryMethod: parent.delivery_method,
       submissionChannel: parent.submission_channel, createdAt: parent.created_at,
+      // HIGH PRIORITY (§14.4 item 6) — a parent-level management fact; the AI report watches these.
+      highPriority: { on: Number(parent.high_priority) === 1, setBy: parent.high_priority_set_by || null, setAt: parent.high_priority_set_at || null },
       // READ, never recomputed. disposition.deriveParent owns this (§5.8).
       state: parent.status === 'closed' ? 'complete' : 'in_process',
       stateIsDerived: true,
@@ -598,6 +600,7 @@ async function overview(userId) {
     }
     rows.push({
       taskId: t.id, requestId: p.id, requestNumber: p.request_number,
+      highPriority: Number(p.high_priority) === 1,
       requestorName: p.requestor_name, description: p.description, descriptionShort: truncate(p.description, 90),
       itemCount: kids.length,
       openItems: kids.filter(function (k) { return k.status !== 'closed'; }).length,

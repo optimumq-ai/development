@@ -80,7 +80,8 @@ export default function MrrOverviewPage() {
               return (
                 <tr key={r.requestId} style={{ cursor: 'pointer' }} onClick={function () { nav('/mrr/' + r.taskId); }}>
                   <td style={td}>
-                    <div style={{ fontFamily: C.mono, fontWeight: 700, color: G.navy }}>{r.requestNumber}</div>
+                    <div style={{ fontFamily: C.mono, fontWeight: 700, color: G.navy }}>{r.requestNumber}
+                      {r.highPriority ? <span style={{ marginLeft: 6, background: '#F9E4E4', color: '#B23A3A', fontWeight: 800, fontSize: 10, borderRadius: 10, padding: '2px 7px', letterSpacing: '.04em', verticalAlign: 1 }}>HIGH PRIORITY</span> : null}</div>
                     <div style={kv}>{r.descriptionShort}</div>
                   </td>
                   <td style={td}>{r.requestorName}</td>

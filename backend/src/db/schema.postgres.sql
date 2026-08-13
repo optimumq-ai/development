@@ -1026,6 +1026,14 @@ ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS geocoded_at TEXT;
 ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS geocode_source TEXT;
 ALTER TABLE record_types ADD COLUMN IF NOT EXISTS mappable INTEGER DEFAULT 1;
 
+-- HIGH PRIORITY on an MRR (§14.4 item 6 — the last unbuilt piece of Kevin's MRR list, built
+-- 2026-08-13). A PARENT-level management fact set by the Request Manager (or oversight) in the hub;
+-- children never carry it. Feeds the high_priority_mrrs AI report. set_by is a display name, the
+-- same audit pattern as time_budgets.updated_by.
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS high_priority INTEGER DEFAULT 0;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS high_priority_set_by TEXT;
+ALTER TABLE requests ADD COLUMN IF NOT EXISTS high_priority_set_at TEXT;
+
 -- TAXONOMY VARIANTS (item 14 slice 1 — model approved by Kevin 2026-08-13 from mockups). A record
 -- type may name a PARENT, making it a VARIANT of that bucket type (the building-permit sub-types
 -- problem). ONE level only — a parent cannot itself have a parent — enforced at the taxonomy routes.

@@ -2,7 +2,15 @@ const { verifyAccessToken } = require('../services/auth');
 function requireAuth(req, res, next) {
   const header = req.headers.authorization;
   if (!header || !header.startsWith('Bearer ')) return res.status(401).json({ error: 'Authentication required' });
-  try { req.user = verifyAccessToken(header.slice(7)); next(); }
+  try {
+    req.user = verifyAccessToken(header.slice(7));
+    // The JWT carries the user id as `sub` (JWT convention); routes have repeatedly written
+    // `req.user.id` expecting it (found 2026-08-13: every req.user.id in mrr.js was undefined, so
+    // manager-by-task-holder and assignee gates never matched and "My MRRs" was empty for its own
+    // manager — masked in tests because oversight roles pass every gate). Alias it once, here.
+    if (req.user && req.user.id == null) req.user.id = req.user.sub;
+    next();
+  }
   catch(e) { return res.status(401).json({ error: 'Invalid or expired token' }); }
 }
 function requireRole() {

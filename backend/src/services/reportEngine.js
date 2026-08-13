@@ -6,7 +6,7 @@
 var db = require('../db');
 
 // ---- catalog (the only things a report can reference) ----
-var METRICS = ['request_count', 'fee_revenue', 'overdue_count', 'avg_processing_days', 'compliance_rate', 'self_service_rate', 'workload_health'];
+var METRICS = ['request_count', 'fee_revenue', 'overdue_count', 'avg_processing_days', 'compliance_rate', 'self_service_rate', 'workload_health', 'high_priority_mrrs'];
 var GROUPS = { month: 'Month', department: 'Department', classification: 'Classification', status: 'Status', requestor: 'Requestor' };
 var TIME_PRESETS = ['all', 'ytd', 'this_month', 'last_month', 'last_7d', 'last_30d', 'last_60d', 'last_90d', 'last_12_months'];
 
@@ -80,6 +80,43 @@ async function runSpec(spec) {
   var metric = METRICS.indexOf(spec.metric) >= 0 ? spec.metric : 'request_count';
   var groupBy = GROUPS[spec.group_by] ? spec.group_by : null;
   var limit = Math.min(Math.max(parseInt(spec.limit, 10) || 0, 0), 50);
+
+  // --- high_priority_mrrs (§14.4 item 6): the watch report over every flagged MRR ---
+  // Point-in-time, grouped by nothing: each flagged, still-open MRR is one row with the facts a
+  // manager acts on — items open, estimate readiness, the statutory due date. Sorted soonest-due first.
+  if (metric === 'high_priority_mrrs') {
+    var HUBr = require('./mrrHub');
+    var flagged = await db.all(
+      "SELECT id, request_number, high_priority_set_by, high_priority_set_at FROM requests r " +
+      "WHERE r.high_priority = 1 AND r.status != 'closed' AND r.master_request_id IS NULL AND " + BASE_EXCL + " ORDER BY r.created_at");
+    var hpRows = [];
+    for (var hi = 0; hi < flagged.length; hi++) {
+      var hp = flagged[hi];
+      var hkids = await db.all("SELECT status FROM requests WHERE master_request_id = ?", [hp.id]);
+      var hready = await HUBr.readiness(hp.id).catch(function () { return null; });
+      // Due dates are COMPUTED (started_at + duration through tolls), never stored — go through
+      // the same parentClocks the hub master renders, so the report can never disagree with it.
+      var hclocks = await HUBr.parentClocks(hp.id);
+      var hprimary = hclocks.filter(function (c) { return c.isPrimary && c.dueDate; })[0] ||
+                     hclocks.filter(function (c) { return c.legalDeadline && c.dueDate; })[0] || null;
+      var hopen = hkids.filter(function (k) { return k.status !== 'closed'; }).length;
+      hpRows.push({
+        label: hp.request_number + ' — ' + hkids.length + ' item' + (hkids.length === 1 ? '' : 's') + ', ' + hopen + ' open' +
+          (hready ? ' · estimate data ' + hready.n + ' of ' + hready.m + ' ready' : '') +
+          (hprimary ? ' · respond by ' + String(hprimary.dueDate).slice(0, 10) : '') +
+          ' · flagged by ' + (hp.high_priority_set_by || 'staff'),
+        value: hopen,
+        _due: hprimary ? String(hprimary.dueDate) : '9999'
+      });
+    }
+    hpRows.sort(function (a, b) { return a._due < b._due ? -1 : 1; });
+    hpRows.forEach(function (rw) { delete rw._due; });
+    return { title: 'High-priority multi-record requests', viz: 'table', columns: ['Request', 'Open items'],
+      rows: hpRows,
+      note: hpRows.length
+        ? 'Every open multi-record request a Request Manager has marked HIGH PRIORITY, soonest statutory due date first. Snapshot of right now.'
+        : 'No open multi-record requests are marked HIGH PRIORITY right now.' };
+  }
 
   // --- workload_health (#13): the AI-reporting hook onto the dashboard's health scoring ---
   // A point-in-time snapshot off the SAME ops-summary read the dashboard uses, so a report can never

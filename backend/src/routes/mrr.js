@@ -82,6 +82,31 @@ router.get('/:id/master', requireAuth, async function (req, res) {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── HIGH PRIORITY (§14.4 item 6) — a management act by the MRR's manager (or oversight) ─────────
+// Parent-level fact; children never carry it. The set/clear is recorded in request_history with the
+// actor's name, and the high_priority_mrrs report watches every flagged MRR.
+router.post('/:id/priority', requireAuth, async function (req, res) {
+  try {
+    var r = await resolveParent(req.params.id);
+    if (!r.parentId) return res.status(404).json({ error: 'Master record not found.' });
+    var auth = await manages(req.user, r.parentId);
+    if (!auth.ok) {
+      return res.status(403).json({ error: 'Only this record\'s Request Manager' +
+        (auth.managerName ? ' (' + auth.managerName + ')' : '') + ' or an oversight role can change its priority.' });
+    }
+    var on = !!(req.body && req.body.on);
+    var who = await displayName(req.user.sub);
+    await run("UPDATE requests SET high_priority = ?, high_priority_set_by = ?, high_priority_set_at = to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'), updated_at = datetime('now') WHERE id = ?",
+      [on ? 1 : 0, who, r.parentId]);
+    await run('INSERT INTO request_history (id, request_id, actor_id, actor_name, action, notes) VALUES (?,?,?,?,?,?)',
+      ['h-' + Math.random().toString(36).slice(2, 10), r.parentId, req.user.sub, who,
+       on ? 'HIGH_PRIORITY_SET' : 'HIGH_PRIORITY_CLEARED',
+       on ? 'Marked HIGH PRIORITY — this request now appears in the high-priority watch report.' : 'High-priority flag cleared.']);
+    var p = await get('SELECT high_priority, high_priority_set_by, high_priority_set_at FROM requests WHERE id = ?', [r.parentId]);
+    res.json({ highPriority: { on: Number(p.high_priority) === 1, setBy: p.high_priority_set_by, setAt: p.high_priority_set_at } });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── THE CHILD RECORD ─────────────────────────────────────────────────────────────────────────────
 router.get('/item/:childId', requireAuth, async function (req, res) {
   try {
