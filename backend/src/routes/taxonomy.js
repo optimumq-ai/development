@@ -6,7 +6,7 @@ const { v4: uuidv4 } = require('uuid');
 const embedIndex = require('../services/embedIndex');
 
 var ARRAY_FIELDS = ['synonyms','disambiguators','keywords','identifying_facets','formats'];
-var BOOL_FIELDS = ['is_structured_data','auto_release_eligible','is_canonical'];
+var BOOL_FIELDS = ['is_structured_data','auto_release_eligible','is_canonical','legal_redaction_required'];
 
 function nid(prefix) { return prefix + '-' + uuidv4().substring(0, 8); }
 
@@ -130,14 +130,14 @@ router.post('/record-types', requireAuth, async function(req, res) {
   var dup = await get('SELECT id FROM record_types WHERE code = ?', [code]);
   if (dup) return res.status(400).json({ error: 'A record type with that code already exists' });
   var id = nid('rt');
-  var cols = 'id, category_id, name, code, description, intent, expected_content, typical_request_reason, synonyms, disambiguators, keywords, identifying_facets, formats, is_structured_data, public_availability, auto_release_eligible, redaction_profile_id, fee_estimate_low, fee_estimate_high, fee_estimate_note, is_canonical, status, source, confidence, sort_order, fulfillment_method, medium';
-  var ph = '?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?';
+  var cols = 'id, category_id, name, code, description, intent, expected_content, typical_request_reason, synonyms, disambiguators, keywords, identifying_facets, formats, is_structured_data, public_availability, auto_release_eligible, redaction_profile_id, fee_estimate_low, fee_estimate_high, fee_estimate_note, is_canonical, status, source, confidence, sort_order, fulfillment_method, medium, legal_redaction_required';
+  var ph = '?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?';
   var vals = [id, b.category_id, name, code, b.description || null, b.intent || null, b.expected_content || null, b.typical_request_reason || null,
     packArray(b.synonyms) || '[]', packArray(b.disambiguators) || '[]', packArray(b.keywords) || '[]', packArray(b.identifying_facets) || '[]', packArray(b.formats) || '[]',
     b.is_structured_data ? 1 : 0, b.public_availability || 'review_required', b.auto_release_eligible ? 1 : 0, b.redaction_profile_id || null,
     b.fee_estimate_low || 0, b.fee_estimate_high || 0, b.fee_estimate_note || null, b.is_canonical ? 1 : 0,
     b.status || 'active', b.source || 'manual', b.confidence !== undefined ? b.confidence : null, b.sort_order || 100,
-    b.fulfillment_method || 'electronic_search', b.medium || 'electronic'];
+    b.fulfillment_method || 'electronic_search', b.medium || 'electronic', b.legal_redaction_required ? 1 : 0];
   await run('INSERT INTO record_types (' + cols + ') VALUES (' + ph + ')', vals);
   await audit('record_type', id, 'create', req, { name: name, code: code, source: b.source || 'manual' });
   embedIndex.bg(embedIndex.reindexRecordType(id), 'rt-create ' + id);

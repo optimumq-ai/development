@@ -506,10 +506,20 @@ function taskFamily(ttype) {
 }
 var LEGAL_FLAG_VALUES = ['SENSITIVE', 'LEGAL_HOLD', 'ONGOING_INVESTIGATION'];
 
-// A request needs legal (advanced) redaction if a director escalated it (legal_flag) or the classifier
-// flagged it sensitive/legal-hold (workflow_decisions.flags, latest decision).
+// A request needs legal (advanced) redaction if a director escalated it (legal_flag), the city marked
+// its RECORD TYPE as always-legal (record_types.legal_redaction_required — the deterministic gate, D4 §7
+// item 10), or the classifier flagged it sensitive/legal-hold (workflow_decisions.flags, latest decision).
+// The record-type gate exists because the classifier flag is an AI judgment on the request TEXT: a city
+// that wants internal-affairs files legally redacted EVERY time cannot depend on it firing.
 async function requestNeedsLegalRedaction(requestId, reqRow) {
+  // reqRow is an optimization for callers that already hold the row — the answer must not DEPEND on it
+  // (a bare call used to silently skip the director-escalation branch).
+  if (!reqRow) reqRow = await get('SELECT legal_flag FROM requests WHERE id = ?', [requestId]);
   if (reqRow && Number(reqRow.legal_flag) === 1) return true;
+  var rt = await get(
+    'SELECT rt.legal_redaction_required AS lrr FROM requests r JOIN record_types rt ON rt.id = r.record_type_id WHERE r.id = ?',
+    [requestId]);
+  if (rt && Number(rt.lrr) === 1) return true;
   var d = await get("SELECT flags FROM workflow_decisions WHERE request_id = ? AND flags IS NOT NULL ORDER BY created_at DESC LIMIT 1", [requestId]);
   if (!d || !d.flags) return false;
   try { var arr = JSON.parse(d.flags); return Array.isArray(arr) && arr.some(function (f) { return LEGAL_FLAG_VALUES.indexOf(f) !== -1; }); }

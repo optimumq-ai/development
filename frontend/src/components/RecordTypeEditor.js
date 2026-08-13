@@ -20,6 +20,7 @@ export default function RecordTypeEditor(props) {
     auto_release_eligible: init.auto_release_eligible === 1,
     auto_publish: init.auto_publish === 1,
     mappable: init.mappable !== 0,
+    legal_redaction_required: init.legal_redaction_required === 1,
     is_structured_data: init.is_structured_data === 1,
     fulfillment_method: init.fulfillment_method || 'electronic_search',
     medium: init.medium || 'electronic',
@@ -68,6 +69,7 @@ export default function RecordTypeEditor(props) {
       category_id: f.category_id, name: f.name.trim(), intent: f.intent,
       expected_content: f.expected_content, typical_request_reason: f.typical_request_reason,
       public_availability: f.public_availability, auto_release_eligible: f.auto_release_eligible, auto_publish: f.auto_publish, mappable: f.mappable,
+      legal_redaction_required: f.legal_redaction_required,
       is_structured_data: f.is_structured_data, fulfillment_method: f.fulfillment_method, medium: f.medium, synonyms: strToArr(f.synonyms),
       disambiguators: strToArr(f.disambiguators), keywords: strToArr(f.keywords),
       identifying_facets: strToArr(f.identifying_facets), formats: strToArr(f.formats), status: f.status
@@ -149,7 +151,7 @@ export default function RecordTypeEditor(props) {
         <select value={f.public_availability} onChange={function(e){ set('public_availability', e.target.value); }} style={inp}>
           {AVAIL_OPTS.map(function(o){ return <option key={o} value={o}>{o}</option>; })}
         </select>
-        <div style={{ display: 'flex', gap: '20px', marginTop: '14px' }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '10px 20px', marginTop: '14px' }}>
           <label style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
             <input type="checkbox" checked={f.auto_release_eligible} onChange={function(e){ set('auto_release_eligible', e.target.checked); }} /> Auto-release eligible
           </label>
@@ -161,6 +163,9 @@ export default function RecordTypeEditor(props) {
           </label>
           <label style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }}>
             <input type="checkbox" checked={f.mappable} onChange={function(e){ set('mappable', e.target.checked); }} /> Show on public map
+          </label>
+          <label style={{ fontSize: '13px', color: '#374151', display: 'flex', alignItems: 'center', gap: '6px', cursor: 'pointer' }} title="Every request for this record type has its redaction done by the legal team, no matter what the request says.">
+            <input type="checkbox" checked={f.legal_redaction_required} onChange={function(e){ set('legal_redaction_required', e.target.checked); }} /> Legal redaction required
           </label>
         </div>
         <label style={lab}>Fulfillment method</label>

@@ -1025,6 +1025,13 @@ ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS geo_address TEXT;
 ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS geocoded_at TEXT;
 ALTER TABLE fulfilled_records ADD COLUMN IF NOT EXISTS geocode_source TEXT;
 ALTER TABLE record_types ADD COLUMN IF NOT EXISTS mappable INTEGER DEFAULT 1;
+
+-- Legal-redaction gate at the RECORD-TYPE level (D4 §7, item 10). A city marks a record type whose
+-- redaction must ALWAYS be done by legal staff (internal-affairs files, personnel investigations, …).
+-- Deterministic, unlike the classifier's SENSITIVE flag — that is an AI judgment on the request TEXT and
+-- may simply not fire. Read by taskRouting.requestNeedsLegalRedaction, so it escalates the redaction-stage
+-- task to legal_redaction AND resolves the redaction job's disposition to 'legal' through the same fact.
+ALTER TABLE record_types ADD COLUMN IF NOT EXISTS legal_redaction_required INTEGER DEFAULT 0;
 ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS test_notes TEXT;
 ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS test_by TEXT;
 ALTER TABLE onboarding_progress ADD COLUMN IF NOT EXISTS test_status TEXT;
