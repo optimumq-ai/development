@@ -6975,3 +6975,44 @@ Kevin's testing/demo list; go-live flip; §6.2 stage glosses; §2.6/§8.3 page s
 'none'-mode actualCost note; Tier 2: #6 fee-choice intake, #10 legal review wiring. The legacy routing
 fallback in `eligibleUsers` stays for in-flight tagged tasks + approval-module routed_task role targets
 (REQUEST_MANAGER / DENIAL_AND_LEGAL / ESCALATION_HANDLER) — retiring it is the v3-era collapse.
+
+---
+
+## 2026-08-13 (c) — item 10 closed: the legal-redaction gate cities can actually set (`dc88365`)
+
+### Verification first (again the right call)
+Item 10 = "Legal Review task wiring; Legal Redaction path for sensitive types". The wiring half was
+ALREADY BUILT (routing 2026-07-09; resolution through applyStageTransition with a required note —
+`verify_legal_review` 44/44). The spec's "record type sensitive=true (flag to verify)" verified as
+NONEXISTENT: no column, no reader. The real gap: legal redaction was reachable only by director
+escalation or the classifier's SENSITIVE/LEGAL_HOLD — an AI judgment on request TEXT. A city could not
+make "internal-affairs files are ALWAYS legally redacted" a rule; a blandly-worded request would land on
+a line redaction clerk.
+
+### Built (config-over-encoding: the city sets it, we don't guess)
+`record_types.legal_redaction_required` — a "Legal redaction required" checkbox in the record-type
+editor (create AND edit), read by `requestNeedsLegalRedaction` alongside the two existing triggers: the
+redaction stage escalates to `legal_redaction` (office-level) and the redaction job's disposition
+resolves `legal` from the same fact. Editor row got `flexWrap` so the fifth checkbox wraps instead of
+overflowing the 640px modal. Latent fix in passing: a bare `requestNeedsLegalRedaction(requestId)` call
+silently skipped the director-escalation branch (the check lived only on the caller-supplied row) — my
+harness's C3 caught it; the function now fetches what it needs.
+
+### Observations recorded, deliberately NOT acted on (scope)
+- The record-type CREATE route silently drops `auto_publish` and `mappable` (the editor sends them; the
+  INSERT ignores them). My new flag does carry through create. Cleanup-pass candidate.
+- The editor modal header renders literal `×` / `·` escape strings (pre-existing rendering
+  wart, visible in the screenshots). Cleanup-pass candidate.
+
+### Evidence
+`verify_rt_legal_gate` 11/11 (API round-trip incl. create; gate fires deterministically on bland text
+with NO classifier flag; unflagged untouched; director escalation unchanged; null record type safe;
+redaction family idempotency holds; world restored for later harnesses). **Full suite 2013/2013, live
+untouched, exit 0.** Deployed: API restarted (health 200), frontend rebuilt (build/index.html + nginx
+200), toggle verified rendering live (`exchange/rt_editor_legal_toggle.png`). Live DB: column present,
+**all 84 types default 0 — behavior changes only when a city flags a type.**
+
+### Open
+Kevin's testing/demo list; go-live flip; §6.2 stage glosses; §2.6/§8.3 page stamping; erpSettlement
+'none'-mode actualCost note; Tier 2 remaining: #6 fee-choice intake (needs design direction first),
+#7-adjacent cleanups above. Dedicated legal task screens still NOT BUILT (design-gated, v2 UI rule).
