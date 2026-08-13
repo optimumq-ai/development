@@ -50,7 +50,12 @@ router.get('/mine', requireAuth, async function (req, res) {
       est[i].paused = require('../services/taskPause').stateOf(est[i]);
     }
   } catch (e) { console.error('[tasks/mine pathHere]', e && e.message); }
-  res.json({ tasks: rows });
+  // WORKLOAD HEALTH (#13) — the personal composite: the same 1/2/4-point formula the dashboard uses,
+  // computed over only this person's tasks (paused and unbudgeted never count). The buckets ride along
+  // so the page can say WHY ("one task is 1 day over, one is 2 days over") instead of just a number.
+  var WH = require('../services/workloadHealth');
+  var myLate = WH.bucketsOf(rows, budget);
+  res.json({ tasks: rows, health: Object.assign(WH.healthOf(myLate), { late: myLate }) });
 });
 
 // ============================================================================================

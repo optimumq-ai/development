@@ -7,7 +7,7 @@ var reportEngine = require('./reportEngine');
 var SPEC_SCHEMA = [
   'Translate the question into a JSON report spec. Return ONLY the JSON object - no prose, no markdown fences.',
   '{',
-  '  "metric": one of [request_count, fee_revenue, overdue_count, avg_processing_days, compliance_rate, self_service_rate],',
+  '  "metric": one of [request_count, fee_revenue, overdue_count, avg_processing_days, compliance_rate, self_service_rate, workload_health],',
   '  "group_by": one of [month, department, classification, status, requestor] or null,',
   '  "time_range": { "preset": one of [all, ytd, this_month, last_month, last_7d, last_30d, last_60d, last_90d, last_12_months] },',
   '  "filters": { "status": "active|closed|all" (optional), "classification": "simple|standard|complex|redaction_required" (optional), "overdue": true (optional) },',
@@ -21,6 +21,7 @@ var SPEC_SCHEMA = [
   '- "by department", "by category" -> group_by department or classification (category maps to classification). viz bar.',
   '- fee_revenue by department or classification IS available. Each payment is split across the records it covers in proportion to their charged share, so the columns sum to the total. (This was refused before 2026-07-19, when there was no per-record price to split by.)',
   '- "top requestors / who submitted the most" -> metric request_count, group_by requestor, sort desc, limit (default 10), viz table.',
+  '- "workload health / team health / falling behind / tasks over budget / which team needs help" -> metric workload_health, viz table. It is a snapshot of right now: ignore group_by and time_range (budget lateness per team, not the legal deadline — "past deadline/overdue" alone stays overdue_count).',
   '- "this month vs last month" -> compare this_vs_last_month.',
   '- Map time phrases to the nearest preset (e.g. "past 60 days" -> last_60d, "year to date" -> ytd, "this month" -> this_month).',
   '- If the question cannot be answered from this catalog, return {"error":"<one short sentence saying what is not supported and suggest a rephrase>"}.'

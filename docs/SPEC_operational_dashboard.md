@@ -75,11 +75,30 @@ group by team, never name teams, so adding/deleting departments needs no dashboa
      labeled).
   6. **Generic** — today's KPI cards, the clerical default.
 
+## 2.5 Workload health scoring `[BUILT 2026-08-13 — #13 un-deferred by Kevin; formula + both mockup variants approved; verify_health_scoring 21/21]`
+The scoring layer over the §1 buckets (D4 §4's "exponential penalty per additional day late", expressed
+in the decided buckets). One pure module, `services/workloadHealth.js`, owns everything; four consumers
+compute from the same buckets so score and screen can never disagree.
+- **Points**: a task 1 day over budget = 1 · 2 days = 2 · more than 2 days = 4. Doubling per day means
+  one badly stuck task outweighs several slightly-late ones. Paused and unbudgeted tasks never score.
+- **Status** (fixed v1, refine from customer feedback): 0 = **On track** · 1–3 = **Needs attention** ·
+  4+ = **Falling behind** (wire values `on_track`/`needs_attention`/`falling_behind`; display names in
+  the frontend per the terminology rule). Bucket edges moved into `workloadHealth.bucketOf` so
+  ops-summary and the personal composite bucket identically by construction.
+- **Consumers**: (1) ops-summary — every node, team, and the totals carry `health {points, status}`;
+  (2) the dashboard — a **Health column** in Late-by-Team and Task Nodes panes + a new **Workload
+  health pane** (teams × task nodes heat grid, composite chip in its header; scopable; FIRST in the
+  org-wide and team-lead role defaults); (3) **My Tasks** — a personal composite chip
+  (`GET /tasks/mine` now returns `health` with its buckets so the page says WHY in plain words);
+  (4) the **AI reporting hook** — report metric `workload_health` (engine + report-agent catalog): a
+  per-team table off the same ops-summary read, snapshot-of-now, note explains the formula and
+  disclaims the legal clock.
+
 ## 3. Explicitly out of scope (recorded so they are choices)
-Health scores / exponential penalties (#13, still deferred) · the AI budget "brain" (Slice I, still
-deferred — the editor is its manual forerunner) · per-record-type budget UI · parent roll-up of budget
-variance (critical-path child; unblocked, separate slice) · historical pause interval subtraction ·
-Recent Requests in any form.
+~~Health scores / exponential penalties (#13)~~ **built 2026-08-13, §2.5** · the AI budget "brain"
+(Slice I, still deferred — the editor is its manual forerunner) · per-record-type budget UI · parent
+roll-up of budget variance (critical-path child; unblocked, separate slice) · historical pause interval
+subtraction · Recent Requests in any form · health-threshold configurability (fixed constants v1).
 
 ## 4. Tests
 Budget editor round-trip + role gate + validation refusals; paused exclusion (a paused over-budget task

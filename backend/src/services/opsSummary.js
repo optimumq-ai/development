@@ -18,9 +18,9 @@ var { all } = require('../db');
 var taskTiming = require('./taskTiming');
 var taskBudget = require('./taskBudget');
 
-var H24 = 86400000, H48 = 2 * 86400000;
-
-function bucketOf(overMs) { return overMs <= H24 ? 'd1' : (overMs <= H48 ? 'd2' : 'd2plus'); }
+// Bucket edges live in workloadHealth so the node grid and the My Tasks personal composite bucket
+// identically by construction (#13).
+var bucketOf = require('./workloadHealth').bucketOf;
 function emptyNode(taskType) {
   return { taskType: taskType, queued: 0, inProcess: 0, inReview: 0, paused: 0,
            late: { d1: 0, d2: 0, d2plus: 0 }, unbudgeted: 0 };
@@ -82,15 +82,23 @@ async function taskNodes(opts) {
     if (!teams[s.team_id]) teams[s.team_id] = { teamId: s.team_id === '_unassigned' ? null : s.team_id, teamName: s.team_name, nodes: {} };
   });
 
+  // WORKLOAD HEALTH (#13): score every node and composite every team from the SAME buckets the row
+  // displays, so the verdict can never disagree with the counts beside it.
+  var WH = require('./workloadHealth');
   function flatten(store) {
     return Object.keys(store).map(function (k) {
       var team = store[k];
+      var nodes = Object.keys(team.nodes).sort().map(function (tt) {
+        var n = team.nodes[tt];
+        n.health = WH.healthOf(n.late);
+        return n;
+      });
       return { teamId: team.teamId, teamName: team.teamName,
                stages: stagesByTeam[k] || {}, activeRequests: activeByTeam[k] || 0,
-               nodes: Object.keys(team.nodes).sort().map(function (tt) { return team.nodes[tt]; }) };
+               health: WH.compositeOf(nodes), nodes: nodes };
     }).sort(function (a, b) { return String(a.teamName).localeCompare(String(b.teamName)); });
   }
-  var totalsOut = flatten(totals)[0] || { teamName: 'All teams', nodes: [] };
+  var totalsOut = flatten(totals)[0] || { teamName: 'All teams', nodes: [], health: WH.compositeOf([]) };
   totalsOut.stages = stageTotals; totalsOut.activeRequests = activeTotal;
   return { teams: flatten(teams), totals: totalsOut };
 }

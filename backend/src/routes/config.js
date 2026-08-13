@@ -87,6 +87,8 @@ router.put('/time-budgets', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR',
 // everyone else → the generic KPI view. `scope` on a team pane is 'own' | 'all' (resolved to the
 // viewer's department client-side; panes group by team, never name teams).
 var PANE_LIBRARY = [
+  { key: 'health', label: 'Workload health', scopable: true,
+    description: 'One color per team and task type: green means nothing is over its time budget, amber means something is late but contained, red means work is badly stuck and someone should act today.' },
   { key: 'teamInProcess', label: 'Requests in Process', scopable: true,
     description: 'Stage counts for one team, or all teams.' },
   { key: 'taskNodes', label: 'Task Nodes — where the time is going', scopable: true,
@@ -104,8 +106,8 @@ function defaultPanes(roles, dept) {
   var r = roles || [];
   var orgWide = r.indexOf('DIRECTOR') >= 0 || r.indexOf('SYSTEM_ADMIN') >= 0;
   var teamLead = r.indexOf('SUPERVISOR') >= 0 || r.indexOf('DEPT_MANAGER') >= 0;
-  if (orgWide) return [{ key: 'lateByTeam' }, { key: 'finance' }, { key: 'taskNodes', scope: 'all' }, { key: 'statutory' }];
-  if (teamLead && dept) return [{ key: 'teamInProcess', scope: 'own' }, { key: 'taskNodes', scope: 'own' }, { key: 'statutory' }];
+  if (orgWide) return [{ key: 'health', scope: 'all' }, { key: 'lateByTeam' }, { key: 'finance' }, { key: 'taskNodes', scope: 'all' }, { key: 'statutory' }];
+  if (teamLead && dept) return [{ key: 'health', scope: 'own' }, { key: 'teamInProcess', scope: 'own' }, { key: 'taskNodes', scope: 'own' }, { key: 'statutory' }];
   return [{ key: 'generic' }, { key: 'statutory' }];
 }
 router.get('/dashboard-panes', requireAuth, async function (req, res) {

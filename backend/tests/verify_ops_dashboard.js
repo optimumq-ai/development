@@ -135,9 +135,10 @@ function agoStr(ms) { return new Date(Date.now() - ms).toISOString().slice(0, 19
 
     console.log('\n=== C. THE PANE LAYOUT ===');
     var supPanes = await req('GET', '/api/config/dashboard-panes', null, T_SUP);
-    ok('C1 a supervisor with a team defaults to team panes',
+    ok('C1 a supervisor with a team defaults to team panes, led by workload health (#13)',
       supPanes.status === 200 && supPanes.body.defaultsApplied === true &&
-      supPanes.body.panes[0].key === 'teamInProcess' && supPanes.body.panes[0].scope === 'own');
+      supPanes.body.panes[0].key === 'health' && supPanes.body.panes[0].scope === 'own' &&
+      supPanes.body.panes[1].key === 'teamInProcess' && supPanes.body.panes[1].scope === 'own');
     var dirPanes = await req('GET', '/api/config/dashboard-panes', null, T_DIR);
     ok('C2 an org-wide role defaults to the attention map and finance',
       dirPanes.body.panes.some(function (p) { return p.key === 'lateByTeam'; }) &&

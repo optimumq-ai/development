@@ -67,8 +67,8 @@ Owner-facing labels: **In Queue** (=`open` unclaimed / `assigned`) · **In Proce
 2. **Auto load-balancing toggle** — OFF → claim pool (first to claim owns) `[BUILT]`; ON → assign least-loaded person `[PARTIAL — leastLoaded primitive exists; toggle + workload formula NOT verified/built]`.
 Supervisors, managers, system admins: **excluded from automatic assignment**; manually assignable; assumed able to do lower-level tasks in their department. `[design; enforcement to verify]`
 
-## 4. Workload health scoring `[NOT BUILT]`
-Per-role R/Y/G from a formula of late-task count with an **exponential penalty per additional day late**. Composite score at top of My Tasks. Feeds AI reporting + a management dashboard (health per task node per team). A per-task **"time budget"** is an input (reintroduce — dropped from an earlier spec).
+## 4. Workload health scoring `[BUILT 2026-08-13 — the binding spec is SPEC_operational_dashboard.md §2.5; verify_health_scoring 21/21]`
+Per-scope R/Y/G from the exponential-penalty formula (1/2/4 points per lateness bucket), time budgets as the input, composite at the top of My Tasks, health per task node per team on the management dashboard, and the `workload_health` report metric as the AI-reporting hook. All four consumers compute from one pure module over the same buckets.
 
 ## 5. My Tasks page structure `[BUILT 2026-07-15 (slice 8a) — task-centric MyTasksPage; verified live]`
 One box **per task type** the user holds work in — a box appears **only if** the user has a task of that type (no empty boxes). Each box lists **Queued** (`assigned`) then **In Process** (`in_progress`) items; a **claim pool** section and a **notifications area** (same `/api/notifications` as the header bell) sit below. Sourced from `/tasks/mine` + `/tasks/pool` (not `/requests`), so request-independent tasks (null `request_id`, e.g. `review_auto_redaction`) now appear. Summary tiles are **deadline-derived** (Assigned / Overdue / Due ≤3d).

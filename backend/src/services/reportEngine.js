@@ -6,7 +6,7 @@
 var db = require('../db');
 
 // ---- catalog (the only things a report can reference) ----
-var METRICS = ['request_count', 'fee_revenue', 'overdue_count', 'avg_processing_days', 'compliance_rate', 'self_service_rate'];
+var METRICS = ['request_count', 'fee_revenue', 'overdue_count', 'avg_processing_days', 'compliance_rate', 'self_service_rate', 'workload_health'];
 var GROUPS = { month: 'Month', department: 'Department', classification: 'Classification', status: 'Status', requestor: 'Requestor' };
 var TIME_PRESETS = ['all', 'ytd', 'this_month', 'last_month', 'last_7d', 'last_30d', 'last_60d', 'last_90d', 'last_12_months'];
 
@@ -80,6 +80,32 @@ async function runSpec(spec) {
   var metric = METRICS.indexOf(spec.metric) >= 0 ? spec.metric : 'request_count';
   var groupBy = GROUPS[spec.group_by] ? spec.group_by : null;
   var limit = Math.min(Math.max(parseInt(spec.limit, 10) || 0, 0), 50);
+
+  // --- workload_health (#13): the AI-reporting hook onto the dashboard's health scoring ---
+  // A point-in-time snapshot off the SAME ops-summary read the dashboard uses, so a report can never
+  // disagree with the screen. Time ranges and groupings don't apply (it is "now", grouped by team).
+  if (metric === 'workload_health') {
+    var opsW = await require('./opsSummary').taskNodes({});
+    var WHr = require('./workloadHealth');
+    var LABELS = { on_track: 'On track', needs_attention: 'Needs attention', falling_behind: 'Falling behind' };
+    var whRows = opsW.teams.map(function (t) {
+      var l = t.nodes.reduce(function (acc, n) {
+        acc.d1 += n.late.d1; acc.d2 += n.late.d2; acc.d2plus += n.late.d2plus; return acc;
+      }, { d1: 0, d2: 0, d2plus: 0 });
+      var parts = [];
+      if (l.d1) parts.push(l.d1 + ' task' + (l.d1 > 1 ? 's' : '') + ' 1 day late');
+      if (l.d2) parts.push(l.d2 + ' 2 days late');
+      if (l.d2plus) parts.push(l.d2plus + ' more than 2 days late');
+      return { label: t.teamName + ' — ' + LABELS[t.health.status] + (parts.length ? ' (' + parts.join(', ') + ')' : ''),
+               value: t.health.points };
+    }).sort(function (a, b) { return b.value - a.value; });
+    var totW = opsW.totals.health || WHr.compositeOf([]);
+    return { title: 'Workload health by team', viz: 'table', columns: ['Team', 'Health points'],
+      rows: whRows,
+      note: 'All teams: ' + LABELS[totW.status] + ' at ' + totW.points + ' points. Points: a task 1 day over its ' +
+            'time budget = 1, 2 days = 2, more than 2 days = 4. 0 = on track, 1–3 = needs attention, 4+ = falling ' +
+            'behind. Snapshot of right now; tasks waiting on the requestor never count. Budget lateness, not the legal deadline.' };
+  }
 
   // --- self_service_rate: library (published) vs submitted requests ---
   if (metric === 'self_service_rate') {

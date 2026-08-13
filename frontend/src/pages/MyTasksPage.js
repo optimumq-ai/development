@@ -171,6 +171,7 @@ export default function MyTasksPage() {
   var store = useAuthStore();
   var canApprove = store.hasAnyRole('SYSTEM_ADMIN', 'DIRECTOR') || store.hasAnyPerm('FINANCE');
   var [mine, setMine] = useState([]);
+  var [myHealth, setMyHealth] = useState(null);
   var [pool, setPool] = useState([]);
   var [intake, setIntake] = useState([]);
   var [notes, setNotes] = useState([]);
@@ -184,7 +185,7 @@ export default function MyTasksPage() {
   async function load() {
     setLoading(true);
     try {
-      var m = await api.get('/tasks/mine'); setMine(m.data.tasks || []);
+      var m = await api.get('/tasks/mine'); setMine(m.data.tasks || []); setMyHealth(m.data.health || null);
       var p = await api.get('/tasks/pool'); setPool(p.data.tasks || []);
       // Its own fetch: the trigger labels and the per-request clock resolution are work no other task type
       // wants done. Tolerated failure — an intake queue that cannot load must not blank My Tasks.
@@ -345,11 +346,39 @@ export default function MyTasksPage() {
 
   return (
     <div style={{ maxWidth: '1080px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      <div>
-        <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, letterSpacing: '-.01em' }}>My Tasks</h1>
-        <p style={{ color: C.muted, fontSize: '13.5px', margin: '3px 0 0' }}>
-          Work assigned to you, grouped by type{returned ? ' · ' : ''}{returned ? <span style={{ color: C.crit, fontWeight: 600 }}>{returned} needs corrections</span> : null}{overdue ? ' · ' : ''}{overdue ? <span style={{ color: C.crit, fontWeight: 600 }}>{overdue} overdue</span> : null}{soon ? ' · ' + soon + ' due within 3 days' : ''}.
-        </p>
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+        <div>
+          <h1 style={{ fontSize: '22px', fontWeight: 800, margin: 0, letterSpacing: '-.01em' }}>My Tasks</h1>
+          <p style={{ color: C.muted, fontSize: '13.5px', margin: '3px 0 0' }}>
+            Work assigned to you, grouped by type{returned ? ' · ' : ''}{returned ? <span style={{ color: C.crit, fontWeight: 600 }}>{returned} needs corrections</span> : null}{overdue ? ' · ' : ''}{overdue ? <span style={{ color: C.crit, fontWeight: 600 }}>{overdue} overdue</span> : null}{soon ? ' · ' + soon + ' due within 3 days' : ''}.
+          </p>
+        </div>
+        {/* WORKLOAD HEALTH (#13) — the personal composite: same 1/2/4-point score as the dashboard,
+            over only this person's tasks. The subline says WHY, in plain words, so the number never
+            needs decoding. */}
+        {myHealth ? (() => {
+          var HC = { on_track: ['#17803D', '#E6F4EC', 'On track'],
+                     needs_attention: ['#C77A0A', '#FBEFD7', 'Needs attention'],
+                     falling_behind: ['#B23A3A', '#F9E4E4', 'Falling behind'] };
+          var h = HC[myHealth.status] || HC.on_track;
+          var l = myHealth.late || {};
+          var bits = [];
+          if (l.d1) bits.push(l.d1 + (l.d1 > 1 ? ' tasks are' : ' task is') + ' 1 day over budget');
+          if (l.d2) bits.push(l.d2 + ' ' + (l.d2 > 1 ? 'are' : 'is') + ' 2 days over');
+          if (l.d2plus) bits.push(l.d2plus + ' ' + (l.d2plus > 1 ? 'are' : 'is') + ' more than 2 days over');
+          return (
+            <div style={{ textAlign: 'right' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', background: h[1], color: h[0],
+                fontSize: '13px', fontWeight: 700, padding: '5px 13px', borderRadius: '16px', whiteSpace: 'nowrap' }}>
+                <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: h[0] }} />
+                {h[2]}{myHealth.points ? ' · ' + myHealth.points + ' point' + (myHealth.points > 1 ? 's' : '') : ''}
+              </span>
+              <div style={{ fontSize: '12px', color: C.muted, marginTop: '5px', maxWidth: '340px' }}>
+                {bits.length ? bits.join(', ') + '. Start with the oldest.' : 'Nothing assigned to you is over its time budget.'}
+              </div>
+            </div>
+          );
+        })() : null}
       </div>
 
       {msg ? <div style={{ fontSize: '13px', color: '#9B1C1C', background: '#FDE8E8', border: '1px solid #FBD5D5', borderRadius: '8px', padding: '9px 12px' }}>{msg}</div> : null}

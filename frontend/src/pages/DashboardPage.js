@@ -13,7 +13,7 @@ const STYLES = `
 .ops{--page:transparent;--panel:#EBF3FB;--surface:#FFFFFF;--civic:#1F4E79;--civic-700:#163A5C;
   --civic-tint:#E7EEF6;--ink:#14202B;--muted:#5B6B7A;--hair:#C9D6E2;
   --warn:#C77A0A;--warn-bg:#FBEFD7;--serious:#B23A3A;--serious-bg:#F9E4E4;
-  --critical:#7C1D1D;--critical-bg:#F3D2D2;
+  --critical:#7C1D1D;--critical-bg:#F3D2D2;--ok:#17803D;--ok-bg:#E6F4EC;
   --shadow:0 1px 2px rgba(20,32,43,.06),0 6px 20px rgba(20,32,43,.06);
   max-width:1200px;color:var(--ink);font-size:14px;line-height:1.45}
 .ops *{box-sizing:border-box}
@@ -47,6 +47,21 @@ const STYLES = `
 .ops .c-zero{background:var(--civic-tint);color:var(--muted);font-weight:600}
 .ops .c-paused{background:var(--surface);border:1px dashed var(--hair);color:var(--muted);font-weight:600}
 .ops .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:10px;font-size:12px;color:var(--muted)}
+.ops .hchip{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:14px;
+  font-size:12px;font-weight:700;white-space:nowrap}
+.ops .hchip .dot{width:8px;height:8px;border-radius:50%;flex:none}
+.ops .h-ok{background:var(--ok-bg);color:var(--ok)} .ops .h-ok .dot{background:var(--ok)}
+.ops .h-warn{background:var(--warn-bg);color:var(--warn)} .ops .h-warn .dot{background:var(--warn)}
+.ops .h-bad{background:var(--serious-bg);color:var(--serious)} .ops .h-bad .dot{background:var(--serious)}
+.ops .hgrid{display:grid;gap:6px;background:var(--surface);border:1px solid var(--hair);border-radius:10px;padding:14px}
+.ops .hgrid .hhdr{font-size:11px;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);
+  padding:4px 6px;text-align:center;font-weight:700}
+.ops .hcell{border-radius:8px;padding:10px 8px;text-align:center;font-size:13px;font-weight:700}
+.ops .hcell small{display:block;font-weight:400;font-size:11px;margin-top:2px}
+.ops .hc-ok{background:var(--ok-bg);color:var(--ok)} .ops .hc-warn{background:var(--warn-bg);color:var(--warn)}
+.ops .hc-bad{background:var(--serious-bg);color:var(--serious)} .ops .hc-none{background:#F0F2F5;color:#9CA3AF}
+.ops .hrow{font-size:13.5px;font-weight:700;padding:12px 6px 0}
+.ops .hrow small{display:block;font-weight:600;font-size:11.5px}
 .ops .strip{display:flex;align-items:center;gap:10px;background:var(--surface);border:1px solid var(--hair);
   border-radius:10px;padding:10px 14px;font-size:13px}
 .ops .strip b{color:var(--serious)}
@@ -81,6 +96,23 @@ const NODE_LABELS = { estimate:'Estimate', record_search:'Record search', redact
 function nodeLabel(t){ return NODE_LABELS[t] || String(t).replace(/_/g,' '); }
 function money(n){ return '$' + (Number(n)||0).toLocaleString('en-US',{minimumFractionDigits:0,maximumFractionDigits:2}); }
 
+// WORKLOAD HEALTH (#13, model approved 2026-08-13). Wire statuses keep their snake_case names; these
+// are the plain display names. The verdict always travels with its points so the number is explainable.
+const HEALTH = {
+  on_track:        { cls: 'h-ok',   cell: 'hc-ok',   label: 'On track' },
+  needs_attention: { cls: 'h-warn', cell: 'hc-warn', label: 'Needs attention' },
+  falling_behind:  { cls: 'h-bad',  cell: 'hc-bad',  label: 'Falling behind' },
+};
+function HealthChip({ health, big }) {
+  if (!health) return null;
+  const h = HEALTH[health.status] || HEALTH.on_track;
+  return (
+    <span className={'hchip ' + h.cls} style={big ? { fontSize: '13px', padding: '5px 13px' } : null}>
+      <span className="dot" />{h.label}{health.points ? ' · ' + health.points : ''}
+    </span>
+  );
+}
+
 function LateChips({ late }) {
   const cells = [ ['d1','c-warn','⚠'], ['d2','c-serious','⚠'], ['d2plus','c-critical','⛔'] ];
   return cells.map(([k, cls, icon]) => (
@@ -92,10 +124,10 @@ function NodesTable({ nodes, showBudget, budgets }) {
   return (
     <table>
       <thead><tr><th>Task node</th><th>In queue</th><th>In process</th><th>Waiting on requestor</th>
-        <th>1 day late</th><th>2 days late</th><th>&gt;2 days late</th></tr></thead>
+        <th>1 day late</th><th>2 days late</th><th>&gt;2 days late</th><th>Health</th></tr></thead>
       <tbody>
         {(nodes || []).length === 0
-          ? <tr><td colSpan={7} style={{ textAlign:'center', color:'#9CA3AF' }}>No open tasks</td></tr>
+          ? <tr><td colSpan={8} style={{ textAlign:'center', color:'#9CA3AF' }}>No open tasks</td></tr>
           : nodes.map(n => (
             <tr key={n.taskType}>
               <td>{nodeLabel(n.taskType)}{showBudget && budgets[n.taskType] != null
@@ -104,6 +136,7 @@ function NodesTable({ nodes, showBudget, budgets }) {
               <td>{n.inProcess || 0}</td>
               <td>{n.paused ? <span className="chip c-paused">{n.paused} ⏸</span> : <span className="chip c-zero">—</span>}</td>
               <LateChips late={n.late} />
+              <td><HealthChip health={n.health} /></td>
             </tr>
           ))}
       </tbody>
@@ -182,6 +215,59 @@ export default function DashboardPage() {
 
   function renderPane(pane, i) {
     const key = pane.key + i;
+    if (pane.key === 'health') {
+      const teams = pane.scope === 'all' ? (ops.teams || []) : (myTeam() ? [myTeam()] : (ops.teams || []));
+      const types = [...new Set(teams.flatMap(t => (t.nodes || []).map(n => n.taskType)))].sort();
+      const overall = pane.scope === 'all' ? (ops.totals && ops.totals.health) : (myTeam() && myTeam().health);
+      return (
+        <div className="pane" key={key}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px' }}>
+            <h2>Workload health</h2>
+            <HealthChip health={overall} big />
+          </div>
+          <div className="scope">{scopeLabel(pane)} · the color answers "where do I look first" · budget lateness, not the legal deadline</div>
+          {types.length === 0 ? <div className="note">No open tasks anywhere — nothing to score.</div> : (
+            <div className="hgrid" style={{ gridTemplateColumns: '170px repeat(' + types.length + ', 1fr)' }}>
+              <div className="hhdr" />
+              {types.map(tt => <div className="hhdr" key={tt}>{nodeLabel(tt)}</div>)}
+              {teams.map(t => {
+                const byType = {}; (t.nodes || []).forEach(n => { byType[n.taskType] = n; });
+                const th = HEALTH[(t.health && t.health.status) || 'on_track'];
+                return (
+                  <React.Fragment key={t.teamId || 'none'}>
+                    <div className="hrow">{t.teamName}
+                      <small style={{ color: th === HEALTH.on_track ? 'var(--ok)' : th === HEALTH.needs_attention ? 'var(--warn)' : 'var(--serious)' }}>
+                        {th.label}{t.health && t.health.points ? ' · ' + t.health.points : ''}</small></div>
+                    {types.map(tt => {
+                      const n = byType[tt];
+                      if (!n) return <div className="hcell hc-none" key={tt}>—<small>no tasks</small></div>;
+                      const h = HEALTH[(n.health && n.health.status) || 'on_track'];
+                      const active = (n.queued || 0) + (n.inProcess || 0) + (n.inReview || 0) + (n.paused || 0);
+                      const lateBits = [];
+                      if (n.late.d1) lateBits.push(n.late.d1 + ' × 1d late');
+                      if (n.late.d2) lateBits.push(n.late.d2 + ' × 2d late');
+                      if (n.late.d2plus) lateBits.push(n.late.d2plus + ' × >2d late');
+                      return (
+                        <div className={'hcell ' + h.cell} key={tt}>
+                          {n.health && n.health.points ? n.health.points + ' pts' : 'On track'}
+                          <small>{lateBits.length ? lateBits.join(', ') : active + ' active'}</small>
+                        </div>
+                      );
+                    })}
+                  </React.Fragment>
+                );
+              })}
+            </div>
+          )}
+          <div className="legend">
+            <span>Green — nothing over its time budget</span>
+            <span>Amber — 1–3 points: something is late, but contained</span>
+            <span>Red — 4+ points: badly stuck or slipping at once, act today</span>
+            <span>Points: 1 day over = 1 · 2 days = 2 · more than 2 days = 4 · paused tasks never count</span>
+          </div>
+        </div>
+      );
+    }
     if (pane.key === 'teamInProcess') {
       const t = scoped(pane);
       const stages = (t && t.stages) || {};
@@ -221,7 +307,7 @@ export default function DashboardPage() {
           <h2>Late by Team — attention map</h2>
           <div className="scope">Every fulfillment team · counts of tasks over budget</div>
           <table>
-            <thead><tr><th>Team</th><th>Active</th><th>1 day late</th><th>2 days late</th><th>&gt;2 days late</th></tr></thead>
+            <thead><tr><th>Team</th><th>Active</th><th>1 day late</th><th>2 days late</th><th>&gt;2 days late</th><th>Health</th></tr></thead>
             <tbody>
               {(ops.teams || []).map(t => {
                 const late = teamLateTotals(t);
@@ -229,6 +315,7 @@ export default function DashboardPage() {
                   <tr key={t.teamId || 'none'}>
                     <td>{t.teamName}</td><td>{t.activeRequests || 0}</td>
                     <LateChips late={late} />
+                    <td><HealthChip health={t.health} /></td>
                   </tr>
                 );
               })}
