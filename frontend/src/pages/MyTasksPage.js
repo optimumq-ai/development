@@ -16,7 +16,7 @@ import { ClockChip } from '../components/primitives';
 var TYPE_LABEL = {
   record_search: 'Record Search', redaction: 'Redaction', legal_redaction: 'Legal Redaction',
   redaction_qa: 'Redaction Review', review_auto_redaction: 'Auto-Redaction Review',
-  estimate: 'Estimate', fee_waiver: 'Fee Waiver', legal_review: 'Legal Review', routing_review: 'Routing Review',
+  estimate: 'Estimate', fee_waiver: 'Fee Waiver', legal_review: 'Legal Review', legal_estimate: 'Legal Hours Estimate', routing_review: 'Routing Review',
   // BW2 catalog (docs/SPEC_processing_ui.md §8). BW3 gave intake_review its screen, BW6 the four MRR
   // types theirs, and BW8 gave release_review its two paths (task screen + power mode).
   //
@@ -35,7 +35,7 @@ var TYPE_LABEL = {
 // take one (annotation 2).
 var TYPE_ORDER = ['mrr_management', 'intake_review', 'record_search', 'redaction', 'legal_redaction', 'redaction_qa', 'review_auto_redaction',
   'mrr_search', 'mrr_estimate', 'mrr_redaction',
-  'estimate', 'fee_waiver', 'legal_review', 'release_review', 'routing_review'];
+  'estimate', 'fee_waiver', 'legal_review', 'legal_estimate', 'release_review', 'routing_review'];
 
 // The MRR family, for the grouping banner. `mrr_management` is the coordination job; the other three are
 // the items' activities, which NEVER advance a stage — the banner says so once, where the boxes meet, so
@@ -69,6 +69,9 @@ var TASK_SCREEN = {
   // BW8 — the release-review task screen (one-at-a-time path; power mode is the group-header button).
   // Until this entry existed the task fell through to /requests/:id, which can approve nothing.
   release_review: function (t) { return '/release-review/' + t.id; },
+  // Legal-hours ask (DESIGN_legal_hours_estimate.md slice 1) — the thin answer screen. Entry added
+  // WITH the type's spawner, per the reachability lesson this map keeps re-teaching.
+  legal_estimate: function (t) { return '/legal-estimate/' + t.id; },
   review_auto_redaction: function () { return '/mass-redaction'; }
 };
 function screenFor(t) { var f = TASK_SCREEN[t.type]; return f ? f(t) : (t.request_id ? '/requests/' + t.request_id : '/mass-redaction'); }
@@ -80,6 +83,7 @@ function actionLabel(t) {
     // opens ONE activity. Two verbs, because they are two jobs.
     : t.type === 'mrr_management' ? 'Coordinate →'
     : t.type === 'mrr_search' || t.type === 'mrr_estimate' || t.type === 'mrr_redaction' ? 'Open item →'
+    : t.type === 'legal_estimate' ? 'Answer →'
     : t.status === 'in_progress' ? 'Continue →' : 'Open →';
 }
 

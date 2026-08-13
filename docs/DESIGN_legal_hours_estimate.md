@@ -48,16 +48,20 @@ expertise contribute expected hours to a quote.
     deliberately NOT a per-child activity), OR the manager just types hours directly into the
     estimate's `legalHours` field. Both of the sketch's routes exist; neither is forced.
 - **The answer is structured, not prose** (the MRR roll-up's numbers-as-prose is the recorded
-  anti-pattern): new table **`legal_estimate_inputs`**
-  `(id, request_id, task_id, hours NUMERIC, note TEXT, entered_by, entered_by_name, entered_at,
-  superseded INTEGER DEFAULT 0)`. Completing the task writes one row (+ `request_history`
-  `LEGAL_HOURS_ESTIMATED` for the audit trail); a re-ask supersedes the old row. The legal_estimate
+  anti-pattern): new table **`legal_estimate_inputs`** — one row per ASK+ANSWER exchange
+  `(id, request_id, task_id, ask_note NOT NULL, asked_by/_name/_at, hours NUMERIC, note TEXT,
+  entered_by/_name/_at, superseded INTEGER DEFAULT 0)` `[as built, slice 1: the ask half lives in
+  the same row — tasks has no notes column, and the question belongs with its answer]`. Completing
+  the task fills the answer half (+ `request_history` `LEGAL_HOURS_ESTIMATED`); a re-ask cancels the
+  open task and supersedes its row; a new answer supersedes the previous one. The legal_estimate
   task gets a thin dedicated screen (context header · request description · hours + required note ·
   complete) — **with its MyTasksPage `TASK_SCREEN` entry in the same slice** (the reachability
   lesson: a backend path with no screen entry is unreachable work, verify_legal_review §H class).
-- **The estimator stays the author:** the estimate panel shows the answer as a pre-fill banner
-  ("Legal: 3.0h — Dana Whitfield: 'PD investigation exemptions'") with one Accept action that fills
-  `legalHours`. Accepting is an act, not an automatic merge.
+- **The estimator stays the author:** the estimate panel shows the answer as a banner
+  ("Legal's answer: 3.0h — Dana Whitfield: '…'"). The one-click **Accept** that fills `legalHours`
+  ships WITH the engine's Legal line in slice 2 — in slice 1 there is no `legalHours` field to fill,
+  and a control that pretends to apply the answer would be theatre; until then the banner feeds the
+  estimator's judgment. Accepting is an act, not an automatic merge.
 
 ## Part C — Pricing (`feeEngine`)
 - New per-component quantity **`legalHours`** in `input_json.quantities`, priced as a fourth labor
@@ -81,11 +85,13 @@ expertise contribute expected hours to a quote.
    not folded into Review & redaction. (Chosen from previews.)
 
 ## Build slices (each with its own harness; order matters)
-1. **The ask + the answer:** schema (`legal_estimate_inputs`), task type + hand-assign spawn route,
-   the thin task screen + TASK_SCREEN entry, estimate-panel pre-fill/Accept, pending-ask warning on
-   notice send. (`verify_legal_estimate`)
+1. **The ask + the answer** `[BUILT 2026-08-13 — verify_legal_estimate]`: schema
+   (`legal_estimate_inputs`), task type + hand-assign spawn route (`/api/legal-estimate`), the thin
+   task screen + TASK_SCREEN entry, estimate-panel ask modal + pending/answer banners, soft
+   pending-ask warning (display only — Accept waits for slice 2's `legalHours` field).
 2. **The engine line:** `legalHours` quantity, `labor.legal` inherit-with-override, notice line,
-   free-hours order, reconciliation pairing. (extend `verify_fee_labor_gate` family)
+   free-hours order, reconciliation pairing, panel Accept-pre-fill from the answer banner.
+   (extend `verify_fee_labor_gate` family)
 3. **The deterministic trigger:** `legal_rt` intake_review trigger off `legal_redaction_required`
    with parent walk-up. (extend `verify_bw3_intake_review`)
 4. **MRR hub wiring:** parent-level ask button; `legalHours` on the master estimate form.

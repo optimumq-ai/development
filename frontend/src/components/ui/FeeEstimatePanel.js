@@ -47,9 +47,41 @@ export default function FeeEstimatePanel(props) {
   var [adjNotice, setAdjNotice] = useState(null);
   var [adjBusy, setAdjBusy] = useState(false);
   var [adjMsg, setAdjMsg] = useState('');
+  // Legal-hours ask (DESIGN_legal_hours_estimate.md slice 1). Display + ask only in this slice: the
+  // engine's "Legal review" line and Accept-pre-fill arrive with slice 2, so until then the answer is
+  // shown for the estimator's judgment, not auto-applied.
+  var [legalAsk, setLegalAsk] = useState(null);
+  var [askOpen, setAskOpen] = useState(false);
+  var [askNote, setAskNote] = useState('');
+  var [askAssignee, setAskAssignee] = useState('');
+  var [askBusy, setAskBusy] = useState(false);
+  var [askMsg, setAskMsg] = useState('');
+  var [legalStaff, setLegalStaff] = useState(null);
 
   useEffect(function () { load(); }, [requestId]);
+  async function loadLegalAsk() {
+    try { var la = await api.get('/legal-estimate/request/' + requestId); setLegalAsk(la.data); } catch (e) { setLegalAsk(null); }
+  }
+  function openAsk() {
+    setAskMsg(''); setAskNote(''); setAskAssignee(''); setAskOpen(true);
+    if (legalStaff === null) {
+      api.get('/staff').then(function (r) {
+        setLegalStaff((r.data.staff || []).filter(function (u) { return (u.taskTypes || []).indexOf('legal_review') >= 0 && u.status !== 'inactive'; }));
+      }).catch(function () { setLegalStaff([]); });
+    }
+  }
+  async function submitAsk() {
+    if (!askAssignee) { setAskMsg('Name the person to ask.'); return; }
+    if (!askNote.trim()) { setAskMsg('Say what legal should look at.'); return; }
+    setAskBusy(true); setAskMsg('');
+    try {
+      await api.post('/legal-estimate/request/' + requestId + '/ask', { assignee_id: askAssignee, note: askNote.trim() });
+      setAskOpen(false); loadLegalAsk();
+    } catch (e) { setAskMsg((e.response && e.response.data && e.response.data.error) || 'Could not send the ask.'); }
+    setAskBusy(false);
+  }
   async function load() {
+    loadLegalAsk();
     try {
       var r = await api.get('/fee-estimates/request/' + requestId);
       setCtx(r.data);
@@ -332,6 +364,49 @@ export default function FeeEstimatePanel(props) {
     <div>
       {renderResponse()}
       <div style={{ fontSize: '12.5px', color: '#6B7280', marginBottom: '14px' }}>Priced against <strong>{ctx.configProfile.name}</strong>{ctx.configProfile.status !== 'active' ? ' (' + ctx.configProfile.status + ')' : ''}. Enter the quantities for each component; the engine itemizes the estimate and saves it to the request.</div>
+
+      {legalAsk && legalAsk.open ? (
+        <div style={{ background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '8px', padding: '10px 14px', marginBottom: '12px', fontSize: '12.5px', color: '#92400E', lineHeight: 1.5 }}>
+          <strong>Legal hours pending</strong>{legalAsk.open.assignee_name ? ' — asked of ' + legalAsk.open.assignee_name : ''}{legalAsk.open.asked_at ? ' ' + (legalAsk.open.asked_at || '').slice(0, 10) : ''}: &ldquo;{legalAsk.open.ask_note}&rdquo;.
+          You can still send the estimate; if legal&rsquo;s answer changes the price, a revised estimate goes out through the normal renotify rules.
+        </div>
+      ) : null}
+      {legalAsk && legalAsk.answer ? (
+        <div style={{ background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: '8px', padding: '10px 14px', marginBottom: '12px', fontSize: '12.5px', color: '#166534', lineHeight: 1.5 }}>
+          <strong>Legal&rsquo;s answer: {legalAsk.answer.hours} hour{legalAsk.answer.hours === 1 ? '' : 's'}</strong>
+          {legalAsk.answer.entered_by_name ? ' (from ' + legalAsk.answer.entered_by_name + ')' : ''} &mdash; &ldquo;{legalAsk.answer.note}&rdquo;.
+          Use it in your pricing as your judgment; a dedicated Legal review line on the estimate is coming.
+        </div>
+      ) : null}
+      <div style={{ marginBottom: '14px' }}>
+        <button onClick={openAsk} style={{ padding: '7px 14px', borderRadius: '8px', border: '1px solid ' + NAVY, background: 'white', color: NAVY, fontSize: '12.5px', fontWeight: 700, cursor: 'pointer' }}>
+          {legalAsk && (legalAsk.open || legalAsk.answer) ? 'Ask legal again' : 'Ask legal for hours'}
+        </button>
+      </div>
+
+      {askOpen ? (
+        <div onClick={function () { if (!askBusy) setAskOpen(false); }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: '20px' }}>
+          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '14px', width: '480px', maxWidth: '100%', padding: '24px' }}>
+            <div style={{ fontWeight: 700, fontSize: '16px', marginBottom: '6px' }}>Ask legal for hours</div>
+            <div style={{ fontSize: '13px', color: '#374151', lineHeight: 1.5, marginBottom: '14px' }}>
+              A named person on the legal staff answers with the hours of legal work this request should be
+              expected to need. Their answer lands here as an input for you &mdash; the estimate stays yours.
+            </div>
+            <label style={lbl}>Who to ask (legal staff)</label>
+            <select value={askAssignee} onChange={function (e) { setAskAssignee(e.target.value); }} style={Object.assign({}, inp, { marginBottom: '10px' })}>
+              <option value="">{legalStaff === null ? 'Loading…' : legalStaff.length ? 'Choose a person' : 'Nobody holds the Legal Review task type'}</option>
+              {(legalStaff || []).map(function (u) { return <option key={u.id} value={u.id}>{u.display_name}{u.title ? ' — ' + u.title : ''}</option>; })}
+            </select>
+            <label style={lbl}>What should legal look at? (required)</label>
+            <textarea value={askNote} onChange={function (e) { setAskNote(e.target.value); }} rows={3} style={Object.assign({}, inp, { resize: 'vertical', fontFamily: 'inherit' })} />
+            {askMsg ? <div style={{ fontSize: '12.5px', color: '#DC2626', marginTop: '8px' }}>{askMsg}</div> : null}
+            <div style={{ marginTop: '14px' }}>
+              <button onClick={submitAsk} disabled={askBusy} style={{ padding: '10px 16px', borderRadius: '8px', border: 'none', background: askBusy ? '#9CB4CC' : NAVY, color: 'white', fontSize: '13px', fontWeight: 700, cursor: askBusy ? 'default' : 'pointer' }}>{askBusy ? 'Sending…' : 'Send the ask'}</button>
+              <button onClick={function () { if (!askBusy) setAskOpen(false); }} style={{ marginLeft: '10px', padding: '10px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: 600, cursor: 'pointer' }}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
 
       <div style={{ display: 'flex', gap: '20px', alignItems: 'flex-start', flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: '320px' }}>

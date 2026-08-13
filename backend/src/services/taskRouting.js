@@ -82,6 +82,9 @@ var TASK_ROLES = {
   mrr_estimate: 'mrr_estimate',
   // mrr_redaction joins the pair above: redaction of one child's records, same assignment model.
   mrr_redaction: 'mrr_redaction',
+  // Legal-hours ask (DESIGN_legal_hours_estimate.md slice 1): hand-assigned to a legal_review token
+  // holder by the estimator or hub manager. Own key = unclaimable from every pool, same as the MRR trio.
+  legal_estimate: 'legal_estimate',
   // Reviewing an auto-redaction import batch is redaction work and needs redaction competence. It had NO
   // entry here, which meant `role_required` came out NULL — and NULL was treated as "everyone eligible"
   // (brief §3.5). See the fail-closed guard in createTask below.
@@ -116,7 +119,7 @@ var TASK_ROLES = {
 var ROUTABLE_TASK_TYPES = ['estimate', 'record_search', 'redaction', 'redaction_qa', 'legal_redaction', 'legal_review', 'fee_waiver', 'routing_review', 'intake_review', 'mrr_management', 'release_review', 'close_approval', 'process_withdrawal'];
 // Task types the Request Manager hand-assigns per MRR child. Deliberately NOT routable (see TASK_ROLES):
 // no eligibility, no team filter, no smart routing, never offered in the per-person picker.
-var HAND_ASSIGNED_TASK_TYPES = ['mrr_search', 'mrr_estimate', 'mrr_redaction'];
+var HAND_ASSIGNED_TASK_TYPES = ['mrr_search', 'mrr_estimate', 'mrr_redaction', 'legal_estimate'];
 // Reverse of TASK_ROLES: legacy permission-role name -> task type, used to translate existing callers
 // (which pass task.role_required) onto the new task-type model during the cutover.
 var ROLE_TO_TYPE = { FEE_MANAGER: 'estimate', SEARCH_AND_TRIAGE: 'record_search', REDACTION_WORKER: 'redaction', FINANCE: 'fee_waiver' };

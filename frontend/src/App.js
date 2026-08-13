@@ -21,6 +21,7 @@ import RedactionTaskPage from './pages/RedactionTaskPage';
 import RecordSearchTaskPage from './pages/RecordSearchTaskPage';
 import DispositionsPage from './pages/DispositionsPage';
 import LegalReviewTaskPage from './pages/LegalReviewTaskPage';
+import LegalEstimateTaskPage from './pages/LegalEstimateTaskPage';
 import IntakeReviewTaskPage from './pages/IntakeReviewTaskPage';
 import ReleaseReviewTaskPage from './pages/ReleaseReviewTaskPage';
 import ReleaseReviewPowerModePage from './pages/ReleaseReviewPowerModePage';
@@ -103,6 +104,7 @@ export default function App() {
               the searcher works alongside the queue, the redactor works in a focused workspace. */}
           <Route path="record-search/:taskId" element={<RecordSearchTaskPage />} />
           <Route path="legal-review/:taskId" element={<LegalReviewTaskPage />} />
+          <Route path="legal-estimate/:taskId" element={<LegalEstimateTaskPage />} />
           {/* Intake review (BW3). Inside the app shell for the same reason record search is: the ORO
               Associate works alongside their exceptions queue. */}
           <Route path="intake-review/:taskId" element={<IntakeReviewTaskPage />} />

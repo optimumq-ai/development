@@ -7407,3 +7407,41 @@ parent walk-up. Four build slices with named harnesses.
 §14's open legal design is now DECIDED (build is 4 slices, unscheduled). Remaining follow-ons:
 chat-agent model upgrade · v3 collapse · search-activity tracking. Plus pre-production hardening,
 Kevin's testing/demo, go-live flip, §6.2 glosses, §2.6/§8.3 stamping.
+
+## 2026-08-13 (o) — legal hours in the estimate, slice 1 SHIPPED: the ask + the answer
+
+### Built (DESIGN_legal_hours_estimate.md slice 1, as decided)
+- **Schema**: `legal_estimate_inputs` — one row per ask+answer exchange (ask_note/asked_* + the
+  structured hours/note/entered_* answer; superseded flag). The ask half lives in the same row
+  (tasks has no notes column; the question belongs with its answer) — design doc updated in-commit.
+- **Task type `legal_estimate`**: hand-assigned (joins HAND_ASSIGNED_TASK_TYPES, own unclaimable
+  role key), askable only of `legal_review` token holders. Routes at `/api/legal-estimate`:
+  ask (note + named person required; re-ask cancels the open task and supersedes its row),
+  panel read (open ask + current answer), answer (assignee-only, hours + note required, 409 on a
+  finished task — the resolve-route lesson applied at birth).
+- **Screens**: LegalEstimateTaskPage (`/legal-estimate/:taskId`, thin Phase-2 shape) + MyTasksPage
+  entries added WITH the spawner (reachability locked in the harness). FeeEstimatePanel: "Ask legal
+  for hours" modal (staff picker filtered to legal_review holders), amber pending banner carrying
+  Kevin's soft-block sentence, green answer banner. Accept-pre-fill deliberately waits for slice 2's
+  `legalHours` field — a control that pretends to apply the answer would be theatre.
+
+### Evidence
+`verify_legal_estimate` **21/21** (ask gates incl. NOT_LEGAL in words; structured storage; history
+rows; assignee-only answer; 409 re-answer; one live question; supersede chain; notice SENDS with an
+open ask — the soft block proven, not asserted; reachability; world restored). **Full suite
+2136/2136, live untouched, exit 0.** One re-run was needed: verify_stages 26/27 with a Playwright
+timeout — caused by running the frontend build CONCURRENTLY with the suite (harnesses drive the
+nginx-served build/, and CRA swaps it mid-run). Lesson memorized; suite alone → 42/42. Deployed
+(API restart 200, nginx 200). **Live-probed end-to-end** on a fresh request via real paths: ask →
+pending banner (`exchange/legal_ask_pending.png`) → David Okafor's task screen
+(`legal_ask_task.png`) → 4-hour answer → green banner (`legal_ask_answered.png`). David's task-type
+grants snapshot-restored exactly; probe family purged; zero residue.
+
+### For Kevin (data, not code)
+**No live user holds the `legal_review` task type** — the ask picker will say so until you grant it
+in Staff Management (David Okafor held it only for the probe, then restored).
+
+### The board
+Design slices 2 (engine Legal line + Accept), 3 (`legal_rt` intake trigger), 4 (MRR hub ask) remain.
+Follow-ons: chat-agent model upgrade · v3 collapse · search-activity tracking. Plus hardening,
+testing/demo, go-live flip, §6.2 glosses, §2.6/§8.3 stamping.

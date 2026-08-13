@@ -1606,6 +1606,26 @@ CREATE TABLE IF NOT EXISTS mrr_estimate_data (
 CREATE UNIQUE INDEX IF NOT EXISTS idx_mrr_estdata_item ON mrr_estimate_data(request_id);
 CREATE INDEX IF NOT EXISTS idx_mrr_estdata_parent ON mrr_estimate_data(parent_request_id);
 
+-- LEGAL HOURS IN THE ESTIMATE (DESIGN_legal_hours_estimate.md, slice 1). One row per ASK+ANSWER
+-- exchange: the estimator's question (ask_*) and legal's structured reply (hours/note/entered_*) —
+-- structured because the MRR roll-up's numbers-as-prose is the recorded anti-pattern. A re-ask
+-- writes a NEW row and supersedes the old on answer; the panel reads the latest live one. The
+-- estimator stays the single author of the estimate snapshot: this table is an INPUT they accept,
+-- never a competing estimate.
+CREATE TABLE IF NOT EXISTS legal_estimate_inputs (
+  id TEXT PRIMARY KEY,
+  request_id TEXT NOT NULL REFERENCES requests(id) ON DELETE CASCADE,
+  task_id TEXT,                        -- the hand-assigned legal_estimate task (no FK: answered rows outlive task cleanup)
+  ask_note TEXT NOT NULL,              -- "what should legal look at" — required, the ask is a question not a ping
+  asked_by TEXT, asked_by_name TEXT,
+  asked_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')),
+  hours NUMERIC,                       -- NULL until legal answers
+  note TEXT,                           -- legal's basis — required on answer (a judgment the city may defend)
+  entered_by TEXT, entered_by_name TEXT, entered_at TEXT,
+  superseded INTEGER DEFAULT 0
+);
+CREATE INDEX IF NOT EXISTS idx_legal_est_request ON legal_estimate_inputs(request_id);
+
 -- ── DENIAL DESIGNATION AT THE CHILD LEVEL — A FLAG, NEVER AN ENDING ──────────────────────────────
 --
 -- Kevin, 7/28 item 6: "designate denial at the child level AND submit for Legal Review". The draft is
