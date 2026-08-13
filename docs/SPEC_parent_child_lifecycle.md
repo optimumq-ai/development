@@ -1023,7 +1023,7 @@ contradiction of always-wrap. They are not.
   they carry **"email the Request Manager."** One request, one voice — this exists to stop five staff
   independently emailing one citizen about one request.
 
-### 14.2 Child routing — SUGGEST vs COMMIT `[DECIDED 2026-07-16 by Kevin — SUPERSEDES §9 item 5's "purely manual"]`
+### 14.2 Child routing — SUGGEST vs COMMIT `[PARTIALLY SUPERSEDED — read the as-built note. As BUILT (verified live 2026-08-13): children AUTO-COMMIT through the normal engine (classifier routes each child, flow tasks spawn per child), AND the hub's hand-assigned MRR activities (mrr_search/mrr_estimate/mrr_redaction — never advancing a stage) sit on top for the RM's orchestration (Kevin 2026-07-28, rev 5b). The suggest-gate below was never built; the surviving open question is Draft 5 §3's narrower version — should the child assign-picker show the classifier's hint — parked with Kevin.]`
 
 **The classifier runs identically on EVERY child. Only the commit gate differs.**
 
@@ -1052,7 +1052,7 @@ advance to write `request_history` and spawn/update the stage task. Work with no
 state that invariant exists to prevent — and an unassigned, task-less child is **invisible to the budget clock**
 (§5.4), which is the one signal that would catch it stalling.
 
-### 14.3 The hub — MRR management workspace `[DEFERRED 2026-07-19 by Kevin — SINGLE-RECORD FIRST]`
+### 14.3 The hub — MRR management workspace `[BUILT — BW6 (processing-UI workstream); verified 2026-08-13. THE BINDING DESIGN IS SPEC_processing_ui.md screen 5 / DRAFT_processing_ui_mrr_hub.md rev 5b, from KEVIN'S 2026-07-28 DIRECTION — which superseded the "Kevin's shape (2026-07-16)" below (an attribution Kevin did not recognize as his). This section is kept as HISTORY; read the processing-UI spec for the as-built contract.]`
 
 > **DECISION (brief §5.3): single-record first; the MRR hub is NOT being built.** The design below stands and
 > is not withdrawn — it is the reference for whenever the hub is picked up. Nothing here is retracted.
@@ -1091,7 +1091,7 @@ already computes the raw signal (`c74b97e`..`a933b88`); `BUILD_PRIORITY` #13 is 
 recurring blockage into a staffing pattern rather than an incident. This is also the operational reason the child
 carries `budget_clock` at all (§5.4) — the statutory clock (parent) would never reveal it.
 
-### 14.4 The three other staff surfaces — actions WITHIN the hub `[NOT BUILT]`
+### 14.4 The three other staff surfaces — actions WITHIN the hub `[MOSTLY BUILT — BW5/BW6, verified 2026-08-13: (1) estimate gathering + readiness meter arming the standard engine BUILT (verify_bw6_mrr §C) · (2) non-system contributor token links BUILT (externalContributor, verify_external_links 26/26) · (3) per-child search incl. fulfills auto-complete BUILT (§E) · (4) Verify ≠ Approve preserved as designed · (5) the HOLD control + §5.9 coverage gate BUILT (§H). REMAINING NOT BUILT: item 6 — the HIGH PRIORITY flag + the AI report monitoring high-priority MRRs.]`
 1. **Multi-Record Estimate interface** — gather per-child inputs (search/select auto-populates the estimate
    profile, or manual entry) → totals accrue to the parent → parent **Create Estimate** via the standard engine
    (§6.4). Budgeted dates come from estimate profiles (`BUILD_PRIORITY` item 3).
