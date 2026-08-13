@@ -7016,3 +7016,38 @@ untouched, exit 0.** Deployed: API restarted (health 200), frontend rebuilt (bui
 Kevin's testing/demo list; go-live flip; §6.2 stage glosses; §2.6/§8.3 page stamping; erpSettlement
 'none'-mode actualCost note; Tier 2 remaining: #6 fee-choice intake (needs design direction first),
 #7-adjacent cleanups above. Dedicated legal task screens still NOT BUILT (design-gated, v2 UI rule).
+
+---
+
+## 2026-08-13 (d) — item 6 was already built; now it's proven and the docs say so (`b06609f`)
+
+### The finding (verification-first paid for the whole slice)
+"Fee-choice intake (default-forward)" — the last unstruck Tier-2 build — was ALREADY LIVE: the wizard's
+Your Information step has carried the three-option fee choice since 2026-07-18 (Kevin's approved
+mockups), and `requestCreate` has derived `purpose='commercial'` in the one creation helper since the
+same day (`97a0764`, comment cites §5). THREE docs still said NOT BUILT / "nothing captures commercial
+today" — written for the pre-wizard chat design, whose "just type" + rich-quick-reply framing lapsed
+when the wizard became the ratified shell (agent is description-only; the fee choice is a form control).
+
+### What was genuinely missing: the lock
+No test covered the capture contract — a payload rename or the derivation moving out of `requestCreate`
+would have silently decoupled the portal from the fee engine (citizen declares commercial; request
+proceeds standard-rate). `verify_fee_choice_intake` (11/11) drives the REAL `POST /api/public/submit`
+three times, asserting on the PARENT per the money-facts rule: default → no purpose, no waiver
+machinery; waiver → parent flags + reason + team-agnostic `fee_waiver` task via onIntake; commercial →
+`requestor_type` AND `purpose='commercial'`. (First run taught it the submit route returns 201.)
+
+### Docs reconciled (same commit)
+Portal spec §5 BUILT + superseding note; §4 form-fallback marked superseded (the wizard IS the form, so
+its "no fee-choice field" gap closed by construction); §7: MRR intake (§6) is now THE remaining intake
+build. D4 §10 marker; BUILD_PRIORITY #6 struck. Commercial approval stays deferred on customer demand.
+
+### Evidence
+`verify_fee_choice_intake` 11/11; **full suite 2024/2024, live untouched, exit 0.** No production code
+changed — nothing to deploy.
+
+### Where this leaves the board
+**Tier 2 is now fully closed** (#6–#10 all struck: #7 notifications and #8 My Tasks were done earlier;
+#9 routing cutover and #10 legal gate shipped today). Remaining open: Kevin's testing/demo list, the
+go-live flip, §6.2 stage glosses, §2.6/§8.3 page stamping, erpSettlement 'none'-mode note, and Tier 3
+(MRR intake §6 is the next real intake build, design-decided but gated on Kevin's MRR-hub sequencing).
