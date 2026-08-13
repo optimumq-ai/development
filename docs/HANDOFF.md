@@ -7176,3 +7176,34 @@ Live catalog untouched — 84 types, all parentless until Kevin creates variants
 ### Open
 Kevin's testing/demo list; go-live flip; §6.2 stage glosses; §2.6/§8.3 page stamping; variants slice 2
 (discovery groupings); sources redesign #15 (decision pending); MRR hub §14.3 (Kevin-deferred).
+
+---
+
+## 2026-08-13 (h) — item 14 COMPLETE: discovery groupings with honest counts (`17be3a1`)
+
+### Built (slice 2 of the approved design — Kevin's counting concept, mockup 3)
+- **`countAll` on the filestore connector** — a real listing, never a sample, so counts are honest.
+- **`discoverVariantGroupings`** (read-only): scans a bucket's linked sources, AI groups the samples
+  into proposed variants with share, layout consistency, and a mass-redaction flag (consistent-layout
+  groupings only). Inserts NOTHING; refusals are honest 422s BEFORE any model call.
+- **`applyGroupingProposal`**: one approved proposal → one DRAFT variant (parent + category aligned,
+  `source='discovered'`), provenance in the description — "about N documents in the holdings" only
+  when the total is real, else "% of the scanned sample". Drafts don't classify.
+- **UI**: "Find variants" on every bucket row → the mockup-3 modal (counts, reasoning, ⚡ flags,
+  approve-per-card, ungrouped share reported).
+
+### Evidence
+`verify_variant_discovery` 12/12 (counting; pre-spend refusals; draft insert + provenance wording;
+one-level rule via the apply path; drafts absent from the classifier catalog; world restored).
+**Full suite 2083/2083, live untouched, exit 0.** Deployed (build + nginx 200, API 200). **AI path
+probed LIVE** on `rt-building-permits`: the mixed demo folder yielded exactly one true permit
+(uniform, mass-candidate) with 88% honestly reported ungrouped — behaviorally correct for that
+source; real per-type corpora will produce richer groupings. Modal screenshot:
+`exchange/variant_discovery_live.png`.
+
+### Where this leaves the board
+**Item 14 complete** — the last Tier-3 item that wasn't Kevin-deferred. Remaining build surface:
+sources redesign #15 (decision pending, Kevin), MRR hub §14.3 (Kevin-deferred), the recorded
+follow-ons (Mass Redaction hand-off; legal task screens; chat-agent model upgrade; v3 full collapse),
+and the pre-production hardening list. Everything else is Kevin's: testing/demo, go-live flip,
+§6.2 glosses, §2.6/§8.3 stamping.
