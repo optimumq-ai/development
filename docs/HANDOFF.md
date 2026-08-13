@@ -7291,3 +7291,14 @@ orphans. task_events cascade via the new FK.
 `docs/SPEC_reporting_ai_help.md` was root-owned; Kevin chowned it to `optimumq` during wrap-up.
 The spec now documents the full metric catalog and strikes both its Known Gaps (health dashboard,
 high-priority MRR report) as BUILT — included in `1df974a`.
+
+## 2026-08-13 (k) — demo family 2026-000005 purged (Kevin done viewing)
+
+The inconsistent demo MRR family from note (j) is gone. Family-scoped node script (not the corpus
+purge): resolved parent `e9c0f8dd` + 2 surviving children + the deleted child's full id
+(`3ec53d63-f635-497b-b1c1-e094dd2dc456`) from residue; payment guard passed; one transaction.
+Reference sites enumerated from information_schema (all request_id / parent_request_id /
+master_request_id columns) — which caught `requestor_request_links`, a site note (j)'s hand-list
+missed. Also learned: `notifications` has NO request_id — it scopes by `context_type`/`context_id`.
+Post-purge census: every family reference site 0 rows, incl. the gone child's orphaned tasks/history
+and task_events/tolls by captured ids. Live DB otherwise untouched.
