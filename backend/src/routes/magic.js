@@ -19,8 +19,18 @@ async function demoMode(req, res, next) {
 }
 
 router.get('/status', requireAuth, requireRole('SYSTEM_ADMIN'), demoMode, async function (req, res) {
-  try { res.json(magic.status()); }
+  try { res.json(await magic.status()); }
   catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// The magic clock (slice 2): the world ages by `days`/`seconds`, then the date-driven workers run
+// immediately so consequences land while the audience watches. Undo = Reset; hence NO_BENCHMARK 409.
+router.post('/clock/advance', requireAuth, requireRole('SYSTEM_ADMIN'), demoMode, async function (req, res) {
+  try {
+    var b = req.body || {};
+    var seconds = b.seconds != null ? Number(b.seconds) : Number(b.days || 0) * 86400;
+    res.json(await magic.clockAdvance({ seconds: seconds }));
+  } catch (e) { res.status(e.status || 500).json({ error: e.message, code: e.code }); }
 });
 
 router.post('/benchmark', requireAuth, requireRole('SYSTEM_ADMIN'), demoMode, async function (req, res) {

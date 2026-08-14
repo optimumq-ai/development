@@ -50,12 +50,19 @@ the groundwork facts are recorded below so nothing is re-discovered.
   compromised admin token can conjure the magic surface onto a production install.
   **Go-live/hardening note: flipping demo_mode OFF joins the go-live checklist.**
 
-## Magic clock (slice 2 — NOT BUILT)
-`shiftDates(pool, -86400 × days)` against the LIVE demo db (no rebuild — the clock mutates the
-running world; Reset is the safety net beneath it) + a worker poke after each tick + an accumulated
-`magic_clock_offset` in system_config (the synthetic date = real now + offset; Reset zeroes it).
-UI: hold-the-arrow advances (~1 day per press-and-hold cycle), analog clock + calendar per Kevin's
-visual; pace tuned so the engine's workers keep up (60s/day is acceptable — Kevin narrates over it).
+## Magic clock (slice 2 — engine BUILT 2026-08-14; UI ships with the screen shell)
+`POST /api/magic/clock/advance {days|seconds}` (same gates as reset): `shiftDates(appPool, −N)`
+against the LIVE demo db (no rebuild — the clock mutates the running world; Reset is the safety net
+beneath it, and the clock REFUSES 409 NO_BENCHMARK when none exists — aging the world with no way
+back is data loss, not a demo). After each tick the date-driven workers run IMMEDIATELY, each
+isolated: `tickler.runSweep` (deadline flags + nonpayment dunning/closure + clarification
+timeouts), `massJobs.tick` (nightly window), `effectiveConfig.promoteDue` (scheduled config),
+`taskRouting.reconcileStageTasks` — so consequences land while the audience watches, not on the
+next interval. Accumulated advance in system_config `magic_clock_offset`; `GET /magic/status`
+serves `syntheticNow` (real now + offset) for the screen's clock face; Reset zeroes the key.
+Advances bounded 1 min–90 days per call. UI (with the shell): hold-the-arrow advances, analog
+clock + calendar per Kevin's visual; pace tuned so the workers keep up (60s/day acceptable —
+Kevin narrates over it).
 
 ## Role switch (slice 3 — NOT BUILT, ships with the screen shell)
 Curated cast on the screen (legal · ORO head · finance · estimator · searcher · redactor · ORO

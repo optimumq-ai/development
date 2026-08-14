@@ -137,11 +137,51 @@ async function submit(email, desc) {
       grew === after.task_events + 1);
   } else { ok('D2 SKIPPED — no assignable task in world (counts as fail to force a look)', false); }
 
-  console.log('\n=== E. LEAVE THE WORLD AT ITS BENCHMARK ===');
+  console.log('\n=== E. RESTORE, THEN THE CLOCK (slice 2) — a day passes = the data ages a day ===');
   var out0 = await magic.reset({ deltaSeconds: 0 });
   var aFinal = await db.get('SELECT created_at FROM requests WHERE id = ?', [reqA.id]);
-  ok('E1 a delta-0 reset restores the benchmark EXACTLY (dates unshifted) — the world later harnesses get',
+  ok('E1 a delta-0 reset restores the benchmark EXACTLY (dates unshifted)',
     out0.deltaSeconds === 0 && aFinal.created_at === atBench.aCreated &&
+    (await db.get('SELECT count(*)::int n FROM requests')).n === atBench.requests);
+
+  console.log('\n=== F. THE MAGIC CLOCK ===');
+  var META = '/opt/optimumq/backend/data/benchmarks/optimumq_test.meta.json';
+  fs.renameSync(META, META + '.aside');
+  var noBench = await call(ADMIN, 'POST', '/magic/clock/advance', { days: 1 });
+  fs.renameSync(META + '.aside', META);
+  ok('F1 with no benchmark the clock REFUSES — aging the world with no way back is data loss (409)',
+    noBench.status === 409 && noBench.body.code === 'NO_BENCHMARK');
+  var tooBig = await call(ADMIN, 'POST', '/magic/clock/advance', { days: 400 });
+  ok('F2 an absurd advance is refused in words (422)', tooBig.status === 422 && tooBig.body.code === 'BAD_ADVANCE');
+
+  var clockBefore = await db.get('SELECT started_at FROM request_clocks WHERE request_id = ? LIMIT 1', [reqA.id]);
+  var adv = await call(ADMIN, 'POST', '/magic/clock/advance', { days: 2 });
+  ok('F3 a 2-day advance runs, reports the shift, and POKES the workers (tickler actions present)',
+    adv.status === 200 && adv.body.advancedSeconds === 172800 && adv.body.offsetSeconds === 172800 &&
+    adv.body.shift.shifted > 0 && adv.body.workers && typeof adv.body.workers.tickler === 'object');
+  var aAged = await db.get('SELECT created_at FROM requests WHERE id = ?', [reqA.id]);
+  var expAged = new Date(new Date(atBench.aCreated.replace(' ', 'T') + 'Z').getTime() - 172800000)
+    .toISOString().slice(0, 19).replace(' ', ' ').replace('T', ' ');
+  ok('F4 the resident AGED two days (created_at moved back — every relative display now reads +2d)',
+    aAged.created_at === expAged);
+  if (clockBefore) {
+    var clockAged = await db.get('SELECT started_at FROM request_clocks WHERE request_id = ? LIMIT 1', [reqA.id]);
+    var expClock = new Date(new Date(clockBefore.started_at.replace(' ', 'T') + 'Z').getTime() - 172800000)
+      .toISOString().slice(0, 19).replace('T', ' ');
+    ok('F5 the statutory clock anchor aged with it — respond-by is now 2 days closer, the demo\'s core promise',
+      clockAged.started_at === expClock);
+  } else { ok('F5 SKIPPED — resident carries no clock (counts as fail to force a look)', false); }
+  var st2 = await call(ADMIN, 'GET', '/magic/status');
+  ok('F6 status carries the synthetic date (real now + offset) for the screen\'s clock face',
+    st2.status === 200 && st2.body.clockOffsetSeconds === 172800 &&
+    Math.abs(new Date(st2.body.syntheticNow).getTime() - (Date.now() + 172800000)) < 60000);
+
+  console.log('\n=== G. RESET IS THE CLOCK\'S UNDO — and leaves the world at its benchmark ===');
+  var outG = await magic.reset({ deltaSeconds: 0 });
+  var stG = await call(ADMIN, 'GET', '/magic/status');
+  var aG = await db.get('SELECT created_at FROM requests WHERE id = ?', [reqA.id]);
+  ok('G1 reset restores the benchmark AND zeroes the clock — back in sync with real time',
+    outG.deltaSeconds === 0 && stG.body.clockOffsetSeconds === 0 && aG.created_at === atBench.aCreated &&
     (await db.get('SELECT count(*)::int n FROM requests')).n === atBench.requests);
 
   console.log('\n  ' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');

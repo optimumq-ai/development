@@ -7623,3 +7623,37 @@ gone, counts exact, API 200 through the swap. Probe markers purged; a CLEAN benc
 Slice 2 the magic clock (shiftDates negative + worker pokes + clock/calendar UI) · slice 3 role
 switch + the /magic screen shell (MOCKUP FIRST — Kevin decides visually) · then request purge +
 scenario authoring + the real benchmark.
+
+## 2026-08-14 (f) — MAGIC CLOCK SHIPPED (slice 2): a day passes = the data ages a day
+
+### Built
+`POST /api/magic/clock/advance {days|seconds}` (same gates as reset; bounded 1min–90d):
+`shiftDates(appPool, −N)` against the RUNNING demo db, then the date-driven workers run
+IMMEDIATELY, each isolated — `tickler.runSweep` (THE funnel: estimate lapse incl. lapsed_at,
+deposit overdue/withdraw, stall, chained nonpayment dunning/closure + clarification timeout),
+`massJobs.tick`, `effectiveConfig.promoteDue`, `reconcileStageTasks` — so consequences land while
+the audience watches. Accumulated `magic_clock_offset` in system_config; `GET /magic/status`
+serves `syntheticNow` for the future clock face. **Advance REFUSES 409 NO_BENCHMARK when no
+benchmark exists** (aging the world with no undo is data loss, not a demo); **Reset zeroes the
+clock** (the key is deleted in the build before the swap).
+
+### The time-behavior map (Kevin asked; verified, in the design doc's terms)
+Class 1 request-state consequences — ALL funnel through the tickler (verified: it is lapsed_at's
+only writer). Class 2 own-scheduler workers — the clock pokes the demo-relevant ones. Class 3
+computed-on-read (statutory clocks, budgets, elapsed, link/session expiry) — correct the instant
+the data ages, no poke needed. Stray found: `overdue_alert_days`/`escalation_days` are allowlisted
+config keys with ZERO readers (v1 remnant; cleanup candidate).
+
+### Evidence
+`verify_magic_reset` **24/24** (adds: NO_BENCHMARK refusal · BAD_ADVANCE bounds · 2-day advance
+ages created_at AND the statutory clock anchor exactly · workers poked with tickler actions in the
+response · status carries syntheticNow · reset zeroes the offset and restores byte-exact).
+**Full suite 2190/2190, live untouched, exit 0.** **LIVE probe**: advance 2d in 1.55s (14,663
+values; sample request 07-19 → 07-17; syntheticNow 08-16; tickler swept — zeros on this stale
+corpus, honestly), reset restored with offset 0 and the benchmark's relative ages preserved to the
+second (+18min = exactly the benchmark's age). API alive throughout.
+
+### Next
+Slice 3: the /magic screen shell — role switch + the clock/calendar visuals. MOCKUP FIRST (Kevin
+decides visually): hold-the-arrow advance, analog clock + calendar with the date highlighting.
+Then: request purge → scenario authoring with the clock → the real benchmark.

@@ -136,11 +136,17 @@ async function benchmark(opts) {
   } finally { await pool.end(); }
 }
 
-function status() {
+async function status() {
   var name = dbName(dbUrl());
-  if (!fs.existsSync(metaFile(name))) return { db: name, benchmark: null };
-  try { return { db: name, benchmark: JSON.parse(fs.readFileSync(metaFile(name), 'utf8')) }; }
-  catch (e) { return { db: name, benchmark: null, error: 'benchmark meta unreadable' }; }
+  var offset = 0;
+  try { offset = await clockOffset(); } catch (e) {}
+  var out = { db: name, benchmark: null,
+    clockOffsetSeconds: offset,
+    syntheticNow: new Date(Date.now() + offset * 1000).toISOString() };
+  if (!fs.existsSync(metaFile(name))) return out;
+  try { out.benchmark = JSON.parse(fs.readFileSync(metaFile(name), 'utf8')); }
+  catch (e) { out.error = 'benchmark meta unreadable'; }
+  return out;
 }
 
 // ── THE DATE-SHIFTER (shared with the magic clock, slice 2) ─────────────────────────────────────
@@ -231,6 +237,10 @@ async function reset(opts) {
       await build.query("SELECT setval('" + seqs[s].seq + "', COALESCE((SELECT MAX(\"" + seqs[s].column_name + "\") FROM \"" + seqs[s].table_name + "\"), 0) + 1, false)");
     }
 
+    // 4b. The magic clock zeroes on reset (design rule): whatever offset the snapshot carried, the
+    //     restored world is back in sync with real time — absent key = zero.
+    await build.query("DELETE FROM system_config WHERE key = 'magic_clock_offset'");
+
     // 5. The shift — against the build, nothing else connected. Fails here → live untouched.
     var shift = await shiftDates(build, deltaSeconds);
     await build.end(); build = null;
@@ -254,5 +264,52 @@ async function reset(opts) {
   }
 }
 
+// ── THE MAGIC CLOCK (slice 2): "a day passes" = the data ages a day ─────────────────────────────
+// The inversion the design is built on: system time never moves; every date shifts BACK by the
+// advance, then the scheduled workers run IMMEDIATELY so consequences (overdue flags, clarification
+// timeouts, nonpayment dunning/closure, nightly batches, scheduled config promotions) land while
+// the audience watches instead of on the next interval tick. The accumulated advance lives in
+// system_config `magic_clock_offset` (seconds); the synthetic date = real now + offset. Reset is
+// the clock's undo — it restores the benchmark and zeroes the offset — so advancing REQUIRES a
+// benchmark to exist: aging the world with no way back is not a demo, it is data loss.
+async function clockAdvance(opts) {
+  opts = opts || {};
+  var seconds = Math.round(Number(opts.seconds) || 0);
+  if (!(seconds >= 60 && seconds <= 90 * 86400)) {
+    var eR = new Error('Advance between one minute and 90 days at a time.'); eR.code = 'BAD_ADVANCE'; eR.status = 422; throw eR;
+  }
+  var name = dbName(dbUrl());
+  if (!fs.existsSync(metaFile(name))) {
+    var eB = new Error('The clock’s undo is Reset — take a benchmark before advancing time.');
+    eB.code = 'NO_BENCHMARK'; eB.status = 409; throw eB;
+  }
+  var db = require('../db');
+  var pool = db.getDb();
+  var shift = await shiftDates(pool, -seconds);
+  await db.run(
+    "INSERT INTO system_config (key, value) VALUES ('magic_clock_offset', ?) " +
+    "ON CONFLICT (key) DO UPDATE SET value = ((COALESCE(NULLIF(system_config.value,''),'0'))::bigint + EXCLUDED.value::bigint)::text",
+    [String(seconds)]);
+  // Poke every date-driven worker, each isolated — one failing sweep must not hide the others.
+  var workers = {};
+  try { workers.tickler = (await require('./tickler').runSweep({ trigger: 'magic_clock' })).actions; }
+  catch (e) { workers.tickler = { error: e.message }; }
+  try { workers.massJobs = await require('./massJobs').tick({}); }
+  catch (e) { workers.massJobs = { error: e.message }; }
+  try { workers.configPromotions = await require('./effectiveConfig').promoteDue({ trigger: 'magic_clock' }); }
+  catch (e) { workers.configPromotions = { error: e.message }; }
+  try { await require('./taskRouting').reconcileStageTasks(); workers.stageTasks = 'reconciled'; }
+  catch (e) { workers.stageTasks = { error: e.message }; }
+  return { advancedSeconds: seconds, offsetSeconds: await clockOffset(), shift: shift, workers: workers };
+}
+
+async function clockOffset() {
+  var db = require('../db');
+  var row = await db.get("SELECT value FROM system_config WHERE key = 'magic_clock_offset'");
+  var n = row ? parseInt(row.value, 10) : 0;
+  return isFinite(n) ? n : 0;
+}
+
 module.exports = { benchmark: benchmark, reset: reset, status: status, shiftDates: shiftDates,
+  clockAdvance: clockAdvance, clockOffset: clockOffset,
   _internals: { tableOrder: tableOrder, dbName: dbName } };
