@@ -35,6 +35,9 @@ const ALL = [
   'verify_bw8_release_review', 'verify_bw9_golive', 'verify_bw9b_editors', 'verify_status_check',
   'verify_record_verification', 'verify_ops_dashboard', 'verify_health_scoring',
   'verify_e2e_tx', 'verify_e2e_oh',
+  // LAST on purpose: it benchmarks, SWAPS, and restores the test database — the world it leaves is
+  // its own benchmark, but nothing else should have to run after a database swap.
+  'verify_magic_reset',
 ];
 
 const args = process.argv.slice(2);

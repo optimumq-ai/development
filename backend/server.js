@@ -50,6 +50,7 @@ app.use('/api/dispositions', require('./src/routes/dispositions'));
 app.use('/api/mrr', require('./src/routes/mrr'));
 app.use('/api/parent-finance', require('./src/routes/parentFinance'));
 app.use('/api/legal-estimate', require('./src/routes/legalEstimate'));
+app.use('/api/magic', require('./src/routes/magic'));
 app.use('/api/notifications', require('./src/routes/notifications'));
 app.use('/api/tickler', require('./src/routes/tickler'));
 app.use('/api/clocks', require('./src/routes/clocks'));

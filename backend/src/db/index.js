@@ -19,6 +19,15 @@ function connString() {
 }
 async function initDb() {
   pool = new Pool({ connectionString: connString() });
+  // An idle client dying — a Postgres restart, or pg_terminate_backend during a magic-demo
+  // reset/swap — must not kill the PROCESS. Without this listener node-pg's pool 'error' event is
+  // unhandled and the whole API crashes (found 2026-08-14: the API died the moment the magic reset
+  // terminated its idle connections). The pool discards the dead client and dials fresh on the next
+  // query; in-flight queries on a terminated connection fail individually to their callers, which
+  // is the honest outcome during a database swap.
+  pool.on('error', function (e) {
+    console.error('[db pool] idle client error (recovering):', e && e.message);
+  });
   const schema = fs.readFileSync(SCHEMA_PATH, 'utf8');
   await pool.query(schema);
   console.log('Database initialized (Postgres)');

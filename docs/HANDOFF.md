@@ -7579,3 +7579,47 @@ aging clock, role switch; state-switching PARKED by Kevin for later). TX jurisdi
 out to be fully attested since 2026-08-01 — the "mock config + attestation" ask was already done;
 this display fix was the only real gap found. NEXT: magic screen slice 1 (benchmark + reset + the
 date-shifter).
+
+## 2026-08-14 (e) — MAGIC SCREEN slice 1 SHIPPED: benchmark + reset + the date-shifter (`8fcb7dc`)
+
+### The project (new: docs/DESIGN_magic_screen.md — read it first)
+Kevin's demo/test mode (magicscreen.doc): /magic screen with Reset-to-benchmark (RELATIVE dates
+preserved), a "magic clock" that visibly ages the world, role switch. Two agreed inversions anchor
+the design: (1) the clock AGES THE DATA (shift back + poke workers), never moves system time;
+(2) the clock is also the AUTHORING tool for the ~10 benchmark scenarios (real portal + real
+screens + clock advances, then Benchmark). State-switching (TX→OK) is PARKED by Kevin — the
+groundwork facts (32-state research DONE, importer lists 32 templates, TX+OH imported, TX attested)
+are recorded in the design doc so nothing is re-learned.
+
+### Built (slice 1)
+- `services/magicDemo.js`: **benchmark** (full SQL snapshot, FK-topological order, self-ref tables
+  parent-NULLS-first, secrets included, server-local `data/benchmarks/`), **reset** =
+  build-beside-swap (schema-from-empty on `<db>_magicbuild` — the reset_test_db pathway — snapshot
+  load with tasks triggers held off, sequences re-synced, DATE SHIFT by now−taken_at, then two
+  renames; failure before the swap leaves the running db untouched; one `_prereset` undo generation
+  survives), **shiftDates** exported alone (slice 2's clock = negative delta).
+- Routes `/api/magic/{status,benchmark,reset}`: demo_mode='1' (absent ⇒ 404 — the surface does not
+  EXIST off-demo; the key is deliberately NOT settable via any API, server access only) +
+  SYSTEM_ADMIN + confirm:true on reset.
+- **Stray-table guard**: benchmark REFUSES in words (409 STRAY_TABLES) if the db carries tables the
+  schema can't rebuild — found live: `poc_request`/`poc_request_child` (July spike leftovers, zero
+  code refs, 9 rows archived to `exchange/poc_tables_archive.json`, then dropped).
+- **Product fix that mattered beyond magic**: the db pool had NO 'error' listener — ANY terminated
+  idle client (Postgres restart included) killed the whole API process. Found because the reset's
+  pg_terminate_backend did exactly that to the test API. Fixed in src/db/index.js (and the index.pg
+  twin). ⚠️ The FIRST patch went to index.pg.js — the LEGACY twin; src/db/index.js is the live
+  module. Check which db file is actually required before patching "the" pool.
+
+### Evidence
+`verify_magic_reset` **17/17** (gate 404/403; stray refusal; snapshot; confirm-required; intruder
+gone; counts exact; task_events NOT doubled; created_at shifted exactly +1 day; date-only format
+kept; API survives the swap; sequences continue; delta-0 restores byte-exact). **Full suite
+2183/2183, live untouched, exit 0.** **LIVE reset probed end-to-end**: benchmark (84 tables, 10,688
+rows) → marker submitted → reset 200 in 7.9s (14,681 values shifted across 73 columns) → marker
+gone, counts exact, API 200 through the swap. Probe markers purged; a CLEAN benchmark
+(13 requests) is in place. demo_mode=1 set on this box (operator write).
+
+### Next (the design doc's slice order)
+Slice 2 the magic clock (shiftDates negative + worker pokes + clock/calendar UI) · slice 3 role
+switch + the /magic screen shell (MOCKUP FIRST — Kevin decides visually) · then request purge +
+scenario authoring + the real benchmark.
