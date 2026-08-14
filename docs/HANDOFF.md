@@ -7445,3 +7445,36 @@ in Staff Management (David Okafor held it only for the probe, then restored).
 Design slices 2 (engine Legal line + Accept), 3 (`legal_rt` intake trigger), 4 (MRR hub ask) remain.
 Follow-ons: chat-agent model upgrade · v3 collapse · search-activity tracking. Plus hardening,
 testing/demo, go-live flip, §6.2 glosses, §2.6/§8.3 stamping.
+
+## 2026-08-14 (a) — legal hours in the estimate, slice 2 SHIPPED: the engine's Legal review line
+
+### Built (DESIGN_legal_hours_estimate.md slice 2, both Kevin forks honored)
+- **`legalHours`** is a fourth labor driver. `feeEngine.legalLaborConfig` resolves its EFFECTIVE
+  config — review's entire config (rate, increment, rounding, billable, billableWhen, citations)
+  under any explicit `labor.legal.*` — computed AFTER the purpose merge so commercial flips carry.
+  Free-hours order search → review → legal → programming (identical behavior at legalHours 0).
+- **Notice**: its own line, "Legal review of the records: N hours at $X/hour = $Y" (Kevin's fork 2).
+- **Chargeability**: the `legal` builder box judges the same effective config (shared helper), so
+  the boxes never disagree with what the engine prices; a legal-only prohibition hides only legal.
+- **Reconciliation pairing**: `applyMeasuredLabor` zeroes estimated `legalHours` on every component
+  (legal actuals already arrive inside measured review — leaving them would double-charge);
+  `estimatedHoursFromInput` folds legal into the review figure so the readout compares like pairs.
+- **Panel**: "Legal review hrs" field (chargeability-filtered) + **Accept into Legal review hrs** on
+  the answer banner — fills the FIRST component (mirroring where measured labor lands), estimator
+  still calculates and saves. The slice-1 "coming soon" copy is gone.
+
+### Evidence
+`verify_legal_line` **16/16** first run (inherit rate; rate/billable overrides diverge only legal;
+the TX 50-page paper bar bites and releases legal exactly as review; commercial carry-through;
+free-hours order; inherited rounding; per-request rate override by key; the notice line verbatim;
+reconcile zeroing + readout pairing; chargeability agreement incl. legal-only prohibition with
+citation). **Full suite 2152/2152, live untouched, exit 0** — run ALONE, build sequenced after
+(yesterday's lesson applied). Deployed (API 200, build compiled, nginx). **Live-probed**: ask →
+answer (4h) → Accept → Calculate → itemized "Legal review labor … $60.00", overhead $12, total $72
+(`exchange/legal_line_accepted_priced.png`); live notice text carries the exact line. David's
+grants snapshot-restored; probe family purged, zero residue.
+
+### The board
+Design slices 3 (`legal_rt` intake trigger) and 4 (MRR hub ask) remain. Then the standing list:
+chat-agent model upgrade · v3 collapse · search-activity tracking · hardening · testing/demo ·
+go-live flip · §6.2 glosses · §2.6/§8.3 stamping.

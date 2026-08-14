@@ -101,7 +101,22 @@ function deepMerge(base, ov) {
   return out;
 }
 
-var LABOR_ORDER = ['search', 'review', 'programming']; // order free hours are consumed in
+// Order free hours are consumed in. `legal` sits after review (it is review-family work — the same
+// place its ACTUALS already land via laborActuals.TASK_DRIVER) and before programming, so existing
+// profiles see identical behavior when legalHours is zero.
+var LABOR_ORDER = ['search', 'review', 'legal', 'programming'];
+
+// Effective config for the LEGAL labor driver (DESIGN_legal_hours_estimate.md slice 2): the review
+// driver's ENTIRE config — rate, increment, rounding, billable, billableWhen, citations — with any
+// explicit labor.legal.* laid over it. A city whose statute treats legal time differently sets
+// labor.legal to diverge; everyone else prices legal hours exactly as review (measure-always /
+// gate-chargeability). Null when neither driver is configured: no labor config means no legal
+// pricing, and the hours still live in input_json for the record.
+function legalLaborConfig(labor) {
+  labor = labor || {};
+  if (!labor.review && !labor.legal) return null;
+  return deepMerge(clone(labor.review) || {}, labor.legal || {});
+}
 
 // Per-driver labor billability: a hard non-billable flag (CA/NY/OH forbid labor charges) OR an all-or-nothing
 // trigger (TX: no labor until total pages exceed 50; FL/NY: no labor until total labor time exceeds a threshold).
@@ -155,6 +170,10 @@ function compute(profile, request) {
   var purposeApplied = false;
   if (purpose && purpose !== 'standard' && profile.purposeOverrides && profile.purposeOverrides[purpose]) { profile = deepMerge(profile, profile.purposeOverrides[purpose]); purposeApplied = true; }
   var labor = profile.labor || {};
+  // Resolve the legal driver AFTER the purpose merge above, so a commercial override that flips
+  // review's billability carries to legal the same way.
+  var legalCfg = legalLaborConfig(labor);
+  if (legalCfg) labor = Object.assign({}, labor, { legal: legalCfg });
   var dup = profile.duplication || {};
   var media = profile.media || {};
   var av = profile.av || {};
@@ -168,7 +187,7 @@ function compute(profile, request) {
   function laborRate(k) { var ov = rateOv[k]; return (ov != null && ov !== '') ? num(ov) : num((labor[k] || {}).rate); }
 
   var i, k;
-  var agg = { search: 0, review: 0, programming: 0, bw: 0, color: 0, oversized: 0 };
+  var agg = { search: 0, review: 0, legal: 0, programming: 0, bw: 0, color: 0, oversized: 0 };
   var mediaAgg = {};
   var avAgg = { recordings: 0, minutes: 0 };
   var compOut = [];
@@ -177,7 +196,7 @@ function compute(profile, request) {
     var cfg = labor[kind]; hours = num(hours);
     if (!cfg || hours <= 0) return null;
     var rate = laborRate(kind);
-    return { kind: kind + '_labor', description: capWord(kind) + ' labor', unit: 'hour', quantity: hours, rate: rate, amount: r2(hours * rate) };
+    return { kind: kind + '_labor', description: kind === 'legal' ? 'Legal review labor' : capWord(kind) + ' labor', unit: 'hour', quantity: hours, rate: rate, amount: r2(hours * rate) };
   }
   function dupGross(kind, pages) {
     var cfg = dup[kind]; pages = num(pages);
@@ -193,6 +212,7 @@ function compute(profile, request) {
     var items = [], gross = 0, ln;
     ln = laborGross('search', q.searchHours); if (ln) { items.push(ln); gross += ln.amount; agg.search += num(q.searchHours); }
     ln = laborGross('review', q.reviewHours); if (ln) { items.push(ln); gross += ln.amount; agg.review += num(q.reviewHours); }
+    ln = laborGross('legal', q.legalHours); if (ln) { items.push(ln); gross += ln.amount; agg.legal += num(q.legalHours); }
     ln = laborGross('programming', q.programmingHours); if (ln) { items.push(ln); gross += ln.amount; agg.programming += num(q.programmingHours); }
     ln = dupGross('bw', q.bwPages); if (ln) { items.push(ln); gross += ln.amount; agg.bw += num(q.bwPages); }
     ln = dupGross('color', q.colorPages); if (ln) { items.push(ln); gross += ln.amount; agg.color += num(q.colorPages); }
@@ -221,7 +241,7 @@ function compute(profile, request) {
   grossSubtotal = r2(grossSubtotal);
 
   // ---- request-level: free labor hours consumed in order, then increment-rounded + priced ----
-  var billable = { search: agg.search, review: agg.review, programming: agg.programming };
+  var billable = { search: agg.search, review: agg.review, legal: agg.legal, programming: agg.programming };
   var remainingFree = num(rules.freeLaborHours);
   for (i = 0; i < LABOR_ORDER.length && remainingFree > 0; i++) {
     k = LABOR_ORDER[i];
@@ -230,7 +250,7 @@ function compute(profile, request) {
     remainingFree = r4(remainingFree - take);
   }
   var totalPages = num(agg.bw) + num(agg.color) + num(agg.oversized);
-  var totalLaborHours = num(agg.search) + num(agg.review) + num(agg.programming);
+  var totalLaborHours = num(agg.search) + num(agg.review) + num(agg.legal) + num(agg.programming);
   // Delivery drives the labor gate's paper-only scope (§ 552.261(a)), so it must be known BEFORE labor is
   // priced -- not just at the delivery line below.
   var deliveryMethod = (request && request.delivery && request.delivery.method) || null;
@@ -391,4 +411,4 @@ function compute(profile, request) {
   };
 }
 
-module.exports = { compute: compute, roundHours: roundHours };
+module.exports = { compute: compute, roundHours: roundHours, legalLaborConfig: legalLaborConfig };

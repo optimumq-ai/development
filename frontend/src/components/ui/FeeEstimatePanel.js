@@ -97,7 +97,7 @@ export default function FeeEstimatePanel(props) {
         var pq = (prev && prev.quantities) || fromProfile || {};
         var m = (pq.media && pq.media[0]) || {};
         var hasSource = !!(prev || fromProfile);
-        init[c.id] = { searchHours: pq.searchHours || 0, reviewHours: pq.reviewHours || 0, bwPages: (hasSource ? (pq.bwPages || 0) : ((c.suggested && c.suggested.hasKnown) ? c.suggested.knownPages : 0)), colorPages: pq.colorPages || 0, oversizedPages: pq.oversizedPages || 0, mediaType: m.type || 'cd', mediaCount: m.count || 0, avRecordings: (pq.av && pq.av.recordings) || 0, avMinutes: (pq.av && pq.av.minutes) || 0 };
+        init[c.id] = { searchHours: pq.searchHours || 0, reviewHours: pq.reviewHours || 0, legalHours: pq.legalHours || 0, bwPages: (hasSource ? (pq.bwPages || 0) : ((c.suggested && c.suggested.hasKnown) ? c.suggested.knownPages : 0)), colorPages: pq.colorPages || 0, oversizedPages: pq.oversizedPages || 0, mediaType: m.type || 'cd', mediaCount: m.count || 0, avRecordings: (pq.av && pq.av.recordings) || 0, avMinutes: (pq.av && pq.av.minutes) || 0 };
       });
       setQty(init);
       setPrefilled(pf);
@@ -123,7 +123,7 @@ export default function FeeEstimatePanel(props) {
     try {
       var comps = (ctx.components || []).map(function (c) {
         var q = qty[c.id] || {};
-        var quant = { searchHours: num(q.searchHours), reviewHours: num(q.reviewHours), bwPages: num(q.bwPages), colorPages: num(q.colorPages), oversizedPages: num(q.oversizedPages) };
+        var quant = { searchHours: num(q.searchHours), reviewHours: num(q.reviewHours), legalHours: num(q.legalHours), bwPages: num(q.bwPages), colorPages: num(q.colorPages), oversizedPages: num(q.oversizedPages) };
         if (num(q.mediaCount) > 0) quant.media = [{ type: q.mediaType, count: num(q.mediaCount) }];
         if (num(q.avRecordings) > 0 || num(q.avMinutes) > 0) quant.av = { recordings: num(q.avRecordings), minutes: num(q.avMinutes) };
         return { id: c.id, label: c.label, recordType: c.recordType, quantities: quant };
@@ -322,7 +322,7 @@ export default function FeeEstimatePanel(props) {
     try {
       var comps = (ctx.components || []).map(function (c) {
         var q = qty[c.id] || {};
-        var quant = { searchHours: num(q.searchHours), reviewHours: num(q.reviewHours), bwPages: num(q.bwPages), colorPages: num(q.colorPages), oversizedPages: num(q.oversizedPages) };
+        var quant = { searchHours: num(q.searchHours), reviewHours: num(q.reviewHours), legalHours: num(q.legalHours), bwPages: num(q.bwPages), colorPages: num(q.colorPages), oversizedPages: num(q.oversizedPages) };
         if (num(q.mediaCount) > 0) quant.media = [{ type: q.mediaType, count: num(q.mediaCount) }];
         if (num(q.avRecordings) > 0 || num(q.avMinutes) > 0) quant.av = { recordings: num(q.avRecordings), minutes: num(q.avMinutes) };
         return { id: c.id, label: c.label, recordType: c.recordType, quantities: quant };
@@ -372,10 +372,20 @@ export default function FeeEstimatePanel(props) {
         </div>
       ) : null}
       {legalAsk && legalAsk.answer ? (
-        <div style={{ background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: '8px', padding: '10px 14px', marginBottom: '12px', fontSize: '12.5px', color: '#166534', lineHeight: 1.5 }}>
-          <strong>Legal&rsquo;s answer: {legalAsk.answer.hours} hour{legalAsk.answer.hours === 1 ? '' : 's'}</strong>
-          {legalAsk.answer.entered_by_name ? ' (from ' + legalAsk.answer.entered_by_name + ')' : ''} &mdash; &ldquo;{legalAsk.answer.note}&rdquo;.
-          Use it in your pricing as your judgment; a dedicated Legal review line on the estimate is coming.
+        <div style={{ background: '#F0FDF4', border: '1px solid #86EFAC', borderRadius: '8px', padding: '10px 14px', marginBottom: '12px', fontSize: '12.5px', color: '#166534', lineHeight: 1.5, display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          <span style={{ flex: 1, minWidth: '240px' }}>
+            <strong>Legal&rsquo;s answer: {legalAsk.answer.hours} hour{legalAsk.answer.hours === 1 ? '' : 's'}</strong>
+            {legalAsk.answer.entered_by_name ? ' (from ' + legalAsk.answer.entered_by_name + ')' : ''} &mdash; &ldquo;{legalAsk.answer.note}&rdquo;.
+          </span>
+          <button onClick={function () {
+            // Accepting is an act, not an automatic merge (the estimator stays the author). The hours
+            // land on the FIRST component — legal review is request-level work, and this mirrors where
+            // measured labor lands at reconciliation (laborActuals.applyMeasuredLabor).
+            var first = (ctx.components || [])[0];
+            if (first) { setQ(first.id, 'legalHours', legalAsk.answer.hours); setResult(null); }
+          }} style={{ flexShrink: 0, padding: '7px 14px', borderRadius: '8px', border: 'none', background: '#166534', color: 'white', fontSize: '12px', fontWeight: 700, cursor: 'pointer' }}>
+            Accept into Legal review hrs
+          </button>
         </div>
       ) : null}
       <div style={{ marginBottom: '14px' }}>
@@ -435,7 +445,7 @@ export default function FeeEstimatePanel(props) {
                     because a vanished field reads as a bug. Only an EXPLICIT prohibition filters — an
                     unconfigured rate still renders (see services/chargeability.js). */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-                  {[['searchHours', 'Search hrs'], ['reviewHours', 'Review/redaction hrs'], ['bwPages', 'B&W pages'], ['colorPages', 'Color pages'], ['oversizedPages', 'Oversized pages']].filter(function (f) { return chargeable(f[0]); }).map(function (f) {
+                  {[['searchHours', 'Search hrs'], ['reviewHours', 'Review/redaction hrs'], ['legalHours', 'Legal review hrs'], ['bwPages', 'B&W pages'], ['colorPages', 'Color pages'], ['oversizedPages', 'Oversized pages']].filter(function (f) { return chargeable(f[0]); }).map(function (f) {
                     var ck = kindFor(f[0]);
                     return <div key={f[0]}><label style={lbl}>{f[1]}</label><input type="number" step="any" value={q[f[0]]} onChange={function (e) { setQ(c.id, f[0], e.target.value === '' ? 0 : parseFloat(e.target.value)); }} style={inp} />{ck && ck.reason === 'conditional' ? <div style={{ fontSize: '10px', color: '#92400E', marginTop: '2px' }}>{ck.text}{ck.citation ? ' (' + ck.citation + ')' : ''}</div> : null}</div>;
                   })}

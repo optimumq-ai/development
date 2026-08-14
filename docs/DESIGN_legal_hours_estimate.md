@@ -89,9 +89,13 @@ expertise contribute expected hours to a quote.
    (`legal_estimate_inputs`), task type + hand-assign spawn route (`/api/legal-estimate`), the thin
    task screen + TASK_SCREEN entry, estimate-panel ask modal + pending/answer banners, soft
    pending-ask warning (display only — Accept waits for slice 2's `legalHours` field).
-2. **The engine line:** `legalHours` quantity, `labor.legal` inherit-with-override, notice line,
-   free-hours order, reconciliation pairing, panel Accept-pre-fill from the answer banner.
-   (extend `verify_fee_labor_gate` family)
+2. **The engine line** `[BUILT 2026-08-13 — verify_legal_line]`: `legalHours` quantity priced as
+   `legal_labor` ("Legal review of the records" on the notice); `feeEngine.legalLaborConfig`
+   inherit-with-override (shared with chargeability so the builder's boxes agree with the engine);
+   free-hours order search → review → legal → programming; reconciliation pairing (applyMeasuredLabor
+   zeroes estimated legalHours; estimatedHoursFromInput folds legal into the review figure); panel
+   field + Accept-into-legalHours on the answer banner (first component, mirroring where measured
+   labor lands).
 3. **The deterministic trigger:** `legal_rt` intake_review trigger off `legal_redaction_required`
    with parent walk-up. (extend `verify_bw3_intake_review`)
 4. **MRR hub wiring:** parent-level ask button; `legalHours` on the master estimate form.

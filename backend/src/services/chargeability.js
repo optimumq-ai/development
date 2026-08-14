@@ -44,6 +44,7 @@ var FALLBACK_NOTES = {
 var LABOR_DRIVERS = [
   { key: 'search', field: 'searchHours', label: 'Search hours' },
   { key: 'review', field: 'reviewHours', label: 'Review / redaction hours' },
+  { key: 'legal', field: 'legalHours', label: 'Legal review hours' },
   { key: 'programming', field: 'programmingHours', label: 'Programming hours' }
 ];
 var DUP_KINDS = [
@@ -63,6 +64,10 @@ function citationFor(code, key, cfgCitation) {
 function fromConfig(config, code) {
   config = config || {};
   var labor = config.labor || {};
+  // The legal driver's chargeability is judged against its EFFECTIVE config — review's rules unless
+  // the city set labor.legal.* — so the builder's boxes agree with what the engine will price.
+  var legalCfg = require('./feeEngine').legalLaborConfig(labor);
+  if (legalCfg) labor = Object.assign({}, labor, { legal: legalCfg });
   var dup = config.duplication || {};
   var kinds = [];
 

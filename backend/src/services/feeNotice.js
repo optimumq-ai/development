@@ -6,7 +6,7 @@
 function money(n) { return '$' + (Number(n) || 0).toFixed(2); }
 function hrLabel(n) { n = Number(n) || 0; return n + (n === 1 ? ' hour' : ' hours'); }
 
-var LABOR_LABEL = { search_labor: 'Staff time to locate and compile records', review_labor: 'Staff time to review and prepare records', programming_labor: 'Programming / data extraction time' };
+var LABOR_LABEL = { search_labor: 'Staff time to locate and compile records', review_labor: 'Staff time to review and prepare records', legal_labor: 'Legal review of the records', programming_labor: 'Programming / data extraction time' };
 var DUP_LABEL = { dup_bw: 'Black-and-white copies', dup_color: 'Color copies', dup_oversized: 'Oversized copies' };
 
 // --- Payment-plan-aware requestor language (slice 3). Given a resolved paymentPlan

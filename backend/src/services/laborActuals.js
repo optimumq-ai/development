@@ -37,7 +37,10 @@ var TASK_DRIVER = {
 var BILLABLE_TASK_TYPES = Object.keys(TASK_DRIVER);
 // Active (non-terminal) task statuses — a billable task in one of these still has labor to come.
 var ACTIVE_STATUSES = ['open', 'assigned', 'in_progress', 'returned', 'awaiting_review'];
-// The engine's per-component quantity keys for the three labor drivers.
+// The engine's per-component quantity keys for the labor drivers. `legal` has no entry ON PURPOSE:
+// legal ACTUALS (legal_review / legal_redaction seconds) fold into `review` via TASK_DRIVER above,
+// so at reconcile the measured review hours REPLACE the estimated review+legal pair — apples to
+// apples at the total, and applyMeasuredLabor below zeroes the estimated legalHours accordingly.
 var DRIVER_QTY_KEY = { search: 'searchHours', review: 'reviewHours', programming: 'programmingHours' };
 
 function r4(n) { return Math.round((Number(n) || 0) * 10000) / 10000; }
@@ -93,13 +96,15 @@ async function remainingBillableCount(requestId, excludeTaskId) {
 }
 
 // The estimate's quoted labor hours, summed across components (request-level), for the estimate-vs-actual readout.
+// Estimated LEGAL hours fold into the review figure here: legal actuals are measured under `review`
+// (TASK_DRIVER), so review-estimated must mean review+legal or the readout compares mismatched pairs.
 function estimatedHoursFromInput(input) {
   var out = { searchHours: 0, reviewHours: 0, programmingHours: 0 };
   var comps = (input && input.components) || [];
   comps.forEach(function (c) {
     var q = (c && c.quantities) || {};
     out.searchHours += Number(q.searchHours) || 0;
-    out.reviewHours += Number(q.reviewHours) || 0;
+    out.reviewHours += (Number(q.reviewHours) || 0) + (Number(q.legalHours) || 0);
     out.programmingHours += Number(q.programmingHours) || 0;
   });
   return { searchHours: r4(out.searchHours), reviewHours: r4(out.reviewHours), programmingHours: r4(out.programmingHours) };
@@ -118,6 +123,9 @@ function applyMeasuredLabor(input, measuredHours) {
       var key = DRIVER_QTY_KEY[d];
       c.quantities[key] = (i === 0) ? (Number(measuredHours[key]) || 0) : 0;
     });
+    // Estimated legal hours are superseded by the measured review actuals (which already contain the
+    // legal work's seconds) — leaving them would double-charge the legal time at reconciliation.
+    c.quantities.legalHours = 0;
   });
   base._laborActuals = true;
   return base;
