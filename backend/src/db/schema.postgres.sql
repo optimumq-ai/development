@@ -423,6 +423,10 @@ CREATE TABLE IF NOT EXISTS mass_redaction_jobs (
   last_run_at TEXT
 );
 CREATE INDEX IF NOT EXISTS idx_mass_jobs_status ON mass_redaction_jobs(status, priority, created_at);
+-- Library destination: where this job's released output is shelved in the public library.
+-- Request-attached files keep their request's shelf; these cover request-less (ad-hoc/import) piles.
+ALTER TABLE mass_redaction_jobs ADD COLUMN IF NOT EXISTS record_type_id TEXT;
+ALTER TABLE mass_redaction_jobs ADD COLUMN IF NOT EXISTS department_id TEXT;
 
 -- Per-day shared compute budget counter (UTC date -> items processed that day across all jobs).
 CREATE TABLE IF NOT EXISTS mass_job_budget (

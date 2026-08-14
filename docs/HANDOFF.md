@@ -7786,3 +7786,52 @@ cities toward a curated, limited set of record-type buckets (predictable templat
 same-format piles, cleaner mass redaction), or stay open to a broad range of types? Touches the
 variant scan, mass-redaction templates, the library, and probably taxonomy design. Discussion
 first, no build.
+
+## 2026-08-14 (k) — library destination: every released record gets a SHELF a citizen can find
+
+### The discussion that opened the session (the parked limited-vs-broad question)
+Kevin's scenario: staff paste an ad-hoc pile somewhere, point mass redaction at it, publish — where
+does it land? Traced answer: NOWHERE browsable. fulfilled_records takes record_type_id/department_id
+ONLY from the parent request; request-less batches got NULL/NULL → the library's "Other →
+Uncategorized" junk drawer, and auto_publish (also read off the request) could never fire. No AI
+groups anything at the library — the browse tree is just two FK joins. Decision (Kevin): per-doc AI
+placement is the wrong grain; the shelf is a HUMAN decision made once per pile at the point of work,
+AI/template supplies the default. This mostly answers limited-vs-broad without new machinery: the
+effective public list stays naturally limited because mass output flows through templates bound to
+curated types; the internal 77-type taxonomy is untouched. Confirmed separate from the
+variant-discovery scan code — only shared object is layout_profiles.record_type_id (read, not changed).
+
+### Built (one slice)
+- `mass_redaction_jobs.record_type_id/department_id` (additive schema) + `services/libraryShelf.js`
+  (owner-department walk-up: variant → parent, same COALESCE the classifier routes with).
+- Job creation defaults the destination from the template's linked type + owner dept; explicit pick
+  wins; the job list names the shelf. The immediate apply-batch path takes the same destination.
+- `redactionApply.applyRedaction` + `structuredRedaction.applyFieldMap` accept a destination;
+  REQUEST VALUES ALWAYS WIN — destination fills only NULLs. auto_publish now reads the effective
+  type, so scheduled request-less batches can auto-publish (was structurally dead).
+- Publish gate: `POST /released/:id/publish` refuses unshelved records (plain-words 400); body may
+  shelve-and-publish in one step (dept resolvable from the type's owner routing). Unpublish free.
+  ReleasedRecordsPage: "No library section" pill + picker modal instead of a dead error.
+- Public browse rolls VARIANTS up to the parent bucket (`COALESCE(parent_record_type_id, ...)`);
+  drilling a bucket includes its variants' records. Processing-artifact names never become shelves.
+- UI: Mass Redaction compose gains the "Public library section" block (prefilled, with the honest
+  "can't publish without one" consequence line); job cards show their shelf.
+
+### Evidence
+`verify_library_destination` **18/18** (job defaults + override; stamp on request-less, request wins
+on conflict; auto_publish fires; publish 400 → shelve-and-publish 200; browse shows parent not
+variant; drill returns variant-stamped record). **Full suite 2212/2212, LIVE UNTOUCHED, exit 0.**
+Deployed (API restarted, build + nginx 200). Screenshots: `exchange/mass_job_destination.png`
+(compose modal with the destination block — record type prefilled from the template, dept honestly
+"Not set" since 911 Call Records has no owner routing row), `exchange/released_records_live.png`.
+Specs updated same commit: SPEC_public_library §2a + §3 roll-up note, SPEC_redaction §mass-queue.
+
+### Open threads
+- 911 Call Records (and likely others) have no `record_type_departments` owner row → dept defaults
+  to "Not set" in the compose UI. Worth a pass over the catalog's owner routing, or the shelf dept
+  default stays blank for those types.
+- Kevin will someday revisit the search/comparison (variant discovery) sampling skew — separate code,
+  unaffected by this slice.
+- Standing board unchanged: request purge + scenario authoring + real benchmark · state-switching
+  parked · chat-agent upgrade · v3 collapse · search-activity tracking · hardening · go-live flip ·
+  glosses/stamping.

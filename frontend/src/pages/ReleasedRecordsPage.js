@@ -12,7 +12,21 @@ export default function ReleasedRecordsPage() {
   var [q, setQ] = useState('');
   var [busy, setBusy] = useState({});
 
+  // Shelve-and-publish: publishing needs a public library section (department + record type).
+  // For records that arrived without one (ad-hoc batches), a small picker collects it first.
+  var [shelving, setShelving] = useState(null); // the record being shelved
+  var [depts, setDepts] = useState([]);
+  var [recTypes, setRecTypes] = useState([]);
+  var [shelfDept, setShelfDept] = useState('');
+  var [shelfRt, setShelfRt] = useState('');
+  var [shelfErr, setShelfErr] = useState('');
+  var [shelfBusy, setShelfBusy] = useState(false);
+
   useEffect(function () { load(); }, []);
+  useEffect(function () {
+    api.get('/departments').then(function (r) { setDepts(r.data.departments || []); }).catch(function () {});
+    api.get('/taxonomy/record-types').then(function (r) { setRecTypes(r.data.record_types || []); }).catch(function () {});
+  }, []);
   async function load() {
     setLoading(true);
     try { var r = await api.get('/redaction-jobs/released'); setRecords(r.data.records || []); } catch (e) { console.error(e); }
@@ -30,10 +44,26 @@ export default function ReleasedRecordsPage() {
   }
 
   async function togglePublish(r) {
+    if (!r.published && (!r.record_type_id || !r.department_id)) {
+      // No library section yet — collect one before publishing.
+      setShelving(r); setShelfDept(r.department_id || ''); setShelfRt(r.record_type_id || ''); setShelfErr('');
+      return;
+    }
     try {
       var resp = await api.post('/redaction-jobs/released/' + r.id + '/publish', { published: !r.published });
       setRecords(function (rs) { return rs.map(function (x) { return x.id === r.id ? Object.assign({}, x, { published: resp.data.published ? 1 : 0 }) : x; }); });
-    } catch (e) { alert('Could not update publication.'); }
+    } catch (e) { alert((e.response && e.response.data && e.response.data.error) || 'Could not update publication.'); }
+  }
+
+  async function shelveAndPublish() {
+    if (!shelfDept || !shelfRt) { setShelfErr('Pick both a department and a record type.'); return; }
+    setShelfBusy(true); setShelfErr('');
+    try {
+      await api.post('/redaction-jobs/released/' + shelving.id + '/publish', { published: true, record_type_id: shelfRt, department_id: shelfDept });
+      setShelving(null);
+      load();
+    } catch (e) { setShelfErr((e.response && e.response.data && e.response.data.error) || 'Could not publish the record.'); }
+    setShelfBusy(false);
   }
 
   var shown = records.filter(function (r) {
@@ -76,6 +106,7 @@ export default function ReleasedRecordsPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
           {shown.map(function (r) {
             var av = AVAIL[r.public_availability] || AVAIL.released;
+            var unshelved = !r.record_type_id || !r.department_id;
             return (
               <div key={r.id} style={{ background: 'white', border: '1px solid #E5E7EB', borderRadius: '12px', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px', boxShadow: '0 1px 3px rgba(0,0,0,.04)' }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
@@ -83,9 +114,10 @@ export default function ReleasedRecordsPage() {
                     <span style={{ fontWeight: '700', fontSize: '14.5px', color: '#1F4E79' }}>{r.title}</span>
                     <Pill bg={av.bg} fg={av.fg}>{av.label}</Pill>
                     {r.published ? <Pill bg="#DEF7EC" fg="#03543F">In public library</Pill> : <Pill bg="#F3F4F6" fg="#6B7280">Not published</Pill>}
+                    {unshelved && !r.published ? <Pill bg="#FEF3C7" fg="#92400E">No library section</Pill> : null}
                   </div>
                   <div style={{ fontSize: '12px', color: '#9CA3AF' }}>
-                    {r.record_type_name ? r.record_type_name + ' \u00b7 ' : ''}{r.department_name ? r.department_name + ' \u00b7 ' : ''}{r.page_count ? r.page_count + ' page' + (r.page_count !== 1 ? 's' : '') + ' \u00b7 ' : ''}{r.released_at ? 'released ' + (r.released_at || '').slice(0, 10) : ''}
+                    {r.record_type_name ? r.record_type_name + ' · ' : ''}{r.department_name ? r.department_name + ' · ' : ''}{r.page_count ? r.page_count + ' page' + (r.page_count !== 1 ? 's' : '') + ' · ' : ''}{r.released_at ? 'released ' + (r.released_at || '').slice(0, 10) : ''}
                   </div>
                 </div>
                 <button onClick={function () { togglePublish(r); }}
@@ -98,6 +130,36 @@ export default function ReleasedRecordsPage() {
           {shown.length === 0 ? <div style={{ padding: '24px', textAlign: 'center', color: '#9CA3AF' }}>No records match your search.</div> : null}
         </div>
       )}
+
+      {shelving ? (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(17,24,39,.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 60 }}>
+          <div style={{ background: 'white', borderRadius: '14px', width: '440px', maxWidth: '92vw', boxShadow: '0 12px 40px rgba(0,0,0,.18)' }}>
+            <div style={{ padding: '18px 22px 0' }}>
+              <div style={{ fontSize: '16px', fontWeight: '700', color: '#111', marginBottom: '4px' }}>Pick a public library section</div>
+              <div style={{ fontSize: '12.5px', color: '#6B7280', lineHeight: 1.55 }}>
+                &ldquo;{shelving.title}&rdquo; was released without a library section, so citizens would have no place to find it. Choose the department and record type it belongs under, and it will be published there.
+              </div>
+            </div>
+            <div style={{ padding: '16px 22px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#6B7280', marginBottom: '4px' }}>Department</label>
+              <select value={shelfDept} onChange={function (e) { setShelfDept(e.target.value); }} style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', background: 'white', marginBottom: '12px' }}>
+                <option value="">Select a department...</option>
+                {depts.map(function (d) { return <option key={d.id} value={d.id}>{d.name}</option>; })}
+              </select>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#6B7280', marginBottom: '4px' }}>Record type</label>
+              <select value={shelfRt} onChange={function (e) { setShelfRt(e.target.value); }} style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', background: 'white' }}>
+                <option value="">Select a record type...</option>
+                {recTypes.map(function (t) { return <option key={t.id} value={t.id}>{t.name}</option>; })}
+              </select>
+              {shelfErr ? <div style={{ fontSize: '12.5px', color: '#B91C1C', marginTop: '10px' }}>{shelfErr}</div> : null}
+            </div>
+            <div style={{ padding: '14px 22px', borderTop: '1px solid #F3F4F6', display: 'flex', justifyContent: 'flex-end', gap: '8px' }}>
+              <button onClick={function () { if (!shelfBusy) setShelving(null); }} style={{ padding: '9px 14px', borderRadius: '8px', border: '1px solid #E5E7EB', background: 'white', color: '#374151', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
+              <button onClick={shelveAndPublish} disabled={shelfBusy} style={{ padding: '9px 16px', borderRadius: '8px', border: 'none', background: shelfBusy ? '#9CB4CC' : '#1F4E79', color: 'white', fontSize: '13px', fontWeight: '700', cursor: 'pointer' }}>{shelfBusy ? 'Publishing...' : 'Publish to library'}</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

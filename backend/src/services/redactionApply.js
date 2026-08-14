@@ -21,7 +21,10 @@ function safe(s) {
     .replace(/[^\x20-\x7E\xA0-\xFF]/g, '');
 }
 
-async function applyRedaction(jobId, actor) {
+// opts.destination { record_type_id, department_id }: library shelf for the released record when
+// the file has no parent request (ad-hoc mass batches). Request values always win when present.
+async function applyRedaction(jobId, actor, opts) {
+  var dest = (opts && opts.destination) || {};
   var job = await get('SELECT * FROM redaction_jobs WHERE id = ?', [jobId]);
   if (!job) throw new Error('job not found');
   var file = await get('SELECT * FROM request_files WHERE id = ?', [job.file_id]);
@@ -174,8 +177,10 @@ async function applyRedaction(jobId, actor) {
   // Record into the Fulfilled Request Index (public-ready tier of search).
   try {
     var reqRow = file.request_id ? await get('SELECT description, record_type_id, department_id FROM requests WHERE id = ?', [file.request_id]) : null;
+    var effRtId = (reqRow && reqRow.record_type_id) || dest.record_type_id || null;
+    var effDeptId = (reqRow && reqRow.department_id) || dest.department_id || null;
     var rtName = '';
-    if (reqRow && reqRow.record_type_id) { var rt = await get('SELECT name FROM record_types WHERE id = ?', [reqRow.record_type_id]); rtName = rt ? rt.name : ''; }
+    if (effRtId) { var rt = await get('SELECT name FROM record_types WHERE id = ?', [effRtId]); rtName = rt ? rt.name : ''; }
     var baseTitle = (file.original_name || file.filename || 'Released record').replace(/\.[a-z0-9]+$/i, '');
     var frId = uuidv4();
     var frStatus = 'released';
@@ -187,8 +192,8 @@ async function applyRedaction(jobId, actor) {
     // the unique source index makes the second writer UPDATE the row instead of duplicating it.
     await run('INSERT INTO fulfilled_records (id, request_id, source_file_id, output_file_id, title, summary, record_type_id, department_id, keywords, public_availability, page_count, released_by, released_at, status, content_sha256) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,datetime(\'now\'),?,?) ' +
       'ON CONFLICT (source_file_id) WHERE source_file_id IS NOT NULL DO UPDATE SET output_file_id = EXCLUDED.output_file_id, title = EXCLUDED.title, summary = EXCLUDED.summary, record_type_id = EXCLUDED.record_type_id, department_id = EXCLUDED.department_id, keywords = EXCLUDED.keywords, public_availability = EXCLUDED.public_availability, page_count = EXCLUDED.page_count, released_by = EXCLUDED.released_by, released_at = EXCLUDED.released_at, status = EXCLUDED.status, content_sha256 = EXCLUDED.content_sha256',
-      [frId, file.request_id || null, file.id, outId, baseTitle, (reqRow && reqRow.description) || baseTitle, (reqRow && reqRow.record_type_id) || null, (reqRow && reqRow.department_id) || null, (rtName + ' ' + baseTitle).trim(), zones.length ? 'redacted' : 'released', pages.length, actor || null, frStatus, contentSha]);
-    try { var rtp = (reqRow && reqRow.record_type_id) ? await get('SELECT auto_publish FROM record_types WHERE id = ?', [reqRow.record_type_id]) : null; if (rtp && rtp.auto_publish) await run("UPDATE fulfilled_records SET published = 1, published_at = datetime('now'), published_by = ? WHERE id = ?", [actor || 'auto', frId]); } catch (eP) {}
+      [frId, file.request_id || null, file.id, outId, baseTitle, (reqRow && reqRow.description) || baseTitle, effRtId, effDeptId, (rtName + ' ' + baseTitle).trim(), zones.length ? 'redacted' : 'released', pages.length, actor || null, frStatus, contentSha]);
+    try { var rtp = effRtId ? await get('SELECT auto_publish FROM record_types WHERE id = ?', [effRtId]) : null; if (rtp && rtp.auto_publish) await run("UPDATE fulfilled_records SET published = 1, published_at = datetime('now'), published_by = ? WHERE id = ?", [actor || 'auto', frId]); } catch (eP) {}
     require('./embedIndex').bg(require('./recordMetaExtract').enrichFulfilledMeta(frId), 'enrich ' + frId);
   } catch (e) { console.error('[fulfilled index]', e.message); }
 

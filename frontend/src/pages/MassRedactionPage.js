@@ -21,6 +21,13 @@ export default function MassRedactionPage() {
   var [batchResults, setBatchResults] = useState(null);
   var [batchErr, setBatchErr] = useState('');
 
+  // Public library section: where this batch's released documents are shelved in the public
+  // library (documents tied to a request keep the request's own department and record type).
+  var [depts, setDepts] = useState([]);
+  var [recTypes, setRecTypes] = useState([]);
+  var [destRt, setDestRt] = useState('');
+  var [destDept, setDestDept] = useState('');
+
   // scheduled-job state
   var [scheduleMode, setScheduleMode] = useState(false);
   var [scheduleForm, setScheduleForm] = useState(false);
@@ -45,6 +52,10 @@ export default function MassRedactionPage() {
 
   useEffect(function () { load(); }, []);
   useEffect(function () { api.get('/mass-jobs/config').then(function (r) { setCfg(r.data); }).catch(function () {}); }, []);
+  useEffect(function () {
+    api.get('/departments').then(function (r) { setDepts(r.data.departments || []); }).catch(function () {});
+    api.get('/taxonomy/record-types').then(function (r) { setRecTypes(r.data.record_types || []); }).catch(function () {});
+  }, []);
   useEffect(function () { loadStatus911(); }, []);
   async function load() {
     setLoading(true);
@@ -67,6 +78,7 @@ export default function MassRedactionPage() {
     setBatchTpl(t); setSelected({}); setCheckResults(null); setBatchResults(null); setBatchErr(''); setCandidates([]);
     setScheduleMode(!!schedule); setScheduleForm(false); setCreatedJob(null);
     setJobName(t.name + ' \u2014 batch'); setChunkSize(500);
+    setDestRt(t.record_type_id || ''); setDestDept(t.owner_department_id || '');
     setCandLoading(true);
     try { var r = await api.get('/redaction-templates/' + t.id + '/candidates'); setCandidates(r.data.candidates || []); } catch (e) { setBatchErr('Could not load documents.'); }
     setCandLoading(false);
@@ -94,7 +106,7 @@ export default function MassRedactionPage() {
     setProcessing(true); setBatchErr('');
     try {
       var ids = passing.map(function (r) { return r.file_id; });
-      var r = await api.post('/redaction-templates/' + batchTpl.id + '/apply-batch', { file_ids: ids, commit: true });
+      var r = await api.post('/redaction-templates/' + batchTpl.id + '/apply-batch', { file_ids: ids, commit: true, record_type_id: destRt || null, department_id: destDept || null });
       setBatchResults(r.data);
     } catch (e) { setBatchErr('Processing failed. ' + ((e.response && e.response.data && e.response.data.error) || '')); }
     setProcessing(false);
@@ -102,7 +114,7 @@ export default function MassRedactionPage() {
   async function createJob() {
     setCreating(true); setBatchErr('');
     try {
-      var r = await api.post('/mass-jobs', { name: jobName || (batchTpl.name + ' batch'), template_id: batchTpl.id, file_ids: selIds, chunk_size: parseInt(chunkSize, 10) || 500 });
+      var r = await api.post('/mass-jobs', { name: jobName || (batchTpl.name + ' batch'), template_id: batchTpl.id, file_ids: selIds, chunk_size: parseInt(chunkSize, 10) || 500, record_type_id: destRt || null, department_id: destDept || null });
       setCreatedJob(r.data);
       setJobsReload(function (n) { return n + 1; });
     } catch (e) { setBatchErr('Could not create the job. ' + ((e.response && e.response.data && e.response.data.error) || '')); }
@@ -113,6 +125,32 @@ export default function MassRedactionPage() {
       var r = await api.get('/files/download/' + fileId, { responseType: 'blob' });
       var url = URL.createObjectURL(r.data); var a = document.createElement('a'); a.href = url; a.download = name || 'redacted.pdf'; a.click(); URL.revokeObjectURL(url);
     } catch (e) { alert('Download failed.'); }
+  }
+
+  function destinationBlock() {
+    return (
+      <div style={{ border: '1px solid #E5E7EB', borderRadius: '10px', padding: '12px 14px', marginTop: '14px', marginBottom: '14px' }}>
+        <div style={{ fontSize: '13px', fontWeight: '700', color: '#374151', marginBottom: '4px' }}>Public library section</div>
+        <div style={{ fontSize: '12px', color: '#6B7280', marginBottom: '10px', lineHeight: 1.5 }}>When these documents are published to the public library, citizens will find them under this department and record type. Documents that came from a request keep the request&rsquo;s own department and record type.</div>
+        <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+          <div style={{ flex: 1, minWidth: '180px' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#6B7280', marginBottom: '4px' }}>Department</label>
+            <select value={destDept} onChange={function (e) { setDestDept(e.target.value); }} style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', background: 'white' }}>
+              <option value="">— Not set —</option>
+              {depts.map(function (d) { return <option key={d.id} value={d.id}>{d.name}</option>; })}
+            </select>
+          </div>
+          <div style={{ flex: 1, minWidth: '180px' }}>
+            <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#6B7280', marginBottom: '4px' }}>Record type</label>
+            <select value={destRt} onChange={function (e) { setDestRt(e.target.value); }} style={{ width: '100%', boxSizing: 'border-box', padding: '8px 10px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', background: 'white' }}>
+              <option value="">— Not set —</option>
+              {recTypes.map(function (t) { return <option key={t.id} value={t.id}>{t.name}</option>; })}
+            </select>
+          </div>
+        </div>
+        {(!destRt || !destDept) ? <div style={{ fontSize: '12px', color: '#92400E', marginTop: '8px' }}>Without a section, these documents cannot be published to the public library until someone picks one on the Released Records page.</div> : null}
+      </div>
+    );
   }
 
   var budget = cfg ? cfg.nightly_budget : 500;
@@ -406,6 +444,7 @@ export default function MassRedactionPage() {
                     );
                   })}
                   <div style={{ fontSize: '12.5px', color: '#6B7280', marginTop: '10px' }}>{checkResults.summary.passing} of {checkResults.results.length} match the template and will be redacted. Mismatches are skipped &mdash; redact those individually in the workspace.</div>
+                  {destinationBlock()}
                 </div>
               ) : scheduleForm ? (
                 <div>
@@ -414,6 +453,7 @@ export default function MassRedactionPage() {
                   <input value={jobName} onChange={function (e) { setJobName(e.target.value); }} style={{ width: '100%', boxSizing: 'border-box', padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', marginBottom: '14px' }} />
                   <label style={{ display: 'block', fontSize: '12px', fontWeight: '600', color: '#6B7280', marginBottom: '4px' }}>Documents per night</label>
                   <input type="number" min="1" value={chunkSize} onChange={function (e) { setChunkSize(e.target.value); }} style={{ width: '160px', boxSizing: 'border-box', padding: '9px 12px', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', marginBottom: '14px' }} />
+                  {destinationBlock()}
                   <div style={{ background: '#F0F9FF', border: '1px solid #BAE6FD', borderRadius: '10px', padding: '12px 14px', fontSize: '13px', color: '#075985', lineHeight: 1.6 }}>
                     <strong>{selIds.length}</strong> document(s) selected &rarr; up to <strong>{effChunk}</strong>/night &rarr; finishes in about <strong>{estNights}</strong> night{estNights !== 1 ? 's' : ''}{estDate ? (', around ' + estDate) : ''}.
                     {cfg && parseInt(chunkSize, 10) > budget ? <div style={{ marginTop: '6px', color: '#92400E' }}>Note: the shared nightly budget is {budget}/night, so no more than {budget} will run per night across all jobs.</div> : null}

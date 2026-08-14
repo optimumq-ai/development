@@ -83,6 +83,11 @@ export default function MassJobsPanel(props) {
                   <span style={{ fontSize: '12px', color: '#6B7280' }}>
                     {j.redacted_count} redacted &middot; {j.held_count} held{j.error_count ? ' \u00b7 ' + j.error_count + ' error(s)' : ''}
                   </span>
+                  <span style={{ fontSize: '12px', color: '#6B7280' }}>
+                    {j.record_type_name || j.department_name
+                      ? <>Library section: {j.department_name || 'no department'} &middot; {j.record_type_name || 'no record type'}</>
+                      : 'No library section \u2014 released documents will need one before publishing'}
+                  </span>
                   {j.remaining_items > 0 ? (
                     <span style={{ fontSize: '12px', color: '#6B7280' }}>
                       {j.remaining_items} left &middot; ~{j.nights_remaining} night{j.nights_remaining !== 1 ? 's' : ''}{j.est_completion ? ' (done around ' + j.est_completion + ')' : ''}

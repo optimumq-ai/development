@@ -189,16 +189,32 @@ router.post('/jobs/:jobId/return', requireAuth, async function(req, res) {
 
 // GET /released -> the Fulfilled Request Index (Released Records Library)
 router.get('/released', requireAuth, async function(req, res) {
-  var rows = await all("SELECT fr.id, fr.title, fr.summary, fr.public_availability, fr.page_count, fr.released_at, fr.output_file_id, COALESCE(fr.published,0) AS published, rt.name AS record_type_name, rt.auto_publish AS rt_auto_publish, d.name AS department_name FROM fulfilled_records fr LEFT JOIN record_types rt ON rt.id = fr.record_type_id LEFT JOIN departments d ON d.id = fr.department_id WHERE fr.status = 'released' ORDER BY fr.released_at DESC");
+  var rows = await all("SELECT fr.id, fr.title, fr.summary, fr.public_availability, fr.page_count, fr.released_at, fr.output_file_id, COALESCE(fr.published,0) AS published, fr.record_type_id, fr.department_id, rt.name AS record_type_name, rt.auto_publish AS rt_auto_publish, d.name AS department_name FROM fulfilled_records fr LEFT JOIN record_types rt ON rt.id = fr.record_type_id LEFT JOIN departments d ON d.id = fr.department_id WHERE fr.status = 'released' ORDER BY fr.released_at DESC");
   res.json({ records: rows });
 });
 
 // Toggle whether a released record is PUBLISHED to the open public library (searchable/browsable).
 // Independent of delivery to the requestor - unpublishing removes it from public discovery only.
+// Publishing requires a library shelf (department + record type): the public library browses on
+// those two fields, so an unshelved record would land in an unbrowsable "Other/Uncategorized" pile.
+// The body may carry record_type_id/department_id to shelve-and-publish in one step.
 router.post('/released/:id/publish', requireAuth, async function(req, res) {
   try {
-    var pub = (req.body && req.body.published) ? 1 : 0;
+    var b = req.body || {};
+    var pub = b.published ? 1 : 0;
     var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'staff';
+    if (pub) {
+      var row = await get("SELECT record_type_id, department_id FROM fulfilled_records WHERE id = ?", [req.params.id]);
+      if (!row) return res.status(404).json({ error: 'Record not found.' });
+      var dest = await require('../services/libraryShelf').resolveDestination(
+        { record_type_id: b.record_type_id, department_id: b.department_id }, null);
+      var rtId = row.record_type_id || dest.record_type_id;
+      var deptId = row.department_id || dest.department_id;
+      if (!rtId || !deptId) return res.status(400).json({ error: 'Pick where this record belongs in the public library (a department and a record type) before publishing it.' });
+      if (rtId !== row.record_type_id || deptId !== row.department_id) {
+        await run("UPDATE fulfilled_records SET record_type_id = ?, department_id = ? WHERE id = ?", [rtId, deptId, req.params.id]);
+      }
+    }
     await run("UPDATE fulfilled_records SET published = ?, published_at = CASE WHEN ? = 1 THEN datetime('now') ELSE published_at END, published_by = ? WHERE id = ?", [pub, pub, actor, req.params.id]);
     res.json({ id: req.params.id, published: !!pub });
   } catch (e) { res.status(500).json({ error: 'Could not update publication.' }); }

@@ -18,7 +18,7 @@ Job review stages: `pending_review → in_review → released`. **Apply = burn**
 Redaction **templates** (built from a sample document; `build_redaction_template` task from import ingest): create/edit/sample preview; **match** and **match-batch** (does a doc fit the template?); **apply** and **apply-batch** with candidate listing — the mechanism behind mass redaction of format-static groupings.
 
 ## 6. Mass jobs `[BUILT]`
-Durable, resumable, **chunked** background queue (`mass_redaction_jobs`): worker ticks every 60s; runs only inside a configured **work window** (start/end time); respects a **daily budget** cap; per-item error isolation with a merged error log. Feeds the review pipeline (§4).
+Durable, resumable, **chunked** background queue (`mass_redaction_jobs`): worker ticks every 60s; runs only inside a configured **work window** (start/end time); respects a **daily budget** cap; per-item error isolation with a merged error log. Feeds the review pipeline (§4). **Library destination `[2026-08-14]`:** each job carries `record_type_id`/`department_id` — where its request-less outputs shelve in the public library (defaulted from the template's linked type + owner department, human-editable at compose; request-attached files keep the request's own shelf). Binding detail: `SPEC_public_library.md` §2a.
 
 ## 7. AV / video redaction `[BUILT]`
 Server-side A/V **burn** from zone JSON produced in the AV workbench (`av_redaction_tasks`, AvWorkbenchPage) — server-side by design (Replit lesson; no browser-side shortcut).

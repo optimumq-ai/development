@@ -7,6 +7,7 @@ const { requireAuth } = require('../middleware/auth');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const worker = require('../services/massJobs');
+const libraryShelf = require('../services/libraryShelf');
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 async function getConfig(key, def) { var r = await get("SELECT value FROM system_config WHERE key = ?", [key]); return (r && r.value != null) ? r.value : def; }
@@ -37,7 +38,7 @@ function withEta(job, budget) {
 
 router.get('/', requireAuth, async function (req, res) {
   var budget = parseInt(await getConfig('mass_redaction_nightly_budget', '500'), 10) || 500;
-  var rows = await all("SELECT * FROM mass_redaction_jobs ORDER BY (status IN ('running','queued')) DESC, priority ASC, created_at DESC");
+  var rows = await all("SELECT mj.*, rt.name AS record_type_name, d.name AS department_name FROM mass_redaction_jobs mj LEFT JOIN record_types rt ON rt.id = mj.record_type_id LEFT JOIN departments d ON d.id = mj.department_id ORDER BY (mj.status IN ('running','queued')) DESC, mj.priority ASC, mj.created_at DESC");
   res.json(rows.map(function (j) { return withEta(j, budget); }));
 });
 
@@ -86,13 +87,18 @@ router.post('/', requireAuth, async function (req, res) {
   if (!b.template_id) return res.status(400).json({ error: 'template_id required' });
   var fileIds = Array.isArray(b.file_ids) ? b.file_ids.filter(Boolean) : [];
   if (!fileIds.length) return res.status(400).json({ error: 'file_ids required' });
-  var t = await get("SELECT id, kind FROM layout_profiles WHERE id = ?", [b.template_id]);
+  var t = await get("SELECT id, kind, record_type_id FROM layout_profiles WHERE id = ?", [b.template_id]);
   if (!t) return res.status(404).json({ error: 'template not found' });
+  // Library destination for the job's request-less files: staff's pick at composition, defaulted
+  // from the template's linked record type + its owner department. Stored on the job so every
+  // chunk — tonight's or a later resume — shelves outputs the same way.
+  var dest = await libraryShelf.resolveDestination({ record_type_id: b.record_type_id, department_id: b.department_id }, t.record_type_id);
   var id = uuidv4();
   await run(
-    "INSERT INTO mass_redaction_jobs (id, name, template_id, kind, file_ids, total_items, chunk_size, window_start, window_end, priority, status, created_by, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?, 'queued', ?, ?, ?)",
+    "INSERT INTO mass_redaction_jobs (id, name, template_id, kind, file_ids, total_items, chunk_size, window_start, window_end, priority, status, record_type_id, department_id, created_by, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?, 'queued', ?, ?, ?, ?, ?)",
     [id, b.name || 'Untitled batch', t.id, t.kind || 'pages', JSON.stringify(fileIds), fileIds.length,
      b.chunk_size || 500, b.window_start || '18:00', b.window_end || '06:00', b.priority != null ? b.priority : 100,
+     dest.record_type_id, dest.department_id,
      req.user.name || req.user.sub, nowStr(), nowStr()]);
   var budget = parseInt(await getConfig('mass_redaction_nightly_budget', '500'), 10) || 500;
   res.json(withEta(await get("SELECT * FROM mass_redaction_jobs WHERE id = ?", [id]), budget));

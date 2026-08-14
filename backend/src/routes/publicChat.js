@@ -793,12 +793,16 @@ router.get('/sources', async function(req, res) {
 // ---- Public-ready library BROWSE (deterministic drill-down: dept -> record type -> year) ----
 router.get('/browse', async function(req, res) {
   try {
+    // Variants roll up to their parent bucket: a record stamped with a processing-level variant
+    // ("Residential Building Permit Applications") shelves publicly under the parent the citizen
+    // knows ("Building permits"). Same read-through-the-parent principle as request numbering.
     var rows = await all(
-      "SELECT fr.department_id, d.name AS dept_name, fr.record_type_id, rt.name AS rt_name, " +
+      "SELECT fr.department_id, d.name AS dept_name, COALESCE(rt.parent_record_type_id, fr.record_type_id) AS record_type_id, COALESCE(p.name, rt.name) AS rt_name, " +
       "COALESCE(substr(fr.event_date,1,4), substr(fr.released_at,1,4)) AS yr, count(*) AS n " +
       "FROM fulfilled_records fr LEFT JOIN departments d ON d.id=fr.department_id " +
-      "LEFT JOIN record_types rt ON rt.id=fr.record_type_id WHERE fr.status='released' AND COALESCE(fr.published,0)=1 " +
-      "GROUP BY fr.department_id, d.name, fr.record_type_id, rt.name, yr ORDER BY d.name, rt.name, yr DESC");
+      "LEFT JOIN record_types rt ON rt.id=fr.record_type_id " +
+      "LEFT JOIN record_types p ON p.id=rt.parent_record_type_id WHERE fr.status='released' AND COALESCE(fr.published,0)=1 " +
+      "GROUP BY fr.department_id, d.name, COALESCE(rt.parent_record_type_id, fr.record_type_id), COALESCE(p.name, rt.name), yr ORDER BY d.name, COALESCE(p.name, rt.name), yr DESC");
     var depts = {}, order = [];
     rows.forEach(function(r){
       var dk = r.department_id || 'none';
@@ -819,7 +823,8 @@ router.get('/browse/records', async function(req, res) {
   try {
     var rtId = req.query.recordType || null, yr = req.query.year || null, deptId = req.query.department || null;
     var where = ["status='released'", "COALESCE(published,0)=1"], params = [];
-    if(rtId){ where.push("record_type_id = ?"); params.push(rtId); }
+    // A browse shelf is the parent bucket; records stamped with one of its variants belong on it too.
+    if(rtId){ where.push("(record_type_id = ? OR record_type_id IN (SELECT id FROM record_types WHERE parent_record_type_id = ?))"); params.push(rtId, rtId); }
     if(deptId){ where.push("department_id = ?"); params.push(deptId); }
     if(yr && yr !== 'Undated'){ where.push("COALESCE(substr(event_date,1,4), substr(released_at,1,4)) = ?"); params.push(yr); }
     var rows = await all("SELECT id, title, summary, event_date, released_at, output_file_id, page_count FROM fulfilled_records WHERE " +

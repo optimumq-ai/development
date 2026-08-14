@@ -39,6 +39,10 @@ async function processChunk(job, take, actor, actorSub) {
   var fieldMap = engine.parseFieldMap(template);
   var fcols = engine.fpColumns(template.layout_fingerprint) || [];
   var threshold = template.safety_threshold != null ? template.safety_threshold : 80;
+  // Library destination for request-less files: the job's stored shelf, else the template's linked
+  // type + owner department (jobs created before shelves existed). Resolved once per chunk.
+  var destination = await require('./libraryShelf').resolveDestination(
+    { record_type_id: job.record_type_id, department_id: job.department_id }, template.record_type_id);
   var start = job.processed_items;
   for (var i = start; i < start + take && i < fileIds.length; i++) {
     var fid = fileIds[i];
@@ -48,13 +52,13 @@ async function processChunk(job, take, actor, actorSub) {
       if (job.kind === 'fields') {
         var fsc = await engine.fieldsScore(fcols, fid);
         if (fsc.score != null && fsc.score < threshold) res.held++;
-        else { await structuredRedaction.applyFieldMap(fid, fieldMap, actor, actorSub); res.redacted++; }
+        else { await structuredRedaction.applyFieldMap(fid, fieldMap, actor, actorSub, destination); res.redacted++; }
       } else {
         var pc = await get('SELECT count(*) AS c FROM document_pages WHERE file_id = ?', [fid]);
         if (!pc || !pc.c) await docProcessing.processFile(fid);
         var s = await engine.safetyScore(template, fid);
         if (s.score != null && s.score < threshold) res.held++;
-        else { await engine.applyTemplateToFile(template, file, zones, actor, actorSub); res.redacted++; }
+        else { await engine.applyTemplateToFile(template, file, zones, actor, actorSub, destination); res.redacted++; }
       }
     } catch (e) { res.errors++; res.errs.push({ file_id: fid, error: e.message }); }
     res.processed++;

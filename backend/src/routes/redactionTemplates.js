@@ -10,6 +10,7 @@ const { v4: uuidv4 } = require('uuid');
 const docProcessing = require('../services/docProcessing');
 const redactionApply = require('../services/redactionApply');
 const structuredRedaction = require('../services/structuredRedaction');
+const libraryShelf = require('../services/libraryShelf');
 
 var ELEVATED = ['SUPERVISOR', 'DIRECTOR', 'SYSTEM_ADMIN', 'DEPT_MANAGER'];
 function isElevated(req) { return (req.user.roles || []).some(function(r){ return ELEVATED.indexOf(r) >= 0; }); }
@@ -70,9 +71,10 @@ async function safetyScore(template, fileId) {
   return { score: Math.round(100 * inter / keys.length), file_pages: ft.pages, template_pages: fpPages(template.layout_fingerprint), matched: inter, template_terms: keys.length };
 }
 // Apply a template's zones to one file -> released redacted copy (shared by single + batch apply).
-async function applyTemplateToFile(t, file, zones, actorName, actorSub) {
+async function applyTemplateToFile(t, file, zones, actorName, actorSub, destination) {
   var pc = await get('SELECT count(*) AS c FROM document_pages WHERE file_id = ?', [file.id]);
   if (!pc || !pc.c) await docProcessing.processFile(file.id);
+  if (!destination) destination = await libraryShelf.resolveDestination(null, t.record_type_id);
   var jobId = uuidv4();
   var jur = await activeJurisdiction();
   await run('INSERT INTO redaction_jobs (id, file_id, request_id, jurisdiction_id, status, created_by) VALUES (?,?,?,?,?,?)',
@@ -82,7 +84,7 @@ async function applyTemplateToFile(t, file, zones, actorName, actorSub) {
     await run('INSERT INTO redaction_zones (id, job_id, file_id, page_no, x, y, w, h, rule_id, note, zone_type, created_by) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
       [uuidv4(), jobId, file.id, z.page_no || 1, z.x, z.y, z.w, z.h, z.rule_id || null, z.label || null, 'template', actorSub]);
   }
-  var result = await redactionApply.applyRedaction(jobId, actorName);
+  var result = await redactionApply.applyRedaction(jobId, actorName, { destination: destination });
   return Object.assign({ jobId: jobId }, result);
 }
 
@@ -116,8 +118,12 @@ router.post('/', requireAuth, async function(req, res) {
 
 // GET / -> list templates
 router.get('/', requireAuth, async function(req, res) {
-  var rows = await all("SELECT lp.*, rt.name AS record_type_name FROM layout_profiles lp LEFT JOIN record_types rt ON rt.id = lp.record_type_id WHERE lp.status != 'deleted' ORDER BY lp.created_at DESC");
-  res.json({ templates: rows.map(function(t){ return { id: t.id, name: t.name, description: t.description, kind: t.kind || 'pages', record_type_id: t.record_type_id, record_type_name: t.record_type_name, zone_count: parseZones(t).length, field_count: parseFieldMap(t).length, source_filename: t.source_filename, safety_threshold: t.safety_threshold, status: t.status, created_at: t.created_at }; }) });
+  var rows = await all(
+    "SELECT lp.*, rt.name AS record_type_name, " +
+    "COALESCE((SELECT department_id FROM record_type_departments WHERE record_type_id = rt.id AND role = 'owner' ORDER BY sort_order LIMIT 1), " +
+    "(SELECT department_id FROM record_type_departments WHERE record_type_id = rt.parent_record_type_id AND role = 'owner' ORDER BY sort_order LIMIT 1)) AS owner_department_id " +
+    "FROM layout_profiles lp LEFT JOIN record_types rt ON rt.id = lp.record_type_id WHERE lp.status != 'deleted' ORDER BY lp.created_at DESC");
+  res.json({ templates: rows.map(function(t){ return { id: t.id, name: t.name, description: t.description, kind: t.kind || 'pages', record_type_id: t.record_type_id, record_type_name: t.record_type_name, owner_department_id: t.owner_department_id, zone_count: parseZones(t).length, field_count: parseFieldMap(t).length, source_filename: t.source_filename, safety_threshold: t.safety_threshold, status: t.status, created_at: t.created_at }; }) });
 });
 
 // GET /opportunities -> variants the discovery scan flagged as mass-redaction candidates that still
@@ -232,6 +238,9 @@ router.post('/:id/apply-batch', requireAuth, async function(req, res) {
   if (!ids.length) return res.status(400).json({ error: 'file_ids is required' });
   var commit = !!b.commit;
   var threshold = t.safety_threshold != null ? t.safety_threshold : 80;
+  // Library destination for request-less files in this batch: caller's pick, else the template's
+  // linked record type with its owner department. Resolved once for the whole batch.
+  var destination = await libraryShelf.resolveDestination({ record_type_id: b.record_type_id, department_id: b.department_id }, t.record_type_id);
 
   if (t.kind === 'fields') {
     var fmap = parseFieldMap(t);
@@ -248,7 +257,7 @@ router.post('/:id/apply-batch', requireAuth, async function(req, res) {
         var fpass = fsc.score == null ? null : fsc.score >= threshold;
         if (!commit) { fres.push({ file_id: ffid, name: fnm, status: 'checked', score: fsc.score, pass: fpass, file_pages: fsc.rowCount }); continue; }
         if (fsc.score != null && fsc.score < threshold) { fres.push({ file_id: ffid, name: fnm, status: 'held', score: fsc.score, reason: 'Field match ' + fsc.score + '% is below the ' + threshold + '% safety threshold' }); continue; }
-        var fout = await structuredRedaction.applyFieldMap(ffid, fmap, req.user.name || 'Mass Redaction', req.user.sub);
+        var fout = await structuredRedaction.applyFieldMap(ffid, fmap, req.user.name || 'Mass Redaction', req.user.sub, destination);
         fres.push({ file_id: ffid, name: fnm, status: 'redacted', score: fsc.score, outputFileId: fout.outputFileId, fileName: fout.fileName, zoneCount: fout.withheldFields.length });
       } catch (e) { fres.push({ file_id: ffid, name: fnm, status: 'error', error: e.message }); }
     }
@@ -276,7 +285,7 @@ router.post('/:id/apply-batch', requireAuth, async function(req, res) {
         results.push({ file_id: fid, name: nm, status: 'held', score: s.score, reason: 'Layout match ' + s.score + '% is below the ' + threshold + '% safety threshold' });
         continue;
       }
-      var out = await applyTemplateToFile(t, file, zones, req.user.name || 'Mass Redaction', req.user.sub);
+      var out = await applyTemplateToFile(t, file, zones, req.user.name || 'Mass Redaction', req.user.sub, destination);
       results.push({ file_id: fid, name: nm, status: 'redacted', score: s.score, outputFileId: out.outputFileId, fileName: out.fileName, zoneCount: out.zoneCount, jobId: out.jobId });
     } catch (e) {
       results.push({ file_id: fid, name: nm, status: 'error', error: e.message });

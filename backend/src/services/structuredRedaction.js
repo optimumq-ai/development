@@ -86,7 +86,10 @@ async function preview(fileId) {
 }
 
 // field_map: [{ field: "<column>", rule_id: "<id|null>" }] listing EXEMPT columns.
-async function applyFieldMap(fileId, fieldMap, actor, actorSub) {
+// destination { record_type_id, department_id }: library shelf for the released record when the
+// file has no parent request (ad-hoc mass batches). Request values always win when present.
+async function applyFieldMap(fileId, fieldMap, actor, actorSub, destination) {
+  var dest = destination || {};
   var P = await readCsvFile(fileId);
   var file = P.file, headers = P.headers, data = P.data;
   if (!data.length) throw new Error('CSV has no data rows');
@@ -172,6 +175,8 @@ async function applyFieldMap(fileId, fieldMap, actor, actorSub) {
   }
   try {
     var reqRow = file.request_id ? await get('SELECT description, record_type_id, department_id FROM requests WHERE id = ?', [file.request_id]) : null;
+    var effRtId = (reqRow && reqRow.record_type_id) || dest.record_type_id || null;
+    var effDeptId = (reqRow && reqRow.department_id) || dest.department_id || null;
     var frId = uuidv4();
     var frStatus = 'released';
     try { if (file.request_id && await require('./paymentStatus').publicationHeld(file.request_id)) frStatus = 'held'; } catch (eF) {}
@@ -181,8 +186,8 @@ async function applyFieldMap(fileId, fieldMap, actor, actorSub) {
     // ON CONFLICT: concurrent-writer guard (smoke run 5) — see redactionApply for the full note.
     await run("INSERT INTO fulfilled_records (id, request_id, source_file_id, output_file_id, title, summary, record_type_id, department_id, keywords, public_availability, page_count, released_by, released_at, status, content_sha256) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,datetime('now'),?,?) " +
       'ON CONFLICT (source_file_id) WHERE source_file_id IS NOT NULL DO UPDATE SET output_file_id = EXCLUDED.output_file_id, title = EXCLUDED.title, summary = EXCLUDED.summary, record_type_id = EXCLUDED.record_type_id, department_id = EXCLUDED.department_id, keywords = EXCLUDED.keywords, public_availability = EXCLUDED.public_availability, page_count = EXCLUDED.page_count, released_by = EXCLUDED.released_by, released_at = EXCLUDED.released_at, status = EXCLUDED.status, content_sha256 = EXCLUDED.content_sha256',
-      [frId, file.request_id || null, file.id, outId, baseTitle, (reqRow && reqRow.description) || baseTitle, (reqRow && reqRow.record_type_id) || null, (reqRow && reqRow.department_id) || null, baseTitle, withheldFields.length ? 'redacted' : 'released', pageCount, actor || null, frStatus, contentSha]);
-    try { var rtp = (reqRow && reqRow.record_type_id) ? await get('SELECT auto_publish FROM record_types WHERE id = ?', [reqRow.record_type_id]) : null; if (rtp && rtp.auto_publish) await run("UPDATE fulfilled_records SET published = 1, published_at = datetime('now'), published_by = ? WHERE id = ?", [actor || 'auto', frId]); } catch (eP) {}
+      [frId, file.request_id || null, file.id, outId, baseTitle, (reqRow && reqRow.description) || baseTitle, effRtId, effDeptId, baseTitle, withheldFields.length ? 'redacted' : 'released', pageCount, actor || null, frStatus, contentSha]);
+    try { var rtp = effRtId ? await get('SELECT auto_publish FROM record_types WHERE id = ?', [effRtId]) : null; if (rtp && rtp.auto_publish) await run("UPDATE fulfilled_records SET published = 1, published_at = datetime('now'), published_by = ? WHERE id = ?", [actor || 'auto', frId]); } catch (eP) {}
     require('./embedIndex').bg(require('./recordMetaExtract').enrichFulfilledMeta(frId), 'enrich ' + frId);
   } catch (e) { console.error('[fulfilled index structured]', e.message); }
 
