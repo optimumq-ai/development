@@ -7723,3 +7723,26 @@ honest counts (share × 160) and mass-candidate flags; approve one and the Mass 
 Magic screen COMPLETE (3 slices) · sample corpus WIRED (AI probe pending credits) · Kevin's
 scenario authoring + real benchmark pending (he's thinking through the script) · state-switching
 parked · standing list unchanged.
+
+## 2026-08-14 (i) — credits restored: the discovery test RAN; flags fire with honest quantity
+
+### Evidence (two live scans, API-level)
+rt-business-licenses: 78 sampled / 98 total across 3 drives → "Business Licenses" 64%, est 63,
+few_layouts, ⚡ MASS CANDIDATE (+ a correct stray "Building Permits" est 4 ⚡ from the old sample
+drive; 31% honestly ungrouped). rt-building-permits: 98/208 → three groupings, all ⚡, est 89/75/4.
+The corpus does exactly what Kevin bought it for. NOT approved tonight — deliberately: the
+benchmark (04:23 wiring snapshot) predates all discovery, so the modal → approve → "Waiting for a
+template" → Reset loop is Kevin's REPEATABLE demo moment; approving now would bake tonight's
+AI-named variant into his rehearsal space.
+
+### Finding recorded (follow-on candidate, not fixed)
+Filestore sampling is ALPHABETICAL (first 50 per drive) and the AI digest caps ~14k chars, so on a
+160-file drive the model mostly saw the types that sort first — the Building-permits scan proposed
+inspection-report/correction-notice groupings over the actual permits. Counts stay honest
+(share × real total); the grouping MENU skews to the alphabetical front of large corpora.
+Candidate fix: randomized sampling + larger/varied digest budget. Decide with Kevin before touching
+the scan's behavior.
+
+### Also
+The classifier is back too (credits) — tonight's earlier submits fell back silently; future portal
+submits classify again.
