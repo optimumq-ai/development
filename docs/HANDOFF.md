@@ -7478,3 +7478,41 @@ grants snapshot-restored; probe family purged, zero residue.
 Design slices 3 (`legal_rt` intake trigger) and 4 (MRR hub ask) remain. Then the standing list:
 chat-agent model upgrade · v3 collapse · search-activity tracking · hardening · testing/demo ·
 go-live flip · §6.2 glosses · §2.6/§8.3 stamping.
+
+## 2026-08-14 (b) — legal hours in the estimate, slice 3 SHIPPED: the deterministic legal_rt trigger
+
+### Built (DESIGN_legal_hours_estimate.md slice 3)
+`legal_rt` joins the intake_review trigger enum (now six keys) as the DETERMINISTIC twin of
+sensitivity_flag: when classification PINS a record type carrying `legal_redaction_required` — own
+flag or inherited from its parent bucket — the request stops for intake review, so legal work is
+visible at PRICING time, not first at the redaction stage. The walk-up was extracted from
+`requestNeedsLegalRedaction` into `taskRouting.recordTypeLegalGate` so the intake trigger and the
+redaction-stage escalation share ONE definition. Spawn site mirrors its twin in
+`workflowEngine.onIntake`: MRR excluded, moved-under-us excluded, additive on an open task; fires
+off the record-type PIN (confidence >= 70), never off the guess. Labelled for the queue and screen
+("… — expect legal hours in the estimate"); no frontend change needed (labels are server-served).
+
+### Two suite guards moved WITH the change (both correct trips)
+`verify_bw2_catalog` C0/C1 pin the trigger enum and the wired set — updated to six keys with the
+provenance comment (the guard's intent — the list grows WITH its spawners — is exactly what
+happened). `verify_bw3_intake_review` gained §G (6 checks): fires deterministically with no AI flag;
+walks up from an unflagged variant; ungated type silent; keys JOIN one task with sensitivity_flag;
+a low-confidence guess (no pin) triggers nothing; label content.
+
+### CENSUS FALSE POSITIVE, diagnosed and memorized (not a code problem)
+First run: "LIVE WAS MODIFIED: request_history 910 -> 930". The 20 rows were `REDACTION_APPLIED` by
+**"Scheduled Batch"** at 01:25 — the LIVE API's own mass-redaction nightly worker running a queued
+job inside its 18:00–06:00 window DURING the suite. The census counts rows and cannot see who wrote
+them. Verified no queued/running mass jobs remained, re-ran: green. Memory note
+`census-vs-nightly-worker` records the diagnosis path (read the new rows' actor FIRST).
+
+### Evidence
+`verify_bw3_intake_review` **54/54** (§G new) · `verify_bw2_catalog` **55/55** · **full suite
+2159/2159, live untouched, exit 0.** API restarted (200). Live posture: all 84 live types still
+carry `legal_redaction_required = 0`, so live behavior changes only when Kevin flags a type — the
+same city-decides posture the gate itself shipped with.
+
+### The board
+Design slice 4 (MRR hub ask) is the last legal-hours slice. Then: chat-agent model upgrade ·
+v3 collapse · search-activity tracking · hardening · testing/demo · go-live flip · §6.2 glosses ·
+§2.6/§8.3 stamping.

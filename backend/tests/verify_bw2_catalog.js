@@ -155,8 +155,8 @@ var UNROUTABLE_MATCH = { classification: 'standard', recordTypeConfidence: 0, fl
 
     // ================================================================================================
     console.log('\n=== C. TRIGGERS ARE A LIST ON ONE TASK, NOT A TASK EACH ===');
-    ok('C0 the decided enum is exactly the five keys, in draft order',
-      IR.TRIGGERS.join('|') === 'unroutable|eligibility_review|approval_pending|sensitivity_flag|reopen_retriage');
+    ok('C0 the decided enum is exactly the six keys, in draft order',
+      IR.TRIGGERS.join('|') === 'unroutable|eligibility_review|approval_pending|sensitivity_flag|reopen_retriage|legal_rt');
     // BW3 added `eligibility_review` — its structured signal now exists (services/eligibilityFindings.js).
     // BW4 added `sensitivity_flag` (Kevin, 2026-07-29): the question BW3 declined to answer for itself —
     // WHICH flags should stop a request — turned out to be already answered by the rulebook, where
@@ -166,9 +166,12 @@ var UNROUTABLE_MATCH = { classification: 'standard', recordTypeConfidence: 0, fl
     // the stop through `disposition.reopen`, so the enum stub BW2 registered now has its own spawner. It is
     // safe by default in the strongest available sense — it cannot fire without a Director deliberately
     // choosing the non-default door on an already-closed request, so no install reaches it by sitting still.
+    // Slice 3 of DESIGN_legal_hours_estimate (2026-08-14) added `legal_rt`: the deterministic twin of
+    // sensitivity_flag, off the pinned record type's legal_redaction_required (parent walk-up). It
+    // arrived WITH its spawner in workflowEngine.onIntake — verify_bw3 §G owns the wiring proof.
     // verify_bw3 / verify_bw4 / verify_bw5 own the wiring proofs.
     ok('C1 every trigger whose signal now exists is wired — the list grows with its spawners, never ahead of them',
-      IR.WIRED_TRIGGERS.join('|') === 'unroutable|approval_pending|eligibility_review|sensitivity_flag|reopen_retriage');
+      IR.WIRED_TRIGGERS.join('|') === 'unroutable|approval_pending|eligibility_review|sensitivity_flag|reopen_retriage|legal_rt');
 
     var r3 = await makeRequest('req-' + TAG + '-C'); created.requests.push(r3);
     var s1 = await IR.spawn(r3, ['unroutable'], { createdBy: 'harness', awaitRouting: true });

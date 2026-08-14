@@ -66,15 +66,21 @@ var get = db.get, all = db.all, run = db.run;
 
 var TYPE = 'intake_review';
 // The decided trigger vocabulary (draft §0 decision 5). Order is the draft's (i)…(v).
-var TRIGGERS = ['unroutable', 'eligibility_review', 'approval_pending', 'sensitivity_flag', 'reopen_retriage'];
+// `legal_rt` (DESIGN_legal_hours_estimate.md slice 3) is the DETERMINISTIC twin of sensitivity_flag:
+// the classified record type carries `legal_redaction_required` (own or inherited from its parent
+// bucket), so legal work can reasonably be EXPECTED — visible at pricing time, not first at the
+// redaction stage. The classifier flags are an AI judgment on request text; this one is the city's
+// own rule and fires every time.
+var TRIGGERS = ['unroutable', 'eligibility_review', 'approval_pending', 'sensitivity_flag', 'reopen_retriage', 'legal_rt'];
 // Wired today — see the header. Everything else is recordable but nothing raises it yet.
-var WIRED_TRIGGERS = ['unroutable', 'approval_pending', 'eligibility_review', 'sensitivity_flag', 'reopen_retriage'];
+var WIRED_TRIGGERS = ['unroutable', 'approval_pending', 'eligibility_review', 'sensitivity_flag', 'reopen_retriage', 'legal_rt'];
 var TRIGGER_LABELS = {
   unroutable: 'The fulfillment team could not be determined',
   eligibility_review: 'An eligibility finding needs a human decision',
   approval_pending: 'A fee-waiver or commercial-rate decision is pending',
   sensitivity_flag: 'The request carries a sensitivity flag',
-  reopen_retriage: 'Reopened and sent back for re-triage'
+  reopen_retriage: 'Reopened and sent back for re-triage',
+  legal_rt: 'The record type always requires legal redaction — expect legal hours in the estimate'
 };
 var ACTIONABLE = "('open','assigned','in_progress','returned','awaiting_review')";
 

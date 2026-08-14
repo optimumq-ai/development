@@ -96,8 +96,12 @@ expertise contribute expected hours to a quote.
    zeroes estimated legalHours; estimatedHoursFromInput folds legal into the review figure); panel
    field + Accept-into-legalHours on the answer banner (first component, mirroring where measured
    labor lands).
-3. **The deterministic trigger:** `legal_rt` intake_review trigger off `legal_redaction_required`
-   with parent walk-up. (extend `verify_bw3_intake_review`)
+3. **The deterministic trigger** `[BUILT 2026-08-14 — verify_bw3_intake_review §G]`: `legal_rt`
+   intake_review trigger off `legal_redaction_required`, reading the record-type PIN through
+   `taskRouting.recordTypeLegalGate` (the walk-up extracted from `requestNeedsLegalRedaction` so the
+   intake trigger and the redaction-stage escalation share one definition). Spawn site mirrors
+   sensitivity_flag in `workflowEngine.onIntake` (MRR + moved-under-us excluded; additive on an open
+   task); labelled for the queue and screen.
 4. **MRR hub wiring:** parent-level ask button; `legalHours` on the master estimate form.
    (extend `verify_bw6_mrr`)
 

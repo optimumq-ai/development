@@ -292,6 +292,61 @@ function finding(dimension, label, extra) {
     var bogus = await req('PATCH', '/api/tasks/' + tF.task.id + '/intake-routing', { teamId: 'not-a-team-' + TAG });
     ok('F11 …and a value that is not on the list it claims to come from is refused', bogus.status === 400);
 
+    // ================================================================================================
+    console.log('\n=== G. TRIGGER legal_rt — the DETERMINISTIC twin (DESIGN_legal_hours_estimate.md slice 3) ===');
+    // A record type the city marked "always legal redaction" makes legal work EXPECTABLE, and that
+    // belongs in front of intake-review eyes at PRICING time — off the record-type PIN, no classifier
+    // flag involved. Same walk-up as the redaction-stage escalation (one definition, two readers).
+    var WEg = require('/opt/optimumq/backend/src/services/workflowEngine');
+    var catG = await db.get('SELECT id FROM categories ORDER BY sort_order LIMIT 1');
+    var rtGated = 'rt-' + TAG + '-gated', rtVariant = 'rt-' + TAG + '-variant', rtPlain = 'rt-' + TAG + '-plain';
+    await db.run("INSERT INTO record_types (id, category_id, name, code, description, status, legal_redaction_required) VALUES (?,?,?,?,?,'active',1)",
+      [rtGated, catG.id, 'G Gated ' + TAG, rtGated, 'x']);
+    await db.run("INSERT INTO record_types (id, category_id, parent_record_type_id, name, code, description, status, legal_redaction_required) VALUES (?,?,?,?,?,?,'active',0)",
+      [rtVariant, catG.id, rtGated, 'G Variant ' + TAG, rtVariant, 'x']);
+    await db.run("INSERT INTO record_types (id, category_id, name, code, description, status, legal_redaction_required) VALUES (?,?,?,?,?,'active',0)",
+      [rtPlain, catG.id, 'G Plain ' + TAG, rtPlain, 'x']);
+    function matcherG(rtId, conf, flags) {
+      return { classification: 'standard', recordTypeId: rtId, recordTypeConfidence: conf == null ? 95 : conf,
+        flags: flags || [], departmentId: TEAM, custodianDepartmentId: TEAM, reasoning: 'harness' };
+    }
+
+    var rG1 = await makeRequest('req-' + TAG + '-G1', { description: 'internal affairs file ' + TAG });
+    await WEg.onIntake(rG1, matcherG(rtGated));
+    var stopG1 = await IR.openTask(rG1);
+    ok('G1 a request PINNED to an always-legal type raises intake_review with legal_rt — no AI flag needed',
+      !!stopG1 && IR.triggersOf(stopG1).indexOf('legal_rt') >= 0);
+
+    var rG2 = await makeRequest('req-' + TAG + '-G2', { description: 'variant of an IA file ' + TAG });
+    await WEg.onIntake(rG2, matcherG(rtVariant));
+    var stopG2 = await IR.openTask(rG2);
+    ok('G2 the gate WALKS UP: a variant whose own flag is 0 under a gated bucket still triggers (never loosens)',
+      !!stopG2 && IR.triggersOf(stopG2).indexOf('legal_rt') >= 0);
+
+    var rG3 = await makeRequest('req-' + TAG + '-G3', { description: 'ordinary parks matter ' + TAG });
+    await WEg.onIntake(rG3, matcherG(rtPlain));
+    var stopG3 = await IR.openTask(rG3);
+    ok('G3 an ungated type raises NO legal_rt', !stopG3 || IR.triggersOf(stopG3).indexOf('legal_rt') < 0);
+
+    var rG4 = await makeRequest('req-' + TAG + '-G4', { description: 'sensitive IA file ' + TAG });
+    await WEg.onIntake(rG4, matcherG(rtGated, 95, ['SENSITIVE']));
+    var stopG4 = await IR.openTask(rG4);
+    var trigsG4 = stopG4 ? IR.triggersOf(stopG4) : [];
+    var countG4 = await db.get("SELECT count(*)::int AS n FROM tasks WHERE request_id = ? AND type = 'intake_review'", [rG4]);
+    ok('G4 with a sensitivity flag TOO the keys join ONE task — additive, never a second stop',
+      countG4.n === 1 && trigsG4.indexOf('legal_rt') >= 0 && trigsG4.indexOf('sensitivity_flag') >= 0);
+
+    var rG5 = await makeRequest('req-' + TAG + '-G5', { description: 'maybe an IA file ' + TAG });
+    await WEg.onIntake(rG5, matcherG(rtGated, 40));
+    var stopG5 = await IR.openTask(rG5);
+    ok('G5 a low-confidence guess is NOT a pin, and an unpinned type triggers nothing — the rule reads facts',
+      !stopG5 || IR.triggersOf(stopG5).indexOf('legal_rt') < 0);
+
+    ok('G6 the trigger is labelled for the queue and the screen, and the label says what to DO about it',
+      /legal redaction/.test(IR.TRIGGER_LABELS.legal_rt) && /legal hours/.test(IR.TRIGGER_LABELS.legal_rt));
+
+    await db.run('DELETE FROM record_types WHERE id = ANY($1::text[])', [[rtVariant, rtGated, rtPlain]]);
+
     console.log('\n  ' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
     process.exit(fail ? 1 : 0);
   } catch (e) {

@@ -216,6 +216,27 @@ async function onIntake(requestId, matcherResult){
     }
   } catch (e) { console.error('[workflowEngine] sensitivity intake review failed:', e && e.message); }
 
+  // The DETERMINISTIC twin (DESIGN_legal_hours_estimate.md slice 3): the pinned record type carries
+  // `legal_redaction_required` — own or inherited from its parent bucket, the SAME walk-up the
+  // redaction-stage escalation reads (tr.recordTypeLegalGate; one definition, two readers). Legal
+  // work can reasonably be EXPECTED on this request, and that belongs in front of intake-review eyes
+  // at PRICING time, not first at the redaction stage. Unlike sensitivity_flag this does not depend
+  // on any rule having fired — the record-type pin above (COALESCE write) is the fact it reads.
+  // Same exclusions as its twin: MRR intake is the Request-Manager flow, and a request that moved
+  // under us keeps its stop with the opening move the engine declined to make. Additive: on a
+  // request already stopped for another trigger, the key joins the open task.
+  try {
+    if (!movedUnderUs) {
+      var IRl = require('./intakeReview');
+      var trl = require('./taskRouting');
+      if (!(await IRl.isMrr(requestId)) && (await trl.recordTypeLegalGate(requestId))) {
+        await IRl.spawn(requestId, ['legal_rt'], {
+          createdBy: 'workflow', requestText: request.description, awaitRouting: true
+        });
+      }
+    }
+  } catch (e) { console.error('[workflowEngine] legal_rt intake review failed:', e && e.message); }
+
   // Fee-waiver approval: a requested waiver needs a decision before any amount is invoiced. Independent
   // of the record-type routing above; the estimate still proceeds (a granted waiver zeroes fees at notice
   // time). Idempotent, and skipped once a decision has been recorded. Resolved by /fee-waiver-decision,

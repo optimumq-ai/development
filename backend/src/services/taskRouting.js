@@ -514,19 +514,25 @@ var LEGAL_FLAG_VALUES = ['SENSITIVE', 'LEGAL_HOLD', 'ONGOING_INVESTIGATION'];
 // item 10), or the classifier flagged it sensitive/legal-hold (workflow_decisions.flags, latest decision).
 // The record-type gate exists because the classifier flag is an AI judgment on the request TEXT: a city
 // that wants internal-affairs files legally redacted EVERY time cannot depend on it firing.
-async function requestNeedsLegalRedaction(requestId, reqRow) {
-  // reqRow is an optimization for callers that already hold the row — the answer must not DEPEND on it
-  // (a bare call used to silently skip the director-escalation branch).
-  if (!reqRow) reqRow = await get('SELECT legal_flag FROM requests WHERE id = ?', [requestId]);
-  if (reqRow && Number(reqRow.legal_flag) === 1) return true;
-  // Variant inheritance (#14): a parent bucket's legal-redaction flag binds every variant under it —
-  // a legal gate never loosens silently at a more specific level.
+// The RECORD-TYPE half of the legal gate, alone: does this request's classified type require legal
+// redaction, own flag or inherited from its parent bucket (a legal gate never loosens silently at a
+// more specific level)? Split out so the intake `legal_rt` trigger (DESIGN_legal_hours_estimate.md
+// slice 3) reads the SAME walk-up as the redaction-stage escalation — one definition, two readers.
+async function recordTypeLegalGate(requestId) {
   var rt = await get(
     'SELECT (CASE WHEN rt.legal_redaction_required = 1 OR pt.legal_redaction_required = 1 THEN 1 ELSE 0 END) AS lrr ' +
     'FROM requests r JOIN record_types rt ON rt.id = r.record_type_id ' +
     'LEFT JOIN record_types pt ON pt.id = rt.parent_record_type_id WHERE r.id = ?',
     [requestId]);
-  if (rt && Number(rt.lrr) === 1) return true;
+  return !!(rt && Number(rt.lrr) === 1);
+}
+
+async function requestNeedsLegalRedaction(requestId, reqRow) {
+  // reqRow is an optimization for callers that already hold the row — the answer must not DEPEND on it
+  // (a bare call used to silently skip the director-escalation branch).
+  if (!reqRow) reqRow = await get('SELECT legal_flag FROM requests WHERE id = ?', [requestId]);
+  if (reqRow && Number(reqRow.legal_flag) === 1) return true;
+  if (await recordTypeLegalGate(requestId)) return true;
   var d = await get("SELECT flags FROM workflow_decisions WHERE request_id = ? AND flags IS NOT NULL ORDER BY created_at DESC LIMIT 1", [requestId]);
   if (!d || !d.flags) return false;
   try { var arr = JSON.parse(d.flags); return Array.isArray(arr) && arr.some(function (f) { return LEGAL_FLAG_VALUES.indexOf(f) !== -1; }); }
@@ -860,6 +866,7 @@ module.exports = {
   leastLoaded: leastLoaded,
   spawnForStage: spawnForStage,
   requestNeedsLegalRedaction: requestNeedsLegalRedaction,
+  recordTypeLegalGate: recordTypeLegalGate,
   escalateToLegal: escalateToLegal,
   applyStageTransition: applyStageTransition,
   reconcileStageTasks: reconcileStageTasks,
