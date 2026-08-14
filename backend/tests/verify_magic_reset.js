@@ -45,8 +45,26 @@ async function submit(email, desc) {
     if (!parent) await new Promise(function (r2) { setTimeout(r2, 500); });
   }
   if (!parent) throw new Error('parent never appeared');
-  // Let the intake engine finish its background writes before the world is measured.
-  await new Promise(function (r2) { setTimeout(r2, 2500); });
+  // Let the intake engine FINISH before the world is measured. With API credits present the
+  // classifier really runs (a model call, seconds), so a fixed sleep raced it — first seen when
+  // restored credits turned tonight's fallback-fast intakes back into real classifications.
+  // The workflow_decisions row is onIntake's last durable write; wait for it, then settle.
+  var decided = null;
+  for (var d = 0; d < 120 && !decided; d++) {
+    decided = await db.get('SELECT id FROM workflow_decisions WHERE request_id = ?', [parent.id]);
+    if (!decided) await new Promise(function (r2) { setTimeout(r2, 500); });
+  }
+  // The decision row is not the LAST writer — the deadline-rule refiner lands ~10s later (seen:
+  // deadline_date 08-19 at snapshot, 08-24 afterwards, deterministically). Require the row to
+  // hold still across THREE reads spaced 4s — a 12s quiet period outlasts the refiner — so the
+  // snapshot always contains the settled world.
+  var last = '', stableRuns = 0;
+  for (var s2 = 0; s2 < 30 && stableRuns < 2; s2++) {
+    await new Promise(function (r2) { setTimeout(r2, 4000); });
+    var row = await db.get('SELECT deadline_date, updated_at, record_type_id FROM requests WHERE id = ?', [parent.id]);
+    var sig = JSON.stringify(row);
+    if (sig === last) stableRuns++; else { stableRuns = 0; last = sig; }
+  }
   return parent;
 }
 
@@ -84,12 +102,24 @@ async function submit(email, desc) {
     bench.status === 200 && bench.body.benchmark.rows > 0 && !!bench.body.benchmark.taken_at &&
     bench.body.benchmark.counts.requests >= 2);
   ok('B2 the snapshot file exists on disk', fs.existsSync('/opt/optimumq/backend/data/benchmarks/optimumq_test.sql'));
+  // Capture the baseline from the RESTORED world, not the live one: intake's async refiners (the
+  // deadline writer landed ~10s after the decision row — outlasting any polite settle) can change
+  // rows AFTER the snapshot, and a baseline read then disagrees with the benchmark by exactly one
+  // late write. A delta-0 reset makes world ≡ snapshot by construction — the swap sweeps every
+  // in-flight writer away — so what we read next IS what every later reset restores.
+  await magic.reset({ deltaSeconds: 0 });
+  await new Promise(function (r2) { setTimeout(r2, 1500); });
+  // EVERY baseline field reads FRESH from the restored world. aDeadline once came from the
+  // submit-time row OBJECT — which held the pre-classifier +10-day default, refined minutes later
+  // — and that one stale field produced a phantom "shifter is wrong" failure that survived three
+  // wrong fixes. A baseline mixing fresh reads with captured objects is lying about one of them.
+  var aRow = await db.get('SELECT created_at, deadline_date FROM requests WHERE id = ?', [reqA.id]);
   var atBench = {
     requests: (await db.get('SELECT count(*)::int n FROM requests')).n,
     tasks: (await db.get('SELECT count(*)::int n FROM tasks')).n,
     task_events: (await db.get('SELECT count(*)::int n FROM task_events')).n,
-    aCreated: (await db.get('SELECT created_at FROM requests WHERE id = ?', [reqA.id])).created_at,
-    aDeadline: reqA.deadline_date
+    aCreated: aRow.created_at,
+    aDeadline: aRow.deadline_date
   };
 
   console.log('\n=== C. RESET — restores the world AND relative time ===');
@@ -117,7 +147,7 @@ async function submit(email, desc) {
   if (atBench.aDeadline) {
     var expDl = new Date(atBench.aDeadline + 'T00:00:00Z');
     expDl = new Date(expDl.getTime() + 86400000).toISOString().slice(0, 10);
-    ok('C6 a date-only column (deadline_date) shifted a day and kept its format', aNow.deadline_date === expDl);
+    ok('C6 a date-only column (deadline_date) shifted a day and kept its format (got ' + aNow.deadline_date + ', want ' + expDl + ' from ' + atBench.aDeadline + ')', aNow.deadline_date === expDl);
   } else {
     ok('C6 (no deadline_date on the resident — date-only shift asserted via clock below)', true);
   }
@@ -129,12 +159,19 @@ async function submit(email, desc) {
   ok('D1 the API survived the swap (its pool reconnected) and still reports the benchmark',
     stAfter.status === 200 && !!stAfter.body.benchmark);
   var tr = require('/opt/optimumq/backend/src/services/taskRouting');
-  var anyTask = await db.get("SELECT id FROM tasks WHERE status IN ('open','assigned') LIMIT 1");
+  // An OPEN task only: the bookmark trigger writes on status CHANGE, so assigning an
+  // already-'assigned' task writes nothing and the check false-fails (bit us when smart routing,
+  // running again with restored credits, pre-assigned the arbitrary pick).
+  var anyTask = await db.get("SELECT id FROM tasks WHERE status = 'open' LIMIT 1");
   if (anyTask) {
+    // Delta against a count taken IMMEDIATELY before the assign — background engine activity
+    // (stage-task reconciliation, real classifications now that credits exist) may write its own
+    // bookmarks between section C and here, and those are not what this check is about.
+    var pre = (await db.get('SELECT count(*)::int n FROM task_events')).n;
     await tr.assign(anyTask.id, 'u-kruss', 'manual', null); // fires the bookmark trigger -> task_events insert
     var grew = (await db.get('SELECT count(*)::int n FROM task_events')).n;
     ok('D2 a post-reset bookmark INSERT works — the serial sequence continues past the restored max',
-      grew === after.task_events + 1);
+      grew === pre + 1);
   } else { ok('D2 SKIPPED — no assignable task in world (counts as fail to force a look)', false); }
 
   console.log('\n=== E. RESTORE, THEN THE CLOCK (slice 2) — a day passes = the data ages a day ===');

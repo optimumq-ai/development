@@ -25,9 +25,19 @@ export default function AppLayout() {
     { to: '/requests', label: 'Request Queue', show: true },
     { to: '/reports', label: 'Reports', show: isElev },
     { to: '/org', label: 'Organization', show: isElev },
-    { to: '/mass-redaction', label: 'Mass Redaction', show: isElev },
-    { to: '/released', label: 'Released Records', show: isElev },
-    { to: '/library-map', label: 'Records Map', show: isElev },
+    // PUBLIC READY CONTROL CENTER (Kevin, 2026-08-14): everything that converts internally-stored
+    // records into public-facing ones, grouped in PIPELINE order — find the same-format piles,
+    // redact them, released, on the map, in the library. A visible group with indented children,
+    // deliberately NOT a popup: nothing hidden behind hover state, everything one click.
+    { header: 'Public Ready Control Center', show: isElev },
+    // The variant-discovery entry point ("Find variants" lives per bucket on the Taxonomy tab).
+    { to: '/admin?tab=taxonomy', label: 'Find Same-Format Records', show: isElev, child: true },
+    { to: '/mass-redaction', label: 'Mass Redaction', show: isElev, child: true },
+    { to: '/released', label: 'Released Records', show: isElev, child: true },
+    // Label renamed from "Records Map" (Kevin); the ROUTE keeps its old name — wire formats do.
+    { to: '/library-map', label: 'Public Record Geo Location', show: isElev, child: true },
+    // The PUBLIC library page, linked for internal eyes — same page the citizens see.
+    { to: '/portal/library', label: 'Public Records Library', show: isElev, child: true },
     { to: '/cash-drawer', label: 'Cash Drawer', show: isElev },
     { to: '/tickler', label: 'Tickler', show: isElev },
     // BW9a: the go-live checklist. Senior Legal (ATTORNEY_REVIEWER) sees it too — they attest the
@@ -70,9 +80,11 @@ export default function AppLayout() {
         </div>
         <nav style={{ flex: 1, overflowY: 'auto', padding: '12px 8px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
           {items.map(item => (
-            <NavLink key={item.to} to={item.to} style={({ isActive }) => ({ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 10px', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '500', color: isActive ? '#1F4E79' : '#6B7280', background: isActive ? '#D6E4F0' : 'transparent' })}>
-              {item.label}
-            </NavLink>
+            item.header
+              ? <div key={item.header} style={{ margin: '10px 2px 2px', padding: '0 8px', fontSize: '10.5px', fontWeight: '800', letterSpacing: '.07em', textTransform: 'uppercase', color: '#9CA3AF' }}>{item.header}</div>
+              : <NavLink key={item.to} to={item.to} style={({ isActive }) => ({ display: 'flex', alignItems: 'center', gap: '10px', padding: '9px 10px', paddingLeft: item.child ? '22px' : '10px', borderRadius: '8px', textDecoration: 'none', fontSize: '13px', fontWeight: '500', color: isActive ? '#1F4E79' : '#6B7280', background: isActive ? '#D6E4F0' : 'transparent' })}>
+                {item.label}
+              </NavLink>
           ))}
         </nav>
         <div style={{ borderTop: '1px solid #F3F4F6', padding: '8px' }}>

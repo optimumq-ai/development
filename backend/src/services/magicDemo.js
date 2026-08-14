@@ -257,6 +257,11 @@ async function reset(opts) {
       await admin.query('ALTER DATABASE ' + preswap + ' RENAME TO ' + name);
       throw e2;
     }
+    // A client that reconnected in the terminate→rename gap is now attached to the RENAMED old
+    // database and would keep reading the pre-reset world (found 2026-08-14: a baseline read
+    // returned a value only the old world held). Sweep the preswap connections once more — those
+    // clients die and redial <name>, which is now the restored database.
+    await admin.query("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname = $1 AND pid <> pg_backend_pid()", [preswap]);
     return { db: name, deltaSeconds: deltaSeconds, shift: shift, benchmark: meta, undo: preswap };
   } finally {
     if (build) { try { await build.end(); } catch (e) {} }

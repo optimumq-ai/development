@@ -7746,3 +7746,35 @@ the scan's behavior.
 ### Also
 The classifier is back too (credits) — tonight's earlier submits fell back silently; future portal
 submits classify again.
+
+## 2026-08-14 (j) — Public Ready Control Center (nav regroup) + a debugging lesson that must not be lost
+
+### Built (Kevin's last ask of the day)
+The sidebar gains a **PUBLIC READY CONTROL CENTER** group — everything that converts
+internally-stored records into public-facing ones, in PIPELINE order: Find Same-Format Records
+(→ /admin?tab=taxonomy, the variant-discovery entry point) · Mass Redaction · Released Records ·
+Public Record Geo Location (label rename of Records Map; ROUTE unchanged — wire formats keep old
+names) · Public Records Library (→ /portal/library, the public page linked for internal eyes).
+Group is a visible header with indented children, deliberately NOT a popup (nothing hidden behind
+hover state). Verified live: `exchange/nav_public_ready.png`. Suite **2194/2194, live untouched.**
+
+### The suite trip after the nav change — and where the real bugs were
+verify_magic_reset failed 2 (C6, D2) the moment credits returned. D2 was real-but-shallow: the
+bookmark trigger logs status CHANGES, and the arbitrary task pick could grab an already-'assigned'
+row (smart routing runs again now) — pick `status='open'`. C6 cost three WRONG fixes (settle waits,
+a 12s stability window, a stale-connection sweep) before diagnostics found it: **the harness
+captured `aDeadline` from the submit-time row OBJECT** — the pre-classifier +10-day default —
+while every other baseline field read fresh. One stale JS field, phantom "shifter is broken."
+**Lesson, spelled out in the harness comment: a baseline mixing fresh reads with captured objects
+is lying about one of them. And: instrument BEFORE the third guess, not after.**
+
+### Keeper hardening found on the way (real, stays)
+`magicDemo.reset` now sweeps connections off the RENAMED old database after the swap — a client
+that reconnected in the terminate→rename gap would otherwise keep reading the pre-reset world.
+Not tonight's culprit, but a genuine race the swap design had.
+
+### Session close
+Kevin is done for the day. Open items for his return: the alphabetical-sampling skew decision ·
+request purge + scenario authoring + the real demo benchmark · the parked state-switching ·
+the standing board (chat-agent upgrade · v3 collapse · search-activity tracking · hardening ·
+go-live flip · glosses/stamping).
