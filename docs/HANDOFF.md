@@ -7689,3 +7689,37 @@ cast, adjust. Parked: per-state switching (design doc records the groundwork).
 Magic screen DONE · legal-hours design DONE (4 slices) · mass-redaction hand-off DONE · legal_rt
 trigger DONE · identity/taxonomy config render DONE. Standing: chat-agent model upgrade · v3
 collapse · search-activity tracking · hardening · go-live flip · §6.2 glosses · §2.6/§8.3 stamping.
+
+## 2026-08-14 (h) — the ChatGPT sample corpus is WIRED: 9 department drives, 450 documents
+
+### Built (data/config, no code — Kevin's batches from exchange/new_docs)
+Three batches (4A/4B/4C), 450 native-text PDFs across 21 record types with per-batch manifests
+(document_id, department, record_type, person, address, redaction_complexity). Organized FLAT per
+department (the filestore connector reads flat dirs via pdftotext) into
+`/opt/optimumq/demo_sources/<dept>/` (gitignored): development_services 160 · finance 70 ·
+utilities 50 · public_works 40 · code_enforcement 40 · fire 40 · police 20 · engineering 15 ·
+planning 15. Nine "shared drive" sources created via the REAL repositories API with plain-words
+descriptions; seven record types linked ADDITIVELY via the real sources PATCH (building permits ·
+certificates of occupancy · inspection reports · business licenses · purchasing/vendor ·
+utility billing · fire inspection reports). PW/engineering/planning drives deliberately unlinked
+(no honest catalog match). Sources screen verified live: all nine Connected with holdings
+(`exchange/sources_dept_drives.png`). Connector verified deterministically: countAll honest
+(160/70/50/40 spot-checked), pdftotext extracts real form text. Fresh benchmark taken AFTER the
+wiring ("sources wired — 9 dept drives, 450 docs") so Reset preserves it.
+
+### ⚠️ BLOCKED, needs Kevin: THE ANTHROPIC ACCOUNT IS OUT OF CREDITS
+The variant-discovery probe (the point of the corpus: 25-doc uniform piles → ⚡ mass-redaction
+candidates → the "Waiting for a template" hand-off) reached the model call and got:
+"Your credit balance is too low to access the Anthropic API." This blocks EVERY AI feature —
+the classifier (tonight's portal submits silently fell back to unclassified defaults), variant
+discovery, AI search assists, the portal chat agent. **The demo cannot run its AI story until
+billing is topped up.** Once credits exist: POST /taxonomy/record-types/rt-building-permits/
+discover-variants should propose Residential/Industrial Building Permit Applications etc. with
+honest counts (share × 160) and mass-candidate flags; approve one and the Mass Redaction
+"Waiting for a template" card completes the circle. Manifest ground truth to compare against:
+25 docs per 4A type, 20 per 4B/4C type.
+
+### The board
+Magic screen COMPLETE (3 slices) · sample corpus WIRED (AI probe pending credits) · Kevin's
+scenario authoring + real benchmark pending (he's thinking through the script) · state-switching
+parked · standing list unchanged.

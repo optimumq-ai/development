@@ -18,3 +18,4 @@ uploads/processed/
 uploads/
 *.bak
 docker-compose.yml.bak.*
+demo_sources/
