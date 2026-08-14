@@ -7905,3 +7905,45 @@ Incidental defects surfaced by the scan, worth fixing regardless: `/api/mass-job
 is NOT NULL). Product decision parked with Kevin before any build: where redaction lives for an
 A-only customer (kernel vs. B-only vs. redaction-lite) — that decision defines the kernel.
 Standing board unchanged.
+
+## 2026-08-14 (n) — mass-jobs role gate + processing_history audit trail (the two "fix regardless" defects)
+
+### Scope note (Kevin, mid-session)
+Kevin clarified the product split itself is PARKED until after go-live — nothing from the split
+plan was built. This slice is only the two security defects the split scan surfaced that exist in
+the product as it ships today. Mid-session he also pulled up the (l) fingerprint thread for review:
+recap delivered; the open item there is the §6b anchor-relative-zones AUTHORING UI, which needs a
+mockup session with him before build (UI rule). Nothing else touched on that thread.
+
+### What was built
+- **Role gate**: every `/api/mass-jobs` MUTATION (create, pause/resume/cancel, run-now, 911
+  generate/pull/run-now) now requires `requireRoleOrPerm(['DIRECTOR','SUPERVISOR'],
+  ['REDACTION_WORKER','REDACTION_AUTHORITY'])` (SYSTEM_ADMIN passes inside). Was requireAuth only —
+  any logged-in staffer could burn redactions across an archive or cancel a batch. Reads stay
+  requireAuth. REDACTION_AUTHORITY is accepted but is still an orphan nothing else consults.
+- **Audit trail**: new `processing_history` table (insert-only; seq BIGSERIAL for true order;
+  mirrors request_history's actor columns — that table couldn't serve, request_id NOT NULL).
+  `services/processingHistory.record()` never throws (failed audit write logs loudly, never aborts
+  the work). Written on: job created/paused/resumed/canceled/run-now (named actor); EVERY worker
+  chunk (`chunk_processed` — forcing user on run-now, else 'Scheduled Batch'; counts +
+  forced/completed); 911 connector generate/pull/run_pipeline incl. the unattended daily batch.
+  details = shape facts only, never covered text (§6a rule). Read-back: `GET /mass-jobs/:id/history`.
+  NO UI surface yet (UI rule — needs a design pass; trail is queryable meanwhile).
+
+### Evidence
+`verify_processing_audit` **21/21** (403s for a no-role staffer on create/cancel/run-now/911; create
+allowed for REDACTION_WORKER perm holder and sysadmin; reads open; 401 with no token; trail rows
+with correct per-action actors incl. Scheduled Batch attribution; details counts-only, no-PII scan;
+read-back parses). **Full suite 2265/2265, LIVE UNTOUCHED, exit 0.** Deployed: API restarted,
+`processing_history` confirmed on live (0 rows), unauth mutation → 401. No frontend change needed —
+mutation errors already surface the server message, reads ungated. Spec updated same commit:
+SPEC_redaction §6 (gate + trail paragraphs).
+
+### Open threads
+- The rest of the processing side (redaction jobs/templates/rules, repositories, taxonomy writes)
+  is still requireAuth-only — same class of gap, deliberately NOT swept into this slice. Worth its
+  own pass if hardening continues pre-go-live.
+- Trail UI (a "history" strip on the job card / released-record page) — design session first.
+- Standing board unchanged: request purge + scenario authoring + real benchmark · state-switching
+  parked · chat-agent upgrade · v3 collapse · search-activity tracking · hardening · go-live flip ·
+  glosses/stamping · product split (parked until after go-live) · §6b anchor-zones mockup session.

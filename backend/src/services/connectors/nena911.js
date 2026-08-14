@@ -155,6 +155,8 @@ async function startScheduler() {
       if (last && last.value === today) return;
       var r = await runNow(20);
       await db.run("INSERT INTO system_config (key, value) VALUES ('nena911_last_gen_day', ?) ON CONFLICT (key) DO UPDATE SET value = ?", [today, today]);
+      // The daily batch is request-less processing with no human in the loop — it still gets a trail row.
+      await require('../processingHistory').record('connector_911', null, 'run_pipeline', 'Scheduled Batch', { pulled: r.pulled, redacted: r.redacted, errors: r.errors || 0 });
       console.log('[nena911] daily batch:', JSON.stringify(r));
     } catch (e) { console.error('[nena911 sched]', e && e.message); }
   }

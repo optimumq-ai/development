@@ -1733,3 +1733,21 @@ CREATE TABLE IF NOT EXISTS user_dashboard_panes (
   panes_json TEXT NOT NULL,
   updated_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
 );
+
+-- Audit trail for REQUEST-LESS processing work (2026-08-14). request_history.request_id is NOT NULL,
+-- so mass-redaction jobs, forced runs, and connector pulls — work that touches hundreds of files with
+-- no parent request — left no record of who did what. This is that trail: insert-only, mirrors
+-- request_history's actor columns. details is JSON of SHAPE FACTS ONLY (counts, ids, names) — never
+-- document content; covered text is the PII being redacted and must not land in a log (redactionAudit rule).
+CREATE TABLE IF NOT EXISTS processing_history (
+  id TEXT PRIMARY KEY,
+  seq BIGSERIAL,                  -- true insert order; created_at is second-resolution, so bursts tie
+  entity_type TEXT NOT NULL,      -- 'mass_job' | 'connector_911' | future processing entities
+  entity_id TEXT,                 -- the job/entity id; NULL for entity-wide events (e.g. a connector pull)
+  action TEXT NOT NULL,           -- created | paused | resumed | canceled | run_now | chunk_processed | ...
+  actor_id TEXT,
+  actor_name TEXT NOT NULL,       -- a person, or 'Scheduled Batch' for the nightly worker
+  details TEXT,                   -- JSON, shape facts only
+  created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
+);
+CREATE INDEX IF NOT EXISTS idx_prochist_entity ON processing_history(entity_type, entity_id);

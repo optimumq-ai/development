@@ -105,6 +105,11 @@ async function tick(opts) {
       var done = newProcessed >= job.total_items;
       await run("UPDATE mass_redaction_jobs SET processed_items=?, redacted_count=redacted_count+?, held_count=held_count+?, error_count=error_count+?, status=?, error_log=?, last_run_at=?, updated_at=? WHERE id=?",
         [newProcessed, r.redacted, r.held, r.errors, done ? 'completed' : 'running', mergeErrLog(job.error_log, r.errs), nowStr(), nowStr(), job.id]);
+      // Audit trail: every chunk is an act on request-less files — record WHO drove it (the forcing
+      // user on run-now, otherwise the nightly worker) and the shape of what happened. Counts only.
+      await require('./processingHistory').record('mass_job', job.id,
+        'chunk_processed', { id: opts.actorSub || null, name: opts.actor || 'Scheduled Batch' },
+        { processed: r.processed, redacted: r.redacted, held: r.held, errors: r.errors, forced: force, completed: done });
       await addBudget(day, r.processed);
       totalProcessed += r.processed; remaining -= r.processed;
       if (done) {

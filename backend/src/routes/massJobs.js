@@ -3,11 +3,20 @@
 // cancel, plus run-now (force one chunk immediately, ignoring the after-hours window) for urgent jobs.
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRoleOrPerm } = require('../middleware/auth');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const worker = require('../services/massJobs');
 const libraryShelf = require('../services/libraryShelf');
+const procHistory = require('../services/processingHistory');
+
+// A mass job burns redactions across hundreds of files and (via the 911 endpoints) publishes records
+// to the public library — that is redaction authority, not something every logged-in staffer holds.
+// Reads stay requireAuth (consistent with the rest of the processing side); every MUTATION takes this
+// gate: redaction permission-role holders plus the supervising function roles (SYSTEM_ADMIN always
+// passes inside requireRoleOrPerm). REDACTION_AUTHORITY is accepted but not required — it is currently
+// an orphan role nothing else consults.
+const MUTATE = requireRoleOrPerm(['DIRECTOR', 'SUPERVISOR'], ['REDACTION_WORKER', 'REDACTION_AUTHORITY']);
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 async function getConfig(key, def) { var r = await get("SELECT value FROM system_config WHERE key = ?", [key]); return (r && r.value != null) ? r.value : def; }
@@ -56,33 +65,36 @@ router.get('/911/status', requireAuth, async function (req, res) {
   try { var d = await require('../services/connectors/nena911').discoverNew(); res.json({ sourceTotal: d.sourceTotal, newSinceLastPull: d.newCount, watermark: d.watermark }); }
   catch (e) { res.status(500).json({ error: 'status failed' }); }
 });
-router.post('/911/generate', requireAuth, async function (req, res) {
+router.post('/911/generate', requireAuth, MUTATE, async function (req, res) {
   try {
     var n = Math.max(1, Math.min(200, parseInt((req.body && req.body.count) || 20, 10) || 20));
     var n911 = require('../services/connectors/nena911');
     await n911.generateIntoSource(n);
     var d = await n911.discoverNew();
+    await procHistory.record('connector_911', null, 'generate', req.user, { added: n, source_total: d.sourceTotal });
     res.json({ added: n, sourceTotal: d.sourceTotal, newSinceLastPull: d.newCount });
   } catch (e) { res.status(500).json({ error: 'Could not log calls: ' + (e && e.message) }); }
 });
-router.post('/911/pull', requireAuth, async function (req, res) {
+router.post('/911/pull', requireAuth, MUTATE, async function (req, res) {
   try {
     var n911 = require('../services/connectors/nena911');
     var r = await n911.pullAndProcess();
     var d = await n911.discoverNew();
+    await procHistory.record('connector_911', null, 'pull', req.user, { pulled: r.pulled, redacted: r.redacted, errors: r.errors || 0, source_total: d.sourceTotal });
     res.json(Object.assign(r, { sourceTotal: d.sourceTotal, newSinceLastPull: d.newCount }));
   } catch (e) { res.status(500).json({ error: 'Could not pull: ' + (e && e.message) }); }
 });
 
-router.post('/911/run-now', requireAuth, async function (req, res) {
+router.post('/911/run-now', requireAuth, MUTATE, async function (req, res) {
   try {
     var n = Math.max(1, Math.min(50, parseInt((req.body && req.body.count) || 20, 10) || 20));
     var r = await require('../services/connectors/nena911').runNow(n);
+    await procHistory.record('connector_911', null, 'run_pipeline', req.user, { count: n });
     res.json(r);
   } catch (e) { res.status(500).json({ error: 'Could not run the 911 batch: ' + (e && e.message) }); }
 });
 
-router.post('/', requireAuth, async function (req, res) {
+router.post('/', requireAuth, MUTATE, async function (req, res) {
   var b = req.body || {};
   if (!b.template_id) return res.status(400).json({ error: 'template_id required' });
   var fileIds = Array.isArray(b.file_ids) ? b.file_ids.filter(Boolean) : [];
@@ -100,29 +112,39 @@ router.post('/', requireAuth, async function (req, res) {
      b.chunk_size || 500, b.window_start || '18:00', b.window_end || '06:00', b.priority != null ? b.priority : 100,
      dest.record_type_id, dest.department_id,
      req.user.name || req.user.sub, nowStr(), nowStr()]);
+  await procHistory.record('mass_job', id, 'created', req.user,
+    { name: b.name || 'Untitled batch', template_id: t.id, total_items: fileIds.length, record_type_id: dest.record_type_id, department_id: dest.department_id });
   var budget = parseInt(await getConfig('mass_redaction_nightly_budget', '500'), 10) || 500;
   res.json(withEta(await get("SELECT * FROM mass_redaction_jobs WHERE id = ?", [id]), budget));
 });
 
-async function setStatus(req, res, status, fromStatuses) {
+async function setStatus(req, res, status, fromStatuses, action) {
   var job = await get("SELECT * FROM mass_redaction_jobs WHERE id = ?", [req.params.id]);
   if (!job) return res.status(404).json({ error: 'not found' });
   if (fromStatuses && fromStatuses.indexOf(job.status) < 0) return res.status(400).json({ error: 'cannot ' + status + ' a ' + job.status + ' job' });
   await run("UPDATE mass_redaction_jobs SET status = ?, updated_at = ? WHERE id = ?", [status, nowStr(), req.params.id]);
+  await procHistory.record('mass_job', req.params.id, action, req.user, { from: job.status, to: status });
   res.json({ ok: true, status: status });
 }
-router.post('/:id/pause', requireAuth, function (req, res) { setStatus(req, res, 'paused', ['queued', 'running']); });
-router.post('/:id/resume', requireAuth, function (req, res) { setStatus(req, res, 'queued', ['paused']); });
-router.post('/:id/cancel', requireAuth, function (req, res) { setStatus(req, res, 'canceled', ['queued', 'running', 'paused']); });
+router.post('/:id/pause', requireAuth, MUTATE, function (req, res) { setStatus(req, res, 'paused', ['queued', 'running'], 'paused'); });
+router.post('/:id/resume', requireAuth, MUTATE, function (req, res) { setStatus(req, res, 'queued', ['paused'], 'resumed'); });
+router.post('/:id/cancel', requireAuth, MUTATE, function (req, res) { setStatus(req, res, 'canceled', ['queued', 'running', 'paused'], 'canceled'); });
 
 // Force one chunk now (ignores the after-hours window; still counts against the shared nightly budget).
-router.post('/:id/run-now', requireAuth, async function (req, res) {
+router.post('/:id/run-now', requireAuth, MUTATE, async function (req, res) {
   var job = await get("SELECT * FROM mass_redaction_jobs WHERE id = ?", [req.params.id]);
   if (!job) return res.status(404).json({ error: 'not found' });
   if (['completed', 'canceled'].indexOf(job.status) >= 0) return res.status(400).json({ error: 'job is ' + job.status });
+  await procHistory.record('mass_job', req.params.id, 'run_now', req.user, { status_at_request: job.status });
   var out = await worker.tick({ force: true, jobId: req.params.id, actor: req.user.name, actorSub: req.user.sub });
   var budget = parseInt(await getConfig('mass_redaction_nightly_budget', '500'), 10) || 500;
   res.json({ result: out, job: withEta(await get("SELECT * FROM mass_redaction_jobs WHERE id = ?", [req.params.id]), budget) });
+});
+
+// The job's audit trail: who created/paused/canceled/forced it, and what each worker chunk did.
+router.get('/:id/history', requireAuth, async function (req, res) {
+  var rows = await all("SELECT * FROM processing_history WHERE entity_type = 'mass_job' AND entity_id = ? ORDER BY seq ASC", [req.params.id]);
+  res.json(rows.map(function (r) { try { r.details = r.details ? JSON.parse(r.details) : null; } catch (e) {} return r; }));
 });
 
 module.exports = router;
