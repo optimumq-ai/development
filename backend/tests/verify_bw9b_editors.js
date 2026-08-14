@@ -158,6 +158,21 @@ async function makeUser(suffix, name, roleIds) {
       ex.json.content.exemptions.every(function (x) { return x.wiredLabel === 'wired' || x.wiredLabel === 'content-only'; }));
     var raw = await req('GET', '/api/jurisdiction-profile/rules/branches', null, TDIR);
     ok('A9 an un-rendered section falls back to the honest raw view', raw.status === 200 && raw.json.content.kind === 'raw');
+    // Identity + taxonomy live OUTSIDE the rules store (profile row + agency config; record_types).
+    // Until 2026-08-14 both fell to `raw: null` and the screen said "No content" over configured,
+    // ATTESTED sections — the row and the detail disagreed (found by Kevin). They now render derived
+    // read-only fields from the SAME sources the index's configured-ness check reads.
+    var idn = await req('GET', '/api/jurisdiction-profile/rules/identity', null, TDIR);
+    ok('A9b identity renders the statute (cited), exemption model, and agency — never "No content" over an attested section',
+      idn.status === 200 && idn.json.content.kind === 'fields' &&
+      idn.json.content.fields.some(function (f) { return f.key === 'statute' && f.value && f.citation; }) &&
+      idn.json.content.fields.some(function (f) { return f.key === 'agency' && f.value; }) &&
+      /read-only/.test(idn.json.content.areaEditorNote || ''));
+    var txn = await req('GET', '/api/jurisdiction-profile/rules/taxonomy', null, TDIR);
+    ok('A9c taxonomy renders catalog counts and points at its real authoring surface',
+      txn.status === 200 && txn.json.content.kind === 'fields' &&
+      txn.json.content.fields.some(function (f) { return f.key === 'types' && /active/.test(String(f.value)); }) &&
+      txn.json.content.areaEditor === '/taxonomy');
     var rr1 = await req('GET', '/api/jurisdiction-profile/rules-research/TX-0016', null, TSUP);
     ok('A10 the research drill-down serves the full record incl. the statute\'s own words (Supervisor may read)',
       rr1.status === 200 && !!rr1.json.rule.source_language && !!rr1.json.rule.atomic_rule);

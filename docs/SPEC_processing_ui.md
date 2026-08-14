@@ -156,7 +156,11 @@ Proposals) over the BW9a detail; renderers: deadlines (Frame C named-timer table
 deadline + clock_matrix domains, humanized use cases with run-out consequences), fee (cited
 schedule facts), clarification/payment/fee_waiver (labeled fields w/ per-field provenance),
 exemption/redaction (the redaction_rules + legal_sources store w/ honest wired/content-only),
-rest read-only raw. Composer: citation + note required; compose-time validators are
+identity + taxonomy (derived read-only fields from their REAL stores — the profile row + agency
+config, and record_types counts — with an edited-elsewhere pointer; added 2026-08-14 after both
+fell to raw-null and rendered "No content" over configured, attested sections while the index,
+reading the same sources via the signature, said configured — the row and the detail must agree;
+verify_bw9b_editors A9b/A9c), rest read-only raw. Composer: citation + note required; compose-time validators are
 configIntegrity's OWN `validateDomainConfig`/`validateClockMatrix` (factored pure — same code,
 same wording, re-run at apply); proposals land `source_ref='editor'` in the existing review/apply
 flow; editor applies write the jurisdiction_rules row + re-sync (drift-warn). Senior Legal

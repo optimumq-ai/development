@@ -547,6 +547,12 @@ export default function JurisdictionConfigPage() {
                 </div>
               ) : body.kind === 'fields' ? (
                 <div>
+                  {body.areaEditorNote ? (
+                    <div style={Object.assign({}, panel, { background: C.surface2 })}>
+                      <span style={kv}>{body.areaEditorNote}{' '}
+                        <Link to={body.areaEditor} style={{ color: C.blue }}>{body.areaEditorLabel || 'Open →'}</Link></span>
+                    </div>
+                  ) : null}
                   {!body.enabled ? <div style={Object.assign({}, panel, { background: C.surface2 })}><span style={kv}>This policy is not enabled — the fields below are what the import carried; nothing acts on them yet.</span></div> : null}
                   {body.fields.map(function (f) {
                     return (
@@ -556,9 +562,13 @@ export default function JurisdictionConfigPage() {
                         <div style={{ display: 'flex', gap: 8, alignItems: 'baseline', flexWrap: 'wrap' }}>
                           <span style={{ fontWeight: 600 }}>{f.label}:</span>
                           <b style={{ color: G.navy }}>{f.value == null ? '—' : String(f.value)}</b>
-                          {f.citation ? <CiteChip>{f.citation}</CiteChip> : <span style={kv}>city policy</span>}
+                          {/* Three provenance labels, never conflated: a citation, statute-derived without
+                              one (e.g. the identity section's state/model facts), or the city's own call. */}
+                          {f.citation ? <CiteChip>{f.citation}</CiteChip> : f.statuteDerived ? <span style={kv}>statute-derived</span> : <span style={kv}>city policy</span>}
                           {ruleChips(f.sourceRuleIds)}
-                          {canPropose ? <button type="button" style={Object.assign({}, btnQuiet, { marginLeft: 'auto' })}
+                          {/* No propose control on a section with no rules domain (identity/taxonomy render
+                              derived read-only fields — their real editors are linked above). */}
+                          {canPropose && rules.domains.length ? <button type="button" style={Object.assign({}, btnQuiet, { marginLeft: 'auto' })}
                             onClick={function () { openComposer(rules.domains[0], 'Propose change — ' + f.label, { field: f }); }}>Propose…</button> : null}
                         </div>
                         {f.help ? <div style={Object.assign({}, kv, { marginTop: 2 })}>{f.help}</div> : null}

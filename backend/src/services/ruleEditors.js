@@ -217,6 +217,33 @@ async function content(jid, section) {
       exemptionModel: (jur && jur.exemption_model) || null,
       areaEditor: '/admin?tab=redaction',
       areaEditorNote: 'Rule rows are authored and approved in the Redaction Rules area — its draft → legal-approval flow is the audit path for row-level changes. The domain configuration below edits as a proposal here.' };
+  } else if (section === 'identity') {
+    // The one section whose substance lives OUTSIDE the rules store — the jurisdiction profile row
+    // and the agency's system config. Without this branch it fell to `raw: null` and the screen said
+    // "No content" over a configured, ATTESTED section (found by Kevin 2026-08-14). Same sources the
+    // index's configured-ness check reads (JP.sectionSignature), so the row and the detail agree.
+    var prof = await get('SELECT name, code, statute_name, statute_citation, exemption_model FROM jurisdiction_profiles WHERE id = ?', [jid]);
+    var agency = await get("SELECT value FROM system_config WHERE key = 'agency_name'");
+    var contact = await get("SELECT value FROM system_config WHERE key = 'contact_email'");
+    body = { kind: 'fields', enabled: true, fields: [
+      { key: 'statute', label: 'Public-records statute', value: prof && prof.statute_name, citation: prof && prof.statute_citation, statuteDerived: true },
+      { key: 'state', label: 'State', value: prof ? (prof.name + ' (' + prof.code + ')') : null, statuteDerived: true },
+      { key: 'exemption_model', label: 'Exemption model', value: prof && prof.exemption_model, statuteDerived: true },
+      { key: 'agency', label: 'Agency', value: agency && agency.value },
+      { key: 'contact', label: 'Public records contact', value: contact && contact.value }
+    ],
+      areaEditor: '/config', areaEditorLabel: 'Open Configuration →',
+      areaEditorNote: 'Identity lives on the jurisdiction profile and the agency configuration — shown here read-only; attesting records the state of both.' };
+  } else if (section === 'taxonomy') {
+    // Same shape of gap: the catalog lives in record_types with its own authoring surface.
+    var rtc = await get("SELECT count(*)::int AS total, count(*) FILTER (WHERE status = 'draft')::int AS drafts, count(*) FILTER (WHERE status = 'active')::int AS act FROM record_types");
+    var catc = await get('SELECT count(*)::int AS n FROM categories');
+    body = { kind: 'fields', enabled: true, fields: [
+      { key: 'types', label: 'Record types', value: rtc ? (rtc.act + ' active · ' + rtc.drafts + ' draft') : null },
+      { key: 'categories', label: 'Categories', value: catc && catc.n }
+    ],
+      areaEditor: '/taxonomy', areaEditorLabel: 'Open the Taxonomy page →',
+      areaEditorNote: 'The catalog is authored on the Taxonomy page — its editors and discovery flows are the audit path for changes; this section attests the catalog’s state.' };
   } else {
     body = { kind: 'raw', config: cfgs[domains[0]] || null };
   }

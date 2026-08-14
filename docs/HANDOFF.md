@@ -7546,3 +7546,36 @@ holds `legal_review` yet — grant it in Staff Management to activate the picker
 Legal-hours design COMPLETE. Remaining: chat-agent model upgrade · v3 collapse · search-activity
 tracking · pre-production hardening · Kevin's testing/demo · go-live flip · §6.2 glosses ·
 §2.6/§8.3 stamping.
+
+## 2026-08-14 (d) — the "empty identity section" Kevin found: fixed (+ taxonomy, same class)
+
+### The finding (Kevin's, from using the app — the best kind)
+The Jurisdiction Configuration index showed identity ATTESTED/configured while its detail said
+"No content — import a state template or add the first rule." Root cause: the section detail's
+Content zone renders the RULES STORE, and identity's substance lives elsewhere (the jurisdiction
+profile row + agency system_config) — the exact sources the index's configured-ness signature
+reads. The row and the detail were reading different stores. Probing all sections found ONE more
+in the class: taxonomy (substance in record_types). Deadlines/clarification/payment/fee_waiver
+render fine (my first probe said otherwise — it read `body` where the payload key is `content`;
+probe twice, print the HTTP status).
+
+### Built
+`ruleEditors.content` branches for identity (statute cited via chip · state · exemption model ·
+agency · contact, read-only, from the SAME sources as the signature) and taxonomy (catalog counts +
+pointer to the Taxonomy page). Frontend fields-renderer: the edited-elsewhere note panel (exemption's
+pattern, generalized), a third provenance label ("statute-derived" for cited-less statute facts —
+"State: Texas · city policy" was wrong), and Propose buttons gated on the section actually having a
+rules domain (identity/taxonomy have none; a domain-less compose would have errored).
+
+### Evidence
+`verify_bw9b_editors` **37/37** (A9b identity: cited statute + agency + read-only note; A9c
+taxonomy: counts + /taxonomy pointer). **Full suite 2166/2166, live untouched, exit 0.** Deployed
+(build + API 200); identity verified live (`exchange/jur_identity_fixed.png`). SPEC_processing_ui
+BW9b paragraph updated in-commit.
+
+### Context for the record
+This came out of demo planning: the magic-screen project (Kevin's magicscreen.doc — benchmark/reset,
+aging clock, role switch; state-switching PARKED by Kevin for later). TX jurisdiction config turned
+out to be fully attested since 2026-08-01 — the "mock config + attestation" ask was already done;
+this display fix was the only real gap found. NEXT: magic screen slice 1 (benchmark + reset + the
+date-shifter).
