@@ -64,11 +64,19 @@ Advances bounded 1 min–90 days per call. UI (with the shell): hold-the-arrow a
 clock + calendar per Kevin's visual; pace tuned so the workers keep up (60s/day acceptable —
 Kevin narrates over it).
 
-## Role switch (slice 3 — NOT BUILT, ships with the screen shell)
-Curated cast on the screen (legal · ORO head · finance · estimator · searcher · redactor · ORO
-Associate for MRR — Kevin expects to tune this with use): server mints a real session token for the
-chosen user (the login mechanism, demo-gated), the client swaps it in and reloads. The screen shell
-itself is design-gated (v2 UI rule): mockup for Kevin before build, including the clock/calendar.
+## Role switch + the screen shell (slice 3 — BUILT 2026-08-14; Kevin approved the mock
+(`exchange/magic_screen_mock.png`) same day)
+`/magic` is URL-only (no nav entry — harness-asserted) and a deliberately DARK backstage console so
+a glimpsed screen is unmistakably the control room. Three zones per the mock: Starting point
+(Reset All with the relative-time promise in words + confirm modal; Benchmark now with the
+modify-then-benchmark workflow as one sentence) · the clock hero (SVG analog face on syntheticNow,
+month calendar with real-today dashed vs demo-today amber, HOLD-to-advance — sequential half-day
+ticks, each awaiting the server so the workers always keep up, ~2s per day — +1/+7 quick buttons,
+drift line, and the "the system noticed" strip rendering the tickler's actions in plain words with
+a Tickler link) · Become (curated cast in system_config `magic_cast`, edited ON the screen —
+add-from-staff picker, remove per row; `POST /magic/become` mints a real session via the login
+signer, client swaps localStorage and reloads). All routes demo_mode+SYSTEM_ADMIN-gated; off demo
+mode the page says "not in demo mode — there is nothing here."
 
 ## Parked: per-state switching (Kevin, 2026-08-14)
 Facts so nothing is re-learned: the 32-state rules research is DONE (5 waves, pruned 1,116 rules,

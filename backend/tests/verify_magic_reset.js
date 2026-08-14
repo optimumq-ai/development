@@ -184,6 +184,27 @@ async function submit(email, desc) {
     outG.deltaSeconds === 0 && stG.body.clockOffsetSeconds === 0 && aG.created_at === atBench.aCreated &&
     (await db.get('SELECT count(*)::int n FROM requests')).n === atBench.requests);
 
+  console.log('\n=== H. BECOME + THE CAST (slice 3) ===');
+  var becomePlain = await call(PLAIN, 'POST', '/magic/become', { user_id: 'u-kruss' });
+  ok('H1 a non-admin cannot Become anyone (403)', becomePlain.status === 403);
+  var badCast = await call(ADMIN, 'PUT', '/magic/cast', { cast: [{ user_id: 'nobody-' + TAG }] });
+  ok('H2 a cast entry naming nobody is refused (404)', badCast.status === 404);
+  await call(ADMIN, 'PUT', '/magic/cast', { cast: [{ user_id: plainU.id, caption: 'Demo person' }] });
+  var castGet = await call(ADMIN, 'GET', '/magic/cast');
+  ok('H3 the cast round-trips with the person\'s name joined on',
+    castGet.status === 200 && castGet.body.cast.length === 1 &&
+    castGet.body.cast[0].display_name === plainU.display_name && castGet.body.cast[0].caption === 'Demo person');
+  var became = await call(ADMIN, 'POST', '/magic/become', { user_id: plainU.id });
+  var asThem = became.status === 200 ? await call(became.body.token, 'GET', '/auth/me') : { status: 0 };
+  ok('H4 Become mints a REAL working session for the chosen person (auth/me answers as them)',
+    became.status === 200 && asThem.status === 200 &&
+    (asThem.body.id === plainU.id || (asThem.body.user && asThem.body.user.id === plainU.id)));
+  var appSrc = fs.readFileSync('/opt/optimumq/frontend/src/App.js', 'utf8');
+  ok('H5 the /magic route exists and the page is real (URL-only — no nav entry, asserted)',
+    /path="\/magic"/.test(appSrc) && fs.existsSync('/opt/optimumq/frontend/src/pages/MagicPage.js') &&
+    !/magic/i.test(fs.readFileSync('/opt/optimumq/frontend/src/components/layout/AppLayout.js', 'utf8').split('\n').filter(function (l) { return /to=|href=/.test(l); }).join('\n')));
+  await db.run("DELETE FROM system_config WHERE key = 'magic_cast'");
+
   console.log('\n  ' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
   process.exit(fail ? 1 : 0);
 })().catch(function (e) { console.error('HARNESS ERROR:', e); process.exit(1); });

@@ -50,4 +50,48 @@ router.post('/reset', requireAuth, requireRole('SYSTEM_ADMIN'), demoMode, async 
   } catch (e) { res.status(e.status || 500).json({ error: e.message, code: e.code }); }
 });
 
+// ── BECOME (role switch) + the curated cast ─────────────────────────────────────────────────────
+// The cast is a system_config list (`magic_cast`), edited on the screen itself — Kevin expects to
+// tune it as he rehearses. Become mints a REAL session token for the chosen person via the same
+// signer login uses; the client swaps it into localStorage and reloads. Demo-gated like everything
+// here: on a production install none of this exists (404).
+router.get('/cast', requireAuth, requireRole('SYSTEM_ADMIN'), demoMode, async function (req, res) {
+  try {
+    var row = await get("SELECT value FROM system_config WHERE key = 'magic_cast'");
+    var cast = []; try { cast = JSON.parse((row && row.value) || '[]') || []; } catch (e) {}
+    var out = [];
+    for (var i = 0; i < cast.length; i++) {
+      var u = await get("SELECT id, display_name, title, status FROM users WHERE id = ?", [cast[i].user_id]);
+      if (u && u.status !== 'inactive') out.push({ user_id: u.id, display_name: u.display_name, title: u.title, caption: cast[i].caption || u.title || '' });
+    }
+    res.json({ cast: out });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.put('/cast', requireAuth, requireRole('SYSTEM_ADMIN'), demoMode, async function (req, res) {
+  try {
+    var cast = Array.isArray((req.body || {}).cast) ? req.body.cast : null;
+    if (!cast) return res.status(422).json({ error: 'Send { cast: [{ user_id, caption }] }.' });
+    var clean = [];
+    for (var i = 0; i < cast.length; i++) {
+      var u = await get('SELECT id FROM users WHERE id = ?', [cast[i].user_id]);
+      if (!u) return res.status(404).json({ error: 'No such person: ' + cast[i].user_id });
+      clean.push({ user_id: cast[i].user_id, caption: String(cast[i].caption || '').slice(0, 60) });
+    }
+    var { run } = require('../db');
+    await run("INSERT INTO system_config (key, value) VALUES ('magic_cast', ?) ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value", [JSON.stringify(clean)]);
+    res.json({ cast: clean });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+router.post('/become', requireAuth, requireRole('SYSTEM_ADMIN'), demoMode, async function (req, res) {
+  try {
+    var u = await get('SELECT * FROM users WHERE id = ?', [(req.body || {}).user_id]);
+    if (!u) return res.status(404).json({ error: 'No such person.' });
+    if (u.status === 'inactive') return res.status(422).json({ error: u.display_name + ' is inactive.' });
+    var token = await require('../services/auth').signAccessToken(u);
+    res.json({ token: token, user: { id: u.id, display_name: u.display_name } });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 module.exports = router;

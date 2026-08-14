@@ -22,6 +22,7 @@ import RecordSearchTaskPage from './pages/RecordSearchTaskPage';
 import DispositionsPage from './pages/DispositionsPage';
 import LegalReviewTaskPage from './pages/LegalReviewTaskPage';
 import LegalEstimateTaskPage from './pages/LegalEstimateTaskPage';
+import MagicPage from './pages/MagicPage';
 import IntakeReviewTaskPage from './pages/IntakeReviewTaskPage';
 import ReleaseReviewTaskPage from './pages/ReleaseReviewTaskPage';
 import ReleaseReviewPowerModePage from './pages/ReleaseReviewPowerModePage';
@@ -84,6 +85,9 @@ export default function App() {
         <Route path="/portal/library/map" element={<PublicLibraryMapPage />} />
         {/* Redaction task screen — full-bleed (no app nav) but auth-gated; a redaction task opens here. */}
         <Route path="/redaction/:taskId" element={<Guard c={<RedactionTaskPage />} />} />
+        {/* The magic demo console — URL-only (no nav entry, DESIGN_magic_screen.md), auth-gated here
+            and demo_mode+admin-gated at every API it calls; off demo mode it renders "nothing here". */}
+        <Route path="/magic" element={<Guard c={<MagicPage />} />} />
         <Route path="/" element={<Guard c={<AppLayout />} />}>
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<DashboardPage />} />

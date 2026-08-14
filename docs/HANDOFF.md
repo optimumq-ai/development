@@ -7657,3 +7657,35 @@ second (+18min = exactly the benchmark's age). API alive throughout.
 Slice 3: the /magic screen shell — role switch + the clock/calendar visuals. MOCKUP FIRST (Kevin
 decides visually): hold-the-arrow advance, analog clock + calendar with the date highlighting.
 Then: request purge → scenario authoring with the clock → the real benchmark.
+
+## 2026-08-14 (g) — THE MAGIC SCREEN IS COMPLETE (slice 3): /magic live, all three zones
+
+### Built (Kevin approved the mock — exchange/magic_screen_mock.png — same day)
+`/magic` (URL-only, NO nav entry — harness-asserted): the dark backstage console. Left: Reset All
+(confirm modal, relative-time promise in words) + Benchmark now (the modify-then-benchmark workflow
+as one sentence). Center: the clock hero — SVG analog face on syntheticNow, month calendar with
+real-today (dashed) vs demo-today (amber), HOLD-to-advance (sequential half-day ticks, each awaits
+the server so the workers always keep up — ~2s/day, inside Kevin's envelope), +1/+7 buttons, drift
+line, and the "the system noticed" strip rendering tickler actions in plain words with a Tickler
+link. Right: Become — curated cast in system_config `magic_cast`, edited ON the screen
+(add-from-staff, remove), `POST /magic/become` mints a real session via the login signer, client
+swaps localStorage and reloads. Off demo mode the page says "not in demo mode — there is nothing
+here"; every API behind it 404s.
+
+### Evidence
+`verify_magic_reset` **29/29** (adds: become 403 for non-admin; cast 404 on nobody; cast
+round-trip with names joined; Become's token WORKS — /auth/me answers as the target; /magic route
+exists, page real, NO nav entry). **Full suite 2195/2195, live untouched, exit 0.** Deployed
+(build + API 200); live screenshot `exchange/magic_screen_live.png` — in-sync calendar state,
+empty cast with picker.
+
+### THE MAGIC SCREEN PROJECT: slices 1–3 ALL BUILT in one night
+Benchmark/Reset (95bddb6) · the clock engine (6e418bf) · the screen (this). What remains is
+Kevin's authoring work, with help: purge the current requests (guarded corpus purge) → build the
+~10 scenarios through the real app using the clock → press Benchmark. Then rehearse, tune the
+cast, adjust. Parked: per-state switching (design doc records the groundwork).
+
+### The wider board
+Magic screen DONE · legal-hours design DONE (4 slices) · mass-redaction hand-off DONE · legal_rt
+trigger DONE · identity/taxonomy config render DONE. Standing: chat-agent model upgrade · v3
+collapse · search-activity tracking · hardening · go-live flip · §6.2 glosses · §2.6/§8.3 stamping.
