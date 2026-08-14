@@ -85,6 +85,15 @@ export default function MrrMasterPage() {
   var [ledger, setLedger] = useState(null);
   var [busy, setBusy] = useState(false);
   var [msg, setMsg] = useState(null);
+  // Legal-hours ask, PARENT-level (DESIGN_legal_hours_estimate.md slice 4). Deliberately not a
+  // per-child activity: exemption analysis spans items, and the answer feeds ONE master estimate.
+  var [legalAsk, setLegalAsk] = useState(null);
+  var [askOpen, setAskOpen] = useState(false);
+  var [askNote, setAskNote] = useState('');
+  var [askAssignee, setAskAssignee] = useState('');
+  var [askBusy, setAskBusy] = useState(false);
+  var [askMsg, setAskMsg] = useState('');
+  var [legalStaff, setLegalStaff] = useState(null);
 
   function load() {
     api.get('/mrr/' + id + '/master')
@@ -95,8 +104,25 @@ export default function MrrMasterPage() {
         // intake-review stop on an MRR, so these requestor-level checks surface HERE instead of vanishing.
         api.get('/requests/' + pid + '/eligibility-findings').then(function (x) { setFindings(x.data); }).catch(function () {});
         api.get('/jurisdiction-profile/ledger/request/' + pid).then(function (x) { setLedger(x.data); }).catch(function () { setLedger(null); });
+        api.get('/legal-estimate/request/' + pid).then(function (x) { setLegalAsk(x.data); }).catch(function () { setLegalAsk(null); });
       })
       .catch(function (e) { setErr((e.response && e.response.data && e.response.data.error) || e.message); });
+  }
+  function openAsk() {
+    setAskMsg(''); setAskNote(''); setAskAssignee(''); setAskOpen(true);
+    if (legalStaff === null) {
+      api.get('/staff').then(function (r) {
+        setLegalStaff((r.data.staff || []).filter(function (u) { return (u.taskTypes || []).indexOf('legal_review') >= 0 && u.status !== 'inactive'; }));
+      }).catch(function () { setLegalStaff([]); });
+    }
+  }
+  function submitAsk() {
+    if (!askAssignee) { setAskMsg('Name the person to ask.'); return; }
+    if (!askNote.trim()) { setAskMsg('Say what legal should look at.'); return; }
+    setAskBusy(true); setAskMsg('');
+    api.post('/legal-estimate/request/' + m.parent.id + '/ask', { assignee_id: askAssignee, note: askNote.trim() })
+      .then(function () { setAskBusy(false); setAskOpen(false); load(); })
+      .catch(function (e) { setAskBusy(false); setAskMsg((e.response && e.response.data && e.response.data.error) || 'Could not send the ask.'); });
   }
   useEffect(load, [id]);
 
@@ -233,6 +259,32 @@ export default function MrrMasterPage() {
             Waiting on: {(ready.pending || []).map(function (x) { return x.label; }).join(' · ')}
           </div>
         ) : null}
+
+        {/* ── LEGAL HOURS, PARENT-LEVEL (slice 4). Exemption analysis spans items — one ask, one
+            answer, feeding the ONE master estimate. Never blocks Generate (soft block, Kevin). ── */}
+        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', marginTop: 10 }}>
+          {m.canManage ? (
+            <button onClick={openAsk} style={btnQuiet}>
+              {legalAsk && (legalAsk.open || legalAsk.answer) ? 'Ask legal again' : 'Ask legal for hours'}
+            </button>
+          ) : null}
+          {legalAsk && legalAsk.open ? (
+            <span style={kv}>
+              <b style={{ color: G.navy }}>Legal hours pending</b>
+              {legalAsk.open.assignee_name ? ' — asked of ' + legalAsk.open.assignee_name : ''}
+              {': “' + legalAsk.open.ask_note + '”. The estimate can still be generated and sent; a later answer rides the revision rules.'}
+            </span>
+          ) : legalAsk && legalAsk.answer ? (
+            <span style={kv}>
+              <b style={{ color: G.statute }}>{'Legal’s answer: ' + legalAsk.answer.hours + ' hour' + (legalAsk.answer.hours === 1 ? '' : 's')}</b>
+              {(legalAsk.answer.entered_by_name ? ' (from ' + legalAsk.answer.entered_by_name + ')' : '') +
+                ' — lands in the estimate builder as Legal review hrs.'}
+            </span>
+          ) : m.canManage ? (
+            <span style={kv}>If these items need legal review, ask before the estimate goes out.</span>
+          ) : null}
+        </div>
+
         {msg ? <div style={{ fontSize: 12.5, color: '#8C3A2B', marginTop: 6 }}>{msg}</div> : null}
       </div>
 
@@ -296,6 +348,32 @@ export default function MrrMasterPage() {
         <span style={{ color: C.faint }}> · </span>
         <Link to="/my-tasks" style={{ color: G.navy }}>My Tasks</Link>
       </div>
+
+      {askOpen ? (
+        <div onClick={function () { if (!askBusy) setAskOpen(false); }} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50, padding: 20 }}>
+          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: C.surface, borderRadius: 8, width: 460, maxWidth: '100%', padding: 20, border: '1px solid ' + G.line }}>
+            <div style={panelHead}>Ask legal for hours</div>
+            <div style={Object.assign({}, kv, { marginBottom: 12 })}>
+              One ask for the whole request &mdash; exemption analysis spans the items. A named person on the
+              legal staff answers with expected hours; the answer lands on the master estimate as an input.
+            </div>
+            <div style={Object.assign({}, kv, { fontWeight: 700, marginBottom: 3 })}>Who to ask (legal staff)</div>
+            <select value={askAssignee} onChange={function (e) { setAskAssignee(e.target.value); }}
+              style={{ font: 'inherit', fontSize: 13, width: '100%', padding: '6px 8px', borderRadius: 5, border: '1px solid ' + G.line, marginBottom: 10, boxSizing: 'border-box' }}>
+              <option value="">{legalStaff === null ? 'Loading…' : legalStaff.length ? 'Choose a person' : 'Nobody holds the Legal Review task type'}</option>
+              {(legalStaff || []).map(function (u) { return <option key={u.id} value={u.id}>{u.display_name}{u.title ? ' — ' + u.title : ''}</option>; })}
+            </select>
+            <div style={Object.assign({}, kv, { fontWeight: 700, marginBottom: 3 })}>What should legal look at? (required)</div>
+            <textarea value={askNote} onChange={function (e) { setAskNote(e.target.value); }} rows={3}
+              style={{ font: 'inherit', fontSize: 13, width: '100%', padding: '6px 8px', borderRadius: 5, border: '1px solid ' + G.line, boxSizing: 'border-box', resize: 'vertical' }} />
+            {askMsg ? <div style={{ fontSize: 12.5, color: '#8C3A2B', marginTop: 6 }}>{askMsg}</div> : null}
+            <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+              <button onClick={submitAsk} disabled={askBusy} style={Object.assign({}, btn, askBusy ? { opacity: 0.5, cursor: 'not-allowed' } : {})}>{askBusy ? 'Sending…' : 'Send the ask'}</button>
+              <button onClick={function () { if (!askBusy) setAskOpen(false); }} style={btnQuiet}>Cancel</button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

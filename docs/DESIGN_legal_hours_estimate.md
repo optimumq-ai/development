@@ -102,8 +102,12 @@ expertise contribute expected hours to a quote.
    intake trigger and the redaction-stage escalation share one definition). Spawn site mirrors
    sensitivity_flag in `workflowEngine.onIntake` (MRR + moved-under-us excluded; additive on an open
    task); labelled for the queue and screen.
-4. **MRR hub wiring:** parent-level ask button; `legalHours` on the master estimate form.
-   (extend `verify_bw6_mrr`)
+4. **MRR hub wiring** `[BUILT 2026-08-14 — verify_legal_estimate §G, which owns the feature (the
+   bw6 pointer here predated slice 1)]`: parent-level "Ask legal for hours" on the hub master's
+   estimate block (manage-gated; pending/answer status line; hub-grammar modal). The answer feeds
+   the master estimate's `legalHours` through the slice-2 panel — the hub adds no second path, and
+   nothing blocks Generate (soft block). Per-child `mrr_estimate_data` untouched: legal is a parent
+   fact, asserted as such (§G3).
 
 ## Out of scope (recorded so they aren't rediscovered)
 - Attorney-rate schedules: no separate legal rate unless the city sets `labor.legal.rate`.

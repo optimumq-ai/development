@@ -145,15 +145,48 @@ async function call(token, method, path, body) {
     /legal_estimate:\s*function/.test(screenMap) && /legal-estimate\/:taskId/.test(app) &&
     fs.existsSync(FE + '/pages/LegalEstimateTaskPage.js'));
 
+  console.log('\n=== G. PARENT-LEVEL ON A TRUE MRR (slice 4) — one ask for the whole request ===');
+  // Exemption analysis spans items, so the ask is deliberately PARENT-level, never a per-child
+  // activity: one ask, one answer, feeding the ONE master estimate.
+  var subM = await fetch('http://localhost:' + PORT + '/api/public/submit', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ requestorName: 'LE MRR Harness', requestorEmail: 'lemrr-' + TAG + '@example.com',
+      description: 'IA complaints and dispatch logs ' + TAG,
+      records: [{ label: 'IA', description: 'IA complaints ' + TAG }, { label: 'Dispatch', description: 'dispatch logs ' + TAG }] })
+  });
+  ok('G0 a 2-item MRR submits (' + subM.status + ')', subM.status >= 200 && subM.status < 300);
+  var mrrParent = null;
+  for (var im = 0; im < 60 && !mrrParent; im++) {
+    mrrParent = await db.get('SELECT id, is_mrr FROM requests WHERE requestor_email = ? AND master_request_id IS NULL', ['lemrr-' + TAG + '@example.com']);
+    if (!mrrParent) await new Promise(function (r2) { setTimeout(r2, 500); });
+  }
+  var kids = await db.get('SELECT count(*)::int n FROM requests WHERE master_request_id = ?', [mrrParent.id]);
+  ok('G1 the parent is a real MRR (2 children)', Number(mrrParent.is_mrr) === 1 && kids.n === 2);
+  var askM = await call(ADMIN, 'POST', '/legal-estimate/request/' + mrrParent.id + '/ask',
+    { assignee_id: legalU.id, note: 'exemptions across both items' });
+  var ansM = await call(LEGAL, 'POST', '/legal-estimate/task/' + askM.body.task_id + '/complete',
+    { hours: 6, note: 'IA exemptions dominate; dispatch adds a CAD-log review' });
+  var panelM = await call(ADMIN, 'GET', '/legal-estimate/request/' + mrrParent.id);
+  ok('G2 ask -> answer -> read all work against the MRR PARENT, same rails as a single-record request',
+    askM.status === 200 && ansM.status === 200 && panelM.body.answer && Number(panelM.body.answer.hours) === 6);
+  var childAsk = await db.get("SELECT count(*)::int n FROM legal_estimate_inputs l JOIN requests r ON r.id = l.request_id WHERE r.master_request_id = ?", [mrrParent.id]);
+  ok('G3 nothing landed on a CHILD — the exchange is a parent fact', childAsk.n === 0);
+  var hubSrc = fs.readFileSync(FE + '/pages/MrrMasterPage.js', 'utf8');
+  ok('G4 the hub master carries the parent-level ask control (the reachability lesson, hub edition)',
+    /legal-estimate\/request/.test(hubSrc) && /Ask legal for hours/.test(hubSrc));
+
   console.log('\n=== F. LEAVE THE WORLD AS FOUND ===');
-  await db.run('DELETE FROM requests WHERE requestor_email = ?', ['le-' + TAG + '@example.com']); // cascades tasks + inputs + snapshots
+  // Children first by master link (master_request_id carries no FK), then the parents by email.
+  await db.run('DELETE FROM requests WHERE master_request_id IN (SELECT id FROM requests WHERE requestor_email = ANY($1::text[]))',
+    [['le-' + TAG + '@example.com', 'lemrr-' + TAG + '@example.com']]);
+  await db.run('DELETE FROM requests WHERE requestor_email = ANY($1::text[])', [['le-' + TAG + '@example.com', 'lemrr-' + TAG + '@example.com']]); // cascades tasks + inputs + snapshots
   await db.run('DELETE FROM user_task_types WHERE user_id = ANY($1::text[])', [[legalU.id, plainU.id]]);
   await db.run('DELETE FROM user_function_roles WHERE user_id = ANY($1::text[])', [[legalU.id, plainU.id]]);
   await db.run('DELETE FROM users WHERE id = ANY($1::text[])', [[legalU.id, plainU.id]]);
   var left = await db.get(
-    "SELECT (SELECT count(*) FROM requests WHERE requestor_email = ?) + (SELECT count(*) FROM users WHERE email LIKE ?) " +
+    "SELECT (SELECT count(*) FROM requests WHERE requestor_email LIKE ?) + (SELECT count(*) FROM users WHERE email LIKE ?) " +
     "+ (SELECT count(*) FROM legal_estimate_inputs l WHERE NOT EXISTS (SELECT 1 FROM requests r WHERE r.id = l.request_id)) AS n",
-    ['le-' + TAG + '@example.com', '%' + TAG + '@example.com']);
+    ['%' + TAG + '@example.com', '%' + TAG + '@example.com']);
   ok('F1 fixture request family, users, and any orphaned inputs are gone', Number(left.n) === 0);
 
   console.log('\n  ' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');

@@ -7516,3 +7516,33 @@ same city-decides posture the gate itself shipped with.
 Design slice 4 (MRR hub ask) is the last legal-hours slice. Then: chat-agent model upgrade ·
 v3 collapse · search-activity tracking · hardening · testing/demo · go-live flip · §6.2 glosses ·
 §2.6/§8.3 stamping.
+
+## 2026-08-14 (c) — legal hours in the estimate, slice 4 SHIPPED: the hub's parent-level ask. THE DESIGN IS FULLY BUILT.
+
+### Built (DESIGN_legal_hours_estimate.md slice 4 — the last one)
+The MRR hub master's estimate block gained the parent-level "Ask legal for hours" (manage-gated,
+hub-grammar modal with the legal-staff picker + required note) and a status line: pending carries
+the soft-block sentence; the answer says where it lands ("… as Legal review hrs"). One ask for the
+whole request — exemption analysis spans items — so it is deliberately NOT a per-child activity and
+`mrr_estimate_data` is untouched; the answer feeds the ONE master estimate through the slice-2
+panel. Nothing blocks Generate. Backend unchanged: the slice-1 routes were request-agnostic and the
+parent is a request.
+
+### Evidence
+`verify_legal_estimate` **26/26** (§G new: real 2-child MRR parent — ask/answer/read on the same
+rails; nothing lands on a child, asserted; hub control source-locked). **Full suite 2164/2164, live
+untouched, exit 0.** Suite → build → deploy sequenced. **Live-probed on a true 2-item MRR**: hub
+master pending state (`exchange/legal_hub_pending.png` — Generate stays readiness-gated only) →
+David answers 4h → answer line (`legal_hub_answered.png`). Probe purged, David's grants restored.
+Design-doc slice 4 marked BUILT with the harness-ownership note (verify_legal_estimate §G owns it;
+the bw6 pointer predated slice 1).
+
+### Where this leaves legal hours
+All four slices BUILT in two days, every Kevin fork honored: ask+answer (28d5280) · engine line
+(b9f95a5) · legal_rt trigger (8b8140a) · hub ask (this). Standing note for Kevin: nobody on live
+holds `legal_review` yet — grant it in Staff Management to activate the pickers.
+
+### The board
+Legal-hours design COMPLETE. Remaining: chat-agent model upgrade · v3 collapse · search-activity
+tracking · pre-production hardening · Kevin's testing/demo · go-live flip · §6.2 glosses ·
+§2.6/§8.3 stamping.
