@@ -1,7 +1,7 @@
 // Structured-data (FIELDS) redaction endpoints.
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRedactionWork } = require('../middleware/auth');
 const sr = require('../services/structuredRedaction');
 
 // POST /preview { file_id } -> columns + sample rows for the field picker
@@ -11,7 +11,7 @@ router.post('/preview', requireAuth, async function (req, res) {
 });
 
 // POST /apply { file_id, field_map:[{field,rule_id}] } -> born-redacted released PDF
-router.post('/apply', requireAuth, async function (req, res) {
+router.post('/apply', requireAuth, requireRedactionWork, async function (req, res) {
   var b = req.body || {};
   if (!b.file_id) return res.status(400).json({ error: 'file_id is required' });
   try {

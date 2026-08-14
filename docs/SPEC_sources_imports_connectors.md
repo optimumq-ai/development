@@ -5,6 +5,8 @@ Legend: `[BUILT]` · `[PARTIAL]` · `[NOT BUILT]` · `[DECISION]`
 ## 1. Record Sources model `[BUILT]`
 One unified table — `record_repositories` (id, **free-text name**, connector_type, status, config JSON, description) — is the single source of truth for ALL sources; `record_type_repositories` links sources ↔ record types (many-to-many). The four-attribute design (name / location / access method / linked types): name is first-class; location + access method live in `connector_type` + `config`; SourcesPage foregrounds the free-text name with a purpose-grouped access-method dropdown.
 
+**Role gates `[BUILT 2026-08-14]`:** repository CONFIG mutations (create/edit/delete, ai-configure, paper-index import) require `SYSTEM_ADMIN`/`DIRECTOR` (the redactionConfig EDIT precedent — connecting an archive is system configuration). Running an ingest sweep (`POST /:id/ingest/run`) is processing work and takes the shared redaction gate (`middleware/auth.requireRedactionWork` — see `SPEC_redaction.md` §6). Reads stay `requireAuth`. Previously all `requireAuth` only.
+
 ## 2. Connector registry `[BUILT]` (11 connectors)
 Declared **capabilities**: `scan` (record-type discovery) vs `search` (queryable). Purposes: storage / live / av. Inventory: **filestore** (folder path; scan), **structured** (schema+samples JSON; scan), **tyler** (ERP; search), **laserfiche** (ECM; search), **axon** (AV evidence; search), **email** (count-only), **paperindex**, **nena911**, **keyword** (shared keyword engine), **demo**, **registry**.
 - **email** — returns ONLY a count, never content/subjects/senders: raw email is unreviewed, and even a subject or sender address can itself be exempt. Deliberate privacy stance (backs the intake count-then-narrow).

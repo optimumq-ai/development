@@ -4,7 +4,7 @@
 // consumed two ways: batch processing, and on-demand when a request pulls a not-yet-public record.
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRedactionWork } = require('../middleware/auth');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const docProcessing = require('../services/docProcessing');
@@ -201,7 +201,7 @@ router.delete('/:id', requireAuth, async function(req, res) {
 });
 
 // POST /:id/apply -> apply this template to a document (the consume path). Body: { file_id }
-router.post('/:id/apply', requireAuth, async function(req, res) {
+router.post('/:id/apply', requireAuth, requireRedactionWork, async function(req, res) {
   var t = await get('SELECT * FROM layout_profiles WHERE id = ?', [req.params.id]);
   if (!t) return res.status(404).json({ error: 'Template not found' });
   var fileId = (req.body || {}).file_id;
@@ -346,7 +346,7 @@ router.post('/match-batch', requireAuth, async function(req, res) {
 });
 
 // POST /:id/stage -> copy this template's zones onto an existing draft job for human review (no release). Body: { job_id, file_id }
-router.post('/:id/stage', requireAuth, async function(req, res) {
+router.post('/:id/stage', requireAuth, requireRedactionWork, async function(req, res) {
   var t = await get('SELECT * FROM layout_profiles WHERE id = ?', [req.params.id]);
   if (!t) return res.status(404).json({ error: 'Template not found' });
   var b = req.body || {};

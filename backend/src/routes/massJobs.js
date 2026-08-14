@@ -3,7 +3,7 @@
 // cancel, plus run-now (force one chunk immediately, ignoring the after-hours window) for urgent jobs.
 const express = require('express');
 const router = express.Router();
-const { requireAuth, requireRoleOrPerm } = require('../middleware/auth');
+const { requireAuth, requireRedactionWork } = require('../middleware/auth');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const worker = require('../services/massJobs');
@@ -12,11 +12,8 @@ const procHistory = require('../services/processingHistory');
 
 // A mass job burns redactions across hundreds of files and (via the 911 endpoints) publishes records
 // to the public library — that is redaction authority, not something every logged-in staffer holds.
-// Reads stay requireAuth (consistent with the rest of the processing side); every MUTATION takes this
-// gate: redaction permission-role holders plus the supervising function roles (SYSTEM_ADMIN always
-// passes inside requireRoleOrPerm). REDACTION_AUTHORITY is accepted but not required — it is currently
-// an orphan role nothing else consults.
-const MUTATE = requireRoleOrPerm(['DIRECTOR', 'SUPERVISOR'], ['REDACTION_WORKER', 'REDACTION_AUTHORITY']);
+// Every MUTATION takes the shared redaction-work gate; reads stay requireAuth.
+const MUTATE = requireRedactionWork;
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
 async function getConfig(key, def) { var r = await get("SELECT value FROM system_config WHERE key = ?", [key]); return (r && r.value != null) ? r.value : def; }

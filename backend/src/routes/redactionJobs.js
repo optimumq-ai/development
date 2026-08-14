@@ -1,7 +1,7 @@
 // Redaction workspace API: one job per file, zones (boxes linked to a rule), and apply.
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRedactionWork } = require('../middleware/auth');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const docProcessing = require('../services/docProcessing');
@@ -19,7 +19,7 @@ async function pagesPayload(fileId) {
 }
 
 // POST /file/:fileId/job -> ensure processed, create or return the draft job, with pages + zones
-router.post('/file/:fileId/job', requireAuth, async function(req, res) {
+router.post('/file/:fileId/job', requireAuth, requireRedactionWork, async function(req, res) {
   var fileId = req.params.fileId;
   var file = await get('SELECT * FROM request_files WHERE id = ?', [fileId]);
   if (!file) return res.status(404).json({ error: 'File not found' });
@@ -40,7 +40,7 @@ router.post('/file/:fileId/job', requireAuth, async function(req, res) {
 });
 
 // POST /jobs/:jobId/zones -> add a zone
-router.post('/jobs/:jobId/zones', requireAuth, async function(req, res) {
+router.post('/jobs/:jobId/zones', requireAuth, requireRedactionWork, async function(req, res) {
   var job = await get('SELECT * FROM redaction_jobs WHERE id = ?', [req.params.jobId]);
   if (!job) return res.status(404).json({ error: 'Job not found' });
   var b = req.body || {};
@@ -52,7 +52,7 @@ router.post('/jobs/:jobId/zones', requireAuth, async function(req, res) {
 });
 
 // PATCH /zones/:zoneId -> change attached rule / note
-router.patch('/zones/:zoneId', requireAuth, async function(req, res) {
+router.patch('/zones/:zoneId', requireAuth, requireRedactionWork, async function(req, res) {
   var z = await get('SELECT * FROM redaction_zones WHERE id = ?', [req.params.zoneId]);
   if (!z) return res.status(404).json({ error: 'Zone not found' });
   var b = req.body || {};
@@ -68,13 +68,13 @@ router.patch('/zones/:zoneId', requireAuth, async function(req, res) {
 });
 
 // DELETE /zones/:zoneId
-router.delete('/zones/:zoneId', requireAuth, async function(req, res) {
+router.delete('/zones/:zoneId', requireAuth, requireRedactionWork, async function(req, res) {
   await run('DELETE FROM redaction_zones WHERE id = ?', [req.params.zoneId]);
   res.json({ success: true });
 });
 
 // POST /suggest-rule -> given a field description, AI picks the best rule from the library
-router.post('/suggest-rule', requireAuth, async function(req, res) {
+router.post('/suggest-rule', requireAuth, requireRedactionWork, async function(req, res) {
   try {
     var zd = require('../services/zoneDiscovery');
     var r = await zd.suggestRule(req.body && req.body.label);
@@ -83,7 +83,7 @@ router.post('/suggest-rule', requireAuth, async function(req, res) {
 });
 
 // POST /file/:fileId/discover -> AI suggests redaction boxes from document content (ephemeral)
-router.post('/file/:fileId/discover', requireAuth, async function(req, res) {
+router.post('/file/:fileId/discover', requireAuth, requireRedactionWork, async function(req, res) {
   var file = await get('SELECT * FROM request_files WHERE id = ?', [req.params.fileId]);
   if (!file) return res.status(404).json({ error: 'File not found' });
   try {
@@ -98,7 +98,7 @@ router.post('/file/:fileId/discover', requireAuth, async function(req, res) {
 });
 
 // POST /jobs/:jobId/apply -> burn redactions, produce released PDF + documentation sheet
-router.post('/jobs/:jobId/apply', requireAuth, async function(req, res) {
+router.post('/jobs/:jobId/apply', requireAuth, requireRedactionWork, async function(req, res) {
   var job = await get('SELECT * FROM redaction_jobs WHERE id = ?', [req.params.jobId]);
   if (!job) return res.status(404).json({ error: 'Job not found' });
   // Slice 4: Elevated/Legal jobs require a second-person review before release (author cannot self-release).
@@ -116,7 +116,7 @@ router.post('/jobs/:jobId/apply', requireAuth, async function(req, res) {
 });
 
 // Submit a job for review (redactor hands off to an approver/legal).
-router.post('/jobs/:jobId/submit', requireAuth, async function(req, res) {
+router.post('/jobs/:jobId/submit', requireAuth, requireRedactionWork, async function(req, res) {
   var job = await get('SELECT * FROM redaction_jobs WHERE id = ?', [req.params.jobId]);
   if (!job) return res.status(404).json({ error: 'Job not found' });
   await run("UPDATE redaction_jobs SET review_stage = 'pending_review', submitted_by = ?, submitted_at = datetime('now'), updated_at = datetime('now') WHERE id = ?", [req.user.name || req.user.sub, req.params.jobId]);
@@ -153,7 +153,7 @@ router.post('/jobs/:jobId/submit', requireAuth, async function(req, res) {
 });
 
 // Begin review (reviewer opens a submitted doc -> moves Awaiting review to Review in process).
-router.post('/jobs/:jobId/begin-review', requireAuth, async function(req, res) {
+router.post('/jobs/:jobId/begin-review', requireAuth, requireRedactionWork, async function(req, res) {
   var job = await get('SELECT * FROM redaction_jobs WHERE id = ?', [req.params.jobId]);
   if (!job) return res.status(404).json({ error: 'Job not found' });
   if (job.review_stage === 'pending_review') {
@@ -165,7 +165,7 @@ router.post('/jobs/:jobId/begin-review', requireAuth, async function(req, res) {
 
 // Send a job back to editing (reviewer returns it to the redactor). A reason is required: the author
 // only learns what to fix from it, so it is recorded on the request's history.
-router.post('/jobs/:jobId/return', requireAuth, async function(req, res) {
+router.post('/jobs/:jobId/return', requireAuth, requireRedactionWork, async function(req, res) {
   var job = await get('SELECT * FROM redaction_jobs WHERE id = ?', [req.params.jobId]);
   if (!job) return res.status(404).json({ error: 'Job not found' });
   var note = (req.body && req.body.note ? String(req.body.note) : '').trim();
@@ -198,7 +198,7 @@ router.get('/released', requireAuth, async function(req, res) {
 // Publishing requires a library shelf (department + record type): the public library browses on
 // those two fields, so an unshelved record would land in an unbrowsable "Other/Uncategorized" pile.
 // The body may carry record_type_id/department_id to shelve-and-publish in one step.
-router.post('/released/:id/publish', requireAuth, async function(req, res) {
+router.post('/released/:id/publish', requireAuth, requireRedactionWork, async function(req, res) {
   try {
     var b = req.body || {};
     var pub = b.published ? 1 : 0;

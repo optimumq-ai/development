@@ -42,4 +42,9 @@ function requireRoleOrPerm(roles, perms) {
     next();
   };
 }
-module.exports = { requireAuth, requireRole, requireRoleOrPerm };
+// THE redaction-work gate, shared by every processing-side route (mass jobs, workspace jobs/zones,
+// templates apply, rules library, structured/AV apply, publish) so the bar can't drift between files:
+// redaction permission-role holders plus the supervising function roles. REDACTION_AUTHORITY is
+// accepted but not required — an orphan role nothing else consults yet. Reads stay requireAuth.
+const requireRedactionWork = requireRoleOrPerm(['DIRECTOR', 'SUPERVISOR'], ['REDACTION_WORKER', 'REDACTION_AUTHORITY']);
+module.exports = { requireAuth, requireRole, requireRoleOrPerm, requireRedactionWork };

@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRedactionWork } = require('../middleware/auth');
 const { run, get, all } = require('../db');
 const multer = require('multer');
 const path = require('path');
@@ -36,7 +36,7 @@ router.get('/request/:requestId', requireAuth, async function(req, res) {
 });
 
 // POST start: send a file out for external redaction (creates a hold)
-router.post('/request/:requestId/start', requireAuth, async function(req, res) {
+router.post('/request/:requestId/start', requireAuth, requireRedactionWork, async function(req, res) {
   var requestId = req.params.requestId;
   var originalFileId = (req.body && req.body.original_file_id) || null;
   var note = (req.body && req.body.note) || null;
@@ -58,7 +58,7 @@ router.post('/request/:requestId/start', requireAuth, async function(req, res) {
 });
 
 // POST checkin: upload redacted file + attest, clears the hold
-router.post('/task/:taskId/checkin', requireAuth, upload.single('file'), async function(req, res) {
+router.post('/task/:taskId/checkin', requireAuth, requireRedactionWork, upload.single('file'), async function(req, res) {
   var taskId = req.params.taskId;
   var task = await get('SELECT * FROM av_redaction_tasks WHERE id = ?', [taskId]);
   if (!task) return res.status(404).json({ error: 'Task not found' });
@@ -78,7 +78,7 @@ router.post('/task/:taskId/checkin', requireAuth, upload.single('file'), async f
 });
 
 // POST cancel: remove an out task (sent by mistake)
-router.post('/task/:taskId/cancel', requireAuth, async function(req, res) {
+router.post('/task/:taskId/cancel', requireAuth, requireRedactionWork, async function(req, res) {
   var task = await get('SELECT * FROM av_redaction_tasks WHERE id = ?', [req.params.taskId]);
   if (!task) return res.status(404).json({ error: 'Task not found' });
   if (task.status !== 'out') return res.status(400).json({ error: 'Only an open task can be cancelled' });
@@ -89,7 +89,7 @@ router.post('/task/:taskId/cancel', requireAuth, async function(req, res) {
 });
 
 // POST apply-internal: run the in-system burn on a stored original, store redacted copy
-router.post('/request/:requestId/apply-internal', requireAuth, async function(req, res) {
+router.post('/request/:requestId/apply-internal', requireAuth, requireRedactionWork, async function(req, res) {
   var requestId = req.params.requestId;
   var originalFileId = req.body && req.body.original_file_id;
   var zones = (req.body && req.body.zones) || {};
@@ -124,7 +124,7 @@ router.post('/request/:requestId/apply-internal', requireAuth, async function(re
 });
 
 // POST release-as-is: reviewer confirms media is releasable without redaction (not_required path)
-router.post('/request/:requestId/release-as-is', requireAuth, async function(req, res) {
+router.post('/request/:requestId/release-as-is', requireAuth, requireRedactionWork, async function(req, res) {
   var requestId = req.params.requestId;
   var originalFileId = (req.body && req.body.original_file_id) || null;
   var note = (req.body && req.body.note) || null;

@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRole, requireRedactionWork } = require('../middleware/auth');
+// Connecting/reconfiguring a records repository is system configuration (the redactionConfig EDIT
+// precedent); running an ingest sweep is processing work, so it takes the shared redaction gate.
+const EDIT = requireRole('SYSTEM_ADMIN', 'DIRECTOR');
 const { all, get, run } = require('../db');
 const catalog = require('../services/connectors/registry');
 
@@ -68,7 +71,7 @@ router.get('/', requireAuth, async function(req, res){
   res.json({ repositories: rows });
 });
 
-router.post('/', requireAuth, async function(req, res){
+router.post('/', requireAuth, EDIT, async function(req, res){
   var b = req.body || {};
   if (!b.name || !b.connector_type) return res.status(400).json({ error: 'name and connector_type are required' });
   var id = b.id || nid();
@@ -85,7 +88,7 @@ router.post('/', requireAuth, async function(req, res){
   res.json({ repository: row });
 });
 
-router.patch('/:id', requireAuth, async function(req, res){
+router.patch('/:id', requireAuth, EDIT, async function(req, res){
   var b = req.body || {};
   var sets = [], vals = [];
   ['name','connector_type','status','sort_order','description'].forEach(function(f){ if (b.hasOwnProperty(f)) { sets.push(f + ' = ?'); vals.push(b[f]); } });
@@ -105,12 +108,12 @@ router.patch('/:id', requireAuth, async function(req, res){
   res.json({ success: true });
 });
 
-router.delete('/:id', requireAuth, async function(req, res){
+router.delete('/:id', requireAuth, EDIT, async function(req, res){
   await run('DELETE FROM record_repositories WHERE id = ?', [req.params.id]);
   res.json({ success: true });
 });
 
-router.post('/ai-configure', requireAuth, async function(req, res) {
+router.post('/ai-configure', requireAuth, EDIT, async function(req, res) {
   var b = req.body || {};
   var desc = (b.description || '').toString().trim();
   if (!desc) return res.status(400).json({ error: 'description is required' });
@@ -154,7 +157,7 @@ function parseCsv(text) {
 
 function piId(){ return 'pi-' + Math.random().toString(36).slice(2, 10) + Date.now().toString(36); }
 
-router.post('/:id/paper-index/import', requireAuth, async function(req, res){
+router.post('/:id/paper-index/import', requireAuth, EDIT, async function(req, res){
   var repoId = req.params.id;
   var repo = await get('SELECT id, connector_type FROM record_repositories WHERE id = ?', [repoId]);
   if (!repo) return res.status(404).json({ error: 'source not found' });
@@ -201,7 +204,7 @@ router.get('/:id/paper-index', requireAuth, async function(req, res){
 
 var importIngest = require('../services/importIngest');
 // Import ingestion (increment 3): run-now + status for Import sources
-router.post('/:id/ingest/run', requireAuth, async function(req, res){
+router.post('/:id/ingest/run', requireAuth, requireRedactionWork, async function(req, res){
   try { res.json(await importIngest.runIngest(req.params.id)); }
   catch(e){ console.error('[ingest/run]', e && e.message); res.status(500).json({ error: 'Ingestion failed to run.' }); }
 });

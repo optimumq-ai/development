@@ -7947,3 +7947,40 @@ SPEC_redaction §6 (gate + trail paragraphs).
 - Standing board unchanged: request purge + scenario authoring + real benchmark · state-switching
   parked · chat-agent upgrade · v3 collapse · search-activity tracking · hardening · go-live flip ·
   glosses/stamping · product split (parked until after go-live) · §6b anchor-zones mockup session.
+
+## 2026-08-14 (o) — processing-side role-gate sweep (the ring around (n)'s mass-jobs gate)
+
+### What was built ("proceed with what's next" — Kevin)
+The rest of the processing surface had the same defect (n) fixed for mass jobs: requireAuth-only
+mutations. Now:
+- `middleware/auth.js` exports the SHARED gate `requireRedactionWork` (DIRECTOR/SUPERVISOR roles or
+  REDACTION_WORKER/REDACTION_AUTHORITY perms; SYSTEM_ADMIN passes); massJobs now imports it.
+- Gated with it: redaction workspace (job create, zone CRUD, AI discover/suggest-rule, apply,
+  submit/begin-review/return, released-record PUBLISH), template single-apply + stage, rules library
+  (create/edit/delete/discover/approve), structured apply, all five AV mutations, repository
+  ingest/run.
+- Repository CONFIG (create/edit/delete, ai-configure, paper-index import) = SYSTEM_ADMIN/DIRECTOR
+  (redactionConfig EDIT precedent).
+- Deliberately UNCHANGED: templates' stricter in-handler isElevated bar (create/edit/delete/dismiss/
+  apply-batch — includes DEPT_MANAGER, so fronting it with the worker gate could lock out managers);
+  rules-approve's own isElevated check; compute-only endpoints (template match/match-batch,
+  structured preview); ALL reads. Taxonomy writes left alone (BW9b editors model — its own design).
+
+### Evidence
+`verify_processing_gates` **30/30** (no-role 403 across every gated group; worker passes; worker
+403 on admin-only repo config; elevated bars unchanged — worker still can't create templates; reads
+open; 401-before-403). **Full suite 2295/2295, LIVE UNTOUCHED, exit 0.** Deployed: API restarted,
+200; unauth workspace mutation → 401 on live. Seed staff all hold pr-redworker, so no demo flow
+changes. No public page touches gated endpoints (checked). Specs same commit: SPEC_redaction §6
+(domain-wide gate paragraph), SPEC_sources_imports_connectors §1.
+
+### Open threads
+- Should PUBLISH (public library exposure) require more than REDACTION_WORKER? Today it takes the
+  shared work gate; a stricter authority tier (e.g. finally giving REDACTION_AUTHORITY a job) is a
+  product call for Kevin.
+- Rules-library approve keeps its isElevated (supervisor+) bar — if legal review should gate it
+  instead (ATTORNEY_REVIEWER, like jurisdictionProfile attest), that's also Kevin's call.
+- Remaining requireAuth-only WRITE surfaces outside processing: taxonomy/catalog writes (editors
+  model exists — reconcile, don't duplicate), files.js request-side mutations (request-domain roles).
+- Standing board unchanged (incl. product split parked until after go-live; §6b anchor-zones mockup
+  session pending).
