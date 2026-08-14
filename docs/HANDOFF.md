@@ -7778,3 +7778,11 @@ Kevin is done for the day. Open items for his return: the alphabetical-sampling 
 request purge + scenario authoring + the real demo benchmark · the parked state-switching ·
 the standing board (chat-agent upgrade · v3 collapse · search-activity tracking · hardening ·
 go-live flip · glosses/stamping).
+
+### Parked for NEXT SESSION (Kevin, end of day 2026-08-14)
+**Discuss: forcing public-ready records into reasonably LIMITED buckets vs a broad range.** The
+question behind the Public Ready Control Center pipeline: should the convert-to-public flow steer
+cities toward a curated, limited set of record-type buckets (predictable templates, dense
+same-format piles, cleaner mass redaction), or stay open to a broad range of types? Touches the
+variant scan, mass-redaction templates, the library, and probably taxonomy design. Discussion
+first, no build.
