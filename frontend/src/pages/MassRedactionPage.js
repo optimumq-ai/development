@@ -422,10 +422,17 @@ export default function MassRedactionPage() {
                   {batchResults.results.map(function (r) {
                     var ok = r.status === 'redacted';
                     return (
-                      <div key={r.file_id} style={{ display: 'flex', alignItems: 'center', gap: '10px', border: '1px solid #E5E7EB', borderRadius: '8px', padding: '9px 12px', marginBottom: '8px' }}>
-                        <span style={{ fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '999px', color: ok ? '#03543F' : r.status === 'held' ? '#92400E' : '#9B1C1C', background: ok ? '#DEF7EC' : r.status === 'held' ? '#FEF3C7' : '#FDE8E8' }}>{r.status === 'redacted' ? 'Redacted' : r.status === 'held' ? 'Held' : 'Error'}</span>
-                        <span style={{ flex: 1, minWidth: 0, fontSize: '13px', color: '#111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}{r.reason ? <span style={{ color: '#92400E', fontSize: '11.5px' }}> &mdash; {r.reason}</span> : null}{r.error ? <span style={{ color: '#9B1C1C', fontSize: '11.5px' }}> &mdash; {r.error}</span> : null}</span>
-                        {ok ? <button onClick={function () { downloadOut(r.outputFileId, r.fileName); }} style={{ flexShrink: 0, padding: '5px 10px', borderRadius: '6px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '11.5px', fontWeight: '700', cursor: 'pointer' }}>Download</button> : null}
+                      <div key={r.file_id} style={{ border: '1px solid #E5E7EB', borderRadius: '8px', padding: '9px 12px', marginBottom: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                          <span style={{ fontSize: '11px', fontWeight: '700', padding: '2px 8px', borderRadius: '999px', color: ok ? '#03543F' : r.status === 'held' ? '#92400E' : '#9B1C1C', background: ok ? '#DEF7EC' : r.status === 'held' ? '#FEF3C7' : '#FDE8E8' }}>{r.status === 'redacted' ? 'Redacted' : r.status === 'held' ? 'Held' : 'Error'}</span>
+                          <span style={{ flex: 1, minWidth: 0, fontSize: '13px', color: '#111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}{r.reason ? <span style={{ color: '#92400E', fontSize: '11.5px' }}> &mdash; {r.reason}</span> : null}{r.error ? <span style={{ color: '#9B1C1C', fontSize: '11.5px' }}> &mdash; {r.error}</span> : null}</span>
+                          {ok ? <button onClick={function () { downloadOut(r.outputFileId, r.fileName); }} style={{ flexShrink: 0, padding: '5px 10px', borderRadius: '6px', border: '1px solid #1F4E79', background: 'white', color: '#1F4E79', fontSize: '11.5px', fontWeight: '700', cursor: 'pointer' }}>Download</button> : null}
+                        </div>
+                        {(r.audit_flags && r.audit_flags.length) ? (
+                          <div style={{ marginTop: '6px', fontSize: '11.5px', color: '#92400E', background: '#FFFBEB', border: '1px solid #FDE68A', borderRadius: '6px', padding: '6px 9px' }}>
+                            <strong>Content check:</strong> {r.audit_flags.map(function (f) { return f.detail; }).join(' ')}
+                          </div>
+                        ) : null}
                       </div>
                     );
                   })}

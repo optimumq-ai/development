@@ -304,10 +304,26 @@ export default function TaxonomyPage() {
               <div>
                 <div style={{ fontWeight: 800, fontSize: '18px', color: '#1F4E79' }}>Discovered groupings in "{scanResult.bucket.name}"</div>
                 <div style={{ fontSize: '13px', color: '#5B6B7A', margin: '4px 0 16px' }}>
-                  Sampled {scanResult.sampled} documents from {scanResult.repos.join(', ')}
-                  {scanResult.totalDocuments != null ? ' · about ' + scanResult.totalDocuments + ' documents in the holdings' : ' · totals unavailable for these sources'}
-                  · the AI proposes, you approve — nothing changes until you say so.
+                  {scanResult.method === 'fingerprint'
+                    ? <>Read and fingerprinted every document — {scanResult.sampled} of {scanResult.totalDocuments} in {scanResult.repos.join(', ')}{scanResult.unreadable ? ' (' + scanResult.unreadable + ' unreadable or image-only, excluded)' : ''} · counts are exact</>
+                    : <>Sampled {scanResult.sampled} documents from {scanResult.repos.join(', ')}{scanResult.totalDocuments != null ? ' · about ' + scanResult.totalDocuments + ' documents in the holdings' : ' · totals unavailable for these sources'}</>}
+                  {' '}· the AI proposes, you approve — nothing changes until you say so.
                 </div>
+                {(scanResult.recognized || []).length ? (
+                  <div style={{ background: '#F0FDF4', border: '1px solid #BBF7D0', borderRadius: '10px', padding: '12px 14px', marginBottom: '12px' }}>
+                    <div style={{ fontSize: '13px', fontWeight: 700, color: '#166534', marginBottom: '6px' }}>Already known — recognized, not re-proposed</div>
+                    {scanResult.recognized.map(function (r) {
+                      return (
+                        <div key={r.record_type_id} style={{ fontSize: '13px', color: '#14532D', marginBottom: '3px' }}>
+                          <strong>{r.count.toLocaleString()}</strong> document{r.count !== 1 ? 's' : ''} match the existing variant "{r.name}"
+                          {r.template_ready
+                            ? <span style={{ color: '#166534', fontWeight: 700 }}> — its redaction template is ready; they can go straight to a mass job.</span>
+                            : <span style={{ color: '#92400E' }}> — no redaction template yet (see Mass Redaction).</span>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : null}
                 {(scanResult.groupings || []).length === 0 ? (
                   <div style={{ color: '#5B6B7A', fontSize: '14px', padding: '10px 0' }}>No clear groupings — the samples look like one kind of document.</div>
                 ) : scanResult.groupings.map(function (g) {
@@ -315,7 +331,7 @@ export default function TaxonomyPage() {
                     <div key={g.code} style={{ display: 'flex', gap: '14px', border: '1px solid #E5E7EB', borderRadius: '10px', padding: '14px 16px', marginBottom: '10px', alignItems: 'flex-start' }}>
                       <div style={{ minWidth: '86px', textAlign: 'right' }}>
                         <div style={{ fontSize: '20px', fontWeight: 800, color: '#1F4E79' }}>{g.estimated_count != null ? g.estimated_count.toLocaleString() : Math.round((g.sample_share || 0) * 100) + '%'}</div>
-                        <div style={{ fontSize: '11px', color: '#8A97A5', fontWeight: 600 }}>{g.estimated_count != null ? 'documents (est.)' : 'of the sample'}</div>
+                        <div style={{ fontSize: '11px', color: '#8A97A5', fontWeight: 600 }}>{g.counted ? 'documents (counted)' : g.estimated_count != null ? 'documents (est.)' : 'of the sample'}</div>
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ fontWeight: 700, fontSize: '14.5px' }}>{g.name}</div>
@@ -336,7 +352,7 @@ export default function TaxonomyPage() {
                 })}
                 {scanResult.ungroupedShare > 0 ? (
                   <div style={{ fontSize: '12px', color: '#8A97A5', marginTop: '4px' }}>
-                    About {Math.round(scanResult.ungroupedShare * 100)}% of the sample didn't fit any grouping and stays on "{scanResult.bucket.name}".
+                    About {Math.round(scanResult.ungroupedShare * 100)}% of the {scanResult.method === 'fingerprint' ? 'documents' : 'sample'} didn't {scanResult.method === 'fingerprint' ? 'match any layout grouping' : 'fit any grouping'} and stay{scanResult.method === 'fingerprint' ? '' : 's'} on "{scanResult.bucket.name}".
                   </div>
                 ) : null}
                 <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '14px' }}>

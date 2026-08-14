@@ -23,7 +23,7 @@ var pass = 0, fail = 0, TOKEN = null;
 function ok(l, c) { (c ? pass++ : fail++); console.log((c ? '  PASS  ' : '  FAIL  ') + l); }
 var TAG = 'LD' + Date.now();
 var PORT = Number(process.env.API_PORT) || 3101;
-var UPLOAD_DIR = path.join('/opt/optimumq/backend', 'uploads');
+var UPLOAD_DIR = require('/opt/optimumq/backend/src/services/docProcessing').UPLOAD_DIR;
 async function call(token, method, path2, body) {
   var r = await fetch('http://localhost:' + PORT + '/api' + path2, {
     method: method,

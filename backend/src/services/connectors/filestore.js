@@ -60,4 +60,13 @@ function nativeSearch(query, config) {
   return out.slice(0, 8);
 }
 
-module.exports = { scan: scan, countAll: countAll, nativeSearch: nativeSearch };
+// Every matching document with its on-disk path — the substrate for fingerprint discovery, which
+// reads the WHOLE holding (no alphabetical first-50 sample) and counts exactly.
+function listFiles(config) {
+  var dir = (config && config.path) ? config.path : null;
+  if (!dir || !fs.existsSync(dir)) return [];
+  return fs.readdirSync(dir).filter(function(f){ return /\.pdf$/i.test(f); })
+    .map(function(f){ return { filename: f, fullPath: path.join(dir, f) }; });
+}
+
+module.exports = { scan: scan, countAll: countAll, nativeSearch: nativeSearch, listFiles: listFiles };

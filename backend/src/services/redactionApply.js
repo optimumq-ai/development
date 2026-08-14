@@ -57,6 +57,14 @@ async function applyRedaction(jobId, actor, opts) {
     }
   }
 
+  // Content audit (advisory, never blocking): does each box cover what its rule says, and is
+  // anything of the redacted kinds left visible outside every box? Deterministic, text-layer based.
+  var auditFlags = [];
+  try {
+    auditFlags = require('./redactionAudit').auditZones(pages, zones, ruleMap);
+    await run("UPDATE redaction_jobs SET audit_flags = ? WHERE id = ?", [JSON.stringify(auditFlags), jobId]);
+  } catch (eA) { console.error('[redaction audit]', eA && eA.message); }
+
   var pdf = await PDFDocument.create();
   var font = await pdf.embedFont(StandardFonts.Helvetica);
   var fontB = await pdf.embedFont(StandardFonts.HelveticaBold);
@@ -197,7 +205,7 @@ async function applyRedaction(jobId, actor, opts) {
     require('./embedIndex').bg(require('./recordMetaExtract').enrichFulfilledMeta(frId), 'enrich ' + frId);
   } catch (e) { console.error('[fulfilled index]', e.message); }
 
-  return { outputFileId: outId, fileName: origLabel, zoneCount: zones.length, pageCount: pages.length, bytes: bytes.length };
+  return { outputFileId: outId, fileName: origLabel, zoneCount: zones.length, pageCount: pages.length, bytes: bytes.length, auditFlags: auditFlags };
 }
 
 module.exports = { applyRedaction: applyRedaction };

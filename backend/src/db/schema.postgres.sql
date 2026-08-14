@@ -311,6 +311,8 @@ CREATE TABLE IF NOT EXISTS rule_legal_sources (
 CREATE INDEX IF NOT EXISTS idx_rule_legal_sources_rule ON rule_legal_sources(rule_id);
 
 -- A redaction effort on one uploaded file.
+-- audit_flags (added 2026-08-14): advisory content-check findings from services/redactionAudit —
+-- covered-content mismatches and possible leaks, in plain words, never the covered text itself.
 CREATE TABLE IF NOT EXISTS redaction_jobs (
   id TEXT PRIMARY KEY,
   file_id TEXT NOT NULL,
@@ -332,6 +334,7 @@ CREATE INDEX IF NOT EXISTS idx_redaction_jobs_file ON redaction_jobs(file_id);
 -- disposition ∈ bypass|simple|standard|elevated|legal; disposition_basis = JSON snapshot of the deciding signals.
 ALTER TABLE redaction_jobs ADD COLUMN IF NOT EXISTS disposition TEXT;
 ALTER TABLE redaction_jobs ADD COLUMN IF NOT EXISTS disposition_basis TEXT;
+ALTER TABLE redaction_jobs ADD COLUMN IF NOT EXISTS audit_flags TEXT;
 
 -- A single redaction box. Coords normalized 0-1, top-left origin (same frame as document_pages.words).
 CREATE TABLE IF NOT EXISTS redaction_zones (
@@ -427,6 +430,24 @@ CREATE INDEX IF NOT EXISTS idx_mass_jobs_status ON mass_redaction_jobs(status, p
 -- Request-attached files keep their request's shelf; these cover request-less (ad-hoc/import) piles.
 ALTER TABLE mass_redaction_jobs ADD COLUMN IF NOT EXISTS record_type_id TEXT;
 ALTER TABLE mass_redaction_jobs ADD COLUMN IF NOT EXISTS department_id TEXT;
+
+-- Persistent per-document layout fingerprints (services/docFingerprint, 2026-08-14). Extract-once
+-- index keyed by content hash: a document fingerprinted during one scan is recognized in every
+-- later scan — including scans of OTHER locations holding the same template (the date-split-storage
+-- case). matched_record_type_id is stamped when a document matches an approved variant's signature.
+CREATE TABLE IF NOT EXISTS document_fingerprints (
+  id TEXT PRIMARY KEY,
+  repository_id TEXT,
+  filename TEXT,
+  content_sha256 TEXT,
+  page_count INTEGER,
+  features TEXT,
+  matched_record_type_id TEXT,
+  extracted_at TEXT DEFAULT to_char((now() AT TIME ZONE 'UTC'),'YYYY-MM-DD HH24:MI:SS'),
+  UNIQUE (repository_id, filename)
+);
+CREATE INDEX IF NOT EXISTS idx_docfp_repo ON document_fingerprints(repository_id);
+CREATE INDEX IF NOT EXISTS idx_docfp_matched ON document_fingerprints(matched_record_type_id);
 
 -- Per-day shared compute budget counter (UTC date -> items processed that day across all jobs).
 CREATE TABLE IF NOT EXISTS mass_job_budget (

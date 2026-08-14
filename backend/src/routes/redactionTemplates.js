@@ -286,7 +286,7 @@ router.post('/:id/apply-batch', requireAuth, async function(req, res) {
         continue;
       }
       var out = await applyTemplateToFile(t, file, zones, req.user.name || 'Mass Redaction', req.user.sub, destination);
-      results.push({ file_id: fid, name: nm, status: 'redacted', score: s.score, outputFileId: out.outputFileId, fileName: out.fileName, zoneCount: out.zoneCount, jobId: out.jobId });
+      results.push({ file_id: fid, name: nm, status: 'redacted', score: s.score, outputFileId: out.outputFileId, fileName: out.fileName, zoneCount: out.zoneCount, jobId: out.jobId, audit_flags: out.auditFlags || [] });
     } catch (e) {
       results.push({ file_id: fid, name: nm, status: 'error', error: e.message });
     }

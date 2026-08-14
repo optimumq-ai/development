@@ -58,7 +58,14 @@ async function processChunk(job, take, actor, actorSub) {
         if (!pc || !pc.c) await docProcessing.processFile(fid);
         var s = await engine.safetyScore(template, fid);
         if (s.score != null && s.score < threshold) res.held++;
-        else { await engine.applyTemplateToFile(template, file, zones, actor, actorSub, destination); res.redacted++; }
+        else {
+          var out = await engine.applyTemplateToFile(template, file, zones, actor, actorSub, destination);
+          res.redacted++;
+          // Content-audit findings surface in the job's issue log (advisory — the doc still released).
+          if (out && out.auditFlags && out.auditFlags.length) {
+            res.errs.push({ file_id: fid, error: 'Content check on ' + (file.original_name || file.filename) + ': ' + out.auditFlags.map(function (f) { return f.detail; }).join(' ') });
+          }
+        }
       }
     } catch (e) { res.errors++; res.errs.push({ file_id: fid, error: e.message }); }
     res.processed++;

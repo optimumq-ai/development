@@ -7835,3 +7835,56 @@ Specs updated same commit: SPEC_public_library §2a + §3 roll-up note, SPEC_red
 - Standing board unchanged: request purge + scenario authoring + real benchmark · state-switching
   parked · chat-agent upgrade · v3 collapse · search-activity tracking · hardening · go-live flip ·
   glosses/stamping.
+
+## 2026-08-14 (l) — fingerprint discovery + redaction content audit: the scan is DETERMINISTIC now
+
+### The discussion (Kevin's design session, then "build what you believe should be built")
+Kevin proposed replacing the AI-digest matching with code that reads fixed zones/measurements per
+document, stores them, groups by tolerant matching (8-of-10), and demotes AI to naming/validation.
+Extended it live with: a PERSISTENT index so a later scan of a DIFFERENT location recognizes the
+same template (date-split storage → "leverage the same mass redaction template"); semi-fixed
+templates via anchor-relative zones; print-driver drift normalization; and a per-item audit that
+checks each burned zone covered what its rule names. Build/park decisions were mine (mandated):
+BUILT fingerprint census + recognition (slice B) and the deterministic content audit + leak scan
+(slice A); PARKED with full designs written into specs: anchor-relative zones (§6b SPEC_redaction —
+authoring UI needs a mockup session per the UI rule), vision/image-crop audit for scans, OCR/OpenCV
+registration for image-only archives, multi-section/cross-page flow.
+
+### Slice A — redaction content audit (verify_redaction_audit 14/14)
+`services/redactionAudit` runs inside EVERY zone apply: covers-no-text (drift), covered-text-
+doesn't-contain-a-complete-<kind> (rule title → SSN/phone/email/card/DOB detector; partial-value
+catch), and the LEAK SCAN — a value of a redacted kind visible outside every box. Advisory only;
+flags persist on redaction_jobs.audit_flags, render per-file in batch results ("Content check:"),
+roll into mass job issue logs. Flags NEVER contain covered text (asserted: no PII in logs). Fields
+path exempt (no zones).
+
+### Slice B — fingerprint discovery (verify_fingerprint_discovery 18/18)
+`services/docFingerprint` + persistent `document_fingerprints` (hash-keyed, extract once ever) +
+filestore `listFiles`. The variant scan now: census EVERY file → recognize against approved
+variants' stored consensus signatures (discovery_meta.signature, written at approval; cluster docs
+stamped matched_record_type_id) → cluster the remainder (union-find, 8/10 threshold, min 3) →
+AI names the clusters it is handed (2 excerpts + label set each; no 14k digest, no counting).
+Counts EXACT (`counted: true`, modal says "documents (counted)"); layout uniformity MEASURED;
+image-only files reported as `unreadable`, not silently skipped. Legacy sample-digest kept only
+for connectors without file access. Modal gains the green "Already known — recognized, not
+re-proposed" section (template-ready vs needs-template). The alphabetical-skew finding from
+2026-08-14 (i) is FIXED by construction — there is no sample.
+
+### Evidence
+Suite **2244/2244, LIVE UNTOUCHED, exit 0** (adds 18 + 14). Live probe on the real corpus:
+rt-business-licenses → method fingerprint, **98 of 98 read** (~20s incl. first-time pdftotext of
+every file + ONE small naming call), clusters **50 + 20 + 20 counted** (Business License
+Certificates / Basic / Enhanced Vendor Registration), all ⚡ with measured layouts, 8% honestly
+ungrouped. Compare (i): 78 sampled, one grouping "est 63" at 64%, 31% unaccounted. Screenshot
+`exchange/fingerprint_discovery_live.png`. NOT approved — same reasoning as (i): approving would
+bake variants into Kevin's rehearsal space; the modal → approve → hand-off loop stays his demo.
+Deployed (API restarted, build + nginx 200). Synthetic-PDF probe: same-template docs with
+different names/numbers score 10/10, different templates 4/10.
+
+### Notes / open threads
+- An early mis-clicked probe ran discovery once on a different bucket (first Find-variants button
+  on the page) — side effect is only extra rows in the fingerprint index + one model call.
+- The naming call keeps the file's existing pinned model — the model upgrade remains Kevin's
+  standing board item, deliberately untouched.
+- document_fingerprints is LIVE derived data now (~200 rows from probes) — it is an index, safe.
+- Standing board otherwise unchanged; parked designs above are written in the specs, not just here.
