@@ -7888,3 +7888,20 @@ different names/numbers score 10/10, different templates 4/10.
   standing board item, deliberately untouched.
 - document_fingerprints is LIVE derived data now (~200 rows from probes) — it is an index, safe.
 - Standing board otherwise unchanged; parked designs above are written in the specs, not just here.
+
+## 2026-08-14 (m) — DISCUSSION ONLY: two-product split analysis (no build)
+
+Kevin asked what it would take to split the build into two products — (A) open-records request
+management and (B) document layout matching / mass redaction / public library — composable when a
+customer buys both, standalone otherwise. Full write-up delivered to
+`/home/optimumq/exchange/PRODUCT_SPLIT_ANALYSIS.md` (grounded in a three-way code scan; no code
+touched). Headlines: the boundary largely already exists (processing side never imports
+requestScope; seam = 3 shared tables + 4 function-call crossings + 5 direct `requests` reads + the
+synthetic container-request hack); recommendation is one codebase / one installer / two license
+keys, phased as (1) bridge-module seam formalization + retire container requests, (2) entitlement
+gating (none exists today — the ONBOARDING_TAXONOMY_GATING two-key strategy was never built).
+Incidental defects surfaced by the scan, worth fixing regardless: `/api/mass-jobs` has NO role gate
+(requireAuth only), and request-less processing work has no audit trail (`request_history.request_id`
+is NOT NULL). Product decision parked with Kevin before any build: where redaction lives for an
+A-only customer (kernel vs. B-only vs. redaction-lite) — that decision defines the kernel.
+Standing board unchanged.
