@@ -7984,3 +7984,46 @@ changes. No public page touches gated endpoints (checked). Specs same commit: SP
   model exists — reconcile, don't duplicate), files.js request-side mutations (request-domain roles).
 - Standing board unchanged (incl. product split parked until after go-live; §6b anchor-zones mockup
   session pending).
+
+## 2026-08-15 (a) — Open Records OFFICE vs FULFILLMENT TEAM split + Teams-tab rework (Kevin's session)
+
+### The correction (Kevin) and the decisions (his, via Q&A)
+Kevin flagged that "Open Records" on the Staff page conflated two real-world entities. Confirmed in
+data: dept-openrecords was ONE row serving as both the ORO (his own staff home) and the catch-all
+fulfillment team. DESIGN_user_type_role_model.md §7 had specified the distinction in 2026-07; the UI
+realized it as the "staffing-only" concept but the DATA was never split. Kevin's decisions: full
+split; Michael Hargrove + Tom Jones staff the new fulfillment team; popup comment text; tab renamed
+"Teams" with the Office pinned above a "Fulfillment Teams" heading. His MRR nuance recorded in §7:
+the Office manages MRRs (associate manages, generates roll-up estimate) — compatible because MRR
+child work is hand-assigned, never team-routed.
+
+### What changed
+- DATA (live, verified by query): dept-openrecords → "Open Records Office", is_open_records=0,
+  serves nothing (staffing-only; Kevin/Kerri/Steve). NEW team-openrecords "Open Records Fulfillment
+  Team" (ORF) carries is_open_records=1 (the fallback consumed by classifier/workflowEngine/requests)
+  and took Building & Planning, Public Works, PIO, Parks & Rec. Michael + Tom moved to it; Michael's
+  title typo ("Clderk") fixed. Seeds updated to produce this on fresh install (seed_teams_provisional
+  rewritten — no longer provisional in substance; fulfillment-teams seed comment corrected).
+- UI (OrgPage): tab "Fulfillment Teams" → "Teams"; office teams (serve nothing, not fallback) pinned
+  on top with "Oversight (not routed)" badge (renamed from "Staffing only"); "FULFILLMENT TEAMS"
+  section heading; every team row gains "View staff" → read-only member popup ending "Go to STAFF to
+  modify team member list."; guidance copy rewritten around the Office/fulfillment distinction.
+
+### Evidence
+Live queries confirm fallback resolution, routing, staff homes. Frontend built (exit 0, nginx 200);
+screenshots exchange/org_teams_tab.png + org_view_staff.png (sent to Kevin in-session). Full suite
+**2295/2295, LIVE UNTOUCHED, exit 0** (suite runs AFTER the live org change — census compares within
+the run, so the intentional pre-run change is invisible to it, as designed).
+
+### Flake found and fixed (test-only)
+First full run came back 2294/1: bw6_mrr A3 counted ANY flow task on an MRR child as an
+activity-completion side effect, but taskRouting.reconcileStageTasks ticks every 120s on the test API
+and legitimately spawns the STAGE task for a child parked in a work stage (§14.2: children live in
+the normal engine, activities on top). Green in isolation, then green in the full re-run after A3
+now excludes created_by='system-reconciler'. Pre-existing race — my two new harnesses shifted bw6's
+start into a tick; unrelated to the org change.
+
+### Open threads
+- Publish-tier and rules-approve-tier role questions from (o) still parked with Kevin.
+- Standing board unchanged (product split parked until after go-live; §6b anchor-zones mockup
+  session pending).

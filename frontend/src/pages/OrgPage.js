@@ -36,6 +36,7 @@ export default function OrgPage() {
   const [editRow, setEditRow] = useState(null);
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
+  const [viewStaffTeam, setViewStaffTeam] = useState(null);
 
   useEffect(() => { load(); }, []);
   async function load() {
@@ -92,7 +93,7 @@ export default function OrgPage() {
     setSaving(false);
   }
 
-  const TABS = [['departments', 'City Departments'], ['teams', 'Fulfillment Teams'], ['staff', 'Staff']];
+  const TABS = [['departments', 'City Departments'], ['teams', 'Teams'], ['staff', 'Staff']];
 
   return (
     <div style={{ maxWidth: '1100px', display: 'flex', flexDirection: 'column', gap: '18px' }}>
@@ -151,46 +152,60 @@ export default function OrgPage() {
           )}
 
           {/* ---------- TEAMS ---------- */}
-          {tab === 'teams' && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-              <Guidance>
-                <strong>Fulfillment teams</strong> process requests. A team can serve one or more city departments — that link is what routes an incoming request to the right people. A team that serves <strong>no</strong> departments is <em>staffing-only</em>: it groups people (like an <strong>Open Records Office</strong> that manages fulfillment) but never appears in request routing. Mark the <strong>Open-Records fallback</strong> team to catch anything that doesn't match a department.
-              </Guidance>
-              <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-                <button onClick={newTeam} style={btnPrimary}>+ Add Team</button>
-              </div>
-              {teams.length === 0 ? <div style={{ ...card, textAlign: 'center', color: '#9CA3AF' }}>No teams yet.</div> : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                  {teams.map(t => {
-                    const served = deptsServedBy(t.id);
-                    const members = memberCount(t.id);
-                    const staffingOnly = served.length === 0 && !t.is_open_records;
-                    return (
-                      <div key={t.id} style={{ ...card, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', minWidth: 0 }}>
-                          <CodeChip code={t.code} color={t.color} />
-                          <div style={{ minWidth: 0 }}>
-                            <div style={{ fontWeight: '600', fontSize: '14px', color: '#111' }}>{t.name}
-                              {t.is_open_records ? <span style={{ marginLeft: '8px', ...chip('#DBEAFE', '#1E40AF') }}>Open-Records fallback</span> : null}
-                              {staffingOnly ? <span style={{ marginLeft: '8px', ...chip('#F3E8FF', '#6D28D9') }}>Staffing only (not routed)</span> : null}
-                              {t.auto_load_balancing ? <span style={{ marginLeft: '6px', ...chip('#D1FAE5', '#065F46') }}>Auto load-balance</span> : null}
-                            </div>
-                            <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '3px' }}>
-                              {members} member{members !== 1 ? 's' : ''}
-                              {' · '}
-                              {served.length ? <>Serves {served.map(d => d.name).join(', ')}</> : <span>Serves no departments</span>}
-                              {t.routing_specialization ? ' · has routing profile' : ''}
-                            </div>
-                          </div>
-                        </div>
-                        <button onClick={() => editTeam(t)} style={{ padding: '6px 14px', background: 'white', color: '#1F4E79', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Edit</button>
+          {tab === 'teams' && (() => {
+            // Two groups: office teams (serve no departments — oversight/administration, never in
+            // request routing) pinned on top, then the fulfillment teams that process requests.
+            const officeTeams = teams.filter(t => deptsServedBy(t.id).length === 0 && !t.is_open_records);
+            const fulfillTeams = teams.filter(t => !officeTeams.includes(t));
+            const teamCard = (t) => {
+              const served = deptsServedBy(t.id);
+              const members = memberCount(t.id);
+              const staffingOnly = served.length === 0 && !t.is_open_records;
+              return (
+                <div key={t.id} style={{ ...card, display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px', minWidth: 0 }}>
+                    <CodeChip code={t.code} color={t.color} />
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ fontWeight: '600', fontSize: '14px', color: '#111' }}>{t.name}
+                        {t.is_open_records ? <span style={{ marginLeft: '8px', ...chip('#DBEAFE', '#1E40AF') }}>Open-Records fallback</span> : null}
+                        {staffingOnly ? <span style={{ marginLeft: '8px', ...chip('#F3E8FF', '#6D28D9') }}>Oversight (not routed)</span> : null}
+                        {t.auto_load_balancing ? <span style={{ marginLeft: '6px', ...chip('#D1FAE5', '#065F46') }}>Auto load-balance</span> : null}
                       </div>
-                    );
-                  })}
+                      <div style={{ fontSize: '12px', color: '#6B7280', marginTop: '3px' }}>
+                        {members} member{members !== 1 ? 's' : ''}
+                        {' · '}
+                        {served.length ? <>Serves {served.map(d => d.name).join(', ')}</> : <span>Serves no departments</span>}
+                        {t.routing_specialization ? ' · has routing profile' : ''}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', gap: '8px', flexShrink: 0 }}>
+                    <button onClick={() => setViewStaffTeam(t)} style={{ padding: '6px 14px', background: 'white', color: '#1F4E79', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>View staff</button>
+                    <button onClick={() => editTeam(t)} style={{ padding: '6px 14px', background: 'white', color: '#1F4E79', border: '1px solid #BFDBFE', borderRadius: '6px', fontSize: '12px', fontWeight: '600', cursor: 'pointer' }}>Edit</button>
+                  </div>
                 </div>
-              )}
-            </div>
-          )}
+              );
+            };
+            return (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                <Guidance>
+                  The <strong>Open Records Office</strong> team manages and oversees the whole open-records operation (director, legal authority, associates) — it serves no departments, so requests never route to it. <strong>Fulfillment teams</strong> below it do the request work: each serves one or more city departments, and that link is what routes an incoming request to the right people. The team marked <strong>Open-Records fallback</strong> also catches anything that doesn't match a department.
+                </Guidance>
+                <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <button onClick={newTeam} style={btnPrimary}>+ Add Team</button>
+                </div>
+                {teams.length === 0 ? <div style={{ ...card, textAlign: 'center', color: '#9CA3AF' }}>No teams yet.</div> : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {officeTeams.map(teamCard)}
+                    {fulfillTeams.length > 0 && (
+                      <div style={{ fontSize: '13px', fontWeight: '700', color: '#6B7280', textTransform: 'uppercase', letterSpacing: '.04em', margin: '8px 0 0' }}>Fulfillment Teams</div>
+                    )}
+                    {fulfillTeams.map(teamCard)}
+                  </div>
+                )}
+              </div>
+            );
+          })()}
 
           {/* ---------- STAFF ---------- */}
           {tab === 'staff' && (
@@ -282,6 +297,34 @@ export default function OrgPage() {
             <div style={{ display: 'flex', justifyContent: 'flex-end', gap: '8px', marginTop: '18px' }}>
               <button onClick={closeEditor} disabled={saving} style={{ padding: '9px 16px', background: 'white', color: '#6B7280', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Cancel</button>
               <button onClick={saveEditor} disabled={saving} style={{ padding: '9px 18px', background: saving ? '#9CA3AF' : '#1F4E79', color: 'white', border: 'none', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: saving ? 'default' : 'pointer' }}>{saving ? 'Saving…' : 'Save'}</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ---------- VIEW STAFF MODAL (read-only) ---------- */}
+      {viewStaffTeam && (
+        <div onClick={() => setViewStaffTeam(null)} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(17,24,39,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, padding: '20px' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: 'white', borderRadius: '12px', padding: '24px', width: '460px', maxWidth: '100%', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+              <CodeChip code={viewStaffTeam.code} color={viewStaffTeam.color} />
+              <div style={{ fontSize: '16px', fontWeight: '700', color: '#1F4E79' }}>{viewStaffTeam.name} — staff</div>
+            </div>
+            <div style={{ marginTop: '14px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              {staff.filter(s => s.department_id === viewStaffTeam.id).length === 0
+                ? <div style={{ fontSize: '13px', color: '#9CA3AF', padding: '10px 0' }}>No staff on this team yet.</div>
+                : staff.filter(s => s.department_id === viewStaffTeam.id).map(s => (
+                  <div key={s.id} style={{ display: 'flex', justifyContent: 'space-between', gap: '10px', padding: '8px 12px', border: '1px solid #F3F4F6', borderRadius: '8px' }}>
+                    <span style={{ fontSize: '13px', fontWeight: '600', color: '#111' }}>{s.display_name}</span>
+                    <span style={{ fontSize: '12px', color: '#6B7280' }}>{s.title || ''}</span>
+                  </div>
+                ))}
+            </div>
+            <div style={{ marginTop: '14px', fontSize: '12px', color: '#6B7280', background: '#F9FAFB', border: '1px solid #F3F4F6', borderRadius: '8px', padding: '10px 12px' }}>
+              Go to STAFF to modify team member list.
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '14px' }}>
+              <button onClick={() => setViewStaffTeam(null)} style={{ padding: '9px 16px', background: 'white', color: '#6B7280', border: '1px solid #E5E7EB', borderRadius: '8px', fontSize: '13px', fontWeight: '600', cursor: 'pointer' }}>Close</button>
             </div>
           </div>
         </div>

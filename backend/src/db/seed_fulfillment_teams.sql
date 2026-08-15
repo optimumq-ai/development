@@ -1,5 +1,6 @@
 -- Department-specific fulfillment teams (kind='team'), parented to their department.
--- Open Records remains the central intake team; these handle their own department's records.
+-- The Open Records Fulfillment Team ('team-openrecords', seed_teams_provisional.sql) remains the
+-- central/fallback team; these handle their own department's records.
 INSERT INTO departments (id, name, code, color, is_open_records, kind, parent_id, sort_order, active) VALUES
  ('team-police',         'Police Records Unit',          'PRU', '#7C3AED', 0, 'team', 'dept-police',   30, 1),
  ('team-finance',        'Finance Records Team',         'FRT', '#0E7490', 0, 'team', 'dept-finance',  31, 1),

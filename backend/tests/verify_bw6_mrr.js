@@ -126,7 +126,11 @@ async function stageOf(id) { var r = await db.get('SELECT stage, status FROM req
       afterChild.stage === beforeChild.stage && afterChild.status === beforeChild.status);
     ok('A2 …nor has the parent — an MRR is orchestrated by the manager, not by the engine',
       afterParent.stage === beforeParent.stage && afterParent.status === beforeParent.status);
-    var noFlow = await db.get("SELECT count(*)::int AS n FROM tasks WHERE request_id = ? AND type IN ('record_search','redaction','estimate')", [A.kids[0]]);
+    // Exclude the 120s background reconciler (taskRouting.reconcileStageTasks): a child parked in a
+    // work stage legitimately gets ITS STAGE's task from that tick (§14.2 — children live in the normal
+    // engine, activities on top). A3's claim is only that ACTIVITY COMPLETION spawns nothing — the
+    // unfiltered count made this a timing flake (first bit 2026-08-15, full-suite run, tick mid-harness).
+    var noFlow = await db.get("SELECT count(*)::int AS n FROM tasks WHERE request_id = ? AND type IN ('record_search','redaction','estimate') AND COALESCE(created_by,'') <> 'system-reconciler'", [A.kids[0]]);
     ok('A3 …and no FLOW task was spawned as a side effect — the MRR types are separate keys precisely so ' +
        'the two can never blur', noFlow.n === 0);
     var hist = await db.all("SELECT notes FROM request_history WHERE request_id = ? AND action = 'MRR_ACTIVITY_COMPLETED'", [A.kids[0]]);
