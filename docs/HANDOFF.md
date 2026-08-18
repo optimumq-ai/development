@@ -8027,3 +8027,53 @@ start into a tick; unrelated to the org change.
 - Publish-tier and rules-approve-tier role questions from (o) still parked with Kevin.
 - Standing board unchanged (product split parked until after go-live; §6b anchor-zones mockup
   session pending).
+
+## 2026-08-18 (a) — request-side role-gate sweep: taxonomy writes + request-file mutations
+
+### What was built (the two requireAuth-only WRITE surfaces (o) left open)
+- `middleware/auth.js` gains two more SHARED gates beside `requireRedactionWork`:
+  - **`requireTaxonomyEdit`** = `requireRole('SYSTEM_ADMIN','DIRECTOR')` — the "Workflow & Taxonomy"
+    permission group of DESIGN_user_type_role_model §4–5 (team managers/supervisors hold no global
+    config), same bar as redactionConfig / repository EDIT. Applied to EVERY taxonomy write:
+    categories CRUD, record types CRUD, department/routing/source/repository links, applying a
+    variant proposal, AI `discover` + `discover-scan` (both insert drafts). Reads and the
+    compute-only variant scan (`discover-variants` proposes, inserts nothing) stay requireAuth.
+  - **`requireRequestWork`** = `requireRoleOrPerm(['DIRECTOR','SUPERVISOR','DEPT_MANAGER','COORDINATOR'],
+    ['REQUEST_MANAGER','SEARCH_AND_TRIAGE','REDACTION_WORKER','DELIVERY_AND_CLOSURE'])` — the function
+    roles are requests.js's own `canRoute` set. Applied to every `/api/files` MUTATION: upload (gate
+    runs BEFORE multer, so a refused upload never touches disk), attach a found record, delete (which
+    unlinks the blob), mark responsive/not, render/extract. Reads (list/download/pages/page-image) and
+    the compute-only staff record search stay requireAuth. Mass Redaction's template-sample upload
+    rides `/files/upload/req-template-samples` — REDACTION_WORKER is in the gate, so unchanged.
+- Live users: every account holds REQUEST_MANAGER + SEARCH_AND_TRIAGE + REDACTION_WORKER, so nobody
+  loses file work; taxonomy editing narrows to Kevin/Kerri/Steve (SYSTEM_ADMIN) — no DIRECTOR is
+  held on live today. Michael (SUPERVISOR/DEPT_MANAGER) is correctly refused on taxonomy writes.
+- Frontend honesty (not a redesign): `RecordsPanel` swallowed every file-mutation error and even
+  applied the optimistic state on failure — now an error line shows the server refusal;
+  `SchemaDiscoveryPage` approve/reject likewise. Task-screen attach already surfaced refusals.
+- `verify_search_resolve` now acts as a real SEARCH_AND_TRIAGE holder (was `users LIMIT 1`, which
+  could be a role-less fixture user from another harness).
+
+### Evidence
+`verify_request_gates` **44/44** (no-role/searcher/supervisor 403 across every taxonomy write;
+DIRECTOR + SYSTEM_ADMIN pass; variant scan open; searcher/supervisor/director pass every files
+mutation, no-role 403; record search open; reads 200; 401-before-403; nothing written by the
+pass-through probes). Break-test: gate removed from one taxonomy + one files route → 42/44 with
+exactly those two assertions failing; restored. **Full suite 2339/2339, LIVE UNTOUCHED, exit 0.**
+Deployed: frontend built (exit 0, nginx 200), API restarted (200); live probe on nonexistent ids —
+Michael taxonomy PATCH 403 / files DELETE 404 (through), Kevin 404/404, Michael taxonomy GET 200.
+Specs same commit: SPEC_taxonomy_classification §1, SPEC_record_search_task_screen §4a,
+SPEC_auth_security_platform §1 (now lists the shared gates + the remaining requireAuth-only writes).
+
+### Open threads
+- Taxonomy tab / "Find Same-Format Records" stay VISIBLE to supervisors & team managers (nav is
+  `isElev`); their write attempts get the refusal text. Hiding write controls per role is a UI
+  follow-on (UI rule — not touched here).
+- ATTORNEY_REVIEWER is not in `requireRequestWork` by function role (mirrors the redaction gate);
+  Senior Legal holds the work perms on live so nothing changes in practice — Kevin's call if legal
+  should pass by title.
+- Remaining requireAuth-only WRITES: `requests.js` per-request acts (`/:id/stage`, `/:id/assign`,
+  clarification, effort, intents — the domain scopes LISTS to team/assignee for non-elevated staff
+  but never scopes or role-gates these mutations), `onboarding.js` phase writes. Worth its own pass.
+- Publish-tier and rules-approve-tier questions from (o) still parked with Kevin. Standing board
+  unchanged (product split parked until after go-live; §6b anchor-zones mockup session pending).
