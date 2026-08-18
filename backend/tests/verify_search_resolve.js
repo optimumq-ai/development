@@ -62,7 +62,11 @@ async function stageOf(rid) { return (await db.get('SELECT stage FROM requests W
 
 (async function () {
   await db.initDb();
-  var u = await db.get('SELECT * FROM users LIMIT 1');
+  // Act as a SEARCHER — the files mutations (attach/delete) take the request-work gate now, so an
+  // arbitrary `LIMIT 1` row (which can be a role-less user another harness created) is no longer a
+  // valid actor. A SEARCH_AND_TRIAGE holder is exactly who this screen is for.
+  var u = await db.get("SELECT u.* FROM users u JOIN user_permission_roles upr ON upr.user_id = u.id " +
+    "WHERE upr.permission_role_id = 'pr-searchtriage' AND u.status = 'active' ORDER BY u.id LIMIT 1");
   TOKEN = await auth.signAccessToken(u);
 
   // Build our OWN source record with a real blob on disk. The deterministic fixture deliberately carries

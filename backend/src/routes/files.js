@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRequestWork } = require('../middleware/auth');
+// WORK = the request-work gate (middleware/auth.requireRequestWork). Every mutation on a request's files
+// takes it; reads (list, download, pages, page images) and the compute-only record search stay requireAuth.
+const WORK = requireRequestWork;
 const { run, get, all } = require('../db');
 const multer = require('multer');
 const path = require('path');
@@ -30,7 +33,7 @@ const upload = multer({
   }
 });
 
-router.post('/upload/:requestId', requireAuth, upload.single('file'), async function(req, res) {
+router.post('/upload/:requestId', requireAuth, WORK, upload.single('file'), async function(req, res) {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
   var requestId = req.params.requestId;
   var request = await get('SELECT id FROM requests WHERE id = ?', [requestId]);
@@ -77,7 +80,7 @@ router.post('/search/records', requireAuth, async function (req, res) {
 // `filename` on disk — one row, no I/O. That is a landmine: DELETE /files/:fileId UNLINKS THE FILE FROM
 // DISK, so removing the record from one request would silently destroy it inside the other, which is a
 // released record in someone else's fulfilled request. Two rows, two blobs.
-router.post('/attach/:requestId', requireAuth, async function (req, res) {
+router.post('/attach/:requestId', requireAuth, WORK, async function (req, res) {
   try {
     var requestId = req.params.requestId;
     var rec = (req.body && req.body.record) || {};
@@ -124,7 +127,7 @@ router.get('/:requestId', requireAuth, async function(req, res) {
   res.json({ files: files });
 });
 
-router.delete('/:fileId', requireAuth, async function(req, res) {
+router.delete('/:fileId', requireAuth, WORK, async function(req, res) {
   var file = await get('SELECT * FROM request_files WHERE id = ?', [req.params.fileId]);
   if (!file) return res.status(404).json({ error: 'File not found' });
   var filePath = path.join(UPLOAD_DIR, file.filename);
@@ -141,7 +144,7 @@ router.get('/download/:fileId', requireAuth, async function(req, res) {
   res.download(filePath, file.original_name);
 });
 
-router.patch('/:fileId/status', requireAuth, async function(req, res) {
+router.patch('/:fileId/status', requireAuth, WORK, async function(req, res) {
   var file = await get('SELECT * FROM request_files WHERE id = ?', [req.params.fileId]);
   if (!file) return res.status(404).json({ error: 'File not found' });
   var responsive = req.body.responsive ? 1 : 0;
@@ -152,7 +155,7 @@ router.patch('/:fileId/status', requireAuth, async function(req, res) {
 });
 
 // --- Document processing foundation (render pages + extract text/word boxes) ---
-router.post('/:fileId/process', requireAuth, async function(req, res) {
+router.post('/:fileId/process', requireAuth, WORK, async function(req, res) {
   var file = await get('SELECT * FROM request_files WHERE id = ?', [req.params.fileId]);
   if (!file) return res.status(404).json({ error: 'File not found' });
   try {

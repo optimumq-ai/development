@@ -1,7 +1,10 @@
 const express = require('express');
 const router = express.Router();
 const { get, all, run } = require('../db');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireTaxonomyEdit } = require('../middleware/auth');
+// EDIT = the taxonomy-edit gate (SYSTEM_ADMIN/DIRECTOR). Every write below takes it; reads and the
+// compute-only variant scan (discover-variants proposes, inserts nothing) stay requireAuth.
+const EDIT = requireTaxonomyEdit;
 const { v4: uuidv4 } = require('uuid');
 const embedIndex = require('../services/embedIndex');
 
@@ -60,7 +63,7 @@ router.get('/categories', requireAuth, async function(req, res) {
   res.json({ categories: rows });
 });
 
-router.post('/categories', requireAuth, async function(req, res) {
+router.post('/categories', requireAuth, EDIT, async function(req, res) {
   var name = (req.body.name || '').trim();
   var code = (req.body.code || '').trim();
   if (!name || !code) return res.status(400).json({ error: 'name and code are required' });
@@ -73,7 +76,7 @@ router.post('/categories', requireAuth, async function(req, res) {
   res.json(await get('SELECT * FROM categories WHERE id = ?', [id]));
 });
 
-router.patch('/categories/:id', requireAuth, async function(req, res) {
+router.patch('/categories/:id', requireAuth, EDIT, async function(req, res) {
   var row = await get('SELECT * FROM categories WHERE id = ?', [req.params.id]);
   if (!row) return res.status(404).json({ error: 'Category not found' });
   var b = req.body;
@@ -88,7 +91,7 @@ router.patch('/categories/:id', requireAuth, async function(req, res) {
   res.json(await get('SELECT * FROM categories WHERE id = ?', [row.id]));
 });
 
-router.delete('/categories/:id', requireAuth, async function(req, res) {
+router.delete('/categories/:id', requireAuth, EDIT, async function(req, res) {
   var row = await get('SELECT id FROM categories WHERE id = ?', [req.params.id]);
   if (!row) return res.status(404).json({ error: 'Category not found' });
   var used = await get('SELECT COUNT(*) as c FROM record_types WHERE category_id = ?', [req.params.id]);
@@ -138,7 +141,7 @@ async function resolveParent(b, selfId) {
   return p;
 }
 
-router.post('/record-types', requireAuth, async function(req, res) {
+router.post('/record-types', requireAuth, EDIT, async function(req, res) {
   var b = req.body;
   var name = (b.name || '').trim();
   var code = (b.code || '').trim();
@@ -167,7 +170,7 @@ router.post('/record-types', requireAuth, async function(req, res) {
   res.json(hydrate(await get('SELECT * FROM record_types WHERE id = ?', [id])));
 });
 
-router.patch('/record-types/:id', requireAuth, async function(req, res) {
+router.patch('/record-types/:id', requireAuth, EDIT, async function(req, res) {
   var rt = await get('SELECT * FROM record_types WHERE id = ?', [req.params.id]);
   if (!rt) return res.status(404).json({ error: 'Record type not found' });
   var b = req.body;
@@ -193,7 +196,7 @@ router.patch('/record-types/:id', requireAuth, async function(req, res) {
   res.json(hydrate(await get('SELECT * FROM record_types WHERE id = ?', [rt.id])));
 });
 
-router.delete('/record-types/:id', requireAuth, async function(req, res) {
+router.delete('/record-types/:id', requireAuth, EDIT, async function(req, res) {
   var rt = await get('SELECT id FROM record_types WHERE id = ?', [req.params.id]);
   if (!rt) return res.status(404).json({ error: 'Record type not found' });
   // #14 — deleting a bucket would orphan its variants' inheritance; refuse in words.
@@ -210,7 +213,7 @@ router.delete('/record-types/:id', requireAuth, async function(req, res) {
 });
 
 // ===== LINKS: departments (owner/fulfiller) =====
-router.post('/record-types/:id/departments', requireAuth, async function(req, res) {
+router.post('/record-types/:id/departments', requireAuth, EDIT, async function(req, res) {
   var rt = await get('SELECT id FROM record_types WHERE id = ?', [req.params.id]);
   if (!rt) return res.status(404).json({ error: 'Record type not found' });
   if (!req.body.department_id) return res.status(400).json({ error: 'department_id is required' });
@@ -224,7 +227,7 @@ router.post('/record-types/:id/departments', requireAuth, async function(req, re
   res.json(await get('SELECT * FROM record_type_departments WHERE id = ?', [id]));
 });
 
-router.delete('/record-types/:id/departments/:linkId', requireAuth, async function(req, res) {
+router.delete('/record-types/:id/departments/:linkId', requireAuth, EDIT, async function(req, res) {
   var link = await get('SELECT id FROM record_type_departments WHERE id = ? AND record_type_id = ?', [req.params.linkId, req.params.id]);
   if (!link) return res.status(404).json({ error: 'Link not found' });
   await run('DELETE FROM record_type_departments WHERE id = ?', [req.params.linkId]);
@@ -233,7 +236,7 @@ router.delete('/record-types/:id/departments/:linkId', requireAuth, async functi
 });
 
 // ===== ROUTING: owning department + optional fulfillment team override =====
-router.patch('/record-types/:id/routing', requireAuth, async function(req, res) {
+router.patch('/record-types/:id/routing', requireAuth, EDIT, async function(req, res) {
   var rt = await get('SELECT id FROM record_types WHERE id = ?', [req.params.id]);
   if (!rt) return res.status(404).json({ error: 'Record type not found' });
   var ownId = req.body.owning_department_id || null;
@@ -254,7 +257,7 @@ router.patch('/record-types/:id/routing', requireAuth, async function(req, res) 
 });
 
 // ===== SOURCES: bulk-set which sources hold this record type =====
-router.patch('/record-types/:id/sources', requireAuth, async function(req, res) {
+router.patch('/record-types/:id/sources', requireAuth, EDIT, async function(req, res) {
   var rt = await get('SELECT id FROM record_types WHERE id = ?', [req.params.id]);
   if (!rt) return res.status(404).json({ error: 'Record type not found' });
   var ids = Array.isArray(req.body.repository_ids) ? req.body.repository_ids : [];
@@ -268,7 +271,7 @@ router.patch('/record-types/:id/sources', requireAuth, async function(req, res) 
 });
 
 // ===== LINKS: repositories (where it lives) =====
-router.post('/record-types/:id/repositories', requireAuth, async function(req, res) {
+router.post('/record-types/:id/repositories', requireAuth, EDIT, async function(req, res) {
   var rt = await get('SELECT id FROM record_types WHERE id = ?', [req.params.id]);
   if (!rt) return res.status(404).json({ error: 'Record type not found' });
   if (!req.body.repository_id) return res.status(400).json({ error: 'repository_id is required' });
@@ -280,7 +283,7 @@ router.post('/record-types/:id/repositories', requireAuth, async function(req, r
   res.json(await get('SELECT * FROM record_type_repositories WHERE id = ?', [id]));
 });
 
-router.delete('/record-types/:id/repositories/:linkId', requireAuth, async function(req, res) {
+router.delete('/record-types/:id/repositories/:linkId', requireAuth, EDIT, async function(req, res) {
   var link = await get('SELECT id FROM record_type_repositories WHERE id = ? AND record_type_id = ?', [req.params.linkId, req.params.id]);
   if (!link) return res.status(404).json({ error: 'Link not found' });
   await run('DELETE FROM record_type_repositories WHERE id = ?', [req.params.linkId]);
@@ -298,7 +301,7 @@ router.post('/record-types/:id/discover-variants', requireAuth, async function(r
     res.json(out);
   } catch (e) { res.status(500).json({ error: 'Variant discovery failed: ' + (e && e.message) }); }
 });
-router.post('/record-types/:id/variants', requireAuth, async function(req, res) {
+router.post('/record-types/:id/variants', requireAuth, EDIT, async function(req, res) {
   try {
     var rt = await require('../services/schemaDiscovery').applyGroupingProposal(req.params.id, req.body || {});
     await audit('record_type', rt.id, 'discover_variant', req, { name: rt.name, code: rt.code, parent: req.params.id });
@@ -306,7 +309,7 @@ router.post('/record-types/:id/variants', requireAuth, async function(req, res) 
   } catch (e) { res.status(422).json({ error: e.message }); }
 });
 
-router.post('/discover', requireAuth, async function(req, res) {
+router.post('/discover', requireAuth, EDIT, async function(req, res) {
   var text = (req.body && req.body.text ? String(req.body.text) : '').trim();
   if (!text) return res.status(400).json({ error: 'text is required' });
   if (text.length > 16000) text = text.substring(0, 16000);
@@ -368,7 +371,7 @@ router.post('/discover', requireAuth, async function(req, res) {
   }
 });
 
-router.post('/discover-scan', requireAuth, async function(req, res) {
+router.post('/discover-scan', requireAuth, EDIT, async function(req, res) {
   var repoId = req.body && req.body.repository_id;
   if (!repoId) return res.status(400).json({ error: 'repository_id is required' });
   var repo = await get('SELECT id, name, connector_type, config FROM record_repositories WHERE id = ?', [repoId]);

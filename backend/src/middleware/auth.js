@@ -47,4 +47,18 @@ function requireRoleOrPerm(roles, perms) {
 // redaction permission-role holders plus the supervising function roles. REDACTION_AUTHORITY is
 // accepted but not required — an orphan role nothing else consults yet. Reads stay requireAuth.
 const requireRedactionWork = requireRoleOrPerm(['DIRECTOR', 'SUPERVISOR'], ['REDACTION_WORKER', 'REDACTION_AUTHORITY']);
-module.exports = { requireAuth, requireRole, requireRoleOrPerm, requireRedactionWork };
+// THE REQUEST-WORK gate — mutations on a request's files (upload, attach a found record, delete,
+// mark responsive, render/extract). A work permission role (the searcher, the request manager, the
+// redaction worker, delivery) or one of the function roles that ACT on requests by title (the same
+// set requests.js `canRoute` uses; SYSTEM_ADMIN passes inside). Reads and compute-only search stay
+// requireAuth. Previously requireAuth only — any logged-in account, including a reporting-only or
+// finance-only one, could delete a record off someone else's request (and the blob from disk).
+const requireRequestWork = requireRoleOrPerm(['DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER', 'COORDINATOR'],
+  ['REQUEST_MANAGER', 'SEARCH_AND_TRIAGE', 'REDACTION_WORKER', 'DELIVERY_AND_CLOSURE']);
+// THE TAXONOMY-EDIT gate — categories, record types, their department/routing/source links, and the
+// discovery paths that INSERT drafts. "Workflow & Taxonomy" is the System Administrator's and the
+// Director's permission group (DESIGN_user_type_role_model §4–5); the redactionConfig / repository
+// EDIT precedent. Compute-only discovery (variant scan proposes, inserts nothing) and reads stay
+// requireAuth. Previously requireAuth only.
+const requireTaxonomyEdit = requireRole('SYSTEM_ADMIN', 'DIRECTOR');
+module.exports = { requireAuth, requireRole, requireRoleOrPerm, requireRedactionWork, requireRequestWork, requireTaxonomyEdit };

@@ -31,6 +31,9 @@ export default function RecordsPanel({ requestId, stage, onChange }) {
   const [uploading, setUploading] = useState(false);
   const [form, setForm] = useState({ title:'', recordType:'Document / PDF', description:'', isNonDigital:false });
   const [dragOver, setDragOver] = useState(false);
+  // Server refusals (e.g. the request-work role gate on file mutations) must be SEEN, not console-logged.
+  const [err, setErr] = useState('');
+  function failed(e, fallback) { setErr((e && e.response && e.response.data && e.response.data.error) || fallback); }
   const fileRef = useRef();
 
   useEffect(function() { if (requestId) loadFiles(); }, [requestId]);
@@ -56,9 +59,10 @@ export default function RecordsPanel({ requestId, stage, onChange }) {
     try {
       var fd = new FormData();
       fd.append('file', file);
+      setErr('');
       var r = await api.post('/files/upload/' + requestId, fd, { headers: {'Content-Type':'multipart/form-data'} });
       await loadFiles();
-    } catch(e) { console.error('Upload error:', e); }
+    } catch(e) { failed(e, 'Upload failed'); }
     setUploading(false);
   }
 
@@ -83,11 +87,12 @@ export default function RecordsPanel({ requestId, stage, onChange }) {
       var file = new File([blob], form.title + '.json', {type:'application/json'});
       var fd = new FormData();
       fd.append('file', file);
+      setErr('');
       await api.post('/files/upload/' + requestId, fd, { headers: {'Content-Type':'multipart/form-data'} });
       await loadFiles();
       setForm({ title:'', recordType:'Document / PDF', description:'', isNonDigital:false });
       setShowAdd(false);
-    } catch(e) { console.error(e); }
+    } catch(e) { failed(e, 'Upload failed'); }
     setUploading(false);
   }
 
@@ -97,16 +102,18 @@ export default function RecordsPanel({ requestId, stage, onChange }) {
       setRecords(function(prev){ return prev.map(function(r){ return r.id===fileId ? Object.assign({},r,{status:responsive?'responsive':'attached'}) : r; }); });
       if (onChange) onChange();
     } catch(e) {
-      setRecords(function(prev){ return prev.map(function(r){ return r.id===fileId ? Object.assign({},r,{status:responsive?'responsive':'attached'}) : r; }); });
+      // Refused: say so and leave the row as it was (it previously applied the change on failure too).
+      failed(e, 'Could not update the record');
     }
   }
 
   async function deleteFile(fileId) {
     if (!window.confirm('Remove this record?')) return;
     try {
+      setErr('');
       await api.delete('/files/' + fileId);
       await loadFiles();
-    } catch(e) { console.error(e); }
+    } catch(e) { failed(e, 'Could not remove the record'); }
   }
 
   var responsiveCount = records.filter(function(r){ return r.status==='responsive'; }).length;
@@ -121,6 +128,7 @@ export default function RecordsPanel({ requestId, stage, onChange }) {
             {loading ? 'Loading...' : records.length===0 ? 'No records attached yet' : records.length+' record'+(records.length!==1?'s':'')+' · '+responsiveCount+' to include'}
             {stage==='record_search'&&!canAdvance&&records.length>0?' — include at least one record in the response to advance':''}
           </p>
+          {err ? <p style={{fontSize:'12px',color:'#DC2626',margin:'4px 0 0'}}>{err}</p> : null}
         </div>
         <button onClick={function(){setShowAdd(!showAdd);}} style={{padding:'8px 14px',background:'#1F4E79',color:'white',border:'none',borderRadius:'8px',fontSize:'13px',fontWeight:'600',cursor:'pointer'}}>
           + Attach Record

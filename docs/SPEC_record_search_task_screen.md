@@ -120,6 +120,7 @@ The AI/taxonomy already stores physical format, so the screen defaults to it and
 
 ### 4a. Digital `[reuse existing]`
 Live keyword + semantic search across connected systems → review results → attach/select files. Backed by the `recordSearch` engine (`[BUILT]`, §1 of the fulfillment spec) and the existing `RecordsPanel` / `DocSearchPanel`. Results filtered/prioritized to digital sources.
+**Role gate `[BUILT 2026-08-18; verify_request_gates]`:** every MUTATION on a request's files (`/api/files` upload, attach a found record, delete, mark responsive/not, render-extract) takes the shared gate `middleware/auth.requireRequestWork` — a work permission role (`SEARCH_AND_TRIAGE`, `REQUEST_MANAGER`, `REDACTION_WORKER`, `DELIVERY_AND_CLOSURE`) or a function role that acts on requests by title (`DIRECTOR`/`SUPERVISOR`/`DEPT_MANAGER`/`COORDINATOR` — the same set `requests.js` `canRoute` uses; `SYSTEM_ADMIN` passes). Reads (list, download, pages, page images) and the compute-only staff record search stay `requireAuth`. Previously everything here was `requireAuth` only — any logged-in account, including a reporting-only one, could delete a record off someone else's request (and the blob from disk). Refusals now surface in `RecordsPanel` (an error line; previously swallowed) and on the task screen's flash.
 
 ### 4b. Audio / Video `[NEW UI over existing connectors]` — **partially open, see §10.3**
 "Search" here means **locate the asset**, never search events *inside* the media.

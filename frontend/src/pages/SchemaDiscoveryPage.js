@@ -75,13 +75,13 @@ export default function SchemaDiscoveryPage() {
   async function approve(id) {
     setBusy(id);
     try { await api.patch('/taxonomy/record-types/' + id, { status: 'active' }); await loadDrafts(); }
-    catch (e) { console.error(e); }
+    catch (e) { setError((e.response && e.response.data && e.response.data.error) || 'Could not approve the draft'); }
     setBusy(null);
   }
   async function reject(id) {
     setBusy(id);
     try { await api.delete('/taxonomy/record-types/' + id); await loadDrafts(); }
-    catch (e) { console.error(e); }
+    catch (e) { setError((e.response && e.response.data && e.response.data.error) || 'Could not reject the draft'); }
     setBusy(null);
   }
 
