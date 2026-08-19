@@ -18,6 +18,7 @@ On a cadence (and on demand): sends a periodic **courtesy reminder** (explicitly
 
 ## 5. Onboarding wizard `[BUILT]`
 Seven phases (Jurisdiction, City Departments, Fulfillment Teams, Record Ownership, Repositories & Discovery, Fees & Estimates, Redaction Readiness) with **live readiness signals from actual DB state** (not bare checkboxes). Gated phases: designated **reviewer + approval + email** flow (branded review-request email via Resend — live, verified end-to-end); onboarding cannot pass a gated phase until approved. Fees phase carries the **sandbox hard gate** (Domain 6 §8) and surfaces the current fee-config version. SetupPage/stepper with deep links.
+**Role gate `[BUILT 2026-08-19; verify_onboarding_gates 25/25]`:** setup is system configuration — assigning a phase's reviewer, requesting a review and moving a phase's status take `SYSTEM_ADMIN`/`DIRECTOR` (the System Administration permission group; the redactionConfig / repository / taxonomy EDIT precedent). Two carve-outs keep the review flow honest: `/approve` keeps its own decided authority (the phase's DESIGNATED reviewer, or an administrator), and the Fees phase's designated reviewer may also record the fee-test outcome (`/fees/test-result`) — they run the sandbox test before they can approve. Reads stay `requireAuth`. Previously every write was `requireAuth` only.
 
 ## 6. Supporting pieces
 - **decision_reasons** library (statutory reason texts, per category, usage-ranked) `[BUILT — Domain 6 §7 / Domain 4 spec §9]`.

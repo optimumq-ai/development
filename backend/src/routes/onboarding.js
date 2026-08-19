@@ -1,6 +1,29 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRole } = require('../middleware/auth');
+// SETUP IS SYSTEM CONFIGURATION (2026-08-19). Assigning a reviewer, requesting a review, moving a phase's
+// status and recording the fee-test outcome were requireAuth-only. Now: SYSTEM_ADMIN / DIRECTOR (the
+// System Administration permission group; the redactionConfig / repository / taxonomy EDIT precedent).
+// Two deliberate carve-outs keep the review flow honest: /approve keeps its own decided authority (the
+// DESIGNATED reviewer of the phase, or an administrator), and the fee-test outcome may also be recorded by
+// the Fees phase's designated reviewer — they run the sandbox test before they can approve. Reads open.
+const EDIT = requireRole('SYSTEM_ADMIN', 'DIRECTOR');
+async function isPhaseReviewer(phaseKey, user) {
+  if (!user || !user.sub) return false;
+  const p = await get("SELECT reviewer_id FROM onboarding_progress WHERE phase_key = ?", [phaseKey]);
+  return !!(p && p.reviewer_id && p.reviewer_id === user.sub);
+}
+// EDIT, or the designated reviewer of the named phase.
+function editOrReviewer(phaseKey) {
+  return async function (req, res, next) {
+    const roles = (req.user && req.user.roles) || [];
+    if (['SYSTEM_ADMIN', 'DIRECTOR'].some(function (r) { return roles.indexOf(r) !== -1; })) return next();
+    try {
+      if (await isPhaseReviewer(phaseKey, req.user)) return next();
+    } catch (e) { return res.status(500).json({ error: 'Could not verify your access to this phase.' }); }
+    return res.status(403).json({ error: 'Recording the fee-test outcome is a setup act — a System Administrator, a Director, or the designated reviewer of the Fees phase.' });
+  };
+}
 const { all, get, run } = require('../db');
 const email = require('../services/email');
 
@@ -77,7 +100,7 @@ router.get('/', requireAuth, async function (req, res) {
 });
 
 // Assign the designated reviewer for a phase
-router.patch('/:phase/reviewer', requireAuth, async function (req, res) {
+router.patch('/:phase/reviewer', requireAuth, EDIT, async function (req, res) {
   const p = await get("SELECT phase_key FROM onboarding_progress WHERE phase_key = ?", [req.params.phase]);
   if (!p) return res.status(404).json({ error: 'Unknown phase' });
   const reviewerId = req.body.reviewerId || null;
@@ -90,7 +113,7 @@ router.patch('/:phase/reviewer', requireAuth, async function (req, res) {
 });
 
 // Submit a gated phase for review -> email the designated reviewer a deep-link
-router.post('/:phase/request-review', requireAuth, async function (req, res) {
+router.post('/:phase/request-review', requireAuth, EDIT, async function (req, res) {
   const p = await get("SELECT p.*, r.display_name AS reviewer_name, r.email AS reviewer_email FROM onboarding_progress p LEFT JOIN users r ON r.id = p.reviewer_id WHERE p.phase_key = ?", [req.params.phase]);
   if (!p) return res.status(404).json({ error: 'Unknown phase' });
   if (!p.requires_review) return res.status(400).json({ error: 'This phase does not require review' });
@@ -129,7 +152,7 @@ router.post('/:phase/approve', requireAuth, async function (req, res) {
 });
 
 // Generic status change: non-gated completion, in_progress, or reset. Gated 'complete' must use /approve.
-router.patch('/:phase', requireAuth, async function (req, res) {
+router.patch('/:phase', requireAuth, EDIT, async function (req, res) {
   const status = req.body.status;
   if (['not_started', 'in_progress', 'complete'].indexOf(status) < 0) return res.status(400).json({ error: 'Invalid status' });
   const p = await get("SELECT requires_review FROM onboarding_progress WHERE phase_key = ?", [req.params.phase]);
@@ -146,7 +169,7 @@ router.patch('/:phase', requireAuth, async function (req, res) {
 });
 
 // Record the fee/estimate sandbox test outcome on the Fees phase (mandatory before Fees approval).
-router.post('/fees/test-result', requireAuth, async function (req, res) {
+router.post('/fees/test-result', requireAuth, editOrReviewer('fees'), async function (req, res) {
   const outcome = req.body.outcome;
   if (['confirmed', 'issues'].indexOf(outcome) < 0) return res.status(400).json({ error: 'outcome must be confirmed or issues' });
   const jr = await get("SELECT value FROM system_config WHERE key='jurisdiction_profile'");

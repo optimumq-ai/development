@@ -547,7 +547,15 @@ router.post('/:id/ag-ruling', requireAuth, ACT.agRuling, async function(req, res
   var request = resolvedAg.row;
   var T = require('../services/tolling');
   var actor = (req.user && req.user.name) || 'Staff';
-  var outcome = (req.body && req.body.outcome) || 'sustained';
+  // THE OUTCOME IS REQUIRED. This used to default to 'sustained', so an EMPTY POST recorded a
+  // "withholding sustained" ruling, moved the record to redaction review, cancelled its search task and
+  // spawned redaction — which is exactly what happened to a live request on 2026-08-18 (HANDOFF (b)).
+  // A ruling is a legal fact somebody read; the caller must say which one.
+  var AG_OUTCOMES = ['sustained', 'partial', 'overruled'];
+  var outcome = req.body && req.body.outcome;
+  if (AG_OUTCOMES.indexOf(outcome) === -1) {
+    return res.status(400).json({ error: 'An AG ruling needs its outcome: sustained, partial, or overruled.', code: 'OUTCOME_REQUIRED', outcomes: AG_OUTCOMES });
+  }
   var note = (req.body && req.body.note) || '';
   var ag = await get("SELECT id FROM request_clocks WHERE request_id = (SELECT COALESCE(master_request_id, id) FROM requests WHERE id = ?) AND clock_type = 'ag_ruling' AND status != 'satisfied' ORDER BY created_at DESC LIMIT 1", [request.id]);
   if (ag) { try { await T.satisfy(ag.id); } catch (e) {} }

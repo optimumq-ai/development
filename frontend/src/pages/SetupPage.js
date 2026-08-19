@@ -46,7 +46,7 @@ export default function SetupPage() {
   useEffect(function () { load(); }, []);
 
   async function setReviewer(phase, reviewerId) {
-    try { await api.patch('/onboarding/' + phase + '/reviewer', { reviewerId: reviewerId || null }); await load(); } catch (e) { alert('Failed to set reviewer'); }
+    try { await api.patch('/onboarding/' + phase + '/reviewer', { reviewerId: reviewerId || null }); await load(); } catch (e) { alert((e.response && e.response.data && e.response.data.error) || 'Failed to set reviewer'); }
   }
   async function requestReview(phase) {
     setBusy(phase); setMsg('');

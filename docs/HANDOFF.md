@@ -8183,3 +8183,39 @@ Specs same commit: SPEC_request_lifecycle_workflow §5a (extended), SPEC_auth_se
 - BW5's `manualEndingRights` task-holder check is on the addressed row only (no cluster walk) — if a
   parent id is ever passed there, a child's task-holder would be refused. Not touched (decided model).
 - Standing board unchanged.
+
+## 2026-08-19 (b) — onboarding setup gate + ag-ruling outcome required
+
+### What was built
+- **onboarding.js**: assign reviewer / request-review / status patch → `requireRole('SYSTEM_ADMIN','DIRECTOR')`
+  (setup is system configuration; the redactionConfig / repository / taxonomy EDIT precedent). Two carve-outs
+  keep the review flow honest: `/approve` keeps its own decided authority (designated reviewer OR admin),
+  and `/fees/test-result` also admits the Fees phase's DESIGNATED reviewer (`editOrReviewer('fees')`) —
+  they run the sandbox test before they can approve. Reads open. SetupPage now shows the server's words on
+  a refused reviewer assignment (was a generic alert); FeeSandboxPanel already did.
+- **requests.js `POST /:id/ag-ruling` REQUIRES `outcome ∈ {sustained, partial, overruled}`** → 400
+  `OUTCOME_REQUIRED` (lists the three). It defaulted to `sustained`, which is how an empty probe recorded a
+  real ruling on 2026-08-18. The gate still answers first (403 before the outcome check); the parent/child
+  ambiguity check still precedes it (409). Every real caller already sent `outcome`.
+- Correction to something I nearly wrote into the auth spec: "no requireAuth-only write surface remains"
+  was FALSE — the grep shows 82 middleware-level `requireAuth`-only mutations. SPEC_auth_security_platform
+  §1 now carries an honest three-way inventory: (a) own in-handler authority, (b) compute-only / own-record,
+  (c) **NOT YET AUDITED**: feeEstimates.js (11 money acts), objections create/assign/resolve, settlement
+  charge, departments.js, feeProfiles.js, agentRules.js, tickler clear, legalEstimate ask, several mrr.js
+  acts. That (c) list is the next hardening pass.
+
+### Evidence
+`verify_onboarding_gates` **25/25** (no-role / SUPERVISOR 403 on setup writes; DIRECTOR + SYSTEM_ADMIN
+pass on probes that write nothing — unknown phase 404, invalid status 400, no reviewer 400; fee-test:
+stranger 403, designated reviewer passes but still cannot assign reviewers, approve's own check intact;
+ag-ruling: empty → 400 OUTCOME_REQUIRED, bogus → 400 with the three outcomes, record did not move, gate
+before validation; onboarding rows restored to pre-run values). Affected harnesses green
+(verify_request_acts 58, verify_legal_review 44, verify_e2e_tx 36). **Full suite 2458/2458, LIVE UNTOUCHED, exit 0.** Deployed: frontend built (nginx 200), API restarted (200); live probes on NONEXISTENT ids only — Michael (SUPERVISOR) reviewer-assign 403; Kevin 404 through; ag-ruling on a nonexistent request 404; unauth 401.
+Specs same commit: SPEC_jurisdiction_configuration §5, SPEC_request_lifecycle_workflow §5a,
+SPEC_auth_security_platform §1 (inventory).
+
+### Open threads
+- The (c) inventory above — feeEstimates.js first (money acts on a request; FINANCE / FEE_MANAGER via the
+  act gate), then departments/feeProfiles/agentRules (config → SYSTEM_ADMIN/DIRECTOR), objections,
+  settlement, tickler clear, legalEstimate ask, mrr.js residue.
+- Standing board unchanged.
