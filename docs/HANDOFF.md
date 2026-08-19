@@ -8268,3 +8268,35 @@ SPEC_auth_security_platform §1 (inventory).
    Acceptance: every item per state valued-from-library or explicitly city-deferred; no state-specific code.
 - The fees role-gate hardening (feeEstimates.js etc., (b) inventory) is PAUSED behind this redesign at Kevin's
   request. Standing board unchanged.
+
+## 2026-08-19 (d) — STEP 2 fee gap pass LAUNCHED (in flight at session end) — RESUME INSTRUCTIONS
+
+### What ran
+- Kevin approved the step-2 prompt with: municipalities only (note agency regimes); recency 2024–2026;
+  one discover + one verify agent per state; estimate calibration OUT. Launched over the 32 states.
+- Lesson learned mid-run: this 4-CPU box caps a workflow at min(16, cpus-2) = **2 concurrent agents** —
+  32 states × 2 agents × ~30 min ≈ 16 h. Cap is PER WORKFLOW, so the run was stopped and relaunched as
+  **4 parallel workflows over disjoint 8-state slices** (script: `docs/rules_research/fee_gap/scripts/
+  fee-gap-pass-slice.js`; discover AND verify steps SHORT-CIRCUIT when their output file already exists
+  and is complete, so re-running a slice never redoes finished work).
+- Slices: [AL AZ CA CO CT FL GA ID] · [IL IN KS LA MA MI MN MO] · [NC NE NJ NV NY OH OK OR] · [PA SC TN TX UT VA WA WI].
+- Outputs are FILES (so nothing completed is lost when the session ends): discover →
+  `docs/rules_research/fee_gap/raw/<ST>.json` (36 resolutions + new 9NNN rule rows + delegations log +
+  coverage + negatives); verify → `docs/rules_research/fee_gap/verified/<ST>.json` (verdict per row,
+  corrected rows). Inputs: `fee_gap/input/<ST>.json` (committed).
+- At session end: raw done for AL, AZ, CA, CO (each 36/36; 9–14 new rule rows; 3–4 delegations followed);
+  no verified files yet. Early shape matches step 1: these four are actual-cost / defers-to-city states.
+
+### TO RESUME (next session) — no design decisions needed
+1. `ls docs/rules_research/fee_gap/raw docs/rules_research/fee_gap/verified` — see what finished.
+2. Re-launch the same 4 slices with `Workflow({scriptPath: 'docs/rules_research/fee_gap/scripts/fee-gap-pass-slice.js',
+   args: {states: [...8...]}})` (four calls, disjoint slices as above). Finished states short-circuit;
+   unfinished ones run. Kevin has explicitly authorized this run ("run it").
+3. When all 32 raw + verified exist: aggregate → `fee_gap/RESULTS.md` (per state: 36/36, C/c/R/U counts,
+   delegations followed/unresolved, not-confirmed items) and merge CONFIRMED (and CORRECTED) resolutions
+   into `alignment/fee_master_list.json` as a `verified` layer per cell (keep the auto layer). Commit.
+   Report to Kevin; then step 3 (template `fee_schedule` gains value/unit/basis/engine_field/applies_to).
+4. Watch for: a state with <36 resolutions (re-run that state), verify UNVERIFIABLE-heavy states (source
+   access), NJ (no prior rules — researched from scratch here; its NON-fee domains still need the full V2
+   chunked discovery — separate task).
+- Fees role-gate hardening remains PAUSED behind the redesign. Standing board unchanged.
