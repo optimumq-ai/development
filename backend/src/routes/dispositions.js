@@ -13,6 +13,17 @@ var { requireAuth } = require('../middleware/auth');
 var { all, get, run } = require('../db');
 var DISP = require('../services/disposition');
 var AR = require('../services/autoRelease');
+// PER-REQUEST ACT GATE (2026-08-19) for the three writes that had NO rights model: logging a withdrawal
+// communication, the RM release hold (place / lift), and recording an installment request. The two manual
+// endings keep BW5's own decided rights (manualEndingRights: ORO Associate+ / current task-holder); the
+// knobs keep their Director bar. services/requestAccess: acting role OR act permission OR the work is yours.
+var { requireRequestAct } = require('../middleware/requestAct');
+var ACT = {
+  withdrawal: requireRequestAct({ label: 'log a withdrawal communication', param: 'requestId', perms: ['REQUEST_MANAGER', 'CLARIFICATION_SENDER', 'DELIVERY_AND_CLOSURE'] }),
+  hold:       requireRequestAct({ label: 'place a release hold', param: 'requestId', perms: ['REQUEST_MANAGER', 'DELIVERY_AND_CLOSURE'] }),
+  lift:       requireRequestAct({ label: 'lift a release hold', param: 'requestId', perms: ['REQUEST_MANAGER', 'DELIVERY_AND_CLOSURE'] }),
+  installment: requireRequestAct({ label: 'record an installment request', param: 'requestId', perms: ['REQUEST_MANAGER', 'CLARIFICATION_SENDER', 'DELIVERY_AND_CLOSURE'] })
+};
 
 // ── THE PIPELINE'S CITY KNOBS (rule d) ────────────────────────────────────────────────────────────
 //
@@ -125,7 +136,7 @@ router.get('/:requestId/gate/:ending', requireAuth, async function (req, res) {
 //
 // Logging one is both the evidence the Withdrawn gate demands and the trigger for the "Process withdrawal"
 // task — a withdrawal can never sit unprocessed while the clock runs.
-router.post('/:requestId/withdrawal-communication', requireAuth, async function (req, res) {
+router.post('/:requestId/withdrawal-communication', requireAuth, ACT.withdrawal, async function (req, res) {
   try {
     res.json(await DISP.logWithdrawalCommunication(req.params.requestId, {
       actorId: req.user.sub, actorName: req.user.name || 'Staff',
@@ -150,7 +161,7 @@ router.get('/:requestId/hold', requireAuth, async function (req, res) {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-router.post('/:requestId/hold', requireAuth, async function (req, res) {
+router.post('/:requestId/hold', requireAuth, ACT.hold, async function (req, res) {
   try {
     res.json(await RH.hold(req.params.requestId, {
       actorId: req.user.sub, actorName: req.user.name || 'Request Manager', note: (req.body && req.body.note) || '' }));
@@ -160,7 +171,7 @@ router.post('/:requestId/hold', requireAuth, async function (req, res) {
   }
 });
 
-router.delete('/:requestId/hold', requireAuth, async function (req, res) {
+router.delete('/:requestId/hold', requireAuth, ACT.lift, async function (req, res) {
   try {
     res.json(await RH.lift(req.params.requestId, {
       actorId: req.user.sub, actorName: req.user.name || 'Request Manager', note: (req.body && req.body.note) || '' }));
@@ -172,7 +183,7 @@ router.delete('/:requestId/hold', requireAuth, async function (req, res) {
 
 // An installment request arriving. Recorded always; auto-lifts a standing hold only where the state's own
 // imported research says the entitlement exists — the one true override, and the RM is notified.
-router.post('/:requestId/installment-request', requireAuth, async function (req, res) {
+router.post('/:requestId/installment-request', requireAuth, ACT.installment, async function (req, res) {
   try {
     res.json(await RH.onInstallmentRequest(req.params.requestId, {
       actorId: req.user.sub, actorName: req.user.name || 'Staff', note: (req.body && req.body.note) || '' }));

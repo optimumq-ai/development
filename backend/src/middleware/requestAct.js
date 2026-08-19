@@ -9,6 +9,8 @@
 //   opts.taskTypes if given, only holders of an open task of THESE types count as "the work is theirs"
 //   opts.label     plain words for the refusal ("send a clarification")
 //   opts.param     the route param carrying the request id/number (default 'id')
+//   opts.resolve   async (req) => request id/number, for routes addressed by something ELSE (a clock id);
+//                  returning null/undefined means "nothing addressed" → pass through to the handler's own error
 var access = require('../services/requestAccess');
 
 function requireRequestAct(opts) {
@@ -17,7 +19,9 @@ function requireRequestAct(opts) {
   return async function (req, res, next) {
     if (!req.user) return res.status(401).json({ error: 'Authentication required' });
     try {
-      var d = await access.decide(req.user, req.params[param], opts);
+      var target = opts.resolve ? await opts.resolve(req) : req.params[param];
+      if (target == null) return next();
+      var d = await access.decide(req.user, target, opts);
       if (d.ok || !d.found) return next();
       return res.status(403).json({ error: d.error, code: 'NOT_YOUR_REQUEST' });
     } catch (e) {

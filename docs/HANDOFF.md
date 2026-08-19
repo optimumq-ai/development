@@ -8150,3 +8150,36 @@ Latent defect surfaced: `ag-ruling` accepts an empty body as "withholding sustai
   redaction gate; Senior Legal holds the work perms on live anyway.
 - Standing board unchanged (publish-tier / rules-approve-tier parked with Kevin; product split parked;
   §6b anchor-zones mockup pending; taxonomy write controls still visible to supervisors).
+
+## 2026-08-19 (a) — per-request ACT gate extended to clocks.js + dispositions.js
+
+### What was built
+- `middleware/requestAct.requireRequestAct` gains `opts.resolve(req)` so a route addressed by something
+  other than a request id (a clock id) resolves to its request first; an unknown clock passes through
+  to tolling's own "Clock not found".
+- **clocks.js**: start / start-one → `REQUEST_MANAGER`; toll / resume / extend / satisfy →
+  `REQUEST_MANAGER`, `DENIAL_AND_LEGAL`, `ATTORNEY_REVIEWER` (satisfy also `DELIVERY_AND_CLOSURE`) — plus
+  the standard acting roles and "the work is yours" (request / open task on its cluster). Reads open.
+- **dispositions.js**: withdrawal-communication + installment-request → `REQUEST_MANAGER`,
+  `CLARIFICATION_SENDER`, `DELIVERY_AND_CLOSURE`; RM release hold place / lift → `REQUEST_MANAGER`,
+  `DELIVERY_AND_CLOSURE`. UNCHANGED on purpose: the two manual endings (BW5's decided
+  `manualEndingRights` — ORO Associate+ / current task-holder), the Director-only knobs, all reads.
+- `verify_extend` now acts as a REQUEST_MANAGER holder (was an arbitrary `LIMIT 1` user).
+- No frontend change: only RequestWorkspacePage calls the clock writes and (b) made its refusals visible.
+
+### Evidence
+`verify_clock_disposition_gates` **36/36** — no-role/wrong-perm 403 on the fixture's real clock and
+request; REQUEST_MANAGER / ATTORNEY_REVIEWER / SUPERVISOR / child-task holder pass (cluster walk to the
+parent's clock); unknown clock/request pass through; manual endings still answer BW5's NOT_PERMITTED,
+knobs still DIRECTOR_REQUIRED; reads open; 401 first; and a "nothing moved" section (clock still
+running, no extension, no hold, no history beyond creation) — every positive probe used a body the
+service rejects BEFORE its first write (extend days:0, empty withdrawal body, hold without note, lift on
+an unheld request), per the (b) incident rule. **Full suite 2433/2433, LIVE UNTOUCHED, exit 0.** Deployed: API restarted (200); live probes on NONEXISTENT ids only — unauth 401; Marcus toll → 500 "Clock not found" (through); hold → 422 NOTE_REQUIRED (through, service check before lookup).
+Specs same commit: SPEC_request_lifecycle_workflow §5a (extended), SPEC_auth_security_platform §1.
+
+### Open threads
+- `onboarding.js` phase writes — the last requireAuth-only write surface I know of.
+- `POST /requests/:id/ag-ruling` should REQUIRE `outcome` (from the (b) incident).
+- BW5's `manualEndingRights` task-holder check is on the addressed row only (no cluster walk) — if a
+  parent id is ever passed there, a child's task-holder would be refused. Not touched (decided model).
+- Standing board unchanged.
