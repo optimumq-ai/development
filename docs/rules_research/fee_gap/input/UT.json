@@ -1,0 +1,1104 @@
+{
+ "state": "Utah",
+ "code": "UT",
+ "next_rule_id": "UT-9001 \u2014 new/amended rule rows from THIS pass use the UT-9NNN namespace (9001, 9002, \u2026) so they never collide with existing ids; reference existing rows by their existing ids.",
+ "items": [
+  {
+   "id": "dup.bw.rate",
+   "label": "Copy rate \u2014 B&W page",
+   "home": "fee_profiles:duplication.bw.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "defers_to_city",
+   "prior_rule_ids": [
+    "UT-0028",
+    "UT-0029",
+    "UT-0030"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(1)",
+    "Utah Code \u00a7 63G-2-203(2)(a)",
+    "Utah Code \u00a7 63G-2-203(3)(c)"
+   ],
+   "prior_snippet": "An entity may charge a reasonable fee to cover its actual cost of providing a record; the fee must be approved by the entity's executive officer."
+  },
+  {
+   "id": "dup.color.rate",
+   "label": "Copy rate \u2014 color page",
+   "home": "fee_profiles:duplication.color.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "dup.oversized.rate",
+   "label": "Copy rate \u2014 oversized / nonstandard page",
+   "home": "fee_profiles:duplication.oversized.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "dup.specialty.rate",
+   "label": "Specialty reproduction (photos, maps, transcripts)",
+   "home": "fee_profiles:duplication.specialty.rate",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.nonstandard_rate",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "dup.tiers",
+   "label": "Graduated page bands (per-page rate by volume)",
+   "home": "fee_profiles:duplication.*.tiers",
+   "type": "tiers",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.free_allowance"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "UT-0035",
+    "UT-0036"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(5)(b)(iii)",
+    "Utah Code \u00a7 63G-2-203(5)(c)"
+   ],
+   "prior_snippet": "An entity may not charge a fee for the first quarter hour of staff time spent responding to a request."
+  },
+  {
+   "id": "rules.freePages",
+   "label": "Free page allowance per request",
+   "home": "fee_profiles:requestRules.freePageAllowance",
+   "type": "pages",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "UT-0035",
+    "UT-0036",
+    "UT-0034"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(5)(b)(i)",
+    "Utah Code \u00a7 63G-2-203(5)(b)(iii)",
+    "Utah Code \u00a7 63G-2-203(5)(c)"
+   ],
+   "prior_snippet": "An entity may not charge a fee for the first quarter hour of staff time spent responding to a request."
+  },
+  {
+   "id": "labor.search.rate",
+   "label": "Labor rate \u2014 search / retrieval ($/hr)",
+   "home": "fee_profiles:labor.search.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "UT-0031",
+    "UT-0028",
+    "UT-0029"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(1)",
+    "Utah Code \u00a7 63G-2-203(2)(a)",
+    "Utah Code \u00a7 63G-2-203(2)(b)"
+   ],
+   "prior_snippet": "An hourly staff-time charge may not exceed the salary of the lowest paid employee who has the necessary skill and training to perform the request."
+  },
+  {
+   "id": "labor.review.rate",
+   "label": "Labor rate \u2014 review / redaction ($/hr)",
+   "home": "fee_profiles:labor.review.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "UT-0031",
+    "UT-0034"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(2)(b)",
+    "Utah Code \u00a7 63G-2-203(5)(b)(i)"
+   ],
+   "prior_snippet": "An hourly staff-time charge may not exceed the salary of the lowest paid employee who has the necessary skill and training to perform the request."
+  },
+  {
+   "id": "labor.programming.rate",
+   "label": "Labor rate \u2014 programming / data extraction ($/hr)",
+   "home": "fee_profiles:labor.programming.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "UT-0031"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(2)(b)"
+   ],
+   "prior_snippet": "An hourly staff-time charge may not exceed the salary of the lowest paid employee who has the necessary skill and training to perform the request."
+  },
+  {
+   "id": "labor.billableWhen",
+   "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+   "home": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+   "type": "enum+threshold",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "UT-0035",
+    "UT-0036",
+    "UT-0031",
+    "UT-0034"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(2)(b)",
+    "Utah Code \u00a7 63G-2-203(5)(b)(i)",
+    "Utah Code \u00a7 63G-2-203(5)(b)(iii)",
+    "Utah Code \u00a7 63G-2-203(5)(c)"
+   ],
+   "prior_snippet": "An entity may not charge a fee for the first quarter hour of staff time spent responding to a request."
+  },
+  {
+   "id": "labor.overheadPct",
+   "label": "Overhead / fringe surcharge on labor (%)",
+   "home": "fee_profiles:labor.overheadPct",
+   "type": "pct",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "UT-0031",
+    "UT-0028",
+    "UT-0029"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(1)",
+    "Utah Code \u00a7 63G-2-203(2)(a)",
+    "Utah Code \u00a7 63G-2-203(2)(b)"
+   ],
+   "prior_snippet": "An hourly staff-time charge may not exceed the salary of the lowest paid employee who has the necessary skill and training to perform the request."
+  },
+  {
+   "id": "labor.increment",
+   "label": "Labor time increment + rounding",
+   "home": "fee_profiles:labor.*.increment / rounding",
+   "type": "hours",
+   "concepts": [
+    "fee.labor_charge"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "UT-0031"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(2)(b)"
+   ],
+   "prior_snippet": "An hourly staff-time charge may not exceed the salary of the lowest paid employee who has the necessary skill and training to perform the request."
+  },
+  {
+   "id": "rules.freeLaborHours",
+   "label": "Free labor hours per request",
+   "home": "fee_profiles:requestRules.freeLaborHours",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "UT-0035",
+    "UT-0036",
+    "UT-0031"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(2)(b)",
+    "Utah Code \u00a7 63G-2-203(5)(b)(iii)",
+    "Utah Code \u00a7 63G-2-203(5)(c)"
+   ],
+   "prior_snippet": "An entity may not charge a fee for the first quarter hour of staff time spent responding to a request."
+  },
+  {
+   "id": "labor.periodicFreeHours",
+   "label": "Free personnel time per requestor per month/year (TX \u00a7 552.275 pattern)",
+   "home": "NOT IN ENGINE (fee_profiles gap \u2014 requestor-ledger counter)",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.aggregation"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "UT-0035",
+    "UT-0036"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(5)(b)(iii)",
+    "Utah Code \u00a7 63G-2-203(5)(c)"
+   ],
+   "prior_snippet": "An entity may not charge a fee for the first quarter hour of staff time spent responding to a request."
+  },
+  {
+   "id": "rules.estimateNotifyThreshold",
+   "label": "Itemized estimate / cost notice required above ($ or hours)",
+   "home": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+   "type": "usd",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "estimate.requesterResponseDays",
+   "label": "Requester must respond to an estimate within N days (else withdrawn)",
+   "home": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "estimate.revisionNotifyPercent",
+   "label": "Revised estimate required when actual exceeds estimate by N%",
+   "home": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+   "type": "pct",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "estimate.validityDays",
+   "label": "Estimate validity period (days)",
+   "home": "fee_profiles:estimatePolicy.estimateValidityDays",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.deposit.threshold",
+   "label": "Deposit / prepayment may be required above ($)",
+   "home": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+   "type": "usd",
+   "concepts": [
+    "payment.deposit_threshold",
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "UT-0037",
+    "UT-0038",
+    "UT-0039"
+   ],
+   "prior_values": [
+    "$50"
+   ],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(8)(a)",
+    "Utah Code \u00a7 63G-2-203(8)(a)(i)",
+    "Utah Code \u00a7 63G-2-203(8)(b)"
+   ],
+   "prior_snippet": "An entity may require payment of past fees and future estimated fees before beginning to process a request."
+  },
+  {
+   "id": "rules.deposit.percent",
+   "label": "Deposit capped at (% of estimate)",
+   "home": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+   "type": "pct",
+   "concepts": [
+    "payment.deposit_ceiling",
+    "payment.deposit"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.productionGate",
+   "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+   "home": "paymentTiming gates + fee_profiles bands",
+   "type": "enum",
+   "concepts": [
+    "payment.production_conditioned_on_payment",
+    "payment.advance_payment"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "UT-0037",
+    "UT-0038",
+    "UT-0039"
+   ],
+   "prior_values": [
+    "$50"
+   ],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(8)(a)",
+    "Utah Code \u00a7 63G-2-203(8)(a)(i)",
+    "Utah Code \u00a7 63G-2-203(8)(b)"
+   ],
+   "prior_snippet": "An entity may require payment of past fees and future estimated fees before beginning to process a request."
+  },
+  {
+   "id": "payment.nonpayment",
+   "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+   "home": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+   "type": "enum+int",
+   "concepts": [
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.depositClock",
+   "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+   "home": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+   "type": "enum",
+   "concepts": [
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "UT-0037",
+    "UT-0038",
+    "UT-0039"
+   ],
+   "prior_values": [
+    "$50"
+   ],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(8)(a)",
+    "Utah Code \u00a7 63G-2-203(8)(a)(i)",
+    "Utah Code \u00a7 63G-2-203(8)(b)"
+   ],
+   "prior_snippet": "An entity may require payment of past fees and future estimated fees before beginning to process a request."
+  },
+  {
+   "id": "payment.reissue",
+   "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+   "home": "jurisdiction_rules:payment.reissue_*",
+   "type": "bool",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.method",
+   "label": "Electronic payment method offered",
+   "home": "fee_profiles:payment_mode (operational; not law-driven except VA)",
+   "type": "enum",
+   "concepts": [
+    "payment.method"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.maxFee",
+   "label": "Request-level ceiling (actual cost cap / statutory max)",
+   "home": "fee_profiles:requestRules.maxFee",
+   "type": "usd_or_rule",
+   "concepts": [
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "defers_to_city",
+   "prior_rule_ids": [
+    "UT-0028",
+    "UT-0029",
+    "UT-0030"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(1)",
+    "Utah Code \u00a7 63G-2-203(2)(a)",
+    "Utah Code \u00a7 63G-2-203(3)(c)"
+   ],
+   "prior_snippet": "An entity may charge a reasonable fee to cover its actual cost of providing a record; the fee must be approved by the entity's executive officer."
+  },
+  {
+   "id": "rules.deMinimis",
+   "label": "De-minimis: no charge below ($)",
+   "home": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+   "type": "usd",
+   "concepts": [
+    "fee.waiver",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "UT-0032",
+    "UT-0034"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(4)",
+    "Utah Code \u00a7 63G-2-203(5)(b)(i)"
+   ],
+   "prior_snippet": "An entity may (and is encouraged to) fulfill a request without charge if release primarily benefits the public, the requester is the subject of/specified in the record, or the requester's legal rights are directly implic"
+  },
+  {
+   "id": "rules.minFee",
+   "label": "Minimum fee",
+   "home": "fee_profiles:requestRules.minFee",
+   "type": "usd",
+   "concepts": [],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "media",
+   "label": "Electronic media (CD/DVD/USB) charge",
+   "home": "fee_profiles:media.{cd,dvd,usb}",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "delivery",
+   "label": "Delivery: mail / handling / email / pickup",
+   "home": "fee_profiles:delivery.*",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.delivery_charge",
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "certification",
+   "label": "Certification / certified-copy charge",
+   "home": "fee_profiles:certification.{rate,unit}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.certified_copy_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "av",
+   "label": "Audio/video: per recording, per minute, free minutes",
+   "home": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.special_service_charge",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "commercial",
+   "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+   "home": "fee_profiles:purposeOverrides.commercial",
+   "type": "pct+bool",
+   "concepts": [
+    "fee.commercial_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "waiver",
+   "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+   "home": "jurisdiction_rules:fee_waiver.*",
+   "type": "enum_list+bool",
+   "concepts": [
+    "fee.waiver"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "UT-0032"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(4)"
+   ],
+   "prior_snippet": "An entity may (and is encouraged to) fulfill a request without charge if release primarily benefits the public, the requester is the subject of/specified in the record, or the requester's legal rights are directly implic"
+  },
+  {
+   "id": "waiver.forfeiture",
+   "label": "Late response forfeits the fee",
+   "home": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+   "type": "bool",
+   "concepts": [
+    "fee.waiver",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "UT-0032"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Utah Code \u00a7 63G-2-203(4)"
+   ],
+   "prior_snippet": "An entity may (and is encouraged to) fulfill a request without charge if release primarily benefits the public, the requester is the subject of/specified in the record, or the requester's legal rights are directly implic"
+  },
+  {
+   "id": "repeat",
+   "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+   "home": "NOT IN ENGINE (requestor-ledger)",
+   "type": "structural",
+   "concepts": [
+    "fee.repeat_request_carryforward",
+    "fee.aggregation"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  }
+ ],
+ "canonical_concepts": [
+  {
+   "canonical_key": "fee.copy_rate_per_page",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Absent a published actual-cost calculation, the agency may charge up to ten cents per page for public records scanned into an electronic format."
+  },
+  {
+   "canonical_key": "fee.actual_cost_basis",
+   "family": "fee",
+   "config_home": "mixed(p:24/s:8)",
+   "definition": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records."
+  },
+  {
+   "canonical_key": "fee.waiver",
+   "family": "fee",
+   "config_home": "mixed(p:5/s:23)",
+   "definition": "State, county, and municipal officers shall furnish, without charge, searches for and certified copies of public records needed in support of a claim or benefit applicati"
+  },
+  {
+   "canonical_key": "fee.electronic_media_charge",
+   "family": "fee",
+   "config_home": "mixed(p:21/s:1)",
+   "definition": "If records are not in electronic format and the public body agrees to produce them electronically, it may charge for the staff time required to transfer the documents to "
+  },
+  {
+   "canonical_key": "fee.no_charge_categories",
+   "family": "fee",
+   "config_home": "mixed(p:11/s:9)",
+   "definition": "A fee shall not be assessed for time spent segregating or redacting records unless such segregation/redaction is required by law or approved by the Supervisor."
+  },
+  {
+   "canonical_key": "fee.labor_charge",
+   "family": "fee",
+   "config_home": "mixed(p:25/s:4)",
+   "definition": "A public body may add up to 50% to the applicable labor charge to cover fringe benefits, not exceeding the actual cost of fringe benefits, if it notes the multiplier on t"
+  },
+  {
+   "canonical_key": "fee.schedule_and_authority",
+   "family": "fee",
+   "config_home": "mixed(p:6/s:10)",
+   "definition": "For state-agency public records, copy fees shall be charged according to the uniform fee schedule adopted by the commissioner of administration (R.S. 39:241) or as otherw"
+  },
+  {
+   "canonical_key": "fee.estimate_and_notice",
+   "family": "fee",
+   "config_home": "mixed(p:3/s:19)",
+   "definition": "The requester shall be informed of the estimated cost of preparing the copy if more than two hours of employee time is needed or if an outside professional service would "
+  },
+  {
+   "canonical_key": "fee.nonstandard_rate",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Where a copy requires a transcription, or a person requests a transcription of a public record, the transcription fee shall not exceed the agency's cost."
+  },
+  {
+   "canonical_key": "fee.free_allowance",
+   "family": "fee",
+   "config_home": "mixed(p:10/s:2)",
+   "definition": "The custodian shall not impose any charge for the first hour of time expended in research and retrieval of public records."
+  },
+  {
+   "canonical_key": "fee.certified_copy_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "The fee for certification of documents may not exceed five dollars ($5) per document."
+  },
+  {
+   "canonical_key": "fee.special_service_charge",
+   "family": "fee",
+   "config_home": "mixed(p:7/s:1)",
+   "definition": "For a voluminous request for electronic records, a public body may charge tiered caps by data size: for non-PDF data up to $20 (<=2 MB), $40 (2-4 MB), or $100 (>4 MB); fo"
+  },
+  {
+   "canonical_key": "fee.commercial_charge",
+   "family": "fee",
+   "config_home": "mixed(p:4/s:3)",
+   "definition": "The chapter does not authorize giving, selling, or providing access to lists of individuals requested for commercial purposes, and agencies shall not do so unless specifi"
+  },
+  {
+   "canonical_key": "fee.delivery_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Mailing may be charged at actual cost in a reasonably economical manner; no charge for expedited shipping or insurance unless stipulated by the requester."
+  },
+  {
+   "canonical_key": "fee.repeat_request_carryforward",
+   "family": "fee",
+   "config_home": "structural",
+   "definition": "If the same or a substantially similar request is made within six months after expiration of the ninety-day nonpayment-withdrawal period (or one hundred fifty days if req"
+  },
+  {
+   "canonical_key": "fee.aggregation",
+   "family": "fee",
+   "config_home": "mixed(p:1/s:2)",
+   "definition": "Once a records custodian reaches the aggregation threshold, the custodian is no longer required to deduct the labor threshold or any other minimum charge per request that"
+  },
+  {
+   "canonical_key": "payment.advance_payment",
+   "family": "payment",
+   "config_home": "mixed(p:6/s:12)",
+   "definition": "The custodian may require advance payment of the fees authorized by this section before providing the records."
+  },
+  {
+   "canonical_key": "payment.nonpayment_consequence",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:11)",
+   "definition": "A request is considered withdrawn if the requester fails to remit all fees within ninety days, or within one hundred fifty days if the requested fees are greater than one"
+  },
+  {
+   "canonical_key": "payment.production_conditioned_on_payment",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "For a standard request, the public officer has discretion to require the requester to pay all or a portion of the estimated fee prior to searching for any responsive publ"
+  },
+  {
+   "canonical_key": "payment.deposit",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:3)",
+   "definition": "A deposit notice is considered received 3 days after it is sent (regardless of transmission means), and it must state the deposit-due date, which is 48 days after the not"
+  },
+  {
+   "canonical_key": "payment.deposit_threshold",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "Where a public body determines in advance that charges are likely to exceed $200, it may, before continuing to process the request, require the requester to pay a deposit"
+  },
+  {
+   "canonical_key": "payment.deposit_ceiling",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "A good-faith deposit must not exceed one-half of the total estimated fee, and the deposit request must include a detailed fee itemization."
+  },
+  {
+   "canonical_key": "payment.method",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "Any local public body that charges for producing records may provide an electronic method of payment (noncash, non-paper-check \u2014 credit/debit cards, direct deposit/debit,"
+  }
+ ],
+ "existing_fee_payment_rules": [
+  {
+   "rule_id": "UT-0028",
+   "category": "Fees",
+   "concept_key": "fee.actual_cost_basis",
+   "legal_concept": "Reasonable fee to cover actual cost",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "rule_type": "Permission",
+   "atomic_rule": "An entity may charge a reasonable fee to cover its actual cost of providing a record; the fee must be approved by the entity's executive officer.",
+   "trigger": "Entity provides a record",
+   "clock_effect": "none",
+   "source_language": "(a) Subject to Subsection (5), a governmental entity may charge a reasonable fee to cover the governmental entity's actual cost of providing a record. (b) A fee under Subsection (1)(a) shall be approved by the governmental entity's executive officer.",
+   "is_paraphrase": false,
+   "source_authority": "Utah Code \u00a7 63G-2-203(1)",
+   "source_type": "Statute",
+   "effective_status": "Current (amended Ch. 33, 2025 General Session)",
+   "official_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "notes": "Ceiling = actual cost; also bounded by the soft 'reasonable' standard. Executive-officer approval is a structural sub-requirement (UT-0030).",
+   "related_rule_ids": [
+    "UT-0029",
+    "UT-0030",
+    "UT-0031"
+   ]
+  },
+  {
+   "rule_id": "UT-0029",
+   "category": "Fees",
+   "concept_key": "fee.compilation_cost_components",
+   "legal_concept": "Actual-cost components for compiled records",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "rule_type": "Calculation",
+   "atomic_rule": "When compiling a record in a form other than normally maintained, actual costs may include staff time for compiling/formatting/tailoring, staff time for search/retrieval and direct administrative costs, and (for non-word-processing computer output) actual incremental cost plus a reasonable portion of formatting/administrative costs.",
+   "trigger": "Entity compiles a record in a form other than normally maintained",
+   "clock_effect": "none",
+   "source_language": "When a governmental entity compiles a record in a form other than that normally maintained by the governmental entity, the actual costs under this section may include the following: (i) the cost of staff time for compiling, formatting, manipulating, packaging, summarizing, or tailoring the record...; (ii) the cost of staff time for search, retrieval, and other direct administrative costs for complying with a request; and (iii) in the case of fees for a record that is the result of computer output other than word processing, the actual incremental cost of providing the electronic services and products together with a reasonable portion of the costs associated with formatting or interfacing the information for particular users, and the administrative costs...",
+   "is_paraphrase": false,
+   "source_authority": "Utah Code \u00a7 63G-2-203(2)(a)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "notes": "",
+   "related_rule_ids": [
+    "UT-0028",
+    "UT-0031"
+   ]
+  },
+  {
+   "rule_id": "UT-0031",
+   "category": "Fees",
+   "concept_key": "fee.hourly_staff_rate_cap",
+   "legal_concept": "Hourly charge capped at lowest-paid qualified employee",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "rule_type": "Calculation",
+   "atomic_rule": "An hourly staff-time charge may not exceed the salary of the lowest paid employee who has the necessary skill and training to perform the request.",
+   "trigger": "Entity charges staff-time hourly fee",
+   "clock_effect": "none",
+   "source_language": "An hourly charge under Subsection (2)(a) may not exceed the salary of the lowest paid employee who, in the discretion of the custodian of records, has the necessary skill and training to perform the request.",
+   "is_paraphrase": false,
+   "source_authority": "Utah Code \u00a7 63G-2-203(2)(b)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "notes": "",
+   "related_rule_ids": [
+    "UT-0029"
+   ]
+  },
+  {
+   "rule_id": "UT-0030",
+   "category": "Fees",
+   "concept_key": "fee.political_subdivision_fee_setting",
+   "legal_concept": "Political subdivisions set fees by ordinance/policy",
+   "config_home": "structural",
+   "rule_type": "Requirement",
+   "atomic_rule": "Political subdivisions must establish records fees by ordinance or written formal policy adopted by the governing body.",
+   "trigger": "Political subdivision establishes fees",
+   "clock_effect": "none",
+   "source_language": "Political subdivisions shall establish fees by ordinance or written formal policy adopted by the governing body.",
+   "is_paraphrase": false,
+   "source_authority": "Utah Code \u00a7 63G-2-203(3)(c)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "notes": "The municipal hook: the CITY supplies the actual fee schedule under the state's actual-cost ceiling (UT-0028).",
+   "related_rule_ids": [
+    "UT-0028",
+    "UT-0049"
+   ]
+  },
+  {
+   "rule_id": "UT-0032",
+   "category": "Fees",
+   "concept_key": "fee.waiver_discretion",
+   "legal_concept": "Discretionary fee waiver",
+   "config_home": "structural",
+   "rule_type": "Discretion",
+   "atomic_rule": "An entity may (and is encouraged to) fulfill a request without charge if release primarily benefits the public, the requester is the subject of/specified in the record, or the requester's legal rights are directly implicated and the requester is impecunious.",
+   "trigger": "One of the enumerated benefit/subject/impecunious conditions",
+   "clock_effect": "none",
+   "source_language": "A governmental entity may fulfill a record request without charge and is encouraged to do so if it determines that: (a) releasing the record primarily benefits the public rather than a person; (b) the individual requesting the record is the subject of the record, or an individual specified in Subsection 63G-2-202(1) or (2); or (c) the requester's legal rights are directly implicated by the information in the record, and the requester is impecunious.",
+   "is_paraphrase": false,
+   "source_authority": "Utah Code \u00a7 63G-2-203(4)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "notes": "Denial of a fee waiver is separately appealable (UT-0040) and reviewed de novo (\u00a7 63G-2-203(6)).",
+   "related_rule_ids": [
+    "UT-0040"
+   ]
+  },
+  {
+   "rule_id": "UT-0034",
+   "category": "Fees",
+   "concept_key": "fee.no_charge_disclosure_review",
+   "legal_concept": "No fee for reviewing a record for disclosability",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "rule_type": "Prohibition",
+   "atomic_rule": "An entity may not charge a fee for reviewing a record to determine whether it is subject to disclosure, except as permitted for search/retrieval staff time under 203(2)(a)(ii).",
+   "trigger": "Entity reviews record for disclosability",
+   "clock_effect": "none",
+   "source_language": "A governmental entity may not charge a fee for: (i) reviewing a record to determine whether it is subject to disclosure, except as permitted by Subsection (2)(a)(ii);",
+   "is_paraphrase": false,
+   "source_authority": "Utah Code \u00a7 63G-2-203(5)(b)(i)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "notes": "",
+   "related_rule_ids": [
+    "UT-0029"
+   ]
+  },
+  {
+   "rule_id": "UT-0035",
+   "category": "Fees",
+   "concept_key": "fee.first_quarter_hour_free",
+   "legal_concept": "First quarter hour of staff time free",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "rule_type": "Prohibition",
+   "atomic_rule": "An entity may not charge a fee for the first quarter hour of staff time spent responding to a request.",
+   "trigger": "Entity responds to a request under \u00a7 63G-2-204",
+   "clock_effect": "none",
+   "source_language": "A governmental entity may not charge a fee for: ... (iii) the first quarter hour of staff time spent in responding to a request under Section 63G-2-204.",
+   "is_paraphrase": false,
+   "source_authority": "Utah Code \u00a7 63G-2-203(5)(b)(iii)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "notes": "Fixed free allotment of 15 minutes. Exception in UT-0036.",
+   "related_rule_ids": [
+    "UT-0036"
+   ]
+  },
+  {
+   "rule_id": "UT-0036",
+   "category": "Fees",
+   "concept_key": "fee.first_quarter_hour_exception",
+   "legal_concept": "Exception to free first quarter hour for repeat non-media requesters",
+   "config_home": "structural",
+   "rule_type": "Exception",
+   "atomic_rule": "The free first quarter hour does not apply if the requester is not a Utah media representative AND previously submitted a separate request within the 10-day period immediately before the current request.",
+   "trigger": "Non-media requester filed a separate request within prior 10 days",
+   "clock_effect": "none",
+   "source_language": "Notwithstanding Subsection (5)(b)(iii), a governmental entity is not prevented from charging a fee for the first quarter hour of staff time spent in responding to a request under Section 63G-2-204 if the person who submits the request: (i) is not a Utah media representative; and (ii) previously submitted a separate request within the 10-day period immediately before the date of the request to which the governmental entity is responding.",
+   "is_paraphrase": false,
+   "source_authority": "Utah Code \u00a7 63G-2-203(5)(c)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "notes": "'Media representative' here (203(5)(a)) excludes blog/podcast/social-media requesters, unlike the broader publication/broadcast presumption in 204(5).",
+   "related_rule_ids": [
+    "UT-0035",
+    "UT-0012"
+   ]
+  },
+  {
+   "rule_id": "UT-0037",
+   "category": "Payment",
+   "concept_key": "payment.prepayment_permitted",
+   "legal_concept": "Advance payment before processing",
+   "config_home": "structural",
+   "rule_type": "Permission",
+   "atomic_rule": "An entity may require payment of past fees and future estimated fees before beginning to process a request.",
+   "trigger": "Fees expected to exceed $50, or prior invoiced fees unpaid",
+   "clock_effect": "pauses",
+   "clock_spec": "undefined-soft: processing withheld until prepayment received ('before beginning to process a request')",
+   "source_language": "A governmental entity may require payment of past fees and future estimated fees before beginning to process a request if: (i) fees are expected to exceed $50; or (ii) after the government entity has sent an invoice, the requester has not paid fees from a previous request.",
+   "is_paraphrase": false,
+   "source_authority": "Utah Code \u00a7 63G-2-203(8)(a)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "notes": "Prepayment gate; the request enters a hold state until paid. Threshold value in UT-0038.",
+   "related_rule_ids": [
+    "UT-0038",
+    "UT-0039"
+   ]
+  },
+  {
+   "rule_id": "UT-0038",
+   "category": "Payment",
+   "concept_key": "payment.prepayment_threshold_amount",
+   "legal_concept": "$50 prepayment threshold",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "rule_type": "Calculation",
+   "atomic_rule": "Prepayment may be required when fees are expected to exceed $50.",
+   "trigger": "Estimated fees exceed $50",
+   "clock_effect": "none",
+   "source_language": "fees are expected to exceed $50;",
+   "is_paraphrase": false,
+   "source_authority": "Utah Code \u00a7 63G-2-203(8)(a)(i)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "notes": "Fixed statutory threshold.",
+   "related_rule_ids": [
+    "UT-0037"
+   ]
+  },
+  {
+   "rule_id": "UT-0039",
+   "category": "Payment",
+   "concept_key": "payment.excess_prepayment_refund",
+   "legal_concept": "Refund of excess prepayment",
+   "config_home": "structural",
+   "rule_type": "Requirement",
+   "atomic_rule": "Any prepaid amount in excess of fees due must be returned to the requester.",
+   "trigger": "Prepaid amount exceeds fees actually due",
+   "clock_effect": "none",
+   "source_language": "Any prepaid amount in excess of fees due shall be returned to the requester.",
+   "is_paraphrase": false,
+   "source_authority": "Utah Code \u00a7 63G-2-203(8)(b)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "notes": "",
+   "related_rule_ids": [
+    "UT-0037"
+   ]
+  }
+ ],
+ "template": {
+  "fee_schedule": {
+   "fee.labor_charge": [
+    {
+     "rule_id": "UT-0031",
+     "authority": "Utah Code \u00a7 63G-2-203(2)(b)",
+     "summary": "An hourly staff-time charge may not exceed the salary of the lowest paid employee who has the necessary skill and training to perform the request."
+    }
+   ],
+   "fee.actual_cost_basis": [
+    {
+     "rule_id": "UT-0028",
+     "authority": "Utah Code \u00a7 63G-2-203(1)",
+     "summary": "An entity may charge a reasonable fee to cover its actual cost of providing a record; the fee must be approved by the entity's executive officer."
+    },
+    {
+     "rule_id": "UT-0029",
+     "authority": "Utah Code \u00a7 63G-2-203(2)(a)",
+     "summary": "When compiling a record in a form other than normally maintained, actual costs may include staff time for compiling/formatting/tailoring, staff time for search/retrieval and direct administrative costs, and (for non-word-processing computer output) actual incremental cost plus a reasonable portio\u2026"
+    }
+   ],
+   "fee.free_allowance": [
+    {
+     "rule_id": "UT-0035",
+     "authority": "Utah Code \u00a7 63G-2-203(5)(b)(iii)",
+     "summary": "An entity may not charge a fee for the first quarter hour of staff time spent responding to a request."
+    },
+    {
+     "rule_id": "UT-0036",
+     "authority": "Utah Code \u00a7 63G-2-203(5)(c)",
+     "summary": "The free first quarter hour does not apply if the requester is not a Utah media representative AND previously submitted a separate request within the 10-day period immediately before the current request."
+    }
+   ],
+   "fee.no_charge_categories": [
+    {
+     "rule_id": "UT-0034",
+     "authority": "Utah Code \u00a7 63G-2-203(5)(b)(i)",
+     "summary": "An entity may not charge a fee for reviewing a record to determine whether it is subject to disclosure, except as permitted for search/retrieval staff time under 203(2)(a)(ii)."
+    }
+   ],
+   "fee.schedule_and_authority": [
+    {
+     "rule_id": "UT-0030",
+     "authority": "Utah Code \u00a7 63G-2-203(3)(c)",
+     "summary": "Political subdivisions must establish records fees by ordinance or written formal policy adopted by the governing body."
+    }
+   ]
+  },
+  "knobs_fee": null
+ },
+ "run_parameters": {
+  "scope": "municipalities only (note agency regimes)",
+  "recency": "check 2024-2026 session laws + rule amendments for fee sections",
+  "estimate_calibration": "OUT of scope"
+ }
+}

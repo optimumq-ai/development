@@ -1,0 +1,1060 @@
+{
+ "state": "Virginia",
+ "code": "VA",
+ "next_rule_id": "VA-9001 \u2014 new/amended rule rows from THIS pass use the VA-9NNN namespace (9001, 9002, \u2026) so they never collide with existing ids; reference existing rows by their existing ids.",
+ "items": [
+  {
+   "id": "dup.bw.rate",
+   "label": "Copy rate \u2014 B&W page",
+   "home": "fee_profiles:duplication.bw.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "VA-0021",
+    "VA-0022",
+    "VA-0024"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records."
+  },
+  {
+   "id": "dup.color.rate",
+   "label": "Copy rate \u2014 color page",
+   "home": "fee_profiles:duplication.color.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "dup.oversized.rate",
+   "label": "Copy rate \u2014 oversized / nonstandard page",
+   "home": "fee_profiles:duplication.oversized.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "dup.specialty.rate",
+   "label": "Specialty reproduction (photos, maps, transcripts)",
+   "home": "fee_profiles:duplication.specialty.rate",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.nonstandard_rate",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "dup.tiers",
+   "label": "Graduated page bands (per-page rate by volume)",
+   "home": "fee_profiles:duplication.*.tiers",
+   "type": "tiers",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.free_allowance"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.freePages",
+   "label": "Free page allowance per request",
+   "home": "fee_profiles:requestRules.freePageAllowance",
+   "type": "pages",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "VA-0023"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "No public body shall impose extraneous, intermediary, or surplus fees or expenses to recoup the general costs of creating or maintaining records or transacting the general business of the public body."
+  },
+  {
+   "id": "labor.search.rate",
+   "label": "Labor rate \u2014 search / retrieval ($/hr)",
+   "home": "fee_profiles:labor.search.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "VA-0021",
+    "VA-0022",
+    "VA-0024"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records."
+  },
+  {
+   "id": "labor.review.rate",
+   "label": "Labor rate \u2014 review / redaction ($/hr)",
+   "home": "fee_profiles:labor.review.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "VA-0023"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "No public body shall impose extraneous, intermediary, or surplus fees or expenses to recoup the general costs of creating or maintaining records or transacting the general business of the public body."
+  },
+  {
+   "id": "labor.programming.rate",
+   "label": "Labor rate \u2014 programming / data extraction ($/hr)",
+   "home": "fee_profiles:labor.programming.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.billableWhen",
+   "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+   "home": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+   "type": "enum+threshold",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "VA-0023"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "No public body shall impose extraneous, intermediary, or surplus fees or expenses to recoup the general costs of creating or maintaining records or transacting the general business of the public body."
+  },
+  {
+   "id": "labor.overheadPct",
+   "label": "Overhead / fringe surcharge on labor (%)",
+   "home": "fee_profiles:labor.overheadPct",
+   "type": "pct",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "VA-0021",
+    "VA-0022",
+    "VA-0024"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records."
+  },
+  {
+   "id": "labor.increment",
+   "label": "Labor time increment + rounding",
+   "home": "fee_profiles:labor.*.increment / rounding",
+   "type": "hours",
+   "concepts": [
+    "fee.labor_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.freeLaborHours",
+   "label": "Free labor hours per request",
+   "home": "fee_profiles:requestRules.freeLaborHours",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.periodicFreeHours",
+   "label": "Free personnel time per requestor per month/year (TX \u00a7 552.275 pattern)",
+   "home": "NOT IN ENGINE (fee_profiles gap \u2014 requestor-ledger counter)",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.aggregation"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.estimateNotifyThreshold",
+   "label": "Itemized estimate / cost notice required above ($ or hours)",
+   "home": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+   "type": "usd",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "VA-0025",
+    "VA-0026",
+    "VA-0029"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "Prior to conducting a search for records, the body shall notify the requester in writing that it may make reasonable charges not to exceed actual cost and inquire whether the requester would like a cost estimate in advan"
+  },
+  {
+   "id": "estimate.requesterResponseDays",
+   "label": "Requester must respond to an estimate within N days (else withdrawn)",
+   "home": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "VA-0025",
+    "VA-0026",
+    "VA-0029"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "Prior to conducting a search for records, the body shall notify the requester in writing that it may make reasonable charges not to exceed actual cost and inquire whether the requester would like a cost estimate in advan"
+  },
+  {
+   "id": "estimate.revisionNotifyPercent",
+   "label": "Revised estimate required when actual exceeds estimate by N%",
+   "home": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+   "type": "pct",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "VA-0025",
+    "VA-0026",
+    "VA-0029"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "Prior to conducting a search for records, the body shall notify the requester in writing that it may make reasonable charges not to exceed actual cost and inquire whether the requester would like a cost estimate in advan"
+  },
+  {
+   "id": "estimate.validityDays",
+   "label": "Estimate validity period (days)",
+   "home": "fee_profiles:estimatePolicy.estimateValidityDays",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "VA-0025",
+    "VA-0026",
+    "VA-0029"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "Prior to conducting a search for records, the body shall notify the requester in writing that it may make reasonable charges not to exceed actual cost and inquire whether the requester would like a cost estimate in advan"
+  },
+  {
+   "id": "rules.deposit.threshold",
+   "label": "Deposit / prepayment may be required above ($)",
+   "home": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+   "type": "usd",
+   "concepts": [
+    "payment.deposit_threshold",
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "VA-0031"
+   ],
+   "prior_values": [
+    "$200,"
+   ],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(H)"
+   ],
+   "prior_snippet": "Where a public body determines in advance that charges are likely to exceed $200, it may, before continuing to process the request, require the requester to pay a deposit not to exceed the amount of the advance determina"
+  },
+  {
+   "id": "rules.deposit.percent",
+   "label": "Deposit capped at (% of estimate)",
+   "home": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+   "type": "pct",
+   "concepts": [
+    "payment.deposit_ceiling",
+    "payment.deposit"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.productionGate",
+   "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+   "home": "paymentTiming gates + fee_profiles bands",
+   "type": "enum",
+   "concepts": [
+    "payment.production_conditioned_on_payment",
+    "payment.advance_payment"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.nonpayment",
+   "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+   "home": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+   "type": "enum+int",
+   "concepts": [
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.depositClock",
+   "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+   "home": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+   "type": "enum",
+   "concepts": [
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.reissue",
+   "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+   "home": "jurisdiction_rules:payment.reissue_*",
+   "type": "bool",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "VA-0025",
+    "VA-0026",
+    "VA-0029"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "Prior to conducting a search for records, the body shall notify the requester in writing that it may make reasonable charges not to exceed actual cost and inquire whether the requester would like a cost estimate in advan"
+  },
+  {
+   "id": "payment.method",
+   "label": "Electronic payment method offered",
+   "home": "fee_profiles:payment_mode (operational; not law-driven except VA)",
+   "type": "enum",
+   "concepts": [
+    "payment.method"
+   ],
+   "prior_status": "defers_to_city",
+   "prior_rule_ids": [
+    "VA-0030"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "Any local public body that charges for producing records may provide an electronic method of payment (noncash, non-paper-check \u2014 credit/debit cards, direct deposit/debit, electronic checks, telephonic payment)."
+  },
+  {
+   "id": "rules.maxFee",
+   "label": "Request-level ceiling (actual cost cap / statutory max)",
+   "home": "fee_profiles:requestRules.maxFee",
+   "type": "usd_or_rule",
+   "concepts": [
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "VA-0021",
+    "VA-0022",
+    "VA-0024"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records."
+  },
+  {
+   "id": "rules.deMinimis",
+   "label": "De-minimis: no charge below ($)",
+   "home": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+   "type": "usd",
+   "concepts": [
+    "fee.waiver",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "VA-0033",
+    "VA-0023"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "The reasonable-charge fee provisions do not apply to scholastic records that must be made available under FERPA when requested by a parent or legal guardian of a minor student or by a student who is 18 or older."
+  },
+  {
+   "id": "rules.minFee",
+   "label": "Minimum fee",
+   "home": "fee_profiles:requestRules.minFee",
+   "type": "usd",
+   "concepts": [],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "media",
+   "label": "Electronic media (CD/DVD/USB) charge",
+   "home": "fee_profiles:media.{cd,dvd,usb}",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "VA-0034"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "A body may make a reasonable charge, not exceeding actual cost, for records produced from a geographic information system at the request of anyone other than the owner of the subject land, except that it may charge on a "
+  },
+  {
+   "id": "delivery",
+   "label": "Delivery: mail / handling / email / pickup",
+   "home": "fee_profiles:delivery.*",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.delivery_charge",
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "VA-0034"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "A body may make a reasonable charge, not exceeding actual cost, for records produced from a geographic information system at the request of anyone other than the owner of the subject land, except that it may charge on a "
+  },
+  {
+   "id": "certification",
+   "label": "Certification / certified-copy charge",
+   "home": "fee_profiles:certification.{rate,unit}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.certified_copy_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "av",
+   "label": "Audio/video: per recording, per minute, free minutes",
+   "home": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.special_service_charge",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "commercial",
+   "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+   "home": "fee_profiles:purposeOverrides.commercial",
+   "type": "pct+bool",
+   "concepts": [
+    "fee.commercial_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "waiver",
+   "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+   "home": "jurisdiction_rules:fee_waiver.*",
+   "type": "enum_list+bool",
+   "concepts": [
+    "fee.waiver"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "VA-0033"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "The reasonable-charge fee provisions do not apply to scholastic records that must be made available under FERPA when requested by a parent or legal guardian of a minor student or by a student who is 18 or older."
+  },
+  {
+   "id": "waiver.forfeiture",
+   "label": "Late response forfeits the fee",
+   "home": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+   "type": "bool",
+   "concepts": [
+    "fee.waiver",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "VA-0033"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Va. Code \u00a7 2.2-3704(F)"
+   ],
+   "prior_snippet": "The reasonable-charge fee provisions do not apply to scholastic records that must be made available under FERPA when requested by a parent or legal guardian of a minor student or by a student who is 18 or older."
+  },
+  {
+   "id": "repeat",
+   "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+   "home": "NOT IN ENGINE (requestor-ledger)",
+   "type": "structural",
+   "concepts": [
+    "fee.repeat_request_carryforward",
+    "fee.aggregation"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  }
+ ],
+ "canonical_concepts": [
+  {
+   "canonical_key": "fee.copy_rate_per_page",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Absent a published actual-cost calculation, the agency may charge up to ten cents per page for public records scanned into an electronic format."
+  },
+  {
+   "canonical_key": "fee.actual_cost_basis",
+   "family": "fee",
+   "config_home": "mixed(p:24/s:8)",
+   "definition": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records."
+  },
+  {
+   "canonical_key": "fee.waiver",
+   "family": "fee",
+   "config_home": "mixed(p:5/s:23)",
+   "definition": "State, county, and municipal officers shall furnish, without charge, searches for and certified copies of public records needed in support of a claim or benefit applicati"
+  },
+  {
+   "canonical_key": "fee.electronic_media_charge",
+   "family": "fee",
+   "config_home": "mixed(p:21/s:1)",
+   "definition": "If records are not in electronic format and the public body agrees to produce them electronically, it may charge for the staff time required to transfer the documents to "
+  },
+  {
+   "canonical_key": "fee.no_charge_categories",
+   "family": "fee",
+   "config_home": "mixed(p:11/s:9)",
+   "definition": "A fee shall not be assessed for time spent segregating or redacting records unless such segregation/redaction is required by law or approved by the Supervisor."
+  },
+  {
+   "canonical_key": "fee.labor_charge",
+   "family": "fee",
+   "config_home": "mixed(p:25/s:4)",
+   "definition": "A public body may add up to 50% to the applicable labor charge to cover fringe benefits, not exceeding the actual cost of fringe benefits, if it notes the multiplier on t"
+  },
+  {
+   "canonical_key": "fee.schedule_and_authority",
+   "family": "fee",
+   "config_home": "mixed(p:6/s:10)",
+   "definition": "For state-agency public records, copy fees shall be charged according to the uniform fee schedule adopted by the commissioner of administration (R.S. 39:241) or as otherw"
+  },
+  {
+   "canonical_key": "fee.estimate_and_notice",
+   "family": "fee",
+   "config_home": "mixed(p:3/s:19)",
+   "definition": "The requester shall be informed of the estimated cost of preparing the copy if more than two hours of employee time is needed or if an outside professional service would "
+  },
+  {
+   "canonical_key": "fee.nonstandard_rate",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Where a copy requires a transcription, or a person requests a transcription of a public record, the transcription fee shall not exceed the agency's cost."
+  },
+  {
+   "canonical_key": "fee.free_allowance",
+   "family": "fee",
+   "config_home": "mixed(p:10/s:2)",
+   "definition": "The custodian shall not impose any charge for the first hour of time expended in research and retrieval of public records."
+  },
+  {
+   "canonical_key": "fee.certified_copy_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "The fee for certification of documents may not exceed five dollars ($5) per document."
+  },
+  {
+   "canonical_key": "fee.special_service_charge",
+   "family": "fee",
+   "config_home": "mixed(p:7/s:1)",
+   "definition": "For a voluminous request for electronic records, a public body may charge tiered caps by data size: for non-PDF data up to $20 (<=2 MB), $40 (2-4 MB), or $100 (>4 MB); fo"
+  },
+  {
+   "canonical_key": "fee.commercial_charge",
+   "family": "fee",
+   "config_home": "mixed(p:4/s:3)",
+   "definition": "The chapter does not authorize giving, selling, or providing access to lists of individuals requested for commercial purposes, and agencies shall not do so unless specifi"
+  },
+  {
+   "canonical_key": "fee.delivery_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Mailing may be charged at actual cost in a reasonably economical manner; no charge for expedited shipping or insurance unless stipulated by the requester."
+  },
+  {
+   "canonical_key": "fee.repeat_request_carryforward",
+   "family": "fee",
+   "config_home": "structural",
+   "definition": "If the same or a substantially similar request is made within six months after expiration of the ninety-day nonpayment-withdrawal period (or one hundred fifty days if req"
+  },
+  {
+   "canonical_key": "fee.aggregation",
+   "family": "fee",
+   "config_home": "mixed(p:1/s:2)",
+   "definition": "Once a records custodian reaches the aggregation threshold, the custodian is no longer required to deduct the labor threshold or any other minimum charge per request that"
+  },
+  {
+   "canonical_key": "payment.advance_payment",
+   "family": "payment",
+   "config_home": "mixed(p:6/s:12)",
+   "definition": "The custodian may require advance payment of the fees authorized by this section before providing the records."
+  },
+  {
+   "canonical_key": "payment.nonpayment_consequence",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:11)",
+   "definition": "A request is considered withdrawn if the requester fails to remit all fees within ninety days, or within one hundred fifty days if the requested fees are greater than one"
+  },
+  {
+   "canonical_key": "payment.production_conditioned_on_payment",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "For a standard request, the public officer has discretion to require the requester to pay all or a portion of the estimated fee prior to searching for any responsive publ"
+  },
+  {
+   "canonical_key": "payment.deposit",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:3)",
+   "definition": "A deposit notice is considered received 3 days after it is sent (regardless of transmission means), and it must state the deposit-due date, which is 48 days after the not"
+  },
+  {
+   "canonical_key": "payment.deposit_threshold",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "Where a public body determines in advance that charges are likely to exceed $200, it may, before continuing to process the request, require the requester to pay a deposit"
+  },
+  {
+   "canonical_key": "payment.deposit_ceiling",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "A good-faith deposit must not exceed one-half of the total estimated fee, and the deposit request must include a detailed fee itemization."
+  },
+  {
+   "canonical_key": "payment.method",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "Any local public body that charges for producing records may provide an electronic method of payment (noncash, non-paper-check \u2014 credit/debit cards, direct deposit/debit,"
+  }
+ ],
+ "existing_fee_payment_rules": [
+  {
+   "rule_id": "VA-0021",
+   "category": "Fees",
+   "concept_key": "fee.actual_cost_ceiling",
+   "legal_concept": "Charges not to exceed actual cost incurred",
+   "rule_type": "Permission",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records.",
+   "trigger": "Body incurs cost in responding",
+   "clock_effect": "none",
+   "clock_spec": "ceiling: actual cost incurred in accessing/duplicating/supplying/searching",
+   "source_language": "a public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records and shall make all reasonable efforts to supply the requested records at the lowest possible cost.",
+   "is_paraphrase": false,
+   "source_authority": "Va. Code \u00a7 2.2-3704(F)",
+   "source_language_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://law.lis.virginia.gov/vacode/title2.2/chapter37/section2.2-3704/",
+   "related_rule_ids": [
+    "VA-0022",
+    "VA-0023",
+    "VA-0024"
+   ],
+   "notes": "State sets a ceiling (actual cost); the city sets its actual per-request charge under it. No statewide fixed per-page rate exists."
+  },
+  {
+   "rule_id": "VA-0022",
+   "category": "Fees",
+   "concept_key": "fee.lowest_possible_cost_effort",
+   "legal_concept": "Duty to supply at lowest possible cost",
+   "rule_type": "Requirement",
+   "config_home": "parameter",
+   "constraint_basis": "soft-standard",
+   "atomic_rule": "The body shall make all reasonable efforts to supply the requested records at the lowest possible cost.",
+   "trigger": "Body sets charges for a request",
+   "clock_effect": "none",
+   "clock_spec": "soft-standard: 'lowest possible cost'",
+   "source_language": "and shall make all reasonable efforts to supply the requested records at the lowest possible cost.",
+   "is_paraphrase": false,
+   "source_authority": "Va. Code \u00a7 2.2-3704(F)",
+   "source_language_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://law.lis.virginia.gov/vacode/title2.2/chapter37/section2.2-3704/",
+   "related_rule_ids": [
+    "VA-0021"
+   ]
+  },
+  {
+   "rule_id": "VA-0023",
+   "category": "Fees",
+   "concept_key": "fee.no_overhead_recoupment",
+   "legal_concept": "No extraneous/intermediary/surplus fees",
+   "rule_type": "Prohibition",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "No public body shall impose extraneous, intermediary, or surplus fees or expenses to recoup the general costs of creating or maintaining records or transacting the general business of the public body.",
+   "trigger": "Body assesses charges",
+   "clock_effect": "none",
+   "source_language": "No public body shall impose any extraneous, intermediary, or surplus fees or expenses to recoup the general costs associated with creating or maintaining records or transacting the general business of the public body.",
+   "is_paraphrase": false,
+   "source_authority": "Va. Code \u00a7 2.2-3704(F)",
+   "source_language_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://law.lis.virginia.gov/vacode/title2.2/chapter37/section2.2-3704/",
+   "related_rule_ids": [
+    "VA-0021"
+   ]
+  },
+  {
+   "rule_id": "VA-0024",
+   "category": "Fees",
+   "concept_key": "fee.duplication_actual_cost_ceiling",
+   "legal_concept": "Duplicating fee not to exceed actual cost of duplication",
+   "rule_type": "Permission",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "Any duplicating fee charged by a public body shall not exceed the actual cost of duplication.",
+   "trigger": "Body charges a duplicating fee",
+   "clock_effect": "none",
+   "clock_spec": "ceiling: actual cost of duplication",
+   "source_language": "Any duplicating fee charged by a public body shall not exceed the actual cost of duplication.",
+   "is_paraphrase": false,
+   "source_authority": "Va. Code \u00a7 2.2-3704(F)",
+   "source_language_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://law.lis.virginia.gov/vacode/title2.2/chapter37/section2.2-3704/",
+   "related_rule_ids": [
+    "VA-0021"
+   ]
+  },
+  {
+   "rule_id": "VA-0025",
+   "category": "Fees",
+   "concept_key": "fee.pre_search_charge_notice",
+   "legal_concept": "Pre-search written notice of possible charges",
+   "rule_type": "Requirement",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "Prior to conducting a search for records, the body shall notify the requester in writing that it may make reasonable charges not to exceed actual cost and inquire whether the requester would like a cost estimate in advance.",
+   "trigger": "Before conducting a search for records",
+   "clock_effect": "none",
+   "source_language": "Prior to conducting a search for records, the public body shall notify the requester in writing that the public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for requested records and inquire of the requester whether he would like to request a cost estimate in advance of the supplying of the requested records.",
+   "is_paraphrase": false,
+   "source_authority": "Va. Code \u00a7 2.2-3704(F)",
+   "source_language_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://law.lis.virginia.gov/vacode/title2.2/chapter37/section2.2-3704/",
+   "related_rule_ids": [
+    "VA-0026",
+    "VA-0027"
+   ]
+  },
+  {
+   "rule_id": "VA-0026",
+   "category": "Fees",
+   "concept_key": "fee.cost_estimate_on_request",
+   "legal_concept": "Cost estimate provided on request",
+   "rule_type": "Requirement",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "The public body shall provide the requester with a cost estimate if requested.",
+   "trigger": "Requester asks for a cost estimate",
+   "clock_effect": "none",
+   "source_language": "The public body shall provide the requester with a cost estimate if requested.",
+   "is_paraphrase": false,
+   "source_authority": "Va. Code \u00a7 2.2-3704(F)",
+   "source_language_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://law.lis.virginia.gov/vacode/title2.2/chapter37/section2.2-3704/",
+   "related_rule_ids": [
+    "VA-0025",
+    "VA-0027"
+   ]
+  },
+  {
+   "rule_id": "VA-0029",
+   "category": "Fees",
+   "concept_key": "fee.estimate_cost_credited_to_charges",
+   "legal_concept": "Estimating cost credited toward overall charges",
+   "rule_type": "Calculation",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "Any costs incurred by the public body in estimating the cost of supplying the records shall be applied toward the overall charges to be paid by the requester.",
+   "trigger": "Body incurs cost preparing a cost estimate",
+   "clock_effect": "none",
+   "source_language": "Any costs incurred by the public body in estimating the cost of supplying the requested records shall be applied toward the overall charges to be paid by the requester for the supplying of such requested records.",
+   "is_paraphrase": false,
+   "source_authority": "Va. Code \u00a7 2.2-3704(F)",
+   "source_language_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://law.lis.virginia.gov/vacode/title2.2/chapter37/section2.2-3704/",
+   "related_rule_ids": [
+    "VA-0026"
+   ]
+  },
+  {
+   "rule_id": "VA-0030",
+   "category": "Payment",
+   "concept_key": "payment.electronic_method_option",
+   "legal_concept": "Local body may offer an electronic method of payment",
+   "rule_type": "Permission",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "Any local public body that charges for producing records may provide an electronic method of payment (noncash, non-paper-check \u2014 credit/debit cards, direct deposit/debit, electronic checks, telephonic payment).",
+   "trigger": "Local public body charges for record production",
+   "clock_effect": "none",
+   "source_language": "Any local public body that charges for the production of records pursuant to this section may provide an electronic method of payment through which all payments for the production of such records to such locality may be made.",
+   "is_paraphrase": false,
+   "source_authority": "Va. Code \u00a7 2.2-3704(F)",
+   "source_language_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://law.lis.virginia.gov/vacode/title2.2/chapter37/section2.2-3704/"
+  },
+  {
+   "rule_id": "VA-0031",
+   "category": "Payment",
+   "concept_key": "payment.advance_deposit_threshold",
+   "legal_concept": "Advance deposit when charges likely to exceed $200",
+   "rule_type": "Permission",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "atomic_rule": "Where a public body determines in advance that charges are likely to exceed $200, it may, before continuing to process the request, require the requester to pay a deposit not to exceed the amount of the advance determination.",
+   "trigger": "Advance determination that charges are likely to exceed $200",
+   "clock_effect": "none",
+   "clock_spec": "fixed threshold: $200; deposit ceiling = the advance-determination amount",
+   "source_language": "In any case where a public body determines in advance that charges for producing the requested records are likely to exceed $200, the public body may, before continuing to process the request, require the requester to pay a deposit not to exceed the amount of the advance determination.",
+   "is_paraphrase": false,
+   "source_authority": "Va. Code \u00a7 2.2-3704(H)",
+   "source_language_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://law.lis.virginia.gov/vacode/title2.2/chapter37/section2.2-3704/",
+   "related_rule_ids": [
+    "VA-0032"
+   ],
+   "notes": "$200 is a state-fixed trigger threshold; the deposit itself is capped at the body's advance determination (a ceiling)."
+  },
+  {
+   "rule_id": "VA-0033",
+   "category": "Fees",
+   "concept_key": "fee.scholastic_records_exemption",
+   "legal_concept": "No charge for FERPA scholastic records to parent/guardian/eligible student",
+   "rule_type": "Exception",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "The reasonable-charge fee provisions do not apply to scholastic records that must be made available under FERPA when requested by a parent or legal guardian of a minor student or by a student who is 18 or older.",
+   "trigger": "Request for scholastic records under \u00a7 2.2-3705.4(A)(1) by parent/guardian or student 18+",
+   "clock_effect": "none",
+   "source_language": "Except with regard to scholastic records requested pursuant to subdivision A 1 of \u00a7 2.2-3705.4 that must be made available for inspection pursuant to the federal Family Educational Rights and Privacy Act (20 U.S.C. \u00a7 1232g) and such requests for scholastic records by a parent or legal guardian of a minor student or by a student who is 18 years of age or older, a public body may make reasonable charges ...",
+   "is_paraphrase": false,
+   "source_authority": "Va. Code \u00a7 2.2-3704(F)",
+   "source_language_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://law.lis.virginia.gov/vacode/title2.2/chapter37/section2.2-3704/",
+   "related_rule_ids": [
+    "VA-0021"
+   ],
+   "notes": "Special-record fee treatment: carves this class out of the \u00a7 2.2-3704(F) charge regime."
+  },
+  {
+   "rule_id": "VA-0034",
+   "category": "Fees",
+   "concept_key": "fee.gis_records_charge",
+   "legal_concept": "Charge for GIS records to non-owner; topo map pro rata",
+   "rule_type": "Permission",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "A body may make a reasonable charge, not exceeding actual cost, for records produced from a geographic information system at the request of anyone other than the owner of the subject land, except that it may charge on a pro rata per-acre basis for topographical maps it developed that encompass a contiguous area greater than 50 acres.",
+   "trigger": "Request for GIS-produced records by a non-owner of the subject land",
+   "clock_effect": "none",
+   "clock_spec": "ceiling: actual cost; exception \u2014 pro rata per-acre for body-developed topo maps over 50 contiguous acres",
+   "source_language": "The public body may also make a reasonable charge for the cost incurred in supplying records produced from a geographic information system at the request of anyone other than the owner of the land that is the subject of the request. However, such charges shall not exceed the actual cost to the public body in supplying such records, except that the public body may charge, on a pro rata per acre basis, for the cost of creating topographical maps developed by the public body, for such maps or portions thereof, which encompass a contiguous area greater than 50 acres.",
+   "is_paraphrase": false,
+   "source_authority": "Va. Code \u00a7 2.2-3704(F)",
+   "source_language_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://law.lis.virginia.gov/vacode/title2.2/chapter37/section2.2-3704/",
+   "related_rule_ids": [
+    "VA-0021"
+   ],
+   "notes": "Special-record fee treatment (GIS/topo)."
+  }
+ ],
+ "template": {
+  "fee_schedule": {
+   "fee.actual_cost_basis": [
+    {
+     "rule_id": "VA-0021",
+     "authority": "Va. Code \u00a7 2.2-3704(F)",
+     "summary": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records.",
+     "clock_spec": "ceiling: actual cost incurred in accessing/duplicating/supplying/searching"
+    },
+    {
+     "rule_id": "VA-0022",
+     "authority": "Va. Code \u00a7 2.2-3704(F)",
+     "summary": "The body shall make all reasonable efforts to supply the requested records at the lowest possible cost.",
+     "clock_spec": "soft-standard: 'lowest possible cost'"
+    },
+    {
+     "rule_id": "VA-0024",
+     "authority": "Va. Code \u00a7 2.2-3704(F)",
+     "summary": "Any duplicating fee charged by a public body shall not exceed the actual cost of duplication.",
+     "clock_spec": "ceiling: actual cost of duplication"
+    }
+   ],
+   "fee.electronic_media_charge": [
+    {
+     "rule_id": "VA-0034",
+     "authority": "Va. Code \u00a7 2.2-3704(F)",
+     "summary": "A body may make a reasonable charge, not exceeding actual cost, for records produced from a geographic information system at the request of anyone other than the owner of the subject land, except that it may charge on a pro rata per-acre basis for topographical maps it developed that encompass a \u2026",
+     "clock_spec": "ceiling: actual cost; exception \u2014 pro rata per-acre for body-developed topo maps over 50 contiguous acres"
+    }
+   ],
+   "fee.no_charge_categories": [
+    {
+     "rule_id": "VA-0023",
+     "authority": "Va. Code \u00a7 2.2-3704(F)",
+     "summary": "No public body shall impose extraneous, intermediary, or surplus fees or expenses to recoup the general costs of creating or maintaining records or transacting the general business of the public body."
+    }
+   ]
+  },
+  "knobs_fee": null
+ },
+ "run_parameters": {
+  "scope": "municipalities only (note agency regimes)",
+  "recency": "check 2024-2026 session laws + rule amendments for fee sections",
+  "estimate_calibration": "OUT of scope"
+ }
+}

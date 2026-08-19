@@ -1,0 +1,1664 @@
+{
+ "state": "Michigan",
+ "code": "MI",
+ "next_rule_id": "MI-9001 \u2014 new/amended rule rows from THIS pass use the MI-9NNN namespace (9001, 9002, \u2026) so they never collide with existing ids; reference existing rows by their existing ids.",
+ "items": [
+  {
+   "id": "dup.bw.rate",
+   "label": "Copy rate \u2014 B&W page",
+   "home": "fee_profiles:duplication.bw.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0038",
+    "MI-0033",
+    "MI-0049"
+   ],
+   "prior_values": [
+    "10 cents"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(1)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(d)",
+    "Mich. Comp. Laws \u00a7 15.234(4)"
+   ],
+   "prior_snippet": "The charge for paper copies must not exceed 10 cents per sheet for copies made on 8.5x11 or 8.5x14 paper, calculated as a total cost per sheet."
+  },
+  {
+   "id": "dup.color.rate",
+   "label": "Copy rate \u2014 color page",
+   "home": "fee_profiles:duplication.color.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0038"
+   ],
+   "prior_values": [
+    "10 cents"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(1)(d)"
+   ],
+   "prior_snippet": "The charge for paper copies must not exceed 10 cents per sheet for copies made on 8.5x11 or 8.5x14 paper, calculated as a total cost per sheet."
+  },
+  {
+   "id": "dup.oversized.rate",
+   "label": "Copy rate \u2014 oversized / nonstandard page",
+   "home": "fee_profiles:duplication.oversized.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "dup.specialty.rate",
+   "label": "Specialty reproduction (photos, maps, transcripts)",
+   "home": "fee_profiles:duplication.specialty.rate",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.nonstandard_rate",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "dup.tiers",
+   "label": "Graduated page bands (per-page rate by volume)",
+   "home": "fee_profiles:duplication.*.tiers",
+   "type": "tiers",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.free_allowance"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0038"
+   ],
+   "prior_values": [
+    "10 cents"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(1)(d)"
+   ],
+   "prior_snippet": "The charge for paper copies must not exceed 10 cents per sheet for copies made on 8.5x11 or 8.5x14 paper, calculated as a total cost per sheet."
+  },
+  {
+   "id": "rules.freePages",
+   "label": "Free page allowance per request",
+   "home": "fee_profiles:requestRules.freePageAllowance",
+   "type": "pages",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "MI-0032",
+    "MI-0046",
+    "MI-0050"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(1)(b)",
+    "Mich. Comp. Laws \u00a7 15.234(4)",
+    "Mich. Comp. Laws \u00a7 15.234(5)"
+   ],
+   "prior_snippet": "A public body may not charge for redaction labor if it knows or has reason to know it previously redacted the record and the redacted version is still in its possession."
+  },
+  {
+   "id": "labor.search.rate",
+   "label": "Labor rate \u2014 search / retrieval ($/hr)",
+   "home": "fee_profiles:labor.search.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0034",
+    "MI-0035",
+    "MI-0036",
+    "MI-0039",
+    "MI-0041",
+    "MI-0042",
+    "MI-0033"
+   ],
+   "prior_values": [
+    "15 minutes",
+    "50%"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(1)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(a)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(b)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(e)"
+   ],
+   "prior_snippet": "Labor for searching, locating, and examining records may not be charged at more than the hourly wage of the public body's lowest-paid employee capable of doing so, regardless of who performs the labor."
+  },
+  {
+   "id": "labor.review.rate",
+   "label": "Labor rate \u2014 review / redaction ($/hr)",
+   "home": "fee_profiles:labor.review.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0034",
+    "MI-0035",
+    "MI-0036",
+    "MI-0039",
+    "MI-0041",
+    "MI-0042",
+    "MI-0032",
+    "MI-0046",
+    "MI-0050"
+   ],
+   "prior_values": [
+    "15 minutes",
+    "50%"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(1)(a)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(b)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(e)",
+    "Mich. Comp. Laws \u00a7 15.234(2)"
+   ],
+   "prior_snippet": "Labor for searching, locating, and examining records may not be charged at more than the hourly wage of the public body's lowest-paid employee capable of doing so, regardless of who performs the labor."
+  },
+  {
+   "id": "labor.programming.rate",
+   "label": "Labor rate \u2014 programming / data extraction ($/hr)",
+   "home": "fee_profiles:labor.programming.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0034",
+    "MI-0035",
+    "MI-0036",
+    "MI-0039",
+    "MI-0041",
+    "MI-0042"
+   ],
+   "prior_values": [
+    "15 minutes",
+    "50%"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(1)(a)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(b)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(e)",
+    "Mich. Comp. Laws \u00a7 15.234(2)"
+   ],
+   "prior_snippet": "Labor for searching, locating, and examining records may not be charged at more than the hourly wage of the public body's lowest-paid employee capable of doing so, regardless of who performs the labor."
+  },
+  {
+   "id": "labor.billableWhen",
+   "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+   "home": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+   "type": "enum+threshold",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0034",
+    "MI-0035",
+    "MI-0036",
+    "MI-0039",
+    "MI-0041",
+    "MI-0042",
+    "MI-0032",
+    "MI-0046",
+    "MI-0050"
+   ],
+   "prior_values": [
+    "15 minutes",
+    "50%"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(1)(a)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(b)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(e)",
+    "Mich. Comp. Laws \u00a7 15.234(2)"
+   ],
+   "prior_snippet": "Labor for searching, locating, and examining records may not be charged at more than the hourly wage of the public body's lowest-paid employee capable of doing so, regardless of who performs the labor."
+  },
+  {
+   "id": "labor.overheadPct",
+   "label": "Overhead / fringe surcharge on labor (%)",
+   "home": "fee_profiles:labor.overheadPct",
+   "type": "pct",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0034",
+    "MI-0035",
+    "MI-0036",
+    "MI-0039",
+    "MI-0041",
+    "MI-0042",
+    "MI-0033"
+   ],
+   "prior_values": [
+    "15 minutes",
+    "50%"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(1)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(a)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(b)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(e)"
+   ],
+   "prior_snippet": "Labor for searching, locating, and examining records may not be charged at more than the hourly wage of the public body's lowest-paid employee capable of doing so, regardless of who performs the labor."
+  },
+  {
+   "id": "labor.increment",
+   "label": "Labor time increment + rounding",
+   "home": "fee_profiles:labor.*.increment / rounding",
+   "type": "hours",
+   "concepts": [
+    "fee.labor_charge"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0034",
+    "MI-0035",
+    "MI-0036",
+    "MI-0039",
+    "MI-0041",
+    "MI-0042"
+   ],
+   "prior_values": [
+    "15 minutes",
+    "50%"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(1)(a)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(b)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(e)",
+    "Mich. Comp. Laws \u00a7 15.234(2)"
+   ],
+   "prior_snippet": "Labor for searching, locating, and examining records may not be charged at more than the hourly wage of the public body's lowest-paid employee capable of doing so, regardless of who performs the labor."
+  },
+  {
+   "id": "rules.freeLaborHours",
+   "label": "Free labor hours per request",
+   "home": "fee_profiles:requestRules.freeLaborHours",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0034",
+    "MI-0035",
+    "MI-0036",
+    "MI-0039",
+    "MI-0041",
+    "MI-0042"
+   ],
+   "prior_values": [
+    "15 minutes",
+    "50%"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(1)(a)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(b)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(e)",
+    "Mich. Comp. Laws \u00a7 15.234(2)"
+   ],
+   "prior_snippet": "Labor for searching, locating, and examining records may not be charged at more than the hourly wage of the public body's lowest-paid employee capable of doing so, regardless of who performs the labor."
+  },
+  {
+   "id": "labor.periodicFreeHours",
+   "label": "Free personnel time per requestor per month/year (TX \u00a7 552.275 pattern)",
+   "home": "NOT IN ENGINE (fee_profiles gap \u2014 requestor-ledger counter)",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.aggregation"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.estimateNotifyThreshold",
+   "label": "Itemized estimate / cost notice required above ($ or hours)",
+   "home": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+   "type": "usd",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "MI-0048"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(4)"
+   ],
+   "prior_snippet": "A public body's procedures must use a standard form for detailed itemization of any fee that clearly lists and explains the allowable charges for each of the six fee components used in estimating or charging."
+  },
+  {
+   "id": "estimate.requesterResponseDays",
+   "label": "Requester must respond to an estimate within N days (else withdrawn)",
+   "home": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0048",
+    "MI-0045",
+    "MI-0051"
+   ],
+   "prior_values": [
+    "5%",
+    "50%"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(3)",
+    "Mich. Comp. Laws \u00a7 15.234(4)",
+    "Mich. Comp. Laws \u00a7 15.234(9)"
+   ],
+   "prior_snippet": "A public body's procedures must use a standard form for detailed itemization of any fee that clearly lists and explains the allowable charges for each of the six fee components used in estimating or charging."
+  },
+  {
+   "id": "estimate.revisionNotifyPercent",
+   "label": "Revised estimate required when actual exceeds estimate by N%",
+   "home": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+   "type": "pct",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "MI-0048"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(4)"
+   ],
+   "prior_snippet": "A public body's procedures must use a standard form for detailed itemization of any fee that clearly lists and explains the allowable charges for each of the six fee components used in estimating or charging."
+  },
+  {
+   "id": "estimate.validityDays",
+   "label": "Estimate validity period (days)",
+   "home": "fee_profiles:estimatePolicy.estimateValidityDays",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "MI-0048"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(4)"
+   ],
+   "prior_snippet": "A public body's procedures must use a standard form for detailed itemization of any fee that clearly lists and explains the allowable charges for each of the six fee components used in estimating or charging."
+  },
+  {
+   "id": "rules.deposit.threshold",
+   "label": "Deposit / prepayment may be required above ($)",
+   "home": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+   "type": "usd",
+   "concepts": [
+    "payment.deposit_threshold",
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0053",
+    "MI-0056",
+    "MI-0057",
+    "MI-0059",
+    "MI-0060"
+   ],
+   "prior_values": [
+    "$50,",
+    "$50.00",
+    "100%",
+    "3 days",
+    "365 days",
+    "45 days",
+    "48 days"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(11)",
+    "Mich. Comp. Laws \u00a7 15.234(12)",
+    "Mich. Comp. Laws \u00a7 15.234(14)",
+    "Mich. Comp. Laws \u00a7 15.234(8)"
+   ],
+   "prior_snippet": "A public body may require a good-faith deposit before providing records if the entire estimated fee or charge exceeds $50, based on a good-faith total-fee calculation."
+  },
+  {
+   "id": "rules.deposit.percent",
+   "label": "Deposit capped at (% of estimate)",
+   "home": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+   "type": "pct",
+   "concepts": [
+    "payment.deposit_ceiling",
+    "payment.deposit"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0054",
+    "MI-0056",
+    "MI-0057",
+    "MI-0059",
+    "MI-0060"
+   ],
+   "prior_values": [
+    "100%",
+    "3 days",
+    "365 days",
+    "45 days",
+    "48 days"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(11)",
+    "Mich. Comp. Laws \u00a7 15.234(12)",
+    "Mich. Comp. Laws \u00a7 15.234(14)",
+    "Mich. Comp. Laws \u00a7 15.234(8)"
+   ],
+   "prior_snippet": "A good-faith deposit must not exceed one-half of the total estimated fee, and the deposit request must include a detailed fee itemization."
+  },
+  {
+   "id": "payment.productionGate",
+   "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+   "home": "paymentTiming gates + fee_profiles bands",
+   "type": "enum",
+   "concepts": [
+    "payment.production_conditioned_on_payment",
+    "payment.advance_payment"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.nonpayment",
+   "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+   "home": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+   "type": "enum+int",
+   "concepts": [
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0045",
+    "MI-0051"
+   ],
+   "prior_values": [
+    "5%",
+    "50%"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(3)",
+    "Mich. Comp. Laws \u00a7 15.234(9)"
+   ],
+   "prior_snippet": "A fee for search, examination, review, and separation/deletion of exempt material may not be charged unless failure to charge would result in unreasonably high costs to the public body because of the nature of the reques"
+  },
+  {
+   "id": "payment.depositClock",
+   "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+   "home": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+   "type": "enum",
+   "concepts": [
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0056",
+    "MI-0057",
+    "MI-0059",
+    "MI-0060"
+   ],
+   "prior_values": [
+    "100%",
+    "3 days",
+    "365 days",
+    "45 days",
+    "48 days"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(11)",
+    "Mich. Comp. Laws \u00a7 15.234(12)",
+    "Mich. Comp. Laws \u00a7 15.234(14)"
+   ],
+   "prior_snippet": "For a subsequent request from an individual who did not pay in full for a prior fulfilled request, the body may require a deposit of up to 100% of the estimated fee before beginning the search, if six enumerated conditio"
+  },
+  {
+   "id": "payment.reissue",
+   "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+   "home": "jurisdiction_rules:payment.reissue_*",
+   "type": "bool",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "MI-0048"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(4)"
+   ],
+   "prior_snippet": "A public body's procedures must use a standard form for detailed itemization of any fee that clearly lists and explains the allowable charges for each of the six fee components used in estimating or charging."
+  },
+  {
+   "id": "payment.method",
+   "label": "Electronic payment method offered",
+   "home": "fee_profiles:payment_mode (operational; not law-driven except VA)",
+   "type": "enum",
+   "concepts": [
+    "payment.method"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.maxFee",
+   "label": "Request-level ceiling (actual cost cap / statutory max)",
+   "home": "fee_profiles:requestRules.maxFee",
+   "type": "usd_or_rule",
+   "concepts": [
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "MI-0033",
+    "MI-0049"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(1)",
+    "Mich. Comp. Laws \u00a7 15.234(4)"
+   ],
+   "prior_snippet": "A permitted fee is limited to actual mailing costs and the actual incremental cost of duplication or publication, including labor and the cost of search, examination, review, and separation/deletion of exempt material, a"
+  },
+  {
+   "id": "rules.deMinimis",
+   "label": "De-minimis: no charge below ($)",
+   "home": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+   "type": "usd",
+   "concepts": [
+    "fee.waiver",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0043",
+    "MI-0044",
+    "MI-0052",
+    "MI-0032",
+    "MI-0046",
+    "MI-0050"
+   ],
+   "prior_values": [
+    "$20",
+    "$20.00"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(1)(b)",
+    "Mich. Comp. Laws \u00a7 15.234(10)",
+    "Mich. Comp. Laws \u00a7 15.234(2)",
+    "Mich. Comp. Laws \u00a7 15.234(2)(a),(b)"
+   ],
+   "prior_snippet": "A record search and copies must be furnished without charge for the first $20 of the fee for each request by a qualifying indigent individual (with affidavit) or by a state-designated developmental-disabilities/mental-il"
+  },
+  {
+   "id": "rules.minFee",
+   "label": "Minimum fee",
+   "home": "fee_profiles:requestRules.minFee",
+   "type": "usd",
+   "concepts": [],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "media",
+   "label": "Electronic media (CD/DVD/USB) charge",
+   "home": "fee_profiles:media.{cd,dvd,usb}",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "MI-0037"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(1)(c)"
+   ],
+   "prior_snippet": "For records provided on nonpaper physical media, the charge is limited to the actual and most reasonably economical cost of that media."
+  },
+  {
+   "id": "delivery",
+   "label": "Delivery: mail / handling / email / pickup",
+   "home": "fee_profiles:delivery.*",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.delivery_charge",
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "MI-0040",
+    "MI-0037"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(1)(c)",
+    "Mich. Comp. Laws \u00a7 15.234(1)(f)"
+   ],
+   "prior_snippet": "Mailing may be charged at actual cost in a reasonably economical manner; no charge for expedited shipping or insurance unless stipulated by the requester."
+  },
+  {
+   "id": "certification",
+   "label": "Certification / certified-copy charge",
+   "home": "fee_profiles:certification.{rate,unit}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.certified_copy_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "av",
+   "label": "Audio/video: per recording, per minute, free minutes",
+   "home": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.special_service_charge",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "commercial",
+   "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+   "home": "fee_profiles:purposeOverrides.commercial",
+   "type": "pct+bool",
+   "concepts": [
+    "fee.commercial_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "waiver",
+   "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+   "home": "jurisdiction_rules:fee_waiver.*",
+   "type": "enum_list+bool",
+   "concepts": [
+    "fee.waiver"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0043",
+    "MI-0044",
+    "MI-0052"
+   ],
+   "prior_values": [
+    "$20",
+    "$20.00"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(10)",
+    "Mich. Comp. Laws \u00a7 15.234(2)",
+    "Mich. Comp. Laws \u00a7 15.234(2)(a),(b)"
+   ],
+   "prior_snippet": "A record search and copies must be furnished without charge for the first $20 of the fee for each request by a qualifying indigent individual (with affidavit) or by a state-designated developmental-disabilities/mental-il"
+  },
+  {
+   "id": "waiver.forfeiture",
+   "label": "Late response forfeits the fee",
+   "home": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+   "type": "bool",
+   "concepts": [
+    "fee.waiver",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "MI-0043",
+    "MI-0044",
+    "MI-0052",
+    "MI-0045",
+    "MI-0051"
+   ],
+   "prior_values": [
+    "$20",
+    "$20.00",
+    "5%",
+    "50%"
+   ],
+   "prior_citations": [
+    "Mich. Comp. Laws \u00a7 15.234(10)",
+    "Mich. Comp. Laws \u00a7 15.234(2)",
+    "Mich. Comp. Laws \u00a7 15.234(2)(a),(b)",
+    "Mich. Comp. Laws \u00a7 15.234(3)"
+   ],
+   "prior_snippet": "A record search and copies must be furnished without charge for the first $20 of the fee for each request by a qualifying indigent individual (with affidavit) or by a state-designated developmental-disabilities/mental-il"
+  },
+  {
+   "id": "repeat",
+   "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+   "home": "NOT IN ENGINE (requestor-ledger)",
+   "type": "structural",
+   "concepts": [
+    "fee.repeat_request_carryforward",
+    "fee.aggregation"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  }
+ ],
+ "canonical_concepts": [
+  {
+   "canonical_key": "fee.copy_rate_per_page",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Absent a published actual-cost calculation, the agency may charge up to ten cents per page for public records scanned into an electronic format."
+  },
+  {
+   "canonical_key": "fee.actual_cost_basis",
+   "family": "fee",
+   "config_home": "mixed(p:24/s:8)",
+   "definition": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records."
+  },
+  {
+   "canonical_key": "fee.waiver",
+   "family": "fee",
+   "config_home": "mixed(p:5/s:23)",
+   "definition": "State, county, and municipal officers shall furnish, without charge, searches for and certified copies of public records needed in support of a claim or benefit applicati"
+  },
+  {
+   "canonical_key": "fee.electronic_media_charge",
+   "family": "fee",
+   "config_home": "mixed(p:21/s:1)",
+   "definition": "If records are not in electronic format and the public body agrees to produce them electronically, it may charge for the staff time required to transfer the documents to "
+  },
+  {
+   "canonical_key": "fee.no_charge_categories",
+   "family": "fee",
+   "config_home": "mixed(p:11/s:9)",
+   "definition": "A fee shall not be assessed for time spent segregating or redacting records unless such segregation/redaction is required by law or approved by the Supervisor."
+  },
+  {
+   "canonical_key": "fee.labor_charge",
+   "family": "fee",
+   "config_home": "mixed(p:25/s:4)",
+   "definition": "A public body may add up to 50% to the applicable labor charge to cover fringe benefits, not exceeding the actual cost of fringe benefits, if it notes the multiplier on t"
+  },
+  {
+   "canonical_key": "fee.schedule_and_authority",
+   "family": "fee",
+   "config_home": "mixed(p:6/s:10)",
+   "definition": "For state-agency public records, copy fees shall be charged according to the uniform fee schedule adopted by the commissioner of administration (R.S. 39:241) or as otherw"
+  },
+  {
+   "canonical_key": "fee.estimate_and_notice",
+   "family": "fee",
+   "config_home": "mixed(p:3/s:19)",
+   "definition": "The requester shall be informed of the estimated cost of preparing the copy if more than two hours of employee time is needed or if an outside professional service would "
+  },
+  {
+   "canonical_key": "fee.nonstandard_rate",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Where a copy requires a transcription, or a person requests a transcription of a public record, the transcription fee shall not exceed the agency's cost."
+  },
+  {
+   "canonical_key": "fee.free_allowance",
+   "family": "fee",
+   "config_home": "mixed(p:10/s:2)",
+   "definition": "The custodian shall not impose any charge for the first hour of time expended in research and retrieval of public records."
+  },
+  {
+   "canonical_key": "fee.certified_copy_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "The fee for certification of documents may not exceed five dollars ($5) per document."
+  },
+  {
+   "canonical_key": "fee.special_service_charge",
+   "family": "fee",
+   "config_home": "mixed(p:7/s:1)",
+   "definition": "For a voluminous request for electronic records, a public body may charge tiered caps by data size: for non-PDF data up to $20 (<=2 MB), $40 (2-4 MB), or $100 (>4 MB); fo"
+  },
+  {
+   "canonical_key": "fee.commercial_charge",
+   "family": "fee",
+   "config_home": "mixed(p:4/s:3)",
+   "definition": "The chapter does not authorize giving, selling, or providing access to lists of individuals requested for commercial purposes, and agencies shall not do so unless specifi"
+  },
+  {
+   "canonical_key": "fee.delivery_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Mailing may be charged at actual cost in a reasonably economical manner; no charge for expedited shipping or insurance unless stipulated by the requester."
+  },
+  {
+   "canonical_key": "fee.repeat_request_carryforward",
+   "family": "fee",
+   "config_home": "structural",
+   "definition": "If the same or a substantially similar request is made within six months after expiration of the ninety-day nonpayment-withdrawal period (or one hundred fifty days if req"
+  },
+  {
+   "canonical_key": "fee.aggregation",
+   "family": "fee",
+   "config_home": "mixed(p:1/s:2)",
+   "definition": "Once a records custodian reaches the aggregation threshold, the custodian is no longer required to deduct the labor threshold or any other minimum charge per request that"
+  },
+  {
+   "canonical_key": "payment.advance_payment",
+   "family": "payment",
+   "config_home": "mixed(p:6/s:12)",
+   "definition": "The custodian may require advance payment of the fees authorized by this section before providing the records."
+  },
+  {
+   "canonical_key": "payment.nonpayment_consequence",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:11)",
+   "definition": "A request is considered withdrawn if the requester fails to remit all fees within ninety days, or within one hundred fifty days if the requested fees are greater than one"
+  },
+  {
+   "canonical_key": "payment.production_conditioned_on_payment",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "For a standard request, the public officer has discretion to require the requester to pay all or a portion of the estimated fee prior to searching for any responsive publ"
+  },
+  {
+   "canonical_key": "payment.deposit",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:3)",
+   "definition": "A deposit notice is considered received 3 days after it is sent (regardless of transmission means), and it must state the deposit-due date, which is 48 days after the not"
+  },
+  {
+   "canonical_key": "payment.deposit_threshold",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "Where a public body determines in advance that charges are likely to exceed $200, it may, before continuing to process the request, require the requester to pay a deposit"
+  },
+  {
+   "canonical_key": "payment.deposit_ceiling",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "A good-faith deposit must not exceed one-half of the total estimated fee, and the deposit request must include a detailed fee itemization."
+  },
+  {
+   "canonical_key": "payment.method",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "Any local public body that charges for producing records may provide an electronic method of payment (noncash, non-paper-check \u2014 credit/debit cards, direct deposit/debit,"
+  }
+ ],
+ "existing_fee_payment_rules": [
+  {
+   "rule_id": "MI-0032",
+   "category": "Fees",
+   "concept_key": "fee.no_recharge_prior_redaction",
+   "legal_concept": "No charge for re-redacting previously redacted record",
+   "rule_type": "Prohibition",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "A public body may not charge for redaction labor if it knows or has reason to know it previously redacted the record and the redacted version is still in its possession.",
+   "trigger": "Public body previously redacted the same record and retains the redacted version.",
+   "clock_effect": "none",
+   "clock_spec": "",
+   "related_rule_ids": [
+    "MI-0036"
+   ],
+   "source_language": "A public body shall not charge for labor directly associated with redaction under section 14 if it knows or has reason to know that it previously redacted the public record in question and the redacted version is still in the public body's possession.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(1)(b)",
+   "source_language_note": "Statute",
+   "effective_status": "Current (Am. 2014 PA 563)",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": ""
+  },
+  {
+   "rule_id": "MI-0033",
+   "category": "Fees",
+   "concept_key": "fee.actual_cost_basis",
+   "legal_concept": "Fee limited to actual incremental cost",
+   "rule_type": "Calculation",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "A permitted fee is limited to actual mailing costs and the actual incremental cost of duplication or publication, including labor and the cost of search, examination, review, and separation/deletion of exempt material, and the total must not exceed the sum of the six enumerated components.",
+   "trigger": "Public body charges or estimates a fee.",
+   "clock_effect": "none",
+   "clock_spec": "ceiling: sum of the 6 enumerated components (actual incremental cost)",
+   "related_rule_ids": [
+    "MI-0034",
+    "MI-0036",
+    "MI-0037",
+    "MI-0038",
+    "MI-0039",
+    "MI-0040"
+   ],
+   "source_language": "the fee must be limited to actual mailing costs, and to the actual incremental cost of duplication or publication including labor, the cost of search, examination, review, and the deletion and separation of exempt from nonexempt information as provided in section 14. Except as otherwise provided in this act, if the public body estimates or charges a fee in accordance with this act, the total fee must not exceed the sum of the following components:",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(1)",
+   "source_language_note": "Statute",
+   "effective_status": "Current (Am. 2014 PA 563)",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": "Umbrella fee-cap; the six components are MI-0034/0036/0037/0038/0039/0040."
+  },
+  {
+   "rule_id": "MI-0034",
+   "category": "Fees",
+   "concept_key": "fee.labor_rate_hourly_ceiling",
+   "legal_concept": "Search labor rate \u2014 lowest-paid capable employee",
+   "rule_type": "Calculation",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "Labor for searching, locating, and examining records may not be charged at more than the hourly wage of the public body's lowest-paid employee capable of doing so, regardless of who performs the labor.",
+   "trigger": "Public body charges search/location/examination labor.",
+   "clock_effect": "none",
+   "clock_spec": "ceiling: hourly wage of lowest-paid capable employee",
+   "related_rule_ids": [
+    "MI-0033",
+    "MI-0035",
+    "MI-0045"
+   ],
+   "source_language": "The public body shall not charge more than the hourly wage of its lowest-paid employee capable of searching for, locating, and examining the public records in the particular instance regardless of whether that person is available or who actually performs the labor.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(1)(a)",
+   "source_language_note": "Statute",
+   "effective_status": "Current (Am. 2014 PA 563)",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": "Shared labor-rate ceiling key."
+  },
+  {
+   "rule_id": "MI-0035",
+   "category": "Fees",
+   "concept_key": "fee.labor_time_increment",
+   "legal_concept": "Labor charged in 15-minute increments, rounded down",
+   "rule_type": "Calculation",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "atomic_rule": "Search/examination labor costs must be estimated and charged in increments of 15 minutes or more, with all partial time increments rounded down.",
+   "trigger": "Public body charges search/examination labor.",
+   "clock_effect": "none",
+   "clock_spec": "fixed: 15-minute increments, partial increments rounded down",
+   "related_rule_ids": [
+    "MI-0034"
+   ],
+   "source_language": "Labor costs under this subdivision shall be estimated and charged in increments of 15 minutes or more, with all partial time increments rounded down.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(1)(a)",
+   "source_language_note": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": "Same increment rule also applies to redaction labor under (1)(b); duplication labor (1)(e) allows increments of the body's choosing rounded down."
+  },
+  {
+   "rule_id": "MI-0036",
+   "category": "Fees",
+   "concept_key": "fee.redaction_labor_rate_ceiling",
+   "legal_concept": "Redaction/separation labor rate ceiling",
+   "rule_type": "Calculation",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "Labor to separate/delete exempt from nonexempt information may not exceed the hourly wage of the lowest-paid capable employee; if none is employed, contracted labor may be charged like employee labor but not exceeding 6 times the state minimum hourly wage.",
+   "trigger": "Public body charges separation/deletion (redaction) labor.",
+   "clock_effect": "none",
+   "clock_spec": "ceiling: lowest-paid capable employee wage; contracted labor <= 6x state minimum hourly wage",
+   "related_rule_ids": [
+    "MI-0030",
+    "MI-0032",
+    "MI-0045"
+   ],
+   "source_language": "For services performed by an employee of the public body, the public body shall not charge more than the hourly wage of its lowest-paid employee capable of separating and deleting exempt information from nonexempt information in the particular instance... Total labor costs calculated under this subdivision for contracted labor costs must not exceed an amount equal to 6 times the state minimum hourly wage rate determined under section 4 of the improved workforce opportunity wage act, 2018 PA 337, MCL 408.934.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(1)(b)",
+   "source_language_note": "Statute",
+   "effective_status": "Current (Am. 2014 PA 563)",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": "Contracted-labor ceiling references a moving external figure (state minimum wage)."
+  },
+  {
+   "rule_id": "MI-0037",
+   "category": "Fees",
+   "concept_key": "fee.nonpaper_media_cost",
+   "legal_concept": "Nonpaper physical media at actual economical cost",
+   "rule_type": "Calculation",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "For records provided on nonpaper physical media, the charge is limited to the actual and most reasonably economical cost of that media.",
+   "trigger": "Records provided on nonpaper physical media.",
+   "clock_effect": "none",
+   "clock_spec": "ceiling: actual most-economical cost of the nonpaper media",
+   "related_rule_ids": [
+    "MI-0033",
+    "MI-0067"
+   ],
+   "source_language": "For public records provided to the requestor on any form of nonpaper physical media, the actual and most reasonably economical cost of the nonpaper physical media.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(1)(c)",
+   "source_language_note": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": "Does not apply if the body lacks the technological capability for the stipulated media."
+  },
+  {
+   "rule_id": "MI-0038",
+   "category": "Fees",
+   "concept_key": "fee.copy_rate_per_page",
+   "legal_concept": "Paper copy charge ceiling \u2014 10 cents per sheet",
+   "rule_type": "Calculation",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "The charge for paper copies must not exceed 10 cents per sheet for copies made on 8.5x11 or 8.5x14 paper, calculated as a total cost per sheet.",
+   "trigger": "Public body provides paper copies.",
+   "clock_effect": "none",
+   "clock_spec": "ceiling: $0.10 per sheet (8.5x11 or 8.5x14)",
+   "related_rule_ids": [
+    "MI-0033"
+   ],
+   "source_language": "The fee must not exceed 10 cents per sheet of paper for copies of public records made on 8-1/2- by 11-inch paper or 8-1/2- by 14-inch paper. A public body shall utilize the most economical means available for making copies of public records, including using double-sided printing, if cost saving and available.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(1)(d)",
+   "source_language_note": "Statute",
+   "effective_status": "Current (Am. 2014 PA 563)",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": "Shared per-page copy-rate ceiling key. Excludes labor (which is separately capped)."
+  },
+  {
+   "rule_id": "MI-0039",
+   "category": "Fees",
+   "concept_key": "fee.duplication_labor_rate_ceiling",
+   "legal_concept": "Duplication/publication labor rate ceiling",
+   "rule_type": "Calculation",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "Labor directly associated with duplication or publication (paper or digital copies, transfers) may not exceed the hourly wage of the lowest-paid employee capable of the duplication.",
+   "trigger": "Public body charges duplication/publication labor.",
+   "clock_effect": "none",
+   "clock_spec": "ceiling: hourly wage of lowest-paid capable employee; increments of body's choosing, rounded down",
+   "related_rule_ids": [
+    "MI-0033"
+   ],
+   "source_language": "The public body shall not charge more than the hourly wage of its lowest-paid employee capable of necessary duplication or publication in the particular instance, regardless of whether that person is available or who actually performs the labor. Labor costs under this subdivision may be estimated and charged in time increments of the public body's choosing; however, all partial time increments shall be rounded down.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(1)(e)",
+   "source_language_note": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": ""
+  },
+  {
+   "rule_id": "MI-0040",
+   "category": "Fees",
+   "concept_key": "fee.mailing_cost",
+   "legal_concept": "Actual mailing cost only",
+   "rule_type": "Calculation",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "Mailing may be charged at actual cost in a reasonably economical manner; no charge for expedited shipping or insurance unless stipulated by the requester.",
+   "trigger": "Public body mails records.",
+   "clock_effect": "none",
+   "clock_spec": "ceiling: actual cost of least-expensive economical mailing (plus delivery confirmation)",
+   "related_rule_ids": [
+    "MI-0033"
+   ],
+   "source_language": "The actual cost of mailing, if any, for sending the public records in a reasonably economical and justifiable manner. The public body shall not charge more for expedited shipping or insurance unless specifically stipulated by the requestor, but may otherwise charge for the least expensive form of postal delivery confirmation when mailing public records.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(1)(f)",
+   "source_language_note": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": ""
+  },
+  {
+   "rule_id": "MI-0041",
+   "category": "Fees",
+   "concept_key": "fee.fringe_benefit_multiplier",
+   "legal_concept": "Up to 50% fringe-benefit add-on to labor",
+   "rule_type": "Permission",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "A public body may add up to 50% to the applicable labor charge to cover fringe benefits, not exceeding the actual cost of fringe benefits, if it notes the multiplier on the itemization.",
+   "trigger": "Public body charges labor and elects to recover fringe benefits.",
+   "clock_effect": "none",
+   "clock_spec": "ceiling: +50% of the applicable labor charge (capped at actual fringe cost)",
+   "related_rule_ids": [
+    "MI-0034",
+    "MI-0036",
+    "MI-0039"
+   ],
+   "source_language": "The public body may also add up to 50% to the applicable labor charge amount to cover or partially cover the cost of fringe benefits if it clearly notes the percentage multiplier used to account for benefits in the detailed itemization described in subsection (4). Subject to the 50% limitation, the public body shall not charge more than the actual cost of fringe benefits, and overtime wages shall not be used in calculating the cost of fringe benefits.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(2)",
+   "source_language_note": "Statute",
+   "effective_status": "Current (Am. 2014 PA 563)",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": "A higher multiplier is allowed only in the narrow website-then-paper scenario under \u00a7 15.234(5)."
+  },
+  {
+   "rule_id": "MI-0042",
+   "category": "Fees",
+   "concept_key": "fee.overtime_exclusion",
+   "legal_concept": "Overtime excluded from labor unless stipulated",
+   "rule_type": "Prohibition",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "Overtime wages may not be included in labor-cost calculations unless overtime is specifically stipulated by the requester and noted on the itemization.",
+   "trigger": "Labor performed on overtime.",
+   "clock_effect": "none",
+   "clock_spec": "",
+   "related_rule_ids": [
+    "MI-0041"
+   ],
+   "source_language": "Overtime wages shall not be included in the calculation of labor costs unless overtime is specifically stipulated by the requestor and clearly noted on the detailed itemization described in subsection (4).",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(2)",
+   "source_language_note": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": ""
+  },
+  {
+   "rule_id": "MI-0043",
+   "category": "Fees",
+   "concept_key": "fee.indigent_waiver",
+   "legal_concept": "First $20 free for indigent / designated nonprofit",
+   "rule_type": "Requirement",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "atomic_rule": "A record search and copies must be furnished without charge for the first $20 of the fee for each request by a qualifying indigent individual (with affidavit) or by a state-designated developmental-disabilities/mental-illness protection-and-advocacy nonprofit.",
+   "trigger": "Requester is a qualifying indigent individual or a qualifying designated nonprofit.",
+   "clock_effect": "none",
+   "clock_spec": "fixed: first $20.00 of the fee waived per request",
+   "related_rule_ids": [
+    "MI-0007"
+   ],
+   "source_language": "A public record search shall be made and a copy of a public record shall be furnished without charge for the first $20.00 of the fee for each request by either of the following: (a) An individual who is entitled to information under this act and who submits an affidavit stating that the individual is indigent and receiving specific public assistance or, if not receiving public assistance, stating facts showing inability to pay the cost because of indigency.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(2)(a),(b)",
+   "source_language_note": "Statute",
+   "effective_status": "Current (Am. 2014 PA 563)",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": "Indigent ineligible if already received the discount twice that calendar year from the same body, or if request is in conjunction with paying outside parties. Nonprofit conditions in \u00a7 15.234(2)(b)."
+  },
+  {
+   "rule_id": "MI-0044",
+   "category": "Fees",
+   "concept_key": "fee.public_interest_waiver",
+   "legal_concept": "Discretionary public-interest fee waiver/reduction",
+   "rule_type": "Discretion",
+   "config_home": "parameter",
+   "constraint_basis": "soft-standard",
+   "atomic_rule": "A public body may search for or furnish copies without charge or at a reduced charge if it determines a waiver/reduction is in the public interest because the disclosure primarily benefits the general public.",
+   "trigger": "Public body determines disclosure primarily benefits the general public.",
+   "clock_effect": "none",
+   "clock_spec": "",
+   "related_rule_ids": [],
+   "source_language": "A search for a public record may be conducted or copies of public records may be furnished without charge or at a reduced charge if the public body determines that a waiver or reduction of the fee is in the public interest because searching for or furnishing copies of the public record can be considered as primarily benefiting the general public.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(2)",
+   "source_language_note": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": "Discretionary; 'public interest / primarily benefiting the general public' is a soft standard."
+  },
+  {
+   "rule_id": "MI-0045",
+   "category": "Fees",
+   "concept_key": "fee.search_fee_unreasonable_cost_gate",
+   "legal_concept": "Search/redaction labor chargeable only if not charging would cause unreasonably high costs",
+   "rule_type": "Requirement",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "A fee for search, examination, review, and separation/deletion of exempt material may not be charged unless failure to charge would result in unreasonably high costs to the public body because of the nature of the request, and the body specifically identifies the nature of those costs.",
+   "trigger": "Public body wishes to charge search/examination/review/separation labor.",
+   "clock_effect": "none",
+   "clock_spec": "",
+   "related_rule_ids": [
+    "MI-0034",
+    "MI-0036"
+   ],
+   "source_language": "A fee as described in subsection (1) shall not be charged for the cost of search, examination, review, and the deletion and separation of exempt from nonexempt information as provided in section 14 unless failure to charge a fee would result in unreasonably high costs to the public body because of the nature of the request in the particular instance, and the public body specifically identifies the nature of these unreasonably high costs.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(3)",
+   "source_language_note": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": "A gate the engine must evaluate before charging labor components; structural condition, not a value."
+  },
+  {
+   "rule_id": "MI-0046",
+   "category": "Fees",
+   "concept_key": "fee.website_available_no_charge",
+   "legal_concept": "No charge for records already on the body's website",
+   "rule_type": "Exception",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "Public records available to the general public on the body's website at the time of the request are exempt from separation/deletion labor charges under (1)(b).",
+   "trigger": "Requested records are available on the body's public website when the request is made.",
+   "clock_effect": "none",
+   "clock_spec": "",
+   "related_rule_ids": [
+    "MI-0036",
+    "MI-0047"
+   ],
+   "source_language": "If the public body directly or indirectly administers or maintains an official internet presence, any public records available to the general public on that internet site at the time the request is made are exempt from any charges under subsection (1)(b).",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(5)",
+   "source_language_note": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": ""
+  },
+  {
+   "rule_id": "MI-0048",
+   "category": "Fees",
+   "concept_key": "fee.itemization_form_required",
+   "legal_concept": "Standard itemized fee form",
+   "rule_type": "Requirement",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "A public body's procedures must use a standard form for detailed itemization of any fee that clearly lists and explains the allowable charges for each of the six fee components used in estimating or charging.",
+   "trigger": "Public body estimates or charges a fee.",
+   "clock_effect": "none",
+   "clock_spec": "",
+   "related_rule_ids": [
+    "MI-0033",
+    "MI-0049"
+   ],
+   "source_language": "A public body's procedures and guidelines must include the use of a standard form for detailed itemization of any fee amount in its responses to written requests under this act. The detailed itemization must clearly list and explain the allowable charges for each of the 6 fee components listed under subsection (1) that compose the total fee used for estimating or charging purposes.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(4)",
+   "source_language_note": "Statute",
+   "effective_status": "Current (Am. 2014 PA 563)",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": "DTMB provides a model form; a body may create its own compliant form."
+  },
+  {
+   "rule_id": "MI-0049",
+   "category": "Fees",
+   "concept_key": "fee.procedures_guidelines_required",
+   "legal_concept": "Procedures, guidelines, and written public summary",
+   "rule_type": "Requirement",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "A public body must establish procedures and guidelines to implement the act and create a written public summary (how to submit requests, understand responses, deposits, fee calculations, and appeals), post them on any website, and provide free copies with responses and on request.",
+   "trigger": "Public body is subject to the act.",
+   "clock_effect": "none",
+   "clock_spec": "",
+   "related_rule_ids": [
+    "MI-0048",
+    "MI-0050"
+   ],
+   "source_language": "A public body shall establish procedures and guidelines to implement this act and shall create a written public summary of the specific procedures and guidelines relevant to the general public regarding how to submit written requests to the public body and explaining how to understand a public body's written responses, deposit requirements, fee calculations, and avenues for challenge and appeal.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(4)",
+   "source_language_note": "Statute",
+   "effective_status": "Current (Am. 2014 PA 563)",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": "Procedures/guidelines are themselves non-exempt public records."
+  },
+  {
+   "rule_id": "MI-0050",
+   "category": "Fees",
+   "concept_key": "fee.no_fee_without_guidelines",
+   "legal_concept": "No fees/deposits until procedures published",
+   "rule_type": "Prohibition",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "A public body that has not established procedures and guidelines, created a written public summary, or made them publicly available free may not require deposits or charge fees until it is in compliance.",
+   "trigger": "Public body lacks published procedures/guidelines/summary.",
+   "clock_effect": "none",
+   "clock_spec": "",
+   "related_rule_ids": [
+    "MI-0049",
+    "MI-0053"
+   ],
+   "source_language": "A public body that has not established procedures and guidelines, has not created a written public summary, or has not made those items publicly available without charge as required in this subsection is not relieved of its duty to comply with any requirement of this act and shall not require deposits or charge fees otherwise permitted under this act until it is in compliance with this subsection.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(4)",
+   "source_language_note": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": "Gate on the fee/deposit machinery."
+  },
+  {
+   "rule_id": "MI-0051",
+   "category": "Fees",
+   "concept_key": "fee.late_response_reduction",
+   "legal_concept": "5%-per-day labor-fee reduction for late response",
+   "rule_type": "Remedy",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "atomic_rule": "If a public body does not respond timely and the lateness was willful/intentional or the request was flagged, it must reduce labor-cost charges by 5% for each day it exceeds the response deadline, up to a 50% maximum reduction.",
+   "trigger": "Untimely response AND (willful/intentional) OR (request carried FOIA flagging language/keywords).",
+   "clock_effect": "none",
+   "clock_spec": "fixed: -5% of labor charge per late day, capped at -50%",
+   "related_rule_ids": [
+    "MI-0016",
+    "MI-0022"
+   ],
+   "source_language": "Reduce the charges for labor costs otherwise permitted under this section by 5% for each day the public body exceeds the time permitted under section 5(2) for a response to the request, with a maximum 50% reduction, if either of the following applies: (i) The late response was willful and intentional. (ii) The written request included language that conveyed a request for information within the first 250 words of the body of a letter, facsimile, electronic mail, or electronic mail attachment, or specifically included the words, characters, or abbreviations for \"freedom of information\", \"information\", \"FOIA\", \"copy\", or a recognizable misspelling of such, or appropriate legal code reference for this act, on the front of an envelope, or in the subject line of an electronic mail, letter, or facsimile cover page.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(9)",
+   "source_language_note": "Statute",
+   "effective_status": "Current (Am. 2014 PA 563)",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": "Fee-calculation remedy tied to lateness; reduces only the labor components."
+  },
+  {
+   "rule_id": "MI-0052",
+   "category": "Fees",
+   "concept_key": "fee.statutory_price_exemption",
+   "legal_concept": "Fee section inapplicable to statutorily-priced records",
+   "rule_type": "Exception",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "The fee section does not apply to records prepared under a statute specifically authorizing their sale, or where another act/statute specifically sets the copy fee.",
+   "trigger": "Requested record has a statutorily-authorized sale price or a specifically-provided copy fee.",
+   "clock_effect": "none",
+   "clock_spec": "",
+   "related_rule_ids": [
+    "MI-0033"
+   ],
+   "source_language": "This section does not apply to public records prepared under an act or statute specifically authorizing the sale of those public records to the public, or if the amount of the fee for providing a copy of the public record is otherwise specifically provided by an act or statute.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(10)",
+   "source_language_note": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": ""
+  },
+  {
+   "rule_id": "MI-0053",
+   "category": "Payment",
+   "concept_key": "payment.deposit_threshold",
+   "legal_concept": "Good-faith deposit permitted above $50",
+   "rule_type": "Permission",
+   "config_home": "parameter",
+   "constraint_basis": "floor",
+   "atomic_rule": "A public body may require a good-faith deposit before providing records if the entire estimated fee or charge exceeds $50, based on a good-faith total-fee calculation.",
+   "trigger": "Good-faith fee estimate exceeds $50.00.",
+   "clock_effect": "none",
+   "clock_spec": "floor: deposit only allowed when estimate exceeds $50.00",
+   "related_rule_ids": [
+    "MI-0054",
+    "MI-0055"
+   ],
+   "source_language": "the public body may require a good-faith deposit from the person requesting information before providing the public records to the requestor if the entire fee estimate or charge authorized under this section exceeds $50.00, based on a good-faith calculation of the total fee described in subsection (4).",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(8)",
+   "source_language_note": "Statute",
+   "effective_status": "Current (Am. 2014 PA 563)",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": ""
+  },
+  {
+   "rule_id": "MI-0054",
+   "category": "Payment",
+   "concept_key": "payment.deposit_ceiling",
+   "legal_concept": "Deposit capped at one-half of estimate",
+   "rule_type": "Calculation",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "A good-faith deposit must not exceed one-half of the total estimated fee, and the deposit request must include a detailed fee itemization.",
+   "trigger": "Public body requires a good-faith deposit under \u00a7 15.234(8).",
+   "clock_effect": "none",
+   "clock_spec": "ceiling: 1/2 of the total estimated fee",
+   "related_rule_ids": [
+    "MI-0053",
+    "MI-0048"
+   ],
+   "source_language": "Subject to subsection (10), the deposit must not exceed 1/2 of the total estimated fee, and a public body's request for a deposit must include a detailed itemization as required under subsection (4).",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(8)",
+   "source_language_note": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": ""
+  },
+  {
+   "rule_id": "MI-0056",
+   "category": "Payment",
+   "concept_key": "payment.prior_nonpayer_deposit",
+   "legal_concept": "Up to 100% deposit for prior non-payers",
+   "rule_type": "Permission",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "For a subsequent request from an individual who did not pay in full for a prior fulfilled request, the body may require a deposit of up to 100% of the estimated fee before beginning the search, if six enumerated conditions are all met.",
+   "trigger": "Individual left a prior granted-and-fulfilled request unpaid and the six conditions in \u00a7 15.234(11)(a)-(f) are all satisfied.",
+   "clock_effect": "none",
+   "clock_spec": "ceiling: up to 100% of estimated fee (only when all six conditions met, incl. 90 days since availability notice)",
+   "related_rule_ids": [
+    "MI-0057",
+    "MI-0053"
+   ],
+   "source_language": "after a public body has granted and fulfilled a written request from an individual under this act, if the public body has not been paid in full the total amount under subsection (1)...the public body may require a deposit of up to 100% of the estimated fee before it begins a full public record search for any subsequent written request from that individual if all of the following apply:",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(11)",
+   "source_language_note": "Statute",
+   "effective_status": "Current (Am. 2014 PA 563)",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": "Conditions include: prior final fee <=105% of estimate; records still in possession; 90 days since availability notice; no proof of prior payment; detailed itemization. Structural branch with a parameter ceiling."
+  },
+  {
+   "rule_id": "MI-0057",
+   "category": "Payment",
+   "concept_key": "payment.prior_nonpayer_deposit_termination",
+   "legal_concept": "Termination of 100% deposit authority",
+   "rule_type": "Exception",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "The body must stop requiring the increased (up to 100%) deposit if the individual shows proof of prior full payment, the body is later paid in full, or 365 days have passed since the unpaid request was made.",
+   "trigger": "Proof of payment shown, prior request paid in full, or 365 days elapsed since the unpaid request.",
+   "clock_effect": "terminal",
+   "clock_spec": "terminal: 365 days from the unpaid written request extinguishes the increased-deposit authority",
+   "related_rule_ids": [
+    "MI-0056"
+   ],
+   "source_language": "A public body shall no longer require an increased estimated fee deposit from an individual as described under subsection (11) if any of the following apply: (a) The individual is able to show proof of prior payment in full to the public body. (b) The public body is subsequently paid in full for the applicable prior written request. (c) Three hundred sixty-five days have passed since the individual made the written request for which full payment was not remitted to the public body.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(12)",
+   "source_language_note": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": ""
+  },
+  {
+   "rule_id": "MI-0059",
+   "category": "Payment",
+   "concept_key": "payment.deposit_abandonment_trigger",
+   "legal_concept": "Request abandoned if deposit unpaid within 45 days",
+   "rule_type": "Trigger",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "atomic_rule": "If a required deposit is not received within 45 days after the requester's receipt of the deposit notice, and no deposit-amount appeal was filed, the request is considered abandoned and the body need no longer fulfill it.",
+   "trigger": "Deposit not received within 45 days of receipt of the deposit notice and no \u00a7 15.240a appeal filed.",
+   "clock_effect": "terminal",
+   "clock_spec": "terminal: 45 days from requester's receipt of the deposit notice",
+   "related_rule_ids": [
+    "MI-0053",
+    "MI-0060",
+    "MI-0081"
+   ],
+   "source_language": "If a deposit that is required under subsection (8) or (11) is not received by the public body within 45 days from receipt by the requesting person of the notice that a deposit is required, and if the requesting person has not filed an appeal of the deposit amount pursuant to section 10a, the request shall be considered abandoned by the requesting person and the public body is no longer required to fulfill the request.",
+   "is_paraphrase": false,
+   "source_authority": "Mich. Comp. Laws \u00a7 15.234(14)",
+   "source_language_note": "Statute",
+   "effective_status": "Current (Am. 2014 PA 563)",
+   "official_link": "https://www.legislature.mi.gov/Laws/MCL?objectName=MCL-15-234",
+   "notes": "Terminal state (abandonment). Keeper-sliver-style deemed disposition."
+  }
+ ],
+ "template": {
+  "fee_schedule": {
+   "fee.copy_rate_per_page": [
+    {
+     "rule_id": "MI-0038",
+     "authority": "Mich. Comp. Laws \u00a7 15.234(1)(d)",
+     "summary": "The charge for paper copies must not exceed 10 cents per sheet for copies made on 8.5x11 or 8.5x14 paper, calculated as a total cost per sheet.",
+     "clock_spec": "ceiling: $0.10 per sheet (8.5x11 or 8.5x14)"
+    }
+   ],
+   "fee.labor_charge": [
+    {
+     "rule_id": "MI-0034",
+     "authority": "Mich. Comp. Laws \u00a7 15.234(1)(a)",
+     "summary": "Labor for searching, locating, and examining records may not be charged at more than the hourly wage of the public body's lowest-paid employee capable of doing so, regardless of who performs the labor.",
+     "clock_spec": "ceiling: hourly wage of lowest-paid capable employee"
+    },
+    {
+     "rule_id": "MI-0035",
+     "authority": "Mich. Comp. Laws \u00a7 15.234(1)(a)",
+     "summary": "Search/examination labor costs must be estimated and charged in increments of 15 minutes or more, with all partial time increments rounded down.",
+     "clock_spec": "fixed: 15-minute increments, partial increments rounded down"
+    },
+    {
+     "rule_id": "MI-0036",
+     "authority": "Mich. Comp. Laws \u00a7 15.234(1)(b)",
+     "summary": "Labor to separate/delete exempt from nonexempt information may not exceed the hourly wage of the lowest-paid capable employee; if none is employed, contracted labor may be charged like employee labor but not exceeding 6 times the state minimum hourly wage.",
+     "clock_spec": "ceiling: lowest-paid capable employee wage; contracted labor <= 6x state minimum hourly wage"
+    },
+    {
+     "rule_id": "MI-0039",
+     "authority": "Mich. Comp. Laws \u00a7 15.234(1)(e)",
+     "summary": "Labor directly associated with duplication or publication (paper or digital copies, transfers) may not exceed the hourly wage of the lowest-paid employee capable of the duplication.",
+     "clock_spec": "ceiling: hourly wage of lowest-paid capable employee; increments of body's choosing, rounded down"
+    },
+    {
+     "rule_id": "MI-0041",
+     "authority": "Mich. Comp. Laws \u00a7 15.234(2)",
+     "summary": "A public body may add up to 50% to the applicable labor charge to cover fringe benefits, not exceeding the actual cost of fringe benefits, if it notes the multiplier on the itemization.",
+     "clock_spec": "ceiling: +50% of the applicable labor charge (capped at actual fringe cost)"
+    },
+    {
+     "rule_id": "MI-0042",
+     "authority": "Mich. Comp. Laws \u00a7 15.234(2)",
+     "summary": "Overtime wages may not be included in labor-cost calculations unless overtime is specifically stipulated by the requester and noted on the itemization."
+    }
+   ],
+   "fee.actual_cost_basis": [
+    {
+     "rule_id": "MI-0033",
+     "authority": "Mich. Comp. Laws \u00a7 15.234(1)",
+     "summary": "A permitted fee is limited to actual mailing costs and the actual incremental cost of duplication or publication, including labor and the cost of search, examination, review, and separation/deletion of exempt material, and the total must not exceed the sum of the six enumerated components.",
+     "clock_spec": "ceiling: sum of the 6 enumerated components (actual incremental cost)"
+    }
+   ],
+   "fee.electronic_media_charge": [
+    {
+     "rule_id": "MI-0037",
+     "authority": "Mich. Comp. Laws \u00a7 15.234(1)(c)",
+     "summary": "For records provided on nonpaper physical media, the charge is limited to the actual and most reasonably economical cost of that media.",
+     "clock_spec": "ceiling: actual most-economical cost of the nonpaper media"
+    }
+   ],
+   "fee.delivery_charge": [
+    {
+     "rule_id": "MI-0040",
+     "authority": "Mich. Comp. Laws \u00a7 15.234(1)(f)",
+     "summary": "Mailing may be charged at actual cost in a reasonably economical manner; no charge for expedited shipping or insurance unless stipulated by the requester.",
+     "clock_spec": "ceiling: actual cost of least-expensive economical mailing (plus delivery confirmation)"
+    }
+   ],
+   "fee.no_charge_categories": [
+    {
+     "rule_id": "MI-0032",
+     "authority": "Mich. Comp. Laws \u00a7 15.234(1)(b)",
+     "summary": "A public body may not charge for redaction labor if it knows or has reason to know it previously redacted the record and the redacted version is still in its possession."
+    },
+    {
+     "rule_id": "MI-0046",
+     "authority": "Mich. Comp. Laws \u00a7 15.234(5)",
+     "summary": "Public records available to the general public on the body's website at the time of the request are exempt from separation/deletion labor charges under (1)(b)."
+    },
+    {
+     "rule_id": "MI-0050",
+     "authority": "Mich. Comp. Laws \u00a7 15.234(4)",
+     "summary": "A public body that has not established procedures and guidelines, created a written public summary, or made them publicly available free may not require deposits or charge fees until it is in compliance."
+    }
+   ],
+   "fee.schedule_and_authority": [
+    {
+     "rule_id": "MI-0049",
+     "authority": "Mich. Comp. Laws \u00a7 15.234(4)",
+     "summary": "A public body must establish procedures and guidelines to implement the act and create a written public summary (how to submit requests, understand responses, deposits, fee calculations, and appeals), post them on any website, and provide free copies with responses and on request."
+    }
+   ]
+  },
+  "knobs_fee": null
+ },
+ "run_parameters": {
+  "scope": "municipalities only (note agency regimes)",
+  "recency": "check 2024-2026 session laws + rule amendments for fee sections",
+  "estimate_calibration": "OUT of scope"
+ }
+}

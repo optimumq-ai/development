@@ -1,0 +1,1137 @@
+{
+ "state": "Illinois",
+ "code": "IL",
+ "next_rule_id": "IL-9001 \u2014 new/amended rule rows from THIS pass use the IL-9NNN namespace (9001, 9002, \u2026) so they never collide with existing ids; reference existing rows by their existing ids.",
+ "items": [
+  {
+   "id": "dup.bw.rate",
+   "label": "Copy rate \u2014 B&W page",
+   "home": "fee_profiles:duplication.bw.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "IL-0028"
+   ],
+   "prior_values": [
+    "15 cents"
+   ],
+   "prior_citations": [
+    "5 ILCS 140/6(b)"
+   ],
+   "prior_snippet": "The fee for black-and-white, letter- or legal-sized copies (after the free 50) may not exceed 15 cents per page."
+  },
+  {
+   "id": "dup.color.rate",
+   "label": "Copy rate \u2014 color page",
+   "home": "fee_profiles:duplication.color.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "IL-0028",
+    "IL-0029"
+   ],
+   "prior_values": [
+    "15 cents"
+   ],
+   "prior_citations": [
+    "5 ILCS 140/6(b)"
+   ],
+   "prior_snippet": "The fee for black-and-white, letter- or legal-sized copies (after the free 50) may not exceed 15 cents per page."
+  },
+  {
+   "id": "dup.oversized.rate",
+   "label": "Copy rate \u2014 oversized / nonstandard page",
+   "home": "fee_profiles:duplication.oversized.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "IL-0029"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "5 ILCS 140/6(b)"
+   ],
+   "prior_snippet": "For copies in color or in a size other than letter/legal, a public body may not charge more than its actual cost of reproduction."
+  },
+  {
+   "id": "dup.specialty.rate",
+   "label": "Specialty reproduction (photos, maps, transcripts)",
+   "home": "fee_profiles:duplication.specialty.rate",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.nonstandard_rate",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "IL-0029",
+    "IL-0038"
+   ],
+   "prior_values": [
+    "$100",
+    "$20",
+    "$40"
+   ],
+   "prior_citations": [
+    "5 ILCS 140/6(a-5)",
+    "5 ILCS 140/6(b)"
+   ],
+   "prior_snippet": "For copies in color or in a size other than letter/legal, a public body may not charge more than its actual cost of reproduction."
+  },
+  {
+   "id": "dup.tiers",
+   "label": "Graduated page bands (per-page rate by volume)",
+   "home": "fee_profiles:duplication.*.tiers",
+   "type": "tiers",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.free_allowance"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "IL-0028",
+    "IL-0027",
+    "IL-0036"
+   ],
+   "prior_values": [
+    "15 cents",
+    "50 pages",
+    "8 hours"
+   ],
+   "prior_citations": [
+    "5 ILCS 140/6(b)",
+    "5 ILCS 140/6(f)"
+   ],
+   "prior_snippet": "The fee for black-and-white, letter- or legal-sized copies (after the free 50) may not exceed 15 cents per page."
+  },
+  {
+   "id": "rules.freePages",
+   "label": "Free page allowance per request",
+   "home": "fee_profiles:requestRules.freePageAllowance",
+   "type": "pages",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "IL-0027",
+    "IL-0036",
+    "IL-0032"
+   ],
+   "prior_values": [
+    "50 pages",
+    "8 hours"
+   ],
+   "prior_citations": [
+    "5 ILCS 140/6(a)",
+    "5 ILCS 140/6(b)",
+    "5 ILCS 140/6(f)"
+   ],
+   "prior_snippet": "No fee may be charged for the first 50 pages of black-and-white, letter- or legal-sized copies requested."
+  },
+  {
+   "id": "labor.search.rate",
+   "label": "Labor rate \u2014 search / retrieval ($/hr)",
+   "home": "fee_profiles:labor.search.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.review.rate",
+   "label": "Labor rate \u2014 review / redaction ($/hr)",
+   "home": "fee_profiles:labor.review.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "IL-0032"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "5 ILCS 140/6(a)"
+   ],
+   "prior_snippet": "A public body may not charge the requester for the cost of any search for and review of the records."
+  },
+  {
+   "id": "labor.programming.rate",
+   "label": "Labor rate \u2014 programming / data extraction ($/hr)",
+   "home": "fee_profiles:labor.programming.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "IL-0038"
+   ],
+   "prior_values": [
+    "$100",
+    "$20",
+    "$40"
+   ],
+   "prior_citations": [
+    "5 ILCS 140/6(a-5)"
+   ],
+   "prior_snippet": "For a voluminous request for electronic records, a public body may charge tiered caps by data size: for non-PDF data up to $20 (<=2 MB), $40 (2-4 MB), or $100 (>4 MB); for PDF data up to $20 (<=80 MB), $40 (80-160 MB), o"
+  },
+  {
+   "id": "labor.billableWhen",
+   "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+   "home": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+   "type": "enum+threshold",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "IL-0027",
+    "IL-0036",
+    "IL-0032"
+   ],
+   "prior_values": [
+    "50 pages",
+    "8 hours"
+   ],
+   "prior_citations": [
+    "5 ILCS 140/6(a)",
+    "5 ILCS 140/6(b)",
+    "5 ILCS 140/6(f)"
+   ],
+   "prior_snippet": "No fee may be charged for the first 50 pages of black-and-white, letter- or legal-sized copies requested."
+  },
+  {
+   "id": "labor.overheadPct",
+   "label": "Overhead / fringe surcharge on labor (%)",
+   "home": "fee_profiles:labor.overheadPct",
+   "type": "pct",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.increment",
+   "label": "Labor time increment + rounding",
+   "home": "fee_profiles:labor.*.increment / rounding",
+   "type": "hours",
+   "concepts": [
+    "fee.labor_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.freeLaborHours",
+   "label": "Free labor hours per request",
+   "home": "fee_profiles:requestRules.freeLaborHours",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "IL-0027",
+    "IL-0036"
+   ],
+   "prior_values": [
+    "50 pages",
+    "8 hours"
+   ],
+   "prior_citations": [
+    "5 ILCS 140/6(b)",
+    "5 ILCS 140/6(f)"
+   ],
+   "prior_snippet": "No fee may be charged for the first 50 pages of black-and-white, letter- or legal-sized copies requested."
+  },
+  {
+   "id": "labor.periodicFreeHours",
+   "label": "Free personnel time per requestor per month/year (TX \u00a7 552.275 pattern)",
+   "home": "NOT IN ENGINE (fee_profiles gap \u2014 requestor-ledger counter)",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.aggregation"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "IL-0027",
+    "IL-0036"
+   ],
+   "prior_values": [
+    "50 pages",
+    "8 hours"
+   ],
+   "prior_citations": [
+    "5 ILCS 140/6(b)",
+    "5 ILCS 140/6(f)"
+   ],
+   "prior_snippet": "No fee may be charged for the first 50 pages of black-and-white, letter- or legal-sized copies requested."
+  },
+  {
+   "id": "rules.estimateNotifyThreshold",
+   "label": "Itemized estimate / cost notice required above ($ or hours)",
+   "home": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+   "type": "usd",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "estimate.requesterResponseDays",
+   "label": "Requester must respond to an estimate within N days (else withdrawn)",
+   "home": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "estimate.revisionNotifyPercent",
+   "label": "Revised estimate required when actual exceeds estimate by N%",
+   "home": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+   "type": "pct",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "estimate.validityDays",
+   "label": "Estimate validity period (days)",
+   "home": "fee_profiles:estimatePolicy.estimateValidityDays",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.deposit.threshold",
+   "label": "Deposit / prepayment may be required above ($)",
+   "home": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+   "type": "usd",
+   "concepts": [
+    "payment.deposit_threshold",
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.deposit.percent",
+   "label": "Deposit capped at (% of estimate)",
+   "home": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+   "type": "pct",
+   "concepts": [
+    "payment.deposit_ceiling",
+    "payment.deposit"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.productionGate",
+   "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+   "home": "paymentTiming gates + fee_profiles bands",
+   "type": "enum",
+   "concepts": [
+    "payment.production_conditioned_on_payment",
+    "payment.advance_payment"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "IL-0019"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "5 ILCS 140/3.1(a); 5 ILCS 140/3.2(a)"
+   ],
+   "prior_snippet": "When it gives a fee estimate on a commercial or recurrent-requester request, the public body may require the requester to pay the fees in full before copying the requested documents."
+  },
+  {
+   "id": "payment.nonpayment",
+   "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+   "home": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+   "type": "enum+int",
+   "concepts": [
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.depositClock",
+   "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+   "home": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+   "type": "enum",
+   "concepts": [
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.reissue",
+   "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+   "home": "jurisdiction_rules:payment.reissue_*",
+   "type": "bool",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.method",
+   "label": "Electronic payment method offered",
+   "home": "fee_profiles:payment_mode (operational; not law-driven except VA)",
+   "type": "enum",
+   "concepts": [
+    "payment.method"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.maxFee",
+   "label": "Request-level ceiling (actual cost cap / statutory max)",
+   "home": "fee_profiles:requestRules.maxFee",
+   "type": "usd_or_rule",
+   "concepts": [
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.deMinimis",
+   "label": "De-minimis: no charge below ($)",
+   "home": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+   "type": "usd",
+   "concepts": [
+    "fee.waiver",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "IL-0033",
+    "IL-0032"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "5 ILCS 140/6(a)",
+    "5 ILCS 140/6(c)"
+   ],
+   "prior_snippet": "Documents must be furnished without charge or at reduced charge, as determined by the public body, if the requester states a specific purpose and the waiver is in the public interest (principally to disseminate informati"
+  },
+  {
+   "id": "rules.minFee",
+   "label": "Minimum fee",
+   "home": "fee_profiles:requestRules.minFee",
+   "type": "usd",
+   "concepts": [],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "media",
+   "label": "Electronic media (CD/DVD/USB) charge",
+   "home": "fee_profiles:media.{cd,dvd,usb}",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "IL-0031"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "5 ILCS 140/6(a)"
+   ],
+   "prior_snippet": "For records provided in electronic format, a public body may charge the requester only the actual cost of purchasing the recording medium."
+  },
+  {
+   "id": "delivery",
+   "label": "Delivery: mail / handling / email / pickup",
+   "home": "fee_profiles:delivery.*",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.delivery_charge",
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "IL-0031"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "5 ILCS 140/6(a)"
+   ],
+   "prior_snippet": "For records provided in electronic format, a public body may charge the requester only the actual cost of purchasing the recording medium."
+  },
+  {
+   "id": "certification",
+   "label": "Certification / certified-copy charge",
+   "home": "fee_profiles:certification.{rate,unit}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.certified_copy_charge"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "IL-0030"
+   ],
+   "prior_values": [
+    "$1"
+   ],
+   "prior_citations": [
+    "5 ILCS 140/6(b)"
+   ],
+   "prior_snippet": "The cost for certifying a record may not exceed $1."
+  },
+  {
+   "id": "av",
+   "label": "Audio/video: per recording, per minute, free minutes",
+   "home": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.special_service_charge",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "IL-0038",
+    "IL-0029"
+   ],
+   "prior_values": [
+    "$100",
+    "$20",
+    "$40"
+   ],
+   "prior_citations": [
+    "5 ILCS 140/6(a-5)",
+    "5 ILCS 140/6(b)"
+   ],
+   "prior_snippet": "For a voluminous request for electronic records, a public body may charge tiered caps by data size: for non-PDF data up to $20 (<=2 MB), $40 (2-4 MB), or $100 (>4 MB); for PDF data up to $20 (<=80 MB), $40 (80-160 MB), o"
+  },
+  {
+   "id": "commercial",
+   "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+   "home": "fee_profiles:purposeOverrides.commercial",
+   "type": "pct+bool",
+   "concepts": [
+    "fee.commercial_charge"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "IL-0035",
+    "IL-0037"
+   ],
+   "prior_values": [
+    "$10"
+   ],
+   "prior_citations": [
+    "5 ILCS 140/6(f)"
+   ],
+   "prior_snippet": "For a commercial request, a public body may charge up to $10 for each hour spent by personnel searching for, retrieving, or examining the record for necessary redactions."
+  },
+  {
+   "id": "waiver",
+   "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+   "home": "jurisdiction_rules:fee_waiver.*",
+   "type": "enum_list+bool",
+   "concepts": [
+    "fee.waiver"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "IL-0033"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "5 ILCS 140/6(c)"
+   ],
+   "prior_snippet": "Documents must be furnished without charge or at reduced charge, as determined by the public body, if the requester states a specific purpose and the waiver is in the public interest (principally to disseminate informati"
+  },
+  {
+   "id": "waiver.forfeiture",
+   "label": "Late response forfeits the fee",
+   "home": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+   "type": "bool",
+   "concepts": [
+    "fee.waiver",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "IL-0033"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "5 ILCS 140/6(c)"
+   ],
+   "prior_snippet": "Documents must be furnished without charge or at reduced charge, as determined by the public body, if the requester states a specific purpose and the waiver is in the public interest (principally to disseminate informati"
+  },
+  {
+   "id": "repeat",
+   "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+   "home": "NOT IN ENGINE (requestor-ledger)",
+   "type": "structural",
+   "concepts": [
+    "fee.repeat_request_carryforward",
+    "fee.aggregation"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  }
+ ],
+ "canonical_concepts": [
+  {
+   "canonical_key": "fee.copy_rate_per_page",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Absent a published actual-cost calculation, the agency may charge up to ten cents per page for public records scanned into an electronic format."
+  },
+  {
+   "canonical_key": "fee.actual_cost_basis",
+   "family": "fee",
+   "config_home": "mixed(p:24/s:8)",
+   "definition": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records."
+  },
+  {
+   "canonical_key": "fee.waiver",
+   "family": "fee",
+   "config_home": "mixed(p:5/s:23)",
+   "definition": "State, county, and municipal officers shall furnish, without charge, searches for and certified copies of public records needed in support of a claim or benefit applicati"
+  },
+  {
+   "canonical_key": "fee.electronic_media_charge",
+   "family": "fee",
+   "config_home": "mixed(p:21/s:1)",
+   "definition": "If records are not in electronic format and the public body agrees to produce them electronically, it may charge for the staff time required to transfer the documents to "
+  },
+  {
+   "canonical_key": "fee.no_charge_categories",
+   "family": "fee",
+   "config_home": "mixed(p:11/s:9)",
+   "definition": "A fee shall not be assessed for time spent segregating or redacting records unless such segregation/redaction is required by law or approved by the Supervisor."
+  },
+  {
+   "canonical_key": "fee.labor_charge",
+   "family": "fee",
+   "config_home": "mixed(p:25/s:4)",
+   "definition": "A public body may add up to 50% to the applicable labor charge to cover fringe benefits, not exceeding the actual cost of fringe benefits, if it notes the multiplier on t"
+  },
+  {
+   "canonical_key": "fee.schedule_and_authority",
+   "family": "fee",
+   "config_home": "mixed(p:6/s:10)",
+   "definition": "For state-agency public records, copy fees shall be charged according to the uniform fee schedule adopted by the commissioner of administration (R.S. 39:241) or as otherw"
+  },
+  {
+   "canonical_key": "fee.estimate_and_notice",
+   "family": "fee",
+   "config_home": "mixed(p:3/s:19)",
+   "definition": "The requester shall be informed of the estimated cost of preparing the copy if more than two hours of employee time is needed or if an outside professional service would "
+  },
+  {
+   "canonical_key": "fee.nonstandard_rate",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Where a copy requires a transcription, or a person requests a transcription of a public record, the transcription fee shall not exceed the agency's cost."
+  },
+  {
+   "canonical_key": "fee.free_allowance",
+   "family": "fee",
+   "config_home": "mixed(p:10/s:2)",
+   "definition": "The custodian shall not impose any charge for the first hour of time expended in research and retrieval of public records."
+  },
+  {
+   "canonical_key": "fee.certified_copy_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "The fee for certification of documents may not exceed five dollars ($5) per document."
+  },
+  {
+   "canonical_key": "fee.special_service_charge",
+   "family": "fee",
+   "config_home": "mixed(p:7/s:1)",
+   "definition": "For a voluminous request for electronic records, a public body may charge tiered caps by data size: for non-PDF data up to $20 (<=2 MB), $40 (2-4 MB), or $100 (>4 MB); fo"
+  },
+  {
+   "canonical_key": "fee.commercial_charge",
+   "family": "fee",
+   "config_home": "mixed(p:4/s:3)",
+   "definition": "The chapter does not authorize giving, selling, or providing access to lists of individuals requested for commercial purposes, and agencies shall not do so unless specifi"
+  },
+  {
+   "canonical_key": "fee.delivery_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Mailing may be charged at actual cost in a reasonably economical manner; no charge for expedited shipping or insurance unless stipulated by the requester."
+  },
+  {
+   "canonical_key": "fee.repeat_request_carryforward",
+   "family": "fee",
+   "config_home": "structural",
+   "definition": "If the same or a substantially similar request is made within six months after expiration of the ninety-day nonpayment-withdrawal period (or one hundred fifty days if req"
+  },
+  {
+   "canonical_key": "fee.aggregation",
+   "family": "fee",
+   "config_home": "mixed(p:1/s:2)",
+   "definition": "Once a records custodian reaches the aggregation threshold, the custodian is no longer required to deduct the labor threshold or any other minimum charge per request that"
+  },
+  {
+   "canonical_key": "payment.advance_payment",
+   "family": "payment",
+   "config_home": "mixed(p:6/s:12)",
+   "definition": "The custodian may require advance payment of the fees authorized by this section before providing the records."
+  },
+  {
+   "canonical_key": "payment.nonpayment_consequence",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:11)",
+   "definition": "A request is considered withdrawn if the requester fails to remit all fees within ninety days, or within one hundred fifty days if the requested fees are greater than one"
+  },
+  {
+   "canonical_key": "payment.production_conditioned_on_payment",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "For a standard request, the public officer has discretion to require the requester to pay all or a portion of the estimated fee prior to searching for any responsive publ"
+  },
+  {
+   "canonical_key": "payment.deposit",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:3)",
+   "definition": "A deposit notice is considered received 3 days after it is sent (regardless of transmission means), and it must state the deposit-due date, which is 48 days after the not"
+  },
+  {
+   "canonical_key": "payment.deposit_threshold",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "Where a public body determines in advance that charges are likely to exceed $200, it may, before continuing to process the request, require the requester to pay a deposit"
+  },
+  {
+   "canonical_key": "payment.deposit_ceiling",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "A good-faith deposit must not exceed one-half of the total estimated fee, and the deposit request must include a detailed fee itemization."
+  },
+  {
+   "canonical_key": "payment.method",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "Any local public body that charges for producing records may provide an electronic method of payment (noncash, non-paper-check \u2014 credit/debit cards, direct deposit/debit,"
+  }
+ ],
+ "existing_fee_payment_rules": [
+  {
+   "rule_id": "IL-0019",
+   "category": "Payment",
+   "concept_key": "payment.advance_full_payment_before_copying",
+   "legal_concept": "Full prepayment before copying",
+   "rule_type": "Permission",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "When it gives a fee estimate on a commercial or recurrent-requester request, the public body may require the requester to pay the fees in full before copying the requested documents.",
+   "trigger": "Public body issues a fee estimate on a commercial or recurrent-requester request",
+   "clock_effect": "none",
+   "source_language": "provide to the requester an estimate of the time required by the public body to provide the records requested and an estimate of the fees to be charged, which the public body may require the person to pay in full before copying the requested documents",
+   "is_paraphrase": false,
+   "source_authority": "5 ILCS 140/3.1(a); 5 ILCS 140/3.2(a)",
+   "effective_status": "Current",
+   "official_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K3.1.htm",
+   "related_rule_ids": [
+    "IL-0018",
+    "IL-0020"
+   ],
+   "notes": "Payment gate. Identical prepayment language appears in Section 3.2(a) for recurrent requesters; one concept cited to both.",
+   "source_authority_field": "Statute"
+  },
+  {
+   "rule_id": "IL-0027",
+   "category": "Fees",
+   "concept_key": "fee.first_50_pages_free",
+   "legal_concept": "First 50 pages free",
+   "rule_type": "Prohibition",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "atomic_rule": "No fee may be charged for the first 50 pages of black-and-white, letter- or legal-sized copies requested.",
+   "trigger": "Requester requests black-and-white letter/legal copies",
+   "clock_effect": "none",
+   "source_language": "No fees shall be charged for the first 50 pages of black and white, letter or legal sized copies requested by a requester.",
+   "is_paraphrase": false,
+   "source_authority": "5 ILCS 140/6(b)",
+   "effective_status": "Current",
+   "official_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "related_rule_ids": [
+    "IL-0028"
+   ],
+   "notes": "Fixed 50-page free threshold set by state; the city cannot lower it.",
+   "source_authority_field": "Statute"
+  },
+  {
+   "rule_id": "IL-0028",
+   "category": "Fees",
+   "concept_key": "fee.copy_rate_per_page",
+   "legal_concept": "Per-page copy fee cap",
+   "rule_type": "Calculation",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "The fee for black-and-white, letter- or legal-sized copies (after the free 50) may not exceed 15 cents per page.",
+   "trigger": "Copies beyond the first 50 black-and-white letter/legal pages",
+   "clock_effect": "none",
+   "source_language": "The fee for black and white, letter or legal sized copies shall not exceed 15 cents per page.",
+   "is_paraphrase": false,
+   "source_authority": "5 ILCS 140/6(b)",
+   "effective_status": "Current",
+   "official_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "related_rule_ids": [
+    "IL-0027"
+   ],
+   "notes": "Ceiling of 15 cents; the city sets the operative rate at or below it. Same concept whether a city charges a fixed 10 cents or the full 15 cents.",
+   "source_authority_field": "Statute"
+  },
+  {
+   "rule_id": "IL-0029",
+   "category": "Fees",
+   "concept_key": "fee.color_or_nonstandard_actual_cost",
+   "legal_concept": "Color/non-standard copy cost",
+   "rule_type": "Calculation",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "For copies in color or in a size other than letter/legal, a public body may not charge more than its actual cost of reproduction.",
+   "trigger": "Copies in color or a non-letter/legal size",
+   "clock_effect": "none",
+   "source_language": "If a public body provides copies in color or in a size other than letter or legal, the public body may not charge more than its actual cost for reproducing the records.",
+   "is_paraphrase": false,
+   "source_authority": "5 ILCS 140/6(b)",
+   "effective_status": "Current",
+   "official_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "related_rule_ids": [
+    "IL-0028"
+   ],
+   "notes": "Ceiling tied to actual cost (no fixed number).",
+   "source_authority_field": "Statute"
+  },
+  {
+   "rule_id": "IL-0030",
+   "category": "Fees",
+   "concept_key": "fee.certification_charge",
+   "legal_concept": "Certification fee cap",
+   "rule_type": "Calculation",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "The cost for certifying a record may not exceed $1.",
+   "trigger": "Requester asks for a certified record",
+   "clock_effect": "none",
+   "source_language": "The cost for certifying a record shall not exceed $1.",
+   "is_paraphrase": false,
+   "source_authority": "5 ILCS 140/6(b)",
+   "effective_status": "Current",
+   "official_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "related_rule_ids": [],
+   "notes": "Ceiling of $1 per certification.",
+   "source_authority_field": "Statute"
+  },
+  {
+   "rule_id": "IL-0031",
+   "category": "Fees",
+   "concept_key": "fee.electronic_medium_actual_cost",
+   "legal_concept": "Electronic recording-medium cost",
+   "rule_type": "Calculation",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "For records provided in electronic format, a public body may charge the requester only the actual cost of purchasing the recording medium.",
+   "trigger": "Records furnished in electronic format on a recording medium",
+   "clock_effect": "none",
+   "source_language": "A public body may charge the requester for the actual cost of purchasing the recording medium, whether disc, diskette, tape, or other medium.",
+   "is_paraphrase": false,
+   "source_authority": "5 ILCS 140/6(a)",
+   "effective_status": "Current",
+   "official_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "related_rule_ids": [
+    "IL-0032",
+    "IL-0038"
+   ],
+   "notes": "Ceiling tied to actual medium cost. Voluminous electronic requests have their own tiered caps (IL-0038).",
+   "source_authority_field": "Statute"
+  },
+  {
+   "rule_id": "IL-0032",
+   "category": "Fees",
+   "concept_key": "fee.no_search_or_review_charge",
+   "legal_concept": "No search/review fee (non-commercial)",
+   "rule_type": "Prohibition",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "A public body may not charge the requester for the cost of any search for and review of the records.",
+   "trigger": "Any non-commercial request",
+   "clock_effect": "none",
+   "source_language": "a public body may not charge the requester for the costs of any search for and review of the records.",
+   "is_paraphrase": false,
+   "source_authority": "5 ILCS 140/6(a)",
+   "effective_status": "Current",
+   "official_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "related_rule_ids": [
+    "IL-0035"
+   ],
+   "notes": "General prohibition on search/review charges; the only exception is the commercial-request hourly fee in Section 6(f) (IL-0035).",
+   "source_authority_field": "Statute"
+  },
+  {
+   "rule_id": "IL-0033",
+   "category": "Fees",
+   "concept_key": "fee.waiver_public_interest",
+   "legal_concept": "Fee waiver in the public interest",
+   "rule_type": "Discretion",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "Documents must be furnished without charge or at reduced charge, as determined by the public body, if the requester states a specific purpose and the waiver is in the public interest (principally to disseminate information on public health/safety/welfare or legal rights, not for personal/commercial benefit).",
+   "trigger": "Requester states a specific purpose and asserts the waiver is in the public interest",
+   "clock_effect": "none",
+   "source_language": "Documents shall be furnished without charge or at a reduced charge, as determined by the public body, if the person requesting the documents states the specific purpose for the request and indicates that a waiver or reduction of the fee is in the public interest. Waiver or reduction of the fee is in the public interest if the principal purpose of the request is to access and disseminate information regarding the health, safety and welfare or the legal rights of the general public and is not for the principal purpose of personal or commercial benefit.",
+   "is_paraphrase": false,
+   "source_authority": "5 ILCS 140/6(c)",
+   "effective_status": "Current",
+   "official_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "related_rule_ids": [
+    "IL-0002"
+   ],
+   "notes": "Soft public-interest standard the engine applies (a discretionary waiver path), so config_home structural. The public-interest test is one of the two allowed purpose inquiries (see IL-0002).",
+   "source_authority_field": "Statute"
+  },
+  {
+   "rule_id": "IL-0035",
+   "category": "Fees",
+   "concept_key": "fee.commercial_search_hourly_rate",
+   "legal_concept": "Commercial-request search/redaction hourly fee",
+   "rule_type": "Calculation",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "For a commercial request, a public body may charge up to $10 for each hour spent by personnel searching for, retrieving, or examining the record for necessary redactions.",
+   "trigger": "Request is for a commercial purpose",
+   "clock_effect": "none",
+   "source_language": "A public body may charge up to $10 for each hour spent by personnel in searching for and retrieving a requested record or examining the record for necessary redactions.",
+   "is_paraphrase": false,
+   "source_authority": "5 ILCS 140/6(f)",
+   "effective_status": "Current",
+   "official_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "related_rule_ids": [
+    "IL-0036",
+    "IL-0037",
+    "IL-0017"
+   ],
+   "notes": "Ceiling of $10/hour; applies only to commercial requests. This is the sole exception to the no-search-fee rule (IL-0032).",
+   "source_authority_field": "Statute"
+  },
+  {
+   "rule_id": "IL-0036",
+   "category": "Fees",
+   "concept_key": "fee.commercial_search_free_hours",
+   "legal_concept": "First 8 search hours free (commercial)",
+   "rule_type": "Prohibition",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "atomic_rule": "No fee may be charged for the first 8 hours spent by personnel searching for or retrieving a requested record on a commercial request.",
+   "trigger": "Commercial request incurring personnel search/retrieval time",
+   "clock_effect": "none",
+   "source_language": "No fees shall be charged for the first 8 hours spent by personnel in searching for or retrieving a requested record.",
+   "is_paraphrase": false,
+   "source_authority": "5 ILCS 140/6(f)",
+   "effective_status": "Current",
+   "official_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "related_rule_ids": [
+    "IL-0035"
+   ],
+   "notes": "Fixed 8-hour free floor before the IL-0035 hourly fee applies. Applies only to commercial requests.",
+   "source_authority_field": "Statute"
+  },
+  {
+   "rule_id": "IL-0038",
+   "category": "Fees",
+   "concept_key": "fee.voluminous_electronic_data_tiers",
+   "legal_concept": "Voluminous electronic-data fee tiers",
+   "rule_type": "Calculation",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "atomic_rule": "For a voluminous request for electronic records, a public body may charge tiered caps by data size: for non-PDF data up to $20 (<=2 MB), $40 (2-4 MB), or $100 (>4 MB); for PDF data up to $20 (<=80 MB), $40 (80-160 MB), or $100 (>160 MB).",
+   "trigger": "Voluminous request for electronic records",
+   "clock_effect": "none",
+   "source_language": "If a voluminous request is for electronic records and those records are not in a portable document format (PDF), the public body may charge up to $20 for not more than 2 megabytes of data, up to $40 for more than 2 but not more than 4 megabytes of data, and up to $100 for more than 4 megabytes of data. [For PDF:] up to $20 for not more than 80 megabytes of data, up to $40 for more than 80 megabytes but not more than 160 megabytes of data, and up to $100 for more than 160 megabytes of data.",
+   "is_paraphrase": false,
+   "source_authority": "5 ILCS 140/6(a-5)",
+   "effective_status": "Current",
+   "official_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "related_rule_ids": [
+    "IL-0023",
+    "IL-0031"
+   ],
+   "notes": "One concept (voluminous electronic-data cap) with two format bases (PDF vs non-PDF) kept in one row per the do-not-split guidance. All tiers are ceilings.",
+   "source_authority_field": "Statute"
+  }
+ ],
+ "template": {
+  "fee_schedule": {
+   "fee.copy_rate_per_page": [
+    {
+     "rule_id": "IL-0028",
+     "authority": "5 ILCS 140/6(b)",
+     "summary": "The fee for black-and-white, letter- or legal-sized copies (after the free 50) may not exceed 15 cents per page."
+    }
+   ],
+   "fee.electronic_media_charge": [
+    {
+     "rule_id": "IL-0031",
+     "authority": "5 ILCS 140/6(a)",
+     "summary": "For records provided in electronic format, a public body may charge the requester only the actual cost of purchasing the recording medium."
+    }
+   ],
+   "fee.certified_copy_charge": [
+    {
+     "rule_id": "IL-0030",
+     "authority": "5 ILCS 140/6(b)",
+     "summary": "The cost for certifying a record may not exceed $1."
+    }
+   ],
+   "fee.nonstandard_rate": [
+    {
+     "rule_id": "IL-0029",
+     "authority": "5 ILCS 140/6(b)",
+     "summary": "For copies in color or in a size other than letter/legal, a public body may not charge more than its actual cost of reproduction."
+    }
+   ],
+   "fee.commercial_charge": [
+    {
+     "rule_id": "IL-0035",
+     "authority": "5 ILCS 140/6(f)",
+     "summary": "For a commercial request, a public body may charge up to $10 for each hour spent by personnel searching for, retrieving, or examining the record for necessary redactions."
+    },
+    {
+     "rule_id": "IL-0037",
+     "authority": "5 ILCS 140/6(f)",
+     "summary": "If it imposes a Section 6(f) fee, the public body must provide the requester an accounting of all fees, costs, and personnel hours connected with the request."
+    }
+   ],
+   "fee.special_service_charge": [
+    {
+     "rule_id": "IL-0038",
+     "authority": "5 ILCS 140/6(a-5)",
+     "summary": "For a voluminous request for electronic records, a public body may charge tiered caps by data size: for non-PDF data up to $20 (<=2 MB), $40 (2-4 MB), or $100 (>4 MB); for PDF data up to $20 (<=80 MB), $40 (80-160 MB), or $100 (>160 MB)."
+    }
+   ],
+   "fee.free_allowance": [
+    {
+     "rule_id": "IL-0027",
+     "authority": "5 ILCS 140/6(b)",
+     "summary": "No fee may be charged for the first 50 pages of black-and-white, letter- or legal-sized copies requested."
+    },
+    {
+     "rule_id": "IL-0036",
+     "authority": "5 ILCS 140/6(f)",
+     "summary": "No fee may be charged for the first 8 hours spent by personnel searching for or retrieving a requested record on a commercial request."
+    }
+   ],
+   "fee.no_charge_categories": [
+    {
+     "rule_id": "IL-0032",
+     "authority": "5 ILCS 140/6(a)",
+     "summary": "A public body may not charge the requester for the cost of any search for and review of the records."
+    }
+   ]
+  },
+  "knobs_fee": null
+ },
+ "run_parameters": {
+  "scope": "municipalities only (note agency regimes)",
+  "recency": "check 2024-2026 session laws + rule amendments for fee sections",
+  "estimate_calibration": "OUT of scope"
+ }
+}

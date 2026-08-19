@@ -1,0 +1,1012 @@
+{
+ "state": "Pennsylvania",
+ "code": "PA",
+ "next_rule_id": "PA-9001 \u2014 new/amended rule rows from THIS pass use the PA-9NNN namespace (9001, 9002, \u2026) so they never collide with existing ids; reference existing rows by their existing ids.",
+ "items": [
+  {
+   "id": "dup.bw.rate",
+   "label": "Copy rate \u2014 B&W page",
+   "home": "fee_profiles:duplication.bw.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "PA-0040",
+    "PA-0039"
+   ],
+   "prior_values": [
+    "$0.20",
+    "$0.25",
+    "14 page"
+   ],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(b)",
+    "OOR Official RTKL Fee Schedule (adopted Dec. 30, 2024), issued under 65 P.S. \u00a7 67.1307(b)"
+   ],
+   "prior_snippet": "Under the OOR Official RTKL Fee Schedule, an agency may charge up to $0.25 per copy for black-and-white photocopies (8.5x11 or 8.5x14), reduced to $0.20 per copy beyond the first 1,000 copies."
+  },
+  {
+   "id": "dup.color.rate",
+   "label": "Copy rate \u2014 color page",
+   "home": "fee_profiles:duplication.color.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "PA-0040"
+   ],
+   "prior_values": [
+    "$0.20",
+    "$0.25",
+    "14 page"
+   ],
+   "prior_citations": [
+    "OOR Official RTKL Fee Schedule (adopted Dec. 30, 2024), issued under 65 P.S. \u00a7 67.1307(b)"
+   ],
+   "prior_snippet": "Under the OOR Official RTKL Fee Schedule, an agency may charge up to $0.25 per copy for black-and-white photocopies (8.5x11 or 8.5x14), reduced to $0.20 per copy beyond the first 1,000 copies."
+  },
+  {
+   "id": "dup.oversized.rate",
+   "label": "Copy rate \u2014 oversized / nonstandard page",
+   "home": "fee_profiles:duplication.oversized.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "dup.specialty.rate",
+   "label": "Specialty reproduction (photos, maps, transcripts)",
+   "home": "fee_profiles:duplication.specialty.rate",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.nonstandard_rate",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "defers_to_city",
+   "prior_rule_ids": [
+    "PA-0045"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(e)"
+   ],
+   "prior_snippet": "If an agency offers enhanced electronic access to records in addition to the inspection-and-duplication access required by the act, it may establish user fees specifically for the provision of that enhanced electronic ac"
+  },
+  {
+   "id": "dup.tiers",
+   "label": "Graduated page bands (per-page rate by volume)",
+   "home": "fee_profiles:duplication.*.tiers",
+   "type": "tiers",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.free_allowance"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "PA-0040"
+   ],
+   "prior_values": [
+    "$0.20",
+    "$0.25",
+    "14 page"
+   ],
+   "prior_citations": [
+    "OOR Official RTKL Fee Schedule (adopted Dec. 30, 2024), issued under 65 P.S. \u00a7 67.1307(b)"
+   ],
+   "prior_snippet": "Under the OOR Official RTKL Fee Schedule, an agency may charge up to $0.25 per copy for black-and-white photocopies (8.5x11 or 8.5x14), reduced to $0.20 per copy beyond the first 1,000 copies."
+  },
+  {
+   "id": "rules.freePages",
+   "label": "Free page allowance per request",
+   "home": "fee_profiles:requestRules.freePageAllowance",
+   "type": "pages",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "PA-0042"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(g)"
+   ],
+   "prior_snippet": "No fee may be imposed for an agency's review of a record to determine whether it is a public, legislative or financial record subject to access."
+  },
+  {
+   "id": "labor.search.rate",
+   "label": "Labor rate \u2014 search / retrieval ($/hr)",
+   "home": "fee_profiles:labor.search.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.review.rate",
+   "label": "Labor rate \u2014 review / redaction ($/hr)",
+   "home": "fee_profiles:labor.review.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "PA-0042"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(g)"
+   ],
+   "prior_snippet": "No fee may be imposed for an agency's review of a record to determine whether it is a public, legislative or financial record subject to access."
+  },
+  {
+   "id": "labor.programming.rate",
+   "label": "Labor rate \u2014 programming / data extraction ($/hr)",
+   "home": "fee_profiles:labor.programming.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "defers_to_city",
+   "prior_rule_ids": [
+    "PA-0045"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(e)"
+   ],
+   "prior_snippet": "If an agency offers enhanced electronic access to records in addition to the inspection-and-duplication access required by the act, it may establish user fees specifically for the provision of that enhanced electronic ac"
+  },
+  {
+   "id": "labor.billableWhen",
+   "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+   "home": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+   "type": "enum+threshold",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "PA-0042"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(g)"
+   ],
+   "prior_snippet": "No fee may be imposed for an agency's review of a record to determine whether it is a public, legislative or financial record subject to access."
+  },
+  {
+   "id": "labor.overheadPct",
+   "label": "Overhead / fringe surcharge on labor (%)",
+   "home": "fee_profiles:labor.overheadPct",
+   "type": "pct",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.increment",
+   "label": "Labor time increment + rounding",
+   "home": "fee_profiles:labor.*.increment / rounding",
+   "type": "hours",
+   "concepts": [
+    "fee.labor_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.freeLaborHours",
+   "label": "Free labor hours per request",
+   "home": "fee_profiles:requestRules.freeLaborHours",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.periodicFreeHours",
+   "label": "Free personnel time per requestor per month/year (TX \u00a7 552.275 pattern)",
+   "home": "NOT IN ENGINE (fee_profiles gap \u2014 requestor-ledger counter)",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.aggregation"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.estimateNotifyThreshold",
+   "label": "Itemized estimate / cost notice required above ($ or hours)",
+   "home": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+   "type": "usd",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "estimate.requesterResponseDays",
+   "label": "Requester must respond to an estimate within N days (else withdrawn)",
+   "home": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "estimate.revisionNotifyPercent",
+   "label": "Revised estimate required when actual exceeds estimate by N%",
+   "home": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+   "type": "pct",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "estimate.validityDays",
+   "label": "Estimate validity period (days)",
+   "home": "fee_profiles:estimatePolicy.estimateValidityDays",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.deposit.threshold",
+   "label": "Deposit / prepayment may be required above ($)",
+   "home": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+   "type": "usd",
+   "concepts": [
+    "payment.deposit_threshold",
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "PA-0046"
+   ],
+   "prior_values": [
+    "$100"
+   ],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(h)"
+   ],
+   "prior_snippet": "An agency may require a requester to prepay an estimate of the authorized fees if the fees required to fulfill the request are expected to exceed $100."
+  },
+  {
+   "id": "rules.deposit.percent",
+   "label": "Deposit capped at (% of estimate)",
+   "home": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+   "type": "pct",
+   "concepts": [
+    "payment.deposit_ceiling",
+    "payment.deposit"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.productionGate",
+   "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+   "home": "paymentTiming gates + fee_profiles bands",
+   "type": "enum",
+   "concepts": [
+    "payment.production_conditioned_on_payment",
+    "payment.advance_payment"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "PA-0046"
+   ],
+   "prior_values": [
+    "$100"
+   ],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(h)"
+   ],
+   "prior_snippet": "An agency may require a requester to prepay an estimate of the authorized fees if the fees required to fulfill the request are expected to exceed $100."
+  },
+  {
+   "id": "payment.nonpayment",
+   "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+   "home": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+   "type": "enum+int",
+   "concepts": [
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.depositClock",
+   "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+   "home": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+   "type": "enum",
+   "concepts": [
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "PA-0046"
+   ],
+   "prior_values": [
+    "$100"
+   ],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(h)"
+   ],
+   "prior_snippet": "An agency may require a requester to prepay an estimate of the authorized fees if the fees required to fulfill the request are expected to exceed $100."
+  },
+  {
+   "id": "payment.reissue",
+   "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+   "home": "jurisdiction_rules:payment.reissue_*",
+   "type": "bool",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.method",
+   "label": "Electronic payment method offered",
+   "home": "fee_profiles:payment_mode (operational; not law-driven except VA)",
+   "type": "enum",
+   "concepts": [
+    "payment.method"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.maxFee",
+   "label": "Request-level ceiling (actual cost cap / statutory max)",
+   "home": "fee_profiles:requestRules.maxFee",
+   "type": "usd_or_rule",
+   "concepts": [
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "PA-0039"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(b)"
+   ],
+   "prior_snippet": "Duplication fees for Commonwealth and local agencies (absent an agency-specific fee schedule) are established by the Office of Open Records and must be reasonable and based on prevailing fees for comparable duplication s"
+  },
+  {
+   "id": "rules.deMinimis",
+   "label": "De-minimis: no charge below ($)",
+   "home": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+   "type": "usd",
+   "concepts": [
+    "fee.waiver",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "PA-0043",
+    "PA-0042"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(f)",
+    "65 P.S. \u00a7 67.1307(g)"
+   ],
+   "prior_snippet": "An agency may waive duplication fees, including when the requester duplicates the record or when the agency deems it in the public interest to do so."
+  },
+  {
+   "id": "rules.minFee",
+   "label": "Minimum fee",
+   "home": "fee_profiles:requestRules.minFee",
+   "type": "usd",
+   "concepts": [],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "media",
+   "label": "Electronic media (CD/DVD/USB) charge",
+   "home": "fee_profiles:media.{cd,dvd,usb}",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "PA-0044"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(d)"
+   ],
+   "prior_snippet": "If a record is maintained only electronically or in nonpaper media, duplication fees are limited to the lesser of the paper-duplication fee or the original-media fee under \u00a7 1307(b), unless the requester specifically req"
+  },
+  {
+   "id": "delivery",
+   "label": "Delivery: mail / handling / email / pickup",
+   "home": "fee_profiles:delivery.*",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.delivery_charge",
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "PA-0038",
+    "PA-0044"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(a)",
+    "65 P.S. \u00a7 67.1307(d)"
+   ],
+   "prior_snippet": "Fees for postage may not exceed the actual cost of mailing."
+  },
+  {
+   "id": "certification",
+   "label": "Certification / certified-copy charge",
+   "home": "fee_profiles:certification.{rate,unit}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.certified_copy_charge"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "PA-0041"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(c)"
+   ],
+   "prior_snippet": "An agency may impose reasonable fees for official certification of copies where the certification is at the requester's behest and for the purpose of legally verifying the public record."
+  },
+  {
+   "id": "av",
+   "label": "Audio/video: per recording, per minute, free minutes",
+   "home": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.special_service_charge",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "defers_to_city",
+   "prior_rule_ids": [
+    "PA-0045"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(e)"
+   ],
+   "prior_snippet": "If an agency offers enhanced electronic access to records in addition to the inspection-and-duplication access required by the act, it may establish user fees specifically for the provision of that enhanced electronic ac"
+  },
+  {
+   "id": "commercial",
+   "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+   "home": "fee_profiles:purposeOverrides.commercial",
+   "type": "pct+bool",
+   "concepts": [
+    "fee.commercial_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "waiver",
+   "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+   "home": "jurisdiction_rules:fee_waiver.*",
+   "type": "enum_list+bool",
+   "concepts": [
+    "fee.waiver"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "PA-0043"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(f)"
+   ],
+   "prior_snippet": "An agency may waive duplication fees, including when the requester duplicates the record or when the agency deems it in the public interest to do so."
+  },
+  {
+   "id": "waiver.forfeiture",
+   "label": "Late response forfeits the fee",
+   "home": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+   "type": "bool",
+   "concepts": [
+    "fee.waiver",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "PA-0043"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "65 P.S. \u00a7 67.1307(f)"
+   ],
+   "prior_snippet": "An agency may waive duplication fees, including when the requester duplicates the record or when the agency deems it in the public interest to do so."
+  },
+  {
+   "id": "repeat",
+   "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+   "home": "NOT IN ENGINE (requestor-ledger)",
+   "type": "structural",
+   "concepts": [
+    "fee.repeat_request_carryforward",
+    "fee.aggregation"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  }
+ ],
+ "canonical_concepts": [
+  {
+   "canonical_key": "fee.copy_rate_per_page",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Absent a published actual-cost calculation, the agency may charge up to ten cents per page for public records scanned into an electronic format."
+  },
+  {
+   "canonical_key": "fee.actual_cost_basis",
+   "family": "fee",
+   "config_home": "mixed(p:24/s:8)",
+   "definition": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records."
+  },
+  {
+   "canonical_key": "fee.waiver",
+   "family": "fee",
+   "config_home": "mixed(p:5/s:23)",
+   "definition": "State, county, and municipal officers shall furnish, without charge, searches for and certified copies of public records needed in support of a claim or benefit applicati"
+  },
+  {
+   "canonical_key": "fee.electronic_media_charge",
+   "family": "fee",
+   "config_home": "mixed(p:21/s:1)",
+   "definition": "If records are not in electronic format and the public body agrees to produce them electronically, it may charge for the staff time required to transfer the documents to "
+  },
+  {
+   "canonical_key": "fee.no_charge_categories",
+   "family": "fee",
+   "config_home": "mixed(p:11/s:9)",
+   "definition": "A fee shall not be assessed for time spent segregating or redacting records unless such segregation/redaction is required by law or approved by the Supervisor."
+  },
+  {
+   "canonical_key": "fee.labor_charge",
+   "family": "fee",
+   "config_home": "mixed(p:25/s:4)",
+   "definition": "A public body may add up to 50% to the applicable labor charge to cover fringe benefits, not exceeding the actual cost of fringe benefits, if it notes the multiplier on t"
+  },
+  {
+   "canonical_key": "fee.schedule_and_authority",
+   "family": "fee",
+   "config_home": "mixed(p:6/s:10)",
+   "definition": "For state-agency public records, copy fees shall be charged according to the uniform fee schedule adopted by the commissioner of administration (R.S. 39:241) or as otherw"
+  },
+  {
+   "canonical_key": "fee.estimate_and_notice",
+   "family": "fee",
+   "config_home": "mixed(p:3/s:19)",
+   "definition": "The requester shall be informed of the estimated cost of preparing the copy if more than two hours of employee time is needed or if an outside professional service would "
+  },
+  {
+   "canonical_key": "fee.nonstandard_rate",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Where a copy requires a transcription, or a person requests a transcription of a public record, the transcription fee shall not exceed the agency's cost."
+  },
+  {
+   "canonical_key": "fee.free_allowance",
+   "family": "fee",
+   "config_home": "mixed(p:10/s:2)",
+   "definition": "The custodian shall not impose any charge for the first hour of time expended in research and retrieval of public records."
+  },
+  {
+   "canonical_key": "fee.certified_copy_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "The fee for certification of documents may not exceed five dollars ($5) per document."
+  },
+  {
+   "canonical_key": "fee.special_service_charge",
+   "family": "fee",
+   "config_home": "mixed(p:7/s:1)",
+   "definition": "For a voluminous request for electronic records, a public body may charge tiered caps by data size: for non-PDF data up to $20 (<=2 MB), $40 (2-4 MB), or $100 (>4 MB); fo"
+  },
+  {
+   "canonical_key": "fee.commercial_charge",
+   "family": "fee",
+   "config_home": "mixed(p:4/s:3)",
+   "definition": "The chapter does not authorize giving, selling, or providing access to lists of individuals requested for commercial purposes, and agencies shall not do so unless specifi"
+  },
+  {
+   "canonical_key": "fee.delivery_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Mailing may be charged at actual cost in a reasonably economical manner; no charge for expedited shipping or insurance unless stipulated by the requester."
+  },
+  {
+   "canonical_key": "fee.repeat_request_carryforward",
+   "family": "fee",
+   "config_home": "structural",
+   "definition": "If the same or a substantially similar request is made within six months after expiration of the ninety-day nonpayment-withdrawal period (or one hundred fifty days if req"
+  },
+  {
+   "canonical_key": "fee.aggregation",
+   "family": "fee",
+   "config_home": "mixed(p:1/s:2)",
+   "definition": "Once a records custodian reaches the aggregation threshold, the custodian is no longer required to deduct the labor threshold or any other minimum charge per request that"
+  },
+  {
+   "canonical_key": "payment.advance_payment",
+   "family": "payment",
+   "config_home": "mixed(p:6/s:12)",
+   "definition": "The custodian may require advance payment of the fees authorized by this section before providing the records."
+  },
+  {
+   "canonical_key": "payment.nonpayment_consequence",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:11)",
+   "definition": "A request is considered withdrawn if the requester fails to remit all fees within ninety days, or within one hundred fifty days if the requested fees are greater than one"
+  },
+  {
+   "canonical_key": "payment.production_conditioned_on_payment",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "For a standard request, the public officer has discretion to require the requester to pay all or a portion of the estimated fee prior to searching for any responsive publ"
+  },
+  {
+   "canonical_key": "payment.deposit",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:3)",
+   "definition": "A deposit notice is considered received 3 days after it is sent (regardless of transmission means), and it must state the deposit-due date, which is 48 days after the not"
+  },
+  {
+   "canonical_key": "payment.deposit_threshold",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "Where a public body determines in advance that charges are likely to exceed $200, it may, before continuing to process the request, require the requester to pay a deposit"
+  },
+  {
+   "canonical_key": "payment.deposit_ceiling",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "A good-faith deposit must not exceed one-half of the total estimated fee, and the deposit request must include a detailed fee itemization."
+  },
+  {
+   "canonical_key": "payment.method",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "Any local public body that charges for producing records may provide an electronic method of payment (noncash, non-paper-check \u2014 credit/debit cards, direct deposit/debit,"
+  }
+ ],
+ "existing_fee_payment_rules": [
+  {
+   "rule_id": "PA-0038",
+   "category": "Fees",
+   "concept_key": "fee.postage_actual_cost",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "legal_concept": "Postage fee limited to actual cost",
+   "rule_type": "Calculation",
+   "atomic_rule": "Fees for postage may not exceed the actual cost of mailing.",
+   "trigger": "Records mailed to requester",
+   "clock_effect": "none",
+   "source_language": "Fees for postage may not exceed the actual cost of mailing.",
+   "is_paraphrase": false,
+   "source_authority": "65 P.S. \u00a7 67.1307(a)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM"
+  },
+  {
+   "rule_id": "PA-0039",
+   "category": "Fees",
+   "concept_key": "fee.duplication_agency_schedule",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "legal_concept": "Duplication fees set by Office of Open Records schedule",
+   "rule_type": "Calculation",
+   "atomic_rule": "Duplication fees for Commonwealth and local agencies (absent an agency-specific fee schedule) are established by the Office of Open Records and must be reasonable and based on prevailing fees for comparable duplication services provided by local business entities.",
+   "trigger": "Requester seeks duplication/copies",
+   "clock_effect": "none",
+   "source_language": "Fees for duplication by a Commonwealth agency or a local agency shall be established by the Office of Open Records. Fees shall be reasonable and based on prevailing fees for comparable duplication services provided by local business entities.",
+   "is_paraphrase": true,
+   "source_authority": "65 P.S. \u00a7 67.1307(b)",
+   "source_type": "Statute",
+   "effective_status": "Requires manual verification",
+   "official_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+   "notes": "Paraphrase of \u00a7 1307(b); the concrete per-page value lives in the OOR fee schedule (PA-0040).",
+   "related_rule_ids": [
+    "PA-0040"
+   ]
+  },
+  {
+   "rule_id": "PA-0040",
+   "category": "Fees",
+   "concept_key": "fee.copy_rate_per_page",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "legal_concept": "OOR Official RTKL Fee Schedule \u2014 per-copy photocopy rate",
+   "rule_type": "Calculation",
+   "atomic_rule": "Under the OOR Official RTKL Fee Schedule, an agency may charge up to $0.25 per copy for black-and-white photocopies (8.5x11 or 8.5x14), reduced to $0.20 per copy beyond the first 1,000 copies.",
+   "trigger": "Requester seeks paper copies",
+   "clock_effect": "none",
+   "source_language": "Up to $0.25 per copy for black and white copies (a 'copy' is one side of an 8.5x11 or 8.5x14 page); up to $0.20 per copy beyond the first 1,000 copies.",
+   "is_paraphrase": true,
+   "source_authority": "OOR Official RTKL Fee Schedule (adopted Dec. 30, 2024), issued under 65 P.S. \u00a7 67.1307(b)",
+   "source_type": "Official Guidance",
+   "effective_status": "Effective 2024 \u2014 Requires manual verification",
+   "official_link": "https://www.openrecords.pa.gov/Documents/RTKL/Official_RTKL_Fee_Schedule.pdf",
+   "notes": "Value set by OOR schedule, not the statute; confirm current amounts and tiering against the linked PDF. Ceiling the city applies its actual (lower) value under.",
+   "related_rule_ids": [
+    "PA-0039"
+   ]
+  },
+  {
+   "rule_id": "PA-0041",
+   "category": "Fees",
+   "concept_key": "fee.certification_charge",
+   "config_home": "parameter",
+   "constraint_basis": "soft-standard",
+   "legal_concept": "Fee for certification of copies",
+   "rule_type": "Calculation",
+   "atomic_rule": "An agency may impose reasonable fees for official certification of copies where the certification is at the requester's behest and for the purpose of legally verifying the public record.",
+   "trigger": "Requester seeks a certified copy",
+   "clock_effect": "none",
+   "source_language": "An agency may impose reasonable fees for official certification of copies if the certification is at the behest of the requester and for the purpose of legally verifying the public record.",
+   "is_paraphrase": false,
+   "source_authority": "65 P.S. \u00a7 67.1307(c)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+   "notes": "Subsection letter approximate; 'reasonable' is a soft-standard, no fixed number.",
+   "related_rule_ids": [
+    "PA-0015"
+   ]
+  },
+  {
+   "rule_id": "PA-0042",
+   "category": "Fees",
+   "concept_key": "fee.no_charge_for_access_review",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "legal_concept": "No fee for reviewing a record to determine access",
+   "rule_type": "Prohibition",
+   "atomic_rule": "No fee may be imposed for an agency's review of a record to determine whether it is a public, legislative or financial record subject to access.",
+   "trigger": "Agency reviews record for access determination",
+   "clock_effect": "none",
+   "source_language": "No fee may be imposed for an agency's review of a record to determine whether the record is a public record, legislative record or financial record subject to access.",
+   "is_paraphrase": false,
+   "source_authority": "65 P.S. \u00a7 67.1307(g)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+   "notes": "Fixed at $0 \u2014 agency may not charge for exemption-review/redaction-decision time."
+  },
+  {
+   "rule_id": "PA-0043",
+   "category": "Fees",
+   "concept_key": "fee.waiver_permitted",
+   "config_home": "structural",
+   "legal_concept": "Waiver of duplication fees",
+   "rule_type": "Permission",
+   "atomic_rule": "An agency may waive duplication fees, including when the requester duplicates the record or when the agency deems it in the public interest to do so.",
+   "trigger": "Agency elects to waive fees",
+   "clock_effect": "none",
+   "source_language": "An agency may waive the fees for duplication of a record, including, but not limited to, when: (1) the requester duplicates the record; or (2) the agency deems it is in the public interest to do so.",
+   "is_paraphrase": false,
+   "source_authority": "65 P.S. \u00a7 67.1307(f)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM"
+  },
+  {
+   "rule_id": "PA-0044",
+   "category": "Fees",
+   "concept_key": "fee.conversion_medium_lesser",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "legal_concept": "Fee for records maintained only in electronic/nonpaper media",
+   "rule_type": "Calculation",
+   "atomic_rule": "If a record is maintained only electronically or in nonpaper media, duplication fees are limited to the lesser of the paper-duplication fee or the original-media fee under \u00a7 1307(b), unless the requester specifically requests the more expensive medium.",
+   "trigger": "Record maintained only in nonpaper media",
+   "clock_effect": "none",
+   "source_language": "If a record is only maintained electronically or in other nonpaper media, duplication fees shall be limited to the lesser of the fee for duplication on paper or the fee for duplication in the original media as provided by subsection (b) unless the requester specifically requests for the record to be duplicated in the more expensive medium.",
+   "is_paraphrase": false,
+   "source_authority": "65 P.S. \u00a7 67.1307(d)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM"
+  },
+  {
+   "rule_id": "PA-0045",
+   "category": "Fees",
+   "concept_key": "fee.enhanced_electronic_access",
+   "config_home": "parameter",
+   "constraint_basis": "soft-standard",
+   "legal_concept": "User fees for enhanced electronic access",
+   "rule_type": "Permission",
+   "atomic_rule": "If an agency offers enhanced electronic access to records in addition to the inspection-and-duplication access required by the act, it may establish user fees specifically for the provision of that enhanced electronic access.",
+   "trigger": "Agency offers optional enhanced electronic access",
+   "clock_effect": "none",
+   "source_language": "If an agency offers enhanced electronic access to records in addition to making the records accessible for inspection and duplication by a requester as required by this act, the agency may establish user fees specifically for the provision of the enhanced electronic access.",
+   "is_paraphrase": false,
+   "source_authority": "65 P.S. \u00a7 67.1307(e)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+   "notes": "Subsection letter approximate; enhanced access is optional, separate from statutory access."
+  },
+  {
+   "rule_id": "PA-0046",
+   "category": "Payment",
+   "concept_key": "payment.prepayment_threshold",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "legal_concept": "Prepayment of estimated fees over $100",
+   "rule_type": "Permission",
+   "atomic_rule": "An agency may require a requester to prepay an estimate of the authorized fees if the fees required to fulfill the request are expected to exceed $100.",
+   "trigger": "Estimated fees expected to exceed $100",
+   "clock_effect": "none",
+   "source_language": "An agency may require a requester to prepay an estimate of the fees authorized under this section if the fees required to fulfill the request are expected to exceed $100.",
+   "is_paraphrase": false,
+   "source_authority": "65 P.S. \u00a7 67.1307(h)",
+   "source_type": "Statute",
+   "effective_status": "Current",
+   "official_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+   "notes": "$100 is a fixed trigger threshold; in practice prepayment gates production (may pause fulfillment until paid), and nonpayment is an extension ground under PA-0023 factor (6)."
+  }
+ ],
+ "template": {
+  "fee_schedule": {
+   "fee.copy_rate_per_page": [
+    {
+     "rule_id": "PA-0040",
+     "authority": "OOR Official RTKL Fee Schedule (adopted Dec. 30, 2024), issued under 65 P.S. \u00a7 67.1307(b)",
+     "summary": "Under the OOR Official RTKL Fee Schedule, an agency may charge up to $0.25 per copy for black-and-white photocopies (8.5x11 or 8.5x14), reduced to $0.20 per copy beyond the first 1,000 copies."
+    }
+   ],
+   "fee.electronic_media_charge": [
+    {
+     "rule_id": "PA-0044",
+     "authority": "65 P.S. \u00a7 67.1307(d)",
+     "summary": "If a record is maintained only electronically or in nonpaper media, duplication fees are limited to the lesser of the paper-duplication fee or the original-media fee under \u00a7 1307(b), unless the requester specifically requests the more expensive medium."
+    }
+   ],
+   "fee.certified_copy_charge": [
+    {
+     "rule_id": "PA-0041",
+     "authority": "65 P.S. \u00a7 67.1307(c)",
+     "summary": "An agency may impose reasonable fees for official certification of copies where the certification is at the requester's behest and for the purpose of legally verifying the public record."
+    }
+   ],
+   "fee.delivery_charge": [
+    {
+     "rule_id": "PA-0038",
+     "authority": "65 P.S. \u00a7 67.1307(a)",
+     "summary": "Fees for postage may not exceed the actual cost of mailing."
+    }
+   ],
+   "fee.special_service_charge": [
+    {
+     "rule_id": "PA-0045",
+     "authority": "65 P.S. \u00a7 67.1307(e)",
+     "summary": "If an agency offers enhanced electronic access to records in addition to the inspection-and-duplication access required by the act, it may establish user fees specifically for the provision of that enhanced electronic access."
+    }
+   ],
+   "fee.no_charge_categories": [
+    {
+     "rule_id": "PA-0042",
+     "authority": "65 P.S. \u00a7 67.1307(g)",
+     "summary": "No fee may be imposed for an agency's review of a record to determine whether it is a public, legislative or financial record subject to access."
+    }
+   ],
+   "fee.schedule_and_authority": [
+    {
+     "rule_id": "PA-0039",
+     "authority": "65 P.S. \u00a7 67.1307(b)",
+     "summary": "Duplication fees for Commonwealth and local agencies (absent an agency-specific fee schedule) are established by the Office of Open Records and must be reasonable and based on prevailing fees for comparable duplication services provided by local business entities."
+    }
+   ]
+  },
+  "knobs_fee": null
+ },
+ "run_parameters": {
+  "scope": "municipalities only (note agency regimes)",
+  "recency": "check 2024-2026 session laws + rule amendments for fee sections",
+  "estimate_calibration": "OUT of scope"
+ }
+}

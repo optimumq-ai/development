@@ -1,0 +1,1080 @@
+{
+ "state": "Kansas",
+ "code": "KS",
+ "next_rule_id": "KS-9001 \u2014 new/amended rule rows from THIS pass use the KS-9NNN namespace (9001, 9002, \u2026) so they never collide with existing ids; reference existing rows by their existing ids.",
+ "items": [
+  {
+   "id": "dup.bw.rate",
+   "label": "Copy rate \u2014 B&W page",
+   "home": "fee_profiles:duplication.bw.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "KS-0034",
+    "KS-0037",
+    "KS-0040",
+    "KS-0033"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "K.S.A. 45-219(b)",
+    "K.S.A. 45-219(c)",
+    "K.S.A. 45-219(c)(1)",
+    "K.S.A. 45-219(c)(3)"
+   ],
+   "prior_snippet": "Fees for copies shall not exceed the actual cost of furnishing the requested records, including the cost of staff time required to make the information available."
+  },
+  {
+   "id": "dup.color.rate",
+   "label": "Copy rate \u2014 color page",
+   "home": "fee_profiles:duplication.color.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "dup.oversized.rate",
+   "label": "Copy rate \u2014 oversized / nonstandard page",
+   "home": "fee_profiles:duplication.oversized.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "dup.specialty.rate",
+   "label": "Specialty reproduction (photos, maps, transcripts)",
+   "home": "fee_profiles:duplication.specialty.rate",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.nonstandard_rate",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "dup.tiers",
+   "label": "Graduated page bands (per-page rate by volume)",
+   "home": "fee_profiles:duplication.*.tiers",
+   "type": "tiers",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.free_allowance"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.freePages",
+   "label": "Free page allowance per request",
+   "home": "fee_profiles:requestRules.freePageAllowance",
+   "type": "pages",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.search.rate",
+   "label": "Labor rate \u2014 search / retrieval ($/hr)",
+   "home": "fee_profiles:labor.search.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "KS-0035",
+    "KS-0038",
+    "KS-0034",
+    "KS-0037",
+    "KS-0040"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "K.S.A. 45-219(b)",
+    "K.S.A. 45-219(c)(1)",
+    "K.S.A. 45-219(c)(3)"
+   ],
+   "prior_snippet": "Actual costs may include the cost to review and redact the requested records but shall not include incidental costs not attributable to furnishing the requested records."
+  },
+  {
+   "id": "labor.review.rate",
+   "label": "Labor rate \u2014 review / redaction ($/hr)",
+   "home": "fee_profiles:labor.review.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "KS-0035",
+    "KS-0038"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "K.S.A. 45-219(c)(1)",
+    "K.S.A. 45-219(c)(3)"
+   ],
+   "prior_snippet": "Actual costs may include the cost to review and redact the requested records but shall not include incidental costs not attributable to furnishing the requested records."
+  },
+  {
+   "id": "labor.programming.rate",
+   "label": "Labor rate \u2014 programming / data extraction ($/hr)",
+   "home": "fee_profiles:labor.programming.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "KS-0035",
+    "KS-0038"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "K.S.A. 45-219(c)(1)",
+    "K.S.A. 45-219(c)(3)"
+   ],
+   "prior_snippet": "Actual costs may include the cost to review and redact the requested records but shall not include incidental costs not attributable to furnishing the requested records."
+  },
+  {
+   "id": "labor.billableWhen",
+   "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+   "home": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+   "type": "enum+threshold",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "KS-0035",
+    "KS-0038"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "K.S.A. 45-219(c)(1)",
+    "K.S.A. 45-219(c)(3)"
+   ],
+   "prior_snippet": "Actual costs may include the cost to review and redact the requested records but shall not include incidental costs not attributable to furnishing the requested records."
+  },
+  {
+   "id": "labor.overheadPct",
+   "label": "Overhead / fringe surcharge on labor (%)",
+   "home": "fee_profiles:labor.overheadPct",
+   "type": "pct",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "KS-0035",
+    "KS-0038",
+    "KS-0034",
+    "KS-0037",
+    "KS-0040"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "K.S.A. 45-219(b)",
+    "K.S.A. 45-219(c)(1)",
+    "K.S.A. 45-219(c)(3)"
+   ],
+   "prior_snippet": "Actual costs may include the cost to review and redact the requested records but shall not include incidental costs not attributable to furnishing the requested records."
+  },
+  {
+   "id": "labor.increment",
+   "label": "Labor time increment + rounding",
+   "home": "fee_profiles:labor.*.increment / rounding",
+   "type": "hours",
+   "concepts": [
+    "fee.labor_charge"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "KS-0035",
+    "KS-0038"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "K.S.A. 45-219(c)(1)",
+    "K.S.A. 45-219(c)(3)"
+   ],
+   "prior_snippet": "Actual costs may include the cost to review and redact the requested records but shall not include incidental costs not attributable to furnishing the requested records."
+  },
+  {
+   "id": "rules.freeLaborHours",
+   "label": "Free labor hours per request",
+   "home": "fee_profiles:requestRules.freeLaborHours",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "KS-0035",
+    "KS-0038"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "K.S.A. 45-219(c)(1)",
+    "K.S.A. 45-219(c)(3)"
+   ],
+   "prior_snippet": "Actual costs may include the cost to review and redact the requested records but shall not include incidental costs not attributable to furnishing the requested records."
+  },
+  {
+   "id": "labor.periodicFreeHours",
+   "label": "Free personnel time per requestor per month/year (TX \u00a7 552.275 pattern)",
+   "home": "NOT IN ENGINE (fee_profiles gap \u2014 requestor-ledger counter)",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.aggregation"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.estimateNotifyThreshold",
+   "label": "Itemized estimate / cost notice required above ($ or hours)",
+   "home": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+   "type": "usd",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "KS-0039",
+    "KS-0041"
+   ],
+   "prior_values": [
+    "$200,"
+   ],
+   "prior_citations": [
+    "K.S.A. 45-219(c)(4)",
+    "K.S.A. 45-219(e)(1)"
+   ],
+   "prior_snippet": "Upon request, the agency shall provide an itemized statement of costs charged to the requester, including the hourly rates for each employee involved and an itemized list of any other fees."
+  },
+  {
+   "id": "estimate.requesterResponseDays",
+   "label": "Requester must respond to an estimate within N days (else withdrawn)",
+   "home": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "KS-0039",
+    "KS-0041",
+    "KS-0042"
+   ],
+   "prior_values": [
+    "$200,"
+   ],
+   "prior_citations": [
+    "K.S.A. 45-219(c)(4)",
+    "K.S.A. 45-219(e)(1)",
+    "K.S.A. 45-219(e)(2)"
+   ],
+   "prior_snippet": "Upon request, the agency shall provide an itemized statement of costs charged to the requester, including the hourly rates for each employee involved and an itemized list of any other fees."
+  },
+  {
+   "id": "estimate.revisionNotifyPercent",
+   "label": "Revised estimate required when actual exceeds estimate by N%",
+   "home": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+   "type": "pct",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "KS-0039",
+    "KS-0041"
+   ],
+   "prior_values": [
+    "$200,"
+   ],
+   "prior_citations": [
+    "K.S.A. 45-219(c)(4)",
+    "K.S.A. 45-219(e)(1)"
+   ],
+   "prior_snippet": "Upon request, the agency shall provide an itemized statement of costs charged to the requester, including the hourly rates for each employee involved and an itemized list of any other fees."
+  },
+  {
+   "id": "estimate.validityDays",
+   "label": "Estimate validity period (days)",
+   "home": "fee_profiles:estimatePolicy.estimateValidityDays",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "KS-0039",
+    "KS-0041"
+   ],
+   "prior_values": [
+    "$200,"
+   ],
+   "prior_citations": [
+    "K.S.A. 45-219(c)(4)",
+    "K.S.A. 45-219(e)(1)"
+   ],
+   "prior_snippet": "Upon request, the agency shall provide an itemized statement of costs charged to the requester, including the hourly rates for each employee involved and an itemized list of any other fees."
+  },
+  {
+   "id": "rules.deposit.threshold",
+   "label": "Deposit / prepayment may be required above ($)",
+   "home": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+   "type": "usd",
+   "concepts": [
+    "payment.deposit_threshold",
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "KS-0043"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "K.S.A. 45-218(f)"
+   ],
+   "prior_snippet": "A public agency may charge and require advance payment of a fee for providing access to or furnishing copies of public records, subject to K.S.A. 45-219."
+  },
+  {
+   "id": "rules.deposit.percent",
+   "label": "Deposit capped at (% of estimate)",
+   "home": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+   "type": "pct",
+   "concepts": [
+    "payment.deposit_ceiling",
+    "payment.deposit"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "KS-0043"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "K.S.A. 45-218(f)"
+   ],
+   "prior_snippet": "A public agency may charge and require advance payment of a fee for providing access to or furnishing copies of public records, subject to K.S.A. 45-219."
+  },
+  {
+   "id": "payment.productionGate",
+   "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+   "home": "paymentTiming gates + fee_profiles bands",
+   "type": "enum",
+   "concepts": [
+    "payment.production_conditioned_on_payment",
+    "payment.advance_payment"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.nonpayment",
+   "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+   "home": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+   "type": "enum+int",
+   "concepts": [
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "KS-0042"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "K.S.A. 45-219(e)(2)"
+   ],
+   "prior_snippet": "If the agency has made reasonable efforts to contact the requester under subsection (e) and the requester fails to respond by the end of the third business day, the request is deemed withdrawn until the requester makes s"
+  },
+  {
+   "id": "payment.depositClock",
+   "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+   "home": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+   "type": "enum",
+   "concepts": [
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "KS-0043"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "K.S.A. 45-218(f)"
+   ],
+   "prior_snippet": "A public agency may charge and require advance payment of a fee for providing access to or furnishing copies of public records, subject to K.S.A. 45-219."
+  },
+  {
+   "id": "payment.reissue",
+   "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+   "home": "jurisdiction_rules:payment.reissue_*",
+   "type": "bool",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "KS-0039",
+    "KS-0041"
+   ],
+   "prior_values": [
+    "$200,"
+   ],
+   "prior_citations": [
+    "K.S.A. 45-219(c)(4)",
+    "K.S.A. 45-219(e)(1)"
+   ],
+   "prior_snippet": "Upon request, the agency shall provide an itemized statement of costs charged to the requester, including the hourly rates for each employee involved and an itemized list of any other fees."
+  },
+  {
+   "id": "payment.method",
+   "label": "Electronic payment method offered",
+   "home": "fee_profiles:payment_mode (operational; not law-driven except VA)",
+   "type": "enum",
+   "concepts": [
+    "payment.method"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.maxFee",
+   "label": "Request-level ceiling (actual cost cap / statutory max)",
+   "home": "fee_profiles:requestRules.maxFee",
+   "type": "usd_or_rule",
+   "concepts": [
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "KS-0034",
+    "KS-0037",
+    "KS-0040",
+    "KS-0033"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "K.S.A. 45-219(b)",
+    "K.S.A. 45-219(c)",
+    "K.S.A. 45-219(c)(1)",
+    "K.S.A. 45-219(c)(3)"
+   ],
+   "prior_snippet": "Fees for copies shall not exceed the actual cost of furnishing the requested records, including the cost of staff time required to make the information available."
+  },
+  {
+   "id": "rules.deMinimis",
+   "label": "De-minimis: no charge below ($)",
+   "home": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+   "type": "usd",
+   "concepts": [
+    "fee.waiver",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.minFee",
+   "label": "Minimum fee",
+   "home": "fee_profiles:requestRules.minFee",
+   "type": "usd",
+   "concepts": [],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "media",
+   "label": "Electronic media (CD/DVD/USB) charge",
+   "home": "fee_profiles:media.{cd,dvd,usb}",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "KS-0036"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "K.S.A. 45-219(c)(2)"
+   ],
+   "prior_snippet": "Fees for providing access to records maintained on computer facilities shall include only the cost of any computer services, including staff time required."
+  },
+  {
+   "id": "delivery",
+   "label": "Delivery: mail / handling / email / pickup",
+   "home": "fee_profiles:delivery.*",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.delivery_charge",
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "KS-0036"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "K.S.A. 45-219(c)(2)"
+   ],
+   "prior_snippet": "Fees for providing access to records maintained on computer facilities shall include only the cost of any computer services, including staff time required."
+  },
+  {
+   "id": "certification",
+   "label": "Certification / certified-copy charge",
+   "home": "fee_profiles:certification.{rate,unit}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.certified_copy_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "av",
+   "label": "Audio/video: per recording, per minute, free minutes",
+   "home": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.special_service_charge",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "commercial",
+   "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+   "home": "fee_profiles:purposeOverrides.commercial",
+   "type": "pct+bool",
+   "concepts": [
+    "fee.commercial_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "waiver",
+   "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+   "home": "jurisdiction_rules:fee_waiver.*",
+   "type": "enum_list+bool",
+   "concepts": [
+    "fee.waiver"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "waiver.forfeiture",
+   "label": "Late response forfeits the fee",
+   "home": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+   "type": "bool",
+   "concepts": [
+    "fee.waiver",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "KS-0042"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "K.S.A. 45-219(e)(2)"
+   ],
+   "prior_snippet": "If the agency has made reasonable efforts to contact the requester under subsection (e) and the requester fails to respond by the end of the third business day, the request is deemed withdrawn until the requester makes s"
+  },
+  {
+   "id": "repeat",
+   "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+   "home": "NOT IN ENGINE (requestor-ledger)",
+   "type": "structural",
+   "concepts": [
+    "fee.repeat_request_carryforward",
+    "fee.aggregation"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  }
+ ],
+ "canonical_concepts": [
+  {
+   "canonical_key": "fee.copy_rate_per_page",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Absent a published actual-cost calculation, the agency may charge up to ten cents per page for public records scanned into an electronic format."
+  },
+  {
+   "canonical_key": "fee.actual_cost_basis",
+   "family": "fee",
+   "config_home": "mixed(p:24/s:8)",
+   "definition": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records."
+  },
+  {
+   "canonical_key": "fee.waiver",
+   "family": "fee",
+   "config_home": "mixed(p:5/s:23)",
+   "definition": "State, county, and municipal officers shall furnish, without charge, searches for and certified copies of public records needed in support of a claim or benefit applicati"
+  },
+  {
+   "canonical_key": "fee.electronic_media_charge",
+   "family": "fee",
+   "config_home": "mixed(p:21/s:1)",
+   "definition": "If records are not in electronic format and the public body agrees to produce them electronically, it may charge for the staff time required to transfer the documents to "
+  },
+  {
+   "canonical_key": "fee.no_charge_categories",
+   "family": "fee",
+   "config_home": "mixed(p:11/s:9)",
+   "definition": "A fee shall not be assessed for time spent segregating or redacting records unless such segregation/redaction is required by law or approved by the Supervisor."
+  },
+  {
+   "canonical_key": "fee.labor_charge",
+   "family": "fee",
+   "config_home": "mixed(p:25/s:4)",
+   "definition": "A public body may add up to 50% to the applicable labor charge to cover fringe benefits, not exceeding the actual cost of fringe benefits, if it notes the multiplier on t"
+  },
+  {
+   "canonical_key": "fee.schedule_and_authority",
+   "family": "fee",
+   "config_home": "mixed(p:6/s:10)",
+   "definition": "For state-agency public records, copy fees shall be charged according to the uniform fee schedule adopted by the commissioner of administration (R.S. 39:241) or as otherw"
+  },
+  {
+   "canonical_key": "fee.estimate_and_notice",
+   "family": "fee",
+   "config_home": "mixed(p:3/s:19)",
+   "definition": "The requester shall be informed of the estimated cost of preparing the copy if more than two hours of employee time is needed or if an outside professional service would "
+  },
+  {
+   "canonical_key": "fee.nonstandard_rate",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Where a copy requires a transcription, or a person requests a transcription of a public record, the transcription fee shall not exceed the agency's cost."
+  },
+  {
+   "canonical_key": "fee.free_allowance",
+   "family": "fee",
+   "config_home": "mixed(p:10/s:2)",
+   "definition": "The custodian shall not impose any charge for the first hour of time expended in research and retrieval of public records."
+  },
+  {
+   "canonical_key": "fee.certified_copy_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "The fee for certification of documents may not exceed five dollars ($5) per document."
+  },
+  {
+   "canonical_key": "fee.special_service_charge",
+   "family": "fee",
+   "config_home": "mixed(p:7/s:1)",
+   "definition": "For a voluminous request for electronic records, a public body may charge tiered caps by data size: for non-PDF data up to $20 (<=2 MB), $40 (2-4 MB), or $100 (>4 MB); fo"
+  },
+  {
+   "canonical_key": "fee.commercial_charge",
+   "family": "fee",
+   "config_home": "mixed(p:4/s:3)",
+   "definition": "The chapter does not authorize giving, selling, or providing access to lists of individuals requested for commercial purposes, and agencies shall not do so unless specifi"
+  },
+  {
+   "canonical_key": "fee.delivery_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Mailing may be charged at actual cost in a reasonably economical manner; no charge for expedited shipping or insurance unless stipulated by the requester."
+  },
+  {
+   "canonical_key": "fee.repeat_request_carryforward",
+   "family": "fee",
+   "config_home": "structural",
+   "definition": "If the same or a substantially similar request is made within six months after expiration of the ninety-day nonpayment-withdrawal period (or one hundred fifty days if req"
+  },
+  {
+   "canonical_key": "fee.aggregation",
+   "family": "fee",
+   "config_home": "mixed(p:1/s:2)",
+   "definition": "Once a records custodian reaches the aggregation threshold, the custodian is no longer required to deduct the labor threshold or any other minimum charge per request that"
+  },
+  {
+   "canonical_key": "payment.advance_payment",
+   "family": "payment",
+   "config_home": "mixed(p:6/s:12)",
+   "definition": "The custodian may require advance payment of the fees authorized by this section before providing the records."
+  },
+  {
+   "canonical_key": "payment.nonpayment_consequence",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:11)",
+   "definition": "A request is considered withdrawn if the requester fails to remit all fees within ninety days, or within one hundred fifty days if the requested fees are greater than one"
+  },
+  {
+   "canonical_key": "payment.production_conditioned_on_payment",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "For a standard request, the public officer has discretion to require the requester to pay all or a portion of the estimated fee prior to searching for any responsive publ"
+  },
+  {
+   "canonical_key": "payment.deposit",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:3)",
+   "definition": "A deposit notice is considered received 3 days after it is sent (regardless of transmission means), and it must state the deposit-due date, which is 48 days after the not"
+  },
+  {
+   "canonical_key": "payment.deposit_threshold",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "Where a public body determines in advance that charges are likely to exceed $200, it may, before continuing to process the request, require the requester to pay a deposit"
+  },
+  {
+   "canonical_key": "payment.deposit_ceiling",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "A good-faith deposit must not exceed one-half of the total estimated fee, and the deposit request must include a detailed fee itemization."
+  },
+  {
+   "canonical_key": "payment.method",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "Any local public body that charges for producing records may provide an electronic method of payment (noncash, non-paper-check \u2014 credit/debit cards, direct deposit/debit,"
+  }
+ ],
+ "existing_fee_payment_rules": [
+  {
+   "rule_id": "KS-0033",
+   "category": "Fees",
+   "concept_key": "fee.reasonable_fee_standard",
+   "config_home": "parameter",
+   "constraint_basis": "soft-standard",
+   "legal_concept": "Agency may prescribe reasonable fees",
+   "rule_type": "Permission",
+   "atomic_rule": "Except where fees are prescribed by statute or subsection (h) applies, each public agency may prescribe reasonable fees for providing access to or furnishing copies of public records, subject to enumerated limits.",
+   "trigger": "Agency prescribes a fee",
+   "clock_effect": "none",
+   "source_language": "Except as provided by subsection (h) or where fees for inspection or for copies of a public record are prescribed by statute, each public agency may prescribe reasonable fees for providing access to or furnishing copies of public records, subject to the following:",
+   "is_paraphrase": false,
+   "source_authority": "K.S.A. 45-219(c)",
+   "notes": "Umbrella soft-standard ('reasonable'); the actual-cost ceiling is KS-0034. The city supplies the value under the reasonableness standard.",
+   "related_rule_ids": [
+    "KS-0034"
+   ],
+   "official_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "effective_status": "Amended effective 2025-07-01",
+   "source_type": "Statute"
+  },
+  {
+   "rule_id": "KS-0034",
+   "category": "Fees",
+   "concept_key": "fee.copy_actual_cost_ceiling",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "legal_concept": "Copy fee capped at actual cost including staff time",
+   "rule_type": "Calculation",
+   "atomic_rule": "Fees for copies shall not exceed the actual cost of furnishing the requested records, including the cost of staff time required to make the information available.",
+   "trigger": "Agency charges for copies of records",
+   "clock_effect": "none",
+   "source_language": "In the case of fees for copies of records, the fees shall not exceed the actual cost of furnishing the requested records, including the cost of staff time required to make the information available. Actual costs may include the cost to review and redact the requested records but shall not include incidental costs incurred by the public agency that are not attributable to furnishing the requested records.",
+   "is_paraphrase": false,
+   "source_authority": "K.S.A. 45-219(c)(1)",
+   "notes": "Unlike states that bar search/review labor, Kansas expressly permits charging staff time and review/redaction cost (KS-0035). Excludes non-attributable incidental costs.",
+   "related_rule_ids": [
+    "KS-0035",
+    "KS-0033"
+   ],
+   "official_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "effective_status": "Amended effective 2025-07-01",
+   "source_type": "Statute"
+  },
+  {
+   "rule_id": "KS-0035",
+   "category": "Fees",
+   "concept_key": "fee.review_redaction_chargeable",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "legal_concept": "Review and redaction costs chargeable; incidentals excluded",
+   "rule_type": "Permission",
+   "atomic_rule": "Actual costs may include the cost to review and redact the requested records but shall not include incidental costs not attributable to furnishing the requested records.",
+   "trigger": "Records require review/redaction before production",
+   "clock_effect": "none",
+   "source_language": "Actual costs may include the cost to review and redact the requested records but shall not include incidental costs incurred by the public agency that are not attributable to furnishing the requested records.",
+   "is_paraphrase": false,
+   "source_authority": "K.S.A. 45-219(c)(1)",
+   "related_rule_ids": [
+    "KS-0034"
+   ],
+   "official_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "effective_status": "Amended effective 2025-07-01",
+   "source_type": "Statute"
+  },
+  {
+   "rule_id": "KS-0036",
+   "category": "Fees",
+   "concept_key": "fee.electronic_medium_cost",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "legal_concept": "Computer-access fees limited to computer-service cost",
+   "rule_type": "Calculation",
+   "atomic_rule": "Fees for providing access to records maintained on computer facilities shall include only the cost of any computer services, including staff time required.",
+   "trigger": "Access to records maintained on computer facilities",
+   "clock_effect": "none",
+   "source_language": "In the case of fees for providing access to records maintained on computer facilities, the fees shall include only the cost of any computer services, including staff time required.",
+   "is_paraphrase": false,
+   "source_authority": "K.S.A. 45-219(c)(2)",
+   "official_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "effective_status": "Amended effective 2025-07-01",
+   "source_type": "Statute"
+  },
+  {
+   "rule_id": "KS-0037",
+   "category": "Fees",
+   "concept_key": "fee.lowest_cost_staff",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "legal_concept": "Good-faith use of lowest-cost staff category",
+   "rule_type": "Requirement",
+   "atomic_rule": "If the agency incurs staff-time costs, it shall use in good faith the lowest-cost category of staff reasonably necessary to provide access or furnish copies.",
+   "trigger": "Agency incurs staff-time cost to fulfill the request",
+   "clock_effect": "none",
+   "source_language": "If the public agency incurs costs for staff time to provide access to or furnish copies of public records, the agency shall use in good faith the lowest-cost category of staff reasonably necessary to provide access to or furnish copies of public records.",
+   "is_paraphrase": false,
+   "source_authority": "K.S.A. 45-219(c)(3)",
+   "related_rule_ids": [
+    "KS-0038"
+   ],
+   "official_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "effective_status": "Amended effective 2025-07-01",
+   "source_type": "Statute"
+  },
+  {
+   "rule_id": "KS-0038",
+   "category": "Fees",
+   "concept_key": "fee.staff_time_salary_basis_no_benefits",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "legal_concept": "Staff-time charges based on salary/wage, excluding benefits",
+   "rule_type": "Calculation",
+   "atomic_rule": "Charges for staff time shall be based on the employee's salary or hourly wage and shall not include the costs of employee benefits.",
+   "trigger": "Agency charges for staff time",
+   "clock_effect": "none",
+   "source_language": "Charges for staff time shall be based on the employee's salary or hourly wage. Charges for staff time shall not include the costs of employee benefits.",
+   "is_paraphrase": false,
+   "source_authority": "K.S.A. 45-219(c)(3)",
+   "related_rule_ids": [
+    "KS-0037"
+   ],
+   "official_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "effective_status": "Amended effective 2025-07-01",
+   "source_type": "Statute"
+  },
+  {
+   "rule_id": "KS-0039",
+   "category": "Fees",
+   "concept_key": "fee.estimate_itemized_statement",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "legal_concept": "Itemized statement of costs on request",
+   "rule_type": "Requirement",
+   "atomic_rule": "Upon request, the agency shall provide an itemized statement of costs charged to the requester, including the hourly rates for each employee involved and an itemized list of any other fees.",
+   "trigger": "Requester asks for an itemized statement of costs",
+   "clock_effect": "none",
+   "source_language": "Upon request, a public agency shall provide to the person requesting access to or copies of public records pursuant to this section an itemized statement of costs incurred by the public agency and charged to such requester. Such itemized statement shall include, but not be limited to, the hourly rates charged for each employee involved in making the requested records available and an itemized list of any other fees charged to provide access to or furnish copies of the requested records.",
+   "is_paraphrase": false,
+   "source_authority": "K.S.A. 45-219(c)(4)",
+   "official_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "effective_status": "Amended effective 2025-07-01",
+   "source_type": "Statute"
+  },
+  {
+   "rule_id": "KS-0040",
+   "category": "Fees",
+   "concept_key": "fee.other_facilities_copying_cost",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "legal_concept": "Cost of copying at other facilities and supervision fee",
+   "rule_type": "Permission",
+   "atomic_rule": "If it is necessary to use other facilities for copying, the requester shall pay that cost; the agency may also charge the same supervision fee as for furnishing copies under subsection (c).",
+   "trigger": "Copying cannot practicably be done where records are kept, so other facilities are used",
+   "clock_effect": "none",
+   "source_language": "If it is necessary to use other facilities for copying, the cost thereof shall be paid by the person desiring a copy of the records. In addition, the public agency may charge the same fee for the services rendered in supervising the copying as for furnishing copies under subsection (c) and may establish a reasonable schedule of times for making copies at other facilities.",
+   "is_paraphrase": false,
+   "source_authority": "K.S.A. 45-219(b)",
+   "related_rule_ids": [
+    "KS-0045",
+    "KS-0034"
+   ],
+   "official_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "effective_status": "Current",
+   "source_type": "Statute"
+  },
+  {
+   "rule_id": "KS-0041",
+   "category": "Fees",
+   "concept_key": "fee.cost_mitigation_conference_threshold",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "legal_concept": "Interactive cost-mitigation communication above threshold",
+   "rule_type": "Requirement",
+   "atomic_rule": "When staff time to respond will exceed five hours, or estimated actual staff-time cost exceeds $200, the agency shall make reasonable efforts to contact the requester and engage in interactive communication about mitigating costs; the requester is not obligated to mitigate.",
+   "trigger": "Staff time to respond will exceed 5 hours OR estimated actual staff-time cost exceeds $200",
+   "clock_effect": "none",
+   "source_language": "When the staff time needed to respond to a records request will exceed five hours or the estimated actual cost for staff time needed to fill the request exceeds $200, the public agency shall make reasonable efforts to contact the requester and engage in interactive communication about mitigating costs to fill the request. The requester is not obligated to mitigate costs.",
+   "is_paraphrase": false,
+   "source_authority": "K.S.A. 45-219(e)(1)",
+   "notes": "Added by L. 2025, ch. 89 (eff. 2025-07-01). Thresholds (5 hours / $200) are fixed statutory triggers. 'Reasonable efforts to contact' defined in (e)(3) as contacting via the means the requester provided.",
+   "related_rule_ids": [
+    "KS-0042"
+   ],
+   "official_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "effective_status": "Effective 2025-07-01",
+   "source_type": "Statute"
+  },
+  {
+   "rule_id": "KS-0043",
+   "category": "Payment",
+   "concept_key": "payment.advance_deposit_before_production",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "legal_concept": "Advance payment of fees may be required",
+   "rule_type": "Permission",
+   "atomic_rule": "A public agency may charge and require advance payment of a fee for providing access to or furnishing copies of public records, subject to K.S.A. 45-219.",
+   "trigger": "Agency elects to charge a fee",
+   "clock_effect": "none",
+   "source_language": "A public agency may charge and require advance payment of a fee for providing access to or furnishing copies of public records, subject to K.S.A. 45-219.",
+   "is_paraphrase": false,
+   "source_authority": "K.S.A. 45-218(f)",
+   "notes": "Also stated in K.S.A. 45-219(a) for copies (see KS-0009).",
+   "related_rule_ids": [
+    "KS-0009"
+   ],
+   "official_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0018.html",
+   "effective_status": "Current",
+   "source_type": "Statute"
+  }
+ ],
+ "template": {
+  "fee_schedule": {
+   "fee.labor_charge": [
+    {
+     "rule_id": "KS-0035",
+     "authority": "K.S.A. 45-219(c)(1)",
+     "summary": "Actual costs may include the cost to review and redact the requested records but shall not include incidental costs not attributable to furnishing the requested records."
+    },
+    {
+     "rule_id": "KS-0038",
+     "authority": "K.S.A. 45-219(c)(3)",
+     "summary": "Charges for staff time shall be based on the employee's salary or hourly wage and shall not include the costs of employee benefits."
+    }
+   ],
+   "fee.actual_cost_basis": [
+    {
+     "rule_id": "KS-0034",
+     "authority": "K.S.A. 45-219(c)(1)",
+     "summary": "Fees for copies shall not exceed the actual cost of furnishing the requested records, including the cost of staff time required to make the information available."
+    },
+    {
+     "rule_id": "KS-0037",
+     "authority": "K.S.A. 45-219(c)(3)",
+     "summary": "If the agency incurs staff-time costs, it shall use in good faith the lowest-cost category of staff reasonably necessary to provide access or furnish copies."
+    },
+    {
+     "rule_id": "KS-0040",
+     "authority": "K.S.A. 45-219(b)",
+     "summary": "If it is necessary to use other facilities for copying, the requester shall pay that cost; the agency may also charge the same supervision fee as for furnishing copies under subsection (c)."
+    }
+   ],
+   "fee.electronic_media_charge": [
+    {
+     "rule_id": "KS-0036",
+     "authority": "K.S.A. 45-219(c)(2)",
+     "summary": "Fees for providing access to records maintained on computer facilities shall include only the cost of any computer services, including staff time required."
+    }
+   ],
+   "fee.schedule_and_authority": [
+    {
+     "rule_id": "KS-0033",
+     "authority": "K.S.A. 45-219(c)",
+     "summary": "Except where fees are prescribed by statute or subsection (h) applies, each public agency may prescribe reasonable fees for providing access to or furnishing copies of public records, subject to enumerated limits."
+    }
+   ]
+  },
+  "knobs_fee": null
+ },
+ "run_parameters": {
+  "scope": "municipalities only (note agency regimes)",
+  "recency": "check 2024-2026 session laws + rule amendments for fee sections",
+  "estimate_calibration": "OUT of scope"
+ }
+}

@@ -1,0 +1,943 @@
+{
+ "state": "Oregon",
+ "code": "OR",
+ "next_rule_id": "OR-9001 \u2014 new/amended rule rows from THIS pass use the OR-9NNN namespace (9001, 9002, \u2026) so they never collide with existing ids; reference existing rows by their existing ids.",
+ "items": [
+  {
+   "id": "dup.bw.rate",
+   "label": "Copy rate \u2014 B&W page",
+   "home": "fee_profiles:duplication.bw.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "OR-0020"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(4)(a)"
+   ],
+   "prior_snippet": "A public body may establish fees reasonably calculated to reimburse it for its actual cost of making public records available, including costs for summarizing, compiling or tailoring the records in organization or media "
+  },
+  {
+   "id": "dup.color.rate",
+   "label": "Copy rate \u2014 color page",
+   "home": "fee_profiles:duplication.color.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "dup.oversized.rate",
+   "label": "Copy rate \u2014 oversized / nonstandard page",
+   "home": "fee_profiles:duplication.oversized.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "dup.specialty.rate",
+   "label": "Specialty reproduction (photos, maps, transcripts)",
+   "home": "fee_profiles:duplication.specialty.rate",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.nonstandard_rate",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "dup.tiers",
+   "label": "Graduated page bands (per-page rate by volume)",
+   "home": "fee_profiles:duplication.*.tiers",
+   "type": "tiers",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.free_allowance"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.freePages",
+   "label": "Free page allowance per request",
+   "home": "fee_profiles:requestRules.freePageAllowance",
+   "type": "pages",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.search.rate",
+   "label": "Labor rate \u2014 search / retrieval ($/hr)",
+   "home": "fee_profiles:labor.search.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "OR-0021",
+    "OR-0020"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(4)(a)",
+    "Or. Rev. Stat. \u00a7 192.324(4)(b)"
+   ],
+   "prior_snippet": "A public body may include in the fee the cost of attorney time spent reviewing, redacting, or segregating records into exempt and nonexempt, but may NOT include attorney time spent determining the application of ORS 192."
+  },
+  {
+   "id": "labor.review.rate",
+   "label": "Labor rate \u2014 review / redaction ($/hr)",
+   "home": "fee_profiles:labor.review.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "OR-0021"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(4)(b)"
+   ],
+   "prior_snippet": "A public body may include in the fee the cost of attorney time spent reviewing, redacting, or segregating records into exempt and nonexempt, but may NOT include attorney time spent determining the application of ORS 192."
+  },
+  {
+   "id": "labor.programming.rate",
+   "label": "Labor rate \u2014 programming / data extraction ($/hr)",
+   "home": "fee_profiles:labor.programming.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "OR-0021"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(4)(b)"
+   ],
+   "prior_snippet": "A public body may include in the fee the cost of attorney time spent reviewing, redacting, or segregating records into exempt and nonexempt, but may NOT include attorney time spent determining the application of ORS 192."
+  },
+  {
+   "id": "labor.billableWhen",
+   "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+   "home": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+   "type": "enum+threshold",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "OR-0021"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(4)(b)"
+   ],
+   "prior_snippet": "A public body may include in the fee the cost of attorney time spent reviewing, redacting, or segregating records into exempt and nonexempt, but may NOT include attorney time spent determining the application of ORS 192."
+  },
+  {
+   "id": "labor.overheadPct",
+   "label": "Overhead / fringe surcharge on labor (%)",
+   "home": "fee_profiles:labor.overheadPct",
+   "type": "pct",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "OR-0021",
+    "OR-0020"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(4)(a)",
+    "Or. Rev. Stat. \u00a7 192.324(4)(b)"
+   ],
+   "prior_snippet": "A public body may include in the fee the cost of attorney time spent reviewing, redacting, or segregating records into exempt and nonexempt, but may NOT include attorney time spent determining the application of ORS 192."
+  },
+  {
+   "id": "labor.increment",
+   "label": "Labor time increment + rounding",
+   "home": "fee_profiles:labor.*.increment / rounding",
+   "type": "hours",
+   "concepts": [
+    "fee.labor_charge"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "OR-0021"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(4)(b)"
+   ],
+   "prior_snippet": "A public body may include in the fee the cost of attorney time spent reviewing, redacting, or segregating records into exempt and nonexempt, but may NOT include attorney time spent determining the application of ORS 192."
+  },
+  {
+   "id": "rules.freeLaborHours",
+   "label": "Free labor hours per request",
+   "home": "fee_profiles:requestRules.freeLaborHours",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "OR-0021"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(4)(b)"
+   ],
+   "prior_snippet": "A public body may include in the fee the cost of attorney time spent reviewing, redacting, or segregating records into exempt and nonexempt, but may NOT include attorney time spent determining the application of ORS 192."
+  },
+  {
+   "id": "labor.periodicFreeHours",
+   "label": "Free personnel time per requestor per month/year (TX \u00a7 552.275 pattern)",
+   "home": "NOT IN ENGINE (fee_profiles gap \u2014 requestor-ledger counter)",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.aggregation"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.estimateNotifyThreshold",
+   "label": "Itemized estimate / cost notice required above ($ or hours)",
+   "home": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+   "type": "usd",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "OR-0022"
+   ],
+   "prior_values": [
+    "$25"
+   ],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(4)(c)"
+   ],
+   "prior_snippet": "A public body may not establish a fee greater than $25 unless it first provides the requester written notification of the estimated fee amount and the requester confirms that it wants the public body to proceed."
+  },
+  {
+   "id": "estimate.requesterResponseDays",
+   "label": "Requester must respond to an estimate within N days (else withdrawn)",
+   "home": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "OR-0022",
+    "OR-0025"
+   ],
+   "prior_values": [
+    "$25",
+    "60 days"
+   ],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(4)(c)",
+    "Or. Rev. Stat. \u00a7 192.329(3)(b)"
+   ],
+   "prior_snippet": "A public body may not establish a fee greater than $25 unless it first provides the requester written notification of the estimated fee amount and the requester confirms that it wants the public body to proceed."
+  },
+  {
+   "id": "estimate.revisionNotifyPercent",
+   "label": "Revised estimate required when actual exceeds estimate by N%",
+   "home": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+   "type": "pct",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "OR-0022"
+   ],
+   "prior_values": [
+    "$25"
+   ],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(4)(c)"
+   ],
+   "prior_snippet": "A public body may not establish a fee greater than $25 unless it first provides the requester written notification of the estimated fee amount and the requester confirms that it wants the public body to proceed."
+  },
+  {
+   "id": "estimate.validityDays",
+   "label": "Estimate validity period (days)",
+   "home": "fee_profiles:estimatePolicy.estimateValidityDays",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "OR-0022"
+   ],
+   "prior_values": [
+    "$25"
+   ],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(4)(c)"
+   ],
+   "prior_snippet": "A public body may not establish a fee greater than $25 unless it first provides the requester written notification of the estimated fee amount and the requester confirms that it wants the public body to proceed."
+  },
+  {
+   "id": "rules.deposit.threshold",
+   "label": "Deposit / prepayment may be required above ($)",
+   "home": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+   "type": "usd",
+   "concepts": [
+    "payment.deposit_threshold",
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.deposit.percent",
+   "label": "Deposit capped at (% of estimate)",
+   "home": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+   "type": "pct",
+   "concepts": [
+    "payment.deposit_ceiling",
+    "payment.deposit"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.productionGate",
+   "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+   "home": "paymentTiming gates + fee_profiles bands",
+   "type": "enum",
+   "concepts": [
+    "payment.production_conditioned_on_payment",
+    "payment.advance_payment"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "OR-0024"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.329(3)(a)"
+   ],
+   "prior_snippet": "If the public body has informed the requester of a permitted fee, its obligation to complete the response is suspended until the fee is paid, waived by the body, or ordered waived."
+  },
+  {
+   "id": "payment.nonpayment",
+   "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+   "home": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+   "type": "enum+int",
+   "concepts": [
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "OR-0025"
+   ],
+   "prior_values": [
+    "60 days"
+   ],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.329(3)(b)"
+   ],
+   "prior_snippet": "If the requester fails to pay the fee within 60 days of being informed of the fee (or within 60 days of denial of a fee waiver), the public body shall close the request."
+  },
+  {
+   "id": "payment.depositClock",
+   "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+   "home": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+   "type": "enum",
+   "concepts": [
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.reissue",
+   "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+   "home": "jurisdiction_rules:payment.reissue_*",
+   "type": "bool",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "OR-0022"
+   ],
+   "prior_values": [
+    "$25"
+   ],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(4)(c)"
+   ],
+   "prior_snippet": "A public body may not establish a fee greater than $25 unless it first provides the requester written notification of the estimated fee amount and the requester confirms that it wants the public body to proceed."
+  },
+  {
+   "id": "payment.method",
+   "label": "Electronic payment method offered",
+   "home": "fee_profiles:payment_mode (operational; not law-driven except VA)",
+   "type": "enum",
+   "concepts": [
+    "payment.method"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.maxFee",
+   "label": "Request-level ceiling (actual cost cap / statutory max)",
+   "home": "fee_profiles:requestRules.maxFee",
+   "type": "usd_or_rule",
+   "concepts": [
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "OR-0020"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(4)(a)"
+   ],
+   "prior_snippet": "A public body may establish fees reasonably calculated to reimburse it for its actual cost of making public records available, including costs for summarizing, compiling or tailoring the records in organization or media "
+  },
+  {
+   "id": "rules.deMinimis",
+   "label": "De-minimis: no charge below ($)",
+   "home": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+   "type": "usd",
+   "concepts": [
+    "fee.waiver",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "OR-0023"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(5)"
+   ],
+   "prior_snippet": "The custodian may furnish copies without charge or at a substantially reduced fee if it determines the waiver or reduction is in the public interest because making the record available primarily benefits the general publ"
+  },
+  {
+   "id": "rules.minFee",
+   "label": "Minimum fee",
+   "home": "fee_profiles:requestRules.minFee",
+   "type": "usd",
+   "concepts": [],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "media",
+   "label": "Electronic media (CD/DVD/USB) charge",
+   "home": "fee_profiles:media.{cd,dvd,usb}",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "delivery",
+   "label": "Delivery: mail / handling / email / pickup",
+   "home": "fee_profiles:delivery.*",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.delivery_charge",
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "certification",
+   "label": "Certification / certified-copy charge",
+   "home": "fee_profiles:certification.{rate,unit}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.certified_copy_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "av",
+   "label": "Audio/video: per recording, per minute, free minutes",
+   "home": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.special_service_charge",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "commercial",
+   "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+   "home": "fee_profiles:purposeOverrides.commercial",
+   "type": "pct+bool",
+   "concepts": [
+    "fee.commercial_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "waiver",
+   "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+   "home": "jurisdiction_rules:fee_waiver.*",
+   "type": "enum_list+bool",
+   "concepts": [
+    "fee.waiver"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "OR-0023"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(5)"
+   ],
+   "prior_snippet": "The custodian may furnish copies without charge or at a substantially reduced fee if it determines the waiver or reduction is in the public interest because making the record available primarily benefits the general publ"
+  },
+  {
+   "id": "waiver.forfeiture",
+   "label": "Late response forfeits the fee",
+   "home": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+   "type": "bool",
+   "concepts": [
+    "fee.waiver",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "OR-0023",
+    "OR-0025"
+   ],
+   "prior_values": [
+    "60 days"
+   ],
+   "prior_citations": [
+    "Or. Rev. Stat. \u00a7 192.324(5)",
+    "Or. Rev. Stat. \u00a7 192.329(3)(b)"
+   ],
+   "prior_snippet": "The custodian may furnish copies without charge or at a substantially reduced fee if it determines the waiver or reduction is in the public interest because making the record available primarily benefits the general publ"
+  },
+  {
+   "id": "repeat",
+   "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+   "home": "NOT IN ENGINE (requestor-ledger)",
+   "type": "structural",
+   "concepts": [
+    "fee.repeat_request_carryforward",
+    "fee.aggregation"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  }
+ ],
+ "canonical_concepts": [
+  {
+   "canonical_key": "fee.copy_rate_per_page",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Absent a published actual-cost calculation, the agency may charge up to ten cents per page for public records scanned into an electronic format."
+  },
+  {
+   "canonical_key": "fee.actual_cost_basis",
+   "family": "fee",
+   "config_home": "mixed(p:24/s:8)",
+   "definition": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records."
+  },
+  {
+   "canonical_key": "fee.waiver",
+   "family": "fee",
+   "config_home": "mixed(p:5/s:23)",
+   "definition": "State, county, and municipal officers shall furnish, without charge, searches for and certified copies of public records needed in support of a claim or benefit applicati"
+  },
+  {
+   "canonical_key": "fee.electronic_media_charge",
+   "family": "fee",
+   "config_home": "mixed(p:21/s:1)",
+   "definition": "If records are not in electronic format and the public body agrees to produce them electronically, it may charge for the staff time required to transfer the documents to "
+  },
+  {
+   "canonical_key": "fee.no_charge_categories",
+   "family": "fee",
+   "config_home": "mixed(p:11/s:9)",
+   "definition": "A fee shall not be assessed for time spent segregating or redacting records unless such segregation/redaction is required by law or approved by the Supervisor."
+  },
+  {
+   "canonical_key": "fee.labor_charge",
+   "family": "fee",
+   "config_home": "mixed(p:25/s:4)",
+   "definition": "A public body may add up to 50% to the applicable labor charge to cover fringe benefits, not exceeding the actual cost of fringe benefits, if it notes the multiplier on t"
+  },
+  {
+   "canonical_key": "fee.schedule_and_authority",
+   "family": "fee",
+   "config_home": "mixed(p:6/s:10)",
+   "definition": "For state-agency public records, copy fees shall be charged according to the uniform fee schedule adopted by the commissioner of administration (R.S. 39:241) or as otherw"
+  },
+  {
+   "canonical_key": "fee.estimate_and_notice",
+   "family": "fee",
+   "config_home": "mixed(p:3/s:19)",
+   "definition": "The requester shall be informed of the estimated cost of preparing the copy if more than two hours of employee time is needed or if an outside professional service would "
+  },
+  {
+   "canonical_key": "fee.nonstandard_rate",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Where a copy requires a transcription, or a person requests a transcription of a public record, the transcription fee shall not exceed the agency's cost."
+  },
+  {
+   "canonical_key": "fee.free_allowance",
+   "family": "fee",
+   "config_home": "mixed(p:10/s:2)",
+   "definition": "The custodian shall not impose any charge for the first hour of time expended in research and retrieval of public records."
+  },
+  {
+   "canonical_key": "fee.certified_copy_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "The fee for certification of documents may not exceed five dollars ($5) per document."
+  },
+  {
+   "canonical_key": "fee.special_service_charge",
+   "family": "fee",
+   "config_home": "mixed(p:7/s:1)",
+   "definition": "For a voluminous request for electronic records, a public body may charge tiered caps by data size: for non-PDF data up to $20 (<=2 MB), $40 (2-4 MB), or $100 (>4 MB); fo"
+  },
+  {
+   "canonical_key": "fee.commercial_charge",
+   "family": "fee",
+   "config_home": "mixed(p:4/s:3)",
+   "definition": "The chapter does not authorize giving, selling, or providing access to lists of individuals requested for commercial purposes, and agencies shall not do so unless specifi"
+  },
+  {
+   "canonical_key": "fee.delivery_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Mailing may be charged at actual cost in a reasonably economical manner; no charge for expedited shipping or insurance unless stipulated by the requester."
+  },
+  {
+   "canonical_key": "fee.repeat_request_carryforward",
+   "family": "fee",
+   "config_home": "structural",
+   "definition": "If the same or a substantially similar request is made within six months after expiration of the ninety-day nonpayment-withdrawal period (or one hundred fifty days if req"
+  },
+  {
+   "canonical_key": "fee.aggregation",
+   "family": "fee",
+   "config_home": "mixed(p:1/s:2)",
+   "definition": "Once a records custodian reaches the aggregation threshold, the custodian is no longer required to deduct the labor threshold or any other minimum charge per request that"
+  },
+  {
+   "canonical_key": "payment.advance_payment",
+   "family": "payment",
+   "config_home": "mixed(p:6/s:12)",
+   "definition": "The custodian may require advance payment of the fees authorized by this section before providing the records."
+  },
+  {
+   "canonical_key": "payment.nonpayment_consequence",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:11)",
+   "definition": "A request is considered withdrawn if the requester fails to remit all fees within ninety days, or within one hundred fifty days if the requested fees are greater than one"
+  },
+  {
+   "canonical_key": "payment.production_conditioned_on_payment",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "For a standard request, the public officer has discretion to require the requester to pay all or a portion of the estimated fee prior to searching for any responsive publ"
+  },
+  {
+   "canonical_key": "payment.deposit",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:3)",
+   "definition": "A deposit notice is considered received 3 days after it is sent (regardless of transmission means), and it must state the deposit-due date, which is 48 days after the not"
+  },
+  {
+   "canonical_key": "payment.deposit_threshold",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "Where a public body determines in advance that charges are likely to exceed $200, it may, before continuing to process the request, require the requester to pay a deposit"
+  },
+  {
+   "canonical_key": "payment.deposit_ceiling",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "A good-faith deposit must not exceed one-half of the total estimated fee, and the deposit request must include a detailed fee itemization."
+  },
+  {
+   "canonical_key": "payment.method",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "Any local public body that charges for producing records may provide an electronic method of payment (noncash, non-paper-check \u2014 credit/debit cards, direct deposit/debit,"
+  }
+ ],
+ "existing_fee_payment_rules": [
+  {
+   "rule_id": "OR-0020",
+   "category": "Fees",
+   "concept_key": "fee.actual_cost_basis",
+   "legal_concept": "Fees reasonably calculated to reimburse actual cost",
+   "rule_type": "Permission",
+   "config_home": "parameter",
+   "constraint_basis": "soft-standard",
+   "atomic_rule": "A public body may establish fees reasonably calculated to reimburse it for its actual cost of making public records available, including costs for summarizing, compiling or tailoring the records in organization or media to meet the request.",
+   "trigger": "Public body makes records available in response to a request",
+   "clock_effect": "none",
+   "clock_spec": "",
+   "source_language": "The public body may establish fees reasonably calculated to reimburse the public body for the public body's actual cost of making public records available, including costs for summarizing, compiling or tailoring the public records, either in organization or media, to meet the request.",
+   "is_paraphrase": false,
+   "source_authority": "Or. Rev. Stat. \u00a7 192.324(4)(a)",
+   "effective_status": "Current",
+   "official_link": "https://www.oregonlegislature.gov/bills_laws/ors/ors192.html",
+   "related_rule_ids": [
+    "OR-0021",
+    "OR-0022"
+   ],
+   "notes": "No statewide fixed per-page or per-hour rate; the ceiling is the soft 'actual cost / reasonably calculated' standard and the city supplies the operative rates.",
+   "source_authority_field": "Statute"
+  },
+  {
+   "rule_id": "OR-0021",
+   "category": "Fees",
+   "concept_key": "fee.attorney_review_time_includable",
+   "legal_concept": "Attorney review/redaction time in fees; exclusion of exemption-analysis time",
+   "rule_type": "Permission",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "A public body may include in the fee the cost of attorney time spent reviewing, redacting, or segregating records into exempt and nonexempt, but may NOT include attorney time spent determining the application of ORS 192.311 to 192.478.",
+   "trigger": "Attorney time expended on a request",
+   "clock_effect": "none",
+   "clock_spec": "",
+   "source_language": "The public body may include in a fee established under paragraph (a) of this subsection the cost of time spent by an attorney for the public body in reviewing the public records, redacting material from the public records or segregating the public records into exempt and nonexempt records. The public body may not include in a fee established under paragraph (a) of this subsection the cost of time spent by an attorney for the public body in determining the application of the provisions of ORS 192.311 to 192.478.",
+   "is_paraphrase": false,
+   "source_authority": "Or. Rev. Stat. \u00a7 192.324(4)(b)",
+   "effective_status": "Current",
+   "official_link": "https://www.oregonlegislature.gov/bills_laws/ors/ors192.html",
+   "related_rule_ids": [
+    "OR-0012",
+    "OR-0020"
+   ],
+   "notes": "Conjunctive permission+prohibition kept in one row (the includable/not-includable line is a single fee-component rule). Drives fee composition.",
+   "source_authority_field": "Statute"
+  },
+  {
+   "rule_id": "OR-0022",
+   "category": "Fees",
+   "concept_key": "fee.advance_estimate_threshold",
+   "legal_concept": "$25 fee threshold requiring written estimate and confirmation",
+   "rule_type": "Prohibition",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "atomic_rule": "A public body may not establish a fee greater than $25 unless it first provides the requester written notification of the estimated fee amount and the requester confirms that it wants the public body to proceed.",
+   "trigger": "Estimated fee exceeds $25",
+   "clock_effect": "none",
+   "clock_spec": "",
+   "source_language": "The public body may not establish a fee greater than $25 under this section unless the public body first provides the requester with a written notification of the estimated amount of the fee and the requester confirms that the requester wants the public body to proceed with making the public record available.",
+   "is_paraphrase": false,
+   "source_authority": "Or. Rev. Stat. \u00a7 192.324(4)(c)",
+   "effective_status": "Current",
+   "official_link": "https://www.oregonlegislature.gov/bills_laws/ors/ors192.html",
+   "related_rule_ids": [
+    "OR-0024"
+   ],
+   "notes": "$25 is the fixed trigger value; the estimate-and-confirm step is a structural gate that pairs with the fee-suspension clock (OR-0024). City cannot raise the $25 trigger.",
+   "source_authority_field": "Statute"
+  },
+  {
+   "rule_id": "OR-0023",
+   "category": "Fees",
+   "concept_key": "fee.waiver_public_interest",
+   "legal_concept": "Discretionary fee waiver or reduction in the public interest",
+   "rule_type": "Discretion",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "The custodian may furnish copies without charge or at a substantially reduced fee if it determines the waiver or reduction is in the public interest because making the record available primarily benefits the general public.",
+   "trigger": "Custodian determines waiver/reduction is in the public interest",
+   "clock_effect": "none",
+   "clock_spec": "",
+   "source_language": "The custodian of a public record may furnish copies without charge or at a substantially reduced fee if the custodian determines that the waiver or reduction of fees is in the public interest because making the record available primarily benefits the general public.",
+   "is_paraphrase": false,
+   "source_authority": "Or. Rev. Stat. \u00a7 192.324(5)",
+   "effective_status": "Current",
+   "official_link": "https://www.oregonlegislature.gov/bills_laws/ors/ors192.html",
+   "related_rule_ids": [
+    "OR-0025"
+   ],
+   "notes": "Discretionary branch; denial of a waiver is separately reviewable (OR-0025).",
+   "source_authority_field": "Statute"
+  },
+  {
+   "rule_id": "OR-0024",
+   "category": "Payment",
+   "concept_key": "payment.fee_suspends_response",
+   "legal_concept": "Response obligation suspended pending fee payment",
+   "rule_type": "Requirement",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "atomic_rule": "If the public body has informed the requester of a permitted fee, its obligation to complete the response is suspended until the fee is paid, waived by the body, or ordered waived.",
+   "trigger": "Public body informs requester of a fee under ORS 192.324(4)",
+   "clock_effect": "tolls",
+   "clock_spec": "completion obligation tolled from date requester is informed of fee until fee paid or waived",
+   "source_language": "If a public body has informed a requester of a fee permitted under ORS 192.324 (Copies or inspection of public records) (4), the obligation of the public body to complete its response to the request is suspended until the requester has paid the fee, the fee has been waived by the public body pursuant to ORS 192.324 (Copies or inspection of public records) (5) or the fee otherwise has been ordered waived.",
+   "is_paraphrase": false,
+   "source_authority": "Or. Rev. Stat. \u00a7 192.329(3)(a)",
+   "effective_status": "Current",
+   "official_link": "https://www.oregonlegislature.gov/bills_laws/ors/ors192.html",
+   "related_rule_ids": [
+    "OR-0022",
+    "OR-0025",
+    "OR-0009"
+   ],
+   "notes": "Tolls the soft completion duty (OR-0009) while fee is outstanding.",
+   "source_authority_field": "Statute"
+  },
+  {
+   "rule_id": "OR-0025",
+   "category": "Payment",
+   "concept_key": "payment.nonpayment_abandonment_close",
+   "legal_concept": "Close of request after 60 days' nonpayment",
+   "rule_type": "Trigger",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "atomic_rule": "If the requester fails to pay the fee within 60 days of being informed of the fee (or within 60 days of denial of a fee waiver), the public body shall close the request.",
+   "trigger": "60 days elapse after fee notice or waiver denial without payment",
+   "clock_effect": "terminal",
+   "clock_spec": "60 calendar-days from date requester informed of fee, or from date of fee-waiver denial; on lapse the request closes",
+   "source_language": "If the requester fails to pay the fee within 60 days of the date on which the public body informed the requester of the fee, or fails to pay the fee within 60 days of the date on which the public body informed the requester of the denial of the fee waiver, the public body shall close the request.",
+   "is_paraphrase": false,
+   "source_authority": "Or. Rev. Stat. \u00a7 192.329(3)(b)",
+   "effective_status": "Current",
+   "official_link": "https://www.oregonlegislature.gov/bills_laws/ors/ors192.html",
+   "related_rule_ids": [
+    "OR-0024",
+    "OR-0023"
+   ],
+   "notes": "Terminal event (request ends). 60-day count is fixed by statute.",
+   "source_authority_field": "Statute"
+  }
+ ],
+ "template": {
+  "fee_schedule": {
+   "fee.labor_charge": [
+    {
+     "rule_id": "OR-0021",
+     "authority": "Or. Rev. Stat. \u00a7 192.324(4)(b)",
+     "summary": "A public body may include in the fee the cost of attorney time spent reviewing, redacting, or segregating records into exempt and nonexempt, but may NOT include attorney time spent determining the application of ORS 192.311 to 192.478."
+    }
+   ],
+   "fee.actual_cost_basis": [
+    {
+     "rule_id": "OR-0020",
+     "authority": "Or. Rev. Stat. \u00a7 192.324(4)(a)",
+     "summary": "A public body may establish fees reasonably calculated to reimburse it for its actual cost of making public records available, including costs for summarizing, compiling or tailoring the records in organization or media to meet the request."
+    }
+   ]
+  },
+  "knobs_fee": null
+ },
+ "run_parameters": {
+  "scope": "municipalities only (note agency regimes)",
+  "recency": "check 2024-2026 session laws + rule amendments for fee sections",
+  "estimate_calibration": "OUT of scope"
+ }
+}

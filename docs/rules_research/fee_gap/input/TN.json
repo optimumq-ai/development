@@ -1,0 +1,1260 @@
+{
+ "state": "Tennessee",
+ "code": "TN",
+ "next_rule_id": "TN-9001 \u2014 new/amended rule rows from THIS pass use the TN-9NNN namespace (9001, 9002, \u2026) so they never collide with existing ids; reference existing rows by their existing ids.",
+ "items": [
+  {
+   "id": "dup.bw.rate",
+   "label": "Copy rate \u2014 B&W page",
+   "home": "fee_profiles:duplication.bw.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "TN-0029",
+    "TN-0019",
+    "TN-0031",
+    "TN-0050"
+   ],
+   "prior_values": [
+    "$0.15",
+    "$0.50",
+    "15 cents",
+    "50 cents"
+   ],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 II.A",
+    "OORC Schedule of Reasonable Charges \u00a7 II.C",
+    "OORC Schedule of Reasonable Charges \u00a7 III.A",
+    "Tenn. Code Ann. \u00a7 10-7-503(a)(7)(B)"
+   ],
+   "prior_snippet": "For each standard 8.5x11 or 8.5x14 black-and-white copy produced, a records custodian may assess a per-page charge of up to 15 cents ($0.15)."
+  },
+  {
+   "id": "dup.color.rate",
+   "label": "Copy rate \u2014 color page",
+   "home": "fee_profiles:duplication.color.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "TN-0029",
+    "TN-0030"
+   ],
+   "prior_values": [
+    "$0.15",
+    "$0.50",
+    "15 cents",
+    "50 cents"
+   ],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 II.A"
+   ],
+   "prior_snippet": "For each standard 8.5x11 or 8.5x14 black-and-white copy produced, a records custodian may assess a per-page charge of up to 15 cents ($0.15)."
+  },
+  {
+   "id": "dup.oversized.rate",
+   "label": "Copy rate \u2014 oversized / nonstandard page",
+   "home": "fee_profiles:duplication.oversized.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "TN-0030"
+   ],
+   "prior_values": [
+    "$0.50",
+    "50 cents"
+   ],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 II.A"
+   ],
+   "prior_snippet": "For each standard 8.5x11 or 8.5x14 color copy produced, a records custodian may assess a per-page charge of up to 50 cents ($0.50)."
+  },
+  {
+   "id": "dup.specialty.rate",
+   "label": "Specialty reproduction (photos, maps, transcripts)",
+   "home": "fee_profiles:duplication.specialty.rate",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.nonstandard_rate",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "TN-0030"
+   ],
+   "prior_values": [
+    "$0.50",
+    "50 cents"
+   ],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 II.A"
+   ],
+   "prior_snippet": "For each standard 8.5x11 or 8.5x14 color copy produced, a records custodian may assess a per-page charge of up to 50 cents ($0.50)."
+  },
+  {
+   "id": "dup.tiers",
+   "label": "Graduated page bands (per-page rate by volume)",
+   "home": "fee_profiles:duplication.*.tiers",
+   "type": "tiers",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.free_allowance"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "TN-0029"
+   ],
+   "prior_values": [
+    "$0.15",
+    "15 cents"
+   ],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 II.A"
+   ],
+   "prior_snippet": "For each standard 8.5x11 or 8.5x14 black-and-white copy produced, a records custodian may assess a per-page charge of up to 15 cents ($0.15)."
+  },
+  {
+   "id": "rules.freePages",
+   "label": "Free page allowance per request",
+   "home": "fee_profiles:requestRules.freePageAllowance",
+   "type": "pages",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.search.rate",
+   "label": "Labor rate \u2014 search / retrieval ($/hr)",
+   "home": "fee_profiles:labor.search.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "TN-0032",
+    "TN-0033",
+    "TN-0019",
+    "TN-0031"
+   ],
+   "prior_values": [
+    "$0.15",
+    "$0.50",
+    "15 cents",
+    "50 cents"
+   ],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 II.C",
+    "OORC Schedule of Reasonable Charges \u00a7 III.A",
+    "OORC Schedule of Reasonable Charges \u00a7 IV.C",
+    "OORC Schedule of Reasonable Charges \u00a7\u00a7 IV.B, IV.D, IV.E"
+   ],
+   "prior_snippet": "The labor threshold is the first (1st) hour of labor reasonably necessary to produce requested material; a governmental entity may adopt a higher threshold, and labor may be charged only for time exceeding the threshold."
+  },
+  {
+   "id": "labor.review.rate",
+   "label": "Labor rate \u2014 review / redaction ($/hr)",
+   "home": "fee_profiles:labor.review.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "TN-0032",
+    "TN-0033"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 IV.C",
+    "OORC Schedule of Reasonable Charges \u00a7\u00a7 IV.B, IV.D, IV.E"
+   ],
+   "prior_snippet": "The labor threshold is the first (1st) hour of labor reasonably necessary to produce requested material; a governmental entity may adopt a higher threshold, and labor may be charged only for time exceeding the threshold."
+  },
+  {
+   "id": "labor.programming.rate",
+   "label": "Labor rate \u2014 programming / data extraction ($/hr)",
+   "home": "fee_profiles:labor.programming.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "TN-0032",
+    "TN-0033"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 IV.C",
+    "OORC Schedule of Reasonable Charges \u00a7\u00a7 IV.B, IV.D, IV.E"
+   ],
+   "prior_snippet": "The labor threshold is the first (1st) hour of labor reasonably necessary to produce requested material; a governmental entity may adopt a higher threshold, and labor may be charged only for time exceeding the threshold."
+  },
+  {
+   "id": "labor.billableWhen",
+   "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+   "home": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+   "type": "enum+threshold",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "TN-0032",
+    "TN-0033"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 IV.C",
+    "OORC Schedule of Reasonable Charges \u00a7\u00a7 IV.B, IV.D, IV.E"
+   ],
+   "prior_snippet": "The labor threshold is the first (1st) hour of labor reasonably necessary to produce requested material; a governmental entity may adopt a higher threshold, and labor may be charged only for time exceeding the threshold."
+  },
+  {
+   "id": "labor.overheadPct",
+   "label": "Overhead / fringe surcharge on labor (%)",
+   "home": "fee_profiles:labor.overheadPct",
+   "type": "pct",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "TN-0032",
+    "TN-0033",
+    "TN-0019",
+    "TN-0031"
+   ],
+   "prior_values": [
+    "$0.15",
+    "$0.50",
+    "15 cents",
+    "50 cents"
+   ],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 II.C",
+    "OORC Schedule of Reasonable Charges \u00a7 III.A",
+    "OORC Schedule of Reasonable Charges \u00a7 IV.C",
+    "OORC Schedule of Reasonable Charges \u00a7\u00a7 IV.B, IV.D, IV.E"
+   ],
+   "prior_snippet": "The labor threshold is the first (1st) hour of labor reasonably necessary to produce requested material; a governmental entity may adopt a higher threshold, and labor may be charged only for time exceeding the threshold."
+  },
+  {
+   "id": "labor.increment",
+   "label": "Labor time increment + rounding",
+   "home": "fee_profiles:labor.*.increment / rounding",
+   "type": "hours",
+   "concepts": [
+    "fee.labor_charge"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "TN-0032",
+    "TN-0033"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 IV.C",
+    "OORC Schedule of Reasonable Charges \u00a7\u00a7 IV.B, IV.D, IV.E"
+   ],
+   "prior_snippet": "The labor threshold is the first (1st) hour of labor reasonably necessary to produce requested material; a governmental entity may adopt a higher threshold, and labor may be charged only for time exceeding the threshold."
+  },
+  {
+   "id": "rules.freeLaborHours",
+   "label": "Free labor hours per request",
+   "home": "fee_profiles:requestRules.freeLaborHours",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "TN-0032",
+    "TN-0033"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 IV.C",
+    "OORC Schedule of Reasonable Charges \u00a7\u00a7 IV.B, IV.D, IV.E"
+   ],
+   "prior_snippet": "The labor threshold is the first (1st) hour of labor reasonably necessary to produce requested material; a governmental entity may adopt a higher threshold, and labor may be charged only for time exceeding the threshold."
+  },
+  {
+   "id": "labor.periodicFreeHours",
+   "label": "Free personnel time per requestor per month/year (TX \u00a7 552.275 pattern)",
+   "home": "NOT IN ENGINE (fee_profiles gap \u2014 requestor-ledger counter)",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.aggregation"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "TN-0038",
+    "TN-0039",
+    "TN-0040b"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "OORC Reasonable Charges for Frequent and Multiple Requests \u00a7 I.C",
+    "OORC Reasonable Charges for Frequent and Multiple Requests \u00a7 I.D",
+    "OORC Reasonable Charges for Frequent and Multiple Requests \u00a7 II.A"
+   ],
+   "prior_snippet": "A governmental entity's policy shall specify the number of requests within a calendar month that triggers aggregation; that amount must be no lower than four (4) requests."
+  },
+  {
+   "id": "rules.estimateNotifyThreshold",
+   "label": "Itemized estimate / cost notice required above ($ or hours)",
+   "home": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+   "type": "usd",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "TN-0034"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Tenn. Code Ann. \u00a7 10-7-503(a)(7)(B); OORC Schedule of Reasonable Charges \u00a7 I.G; OORC Model Public Records Policy \u00a7 VI.B"
+   ],
+   "prior_snippet": "The records custodian shall provide the requestor an estimate of the reasonable costs to provide copies of the requested material before producing them."
+  },
+  {
+   "id": "estimate.requesterResponseDays",
+   "label": "Requester must respond to an estimate within N days (else withdrawn)",
+   "home": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "TN-0034"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Tenn. Code Ann. \u00a7 10-7-503(a)(7)(B); OORC Schedule of Reasonable Charges \u00a7 I.G; OORC Model Public Records Policy \u00a7 VI.B"
+   ],
+   "prior_snippet": "The records custodian shall provide the requestor an estimate of the reasonable costs to provide copies of the requested material before producing them."
+  },
+  {
+   "id": "estimate.revisionNotifyPercent",
+   "label": "Revised estimate required when actual exceeds estimate by N%",
+   "home": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+   "type": "pct",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "TN-0034"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Tenn. Code Ann. \u00a7 10-7-503(a)(7)(B); OORC Schedule of Reasonable Charges \u00a7 I.G; OORC Model Public Records Policy \u00a7 VI.B"
+   ],
+   "prior_snippet": "The records custodian shall provide the requestor an estimate of the reasonable costs to provide copies of the requested material before producing them."
+  },
+  {
+   "id": "estimate.validityDays",
+   "label": "Estimate validity period (days)",
+   "home": "fee_profiles:estimatePolicy.estimateValidityDays",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "TN-0034"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Tenn. Code Ann. \u00a7 10-7-503(a)(7)(B); OORC Schedule of Reasonable Charges \u00a7 I.G; OORC Model Public Records Policy \u00a7 VI.B"
+   ],
+   "prior_snippet": "The records custodian shall provide the requestor an estimate of the reasonable costs to provide copies of the requested material before producing them."
+  },
+  {
+   "id": "rules.deposit.threshold",
+   "label": "Deposit / prepayment may be required above ($)",
+   "home": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+   "type": "usd",
+   "concepts": [
+    "payment.deposit_threshold",
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "TN-0035"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 I.E; Tenn. Code Ann. \u00a7 10-7-503(a)(7)(B)"
+   ],
+   "prior_snippet": "A records custodian may require payment for copies before producing the copies of the records."
+  },
+  {
+   "id": "rules.deposit.percent",
+   "label": "Deposit capped at (% of estimate)",
+   "home": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+   "type": "pct",
+   "concepts": [
+    "payment.deposit_ceiling",
+    "payment.deposit"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.productionGate",
+   "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+   "home": "paymentTiming gates + fee_profiles bands",
+   "type": "enum",
+   "concepts": [
+    "payment.production_conditioned_on_payment",
+    "payment.advance_payment"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "TN-0035"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 I.E; Tenn. Code Ann. \u00a7 10-7-503(a)(7)(B)"
+   ],
+   "prior_snippet": "A records custodian may require payment for copies before producing the copies of the records."
+  },
+  {
+   "id": "payment.nonpayment",
+   "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+   "home": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+   "type": "enum+int",
+   "concepts": [
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.depositClock",
+   "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+   "home": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+   "type": "enum",
+   "concepts": [
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "TN-0035"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 I.E; Tenn. Code Ann. \u00a7 10-7-503(a)(7)(B)"
+   ],
+   "prior_snippet": "A records custodian may require payment for copies before producing the copies of the records."
+  },
+  {
+   "id": "payment.reissue",
+   "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+   "home": "jurisdiction_rules:payment.reissue_*",
+   "type": "bool",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "TN-0034"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Tenn. Code Ann. \u00a7 10-7-503(a)(7)(B); OORC Schedule of Reasonable Charges \u00a7 I.G; OORC Model Public Records Policy \u00a7 VI.B"
+   ],
+   "prior_snippet": "The records custodian shall provide the requestor an estimate of the reasonable costs to provide copies of the requested material before producing them."
+  },
+  {
+   "id": "payment.method",
+   "label": "Electronic payment method offered",
+   "home": "fee_profiles:payment_mode (operational; not law-driven except VA)",
+   "type": "enum",
+   "concepts": [
+    "payment.method"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.maxFee",
+   "label": "Request-level ceiling (actual cost cap / statutory max)",
+   "home": "fee_profiles:requestRules.maxFee",
+   "type": "usd_or_rule",
+   "concepts": [
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "TN-0019",
+    "TN-0031",
+    "TN-0050"
+   ],
+   "prior_values": [
+    "$0.15",
+    "$0.50",
+    "15 cents",
+    "50 cents"
+   ],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 II.C",
+    "OORC Schedule of Reasonable Charges \u00a7 III.A",
+    "Tenn. Code Ann. \u00a7 10-7-503(a)(7)(B)"
+   ],
+   "prior_snippet": "When assessing fees for copies, records custodians shall utilize the most economical and efficient method of producing the requested records."
+  },
+  {
+   "id": "rules.deMinimis",
+   "label": "De-minimis: no charge below ($)",
+   "home": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+   "type": "usd",
+   "concepts": [
+    "fee.waiver",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "TN-0036"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 I.D"
+   ],
+   "prior_snippet": "A records custodian may reduce or waive charges, in whole or in part, in accordance with the governmental entity's public records policy."
+  },
+  {
+   "id": "rules.minFee",
+   "label": "Minimum fee",
+   "home": "fee_profiles:requestRules.minFee",
+   "type": "usd",
+   "concepts": [],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "media",
+   "label": "Electronic media (CD/DVD/USB) charge",
+   "home": "fee_profiles:media.{cd,dvd,usb}",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "TN-0037"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7\u00a7 III.B, III.E, III.F"
+   ],
+   "prior_snippet": "A custodian may charge actual out-of-pocket cost for flash drives/storage devices provided; if internal production is not practicable, may use an outside vendor and charge those actual costs; and may recover actual retri"
+  },
+  {
+   "id": "delivery",
+   "label": "Delivery: mail / handling / email / pickup",
+   "home": "fee_profiles:delivery.*",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.delivery_charge",
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "TN-0037"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7\u00a7 III.B, III.E, III.F"
+   ],
+   "prior_snippet": "A custodian may charge actual out-of-pocket cost for flash drives/storage devices provided; if internal production is not practicable, may use an outside vendor and charge those actual costs; and may recover actual retri"
+  },
+  {
+   "id": "certification",
+   "label": "Certification / certified-copy charge",
+   "home": "fee_profiles:certification.{rate,unit}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.certified_copy_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "av",
+   "label": "Audio/video: per recording, per minute, free minutes",
+   "home": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.special_service_charge",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "TN-0030"
+   ],
+   "prior_values": [
+    "$0.50",
+    "50 cents"
+   ],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 II.A"
+   ],
+   "prior_snippet": "For each standard 8.5x11 or 8.5x14 color copy produced, a records custodian may assess a per-page charge of up to 50 cents ($0.50)."
+  },
+  {
+   "id": "commercial",
+   "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+   "home": "fee_profiles:purposeOverrides.commercial",
+   "type": "pct+bool",
+   "concepts": [
+    "fee.commercial_charge"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "TN-0049"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 I.F, citing Tenn. Code Ann. \u00a7 10-7-506(c)"
+   ],
+   "prior_snippet": "Although standard copy/labor charges do not vary by purpose, other statutory provisions (e.g., \u00a7 10-7-506(c)) enumerate fees that may be assessed when specific documents are requested for a specific use."
+  },
+  {
+   "id": "waiver",
+   "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+   "home": "jurisdiction_rules:fee_waiver.*",
+   "type": "enum_list+bool",
+   "concepts": [
+    "fee.waiver"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "TN-0036"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 I.D"
+   ],
+   "prior_snippet": "A records custodian may reduce or waive charges, in whole or in part, in accordance with the governmental entity's public records policy."
+  },
+  {
+   "id": "waiver.forfeiture",
+   "label": "Late response forfeits the fee",
+   "home": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+   "type": "bool",
+   "concepts": [
+    "fee.waiver",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "TN-0036"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "OORC Schedule of Reasonable Charges \u00a7 I.D"
+   ],
+   "prior_snippet": "A records custodian may reduce or waive charges, in whole or in part, in accordance with the governmental entity's public records policy."
+  },
+  {
+   "id": "repeat",
+   "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+   "home": "NOT IN ENGINE (requestor-ledger)",
+   "type": "structural",
+   "concepts": [
+    "fee.repeat_request_carryforward",
+    "fee.aggregation"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "TN-0038",
+    "TN-0039",
+    "TN-0040b"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "OORC Reasonable Charges for Frequent and Multiple Requests \u00a7 I.C",
+    "OORC Reasonable Charges for Frequent and Multiple Requests \u00a7 I.D",
+    "OORC Reasonable Charges for Frequent and Multiple Requests \u00a7 II.A"
+   ],
+   "prior_snippet": "A governmental entity's policy shall specify the number of requests within a calendar month that triggers aggregation; that amount must be no lower than four (4) requests."
+  }
+ ],
+ "canonical_concepts": [
+  {
+   "canonical_key": "fee.copy_rate_per_page",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Absent a published actual-cost calculation, the agency may charge up to ten cents per page for public records scanned into an electronic format."
+  },
+  {
+   "canonical_key": "fee.actual_cost_basis",
+   "family": "fee",
+   "config_home": "mixed(p:24/s:8)",
+   "definition": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records."
+  },
+  {
+   "canonical_key": "fee.waiver",
+   "family": "fee",
+   "config_home": "mixed(p:5/s:23)",
+   "definition": "State, county, and municipal officers shall furnish, without charge, searches for and certified copies of public records needed in support of a claim or benefit applicati"
+  },
+  {
+   "canonical_key": "fee.electronic_media_charge",
+   "family": "fee",
+   "config_home": "mixed(p:21/s:1)",
+   "definition": "If records are not in electronic format and the public body agrees to produce them electronically, it may charge for the staff time required to transfer the documents to "
+  },
+  {
+   "canonical_key": "fee.no_charge_categories",
+   "family": "fee",
+   "config_home": "mixed(p:11/s:9)",
+   "definition": "A fee shall not be assessed for time spent segregating or redacting records unless such segregation/redaction is required by law or approved by the Supervisor."
+  },
+  {
+   "canonical_key": "fee.labor_charge",
+   "family": "fee",
+   "config_home": "mixed(p:25/s:4)",
+   "definition": "A public body may add up to 50% to the applicable labor charge to cover fringe benefits, not exceeding the actual cost of fringe benefits, if it notes the multiplier on t"
+  },
+  {
+   "canonical_key": "fee.schedule_and_authority",
+   "family": "fee",
+   "config_home": "mixed(p:6/s:10)",
+   "definition": "For state-agency public records, copy fees shall be charged according to the uniform fee schedule adopted by the commissioner of administration (R.S. 39:241) or as otherw"
+  },
+  {
+   "canonical_key": "fee.estimate_and_notice",
+   "family": "fee",
+   "config_home": "mixed(p:3/s:19)",
+   "definition": "The requester shall be informed of the estimated cost of preparing the copy if more than two hours of employee time is needed or if an outside professional service would "
+  },
+  {
+   "canonical_key": "fee.nonstandard_rate",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Where a copy requires a transcription, or a person requests a transcription of a public record, the transcription fee shall not exceed the agency's cost."
+  },
+  {
+   "canonical_key": "fee.free_allowance",
+   "family": "fee",
+   "config_home": "mixed(p:10/s:2)",
+   "definition": "The custodian shall not impose any charge for the first hour of time expended in research and retrieval of public records."
+  },
+  {
+   "canonical_key": "fee.certified_copy_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "The fee for certification of documents may not exceed five dollars ($5) per document."
+  },
+  {
+   "canonical_key": "fee.special_service_charge",
+   "family": "fee",
+   "config_home": "mixed(p:7/s:1)",
+   "definition": "For a voluminous request for electronic records, a public body may charge tiered caps by data size: for non-PDF data up to $20 (<=2 MB), $40 (2-4 MB), or $100 (>4 MB); fo"
+  },
+  {
+   "canonical_key": "fee.commercial_charge",
+   "family": "fee",
+   "config_home": "mixed(p:4/s:3)",
+   "definition": "The chapter does not authorize giving, selling, or providing access to lists of individuals requested for commercial purposes, and agencies shall not do so unless specifi"
+  },
+  {
+   "canonical_key": "fee.delivery_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Mailing may be charged at actual cost in a reasonably economical manner; no charge for expedited shipping or insurance unless stipulated by the requester."
+  },
+  {
+   "canonical_key": "fee.repeat_request_carryforward",
+   "family": "fee",
+   "config_home": "structural",
+   "definition": "If the same or a substantially similar request is made within six months after expiration of the ninety-day nonpayment-withdrawal period (or one hundred fifty days if req"
+  },
+  {
+   "canonical_key": "fee.aggregation",
+   "family": "fee",
+   "config_home": "mixed(p:1/s:2)",
+   "definition": "Once a records custodian reaches the aggregation threshold, the custodian is no longer required to deduct the labor threshold or any other minimum charge per request that"
+  },
+  {
+   "canonical_key": "payment.advance_payment",
+   "family": "payment",
+   "config_home": "mixed(p:6/s:12)",
+   "definition": "The custodian may require advance payment of the fees authorized by this section before providing the records."
+  },
+  {
+   "canonical_key": "payment.nonpayment_consequence",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:11)",
+   "definition": "A request is considered withdrawn if the requester fails to remit all fees within ninety days, or within one hundred fifty days if the requested fees are greater than one"
+  },
+  {
+   "canonical_key": "payment.production_conditioned_on_payment",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "For a standard request, the public officer has discretion to require the requester to pay all or a portion of the estimated fee prior to searching for any responsive publ"
+  },
+  {
+   "canonical_key": "payment.deposit",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:3)",
+   "definition": "A deposit notice is considered received 3 days after it is sent (regardless of transmission means), and it must state the deposit-due date, which is 48 days after the not"
+  },
+  {
+   "canonical_key": "payment.deposit_threshold",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "Where a public body determines in advance that charges are likely to exceed $200, it may, before continuing to process the request, require the requester to pay a deposit"
+  },
+  {
+   "canonical_key": "payment.deposit_ceiling",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "A good-faith deposit must not exceed one-half of the total estimated fee, and the deposit request must include a detailed fee itemization."
+  },
+  {
+   "canonical_key": "payment.method",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "Any local public body that charges for producing records may provide an electronic method of payment (noncash, non-paper-check \u2014 credit/debit cards, direct deposit/debit,"
+  }
+ ],
+ "existing_fee_payment_rules": [
+  {
+   "rule_id": "TN-0029",
+   "category": "Fees",
+   "concept_key": "fee.copy_rate_per_page_bw",
+   "legal_concept": "Per-page charge for black-and-white copies",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "rule_type": "Calculation",
+   "atomic_rule": "For each standard 8.5x11 or 8.5x14 black-and-white copy produced, a records custodian may assess a per-page charge of up to 15 cents ($0.15).",
+   "trigger": "Production of standard-size black-and-white copies.",
+   "clock_effect": "none",
+   "source_language": "For each standard 8 1/2\" x 11\" or 8 1/2\" x 14\" copy produced, a records custodian may assess a per page charge of up to 15 cents ($0.15) for black and white copies ... If producing duplex (front and back) copies, a charge for two separate pages may be imposed for each single duplex copy.",
+   "is_paraphrase": false,
+   "source_authority": "OORC Schedule of Reasonable Charges \u00a7 II.A",
+   "source_type": "Official Guidance",
+   "effective_status": "Current; effective Jan. 20, 2017",
+   "official_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "notes": "Ceiling (up to $0.15). City sets the operative rate at or below this in its policy; a higher rate requires documented actual-cost analysis (TN-0031). Duplex counts as two pages.",
+   "related_rule_ids": [
+    "TN-0030",
+    "TN-0031"
+   ]
+  },
+  {
+   "rule_id": "TN-0030",
+   "category": "Fees",
+   "concept_key": "fee.copy_rate_per_page_color",
+   "legal_concept": "Per-page charge for color copies",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "rule_type": "Calculation",
+   "atomic_rule": "For each standard 8.5x11 or 8.5x14 color copy produced, a records custodian may assess a per-page charge of up to 50 cents ($0.50).",
+   "trigger": "Production of standard-size color copies.",
+   "clock_effect": "none",
+   "source_language": "For each standard 8 1/2\" x 11\" or 8 1/2\" x 14\" copy produced, a records custodian may assess a per page charge of ... up to 50 cents ($0.50) for color copies.",
+   "is_paraphrase": false,
+   "source_authority": "OORC Schedule of Reasonable Charges \u00a7 II.A",
+   "source_type": "Official Guidance",
+   "effective_status": "Current; effective Jan. 20, 2017",
+   "official_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "notes": "Ceiling. If color is dearer and the record can be produced in B&W, the custodian must advise the requestor it can be produced in B&W unless the requestor will pay the higher color charge (Schedule \u00a7 II.B).",
+   "related_rule_ids": [
+    "TN-0029",
+    "TN-0031"
+   ]
+  },
+  {
+   "rule_id": "TN-0031",
+   "category": "Fees",
+   "concept_key": "fee.actual_cost_basis",
+   "legal_concept": "Actual-cost charges above the schedule with documentation",
+   "config_home": "parameter",
+   "constraint_basis": "soft-standard",
+   "rule_type": "Calculation",
+   "atomic_rule": "If actual costs are higher than the schedule amounts, or records are produced on a non-standard medium, the entity may develop its own charges but must document 'actual cost' calculation and reasoning in an adopted policy; charges above $0.15 (B&W) / $0.50 (color) require documented actual-cost analysis.",
+   "trigger": "Actual production cost exceeds the schedule amounts, or non-standard medium is used.",
+   "clock_effect": "none",
+   "source_language": "If a governmental entity's actual costs are higher than those reflected above ... the governmental entity may develop its own charges. The governmental entity must establish a schedule of charges documenting \"actual cost\" and state the calculation and reasoning for its charges in a properly adopted policy. ... Charges greater than 15 cents ($0.15) for black and white copies and 50 cents ($0.50) for color copies can be assessed or collected only when there is documented analysis of the fact that the higher charges represent the governmental entity's actual cost of producing such material, unless there exists another basis in law for such charges.",
+   "is_paraphrase": false,
+   "source_authority": "OORC Schedule of Reasonable Charges \u00a7 II.C",
+   "source_type": "Official Guidance",
+   "effective_status": "Current; effective Jan. 20, 2017",
+   "official_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "notes": "Same concept as the ceiling rows (TN-0029/0030) under a different basis \u2014 do not split as a separate rate; this is the escape valve above the guideline ceiling.",
+   "related_rule_ids": [
+    "TN-0029",
+    "TN-0030"
+   ]
+  },
+  {
+   "rule_id": "TN-0032",
+   "category": "Fees",
+   "concept_key": "fee.labor_threshold_hours",
+   "legal_concept": "First hour of labor not chargeable (labor threshold)",
+   "config_home": "parameter",
+   "constraint_basis": "floor",
+   "rule_type": "Calculation",
+   "atomic_rule": "The labor threshold is the first (1st) hour of labor reasonably necessary to produce requested material; a governmental entity may adopt a higher threshold, and labor may be charged only for time exceeding the threshold.",
+   "trigger": "A request for copies requiring labor to locate, retrieve, review, redact, and reproduce records.",
+   "clock_effect": "none",
+   "source_language": "\"Labor threshold\" is the first (1st) hour of labor reasonably necessary to produce requested material(s). A governmental entity may adopt a higher labor threshold than one (1) hour. A records custodian is only permitted to charge for labor exceeding the labor threshold established by the governmental entity.",
+   "is_paraphrase": false,
+   "source_authority": "OORC Schedule of Reasonable Charges \u00a7 IV.C",
+   "source_type": "Official Guidance",
+   "effective_status": "Current; effective Jan. 20, 2017",
+   "official_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "notes": "Floor: minimum one free hour; city may set a higher (more generous) threshold. Aggregation removes this waiver (TN-0038).",
+   "related_rule_ids": [
+    "TN-0033",
+    "TN-0038"
+   ]
+  },
+  {
+   "rule_id": "TN-0033",
+   "category": "Fees",
+   "concept_key": "fee.labor_rate_basis",
+   "legal_concept": "Labor rate = hourly wage of employee(s) reasonably necessary",
+   "config_home": "parameter",
+   "constraint_basis": "soft-standard",
+   "rule_type": "Calculation",
+   "atomic_rule": "Labor above the threshold is charged at the hourly wage of the employee(s) reasonably necessary, using the lowest practicable wage; the hourly wage is the employee's base salary (excluding benefits), computed by dividing annual salary by required hours per year.",
+   "trigger": "Labor time exceeds the labor threshold.",
+   "clock_effect": "none",
+   "source_language": "\"Labor\" is the time (in hours) reasonably necessary to produce requested records, including the time spent locating, retrieving, reviewing, redacting, and reproducing records. ... \"Hourly wage of an employee\" is based upon the base salary of the employee and does not include benefits. If an employee is not paid on an hourly basis, the hourly wage shall be determined by dividing the employee's annual salary by the required hours to be worked per year. ... In calculating labor charges, a records custodian should determine the total amount of labor for each employee and subtract the labor threshold from the labor of the highest paid employee(s).",
+   "is_paraphrase": false,
+   "source_authority": "OORC Schedule of Reasonable Charges \u00a7\u00a7 IV.B, IV.D, IV.E",
+   "source_type": "Official Guidance",
+   "effective_status": "Current; effective Jan. 20, 2017",
+   "official_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "notes": "Rate is a computed value keyed to specific employees' wages, not a fixed number; the one free hour is deducted from the highest-paid employee's time.",
+   "related_rule_ids": [
+    "TN-0032"
+   ]
+  },
+  {
+   "rule_id": "TN-0034",
+   "category": "Fees",
+   "concept_key": "fee.cost_estimate_required",
+   "legal_concept": "Itemized cost estimate before producing copies",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "rule_type": "Requirement",
+   "atomic_rule": "The records custodian shall provide the requestor an estimate of the reasonable costs to provide copies of the requested material before producing them.",
+   "trigger": "A request for copies that will incur charges.",
+   "clock_effect": "none",
+   "source_language": "The records custodian shall provide a requestor an estimate of the reasonable costs to provide copies of the requested material.",
+   "is_paraphrase": false,
+   "source_authority": "Tenn. Code Ann. \u00a7 10-7-503(a)(7)(B); OORC Schedule of Reasonable Charges \u00a7 I.G; OORC Model Public Records Policy \u00a7 VI.B",
+   "source_type": "Statute",
+   "effective_status": "Current (verified against 2021 codification; unchanged 2024)",
+   "official_link": "https://www.mtas.tennessee.edu/reference/tennessee-public-records-statutes",
+   "notes": "Model Policy \u00a7 VI.B: 'Records custodians shall provide requestors with an itemized estimate of the charges ... prior to producing copies ... and may require pre-payment.'",
+   "related_rule_ids": [
+    "TN-0035"
+   ]
+  },
+  {
+   "rule_id": "TN-0035",
+   "category": "Payment",
+   "concept_key": "payment.advance_payment_permitted",
+   "legal_concept": "Payment for copies may be required before production",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "rule_type": "Permission",
+   "atomic_rule": "A records custodian may require payment for copies before producing the copies of the records.",
+   "trigger": "Charges are assessed for copies.",
+   "clock_effect": "none",
+   "source_language": "A records custodian may require payment for copies before producing copies of the records.",
+   "is_paraphrase": false,
+   "source_authority": "OORC Schedule of Reasonable Charges \u00a7 I.E; Tenn. Code Ann. \u00a7 10-7-503(a)(7)(B)",
+   "source_type": "Official Guidance",
+   "effective_status": "Current; effective Jan. 20, 2017",
+   "official_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "notes": "Non-payment of estimated fees is itself a permitted denial/hold ground (OORC Response Form). City sets the dollar threshold above which prepayment is required.",
+   "related_rule_ids": [
+    "TN-0034"
+   ]
+  },
+  {
+   "rule_id": "TN-0036",
+   "category": "Fees",
+   "concept_key": "fee.waiver_discretion",
+   "legal_concept": "Discretionary reduction or waiver of charges",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "rule_type": "Discretion",
+   "atomic_rule": "A records custodian may reduce or waive charges, in whole or in part, in accordance with the governmental entity's public records policy.",
+   "trigger": "Application of the entity's fee-waiver provisions.",
+   "clock_effect": "none",
+   "source_language": "A records custodian may reduce or waive charges, in whole or in part, in accordance with the governmental entity's public records policy.",
+   "is_paraphrase": false,
+   "source_authority": "OORC Schedule of Reasonable Charges \u00a7 I.D",
+   "source_type": "Official Guidance",
+   "effective_status": "Current; effective Jan. 20, 2017",
+   "official_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "notes": "City sets waiver thresholds; fees on aggregated requests are typically non-waivable (TN-0038).",
+   "related_rule_ids": [
+    "TN-0038"
+   ]
+  },
+  {
+   "rule_id": "TN-0037",
+   "category": "Fees",
+   "concept_key": "fee.electronic_media_and_vendor_cost",
+   "legal_concept": "Actual cost of storage media, outside vendor, and retrieval",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "rule_type": "Calculation",
+   "atomic_rule": "A custodian may charge actual out-of-pocket cost for flash drives/storage devices provided; if internal production is not practicable, may use an outside vendor and charge those actual costs; and may recover actual retrieval charges assessed by an archive or other entity holding the records.",
+   "trigger": "Electronic media supplied, outside-vendor production, or retrieval from an archive/other holder.",
+   "clock_effect": "none",
+   "source_language": "A records custodian may charge its actual out-of-pocket costs for flash drives or similar storage devices on which electronic copies are provided. ... If it is not practicable or feasible for the records custodian to produce copies internally, the records custodian may use an outside vendor and charge the costs to the requester. ... If a records custodian is assessed a charge to retrieve requested records from archives or any other entity having possession of requested records, the records custodian may recover from the requestor the costs assessed for retrieval.",
+   "is_paraphrase": false,
+   "source_authority": "OORC Schedule of Reasonable Charges \u00a7\u00a7 III.B, III.E, III.F",
+   "source_type": "Official Guidance",
+   "effective_status": "Current; effective Jan. 20, 2017",
+   "official_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "notes": "Actual-cost pass-throughs (basis 'fixed' = the actual amount incurred). Per-page charges for electronic records only when paper had to be produced (e.g., printed to redact).",
+   "related_rule_ids": []
+  },
+  {
+   "rule_id": "TN-0038",
+   "category": "Fees",
+   "concept_key": "aggregation.threshold_requests",
+   "legal_concept": "Aggregation threshold for frequent/multiple requests",
+   "config_home": "parameter",
+   "constraint_basis": "floor",
+   "rule_type": "Calculation",
+   "atomic_rule": "A governmental entity's policy shall specify the number of requests within a calendar month that triggers aggregation; that amount must be no lower than four (4) requests.",
+   "trigger": "Multiple/frequent requests within a calendar month reaching the entity's threshold.",
+   "clock_effect": "none",
+   "source_language": "A governmental entity's public record policy shall indicate the number of requests within a calendar month that will trigger aggregation; that amount must be no lower than four (4) requests. This amount is the aggregation threshold.",
+   "is_paraphrase": false,
+   "source_authority": "OORC Reasonable Charges for Frequent and Multiple Requests \u00a7 I.D",
+   "source_type": "Official Guidance",
+   "effective_status": "Current; effective Jan. 20, 2017",
+   "official_link": "https://comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/Frequent_and_Multiple_Requests.pdf",
+   "notes": "Floor: statewide minimum threshold is 4/month; the city fills the operative number at or above 4. Once reached, the labor-threshold waiver no longer applies (TN-0039).",
+   "related_rule_ids": [
+    "TN-0032",
+    "TN-0039",
+    "TN-0040b"
+   ]
+  },
+  {
+   "rule_id": "TN-0039",
+   "category": "Fees",
+   "concept_key": "aggregation.labor_waiver_removed",
+   "legal_concept": "Loss of labor-threshold waiver once aggregation threshold met",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "rule_type": "Permission",
+   "atomic_rule": "Once a records custodian reaches the aggregation threshold, the custodian is no longer required to deduct the labor threshold or any other minimum charge per request that would ordinarily be waived.",
+   "trigger": "Aggregation threshold reached.",
+   "clock_effect": "none",
+   "source_language": "Once a records custodian reaches the aggregation threshold, the records custodian is no longer required to deduct the labor threshold set forth in the Schedule of Reasonable Charges or any other minimum charge per request that would ordinarily be waived.",
+   "is_paraphrase": false,
+   "source_authority": "OORC Reasonable Charges for Frequent and Multiple Requests \u00a7 II.A",
+   "source_type": "Official Guidance",
+   "effective_status": "Current; effective Jan. 20, 2017",
+   "official_link": "https://comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/Frequent_and_Multiple_Requests.pdf",
+   "notes": "",
+   "related_rule_ids": [
+    "TN-0032",
+    "TN-0038"
+   ]
+  },
+  {
+   "rule_id": "TN-0040b",
+   "category": "Fees",
+   "concept_key": "aggregation.working_in_concert",
+   "legal_concept": "Aggregation across requestors acting in concert",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "rule_type": "Permission",
+   "atomic_rule": "An entity may aggregate multiple requests by a single requestor, and may aggregate requests by multiple requestors if the coordinator determines they are acting in concert with each other or as agents of another person, entity, or organization.",
+   "trigger": "Multiple requests by one requestor, or by several requestors the coordinator finds are acting in concert/as agents.",
+   "clock_effect": "none",
+   "source_language": "A governmental entity may aggregate multiple public record requests made by a single requestor. A governmental entity may also aggregate public record requests made by multiple requestors, if the public records request coordinator determines the requestors are acting in concert with each other or as the agents of another person, entity, or organization.",
+   "is_paraphrase": false,
+   "source_authority": "OORC Reasonable Charges for Frequent and Multiple Requests \u00a7 I.C",
+   "source_type": "Official Guidance",
+   "effective_status": "Current; effective Jan. 20, 2017",
+   "official_link": "https://comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/Frequent_and_Multiple_Requests.pdf",
+   "notes": "'Working in concert' is a coordinator determination; it is appealable to the OORC (TN-0041).",
+   "related_rule_ids": [
+    "TN-0038",
+    "TN-0041"
+   ]
+  },
+  {
+   "rule_id": "TN-0049",
+   "category": "Fees",
+   "concept_key": "fee.commercial_use_special_documents",
+   "legal_concept": "Special fees for specific documents requested for a specific use",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "rule_type": "Exception",
+   "atomic_rule": "Although standard copy/labor charges do not vary by purpose, other statutory provisions (e.g., \u00a7 10-7-506(c)) enumerate fees that may be assessed when specific documents are requested for a specific use.",
+   "trigger": "Request for specific enumerated documents for a specific (e.g., commercial) use governed by \u00a7 10-7-506(c).",
+   "clock_effect": "none",
+   "source_language": "However, other statutory provisions, such as Tenn. Code Ann. \u00a7 10-7-506(c), enumerate fees that may be assessed when specific documents are requested for a specific use. Any distinctions made, or waiver of charges permitted, based upon the type of records requested should be expressly set forth and permitted in the adopted public records policy.",
+   "is_paraphrase": false,
+   "source_authority": "OORC Schedule of Reasonable Charges \u00a7 I.F, citing Tenn. Code Ann. \u00a7 10-7-506(c)",
+   "source_type": "Official Guidance",
+   "effective_status": "Requires manual verification of \u00a7 10-7-506(c) enumerated documents/rates",
+   "official_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "notes": "The verbatim capture is the OORC Schedule's reference; the specific documents and fee amounts in \u00a7 10-7-506(c) were not opened verbatim and need a later pass. Flags human legal review.",
+   "related_rule_ids": [
+    "TN-0002"
+   ]
+  },
+  {
+   "rule_id": "TN-0050",
+   "category": "Fees",
+   "concept_key": "fee.custodian_reasonable_costs_authority",
+   "legal_concept": "Statutory authority to charge reasonable production costs",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "rule_type": "Permission",
+   "atomic_rule": "A records custodian may require a requestor to pay the custodian's reasonable costs incurred in producing the requested material, assessed in the manner established by the Office of Open Records Counsel pursuant to \u00a7 8-4-604.",
+   "trigger": "A request for copies/production of public records.",
+   "clock_effect": "none",
+   "source_language": "A records custodian may require a requestor to pay the custodian's reasonable costs incurred in producing the requested material and to assess the reasonable costs in the manner established by the office of open records counsel pursuant to \u00a7 8-4-604.",
+   "is_paraphrase": false,
+   "source_authority": "Tenn. Code Ann. \u00a7 10-7-503(a)(7)(B)",
+   "source_type": "Statute",
+   "effective_status": "Current (verified against 2021 codification; unchanged 2024)",
+   "official_link": "https://www.mtas.tennessee.edu/reference/tennessee-public-records-statutes",
+   "notes": "Statutory hook that makes the OORC Schedule of Reasonable Charges the operative cost framework. \u00a7 10-7-506(a) separately grants custodians the right to adopt and enforce reasonable rules governing the making of copies (per OORC Model Policy, Policy Considerations).",
+   "related_rule_ids": [
+    "TN-0029",
+    "TN-0032",
+    "TN-0034"
+   ]
+  }
+ ],
+ "template": {
+  "fee_schedule": {
+   "fee.copy_rate_per_page": [
+    {
+     "rule_id": "TN-0029",
+     "authority": "OORC Schedule of Reasonable Charges \u00a7 II.A",
+     "summary": "For each standard 8.5x11 or 8.5x14 black-and-white copy produced, a records custodian may assess a per-page charge of up to 15 cents ($0.15)."
+    }
+   ],
+   "fee.labor_charge": [
+    {
+     "rule_id": "TN-0032",
+     "authority": "OORC Schedule of Reasonable Charges \u00a7 IV.C",
+     "summary": "The labor threshold is the first (1st) hour of labor reasonably necessary to produce requested material; a governmental entity may adopt a higher threshold, and labor may be charged only for time exceeding the threshold."
+    },
+    {
+     "rule_id": "TN-0033",
+     "authority": "OORC Schedule of Reasonable Charges \u00a7\u00a7 IV.B, IV.D, IV.E",
+     "summary": "Labor above the threshold is charged at the hourly wage of the employee(s) reasonably necessary, using the lowest practicable wage; the hourly wage is the employee's base salary (excluding benefits), computed by dividing annual salary by required hours per year."
+    }
+   ],
+   "fee.actual_cost_basis": [
+    {
+     "rule_id": "TN-0019",
+     "authority": "OORC Schedule of Reasonable Charges \u00a7 III.A",
+     "summary": "When assessing fees for copies, records custodians shall utilize the most economical and efficient method of producing the requested records."
+    },
+    {
+     "rule_id": "TN-0031",
+     "authority": "OORC Schedule of Reasonable Charges \u00a7 II.C",
+     "summary": "If actual costs are higher than the schedule amounts, or records are produced on a non-standard medium, the entity may develop its own charges but must document 'actual cost' calculation and reasoning in an adopted policy; charges above $0.15 (B&W) / $0.50 (color) require documented actual-cost a\u2026"
+    }
+   ],
+   "fee.electronic_media_charge": [
+    {
+     "rule_id": "TN-0037",
+     "authority": "OORC Schedule of Reasonable Charges \u00a7\u00a7 III.B, III.E, III.F",
+     "summary": "A custodian may charge actual out-of-pocket cost for flash drives/storage devices provided; if internal production is not practicable, may use an outside vendor and charge those actual costs; and may recover actual retrieval charges assessed by an archive or other entity holding the records."
+    }
+   ],
+   "fee.nonstandard_rate": [
+    {
+     "rule_id": "TN-0030",
+     "authority": "OORC Schedule of Reasonable Charges \u00a7 II.A",
+     "summary": "For each standard 8.5x11 or 8.5x14 color copy produced, a records custodian may assess a per-page charge of up to 50 cents ($0.50)."
+    }
+   ],
+   "fee.commercial_charge": [
+    {
+     "rule_id": "TN-0049",
+     "authority": "OORC Schedule of Reasonable Charges \u00a7 I.F, citing Tenn. Code Ann. \u00a7 10-7-506(c)",
+     "summary": "Although standard copy/labor charges do not vary by purpose, other statutory provisions (e.g., \u00a7 10-7-506(c)) enumerate fees that may be assessed when specific documents are requested for a specific use."
+    }
+   ],
+   "fee.schedule_and_authority": [
+    {
+     "rule_id": "TN-0050",
+     "authority": "Tenn. Code Ann. \u00a7 10-7-503(a)(7)(B)",
+     "summary": "A records custodian may require a requestor to pay the custodian's reasonable costs incurred in producing the requested material, assessed in the manner established by the Office of Open Records Counsel pursuant to \u00a7 8-4-604."
+    }
+   ]
+  },
+  "knobs_fee": null
+ },
+ "run_parameters": {
+  "scope": "municipalities only (note agency regimes)",
+  "recency": "check 2024-2026 session laws + rule amendments for fee sections",
+  "estimate_calibration": "OUT of scope"
+ }
+}

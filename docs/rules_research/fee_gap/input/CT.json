@@ -1,0 +1,928 @@
+{
+ "state": "Connecticut",
+ "code": "CT",
+ "next_rule_id": "CT-9001 \u2014 new/amended rule rows from THIS pass use the CT-9NNN namespace (9001, 9002, \u2026) so they never collide with existing ids; reference existing rows by their existing ids.",
+ "items": [
+  {
+   "id": "dup.bw.rate",
+   "label": "Copy rate \u2014 B&W page",
+   "home": "fee_profiles:duplication.bw.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "CT-0015",
+    "CT-0016"
+   ],
+   "prior_values": [
+    "twenty-five cents"
+   ],
+   "prior_citations": [
+    "Conn. Gen. Stat. \u00a7 1-212(a)(A)",
+    "Conn. Gen. Stat. \u00a7 1-212(a)(B)"
+   ],
+   "prior_snippet": "For all public agencies other than state offices/agencies, the fee for a copy of a public record shall not exceed fifty cents per page."
+  },
+  {
+   "id": "dup.color.rate",
+   "label": "Copy rate \u2014 color page",
+   "home": "fee_profiles:duplication.color.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "CT-0015",
+    "CT-0016",
+    "CT-0017"
+   ],
+   "prior_values": [
+    "twenty-five cents"
+   ],
+   "prior_citations": [
+    "Conn. Gen. Stat. \u00a7 1-212(a)",
+    "Conn. Gen. Stat. \u00a7 1-212(a)(A)",
+    "Conn. Gen. Stat. \u00a7 1-212(a)(B)"
+   ],
+   "prior_snippet": "For all public agencies other than state offices/agencies, the fee for a copy of a public record shall not exceed fifty cents per page."
+  },
+  {
+   "id": "dup.oversized.rate",
+   "label": "Copy rate \u2014 oversized / nonstandard page",
+   "home": "fee_profiles:duplication.oversized.rate",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "CT-0017"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Conn. Gen. Stat. \u00a7 1-212(a)"
+   ],
+   "prior_snippet": "Where a copy requires a transcription, or a person requests a transcription of a public record, the transcription fee shall not exceed the agency's cost."
+  },
+  {
+   "id": "dup.specialty.rate",
+   "label": "Specialty reproduction (photos, maps, transcripts)",
+   "home": "fee_profiles:duplication.specialty.rate",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.nonstandard_rate",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "CT-0017"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Conn. Gen. Stat. \u00a7 1-212(a)"
+   ],
+   "prior_snippet": "Where a copy requires a transcription, or a person requests a transcription of a public record, the transcription fee shall not exceed the agency's cost."
+  },
+  {
+   "id": "dup.tiers",
+   "label": "Graduated page bands (per-page rate by volume)",
+   "home": "fee_profiles:duplication.*.tiers",
+   "type": "tiers",
+   "concepts": [
+    "fee.copy_rate_per_page",
+    "fee.free_allowance"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "CT-0015",
+    "CT-0016"
+   ],
+   "prior_values": [
+    "twenty-five cents"
+   ],
+   "prior_citations": [
+    "Conn. Gen. Stat. \u00a7 1-212(a)(A)",
+    "Conn. Gen. Stat. \u00a7 1-212(a)(B)"
+   ],
+   "prior_snippet": "For all public agencies other than state offices/agencies, the fee for a copy of a public record shall not exceed fifty cents per page."
+  },
+  {
+   "id": "rules.freePages",
+   "label": "Free page allowance per request",
+   "home": "fee_profiles:requestRules.freePageAllowance",
+   "type": "pages",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.search.rate",
+   "label": "Labor rate \u2014 search / retrieval ($/hr)",
+   "home": "fee_profiles:labor.search.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.review.rate",
+   "label": "Labor rate \u2014 review / redaction ($/hr)",
+   "home": "fee_profiles:labor.review.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.programming.rate",
+   "label": "Labor rate \u2014 programming / data extraction ($/hr)",
+   "home": "fee_profiles:labor.programming.rate",
+   "type": "rate_usd_per_hour",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.special_service_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.billableWhen",
+   "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+   "home": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+   "type": "enum+threshold",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.overheadPct",
+   "label": "Overhead / fringe surcharge on labor (%)",
+   "home": "fee_profiles:labor.overheadPct",
+   "type": "pct",
+   "concepts": [
+    "fee.labor_charge",
+    "fee.actual_cost_basis"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.increment",
+   "label": "Labor time increment + rounding",
+   "home": "fee_profiles:labor.*.increment / rounding",
+   "type": "hours",
+   "concepts": [
+    "fee.labor_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.freeLaborHours",
+   "label": "Free labor hours per request",
+   "home": "fee_profiles:requestRules.freeLaborHours",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.labor_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "labor.periodicFreeHours",
+   "label": "Free personnel time per requestor per month/year (TX \u00a7 552.275 pattern)",
+   "home": "NOT IN ENGINE (fee_profiles gap \u2014 requestor-ledger counter)",
+   "type": "hours",
+   "concepts": [
+    "fee.free_allowance",
+    "fee.aggregation"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.estimateNotifyThreshold",
+   "label": "Itemized estimate / cost notice required above ($ or hours)",
+   "home": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+   "type": "usd",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "estimate.requesterResponseDays",
+   "label": "Requester must respond to an estimate within N days (else withdrawn)",
+   "home": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "estimate.revisionNotifyPercent",
+   "label": "Revised estimate required when actual exceeds estimate by N%",
+   "home": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+   "type": "pct",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "estimate.validityDays",
+   "label": "Estimate validity period (days)",
+   "home": "fee_profiles:estimatePolicy.estimateValidityDays",
+   "type": "int",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.deposit.threshold",
+   "label": "Deposit / prepayment may be required above ($)",
+   "home": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+   "type": "usd",
+   "concepts": [
+    "payment.deposit_threshold",
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "CT-0022"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Conn. Gen. Stat. \u00a7 1-212(c)"
+   ],
+   "prior_snippet": "A public agency may require prepayment of any fee if the fee is estimated to be ten dollars or more."
+  },
+  {
+   "id": "rules.deposit.percent",
+   "label": "Deposit capped at (% of estimate)",
+   "home": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+   "type": "pct",
+   "concepts": [
+    "payment.deposit_ceiling",
+    "payment.deposit"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.productionGate",
+   "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+   "home": "paymentTiming gates + fee_profiles bands",
+   "type": "enum",
+   "concepts": [
+    "payment.production_conditioned_on_payment",
+    "payment.advance_payment"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "CT-0022"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Conn. Gen. Stat. \u00a7 1-212(c)"
+   ],
+   "prior_snippet": "A public agency may require prepayment of any fee if the fee is estimated to be ten dollars or more."
+  },
+  {
+   "id": "payment.nonpayment",
+   "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+   "home": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+   "type": "enum+int",
+   "concepts": [
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.depositClock",
+   "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+   "home": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+   "type": "enum",
+   "concepts": [
+    "payment.deposit",
+    "payment.advance_payment"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "CT-0022"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Conn. Gen. Stat. \u00a7 1-212(c)"
+   ],
+   "prior_snippet": "A public agency may require prepayment of any fee if the fee is estimated to be ten dollars or more."
+  },
+  {
+   "id": "payment.reissue",
+   "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+   "home": "jurisdiction_rules:payment.reissue_*",
+   "type": "bool",
+   "concepts": [
+    "fee.estimate_and_notice"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "payment.method",
+   "label": "Electronic payment method offered",
+   "home": "fee_profiles:payment_mode (operational; not law-driven except VA)",
+   "type": "enum",
+   "concepts": [
+    "payment.method"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.maxFee",
+   "label": "Request-level ceiling (actual cost cap / statutory max)",
+   "home": "fee_profiles:requestRules.maxFee",
+   "type": "usd_or_rule",
+   "concepts": [
+    "fee.actual_cost_basis",
+    "fee.schedule_and_authority"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "rules.deMinimis",
+   "label": "De-minimis: no charge below ($)",
+   "home": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+   "type": "usd",
+   "concepts": [
+    "fee.waiver",
+    "fee.no_charge_categories"
+   ],
+   "prior_status": "defers_to_city",
+   "prior_rule_ids": [
+    "CT-0024"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Conn. Gen. Stat. \u00a7 1-212(d)"
+   ],
+   "prior_snippet": "A public agency shall waive any copy fee when any enumerated ground applies: requester is indigent; records are exempt under 1-210(b); compliance benefits the general welfare in the agency's judgment; requester is an ele"
+  },
+  {
+   "id": "rules.minFee",
+   "label": "Minimum fee",
+   "home": "fee_profiles:requestRules.minFee",
+   "type": "usd",
+   "concepts": [],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "media",
+   "label": "Electronic media (CD/DVD/USB) charge",
+   "home": "fee_profiles:media.{cd,dvd,usb}",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "CT-0018"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Conn. Gen. Stat. \u00a7 1-212(b)"
+   ],
+   "prior_snippet": "The fee for a copy of computer-stored public records shall not exceed the agency's cost, and (for non-preexisting printouts) may include only enumerated components: employee hourly salary for producing/formatting/program"
+  },
+  {
+   "id": "delivery",
+   "label": "Delivery: mail / handling / email / pickup",
+   "home": "fee_profiles:delivery.*",
+   "type": "actual_or_usd",
+   "concepts": [
+    "fee.delivery_charge",
+    "fee.electronic_media_charge"
+   ],
+   "prior_status": "actual_cost_or_reasonable",
+   "prior_rule_ids": [
+    "CT-0018"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Conn. Gen. Stat. \u00a7 1-212(b)"
+   ],
+   "prior_snippet": "The fee for a copy of computer-stored public records shall not exceed the agency's cost, and (for non-preexisting printouts) may include only enumerated components: employee hourly salary for producing/formatting/program"
+  },
+  {
+   "id": "certification",
+   "label": "Certification / certified-copy charge",
+   "home": "fee_profiles:certification.{rate,unit}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.certified_copy_charge"
+   ],
+   "prior_status": "value_present",
+   "prior_rule_ids": [
+    "CT-0020"
+   ],
+   "prior_values": [
+    "one dollar"
+   ],
+   "prior_citations": [
+    "Conn. Gen. Stat. \u00a7 1-212(e)"
+   ],
+   "prior_snippet": "For certifying a copy of records/files (or certifying a fact appearing therein), the fee is one dollar for the first page and fifty cents for each additional page."
+  },
+  {
+   "id": "av",
+   "label": "Audio/video: per recording, per minute, free minutes",
+   "home": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+   "type": "rate_usd",
+   "concepts": [
+    "fee.special_service_charge",
+    "fee.nonstandard_rate"
+   ],
+   "prior_status": "rule_without_value",
+   "prior_rule_ids": [
+    "CT-0017"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Conn. Gen. Stat. \u00a7 1-212(a)"
+   ],
+   "prior_snippet": "Where a copy requires a transcription, or a person requests a transcription of a public record, the transcription fee shall not exceed the agency's cost."
+  },
+  {
+   "id": "commercial",
+   "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+   "home": "fee_profiles:purposeOverrides.commercial",
+   "type": "pct+bool",
+   "concepts": [
+    "fee.commercial_charge"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  },
+  {
+   "id": "waiver",
+   "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+   "home": "jurisdiction_rules:fee_waiver.*",
+   "type": "enum_list+bool",
+   "concepts": [
+    "fee.waiver"
+   ],
+   "prior_status": "defers_to_city",
+   "prior_rule_ids": [
+    "CT-0024"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Conn. Gen. Stat. \u00a7 1-212(d)"
+   ],
+   "prior_snippet": "A public agency shall waive any copy fee when any enumerated ground applies: requester is indigent; records are exempt under 1-210(b); compliance benefits the general welfare in the agency's judgment; requester is an ele"
+  },
+  {
+   "id": "waiver.forfeiture",
+   "label": "Late response forfeits the fee",
+   "home": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+   "type": "bool",
+   "concepts": [
+    "fee.waiver",
+    "payment.nonpayment_consequence"
+   ],
+   "prior_status": "defers_to_city",
+   "prior_rule_ids": [
+    "CT-0024"
+   ],
+   "prior_values": [],
+   "prior_citations": [
+    "Conn. Gen. Stat. \u00a7 1-212(d)"
+   ],
+   "prior_snippet": "A public agency shall waive any copy fee when any enumerated ground applies: requester is indigent; records are exempt under 1-210(b); compliance benefits the general welfare in the agency's judgment; requester is an ele"
+  },
+  {
+   "id": "repeat",
+   "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+   "home": "NOT IN ENGINE (requestor-ledger)",
+   "type": "structural",
+   "concepts": [
+    "fee.repeat_request_carryforward",
+    "fee.aggregation"
+   ],
+   "prior_status": "silent",
+   "prior_rule_ids": [],
+   "prior_values": [],
+   "prior_citations": [],
+   "prior_snippet": null
+  }
+ ],
+ "canonical_concepts": [
+  {
+   "canonical_key": "fee.copy_rate_per_page",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Absent a published actual-cost calculation, the agency may charge up to ten cents per page for public records scanned into an electronic format."
+  },
+  {
+   "canonical_key": "fee.actual_cost_basis",
+   "family": "fee",
+   "config_home": "mixed(p:24/s:8)",
+   "definition": "A public body may make reasonable charges not to exceed its actual cost incurred in accessing, duplicating, supplying, or searching for the requested records."
+  },
+  {
+   "canonical_key": "fee.waiver",
+   "family": "fee",
+   "config_home": "mixed(p:5/s:23)",
+   "definition": "State, county, and municipal officers shall furnish, without charge, searches for and certified copies of public records needed in support of a claim or benefit applicati"
+  },
+  {
+   "canonical_key": "fee.electronic_media_charge",
+   "family": "fee",
+   "config_home": "mixed(p:21/s:1)",
+   "definition": "If records are not in electronic format and the public body agrees to produce them electronically, it may charge for the staff time required to transfer the documents to "
+  },
+  {
+   "canonical_key": "fee.no_charge_categories",
+   "family": "fee",
+   "config_home": "mixed(p:11/s:9)",
+   "definition": "A fee shall not be assessed for time spent segregating or redacting records unless such segregation/redaction is required by law or approved by the Supervisor."
+  },
+  {
+   "canonical_key": "fee.labor_charge",
+   "family": "fee",
+   "config_home": "mixed(p:25/s:4)",
+   "definition": "A public body may add up to 50% to the applicable labor charge to cover fringe benefits, not exceeding the actual cost of fringe benefits, if it notes the multiplier on t"
+  },
+  {
+   "canonical_key": "fee.schedule_and_authority",
+   "family": "fee",
+   "config_home": "mixed(p:6/s:10)",
+   "definition": "For state-agency public records, copy fees shall be charged according to the uniform fee schedule adopted by the commissioner of administration (R.S. 39:241) or as otherw"
+  },
+  {
+   "canonical_key": "fee.estimate_and_notice",
+   "family": "fee",
+   "config_home": "mixed(p:3/s:19)",
+   "definition": "The requester shall be informed of the estimated cost of preparing the copy if more than two hours of employee time is needed or if an outside professional service would "
+  },
+  {
+   "canonical_key": "fee.nonstandard_rate",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Where a copy requires a transcription, or a person requests a transcription of a public record, the transcription fee shall not exceed the agency's cost."
+  },
+  {
+   "canonical_key": "fee.free_allowance",
+   "family": "fee",
+   "config_home": "mixed(p:10/s:2)",
+   "definition": "The custodian shall not impose any charge for the first hour of time expended in research and retrieval of public records."
+  },
+  {
+   "canonical_key": "fee.certified_copy_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "The fee for certification of documents may not exceed five dollars ($5) per document."
+  },
+  {
+   "canonical_key": "fee.special_service_charge",
+   "family": "fee",
+   "config_home": "mixed(p:7/s:1)",
+   "definition": "For a voluminous request for electronic records, a public body may charge tiered caps by data size: for non-PDF data up to $20 (<=2 MB), $40 (2-4 MB), or $100 (>4 MB); fo"
+  },
+  {
+   "canonical_key": "fee.commercial_charge",
+   "family": "fee",
+   "config_home": "mixed(p:4/s:3)",
+   "definition": "The chapter does not authorize giving, selling, or providing access to lists of individuals requested for commercial purposes, and agencies shall not do so unless specifi"
+  },
+  {
+   "canonical_key": "fee.delivery_charge",
+   "family": "fee",
+   "config_home": "parameter",
+   "definition": "Mailing may be charged at actual cost in a reasonably economical manner; no charge for expedited shipping or insurance unless stipulated by the requester."
+  },
+  {
+   "canonical_key": "fee.repeat_request_carryforward",
+   "family": "fee",
+   "config_home": "structural",
+   "definition": "If the same or a substantially similar request is made within six months after expiration of the ninety-day nonpayment-withdrawal period (or one hundred fifty days if req"
+  },
+  {
+   "canonical_key": "fee.aggregation",
+   "family": "fee",
+   "config_home": "mixed(p:1/s:2)",
+   "definition": "Once a records custodian reaches the aggregation threshold, the custodian is no longer required to deduct the labor threshold or any other minimum charge per request that"
+  },
+  {
+   "canonical_key": "payment.advance_payment",
+   "family": "payment",
+   "config_home": "mixed(p:6/s:12)",
+   "definition": "The custodian may require advance payment of the fees authorized by this section before providing the records."
+  },
+  {
+   "canonical_key": "payment.nonpayment_consequence",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:11)",
+   "definition": "A request is considered withdrawn if the requester fails to remit all fees within ninety days, or within one hundred fifty days if the requested fees are greater than one"
+  },
+  {
+   "canonical_key": "payment.production_conditioned_on_payment",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "For a standard request, the public officer has discretion to require the requester to pay all or a portion of the estimated fee prior to searching for any responsive publ"
+  },
+  {
+   "canonical_key": "payment.deposit",
+   "family": "payment",
+   "config_home": "mixed(p:5/s:3)",
+   "definition": "A deposit notice is considered received 3 days after it is sent (regardless of transmission means), and it must state the deposit-due date, which is 48 days after the not"
+  },
+  {
+   "canonical_key": "payment.deposit_threshold",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "Where a public body determines in advance that charges are likely to exceed $200, it may, before continuing to process the request, require the requester to pay a deposit"
+  },
+  {
+   "canonical_key": "payment.deposit_ceiling",
+   "family": "payment",
+   "config_home": "parameter",
+   "definition": "A good-faith deposit must not exceed one-half of the total estimated fee, and the deposit request must include a detailed fee itemization."
+  },
+  {
+   "canonical_key": "payment.method",
+   "family": "payment",
+   "config_home": "structural",
+   "definition": "Any local public body that charges for producing records may provide an electronic method of payment (noncash, non-paper-check \u2014 credit/debit cards, direct deposit/debit,"
+  }
+ ],
+ "existing_fee_payment_rules": [
+  {
+   "rule_id": "CT-0015",
+   "category": "Fees",
+   "concept_key": "fee.copy_rate_per_page",
+   "legal_concept": "Per-page copy fee ceiling - municipal and other agencies",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "rule_type": "Calculation",
+   "atomic_rule": "For all public agencies other than state offices/agencies, the fee for a copy of a public record shall not exceed fifty cents per page.",
+   "trigger": "Requester receives a copy from a non-state public agency",
+   "clock_effect": "none",
+   "source_language": "(B) By all other public agencies, as defined in section 1-200, shall not exceed fifty cents per page.",
+   "is_paraphrase": false,
+   "source_authority": "Conn. Gen. Stat. \u00a7 1-212(a)(B)",
+   "related_rule_ids": [
+    "CT-0016"
+   ],
+   "effective_status": "Current",
+   "official_link": "https://www.cga.ct.gov/current/pub/chap_014.htm",
+   "notes": "Municipal/local rate. Ceiling: the city may set any per-page fee at or below $0.50. 'Page' means one side of a piece of printed matter (108 CA 471)."
+  },
+  {
+   "rule_id": "CT-0016",
+   "category": "Fees",
+   "concept_key": "fee.copy_rate_per_page",
+   "legal_concept": "Per-page copy fee ceiling - state offices/agencies",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "rule_type": "Calculation",
+   "atomic_rule": "For state executive/administrative/legislative offices and state agencies (and judicial offices in their administrative functions), the copy fee shall not exceed twenty-five cents per page.",
+   "trigger": "Requester receives a copy from a state office/agency",
+   "clock_effect": "none",
+   "source_language": "(A) By an executive, administrative or legislative office of the state, a state agency or a department, institution, bureau, board, commission, authority or official of the state, including a committee of, or created by, such an office ..., and also including any judicial office, official or body or committee thereof but only in respect to its or their administrative functions, shall not exceed twenty-five cents per page",
+   "is_paraphrase": false,
+   "source_authority": "Conn. Gen. Stat. \u00a7 1-212(a)(A)",
+   "related_rule_ids": [
+    "CT-0015"
+   ],
+   "effective_status": "Current",
+   "official_link": "https://www.cga.ct.gov/current/pub/chap_014.htm",
+   "notes": "Same concept as CT-0015 with a different ceiling for state agencies; do not merge the values - the constraint differs by agency class."
+  },
+  {
+   "rule_id": "CT-0017",
+   "category": "Fees",
+   "concept_key": "fee.transcription_rate",
+   "legal_concept": "Transcription fee limited to cost",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "rule_type": "Calculation",
+   "atomic_rule": "Where a copy requires a transcription, or a person requests a transcription of a public record, the transcription fee shall not exceed the agency's cost.",
+   "trigger": "Copy requires, or requester applies for, a transcription",
+   "clock_effect": "none",
+   "source_language": "If any copy provided in accordance with said Freedom of Information Act requires a transcription, or if any person applies for a transcription of a public record, the fee for such transcription shall not exceed the cost thereof to the public agency.",
+   "is_paraphrase": false,
+   "source_authority": "Conn. Gen. Stat. \u00a7 1-212(a)",
+   "effective_status": "Current",
+   "official_link": "https://www.cga.ct.gov/current/pub/chap_014.htm",
+   "notes": "Ceiling = actual cost to the agency; no fixed number stated."
+  },
+  {
+   "rule_id": "CT-0018",
+   "category": "Fees",
+   "concept_key": "fee.electronic_record_cost",
+   "legal_concept": "Fee for computer-stored records limited to cost with enumerated components",
+   "config_home": "parameter",
+   "constraint_basis": "ceiling",
+   "rule_type": "Calculation",
+   "atomic_rule": "The fee for a copy of computer-stored public records shall not exceed the agency's cost, and (for non-preexisting printouts) may include only enumerated components: employee hourly salary for producing/formatting/programming (not search/retrieval except sub-(4)), outside copying-service cost, actual storage-media cost, and certain computer-time charges.",
+   "trigger": "Request for a copy of computer-stored public records",
+   "clock_effect": "none",
+   "source_language": "The fee for any copy provided in accordance with subsection (a) of section 1-211 shall not exceed the cost thereof to the public agency. In determining such costs for a copy, other than for a printout which exists at the time that the agency responds to the request for such copy, an agency may include only: (1) An amount equal to the hourly salary attributed to all agency employees engaged in providing the requested computer-stored public record ... but not including search or retrieval costs except as provided in subdivision (4) of this subsection; (2) An amount equal to the cost to the agency of engaging an outside professional electronic copying service ...; (3) The actual cost of the storage devices or media provided ...; and (4) The computer time charges incurred by the agency ... where another agency or contractor provides the agency with computer storage and retrieval services.",
+   "is_paraphrase": false,
+   "source_authority": "Conn. Gen. Stat. \u00a7 1-212(b)",
+   "effective_status": "Current",
+   "official_link": "https://www.cga.ct.gov/current/pub/chap_014.htm",
+   "notes": "Ceiling = cost, with a closed list of includable components. Notably excludes search/retrieval labor except sub-(4). DAS issues guidelines for consistency. Kept in one row (closed enumerated list, not a bundle of independent duties)."
+  },
+  {
+   "rule_id": "CT-0020",
+   "category": "Fees",
+   "concept_key": "fee.certification_rate",
+   "legal_concept": "Certification fee",
+   "config_home": "parameter",
+   "constraint_basis": "fixed",
+   "rule_type": "Calculation",
+   "atomic_rule": "For certifying a copy of records/files (or certifying a fact appearing therein), the fee is one dollar for the first page and fifty cents for each additional page.",
+   "trigger": "Requester asks the custodian to certify a copy or fact",
+   "clock_effect": "none",
+   "source_language": "Except as otherwise provided by law, the fee for any person who has the custody of any public records or files for certifying any copy of such records or files, or certifying to any fact appearing therefrom, shall be for the first page of such certificate, or copy and certificate, one dollar; and for each additional page, fifty cents.",
+   "is_paraphrase": false,
+   "source_authority": "Conn. Gen. Stat. \u00a7 1-212(e)",
+   "effective_status": "Current",
+   "official_link": "https://www.cga.ct.gov/current/pub/chap_014.htm",
+   "notes": "Fixed statewide amount ('except as otherwise provided by law'). Separate from and additive to the per-page copy fee."
+  },
+  {
+   "rule_id": "CT-0022",
+   "category": "Payment",
+   "concept_key": "payment.prepayment_threshold",
+   "legal_concept": "Prepayment permitted when fee estimated at $10 or more",
+   "config_home": "parameter",
+   "constraint_basis": "floor",
+   "rule_type": "Permission",
+   "atomic_rule": "A public agency may require prepayment of any fee if the fee is estimated to be ten dollars or more.",
+   "trigger": "Estimated fee is $10 or more",
+   "clock_effect": "none",
+   "source_language": "A public agency may require the prepayment of any fee required or permitted under the Freedom of Information Act if such fee is estimated to be ten dollars or more.",
+   "is_paraphrase": false,
+   "source_authority": "Conn. Gen. Stat. \u00a7 1-212(c)",
+   "effective_status": "Current",
+   "official_link": "https://www.cga.ct.gov/current/pub/chap_014.htm",
+   "notes": "Discretionary. $10 is the floor at/above which prepayment may be demanded; the city sets whether/how it invokes it."
+  },
+  {
+   "rule_id": "CT-0024",
+   "category": "Fees",
+   "concept_key": "fee.waiver_mandatory_grounds",
+   "legal_concept": "Mandatory fee waiver",
+   "config_home": "structural",
+   "constraint_basis": "n/a",
+   "rule_type": "Requirement",
+   "atomic_rule": "A public agency shall waive any copy fee when any enumerated ground applies: requester is indigent; records are exempt under 1-210(b); compliance benefits the general welfare in the agency's judgment; requester is an elected official of the political subdivision certifying the record pertains to official duties; or requester is Public Defender Services personnel/appointed counsel certifying the record pertains to their duties.",
+   "trigger": "Any one of five enumerated waiver conditions is met",
+   "clock_effect": "none",
+   "source_language": "The public agency shall waive any fee provided for in this section when: (1) The person requesting the records is an indigent individual; (2) The records located are determined by the public agency to be exempt from disclosure under subsection (b) of section 1-210; (3) In its judgment, compliance with the applicant's request benefits the general welfare; (4) The person requesting the record is an elected official of a political subdivision of the state and the official (A) obtains the record from an agency of the political subdivision in which the official serves, and (B) certifies that the record pertains to the official's duties; or (5) The person requesting the records is a member of the Division of Public Defender Services or an attorney appointed by the court as a Division of Public Defender Services assigned counsel under section 51-296 and such member or attorney certifies that the record pertains to the member's or attorney's duties.",
+   "is_paraphrase": false,
+   "source_authority": "Conn. Gen. Stat. \u00a7 1-212(d)",
+   "effective_status": "Current",
+   "official_link": "https://www.cga.ct.gov/current/pub/chap_014.htm",
+   "notes": "Kept as one row (single 'shall waive' duty with disjunctive grounds). Mandatory ('shall'); ground (3) 'general welfare' rests on agency judgment."
+  }
+ ],
+ "template": {
+  "fee_schedule": {
+   "fee.copy_rate_per_page": [
+    {
+     "rule_id": "CT-0015",
+     "authority": "Conn. Gen. Stat. \u00a7 1-212(a)(B)",
+     "summary": "For all public agencies other than state offices/agencies, the fee for a copy of a public record shall not exceed fifty cents per page."
+    },
+    {
+     "rule_id": "CT-0016",
+     "authority": "Conn. Gen. Stat. \u00a7 1-212(a)(A)",
+     "summary": "For state executive/administrative/legislative offices and state agencies (and judicial offices in their administrative functions), the copy fee shall not exceed twenty-five cents per page."
+    }
+   ],
+   "fee.electronic_media_charge": [
+    {
+     "rule_id": "CT-0018",
+     "authority": "Conn. Gen. Stat. \u00a7 1-212(b)",
+     "summary": "The fee for a copy of computer-stored public records shall not exceed the agency's cost, and (for non-preexisting printouts) may include only enumerated components: employee hourly salary for producing/formatting/programming (not search/retrieval except sub-(4)), outside copying-service cost, act\u2026"
+    }
+   ],
+   "fee.certified_copy_charge": [
+    {
+     "rule_id": "CT-0020",
+     "authority": "Conn. Gen. Stat. \u00a7 1-212(e)",
+     "summary": "For certifying a copy of records/files (or certifying a fact appearing therein), the fee is one dollar for the first page and fifty cents for each additional page."
+    }
+   ],
+   "fee.nonstandard_rate": [
+    {
+     "rule_id": "CT-0017",
+     "authority": "Conn. Gen. Stat. \u00a7 1-212(a)",
+     "summary": "Where a copy requires a transcription, or a person requests a transcription of a public record, the transcription fee shall not exceed the agency's cost."
+    }
+   ]
+  },
+  "knobs_fee": null
+ },
+ "run_parameters": {
+  "scope": "municipalities only (note agency regimes)",
+  "recency": "check 2024-2026 session laws + rule amendments for fee sections",
+  "estimate_calibration": "OUT of scope"
+ }
+}
