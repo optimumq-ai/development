@@ -523,3 +523,13 @@ someone" means here. 5–6 are judgement calls the city's config posture affects
 
 **Worth making permanent:** the scan is cheap and deterministic. As a registered harness it would fail the
 moment a new write-swallow-then-200 is added, the same way `verify_v1_retirement` guards retired links.
+
+## "Report a possibly-incorrect state rule" button (captured 2026-08-19, Kevin — DOCUMENT ONLY, no action yet)
+
+On state-level rules shown in the product (Kevin's example: state-level redaction rules; plausibly the same
+affordance belongs on ALL state-rules-profile content — confirm scope with Kevin before building), add a
+small "report an item that might be incorrect" button per rule. Click → ask for a very brief description →
+generates an email to admin@optimumq.com identifying the rule (state, rule id, citation) plus the user's note.
+Rationale: the state rules profiles are manually aggregated best-effort content (see BUSINESS_LEGAL_IP_LOG
+2026-08-19 entry for the matching contract disclaimer); a one-click feedback loop from the people reading the
+rules against their own state's law is the cheapest correction channel we can build.

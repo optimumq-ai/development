@@ -115,3 +115,17 @@ Capture any feature that is a **genuine differentiator vs. other public-records/
 - Whether/how to represent assessment results at all.
 - Duty-to-act obligations once a vulnerability is known.
 - Implications of public-records law for any security document shared with a government customer.
+
+---
+
+## 2026-08-19 — State rules profile: provenance & warranty disclaimer for the contract
+
+**`[FOR COUNSEL]` Contract language to draft** (Kevin, 2026-08-19, captured during the fee-library redesign):
+the contract should state that the **state rules profile content is manually aggregated by Optimum Q** as a
+vehicle intended to **save time and effort during customer setup**. It does **not** include content purchased
+from a third party, is **not intended to be nor warranted as a complete and accurate source**, and is in
+theory reliable to the extent that would be expected **from a human gathering such information through web
+search**. Pairs with the §1 posture (agency's designated reviewer approves configuration on the record;
+platform does not verify compliance) and the product-side on-screen disclaimer already decided for
+state-derived fee content (may be outdated/incomplete; review; supplement — system-wide wording).
+Related product feedback loop: BACKLOG.md "Report a possibly-incorrect state rule" button (2026-08-19).
