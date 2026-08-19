@@ -1,0 +1,259 @@
+{
+  "code": "AL",
+  "verified_at": "2026-08-19",
+  "rows": [
+    {
+      "item_id": "dup.bw.rate",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2) and § 36-12-41 clauses present in the codified text. Statute sets no number: 'a reasonable fee set by the public officer' — actual_cost_standard is the right word (soft standard, no figure); Permission on the standard track ('may require'), Requirement on the time-intensive track ('shall require') as the row's notes state. Article binds every 'public officer' (municipal included; § 36-12-40(b) exempts only judicial branch/Art. VI offices). EO 734 figures ($0.50/page etc.) opened and confirmed §7-limited to state executive-branch agencies — correctly kept out of the municipal value.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.color.rate",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2) present. No color-specific provision in §§ 36-12-40 to -47 (read in full); umbrella reasonable-fee standard is correct; no number recorded.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.oversized.rate",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2) present. No oversized/nonstandard-page provision in Article 3; EO 734 §4.c 'special paper sizes' opened and confirmed state-agency-only.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.specialty.rate",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2), § 36-21-213(b) ('may charge a reasonable fee for redaction and editing of a recording') and § 11-98-12(d)(1) ('a reasonable fee not to exceed the actual cost of transcription') all present in the opened codified sections; both record-specific and correctly not used as a general municipal figure.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47, 36-21-213, 11-98-12); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.tiers",
+      "verdict": "CONFIRMED",
+      "why": "Article 3 read in full: no graduated per-page bands. The only volume line is the 8-hour staff-time classification in § 36-12-43(b)(4),(6), which is process, not rate — silent is correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.freePages",
+      "verdict": "CONFIRMED",
+      "why": "Article 3 read in full: no free-page allowance; § 36-12-44(h) verbatim present. silent is correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.search.rate",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2) and § 36-12-45(b)(3) form text ('extensive requests ... may increase the fees to cover the administrative cost of searching and copying') present. No hourly figure or ceiling for municipalities; EO 734 §4.a $20/hr cap opened and confirmed agency-only. actual_cost_standard correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.review.rate",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim § 36-12-43(b)(4),(6) definitions and § 36-21-213(b) present. Article 3 neither authorizes nor forbids a review/redaction charge; no figure. Row's manual_verification (AG opinions unopened) stands — kept, not converted to a number.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47, 36-21-213, 11-98-12); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.programming.rate",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2) and § 36-12-44(d) present. No programming/data-extraction rate; EO 734 §4.c 'searching electronic databases' agency-only. actual_cost_standard correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.billableWhen",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2) and § 36-12-45(b)(3) form text present. Article 3 has no page/hour trigger or paper-only limit on labor charging; the 'always-permitted-within-reasonable-fee' enum is an inference the row itself flags for human review (manual_verification) — no number invented. Confirmed as recorded, inference flag retained.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.overheadPct",
+      "verdict": "CONFIRMED",
+      "why": "Article 3 read in full: no overhead/fringe multiplier. silent correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.increment",
+      "verdict": "CONFIRMED",
+      "why": "Article 3 read in full: no time increment/rounding rule. silent correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.freeLaborHours",
+      "verdict": "CONFIRMED",
+      "why": "Article 3 read in full: no free labor hours; the 8-hour figure in § 36-12-43(b)(4),(6) is a request-classification threshold, correctly NOT recorded as a free-hours allowance. silent correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.periodicFreeHours",
+      "verdict": "CONFIRMED",
+      "why": "Article 3 read in full: no per-requestor periodic free-time allowance. silent correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.estimateNotifyThreshold",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2), (b)(2), (b)(4) present. 'If the public officer elects to charge a fee, the public officer shall notify the requester of the estimated fee' — no dollar/hour threshold; structural notice gate at 0 is a fair engine shape; Requirement correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.requesterResponseDays",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2) sentence and (b)(4) present; neither states a response deadline or deemed-withdrawal. silent correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.revisionNotifyPercent",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim § 36-12-45(b)(3) form text present; only a 'may increase the fees' warning, no revised-estimate trigger or percentage. silent correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.validityDays",
+      "verdict": "CONFIRMED",
+      "why": "Article 3 read in full: no estimate validity period. silent correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deposit.threshold",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2) and (b)(2) present: pre-search payment of 'all or a portion of the estimated fee' is at the officer's discretion on both tracks with no dollar threshold; time-intensive fee mandatory before substantive response. structural (no threshold, discretionary/mandatory gate) correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deposit.percent",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim clause present. 'all or a portion of the estimated fee' bounds any pre-search deposit at the whole estimate — recording a 100% ceiling with the city choosing the operative share is a correct reading of 'all'; not a soft standard turned into a number (the row flags the unit judgment). ceiling correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.productionGate",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2), (b)(2) present: 'withhold any public records until receipt of payment' / 'withhold any substantive response until receipt of payment', plus discretionary pre-search deposit. structural/Requirement correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.nonpayment",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2) sentence present. No statutory withdrawal period or prior-debt rule anywhere in Article 3. structural correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.depositClock",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(5)a-b and (b)(6)b present; production-side denial presumption runs from 'the payment of the estimated fees'. Values (30 business/60 calendar; 180 business/270 calendar) match the codified text. structural correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.reissue",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim form text present; Article 3 has no overrun/re-issue procedure. silent correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.method",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim § 11-103-1(a) clauses present in the opened codified section (history: Act 2000-154, 2000-314 only — no 2024–2026 amendment). Card acceptance is authorized by the municipal governing body under its own rules; convenience fee capped at the issuer/processor transaction fee. defers_to_city / municipalities correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 11-103-1, 11-103-2); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.maxFee",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2) and § 36-12-43(a) present. No dollar cap; reasonableness is the only request-level bound. actual_cost_standard correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deMinimis",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim § 36-12-44(h) present; no de-minimis floor in Article 3. silent correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.minFee",
+      "verdict": "CONFIRMED",
+      "why": "Article 3 read in full: no minimum fee for municipalities; EO 734 §4.a '$20.00' minimum opened and confirmed state-executive-agency-only. silent correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "media",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2) present; no media-specific provision; EO 734 §4.c 'flash drive or other hardware' agency-only. actual_cost_standard correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "delivery",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2) present; § 36-12-43(b)(5)a-b delivery modes carry no fee terms. actual_cost_standard correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "certification",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim § 36-12-41 (as amended) present; the 2024 rewrite replaced 'certified copy ... legal fees therefor' with 'a copy ... reasonable fee' (enrolled SB270 line 54 shows the strike/insert). No general municipal certification fee remains in Article 3. actual_cost_standard correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "av",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2) and § 36-21-213(b) present; no per-recording/per-minute/free-minute figures for municipalities. actual_cost_standard correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47, 36-21-213, 11-98-12); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "commercial",
+      "verdict": "CONFIRMED",
+      "why": "Article 3 read in full: requests are distinguished by staff time and residency, never by purpose. silent correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "waiver",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(2) first sentence, (b)(2) first sentence and (h) present. No waiver grounds/purpose/denial/appeal provisions in Article 3; may/shall split by track correctly described. structural correct; row's manual_verification on the time-intensive 'shall require' question stands.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "waiver.forfeiture",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim (a)(5) present; consequence of delay is a rebuttable presumption of denial, no fee forfeiture. silent correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "repeat",
+      "verdict": "CONFIRMED",
+      "why": "Article 3 read in full: no repeat/aggregation rule; (b)(4) withdraw-and-resubmit carries no aggregation consequence. silent correct.",
+      "checked_link": "https://alison.legislature.state.al.us/graphql (query codesOfAlabama, displayId eq 36-12-40..47); enrolled act https://alison.legislature.state.al.us/files/pdf/SearchableInstruments/2024RS/SB270-enr.pdf; https://publicrecordsrequest.alabama.gov/Documents/EO-734-Public-Records-1.26.2023.pdf",
+      "corrected_row": null
+    }
+  ],
+  "notes": "Official Code of Alabama viewer opened via its GraphQL endpoint (section text + history); history line for §§ 36-12-40, -41 shows Act 2024-278 §1 and for §§ 36-12-43 to -46 shows only Act 2024-278 §2, with the viewer current through Act 2026-592 (§ 36-12-47 present) — no 2025/2026 amendment to the fee provisions. Enrolled SB270 PDF opened; text of § 36-12-44(a)(2)/(b)(2) identical to codified; effective Oct. 1, 2024 (§3). Row official_link is the viewer root (no stable per-section URL); every cited section was re-pulled independently from the viewer's GraphQL endpoint (codesOfAlabama query by displayId, versions:true — one version each, supersessionDate null) and every source_language segment was string-matched verbatim against the pulled text (36/36 pass; rules.maxFee's § 36-12-43(a) segment is verbatim with a trailing '...' truncation). EO 734 opened: §4 caps ($20/hr incl. $20 minimum, no charge for legal review/redaction, up to $0.50/page 8.5x11, no per-page for electronic, actual costs with advance notice) and §7 applicability ('within the executive branch of state government') confirmed — agency-only, correctly excluded from every municipal value. Web search for 2025/2026 bills amending §§ 36-12-41/-44 found none; the viewer's section histories (current through Act 2026-592) are the authoritative currency check. Residual (not refutations, already flagged in the rows): labor.billableWhen 'always' is an inference; labor.review.rate and waiver depend on unopened AG opinions for the review-time / time-intensive-waiver questions; applies_to 'all_public_bodies' carries the § 36-12-40(b) judicial/Art. VI carve-out noted in the rows. No REFUTED, CORRECTED or UNVERIFIABLE rows."
+}

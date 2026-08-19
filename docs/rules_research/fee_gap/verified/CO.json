@@ -1,0 +1,259 @@
+{
+  "code": "CO",
+  "verified_at": "2026-08-19",
+  "rows": [
+    {
+      "item_id": "dup.bw.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. 'may charge a fee not to exceed twenty-five cents per standard page' — Permission + 'not to exceed' → ceiling 0.25 USD/standard page is the correct word/value/unit.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.color.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. No color-specific rate exists; the only bound that can apply to a color copy on a standard page is the same 25¢/standard-page ceiling (or the actual-cost prong if treated as 'other format'). Row already carries the scope caveat in unit, confidence=medium and manual_verification; ceiling reading is defensible and never understates the bound. Confirmed with the caveat retained.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.oversized.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. 'a fee not to exceed the actual cost of providing a copy ... in a format other than a standard page' — soft standard correctly recorded as actual_cost_standard, no number invented.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.specialty.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. § 205(5)(a) actual-cost prong and § 205(3) 'reasonable fee ... shall not exceed the actual cost of manipulating the said data' both verbatim; § 205(3) expressly names political subdivisions. actual_cost_standard is correct. Note on § 205(5)(b) being limited to 'an institution, as defined in section 24-72-202 (1.5)' (higher-ed) verified.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.tiers",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. § 24-72-205 contains a single per-page ceiling and no graduated bands; coverage note present. silent is correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.freePages",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. No free-page allowance anywhere in § 24-72-205; the only free allowances are the first labor hour (6)(a) and e-mail transmission (1)(b). silent is correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.search.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. Delegation § 205(6)(b) → Legislative Council Staff posting opened (raw HTML fetched): 'Effective July 1, 2024, the maximum hourly fee will increase to $41.37' and next adjustment 2029; June 12, 2024 memo PDF opened, matches. Statute 'shall not exceed thirty dollars per hour' (as adjusted) is a Permission ceiling; first hour free verbatim. Posting/memo speak of 'government agencies/entities' and statute of every 'custodian' → binds municipalities. ceiling 41.37 USD/hour after first hour is correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm ; https://content.leg.colorado.gov/colorado-open-records-act-maximum-hourly-research-and-retrieval-fee ; https://content.leg.colorado.gov/sites/default/files/cora_fee_change_memo_june_2024_accessible.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.review.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. CORA authorizes only a 'research and retrieval' fee and never mentions review/redaction; row records the R&R cap as the only bound that could apply, with confidence=medium and an explicit manual_verification flag. Under either reading (redaction is R&R → capped at $41.37; redaction is not R&R → not chargeable at all under CORA) a lawful municipal charge cannot exceed $41.37/hr, so ceiling is not an overstatement. Confirmed as a bound; chargeability question stays flagged for a human. CCJRA § 24-72-306(1) 'redaction' contrast verified verbatim.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm ; https://content.leg.colorado.gov/colorado-open-records-act-maximum-hourly-research-and-retrieval-fee",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.programming.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. § 205(3) 'reasonable fee ... shall not exceed the actual cost of manipulating the said data and generating the said record' and § 205(4) incremental-cost basis verified. No hourly programming rate exists. actual_cost_standard correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.billableWhen",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. 'shall not impose a charge for the first hour ... After the first hour ... may charge' plus the pre-published written-policy condition — both gates verbatim; only_over_threshold (1 hour) + policy gate is the right shape; statute does not restrict labor charging to paper requests.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.overheadPct",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. No overhead/fringe percentage in § 24-72-205; the § 205(4) 'reasonable portion of the costs associated with building and maintaining the information system' is a system-cost component, not a labor overhead %. silent correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.increment",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. No billing increment/rounding rule in the statute, the LCS posting, the June 2024 memo, or the LCS summary (all opened). silent correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.freeLaborHours",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. Statute: 'shall not impose a charge for the first hour of time expended in connection with the research and retrieval'; June 12, 2024 memo (opened) states 'the first hour of time expended on each request'. value 1 hour per request, Prohibition, fixed — correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm ; https://content.leg.colorado.gov/sites/default/files/cora_fee_change_memo_june_2024_accessible.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.periodicFreeHours",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. No per-requestor periodic free-time allowance anywhere in CORA. silent correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.estimateNotifyThreshold",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. § 205(1)(b) notice ('Within the period specified in section 24-72-203 (3)(a), the custodian shall notify the record requester that a copy of the record is available but will only be sent ... once the custodian either receives payment or makes arrangements') is verbatim; there is no dollar/hour estimate threshold in CORA, so structural (unconditional availability/payment notice) is the right word. Statute's own cross-reference is to (3)(a) although the 3-working-day presumption sits in (3)(b) — row follows the statute's wording, noted here.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.requesterResponseDays",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. No requester response window / deemed-withdrawal period after the payment notice. silent correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.revisionNotifyPercent",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 Title 24 (§ 24-72-205, no percentage anywhere) and the Legislative Council Staff 'Colorado Law Summary: CORA' PDF (LAST REVIEWED 09/18/2024): the quoted 'may require an additional payment or make a partial refund of the deposit' sentence is verbatim; summary footnote states it is not an official legal opinion and does not bind — correctly treated as guidance, not law. silent with coverage note is correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm ; https://content.leg.colorado.gov/sites/default/files/colorado_open_records_act_cora_-_colorado_law_summary.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.validityDays",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. No estimate validity period in statute or guidance. silent correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deposit.threshold",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. § 205(7) verbatim ('any fee or deposit associated with the request'); § 205(6)(a) expressly conditions R&R fees on the custodian's own pre-published written policy specifying 'the applicable conditions concerning the research and retrieval of public records ... including the amount of any current fee'; LCS summary (opened, rev. 9/18/2024) deposit sentence verbatim and treated as guidance. Verifier considered 'silent' but the express delegation of R&R conditions to local policy plus statutory recognition of deposits supports defers_to_city; no state figure recorded (the 1-hour trigger correctly not recorded as a value). Confirmed with the existing manual_verification flag retained.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm ; https://content.leg.colorado.gov/sites/default/files/colorado_open_records_act_cora_-_colorado_law_summary.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deposit.percent",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. No deposit cap % in statute; LCS summary language verbatim and correctly labelled guidance. silent correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm ; https://content.leg.colorado.gov/sites/default/files/colorado_open_records_act_cora_-_colorado_law_summary.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.productionGate",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. 'will only be sent to the requester once the custodian either receives payment or makes arrangements for receiving payment ... unless ... waived by the custodian' and 'no more than three business days after receipt of, or making arrangements to receive, such payment' — verbatim; structural pay_before_release (with release-on-arrangement) is the right shape; applies to transmitted copies, not inspection.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.nonpayment",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. No deemed-withdrawal / prior-debt rule; silent correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.depositClock",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. Notice-within-§ 203(3)(a)-period and 3-business-day post-payment send are verbatim; § 24-72-203(3)(a)–(b) opened (source note: (3)(d) added by SB 24-210 in 2024 — county clerks only, does not touch fees). 'No clock runs while unpaid' is an implication and is flagged as such in manual_verification; structural is the right word.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.reissue",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 Title 24 (§ 24-72-205 has no overrun/re-issue rule) and the LCS CORA summary PDF (rev. 9/18/2024): quoted sentence verbatim, correctly labelled guidance not law. silent correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm ; https://content.leg.colorado.gov/sites/default/files/colorado_open_records_act_cora_-_colorado_law_summary.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.method",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. § 205(7) verbatim; source note confirms (7) added by SB 23-286 (eff. 8/7/2023). Conditional Requirement (trigger = custodian accepts card/electronic payment for any other service) correctly recorded as structural.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.maxFee",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. No request-level cap; only component ceilings. silent correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deMinimis",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. No de-minimis dollar threshold; e-mail $0 and no-per-page-for-digital are zero-charge categories, correctly not recorded as de-minimis. silent correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.minFee",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. No minimum fee. silent correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "media",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. Physical media not named in CORA; 'format other than a standard page' actual-cost prong is the applicable bound and per-page charging for digital/electronic format is prohibited (SB 23-286). actual_cost_standard with the scope caveat is correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "delivery",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. 'No transmission fees may be charged ... via electronic mail' (fixed $0) and 'all costs associated with records transmission' recoverable before sending — both verbatim; two-part rule correctly recorded.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "certification",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. § 205(1)(a) 'Where the fee for a certified copy ... is specifically prescribed by law, the specific fee shall apply' and § 24-72-112 (veterans'-benefits certified copies 'without charge', binding 'the official charged with the custody of such public records') both verbatim; secretary-of-state / dept-of-personnel routing is state-agency-only as noted. structural correct; no state number for municipalities.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "av",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. A/V copies fall under the 'format other than a standard page' actual-cost prong; no per-recording/per-minute/free-minutes figures in CORA. § 24-72-306(1) opened: criminal-justice agencies 'may assess reasonable fees, not to exceed actual costs, including ... personnel and equipment, for the search, retrieval, and redaction' and municipal amounts 'shall be established by the governing body of the county or municipality' — matches the note. actual_cost_standard correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "commercial",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. No commercial-purpose schedule or surcharge in §§ 24-72-204/-205; § 24-72-305.5 opened — solicitation restriction, no fee. Proposed 'direct solicitation' category (SB25-077 vetoed; SB26-107 PI'd) is not law. silent correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "waiver",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. All four grounds verified verbatim in the opened text: § 205(1)(b) 'unless recovery ... has been waived by the custodian'; § 205(4) 'may be reduced or waived ... public purpose, including public agency program support, nonprofit activities, journalism, and academic research ... uniformly applied'; § 24-72-112 'without charge' (mandatory); § 24-72-306(1) 'may waive fees at their discretion'. No purpose-statement, written-denial or waiver-appeal provisions exist. value (enum_list) with only the veterans ground mandatory is correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "waiver.forfeiture",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. No forfeiture-on-late-response provision; the SB26-107 free-hour-per-late-day proposal was postponed indefinitely 3/5/2026 (checked). silent correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "repeat",
+      "verdict": "CONFIRMED",
+      "why": "Opened C.R.S. 2026 edition Title 24 (OLLS HTML, 22 MB download, text-extracted); verbatim clause found in § 24-72-205 exactly as quoted. Source note shows last amendment SB 23-286 (eff. 8/7/2023) — no 2024–2026 amendment (SB25-077 vetoed 4/17/2025; SB26-107 postponed indefinitely 3/5/2026, both checked). 'Custodian'/'public records' (§ 24-72-202(1.1),(6)(a)(I)) reach political subdivisions, so applies_to = all_public_bodies holds for municipalities. § 205(3) 'Persons making subsequent requests for the same or similar records may be charged a fee not in excess of the original fee' verbatim; scope limited to manipulated-data records; no aggregation rule in law (SB25-077/SB26-107 14-day aggregation not enacted). structural correct.",
+      "checked_link": "https://olls.info/crs/crs2026-title-24.htm",
+      "corrected_row": null
+    }
+  ],
+  "notes": "Method: downloaded the OLLS C.R.S. 2026 Title 24 HTML (22.3 MB), stripped to text and matched every source_language fragment of all 36 rows programmatically (whitespace-normalised, exact substring) — 36/36 statute fragments found verbatim in §§ 24-72-112, -203, -205, -306; the three non-statute fragments were matched verbatim against the Legislative Council Staff fee posting (raw HTML), the June 12, 2024 LCS memorandum PDF and the LCS 'Colorado Law Summary: CORA' PDF (LAST REVIEWED 09/18/2024). Currency: § 24-72-205 source note ends at SB 23-286 (2023); § 24-72-203 gained only (3)(d) in 2024 (SB 24-210, county clerks); SB25-077 veto (4/17/2025) and SB26-107 postponed-indefinitely (3/5/2026) confirmed by search. Municipal scope: § 24-72-202(6)(a)(I) 'public records' covers 'political subdivision of the state' and § 24-72-202(1.1) 'custodian' is generic, so all_public_bodies is right for every CORA row; § 24-72-306(1) municipal police recordings note verified. Judgment rows kept CONFIRMED but flagged for the human queue via their existing manual_verification: dup.color.rate (color not distinguished in law), labor.review.rate (CORA names only 'research and retrieval'; $41.37 is an upper bound under either reading, chargeability itself is a legal judgment), rules.deposit.threshold (defers_to_city rests on § 205(6)(a)'s express delegation of R&R conditions to the custodian's published policy plus § 205(7)'s recognition of deposits — verifier considered 'silent' and found the delegation express enough), payment.depositClock ('no clock while unpaid' is an implication, flagged). Minor: rows 16 and 23 list source_type 'Statute; Official Guidance' though their only quoted language is guidance — harmless for a silent resolution. No rows corrected, refuted, or unverifiable; no new research beyond what the checks required."
+}

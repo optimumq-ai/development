@@ -1,0 +1,259 @@
+{
+  "code": "AZ",
+  "verified_at": "2026-08-19",
+  "rows": [
+    {
+      "item_id": "dup.bw.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'defers_to_city' accepted: statute is a bare Permission ('may charge a fee if the facilities are available') with no figure, no standard and no rulemaking delegation, so the custodian (city) sets the amount; 'actual_cost_standard' (AG/Hanania 'copying costs' gloss) would be an equally defensible label with the identical engine consequence (no state number; city sets), so not a refute. Not a value/ceiling; no number recorded. applies_to all_public_bodies correct (§ 39-121.01(A)(2) 'public body' includes cities). Opened https://www.azag.gov/sites/default/files/2025-05/agency_handbook_chapter_6_corrected.pdf (pdftotext): § 6.5.5 text present verbatim ('a fee it deems appropriate for copying records, including a reasonable amount for the cost of time, equipment, and personnel used in producing copies of records, but not for costs of searching for the records'), 'Revised 2018'. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.color.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'defers_to_city' accepted: statute is a bare Permission ('may charge a fee if the facilities are available') with no figure, no standard and no rulemaking delegation, so the custodian (city) sets the amount; 'actual_cost_standard' (AG/Hanania 'copying costs' gloss) would be an equally defensible label with the identical engine consequence (no state number; city sets), so not a refute. Not a value/ceiling; no number recorded. applies_to all_public_bodies correct (§ 39-121.01(A)(2) 'public body' includes cities). No separate color provision anywhere in the opened sources. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.oversized.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'defers_to_city' accepted: statute is a bare Permission ('may charge a fee if the facilities are available') with no figure, no standard and no rulemaking delegation, so the custodian (city) sets the amount; 'actual_cost_standard' (AG/Hanania 'copying costs' gloss) would be an equally defensible label with the identical engine consequence (no state number; city sets), so not a refute. Not a value/ceiling; no number recorded. applies_to all_public_bodies correct (§ 39-121.01(A)(2) 'public body' includes cities). No oversized/nonstandard provision in the opened sources. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.specialty.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'defers_to_city' accepted: statute is a bare Permission ('may charge a fee if the facilities are available') with no figure, no standard and no rulemaking delegation, so the custodian (city) sets the amount; 'actual_cost_standard' (AG/Hanania 'copying costs' gloss) would be an equally defensible label with the identical engine consequence (no state number; city sets), so not a refute. Not a value/ceiling; no number recorded. applies_to all_public_bodies correct (§ 39-121.01(A)(2) 'public body' includes cities). 'photographs' expressly within (D)(1); § 39-129 (opened) is the only specialty figure and is handled under item av; § 39-127 free copies confirmed. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.tiers",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'silent' is right: nothing on this item in the opened statute text (§§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 all opened), AG Op. I13-012, AG Handbook ch. 6 § 6.5.4–6.5.6, or Ombudsman FAQ; no AZ admin-code fee schedule exists (no rulemaking delegation in § 39-121.01). Coverage note present. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.freePages",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'silent' is right: nothing on this item in the opened statute text (§§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 all opened), AG Op. I13-012, AG Handbook ch. 6 § 6.5.4–6.5.6, or Ombudsman FAQ; no AZ admin-code fee schedule exists (no rulemaking delegation in § 39-121.01). §§ 39-122 and 39-127 (opened) are purpose/requester-based no-charge rules, not a page allowance. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.search.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azag.gov/opinions/i13-012-r13-018 (curl, full text): quoted sentences present verbatim (Hanania sentence, 'plain language' sentence, Conclusion paragraph). Opinion dated Dec. 2013; no later AG opinion on copying fees found. Resolution word 'not_applicable' accepted for the non-commercial municipal regime: formal AG opinion restating Hanania (a City of Tucson case) — copying fee only, 'not for searching for or retrieving the record'; handbook § 6.5.5 'not for costs of searching for the records'. Commercial branch (§ 39-121.03(A)(2), opened) and § 39-129 video branch are correctly carved out in notes. Basis is case law/AG opinion, not statute text — manual_verification flag stays. applies_to all_public_bodies correct.",
+      "checked_link": "https://www.azag.gov/opinions/i13-012-r13-018",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.review.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azag.gov/opinions/i13-012-r13-018 (curl, full text): quoted sentences present verbatim (Hanania sentence, 'plain language' sentence, Conclusion paragraph). Opinion dated Dec. 2013; no later AG opinion on copying fees found. Opened https://www.azoca.gov/faqs/faqs-public-access-laws/ (WebFetch; curl blocked by mod_security 406): 'Can the public body charge me for copies?' answer contains verbatim 'The public body may not charge for the cost of searching the records.' and 'The public body also cannot charge for inspection of the record, labor, redaction, overhead costs, or any fee to examine or review a record to determine whether the record is disclosable.' (page last-updated 2025-04-18); the parenthetical Hanania/I13-012 cite string between them was not returned by the fetch — may be a hyperlink; substance unaffected. NOTE the same FAQ answer also says a non-commercial copying fee 'includes a reasonable amount of the cost of time, equipment, and personnel used in producing copies' — the discover row attributes that clause only to the AG handbook; the tension is internal to the Ombudsman FAQ as well. Resolution word 'not_applicable' accepted but on the thinnest footing of the labor items: the express review/redaction bar is Ombudsman guidance (lowest tier); the AG opinion supports it only via 'copying and postage' scope + no fee for inspection-driven redaction copies; § 39-129 (opened) expressly lets local bodies consider 'the reasonable cost of reviewing ... and, as necessary, redacting' within the $46/video-hour ceiling, and § 39-121.03(A)(2) allows personnel time for commercial requests — both carved out in the row. Keep manual_verification; human review before configuring any non-commercial redaction labor line.",
+      "checked_link": "https://www.azag.gov/opinions/i13-012-r13-018",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.programming.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Opened https://www.azag.gov/sites/default/files/2025-05/agency_handbook_chapter_6_corrected.pdf (pdftotext): § 6.5.5 text present verbatim ('a fee it deems appropriate for copying records, including a reasonable amount for the cost of time, equipment, and personnel used in producing copies of records, but not for costs of searching for the records'), 'Revised 2018'. Resolution word 'silent' is right: nothing on this item in the opened statute text (§§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 all opened), AG Op. I13-012, AG Handbook ch. 6 § 6.5.4–6.5.6, or Ombudsman FAQ; no AZ admin-code fee schedule exists (no rulemaking delegation in § 39-121.01). Handbook 'personnel used in producing copies' vs Ombudsman 'labor' tension correctly flagged. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.billableWhen",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azag.gov/opinions/i13-012-r13-018 (curl, full text): quoted sentences present verbatim (Hanania sentence, 'plain language' sentence, Conclusion paragraph). Opinion dated Dec. 2013; no later AG opinion on copying fees found. Opened https://www.azleg.gov/ars/39/00121-03.htm: § 39-121.03(A) three-component clause present verbatim ('shall include the following: 1. ... 2. A reasonable fee for the cost of time, materials, equipment and personnel in producing such reproduction. 3. ...'). Opened § 39-129: review/redaction cost factor present. Structural enum (purpose gate → labor only on commercial branch; LE-video branch) is accurate; no number recorded. Rule_type Prohibition acceptable for the default branch.",
+      "checked_link": "https://www.azag.gov/opinions/i13-012-r13-018",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.overheadPct",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azoca.gov/faqs/faqs-public-access-laws/ (WebFetch; curl blocked by mod_security 406): 'Can the public body charge me for copies?' answer contains verbatim 'The public body may not charge for the cost of searching the records.' and 'The public body also cannot charge for inspection of the record, labor, redaction, overhead costs, or any fee to examine or review a record to determine whether the record is disclosable.' (page last-updated 2025-04-18); the parenthetical Hanania/I13-012 cite string between them was not returned by the fetch — may be a hyperlink; substance unaffected. NOTE the same FAQ answer also says a non-commercial copying fee 'includes a reasonable amount of the cost of time, equipment, and personnel used in producing copies' — the discover row attributes that clause only to the AG handbook; the tension is internal to the Ombudsman FAQ as well. Resolution word 'not_applicable' accepted for the non-commercial regime on the express 'overhead costs' bar (guidance) plus AG-opinion copying+postage scope; no percentage anywhere. Row correctly flags that the commercial branch is unaffected. Guidance-tier basis — manual_verification stays.",
+      "checked_link": "https://www.azoca.gov/faqs/faqs-public-access-laws/",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.increment",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'silent' is right: nothing on this item in the opened statute text (§§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 all opened), AG Op. I13-012, AG Handbook ch. 6 § 6.5.4–6.5.6, or Ombudsman FAQ; no AZ admin-code fee schedule exists (no rulemaking delegation in § 39-121.01). § 39-129 (opened) states 'per video-hour reviewed' with no rounding rule. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.freeLaborHours",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azag.gov/opinions/i13-012-r13-018 (curl, full text): quoted sentences present verbatim (Hanania sentence, 'plain language' sentence, Conclusion paragraph). Opinion dated Dec. 2013; no later AG opinion on copying fees found. 'not_applicable' is consistent with labor.search.rate (moot where labor is not chargeable); no free-time allowance on the commercial branch (§ 39-121.03 opened) or § 39-129 (opened).",
+      "checked_link": "https://www.azag.gov/opinions/i13-012-r13-018",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.periodicFreeHours",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'silent' is right: nothing on this item in the opened statute text (§§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 all opened), AG Op. I13-012, AG Handbook ch. 6 § 6.5.4–6.5.6, or Ombudsman FAQ; no AZ admin-code fee schedule exists (no rulemaking delegation in § 39-121.01). Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.estimateNotifyThreshold",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'silent' is right: nothing on this item in the opened statute text (§§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 all opened), AG Op. I13-012, AG Handbook ch. 6 § 6.5.4–6.5.6, or Ombudsman FAQ; no AZ admin-code fee schedule exists (no rulemaking delegation in § 39-121.01). No estimate/cost-notice provision in any opened section. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.requesterResponseDays",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'silent' is right: nothing on this item in the opened statute text (§§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 all opened), AG Op. I13-012, AG Handbook ch. 6 § 6.5.4–6.5.6, or Ombudsman FAQ; no AZ admin-code fee schedule exists (no rulemaking delegation in § 39-121.01). Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.revisionNotifyPercent",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'silent' is right: nothing on this item in the opened statute text (§§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 all opened), AG Op. I13-012, AG Handbook ch. 6 § 6.5.4–6.5.6, or Ombudsman FAQ; no AZ admin-code fee schedule exists (no rulemaking delegation in § 39-121.01). Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.validityDays",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'silent' is right: nothing on this item in the opened statute text (§§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 all opened), AG Op. I13-012, AG Handbook ch. 6 § 6.5.4–6.5.6, or Ombudsman FAQ; no AZ admin-code fee schedule exists (no rulemaking delegation in § 39-121.01). Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deposit.threshold",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Advance-payment sentence present verbatim ('The custodian may require any person requesting that the custodian mail a copy of any public record to pay in advance for any copying and postage charges.'). Correctly recorded as 'structural' (a mail-triggered prepayment gate with no dollar threshold), Permission, no number. § 39-121.03(B) commercial gate opened and consistent. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deposit.percent",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'silent' is right: nothing on this item in the opened statute text (§§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 all opened), AG Op. I13-012, AG Handbook ch. 6 § 6.5.4–6.5.6, or Ombudsman FAQ; no AZ admin-code fee schedule exists (no rulemaking delegation in § 39-121.01). Advance payment is of 'any copying and postage charges' (full charge), no fractional cap. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.productionGate",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Opened § 39-121.03(B): 'If no order is issued within thirty days of the date of application, the custodian of public records shall provide such copies, printouts or photographs upon being paid the fee determined pursuant to subsection A.' present verbatim. Structural enum accurate; inspection-not-conditioned-on-fee per AG Op. I13-012 (opened). Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.nonpayment",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'silent' is right: nothing on this item in the opened statute text (§§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 all opened), AG Op. I13-012, AG Handbook ch. 6 § 6.5.4–6.5.6, or Ombudsman FAQ; no AZ admin-code fee schedule exists (no rulemaking delegation in § 39-121.01). Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.depositClock",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. § 39-121.01(E) present verbatim ('Access to a public record is deemed denied if a custodian fails to promptly respond ...'). No numeric clock and no deposit-tolling rule in any opened section. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.reissue",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'silent' is right: nothing on this item in the opened statute text (§§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 all opened), AG Op. I13-012, AG Handbook ch. 6 § 6.5.4–6.5.6, or Ombudsman FAQ; no AZ admin-code fee schedule exists (no rulemaking delegation in § 39-121.01). Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.method",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'silent' is right: nothing on this item in the opened statute text (§§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 all opened), AG Op. I13-012, AG Handbook ch. 6 § 6.5.4–6.5.6, or Ombudsman FAQ; no AZ admin-code fee schedule exists (no rulemaking delegation in § 39-121.01). Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.maxFee",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azag.gov/opinions/i13-012-r13-018 (curl, full text): quoted sentences present verbatim (Hanania sentence, 'plain language' sentence, Conclusion paragraph). Opinion dated Dec. 2013; no later AG opinion on copying fees found. Opened https://www.azag.gov/sites/default/files/2025-05/agency_handbook_chapter_6_corrected.pdf (pdftotext): § 6.5.5 text present verbatim ('a fee it deems appropriate for copying records, including a reasonable amount for the cost of time, equipment, and personnel used in producing copies of records, but not for costs of searching for the records'), 'Revised 2018'. Both quoted fragments in `value` are present verbatim (AG opinion Conclusion: 'impose copying fees to offset copying costs'; handbook § 6.5.5). Resolution word 'actual_cost_standard' is right — a scope limitation (copying + postage) with no dollar figure; no number recorded. Handbook is addressed to agencies ('An agency may charge') but restates Hanania (city case) and § 39-121.01, which reaches all public bodies — applies_to all_public_bodies acceptable. § 39-129 $46 cap correctly cross-referenced.",
+      "checked_link": "https://www.azag.gov/opinions/i13-012-r13-018",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deMinimis",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'silent' is right: nothing on this item in the opened statute text (§§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 all opened), AG Op. I13-012, AG Handbook ch. 6 § 6.5.4–6.5.6, or Ombudsman FAQ; no AZ admin-code fee schedule exists (no rulemaking delegation in § 39-121.01). §§ 39-122/39-127 (opened) are not a de-minimis floor; Ombudsman FAQ 'not required to impose a charge' (opened) is discretionary. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.minFee",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'silent' is right: nothing on this item in the opened statute text (§§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 all opened), AG Op. I13-012, AG Handbook ch. 6 § 6.5.4–6.5.6, or Ombudsman FAQ; no AZ admin-code fee schedule exists (no rulemaking delegation in § 39-121.01). Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "media",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Opened https://www.azag.gov/sites/default/files/2025-05/agency_handbook_chapter_6_corrected.pdf (pdftotext): § 6.5.5 text present verbatim ('a fee it deems appropriate for copying records, including a reasonable amount for the cost of time, equipment, and personnel used in producing copies of records, but not for costs of searching for the records'), 'Revised 2018'. 'silent' accepted: no per-unit media charge provision in any opened source. Consistency note for reconcile: handbook § 6.5.5 expressly includes 'digital copies' within the fee permission and the row's own notes say 'the city sets any media charge' — the same reasoning that produced 'defers_to_city' on dup.color.rate/dup.oversized.rate; either word yields the same engine outcome (no state number). Not a refute. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "delivery",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Opened https://www.azag.gov/opinions/i13-012-r13-018 (curl, full text): quoted sentences present verbatim (Hanania sentence, 'plain language' sentence, Conclusion paragraph). Opinion dated Dec. 2013; no later AG opinion on copying fees found. 'postage charges' verbatim in § 39-121.01(D)(1) and AG Op. I13-012; mail right limited to records 'not otherwise available on the public body's website' confirmed. 'actual_cost_standard' is right (postage at cost, no handling surcharge authorized); no number recorded. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "certification",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00122.htm: § 39-122(A) present verbatim. No general certified-copy fee for cities in the opened Title 39 sections; 'silent' with a mandatory no-charge carve-out is right. § 41-126 SOS $3 cap not opened (recorded only as an agency-only comparator, not as a municipal value — correctly excluded from applies_to). No 2024–2026 amendment of § 39-122 found. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00122.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "av",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00129.htm: full section present verbatim ('may establish a onetime fee per copy, not to exceed $46 per video-hour reviewed ... local law enforcement agency ... video recording' + factors 1–2). 'may establish ... not to exceed' = Permission/ceiling — resolution word 'ceiling' correct, value 46, unit USD per video-hour reviewed correct. applies_to 'municipalities' correct: text binds 'a county, a city, a town or any political subdivision' (local bodies; not state agencies). Enactment confirmed by opening Laws 2023, ch. 190 (SB 1148) PDF (https://www.azleg.gov/legtext/56leg/1R/laws/0190.pdf: 'adding section 39-129'); GED Oct. 30, 2023 arithmetic checks (sine die July 31, 2023 + 91 days). Codified text identical to enacted text — no later amendment; § 39-127 exception (opened) confirmed. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00129.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "commercial",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-03.htm: (A) three components, (B), (D) definition all present verbatim; § 39-121.01(D)(1) affirmation sentence present verbatim (opened). 'actual_cost_standard' with components-only value is right ('reasonable fee', market value 'as best determined by the public body' — no number); 'shall include' composition requirement noted. applies_to all_public_bodies correct. Laws 2025 ch. 102 (SB 1372) opened at https://www.azleg.gov/legtext/57leg/1r/laws/0102.htm — amends only § 39-121.01; § 39-121.03 unchanged. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-03.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "waiver",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Opened § 39-122 and § 39-127: (A) clauses present verbatim (incl. 'audio recordings' and 'charging prosecutorial agency'); § 39-127(C) DV/sexual-offense and (D) prioritization confirmed. Ombudsman FAQ hardship answer present verbatim (opened via WebFetch). Structural enum accurate: two mandatory statutory no-charge categories, discretionary otherwise, no waiver-denial notice/appeal. Session laws opened: Laws 2024 ch. 56 (SB 1371, § 39-127), Laws 2025 ch. 37 (SB 1104, § 39-127), Laws 2025 ch. 65 (SB 1220, §§ 39-121.02, 39-127) — chapter/bill pairings verified. Minor imprecision in effective_status wording (2024 ch. 56 took effect in 2024, not Sept. 26, 2025; the Sept. 26, 2025 date applies to the 2025 chapters and is the latest amendment) — substance unaffected, no correction of the row needed. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "waiver.forfeiture",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. § 39-121.01(E) present verbatim; opened https://www.azleg.gov/ars/39/00121-02.htm — special action, fees/costs, damages only; no fee-forfeiture rule. 'silent' correct. Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "repeat",
+      "verdict": "CONFIRMED",
+      "why": "Opened https://www.azleg.gov/ars/39/00121-01.htm (curl, full text) 2026-08-19: quoted clause present verbatim in § 39-121.01(D)(1); codified text carries the Laws 2025 ch. 102 (SB 1372) affirmation sentence, so the 'amended eff. Sept. 26, 2025' status is right. Resolution word 'silent' is right: nothing on this item in the opened statute text (§§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 all opened), AG Op. I13-012, AG Handbook ch. 6 § 6.5.4–6.5.6, or Ombudsman FAQ; no AZ admin-code fee schedule exists (no rulemaking delegation in § 39-121.01). Currency: 2026 session (57th 2nd Reg.) adjourned June 13, 2026, GED Sept. 12, 2026 — SB 1437 (material-costs-only) confirmed dead 06/14/2026 (BillTrack50), HB 2139 stalled at House 2nd reading (FastDemocracy); no 2026 chapter amending §§ 39-121.01/.03, 39-122, 39-127 or 39-129 found, but azleg's codified text would not yet reflect a 2026 chapter and the azleg 2026 laws index is not openable (403) — residual currency risk noted, not a refute.",
+      "checked_link": "https://www.azleg.gov/ars/39/00121-01.htm",
+      "corrected_row": null
+    }
+  ],
+  "notes": "All 36 rows CONFIRMED; 0 CORRECTED, 0 REFUTED, 0 UNVERIFIABLE. Every cited primary source was opened: A.R.S. §§ 39-121.01, 39-121.02, 39-121.03, 39-122, 39-127, 39-129 (azleg codified text, curl full text); AG Op. I13-012 (R13-018) full text; AG Agency Handbook ch. 6 PDF (§§ 6.5.4–6.5.6, 'Revised 2018', 2025 posting); Ombudsman-Citizens' Aide FAQ (WebFetch — curl returns 406 mod_security; last-updated 2025-04-18); session laws 2023 ch. 190, 2024 ch. 56, 2025 chs. 37, 65, 102. AZ has no values/ceilings other than the § 39-129 $46 per video-hour ceiling (row av), which is verbatim, correctly a ceiling under a Permission, and correctly scoped to local bodies. No row records a number for a soft standard, and no agency-only figure is recorded as a municipal value (§ 41-126 SOS cap correctly kept as an unopened comparator only). Caveats carried forward, not refutes: (1) 2026 session GED is Sept. 12, 2026 — SB 1437 confirmed dead, HB 2139 stalled, no other 2026 chapter touching the fee sections found, but azleg's codified text would not yet show a 2026 chapter and the azleg 2026 laws index returned 403, so a residual 2026-currency risk remains for all § 39-121.01-based rows; (2) the labor not_applicable rows (labor.search.rate, labor.review.rate, labor.overheadPct, rules.freeLaborHours) rest on case law / AG opinion / Ombudsman guidance rather than statute text — the Ombudsman FAQ itself both bars 'labor, redaction, overhead' and allows 'a reasonable amount of the cost of time, equipment, and personnel used in producing copies', so the discover's handbook-vs-Ombudsman tension is actually internal to the FAQ too; manual_verification flags on those rows should stay; (3) media 'silent' vs dup.* 'defers_to_city' is a labelling inconsistency with no engine consequence — reconcile may harmonize; (4) AG Op. I86-090 remains unopened (only restated in I13-012 and the handbook), as the discover disclosed."
+}

@@ -1,0 +1,407 @@
+{
+  "code": "CA",
+  "verified_at": "2026-08-19",
+  "rows": [
+    {
+      "item_id": "dup.bw.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened leginfo § 7922.530; subd. (a) present verbatim; history 'Added by Stats. 2021, Ch. 614 (AB 473) … Operative January 1, 2023' with no later amendment; 'each state or local agency' = all_public_bodies; 'direct costs of duplication' correctly recorded as actual_cost_standard (no number). AB 1821 (2025-26) checked on leginfo: 06/25/26 Senate amendment struck the § 7922.530 search/review-fee language (bill title now 'amend Section 7922.535' only), pending 3rd reading — not law. Note: § 81008 ($0.10/page PRA statements, CA-9009) is a note-level item not verified here (leginfo multi-version page did not render).",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.530&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.color.rate",
+      "verdict": "CONFIRMED",
+      "why": "Same source/clause as dup.bw.rate, verified verbatim on leginfo § 7922.530(a); no color-specific figure in Div. 10; actual_cost_standard is the right word.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.530&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.oversized.rate",
+      "verdict": "CONFIRMED",
+      "why": "Verified verbatim on leginfo § 7922.530(a); no oversized figure; standard correctly recorded.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.530&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.specialty.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened leginfo § 7922.575; subd. (b) present verbatim; history Added Stats. 2021, ch. 614, no amendment. Also opened AG Op. No. 04-1105 (Oct. 3, 2005) PDF at oag.ca.gov: the 'may not include expenses associated with the county’s initial gathering … initial conversion … or maintaining the information' language cited in notes is present. actual_cost_standard is correct.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.575&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.tiers",
+      "verdict": "CONFIRMED",
+      "why": "Silent; leginfo § 7922.530(a) clause present verbatim; coverage note names statute chapter, CCR, AG opinions, case law. No banding anywhere in §§ 7922.530/7922.575.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.530&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.freePages",
+      "verdict": "CONFIRMED",
+      "why": "Silent; § 7922.530(b) present verbatim on leginfo (including the 'without being charged any fees or costs' clause); no free-page allowance in the fee sections.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.530&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.search.rate",
+      "verdict": "CONFIRMED",
+      "why": "Opened courts.ca.gov archive PDF S252445 (NLG v. City of Hayward, May 28, 2020, Kruger, J.); quoted passage ('the term “extraction” does not cover every process … Just as agencies cannot recover the costs of searching through a filing cabinet …') present verbatim at slip op. p. 24-25; the North County 'copy machine … operator' / 'staff time involved in searching the records' passages cited in notes are present at slip op. p. 3-4. Opinion construes former § 6253.9(b)(2), continued as § 7922.575(b) (leginfo, no amendment). not_applicable (categorically non-chargeable) is the right word; NLG is a city case, CPRA binds state and local agencies alike.",
+      "checked_link": "https://www.courts.ca.gov/opinions/archive/S252445.PDF",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.review.rate",
+      "verdict": "CONFIRMED",
+      "why": "Holding sentence ('We hold only that section 6253.9(b)(2), as presently written, does not provide a basis for charging requesters for the costs of redacting government records kept in an electronic format, including digital video footage.') present verbatim in S252445.PDF; Fredericks disapproval at fn. 9 present. not_applicable is correct.",
+      "checked_link": "https://www.courts.ca.gov/opinions/archive/S252445.PDF",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.programming.rate",
+      "verdict": "CONFIRMED",
+      "why": "§ 7922.575(b) verbatim on leginfo; no rate stated; AG Op. 04-1105 exclusions verified in the opened AG PDF. actual_cost_standard with 'requester shall bear the cost' correctly recorded without a number.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.575&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.billableWhen",
+      "verdict": "CONFIRMED",
+      "why": "§ 7922.575(b) verbatim on leginfo; NLG narrowing verified in S252445.PDF (search and redaction not 'extraction'; trial court 'correct to disallow the City’s charges for time its staff spent'). The state fixes the choice (never, except § 7922.575(b)), so 'value' with an enum unit is the right word; applies to 'each state or local agency'.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.575&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.overheadPct",
+      "verdict": "CORRECTED",
+      "why": "Resolution 'silent' stands and the quoted clause is genuine — but it is NOT present in the opened official_link (leginfo § 7922.575). The verbatim text is from AG Op. No. 04-1105 (Oct. 3, 2005), p. 13, which I opened at oag.ca.gov/system/files/opinions/pdfs/04-1105.pdf and matched word-for-word. Corrected official_link and source_type to the AG opinion; effective_status reworded (the opinion construes former § 6253.9(b), continued as § 7922.575(b) without substantive change). Note the opinion concerns a county assessor; the statutory 'direct cost' standard it applies binds all agencies.",
+      "checked_link": "https://oag.ca.gov/system/files/opinions/pdfs/04-1105.pdf",
+      "corrected_row": {
+        "state": "CA",
+        "item_id": "labor.overheadPct",
+        "resolution": "silent",
+        "value": null,
+        "unit": null,
+        "basis": null,
+        "rule_type": null,
+        "applies_to": "all_public_bodies",
+        "resolved_by_rule_ids": [],
+        "new_rule_ids": [
+          "CA-9004"
+        ],
+        "source_authority": "AG Op. No. 04-1105 (88 Ops.Cal.Atty.Gen., Oct. 3, 2005), read with Cal. Gov. Code § 7922.575(b) and Div. 10 generally",
+        "source_type": "Official Guidance (Attorney General Opinion)",
+        "official_link": "https://oag.ca.gov/system/files/opinions/pdfs/04-1105.pdf",
+        "source_language": "If the request is made at a time other than when the data is periodically produced, the fee may additionally include “the cost to construct [the] record, and the cost of programming and computer services necessary to produce a copy of the record.” (§ 6253.9, subd. (b)(1).) The fee may similarly cover such additional costs when “[t]he request would require data compilation, extraction, or programming to produce the record.” (§ 6253.9, subd. (b)(2).) In either event, however, the fee may not include expenses associated with the county’s initial gathering of the information, or with initial conversion of the information into an electronic format, or with maintaining the information.",
+        "is_paraphrase": false,
+        "effective_status": "Current (AG Op. No. 04-1105, Oct. 3, 2005, construing former § 6253.9(b), continued without substantive change as § 7922.575(b) by Stats. 2021, ch. 614 (AB 473), operative Jan. 1, 2023; § 7922.575 unamended 2024–2026 as of 2026-08-19)",
+        "confidence": "medium",
+        "manual_verification": null,
+        "notes": "No overhead/fringe percentage anywhere. Direction of the law is against indirect cost: 'direct costs' (§ 7922.530(a)); § 7922.575(b) costs may not include gathering/conversion/maintenance (AG Op. 04-1105). Contrast counties' § 54985 authority (indirect costs per OMB Circular A-87) — county-only, not cities. Searched: full text of Gov. Code Div. 10 (CPRA, §§ 7920.000–7931.000, all 60 article/chapter text pages pulled from leginfo 2026-08-19 and grepped for fee/cost/charge/payment/deposit/waive) — the only fee provisions are §§ 7922.530(a)-(b), 7922.575(a)-(b) (plus §§ 7922.635 guidelines free of charge, 7922.500, 7922.505); no California Code of Regulations title implements the CPRA for local agencies (the Act contains no rulemaking delegation); AG opinions: No. 04-1105 (2005) opened; 85 Ops.Cal.Atty.Gen. 225 (2002) (county § 54985 authority) located by index only; AG 2004 CPRA Summary no longer hosted (404); Brown Act §§ 54953.5, 54954.1, 54957.5 and Gov. Code § 6159 opened; National Lawyers Guild v. City of Hayward (2020) 9 Cal.5th 488 opened; AB 1821 (2025-26) status/text opened (fee provisions struck 06/25/26; pending Senate 3rd reading, not law). [VERIFY 2026-08-19: official_link/source_type corrected — quoted clause is from AG Op. 04-1105 p. 13, not from § 7922.575; opinion addresses a county assessor's parcel data but applies the general CPRA direct-cost standard.]"
+      }
+    },
+    {
+      "item_id": "labor.increment",
+      "verdict": "CONFIRMED",
+      "why": "Silent; § 7922.575(b) verbatim on leginfo; no time unit anywhere in the fee sections; coverage note present.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.575&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.freeLaborHours",
+      "verdict": "CONFIRMED",
+      "why": "Silent; § 7922.575(b) verbatim; no free-hours allowance; coverage note present.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.575&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.periodicFreeHours",
+      "verdict": "CORRECTED",
+      "why": "Verbatim clause verified on leginfo § 7922.535(a); resolution 'silent' stands, coverage note present. But effective_status asserts 'no amendment 2024–2026' for the linked section, and leginfo's history line reads 'Amended by Stats. 2025, Ch. 34, Sec. 1. (AB 370) Effective January 1, 2026' (subd. (c)(5) cyberattack; SB 1034 (2024) earlier added subd. (c)(6)). Subdivision (a) itself is unchanged, so only effective_status is corrected. AB 1821 introduced-version 2-hour/10-hour trigger claim is consistent with the bill history opened (fee provisions struck 06/25/26).",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.535&lawCode=GOV",
+      "corrected_row": {
+        "state": "CA",
+        "item_id": "labor.periodicFreeHours",
+        "resolution": "silent",
+        "value": null,
+        "unit": null,
+        "basis": null,
+        "rule_type": null,
+        "applies_to": "all_public_bodies",
+        "resolved_by_rule_ids": [],
+        "new_rule_ids": [],
+        "source_authority": "Cal. Gov. Code Div. 10",
+        "source_type": "Statute",
+        "official_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.535&lawCode=GOV",
+        "source_language": "Each agency, upon a request for a copy of records, shall, within 10 days from receipt of the request, determine whether the request, in whole or in part, seeks copies of disclosable public records in the possession of the agency and shall promptly notify the person making the request of the determination and the reasons therefor. If the agency determines that the request seeks disclosable public records, the agency shall also state the estimated date and time when the records will be made available.",
+        "is_paraphrase": false,
+        "effective_status": "Current (§ 7922.535 last amended Stats. 2025, ch. 34 (AB 370), eff. Jan. 1, 2026 — added cyberattack 'unusual circumstance' at subd. (c)(5); subd. (a) quoted here is unchanged since Stats. 2021, ch. 614 (AB 473), operative Jan. 1, 2023; AB 1821 (2025-26), which would change 'days' to 'business days', is pending on Senate third reading 08/19/26 and is not law)",
+        "confidence": "high",
+        "manual_verification": null,
+        "notes": "No per-requestor periodic time allowance. AB 1821 as introduced (2026) proposed a 2-hour/request and 10-hour/month search-time trigger for fees; struck by the 06/25/26 amendment; bill pending and not law. Searched: full text of Gov. Code Div. 10 (CPRA, §§ 7920.000–7931.000, all 60 article/chapter text pages pulled from leginfo 2026-08-19 and grepped for fee/cost/charge/payment/deposit/waive) — the only fee provisions are §§ 7922.530(a)-(b), 7922.575(a)-(b) (plus §§ 7922.635 guidelines free of charge, 7922.500, 7922.505); no California Code of Regulations title implements the CPRA for local agencies (the Act contains no rulemaking delegation); AG opinions: No. 04-1105 (2005) opened; 85 Ops.Cal.Atty.Gen. 225 (2002) (county § 54985 authority) located by index only; AG 2004 CPRA Summary no longer hosted (404); Brown Act §§ 54953.5, 54954.1, 54957.5 and Gov. Code § 6159 opened; National Lawyers Guild v. City of Hayward (2020) 9 Cal.5th 488 opened; AB 1821 (2025-26) status/text opened (fee provisions struck 06/25/26; pending Senate 3rd reading, not law)."
+      }
+    },
+    {
+      "item_id": "rules.estimateNotifyThreshold",
+      "verdict": "CONFIRMED",
+      "why": "Silent; § 7922.535(a) verbatim on leginfo; effective_status correctly records the AB 370 (Stats. 2025, ch. 34) amendment; no fee-estimate/cost-notice threshold in Div. 10.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.535&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.requesterResponseDays",
+      "verdict": "CORRECTED",
+      "why": "Verbatim clause verified on leginfo § 7922.535(a); resolution 'silent' stands, coverage note present. But effective_status asserts 'no amendment 2024–2026' for the linked section, and leginfo's history line reads 'Amended by Stats. 2025, Ch. 34, Sec. 1. (AB 370) Effective January 1, 2026' (subd. (c)(5) cyberattack; SB 1034 (2024) earlier added subd. (c)(6)). Subdivision (a) itself is unchanged, so only effective_status is corrected.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.535&lawCode=GOV",
+      "corrected_row": {
+        "state": "CA",
+        "item_id": "estimate.requesterResponseDays",
+        "resolution": "silent",
+        "value": null,
+        "unit": null,
+        "basis": null,
+        "rule_type": null,
+        "applies_to": "all_public_bodies",
+        "resolved_by_rule_ids": [],
+        "new_rule_ids": [],
+        "source_authority": "Cal. Gov. Code Div. 10",
+        "source_type": "Statute",
+        "official_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.535&lawCode=GOV",
+        "source_language": "Each agency, upon a request for a copy of records, shall, within 10 days from receipt of the request, determine whether the request, in whole or in part, seeks copies of disclosable public records in the possession of the agency and shall promptly notify the person making the request of the determination and the reasons therefor. If the agency determines that the request seeks disclosable public records, the agency shall also state the estimated date and time when the records will be made available.",
+        "is_paraphrase": false,
+        "effective_status": "Current (§ 7922.535 last amended Stats. 2025, ch. 34 (AB 370), eff. Jan. 1, 2026 — added cyberattack 'unusual circumstance' at subd. (c)(5); subd. (a) quoted here is unchanged since Stats. 2021, ch. 614 (AB 473), operative Jan. 1, 2023; AB 1821 (2025-26), which would change 'days' to 'business days', is pending on Senate third reading 08/19/26 and is not law)",
+        "confidence": "high",
+        "manual_verification": null,
+        "notes": "No estimate-response window or deemed-withdrawal rule. Searched: full text of Gov. Code Div. 10 (CPRA, §§ 7920.000–7931.000, all 60 article/chapter text pages pulled from leginfo 2026-08-19 and grepped for fee/cost/charge/payment/deposit/waive) — the only fee provisions are §§ 7922.530(a)-(b), 7922.575(a)-(b) (plus §§ 7922.635 guidelines free of charge, 7922.500, 7922.505); no California Code of Regulations title implements the CPRA for local agencies (the Act contains no rulemaking delegation); AG opinions: No. 04-1105 (2005) opened; 85 Ops.Cal.Atty.Gen. 225 (2002) (county § 54985 authority) located by index only; AG 2004 CPRA Summary no longer hosted (404); Brown Act §§ 54953.5, 54954.1, 54957.5 and Gov. Code § 6159 opened; National Lawyers Guild v. City of Hayward (2020) 9 Cal.5th 488 opened; AB 1821 (2025-26) status/text opened (fee provisions struck 06/25/26; pending Senate 3rd reading, not law)."
+      }
+    },
+    {
+      "item_id": "estimate.revisionNotifyPercent",
+      "verdict": "CORRECTED",
+      "why": "Verbatim clause verified on leginfo § 7922.535(a); resolution 'silent' stands, coverage note present. But effective_status asserts 'no amendment 2024–2026' for the linked section, and leginfo's history line reads 'Amended by Stats. 2025, Ch. 34, Sec. 1. (AB 370) Effective January 1, 2026' (subd. (c)(5) cyberattack; SB 1034 (2024) earlier added subd. (c)(6)). Subdivision (a) itself is unchanged, so only effective_status is corrected.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.535&lawCode=GOV",
+      "corrected_row": {
+        "state": "CA",
+        "item_id": "estimate.revisionNotifyPercent",
+        "resolution": "silent",
+        "value": null,
+        "unit": null,
+        "basis": null,
+        "rule_type": null,
+        "applies_to": "all_public_bodies",
+        "resolved_by_rule_ids": [],
+        "new_rule_ids": [],
+        "source_authority": "Cal. Gov. Code Div. 10",
+        "source_type": "Statute",
+        "official_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.535&lawCode=GOV",
+        "source_language": "Each agency, upon a request for a copy of records, shall, within 10 days from receipt of the request, determine whether the request, in whole or in part, seeks copies of disclosable public records in the possession of the agency and shall promptly notify the person making the request of the determination and the reasons therefor. If the agency determines that the request seeks disclosable public records, the agency shall also state the estimated date and time when the records will be made available.",
+        "is_paraphrase": false,
+        "effective_status": "Current (§ 7922.535 last amended Stats. 2025, ch. 34 (AB 370), eff. Jan. 1, 2026 — added cyberattack 'unusual circumstance' at subd. (c)(5); subd. (a) quoted here is unchanged since Stats. 2021, ch. 614 (AB 473), operative Jan. 1, 2023; AB 1821 (2025-26), which would change 'days' to 'business days', is pending on Senate third reading 08/19/26 and is not law)",
+        "confidence": "high",
+        "manual_verification": null,
+        "notes": "No revised-estimate rule or overrun percentage. Searched: full text of Gov. Code Div. 10 (CPRA, §§ 7920.000–7931.000, all 60 article/chapter text pages pulled from leginfo 2026-08-19 and grepped for fee/cost/charge/payment/deposit/waive) — the only fee provisions are §§ 7922.530(a)-(b), 7922.575(a)-(b) (plus §§ 7922.635 guidelines free of charge, 7922.500, 7922.505); no California Code of Regulations title implements the CPRA for local agencies (the Act contains no rulemaking delegation); AG opinions: No. 04-1105 (2005) opened; 85 Ops.Cal.Atty.Gen. 225 (2002) (county § 54985 authority) located by index only; AG 2004 CPRA Summary no longer hosted (404); Brown Act §§ 54953.5, 54954.1, 54957.5 and Gov. Code § 6159 opened; National Lawyers Guild v. City of Hayward (2020) 9 Cal.5th 488 opened; AB 1821 (2025-26) status/text opened (fee provisions struck 06/25/26; pending Senate 3rd reading, not law)."
+      }
+    },
+    {
+      "item_id": "estimate.validityDays",
+      "verdict": "CORRECTED",
+      "why": "Verbatim clause verified on leginfo § 7922.535(a); resolution 'silent' stands, coverage note present. But effective_status asserts 'no amendment 2024–2026' for the linked section, and leginfo's history line reads 'Amended by Stats. 2025, Ch. 34, Sec. 1. (AB 370) Effective January 1, 2026' (subd. (c)(5) cyberattack; SB 1034 (2024) earlier added subd. (c)(6)). Subdivision (a) itself is unchanged, so only effective_status is corrected.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.535&lawCode=GOV",
+      "corrected_row": {
+        "state": "CA",
+        "item_id": "estimate.validityDays",
+        "resolution": "silent",
+        "value": null,
+        "unit": null,
+        "basis": null,
+        "rule_type": null,
+        "applies_to": "all_public_bodies",
+        "resolved_by_rule_ids": [],
+        "new_rule_ids": [],
+        "source_authority": "Cal. Gov. Code Div. 10",
+        "source_type": "Statute",
+        "official_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.535&lawCode=GOV",
+        "source_language": "Each agency, upon a request for a copy of records, shall, within 10 days from receipt of the request, determine whether the request, in whole or in part, seeks copies of disclosable public records in the possession of the agency and shall promptly notify the person making the request of the determination and the reasons therefor. If the agency determines that the request seeks disclosable public records, the agency shall also state the estimated date and time when the records will be made available.",
+        "is_paraphrase": false,
+        "effective_status": "Current (§ 7922.535 last amended Stats. 2025, ch. 34 (AB 370), eff. Jan. 1, 2026 — added cyberattack 'unusual circumstance' at subd. (c)(5); subd. (a) quoted here is unchanged since Stats. 2021, ch. 614 (AB 473), operative Jan. 1, 2023; AB 1821 (2025-26), which would change 'days' to 'business days', is pending on Senate third reading 08/19/26 and is not law)",
+        "confidence": "high",
+        "manual_verification": null,
+        "notes": "No estimate validity period. Searched: full text of Gov. Code Div. 10 (CPRA, §§ 7920.000–7931.000, all 60 article/chapter text pages pulled from leginfo 2026-08-19 and grepped for fee/cost/charge/payment/deposit/waive) — the only fee provisions are §§ 7922.530(a)-(b), 7922.575(a)-(b) (plus §§ 7922.635 guidelines free of charge, 7922.500, 7922.505); no California Code of Regulations title implements the CPRA for local agencies (the Act contains no rulemaking delegation); AG opinions: No. 04-1105 (2005) opened; 85 Ops.Cal.Atty.Gen. 225 (2002) (county § 54985 authority) located by index only; AG 2004 CPRA Summary no longer hosted (404); Brown Act §§ 54953.5, 54954.1, 54957.5 and Gov. Code § 6159 opened; National Lawyers Guild v. City of Hayward (2020) 9 Cal.5th 488 opened; AB 1821 (2025-26) status/text opened (fee provisions struck 06/25/26; pending Senate 3rd reading, not law)."
+      }
+    },
+    {
+      "item_id": "rules.deposit.threshold",
+      "verdict": "CONFIRMED",
+      "why": "Opened leginfo § 54957.5; subd. (d) present verbatim; history 'Amended … by Stats. 2022, Ch. 971, Sec. 1. (AB 2647) Effective January 1, 2023' matches. Clause expressly contemplates 'the legislative body of a local agency … charging a fee or deposit for a copy of a public record pursuant to Section 7922.530' with no threshold — defers_to_city (local legislative body) is defensible; applies_to municipalities is right (Brown Act = local agencies). Discover's own manual_verification flag (non-preclusion clause, not an affirmative CPRA authorization) is accurate and should stay.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=54957.5&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deposit.percent",
+      "verdict": "CONFIRMED",
+      "why": "Silent; § 54957.5(d) verbatim; no deposit percentage anywhere; coverage note present.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=54957.5&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.productionGate",
+      "verdict": "CONFIRMED",
+      "why": "§ 7922.530(a) verbatim on leginfo: copies 'promptly available … upon payment of fees'. State fixes the gate shape (pay-before-release permitted); 'value' with enum unit acceptable for this enum-type item; inspection remains free (§ 7922.525 opened, amended Stats. 2024, ch. 80 (SB 1525) — technical). Applies to 'each state or local agency'.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.530&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.nonpayment",
+      "verdict": "CONFIRMED",
+      "why": "Silent; § 7922.530(a) verbatim; no nonpayment consequence in Div. 10; coverage note present.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.530&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.depositClock",
+      "verdict": "CONFIRMED",
+      "why": "Silent; § 7922.535 opened; subds. (b)-(c) list six 'unusual circumstances' (field facilities, voluminous, consultation, data compilation, cyberattack, state of emergency) — none fee- or deposit-related; effective_status correctly notes AB 370.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.535&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.reissue",
+      "verdict": "CONFIRMED",
+      "why": "Silent; § 7922.530(a) verbatim; no overrun/re-issue rule; coverage note present.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.530&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.method",
+      "verdict": "CONFIRMED",
+      "why": "Opened leginfo § 6159; quoted subds. (b) intro, (b)(5), (b)(6), (c) present verbatim (ellipses honest); (h)(1) convenience-fee-not-to-exceed-costs with governing-body approval present; history 'Amended by Stats. 2018, Ch. 248, Sec. 2. (AB 1531)' matches. Permissive with city-council approval — defers_to_city is right; covers 'a court, city, county, city and county, or other public agency'.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=6159&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.maxFee",
+      "verdict": "CONFIRMED",
+      "why": "§ 7922.530(a) and § 7922.575(a) both present verbatim on leginfo; no dollar cap; actual_cost_standard is right. (Cal. Const. art. XIII C § 1(e)(2) note not separately opened — note-level only.)",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.530&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deMinimis",
+      "verdict": "CONFIRMED",
+      "why": "Silent; § 7922.530(a) verbatim; coverage note present.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.530&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.minFee",
+      "verdict": "CONFIRMED",
+      "why": "Silent; § 7922.530(a) verbatim; coverage note present.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.530&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "media",
+      "verdict": "CONFIRMED",
+      "why": "§ 7922.575(a) verbatim on leginfo; no medium figure; NLG DVD-download passage cited in notes present in S252445.PDF ('searching, reviewing, downloading, and confirming the download').",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.575&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "delivery",
+      "verdict": "CONFIRMED",
+      "why": "Opened leginfo § 54954.1; 'The legislative body may establish a fee for mailing the agenda or agenda packet, which fee shall not exceed the cost of providing the service.' present verbatim; history 'Amended by Stats. 2021, Ch. 763, Sec. 1. (SB 274) Effective January 1, 2022' matches. CPRA itself silent on delivery — 'silent' with the Brown Act rule noted and postage flagged for manual verification is a fair recording.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=54954.1&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "certification",
+      "verdict": "CONFIRMED",
+      "why": "Silent; § 7922.530(a) verbatim; no general certified-copy fee for city records in Div. 10; manual_verification note about county/registrar statutes is appropriate.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.530&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "av",
+      "verdict": "CONFIRMED",
+      "why": "§ 7922.575(a) verbatim on leginfo; NLG holding verbatim in S252445.PDF; § 54953.5(b) opened on leginfo — 'Any inspection of an audio or video recording shall be provided without charge on equipment made available by the local agency' present, history 'Amended by Stats. 2025, Ch. 327, Sec. 6. (SB 707) Effective January 1, 2026'. No per-recording/per-minute figure; actual_cost_standard is right.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.575&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "commercial",
+      "verdict": "CONFIRMED",
+      "why": "Opened leginfo § 7921.300; clause present verbatim; Added Stats. 2021, ch. 614, no amendment. AB 1821 claim verified on leginfo (06/25/26 Amended Senate version: commercial-use search-and-review fee language struck; title now 'amend Section 7922.535'; status 'Read second time. Ordered to third reading' 08/04/26, on Senate 3rd reading file 08/19/26). Silent is correct.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7921.300&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "waiver",
+      "verdict": "CONFIRMED",
+      "why": "Opened leginfo § 7922.505; clause present verbatim; no amendment. § 7921.300 (purpose) verified. No waiver provision exists in Div. 10; discover's manual_verification correctly flags that reading § 7922.505 as the local waiver delegation is reasoned rather than textual — keep that flag; 'defers_to_city' vs 'silent' is a judgment call, factual content verified.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.505&lawCode=GOV",
+      "corrected_row": null
+    },
+    {
+      "item_id": "waiver.forfeiture",
+      "verdict": "CORRECTED",
+      "why": "Verbatim clause verified on leginfo § 7922.535(a); resolution 'silent' stands, coverage note present. But effective_status asserts 'no amendment 2024–2026' for the linked section, and leginfo's history line reads 'Amended by Stats. 2025, Ch. 34, Sec. 1. (AB 370) Effective January 1, 2026' (subd. (c)(5) cyberattack; SB 1034 (2024) earlier added subd. (c)(6)). Subdivision (a) itself is unchanged, so only effective_status is corrected. § 7923.115 attorney-fee note verified on leginfo.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.535&lawCode=GOV",
+      "corrected_row": {
+        "state": "CA",
+        "item_id": "waiver.forfeiture",
+        "resolution": "silent",
+        "value": null,
+        "unit": null,
+        "basis": null,
+        "rule_type": null,
+        "applies_to": "all_public_bodies",
+        "resolved_by_rule_ids": [],
+        "new_rule_ids": [],
+        "source_authority": "Cal. Gov. Code Div. 10 (remedies at §§ 7923.000–7923.500)",
+        "source_type": "Statute",
+        "official_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.535&lawCode=GOV",
+        "source_language": "Each agency, upon a request for a copy of records, shall, within 10 days from receipt of the request, determine whether the request, in whole or in part, seeks copies of disclosable public records in the possession of the agency and shall promptly notify the person making the request of the determination and the reasons therefor. If the agency determines that the request seeks disclosable public records, the agency shall also state the estimated date and time when the records will be made available.",
+        "is_paraphrase": false,
+        "effective_status": "Current (§ 7922.535 last amended Stats. 2025, ch. 34 (AB 370), eff. Jan. 1, 2026 — added cyberattack 'unusual circumstance' at subd. (c)(5); subd. (a) quoted here is unchanged since Stats. 2021, ch. 614 (AB 473), operative Jan. 1, 2023; AB 1821 (2025-26), which would change 'days' to 'business days', is pending on Senate third reading 08/19/26 and is not law)",
+        "confidence": "high",
+        "manual_verification": null,
+        "notes": "No rule that a late determination or late production forfeits the fee; the CPRA's remedy for delay is judicial (§ 7923.000 et seq., with attorney fees to a prevailing requester under § 7923.115). Searched: full text of Gov. Code Div. 10 (CPRA, §§ 7920.000–7931.000, all 60 article/chapter text pages pulled from leginfo 2026-08-19 and grepped for fee/cost/charge/payment/deposit/waive) — the only fee provisions are §§ 7922.530(a)-(b), 7922.575(a)-(b) (plus §§ 7922.635 guidelines free of charge, 7922.500, 7922.505); no California Code of Regulations title implements the CPRA for local agencies (the Act contains no rulemaking delegation); AG opinions: No. 04-1105 (2005) opened; 85 Ops.Cal.Atty.Gen. 225 (2002) (county § 54985 authority) located by index only; AG 2004 CPRA Summary no longer hosted (404); Brown Act §§ 54953.5, 54954.1, 54957.5 and Gov. Code § 6159 opened; National Lawyers Guild v. City of Hayward (2020) 9 Cal.5th 488 opened; AB 1821 (2025-26) status/text opened (fee provisions struck 06/25/26; pending Senate 3rd reading, not law)."
+      }
+    },
+    {
+      "item_id": "repeat",
+      "verdict": "CORRECTED",
+      "why": "Verbatim clause verified on leginfo § 7922.535(a); resolution 'silent' stands, coverage note present. But effective_status asserts 'no amendment 2024–2026' for the linked section, and leginfo's history line reads 'Amended by Stats. 2025, Ch. 34, Sec. 1. (AB 370) Effective January 1, 2026' (subd. (c)(5) cyberattack; SB 1034 (2024) earlier added subd. (c)(6)). Subdivision (a) itself is unchanged, so only effective_status is corrected.",
+      "checked_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.535&lawCode=GOV",
+      "corrected_row": {
+        "state": "CA",
+        "item_id": "repeat",
+        "resolution": "silent",
+        "value": null,
+        "unit": null,
+        "basis": null,
+        "rule_type": null,
+        "applies_to": "all_public_bodies",
+        "resolved_by_rule_ids": [],
+        "new_rule_ids": [],
+        "source_authority": "Cal. Gov. Code Div. 10",
+        "source_type": "Statute",
+        "official_link": "https://leginfo.legislature.ca.gov/faces/codes_displaySection.xhtml?sectionNum=7922.535&lawCode=GOV",
+        "source_language": "Each agency, upon a request for a copy of records, shall, within 10 days from receipt of the request, determine whether the request, in whole or in part, seeks copies of disclosable public records in the possession of the agency and shall promptly notify the person making the request of the determination and the reasons therefor. If the agency determines that the request seeks disclosable public records, the agency shall also state the estimated date and time when the records will be made available.",
+        "is_paraphrase": false,
+        "effective_status": "Current (§ 7922.535 last amended Stats. 2025, ch. 34 (AB 370), eff. Jan. 1, 2026 — added cyberattack 'unusual circumstance' at subd. (c)(5); subd. (a) quoted here is unchanged since Stats. 2021, ch. 614 (AB 473), operative Jan. 1, 2023; AB 1821 (2025-26), which would change 'days' to 'business days', is pending on Senate third reading 08/19/26 and is not law)",
+        "confidence": "high",
+        "manual_verification": null,
+        "notes": "No aggregation threshold or carry-forward rule for repeat/serial requests. (Aggregation appeared only in AB 1821's struck 10-hours-per-month proposal.) Searched: full text of Gov. Code Div. 10 (CPRA, §§ 7920.000–7931.000, all 60 article/chapter text pages pulled from leginfo 2026-08-19 and grepped for fee/cost/charge/payment/deposit/waive) — the only fee provisions are §§ 7922.530(a)-(b), 7922.575(a)-(b) (plus §§ 7922.635 guidelines free of charge, 7922.500, 7922.505); no California Code of Regulations title implements the CPRA for local agencies (the Act contains no rulemaking delegation); AG opinions: No. 04-1105 (2005) opened; 85 Ops.Cal.Atty.Gen. 225 (2002) (county § 54985 authority) located by index only; AG 2004 CPRA Summary no longer hosted (404); Brown Act §§ 54953.5, 54954.1, 54957.5 and Gov. Code § 6159 opened; National Lawyers Guild v. City of Hayward (2020) 9 Cal.5th 488 opened; AB 1821 (2025-26) status/text opened (fee provisions struck 06/25/26; pending Senate 3rd reading, not law)."
+      }
+    }
+  ],
+  "notes": "Verify pass 2026-08-19. Sources actually opened: leginfo §§ 7922.530, 7922.575, 7922.535, 7922.525, 7922.505, 7921.300, 7923.115, 54957.5, 54954.1, 54953.5, 6159 (raw HTML via curl, verbatim compared); NLG v. City of Hayward S252445.PDF (courts.ca.gov archive, 39 pp., pdftotext); AG Op. No. 04-1105 PDF (oag.ca.gov, 13 pp.); AB 1821 status + 06/25/26 text on leginfo (struck text stripped — bill now amends only § 7922.535, pending, not law). Currency: leginfo history for §§ 7922.530 and 7922.575 shows 'Added by Stats. 2021, Ch. 614' with no later amendment; § 7922.535 shows 'Amended by Stats. 2025, Ch. 34 (AB 370) Effective January 1, 2026'. All 36 sources opened — no UNVERIFIABLE. Corrections are metadata-only (7 rows): six § 7922.535-linked 'silent' rows carried a false 'no amendment 2024–2026' effective_status; labor.overheadPct quoted AG Op. 04-1105 text against a leginfo link. No resolution words, values, units or applies_to were refuted. Not independently opened (note-level only): Gov. Code § 81008 (leginfo multi-version page did not render), Cal. Const. art. XIII C § 1(e)(2), 85 Ops.Cal.Atty.Gen. 225 (2002). Two judgment calls left as CONFIRMED with discover's manual_verification flags intact: rules.deposit.threshold (defers_to_city via Brown Act non-preclusion clause) and waiver (defers_to_city via § 7922.505 'greater access').",
+  "counts": {
+    "CONFIRMED": 29,
+    "CORRECTED": 7,
+    "REFUTED": 0,
+    "UNVERIFIABLE": 0
+  }
+}
