@@ -1,0 +1,299 @@
+{
+ "code": "TX",
+ "verified_at": "2026-08-19",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "1 TAC 70.3(b)(1) and Gov't Code 552.262(a) quotes verbatim; $.10 AG rate confirmed, 0.125 disclosed as arithmetic (AG+25% municipal ceiling per 552.262(a)); 'ceiling' is the right word for the municipal regime; no 2024-2026 amendment (552.262 last amended 2005; ch. 70 text identical in AG 2026 Handbook). SOS Appian portal link is JS-rendered and unfetchable; rule text verified against the AG's official 2026 PIA Handbook reproduction of ch. 70, statute against the Legislative Council text service.",
+   "checked_link": "https://www.texasattorneygeneral.gov/sites/default/files/files/divisions/open-government/PIA-Handbook-2026.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "70.2(9) definition and 70.3(b)(1) quotes verbatim in the AG 2026 Handbook reproduction of ch. 70; no color rate exists in ch. 70, so treating a standard-size color impression as a standard paper copy is sound; row already carries medium confidence + manual_verification flag for the specialty-paper edge. Portal link JS-only; verified via Handbook.",
+   "checked_link": "https://www.texasattorneygeneral.gov/sites/default/files/files/divisions/open-government/PIA-Handbook-2026.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "70.3(b)(2)(L) quote verbatim ($.50 oversize, materials only); 0.625 disclosed as AG+25% arithmetic; ceiling correct for municipalities. Verified via AG 2026 Handbook reproduction (portal link JS-only).",
+   "checked_link": "https://www.texasattorneygeneral.gov/sites/default/files/files/divisions/open-government/PIA-Handbook-2026.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "70.3(b)(2)(M) and 70.10(10)-(13) quotes verbatim; correctly recorded as actual_cost_standard / soft-standard with no invented number; 70.9 component tables exist as described. Verified via AG 2026 Handbook reproduction (portal link JS-only).",
+   "checked_link": "https://www.texasattorneygeneral.gov/sites/default/files/files/divisions/open-government/PIA-Handbook-2026.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Silent is right: flat $.10/page in 70.3(b)(1) (verbatim), no volume bands anywhere in subch. F, ch. 70 or Handbook Part VII; the only 50-page threshold gates labor, not the per-page rate.",
+   "checked_link": "https://www.texasattorneygeneral.gov/sites/default/files/files/divisions/open-government/PIA-Handbook-2026.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "552.261(a) quote verbatim on the Legislative Council statute text; silent is right — the 50-page rule bars labor/materials/overhead but the per-page charge still applies from page 1; no free-page allowance exists. Section last amended 2017.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.261",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "70.3(d)(1) quote verbatim ($15/hr, actual time to locate/compile/manipulate/reproduce); 18.75 disclosed as AG+25% arithmetic; ceiling correct for municipalities. Verified via AG 2026 Handbook reproduction (portal link JS-only).",
+   "checked_link": "https://www.texasattorneygeneral.gov/sites/default/files/files/divisions/open-government/PIA-Handbook-2026.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "70.3(d)(3) and (d)(4) quotes verbatim; two-part treatment (exception review $0 prohibited, redaction of mandatorily-confidential info at $15/hr subject to 50-page bar) matches the rule exactly. Verified via AG 2026 Handbook reproduction (portal link JS-only).",
+   "checked_link": "https://www.texasattorneygeneral.gov/sites/default/files/files/divisions/open-government/PIA-Handbook-2026.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "70.3(c)(1) quote verbatim ($28.50/hr programmer, only programming services at that rate); computer resource rates in the unit field match 70.3(h)(3) verbatim (mainframe $10/CPU-min, midsize $1.50/CPU-min, client/server $2.20/clock-hr, PC/LAN $1.00/clock-hr). Verified via AG 2026 Handbook reproduction (portal link JS-only).",
+   "checked_link": "https://www.texasattorneygeneral.gov/sites/default/files/files/divisions/open-government/PIA-Handbook-2026.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "552.261(a) quote verbatim; 50-page paper threshold, two-buildings/remote-storage exceptions, and the inspection carve-outs (552.271(c)-(d), 552.272) all check out against the statute text; fixed statutory bar, applies to all public bodies.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.261",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "70.3(e)(3) quote verbatim (20% of labor, with worked example); permissive election with fixed methodology correctly captured; row already flags the open 25%-variance question. Verified via AG 2026 Handbook reproduction (portal link JS-only).",
+   "checked_link": "https://www.texasattorneygeneral.gov/sites/default/files/files/divisions/open-government/PIA-Handbook-2026.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Silent is right: 70.3(d)(1) ('actual time', quote verbatim) states no billing increment or rounding rule anywhere in ch. 70 or the Handbook.",
+   "checked_link": "https://www.texasattorneygeneral.gov/sites/default/files/files/divisions/open-government/PIA-Handbook-2026.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "552.275(a) quote verbatim; silent is right — Texas has no per-request free labor hours; the 36/15-hour figures belong to the optional per-requestor 552.275 regime (labor.periodicFreeHours), as the row explains.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.275",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "552.275(a) and (b) quotes verbatim ('may not be less than 36 hours' yearly / '15 hours' monthly); 'floor' is exactly the right word — statutory minimums for optional limits; section last amended by 2023 H.B. 3033, no 2024-2026 change; 70.12 delegation exists as described.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.275",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "552.2615(a) quote verbatim ('exceeds $40'); fixed statutory trigger, applies to all public bodies; section last amended 2005, no 2024-2026 change; 70.7(a) backup confirmed in the Handbook reproduction.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.2615",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "552.2615(b) quote verbatim (10 business days, three response options, withdrawal consequence); fixed trigger correctly recorded.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.2615",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "552.2615(c) quote verbatim (updated statement required at 20% or more overrun before the copy is made available); fixed requirement correctly recorded.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.2615",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Silent is right — no estimate expiry exists; the quoted 60-day clause is 552.221(e) (verbatim on the statute page) and the row's own notes correctly attribute it as a related clock, not a validity period.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.221",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "552.263(a) quote verbatim: deposit/bond permitted only after the 552.2615 statement and only if estimate EXCEEDS $100 (>15 FTE) / $50 (<16 FTE); 'exceed' framing correct, statute-over-rule note on 70.7(d)'s '$100 or more' phrasing checks out against the Handbook reproduction; Permission is the right word ('may require').",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.263",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "Silent for copy-request deposits is right — neither 552.263(a) (verbatim) nor 70.7 caps a copy deposit by percentage; the 50% cap in 70.7(e) (quote verbatim in Handbook reproduction) is expressly limited to inspection of paper records, and the Handbook guidance sentence confirming that limitation is present.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.263",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "552.261(d) and 552.221(b)(2) quotes verbatim; copies-available-on-payment gate, deposit-before-preparation above threshold, and 552.275(g) no-production-until-paid all check out against the statute text.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.261",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "552.221(e) (60-day withdrawal) and 552.263(c) (>$100 prior unpaid, exclusive remedy) quotes verbatim; 10-business-day deposit lapse matches 552.263(f); school-district 180-day rule correctly excluded as non-municipal (552.2661 confirmed on page).",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.221",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "552.263(e) and (f) quotes verbatim (request deemed received on deposit receipt; withdrawal before 10th business day); (e-1) modified-request rule also present as described.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.263",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "552.2615(d) quote verbatim; collection cap (updated estimate, or original+20% shorthand where no update sent, when actual > $40) matches statute and the Handbook's restatement; response window restart per (c)+(b) correct.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.2615",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "Official link (AG 2026 Handbook PDF) opened; 'Decisions about method of payment rest with the governmental body.' present verbatim, and 70.3(l) credit-card transaction-fee clause verbatim in the ch. 70 reproduction; row correctly labels the deferral as guidance (soft-standard, medium confidence).",
+   "checked_link": "https://www.texasattorneygeneral.gov/sites/default/files/files/divisions/open-government/PIA-Handbook-2026.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "552.262(a) quote verbatim; actual_cost_standard with the three stacked ceilings (actual cost/not excessive, AG+25% for non-state bodies, 552.2615(d) estimate cap) all confirmed in the statute text; no dollar maximum exists.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.262",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "552.267(b) quote verbatim; discretionary waiver where collection cost exceeds the charge, no number in law — soft-standard without an invented value is right.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.267",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CORRECTED",
+   "why": "Resolution (silent — no minimum fee) is right and the coverage reasoning holds, but the verbatim source_language ('$.10 per page or part of a page') is 1 TAC 70.3(b)(1), which is NOT present at the given official_link (the Gov't Code statute page); source_type 'Statute' is likewise wrong for the quoted clause. Corrected provenance to the TAC instrument (quote verified verbatim in the AG 2026 Handbook reproduction of ch. 70).",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.261",
+   "corrected_row": {
+    "state": "TX",
+    "item_id": "rules.minFee",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "rule_type": null,
+    "applies_to": "all_public_bodies",
+    "resolved_by_rule_ids": [],
+    "new_rule_ids": [],
+    "source_authority": "1 Tex. Admin. Code § 70.3(b)(1); coverage: Tex. Gov't Code ch. 552 subch. F; 1 TAC ch. 70",
+    "source_type": "Administrative Rule",
+    "official_link": "https://texas-sos.appianportalsgov.com/rules-and-meetings?recordId=129094&interface=VIEW_TAC_SUMMARY",
+    "source_language": "The charge for standard paper copies reproduced by means of an office machine copier or a computer printer is $.10 per page or part of a page.",
+    "is_paraphrase": false,
+    "effective_status": "Current (1 TAC § 70.3 reproduced identically in the AG's 2026 PIA Handbook; Gov't Code ch. 552 subch. F unchanged by 2024-2026 session law)",
+    "confidence": "high",
+    "manual_verification": null,
+    "notes": "Coverage: Gov't Code §§ 552.261-.275, 1 TAC §§ 70.1-70.13, 2026 Handbook Part VII. No minimum fee. '$.10 per page or part of a page' is a per-unit rounding rule, not a minimum charge. § 552.267(b) allows waiver of uneconomic charges (rules.deMinimis)."
+   }
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "70.3(b)(2)(A)-(I) quote verbatim (diskette/CD $1.00, DVD $3.00, tape/cartridge/JAZ/other actual cost); USB-under-'other electronic media' reading is faithful; +25% municipal arithmetic disclosed. Verified via AG 2026 Handbook reproduction (portal link JS-only).",
+   "checked_link": "https://www.texasattorneygeneral.gov/sites/default/files/files/divisions/open-government/PIA-Handbook-2026.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "70.3(j) and 70.10(9) quotes verbatim (postal/shipping at actual cost); no handling/e-mail/pickup charge exists in ch. 70; 552.221(b)(2) postage condition confirmed on the statute page. Verified via AG 2026 Handbook reproduction (portal link JS-only).",
+   "checked_link": "https://www.texasattorneygeneral.gov/sites/default/files/files/divisions/open-government/PIA-Handbook-2026.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "552.232(c) quote verbatim (the only PIA certification is free); silent is right — no certified-copy charge exists in subch. F or ch. 70; 552.266 (municipal court clerk copies by ordinance) confirmed as the outside-PIA pointer the row flags for manual check.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.232",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "70.13(b) quote verbatim ($10.00 per responsive recording + $1.00 per full minute unless identical footage already obtained); delegation confirmed — CCP art. 2B.0112(g) (recodified from Occ. Code 1701.661) carries the AG fee-setting mandate in the codified text; general A/V media rates (VHS $2.50, cassette $1.00) verbatim at 70.3(b)(2)(J)-(K); 'value'/fixed is right given 70.13(a)(1)'s no-fee-unless-authorized clause. Verified via AG 2026 Handbook reproduction (portal link JS-only).",
+   "checked_link": "https://www.texasattorneygeneral.gov/sites/default/files/files/divisions/open-government/PIA-Handbook-2026.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "552.222(b) quote verbatim (purpose inquiry prohibited); silent is right — no commercial-purpose surcharge exists anywhere in subch. F, ch. 70 or the Handbook, and the purpose-inquiry bar makes one inoperable.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.222",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "552.267(a) and (b) quotes verbatim; mandatory public-interest waiver ('shall') vs discretionary collection-cost waiver ('may') correctly split; purpose-statement and appeal characterizations consistent with 552.222/552.269 as read on the page; body-cam waiver matches 70.13(c).",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.267",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CORRECTED",
+   "why": "Resolution (silent — no fee forfeiture for late response) is right, but the verbatim source_language ('A governmental body that fails to provide the required statement may not collect more than $40.') is 1 TAC 70.7(a), which is NOT present at the given official_link (the Gov't Code 552.2615 statute page); source_type 'Statute' is wrong for the quoted clause. Corrected provenance to the TAC instrument (quote verified verbatim in the AG 2026 Handbook reproduction).",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.2615",
+   "corrected_row": {
+    "state": "TX",
+    "item_id": "waiver.forfeiture",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "rule_type": null,
+    "applies_to": "all_public_bodies",
+    "resolved_by_rule_ids": ["TX-0028"],
+    "new_rule_ids": ["TX-9018", "TX-9019"],
+    "source_authority": "1 Tex. Admin. Code § 70.7(a); coverage: Tex. Gov't Code ch. 552 subchs. E-F",
+    "source_type": "Administrative Rule",
+    "official_link": "https://texas-sos.appianportalsgov.com/rules-and-meetings?recordId=129097&interface=VIEW_TAC_SUMMARY",
+    "source_language": "A governmental body that fails to provide the required statement may not collect more than $40.",
+    "is_paraphrase": false,
+    "effective_status": "Current (1 TAC § 70.7 reproduced identically in the AG's 2026 PIA Handbook; Gov't Code ch. 552 subch. F unchanged by 2024-2026 session law)",
+    "confidence": "high",
+    "manual_verification": null,
+    "notes": "Coverage: §§ 552.221, 552.2615, 552.263, 552.301-.308, 1 TAC ch. 70, Handbook Part VII. No rule forfeits the fee for a late response. The nearest consequences are cost-notice failures: no itemized statement -> collection capped at $40 (1 TAC § 70.7(a), TX-9018); no updated statement -> capped at 120% of the original estimate (§ 552.2615(d), TX-9019). Late AG-ruling requests trigger a presumption of openness (§ 552.302), not fee forfeiture."
+   }
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "552.261(e) quote verbatim (same-calendar-day aggregation per individual, no cross-individual combining for organizations); 552.232 free certification, 552.263(c) prior-unpaid deposit and 552.275 requestor ledger all confirmed on the statute page.",
+   "checked_link": "https://statutes.capitol.texas.gov/Docs/GV/htm/GV.552.htm#552.261",
+   "corrected_row": null
+  }
+ ],
+ "notes": "Access caveats: (1) statutes.capitol.texas.gov now serves a JS SPA shell to non-browser fetchers; the identical codified document was verified on the Texas Legislative Council's own text service (tcss.legis.texas.gov/Docs/GV/htm/GV.552.htm, and CR.2B.htm for the body-cam delegation) — same publisher, same document path. (2) The SOS TAC Appian portal (texas-sos.appianportalsgov.com) is JS-rendered and could not be opened by fetch (its SAIL API rejects non-browser clients), so all 1 TAC ch. 70 quotes were verified verbatim against the Office of the Attorney General's official 2026 PIA Handbook (PIA-Handbook-2026.pdf, opened in full), which reproduces ch. 70 — confirming both text and currency into 2026. The specific TexReg source-note dates asserted in effective_status fields (e.g., 'eff. Feb. 22, 2007, 32 TexReg 614') could not be independently re-verified for that reason, but the operative text and figures were. Statute currency: amendment notes show no 2024-2026 session law touching the fee/estimate/deposit sections; 2023 H.B. 3033 amended 552.271/.272/.275 and 2025 H.B. 4219 amended 552.221 without altering any quoted subsection. Verdicts: 34 CONFIRMED, 2 CORRECTED (rules.minFee and waiver.forfeiture — provenance only: TAC quotes were pointed at the statute page; resolutions unchanged), 0 REFUTED, 0 UNVERIFIABLE."
+}

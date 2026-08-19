@@ -1,0 +1,259 @@
+{
+ "code": "TN",
+ "verified_at": "2026-08-19",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Schedule PDF downloaded and text-extracted 2026-08-19: § II.A verbatim, 'may assess a per page charge of up to 15 cents ($0.15)' — ceiling word correct for 'up to' under a Permission; schedule's purpose paragraph ties it to every governmental entity subject to the TPRA (municipal included).",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same § II.A clause verbatim; 'up to 50 cents ($0.50) for color copies' — ceiling correct; municipal scope confirmed via schedule purpose paragraph.",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "§ II.C verbatim in extracted schedule text; correctly recorded as actual_cost_standard (entity-developed documented charge), no invented number.",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "§ II.C and § III.E ('may use an outside vendor and charge the costs to the requester') both verbatim; actual-cost/pass-through resolution matches.",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Full 3-page schedule read: single flat per-page ceiling each for B&W/color, duplex-as-two-pages is the only page-count rule, no volume bands — 'silent' absence finding holds.",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Model Policy § VI.E verbatim at the bracketed blank ('[No duplication costs will be charged for requests for less than [$][# of pages.]'); Effective Jan 20 2017 / Amended Aug 16 2017 shown on the document; defers_to_city correct — blank for the entity to fill.",
+   "checked_link": "https://comptroller.tn.gov/content/dam/cot/orc/documents/news-&-updates/ModelPublicRecordsPolicy2017Update.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "Schedule § IV.B, IV.D, IV.E all verbatim (incl. the $39,000/37.5-hr = $20 example); rate is a computed base-wage standard, not a number — actual_cost_standard correct; locating/retrieving named in 'labor'.",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "§ IV.B/IV.D verbatim; 'reviewing, redacting' expressly in chargeable labor; same computed-wage standard.",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "§ IV.B/IV.D verbatim; no separate programming rate anywhere in the schedule — falls under the same wage standard; row's manual_verification flag on extraction scope appropriately retained.",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "§ IV.C (labor threshold, higher threshold allowed, charge only above it) and § I.A (no charge for inspection) verbatim; § III.B supports all-media/per-page-only-if-printed; enum value supported.",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "§ IV.D verbatim: hourly wage 'is based upon the base salary of the employee and does not include benefits' — 0% surcharge under the safe harbor is the accurate encoding; notes correctly preserve the § II.C documented-actual-cost escape.",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Full schedule read: labor measured 'in hours', worked example in whole hours, no rounding/increment rule anywhere — 'silent' holds.",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "§ IV.C/IV.E verbatim: first hour is the threshold, entity 'may adopt a higher labor threshold' — floor of 1 free hour is the right word and value.",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Frequent & Multiple Requests policy § I.D ('no lower than four (4) requests') and § II.A (labor threshold need not be deducted once aggregation reached) verbatim; structural mapping (no periodic budget, request-count trigger) matches the instrument; shape-judgment mv flag retained.",
+   "checked_link": "https://comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/Frequent_and_Multiple_Requests.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "§ 10-7-503(a)(7)(B)(ii) verbatim on FindLaw ('shall provide a requestor an estimate'); Schedule § I.G and Model Policy § VI.B verbatim in extracted PDFs; duty is unconditional so threshold 0 is accurate. FindLaw reproduction current through Jan. 2, 2024; official OORC Fall 2025 Legislative Update opened (comptroller.tn.gov/content/dam/cot/orc/documents/2025OORClegislativeUpdate.pdf) — 2025 session's only §10-7-503 change is PC 392 removing the (a)(7)(C) disruptive-request-injunction sunset, not a fee/estimate/payment provision; web search surfaced no 2024 or 2026 fee amendment (last substantive amendment 2023 ch. 157). Row's manual_verification flag (confirm against official Lexis TCA) stands.",
+   "checked_link": "https://codes.findlaw.com/tn/title-10-public-libraries-archives-and-records/tn-code-sect-10-7-503/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "(B)(i)/(ii) verbatim on FindLaw; (a)(7)(A)(vii)(a) confirmed to be the 15-business-day INSPECTION rule only — no estimate-response window exists; 'silent' holds. FindLaw reproduction current through Jan. 2, 2024; official OORC Fall 2025 Legislative Update opened (comptroller.tn.gov/content/dam/cot/orc/documents/2025OORClegislativeUpdate.pdf) — 2025 session's only §10-7-503 change is PC 392 removing the (a)(7)(C) disruptive-request-injunction sunset, not a fee/estimate/payment provision; web search surfaced no 2024 or 2026 fee amendment (last substantive amendment 2023 ch. 157). Row's manual_verification flag (confirm against official Lexis TCA) stands.",
+   "checked_link": "https://codes.findlaw.com/tn/title-10-public-libraries-archives-and-records/tn-code-sect-10-7-503/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "The proviso ('provided, that the person was provided with an estimated cost ... and the person agreed to pay the estimated cost') confirmed verbatim on FindLaw; no revision-% trigger in statute or any OORC instrument opened; 'silent' holds. FindLaw reproduction current through Jan. 2, 2024; official OORC Fall 2025 Legislative Update opened (comptroller.tn.gov/content/dam/cot/orc/documents/2025OORClegislativeUpdate.pdf) — 2025 session's only §10-7-503 change is PC 392 removing the (a)(7)(C) disruptive-request-injunction sunset, not a fee/estimate/payment provision; web search surfaced no 2024 or 2026 fee amendment (last substantive amendment 2023 ch. 157). Row's manual_verification flag (confirm against official Lexis TCA) stands.",
+   "checked_link": "https://codes.findlaw.com/tn/title-10-public-libraries-archives-and-records/tn-code-sect-10-7-503/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "(B)(i)/(ii) verbatim on FindLaw; no expiry rule in statute, Schedule, Model Policy, Best Practices or FAQ as opened; 'silent' holds. FindLaw reproduction current through Jan. 2, 2024; official OORC Fall 2025 Legislative Update opened (comptroller.tn.gov/content/dam/cot/orc/documents/2025OORClegislativeUpdate.pdf) — 2025 session's only §10-7-503 change is PC 392 removing the (a)(7)(C) disruptive-request-injunction sunset, not a fee/estimate/payment provision; web search surfaced no 2024 or 2026 fee amendment (last substantive amendment 2023 ch. 157). Row's manual_verification flag (confirm against official Lexis TCA) stands.",
+   "checked_link": "https://codes.findlaw.com/tn/title-10-public-libraries-archives-and-records/tn-code-sect-10-7-503/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "Model Policy § VI.G verbatim ('Payment in advance will be required [when costs are estimated to exceed $______]'), § VI.B and Schedule § I.E verbatim; blank-for-entity → defers_to_city correct; municipal applies_to matches § 10-7-503(g)(1) policy duty.",
+   "checked_link": "https://comptroller.tn.gov/content/dam/cot/orc/documents/news-&-updates/ModelPublicRecordsPolicy2017Update.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "Best Practices § III.H verbatim ('either full or partial payment of estimated charges'); no percentage cap anywhere opened; 'silent' holds.",
+   "checked_link": "https://comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/BestPractices_1-20-17.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "Schedule § I.E, Model Policy § VI.B, and Response Form ground 'You have not paid the estimated copying/production fees.' all verbatim; segmented-production support (Best Practices § III.I) also verified; Permission enum correct.",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "§ 10-7-503(a)(7)(A)(vii)(b) incl. the agreed-estimate proviso confirmed verbatim on FindLaw; official OORC FAQ restates it; enum (prior-debt bar, no N-day withdrawal) accurate. FindLaw reproduction current through Jan. 2, 2024; official OORC Fall 2025 Legislative Update opened (comptroller.tn.gov/content/dam/cot/orc/documents/2025OORClegislativeUpdate.pdf) — 2025 session's only §10-7-503 change is PC 392 removing the (a)(7)(C) disruptive-request-injunction sunset, not a fee/estimate/payment provision; web search surfaced no 2024 or 2026 fee amendment (last substantive amendment 2023 ch. 157). Row's manual_verification flag (confirm against official Lexis TCA) stands.",
+   "checked_link": "https://codes.findlaw.com/tn/title-10-public-libraries-archives-and-records/tn-code-sect-10-7-503/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "Response Form PDF opened: non-payment listed as a form ground verbatim; no clock/tolling rule found in any opened instrument — structural 'hold, clock undefined' is faithful; judgment mv flag retained.",
+   "checked_link": "https://comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/RecordsResponseForm.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Official OORC FAQ page opened live 2026-08-19: sentence 'A governmental entity may not charge ... until an estimate of reasonable charges is provided to the requestor.' present verbatim; absence of a revised-estimate rule consistent with all opened sources.",
+   "checked_link": "https://comptroller.tn.gov/office-functions/open-records-counsel/open-meetings/frequently-asked-questions/tennessee-public-records-act-faqs.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "§ 9-1-108(c)(1)/(3)/(5) confirmed on FindLaw (lawful card acceptance; processing fee equal to processor charge, waivable by governing body; fee stated on notices); Model Policy § VI.F payment-forms clause verbatim; municipal applies_to correct — (c) addresses municipal/county entities. FindLaw reproduction current through Jan. 2, 2024; official OORC Fall 2025 Legislative Update opened (comptroller.tn.gov/content/dam/cot/orc/documents/2025OORClegislativeUpdate.pdf) — 2025 session's only §10-7-503 change is PC 392 removing the (a)(7)(C) disruptive-request-injunction sunset, not a fee/estimate/payment provision; web search surfaced no 2024 or 2026 fee amendment (last substantive amendment 2023 ch. 157). Row's manual_verification flag (confirm against official Lexis TCA) stands.",
+   "checked_link": "https://codes.findlaw.com/tn/title-9-public-finances/tn-code-sect-9-1-108/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "§ 10-7-503(a)(7)(B)(i)/(ii) verbatim on FindLaw; § 8-4-604(a)(1)(A)(ii)(b) 'excessive fees ... shall not be used to hinder access to nonexempt public information' confirmed on FindLaw's 8-4-604 page; Schedule § I.C verbatim; actual_cost_standard (no request-level dollar cap) correct. FindLaw reproduction current through Jan. 2, 2024; official OORC Fall 2025 Legislative Update opened (comptroller.tn.gov/content/dam/cot/orc/documents/2025OORClegislativeUpdate.pdf) — 2025 session's only §10-7-503 change is PC 392 removing the (a)(7)(C) disruptive-request-injunction sunset, not a fee/estimate/payment provision; web search surfaced no 2024 or 2026 fee amendment (last substantive amendment 2023 ch. 157). Row's manual_verification flag (confirm against official Lexis TCA) stands.",
+   "checked_link": "https://codes.findlaw.com/tn/title-10-public-libraries-archives-and-records/tn-code-sect-10-7-503/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Model Policy § VI.E and § VI.C verbatim (two bracketed blanks); defers_to_city correct.",
+   "checked_link": "https://comptroller.tn.gov/content/dam/cot/orc/documents/news-&-updates/ModelPublicRecordsPolicy2017Update.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Best Practices § III.G verbatim ('should determine its administrative costs ... minimum amount of fees necessary'); advisory 'should' honestly flagged in the row (verifier-could-call-silent note); defers_to_city defensible via § 10-7-503(g)(1)(C).",
+   "checked_link": "https://comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/BestPractices_1-20-17.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "Schedule § III.B verbatim (actual out-of-pocket cost for flash drives/similar; per-page for electronic only when printing required); actual_cost_standard correct.",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Schedule § III.D verbatim (USPS First-Class Mail obligatory once costs paid/waived; other means discretionary at cost); Requirement + actual-cost resolution matches.",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "Absence finding: full Schedule read and § 10-7-503 fee provisions confirmed on FindLaw contain no certified-copy charge; row's mv flag re municipal charters/private acts retained. FindLaw reproduction current through Jan. 2, 2024; official OORC Fall 2025 Legislative Update opened (comptroller.tn.gov/content/dam/cot/orc/documents/2025OORClegislativeUpdate.pdf) — 2025 session's only §10-7-503 change is PC 392 removing the (a)(7)(C) disruptive-request-injunction sunset, not a fee/estimate/payment provision; web search surfaced no 2024 or 2026 fee amendment (last substantive amendment 2023 ch. 157). Row's manual_verification flag (confirm against official Lexis TCA) stands.",
+   "checked_link": "https://codes.findlaw.com/tn/title-10-public-libraries-archives-and-records/tn-code-sect-10-7-503/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "Schedule § II.C verbatim; A/V treated as non-standard medium — scope judgment flagged in the row and consistent with the schedule's structure; no per-minute/recording figure anywhere opened.",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "§ 10-7-506(c)(3) confirmed on FindLaw: 'limited to not more than ten percent (10%)' with 10–20% requiring governing legislative body + ISC approval for political subdivisions — ceiling word and both figures correct; Schedule § I.F (no purpose-based distinction for general records) verbatim. FindLaw reproduction current through Jan. 2, 2024; official OORC Fall 2025 Legislative Update opened (comptroller.tn.gov/content/dam/cot/orc/documents/2025OORClegislativeUpdate.pdf) — 2025 session's only §10-7-503 change is PC 392 removing the (a)(7)(C) disruptive-request-injunction sunset, not a fee/estimate/payment provision; web search surfaced no 2024 or 2026 fee amendment (last substantive amendment 2023 ch. 157). Row's manual_verification flag (confirm against official Lexis TCA) stands.",
+   "checked_link": "https://codes.findlaw.com/tn/title-10-public-libraries-archives-and-records/tn-code-sect-10-7-506/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "Schedule § I.D verbatim ('may reduce or waive charges, in whole or in part, in accordance with the governmental entity's public records policy'); Model Policy § VI.C bracketed waiver clauses verbatim; discretionary/defers_to_city correct.",
+   "checked_link": "https://www.comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/ScheduleofReasonableCharges.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "§ 10-7-503(a)(3) deemed-denial clause confirmed verbatim on FindLaw; no fee-forfeiture-for-late-response rule in any opened source — 'silent' holds. FindLaw reproduction current through Jan. 2, 2024; official OORC Fall 2025 Legislative Update opened (comptroller.tn.gov/content/dam/cot/orc/documents/2025OORClegislativeUpdate.pdf) — 2025 session's only §10-7-503 change is PC 392 removing the (a)(7)(C) disruptive-request-injunction sunset, not a fee/estimate/payment provision; web search surfaced no 2024 or 2026 fee amendment (last substantive amendment 2023 ch. 157). Row's manual_verification flag (confirm against official Lexis TCA) stands.",
+   "checked_link": "https://codes.findlaw.com/tn/title-10-public-libraries-archives-and-records/tn-code-sect-10-7-503/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Frequent & Multiple Requests §§ I.D, II.A–C verbatim in extracted PDF ('must be no lower than four (4) requests', notice + OORC appeal, routine-records exemption); floor 4 requests/month is the right word and value; delegation § 8-4-604(a)(2) confirmed in the policy's purpose paragraph.",
+   "checked_link": "https://comptroller.tn.gov/content/dam/cot/orc/documents/oorc/policies-and-guidelines/Frequent_and_Multiple_Requests.pdf",
+   "corrected_row": null
+  }
+ ],
+ "notes": "All 9 distinct cited sources opened 2026-08-19: the five OORC instruments (Schedule of Reasonable Charges, Model Public Records Policy 2017 Update, Frequent & Multiple Requests, Best Practices, Records Response Form) downloaded as PDFs and text-extracted in full; the OORC TPRA FAQ page fetched live; FindLaw reproductions of TCA 10-7-503, 10-7-506, 8-4-604 and 9-1-108 fetched. Every verbatim source_language clause located in its cited source; every ceiling recorded with 'up to'/'not more than' language; soft standards recorded as actual_cost_standard/defers_to_city without invented numbers; silences checked against full instrument text. Currency: OORC PDFs are the live posted versions (Schedule eff. 1/20/2017 unrevised; Model Policy amended 8/16/2017 — dates confirmed on the documents); statutes verified on FindLaw (current through 1/2/2024) plus the official OORC Fall 2025 Legislative Update (opened), which shows the 2025 session's only 10-7-503 change is PC 392 removing the (a)(7)(C) injunction sunset — not a fee/estimate/payment provision; no 2024 or 2026 fee amendment surfaced by search. Residual (unchanged from raw): the official Lexis-hosted TCA remains unopened by tooling, so the raw rows' manual_verification flags to confirm statute text against the official TCA before library entry remain in force; the OORC Fall 2026 update is not yet published."
+}

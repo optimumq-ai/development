@@ -1,0 +1,259 @@
+{
+ "code": "UT",
+ "verified_at": "2026-08-19",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Statutory quotes verified verbatim in 63G-2-203(1)(a)-(b),(3)(c) and 63G-2-701(2)(c),(3)(c) (eff. 5/7/2025, Ch. 476 2025 GS). No state per-page figure exists; defers_to_city with null value and municipal applies_to is correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Quotes verified verbatim in 63G-2-203(1)(a)-(b),(3)(c); no color-copy provision anywhere in the section; defers_to_city/null value correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Quotes verified verbatim in 63G-2-203(1)(a)-(b),(3)(c); no oversized provision in the section; defers_to_city/null value correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "Quotes verified verbatim: 63G-2-203(1)(a)-(b),(2)(a) and 63G-2-201(8)(c) (current text eff. 7/1/2026); no specialty figure; defers_to_city correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Absence confirmed: full current text of 63G-2-203 read; no graduated per-page bands anywhere in the section. 'silent' is the right word.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Quote of (5)(b)(i)-(iii) verified verbatim; 201(1)(a) free-inspection and 201(10) self-copy waiver also verified; no free-page allowance exists; 'silent' correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "Quotes of (2)(a)(i)-(iii) and (2)(b) verified verbatim. (2)(b) is a 'may not exceed' formula cap \u2014 'ceiling' is the right resolution word; no dollar figure recorded. Verbatim clause(s) present in current 63G-2-203 (effective 3/17/2025, Amended by Ch. 33, 2025 GS; the le.utah.gov version list shows this as the sole/current version \u2014 no 2024-2026 fee amendment).",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Quotes of (5)(b)(i)-(iii) and (2)(b) verified verbatim; classification-review time non-chargeable, chargeable time capped by (2)(b); ceiling/$0-component reading accurate; redaction-time gap honestly flagged in manual_verification.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "Quotes of (2)(a)(i)-(iii),(2)(b) and 201(8)(c) verified verbatim; formula ceiling + actual incremental cost, no figure \u2014 correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "Quotes of (5)(b) and (5)(c) verified verbatim; only_over_threshold 0.25h with the non-media 10-day-repeat exception matches the statute exactly.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "Absence confirmed in full section text; (2)(b) quote verbatim; no overhead/fringe percentage anywhere in GRAMA fee section; 'silent' correct and the salary-cap interpretation question is flagged, not encoded.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Absence confirmed: only time unit in 63G-2-203 is the free first quarter hour; no billing increment or rounding rule; 'silent' correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "Quotes of (5)(b)(iii) and (5)(c) verified verbatim; 0.25 hour fixed free allotment per request is exactly what the statute says; binds all governmental entities incl. political subdivisions.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Absence confirmed; (5)(c) quote verbatim; the only free labor is per-request, no periodic budget; 'silent' correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "(8)(a)-(b) quote verified verbatim in statute; both Archives form snippets verified verbatim in the 2025 payment form and the request form PDFs ('Do you want to be contacted if the cost ... exceeds a certain amount'). No statutory estimate-notice threshold \u2014 'silent' correct; the $50 figure correctly kept as a prepayment trigger, not recorded here.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Absence confirmed in full text of 63G-2-203 and 63G-2-204 (Ch. 173 2023 GS) and in both Archives forms; no acceptance window or deemed-withdrawal rule; 'silent' correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "(8)(b) quote verified verbatim; no revised-estimate trigger in the section; 'silent' correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Absence confirmed in full section text and Archives forms; no validity period; 'silent' correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "(8)(a) quote verified verbatim; $50 fixed prepayment trigger, applies to every 'governmental entity' incl. political subdivisions; current text (Ch. 33 2025 GS) unchanged in figure; 'value' correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "(8)(a)-(b) quote verified verbatim. 'Payment of ... future estimated fees' authorizes the full estimate, so 100% as a ceiling is the faithful reading of a hard rule (not a soft standard given a number); the unit/scope judgment is transparently flagged in manual_verification.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "All three sources verified verbatim: 63G-2-203(8)(a)-(b); 63G-2-201(6)(a)-(c) (current text eff. 7/1/2026); and both option lines on the 2025 Archives payment form ('Payment will be required upon receipt of records.' / 'Prepayment is required before this request will be processed. Any amount over paid will be reimbursed.').",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "(8)(a)(ii) quote verified verbatim (including the statute's own 'government entity' wording); prior-debt prepayment reading correct; no deemed-withdrawal rule found in 203 or 204.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "(8)(a) statutory quote verbatim; the Archives 2025 payment form 'Statement about the processing time' verified verbatim in the PDF (including its 'may be longer is extraordinary circumstances' typo). Row correctly labels the clock restart as guidance-level, not statute.",
+   "checked_link": "https://archives.utah.gov/wp-content/uploads/GRAMA_payment_needed_2025.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Absence confirmed; (8)(b) refund clause verbatim; no overrun re-issue rule; 'silent' correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "Utah Code 10-8-85.6(1)-(3) verified verbatim (Enacted Ch. 29, 2005 GS; sole version \u2014 never amended); municipality-specific electronic-payment authorization; applies_to municipalities correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title10/Chapter8/10-8-S85.6.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "(1)(a)-(b) and (2)(a) quotes verified verbatim; soft reasonable/actual-cost standard recorded as 'actual_cost_standard' with the verbatim standard as value and no invented number \u2014 correct handling.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Absence confirmed; (4)(a)-(c) waiver quote verified verbatim; waiver is grounds-based not amount-based; 'silent' correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Absence confirmed in full section text; no minimum fee; 'silent' correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "Quotes verified verbatim: 63G-2-203(1)(a)-(b),(3)(c); 63G-2-201(8)(c); 201(13) electronic-copy mandate also confirmed in current text; no statewide media figure; defers_to_city correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Statutory quotes verbatim; the Archives 2025 payment form cost lines 'Mailing or shipping cost', 'Third party service', 'Supplies' verified in the PDF; no statutory postage figure; defers_to_city correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "63G-2-201(6)(a)-(c) verified verbatim in the current version (Effective 7/1/2026 \u2014 matches the row's effective_status); 203(1)(a),(3)(c),(9) verbatim; 'Certification fee' line confirmed on the Archives payment form; no state certification figure; defers_to_city correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S201.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "Quotes of 203(1)(a)-(b),(2)(a),(3)(c) verified verbatim; no A/V-specific fee provision in the section; defers_to_city correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "Absence confirmed; (4)(a) quote verbatim; 204(5) media public-benefit presumption confirmed in current 204 text; no commercial-purpose fee regime; 'silent' correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "All quotes verified verbatim: 63G-2-203(4) and (6)(a)-(b); 63G-2-401(1)(a)(ii) (eff. 5/7/2025, Ch. 476 2025 GS) including the 30-day fee-waiver appeal clock; discretionary/'encouraged' characterization exact.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "63G-2-204(9) verified verbatim in current text (Amended Ch. 173, 2023 GS \u2014 matches row); late response = deemed denial, no fee forfeiture; 'silent' correct.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S204.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "All three quotes verified verbatim: 203(5)(c); 201(7)(a)(iv); 204(6)(c)(ii). Structural characterization (10-day look-back, no aggregation threshold) matches statute.",
+   "checked_link": "https://le.utah.gov/xcode/Title63G/Chapter2/63G-2-S203.html",
+   "corrected_row": null
+  }
+ ],
+ "notes": "All 36 rows CONFIRMED. Method: fetched the current-version statute pages from le.utah.gov (the xcode index pages load text from versioned content files; the version list doubles as an amendment check \u2014 63G-2-203's only listed version is 'Current Version' C63G-2-S203_20250317, Amended by Ch. 33 2025 GS, so no 2024-2026 fee amendment exists; 63G-2-201's current version is Effective 7/1/2026 as the discover pass stated). Also opened and text-extracted both cited Utah Archives official form PDFs (GRAMA Request for Payment or Prepayment 2025; GRAMA Request Form) and confirmed every form quote verbatim, including the payment form's 'may be longer is extraordinary circumstances' typo and the requester cost-contact question. Every rate item is correctly defers_to_city with null value (Utah sets no per-page/per-item figure for any public body); the only numeric parameters ($50 prepayment trigger, 0.25h free staff time) are verbatim-backed and correctly scoped to all governmental entities incl. political subdivisions; agency-only regimes (63G-2-203(3)(b)/63J-1-504) were not recorded as municipal values. rules.deposit.percent (100% ceiling) rests on the natural reading of 'payment of ... future estimated fees' and carries its own manual_verification flag; kept CONFIRMED as a faithful reading of a hard rule rather than a numberized soft standard. Delegated instruments checked: 63G-2-701 (eff. 5/7/2025), 63G-2-401 (eff. 5/7/2025), 10-8-85.6 (enacted 2005, never amended), both Archives forms."
+}
