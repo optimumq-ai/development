@@ -1,0 +1,259 @@
+{
+ "code": "KS",
+ "verified_at": "2026-08-19",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "45-219(c)/(c)(1) opened on ksrevisor.gov; verbatim clauses present; no municipal per-page figure exists in the section; actual-cost ceiling correctly recorded with null value; history line ends L. 2025, ch. 89 (eff. 2025-07-01), no 2026 amendment; 45-217(k) confirms municipalities are public agencies.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "45-219(c)(1) verbatim present; section contains no color-specific figure; actual_cost_standard with null value is the right word; currency confirmed (history ends L. 2025, ch. 89).",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "45-219(c)(1) and (b) verbatim present; no oversized figure in section; other-facility cost-shift correctly cited; currency confirmed.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "45-219(c)(1) and (a) AV carve-out verbatim present; no specialty schedule in section; transcript carve-out (h) correctly noted as non-municipal; currency confirmed.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "45-219(c) verbatim present; full section read — no graduated bands anywhere in 45-219; silent with coverage note is right; currency confirmed.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "45-219 read in full — no free-page allowance for municipalities; EO 18-05 opened (KGI PDF, 200/44KB) and its 100-pages-free clause verbatim confirmed (OCR renders '(1 00)') with executive-branch-under-Governor scope, so state_agencies_only recording is correct; silent-for-municipalities is right.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "45-219(c)(1), (c)(3) verbatim present incl. the 2025 lowest-cost-staff/salary-basis/no-benefits language; no dollar rate in section; actual_cost_standard null-value correct; currency confirmed.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "45-219(c)(1) review/redact clause and (c)(3) verbatim present; chargeable, capped at salary/wage; no figure; currency confirmed.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "45-219(c)(2), (c)(3) verbatim present; computer-services cost incl. staff time, no figure; currency confirmed.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "45-219(c)(1)-(3) verbatim present; section sets no page/hour threshold below which staff time is free, and staff time attaches to both access and copies — 'always' is the faithful enum; the (e)(1) 5-hour/$200 figures are correctly kept out of this item (they trigger the mitigation contact, not free labor).",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "45-219(c)(3) 'shall not include the costs of employee benefits' and (c)(1) incidental-cost exclusion verbatim present; 0% overhead is the faithful engine mapping of a hard statutory prohibition, not a converted soft standard; currency confirmed.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "45-219(c)(3) verbatim present; no increment/rounding rule anywhere in 45-219; silent with coverage note correct.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "45-219 read in full — no free labor hours; DoA 1-hour practice correctly excluded as single-agency policy; silent-for-municipalities correct.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "45-219 read in full — no per-requestor periodic allowance; silent correct.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "45-219(e)(1) verbatim present with exactly 'exceed five hours' and 'exceeds $200'; both thresholds are staff-time-based as recorded; Requirement ('shall make reasonable efforts') correct; shape caveat (mitigation contact, not estimate) properly disclosed; new subsection added by L. 2025, ch. 89, eff. 2025-07-01 — matches effective_status.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "45-219(e)(2) verbatim present: 'failed to respond by the end of the third business day ... deemed to be withdrawn until a subsequent contact'; value 3 business days, Trigger, reversibility all correct.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "45-219(c)(4) verbatim present; no revision-percentage rule anywhere in 45-219; silent correct.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "45-219 read in full — no estimate validity period; silent correct.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "45-218(f) and 45-219(a) verbatim present (the only exact-match gap was the Revisor page's space before the period after the '45-219' hyperlink); advance payment is permitted with no minimum-amount condition — 'no statutory threshold' is a statutory fact, engine mapping threshold=0 disclosed in manual_verification; 45-218 history L. 1984 only, matching effective_status.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0018.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "45-218(f)/45-219(a) verbatim present; 'advance payment of the prescribed fee' does permit requiring the whole fee, so 100% as the ceiling is entailed rather than stated — the row already discloses this as a derived reading with confidence medium and a manual_verification flag, and the resolution word 'ceiling' (city chooses the portion) is right; confirmed on that disclosed basis.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0018.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "45-218(f)/45-219(a) verbatim present; prepay-permitted as a Permission is the correct reading — nothing conditions release on payment absent agency choice.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0018.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "45-219(e)(2) and 45-218(f) verbatim present; 'structural' is right — KORA has no nonpayment clock, only the withhold-until-prepaid permission plus the reversible 3-business-day non-response withdrawal; shape correctly described.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "45-218(f) verbatim present; 45-218(d) three-business-day duty carries no payment-status condition in the text; silent correct.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0018.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "45-219(c)(4), (e)(1) verbatim present; no overrun/re-issue rule in the section; silent correct and the $200 figure correctly kept with the mitigation trigger.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "45-219 read in full — nothing on payment methods; silent correct.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "45-219(c)(1), (c)(2) verbatim present; actual-cost request-level ceiling with no dollar maximum correct; (d) appeal correctly limited to executive branch (verbatim: 'records within the executive branch').",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "45-219 read in full — no de-minimis floor for municipalities; EO 18-05/DoA/SOS analogues correctly excluded as non-municipal; silent correct.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "45-219 read in full — no minimum fee; silent correct.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "45-219(c)(1), (c)(2) verbatim present; no media figure in section; (i) no-attached-device rule accurately noted; actual_cost_standard correct.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "45-219(c)(1), (b) verbatim present; no postage figure in section; postage-as-attributable-cost reading is flagged for manual verification in the row itself; actual_cost_standard correct.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "45-219 read in full — no certified-copy fee in KORA; silent-for-municipalities correct; K.S.A. 28-115 correctly identified as county-officer law outside KORA.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "45-219(a) verbatim present and 45-254(b) opened separately — 'shall allow ... within 20 days ... may charge a reasonable fee' verbatim confirmed; soft standard recorded WITHOUT a number (value null), which is exactly right; 45-254 history ends L. 2021, ch. 82 — no 2024-2026 amendment, matching effective_status.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "45-219 read in full — no commercial-purpose surcharge or definition; silent correct; actual-cost cap reasoning sound.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "45-219 read in full — no waiver framework; permissive 'may prescribe' verbatim present; EO 18-05 correctly scoped to executive branch; silent-for-municipalities correct.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0019.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "45-218(d) verbatim present; no fee-forfeiture-on-late-response provision exists in 45-218/45-219; the row's own correction of the earlier KS-0042 mislinkage is accurate ((e)(2) is requester-side); silent correct; 45-218 history L. 1984 only.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0018.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "45-218(e) verbatim present ('unreasonable burden ... repeated requests ... intended to disrupt', 'sustained by preponderance of the evidence'); no fee aggregation rule; silent correct.",
+   "checked_link": "https://ksrevisor.gov/statutes/chapters/ch45/045_002_0018.html",
+   "corrected_row": null
+  }
+ ],
+ "notes": "All 36 rows verified against sources opened directly: K.S.A. 45-219, 45-218, 45-254 fetched from ksrevisor.gov (site current through the 2026 session; LCC docs dated 08/17/2026 on page) and Executive Order 18-05 fetched as the filed PDF from the KGI online library. Every source_language segment matched the opened text verbatim after normalizing two rendering artifacts: the Revisor pages put a space before the period following a hyperlinked cite ('K.S.A. 45-219 .'), and the EO PDF text layer renders '(100)' as '(1 00)'. Currency: 45-219 history ends 'L. 2025, ch. 89, sec. 1; July 1' (the HB 2134 amendment the rows claim — review/redaction costs, lowest-cost-staff/salary-basis/no-benefits, and subsection (e) are all present in the opened text); 45-218 history ends L. 1984; 45-254 ends L. 2021, ch. 82 — so no 2024-2026 amendment is missing from any row. Municipal scope: K.S.A. 45-217(k) opened — 'public agency' includes any political or taxing subdivision, so all_public_bodies rows bind municipalities; agency-only figures (EO 18-05, DoA/SOS schedules, (c)(5)-(7), (d)) are consistently kept out of municipal values. Two rows carry disclosed derivations rather than stated figures and were confirmed on that disclosed basis: rules.deposit.percent (100% ceiling read from 'advance payment of the prescribed fee', manual_verification flag present, confidence medium) and rules.deposit.threshold (value 'none' mapped to engine threshold=0). The AG's KORA FAQ/Citizen's Guide remained unopened here as in discovery (the raw file's gaps_manual_verification list already routes that to a human); no row depends on it as its source. Verification did not need to open the Kansas Supreme Court judicial-branch fee rules (outside municipal scope, and the one delegation row marked opened:false is not a resolution row)."
+}

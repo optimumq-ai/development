@@ -1,0 +1,259 @@
+{
+ "code": "IL",
+ "verified_at": "2026-08-19",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened 5 ILCS 140/6 on ilga.gov: 'The fee for black and white, letter or legal sized copies shall not exceed 15 cents per page' and the 50-free-pages sentence are verbatim. 'Shall not exceed' = ceiling, recorded as ceiling. Sec. 2(a) opened: 'public body' expressly includes 'counties, townships, cities, villages, incorporated towns, school districts and all other municipal corporations', so all_public_bodies covers municipalities. Source line ends 'P.A. 98-1129, eff. 12-3-14' — no 2024-2026 amendment.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Sec. 6(b) verbatim: 'If a public body provides copies in color or in a size other than letter or legal, the public body may not charge more than its actual cost for reproducing the records.' Soft actual-cost standard correctly recorded as actual_cost_standard with null value, basis ceiling. Current (P.A. 98-1129).",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same Sec. 6(b) color/nonstandard-size sentence verbatim; 'a size other than letter or legal' fairly read as oversized. actual_cost_standard, no number — correct. Current.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "Sec. 6(b) verbatim: 'Except when a fee is otherwise fixed by statute, each public body may charge fees reasonably calculated to reimburse its actual cost for reproducing and certifying public records...' plus the color/size sentence. actual_cost_standard, null value — right word for a soft standard. Cited delegated instruments also opened: 625 ILCS 5/11-416 verbatim 'fee not to exceed $5 for each copy... not to exceed $20' for crash-reconstruction reports, binding 'law enforcement agencies of local authorities' (Source: P.A. 103-706, eff. 1-1-25, matching the raw file); 625 ILCS 5/6-118(a-5) '$20' (Secretary of State only, correctly not used for a municipal figure).",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Both band sentences verbatim in Sec. 6(b): first 50 B&W letter/legal pages free (prohibition, fixed) and 15-cent ceiling thereafter. Two-band structure with mixed fixed/ceiling basis is what the statute prescribes. Current.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim: 'No fees shall be charged for the first 50 pages of black and white, letter or legal sized copies requested by a requester.' Fixed statutory prohibition — 'value' 50 is the right word (not a ceiling the city sets). Manual_verification note on per-request vs per-period unit is a fair flag and preserved. Applies to all public bodies incl. municipalities (Sec. 2(a)).",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "Sec. 6(a) verbatim with opening conditional 'If a request is not a request for a commercial purpose or a voluminous request, a public body may not charge the requester for the costs of any search for and review of the records or other personnel costs...'; 6(b) exclusion clause and 6(f) $10/hour + commercial-only sentences all verbatim. not_applicable for ordinary municipal requests is the correct resolution; commercial exception routed to the 'commercial' item. Current.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Statutory clauses verbatim in Sec. 6. PAC binding opinion 25-014 PDF opened and read in full: Dec. 3, 2025, Mattoon Police Department, $2.58/minute redaction charge held improper; finding 11 verbatim: 'Because the Department maintains the requested video footage in electronic format, section 6(a) of FOIA limits the copying fee to the actual cost of the recording medium.' not_applicable correct for non-commercial review labor.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "Both quoted Sec. 6(a) sentences verbatim (personnel-cost prohibition; paper fees inapplicable to electronic format). No programming rate exists anywhere in Sec. 6 — 6(a-5) tiers confirmed on the page as the only voluminous e-data charge ($20/$40/$100 by MB, non-PDF and PDF bands). not_applicable correct.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "All four quoted sentences verbatim in Sec. 6 (6(a) prohibition, 6(f) $10/hour, 8 free hours, commercial-only). 'Never for non-commercial / commercial only above 8 hours' matches the statute; commercial-purpose definition and news-media/non-profit exclusions confirmed at Sec. 2(c-10). Current.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "Quoted 6(b) exclusion clause and 6(f) $10/hour ceiling verbatim; no overhead/fringe multiplier appears anywhere in Sec. 6. not_applicable correct.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Quoted 6(f) hourly sentence verbatim; Sec. 6 states no billing increment or rounding rule. 'Silent' correct — no number invented.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim: 'No fees shall be charged for the first 8 hours spent by personnel in searching for or retrieving a requested record.' + 'The provisions of this subsection (f) apply only to commercial requests.' Fixed statutory value 8, commercial-only scope correctly stated in the unit; the note that redaction examination is not literally named in the free-hours clause is accurate against the text.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Full-Act page opened (lists Secs. 1-7 with text); quoted 8-free-hours sentence present in Sec. 6(f). No per-requester periodic free-time allowance exists in the Act; recurrent-requester regime (2(g) thresholds 50/12mo, 15/30d, 7/7d confirmed at Sec. 2) affects timing/prepayment, not free hours. 'Silent' correct.",
+   "checked_link": "https://www.ilga.gov/Legislation/ILCS/Articles?ActID=85&ChapterID=2",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "Sec. 3.1(a) opened: quoted response-options passage verbatim, no differences; 21-working-day deadline confirmed. Sec. 3.2(a) confirmed (time + fee estimate, 21 business days; Source P.A. 98-756, eff. 7-16-14). Sec. 3.6(c) confirmed verbatim (Source P.A. 98-1129). 'Structural' is right — the estimate duty is class-gated, no dollar/hour threshold exists.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K3.1.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Full-Act page opened; quoted 3.6(c) language confirmed on the Sec. 3.6 page. No accept-the-estimate-within-N-days rule exists; the 10-business-day window confirmed at Sec. 3.6(b) is to amend the request after the (a) notice, as the row's note says. 'Silent' correct.",
+   "checked_link": "https://www.ilga.gov/Legislation/ILCS/Articles?ActID=85&ChapterID=2",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Quoted 6(f) accounting sentence confirmed verbatim on the Sec. 6 page: 'If a public body imposes a fee pursuant to this subsection (f), it must provide the requester with an accounting of all fees, costs, and personnel hours...'. No revised-estimate trigger or percentage exists. 'Silent' correct.",
+   "checked_link": "https://www.ilga.gov/Legislation/ILCS/Articles?ActID=85&ChapterID=2",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Quoted 3.1(a) passage verbatim at the Sec. 3.1 page; no estimate validity/expiry period anywhere in the Act. 'Silent' correct.",
+   "checked_link": "https://www.ilga.gov/Legislation/ILCS/Articles?ActID=85&ChapterID=2",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "Sec. 3.1(a) verbatim ('may require the person to pay in full before copying'); 3.2(a) and 3.6(c) confirmed. 'Structural' correct: class gate (commercial/recurrent/voluminous) with no dollar threshold; silence for ordinary requests is honestly flagged in manual_verification. All sections unamended 2024-2026 (3.1 Source P.A. 96-542; 3.2 P.A. 98-756; 3.6 P.A. 98-1129).",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K3.1.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "Source language verbatim at Sec. 3.1(a). Encoding 'may require ... pay in full before copying' as a 100% ceiling on a pre-copy deposit is a faithful reading of a permission ('may require') with an upper bound ('in full'); the row itself flags the scope judgment in manual_verification with medium confidence, so it is not a ceiling-as-value or soft-standard-as-number error. Commercial/recurrent/voluminous-only scope correct.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K3.1.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "Sec. 3.6 opened: subsection (c) response options and subsection (e) debt sentences verbatim, including 'even if the requester fails to accept or collect records'. Gate wording 'pay in full before copying' matches the statute exactly. Source P.A. 98-1129 — current.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K3.6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "Sec. 3.6(e) verbatim (debt due and owing; chargeable even if records not collected); 3.6(a)(viii) notice element confirmed on the page. No withdrawal-for-nonpayment or prior-debt rule appears. 'Structural' correct.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K3.6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "Quoted 3.1(a) language verbatim; no payment-linked tolling exists. Effective_status claim checked: Sec. 3 Source line now 'P.A. 104-438, eff. 1-1-26' and the new subsection (j) is person-verification tolling (5 business days / 30-day denial), unrelated to payment — exactly as the row states. 'Silent' correct.",
+   "checked_link": "https://www.ilga.gov/Legislation/ILCS/Articles?ActID=85&ChapterID=2",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Quoted 6(f) accounting sentence verbatim on the Sec. 6 page; it is a post-hoc itemization, and no overrun/re-estimate/re-issue rule exists in the Act. 'Silent' correct.",
+   "checked_link": "https://www.ilga.gov/Legislation/ILCS/Articles?ActID=85&ChapterID=2",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "50 ILCS 345/15 opened: 15(a) verbatim ('authorized, but not required, to accept payment by credit card'); 15(e) no-retention-in-excess clause confirmed (Source P.A. 102-558, eff. 8-20-21). 50 ILCS 345/25 opened: 25(a) convenience-fee sentence verbatim, category caps in (b) match the raw delegation log (Source P.A. 92-114). 50 ILCS 345/20 opened: governing-body election confirmed (Source P.A. 96-1248). applies_to 'municipalities' correct — units of local government, not State agencies. FOIA itself silent, as stated.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/005003450K15.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "All three quoted sentences verbatim in Sec. 6: 6(b) reasonably-calculated actual-cost standard, 6(a) recording-medium sentence, 6(d) 'imposition of a fee not consistent with subsections (6)(a) and (b)... constitutes a denial'. actual_cost_standard with no dollar maximum is the correct resolution.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Quoted 50-free-pages sentence verbatim; no dollar de-minimis exists in Sec. 6. 'Silent' correct — the free-page band is correctly kept on rules.freePages, not converted into a dollar figure.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Quoted 6(b) actual-cost sentence verbatim; no minimum fee is authorized anywhere in Sec. 6. 'Silent' correct.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "Sec. 6(a) verbatim: 'A public body may charge the requester for the actual cost of purchasing the recording medium, whether disc, diskette, tape, or other medium.' actual_cost_standard correct; PAC 25-014 (opened, read in full) supports the no-add-on note.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Both quoted Sec. 6 sentences verbatim (paper fees inapplicable to electronic format; off-site retrieval/transport actual cost, commercial-only per the 6(f) closing sentence). Postage genuinely unaddressed — 'silent' with the manual flag is the honest resolution.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim: 'The cost for certifying a record shall not exceed $1.' Ceiling word correct; binds municipalities via Sec. 2(a). Current (P.A. 98-1129).",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "PAC binding opinion 25-014 PDF opened and read in full (11 pages): issued Dec. 3, 2025, Mattoon Police Department body/dash-cam footage; finding 11 verbatim as quoted in the row; $2.58/minute redaction fee ($696.60) held improper; reasoning sentence ('If the General Assembly had intended...') verbatim on p.8; cites Sage v. Humm 2012 IL App (5th) 110580 ¶¶18-19 and Sage v. Suhr 2014 IL App (2d) 130708 ¶¶14-15,17 (fn. 24). Sec. 6(a) medium sentence quoted verbatim in the opinion. actual_cost_standard with no per-minute figure is correct.",
+   "checked_link": "https://www.illinoisattorneygeneral.gov/Page-Attachments/FOIAPAC/2025-Binding-PAC-Opinions/Binding%20Opinion%2025-014.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "All five quoted 6(f) sentences verbatim ($10/hour ceiling — 'may charge up to' correctly recorded as ceiling; 8 free hours fixed; off-site actual cost; accounting duty; commercial-only). Sec. 2(c-10) news-media/non-profit exclusion confirmed; Sec. 3.1 21-working-day window confirmed. Current.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "Sec. 6(c) verbatim in full: 'Documents shall be furnished without charge or at a reduced charge, as determined by the public body...', the public-interest definition, the news-media commercial-benefit carve-out, and 'In setting the amount of the waiver or reduction...'. Mandatory-trigger/discretionary-amount reading tracks the statutory text; the FAQ-vs-statute tension and the 6(d)-names-only-(a)/(b) point are accurately flagged for manual review. 'Structural' (no number) correct.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K6.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "Sec. 3 opened: both forfeiture sentences (3(d) and 3(f)) verbatim; subsection (i) confirmed removing commercial/recurrent/voluminous requests from the Sec. 3 periods, as the note states. Source line 'P.A. 104-438, eff. 1-1-26' matches the row's effective_status and the quoted clauses are unchanged in the current text. Fixed boolean true correct.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K3.htm",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Sec. 3(g) repeated-requests sentence verbatim at the Sec. 3 page. Sec. 2 opened: 2(h) voluminous definition verbatim (>5 requests/>5 categories/20 business days; >500 pages with single-record exception); 2(g) recurrent thresholds 50/12-months, 15/30-days, 7/7-days confirmed; news-media/non-profit exclusions from both definitions confirmed. 'Structural' with no fee carry-forward correct.",
+   "checked_link": "https://www.ilga.gov/documents/legislation/ilcs/documents/000501400K3.htm",
+   "corrected_row": null
+  }
+ ],
+ "notes": "VERIFY pass 2026-08-19. Sources opened: 5 ILCS 140/6, /3, /3.1, /3.2, /3.6, /2, the full-Act listing page, 50 ILCS 345/15, 345/20, 345/25, 625 ILCS 5/11-416, 625 ILCS 5/6-118, and PAC binding opinion 25-014 PDF (read in full — the small-model text extraction was garbled, so the 11-page PDF was read page-by-page). Currency verified from the ILGA Source lines: Sec. 6 last amended P.A. 98-1129 eff. 12-3-14 (no 2024-2026 amendment); Sec. 3 and Sec. 2 amended by P.A. 104-438 eff. 1-1-26 with all fee-relevant quoted clauses unchanged; 625 ILCS 5/11-416 P.A. 103-706 eff. 1-1-25 and 6-118 P.A. 104-435 eff. 11-21-25 both match the raw file's effective_status claims. Municipal scope verified directly at Sec. 2(a) ('cities, villages, incorporated towns... and all other municipal corporations'). All 36 rows CONFIRMED — an unusual clean sweep, but each check genuinely passed; the discover pass's verbatim quotes were exact against the live pages. Two rows rest on flagged scope judgments the verify pass endorses as correctly labeled rather than as errors: rules.deposit.percent (statutory 'pay in full before copying' encoded as a 100% pre-copy ceiling, medium confidence, manual_verification present) and rules.freePages (per-request unit convention, manual_verification present). Not re-verified beyond row needs: PAC 25-015 (raw file itself discloses it was read only via the PAC Update summary), the AG FAQ/webinar guidance documents (cited in notes only, never as the operative source of a value), and Sec. 9.5(b) commercial-review limitation (notes-only claim)."
+}

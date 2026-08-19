@@ -1,0 +1,259 @@
+{
+ "code": "NE",
+ "verified_at": "2026-08-19",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "§ 84-712(3)(b),(3)(b)(i) verbatim on the codified page; no per-page figure in law; 25-cent AG safe harbor correctly kept as guidance in notes (verbatim on AG Outline Rev. 7/2024), not as a value; 'actual added cost' ceiling binds every custodian incl. cities (§ 84-712.01(1)); source line ends Laws 2024, LB43, § 8 — no later amendment.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Both quoted clauses ((3)(a) any-form; (3)(b) actual-added-cost ceiling) verbatim; statute indeed has no color-specific rate; actual_cost_standard with null value is the right resolution; municipal scope confirmed via § 84-712.01(1).",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same clauses verbatim; no oversized/nonstandard-size provision anywhere in § 84-712; actual_cost_standard with null value correct; municipal scope confirmed.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "(3)(a) and (3)(b)(i)-(iii) verbatim incl. computer run time / analysis-and-programming components; no specialty schedule in law; null value correct; § 84-712(3)(f) no-new-format clause present as cited in notes.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "No graduated per-page bands anywhere in the opened § 84-712 text; quoted general ceiling verbatim; 'silent' is the right word.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "'No special service charge or fee shall be charged for copies of blank forms or pages that have all meaningful information redacted' verbatim in (3)(c); it is categorical, not a page count — 'silent' for a free-page ALLOWANCE is correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "(3)(c) and (3)(d) verbatim; basis is existing salary/pay obligation with no dollar rate; resident 8-hour allowance and nonresident hour-zero regime both present; actual_cost_standard with null value correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same clauses verbatim; the resident attorney-review prohibition and the nonresident proportional attorney-review permission are both exactly as quoted; the two-regime split in notes matches the statute.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "(3)(b)(ii)-(iii) verbatim; analysis-and-programming is an actual-added-cost component with no rate; the flagged ambiguity (programming vs the (3)(c) 8-hour list) is real — (3)(c) enumerates only searching, identifying, physically redacting, copying.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "All three clauses ((3)(c), (3)(d), (5)) verbatim; 'first eight cumulative hours' exact; resident/news-media definition exact; value 8 with prohibition-on-charging-below correct; nonresident hour-zero correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "No overhead/fringe multiplier anywhere in the opened section; labor basis limited to existing salary or pay obligation / calculated labor cost; 'silent' correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "No billing increment or rounding rule in the opened section; 'silent' correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "(3)(c) and (5) verbatim; eight cumulative hours fixed by statute; news media resident regardless of domicile confirmed; value 8 correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "AG Outline (Rev. 7/2024, opened) contains the quoted passage verbatim incl. 'responsive to a particular records request'; statute has no per-requestor-per-period counter; 'silent' correct; effective_status correctly labels the quote as guidance, not law.",
+   "checked_link": "https://ago.nebraska.gov/public-records",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "§ 84-712(4) verbatim: estimate of expected cost is a mandatory component of every response (4 business days) with no dollar threshold; 'structural' with value 0 is a fair encoding.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Ten-business-day review sentence and 'the custodian shall not proceed' consequence verbatim in (4); business-day definition present in (4) as cited; value 10 correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "No revised-estimate or variance rule in the opened section; 'silent' correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "No validity/expiry period for the estimate in the opened section; the 10-day window is the requester's, as the row says; 'silent' correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "(3)(g) verbatim: 'estimated ... to cost more than fifty dollars, the custodian may require ... a deposit prior to fulfilling'; $50 is a fixed statutory trigger and the row records the deposit as Permission ('may'), not a mandate — resolution word correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "No deposit-amount cap or percentage in the opened section; 'silent' correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "(3)(g) verbatim; the only statutory prepayment gate is the optional deposit at estimates over $50; structural enum matches.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "(4) verbatim; the statutory lapse attaches to nonresponse to the estimate (10 business days), not nonpayment, exactly as the row's notes state; value 10 correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "No clock/grace/lapse rule for an unpaid deposit in the opened section; 'silent' correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "No overrun/re-issue/collection-above-estimate rule in the opened section; 'silent' correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "§ 13-609(1)(a) and (6) verbatim on the codified page; 'political subdivision official' covers municipalities; surcharge cap = processor fee exact; source line Laws 2024, LB1074, § 60 matches claimed currency.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=13-609",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "(3)(b) ceiling verbatim; no dollar maximum; actual_cost_standard as request-level ceiling correct; AG fee-review path verified verbatim at § 84-712.03(1)(b).",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712 ; https://nebraskalegislature.gov/laws/statutes.php?statute=84-712.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "No amount-based no-charge floor; (3)(h) waiver is discretionary and public-interest based, verbatim; 'silent' correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "No minimum fee in the opened sections; § 25-1280's $1.00 is a certification charge as the row says; 'silent' correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "(3)(a), (3)(b)(i)-(iii) verbatim; no media-specific figure; § 84-712.01(2) modem fee opened and confirmed expressly county-only ('a custodian of a public record of a county'), so excluding it from the municipal value is right; (3)(e) portal fees confirmed state-agencies-only.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712 ; https://nebraskalegislature.gov/laws/statutes.php?statute=84-712.01",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "No postage/mailing/delivery provision in the opened §§ 84-712 to 84-712.03; county-only modem clause correctly excluded (verified in § 84-712.01(2)); 'silent' with the postage manual-verification flag correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712 ; https://nebraskalegislature.gov/laws/statutes.php?statute=84-712.01",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "§ 25-1280 verbatim on the codified page: $1.00 certificate fee, 30 cents per hundred words typewritten, mechanical copy at cost; binds 'every state, county or political subdivision officer'; history line ends Laws 1977, LB 126, § 1 — no later amendment; VA-claimant free-copy exception verified verbatim at § 84-712.02.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=25-1280",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "(3)(a) any-form clause ('discs, tapes') and (3)(b) ceiling verbatim; no AV-specific rate; actual_cost_standard with null value correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "(3)(h) verbatim; 'commercial interest' appears only inside the public-interest waiver definition; no commercial surcharge or purpose-based schedule; 'silent' correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "All three quoted clauses verified verbatim in their own sections: § 84-712(3)(h) (discretionary 'may waive or reduce' + public-interest definition), § 84-712.02 (mandatory free certified copies for VA claimants), § 84-712.03(1)(b) (AG fee review, 15 calendar days); Discretion is the right word.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712 ; https://nebraskalegislature.gov/laws/statutes.php?statute=84-712.02 ; https://nebraskalegislature.gov/laws/statutes.php?statute=84-712.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "§ 84-712(4) verbatim; § 84-712.03 opened — remedies are mandamus/AG petition/suit, none forfeits the copy fee; 'silent' correct.",
+   "checked_link": "https://nebraskalegislature.gov/laws/statutes.php?statute=84-712 ; https://nebraskalegislature.gov/laws/statutes.php?statute=84-712.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "AG Outline passage verbatim (opened); statute ties the eight hours to 'a particular records request' per the Outline; no cross-request aggregation rule; 'silent' correct.",
+   "checked_link": "https://ago.nebraska.gov/public-records",
+   "corrected_row": null
+  }
+ ],
+ "notes": "All 36 rows verified against sources opened 2026-08-19: nebraskalegislature.gov codified pages for §§ 84-712, 84-712.01, 84-712.02, 84-712.03, 25-1280, 13-609 (full text downloaded and clause-matched programmatically, whitespace/curly-quote normalized) and the AG 'Outline of Nebraska Public Records Statutes' at ago.nebraska.gov/public-records (page carries 'Rev. 7/2024'; the two Outline-sourced quotes and the NE-9001 25-cent safe-harbor sentence are verbatim on it). Source lines confirm currency: 84-712 ends 'Laws 2024, LB43, § 8'; 84-712.03 'Laws 2024, LB43, § 10'; 13-609 'Laws 2024, LB1074, § 60'; 25-1280 'Laws 1977, LB 126, § 1'. Municipal scope confirmed: fee clauses bind 'the public body, public entity, or public official which is the custodian' and § 84-712.01(1) includes any 'county, city, village, political subdivision'; the agency-only regimes (§ 84-712(3)(e) portal fees; § 84-712.01(2) county modem fee) are correctly excluded from municipal resolutions. Residual caveats already flagged by discover and not verifiable here: Op. Att'y Gen. No. 01029 (2001) not openable (AG archive starts 2003) — affects only guidance rule NE-9001's provenance, no resolution row; the claimed 2026 LB 525/LB 1096 amendments to § 84-712.05 (exemptions) were not independently opened — immaterial to fee rows, and the codified fee sections' source lines show no post-2024 change."
+}

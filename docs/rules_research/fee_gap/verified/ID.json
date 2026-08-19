@@ -1,0 +1,307 @@
+{
+ "code": "ID",
+ "verified_at": "2026-08-19",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; verbatim clause(s) present in codified text; value/unit/basis and resolution word match the statutory language; § 74-101(8),(11) confirm 'public agency' includes cities so the municipal scope holds; history line ends 'am. 2025, ch. 298' — no 2024 or 2026 amendment (page maintained current to July 1, 2026).",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; verbatim clause(s) present in codified text; value/unit/basis and resolution word match the statutory language; § 74-101(8),(11) confirm 'public agency' includes cities so the municipal scope holds; history line ends 'am. 2025, ch. 298' — no 2024 or 2026 amendment (page maintained current to July 1, 2026).",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; verbatim clause(s) present in codified text; value/unit/basis and resolution word match the statutory language; § 74-101(8),(11) confirm 'public agency' includes cities so the municipal scope holds; history line ends 'am. 2025, ch. 298' — no 2024 or 2026 amendment (page maintained current to July 1, 2026).",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; verbatim clause(s) present in codified text; value/unit/basis and resolution word match the statutory language; § 74-101(8),(11) confirm 'public agency' includes cities so the municipal scope holds; history line ends 'am. 2025, ch. 298' — no 2024 or 2026 amendment (page maintained current to July 1, 2026).",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; no provision on this item anywhere in § 74-102 (full-text keyword scan of the codified section found nothing contradicting the recorded absence); history ends 2025 ch. 298, no 2026 amendment.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; verbatim clause(s) present in codified text; value/unit/basis and resolution word match the statutory language; § 74-101(8),(11) confirm 'public agency' includes cities so the municipal scope holds; history line ends 'am. 2025, ch. 298' — no 2024 or 2026 amendment (page maintained current to July 1, 2026).",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; verbatim clause(s) present in codified text; value/unit/basis and resolution word match the statutory language; § 74-101(8),(11) confirm 'public agency' includes cities so the municipal scope holds; history line ends 'am. 2025, ch. 298' — no 2024 or 2026 amendment (page maintained current to July 1, 2026).",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; verbatim clause(s) present in codified text; value/unit/basis and resolution word match the statutory language; § 74-101(8),(11) confirm 'public agency' includes cities so the municipal scope holds; history line ends 'am. 2025, ch. 298' — no 2024 or 2026 amendment (page maintained current to July 1, 2026).",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; verbatim clause(s) present in codified text; value/unit/basis and resolution word match the statutory language; § 74-101(8),(11) confirm 'public agency' includes cities so the municipal scope holds; history line ends 'am. 2025, ch. 298' — no 2024 or 2026 amendment (page maintained current to July 1, 2026).",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; verbatim clause(s) present in codified text; value/unit/basis and resolution word match the statutory language; § 74-101(8),(11) confirm 'public agency' includes cities so the municipal scope holds; history line ends 'am. 2025, ch. 298' — no 2024 or 2026 amendment (page maintained current to July 1, 2026).",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; the quoted adjacent clause is verbatim present and no provision supplies the missing figure (keyword scan of the full section confirms the absence); no 2024–2026 amendment beyond 2025 ch. 298.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; the quoted adjacent clause is verbatim present and no provision supplies the missing figure (keyword scan of the full section confirms the absence); no 2024–2026 amendment beyond 2025 ch. 298.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; verbatim clause(s) present in codified text; value/unit/basis and resolution word match the statutory language; § 74-101(8),(11) confirm 'public agency' includes cities so the municipal scope holds; history line ends 'am. 2025, ch. 298' — no 2024 or 2026 amendment (page maintained current to July 1, 2026).",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; the quoted adjacent clause is verbatim present and no provision supplies the missing figure (keyword scan of the full section confirms the absence); no 2024–2026 amendment beyond 2025 ch. 298.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; verbatim clause(s) present in codified text; value/unit/basis and resolution word match the statutory language; § 74-101(8),(11) confirm 'public agency' includes cities so the municipal scope holds; history line ends 'am. 2025, ch. 298' — no 2024 or 2026 amendment (page maintained current to July 1, 2026).",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; no provision on this item anywhere in § 74-102 (full-text keyword scan of the codified section found nothing contradicting the recorded absence); history ends 2025 ch. 298, no 2026 amendment.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; the quoted adjacent clause is verbatim present and no provision supplies the missing figure (keyword scan of the full section confirms the absence); no 2024–2026 amendment beyond 2025 ch. 298.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; no provision on this item anywhere in § 74-102 (full-text keyword scan of the codified section found nothing contradicting the recorded absence); history ends 2025 ch. 298, no 2026 amendment.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; verbatim clause(s) present in codified text; value/unit/basis and resolution word match the statutory language; § 74-101(8),(11) confirm 'public agency' includes cities so the municipal scope holds; history line ends 'am. 2025, ch. 298' — no 2024 or 2026 amendment (page maintained current to July 1, 2026).",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CORRECTED",
+   "why": "Both sentences are verbatim in § 74-102(12), but the row splices them as one contiguous quote, silently omitting the intervening sentence ('Any money received by the public agency shall be credited...'). Corrected source_language uses the file's ' | ' non-contiguity separator. Value, basis, resolution word, municipal scope and currency (last am. 2025 ch. 298) all check out.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": {
+    "state": "ID",
+    "item_id": "rules.deposit.percent",
+    "resolution": "silent",
+    "value": null,
+    "unit": "% of estimate",
+    "basis": null,
+    "rule_type": null,
+    "applies_to": "all_public_bodies",
+    "resolved_by_rule_ids": [
+     "ID-0024"
+    ],
+    "new_rule_ids": [
+     "ID-9006"
+    ],
+    "source_authority": "Idaho Code § 74-102(12)",
+    "source_type": "Statute",
+    "official_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+    "source_language": "The custodian may require advance payment of fees authorized by this section. | Any portion of an advance payment in excess of the actual costs of labor and copying incurred by the agency in responding to the request shall be returned to the requester.",
+    "is_paraphrase": false,
+    "effective_status": "Current (am. 2025, ch. 298 [H0253], eff. July 1, 2025; no 2026 amendment — legislature.idaho.gov codified text updated July 1, 2026 shows last amendment 2025 ch. 298)",
+    "confidence": "medium",
+    "manual_verification": null,
+    "notes": "No percentage cap; the statute permits advance payment of 'fees authorized' (i.e. up to the full anticipated fee) with mandatory refund of any excess over actual costs. Searched: Idaho Code Title 74 ch. 1 (§§ 74-101 to 74-127, opened §§ 74-101, -102, -103, -113, -115, -120 on legislature.idaho.gov, codified text updated July 1, 2026); Title 50 ch. 9 (§§ 50-907, 50-908) and Title 63 (§§ 63-1311, 63-1311A); AG Idaho Public Records Law Manual (July 2026 edition, Q&A 13-17 and the AG legal-guideline index at p. 69); 2025 session (H0253 = ch. 298) and 2026 session bill list (no fee bill enacted; only H0894 open-meetings recording became law); IDAPA search for a general public-records fee rule binding local agencies (none; only agency-specific schedules such as IDAPA 16.02.08.251, which bind that agency only)."
+   }
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CORRECTED",
+   "why": "Both sentences are verbatim in § 74-102(12), but the row splices them as one contiguous quote, silently omitting the intervening sentence ('Any money received by the public agency shall be credited...'). Corrected source_language uses the file's ' | ' non-contiguity separator. Value, basis, resolution word, municipal scope and currency (last am. 2025 ch. 298) all check out.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": {
+    "state": "ID",
+    "item_id": "payment.productionGate",
+    "resolution": "structural",
+    "value": "advance payment may be required before production (custodian discretion); any excess over actual costs refunded",
+    "unit": "enum",
+    "basis": null,
+    "rule_type": "Permission",
+    "applies_to": "all_public_bodies",
+    "resolved_by_rule_ids": [
+     "ID-0024"
+    ],
+    "new_rule_ids": [
+     "ID-9006"
+    ],
+    "source_authority": "Idaho Code § 74-102(12)",
+    "source_type": "Statute",
+    "official_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+    "source_language": "The custodian may require advance payment of fees authorized by this section. | Any portion of an advance payment in excess of the actual costs of labor and copying incurred by the agency in responding to the request shall be returned to the requester.",
+    "is_paraphrase": false,
+    "effective_status": "Current (am. 2025, ch. 298 [H0253], eff. July 1, 2025; no 2026 amendment — legislature.idaho.gov codified text updated July 1, 2026 shows last amendment 2025 ch. 298)",
+    "confidence": "high",
+    "manual_verification": null,
+    "notes": "Permission, not requirement: the city chooses whether to gate production on payment. Statute does not distinguish 'pay before copies' from 'pay before release'."
+   }
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; no provision on this item anywhere in § 74-102 (full-text keyword scan of the codified section found nothing contradicting the recorded absence); history ends 2025 ch. 298, no 2026 amendment.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-103; both quoted clauses verbatim present; history shows am. 2024 ch. 107 and 2025 ch. 298 as recorded, no 2026 amendment; the recorded silence (no tolling / no fee forfeiture) is consistent with the section text.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-103/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; the quoted adjacent clause is verbatim present and no provision supplies the missing figure (keyword scan of the full section confirms the absence); no 2024–2026 amendment beyond 2025 ch. 298.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; no provision on this item anywhere in § 74-102 (full-text keyword scan of the codified section found nothing contradicting the recorded absence); history ends 2025 ch. 298, no 2026 amendment.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; verbatim clause(s) present in codified text; value/unit/basis and resolution word match the statutory language; § 74-101(8),(11) confirm 'public agency' includes cities so the municipal scope holds; history line ends 'am. 2025, ch. 298' — no 2024 or 2026 amendment (page maintained current to July 1, 2026).",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; the quoted adjacent clause is verbatim present and no provision supplies the missing figure (keyword scan of the full section confirms the absence); no 2024–2026 amendment beyond 2025 ch. 298.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; no provision on this item anywhere in § 74-102 (full-text keyword scan of the codified section found nothing contradicting the recorded absence); history ends 2025 ch. 298, no 2026 amendment.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; verbatim clause(s) present in codified text; value/unit/basis and resolution word match the statutory language; § 74-101(8),(11) confirm 'public agency' includes cities so the municipal scope holds; history line ends 'am. 2025, ch. 298' — no 2024 or 2026 amendment (page maintained current to July 1, 2026).",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Opened the AG manual PDF (July 2026 upload path); Q14 answer contains the quoted sentence verbatim; row honestly records it as Official Guidance with soft-standard basis and a manual_verification flag; statute (§ 74-102(4)) permits e-mail delivery as noted.",
+   "checked_link": "https://www.ag.idaho.gov/content/uploads/2026/07/PublicRecordsLaw.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; the quoted adjacent clause is verbatim present and no provision supplies the missing figure (keyword scan of the full section confirms the absence); no 2024–2026 amendment beyond 2025 ch. 298.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; no provision on this item anywhere in § 74-102 (full-text keyword scan of the codified section found nothing contradicting the recorded absence); history ends 2025 ch. 298, no 2026 amendment.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; the quoted adjacent clause is verbatim present and no provision supplies the missing figure (keyword scan of the full section confirms the absence); no 2024–2026 amendment beyond 2025 ch. 298.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; verbatim clause(s) present in codified text; value/unit/basis and resolution word match the statutory language; § 74-101(8),(11) confirm 'public agency' includes cities so the municipal scope holds; history line ends 'am. 2025, ch. 298' — no 2024 or 2026 amendment (page maintained current to July 1, 2026).",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-103; both quoted clauses verbatim present; history shows am. 2024 ch. 107 and 2025 ch. 298 as recorded, no 2026 amendment; the recorded silence (no tolling / no fee forfeiture) is consistent with the section text.",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-103/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Opened § 74-102; verbatim clause(s) present in codified text; value/unit/basis and resolution word match the statutory language; § 74-101(8),(11) confirm 'public agency' includes cities so the municipal scope holds; history line ends 'am. 2025, ch. 298' — no 2024 or 2026 amendment (page maintained current to July 1, 2026).",
+   "checked_link": "https://legislature.idaho.gov/statutesrules/idstat/Title74/T74CH1/SECT74-102/",
+   "corrected_row": null
+  }
+ ],
+ "notes": "Verified against the codified pages on legislature.idaho.gov (§§ 74-101, 74-102, 74-103; each history line ends at 2025 ch. 298 [H0253], confirming the 2025 resident/nonresident fork and the absence of any 2026 amendment — the site is maintained current to July 1, 2026) and the AG Idaho Public Records Law Manual PDF at the July-2026 upload path. Full-text keyword scans of § 74-102 (estimate/deposit/percent/minimum/certif/audio/video/commercial/increment/overhead/tier) found nothing contradicting any 'silent' row. § 74-101 definitions confirm 'local agency' expressly includes a city, so applies_to=all_public_bodies is right for every row — Idaho has no separate agency-only schedule. The AG-manual p. 69 index summary quoted in ID-9012 is verbatim in the PDF (the underlying 1993 guideline itself remains unopened, as the discover output disclosed). The two CORRECTED rows are a quote-contiguity fix only (add the ' | ' separator); no value, basis, resolution word or scope changed. labor.search.rate note: § 74-102(10)(e) 'shall be charged at the per hour pay rate of the lowest paid...' is a rate formula; recording it as a ceiling is the conservative and conventional reading and was accepted. rules.deposit.threshold 'defers_to_city' vs 'structural' is a vocabulary judgment call already flagged by discover; accepted as recorded."
+}

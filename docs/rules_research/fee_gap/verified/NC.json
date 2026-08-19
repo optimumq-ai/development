@@ -1,0 +1,284 @@
+{
+ "code": "NC",
+ "verified_at": "2026-08-19",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6.2(b) actual-cost sentence and GAAP 'actual cost' definition verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); history line '(1995, c. 388, s. 3; 2004-129, s. 38.)' confirms no 2024–2026 amendment; ceiling (shall-not-exceed) not a value — resolution word and basis correct; § 132-1(a) 'any county, unit, special district or other political subdivision' confirms all_public_bodies covers municipalities.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Both clauses (actual-cost ceiling; 'may assess different fees for different media as prescribed by law') verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); no color figure exists in the section — ceiling/standard correct; municipal scope per § 132-1(a).",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same two § 132-6.2 clauses verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); no oversized figure in the section; ceiling correct; municipal scope per § 132-1(a).",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6.2(b) special-service-charge sentence and § 132-6.2(e) voluntary create/compile negotiated-charge sentence both verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); soft-standard basis correct ('reasonable', 'actual cost incurred') — no number recorded; 'may charge' recorded as Permission, not a value.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6.2(b) quote verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); opened §§ 132-1, 132-6, 132-6.1, 132-6.2, 132-10 — no graduated bands anywhere; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-1(b) quote incl. the 'minimal cost' definition sentence verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); no free-page allowance in opened sections; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-1.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6.2(b) special-service-charge sentence verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); AG Guide 'Charging Fees' block (actual-cost definition, labor generally not chargeable, special service fee, mailing, CIO mediation) verbatim in NCDOJ 2019 Open Government Guide PDF (pdftotext, fetched 2026-08-19); soft-standard, no number — resolution word correct; guide is flagged as guidance-not-law in the row.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html ; https://ncdoj.gov/wp-content/uploads/2020/01/2019-Open-Government-Guide-2.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6(c) 'the public agency shall bear the cost of such separation' verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30) (§ 132-6 history ends 2023-134 s. 11.11(c) — no 2024–2026 amendment); AG sentence 'cannot be charged to recover fees for time spent examining or removing confidential information' verbatim in NCDOJ 2019 Open Government Guide PDF (pdftotext, fetched 2026-08-19); not_applicable correct — review labor is categorically non-chargeable.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.html ; https://ncdoj.gov/wp-content/uploads/2020/01/2019-Open-Government-Guide-2.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6.2(b) and (e) clauses verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); soft-standard, no number; Permission word correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "All three quoted clauses (§ 132-6.2(b) 'extensive' trigger; § 132-6(c) separation cost; AG 'under most circumstances ... labor costs') verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30) / verbatim in NCDOJ 2019 Open Government Guide PDF (pdftotext, fetched 2026-08-19); structural gate correct — 'extensive' left undefined, not converted to a number; manual_verification flag appropriate.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html ; https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.html ; https://ncdoj.gov/wp-content/uploads/2020/01/2019-Open-Government-Guide-2.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6.2(b) quote verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); no overhead/fringe percentage in any opened section; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6.2(b) quote verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); no increment/rounding rule in opened sections; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6.2(b) quote verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); no free-hours allowance in opened sections; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Cited source (§ 132-6.2) opened — no per-requestor periodic free-time allowance there or in §§ 132-1, 132-6, 132-6.1, 132-10; absence claim (no source_language, is_paraphrase) consistent; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "AG Guide p. 10 best-practice item (d) verbatim in NCDOJ 2019 Open Government Guide PDF (pdftotext, fetched 2026-08-19), word-for-word; correctly recorded as silent with advisory 'should'-level guidance only — not converted to a threshold; soft standard not given a number.",
+   "checked_link": "https://ncdoj.gov/wp-content/uploads/2020/01/2019-Open-Government-Guide-2.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Cited source opened; no requester-response window anywhere in opened ch. 132 sections; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Cited source opened; no revision/overrun percentage in opened sections; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Cited source opened; no estimate validity period in opened sections; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6(a) 'upon payment of any fees as may be prescribed by law' verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); no deposit/prepayment threshold in opened sections; silent correct — the pay-for-copies gate is recorded separately under payment.productionGate.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "Cited source opened; no deposit mechanism at all in opened sections; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6(a) sentence verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); AG Guide inspection Q&A ('Government agencies may not charge fees for inspecting public records.') verbatim in NCDOJ 2019 Open Government Guide PDF (pdftotext, fetched 2026-08-19); structural reading ('upon payment' permits a pay-before-copies gate) is flagged as a scope judgment in manual_verification — appropriately hedged, no invented value.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.html ; https://ncdoj.gov/wp-content/uploads/2020/01/2019-Open-Government-Guide-2.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6(a) quote verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); no withdrawal/prior-debt rule in opened sections; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6(a) quote verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); no numeric clock and no deposit mechanism in opened sections; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Cited source opened; no overrun/re-issue rule in opened sections; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "§ 159-32.1 all three sentences verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30), word-for-word; history '(1999-434, s. 5.)' confirms unamended; applies_to municipalities correct (Local Government Finance Act, units of local government); Permission word correct — electronic payment is optional.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_159/GS_159-32.1.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6.2(b) sentences and § 132-1(b) policy incl. 'minimal cost' definition verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); CIO-mediation sentence also verbatim in § 132-6.2(b); ceiling standard, no dollar maximum — resolution word correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-1(b) quote verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); no de-minimis threshold in opened sections; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-1.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6.2(b) quote verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); no minimum fee in opened sections; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6.2(a) media sentence and (b) ceiling/special-service text verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); the empty 'as prescribed by law' delegation is logged in delegations_followed and flagged for manual verification; actual_cost_standard (not delegated_unresolved) is a defensible call given the delegation is empty for municipalities and the ceiling still binds — flagged, not silently asserted.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "AG Guide sentence 'Agencies also may charge to recover the costs of mailing copies.' verbatim in NCDOJ 2019 Open Government Guide PDF (pdftotext, fetched 2026-08-19), word-for-word; row correctly attributes it to guidance, notes the statute is silent on postage, and flags for city counsel; soft-standard, no number.",
+   "checked_link": "https://ncdoj.gov/wp-content/uploads/2020/01/2019-Open-Government-Guide-2.pdf ; https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6.2(b) certified/uncertified sentences verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30), word-for-word; delegated_unresolved correct — searched delegation logged; office-specific certified-copy statutes (161-10, 7A-308, 130A-93.1) do not bind city clerks. Nit: the guide's 'special fee for certified copies' sentence sits on the p. 9 text block, not p. 10 — immaterial, quote present.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CORRECTED",
+   "why": "Subsection (l) quote verbatim on the codified page and value/ceiling/applies_to all correct, but effective_status misstates the amendment history: the § 132-1.4A history line reads '(2016-88, s. 1; 2019-48, s. 1; 2021-138, s. 21(a).)' — no S.L. 2025-70 s. 21 appears anywhere on the page (statutes current through S.L. 2026-30), so 'last amended S.L. 2025-70 s. 21' is unsupported; the 'pending S.L. 2026-40 s. 4.53' claim could not be verified either (ncleg pending-modifications page not located). Corrected row fixes effective_status only.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-1.4A.html",
+   "corrected_row": {
+    "state": "NC",
+    "item_id": "av",
+    "resolution": "actual_cost_standard",
+    "value": "for law-enforcement recordings (body-worn/dashboard etc.): a fee 'to offset the cost incurred by it to make a copy of a recording for release' that 'shall not exceed the actual cost of making the copy'; other audio/video: actual cost of making the copy (§ 132-6.2(b)); no per-minute rate and no free-minutes allowance",
+    "unit": "USD per copy/recording (ceiling: actual cost of making the copy)",
+    "basis": "ceiling",
+    "rule_type": "Permission (LE agency may charge) / Prohibition (not above actual cost)",
+    "applies_to": "all_public_bodies",
+    "resolved_by_rule_ids": [
+     "NC-0019",
+     "NC-0017"
+    ],
+    "new_rule_ids": [
+     "NC-9004"
+    ],
+    "source_authority": "N.C. Gen. Stat. § 132-1.4A(l); § 132-6.2(b)",
+    "source_type": "Statute",
+    "official_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-1.4A.html ; https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+    "source_language": "( l ) Fee for Copies. - A law enforcement agency may charge a fee to offset the cost incurred by it to make a copy of a recording for release. The fee shall not exceed the actual cost of making the copy. || Except as otherwise provided by law, no public agency shall charge a fee for an uncertified copy of a public record that exceeds the actual cost to the public agency of making the copy.",
+    "is_paraphrase": false,
+    "effective_status": "Current (ncleg.gov General Statutes current through S.L. 2026-30; codified § 132-1.4A history line: 2016-88 s. 1; 2019-48 s. 1; 2021-138 s. 21(a) — no 2024–2026 amendment shown on the codified page; subsection (l) text verified verbatim 2026-08-19. Discover's 'last amended S.L. 2025-70 s. 21' and 'pending S.L. 2026-40 s. 4.53' claims are unsupported by the opened source. § 132-6.2 last amended S.L. 2004-129 s. 38.)",
+    "confidence": "high",
+    "manual_verification": null,
+    "notes": "Prior status 'delegated_to_regulation_or_schedule' not supported. § 132-1.4A(l) binds every 'law enforcement agency' incl. municipal police; § 132-1.4A recordings are not public records and follow the release/disclosure regime of that section (court order for release), but the copy fee is a plain actual-cost ceiling. No per-minute or free-minute figure exists."
+   }
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6(b) no-purpose sentence and § 132-10 GIS sentences (incl. news-media/MLS/licensed-professional carve-outs) verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30), word-for-word; § 132-10 history '(1995, c. 388, s. 5; 1997-193, s. 1.)' confirms no recent amendment; applies_to municipalities correct (§ 132-10 is county/city-specific); structural, no invented surcharge.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.html ; https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-10.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-1(b) policy and § 132-6.2(b) CIO-mediation sentence verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30), word-for-word; silent correct — discretionary waiver inferred only in notes, no waiver criteria asserted as law.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-1.html ; https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "§ 132-6(a) quote verbatim clause found on ncleg.gov codified page (fetched 2026-08-19; General Statutes current through S.L. 2026-30); no forfeiture rule and no fixed deadline to forfeit against; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Cited source opened; no aggregation/anti-splitting rule in opened sections; silent correct.",
+   "checked_link": "https://www.ncleg.gov/EnactedLegislation/Statutes/HTML/BySection/Chapter_132/GS_132-6.2.html",
+   "corrected_row": null
+  }
+ ],
+ "notes": "Verified against ncleg.gov codified HTML pages fetched 2026-08-19 (GS 132-1, 132-6, 132-6.1, 132-6.2, 132-1.4A, 132-10, 159-32.1; General Statutes TOC states 'include changes through S.L. 2026-30') and the NCDOJ 2019 Open Government Guide PDF (pdftotext). Every quoted clause matched word-for-word. History lines confirm no 2024-2026 amendment to §§ 132-6 (ends 2023-134 s. 11.11(c)), 132-6.2 (ends 2004-129 s. 38), 132-10 (ends 1997-193), 159-32.1 (1999-434 only), 132-1 (ends 2023-138 s. 5(b) — subsection (b) text intact incl. the 'minimal cost' definition sentence). Single correction: the av row's effective_status cited a § 132-1.4A amendment (S.L. 2025-70 s. 21) absent from the codified page's history line; substance of the row (subsection (l) verbatim, actual-cost ceiling, LE-agency scope) stands. The ncleg pending-modifications list could not be located (404 at guessed URLs), so discover's pending-2026 claims rest on discover's own session and remain unreviewed — they affect no row's value. Guidance rows (delivery, labor rows, productionGate, estimateNotifyThreshold) correctly label AG-guide material as Official Guidance, not law, and flag that both guides predate the Jan 2025 administration change."
+}

@@ -1,0 +1,281 @@
+{
+ "code": "CT",
+ "verified_at": "2026-08-19",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "§ 1-212(a)(B) opened and matched verbatim: 'shall not exceed fifty cents per page' — a ceiling; (B) tier = 'all other public agencies' incl. municipalities ((A) $0.25 is the state tier, correctly kept out of the municipal value); 'page = one side of a piece of printed matter' (108 CA 471) present in the section's annotations; currency re-verified: § 1-212 history line ends at P.A. 12-205 (rev. to Jan. 1, 2025); 2026 Supplement ch. 14 contains only § 1-210; SB 225 (2026) last action 3/26/2026 'Favorable Report, Tabled for the Calendar, Senate' — never enacted",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same § 1-212(a)(B) verbatim text confirmed; the statute draws no color/B&W distinction, so the $0.50 ceiling is the only constraint; resolution word 'ceiling' correct; municipal (B)-tier scope correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Both quoted texts matched verbatim (§ 1-212(a)(B) in chap_014; § 7-34a(a)(1) surveys/maps 'the actual cost thereof' in chap_092); no size-based rate exists in the FOIA; row keeps its own manual_verification flag for large-format practice — appropriate",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "Transcription sentence ('shall not exceed the cost thereof to the public agency') and § 7-34a(a)(1) matched verbatim; recorded as actual_cost_standard/soft-standard with no invented number — correct resolution word",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Full § 1-212 read: a single per-page ceiling per tier, no volume/graduated bands anywhere in the section — documented absence is right",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Full § 1-212 read: no free-page allowance; the related no-charge-electronic-transmission holding (Stedman as quoted in FIC 2025-0213 ¶ 59) verified verbatim in the opened decision",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "§ 1-212(b)(1) 'but not including search or retrieval costs except as provided in subdivision (4)' matched verbatim; FIC 2025-0213 ¶¶ 35-37 (exclusive-fee list; paper = per-page only) matched verbatim in the opened Final Decision (approved by Commission order, Mar. 25, 2026); prohibition applies to every 'public agency' incl. municipalities",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "FIC 2025-0213 PDF opened: ¶¶ 52, 66-70, 77 match verbatim (redaction is not 'programming or formatting'; no provision permits charging review time — Walsh cite present); FIC 2022-0176 PDF opened and eyeballed (scanned pages 7-8): ¶¶ 37-42 match — $612 New London redaction fee disallowed, $16.99 flash drive allowed; municipal respondent confirmed on the caption page",
+   "checked_link": "https://portal.ct.gov/-/media/foi/finaldecisions/2026/mar25/2025-0213.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "§ 1-212(b) incl. (1)-(4), voter-names sentence and DAS-guidelines sentence matched verbatim; delegated instrument (DAS BEST Policy Guidelines PDF) opened — every quoted bullet and the $45.75 worked example match verbatim; recorded as actual_cost_standard (hourly salary), no invented rate; guideline's state-agency framing correctly disclosed",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "All quoted text (§ 1-212(a)-(b); FIC 2025-0213 ¶¶ 35-37) matched verbatim; the enum ('never for paper; only programming/formatting salary for computer-stored copies; never search/retrieval or review/redaction') restates fixed statutory triggers, not a number invented for a soft standard",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "DAS guidelines PDF opened: 'Fees can not include any employee fringe benefit costs' verbatim; § 1-212(b)(1) limits the labor component to 'hourly salary' verbatim; 0% is the faithful encoding of a hard prohibition, not a number put on a soft standard",
+   "checked_link": "https://portal.ct.gov/das/-/media/das/communications/electronic_data_guidelines.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "§ 1-212(b) and the opened DAS guidelines contain no billing increment or rounding rule (DAS example uses whole hours but prescribes none) — silence correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "Full § 1-212 read: no free-hours allowance — silence correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "No TX-style periodic free-time counter in ch. 14; § 1-206 section heading 'Petition for relief from vexatious requester' confirmed in the opened chapter — silence correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "§ 1-212(c) first sentence matched verbatim; no estimate/itemized-notice duty anywhere in § 1-212 — silence correct (the $10 figure correctly recorded under rules.deposit.threshold instead)",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Full § 1-212 and § 1-206(a)-(b)(1) read: no requester response window or deemed-withdrawal rule — silence correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Full § 1-212 read: no revised-estimate/variance rule — silence correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Full § 1-212 read: no estimate validity period — silence correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "§ 1-212(c) matched verbatim: 'may require the prepayment of any fee ... if such fee is estimated to be ten dollars or more' — $10 is a printed statutory number; discretionary invocation correctly carried as Permission; FIC 2025-0213 ¶ 29 verified verbatim in the opened decision",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CORRECTED",
+   "why": "The quoted § 1-212(c) sentence is verbatim-correct, but the statute prints no percentage: '100' recorded with resolution 'value'/basis 'fixed' is an inference from 'prepayment of any fee' (the row itself flags this in manual_verification). A derived figure may not stand as a verified value row. Corrected to a structural row: no partial-deposit cap; full prepayment of the estimated fee (≥ $10) may be required.",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": {
+    "state": "CT",
+    "item_id": "rules.deposit.percent",
+    "resolution": "structural",
+    "value": "no partial-deposit cap: when the estimated permitted fee is $10 or more, the agency may require prepayment of the entire estimated fee ('prepayment of any fee'); a city may demand less; no percentage is printed in the statute",
+    "unit": "enum (deposit device = full prepayment of the estimate; statutory percent: none)",
+    "basis": "fixed",
+    "rule_type": "Permission",
+    "applies_to": "all_public_bodies",
+    "resolved_by_rule_ids": [
+     "CT-0022"
+    ],
+    "new_rule_ids": [],
+    "source_authority": "Conn. Gen. Stat. § 1-212(c)",
+    "source_type": "Statute",
+    "official_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+    "source_language": "A public agency may require the prepayment of any fee required or permitted under the Freedom of Information Act if such fee is estimated to be ten dollars or more.",
+    "is_paraphrase": false,
+    "effective_status": "Current — Gen. Stat. rev. to Jan. 1, 2025; § 1-212 not in the 2026 Supplement (rev. to Jan. 1, 2026 — only § 1-210(b)(17) amended in 2025); last amended P.A. 12-205; 2026-session public acts (through P.A. 26-68) searched — none amend § 1-212",
+    "confidence": "high",
+    "manual_verification": null,
+    "notes": "VERIFY correction (2026-08-19): discover recorded value=100/basis=fixed, itself flagging that 100% 'is a reading of prepayment of any fee, not a number printed in the statute'. Re-classed as structural so no invented percentage enters the library. Substance unchanged: § 1-212(c) authorizes prepayment of the whole estimated fee at the $10 threshold (see rules.deposit.threshold); prepayment may rest only on permitted fees (FIC 2025-0213 ¶ 29) and not on costs waivable under § 1-212(d)(2) (¶¶ 74-75)."
+   }
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "§ 1-212(c) verbatim; FIC 2025-0213 ¶ 78 matched verbatim in the opened decision (conditioning fulfillment on prepayment of non-permitted fees violates §§ 1-210(a)/1-212); inspection carve-out consistent with § 1-210(a) and Kozlowski/Stedman n.2 as quoted in the opened decision (¶¶ 54, 60)",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "Full ch. 14 fee provisions read: no nonpayment/withdrawal consequence — silence correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "§ 1-206(a) matched verbatim in the opened chapter (4-business-day deemed denial); no tolling/grace rule tied to prepayment exists — silence correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Full § 1-212 read: no overrun/re-issue rule — silence correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "Sales-tax sentence of § 1-212(c) matched verbatim; no payment-method provision — silence correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "§ 1-212(b) first sentence and FIC 2025-0213 ¶¶ 35-37 matched verbatim; no request-level dollar cap exists; actual_cost_standard/soft-standard is the right word",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Full § 1-212 read: no de-minimis floor; $10 is a prepayment trigger, not a waiver floor; § 1-212(d) grounds verified as status/record-based — silence correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Full § 1-212 read: no minimum fee — silence correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "§ 1-212(b)(3) matched verbatim; DAS media bullet verbatim in opened PDF; FIC 2022-0176 ¶ 42 ($16.99 flash drive) verified on the opened scanned pages",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Stedman ¶ 18, n.2 and the 'free of charge as she requested' conclusion verified verbatim as quoted in the opened FIC 2025-0213 ¶¶ 59-61; statute silent on postage/handling (row's manual_verification flag appropriately retained) — silence correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "§ 1-212(e) matched verbatim: $1 first page, $0.50 each additional, copy-and-certificate one continuous instrument, 'Except as otherwise provided by law'; § 7-34a(a)(1) $2 town-clerk certification verbatim in opened chap_092; 'shall be' = fixed Requirement — correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "FIC 2022-0176 PDF opened and read visually (scanned; pp. 1, 7-8): ¶¶ 37-42 match the quoted text — $628.99 = $612 review/redaction (disallowed) + $16.99 flash drive (allowed, prepayment permitted); Final Decision approved Apr. 12, 2023, New London municipal respondents; § 1-212(b)(1),(3) verbatim in the statute",
+   "checked_link": "https://portal.ct.gov/-/media/foi/finaldecisions/2023/april12/2022-0176.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "Full § 1-212 read: fee provisions are purpose-blind; the only per-item rate is the registered-voter-names ceiling (verbatim in (b)) — silence correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "§ 1-212(d) matched verbatim — all five grounds exactly as quoted ('shall waive'); § 1-206(b)(1) 30-day FOIC appeal verbatim; FIC 2025-0213 ¶¶ 74-75 verbatim in the opened decision — structural/mandatory reading correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "Full §§ 1-206/1-212 read: no fee-forfeiture-on-late-response rule — silence correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Full ch. 14 fee provisions read: no aggregation/carry-forward rule; DAS no-re-charge bullet verified verbatim in the opened guidelines — silence correct",
+   "checked_link": "https://www.cga.ct.gov/current/pub/chap_014.htm#sec_1-212",
+   "corrected_row": null
+  }
+ ],
+ "notes": "All five load-bearing sources opened: (1) cga.ct.gov/current/pub/chap_014.htm — §§ 1-206, 1-210 heading, 1-211 refs, 1-212 full text incl. (a)-(g) and history line (last amendment P.A. 12-205); fetched via curl -k because the CGA server omits its intermediate certificate (leaf cert CN *.cga.ct.gov, GoDaddy-issued — verified via openssl s_client); (2) chap_092.htm § 7-34a(a)(1); (3) FIC 2025-0213 Final Decision PDF (DiPalma v. OPM, approved by Commission order Mar. 25, 2026) — every quoted paragraph (¶¶ 29, 35-37, 52-62, 66-70, 74-78) matched; (4) FIC 2022-0176 Final Decision PDF (Collins & The Day v. New London, Apr. 12, 2023) — scanned, read visually per the discover pass's own OCR caveat; ¶¶ 37-42 and order ¶ 3 match, municipal respondents confirmed; (5) DAS BEST Policy Guidelines PDF — all bullets and the $45.75 example verbatim. Currency: 2026 Supplement ch. 14 (used with Gen. Stat. rev. Jan. 1, 2025) contains only § 1-210, so § 1-212 was untouched by the 2025 sessions; the LCO 'amended or repealed in 2026' table is still not posted (404), so 2026-regular-session currency rests on the statute page plus SB 225's bill-status page (opened: last action 3/26/2026 'Favorable Report, Tabled for the Calendar, Senate', no PA number) — consistent with the discover pass's dtSearch claim. Not independently opened (quoted only through FIC 2025-0213, as the discover pass disclosed): Stedman FIC 2018-0293, Walsh FIC 2010-369, Kozlowski (Conn. Super. 1997), Osmond I/II, Clark; and the FOIC FAQ (notes-level support only). One correction: rules.deposit.percent re-classed value->structural (inferred 100% is not a printed figure). CORRECTED rows go back through discovery once per the run rules."
+}

@@ -1,0 +1,279 @@
+{
+ "code": "IN",
+ "verified_at": "2026-08-19",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened 25-FC-326 (July 21, 2026): it quotes § 8(d) with the operative copying-ceiling clause ($0.10 non-color / $0.25 color or actual cost), the actual-cost definition (paper + per-page equipment, no labor/overhead) and the uniformity sentence verbatim; the opinion elides the fiscal-body and $5-certification sentences with an ellipsis, but the full contiguous block recorded as source_language is verbatim in the PAC Handbook p. 52 (rev. Mar. 2022, also opened, cited in the row's notes) and the fiscal-body/certification sentences also in 19-FC-67. 'May not exceed' = ceiling: resolution word right. § 8(d) expressly applies to 'a public agency that is not a state agency' — municipal scope right. Currency: handbook history ends P.L. 58-2016; FindLaw snapshot current as of Jan. 1, 2026 shows the same (d) sentences; HEA 1360 (2026) added (n)-(o) only. Codified iga.in.gov copy still unreachable on verify (same SPA shell).",
+   "checked_link": "https://www.in.gov/pac/files/advisory/25-FC-326-Newman.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same § 8(d) clause; the color ceiling 'twenty-five cents ($0.25) per page for color copies' is present verbatim in the opened 25-FC-326 quote (and in the PAC Handbook p. 52 and 19-FC-67). Ceiling word right ('may not exceed'); municipal scope right (non-state agencies). FindLaw Jan-1-2026 snapshot matches.",
+   "checked_link": "https://www.in.gov/pac/files/advisory/25-FC-326-Newman.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened 19-FC-67: the recorded source_language (labor/overhead excluded, ink-and-paper cap, actual-cost branch 'comes into play only when copying unusually sized pieces of paper and postage costs to remote requesters') is present verbatim. The statutory actual-cost branch § 8(d)(2) is quoted in the same opinion. Resolution 'actual_cost_standard' with basis ceiling is right — no number invented. Note: source_type says Statute while the quoted passage is PAC gloss; the underlying rule is § 8(d)(2) statute quoted in the same document, and confidence is already 'medium' — not worth a correction.",
+   "checked_link": "https://www.in.gov/dA/7f27cacda9/19-FC-67.pdf?language_id=1",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened PAC Handbook: § 8(j) electronic-map clause present verbatim (pp. 52-53 area), including 'reasonable percentage of the agency's direct cost of maintaining, upgrading, and enhancing' and the fiscal-body approval sentence. Recorded as soft-standard with no invented number — resolution word acceptable; applies_to all_public_bodies matches the subsection. § 8(g)/(d) fallbacks also verified in the handbook.",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Silent claim. The uniformity sentence supporting the no-tiers reading is present verbatim in the opened 25-FC-326 quote of § 8(d); the full block is verbatim in the PAC Handbook (opened). No graduated bands appear anywhere in the § 8 text reproduced in the handbook or in the HEA 1360 additions. Search log present in notes.",
+   "checked_link": "https://www.in.gov/pac/files/advisory/25-FC-326-Newman.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Opened 22-FC-53 (issued May 26, 2022): the (b)(4) e-mail no-fee quote is present verbatim ('...may not charge any fee under this chapter for the following: ... (4) To provide an electronic copy of a public record by electronic mail.'). Silent-on-free-pages claim consistent with the full § 8 text in the handbook and HEA 1360 additions. FindLaw confirms (b)(4) exists in the current text.",
+   "checked_link": "https://www.in.gov/dA/708659655e/22-FC-53.pdf?language_id=1",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened PAC Handbook p. 52: § 8(b) prohibition present verbatim ('(1) to inspect a public record; or (2) to search for, examine, or review a record to determine whether the record may be disclosed'). Row already flags the renumbering to (b)(3); FindLaw Jan-1-2026 snapshot confirms items (1) and (3) carry the same prohibitions today. not_applicable (no municipal search rate) is the right word; the § 8(n) and § 8(m) exceptions are correctly bounded (non-resident / schools-only).",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same § 8(b) clause verified verbatim in the opened handbook; review/redaction labor non-chargeable. The 25-FC-121 gloss cited in notes (copy fee applies when redaction requires a copy, no separate review charge) matches the opened 25-FC-121 text. not_applicable right.",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened PAC Handbook: § 5-14-3-6(c) present verbatim (direct cost of reprogramming when required to separate disclosable from nondisclosable). 'Direct cost' definition (105%) verified verbatim at § 5-14-3-2(d) in the handbook. actual_cost_standard/ceiling right; applies to all public agencies.",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "The enum value is a faithful synthesis of provisions each verified verbatim in opened official sources: § 8(b) prohibition (handbook), § 8(d) labor/overhead exclusion (25-FC-326, handbook), § 8(g)/§ 6(c) direct cost (handbook), § 8(n) $25/hr non-resident fee (PAC HEA 1360 additions), § 8(m) schools-only (25-FC-483). No number is presented that the sources lack.",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "Opened PAC Handbook: '\"Direct cost\" means one hundred five percent (105%) of the sum of the cost of...' present verbatim at § 5-14-3-2(d). Value 5 (the uplift) with fixed basis is an accurate encoding; the unit string correctly confines it to § 8(g)/§ 6(c) contexts. Row already flags possible post-HEA-1360 relettering of the definition (HEA 1360 additions use (d) for 'data scraping' — lettering conflict is real and correctly parked in manual_verification).",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Opened 25-FC-483 (Aug. 11, 2026): the full § 8(m) block recorded as source_language is present verbatim, including the proration sentence. Silent-for-municipalities claim right — the only increment language is schools-only, correctly not recorded as a municipal value.",
+   "checked_link": "https://www.in.gov/pac/files/advisory/25-FC-483-Crawford.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "§ 8(b) prohibition verified verbatim in the opened handbook; the five-free-hours rule verified as schools-only in the opened 25-FC-483 § 8(m) text. not_applicable for municipalities right.",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Silent claim; § 8(b) verified verbatim in the opened handbook; no per-requestor periodic allowance appears in the § 8 text (handbook) or HEA 1360 additions (opened). Search log present.",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "Opened 25-FC-326: the guidance passage ('This protects the agency... the requestor should also be aware of the cost... rather than having it mailed to him or her with a bill for copying and postage') is present verbatim; the opinion found a violation. Correctly recorded as silent (Official Guidance context, no number) — not a numeric threshold.",
+   "checked_link": "https://www.in.gov/pac/files/advisory/25-FC-326-Newman.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Silent claim; supporting § 8(b) clause verbatim in the opened handbook; no estimate mechanism exists anywhere in the § 8/§ 3 text reproduced in the handbook or in the HEA 1360 additions. Search log present.",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Silent claim; same verification as estimate.requesterResponseDays. No revision rule in any opened source.",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Silent claim; same verification. No validity period in any opened source.",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "Opened 25-FC-326: 'A public agency may require that the payment for search and copying costs be made in advance.' present verbatim (quoted as § 8(e)(2) last sentence). FindLaw Jan-1-2026 snapshot confirms the current text uses 'search and copying costs' (the 2022 handbook's 'copying costs' is the older wording, as the row itself documents). Structural/no-threshold right; Permission word right ('may').",
+   "checked_link": "https://www.in.gov/pac/files/advisory/25-FC-326-Newman.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "Same verbatim sentence at the opened official_link. 'Ceiling 100%' follows necessarily from 'the payment ... be made in advance' (full prepayment may be required); the row transparently flags in manual_verification that the statute has no percentage language, so no soft standard is being dressed as a statutory number. Permission/ceiling words right.",
+   "checked_link": "https://www.in.gov/pac/files/advisory/25-FC-326-Newman.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "Opened 25-FC-121 (Feb. 17, 2026): the recorded source_language is present verbatim (advance-payment challenge, § 8(e)(2) quote with the older 'copying costs' wording as quoted by that opinion, and the no-violation finding upholding advance payment of the $150 body-cam fee). Inspection-free and e-mail-free branches verified in handbook/22-FC-53. Structural/Permission right.",
+   "checked_link": "https://www.in.gov/dA/6d61c6b937/25-FC-121-Frazee.pdf?language_id=1",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "Silent claim; the § 8(e) advance-payment sentence is present verbatim at the opened official_link (25-FC-326). No deemed-withdrawal or prior-debt rule appears in the § 8/§ 9 text reproduced in the opened handbook or HEA 1360 additions. Search log present.",
+   "checked_link": "https://www.in.gov/pac/files/advisory/25-FC-326-Newman.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "Opened PAC Handbook: § 5-14-3-3(b) present verbatim ('Within a reasonable time after the request is received... provide the requested copies... or allow the person to make copies...'). Silent claim right: no numeric clock exists for nonpayment to toll.",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Silent claim; supporting clause verbatim in the opened handbook; no estimate/overrun mechanism anywhere in the opened sources. Search log present.",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "Silent claim for APRA verified against the opened handbook reproduction of §§ 3, 3.5, 8 (no payment-method provision). The row correctly parks IC 36-1-8-11 (not opened, iga.in.gov unreachable — still unreachable on this verify pass) in manual_verification rather than recording a value from it.",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "Silent claim (no request-level cap). The operative per-unit ceilings are present verbatim in the opened 25-FC-326 § 8(d) quote (the opinion elides the fiscal-body/$5 sentences; full block verified verbatim in the opened PAC Handbook). No request-level maximum appears in any opened source. Search log present.",
+   "checked_link": "https://www.in.gov/pac/files/advisory/25-FC-326-Newman.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Silent claim; § 8(b) verbatim in the opened handbook; no de-minimis threshold in any opened source. Search log present.",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Opened 19-FC-67: recorded source_language present verbatim; the opinion holds an $8 flat per-report fee unlawful, supporting the no-minimum reading. Schools' express no-minimum verified in 25-FC-483 § 8(m). Silent for municipalities right.",
+   "checked_link": "https://www.in.gov/dA/7f27cacda9/19-FC-67.pdf?language_id=1",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "Opened PAC Handbook: the full § 8(g) block recorded as source_language is present verbatim, including 'direct cost of supplying the information in that form', the $150 LE-recording cap, and the publication-price alternative. actual_cost_standard/ceiling right; all_public_bodies right; direct-cost 105% definition verified at § 5-14-3-2(d).",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Opened 22-FC-53: (b)(4) e-mail no-fee quote present verbatim. Postage-as-actual-cost rests on PAC guidance verified verbatim in the opened 19-FC-67 ('postage costs to remote requesters') and 25-FC-326 ('bill for copying and postage'); the row correctly labels this guidance and flags the (b)(4) exception sentence (seen only in a secondary copy; FindLaw Jan-1-2026 confirms the exception list exists). Structural, no invented rate.",
+   "checked_link": "https://www.in.gov/dA/708659655e/22-FC-53.pdf?language_id=1",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CORRECTED",
+   "why": "Value, unit, basis, resolution word and municipal scope all check out — 'The fee for certification of documents may not exceed five dollars ($5) per document.' (§ 8(d), ceiling, non-state agencies) is verbatim in the opened PAC Handbook p. 52 and in 19-FC-67. But the row's official_link (25-FC-326) ELIDES exactly that sentence with an ellipsis in its § 8(d) quote, so the operative clause is not present at the cited link. Corrected row repoints official_link to the PAC Handbook, which carries the full recorded source_language contiguously.",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": {
+    "state": "IN",
+    "item_id": "certification",
+    "resolution": "ceiling",
+    "value": "5.00",
+    "unit": "USD per document",
+    "basis": "ceiling",
+    "rule_type": "Requirement",
+    "applies_to": "municipalities",
+    "resolved_by_rule_ids": ["IN-0016", "IN-0019"],
+    "new_rule_ids": ["IN-9004"],
+    "source_authority": "Ind. Code § 5-14-3-8(d)",
+    "source_type": "Statute",
+    "official_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+    "source_language": "This subsection applies to a public agency that is not a state agency. The fiscal body (as defined in IC 36-1-2-6) of the public agency, or the governing body, if there is no fiscal body, shall establish a fee schedule for the certification or copying of documents. The fee for certification of documents may not exceed five dollars ($5) per document. The fee for copying documents may not exceed the greater of: (1) ten cents ($0.10) per page for copies that are not color copies or twenty-five cents ($0.25) per page for color copies; or (2) the actual cost to the agency of copying the document. As used in this subsection, \"actual cost\" means the cost of paper and the per-page cost for use of copying or facsimile equipment and does not include labor costs or overhead costs. A fee established under this subsection must be uniform throughout the public agency and uniform to all purchasers.",
+    "is_paraphrase": false,
+    "effective_status": "Current — subsection unchanged since P.L. 58-2016 per the handbook history line; the $5 certification sentence also appears verbatim in PAC Op. 19-FC-67 and in the FindLaw reproduction current as of Jan. 1, 2026; HEA 1360 (P.L. 97-2026, eff. July 1, 2026) added (n)-(o) without altering this text per PAC's Statutory Additions summary. Codified iga.in.gov copy not opened (site inaccessible 2026-08-19, discover and verify passes).",
+    "confidence": "high",
+    "manual_verification": "Confirm verbatim clause and current subsection lettering against the codified text at iga.in.gov once the site is reachable. Existing row IN-0016 cites § 8(b); the $5 certification ceiling for local agencies is in § 8(d) (IN-9004 corrects). Note: 25-FC-326's § 8(d) quote elides the certification sentence — cite the handbook or 19-FC-67 for this item, not 25-FC-326.",
+    "notes": "Fiscal body sets the certification fee in the schedule, ≤ $5 per document. § 8(f): any certification fee 'specified by statute or … ordered by a court' must be collected notwithstanding (b)–(i). Official link repointed by verify pass: the full § 8(d) block including the certification sentence is contiguously verbatim in the PAC Handbook p. 52 (rev. Mar. 2022); 19-FC-67 quotes the fiscal-body and certification sentences as well."
+   }
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "Opened 25-FC-152 (Mar. 9, 2026): recorded source_language present verbatim ('...may not exceed $150. IC 5-14-3-8(g)'), and the opinion's facts confirm $150 is a ceiling (agency charged $100 for shorter recordings). Full § 8(g) statutory text verified verbatim in the opened handbook. Ceiling word right; all_public_bodies right.",
+   "checked_link": "https://www.in.gov/dA/311ec31836/25-FC-152-Shumate.pdf?language_id=1",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "Opened PAC Handbook: § 5-14-3-3(e) present verbatim (ordinance may condition commercial use of disk/tape data; news/nonprofit/academic protected; violators barred). HEA 1360 residency provisions (§ 8(n), § 8.1) verified verbatim in the opened PAC Statutory Additions. Structural — no surcharge number invented; the residency-not-purpose framing is accurate.",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "Opened PAC 'Statutory Additions under HEA 1360': '(o) A public agency may waive the fee under subsection (n) if the public agency finds that the public records request serves the public interest.' present verbatim. § 8(k) map waiver and § 8(i) verified verbatim in the opened handbook. No-general-waiver claim consistent with the full § 8 text; Permission word right; effective date July 1, 2026 (already effective at verify date).",
+   "checked_link": "https://www.in.gov/pac/files/Statutory_Additions_under_HEA_1360.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "Silent claim; supporting § 8(b) clause verbatim in the opened handbook; no fee-forfeiture-for-lateness provision in any opened source (§ 9 remedies are denial-timing rules). Search log present.",
+   "checked_link": "https://www.in.gov/pac/files/pac-handbook.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Opened PAC 'Statutory Additions under HEA 1360': the full § 8.1 block recorded as source_language is present verbatim (priority for Indiana residents and civic/journalistic/academic/personal use; out-of-state/automated requests may be delayed and charged under § 8(n)). Silent-on-aggregation claim right; § 3.3(b) decline authority also verified verbatim in the same document.",
+   "checked_link": "https://www.in.gov/pac/files/Statutory_Additions_under_HEA_1360.pdf",
+   "corrected_row": null
+  }
+ ],
+ "notes": "Verify method: downloaded and text-extracted all eight cited official documents (PAC Handbook rev. Mar. 2022; PAC 'Statutory Additions under HEA 1360'; PAC advisory opinions 19-FC-67, 22-FC-53, 25-FC-121, 25-FC-152, 25-FC-326, 25-FC-483) and matched every recorded source_language string against the extracted text. All eight opened successfully; every quote matched verbatim except as noted for 25-FC-326's elided § 8(d) sentences (drove the one CORRECTED verdict on 'certification'; the four other rows using that link keep their operative clauses at the link). iga.in.gov was re-probed on 2026-08-19 (laws pages and the HEA 1360 enrolled-act PDF path) and still serves only the 691-byte SPA shell — the codified text remains unopened, exactly as the discover pass flagged; every row's manual_verification note to re-check codified lettering stands. Currency cross-check: FindLaw reproduction 'current as of Jan. 1, 2026' (secondary, used for structure only) confirms (b)(1)-(4) with the school item at (b)(2) and search/review at (b)(3), the 'search and copying costs' wording in (e), (m) present, and (n)/(o) absent from that pre-HEA-1360 snapshot — all consistent with the raw file's claims, including that the 2022 handbook's § 8(b)/(e) texts are the older wording (the rows flag this). No 2024/2025 enactment contradicting the municipal fee values was found; HEA 1360 (P.L. 97-2026, eff. 2026-07-01) is the one material change and is captured. Zero REFUTED, zero UNVERIFIABLE; 35 CONFIRMED, 1 CORRECTED (certification: official_link repointed from 25-FC-326 to the PAC Handbook because the opinion's ellipsis drops the $5 certification sentence)."
+}

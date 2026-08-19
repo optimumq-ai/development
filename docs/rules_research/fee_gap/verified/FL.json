@@ -1,0 +1,259 @@
+{
+ "code": "FL",
+ "verified_at": "2026-08-19",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 'Up to 15 cents per one-sided copy ... 14 inches by 8 1/2 inches' and '+5 cents two-sided' confirmed in s. 119.07(4)(a)1.-2. on flsenate.gov (2025 Statutes). 'Ceiling' is the right word for 'up to'. History line ends s. 1, ch. 2021-173 — no 2024-2026 amendment to (4); CS/HB 437 (2026) confirmed died in Senate Rules 3/13/2026 on the flsenate bill page. s. 119.011(2) 'agency' includes municipal officers — municipal scope confirmed.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Statute text confirmed; it draws no color/B&W distinction, so the 15-cent ceiling reading for standard-size color 'duplicated copies' follows the statute's face. The interpretive step ((a)1 vs (a)3) is honestly flagged (confidence medium + manual_verification). Ceiling word correct.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "'For all other copies, the actual cost of duplication' (119.07(4)(a)3.) and the 119.011(1) definition (material and supplies, no labor/overhead) both confirmed verbatim. Soft standard correctly carries no number.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "(a)3., (b) county-constitutional-officer limitation, and 119.01(2)(f) all confirmed verbatim on flsenate.gov. The (4)(b) labor/overhead allowance correctly excluded from the municipal value.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Silence confirmed: s. 119.07(4)(a) has flat per-copy ceilings, no page bands; quoted text verbatim; search log present.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Quote 'An agency is not precluded from choosing to provide informational copies ... without charge. AGO 90-81.' confirmed verbatim in the 2024 Sunshine Manual mirror (opened, Vol. 46). Canonical 2025 ed. re-returned HTTP 403 from this environment — 2024-ed. flag on the row is accurate. 'Silent' (no entitlement) is the right word for a discretionary AGO gloss.",
+   "checked_link": "https://townofjupiterisland.com/DocumentCenter/View/959/2024-Government-in-the-Sunshine-Manual",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "s. 119.07(4)(d) special service charge text confirmed verbatim; no statewide rate exists; soft standard carries no number. Correct.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "(4)(d) verbatim; Manual passage (AGO 84-81, Zuckerman Spaeder, Dorchester Holdings) confirmed verbatim in the 2024 Manual mirror (p. 186, mid-quote page headers aside).",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "(4)(d), 119.011(9) IT-resources reference and 119.01(2)(f) confirmed verbatim. No rate figure in law; soft standard correct.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "(4)(d) verbatim; the long Manual gloss (AGO 13-03, Fla. Institutional Legal Services 15-minute DOC rule, Carden) confirmed verbatim in the 2024 Manual (pp. 184-186; apparent gaps were page-header interruptions). 'only_when_extensive' structural reading correct; the >15-minute figures correctly kept agency-specific.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "119.011(1) exclusion verbatim; AGO 99-41 ('does not authorize the addition of overhead costs') and Colby salary+benefits passage confirmed verbatim in the 2024 Manual (p. 186 area). Value 0 encodes a categorical prohibition, not a soft standard given a number — acceptable.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.011",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Fla. Admin. Code r. 1-2.0031(2)(a) quarter-hour text confirmed verbatim in the rule .doc fetched from flrules.org (History: New 3-21-06, Amended 9-17-08). Correctly recorded as agency-specific (DOS) with municipal resolution 'silent'.",
+   "checked_link": "https://www.flrules.org/gateway/ruleNo.asp?id=1-2.0031",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "(4)(d) verbatim; no numeric free-labor allowance in ch. 119; search log present. Silent correct.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "No periodic free-hours provision anywhere in ch. 119 as displayed; quoted (4)(d) text verbatim. Silent correct.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "Manual passage (Wootton, Woodard, Miami Dade College v. Nader + Museu, AGO 13-03) confirmed verbatim in the 2024 Manual mirror (p. 188 area). No dollar/hour threshold in law; 'structural' with duties described is right; nothing recorded as a number.",
+   "checked_link": "https://townofjupiterisland.com/DocumentCenter/View/959/2024-Government-in-the-Sunshine-Manual",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Silence confirmed; ch. 119 has no requester response window; quoted intro clause verbatim.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "AGO 05-28 shortfall-billing parenthetical confirmed verbatim in the 2024 Manual. Silent correct — no percentage trigger exists.",
+   "checked_link": "https://townofjupiterisland.com/DocumentCenter/View/959/2024-Government-in-the-Sunshine-Manual",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Silence confirmed; no estimate validity period in ch. 119; quoted text verbatim.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "Intro clause verbatim on flsenate.gov; the full deposit case-law passage (Wootton, Promenade D'Iberville, Morris Publishing, Colby, Zuckerman Spaeder, Dorchester) confirmed verbatim in the 2024 Manual (p. 187). 'defers_to_city' fits: threshold set by the agency's own policy subject to reasonableness; no number recorded; caveat about the non-statutory footing is flagged on the row.",
+   "checked_link": "https://townofjupiterisland.com/DocumentCenter/View/959/2024-Government-in-the-Sunshine-Manual",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "DOS r. 1-2.0031(2)(b) prepayment text confirmed verbatim on flrules.org; correctly recorded agency-only with municipal resolution 'silent'.",
+   "checked_link": "https://www.flrules.org/gateway/ruleNo.asp?id=1-2.0031",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "'shall furnish a copy ... upon payment of the fee prescribed by law' confirmed verbatim in s. 119.07(4) intro. 'pay_before_release' as fixed value is faithful to the statutory gate.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "Lozman ('does not require the City to do any more than what it did in this case'), AGO 05-28 and Smith v. State passages all confirmed verbatim in the 2024 Manual (p. 187; page-header artifact mid-quote). Structural enum matches the holdings; municipal scope apt (Lozman is a city case).",
+   "checked_link": "https://townofjupiterisland.com/DocumentCenter/View/959/2024-Government-in-the-Sunshine-Manual",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "Intro clause verbatim; Promenade D'Iberville delay-production parenthetical confirmed verbatim in the 2024 Manual. No statutory clock — structural reading correct; s. 119.07(1)(c) prompt-acknowledgment duty also verified on the statute page.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "AGO 05-28 parenthetical confirmed verbatim in the 2024 Manual; silence on re-issue duty correct.",
+   "checked_link": "https://townofjupiterisland.com/DocumentCenter/View/959/2024-Government-in-the-Sunshine-Manual",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "s. 215.322(5) confirmed verbatim on flsenate.gov (municipality expressly named; card/EFT plus service-fee surcharge). applies_to 'municipalities' correct; the open surcharge-eligibility question is flagged on the row.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/215.322",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "(4)(d) verbatim; AGO 85-03 / McMillan / AGOs 84-03 & 76-34 passage confirmed verbatim in the 2024 Manual (p. 184). Structural cap (statutory schedule only, no revenue generation), no invented number. Correct.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "AGO 90-81 quote confirmed verbatim in the 2024 Manual; silent correct — no de-minimis threshold exists.",
+   "checked_link": "https://townofjupiterisland.com/DocumentCenter/View/959/2024-Government-in-the-Sunshine-Manual",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Ceiling-only statutory text verbatim; no minimum fee anywhere; silent correct.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "(a)3., 119.011(1) and 119.01(2)(f) confirmed verbatim; actual-cost standard with no number correct; medium-requested duty verified.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Yanke and AGO 13-03 parentheticals confirmed verbatim in the 2024 Manual (pp. 185, 188); 119.011(1) verbatim on flsenate.gov. Actual-cost standard, properly caveated (prisoner-context postage authority flagged on the row).",
+   "checked_link": "https://townofjupiterisland.com/DocumentCenter/View/959/2024-Government-in-the-Sunshine-Manual",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "'(c) An agency may charge up to $1 per copy for a certified copy of a public record.' confirmed verbatim in s. 119.07(4)(c). Ceiling word correct for 'up to'.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "(a)3./(d)/119.011(1) verbatim; AGO 88-23 and Morris Publishing passages confirmed verbatim in the 2024 Manual. Actual-cost standard with no per-minute figure correct.",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "Curry/Barfield/Timoney purpose-irrelevance passage and AGO 85-03/84-03/76-34 statutory-fees-only passage both confirmed verbatim in the 2024 Manual (pp. 164, 184). 'not_applicable' (no commercial surcharge available) follows; the inferential step is flagged on the row.",
+   "checked_link": "https://townofjupiterisland.com/DocumentCenter/View/959/2024-Government-in-the-Sunshine-Manual",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "AGO 90-81 and Roesch passages confirmed verbatim in the 2024 Manual (p. 188). Discretionary-only waiver with no statutory grounds is accurate; 'defers_to_city' fits a pure-discretion regime.",
+   "checked_link": "https://townofjupiterisland.com/DocumentCenter/View/959/2024-Government-in-the-Sunshine-Manual",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "No fee-forfeiture provision in ch. 119; quoted intro clause verbatim; silent correct (Nader + Museu correctly parked under estimateNotifyThreshold).",
+   "checked_link": "https://www.flsenate.gov/Laws/Statutes/2025/119.07",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Lozman passage confirmed verbatim in the 2024 Manual (p. 187); silence on aggregation/repeat thresholds correct.",
+   "checked_link": "https://townofjupiterisland.com/DocumentCenter/View/959/2024-Government-in-the-Sunshine-Manual",
+   "corrected_row": null
+  }
+ ],
+ "notes": "Verify method: downloaded and text-extracted every cited source — 2025 Fla. Stat. ss. 119.07, 119.011, 119.01, 215.322 (flsenate.gov), Fla. Admin. Code r. 1-2.0031 (flrules.org rule .doc, History New 3-21-06/Amended 9-17-08), and the 2024 Government-in-the-Sunshine Manual (Vol. 46) via the cited Town of Jupiter Island mirror — then machine-matched every source_language fragment (whitespace/quote-mark-insensitive). All 36 rows' quotes are present verbatim; apparent mismatches were page-header strings ('185/186/187 GOVERNMENT-IN-THE-SUNSHINE-MANUAL') interrupting quotes mid-sentence in the PDF text layer, plus '8 1/2' spacing. Currency re-verified: s. 119.07 History ends s. 1, ch. 2021-173 (no 2024-2026 amendment to subsection (4)); CS/HB 437 (2026) confirmed on the flsenate bill page as passed House 111-0 on 3/4/2026 and Died in [Senate] Rules 3/13/2026; a web search surfaced no 2026 act touching 119.07(4). Municipal scope re-verified: s. 119.011(2) 'agency' includes 'any state, county, district, authority, or municipal officer'; agency-only figures (DOS r. 1-2.0031's 15-minute/quarter-hour/prepayment scheme) are consistently recorded as agency-specific guidance with the municipal resolution 'silent' — none leaked into a municipal value. Resolution words check out: both statutory dollar figures ('up to 15 cents', 'up to $1') are recorded as ceilings, not values; every soft standard (actual cost of duplication, 'extensive', 'reasonable') carries no number (labor.overheadPct's 0 encodes the categorical overhead prohibition of s. 119.011(1)/AGO 99-41, not an invented figure). Standing caveat carried on the Manual-sourced rows: the canonical 2025 Manual on myfloridalegal.com still returns HTTP 403 from this environment (re-tried today), so Manual quotes are verified against the 2024 edition as cited — the rows' own manual_verification flags for a 2025-edition recheck remain appropriate and were a condition of confirmation."
+}

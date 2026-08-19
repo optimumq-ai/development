@@ -1,0 +1,259 @@
+{
+ "code": "LA",
+ "verified_at": "2026-08-19",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). 'Reasonable fees for making copies' is a soft standard, correctly recorded as actual_cost_standard with value null (no number invented); the $0.25/page figure is correctly confined to notes as LAC 4:I.301.B state-agencies-only (instrument opened, 'at a minimum $0.25 per page' verbatim, historical note ends LR 12:229, April 1986). applies_to municipalities correct — (C)(1)(a) governs 'all public records, except public records of state agencies'.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). No color distinction anywhere in the section; soft standard, value null — resolution word right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). No municipal oversized rate; LAC 4:I.301.C 'actual cost to the agency' opened and verbatim, correctly flagged state-agencies-only in notes.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). Soft standard, no number recorded; AG 15-0056 opened (Oct. 8, 2015, Iberia Parish Assessor): 'at a minimum, the actual costs for making the copies' passage present verbatim on p. 4.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32: 'Any custodian who elects to establish and collect such fees shall establish a reasonable fee schedule and post the schedule where it can be readily accessed by the public.' present verbatim in (C)(1)(a) — the schedule's shape is expressly placed with the local custodian, so defers_to_city is the right word; no graduated bands in the section.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). No free-page allowance in 44:32; the only free-page proposal (2026 SB 493) confirmed withdrawn, so silent (with a full coverage note) is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened AG Op. 17-0056 (PDF, Apr. 2, 2018, Calcasieu Parish Sheriff's Office — a local body): the quoted 'default rule that a requester may not be charged a fee ... nor for a custodian's pre-examination retrieval, review, and separation of records ... absent a judicial declaration allowing otherwise' passage is present verbatim on p. 7. Statute authorizes only copy fees ((C)(1)(a) opened). not_applicable with the construction-based caveat in manual_verification is right; no rate was invented.",
+   "checked_link": "https://www.ag.state.la.us/Opinion/Download/17-0056",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32: (C)(3) no-fee-for-examination/review clause present verbatim; amendment line ends Acts 2024, No. 411. Express statutory prohibition on review/examination fees except by court determination; not_applicable correct; applies_to all_public_bodies correct — (C)(3) is not limited to agencies.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). Nothing for local bodies on programming charges; LAC 4:I.301.D (opened, verbatim) is state-agencies-only and correctly not recorded as a municipal value; silent with search log and low confidence flag is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32: (C)(3) no-fee-for-examination/review clause present verbatim; amendment line ends Acts 2024, No. 411. 'Never' with the two statutory exceptions (court-ordered review fee, 44:32(C)(3); after-hours examination supervision compensation, 44:32(A)(1) — both clauses opened verbatim) accurately states the enum; the AG-construction reach beyond examination requests is flagged in manual_verification.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32: (C)(3) no-fee-for-examination/review clause present verbatim; amendment line ends Acts 2024, No. 411. Moot as a derivative of labor never being chargeable; no overhead multiplier exists in 44:32, LAC 4:I.301 (opened), or the opened AG opinions; the derivation is flagged.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32: (C)(3) no-fee-for-examination/review clause present verbatim; amendment line ends Acts 2024, No. 411. Moot derivative; no time increment anywhere in the opened sources; the after-hours 'reasonable compensation' clause (44:32(A)(1), opened verbatim) states none.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32: (C)(3) no-fee-for-examination/review clause present verbatim; amendment line ends Acts 2024, No. 411. Moot derivative of the labor prohibition; no first-N-hours-free construct in any opened source.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32: (C)(3) no-fee-for-examination/review clause present verbatim; amendment line ends Acts 2024, No. 411. Moot derivative; no per-requestor periodic time budget in any opened source; full search log carried.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32: (C)(1)(a) 'unless the requestor fails to pay the applicable copying fees after being notified of the amount in advance of production' present verbatim — an advance fee-amount notice gate with no threshold, correctly recorded as structural; R.S. 44:35(A) (opened) contains 'estimate of the time reasonably necessary for collection, segregation, redaction, examination, or review' — a time estimate, as the notes say.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). No response window or deemed-withdrawal period in the section; silent with search log is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). No revision-percentage trigger for local bodies; LAC 4:I.301.D's charge-actual-if-differs rule (opened verbatim) is state-agencies-only and correctly confined to notes.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). 'The custodian may request payment of fees in advance of production.' present verbatim; no estimate validity period anywhere in the section; silent is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). Advance payment is a bare permission with no threshold, expressly the custodian's choice — defers_to_city under a Permission is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). No cap on the advance share; silent with search log is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). Both sentences of the recorded source_language present verbatim in (C)(1)(a); pay-before-release gate correctly recorded as structural/Permission, and the notes correctly keep inspection free per (C)(3) (opened).",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). The nonpayment and outstanding-prior-balance excuses present verbatim ('outstanding balance from a prior request' confirmed on the page); no withdrawal clock in the section; structural is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). No tolling/pause provision in 44:32; the flagged open interaction with the 44:32(D)/44:35(A) clocks is a fair manual_verification item; silent is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). No overrun/re-issue rule for local bodies; LAC 4:I.301.D overrun rule (opened verbatim) correctly confined to state agencies in notes; silent is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). No payment-method provision in 44:32; the LAC 4:I.403 credit-card line cited in notes is an agency example only; silent is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). No dollar cap for local bodies — only the reasonable-fee standard; AG 15-0056 opened, the Granger-quoting passage ('does not include the original cost of generation ... does include, at a minimum, the actual costs for making the copies') present verbatim on p. 4, footnote 7 confirming 44:32(C)(1)(a) governs non-state agencies. actual_cost_standard with value null is right; the agency delegation chain (39:241 -> LAC 4:I.301, opened) correctly kept out of the municipal value.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). The indigent-waiver sentence present verbatim; no de-minimis threshold in the section; silent is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). No municipal minimum; LAC 4:I.301.B 'at a minimum $0.25 per page' (opened verbatim) correctly recorded as an agencies-only per-page floor in notes, not a municipal value; silent is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). 'which may include the transmission of electronic copies of public records' present verbatim (Acts 2023, No. 247 in the amendment line); AG 15-0056 disc-copy passage opened verbatim; soft standard, no per-medium number invented.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). Electronic-transmission clause present verbatim; mail postage correctly treated as unaddressed for local bodies via manual_verification flag; actual_cost_standard is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). No certification charge in the Public Records Law for local custodians; the $20 Dept. of State line confirmed in LAC 4:I.401 (opened) as agency-specific; silent with the Title-33 caveat in manual_verification is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). No per-recording/per-minute pricing in 44:32; silent with search log and the record-type-statute caveat is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). No commercial-purpose surcharge in the section; the agency public-purpose waiver is the inverse and correctly agencies-only in notes; silent is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). 'Copies of records may be furnished without charge or at a reduced charge to indigent citizens of this state.' present verbatim in (C)(1)(a) — discretionary ('may'), single municipal ground; value/enum recording is accurate.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:35 at legis.la.gov: the arbitrary-withholding and $100/day civil-penalty clauses present; amendment line ends Acts 2024, No. 493, eff. June 5, 2024, matching the row; no fee-forfeiture consequence anywhere in the remedies section; silent is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99703",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Opened R.S. 44:32 at legis.la.gov: source_language present verbatim in (C)(1)(a); amendment line ends Acts 2024, No. 411 (no 2025/2026 change; 2026 SB 493, which would have added 20 free pages and a 5c/page cap, confirmed withdrawn from Senate files). The prior-debt gate ('outstanding balance from a prior request') present verbatim; no aggregation rule in the section; structural is right.",
+   "checked_link": "https://www.legis.la.gov/Legis/Law.aspx?d=99691",
+   "corrected_row": null
+  }
+ ],
+ "notes": "Verify pass opened every distinct official_link and the delegated instrument: R.S. 44:32 (legis.la.gov d=99691, amendment line ends Acts 2024, No. 411 — no 2025/2026 amendment; all eight distinct source_language spans used across the 34 rows citing it confirmed verbatim); R.S. 44:35 (d=99703, ends Acts 2024, No. 493); AG Op. 17-0056 (scanned PDF read page-by-page: Apr. 2, 2018, Calcasieu Parish Sheriff's Office; pp. 5-7 passages verbatim, incl. the 15-0173 block-quote and the present-during-examination holding); AG Op. 15-0056 (text PDF: Oct. 8, 2015, Iberia Parish Assessor; p. 4 Granger passage and footnote 7 verbatim); LAC 4:I §301 via the DOA compilation docx (subsections A-G verbatim; historical note 'Promulgated LR 8:411 (August 1982), amended LR 12:229 (April 1986)' — no later amendment shown, closing the discover pass's currency gap for §301; §401 Dept.-of-State table figures also confirmed); La. DOJ 2023 CLE outline slide 21 'Fees (44:32)' (all bullets verbatim). Currency of the withdrawn 2026 SB 493 (Reese) independently confirmed by web search ('read by title and withdrawn from the files of the Senate'). All 36 rows CONFIRMED: no soft standard was converted to a number, no agency figure was recorded as a municipal value, and every resolution word fits the step-2 vocabulary ('reasonable' -> actual_cost_standard per the prompt's own rule; categorical labor non-chargeability -> not_applicable, the vocabulary's worked example). Residual human items already flagged by discover and left flagged: the mis-numbered 'Op. 15-0173' quoted inside 17-0056; AG Op. 96-270 unopened; certification/AV record-type statutes outside Title 44 not inventoried."
+}
