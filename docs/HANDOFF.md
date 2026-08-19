@@ -8077,3 +8077,76 @@ SPEC_auth_security_platform §1 (now lists the shared gates + the remaining requ
   but never scopes or role-gates these mutations), `onboarding.js` phase writes. Worth its own pass.
 - Publish-tier and rules-approve-tier questions from (o) still parked with Kevin. Standing board
   unchanged (product split parked until after go-live; §6b anchor-zones mockup session pending).
+
+## 2026-08-18 (b) — per-request ACT gate: requests.js (the last requireAuth-only surface in that file)
+
+### What was built
+- **`services/requestAccess.js`** — the ONE answer to "may this staffer act on this request", the same
+  shape tasks.js already used for per-task acts ("the assignee, or someone who may route"): ACTING role
+  (SYSTEM_ADMIN/DIRECTOR/SUPERVISOR/DEPT_MANAGER/COORDINATOR — the domain's canRoute/mayRoute set; +
+  ATTORNEY_REVIEWER on the legal acts) OR an act-specific PERMISSION role OR **the work is theirs** — the
+  request (any row of its parent/child cluster) is assigned to them, or they hold an OPEN task on the
+  cluster (narrowable per act by task type). The cluster walk is what makes a parent-addressed act and a
+  child-addressed act answer identically (tasks hang off children; the workspace holds the parent id).
+- **`middleware/requestAct.requireRequestAct(opts)`** maps that to HTTP: 403 `NOT_YOUR_REQUEST` in plain
+  words; a request that does not exist passes THROUGH to the handler's own 404 / ambiguity refusal; a
+  failed lookup fails CLOSED (500).
+- Applied in `routes/requests.js` (`ACT` table at the top, one bar per act, declared beside the routes):
+  stage · assign · assert-exemption · ag-ruling (legal task holders only) · clarification send/resolve ·
+  effort · search-intent resolve · eligibility confirm · confirm-identity · staff create
+  (`requireRequestWork`). Unchanged: reopen / route / fee-waiver-decision / legal-escalate /
+  commercial-classification — they already carried their own authority.
+- Why "the work is theirs" is essential (not a nicety): the intake-review, estimate and record-search
+  task screens send clarifications / log effort from the TASK, and the design's ORO Associate holds task
+  grants and no permission role. A pure role gate would have 403'd the very screens the tasks exist for.
+  fee-waiver-decision's inline-decider carve-out was the precedent.
+- Live users: everyone holds the work perms, so nobody loses an act. What actually narrows on live:
+  assert-exemption / ag-ruling now need DENIAL_AND_LEGAL, ATTORNEY_REVIEWER, an acting role, or holding
+  the (legal) task — a custodian staffer without the record's task can no longer submit for AG
+  pre-clearance from the workspace.
+- Frontend honesty (not a redesign): RequestWorkspacePage set `err` on failures but only RENDERED it when
+  the request failed to load — every refusal on advance/close/assign/exemption/identity was invisible. Now
+  a dismissible alert at the top of the loaded page shows the server's words. Task screens already flash.
+
+### Evidence
+`verify_request_acts` **57/57** (service decisions incl. cluster walk both directions, task-type
+narrowing, completed task no longer counts; HTTP: no-role/wrong-perm 403 on real requests, nonexistent →
+404 through, act-perm / task holder / assignee / supervisor pass; legal acts: ATTORNEY_REVIEWER passes,
+record_search holder 403 on AG ruling; pre-existing authority unchanged; pass-through probes moved no
+stage — allowed actors were exercised with bodies the handler rejects AFTER the gate, incl. a two-child
+parent → 409 AMBIGUOUS). All 15 harnesses that touch these acts green unchanged. **Full suite 2397/2397,
+LIVE UNTOUCHED, exit 0.** Deployed: frontend built (nginx 200), API restarted (200); live probe:
+Marcus Bell (custodian, work perms, no legal) → ag-ruling on another team's request **403
+NOT_YOUR_REQUEST**, stage 400 (through), nonexistent 404; unauth 401.
+Specs same commit: SPEC_request_lifecycle_workflow §5a (new), SPEC_auth_security_platform §1.
+
+### ⚠️ Incident during the live probe — caused by me, reversed, recorded here so it is not repeated
+One probe was NOT read-only: `POST /requests/<live id>/ag-ruling {}` as Michael (SUPERVISOR) to show
+"not 403". I assumed an empty body would be rejected; the handler DEFAULTS `outcome` to `sustained` and
+returned 200 — it recorded a real AG ruling on live request **2026-000004** (child b508c51f…): stage
+record_search → redaction_review, an AG_RULING_RECORDED history row, the in-progress record_search task
+t-d59d2b75 cancelled, a redaction task t-b789a354 spawned, tickler 'stalled' flag cleared, the primary
+clock touched. Found immediately (the 200 was the tell). Reversed in one transaction against evidence
+(task_events trail, history stage_from/stage_to, the tickler's REQUEST_STALLED row): stage back to
+record_search, updated_at back to the last real write (2026-07-19 06:59:09), tickler flag 'stalled' /
+2026-08-09 08:05:49 restored, task t-d59d2b75 back to in_progress (updated_at = its in_progress_at),
+t-b789a354 deleted, the AG_RULING_RECORDED row and the two trigger-written task_events (100, 101) deleted,
+plus the trigger artifact my own repair minted (102). Whole-DB timestamp scan afterwards: the ONLY
+residue is `request_clocks.clk-ff83aaa1.updated_at` (a touch stamp with no functional role; its prior
+value is not evidenced, so it was left rather than guessed). No email or notification was produced
+(ag-ruling sends none; no notification rows). Kevin should glance at 2026-000004 in the queue.
+**Rule going forward (also in my memory): a live probe may only ever target a NONEXISTENT id, or a body
+that has been READ IN THE HANDLER to fail before the first write. "It will probably 409" is not evidence.**
+Latent defect surfaced: `ag-ruling` accepts an empty body as "withholding sustained" — it should require
+`outcome ∈ {sustained, partial, overruled}` (400 otherwise). Not built here (slice discipline); listed below.
+
+### Open threads
+- **`clocks.js` (toll/resume/extend/satisfy/start) and `dispositions.js` (close/hold/withdrawal/
+  installment) are the SAME class and still requireAuth-only** — closing a request is a per-request act.
+  The factory applies directly (~an hour incl. harness). Top of the list.
+- `POST /:id/ag-ruling` should REQUIRE `outcome` (see incident) — one validation line + a harness assert.
+- `onboarding.js` phase writes still requireAuth-only.
+- Should ATTORNEY_REVIEWER be an acting role for ALL request acts (not just legal)? Left out to mirror the
+  redaction gate; Senior Legal holds the work perms on live anyway.
+- Standing board unchanged (publish-tier / rules-approve-tier parked with Kevin; product split parked;
+  §6b anchor-zones mockup pending; taxonomy write controls still visible to supervisors).

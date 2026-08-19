@@ -36,6 +36,8 @@ export default function RequestWorkspacePage() {
   const [stageNote, setStageNote] = useState('');
   const [showAdvance, setShowAdvance] = useState(false);
   const [err, setErr] = useState('');
+  // Server refusals (the per-request act gate among them) must be SEEN. Every mutation below reports through here.
+  function serverErr(e, fallback) { setErr((e && e.response && e.response.data && e.response.data.error) || fallback); }
   const [records, setRecords] = useState([]);
   const [staff, setStaff] = useState([]);
   const [assigning, setAssigning] = useState(false);
@@ -61,7 +63,8 @@ export default function RequestWorkspacePage() {
     // The confirming act is the anchor — make the staffer say it out loud before it is recorded.
     if (!window.confirm('Confirm you verified WHO THIS PERSON IS, in person. This is recorded under your name and anchors the request to their requestor profile.')) return;
     setIdentityBusy(true);
-    try { await api.post('/requests/' + id + '/confirm-identity', {}); await loadIdentity(); await load(); } catch(e) {}
+    setErr('');
+    try { await api.post('/requests/' + id + '/confirm-identity', {}); await loadIdentity(); await load(); } catch(e) { serverErr(e, 'Could not confirm identity'); }
     setIdentityBusy(false);
   }
 
@@ -77,7 +80,7 @@ export default function RequestWorkspacePage() {
     try { var r = await api.get('/files/' + id); setRecords((r.data.files||[]).map(function(f){ return { id: f.id, status: f.responsive ? 'responsive' : 'attached' }; })); } catch(e) {}
   }
   async function loadClocks() { try { var r = await api.get('/clocks/request/' + id); setClocks(r.data.clocks || []); } catch(e) {} }
-  async function clockAction(promise) { setClockBusy(true); try { await promise; } catch(e) {} await loadClocks(); await load(); setClockBusy(false); }
+  async function clockAction(promise) { setClockBusy(true); setErr(''); try { await promise; } catch(e) { serverErr(e, 'The action was not applied'); } await loadClocks(); await load(); setClockBusy(false); }
   function tollClock(cid) { clockAction(api.post('/clocks/' + cid + '/toll', { reason: reasonByClock[cid] || 'clarification_pending' })); }
   function resumeClock(cid) { clockAction(api.post('/clocks/' + cid + '/resume')); }
   function satisfyClock(cid) { clockAction(api.post('/clocks/' + cid + '/satisfy')); }
@@ -106,23 +109,22 @@ export default function RequestWorkspacePage() {
 
   async function advanceStage() {
     if (!request || !canAdvance) return;
-    setAdvancing(true);
+    setAdvancing(true); setErr('');
     var next = nextStage(request.stage);
     try {
       await api.patch('/requests/' + request.id + '/stage', { stage: next, notes: stageNote });
       setStageNote(''); setShowAdvance(false);
       await load();
-    } catch(e) { setErr('Failed to advance stage'); }
+    } catch(e) { serverErr(e, 'Failed to advance stage'); }
     setAdvancing(false);
   }
 
   async function assignRequest(userId) {
-    
-    setAssigning(true);
+    setAssigning(true); setErr('');
     try {
       await api.patch('/requests/' + request.id + '/assign', { assignTo: userId });
       await load();
-    } catch(e) { console.error(e); }
+    } catch(e) { serverErr(e, 'Could not assign the request'); }
     setAssigning(false);
   }
 
@@ -137,11 +139,11 @@ export default function RequestWorkspacePage() {
   }
 
   async function closeRequest(reason) {
-    setAdvancing(true);
+    setAdvancing(true); setErr('');
     try {
       await api.patch('/requests/' + request.id + '/stage', { stage: 'closed', notes: reason });
       await load();
-    } catch(e) { setErr('Failed to close request'); }
+    } catch(e) { serverErr(e, 'Failed to close request'); }
     setAdvancing(false);
   }
 
@@ -166,6 +168,7 @@ export default function RequestWorkspacePage() {
 
   return (
     <div style={{maxWidth:'1200px',display:'flex',flexDirection:'column',gap:'20px'}}>
+      {err ? <div role="alert" style={{background:'#FEF2F2',border:'1px solid #FECACA',color:'#B91C1C',borderRadius:'8px',padding:'10px 14px',fontSize:'13px',display:'flex',justifyContent:'space-between',gap:'12px'}}><span>{err}</span><button onClick={function(){setErr('');}} style={{background:'none',border:'none',color:'#B91C1C',cursor:'pointer',fontWeight:'700'}}>×</button></div> : null}
       <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:'16px'}}>
         <div style={{display:'flex',alignItems:'center',gap:'12px'}}>
           <button onClick={function(){nav('/requests');}} style={{background:'none',border:'none',cursor:'pointer',color:'#6B7280',fontSize:'14px',padding:'8px 12px',borderRadius:'8px'}}>← Back</button>

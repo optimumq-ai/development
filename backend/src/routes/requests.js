@@ -1,6 +1,26 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requireRequestWork } = require('../middleware/auth');
+// PER-REQUEST ACT GATE (2026-08-18) — services/requestAccess: acting role OR act permission OR the work is
+// yours (request or an open task on its cluster assigned to you). One factory, one bar per act, declared
+// where the route is. Acts that already carried their own authority (reopen, route, fee-waiver-decision,
+// legal-escalate, commercial-classification) keep it.
+const { requireRequestAct } = require('../middleware/requestAct');
+const ACT = {
+  create:      requireRequestWork,
+  identity:    requireRequestAct({ label: 'confirm the requestor’s identity', perms: ['REQUEST_MANAGER', 'DELIVERY_AND_CLOSURE', 'FINANCE', 'FEE_MANAGER'] }),
+  stage:       requireRequestAct({ label: 'advance this request', perms: ['REQUEST_MANAGER', 'SEARCH_AND_TRIAGE', 'REDACTION_WORKER', 'DELIVERY_AND_CLOSURE', 'FEE_MANAGER'] }),
+  assign:      requireRequestAct({ label: 'assign this request', perms: ['REQUEST_MANAGER'] }),
+  // Legal acts: Senior Legal by title, the DENIAL_AND_LEGAL capability, or — for the assertion only — the
+  // holder of an open task raising an exemption about their own work. A RULING is answered by legal work.
+  exemption:   requireRequestAct({ label: 'assert an exemption', perms: ['DENIAL_AND_LEGAL'], roles: ['ATTORNEY_REVIEWER'] }),
+  agRuling:    requireRequestAct({ label: 'record an AG ruling', perms: ['DENIAL_AND_LEGAL'], roles: ['ATTORNEY_REVIEWER'], taskTypes: ['legal_review', 'legal_estimate', 'legal_redaction'] }),
+  effort:      requireRequestAct({ label: 'log effort', perms: ['REQUEST_MANAGER', 'SEARCH_AND_TRIAGE', 'REDACTION_WORKER', 'DELIVERY_AND_CLOSURE', 'CLARIFICATION_SENDER', 'FEE_MANAGER'] }),
+  intent:      requireRequestAct({ label: 'resolve a search intent', perms: ['SEARCH_AND_TRIAGE'] }),
+  eligibility: requireRequestAct({ label: 'confirm an eligibility finding', perms: ['REQUEST_MANAGER', 'DENIAL_AND_LEGAL'] }),
+  clarify:     requireRequestAct({ label: 'send a clarification', perms: ['CLARIFICATION_SENDER'] }),
+  unclarify:   requireRequestAct({ label: 'resolve a clarification', perms: ['CLARIFICATION_SENDER'] })
+};
 const email = require('../services/email');
 const { all, get, run } = require('../db');
 const { v4: uuidv4 } = require('uuid');
@@ -153,7 +173,7 @@ router.get('/:id', requireAuth, async function(req, res) {
   res.json({ request: request, history: history, components: components, selectedRecords: selectedRecords });
 });
 
-router.post('/', requireAuth, async function(req, res) {
+router.post('/', requireAuth, ACT.create, async function(req, res) {
   const b = req.body;
   // FORM BUILD (2026-08-01): staff entry accepts children[] — one description per described record —
   // so a 10-item paper form logs in exactly the shape a portal submission takes (§5.1). A single
@@ -177,7 +197,7 @@ router.post('/', requireAuth, async function(req, res) {
 // shows up later — to pay, to collect, to argue — and gets checked at the counter then. Identity is a
 // citizen-level fact, so the act marks the whole cluster (parent + every child): the person who asked
 // is the same person on every component, and profileForRequest may be asked about any of them.
-router.post('/:id/confirm-identity', requireAuth, async function (req, res) {
+router.post('/:id/confirm-identity', requireAuth, ACT.identity, async function (req, res) {
   const row = await get('SELECT id, master_request_id FROM requests WHERE id = ? OR request_number = ?', [req.params.id, req.params.id]);
   if (!row) return res.status(404).json({ error: 'Request not found' });
   const parentId = row.master_request_id || row.id;
@@ -225,7 +245,7 @@ router.get('/:id/identity', requireAuth, async function (req, res) {
 // `req.params.id` straight through, so advancing a parent-addressed request wrote a work stage onto the
 // PARENT and left the child where it was — the same defect fixed on assert-exemption in cbc9e46, and the
 // Advance button on the request workspace calls exactly this.
-router.patch('/:id/stage', requireAuth, async function(req, res) {
+router.patch('/:id/stage', requireAuth, ACT.stage, async function(req, res) {
   const resolvedStage = await scope.workRow(req.params.id);
   if (!resolvedStage.addressed) return res.status(404).json({ error: 'Request not found' });
   if (resolvedStage.ambiguous) {
@@ -411,7 +431,7 @@ router.patch('/:id/route', requireAuth, async function(req, res) {
 });
 
 
-router.patch('/:id/assign', requireAuth, async function(req, res) {
+router.patch('/:id/assign', requireAuth, ACT.assign, async function(req, res) {
   var request = await get('SELECT * FROM requests WHERE id = ?', [req.params.id]);
   if (!request) return res.status(404).json({ error: 'Request not found' });
   var assignTo = req.body.assignTo || null;
@@ -467,7 +487,7 @@ router.post('/public', async function(req, res) {
 // THE CLOCK STAYS ON THE PARENT and the code below already does that (`COALESCE(master_request_id, id)`),
 // which is the same division read from the other side: the statutory deadline is the citizen's, one per
 // request, no matter how many described items hang off it.
-router.post('/:id/assert-exemption', requireAuth, async function(req, res) {
+router.post('/:id/assert-exemption', requireAuth, ACT.exemption, async function(req, res) {
   var resolved = await scope.workRow(req.params.id);
   if (!resolved.addressed) return res.status(404).json({ error: 'Request not found' });
   if (resolved.ambiguous) {
@@ -511,7 +531,7 @@ router.post('/:id/assert-exemption', requireAuth, async function(req, res) {
 // THE TWIN OF assert-exemption, and it must land on the SAME row. A ruling closes the act the assertion
 // opened, so if the assertion moved the child, a ruling that moved the parent would leave the child stranded
 // in a legal stage forever with nothing able to rule on it.
-router.post('/:id/ag-ruling', requireAuth, async function(req, res) {
+router.post('/:id/ag-ruling', requireAuth, ACT.agRuling, async function(req, res) {
   var resolvedAg = await scope.workRow(req.params.id);
   if (!resolvedAg.addressed) return res.status(404).json({ error: 'Request not found' });
   if (resolvedAg.ambiguous) {
@@ -667,7 +687,7 @@ var EFFORT_ACTIONS = {
   CONSULT_REQUESTED: 'Conferred with a supervisor',
   CALL_LOGGED: 'Logged a phone call'
 };
-router.post('/:id/effort', requireAuth, async function (req, res) {
+router.post('/:id/effort', requireAuth, ACT.effort, async function (req, res) {
   try {
     var b = req.body || {};
     var action = String(b.action || '');
@@ -704,7 +724,7 @@ router.get('/:id/search-intents', requireAuth, async function(req, res) {
 // SEARCH_INTENT_RESOLVED is deliberately NOT in the no-records effort-trail action list: an assertion that
 // there is nothing more is a CLAIM, not evidence of a search. Letting it evidence itself would be circular
 // -- it would mean a searcher could clear both gates having run no search at all.
-router.post('/:id/search-intents/:intentId/resolve', requireAuth, async function(req, res) {
+router.post('/:id/search-intents/:intentId/resolve', requireAuth, ACT.intent, async function(req, res) {
   try {
     var SI = require('../services/searchIntents');
     var b = req.body || {};
@@ -745,7 +765,7 @@ router.get('/:id/eligibility-findings', requireAuth, async function(req, res) {
 // THE CONFIRM (rule c — advisory ≠ automatic). A review is cleared by a NAMED PERSON and nothing else: the
 // system recorded the finding, and it must never be shown as having decided it. The reviewer's name is
 // taken from the token, not the body, so a confirmation cannot be attributed to somebody who did not make it.
-router.post('/:id/eligibility-findings/:findingId/confirm', requireAuth, async function(req, res) {
+router.post('/:id/eligibility-findings/:findingId/confirm', requireAuth, ACT.eligibility, async function(req, res) {
   try {
     var EF = require('../services/eligibilityFindings');
     var finding = await EF.confirm(req.params.findingId, {
@@ -768,7 +788,7 @@ router.get('/:id/clarification/preview', requireAuth, async function(req, res) {
     res.json(out);
   } catch (e) { res.status(e.message === 'Request not found' ? 404 : 500).json({ error: e.message }); }
 });
-router.post('/:id/clarification', requireAuth, async function(req, res) {
+router.post('/:id/clarification', requireAuth, ACT.clarify, async function(req, res) {
   try {
     var CA = require('../services/clarificationAction');
     var b = req.body || {};
@@ -783,7 +803,7 @@ router.post('/:id/clarification', requireAuth, async function(req, res) {
     res.status(e.message === 'Request not found' ? 404 : 500).json({ error: e.message });
   }
 });
-router.post('/:id/clarification/resolve', requireAuth, async function(req, res) {
+router.post('/:id/clarification/resolve', requireAuth, ACT.unclarify, async function(req, res) {
   try {
     var CA = require('../services/clarificationAction');
     var b = req.body || {};
