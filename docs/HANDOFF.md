@@ -8300,3 +8300,35 @@ SPEC_auth_security_platform §1 (inventory).
    access), NJ (no prior rules — researched from scratch here; its NON-fee domains still need the full V2
    chunked discovery — separate task).
 - Fees role-gate hardening remains PAUSED behind the redesign. Standing board unchanged.
+
+## 2026-08-19 (e) — Fee gap pass PAUSED at Kevin's direction; 32-state FEE-REGIME REVIEW compiled from existing material (no new research agents)
+
+### What happened
+- Resumed from (d): background workflows had kept writing before the old session died — raw now 22/32
+  (all 36/36 rows), verified 4/32 (AL AZ CA CO, all clean). Committed (eb070a2). Kevin then REJECTED the
+  slice relaunches: no more research agents until he reviews what prior efforts already hold.
+- Compiled `fee_gap/STATE_FEE_REGIME_REVIEW.md` (mirrored to ~/exchange/STATE_FEE_REGIME_REVIEW_2026-08-19.md,
+  commit 97588cb): all 32 states classified — roll-up tag + item-level statutory exceptions (Kevin's
+  mixed-regime rule: a defers state's explicit waiver/deposit/labor rules stay binding), deferral-rule-in-
+  library check (all anchored; 19 items across 10 states anchor to new rows awaiting merge), delegated-
+  instrument descriptions (municipal-binding: TX→1 TAC 70, TN→OORC schedule, PA→OOR schedule, CO labor cap→
+  Leg. Council CPI posting; agency-only list separate), third-party delta check (Kevin's ChatGPT/DeepSeek
+  uploads = chatgpt_pilot + desktop_research: leads only — ZERO surviving deltas for the 22 gap-passed
+  states), and per-state pending notes. LOUISIANA: R.S. 44:32(C) is LIVE (posted-schedule duty 2023, advance
+  payment 2024, labor never, indigent waiver) — the Google "$0.25 state fee" is LAC 4:I.301, agency-only;
+  SB 493 (2026, would have set rates) withdrawn. MN is the thinnest state + confirmed recency gap (2025
+  subd. 3(g) not in library). NC certification = the one unresolved delegation among the 22.
+- Also logged at Kevin's request (same commit): BACKLOG "report a possibly-incorrect state rule" button
+  (→ admin@optimumq.com); BUSINESS_LEGAL_IP_LOG [FOR COUNSEL] state-rules-profile provenance/warranty
+  disclaimer (manually aggregated, no third-party content, human-web-search reliability).
+
+### State of the run
+- raw/: 22 states done (missing MA MI MN MO NY OK OR VA WA WI). verified/: 4 done (18 raw await verify).
+- NOTHING is running. Do NOT relaunch the slice workflows without Kevin's explicit go — he has now twice
+  rejected launches pending his review of the regime document.
+
+### Next (after Kevin reviews the regime doc)
+- His call among: (a) verify-only pass for the 18 discovered states, (b) full gap pass for the 10 pending
+  (MN first), (c) merge step (verified layer into fee_master_list.json + the new deferral-anchor rules),
+  then step 3 (template fee_schedule value/unit/basis/engine_field). Fees role-gate hardening still PAUSED.
+- Standing board unchanged.
