@@ -1,0 +1,1419 @@
+PROVENANCE: Supplied by Kevin 2026-08-20 (exchange/pruned/'wisconsin  state  legistlature website content.pdf', text-extracted).
+SOURCE: Certified 2023-24 Wisconsin Statutes & Annotations, published 2026-08-05 under s. 35.18, updated through 2025 Wisconsin Act 247. Subset of ch. 19 (subch. II: ss. 19.21-19.39) selected by Kevin.
+NOTE: Official certified text + annotations; treat as openable-source equivalent for the WI gap pass.
+----------------------------------------------------------------
+Updated 2023-24 Wisconsin Statutes & Annotations
+Published August 5, 2026. Certified under s. 35.18.
+Updated through 2025 Wisconsin Act 247 and through all Orders of the Controlled
+Substances Board affecting Chapter 961 and Supreme Court Orders filed before and in
+effect on August 5, 2026.
+
+(I’ve included only a relevant subset of Chapter 19 below)
+
+SUBCHAPTER II
+PUBLIC RECORDS AND PROPERTY
+19.21 Custody and delivery of official property and records.
+(1) Each and every officer of the state, or of any county, town, city, village, school district, or other municipality
+or district, is the legal custodian of and shall safely keep and preserve all property and things received from the
+officer’s predecessor or other persons and required by law to be filed, deposited, or kept in the officer’s office, or
+which are in the lawful possession or control of the officer or the officer’s deputies, or to the possession or
+control of which the officer or the officer’s deputies may be lawfully entitled, as such officers.
+(2) Upon the expiration of each such officer’s term of office, or whenever the office becomes vacant, the officer,
+or on the officer’s death the officer’s legal representative, shall on demand deliver to the officer’s successor all
+such property and things then in the officer’s custody, and the officer’s successor shall receipt therefor to said
+officer, who shall file said receipt, as the case may be, in the office of the secretary of state, county clerk, town
+clerk, city clerk, village clerk, school district clerk, or clerk or other secretarial officer of the municipality or
+district, respectively; but if a vacancy occurs before such successor is qualified, such property and things shall be
+delivered to and be receipted for by such secretary or clerk, respectively, on behalf of the successor, to be
+delivered to such successor upon the latter’s receipt.
+(3) Any person who violates this section shall, in addition to any other liability or penalty, civil or criminal,
+forfeit not less than $25 nor more than $2,000; such forfeiture to be enforced by a civil action on behalf of, and
+the proceeds to be paid into the treasury of the state, municipality, or district, as the case may be.
+
+(4)
+(a) Any city council, village board or town board may provide by ordinance for the destruction of obsolete
+public records. Prior to the destruction at least 60 days’ notice in writing of such destruction shall be given the
+historical society which shall preserve any such records it determines to be of historical interest. The historical
+society may, upon application, waive such notice. No assessment roll containing forest crop acreage may be
+destroyed without prior approval of the secretary of revenue. This paragraph does not apply to school records of
+a 1st class city school district.
+(b) The period of time any town, city or village public record is kept before destruction shall be as prescribed by
+ordinance unless a specific period of time is provided by statute. The period prescribed in the ordinance may not
+be less than 2 years with respect to water stubs, receipts of current billings and customer’s ledgers of any
+municipal utility, and 7 years for other records unless a shorter period has been fixed by the public records board
+under s. 16.61 (3) (e) and except as provided under sub. (7). This paragraph does not apply to school records of a
+1st class city school district.
+(c) Any local governmental unit or agency may provide for the keeping and preservation of public records kept
+by that governmental unit through the use of microfilm or another reproductive device, optical imaging or
+electronic formatting. A local governmental unit or agency shall make such provision by ordinance or resolution.
+Any such action by a subunit of a local governmental unit or agency shall be in conformity with the action of the
+unit or agency of which it is a part. Any photographic reproduction of a record authorized to be reproduced under
+this paragraph is deemed an original record for all purposes if it meets the applicable standards established in
+ss. 16.61 (7) and 16.612. This paragraph does not apply to public records kept by counties electing to be
+governed by ch. 228.
+(cm) Paragraph (c) does not apply to court records kept by a clerk of circuit court and subject to SCR chapter 72.
+(5)
+(a) Any county having a population of 750,000 or more may provide by ordinance for the destruction of obsolete
+public records, except for court records subject to SCR chapter 72.
+(b) Any county having a population of less than 750,000 may provide by ordinance for the destruction of
+obsolete public records, subject to s. 59.52 (4) (b) and (c), except for court records governed by SCR chapter 72.
+(c) The period of time any public record shall be kept before destruction shall be determined by ordinance except
+that in all counties the specific period of time expressed within s. 7.23 or 59.52 (4) (a) or any other law requiring
+a specific retention period shall apply. The period of time prescribed in the ordinance for the destruction of all
+records not governed by s. 7.23 or 59.52 (4) (a) or any other law prescribing a specific retention period may not
+be less than 7 years, unless a shorter period is fixed by the public records board under s. 16.61 (3) (e).
+(d)
+1. Except as provided in subd. 2., prior to any destruction of records under this subsection, except those specified
+within s. 59.52 (4) (a), at least 60 days’ notice of such destruction shall be given in writing, to the historical
+
+society, which may preserve any records it determines to be of historical interest. Notice is not required for any
+records for which destruction has previously been approved by the historical society or in which the society has
+indicated that it has no interest for historical purposes. Records which have a confidential character while in the
+possession of the original custodian shall retain such confidential character after transfer to the historical society
+unless the director of the historical society, with the concurrence of the original custodian, determines that such
+records shall be made accessible to the public under such proper and reasonable rules as the historical society
+promulgates.
+2. Subdivision 1. does not apply to patient health care records, as defined in s. 146.81 (4), that are in the custody
+or control of a local health department, as defined in s. 250.01 (4).
+(e) The county board of any county may provide, by ordinance, a program for the keeping, preservation,
+retention and disposition of public records including the establishment of a committee on public records and may
+institute a records management service for the county and may appropriate funds to accomplish such purposes.
+(f) District attorney records are state records and are subject to s. 978.07.
+(6) A school district may provide for the destruction of obsolete school records. Prior to any such destruction, at
+least 60 days’ notice in writing of such destruction shall be given to the historical society, which shall preserve
+any records it determines to be of historical interest. The historical society may, upon application, waive the
+notice. The period of time a school district record shall be kept before destruction shall be not less than 7 years,
+unless a shorter period is fixed by the public records board under s. 16.61 (3) (e) and except as provided under
+sub. (7). This section does not apply to pupil records under s. 118.125.
+(7) Notwithstanding any minimum period of time for retention set under s. 16.61 (3) (e), any taped recording of
+a meeting, as defined in s. 19.82 (2), by any governmental body, as defined under s. 19.82 (1), of a city, village,
+town or school district may be destroyed no sooner than 90 days after the minutes have been approved and
+published if the purpose of the recording was to make minutes of the meeting.
+(8) Any metropolitan sewerage commission created under ss. 200.21 to 200.65 may provide for the destruction
+of obsolete commission records. No record of the metropolitan sewerage district may be destroyed except by
+action of the commission specifically authorizing the destruction of that record. Prior to any destruction of
+records under this subsection, the commission shall give at least 60 days’ prior notice of the proposed destruction
+to the state historical society, which may preserve records it determines to be of historical interest. Upon the
+application of the commission, the state historical society may waive this notice. Except as provided under
+sub. (7), the commission may only destroy a record under this subsection after 7 years elapse from the date of the
+record’s creation, unless a shorter period is fixed by the public records board under s. 16.61 (3) (e).
+History: 1971 c. 215; 1975 c. 41 s. 52; 1977 c. 202; 1979 c. 35, 221; 1981 c. 191, 282, 335; 1981 c. 350 s. 13; 1981 c.
+391; 1983 a. 532; 1985 a. 180 ss. 22, 30m; 1985 a. 225; 1985 a. 332 s. 251 (1); Sup. Ct. Order, 136 Wis. 2d xi
+(1987); 1987 a. 147 ss. 20, 25; 1989 a. 248; 1991 a. 39, 185, 316; 1993 a. 27, 60, 172; 1995 a. 27, 201; 1999 a.
+150 s. 672; 2017 a. 207 s. 5.
+Sub. (1) provides that a police chief, as an officer of a municipality, is the legal custodian of all records of that officer’s
+department. Town of La Grange v. Auchinleck, 216 Wis. 2d 84, 573 N.W.2d 232 (Ct. App. 1997), 96-3313.
+
+This section relates to records retention and is not a part of the public records law. An agency’s alleged failure to keep
+sought-after records may not be attacked under the public records law. State ex rel. Gehl v. Connors, 2007 WI App
+238, 306 Wis. 2d 247, 742 N.W.2d 530, 06-2455.
+Under sub. (1), district attorneys must indefinitely preserve papers of a documentary nature evidencing activities of a
+prosecutor’s office. 68 Atty. Gen. 17.
+A county with a population under 500,000 [now 750,000] may by ordinance under sub. (6) [now sub. (5)] provide for
+the destruction of obsolete case records maintained by the county social services agency under s. 48.59 (1). 70 Atty.
+Gen. 196.
+A vocational, technical, and adult education [now technical college] district is a “school district” under sub. (7) [now
+sub. (6)]. 71 Atty. Gen. 9.
+
+19.22 Proceedings to compel the delivery of official property.
+(1) If any public officer refuses or neglects to deliver to his or her successor any official property or things as
+required in s. 19.21, or if the property or things shall come to the hands of any other person who refuses or
+neglects, on demand, to deliver them to the successor in the office, the successor may make complaint to any
+circuit judge for the county where the person refusing or neglecting resides. If the judge is satisfied by the oath
+of the complainant and other testimony as may be offered that the property or things are withheld, the judge shall
+grant an order directing the person so refusing to show cause, within some short and reasonable time, why the
+person should not be compelled to deliver the property or things.
+(2) At the time appointed, or at any other time to which the matter may be adjourned, upon due proof of service
+of the order issued under sub. (1), if the person complained against makes affidavit before the judge that the
+person has delivered to the person’s successor all of the official property and things in the person’s custody or
+possession pertaining to the office, within the person’s knowledge, the person complained against shall be
+discharged and all further proceedings in the matter before the judge shall cease.
+(3) If the person complained against does not make such affidavit the matter shall proceed as follows:
+(a) The judge shall inquire further into the matters set forth in the complaint, and if it appears that any such
+property or things are withheld by the person complained against the judge shall by warrant commit the person
+complained against to the county jail, there to remain until the delivery of such property and things to the
+complainant or until the person complained against be otherwise discharged according to law.
+(b) If required by the complainant the judge shall also issue a warrant, directed to the sheriff or any constable of
+the county, commanding the sheriff or constable in the daytime to search such places as shall be designated in
+such warrant for such official property and things as were in the custody of the officer whose term of office
+expired or whose office became vacant, or of which the officer was the legal custodian, and seize and bring them
+before the judge issuing such warrant.
+(c) When any such property or things are brought before the judge by virtue of such warrant, the judge shall
+inquire whether the same pertain to such office, and if it thereupon appears that the property or things pertain
+thereto the judge shall order the delivery of the property or things to the complainant.
+History: 1977 c. 449; 1991 a. 316; 1993 a. 213.
+
+19.23 Transfer of records or materials to historical society.
+
+(1) Any public records, in any state office, that are not required for current use may, in the discretion of the
+public records board, be transferred into the custody of the historical society, as provided in s. 16.61.
+(2) The proper officer of any county, city, village, town, school district or other local governmental unit, may
+under s. 44.09 (1) offer title and transfer custody to the historical society of any records deemed by the society to
+be of permanent historical importance.
+(3) The proper officer of any court may, on order of the judge of that court, transfer to the historical society title
+to such court records as have been photographed or microphotographed or which have been on file for at least 75
+years, and which are deemed by the society to be of permanent historical value.
+(4) Any other articles or materials which are of historic value and are not required for current use may, in the
+discretion of the department or agency where such articles or materials are located, be transferred into the
+custody of the historical society as trustee for the state, and shall thereupon become part of the permanent
+collections of said society.
+History: 1975 c. 41 s. 52; 1981 c. 350 s. 13; 1985 a. 180 s. 30m; 1987 a. 147 s. 25; 1991 a. 226; 1995 a. 27.
+
+19.24 Refusal to deliver money, etc., to successor. Any public officer whatever, in this state, who
+shall, at the expiration of the officer’s term of office, refuse or willfully neglect to deliver, on demand, to the
+officer’s successor in office, after such successor shall have been duly qualified and be entitled to said office
+according to law, all moneys, records, books, papers or other property belonging to the office and in the officer’s
+hands or under the officer’s control by virtue thereof, shall be imprisoned not more than 6 months or fined not
+more than $100.
+History: 1991 a. 316.
+
+19.25 State officers may require searches, etc., without fees. The secretary of state, treasurer and
+attorney general, respectively, are authorized to require searches in the respective offices of each other and in the
+offices of the clerk of the supreme court, of the court of appeals, of the circuit courts, of the registers of deeds for
+any papers, records or documents necessary to the discharge of the duties of their respective offices, and to
+require copies thereof and extracts therefrom without the payment of any fee or charge whatever.
+History: 1977 c. 187, 449.
+
+19.31 Declaration of policy. In recognition of the fact that a representative government is dependent upon
+an informed electorate, it is declared to be the public policy of this state that all persons are entitled to the
+greatest possible information regarding the affairs of government and the official acts of those officers and
+employees who represent them. Further, providing persons with such information is declared to be an essential
+function of a representative government and an integral part of the routine duties of officers and employees
+whose responsibility it is to provide such information. To that end, ss. 19.32 to 19.37 shall be construed in every
+instance with a presumption of complete public access, consistent with the conduct of governmental business.
+The denial of public access generally is contrary to the public interest, and only in an exceptional case may
+access be denied.
+History: 1981 c. 335, 391.
+
+An agency cannot promulgate an administrative rule that creates an exception to the open records law. Chvala v.
+Bubolz, 204 Wis. 2d 82, 552 N.W.2d 892 (Ct. App. 1996), 95-3120.
+Although the requester referred to the federal Freedom of Information Act, a letter that clearly described open records
+and had all the earmarkings of an open records request was in fact an open records request and triggered, at minimum, a
+duty to respond. ECO, Inc. v. City of Elkhorn, 2002 WI App 302, 259 Wis. 2d 276, 655 N.W.2d 510, 02-0216.
+The public records law addresses the duty to disclose records; it does not address the duty to retain records. An agency’s
+alleged failure to keep sought-after records may not be attacked under the public records law. Section 19.21 relates to
+records retention and is not a part of the public records law. State ex rel. Gehl v. Connors, 2007 WI App 238, 306 Wis.
+2d 247, 742 N.W.2d 530, 06-2455.
+Absent a clear statutory exception, a limitation under the common law, or an overriding public interest in keeping a
+public record confidential, the public records law shall be construed in every instance with a presumption of complete
+public access. As the denial of public access generally is contrary to the public interest, access may be denied only in an
+exceptional case. An exceptional case exists when the facts are such that the public policy interests favoring
+nondisclosure outweigh the public policy interests favoring disclosure, notwithstanding the strong presumption favoring
+disclosure. Hagen v. Board of Regents, 2018 WI App 43, 383 Wis. 2d 567, 916 N.W.2d 198, 17-2058.
+When a school district, a government entity, uses government resources to collect email addresses of school district
+parents and then uses those email addresses to promote and advance selected matters of interest to school district
+personnel, the email addresses relate to the affairs of government and the official acts of those officers and employees
+who represent them. Gierl v. Mequon-Thiensville School District, 2023 WI App 5, 405 Wis. 2d 757, 985 N.W.2d
+116, 21-2190.
+The Wisconsin Public Records Law. De la Mora. 67 MLR 65 (1983).
+Toward a More Open and Accountable Government: A Call for Optimal Disclosure Under the Wisconsin Open Records
+Law. Roang. 1994 WLR 719.
+Wisconsin’s Public-Records Law: Preserving the Presumption of Complete Public Access in the Age of Electronic
+Records. Holcomb & Isaac. 2008 WLR 515.
+Municipal responsibility under the Wisconsin revised public records law. Maloney. WBB Jan. 1983.
+The public records law and the Wisconsin Department of Revenue. Boykoff. WBB Dec. 1983.
+The Wisconsin Open Records Act: An update on issues. Trubek & Foley. WBB Aug. 1986.
+Getting the Best of Both Worlds: Open Government and Economic Development. Westerberg. Wis. Law. Feb. 2009.
+
+19.32 Definitions. As used in ss. 19.32 to 19.39:
+(1) “Authority” means any of the following having custody of a record: a state or local office, elective official,
+agency, board, commission, committee, council, department or public body corporate and politic created by the
+constitution or by any law, ordinance, rule or order; a governmental or quasi-governmental corporation except
+for the Bradley center sports and entertainment corporation; a special purpose district; any court of law; the
+assembly or senate; a nonprofit corporation which receives more than 50 percent of its funds from a county or a
+municipality, as defined in s. 59.001 (3), and which provides services related to public health or safety to the
+county or municipality; a university police department under s. 175.42; or a formally constituted subunit of any
+of the foregoing.
+(1b) “Committed person” means a person who is committed under ch. 51, 971, 975 or 980 and who is placed in
+an inpatient treatment facility, during the period that the person’s placement in the inpatient treatment facility
+continues.
+(1bd) “Elective official” means an individual who holds an office that is regularly filled by vote of the people.
+
+(1bg) “Employee” means any individual who is employed by an authority, other than an individual holding
+local public office or a state public office, or any individual who is employed by an employer other than an
+authority.
+(1c) “Incarcerated person” means a person who is incarcerated in a penal facility or who is placed on probation
+and given confinement under s. 973.09 (4) as a condition of placement, during the period of confinement for
+which the person has been sentenced.
+(1d) “Inpatient treatment facility” means any of the following:
+(a) A mental health institute, as defined in s. 51.01 (12).
+(c) A facility or unit for the institutional care of sexually violent persons specified under s. 980.065.
+(d) The Milwaukee County mental health complex established under s. 51.08.
+(1de) “Local governmental unit” has the meaning given in s. 19.42 (7u).
+(1dm) “Local public office” has the meaning given in s. 19.42 (7w), and also includes any appointive office or
+position of a local governmental unit in which an individual serves as the head of a department, agency, or
+division of the local governmental unit, but does not include any office or position filled by a municipal
+employee, as defined in s. 111.70 (1) (i).
+(1e) “Penal facility” means a state prison under s. 302.01, county jail, county house of correction or other state,
+county or municipal correctional or detention facility.
+(1m) “Person authorized by the individual” means the parent, guardian, as defined in s. 48.02 (8), or legal
+custodian, as defined in s. 48.02 (11), of an individual who is a child, as defined in s. 48.02 (2); the guardian of
+an individual adjudicated incompetent in this state; the personal representative or spouse of an individual who is
+deceased; or any person authorized, in writing, by an individual to act on his or her behalf.
+(1r) “Personally identifiable information” has the meaning specified in s. 19.62 (5).
+(2) “Record” means any material on which written, drawn, printed, spoken, visual, or electromagnetic
+information or electronically generated or stored data is recorded or preserved, regardless of physical form or
+characteristics, that has been created or is being kept by an authority. “Record” includes, but is not limited to,
+handwritten, typed, or printed pages, maps, charts, photographs, films, recordings, tapes, optical discs, and any
+other medium on which electronically generated or stored data is recorded or preserved. “Record” does not
+include drafts, notes, preliminary computations, and like materials prepared for the originator’s personal use or
+prepared by the originator in the name of a person for whom the originator is working; materials that are purely
+the personal property of the custodian and have no relation to his or her office; materials to which access is
+limited by copyright, patent, or bequest; and published materials in the possession of an authority other than a
+public library that are available for sale, or that are available for inspection at a public library.
+(2g) “Record subject” means an individual about whom personally identifiable information is contained in a
+record.
+
+(3) “Requester” means any person who requests inspection or copies of a record, except a committed or
+incarcerated person, unless the person requests inspection or copies of a record that contains specific references
+to that person or his or her minor children for whom he or she has not been denied physical placement under
+ch. 767, and the record is otherwise accessible to the person by law.
+(3m) “Special purpose district” means a district, other than a state governmental unit or a county, city, village,
+or town, that is created to perform a particular function and whose geographic jurisdiction is limited to some
+portion of this state.
+(4) “State public office” has the meaning given in s. 19.42 (13), but does not include a position identified in
+s. 20.923 (6) (f) to (gm).
+History: 1981 c. 335; 1985 a. 26, 29, 332; 1987 a. 305; 1991 a. 39, 1991 a. 269 ss. 26pd, 33b; 1993 a.
+215, 263, 491; 1995 a. 158; 1997 a. 79, 94; 1999 a. 9; 2001 a. 16; 2003 a. 47; 2005 a. 387; 2007 a. 20; 2013 a.
+171, 265; 2015 a. 195, 196.
+NOTE: 2003 Wis. Act 47, which affected this section, contains extensive explanatory notes.
+A study commissioned by the corporation counsel and used in various ways was not a “draft” under sub. (2), although it
+was not in final form. A document prepared other than for the originator’s personal use, although in preliminary form or
+marked “draft,” is a record. Fox v. Bock, 149 Wis. 2d 403, 438 N.W.2d 589 (1989).
+A settlement agreement containing a pledge of confidentiality and kept in the possession of a school district’s attorney
+was a public record subject to public access. Journal/Sentinel, Inc. v. School Board, 186 Wis. 2d 443, 521 N.W.2d
+165 (Ct. App. 1994).
+Individuals confined as sexually violent persons under ch. 980 are not “incarcerated” under sub. (1c). Klein v.
+Wisconsin Resource Center, 218 Wis. 2d 487, 582 N.W.2d 44 (Ct. App. 1998), 97-0679.
+A nonprofit corporation that receives 50 percent of its funds from a municipality or county is an authority under sub. (1)
+regardless of the source from which the municipality or county obtains those funds. Cavey v. Walrath, 229 Wis. 2d
+105, 598 N.W.2d 240 (Ct. App. 1999), 98-0072.
+A person aggrieved by a request made under the open records law has standing to raise a challenge that the requested
+materials are not records because they fall within the exception for copyrighted material under sub. (2). Under the facts
+of this case, the language of sub. (2), when viewed in light of the fair use exception to copyright infringement, applied
+so that the disputed materials were records within the statutory definition. Zellner v. Cedarburg School District, 2007
+WI 53, 300 Wis. 2d 290, 731 N.W.2d 240, 06-1143.
+
+“Record” in sub. (2) and s. 19.35 (5) does not include identical copies of otherwise available records. A copy that is not
+different in some meaningful way from an original, regardless of the form of the original, is an identical copy. If a copy
+differs in some significant way for purposes of responding to an open records request, then it is not truly an identical
+copy, but instead a different record. Stone v. Board of Regents, 2007 WI App 223, 305 Wis. 2d 679, 741 N.W.2d
+774, 06-2537.
+A municipality’s independent contractor assessor was not an authority under sub. (1) and was not a proper recipient of
+an open records request. In this case, only the municipalities themselves were the “authorities” for purposes of the open
+records law. Accordingly, only the municipalities were proper recipients of the relevant open records requests.
+WIREdata, Inc. v. Village of Sussex, 2008 WI 69, 310 Wis. 2d 397, 751 N.W.2d 736, 05-1473.
+A corporation is quasi-governmental if, based on the totality of the circumstances, it resembles a governmental
+corporation in function, effect, or status, requiring a case-by-case analysis. Here, a primary consideration was that the
+body was funded exclusively by public tax dollars or interest thereon. Additionally, its office was located in the
+municipal building, it was listed on the city website, the city provided it with clerical support and office supplies, all its
+assets revert to the city if it ceased to exist, its books were open for city inspection, the mayor and another city official
+were directors, and it had no clients other than the city. State v. Beaver Dam Area Development Corp., 2008 WI 90, 312
+Wis. 2d 84, 752 N.W.2d 295, 06-0662.
+
+Employees’ personal emails were not subject to disclosure in this case. Schill v. Wisconsin Rapids School District, 2010
+WI 86, 327 Wis. 2d 572, 786 N.W.2d 177, 08-0967.
+Redacted portions of emails, who sent the emails, and where they were sent from were not “purely personal” and
+therefore subject to disclosure. Public awareness of who is attempting to influence public policy is essential for effective
+oversight of our government. Whether a communication is sent to a public official from a source that appears associated
+with a particular unit of government, a private entity, or a nonprofit organization, or from individuals who may be
+associated with a specific interest or particular area of the state, from where a communication is sent further assists the
+public in understanding who is attempting to influence public policy and why. John K. MacIver Institute for Public
+Policy, Inc. v. Erpenbach, 2014 WI App 49, 354 Wis. 2d 61, 848 N.W.2d 862, 13-1187.
+To be a “quasi-governmental corporation” under sub. (1), an entity must first be a corporation. To hold that the term
+“quasi-governmental corporation” includes an entity that is not a corporation would effectively rewrite the statute to
+eliminate the legislature’s use of the word corporation. Wisconsin Professional Police Ass’n v. Wisconsin Counties
+Ass’n, 2014 WI App 106, 357 Wis. 2d 687, 855 N.W.2d 715, 14-0249.
+
+“Notes” in sub. (2) covers a broad range of frequently created, informal writings. Documents found to be notes in this
+case were mostly handwritten and at times barely legible. They included copies of post-it notes and telephone message
+slips, and in other ways appeared to reflect hurried, fragmentary, and informal writing. A few documents were in the
+form of draft letters, but were created for and used by the originators as part of their preparation for, or as part of their
+processing after, interviews that they conducted. Voice of Wisconsin Rapids, LLC v. Wisconsin Rapids Public School
+District, 2015 WI App 53, 364 Wis. 2d 429, 867 N.W.2d 825, 14-1256.
+The exception from the definition of “record” in sub. (2) of notes “prepared for the originator’s personal use” may apply
+to notes that are created or used in connection with government work and with a governmental purpose. Voice of
+Wisconsin Rapids, LLC v. Wisconsin Rapids Public School District, 2015 WI App 53, 364 Wis. 2d 429, 867 N.W.2d
+825, 14-1256.
+A district attorney is employed by an authority and holds a state public office and therefore is not an “employee” within
+the meaning of sub. (1bg). Moustakis v. Department of Justice, 2016 WI 42, 368 Wis. 2d 677, 880 N.W.2d 142, 141853.
+Each case involving an alleged quasi-governmental corporation must be decided on the particular facts presented. An
+entity is a quasi-governmental corporation if, based on the totality of the circumstances, the entity resembles a
+governmental corporation in function, effect, or status. Accordingly, courts must consider a nonexhaustive list of
+factors, with no single factor being outcome determinative. The five factors that guided the supreme court’s conclusion
+in Beaver Dam Area Development Corp., 2008 WI 90, are: 1) whether the entity’s funding comes from predominately
+public or private sources; 2) whether the entity serves a public function; 3) whether the entity appears to the public to be
+a government entity; 4) the degree to which the entity is subject to government control; and 5) the amount of access
+governmental bodies have to the entity’s records. State ex rel. Flynn v. Kemper Center, Inc., 2019 WI App 6, 385 Wis.
+2d 811, 924 N.W.2d 218, 17-1897.
+There is no requirement under sub. (2) that a record be created by a public authority. Privately created materials are not
+exempt from disclosure. Journal Sentinel, Inc. v. Milwaukee County Sheriff’s Office, 2022 WI App 44, 404 Wis. 2d
+328, 979 N.W.2d 609, 21-0615.
+Communications relating to a defendant’s intentions to remain in office by exercising a power of that office to retain it
+as a holdover until a replacement is appointed by the governor and confirmed by the senate have a connection to a
+governmental function and, thus, are “records” under sub. (2). Midwest Environmental Advocates, Inc. v. Prehn, 2025
+WI App 55, 418 Wis. 2d 212, 26 N.W.3d 347, 23-1478.
+The Natural Resources Board is an “authority” under sub. (1), but its individual members are not. Midwest
+Environmental Advocates, Inc. v. Prehn, 2025 WI App 55, 418 Wis. 2d 212, 26 N.W.3d 347, 23-1478.
+
+“Records” must have some relation to the functions of the agency. 72 Atty. Gen. 99.
+Discussing the treatment of drafts under the public records law. 77 Atty. Gen. 100.
+Applying Open Records Policy to Wisconsin District Attorneys: Can Charging Guidelines Promote Public Awareness?
+Mayer. 1996 WLR 295.
+
+19.33 Legal custodians.
+
+(1) An elective official is the legal custodian of his or her records and the records of his or her office, but the
+official may designate an employee of his or her staff to act as the legal custodian.
+(2) The chairperson of a committee of elective officials, or the designee of the chairperson, is the legal custodian
+of the records of the committee.
+(3) The cochairpersons of a joint committee of elective officials, or the designee of the cochairpersons, are the
+legal custodians of the records of the joint committee.
+(4) Every authority not specified in subs. (1) to (3) shall designate in writing one or more positions occupied by
+an officer or employee of the authority or the unit of government of which it is a part as a legal custodian to
+fulfill its duties under this subchapter. In the absence of a designation the authority’s highest ranking officer and
+the chief administrative officer, if any, are the legal custodians for the authority. The legal custodian shall be
+vested by the authority with full legal power to render decisions and carry out the duties of the authority under
+this subchapter. Each authority shall provide the name of the legal custodian and a description of the nature of
+his or her duties under this subchapter to all employees of the authority entrusted with records subject to the
+legal custodian’s supervision.
+(5) Notwithstanding sub. (4), if an authority specified in sub. (4) or the members of such an authority are
+appointed by another authority, the appointing authority may designate a legal custodian for records of the
+authority or members of the authority appointed by the appointing authority, except that if such an authority is
+attached for administrative purposes to another authority, the authority performing administrative duties shall
+designate the legal custodian for the authority for whom administrative duties are performed.
+(6) The legal custodian of records maintained in a publicly owned or leased building or the authority appointing
+the legal custodian shall designate one or more deputies to act as legal custodian of such records in his or her
+absence or as otherwise required to respond to requests as provided in s. 19.35 (4). This subsection does not
+apply to members of the legislature or to members of any local governmental body.
+(7) The designation of a legal custodian does not affect the powers and duties of an authority under this
+subchapter.
+(8) No elective official of a legislative body has a duty to act as or designate a legal custodian under sub. (4) for
+the records of any committee of the body unless the official is the highest ranking officer or chief administrative
+officer of the committee or is designated the legal custodian of the committee’s records by rule or by law.
+History: 1981 c. 335; 2013 a. 171.
+The right to privacy law, s. 895.50 [now s. 995.50], does not affect the duties of a custodian of public records under
+former s. 19.21, 1977 stats. 68 Atty. Gen. 68.
+
+19.34 Procedural information; access times and locations.
+(1) Each authority shall adopt, prominently display and make available for inspection and copying at its offices,
+for the guidance of the public, a notice containing a description of its organization and the established times and
+places at which, the legal custodian under s. 19.33 from whom, and the methods whereby, the public may obtain
+information and access to records in its custody, make requests for records, or obtain copies of records, and the
+
+costs thereof. The notice shall also separately identify each position of the authority that constitutes a local
+public office or a state public office. This subsection does not apply to members of the legislature or to members
+of any local governmental body.
+(2)
+(a) Each authority which maintains regular office hours at the location where records in the custody of the
+authority are kept shall permit access to the records of the authority at all times during those office hours, unless
+otherwise specifically authorized by law.
+(b) Each authority which does not maintain regular office hours at the location where records in the custody of
+the authority are kept shall:
+1. Permit access to its records upon at least 48 hours’ written or oral notice of intent to inspect or copy a record;
+or
+2. Establish a period of at least 2 consecutive hours per week during which access to the records of the authority
+is permitted. In such case, the authority may require 24 hours’ advance written or oral notice of intent to inspect
+or copy a record.
+(c) An authority imposing a notice requirement under par. (b) shall include a statement of the requirement in its
+notice under sub. (1), if the authority is required to adopt a notice under that subsection.
+(d) If a record of an authority is occasionally taken to a location other than the location where records of the
+authority are regularly kept, and the record may be inspected at the place at which records of the authority are
+regularly kept upon one business day’s notice, the authority or legal custodian of the record need not provide
+access to the record at the occasional location.
+History: 1981 c. 335; 2003 a. 47; 2013 a. 171.
+NOTE: 2003 Wis. Act 47, which affected this section, contains extensive explanatory notes.
+
+19.345 Time computation. In ss. 19.33 to 19.39, when a time period is provided for performing an act,
+whether the period is expressed in hours or days, the whole of Saturday, Sunday, and any legal holiday, from
+midnight to midnight, shall be excluded in computing the period.
+History: 2003 a. 47.
+NOTE: 2003 Wis. Act 47, which created this section, contains extensive explanatory notes.
+
+19.35 Access to records; fees.
+(1) RIGHT TO INSPECTION.
+(a) Except as otherwise provided by law, any requester has a right to inspect any record. Substantive common
+law principles construing the right to inspect, copy or receive copies of records shall remain in effect. The
+exemptions to the requirement of a governmental body to meet in open session under s. 19.85 are indicative of
+public policy, but may be used as grounds for denying public access to a record only if the authority or legal
+custodian under s. 19.33 makes a specific demonstration that there is a need to restrict public access at the time
+that the request to inspect or copy the record is made.
+
+(am) In addition to any right under par. (a), any requester who is an individual or person authorized by the
+individual has a right to inspect any personally identifiable information pertaining to the individual in a record
+containing personally identifiable information that is maintained by an authority and to make or receive a copy
+of any such information. The right to inspect or copy information in a record under this paragraph does not apply
+to any of the following:
+1. Any record containing personally identifiable information that is collected or maintained in connection with a
+complaint, investigation or other circumstances that may lead to an enforcement action, administrative
+proceeding, arbitration proceeding or court proceeding, or any such record that is collected or maintained in
+connection with such an action or proceeding.
+2. Any record containing personally identifiable information that, if disclosed, would do any of the following:
+a. Endanger an individual’s life or safety.
+b. Identify a confidential informant.
+c. Endanger the security, including the security of the population or staff, of any state prison under s. 302.01, jail,
+as defined in s. 165.85 (2) (bg), juvenile correctional facility, as defined in s. 938.02 (10p), secured residential
+care center for children and youth, as defined in s. 938.02 (15g), mental health institute, as defined in s. 51.01
+(12), center for the developmentally disabled, as defined in s. 51.01 (3), or facility, specified under s. 980.065,
+for the institutional care of sexually violent persons.
+d. Compromise the rehabilitation of a person in the custody of the department of corrections or detained in a jail
+or facility identified in subd. 2. c.
+2m. The actual address, as defined in s. 165.68 (1) (b), of a participant in the program established in s. 165.68.
+3. Any record that is part of a records series, as defined in s. 19.62 (7), that is not indexed, arranged or automated
+in a way that the record can be retrieved by the authority maintaining the records series by use of an individual’s
+name, address or other identifier.
+(b) Except as otherwise provided by law, any requester has a right to inspect a record and to make or receive a
+copy of a record. If a requester appears personally to request a copy of a record that permits copying, the
+authority having custody of the record may, at its option, permit the requester to copy the record or provide the
+requester with a copy substantially as readable as the original.
+(c) Except as otherwise provided by law, any requester has a right to receive from an authority having custody of
+a record which is in the form of a comprehensible audio recording a copy of the recording substantially as
+audible as the original. The authority may instead provide a transcript of the recording to the requester if he or
+she requests.
+(d) Except as otherwise provided by law, any requester has a right to receive from an authority having custody of
+a record which is in the form of a video recording a copy of the recording substantially as good as the original.
+
+(e) Except as otherwise provided by law, any requester has a right to receive from an authority having custody of
+a record which is not in a readily comprehensible form a copy of the information contained in the record
+assembled and reduced to written form on paper.
+(em) If an authority receives a request to inspect or copy a record that is in handwritten form or a record that is
+in the form of a voice recording which the authority is required to withhold or from which the authority is
+required to delete information under s. 19.36 (8) (b) because the handwriting or the recorded voice would
+identify an informant, the authority shall provide to the requester, upon his or her request, a transcript of the
+record or the information contained in the record if the record or information is otherwise subject to public
+inspection and copying under this subsection.
+(f) Notwithstanding par. (b) and except as otherwise provided by law, any requester has a right to inspect any
+record not specified in pars. (c) to (e) the form of which does not permit copying. If a requester requests
+permission to photograph the record, the authority having custody of the record may permit the requester to
+photograph the record. If a requester requests that a photograph of the record be provided, the authority shall
+provide a good quality photograph of the record.
+(g) Paragraphs (a) to (c), (e) and (f) do not apply to a record which has been or will be promptly published with
+copies offered for sale or distribution.
+(h) A request under pars. (a) to (f) is deemed sufficient if it reasonably describes the requested record or the
+information requested. However, a request for a record without a reasonable limitation as to subject matter or
+length of time represented by the record does not constitute a sufficient request. A request may be made orally,
+but a request must be in writing before an action to enforce the request is commenced under s. 19.37.
+(i) Except as authorized under this paragraph, no request under pars. (a) and (b) to (f) may be refused because the
+person making the request is unwilling to be identified or to state the purpose of the request. Except as
+authorized under this paragraph, no request under pars. (a) to (f) may be refused because the request is received
+by mail, unless prepayment of a fee is required under sub. (3) (f). A requester may be required to show
+acceptable identification whenever the requested record is kept at a private residence or whenever security
+reasons or federal law or regulations so require.
+(j) Notwithstanding pars. (a) to (f), a requester shall comply with any regulations or restrictions upon access to or
+use of information which are specifically prescribed by law.
+(k) Notwithstanding pars. (a), (am), (b) and (f), a legal custodian may impose reasonable restrictions on the
+manner of access to an original record if the record is irreplaceable or easily damaged.
+(L) Except as necessary to comply with pars. (c) to (e) or s. 19.36 (6), this subsection does not require an
+authority to create a new record by extracting information from existing records and compiling the information
+in a new format.
+(2) FACILITIES. The authority shall provide any person who is authorized to inspect or copy a record under
+sub. (1) (a), (am), (b) or (f) with facilities comparable to those used by its employees to inspect, copy and
+abstract the record during established office hours. An authority is not required by this subsection to purchase or
+
+lease photocopying, duplicating, photographic or other equipment or to provide a separate room for the
+inspection, copying or abstracting of records.
+(3) FEES.
+(a) An authority may impose a fee upon the requester of a copy of a record which may not exceed the actual,
+necessary and direct cost of reproduction and transcription of the record, unless a fee is otherwise specifically
+established or authorized to be established by law.
+(b) Except as otherwise provided by law or as authorized to be prescribed by law an authority may impose a fee
+upon the requester of a copy of a record that does not exceed the actual, necessary and direct cost of
+photographing and photographic processing if the authority provides a photograph of a record, the form of which
+does not permit copying.
+(c) Except as otherwise provided by law or as authorized to be prescribed by law, an authority may impose a fee
+upon a requester for locating a record, not exceeding the actual, necessary and direct cost of location, if the cost
+is $50 or more.
+(d) An authority may impose a fee upon a requester for the actual, necessary and direct cost of mailing or
+shipping of any copy or photograph of a record which is mailed or shipped to the requester.
+(e) An authority may provide copies of a record without charge or at a reduced charge where the authority
+determines that waiver or reduction of the fee is in the public interest.
+(f) An authority may require prepayment by a requester of any fee or fees imposed under this subsection if the
+total amount exceeds $5. If the requester is a prisoner, as defined in s. 301.01 (2), or is a person confined in a
+federal correctional institution located in this state, and he or she has failed to pay any fee that was imposed by
+the authority for a request made previously by that requester, the authority may require prepayment both of the
+amount owed for the previous request and the amount owed for the current request.
+(g) Notwithstanding par. (a), if a record is produced or collected by a person who is not an authority pursuant to
+a contract entered into by that person with an authority, the authorized fees for obtaining a copy of the record
+may not exceed the actual, necessary, and direct cost of reproduction or transcription of the record incurred by
+the person who makes the reproduction or transcription, unless a fee is otherwise established or authorized to be
+established by law.
+(h)
+1. In this paragraph, “law enforcement agency” has the meaning given in s. 19.36 (8) (a) 2.
+2. Subject to subds. 3. to 7., an authority that is a law enforcement agency may impose a fee upon a requester for
+the actual, necessary, and direct cost of redacting, whether by pixelization or other means, recorded audio or
+video content to the extent redaction is necessary to comply with applicable constitutional, statutory, or common
+law.
+3. An authority may not impose the fee under subd. 2. with respect to a request for records containing audio or
+video content for which all of the following apply:
+
+a. If the requester is an individual, the requester provides written certification to the authority that the requester
+will not use the audio or video content for financial gain, not including an award of damages in a civil action.
+Any individual providing a false certification under this subd. 3. a. shall be subject to a forfeiture of $10,000 for
+each violation.
+b. During the calendar year in which the authority receives the request, the same requester has not made more
+than 10 requests to the authority for records containing audio or video content, including the current request but
+excluding any request subject to subd. 4. or 5.
+4. An authority may not impose the fee under subd. 2. with respect to a request for records containing audio or
+video content if the requester is an individual directly involved in the event to which the requested records relate,
+that individual’s attorney or other authorized representative, or that individual’s parent or guardian if the
+individual is under the age of 18.
+5. An authority may not impose the fee under subd. 2. with respect to a request for records containing audio or
+video content if the event to which the requested records relate is a shooting involving an officer of a law
+enforcement agency.
+6. In calculating the fee imposed under subd. 2., the rate for an actual, necessary, and direct charge for staff time
+spent redacting shall be based on the pay rate of the authority’s lowest paid employee capable of performing the
+task.
+7. An authority may not impose the fee under subd. 2. with respect to a request for records containing audio or
+video content unless prior to fulfilling the request the authority provides to the requester in writing an estimate of
+the amount of the fee to be charged.
+(4) TIME FOR COMPLIANCE AND PROCEDURES.
+(a) Each authority, upon request for any record, shall, as soon as practicable and without delay, either fill the
+request or notify the requester of the authority’s determination to deny the request in whole or in part and the
+reasons therefor.
+(b) If a request is made orally, the authority may deny the request orally unless a demand for a written statement
+of the reasons denying the request is made by the requester within 5 business days of the oral denial. If an
+authority denies a written request in whole or in part, the requester shall receive from the authority a written
+statement of the reasons for denying the written request. Every written denial of a request by an authority shall
+inform the requester that if the request for the record was made in writing, then the determination is subject to
+review by mandamus under s. 19.37 (1) or upon application to the attorney general or a district attorney.
+(c) If an authority receives a request under sub. (1) (a) or (am) from an individual or person authorized by the
+individual who identifies himself or herself and states that the purpose of the request is to inspect or copy a
+record containing personally identifiable information pertaining to the individual that is maintained by the
+authority, the authority shall deny or grant the request in accordance with the following procedure:
+1. The authority shall first determine if the requester has a right to inspect or copy the record under sub. (1) (a).
+
+2. If the authority determines that the requester has a right to inspect or copy the record under sub. (1) (a), the
+authority shall grant the request.
+3. If the authority determines that the requester does not have a right to inspect or copy the record under sub. (1)
+(a), the authority shall then determine if the requester has a right to inspect or copy the record under sub. (1)
+(am) and grant or deny the request accordingly.
+(5) RECORD DESTRUCTION. No authority may destroy any record at any time after the receipt of a request for
+inspection or copying of the record under sub. (1) until after the request is granted or until at least 60 days after
+the date that the request is denied or, if the requester is a committed or incarcerated person, until at least 90 days
+after the date that the request is denied. If an authority receives written notice that an action relating to a record
+has been commenced under s. 19.37, the record may not be destroyed until after the order of the court in relation
+to such record is issued and the deadline for appealing that order has passed, or, if appealed, until after the order
+of the court hearing the appeal is issued. If the court orders the production of any record and the order is not
+appealed, the record may not be destroyed until after the request for inspection or copying is granted.
+(6) ELECTIVE OFFICIAL RESPONSIBILITIES. No elective official is responsible for the record of any other elective
+official unless he or she has possession of the record of that other official.
+(7) LOCAL INFORMATION TECHNOLOGY AUTHORITY RESPONSIBILITY FOR LAW ENFORCEMENT RECORDS.
+(a) In this subsection:
+1. “Law enforcement agency” has the meaning given s. 165.83 (1) (b).
+2. “Law enforcement record” means a record that is created or received by a law enforcement agency and that
+relates to an investigation conducted by a law enforcement agency or a request for a law enforcement agency to
+provide law enforcement services.
+3. “Local information technology authority” means a local public office or local governmental unit whose
+primary function is information storage, information technology processing, or other information technology
+usage.
+(b) For purposes of requests for access to records under sub. (1), a local information technology authority that
+has custody of a law enforcement record for the primary purpose of information storage, information technology
+processing, or other information technology usage is not the legal custodian of the record. For such purposes, the
+legal custodian of a law enforcement record is the authority for which the record is stored, processed, or
+otherwise used.
+(c) A local information technology authority that receives a request under sub. (1) for access to information in a
+law enforcement record shall deny any portion of the request that relates to information in a local law
+enforcement record.
+History: 1981 c. 335, 391; 1991 a. 39, 1991 a. 269 ss. 34am, 40am; 1993 a. 93; 1995 a. 77, 158; 1997 a. 94, 133; 1999
+a. 9; 2001 a. 16; 2005 a. 344; 2009 a. 259, 370; 2013 a. 171; 2015 a. 356; 2023 a. 253.
+NOTE: The following annotations relate to public records statutes in effect prior to the creation of s. 19.35 by ch.
+335, laws of 1981.
+
+A mandamus petition to inspect a county hospital’s statistical, administrative, and other records not identifiable with
+individual patients states a cause of action under this section. State ex rel. Dalton v. Mundy, 80 Wis. 2d 190, 257
+N.W.2d 877 (1977).
+Police daily arrest lists must be open for public inspection. Newspapers, Inc. v. Breier, 89 Wis. 2d 417, 279 N.W.2d
+179 (1979).
+This section is a statement of the common law rule that public records are open to public inspection subject to common
+law limitations. Section 59.14 [now s. 59.20 (3)] is a legislative declaration granting persons who come under its
+coverage an absolute right of inspection subject only to reasonable administrative regulations. State ex rel. Bilder v.
+Township of Delavan, 112 Wis. 2d 539, 334 N.W.2d 252 (1983).
+A newspaper had the right to intervene to protect its right to examine sealed court files. State ex rel. Bilder v. Township
+of Delavan, 112 Wis. 2d 539, 334 N.W.2d 252 (1983).
+Examination of birth records cannot be denied simply because the examiner has a commercial purpose. 58 Atty. Gen.
+67.
+Consideration of a resolution is a formal action of an administrative or minor governing body. When taken in a proper
+closed session, the resolution and result of the vote must be made available for public inspection absent a specific
+showing that the public interest would be adversely affected. 60 Atty. Gen. 9.
+Inspection of public records obtained under official pledges of confidentiality may be denied if: 1) a clear pledge has
+been made in order to obtain the information; 2) the pledge was necessary to obtain the information; and 3) the
+custodian determines that the harm to the public interest resulting from inspection would outweigh the public interest in
+full access to public records. The custodian must permit inspection of information submitted under an official pledge of
+confidentiality if the official or agency had specific statutory authority to require its submission. 60 Atty. Gen. 284.
+Discussing the right to inspection and copying of public records in decentralized offices. 61 Atty. Gen. 12.
+Public records subject to inspection and copying by any person would include a list of students awaiting a particular
+program in a VTAE [technical college] district school. 61 Atty. Gen. 297.
+The investment board can only deny members of the public from inspecting and copying portions of the minutes
+relating to the investment of state funds and documents pertaining thereto on a case-by-case basis if valid reasons for
+denial exist and are specially stated. 61 Atty. Gen. 361.
+Matters and documents in the possession or control of school district officials containing information concerning the
+salaries, including fringe benefits, paid to individual teachers are matters of public record. 63 Atty. Gen. 143.
+The Department of Administration probably has authority under former s. 19.21 (1) and (2), 1973 stats., to provide a
+private corporation with camera-ready copy of session laws that is the product of a printout of computer stored public
+records if the costs are minimal. The state cannot contract on a continuing basis for the furnishing of this service. 63
+Atty. Gen. 302.
+Discussing the scope of the duty of the governor to allow members of the public to examine and copy public records in
+the governor’s custody. 63 Atty. Gen. 400.
+Discussing the public’s right to inspect land acquisition files of the Department of Natural Resources. 63 Atty. Gen. 573.
+Financial statements filed in connection with applications for motor vehicle dealers’ and motor vehicle salvage dealers’
+licenses are public records, subject to limitations. 66 Atty. Gen. 302.
+Sheriff’s radio logs, intradepartmental documents kept by the sheriff, and blood test records of deceased automobile
+drivers in the hands of the sheriff are public records, subject to limitations. 67 Atty. Gen. 12.
+Plans and specifications filed under s. 101.12 are public records and are available for public inspection. 67 Atty. Gen.
+214.
+Under s. 19.21 (1), district attorneys must indefinitely preserve papers of a documentary nature evidencing activities of
+a prosecutor’s office. 68 Atty. Gen. 17.
+Discussing the right to examine and copy computer-stored information. 68 Atty. Gen. 231.
+After the transcript of court proceedings is filed with the clerk of court, any person may examine or copy the transcript.
+68 Atty. Gen. 313.
+NOTE: The following annotations relate to this section.
+Although a meeting was properly closed, in order to refuse inspection of records of the meeting, the custodian was
+required by sub. (1) (a) to state specific and sufficient public policy reasons why the public’s interest in nondisclosure
+
+outweighed the right of inspection. Oshkosh Northwestern Co. v. Oshkosh Library Board, 125 Wis. 2d 480, 373 N.W.2d
+459 (Ct. App. 1985).
+Courts must apply the open records balancing test to questions involving disclosure of court records. The public
+interests favoring secrecy must outweigh those favoring disclosure. C.L. v. Edson, 140 Wis. 2d 168, 409 N.W.2d
+417 (Ct. App. 1987).
+Public records germane to pending litigation were available under this section even though the discovery cutoff deadline
+had passed. State ex rel. Lank v. Rzentkowski, 141 Wis. 2d 846, 416 N.W.2d 635 (Ct. App. 1987).
+To uphold a custodian’s denial of access, an appellate court will inquire whether the trial court made a factual
+determination supported by the record of whether documents implicate a secrecy interest and, if so, whether the secrecy
+interest outweighs the interests favoring release. Milwaukee Journal v. Call, 153 Wis. 2d 313, 450 N.W.2d 515 (Ct. App.
+1989).
+That releasing records would reveal a confidential informant’s identity was a legally specific reason for denial of a
+records request. The public interest in not revealing the informant’s identity outweighed the public interest in disclosure
+of the records. Mayfair Chrysler-Plymouth, Inc. v. Baldarotta, 162 Wis. 2d 142, 469 N.W.2d 638 (1991).
+Items subject to examination under s. 346.70 (4) (f) may not be withheld by the prosecution under a common law rule
+that investigative material may be withheld from a criminal defendant. State ex rel. Young v. Shaw, 165 Wis. 2d
+276, 477 N.W.2d 340 (Ct. App. 1991).
+Prosecutors’ files are exempt from public access under the common law. State ex rel. Richards v. Foust, 165 Wis. 2d
+429, 477 N.W.2d 608 (1991).
+Records relating to pending claims against the state under s. 893.82 need not be disclosed under this section. Records of
+non-pending claims must be disclosed unless an in camera inspection reveals that the attorney-client privilege would be
+violated. George v. Record Custodian, 169 Wis. 2d 573, 485 N.W.2d 460 (Ct. App. 1992).
+The public records law confers no exemption as of right on indigents from payment of fees under sub. (3). George v.
+Record Custodian, 169 Wis. 2d 573, 485 N.W.2d 460 (Ct. App. 1992).
+The denial of a prisoner’s information request regarding illegal behavior by guards on the grounds that it could
+compromise the guards’ effectiveness and subject them to harassment was insufficient. State ex rel. Ledford v.
+Turcotte, 195 Wis. 2d 244, 536 N.W.2d 130 (Ct. App. 1995), 94-2710.
+The amount of prepayment required for copies may be based on a reasonable estimate. State ex rel. Hill v.
+Zimmerman, 196 Wis. 2d 419, 538 N.W.2d 608 (Ct. App. 1995), 94-1861.
+The Foust, 165 Wis. 2d 429 (1991), decision does not automatically exempt all records stored in a closed prosecutorial
+file. The exemption is limited to material actually pertaining to the prosecution. Nichols v. Bennett, 199 Wis. 2d
+268, 544 N.W.2d 428 (1996), 93-2480.
+Department of Regulation and Licensing test scores were subject to disclosure under the open records law. Munroe v.
+Braatz, 201 Wis. 2d 442, 549 N.W.2d 451 (Ct. App. 1996), 95-2557.
+Subs. (1) (i) and (3) (f) did not permit a demand for prepayment of $1.29 in response to a mail request for a record.
+State ex rel. Borzych v. Paluszcyk, 201 Wis. 2d 523, 549 N.W.2d 253 (Ct. App. 1996), 95-1711.
+An agency cannot promulgate an administrative rule that creates an exception to the open records law. Chvala v.
+Bubolz, 204 Wis. 2d 82, 552 N.W.2d 892 (Ct. App. 1996), 95-3120.
+While certain statutes grant explicit exceptions to the open records law, many statutes set out broad categories of
+records not open to an open records request. A custodian faced with such a broad statute must state with specificity a
+public policy reason for refusing to release the requested record. Chvala v. Bubolz, 204 Wis. 2d 82, 552 N.W.2d
+892 (Ct. App. 1996), 95-3120.
+The custodian is not authorized to comply with an open records request at some unspecified date in the future. Such a
+response constitutes a denial of the request. WTMJ, Inc. v. Sullivan, 204 Wis. 2d 452, 555 N.W.2d 140 (Ct. App.
+1996), 96-0053.
+Subject to the redaction of officers’ home addresses and supervisors’ conclusions and recommendations regarding
+discipline, police records regarding the use of deadly force were subject to public inspection. State ex rel.
+Journal/Sentinel, Inc. v. Arreola, 207 Wis. 2d 496, 558 N.W.2d 670 (Ct. App. 1996), 95-2956.
+A public school student’s interim grades are pupil records specifically exempted from disclosure under s. 118.125. If
+records are specifically exempted from disclosure, failure to specifically state reasons for denying an open records
+
+request for those records does not compel disclosure of those records. State ex rel. Blum v. Board of Education, 209
+Wis. 2d 377, 565 N.W.2d 140 (Ct. App. 1997), 96-0758.
+Requesting a copy of 180 hours of audiotape of 911 calls, together with a transcription of the tape and log of each
+transmission received, was a request without “reasonable limitation” and was not a “sufficient request” under sub. (1)
+(h). Schopper v. Gehring, 210 Wis. 2d 208, 565 N.W.2d 187 (Ct. App. 1997), 96-2782.
+If the requested information is covered by an exempting statute that does not require a balancing of public interests,
+there is no need for a custodian to conduct such a balancing. Written denial claiming a statutory exception by citing the
+specific statute or regulation is sufficient. State ex rel. Savinski v. Kimble, 221 Wis. 2d 833, 586 N.W.2d 36 (Ct. App.
+1998), 97-3356.
+Protecting persons who supply information or opinions about an inmate to the parole commission is a public interest
+that may outweigh the public interest in access to documents that could identify those persons. State ex rel. Bergmann v.
+Faust, 226 Wis. 2d 273, 595 N.W.2d 75 (Ct. App. 1999), 98-2537.
+Sub. (1) (b) gives the record custodian, and not the requester, the choice of how a record will be copied. The requester
+cannot elect to use the requester’s own copying equipment without the custodian’s permission. Grebner v.
+Schiebel, 2001 WI App 17, 240 Wis. 2d 551, 624 N.W.2d 892, 00-1549.
+Requests for university admissions records focusing on test scores, class rank, grade point average, race, gender,
+ethnicity, and socio-economic background were not requests for personally identifiable information, and release was not
+barred by federal law or public policy. That the requests would require the university to redact information from
+thousands of documents under s. 19.36 (6) did not essentially require the university to create new records and, as such,
+did not provide grounds for denying the request under sub. (1) (L). Osborn v. Board of Regents, 2002 WI 83, 254 Wis.
+2d 266, 647 N.W.2d 158, 00-2861.
+The police report of a closed investigation regarding a teacher’s conduct that did not lead either to an arrest,
+prosecution, or any administrative disciplinary action was subject to release. Linzmeyer v. Forcey, 2002 WI 84, 254
+Wis. 2d 306, 646 N.W.2d 811, 01-0197.
+When a requested item is a public record under the open records law, and there is no statutory or common law
+exception, the open records law applies and the presumption of openness attaches to the record. The court must then
+decide whether that presumption can be overcome by a public policy favoring non-disclosure of the record. The
+fundamental question is whether there is harm to a public interest that outweighs the public interest in inspection of the
+record. A balancing test is applied on a case-by-case basis. If the harm to the public interest caused by release overrides
+the public interest in release, the inspection of the record may be prevented in spite of the general policy of openness.
+Linzmeyer v. Forcey, 2002 WI 84, 254 Wis. 2d 306, 646 N.W.2d 811, 01-0197.
+The John Doe statute, s. 968.26, which authorizes secrecy in John Doe proceedings, is a clear statement of legislative
+policy and constitutes a specific exception to the public records law. On review of a petition for a writ stemming from a
+secret John Doe proceeding, the court of appeals may seal parts of a record in order to comply with existing secrecy
+orders issued by the John Doe judge. State ex rel. Unnamed Person No. 1 v. State, 2003 WI 30, 260 Wis. 2d 653, 660
+N.W.2d 260, 01-3220.
+Sub. (1) (am) is not subject to a balancing of interests. Therefore, the exceptions to sub. (1) (am) should not be narrowly
+construed. A requester who does not qualify for access to records under sub. (1) (am) will always have the right to seek
+records under sub. (1) (a), in which case the records custodian must determine whether the requested records are subject
+to a statutory or common law exception and, if not, whether the strong presumption favoring access and disclosure is
+overcome by some even stronger public policy favoring limited access or nondisclosure determined by applying a
+balancing test. Hempel v. City of Baraboo, 2005 WI 120, 284 Wis. 2d 162, 699 N.W.2d 551, 03-0500.
+Sub. (1) (a) does not mandate that, when a meeting is closed under s. 19.85, all records created for or presented at the
+meeting are exempt from disclosure. The court must still apply the balancing test articulated in Linzmeyer, 2002 WI 84.
+Zellner v. Cedarburg School District, 2007 WI 53, 300 Wis. 2d 290, 731 N.W.2d 240, 06-1143.
+A general request does not trigger the sub. (4) (c) review sequence. Sub. (4) (c) recites the procedure to be employed if
+an authority receives a request under sub. (1) (a) or (am). An authority is an entity having custody of a record. The
+definition does not include a reviewing court. Seifert v. School District, 2007 WI App 207, 305 Wis. 2d 582, 740
+N.W.2d 177, 06-2071.
+
+The open records law cannot be used to circumvent established principles that shield attorney work product, nor can it
+be used as a discovery tool. The presumption of access under sub. (1) (a) is defeated because the attorney work product
+qualifies under the “otherwise provided by law” exception. Seifert v. School District, 2007 WI App 207, 305 Wis. 2d
+582, 740 N.W.2d 177, 06-2071.
+Sub. (1) (am) 1. plainly allows a records custodian to deny access to one who is, in effect, a potential adversary in
+litigation or other proceeding unless or until required to do so under the rules of discovery in actual litigation. The
+balancing of interests under sub. (1) (a) must include examining all the relevant factors in the context of the particular
+circumstances and may include balancing the competing interests considered under sub. (1) (am) 1. when evaluating the
+entire set of facts and making its specific demonstration of the need for withholding the records. Seifert v. School
+District, 2007 WI App 207, 305 Wis. 2d 582, 740 N.W.2d 177, 06-2071.
+The sub. (1) (am) analysis is succinct. There is no balancing. There is no requirement that the investigation be current
+for the exemption for records collected or maintained in connection with a complaint, investigation, or other
+circumstances that may lead to a court proceeding to apply. Seifert v. School District, 2007 WI App 207, 305 Wis. 2d
+582, 740 N.W.2d 177, 06-2071.
+
+“Record” in sub. (5) and s. 19.32 (2) does not include identical copies of otherwise available records. A copy that is not
+different in some meaningful way from an original, regardless of the form of the original, is an identical copy. If a copy
+differs in some significant way for purposes of responding to an open records request, then it is not truly an identical
+copy, but instead a different record. Stone v. Board of Regents, 2007 WI App 223, 305 Wis. 2d 679, 741 N.W.2d
+774, 06-2537.
+Schopper, 210 Wis. 2d 208 (1997), does not permit a records custodian to deny a request based solely on the custodian’s
+assertion that the request could reasonably be narrowed, nor does Schopper require that the custodian take affirmative
+steps to limit the search as a prerequisite to denying a request under sub. (1) (h). The fact that the request may result in
+the generation of a large volume of records is not, in itself, a sufficient reason to deny a request as not properly limited,
+but at some point, an overly broad request becomes sufficiently excessive to warrant rejection under sub. (1) (h). State
+ex rel. Gehl v. Connors, 2007 WI App 238, 306 Wis. 2d 247, 742 N.W.2d 530, 06-2455.
+The public records law addresses the duty to disclose records; it does not address the duty to retain records. An agency’s
+alleged failure to keep sought-after records may not be attacked under the public records law. Section 19.21 relates to
+records retention and is not a part of the public records law. State ex rel. Gehl v. Connors, 2007 WI App 238, 306 Wis.
+2d 247, 742 N.W.2d 530, 06-2455.
+Foust, 165 Wis. 2d 429 (1991), held that a common law categorical exception exists for records in the custody of a
+district attorney’s office, not for records in the custody of a law enforcement agency. A sheriff’s department is legally
+obligated to provide public access to records in its possession, which cannot be avoided by invoking a common law
+exception that is exclusive to the records of another custodian. That the same record is in the custody of both the law
+enforcement agency and the district attorney does not change the outcome. To the extent that a sheriff’s department can
+articulate a policy reason why the public interest in disclosure is outweighed by the interest in withholding the particular
+record, it may properly deny access. Portage Daily Register v. Columbia County Sheriff’s Department, 2008 WI App
+30, 308 Wis. 2d 357, 746 N.W.2d 525, 07-0323.
+When requests are complex, municipalities should be afforded reasonable latitude in time for their responses. An
+authority should not be subjected to the burden and expense of a premature public records lawsuit while it is attempting
+in good faith to respond, or to determine how to respond, to a request. What constitutes a reasonable time for a response
+by an authority depends on the nature of the request, the staff and other resources available to the authority to process
+the request, the extent of the request, and other related considerations. WIREdata, Inc. v. Village of Sussex, 2008 WI
+69, 310 Wis. 2d 397, 751 N.W.2d 736, 05-1473.
+Employees’ personal emails were not subject to disclosure in this case. Schill v. Wisconsin Rapids School District, 2010
+WI 86, 327 Wis. 2d 572, 786 N.W.2d 177, 08-0967.
+Under sub. (3) (a) to (d), 2011 stats., the legislature provided four tasks for which an authority may impose fees on a
+requester: 1) reproduction and transcription; 2) photographing and photographic processing; 3) locating; and 4) mailing
+or shipping. For each task, an authority is permitted to impose a fee that does not exceed the actual, necessary, and
+direct cost of the task. The process of redacting information from a record does not fit into any of those four statutory
+tasks. Milwaukee Journal Sentinel v. City of Milwaukee, 2012 WI 65, 341 Wis. 2d 607, 815 N.W.2d 367, 11-1112.
+
+Redacted portions of emails, who sent the emails, and where they were sent from were not “purely personal” and
+therefore subject to disclosure. Public awareness of who is attempting to influence public policy is essential for effective
+oversight of our government. Whether a communication is sent to a public official from a source that appears associated
+with a particular unit of government, a private entity, or a nonprofit organization, or from individuals who may be
+associated with a specific interest or particular area of the state, from where a communication is sent further assists the
+public in understanding who is attempting to influence public policy and why. John K. MacIver Institute for Public
+Policy, Inc. v. Erpenbach, 2014 WI App 49, 354 Wis. 2d 61, 848 N.W.2d 862, 13-1187.
+The record requester’s identity was relevant in this case. As a general proposition, the identity and purpose of the
+requester of public records is not a part of the balancing test to be applied in determining whether to release records.
+However, the determination of whether there is a safety concern that outweighs the presumption of disclosure is a factintensive inquiry determined on a case-by-case basis. State ex rel. Ardell v. Milwaukee Board of School Directors, 2014
+WI App 66, 354 Wis. 2d 471, 849 N.W.2d 894, 13-1650.
+In this case, although the commission’s responses did not state that no record existed, that omission did not impair the
+court’s ability to determine whether a statutory exemption to disclosure applied. Under the facts of the case, the
+commission lawfully denied the newspaper’s request because no responsive record existed at the time of the request.
+Journal Times v. City of Racine Board of Police & Fire Commissioners, 2015 WI 56, 362 Wis. 2d 577, 866 N.W.2d
+563, 13-1715.
+Sub. (4) (a) does not require immediate disclosure of a record. It allows a custodian a reasonable amount of time to
+respond to a public records request. Journal Times v. City of Racine Board of Police & Fire Commissioners, 2015 WI
+56, 362 Wis. 2d 577, 866 N.W.2d 563, 13-1715.
+There is no obligation to create a record in response to an open records request, and a requester is not entitled to the
+release of information in response to a public records request. Journal Times v. City of Racine Board of Police & Fire
+Commissioners, 2015 WI 56, 362 Wis. 2d 577, 866 N.W.2d 563, 13-1715.
+The question asked by the balancing test is whether there is a risk to the public if information is released, not whether
+there is a risk to an individual if the information is released. Voces De La Frontera, Inc. v. Clarke, 2016 WI App 39, 369
+Wis. 2d 103, 880 N.W.2d 417, 15-1152.
+Reversed on other grounds. 2017 WI 16, 373 Wis. 2d 348, 891 N.W.2d 803, 15-1152.
+In applying the balancing test to a requested video in this case, the court concluded that the public interest in preventing
+release of specific police and prosecution strategies and techniques being taught and used in Wisconsin outweighed the
+general legislative presumption that public records should be disclosed. Because the video consisted almost entirely of
+police tactics and specific prosecution strategies in cases involving sexual exploitation of children, disclosure would
+result in public harm—if local criminals learn the specific techniques and procedures used by police and prosecutors,
+the disclosed information could be used to circumvent the law. The public policy factors favoring nondisclosure thus
+overcame the presumption in favor of disclosure. Democratic Party of Wisconsin v. Department of Justice, 2016 WI
+100, 372 Wis. 2d 460, 888 N.W.2d 584, 14-2536.
+The context of the records request, although not always relevant, was considered in this case. By asserting that, upon
+information and belief, several or all of the requested tapes in this case may have included offensive racial remarks and
+ethnic slurs, including but not limited to stereotyped accents, as well as sexist remarks, made by the attorney general
+when he was a district attorney, the language of the requester’s petition in this case for a writ of mandamus suggested a
+partisan purpose underlying the request. When weighed against the likely harm to law enforcement’s efforts to capture
+and convict sexual predators who target children, the justification offered for the request clearly did not tip the balance
+toward releasing the requested records. Democratic Party of Wisconsin v. Department of Justice, 2016 WI 100, 372 Wis.
+2d 460, 888 N.W.2d 584, 14-2536.
+The common law exception to disclosure for a prosecutor’s case files discussed in Foust, 165 Wis. 2d 429 (1991),
+applied in this case. Under Foust, a district attorney’s closed files were not subject to the public records law based on
+the broad discretion a district attorney has in charging, the confidential nature of the contents of a file, and the threat
+disclosure poses to the orderly administration of justice. In this case, the prosecutor in charge of a sex extortion case
+discussed the prosecutor’s thought processes for charging and walked through the case in a recorded educational
+presentation for prosecutors. The presentation was in great respect the oral equivalent of a prosecutor’s closed case file.
+Democratic Party of Wisconsin v. Department of Justice, 2016 WI 100, 372 Wis. 2d 460, 888 N.W.2d 584, 14-2536.
+
+A video requested in this case discussed the victims of a sex extortion case and the devastating impact of those crimes.
+Disclosing the recording would have reignited interest in the case and allowed identification in the same way it occurred
+the first time around. There was sufficient factual detail in the recording to easily connect the dots to identify the dozens
+of victims, who would have been re-traumatized should this case have resulted in a repeat exposure of their identities
+almost a decade after those events occurred. Disclosure leading to revictimization would have run afoul of Wisconsin’s
+constitutional commitment to treating victims with “fairness, dignity and respect for their privacy” under article I,
+section 9m, of the Wisconsin Constitution. Democratic Party of Wisconsin v. Department of Justice, 2016 WI 100, 372
+Wis. 2d 460, 888 N.W.2d 584, 14-2536.
+When the Wisconsin Employment Relations Commission (WERC) had received detailed and specific complaints of
+past coercion in other certification elections, a WERC employee lawfully performed the balancing test in concluding
+that the public interest in elections free from voter intimidation and coercion outweighed the public interest in favor of
+openness of public records. The public interest in certification elections that are free from intimidation and coercion is
+evidenced by the requirement that those elections be conducted by secret ballot and free from prohibited practices. The
+public interest in elections that are free from intimidation and coercion outweighs the public interest in favor of open
+public records under the circumstances presented in this case. Madison Teachers, Inc. v. Scott, 2018 WI 11, 379 Wis. 2d
+439, 906 N.W.2d 436, 16-2214.
+Sub. (3) (a) defers to other statutes that specifically authorize records custodians to charge fees for records that differ
+from the fees that the open records law itself authorizes. Section 343.24 (2m) grants the Department of Transportation
+(DOT) authority to charge parties for inspecting accident reports. Therefore, the requester was not entitled to free access
+to DOT’s database because both Wisconsin open records law and statutory authority permit DOT to charge access fees
+for certain records and because case law has held that the right to access records does not extend to the right to access
+databases. Media Placement Services, Inc. v. DOT, 2018 WI App 34, 382 Wis. 2d 191, 913 N.W.2d 224, 17-0791.
+The second sentence in sub. (1) (b) only applies to a requester who appears in person. Lueders v. Krug, 2019 WI App
+36, 388 Wis. 2d 147, 931 N.W.2d 898, 18-0431.
+When a requester requests records in electronic form, providing access to only paper printouts of those records is not a
+satisfactory response to the request. Lueders v. Krug, 2019 WI App 36, 388 Wis. 2d 147, 931 N.W.2d 898, 18-0431.
+In this case, the circuit court did not erroneously exercise its discretion when it ordered the plaintiff parents, if they
+wished to proceed, to file under seal and pursuant to a protective order an amended complaint stating their identities
+such that their identities would be disclosed only to the court and the attorneys for the litigants. Doe v. Madison
+Metropolitan School District, 2021 WI App 60, 399 Wis. 2d 102, 963 N.W.2d 823, 20-1032.
+Affirmed. 2022 WI 65, 403 Wis. 2d 369, 976 N.W.2d 584, 20-1032.
+A records custodian must determine whether the surrounding factual circumstances create an exceptional case not
+governed by the strong presumption of openness. An exceptional case exists when the facts are such that the public
+policy interest favoring nondisclosure outweigh the public policy interests favoring disclosure. The public has a strong
+interest in being informed about its public officials and whether those officials have engaged in misconduct. Those
+interests cannot be outweighed simply by the fact that an official played a minor role in an improper search. Milwaukee
+Deputy Sheriffs’ Ass’n v. County of Milwaukee County Clerk, 2021 WI App 80, 399 Wis. 2d 769, 967 N.W.2d 185, 202028.
+In this case, the school district failed to meet its burden to demonstrate that the public interest in keeping parent email
+addresses secret—and preserving them solely for the district’s broad use—outweighed the strong public policy in favor
+of releasing these public records. Gierl v. Mequon-Thiensville School District, 2023 WI App 5, 405 Wis. 2d 757, 985
+N.W.2d 116, 21-2190.
+Specific reasons why each document warrants confidentiality are necessary to provide the requester with sufficient
+notice of the grounds for denial to enable the requester to prepare a challenge to the withholding. In this case, the
+custodian’s application of the balancing test fell short because it did not describe the records that were responsive to the
+requests and then apply the balancing test to each record individually to explain why it was not disclosed. The absence
+of record-specific policy reasons for denial was particularly problematic here, because the differing natures of the three
+documents implicated different levels of public interest. Furthermore, in failing to apply the balancing test to each
+document, the custodian effectively used a blanket or automatic denial rule that applied to all records related to certain
+
+types of complaints. A blanket rule is not a proper application of the balancing test. Wisconsin State Journal v.
+Blazel, 2023 WI App 18, 407 Wis. 2d 472, 991 N.W.2d 450, 21-1196.
+The presumption of the public records law is that members of the public are entitled to evaluate public records for
+themselves and are not required to trust in a governmental authority’s selective summaries. An authority’s statement
+about its own evaluation of the requested records and its own judgment about the public relevance of those records is no
+substitute for a proper response to a public records request. Wisconsin State Journal v. Blazel, 2023 WI App 18, 407
+Wis. 2d 472, 991 N.W.2d 450, 21-1196.
+A legitimate public policy consideration for a records custodian to use in making possible redactions in the context of an
+investigation of a sexual harassment complaint can be the need to avoid creating chilling effects limiting complaints.
+But that proposition provides no support for declining to release even redacted versions of records. When victims and
+witnesses have a strong privacy interest in protecting their privacy, that public interest substantially outweighs the
+public interest in disclosure of their names. Wisconsin State Journal v. Blazel, 2023 WI App 18, 407 Wis. 2d 472, 991
+N.W.2d 450, 21-1196.
+Notice of Voting Eligibility forms used to make the report required under s. 54.25 (2) (c) 1. g. regarding restrictions to
+an individual’s voting rights as a result of a court’s finding of incompetency in a guardianship proceeding are court
+records pertinent to the finding of incompetency and therefore are barred from disclosure under s. 54.75 and the public
+records law. Wisconsin Voter Alliance v. Reynolds, 2023 WI App 66, 410 Wis. 2d 335, 1 N.W.3d 748, 22-1749.
+A custodian may not require a requester to pay the cost of an unrequested certification. Unless the fee for copies of
+records is established by law, a custodian may not charge more than the actual and direct cost of reproduction. 72 Atty.
+Gen. 36.
+Copying fees, but not location fees, may be imposed on a requester for the cost of a computer run. 72 Atty. Gen. 68.
+Discussing the fee for copying public records. 72 Atty. Gen. 150.
+Public records relating to employee grievances are not generally exempt from disclosure. Nondisclosure must be
+justified on a case-by-case basis. 73 Atty. Gen. 20.
+Discussing the disclosure of an employee’s birthdate, sex, ethnic heritage, and handicapped status. 73 Atty. Gen. 26.
+The Department of Regulation and Licensing may refuse to disclose records relating to complaints against health care
+professionals while the matters are merely “under investigation.” Good faith disclosure of the records will not expose
+the custodian to liability for damages. Prospective continuing requests for records are not contemplated by public
+records law. 73 Atty. Gen. 37.
+Prosecutors’ case files are exempt from disclosure. 74 Atty. Gen. 4.
+Discussing the relationship between the public records law and pledges of confidentiality in settlement agreements. 74
+Atty. Gen. 14.
+Discussing a computerized compilation of bibliographic records in relation to copyright law. A requester is entitled to a
+copy of a computer tape or a printout of information on the tape. 75 Atty. Gen. 133.
+Ambulance records relating to medical history, condition, or treatment are confidential while other ambulance call
+records are subject to disclosure under the public records law. 78 Atty. Gen. 71.
+Courts are likely to require disclosure of legislators’ mailing and distribution lists absent a factual showing that the
+public interest in withholding the records outweighs the public interest in their release. OAG 2-03.
+If a legislator custodian decides that a mailing or distribution list compiled and used for official purposes must be
+released under the public records statute, the persons whose names, addresses, or telephone numbers are contained on
+the list are not entitled to notice and the opportunity to challenge the decision prior to release of the record. OAG 2-03.
+Access Denied: How Woznicki v. Erickson Reversed the Statutory Presumption of Openness in the Wisconsin Open
+Records Law. Munro. 2002 WLR 1197.
+
+19.356 Notice to record subject; right of action.
+(1) Except as authorized in this section or as otherwise provided by statute, no authority is required to notify a
+record subject prior to providing to a requester access to a record containing information pertaining to that record
+
+subject, and no person is entitled to judicial review of the decision of an authority to provide a requester with
+access to a record.
+(2)
+(a) Except as provided in pars. (b) to (d) and as otherwise authorized or required by statute, if an authority
+decides under s. 19.35 to permit access to a record specified in this paragraph, the authority shall, before
+permitting access and within 3 days after making the decision to permit access, serve written notice of that
+decision on any record subject to whom the record pertains, either by certified mail or by personally serving the
+notice on the record subject. The notice shall briefly describe the requested record and include a description of
+the rights of the record subject under subs. (3) and (4). This paragraph applies only to the following records:
+1. A record containing information relating to an employee that is created or kept by the authority and that is the
+result of an investigation into a disciplinary matter involving the employee or possible employment-related
+violation by the employee of a statute, ordinance, rule, regulation, or policy of the employee’s employer.
+2. A record obtained by the authority through a subpoena or search warrant.
+3. A record prepared by an employer other than an authority, if that record contains information relating to an
+employee of that employer, unless the employee authorizes the authority to provide access to that information.
+(b) Paragraph (a) does not apply to an authority who provides access to a record pertaining to an employee to the
+employee who is the subject of the record or to his or her representative to the extent required under s. 103.13 or
+to a recognized or certified collective bargaining representative to the extent required to fulfill a duty to bargain
+or pursuant to a collective bargaining agreement under ch. 111.
+(c) Paragraph (a) does not apply to access to a record produced in relation to a function specified in
+s. 106.54 or 230.45 or subch. II of ch. 111 if the record is provided by an authority having responsibility for that
+function.
+(d) Paragraph (a) does not apply to the transfer of a record by the administrator of an educational agency to the
+state superintendent of public instruction under s. 115.31 (3) (a).
+(3) Within 5 days after receipt of a notice under sub. (2) (a), a record subject may provide written notification to
+the authority of his or her intent to seek a court order restraining the authority from providing access to the
+requested record.
+(4) Within 10 days after receipt of a notice under sub. (2) (a), a record subject may commence an action seeking
+a court order to restrain the authority from providing access to the requested record. If a record subject
+commences such an action, the record subject shall name the authority as a defendant. Notwithstanding
+s. 803.09, the requester may intervene in the action as a matter of right. If the requester does not intervene in the
+action, the authority shall notify the requester of the results of the proceedings under this subsection and sub. (5).
+(5) An authority shall not provide access to a requested record within 12 days of sending a notice pertaining to
+that record under sub. (2) (a). In addition, if the record subject commences an action under sub. (4), the authority
+shall not provide access to the requested record during pendency of the action. If the record subject appeals or
+
+petitions for review of a decision of the court or the time for appeal or petition for review of a decision adverse
+to the record subject has not expired, the authority shall not provide access to the requested record until any
+appeal is decided, until the period for appealing or petitioning for review expires, until a petition for review is
+denied, or until the authority receives written notice from the record subject that an appeal or petition for review
+will not be filed, whichever occurs first.
+(6) The court, in an action commenced under sub. (4), may restrain the authority from providing access to the
+requested record. The court shall apply substantive common law principles construing the right to inspect, copy,
+or receive copies of records in making its decision.
+(7) The court, in an action commenced under sub. (4), shall issue a decision within 10 days after the filing of the
+summons and complaint and proof of service of the summons and complaint upon the defendant, unless a party
+demonstrates cause for extension of this period. In any event, the court shall issue a decision within 30 days after
+those filings are complete.
+(8) If a party appeals a decision of the court under sub. (7), the court of appeals shall grant precedence to the
+appeal over all other matters not accorded similar precedence by law. An appeal shall be taken within the time
+period specified in s. 808.04 (1m).
+(9)
+(a) Except as otherwise authorized or required by statute, if an authority decides under s. 19.35 to permit access
+to a record containing information relating to a record subject who is an officer or employee of the authority
+holding a local public office or a state public office, the authority shall, before permitting access and within 3
+days after making the decision to permit access, serve written notice of that decision on the record subject, either
+by certified mail or by personally serving the notice on the record subject. The notice shall briefly describe the
+requested record and include a description of the rights of the record subject under par. (b).
+(b) Within 5 days after receipt of a notice under par. (a), a record subject may augment the record to be released
+with written comments and documentation selected by the record subject. Except as otherwise authorized or
+required by statute, the authority under par. (a) shall release the record as augmented by the record subject.
+History: 2003 a. 47; 2011 a. 84.
+NOTE: 2003 Wis. Act 47, which created this section, contains extensive explanatory notes.
+The right of a public employee to obtain de novo judicial review of an authority’s decision to allow public access to
+certain records granted by this section is no broader than the common law right previously recognized. It is not a right
+to prevent disclosure solely on the basis of a public employee’s privacy and reputational interests. The public’s interest
+in not injuring the reputations of public employees must be given due consideration, but it is not controlling. Local 2489
+v. Rock County, 2004 WI App 210, 277 Wis. 2d 208, 689 N.W.2d 644, 03-3101.
+An intervenor as of right under the statute is “a party” under sub. (8) whose appeal is subject to the time period
+specified in s. 808.04 (1m). The only time period referenced in s. 808.04 (1m) is 20 days. Zellner v. Herrick, 2009 WI
+80, 319 Wis. 2d 532, 770 N.W.2d 305, 07-2584.
+This section does not set forth the only course of action that the subject of a disclosure may engage in to prevent
+disclosure. Subs. (3) and (4) state that “a record subject may commence an action.” The plain language of the statute in
+no way discourages the subject of a records request from engaging in less litigious means to prevent disclosure nor does
+it prevent a records custodian from changing its mind. State ex rel. Ardell v. Milwaukee Board of School
+Directors, 2014 WI App 66, 354 Wis. 2d 471, 849 N.W.2d 894, 13-1650.
+
+For challenges to decisions by authorities under the public records law to release records, as opposed to decisions by
+authorities to withhold records, the legislature has precluded judicial review except in defined circumstances. The rightof-action provision under sub. (1) unambiguously bars any person from seeking judicial review of an authority’s
+decision to release a record unless: 1) a provision within this section authorizes judicial review; or 2) a statute other than
+this section authorizes judicial review. Teague v. Van Hollen, 2016 WI App 20, 367 Wis. 2d 547, 877 N.W.2d 379, 142360.
+A district attorney is not an “employee” as defined in s. 19.32 (1bg) and as used in sub. (2) (a) 1. A district attorney may
+not maintain an action under sub. (4) to restrain an authority from providing access to requested records when the
+requested records do not fall within the sub. (2) (a) 1. exception to the general rule that a “record subject” is not entitled
+to notice or pre-release judicial review of the decision of an authority to provide access to records pertaining to that
+record subject. Moustakis v. Department of Justice, 2016 WI 42, 368 Wis. 2d 677, 880 N.W.2d 142, 14-1853.
+Sub. (5) applies to an “authority” and does not preclude a court from providing limited access to the requested records
+on an attorney’s eyes-only basis for purposes of briefing a case before the court. Section 19.37 (1) (a), which applies
+when a party seeks release of records in an action for mandamus, provides guidance. Whether the action seeks release
+or an injunction, the need for limited review by a party who intervenes by right, in order to ensure fair and fully
+informed adjudication of the dispute, is equally applicable. Hagen v. Board of Regents, 2018 WI App 43, 383 Wis. 2d
+567, 916 N.W.2d 198, 17-2058.
+Sub. (1) clearly abrogates the common law rules for pre-release notice and judicial review. It does not distinguish
+between different categories of individuals or records; it states a general rule that applies to all claims for pre-release
+judicial review and provides two types of exceptions. Wisconsin Manufacturers & Commerce v. Evers, 2022 WI 38, 401
+Wis. 2d 699, 977 N.W.2d 374, 20-2081.
+This section makes clear that no one has a right to block the release of a public record unless otherwise specified. The
+Declaratory Judgments Act, s. 806.04, does not fall within the exception to sub. (1) for statutes that “otherwise provide”
+for pre-release judicial review of records responses. Wisconsin Manufacturers & Commerce v. Evers, 2022 WI 38, 401
+Wis. 2d 699, 977 N.W.2d 374, 20-2081.
+In this case, the employer did not have the right under the sub. (2) (a) 3. exception to block the release by the sheriff’s
+office of the requested surveillance video footage from the employer’s parking garage. The employer did not qualify as
+a record subject, as defined in s. 19.32 (2g), because the employer was not an “individual” about whom personally
+identifiable information was contained in the record. Journal Sentinel, Inc. v. Milwaukee County Sheriff’s Office, 2022
+WI App 44, 404 Wis. 2d 328, 979 N.W.2d 609, 21-0615.
+Sub. (2) (a) 1. must be interpreted as requiring notification when an authority proposes to release records in its
+possession that are the result of an investigation by an employer into a disciplinary or other employment matter
+involving an employee, but not when there has been an investigation of possible employment-related violation by the
+employee and the investigation is conducted by some entity other than the employee’s employer. OAG 1-06.
+Sub. (2) (a) 2. is unambiguous. If an authority has obtained a record through a subpoena or a search warrant, it must
+provide the requisite notice before releasing the records. The duty to notify, however, does not require notice to every
+record subject who happens to be named in the subpoena or search warrant records. Under sub. (2) (a), DCI must serve
+written notice of the decision to release the record to any record subject to whom the record pertains. OAG 1-06.
+To the extent any requested records proposed to be released are records prepared by a private employer and those
+records contain information pertaining to one of the private employer’s employees, sub. (2) (a) 3. does not allow release
+of the information without obtaining authorization from the individual employee. OAG 1-06.
+Sub. (9) does not require advance notification and a five-day delay before releasing a record that mentions the name of a
+person holding state or local public office in any way. A record mentioning the name of a public official does not
+necessarily relate to that public official within the meaning of sub. (9) (a). Sub. (9) is not limited, however, to the
+specific categories of records enumerated in sub. (2) (a). OAG 7-14.
+The use of the phrase “is created” in sub. (2) (a) 1. implies that the status of the record subject should be consistent with
+when the record was created. Therefore, if the record subject is an employee at the time the record is created, the record
+subject is entitled to notice even if the employee is no longer employed by the authority at the time the authority
+receives the request. OAG 2-18.
+
+Sub. (9) does not apply when a record contains information relating to a record subject who is an officer or employee
+who formerly held a local or state public office. The provision only applies when an officer or employee of the authority
+currently holds a local or state public office. OAG 2-18.
+Should service fail in the manner specifically required in subs. (2) (a) 1. and (9) (a), after reasonable diligence, the
+alternatives to personal service in s. 801.11 may be used to provide notice to record subjects. Section 801.11 (1) appears
+reasonable and consistent with the public records law’s purposes with the exception of the publication requirement. An
+authority may leave a copy of the notice at the record subject’s usual place of abode in a manner substantially similar to
+s. 801.11 (1) (b). If the record subject’s usual place of abode cannot be located after reasonable diligence, an authority
+may leave a copy of the notice at the record subject’s usual place of business in a matter substantially similar to s.
+801.11 (4) (b). If, after reasonable diligence, the authority is unable to effectuate service according to the public records
+law’s provisions and other alternatives to personal service that are consistent with the public records law’s purpose, the
+authority may release the records. OAG 2-18.
+
+19.36 Limitations upon access and withholding.
+(1) APPLICATION OF OTHER LAWS. Any record which is specifically exempted from disclosure by state or federal
+law or authorized to be exempted from disclosure by state law is exempt from disclosure under s. 19.35 (1),
+except that any portion of that record which contains public information is open to public inspection as provided
+in sub. (6).
+(2) LAW ENFORCEMENT RECORDS. Except as otherwise provided by law, whenever federal law or regulations
+require or as a condition to receipt of aids by this state require that any record relating to investigative
+information obtained for law enforcement purposes be withheld from public access, then that information is
+exempt from disclosure under s. 19.35 (1).
+(3) CONTRACTORS’ RECORDS. Each authority shall make available for inspection and copying under s. 19.35
+(1) any record produced or collected under a contract entered into by the authority with a person other than an
+authority to the same extent as if the record were maintained by the authority. This subsection does not apply to
+the inspection or copying of a record under s. 19.35 (1) (am).
+(4) COMPUTER PROGRAMS AND DATA. A computer program, as defined in s. 16.971 (4) (c), is not subject to
+examination or copying under s. 19.35 (1), but the material used as input for a computer program or the material
+produced as a product of the computer program is subject to the right of examination and copying, except as
+otherwise provided in s. 19.35 or this section.
+(5) TRADE SECRETS. An authority may withhold access to any record or portion of a record containing
+information qualifying as a trade secret as defined in s. 134.90 (1) (c).
+(6) SEPARATION OF INFORMATION. If a record contains information that is subject to disclosure under s. 19.35 (1)
+(a) or (am) and information that is not subject to such disclosure, the authority having custody of the record shall
+provide the information that is subject to disclosure and delete the information that is not subject to disclosure
+from the record before release.
+(7) IDENTITIES OF APPLICANTS FOR PUBLIC POSITIONS.
+(a) In this subsection:
+
+1. “Final candidate” means each applicant who is seriously considered for appointment or whose name is
+certified for appointment, and whose name is submitted for final consideration to an authority for appointment,
+to any of the following:
+a. A state position that is not a position in the classified service and that is not a position in the University of
+Wisconsin System.
+b. A local public office.
+c. The position of president, vice president, or senior vice president of the University of Wisconsin System; the
+position of chancellor of an institution; or the position of the vice chancellor who serves as deputy at each
+institution.
+2. “Final candidate” includes all of the following, but only with respect to the offices and positions described
+under subd. 1. a. and b.:
+a. Whenever there are at least 5 applicants for an office or position, each of the 5 applicants who are considered
+the most qualified for the office or position by an authority.
+b. Whenever there are fewer than 5 applicants for an office or position, each applicant.
+c. Whenever an appointment is to be made from a group of more than 5 applicants considered the most qualified
+for an office or position by an authority, each applicant in that group.
+3. “Institution” has the meaning given in s. 36.05 (9).
+(b) Every applicant for a position with any authority may indicate in writing to the authority that the applicant
+does not wish the authority to reveal his or her identity. Except with respect to an applicant whose name is
+certified for appointment to a position in the state classified service or a final candidate, if an applicant makes
+such an indication in writing, the authority shall not provide access to any record related to the application that
+may reveal the identity of the applicant.
+(8) IDENTITIES OF LAW ENFORCEMENT INFORMANTS.
+(a) In this subsection:
+1. “Informant” means an individual who requests confidentiality from a law enforcement agency in conjunction
+with providing information to that agency or, pursuant to an express promise of confidentiality by a law
+enforcement agency or under circumstances in which a promise of confidentiality would reasonably be implied,
+provides information to a law enforcement agency or, is working with a law enforcement agency to obtain
+information, related in any case to any of the following:
+a. Another person who the individual or the law enforcement agency suspects has violated, is violating or will
+violate a federal law, a law of any state or an ordinance of any local government.
+b. Past, present or future activities that the individual or law enforcement agency believes may violate a federal
+law, a law of any state or an ordinance of any local government.
+
+2. “Law enforcement agency” has the meaning given in s. 165.83 (1) (b), and includes the department of
+corrections.
+(b) If an authority receives a request to inspect or copy a record or portion of a record under s. 19.35 (1) (a) that
+contains specific information including but not limited to a name, address, telephone number, voice recording, or
+handwriting sample that, if disclosed, would identify an informant, the authority shall delete the portion of the
+record in which the information is contained or, if no portion of the record can be inspected or copied without
+identifying the informant, shall withhold the record unless the legal custodian of the record, designated under
+s. 19.33, makes a determination, at the time that the request is made, that the public interest in allowing a person
+to inspect, copy or receive a copy of such identifying information outweighs the harm done to the public interest
+by providing such access.
+(9) RECORDS OF PLANS OR SPECIFICATIONS FOR STATE BUILDINGS. Records containing plans or specifications for
+any state-owned or state-leased building, structure or facility or any proposed state-owned or state-leased
+building, structure or facility are not subject to the right of inspection or copying under s. 19.35 (1) except as the
+department of administration otherwise provides by rule.
+(10) EMPLOYEE PERSONNEL RECORDS. Unless access is specifically authorized or required by statute, an
+authority shall not provide access under s. 19.35 (1) to records containing the following information, except to an
+employee or the employee’s representative to the extent required under s. 103.13 or to a recognized or certified
+collective bargaining representative to the extent required to fulfill a duty to bargain under ch. 111 or pursuant to
+a collective bargaining agreement under ch. 111:
+(a) Information maintained, prepared, or provided by an employer concerning the home address, home electronic
+mail address, home telephone number, or social security number of an employee, unless the employee authorizes
+the authority to provide access to such information.
+(b) Information relating to the current investigation of a possible criminal offense or possible misconduct
+connected with employment by an employee prior to disposition of the investigation.
+(c) Information pertaining to an employee’s employment examination, except an examination score if access to
+that score is not otherwise prohibited.
+(d) Information relating to one or more specific employees that is used by an authority or by the employer of the
+employees for staff management planning, including performance evaluations, judgments, or recommendations
+concerning future salary adjustments or other wage treatments, management bonus plans, promotions, job
+assignments, letters of reference, or other comments or ratings relating to employees.
+(11) RECORDS OF AN INDIVIDUAL HOLDING A LOCAL PUBLIC OFFICE OR A STATE PUBLIC OFFICE. Unless access is
+specifically authorized or required by statute, an authority shall not provide access under s. 19.35 (1) to records,
+except to an individual to the extent required under s. 103.13, containing information maintained, prepared, or
+provided by an employer concerning the home address, home electronic mail address, home telephone number,
+or social security number of an individual who holds a local public office or a state public office, unless the
+individual authorizes the authority to provide access to such information. Except as provided in sub. (15), this
+
+subsection does not apply to the home address of an individual who holds an elective public office or to the
+home address of an individual who, as a condition of employment, is required to reside in a specified location.
+(13) FINANCIAL IDENTIFYING INFORMATION. An authority shall not provide access to personally identifiable
+information that contains an individual’s account or customer number with a financial institution, as defined in
+s. 134.97 (1) (b), including credit card numbers, debit card numbers, checking account numbers, or draft account
+numbers, unless specifically required by law.
+(14) IDENTITIES OF ELECTION OFFICIALS OR ELECTION REGISTRATION OFFICIALS. Unless access is specifically
+authorized or required by statute, an authority shall not provide access under s. 19.35 (1) to records containing
+the personally identifiable information of a current or former election official, as defined in s. 5.02 (4e), or
+election registration official, as defined in s. 5.02 (4g), who submits a written request to the authority requesting
+that the information be kept confidential, except that an authority may provide access to the name of such current
+or former official and the city and state where the official resides.
+(15) PRIVACY PROTECTIONS FOR JUDICIAL OFFICERS. If a judicial officer, as defined in s. 757.07 (1) (e), submits
+a written request under s. 757.07 (4), an authority shall not provide access under s. 19.35 (1) to a certification of
+residence under s. 8.10 (8) or to the personal information, as defined in s. 757.07 (1) (g), of a judicial officer,
+except as provided under s. 8.10 (8) (b). An authority shall not provide access under s. 19.35 (1) to any form,
+blank or completed, that is prescribed by the director of state courts under s. 757.07 (4) and used for the
+submission of written requests or for consent to release personal information otherwise protected by a judicial
+officer’s written request.
+(16) JUDICIAL SECURITY PROFILES.
+(a) In this subsection:
+1. “Judicial officer” means a person who currently is or who formerly was a supreme court justice, court of
+appeals judge, circuit court judge, municipal judge, tribal judge, temporary or permanent reserve judge, or
+circuit, supplemental, or municipal court commissioner.
+2. “Judicial security profile form” means a form prescribed by the director of state courts.
+(b) An authority shall not provide access under s. 19.35 (1) to a judicial security profile form that is completed
+by or on behalf of a judicial officer and used to develop an emergency response plan.
+History: 1981 c. 335; 1985 a. 236; 1991 a. 39, 269, 317; 1993 a. 93; 1995 a. 27; 2001 a. 16; 2003 a. 33, 47; 2005 a.
+59, 253; 2007 a. 97; 2009 a. 28; 2011 a. 32; 2013 a. 171; 2015 a. 55; 2017 a. 59; 2023 a. 126, 223, 235, 236; 2025 a.
+7, 25, 130.
+NOTE: 2003 Wis. Act 47, which affected this section, contains extensive explanatory notes.
+A settlement agreement containing a pledge of confidentiality and kept in the possession of a school district’s attorney
+was a public record subject to public access under sub. (3). Journal/Sentinel, Inc. v. School Board, 186 Wis. 2d 443, 521
+N.W.2d 165 (Ct. App. 1994).
+Sub. (3) does not require providing access to payroll records of subcontractors of a prime contractor of a public
+construction project. Building & Construction Trades Council v. Waunakee Community School District, 221 Wis. 2d
+575, 585 N.W.2d 726 (Ct. App. 1998), 97-3282.
+
+The ultimate purchasers of municipal bonds from the bond’s underwriter, whose only obligation was to purchase the
+bonds, were not contractor’s records under sub. (3). Machotka v. Village of West Salem, 2000 WI App 43, 233 Wis. 2d
+106, 607 N.W.2d 319, 99-1163.
+Production of an analog audio tape was insufficient under sub. (4) when the requester asked for examination and
+copying of the original digital audio tape. State ex rel. Milwaukee Police Ass’n v. Jones, 2000 WI App 146, 237 Wis. 2d
+840, 615 N.W.2d 190, 98-3629.
+Requests for university admissions records focusing on test scores, class rank, grade point average, race, gender,
+ethnicity, and socio-economic background were not requests for personally identifiable information and release was not
+barred by federal law or public policy. That the requests would require the university to redact information from
+thousands of documents under sub. (6) did not essentially require the university to create new records and, as such, did
+not provide grounds for denying the request under s. 19.35 (1) (L). Osborn v. Board of Regents, 2002 WI 83, 254 Wis.
+2d 266, 647 N.W.2d 158, 00-2861.
+
+“Investigation” in sub. (10) (b) includes only that conducted by the public authority itself as a prelude to possible
+employee disciplinary action. An investigation achieves its “disposition” when the authority acts to impose discipline on
+an employee as a result of the investigation, regardless of whether the employee elects to pursue grievance arbitration or
+another review mechanism that may be available. Local 2489 v. Rock County, 2004 WI App 210, 277 Wis. 2d 208, 689
+N.W.2d 644, 03-3101. See also Zellner v. Cedarburg School District, 2007 WI 53, 300 Wis. 2d 290, 731 N.W.2d
+240, 06-1143.
+Misconduct investigation and disciplinary records are not excepted from public disclosure under sub. (10) (d). Sub. (10)
+(b) is the only exception to the open records law relating to investigations of possible employee misconduct. Kroeplin v.
+DNR, 2006 WI App 227, 297 Wis. 2d 254, 725 N.W.2d 286, 05-1093.
+Municipalities may not avoid liability under the open records law by contracting with independent contractor assessors
+for the collection, maintenance, and custody of property assessment records and then directing any requester of those
+records to the independent contractor assessors. WIREdata, Inc. v. Village of Sussex, 2008 WI 69, 310 Wis. 2d 397, 751
+N.W.2d 736, 05-1473.
+When requests to municipalities were for electronic/digital copies of assessment records, “PDF” files were
+“electronic/digital” files despite the fact that the files did not have all the characteristics that the requester wished. It is
+not required that requesters must be given access to an authority’s electronic databases to examine them, extract
+information from them, or copy them. Allowing requesters such direct access to the electronic databases of an authority
+would pose substantial risks. WIREdata, Inc. v. Village of Sussex, 2008 WI 69, 310 Wis. 2d 397, 751 N.W.2d 736, 051473.
+By procuring a liability insurance policy and allowing the insurance company to retain counsel for it, the county in
+effect contracted with the law firm and created an attorney-client relationship. Because the liability insurance policy
+was the basis for the tripartite relationship between the county, insurance company, and law firm and was the basis for
+an attorney-client relationship between the law firm and county, the invoices produced or collected during the course of
+the law firm’s representation of the county came under the liability insurance policy, and sub. (3) governed the
+accessibility of the invoices. Juneau County Star-Times v. Juneau County, 2013 WI 4, 345 Wis. 2d 122, 824 N.W.2d
+457, 10-2313.
+Responding to a public records request is not a “function” of the police department for purposes of the “agency
+functions” exception to the federal Driver’s Privacy Protection Act, which allows disclosure of personal information
+from state motor vehicle records for use by a government agency in carrying out its functions. New Richmond News v.
+City of New Richmond, 2016 WI App 43, 370 Wis. 2d 75, 881 N.W.2d 339, 14-1938.
+Under subs. (1) and (2), any record specifically exempted from disclosure pursuant to federal law also is exempt from
+disclosure under Wisconsin law. Federal regulations preclude release of any information pertaining to individuals
+detained in a state or local facility, and federal immigration detainer (I-247) forms contain only such information. Read
+together, subs. (1) and (2) and 8 CFR 236.6 exempt I-247 forms from release under Wisconsin public records law, and
+the forms are not subject to common-law exemptions or the public interest balancing test. Voces De La Frontera, Inc. v.
+Clarke, 2017 WI 16, 373 Wis. 2d 348, 891 N.W.2d 803, 15-1152.
+Separation costs must be borne by the agency. 72 Atty. Gen. 99.
+
+Discussing a computerized compilation of bibliographic records in relation to copyright law. A requester is entitled to a
+copy of a computer tape or a printout of information on the tape. 75 Atty. Gen. 133.
+An exemption to the federal Freedom of Information Act was not incorporated under sub. (1). 77 Atty. Gen. 20.
+Former sub. (7), 2011 stats., is an exception to the public records law and should be narrowly construed. In former sub.
+(7), 2011 stats., “applicant” and “candidate” are synonymous. “Final candidates” are the five most qualified unless there
+are less than five applicants, in which case all are final candidates. 81 Atty. Gen. 37.
+Public Access to Law Enforcement Records in Wisconsin. Fitzgerald. 68 MLR 705 (1985).
+
+19.37 Enforcement and penalties.
+(1) MANDAMUS. If an authority withholds a record or a part of a record or delays granting access to a record or
+part of a record after a written request for disclosure is made, the requester may pursue either, or both, of the
+alternatives under pars. (a) and (b).
+(a) The requester may bring an action for mandamus asking a court to order release of the record. The court may
+permit the parties or their attorneys to have access to the requested record under restrictions or protective orders
+as the court deems appropriate.
+(b) The requester may, in writing, request the district attorney of the county where the record is found, or request
+the attorney general, to bring an action for mandamus asking a court to order release of the record to the
+requester. The district attorney or attorney general may bring such an action.
+(1m) TIME FOR COMMENCING ACTION. No action for mandamus under sub. (1) to challenge the denial of a
+request for access to a record or part of a record may be commenced by any committed or incarcerated person
+later than 90 days after the date that the request is denied by the authority having custody of the record or part of
+the record.
+(1n) NOTICE OF CLAIM. Sections 893.80 and 893.82 do not apply to actions commenced under this section.
+(2) COSTS, FEES AND DAMAGES.
+(a) Except as provided in this paragraph, the court shall award reasonable attorney fees, damages of not less than
+$100, and other actual costs to the requester if the requester prevails in whole or in substantial part in any action
+filed under sub. (1) relating to access to a record or part of a record under s. 19.35 (1) (a). If the requester is a
+committed or incarcerated person, the requester is not entitled to any minimum amount of damages, but the court
+may award damages. Costs and fees shall be paid by the authority affected or the unit of government of which it
+is a part, or by the unit of government by which the legal custodian under s. 19.33 is employed and may not
+become a personal liability of any public official.
+(b) In any action filed under sub. (1) relating to access to a record or part of a record under s. 19.35 (1) (am), if
+the court finds that the authority acted in a willful or intentional manner, the court shall award the individual
+actual damages sustained by the individual as a consequence of the failure.
+(3) PUNITIVE DAMAGES. If a court finds that an authority or legal custodian under s. 19.33 has arbitrarily and
+capriciously denied or delayed response to a request or charged excessive fees, the court may award punitive
+damages to the requester.
+
+(4) PENALTY. Any authority which or legal custodian under s. 19.33 who arbitrarily and capriciously denies or
+delays response to a request or charges excessive fees may be required to forfeit not more than $1,000.
+Forfeitures under this section shall be enforced by action on behalf of the state by the attorney general or by the
+district attorney of any county where a violation occurs. In actions brought by the attorney general, the court
+shall award any forfeiture recovered together with reasonable costs to the state; and in actions brought by the
+district attorney, the court shall award any forfeiture recovered together with reasonable costs to the county.
+History: 1981 c. 335, 391; 1991 a. 269 s. 43d; 1995 a. 158; 1997 a. 94.
+If an agency exercises due diligence but is unable to respond timely to a records request, the plaintiff must show that a
+mandamus action was necessary to secure the records release to qualify for an award of fees and costs under sub. (2).
+Racine Education Ass’n v. Board of Education, 145 Wis. 2d 518, 427 N.W.2d 414 (Ct. App. 1988). But see Friends of
+Frame Park, U.A. v. City of Waukesha, 2022 WI 57, 403 Wis. 2d 1, 976 N.W.2d 263, 19-0096.
+Assuming sub. (1) (a) applies before mandamus is issued, the trial court retains discretion to refuse counsel’s
+participation in an in camera inspection. Milwaukee Journal v. Call, 153 Wis. 2d 313, 450 N.W.2d 515 (Ct. App. 1989).
+If the trial court has an incomplete knowledge of the contents of the public records sought, it must conduct an in camera
+inspection to determine what may be disclosed following a custodian’s refusal. State ex rel. Morke v. Donnelly, 155
+Wis. 2d 521, 455 N.W.2d 893 (1990).
+A pro se litigant is not entitled to attorney fees. State ex rel. Young v. Shaw, 165 Wis. 2d 276, 477 N.W.2d 340 (Ct. App.
+1991).
+Actions brought under the open meetings and open records laws are exempt from the notice provisions of former s.
+893.80 (1), 1993 stats. State ex rel. Auchinleck v. Town of LaGrange, 200 Wis. 2d 585, 547 N.W.2d 587 (1996), 942809.
+An inmate’s right to mandamus under this section is subject to s. 801.02 (7), which requires exhaustion of
+administrative remedies before an action may be commenced. Moore v. Stahowiak, 212 Wis. 2d 744, 569 N.W.2d
+711 (Ct. App. 1997), 96-2547.
+When requests are complex, municipalities should be afforded reasonable latitude in time for their responses. An
+authority should not be subjected to the burden and expense of a premature public records lawsuit while it is attempting
+in good faith to respond, or to determine how to respond, to a request. What constitutes a reasonable time for a response
+by an authority depends on the nature of the request, the staff and other resources available to the authority to process
+the request, the extent of the request, and other related considerations. WIREdata, Inc. v. Village of Sussex, 2008 WI
+69, 310 Wis. 2d 397, 751 N.W.2d 736, 05-1473.
+The legislature did not intend to allow a record requester to control or appeal a mandamus action brought by the
+attorney general under sub. (1) (b). Sub. (1) outlines two distinct courses of action when a records request is denied,
+dictates distinct courses of action, and prescribes different remedies for each course. Nothing suggests that a requester is
+hiring the attorney general as a sort of private counsel to proceed with the case or that the requester would be a named
+plaintiff in the case with the attorney general appearing as counsel of record when proceeding under sub. (1) (b). State v.
+Zien, 2008 WI App 153, 314 Wis. 2d 340, 761 N.W.2d 15, 07-1930.
+This section unambiguously limits punitive damages claims under sub. (3) to mandamus actions. The mandamus court
+decides whether there is a violation and, if so, whether it caused actual damages. Then, the mandamus court may
+consider whether punitive damages should be awarded under sub. (3). Capital Times Co. v. Doyle, 2011 WI App
+137, 337 Wis. 2d 544, 807 N.W.2d 666, 10-1687.
+Under the broad terms of s. 51.30 (7), the confidentiality requirements created under s. 51.30 generally apply to
+“treatment records” in criminal not guilty by reason of insanity (NGI) cases. All conditional release plans in NGI cases
+are, by statutory definition, treatment records. They are created in the course of providing services to individuals for
+mental illness, and thus should be deemed confidential. An order of placement in an NGI case is not a “treatment
+record.” La Crosse Tribune v. Circuit Court, 2012 WI App 42, 340 Wis. 2d 663, 814 N.W.2d 867, 10-3120.
+The newspaper argued that s. 19.88 (3), of the open meetings law, which requires “the motions and roll call votes of
+each meeting of a governmental body shall be recorded, preserved and open to public inspection,” in turn, required the
+commission to record and disclose the information the newspaper requested under the open records law. The newspaper
+
+could not seek relief under the public records law for the commission’s alleged violation of the open meetings law and
+could not recover reasonable attorney fees, damages, and other actual costs under sub. (2) for an alleged violation of the
+open meetings law. Journal Times v. City of Racine Board of Police & Fire Commissioners, 2015 WI 56, 362 Wis. 2d
+577, 866 N.W.2d 563, 13-1715.
+A record custodian should not automatically be subject to potential liability under sub. (2) (a) for actively providing
+information, which it is not required to do in response to a public records request, to a requester when no record exists.
+While it might be a better course to inform a requester that no record exists, the language of the public records law does
+not specifically require such a response. Journal Times v. City of Racine Board of Police & Fire Commissioners, 2015
+WI 56, 362 Wis. 2d 577, 866 N.W.2d 563, 13-1715.
+A mandamus litigant has prevailed in substantial part, and thus is entitled to fees, when the requester obtains access to
+improperly withheld public records through a judicial order. That a requester may have succeeded in obtaining access to
+some but not all of the records is an issue subject to the court’s discretion in considering the amount of reasonable fees
+to be awarded. Under this section, the analysis of the extent of access goes to the discretionary award of reasonable fees,
+not the threshold determination of eligibility. Meinecke v. Thyes, 2021 WI App 58, 399 Wis. 2d 1, 963 N.W.2d 816, 200338. See also Friends of Frame Park, U.A. v. City of Waukesha, 2022 WI 57, 403 Wis. 2d 1, 976 N.W.2d 263, 190096.
+For purposes of the fee shifting provision under sub. (2) (a), to prevail in whole or in substantial part means the party
+must obtain a judicially sanctioned change in the parties’ legal relationship. Friends of Frame Park, U.A. v. City of
+Waukesha, 2022 WI 57, 403 Wis. 2d 1, 976 N.W.2d 263, 19-0096. But see Wisconsin State Journal v. Blazel, 2023 WI
+App 18, 407 Wis. 2d 472, 991 N.W.2d 450, 21-1196.
+Friends of Frame Park, 2022 WI 57, does not preclude applying the prevailing-party test in a case in which a
+governmental authority voluntarily releases the requested records after initially denying their release. A decision on the
+merits challenging the authority’s initial outright denial of the records requests will have a practical effect on the
+requester’s entitlement to attorney fees. More specifically, if a court were to rule in favor of the requesters, then the
+requesters would meet the prevailing-party test stated in Friends of Frame Park. Wisconsin State Journal v.
+Blazel, 2023 WI App 18, 407 Wis. 2d 472, 991 N.W.2d 450, 21-1196.
+Actual damages are the liability of the agency. Punitive damages and forfeitures can be the liability of either the agency
+or the legal custodian, or both. Section 895.46 (1) (a) probably provides indemnification for punitive damages assessed
+against a custodian, but not for forfeitures. 72 Atty. Gen. 99.
+Sovereign immunity is waived when a state removes a case to federal court. In that situation, there is no bar related to
+jurisdiction or sovereign immunity that prevents the federal court from compelling the state to produce records under
+the Wisconsin open records law. Friends of Blue Mound State Park v. DNR, 654 F. Supp. 3d 807 (2023).
+
+19.39 Interpretation by attorney general. Any person may request advice from the attorney general as to
+the applicability of this subchapter under any circumstances. The attorney general may respond to such a request.
+History: 1981 c. 335.
+
+SUBCHAPTER III
+
+
