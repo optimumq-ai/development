@@ -8370,3 +8370,9 @@ SPEC_auth_security_platform §1 (inventory).
 ## Session (g) addendum — 2026-08-20
 - Kevin decision: payment.method is OUT OF SCOPE (finance-dept policy, not a records rule) — exclude at merge and in any future gap pass. GA UNVERIFIABLE row resolved by this decision; no § 50-1-6 fetch needed.
 - Kevin-supplied Justia 2025 copy of GA § 50-18-71 (exchange PDF) confirms GA fee subsections current through SB 12 (eff. 5/14/2025, non-fee amendment) — noted in verified/GA.json.
+
+## Session (g) close — 2026-08-20 ~4am
+- Verify pass COMPLETE and committed: 22/22 states, 792 rows, 0 refuted. Rollup: fee_gap/VERIFY_ROLLUP.md.
+- payment.method OUT OF SCOPE (Kevin decision, in memory + rollup) — exclude at merge and in remaining-states research.
+- Kevin is hand-gathering official fee statutes for the 10 pending states into exchange/, banked in fee_gap/source_docs/ with provenance: WI ✓ (certified ch.19 through 2025 Act 247), WA ✓ fee-complete (RCW 42.56.120 + certified .070). Remaining: MA (c.66 §10 + 950 CMR 32.07), MI (MCL 15.234), MN (§13.03 subd.3, 2025 amendment!), MO (§610.026), NY (POL §§87/89), OK (51 O.S. §24A.5), OR (ORS 192.324), VA (§2.2-3704 F–J codified only — SB 56 NOT enacted), optional WA 42.56.520.
+- NEXT on Kevin return: (1) continue banking his uploads; (2) his call: merge verified layer into alignment/fee_master_list.json (ready, nothing blocking); (3) his call: discover pass for pending states, grounded in source_docs/ first. No agent spawns without explicit go.
