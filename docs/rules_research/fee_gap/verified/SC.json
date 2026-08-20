@@ -1,0 +1,339 @@
+{
+ "code": "SC",
+ "verified_at": "2026-08-20",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Both sentences verbatim in § 30-4-30(B) (opened; HISTORY shows last amendment 2017 Act No. 67, eff May 19, 2017 — no 2024-2026 act). Non-numeric 'may not exceed the prevailing commercial rate' standard recorded as actual_cost_standard/soft-standard with no number, notes flag the ceiling wording explicitly — not a soft-standard-with-number or ceiling-as-value error. § 30-4-20(a) confirmed: 'public body' expressly includes municipalities.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Sentence verbatim in § 30-4-30(B); statute makes no color/B&W distinction; soft standard recorded without a number; applies to municipalities per § 30-4-20(a); section current (2017 Act No. 67, no later amendment).",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Sentence verbatim in § 30-4-30(B); no oversized rule exists in the chapter (full page scanned); soft standard, no number; manual_verification flag appropriately retained; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "Statute clause verbatim in § 30-4-30(B); § 30-4-20(c) verbatim includes 'maps, photographs, cards, tapes, recordings'; AG opinion PDF opened — 'may create such a document for a requestor if it chooses; the fees which may be charged by the public body for doing so would be governed by §30-4-30(b)' verbatim (quoting 1996 WL 190741); advisory character and clause ambiguity flagged; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php ; https://www.scag.gov/wp-content/uploads/2019/07/ForrestC-HudsonD-OS-10363-FINAL-Opinion-6-28-2019-02008072xD2C78-02013944xD2C78.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly: full § 30-4-30(B)-(C) read — no volume/page bands; only the uniformity clause (verbatim). Search log present; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly: no free-page allowance in § 30-4-30(B)-(C); quoted electronic-transmission $0 clause verbatim; search log present; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "Both sentences verbatim in § 30-4-30(B); 'shall not exceed the prorated hourly salary of the lowest paid employee...' correctly recorded as ceiling (formula, not dollar); AG $19/hr correctly quarantined to notes as agency-only guidance; municipal scope per § 30-4-20(a); current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Both sentences verbatim in § 30-4-30(B): redaction inside the salary-formula ceiling, examination/review categorically free; boundary flagged for human review; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "Staff-time conversion clause verbatim in § 30-4-30(B); § 30-4-30(A)(2) no-create rule verbatim; AG quote verbatim in opened PDF; Permission + soft-standard with no invented number; open question (salary-cap coverage of conversion time) flagged; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php ; https://www.scag.gov/wp-content/uploads/2019/07/ForrestC-HudsonD-OS-10363-FINAL-Opinion-6-28-2019-02008072xD2C78-02013944xD2C78.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "All three quoted sentences verbatim in § 30-4-30(B); no threshold or paper-only limit exists in the section; 'always' for search/retrieval/redaction with review-time carve-out matches the text; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "Quoted ceiling sentence verbatim; 'not_applicable / 0' is a literal reading (a surcharge above prorated hourly salary would exceed the cap), expressly recorded as inference not a sourced 0% and flagged manual_verification — not a soft-standard-with-number error; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly: no increment/rounding rule anywhere in § 30-4-30 (full section read); quote verbatim; search log present; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly: no free-hours allowance in the section; quote verbatim; search log present; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly: no periodic per-requestor allowance in the section; quote verbatim; search log present; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly: no estimate-notice duty or threshold in § 30-4-30(B)-(C); deposit clause (which presupposes an anticipated cost but imposes no notice) verbatim in (B); current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CORRECTED",
+   "why": "Resolution (silent — no requester response window) and quote verified verbatim, but the quoted deposit-clock sentence sits in § 30-4-30(C), not (B) as the row's source_authority states. Corrected source_authority to § 30-4-30(C). Everything else confirmed; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": {
+    "state": "SC",
+    "item_id": "estimate.requesterResponseDays",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "rule_type": null,
+    "applies_to": "all_public_bodies",
+    "resolved_by_rule_ids": [],
+    "new_rule_ids": [],
+    "source_authority": "S.C. Code Ann. § 30-4-30(C)",
+    "source_type": "Statute",
+    "official_link": "https://www.scstatehouse.gov/code/t30c004.php",
+    "source_language": "If a deposit as provided in subsection (B) is required by the public body, the record must be furnished or made available for inspection or copying no later than thirty calendar days from the date on which the deposit is received, unless the records are more than twenty-four months old, in which case the public body has no later than thirty-five calendar days from the date on which the deposit was received to fulfill the request.",
+    "is_paraphrase": false,
+    "effective_status": "Current (2017 Act No. 67, eff. May 19, 2017; no later amendment through 2025 session; no 2026 act found)",
+    "confidence": "high",
+    "manual_verification": null,
+    "notes": "No requester response window on an estimate/deposit and no deemed-withdrawal. Only clock effect: production deadline runs from deposit receipt (SC-0026). Searched: S.C. Code Title 30 ch. 4 (FOIA, all sections; fee content confined to § 30-4-30(B)-(C)); S.C. Code of Regulations index and ch. 12 (Archives & History) — no FOIA fee regulation exists; SC Attorney General FOIA page and opinion search (scag.gov/search: 'FOIA fee 30-4-30', 'prorated hourly salary', 'prevailing commercial rate', 'FOIA redaction fee') — opened AG Ops. of June 28, 2019 (Forrest/Hudson), Jan. 24, 2020 (McCurdy, clerks of court), May 31, 2024 (Swindler, BWC); 2024, 2025 and 2026 Acts lists on scstatehouse.gov (no FOIA fee act); S. 6 (2025-2026) which re-states § 30-4-30(B) unchanged and remains in Senate Judiciary."
+   }
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly: no revision trigger/overrun percent in the section; deposit clause verbatim in (B); current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly: no estimate validity period in the section; deposit clause verbatim in (B); current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "Both sentences verbatim in § 30-4-30(B); permission is unconditioned (no minimum estimate) — defers_to_city is the right word; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "'not to exceed twenty-five percent of the total reasonably anticipated cost for reproduction' verbatim in § 30-4-30(B); correctly recorded as ceiling (not value); narrow 'reproduction' base flagged; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "'The full amount of the total cost must be paid at the time of the production of the request.' verbatim in § 30-4-30(C); deposit clause verbatim in (B); authority correctly cites (C); (B); current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly: no withdrawal/prior-debt rule in § 30-4-30(B)-(C); quoted (C) sentences verbatim, cited to (C); current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "Full deposit-clock sentence verbatim in § 30-4-30(C); 30/35 calendar days and >24-months split confirmed; structural is the right word; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CORRECTED",
+   "why": "Resolution (silent — no overrun/re-issue rule) verified, but 'The full amount of the total cost must be paid at the time of the production of the request.' is in § 30-4-30(C), not (B) as cited. Corrected source_authority to § 30-4-30(C). Quote verbatim; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": {
+    "state": "SC",
+    "item_id": "payment.reissue",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "rule_type": null,
+    "applies_to": "all_public_bodies",
+    "resolved_by_rule_ids": [],
+    "new_rule_ids": [],
+    "source_authority": "S.C. Code Ann. § 30-4-30(C)",
+    "source_type": "Statute",
+    "official_link": "https://www.scstatehouse.gov/code/t30c004.php",
+    "source_language": "The full amount of the total cost must be paid at the time of the production of the request.",
+    "is_paraphrase": false,
+    "effective_status": "Current (2017 Act No. 67, eff. May 19, 2017; no later amendment through 2025 session; no 2026 act found)",
+    "confidence": "high",
+    "manual_verification": null,
+    "notes": "No overrun / re-issue rule; statute only requires full payment of the total cost at production. Searched: S.C. Code Title 30 ch. 4 (FOIA, all sections; fee content confined to § 30-4-30(B)-(C)); S.C. Code of Regulations index and ch. 12 (Archives & History) — no FOIA fee regulation exists; SC Attorney General FOIA page and opinion search (scag.gov/search: 'FOIA fee 30-4-30', 'prorated hourly salary', 'prevailing commercial rate', 'FOIA redaction fee') — opened AG Ops. of June 28, 2019 (Forrest/Hudson), Jan. 24, 2020 (McCurdy, clerks of court), May 31, 2024 (Swindler, BWC); 2024, 2025 and 2026 Acts lists on scstatehouse.gov (no FOIA fee act); S. 6 (2025-2026) which re-states § 30-4-30(B) unchanged and remains in Senate Judiciary."
+   }
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly for FOIA chapter: no payment-method provision in Title 30 ch. 4; quote verbatim ((B) first sentence); coverage limit (non-FOIA card authority not searched) honestly disclosed; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "All three sentences verbatim in § 30-4-30(B); no dollar maximum exists; actual_cost_standard correct; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly: no de-minimis threshold; both $0-category quotes verbatim in (B); current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly: no minimum fee; 'lowest possible cost' sentence verbatim in (B); current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly: no physical-media charge provision in the section; both adjacent clauses verbatim in (B); manual_verification flag retained; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly: no postage/mailing/handling provision in the section; both quotes verbatim in (B); current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly: no certified-copy fee in Title 30 ch. 4 (full page scanned; §§ 30-4-30, -50, -100 all checked); quote verbatim; officer-specific fee statutes correctly excluded as non-municipal; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CORRECTED",
+   "why": "Resolution (silent — no AV fee rule) verified; § 30-4-30(B) clause and § 23-1-240(G)(1) ('Data recorded by a body-worn camera is not a public record subject to disclosure under the Freedom of Information Act.') both verbatim, and (G)(3) discretionary release confirmed (§ 23-1-240 last amended 2015 Act No. 71 — current). But the quoted § 23-1-240(G)(1) text is NOT on the row's sole official_link (Title 30 ch. 4 page); corrected official_link to include the Title 23 ch. 1 page where it lives.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php ; https://www.scstatehouse.gov/code/t23c001.php",
+   "corrected_row": {
+    "state": "SC",
+    "item_id": "av",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "rule_type": null,
+    "applies_to": "all_public_bodies",
+    "resolved_by_rule_ids": [],
+    "new_rule_ids": [],
+    "source_authority": "S.C. Code Ann. § 30-4-30(B); S.C. Code Ann. § 23-1-240(G)(1); § 30-4-50(A)(9)",
+    "source_type": "Statute",
+    "official_link": "https://www.scstatehouse.gov/code/t30c004.php ; https://www.scstatehouse.gov/code/t23c001.php",
+    "source_language": "Copy charges may not apply to records that are transmitted in an electronic format. || § 23-1-240(G)(1): Data recorded by a body-worn camera is not a public record subject to disclosure under the Freedom of Information Act.",
+    "is_paraphrase": false,
+    "effective_status": "Current (2017 Act No. 67, eff. May 19, 2017; no later amendment through 2025 session; no 2026 act found)",
+    "confidence": "high",
+    "manual_verification": null,
+    "notes": "No per-recording, per-minute or free-minutes rule. Body-worn-camera data is outside FOIA (release discretionary, § 23-1-240(G)(3)); dashboard-camera recordings have a special hearing path (§ 30-4-50(A)(9), SC-0040) but no fee rule. General fee clauses (copy ceiling; $0 copy charge if transmitted electronically; redaction labor at the salary-formula ceiling) govern any recording produced. Searched: S.C. Code Title 30 ch. 4 (FOIA, all sections; fee content confined to § 30-4-30(B)-(C)); S.C. Code of Regulations index and ch. 12 (Archives & History) — no FOIA fee regulation exists; SC Attorney General FOIA page and opinion search (scag.gov/search: 'FOIA fee 30-4-30', 'prorated hourly salary', 'prevailing commercial rate', 'FOIA redaction fee') — opened AG Ops. of June 28, 2019 (Forrest/Hudson), Jan. 24, 2020 (McCurdy, clerks of court), May 31, 2024 (Swindler, BWC); 2024, 2025 and 2026 Acts lists on scstatehouse.gov (no FOIA fee act); S. 6 (2025-2026) which re-states § 30-4-30(B) unchanged and remains in Senate Judiciary."
+   }
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CORRECTED",
+   "why": "Resolution (silent — no commercial-purpose fee rule) and the § 30-4-30(B) uniformity quote verified verbatim, and § 30-4-50(B) (on the same official page) confirmed as a use restriction, not a fee. But the row's § 30-4-50(B) portion was a condensed paraphrase while is_paraphrase=false (it also omitted 'police incident report'). Corrected source_language to the verbatim § 30-4-50(B) sentences.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": {
+    "state": "SC",
+    "item_id": "commercial",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "rule_type": null,
+    "applies_to": "all_public_bodies",
+    "resolved_by_rule_ids": [],
+    "new_rule_ids": [],
+    "source_authority": "S.C. Code Ann. § 30-4-30(B); § 30-4-50(B)",
+    "source_type": "Statute",
+    "official_link": "https://www.scstatehouse.gov/code/t30c004.php",
+    "source_language": "Fees charged by a public body must be uniform for copies of the same record or document and may not exceed the prevailing commercial rate for the producing of copies. || § 30-4-50(B): No information contained in a police incident report or in an employee salary schedule revealed in response to a request pursuant to this chapter may be utilized for commercial solicitation. Also, the home addresses and home telephone numbers of employees and officers of public bodies revealed in response to a request pursuant to this chapter may not be utilized for commercial solicitation.",
+    "is_paraphrase": false,
+    "effective_status": "Current (2017 Act No. 67, eff. May 19, 2017; no later amendment through 2025 session; no 2026 act found)",
+    "confidence": "high",
+    "manual_verification": null,
+    "notes": "No commercial-purpose fee schedule, surcharge or labor switch in SC law; no purpose statement may be demanded (SC-0003). Constraint to note: copy fees 'must be uniform for copies of the same record or document', which forecloses a requester-class copy surcharge; labor fees are not covered by the uniformity clause. § 30-4-50(B) restricts commercial-solicitation USE, not fees. Searched: S.C. Code Title 30 ch. 4 (FOIA, all sections; fee content confined to § 30-4-30(B)-(C)); S.C. Code of Regulations index and ch. 12 (Archives & History) — no FOIA fee regulation exists; SC Attorney General FOIA page and opinion search (scag.gov/search: 'FOIA fee 30-4-30', 'prorated hourly salary', 'prevailing commercial rate', 'FOIA redaction fee') — opened AG Ops. of June 28, 2019 (Forrest/Hudson), Jan. 24, 2020 (McCurdy, clerks of court), May 31, 2024 (Swindler, BWC); 2024, 2025 and 2026 Acts lists on scstatehouse.gov (no FOIA fee act); S. 6 (2025-2026) which re-states § 30-4-30(B) unchanged and remains in Senate Judiciary."
+   }
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "Waiver clause and General Assembly no-charge sentence verbatim in § 30-4-30(B); AG discretionary-character quote verbatim in opened PDF (SC-9001 footnote quote also verbatim); § 30-4-100 confirmed as the judicial-only enforcement path; discretionary + municipal reach (AG reading) accurately represented; current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php ; https://www.scag.gov/wp-content/uploads/2019/07/ForrestC-HudsonD-OS-10363-FINAL-Opinion-6-28-2019-02008072xD2C78-02013944xD2C78.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly: late-response consequence is constructive approval, not fee forfeiture; (C) sentence verbatim, cited to (C); current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Silent correctly: no repeat/aggregation rule in the section; quote verbatim ((B) first sentence); current.",
+   "checked_link": "https://www.scstatehouse.gov/code/t30c004.php",
+   "corrected_row": null
+  }
+ ],
+ "notes": "Verification method: downloaded https://www.scstatehouse.gov/code/t30c004.php (official S.C. Code, Title 30 ch. 4) and checked every quoted sentence for exact verbatim presence; downloaded and text-extracted the cited AG opinion PDF (Forrest/Hudson, June 28, 2019, scag.gov) and confirmed all AG quotes verbatim including the SC-9001 footnote; downloaded https://www.scstatehouse.gov/code/t23c001.php for § 23-1-240(G). Currency: § 30-4-30 HISTORY line ends at 2017 Act No. 67 (eff May 19, 2017); web search for 2024-2026 amendments found only exemption bills (H.3161 inmate-call recordings, H.3876), no fee act — the discover file's currency statement holds. § 23-1-240 last amended 2015 Act No. 71. Municipal scope: § 30-4-20(a) verbatim includes 'counties, municipalities, townships, school districts, and special purpose districts' — all_public_bodies is right on every row; AG-office figures ($19.00/hr, $0.20/page, $12.00/hr) appear only as guidance in notes, never as municipal values. 32 CONFIRMED, 4 CORRECTED (two subsection misattributions (B)->(C); one paraphrase marked is_paraphrase=false on the § 30-4-50(B) quote in 'commercial'; one official_link that did not host the quoted § 23-1-240(G)(1) text on 'av'). No REFUTED, no UNVERIFIABLE. Note for reconcile: several composite quotes order statute sentences differently than the section does (each sentence individually verbatim); the discover file's own gaps_manual_verification list (overheadPct literal reading, redaction/review boundary, created-record clause, deposit base) remains valid and was not re-litigated here."
+}

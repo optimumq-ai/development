@@ -8360,3 +8360,9 @@ SPEC_auth_security_platform §1 (inventory).
    resolutions + new rule rows into alignment/fee_master_list.json as the verified layer, then RESULTS.md
    aggregate. 4. Step 3 of the fee plan (template fee_schedule gains value/unit/basis/engine_field).
 - Fees role-gate hardening still PAUSED. Standing board unchanged.
+
+## Session (g) — 2026-08-20
+- SC verify completed (relaunched after limit reset): 32 CONFIRMED, 4 CORRECTED (citation-level: two rows cited § 30-4-30(B) for (C) text; av quote not on its official_link; commercial paraphrase mis-flagged verbatim), 0 REFUTED, 0 UNVERIFIABLE. All four resolutions stand as silent.
+- Verify pass is now COMPLETE: 22/22 discovered states, 792 rows, 773 confirmed / 18 corrected / 1 unverifiable (GA payment.method, needs manual browser check of O.C.G.A. § 50-1-6) / 0 refuted.
+- Rollup: docs/rules_research/fee_gap/VERIFY_ROLLUP.md
+- Parked with Kevin: (a) merge verified layer into alignment/fee_master_list.json; (b) gap pass for the 10 remaining states (MA MI MN MO NY OK OR VA WA WI — MN first). No agent spawns without explicit go.

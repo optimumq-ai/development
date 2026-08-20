@@ -4,15 +4,15 @@ Status as of 2026-08-20. Covers the verify (refute) pass over the 22 discovered 
 `raw/<ST>.json` files. Verdicts per row: CONFIRMED | CORRECTED | REFUTED | UNVERIFIABLE.
 Source files: `verified/<ST>.json` (one row per resolution item, 36 per state).
 
-## Grand tally (21 of 22 states verified; SC in progress)
+## Grand tally (COMPLETE — all 22 discovered states verified)
 
 | Verdict | Rows | Share |
 |---|---|---|
-| CONFIRMED | 741 | 98.0% |
-| CORRECTED | 14 | 1.9% |
+| CONFIRMED | 773 | 97.6% |
+| CORRECTED | 18 | 2.3% |
 | UNVERIFIABLE | 1 | 0.1% |
 | **REFUTED** | **0** | — |
-| Total checked | 756 | 21 states × 36 |
+| Total checked | 792 | 22 states × 36 |
 
 **Zero refuted rows.** No state had a figure that turned out to be wrong, agency-only
 recorded as municipal, or a ceiling recorded as a value. Every correction below is either
@@ -45,13 +45,12 @@ or (b) one substantive trim (CT).
 | TN | 36 | 0 | 0 | 0 | all 5 OORC instruments opened |
 | TX | 34 | 2 | 0 | 0 | rules.minFee, waiver.forfeiture — "silent" resolutions right, verbatim quotes belonged to other sections; fixed |
 | UT | 36 | 0 | 0 | 0 | — |
-| SC | — | — | — | — | **verify in progress** (agent relaunched 2026-08-20 after session-limit failure) |
+| SC | 32 | 4 | 0 | 0 | estimate.requesterResponseDays, payment.reissue (both: quote is in § 30-4-30(C), not (B)), av (§ 23-1-240(G)(1) quote not on the row's official_link), commercial (§ 30-4-50(B) paraphrase flagged verbatim) — all four resolutions ("silent") stand |
 
 ## Follow-ups
 
 1. **GA payment.method** — the only row with no opened source. One manual check:
    O.C.G.A. § 50-1-6 (electronic payment acceptance) via a browser.
-2. **SC** — slot in its verdict row when `verified/SC.json` lands; update the grand tally.
-3. Decisions parked with Kevin: (a) merge CONFIRMED/CORRECTED resolutions + new 9NNN rule
+2. Decisions parked with Kevin: (a) merge CONFIRMED/CORRECTED resolutions + new 9NNN rule
    rows into `alignment/fee_master_list.json` as the `verified` layer; (b) whether to run the
    full gap pass for the 10 undiscovered states (MA MI MN MO NY OK OR VA WA WI — MN first).
