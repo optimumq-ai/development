@@ -1,0 +1,259 @@
+{
+  "code": "OH",
+  "verified_at": "2026-08-19",
+  "rows": [
+    {
+      "item_id": "dup.bw.rate",
+      "verdict": "CONFIRMED",
+      "why": "R.C. 149.43(B)(1) 'at cost' sentence present verbatim in the opened current version (eff. 2025-09-30); Hutson PDF opened — para. 25 holds 'at cost' means 'actual cost' and para. 26 bars labor charges (municipal respondent, Warren PD). No statewide per-page figure exists; 'actual_cost_standard' with null value is the right word (a number here would have been wrong). Pending 2026-09-07 version opened: fee language unchanged.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.color.rate",
+      "verdict": "CONFIRMED",
+      "why": "Same (B)(1) 'at cost' sentence verified verbatim in the opened statute; no color-copy provision found in any opened source; notes correctly disown the earlier misattributed $75/$750/'five dollars' figures. 'actual_cost_standard', null value, ceiling basis all correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.oversized.rate",
+      "verdict": "CONFIRMED",
+      "why": "Same (B)(1) sentence verified verbatim; no oversized-page provision in the opened statute, manual, or model policy. Resolution word and null value correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.specialty.rate",
+      "verdict": "CONFIRMED",
+      "why": "(B)(1) at-cost + (B)(6) medium-choice sentences both verified verbatim in the opened statute. Delegated instrument R.C. 5502.12 opened: $4 nonrefundable accident-report fee, photos/electronic extra, county-approval clause — all verbatim as quoted in notes; binds submitting municipal police. OAG 99-012 opened: syllabus para. 2 verbatim.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.tiers",
+      "verdict": "CONFIRMED",
+      "why": "Statute opened across (B)(1)/(B)(6)/(B)(7)/(E)(2) — no page-band/tier language anywhere; search log recorded in notes. 'silent' correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.freePages",
+      "verdict": "CONFIRMED",
+      "why": "(B)(1) sentence verified verbatim; no free-page allowance in statute, manual, or model policy (all opened). 'silent' correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.search.rate",
+      "verdict": "CONFIRMED",
+      "why": "Hutson PDF opened and text-extracted: 'Ohio does not specify any charge for search and/or review time', 'the cost set forth in R.C. 149.43(B) should not include labor costs regarding employee time', and the $5-initial-page passage all present verbatim (paras. 25-26); syllabus 'Copies of public records available at actual cost without charges for labor or employee time' confirmed. Municipal respondent. 'not_applicable' (no rate can exist) is the right word.",
+      "checked_link": "https://www.supremecourt.ohio.gov/rod/docs/pdf/0/1994/1994-ohio-5.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.review.rate",
+      "verdict": "CONFIRMED",
+      "why": "Hutson PDF opened and text-extracted: 'Ohio does not specify any charge for search and/or review time', 'the cost set forth in R.C. 149.43(B) should not include labor costs regarding employee time', and the $5-initial-page passage all present verbatim (paras. 25-26); syllabus 'Copies of public records available at actual cost without charges for labor or employee time' confirmed. Municipal respondent. 'not_applicable' (no rate can exist) is the right word.",
+      "checked_link": "https://www.supremecourt.ohio.gov/rod/docs/pdf/0/1994/1994-ohio-5.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.programming.rate",
+      "verdict": "CONFIRMED",
+      "why": "Hutson PDF opened and text-extracted: 'Ohio does not specify any charge for search and/or review time', 'the cost set forth in R.C. 149.43(B) should not include labor costs regarding employee time', and the $5-initial-page passage all present verbatim (paras. 25-26); syllabus 'Copies of public records available at actual cost without charges for labor or employee time' confirmed. Municipal respondent. 'not_applicable' (no rate can exist) is the right word. OAG 99-012 (delegated authority for programming time) opened: syllabus para. 2 'exclusive of any charges for employee labor or computer programming time' verbatim.",
+      "checked_link": "https://www.supremecourt.ohio.gov/rod/docs/pdf/0/1994/1994-ohio-5.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.billableWhen",
+      "verdict": "CONFIRMED",
+      "why": "Hutson quotes verified (see labor rows); the video exception verified verbatim in the opened statute ((B)(1) second para., staff time within 'actual cost'). 'value' = enum 'never (exception: LE/prosecutor video)' is a faithful fixed enum, not a mislabeled ceiling.",
+      "checked_link": "https://www.supremecourt.ohio.gov/rod/docs/pdf/0/1994/1994-ohio-5.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.overheadPct",
+      "verdict": "CONFIRMED",
+      "why": "Hutson quotes verified; video 'any other relevant overhead' clause verified verbatim in opened statute; BMV +10% confirmed in (F) and correctly excluded as BMV-only. 'not_applicable' correct.",
+      "checked_link": "https://www.supremecourt.ohio.gov/rod/docs/pdf/0/1994/1994-ohio-5.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.increment",
+      "verdict": "CONFIRMED",
+      "why": "Hutson quotes verified; no increment/rounding rule in any opened source; video cap confirmed as per hour of video produced. 'not_applicable' correct.",
+      "checked_link": "https://www.supremecourt.ohio.gov/rod/docs/pdf/0/1994/1994-ohio-5.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.freeLaborHours",
+      "verdict": "CONFIRMED",
+      "why": "Hutson quotes verified; all labor free, so allowance moot. 'not_applicable' correct.",
+      "checked_link": "https://www.supremecourt.ohio.gov/rod/docs/pdf/0/1994/1994-ohio-5.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.periodicFreeHours",
+      "verdict": "CONFIRMED",
+      "why": "Hutson quotes verified; (E)(2) no-per-requester-limit sentence verified verbatim in opened statute. 'not_applicable' correct.",
+      "checked_link": "https://www.supremecourt.ohio.gov/rod/docs/pdf/0/1994/1994-ohio-5.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.estimateNotifyThreshold",
+      "verdict": "CONFIRMED",
+      "why": "AG 2026 manual PDF opened and text-extracted: both quoted sentences present verbatim at ch. 2 sec. 12 (fn. 179 Call v. Fragale para. 6; fn. 180 Ware v. Akron paras. 13-15, matching the row's citations); statute's five-business-day video estimate sentence verified verbatim. 'structural' with no threshold number correct; row already flags the un-opened Ware holding for manual verification.",
+      "checked_link": "https://www.ohioattorneygeneral.gov/Files/Publications-Files/Publications-for-Legal/Sunshine-Laws-Publications/2026-Sunshine-Manual",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.requesterResponseDays",
+      "verdict": "CONFIRMED",
+      "why": "(B)(6) sentence verified verbatim in opened statute; no requester-response/withdrawal window in statute, manual, or model policy (all opened). 'silent' correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.revisionNotifyPercent",
+      "verdict": "CONFIRMED",
+      "why": "Both twenty-per-cent sentences verified verbatim in the opened statute ('shall not charge ... exceeds twenty per cent' = genuine ceiling, so 'ceiling' is the right word, not 'value'). Statute opened: sentence verified verbatim incl. the 'Except as specified in division (B)(11)... notwithstanding...' prefix. Record-specific scope (state/local law-enforcement + prosecutor video) is prominently flagged in unit and notes, and municipal police ARE 'local law enforcement agencies', so this is not an agency-only figure misrecorded as municipal. Pending 2026-09-07 version: unchanged.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.validityDays",
+      "verdict": "CONFIRMED",
+      "why": "No validity-period language in any opened source; search log in notes. 'silent' correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deposit.threshold",
+      "verdict": "CONFIRMED",
+      "why": "(B)(6) advance-payment sentence verified verbatim; no dollar threshold in the opened statute. 'silent' correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deposit.percent",
+      "verdict": "CONFIRMED",
+      "why": "(B)(6) sentence verified verbatim; full prepayment permitted with no cap; video full-prepayment clause verified. 'silent' correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.productionGate",
+      "verdict": "CONFIRMED",
+      "why": "(B)(6) sentence and the video prepayment/production-obligation sentences all verified verbatim in the opened statute. 'structural' correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.nonpayment",
+      "verdict": "CONFIRMED",
+      "why": "AG 2026 manual opened: 'There is no obligation to provide free copies to someone who cannot or will not pay.' and the amount-due sentence present verbatim (fns. 179-180 match the row's Fragale/Ware citations). Source_type honestly 'Official Guidance', confidence medium, underlying cases flagged. 'structural' correct.",
+      "checked_link": "https://www.ohioattorneygeneral.gov/Files/Publications-Files/Publications-for-Legal/Sunshine-Laws-Publications/2026-Sunshine-Manual",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.depositClock",
+      "verdict": "CONFIRMED",
+      "why": "Video prepayment/production-obligation sentences verified verbatim in opened statute; 'within a reasonable period of time' confirmed in (B)(1). 'structural' correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.reissue",
+      "verdict": "CONFIRMED",
+      "why": "Twenty-per-cent overrun sentences verified verbatim in opened statute. Statute opened: sentence verified verbatim incl. the 'Except as specified in division (B)(11)... notwithstanding...' prefix. Record-specific scope (state/local law-enforcement + prosecutor video) is prominently flagged in unit and notes, and municipal police ARE 'local law enforcement agencies', so this is not an agency-only figure misrecorded as municipal. Pending 2026-09-07 version: unchanged.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.method",
+      "verdict": "CONFIRMED",
+      "why": "(B)(6) sentence verified verbatim; no payment-method provision anywhere in the opened statute, manual, or model policy. 'silent' correct; applies_to 'municipalities' fine; row already flags the unresearched municipal e-payment statutes.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.maxFee",
+      "verdict": "CONFIRMED",
+      "why": "Both quoted sentences verified verbatim in the opened statute, including the 'Except as specified in division (B)(11)... notwithstanding any other requirement set forth in Chapter 149.' prefix and the $75/$750 caps. 'actual_cost_standard' as the request-level ceiling is correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deMinimis",
+      "verdict": "CONFIRMED",
+      "why": "(B)(1) sentence verified verbatim; no de-minimis threshold in any opened source; model policy 'no charge for e-mailed documents' verified verbatim. 'silent' correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.minFee",
+      "verdict": "CONFIRMED",
+      "why": "Hutson $5-initial-page passage and Bonnell citation verified verbatim in the opened PDF (para. 26). Row honestly flags the evidentiary (not per-se) nature of the holding. 'actual_cost_standard' correct.",
+      "checked_link": "https://www.supremecourt.ohio.gov/rod/docs/pdf/0/1994/1994-ohio-5.pdf",
+      "corrected_row": null
+    },
+    {
+      "item_id": "media",
+      "verdict": "CONFIRMED",
+      "why": "(B)(6) medium-choice sentence verified verbatim in opened statute; model policy '[X] per disc' placeholder verified verbatim (fill-in value, no state figure). 'actual_cost_standard' correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "delivery",
+      "verdict": "CONFIRMED",
+      "why": "(B)(7)(a) transmission and advance-payment sentences verified verbatim in the opened statute; model policy delivery/e-mail lines verified verbatim. The OH-9006 correction is sound: 'ninety-five per cent' confirmed ABSENT from the statute. 'actual_cost_standard' correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "certification",
+      "verdict": "CONFIRMED",
+      "why": "AG 2026 manual opened: 'The Act requires only that offices provide \\u201ccopies\\u201d of requested records at cost within a reasonable time; it does not require a public office to provide certified copies.' present verbatim (fn. 11 = Mobley v. LaRose 2024-Ohio-1909 paras. 14-15, matching the row). 'silent' for municipal certification fees correct.",
+      "checked_link": "https://www.ohioattorneygeneral.gov/Files/Publications-Files/Publications-for-Legal/Sunshine-Laws-Publications/2026-Sunshine-Manual",
+      "corrected_row": null
+    },
+    {
+      "item_id": "av",
+      "verdict": "CONFIRMED",
+      "why": "The full video-cost sentence (with $75/hour-of-video-produced and $750 caps) and the video 'actual cost' definition verified verbatim in the opened statute; manual ch. 2 sec. 13 restatement also opened and consistent. Basis 'ceiling' matches 'may charge ... not to exceed'. Statute opened: sentence verified verbatim incl. the 'Except as specified in division (B)(11)... notwithstanding...' prefix. Record-specific scope (state/local law-enforcement + prosecutor video) is prominently flagged in unit and notes, and municipal police ARE 'local law enforcement agencies', so this is not an agency-only figure misrecorded as municipal. Pending 2026-09-07 version: unchanged.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "commercial",
+      "verdict": "CONFIRMED",
+      "why": "(B)(7)(c)(i) ten-per-month physical-delivery sentence and (c)(iii) 'commercial shall be narrowly construed' sentence verified verbatim in opened statute; (B)(4) no-conditioning confirmed; (F) BMV +10% confirmed agency-only and correctly excluded. 'structural' (no surcharge) correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "waiver",
+      "verdict": "CONFIRMED",
+      "why": "(B)(11) victim no-fee and affidavit sentences verified verbatim in the opened statute (added eff. 2025-09-30 by H.B. 96, as the row states; carried in the 2026-09-07 version). Statute opened: sentence verified verbatim incl. the 'Except as specified in division (B)(11)... notwithstanding...' prefix. Record-specific scope (state/local law-enforcement + prosecutor video) is prominently flagged in unit and notes, and municipal police ARE 'local law enforcement agencies', so this is not an agency-only figure misrecorded as municipal. Pending 2026-09-07 version: unchanged.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "waiver.forfeiture",
+      "verdict": "CONFIRMED",
+      "why": "(B)(1) sentence verified verbatim; no fee-forfeiture-for-late-response provision in any opened source (remedies are damages/mandamus, out of scope). 'silent' correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    },
+    {
+      "item_id": "repeat",
+      "verdict": "CONFIRMED",
+      "why": "(E)(2) no-limit sentence verified verbatim in opened statute; no aggregation rule anywhere. 'silent' correct.",
+      "checked_link": "https://codes.ohio.gov/ohio-revised-code/section-149.43",
+      "corrected_row": null
+    }
+  ],
+  "notes": "All 36 rows CONFIRMED. Sources actually opened this pass: (1) codes.ohio.gov R.C. 149.43 current version — page states eff. Sept. 30, 2025 (H.B. 96) with a later version eff. Sept. 7, 2026 (H.B. 31), matching every row's effective_status; (2) the Sept. 7, 2026 pending version — all eight fee/payment clauses ((B)(1) at-cost, $75/$750 video caps, 5-business-day estimate, 20% overrun pair, (B)(6), (B)(7)(a), (B)(11), (E)(2)) present unchanged, confirming the raw file's 'does not touch the fee language' claim; (3) Hutson 1994-Ohio-5 PDF (text-extracted) — paras. 25-26 and syllabus verbatim, municipal respondent; (4) AG 2026 Sunshine Laws Manual PDF (text-extracted) — all four quoted guidance sentences verbatim with footnotes matching the rows' case citations; (5) AG Model Public Records Policy PDF (text-extracted) — '[X] cents per page'/'[X] per disc' placeholders and delivery/e-mail lines verbatim, document undated as flagged; (6) R.C. 5502.12 — $4 accident-report fee verbatim, eff. 2009; (7) OAG 99-012 PDF (text-extracted) — syllabus para. 2 verbatim, county addressee as the row flags. Also confirmed: 'ninety-five per cent' is absent from R.C. 149.43 (supporting the OH-9006 correction of OH-0026), and R.C. 149.43(F) BMV bulk-extraction +10% is agency-only and nowhere recorded as a municipal figure. Resolution words all check: no ceiling recorded as a value; the soft 'at cost' standard rows carry null values; the two numeric rows (av 75|750; revision-notify 20%) are true statutory ceilings ('not to exceed' / 'shall not ... exceed') scoped and flagged as law-enforcement/prosecutor-video record-specific, which does bind municipal police. Rows resting on Official Guidance (estimateNotifyThreshold, payment.nonpayment, certification) honestly carry source_type 'Official Guidance', medium confidence, and manual_verification flags for the un-opened underlying opinions (Ware v. Akron, Fragale, Dehler, Mobley) — the guidance documents themselves were opened and the quotes are verbatim, so the rows are CONFIRMED as recorded."
+}

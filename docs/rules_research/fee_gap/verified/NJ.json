@@ -1,0 +1,259 @@
+{
+ "code": "NJ",
+ "verified_at": "2026-08-19",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 'shall be $0.05 per letter size page or smaller, and $0.07 per legal size page or larger' found in P.L.2024, c.16 and in the current codified 47:1A-5(b)(1). 'shall be' = mandatory flat rate, so resolution 'value'/fixed is right, not a ceiling; the former actual-cost override sentence is absent from the enacted text (and 'overhead' appears nowhere in it), confirming the deletion claim. Currency independently confirmed: official codified STATUTES-TEXT.zip (last-modified 2026-08-19) history line for 47:1A-5 ends '2024, c.16, s.2' — no 2025/2026 amendment. Municipal scope confirmed: enacted definition makes 'public agency' include any political subdivision; no agency-only schedule exists.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same verbatim 5(b)(1) rate sentence confirmed; statute prices all 'printed matter' by page size with no color distinction, and the row's unit string and manual_verification disclose exactly that (color beyond ordinary equipment falls to 5(c)). Recording the statutory printed-matter rate as the color rate is supported; no separate color rate exists in OPRA, N.J.A.C. 5:105 or GRC guidance. Currency independently confirmed: official codified STATUTES-TEXT.zip (last-modified 2026-08-19) history line for 47:1A-5 ends '2024, c.16, s.2' — no 2025/2026 amendment.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Both quoted clauses ($0.07 'legal size page or larger' and the 5(c) special-service-charge sentence, joined by an ellipsis) found verbatim in the chapter law and codified text. Mixed fixed-rate + soft-standard basis is accurately labeled. Currency independently confirmed: official codified STATUTES-TEXT.zip (last-modified 2026-08-19) history line for 47:1A-5 ends '2024, c.16, s.2' — no 2025/2026 amendment.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "Full 5(c) block (special service charge, actual direct cost, reasonable, itemized list, objection right, rebuttable presumption) found verbatim. 'actual_cost_standard'/soft-standard is the right word — no number recorded. Currency independently confirmed: official codified STATUTES-TEXT.zip (last-modified 2026-08-19) history line for 47:1A-5 ends '2024, c.16, s.2' — no 2025/2026 amendment.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Flat-rate sentence verbatim; 'shall be' flat rate leaves no volume bands; not_applicable is correct (former bands repealed 2010). Currency independently confirmed: official codified STATUTES-TEXT.zip (last-modified 2026-08-19) history line for 47:1A-5 ends '2024, c.16, s.2' — no 2025/2026 amendment.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Quoted 5(b)(1) free-electronic/website-direction sentences verbatim; silent verdict for a free paper-page allowance is right and carries a full search log. Currency independently confirmed: official codified STATUTES-TEXT.zip (last-modified 2026-08-19) history line for 47:1A-5 ends '2024, c.16, s.2' — no 2025/2026 amendment.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "5(c) sentence verbatim in chapter law/codified text; Handbook 8th ed. (opened, 'Eighth Edition – January 2025') contains verbatim 'hourly rate of the lowest level employee capable of fulfilling the request (no fringe benefits)... case-by-case... No special service charges can be established in advance by ordinance.' No number recorded; actual_cost_standard is right.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same 5(c) + Handbook quotes verified verbatim; row correctly limits redaction labor to the extraordinary-effort special service charge with no number.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "5(d) special-service-fee sentence (extensive IT use / programming, clerical, supervisory labor, actually incurred, reasonable) verbatim in chapter law and codified text; actual_cost_standard right. Currency independently confirmed: official codified STATUTES-TEXT.zip (last-modified 2026-08-19) history line for 47:1A-5 ends '2024, c.16, s.2' — no 2025/2026 amendment.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "All three quoted blocks (5(c), 5(d), Handbook computation basis) verified verbatim; 'structural' gate description matches the statutes — no numeric threshold exists.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "5(c) 'actual direct cost' verbatim; Handbook 'no fringe benefits' verbatim; Toolkit response template (lowest level employee, direct hourly rate minus fringe) verbatim in the opened Toolkit PDF. The 0 is a prohibition-zero (no overhead surcharge permitted under 'actual DIRECT cost'), not a quantified soft standard, and the row's manual_verification openly states the statute names no percentage — derivation is disclosed, sources support it.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Silent verdict with full search log; nothing in the opened statute, Handbook, Toolkit, form or FAQ states a billing increment. Nothing to refute.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "5(c) qualitative-trigger sentence verbatim; no numeric free-hours allowance anywhere in the opened sources; silent is right.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Silent with search log; no per-requestor periodic free-time rule found in any opened source.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "Statutory itemization/objection block verbatim (chapter law + codified); Handbook advance-notice sentence verbatim. 'structural' (unconditional duty, no dollar threshold) is the right word.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Silent with search log; the codified section's only adjacent clocks (7-business-day website-response, 14-business-day retrieval) are correctly distinguished in notes; no acceptance window exists.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Silent with search log; no variance/revision percentage anywhere in the opened sources.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Silent with search log; no estimate validity period in statute, rules or guidance.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "'may require a deposit... in excess of $5 to reproduce' and the form-content mandate verbatim in chapter law AND current codified 5(f). Value 5 with rule_type Permission is right: the $5 is a fixed statutory trigger figure, the deposit itself permissive. Currency independently confirmed: official codified STATUTES-TEXT.zip (last-modified 2026-08-19) history line for 47:1A-5 ends '2024, c.16, s.2' — no 2025/2026 amendment.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "Statute quote verbatim; GRC form (2024-9-3, opened) quote verbatim including 'pay a deposit or pay in full prior to reproduction'. Silent on a percentage is right — no cap exists; the stale pre-2024 FAQ percentages are flagged for manual verification in the row.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "All four quoted blocks verified verbatim (5(f) form-content + deposit sentences in statute; Handbook p.24 no-release-until-payment; form prepayment/balance-due language). 'structural' Permission is right; row discloses the guidance (not statutory) footing of the no-release rule.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "14-business-day retrieval sentence verbatim in chapter law and codified 5(i)(1); silent verdict for a nonpayment-withdrawal rule is right with full search log.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "Quotes verbatim (5(f) + Handbook); silent is right — no tolling/grace rule stated anywhere; row flags the GRC-decision question for manual verification.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "5(c) objection-before-incurred block verbatim; silent for an overrun/reissue rule is right with search log.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "GRC form (opened) states verbatim 'Payment shall be made by cash, check or money order payable to the responding agency.' Silent verdict is right — that is form content, not a statutory method mandate, as the row says.",
+   "checked_link": "https://www.nj.gov/grc/GRC%20Official%20OPRA%20request%20form%20(2024-9-3)(Writable).pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "All three quoted ceilings/standards verbatim in chapter law and codified text: 5(c) actual-direct-cost standard, 5(e) website-fallback physical copy 'fee not exceeding two times the cost of the production of the document', 5(i)(1) commercial expedite 'not exceeding two times the cost of the production of the record'. actual_cost_standard with situational 2x ceilings is accurate — no dollar cap exists. Currency independently confirmed: official codified STATUTES-TEXT.zip (last-modified 2026-08-19) history line for 47:1A-5 ends '2024, c.16, s.2' — no 2025/2026 amendment.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Silent with search log; the $5 in 5(f) is a deposit trigger, not a waiver floor, as the row correctly notes.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Silent with search log; no minimum fee in any opened source.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "5(b)(1) actual-cost-of-supplies sentence verbatim; Handbook 'actual cost is the specific fee the agency paid to purchase the materials' ($1.00 CD example) verbatim in the opened 8th ed. actual_cost_standard is right.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Official_link (GRC Toolkit, opened: 'First Edition March 2011') contains verbatim 'Custodians may charge associated costs for same (i.e. actual postage costs)'; the GRC form payment box ($0.05/$0.07, actual cost of material, 'Delivery / postage fees additional depending upon delivery type', 'Extras: Special service charge dependent upon request') is present verbatim in the opened form (text interleaved by two-column PDF layout, as the row's bracket notes); statute sentence verbatim. Guidance footing and 2011 vintage are honestly flagged in effective_status.",
+   "checked_link": "https://www.nj.gov/grc/pdf/Custodian's%20Toolkit.pdf",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "Silent with search log; OPRA sets no certification fee and the row correctly routes municipal certification fees to human legal review.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "5(b)(1) and 5(d) sentences verbatim; Handbook media-cost passage verbatim. actual_cost_standard (medium cost only, no per-minute charge) matches the sources.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "5(i)(1) 'may charge a special service fee not exceeding two times the cost of the production of the record' and the 47:1A-1.1 'commercial purpose' definition verbatim in chapter law; 'not exceeding' = ceiling, so resolution 'ceiling' (200% of production cost, expedite-only) is exactly the right word. Currency independently confirmed: official codified STATUTES-TEXT.zip (last-modified 2026-08-19) history line for 47:1A-5 ends '2024, c.16, s.2' — no 2025/2026 amendment.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "5(b)(2) crime-victim no-fee and 5(b)(1) electronic/website no-fee sentences verbatim in chapter law and codified text; election-agency provisions (Municipal Clerks included) present in P.L.2024, c.16 and 47:1A-5.3 exists in the codified download; FAQ discretion quote verbatim on the live FAQ page. 'structural' with disclosed guidance footing is right.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "Deemed-denial sentence verbatim in chapter law and codified 5(i)(1); no fee-forfeiture consequence exists in any opened source. Minor shape quirk (resolution 'silent' with value 'false') but the meaning — no forfeiture rule — is unambiguous and supported.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Both quoted blocks (identical-request rule with periodic-request savings; repeated-requests-to-multiple-custodians denial) verbatim in chapter law and codified 5(i)(1)/(g); 'structural' access-rule characterization with no fee aggregation is right.",
+   "checked_link": "https://pub.njleg.state.nj.us/Bills/2024/PL24/16_.HTM",
+   "corrected_row": null
+  }
+ ],
+ "notes": "Refute-first verify of all 36 NJ resolution rows. Sources opened and checked locally: (1) P.L.2024, c.16 chapter law HTML (official_link for 34 rows) — every statutory quote found verbatim after whitespace/quote normalization; (2) the Legislature's official codified STATUTES-TEXT.zip, downloaded fresh 2026-08-19 (last-modified 2026-08-19) — the full 47:1A-5 section was extracted, every statutory quote also matches the CODIFIED text, and the history line reads 'L.2001, c.404, s.6; amended 2010, c.75, s.5; ... 2023, c.113, s.2; 2024, c.16, s.2.' — independently confirming NO 2025 or 2026 amendment; (3) GRC Custodian's Handbook, opened, self-identifies 'Eighth Edition – January 2025' (post-amendment) — all Handbook quotes verbatim; (4) GRC Custodian's Toolkit, opened, 'First Edition March 2011' — template and postage quotes verbatim; (5) GRC official OPRA request form (2024-9-3) PDF, opened — payment-box and deposit/prepayment quotes verbatim (two-column layout interleaves lines; all quoted text present); (6) live GRC custodian FAQ page — waiver-discretion quote verbatim. Municipal scope: the enacted 47:1A-1.1 definition ('any political subdivision of the State... and any division, board, bureau, office, commission or other instrumentality within or created by a political subdivision') confirms all rows' applies_to=all_public_bodies; no agency-only figure was recorded as municipal. Resolution-word audit: the $0.05/$0.07 rate is 'shall be' (value, not ceiling); the commercial expedite is 'not exceeding 2x' (ceiling, correctly worded); special service charge/fee rows carry actual_cost_standard with no invented numbers; labor.overheadPct's 0 is a disclosed prohibition-zero derived from 'actual direct cost'/'no fringe benefits', not a quantified soft standard; the enacted text contains no actual-cost override sentence and no occurrence of 'overhead', confirming the P.L.2024, c.16 deletion. Rows resting partly on guidance (delivery, productionGate, depositClock, overheadPct, deposit.percent, color) already carry manual_verification flags in the raw file — kept as-is. Zero corrections, refutes or unverifiables."
+}

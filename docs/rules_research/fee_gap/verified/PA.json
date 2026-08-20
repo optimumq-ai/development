@@ -1,0 +1,259 @@
+{
+  "code": "PA",
+  "verified_at": "2026-08-19",
+  "rows": [
+    {
+      "item_id": "dup.bw.rate",
+      "verdict": "CONFIRMED",
+      "why": "OOR schedule page opened: 'Black & White Copies (first 1,000) Up to $0.25 per copy', 'beyond 1,000 Up to $0.20 per copy' and the footnote copy definition all verbatim; 'Up to' = ceiling word correct; page states adoption Dec. 30, 2024; § 1307(b)(1)(i) delegation verbatim in compiled statute, so the schedule binds local agencies (municipalities). PDF header 'Updated December 30, 2022' vs web 'Dec. 30, 2024' discrepancy re-observed, contents identical — already flagged in the row.",
+      "checked_link": "https://www.openrecords.pa.gov/RTKL/FeeStructure.cfm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.color.rate",
+      "verdict": "CONFIRMED",
+      "why": "OOR schedule: 'Color Copies Up to $0.50 per copy' plus footnote 2 (copy definition; requester may ask for B&W) verbatim on the opened page; ceiling word correct; municipal scope via § 1307(b)(1)(i) confirmed.",
+      "checked_link": "https://www.openrecords.pa.gov/RTKL/FeeStructure.cfm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.oversized.rate",
+      "verdict": "CONFIRMED",
+      "why": "OOR schedule: 'Specialized Documents Up to actual cost' with footnote 'Including, but not necessarily limited to, non-standard sized documents and blueprints' verbatim; actual_cost_standard is the right word (no number invented); municipal scope confirmed.",
+      "checked_link": "https://www.openrecords.pa.gov/RTKL/FeeStructure.cfm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.specialty.rate",
+      "verdict": "CONFIRMED",
+      "why": "Schedule lines 'Specialized Documents Up to actual cost' and 'Other Media Up to actual cost' verbatim on the opened page; § 1307(b)(4) market-value exception verbatim in compiled statute; actual_cost_standard correct; row's manual_verification (photos/transcripts unnamed) stands.",
+      "checked_link": "https://www.openrecords.pa.gov/RTKL/FeeStructure.cfm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.tiers",
+      "verdict": "CONFIRMED",
+      "why": "Both tier lines verbatim on the opened OOR schedule page (first 1,000 at $0.25, beyond at $0.20); ceiling word correct for both bands; color has no tier as stated.",
+      "checked_link": "https://www.openrecords.pa.gov/RTKL/FeeStructure.cfm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.freePages",
+      "verdict": "CONFIRMED",
+      "why": "Silent with coverage note: opened the full compiled RTKL and the OOR schedule (web + PDF) — no free-page allowance anywhere; the zero-fee categories the note lists (electronic delivery, redaction, photographing, search/staff time) are all present on the schedule page, none is a page allowance.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.search.rate",
+      "verdict": "CONFIRMED",
+      "why": "OOR schedule 'Fee Limitations' text verbatim on the opened page: 'No fee may be charged for searching for or retrieval of documents. An agency may not charge staff time or salary for complying with a RTK request. No fee may be charged for an agency's response letter.' not_applicable (categorical bar, item moot) is the right word; row correctly flags that the categorical bar is OOR construction, not statute text.",
+      "checked_link": "https://www.openrecords.pa.gov/RTKL/FeeStructure.cfm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.review.rate",
+      "verdict": "CONFIRMED",
+      "why": "§ 1307(g) second sentence verbatim in the compiled statute: 'No fee may be imposed for an agency's review of a record to determine whether the record is a public record, legislative record or financial record subject to access in accordance with this act.' No amendment note on § 1307 (Act 29 of 2023 touched only §§ 1502–1505).",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.programming.rate",
+      "verdict": "CONFIRMED",
+      "why": "Staff-time bar verbatim on the opened OOR schedule page; § 705 (no duty to create), § 1307(e) (OOR-approved enhanced-access fees) and § 1307(b)(4) all verbatim in the compiled statute; not_applicable correct — no hourly programming rate exists for municipalities; row's manual_verification stands.",
+      "checked_link": "https://www.openrecords.pa.gov/RTKL/FeeStructure.cfm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.billableWhen",
+      "verdict": "CONFIRMED",
+      "why": "Combined schedule + § 1307(g) language verbatim in both opened sources; 'never' as a state-fixed enum value under a Prohibition is the right treatment (not a ceiling, not a threshold).",
+      "checked_link": "https://www.openrecords.pa.gov/RTKL/FeeStructure.cfm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.overheadPct",
+      "verdict": "CONFIRMED",
+      "why": "Moot by the categorical labor bar; source language verbatim on the opened schedule page; not_applicable correct.",
+      "checked_link": "https://www.openrecords.pa.gov/RTKL/FeeStructure.cfm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.increment",
+      "verdict": "CONFIRMED",
+      "why": "Moot by the categorical labor bar; source language verbatim on the opened schedule page; not_applicable correct.",
+      "checked_link": "https://www.openrecords.pa.gov/RTKL/FeeStructure.cfm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.freeLaborHours",
+      "verdict": "CONFIRMED",
+      "why": "Moot by the categorical labor bar; source language verbatim on the opened schedule page; not_applicable correct.",
+      "checked_link": "https://www.openrecords.pa.gov/RTKL/FeeStructure.cfm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.periodicFreeHours",
+      "verdict": "CONFIRMED",
+      "why": "Moot by the categorical labor bar; source language verbatim on the opened schedule page; § 1308(1) (no limit on number of records) verbatim in the compiled statute; not_applicable correct.",
+      "checked_link": "https://www.openrecords.pa.gov/RTKL/FeeStructure.cfm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.estimateNotifyThreshold",
+      "verdict": "CONFIRMED",
+      "why": "§ 902(b)(2) notice-contents sentence (including 'an estimate of applicable fees owed when the record becomes available') and § 1307(h) $100 prepayment sentence both verbatim in the compiled statute; structural is the right word (a required notice element, no threshold).",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.requesterResponseDays",
+      "verdict": "CONFIRMED",
+      "why": "Silent with coverage note; opened the full compiled RTKL — §§ 901–905 and 1307 contain no requester response window for an estimate; the related § 902(b)(2) written-agreement rule and § 905 60-day rule the note distinguishes are both present verbatim.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.revisionNotifyPercent",
+      "verdict": "CONFIRMED",
+      "why": "Silent with coverage note; no revised-estimate or variance rule found in the opened compiled RTKL or the OOR schedule page/PDF.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.validityDays",
+      "verdict": "CONFIRMED",
+      "why": "Silent with coverage note; no estimate expiry in the opened compiled RTKL or OOR schedule.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deposit.threshold",
+      "verdict": "CONFIRMED",
+      "why": "§ 1307(h) verbatim in the compiled statute: prepayment of an estimate may be required 'if the fees required to fulfill the request are expected to exceed $100'; value=100 fixed under a Permission is right; restated in the opened OOR schedule Prepayment note.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deposit.percent",
+      "verdict": "CONFIRMED",
+      "why": "Silent with coverage note; § 1307(h) speaks of prepaying 'an estimate of the fees' with no percentage cap — confirmed in the opened statute and schedule.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.productionGate",
+      "verdict": "CONFIRMED",
+      "why": "§ 901 verbatim in the compiled statute: 'All applicable fees shall be paid in order to receive access to the record requested.' OOR schedule's obtain-payment-before-release recommendation present on the opened page (web wording 'Once the request is fulfilled...'); structural correct.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.nonpayment",
+      "verdict": "CONFIRMED",
+      "why": "§ 905 60-day disposal sentence verbatim in the compiled statute ('days', not business days, as the row says); the prior-debt piece re-verified by independent OCR of the 2016 OOR advisory opinion PDF — the Drack quotation and 'must still timely process future RTKL requests' both match; value=60 correct.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.depositClock",
+      "verdict": "CONFIRMED",
+      "why": "§ 902(a)(6) ('the requester refuses to pay applicable fees authorized by this act'), § 902(b)(2) 30-day/deemed-denied sentence and § 902(b)(3) all verbatim in the compiled statute; structural correct — no tolling concept exists.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.reissue",
+      "verdict": "CONFIRMED",
+      "why": "Silent with coverage note; no overrun/re-issue rule in the opened compiled RTKL or OOR schedule.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.method",
+      "verdict": "CONFIRMED",
+      "why": "Silent with coverage note; nothing on payment methods in the opened compiled RTKL or the OOR schedule page/PDF; row correctly scopes out non-RTKL municipal payment authorities.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.maxFee",
+      "verdict": "CONFIRMED",
+      "why": "§ 1307(g) first sentence verbatim in the compiled statute ('...no other fees may be imposed unless the agency necessarily incurs costs... and such fees must be reasonable'); actual_cost_standard/soft-standard correct — no request-level dollar cap was invented; 'Other Statutory Fees' override note present on the opened schedule page.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deMinimis",
+      "verdict": "CONFIRMED",
+      "why": "§ 1307(f) waiver text verbatim in the compiled statute and 'Fees May Be Waived: All fees established herein may be waived at the discretion of the agency' verbatim on the opened schedule page; defers_to_city defensible (express agency discretion, no state figure) and the row records the judgment in manual_verification.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.minFee",
+      "verdict": "CONFIRMED",
+      "why": "Silent with coverage note; no minimum fee in the opened compiled RTKL or OOR schedule — all schedule figures are 'up to' ceilings as stated.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "media",
+      "verdict": "CONFIRMED",
+      "why": "OOR schedule verbatim on the opened page: 'CD / DVD Up to actual cost, not to exceed $1.00 per disc', 'Flash Drive Up to actual cost', 'Other Media Up to actual cost'; ceiling word correct; § 1307(d) lesser-of rule verbatim in statute and restated in schedule footnote 7.",
+      "checked_link": "https://www.openrecords.pa.gov/RTKL/FeeStructure.cfm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "delivery",
+      "verdict": "CONFIRMED",
+      "why": "§ 1307(a) verbatim in the compiled statute ('Fees for postage may not exceed the actual cost of mailing'); schedule lines 'Postage Up to actual cost of USPS first-class postage', 'Records Delivered via Email or Other Electronic Method No additional fee may be imposed' and 'Facsimile Up to actual cost' all verbatim on the opened page; actual_cost_standard correct.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "certification",
+      "verdict": "CONFIRMED",
+      "why": "§ 1307(c) 'reasonable fees for official certification' verbatim in the compiled statute; schedule 'Certification of a Record Up to $5.00 per record' (PDF label; web table says 'Certification') and the footnote 'The OOR recommends no more than $5 per record... Certification fees do not include notarization fees' verbatim on the opened sources; recording the statutory soft standard with $5 as OOR guidance (not a converted number) is the right treatment — the schedule's own footnote calls it a recommendation and § 1307(c) delegates nothing to the OOR; row flags the ceiling-vs-recommendation call for the product.",
+      "checked_link": "https://www.openrecords.pa.gov/RTKL/FeeStructure.cfm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "av",
+      "verdict": "CONFIRMED",
+      "why": "'Other Media Up to actual cost' and the CD/DVD line verbatim on the opened schedule page; no per-minute or recording-specific line exists, as the row says; actual_cost_standard correct; Act 22 (police recordings outside RTKL) caveat is consistent with the OOR site's separate Requesting Police Recordings path.",
+      "checked_link": "https://www.openrecords.pa.gov/RTKL/FeeStructure.cfm",
+      "corrected_row": null
+    },
+    {
+      "item_id": "commercial",
+      "verdict": "CONFIRMED",
+      "why": "Silent with coverage note; § 703 (no purpose statement required) and § 1308 item (1) verbatim in the compiled statute; § 1307(b)(4) media/nonprofit carve-out verbatim — the only purpose-sensitive fee rule, no commercial surcharge exists.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "waiver",
+      "verdict": "CONFIRMED",
+      "why": "§ 1307(f) grounds verbatim in the compiled statute; 'Fees May Be Waived' verbatim on the opened schedule page; the 15-business-day fee-appeal footnote re-verified by independent OCR of the 2016 advisory opinion PDF (§ 1101, Prison Legal News citation matches); structural correct — discretionary only, no mandatory waiver.",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "waiver.forfeiture",
+      "verdict": "CONFIRMED",
+      "why": "Silent with coverage note; no fee-forfeiture-on-late-response rule in the opened compiled RTKL (late response = deemed denial under §§ 901–902, both verbatim).",
+      "checked_link": "https://www.legis.state.pa.us/WU01/LI/LI/US/HTM/2008/0/0003..HTM",
+      "corrected_row": null
+    },
+    {
+      "item_id": "repeat",
+      "verdict": "CONFIRMED",
+      "why": "Opened the 2016 OOR advisory opinion PDF and re-OCR'd it independently: the Drack quotation ('...withhold access to the request until all applicable fees, including fees for earlier requests, are paid'), the timely-processing sentence and the deny-with-reasons sentence all match the row's transcription; § 1308(1) verbatim in the compiled statute; structural correct.",
+      "checked_link": "https://www.openrecords.pa.gov/Documents/RTKL/2016-01-12_Smith-Payment_when_requester_has_not-received-records.pdf",
+      "corrected_row": null
+    }
+  ],
+  "notes": "Verify method: downloaded and text-extracted the OOR Official RTKL Fee Schedule page (web) and PDF, the full compiled RTKL (Act 3 of 2008, legis.state.pa.us), and the Jan. 12, 2016 OOR advisory opinion (independently re-OCR'd with tesseract at 200dpi). Every quoted statute clause and every schedule line was matched verbatim (normalized quotes/whitespace). Currency: compiled text carries amendment notes only on §§ 1502–1505 (Act 29 of 2023, Nov. 16, 2023); §§ 701–706, 901–905, 1101, 1307, 1308 carry none; a web search found no 2024–2026 enacted amendment to § 1307. Adoption-date discrepancy re-observed exactly as flagged: web page says 'The OOR adopted this Official RTKL Fee Schedule on Dec. 30, 2024' while the PDF header reads 'Updated December 30, 2022'; figures identical in both. applies_to is recorded as all_public_bodies throughout; the OOR-schedule figures actually bind Commonwealth and local agencies only (judicial/legislative set their own duplication fees under § 1307(b)(1)(ii)-(iii)) — every affected row and the file's applicability_notes carry that carve-out, and the municipal applicability the gap pass cares about is correct, so it was not treated as a refute. The 2009 e-transmission and Aug. 19, 2022 advisory opinions back new_rules only (PA-9023, part of repeat's citation chain); the resolution-row language they support is independently confirmed by the schedule page and § 1308 statute text."
+}

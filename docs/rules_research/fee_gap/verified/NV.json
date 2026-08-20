@@ -1,0 +1,259 @@
+{
+ "code": "NV",
+ "verified_at": "2026-08-19",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "NRS 239.052(1) and the 239.005(1) 'actual cost' definition found verbatim on leg.state.nv.us (rev. 4/15/2026, through 2025 session; 239.052 last amended 2013, 239.005 last amended 2019). No per-page figure exists; ceiling/actual_cost_standard is the right word. 'Governmental entity' (239.005(5)(a)-(b)) expressly includes officers and units of political subdivisions, so applies_to all_public_bodies holds for cities.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec052",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "NRS 239.052(1) verbatim confirmed. Chapter's only per-page figures are the law-library 50-cent ceiling (239.052(4)) and the court-reporter transcript contract fee (239.053) - no color rate; the row correctly disclaims the prior 50-cent mis-attachment. Ceiling word correct.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec052",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "NRS 239.052(1) verbatim confirmed; no oversized/nonstandard rate anywhere in ch. 239 (all 'per page' hits checked: law library + transcript only). Ceiling word correct; municipal scope via 239.005(5).",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec052",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "All three quoted clauses (239.052(1), 239.053(1), 239.054(1)) found verbatim. Transcript fee is contract-fixed and GIS costs are 'reasonable costs' - both correctly kept as notes/overrides, not municipal numbers. Both sections added 1997, unamended since.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec052",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Silence verified: no graduated page bands in NRS 239 (rev. 4/15/2026) or NAC 239 (rev. 4/13/2026); 'estimate' appears zero times and the only per-page figures are law-library and transcript. Search-log source_language properly marked is_paraphrase.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Silence verified: no free-page allowance in NRS 239/NAC 239. NRS 239.020 (VA-eligibility certified copies without charge) confirmed verbatim as the category-based free-copy example.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "NRS 239.005(1) definition and SB 287 (2019) sec. 13 ('NRS 239.055 is hereby repealed') both confirmed verbatim (enrolled PDF opened). 239.055 is absent from the current chapter. Prohibition reading is the standard post-SB287 position (LCB digest confirmed verbatim); the overtime nuance is properly flagged as agency guidance in notes.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec005",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same sources as labor.search.rate, all confirmed verbatim; manual's 'may not charge the requester for the redaction' found in the 2020 manual PDF (p. 16) and correctly labeled Executive Branch guidance.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec005",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "NRS 239.005(1) and 239.054(1) confirmed verbatim; GIS personnel-consultation carve-out correctly isolated as the only statutory personnel component. Medium confidence and the new-record gap are appropriately recorded.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec005",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "All three quoted texts confirmed verbatim incl. the LCB digest sentence in SB287_EN.pdf. 'never' as an enum value is the categorical consequence of the 239.005(1) exclusion + 239.055 repeal, with the transcript/GIS/overtime exceptions documented in notes - not a soft standard dressed as a number.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec005",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "NRS 239.005(1) confirmed verbatim; overhead ('incurs regardless') exclusion reads directly off the definition. not_applicable is right - no labor base exists.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec005",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "NRS 239.005(1) confirmed verbatim; no increment provision anywhere in ch. 239/NAC 239. Moot-by-prohibition reasoning sound.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec005",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "NRS 239.005(1) confirmed verbatim; no 'first N hours free' provision found in either instrument.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec005",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "NRS 239.005(1) confirmed verbatim; no per-requestor periodic allowance in ch. 239/NAC 239.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec005",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "NAC 239.864(1) confirmed verbatim, including the $25 figure and postage clause; the section is expressly scoped 'If an agency of the Executive Department charges a fee'. NRS 239 contains zero occurrences of 'estimate', so the municipal regime is silent - defers_to_city with the agency figure kept out of the value field is exactly the contract treatment; NOT recorded as a municipal value.",
+   "checked_link": "https://www.leg.state.nv.us/nac/nac-239.html#NAC239Sec864",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Silence verified: 'estimate' absent from NRS 239; NAC 239.864 sets no response window; manual's approve-in-writing line confirmed in the PDF and correctly treated as agency guidance without a day count.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Silence verified: no revision trigger or overrun percentage in NRS 239, NAC 239 or the manual.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Silence verified: no validity period in any instrument opened.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "NAC 239.864(2)(a) and the manual's 'If an estimate of the fee exceeds $25...' passage both confirmed verbatim in their respective sources; row correctly notes the $25 trigger is manual-only (the regulation sets no threshold) and resolves defers_to_city for municipalities. Agency figure not recorded as municipal value.",
+   "checked_link": "https://www.leg.state.nv.us/nac/nac-239.html#NAC239Sec864",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "NAC 239.864(2)(a) confirmed verbatim ('deposit of not more than the estimate of the actual cost'). Value field carries '100 (agency regime, noted as guidance)' with resolution defers_to_city and an explicit manual_verification flag - annotated as agency guidance, not a municipal value, so within contract. Ceiling word correct for the agency cap.",
+   "checked_link": "https://www.leg.state.nv.us/nac/nac-239.html#NAC239Sec864",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "NRS 239.030 and NAC 239.864(2)(b) both confirmed verbatim; the value string itself separates the all-bodies certified-copy gate from the agencies-only pay-before-receipt rule. 239.030 history (NRS A 1973) - current.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec030",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "NAC 239.868(2) confirmed verbatim (30 days after reproduction; matched after normalizing a stray layout character in the state's HTML). Agency-only scoping correct (added R107-13, eff. 12-22-2014); defers_to_city with annotated guidance value is the contract treatment.",
+   "checked_link": "https://www.leg.state.nv.us/nac/nac-239.html#NAC239Sec868",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "Silence verified: NRS 239.0107 ('Not later than the end of the fifth business day' confirmed present) contains no fee/deposit tolling; 'toll'/'extension of time' absent from ch. 239; manual work-gate language confirmed in the PDF and correctly labeled guidance.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec0107",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Silence verified: no overrun/re-issue/collection-bar provision in NRS 239, NAC 239 or the manual.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "Silence verified for the searched scope (NRS 239/NAC 239/manual); row's medium confidence and the note that general e-payment law outside ch. 239 was not searched are appropriate.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "NRS 239.052(1), 239.005(1) confirmed verbatim; NRS 239.011(1) 'excessive or improper' fee remedy confirmed verbatim. No dollar maximum exists; actual-cost ceiling correctly recorded as the cap, remedy kept as a note.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec052",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Silence verified: no dollar de-minimis in ch. 239/NAC 239; NRS 239.052(2) waiver-by-policy clause confirmed verbatim as the vehicle a city could use.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Silence verified: 'minimum fee' absent from ch. 239; no minimum anywhere in NAC 239 or the manual.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "NRS 239.005(1) confirmed verbatim ('media' an enumerated direct cost); NRS 239.010(4) electronic-medium duty confirmed verbatim; manual's media list confirmed. Ceiling word correct.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec005",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "NRS 239.005(1) confirmed verbatim ('postage' an enumerated direct cost); NAC 239.864 postage-in-estimate and pay-incl-postage clauses confirmed and correctly kept agency-side. Ceiling word correct.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec005",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "NRS 239.030 confirmed verbatim ('pays or tenders such fees as may be prescribed for the service of copying and certifying'); no prescriber named and no statewide municipal certification figure exists in NRS 239/NAC 239 (searched). defers_to_city is a defensible resolution and the row itself flags delegated_unresolved as the alternative; kept as CONFIRMED with that flag standing for the human pass.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec030",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "NRS 239.052(1)/239.005(1) confirmed verbatim; no A/V per-minute figure in ch. 239; body-cam per-incident rule (NRS 289.830) correctly treated as request-shape, not a fee. Prior 50-cent mis-attachment correctly disclaimed.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec052",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "Silence verified: the single 'commercial' occurrence in ch. 239 is 'commercially operated... radio or television station' in a confidentiality provision - no purpose-based fee distinction exists.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "NRS 239.052(2) confirmed verbatim (policy + posted sign conditions); no statutory grounds/appeal, matching the structural value. NRS 239.020 free-copy category confirmed verbatim. Manual's standardized-waiver line confirmed in the PDF.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec052",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "Silence verified: no fee-forfeiture-on-late-response provision; NRS 239.011 remedies confirmed as judicial only.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html#NRS239Sec0107",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Silence verified: no aggregation/carry-forward rule in ch. 239; manual's no-recouping-across-requesters bullet confirmed verbatim in the PDF and correctly labeled agency guidance.",
+   "checked_link": "https://www.leg.state.nv.us/nrs/nrs-239.html",
+   "corrected_row": null
+  }
+ ],
+ "notes": "All four cited sources opened directly (downloaded and text-matched, not summarized): NRS ch. 239 (leg.state.nv.us, page stamp 'Rev. 4/15/2026 --2025', i.e. current through the 2025 83rd Session), NAC ch. 239 (Rev. 4/13/2026), S.B. 287 (2019) enrolled PDF, and the 2020 State Library manual PDF (admin.nv.gov). Every quoted source_language clause was located verbatim in its cited source after normalizing the state site's cp1252 smart quotes and stray layout characters. Currency: NRS 239.052 last amended 2013 (A 2013, 323); NRS 239.005 last amended 2019 (A 2019, 4003 = SB 287); NRS 239.053/239.054 added 1997, unamended; NRS 239.030 last amended 1973; NAC 239.863-.868 added R107-13 eff. 12-22-2014 - no 2024-2026 amendment of any cited fee section. NRS 239.055 is absent from the current chapter (repeal verified in SB287_EN.pdf sec. 13 and by zero occurrences in the chapter text). Key municipal-scope check passed: NRS 239.005(5)(a)-(b) includes officers/units of political subdivisions verbatim, and NAC 239.864/868 are expressly scoped to 'an agency of the Executive Department' - the discover output consistently records those agency figures ($25 estimate threshold, deposit <= estimate, pay-before-receipt, 30-day disposal) as defers_to_city guidance, never as municipal values. Silence claims spot-verified by term search: 'estimate' 0 hits, no tolling/extension, no minimum fee, single irrelevant 'commercial' hit, only per-page figures are law-library 50 cents and transcript contract fee. AB 51 (2025) death corroborated by 2025-2026 Nevada press (Nevada Independent; This Is Reno). Two soft flags stand for the human pass, both already flagged in the discover rows: certification (defers_to_city vs delegated_unresolved is a vocabulary judgment call) and the labor rows' 'never', which rests on the categorical 239.005(1) exclusion + 239.055 repeal while the agency manual treats request-caused overtime as chargeable (guidance only)."
+}
