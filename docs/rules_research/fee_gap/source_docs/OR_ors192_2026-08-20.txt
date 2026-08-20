@@ -1,0 +1,1743 @@
+PROVENANCE: Supplied by Kevin 2026-08-20 (exchange/oregon192.pdf, text-extracted).
+SOURCE: oregonlegislature.gov official ORS Chapter 192 page, current published edition; § 192.324 history ends '2025 c.30 §1'. Includes 192.311 (definitions), 192.314, 192.318, 192.324 (fees), 192.329 (response), and the exemption sections (192.345, 192.355 et seq.).
+CAVEAT: Page header notes ch. 192 sections were amended/added in the 2026 regular session (see 2026 A&R Tables; 2026 Session Laws ch. 93). At discover time, check whether 2026 c.93 touches 192.324/192.329; the printed base text predates incorporation of 2026 acts.
+----------------------------------------------------------------
+Oregon Revised Statutes
+Chapter 192 — Records; Public Reports and Meetings
+ORS sections in this chapter were amended or repealed by the Legislative Assembly during its 2026
+regular session. See the table of ORS sections amended or repealed during the 2026 regular
+session: 2026 A&R Tables
+New sections of law were added by legislative action to this ORS chapter or to a series within this ORS
+chapter by the Legislative Assembly during its 2026 regular session. See sections in the following 2026
+Oregon Laws chapters: 2026 Session Laws 0093
+
+INSPECTION OF PUBLIC RECORDS
+(Definitions)
+192.311 Definitions for ORS 192.311 to 192.478. As used in ORS 192.311 to
+192.478:
+(1) “Business day” means a day other than Saturday, Sunday or a legal holiday and
+on which at least one paid employee of the public body that received the public records
+request is scheduled to and does report to work. In the case of a community college
+district, community college service district, public university, school district or
+education service district, “business day” does not include any day on which the central
+administration offices of the district or university are closed.
+(2) “Custodian” means:
+(a) The person described in ORS 7.110 for purposes of court records; or
+(b) A public body mandated, directly or indirectly, to create, maintain, care for or
+control a public record. “Custodian” does not include a public body that has custody of a
+public record as an agent of another public body that is the custodian unless the public
+record is not otherwise available.
+(3) “Person” includes any natural person, corporation, partnership, firm, association
+or member or committee of the Legislative Assembly.
+(4) “Public body” includes every state officer, agency, department, division, bureau,
+board and commission; every county and city governing body, school district, special
+
+district, municipal corporation, and any board, department, commission, council, or
+agency thereof; and any other public agency of this state.
+(5)(a) “Public record” includes any writing that contains information relating to the
+conduct of the public’s business, including but not limited to court records, mortgages,
+and deed records, prepared, owned, used or retained by a public body regardless of
+physical form or characteristics.
+(b) “Public record” does not include any writing that does not relate to the conduct of
+the public’s business and that is contained on a privately owned computer.
+(6) “State agency” means any state officer, department, board, commission or court
+created by the Constitution or statutes of this state but does not include the Legislative
+Assembly or its members, committees, officers or employees insofar as they are exempt
+under section 9, Article IV of the Oregon Constitution.
+(7) “Writing” means handwriting, typewriting, printing, photographing and every
+means of recording, including letters, words, pictures, sounds, or symbols, or
+combination thereof, and all papers, maps, files, facsimiles or electronic recordings.
+[Formerly 192.410]
+(Public Records Request Processing)
+192.314 Right to inspect public records; notice to public body attorney. (1) Every
+person has a right to inspect any public record of a public body in this state, except as
+otherwise expressly provided by ORS 192.338, 192.345 and 192.355.
+(2)(a) If a person who is a party to a civil judicial proceeding to which a public body
+is a party, or who has filed a notice under ORS 30.275 (5)(a), asks to inspect or to
+receive a copy of a public record that the person knows relates to the proceeding or
+notice, the person must submit the request in writing to the custodian and, at the same
+time, to the attorney for the public body.
+(b) For purposes of this subsection:
+(A) The attorney for a state agency is the Attorney General in Salem.
+(B) “Person” includes a representative or agent of the person. [Formerly 192.420]
+192.318 Functions of custodian of public records; rules. (1) The custodian of any
+public records, including public records maintained in machine readable or electronic
+form, unless otherwise expressly provided by statute, shall furnish proper and reasonable
+opportunities for inspection and examination of the records in the office of the custodian
+and reasonable facilities for making memoranda or abstracts therefrom, during the usual
+business hours, to all persons having occasion to make examination of them. If the
+
+public record is maintained in machine readable or electronic form, the custodian shall
+furnish proper and reasonable opportunity to assure access.
+(2) The custodian of the records may adopt reasonable rules necessary for the
+protection of the records and to prevent interference with the regular discharge of duties
+of the custodian. [Formerly 192.430]
+192.324 Copies or inspection of public records; public body response; fees;
+procedure for records requests. (1) A public body that is the custodian of any public
+record that a person has a right to inspect shall give the person, upon receipt of a written
+request:
+(a) A copy of the public record if the public record is of a nature permitting copying;
+or
+(b) A reasonable opportunity to inspect or copy the public record.
+(2) If an individual who is identified in a public body’s procedure described in
+subsection (7)(a) of this section receives a written request to inspect or receive a copy of
+a public record, the public body shall within five business days after receiving the
+request acknowledge receipt of the request or complete the public body’s response to the
+request. An acknowledgment under this subsection must:
+(a) Confirm that the public body is the custodian of the requested record;
+(b) Inform the requester that the public body is not the custodian of the requested
+record; or
+(c) Notify the requester that the public body is uncertain whether the public body is
+the custodian of the requested record.
+(3) If the public record is maintained in a machine readable or electronic form, the
+public body shall provide a copy of the public record in the form requested, if available.
+If the public record is not available in the form requested, the public body shall make the
+public record available in the form in which the public body maintains the public record.
+(4)(a) The public body may establish fees reasonably calculated to reimburse the
+public body for the public body’s actual cost of making public records available,
+including costs for summarizing, compiling or tailoring the public records, either in
+organization or media, to meet the request.
+(b) The public body may include in a fee established under paragraph (a) of this
+subsection the cost of time spent by an attorney for the public body in reviewing the
+public records, redacting material from the public records or segregating the public
+records into exempt and nonexempt records. The public body may not include in a fee
+established under paragraph (a) of this subsection the cost of time spent by an attorney
+
+for the public body in determining the application of the provisions of ORS 192.311 to
+192.478.
+(c) The public body may not establish a fee greater than $25 under this section unless
+the public body first provides the requester with a written notification of the estimated
+amount of the fee and the requester confirms that the requester wants the public body to
+proceed with making the public record available.
+(d) Notwithstanding paragraphs (a) to (c) of this subsection, when the public records
+are those filed with:
+(A) The Secretary of State under ORS chapter 79A or ORS 81.230 to 81.263, the fees
+for furnishing copies, summaries or compilations of the public records are the fees
+established by the Secretary of State by rule under ORS chapter 79A or ORS 81.230 to
+81.263.
+(B) A county clerk, the fees for copies of records are the fees established under ORS
+205.320.
+(5) The custodian of a public record may furnish copies without charge or at a
+substantially reduced fee if the custodian determines that the waiver or reduction of fees
+is in the public interest because making the record available primarily benefits the
+general public.
+(6) A requester who believes that there has been an unreasonable denial of a fee
+waiver or fee reduction may petition the Attorney General or the district attorney in the
+same manner as a requester who petitions when inspection of a public record is denied
+under ORS 192.311 to 192.478. The Attorney General, the district attorney and the court
+have the same authority in instances when a fee waiver or reduction is denied as when
+inspection of a public record is denied.
+(7) A public body shall make available to the public a written procedure for making
+public records requests that includes:
+(a) The name of one or more individuals within the public body to whom public
+records requests may be sent, with addresses; and
+(b) The amounts of and the manner of calculating fees that the public body charges
+for responding to requests for public records.
+(8) This section does not apply to signatures of individuals submitted under ORS
+chapter 247 for purposes of registering to vote as provided in ORS 247.973. [Formerly
+192.440; 2025 c.30 §1]
+192.329 Public body’s response to public records request. (1) A public body shall
+complete its response to a written public records request that is received by an individual
+
+identified in the public body’s procedure described in ORS 192.324 as soon as
+practicable and without unreasonable delay.
+(2) A public body’s response to a public records request is complete when the public
+body:
+(a) Provides access to or copies of all requested records within the possession or
+custody of the public body that the public body does not assert are exempt from public
+disclosure, or explains where the records are already publicly available;
+(b) Asserts any exemptions from disclosure that the public body believes apply to any
+requested records and, if the public body cites ORS 192.355 (8) or (9), identifies the
+state or federal law that the public body relied on in asserting the exemptions;
+(c) Complies with ORS 192.338;
+(d) To the extent that the public body is not the custodian of records that have been
+requested, provides a written statement to that effect;
+(e) To the extent that state or federal law prohibits the public body from
+acknowledging whether any requested record exists or that acknowledging whether a
+requested record exists would result in the loss of federal benefits or imposition of
+another sanction, provides a written statement to that effect, citing the state or federal
+law that the public body relies on, unless the written statement itself would violate state
+or federal law; and
+(f) If the public body asserts that one or more requested records are exempt from
+public disclosure, includes a statement that the requester may seek review of the public
+body’s determination pursuant to ORS 192.401, 192.411, 192.415, 192.418, 192.422,
+192.427 and 192.431.
+(3)(a) If a public body has informed a requester of a fee permitted under ORS
+192.324 (4), the obligation of the public body to complete its response to the request is
+suspended until the requester has paid the fee, the fee has been waived by the public
+body pursuant to ORS 192.324 (5) or the fee otherwise has been ordered waived.
+(b) If the requester fails to pay the fee within 60 days of the date on which the public
+body informed the requester of the fee, or fails to pay the fee within 60 days of the date
+on which the public body informed the requester of the denial of the fee waiver, the
+public body shall close the request.
+(4)(a) A public body may request additional information or clarification from a
+requester of public records for the purpose of expediting the public body’s response to
+the request. If the public body has requested additional information or clarification in
+good faith, the public body’s obligation to further complete its response to the request is
+
+suspended until the requester provides the requested information or clarification or
+affirmatively declines to provide that information or clarification.
+(b) If the requester fails to respond within 60 days to a good faith request from the
+public body for information or clarification, the public body shall close the request.
+(5) As soon as reasonably possible but not later than 10 business days after the date
+by which a public body is required to acknowledge receipt of the request under ORS
+192.324, a public body shall:
+(a) Complete its response to the public records request; or
+(b) Provide a written statement that the public body is still processing the request and
+a reasonable estimated date by which the public body expects to complete its response
+based on the information currently available.
+(6) The time periods established by ORS 192.324 and subsection (5) of this section
+do not apply to a public body if compliance would be impracticable because:
+(a) The staff or volunteers necessary to complete a response to the public records
+request are unavailable;
+(b) Compliance would demonstrably impede the public body’s ability to perform
+other necessary services; or
+(c) Of the volume of public records requests being simultaneously processed by the
+public body.
+(7) For purposes of this section, staff members or volunteers who are on leave or are
+not scheduled to work are considered to be unavailable.
+(8) A public body that cannot comply with the time periods established by ORS
+192.324 and subsection (5) of this section for a reason listed in subsection (6) of this
+section shall, as soon as practicable and without unreasonable delay, acknowledge a
+public records request and complete the response to the request. [2017 c.456 §4]
+Note: 192.329, 192.335 and 192.340 were added to and made a part of 192.311 to
+192.478 by legislative action but were not added to any smaller series therein. See
+Preface to Oregon Revised Statutes for further explanation.
+192.335 Immunity from liability for disclosure of public record; effect of
+disclosure on privilege. (1) A public body that, acting in good faith, discloses a public
+record in response to a request for public records is not liable for any loss or damages
+based on the disclosure unless the disclosure is affirmatively prohibited by state or
+federal law or by a court order applicable to the public body. Nothing in this subsection
+shall be interpreted to create liability on the part of a public body, or create a cause of
+action against a public body, based on the disclosure of a public record.
+
+(2) A public body that discloses any information or record in response to a written
+request for public records under ORS 192.311 to 192.478 that is privileged under ORS
+40.225 to 40.295 does not waive its right to assert the applicable privilege to prevent the
+introduction of the information or record as evidence pursuant to ORS 40.225 to 40.295.
+[2017 c.456 §8]
+Note: See note under 192.329.
+192.338 Exempt and nonexempt public record to be separated. If any public
+record contains material which is not exempt under ORS 192.345 and 192.355, as well
+as material which is exempt from disclosure, the public body shall separate the exempt
+and nonexempt material and make the nonexempt material available for examination.
+[Formerly 192.505]
+Note: 192.338, 192.345 and 192.355 were made a part of 192.311 to 192.478 by
+legislative action but were not added to any smaller series therein. See Preface to
+Oregon Revised Statutes for further explanation.
+(Exemptions)
+192.340 Attorney General catalog of exemptions from disclosure. (1) The
+Attorney General shall maintain and regularly update a catalog of exemptions created by
+Oregon statute from the disclosure requirements of ORS 192.311 to 192.478. The
+catalog must be as comprehensive as reasonably possible and must be freely available to
+the public in an electronic format that facilitates sorting and searching of the catalog.
+(2) The catalog required by subsection (1) of this section must include the following
+information for each exemption:
+(a) A citation to the Oregon statute or statutes creating the exemption from the
+disclosure requirements of ORS 192.311 to 192.478;
+(b) The relevant text of each statute creating the exemption;
+(c) If the exemption has been construed by a decision of the Oregon Supreme Court
+or Court of Appeals, a citation to that decision;
+(d) To the extent that the exemption is specific to a particular public body or
+particular types of public bodies, a description of the public body or bodies to which the
+exemption relates; and
+(e) Additional information as the Attorney General deems appropriate.
+
+(3) To help ensure that the catalog required by subsection (1) of this section is as
+comprehensive as possible:
+(a) The Legislative Counsel shall provide the Attorney General with an electronic
+copy of any Act passed by the Legislative Assembly that, in the judgment of the
+Legislative Counsel, creates an exemption from the disclosure requirements of ORS
+192.311 to 192.478; and
+(b) When a district attorney issues an order pursuant to ORS 192.415, the district
+attorney shall send the Attorney General an electronic copy of that order.
+(4) The purpose of the catalog required by subsection (1) of this section is to assist
+public officials and members of the public in ascertaining what information is exempt
+from the public disclosure requirements of ORS 192.311 to 192.478. The catalog is not
+intended to provide legal advice to public bodies or to members of the public.
+(5) A public body may assert that an Oregon statute exempts a public record in the
+custody of the public body from disclosure even if that statute is not listed in the catalog
+or the catalog does not include that public body in the catalog’s description of the public
+bodies to which that exemption applies. [2017 c.456 §7]
+Note: See note under 192.329.
+192.345 Public records conditionally exempt from disclosure. The following
+public records are exempt from disclosure under ORS 192.311 to 192.478 unless the
+public interest requires disclosure in the particular instance:
+(1) Records of a public body pertaining to litigation to which the public body is a
+party if the complaint has been filed, or if the complaint has not been filed, if the public
+body shows that such litigation is reasonably likely to occur. This exemption does not
+apply to litigation which has been concluded, and nothing in this subsection shall limit
+any right or opportunity granted by discovery or deposition statutes to a party to
+litigation or potential litigation.
+(2) Trade secrets. “Trade secrets,” as used in this section, may include, but are not
+limited to, any formula, plan, pattern, process, tool, mechanism, compound, procedure,
+production data, or compilation of information which is not patented, which is known
+only to certain individuals within an organization and which is used in a business it
+conducts, having actual or potential commercial value, and which gives its user an
+opportunity to obtain a business advantage over competitors who do not know or use it.
+(3) Investigatory information compiled for criminal law purposes. The record of an
+arrest or the report of a crime shall be disclosed unless and only for so long as there is a
+clear need to delay disclosure in the course of a specific investigation, including the
+
+need to protect the complaining party or the victim. Nothing in this subsection shall limit
+any right constitutionally guaranteed, or granted by statute, to disclosure or discovery in
+criminal cases. For purposes of this subsection, the record of an arrest or the report of a
+crime includes, but is not limited to:
+(a) The arrested person’s name, age, residence, employment, marital status and
+similar biographical information;
+(b) The offense with which the arrested person is charged;
+(c) The conditions of release pursuant to ORS 135.230 to 135.290;
+(d) The identity of and biographical information concerning both complaining party
+and victim;
+(e) The identity of the investigating and arresting agency and the length of the
+investigation;
+(f) The circumstances of arrest, including time, place, resistance, pursuit and
+weapons used; and
+(g) Such information as may be necessary to enlist public assistance in apprehending
+fugitives from justice.
+(4) Test questions, scoring keys, and other data used to administer a licensing
+examination, employment, academic or other examination or testing procedure before
+the examination is given and if the examination is to be used again. Records establishing
+procedures for and instructing persons administering, grading or evaluating an
+examination or testing procedure are included in this exemption, to the extent that
+disclosure would create a risk that the result might be affected.
+(5) Information consisting of production records, sale or purchase records or catch
+records, or similar business records of a private concern or enterprise, required by law to
+be submitted to or inspected by a governmental body to allow it to determine fees or
+assessments payable or to establish production quotas, and the amounts of such fees or
+assessments payable or paid, to the extent that such information is in a form that would
+permit identification of the individual concern or enterprise. This exemption does not
+include records submitted by long term care facilities as defined in ORS 442.015 to the
+state for purposes of reimbursement of expenses or determining fees for patient care.
+Nothing in this subsection shall limit the use that can be made of such information for
+regulatory purposes or its admissibility in any enforcement proceeding.
+(6) Information relating to the appraisal of real estate prior to its acquisition.
+(7) The names and signatures of employees who sign authorization cards or petitions
+for the purpose of requesting representation or decertification elections.
+
+(8) Investigatory information relating to any complaint filed under ORS 659A.820 or
+659A.825, until such time as the complaint is resolved under ORS 659A.835, or a final
+order is issued under ORS 659A.850.
+(9) Investigatory information relating to any complaint or charge filed under ORS
+243.676 and 663.180.
+(10) Records, reports and other information received or compiled by the Director of
+the Department of Consumer and Business Services under ORS 697.732.
+(11) Information concerning the location of archaeological sites or objects as those
+terms are defined in ORS 358.905, except if the governing body of an Indian tribe
+requests the information and the need for the information is related to that Indian tribe’s
+cultural or religious activities. This exemption does not include information relating to a
+site that is all or part of an existing, commonly known and publicized tourist facility or
+attraction.
+(12) A personnel discipline action, or materials or documents supporting that action.
+(13) Fish and wildlife information developed pursuant to ORS 496.004, 496.172 and
+498.026 or ORS 496.192 and 564.100, regarding the habitat, location or population of
+any threatened species or endangered species.
+(14) Writings prepared by or under the direction of faculty of public educational
+institutions, in connection with research, until publicly released, copyrighted or patented.
+(15) Computer programs developed or purchased by or for any public body for its
+own use. As used in this subsection, “computer program” means a series of instructions
+or statements which permit the functioning of a computer system in a manner designed
+to provide storage, retrieval and manipulation of data from such computer system, and
+any associated documentation and source material that explain how to operate the
+computer program. “Computer program” does not include:
+(a) The original data, including but not limited to numbers, text, voice, graphics and
+images;
+(b) Analyses, compilations and other manipulated forms of the original data produced
+by use of the program; or
+(c) The mathematical and statistical formulas which would be used if the manipulated
+forms of the original data were to be produced manually.
+(16) Data and information provided by participants to mediation under ORS 36.256.
+(17) Investigatory information relating to any complaint or charge filed under ORS
+chapter 654, until a final administrative determination is made or, if a citation is issued,
+until an employer receives notice of any citation.
+
+(18) Specific operational plans in connection with an anticipated threat to individual
+or public safety for deployment and use of personnel and equipment, prepared or used
+by a public body, if public disclosure of the plans would endanger an individual’s life or
+physical safety or jeopardize a law enforcement activity.
+(19)(a) Audits or audit reports required of a telecommunications carrier. As used in
+this paragraph, “audit or audit report” means any external or internal audit or audit
+report pertaining to a telecommunications carrier, as defined in ORS 133.721, or
+pertaining to a corporation having an affiliated interest, as defined in ORS 759.390, with
+a telecommunications carrier that is intended to make the operations of the entity more
+efficient, accurate or compliant with applicable rules, procedures or standards, that may
+include self-criticism and that has been filed by the telecommunications carrier or
+affiliate under compulsion of state law. “Audit or audit report” does not mean an audit of
+a cost study that would be discoverable in a contested case proceeding and that is not
+subject to a protective order; and
+(b) Financial statements. As used in this paragraph, “financial statement” means a
+financial statement of a nonregulated corporation having an affiliated interest, as defined
+in ORS 759.390, with a telecommunications carrier, as defined in ORS 133.721.
+(20) The residence address of an elector if authorized under ORS 247.965 and subject
+to ORS 247.967.
+(21) The following records, communications and information submitted to a housing
+authority as defined in ORS 456.005, or to an urban renewal agency as defined in ORS
+457.010, by applicants for and recipients of loans, grants and tax credits:
+(a) Personal and corporate financial statements and information, including tax
+returns;
+(b) Credit reports;
+(c) Project appraisals, excluding appraisals obtained in the course of transactions
+involving an interest in real estate that is acquired, leased, rented, exchanged, transferred
+or otherwise disposed of as part of the project, but only after the transactions have closed
+and are concluded;
+(d) Market studies and analyses;
+(e) Articles of incorporation, partnership agreements and operating agreements;
+(f) Commitment letters;
+(g) Project pro forma statements;
+(h) Project cost certifications and cost data;
+(i) Audits;
+(j) Project tenant correspondence requested to be confidential;
+
+(k) Tenant files relating to certification; and
+(L) Housing assistance payment requests.
+(22) Records or information that, if disclosed, would allow a person to:
+(a) Gain unauthorized access to buildings or other property;
+(b) Identify those areas of structural or operational vulnerability that would permit
+unlawful disruption to, or interference with, services; or
+(c) Disrupt, interfere with or gain unauthorized access to public funds or to
+information processing, communication or telecommunication systems, including the
+information contained in the systems, that are used or operated by a public body.
+(23) Records or information that would reveal or otherwise identify security
+measures, or weaknesses or potential weaknesses in security measures, taken or
+recommended to be taken to protect:
+(a) An individual;
+(b) Buildings or other property;
+(c) Information processing, communication or telecommunication systems, including
+the information contained in the systems; or
+(d) Those operations of the Oregon State Lottery the security of which are subject to
+study and evaluation under ORS 461.180 (6).
+(24) Personal information held by or under the direction of officials of the Oregon
+Health and Science University or a public university listed in ORS 352.002 about a
+person who has or who is interested in donating money or property to the Oregon Health
+and Science University or a public university, if the information is related to the family
+of the person, personal assets of the person or is incidental information not related to the
+donation.
+(25) The home address, professional address and telephone number of a person who
+has or who is interested in donating money or property to a public university listed in
+ORS 352.002.
+(26) Records of the name and address of a person who files a report with or pays an
+assessment to a commodity commission established under ORS 576.051 to 576.455, the
+Oregon Beef Council created under ORS 577.210 or the Oregon Wheat Commission
+created under ORS 578.030.
+(27) Information provided to, obtained by or used by a public body to authorize,
+originate, receive or authenticate a transfer of funds, including but not limited to a credit
+card number, payment card expiration date, password, financial institution account
+number and financial institution routing number.
+(28) Social Security numbers as provided in ORS 107.840.
+
+(29) The electronic mail address of a student who attends a public university listed in
+ORS 352.002 or Oregon Health and Science University.
+(30) The name, home address, professional address or location of a person that is
+engaged in, or that provides goods or services for, medical research at Oregon Health
+and Science University that is conducted using animals other than rodents. This
+subsection does not apply to Oregon Health and Science University press releases,
+websites or other publications circulated to the general public.
+(31) If requested by a public safety officer, as defined in ORS 181A.355, or a county
+juvenile department employee who is charged with and primarily performs duties related
+to the custody, control or supervision of adjudicated youths confined in a detention
+facility, as defined in ORS 419A.004:
+(a) The home address and home telephone number of the public safety officer or
+county juvenile department employee contained in the voter registration records for the
+officer or employee.
+(b) The home address and home telephone number of the public safety officer or
+county juvenile department employee contained in records of the Department of Public
+Safety Standards and Training.
+(c) The name of the public safety officer or county juvenile department employee
+contained in county real property assessment or taxation records. This exemption:
+(A) Applies only to the name of the officer or employee and any other owner of the
+property in connection with a specific property identified by the officer or employee in a
+request for exemption from disclosure;
+(B) Applies only to records that may be made immediately available to the public
+upon request in person, by telephone or using the Internet;
+(C) Applies until the officer or employee requests termination of the exemption;
+(D) Does not apply to disclosure of records among public bodies as defined in ORS
+174.109 for governmental purposes; and
+(E) May not result in liability for the county if the name of the officer or employee is
+disclosed after a request for exemption from disclosure is made under this subsection.
+(32) Unless the public records request is made by a financial institution, as defined in
+ORS 706.008, consumer finance company licensed under ORS chapter 725, mortgage
+banker or mortgage broker licensed under ORS 86A.095 to 86A.198, or title company
+for business purposes, records described in paragraph (a) of this subsection, if the
+exemption from disclosure of the records is sought by an individual described in
+paragraph (b) of this subsection using the procedure described in paragraph (c) of this
+subsection:
+
+(a) The home address, home or cellular telephone number or personal electronic mail
+address contained in the records of any public body that has received the request that is
+set forth in:
+(A) A warranty deed, deed of trust, mortgage, lien, deed of reconveyance, release,
+satisfaction, substitution of trustee, easement, dog license, marriage license or military
+discharge record that is in the possession of the county clerk; or
+(B) Any public record of a public body other than the county clerk.
+(b) The individual claiming the exemption from disclosure must be a district attorney,
+a deputy district attorney, the Attorney General or an assistant attorney general, the
+United States Attorney for the District of Oregon or an assistant United States attorney
+for the District of Oregon, a city attorney who engages in the prosecution of criminal
+matters or a deputy city attorney who engages in the prosecution of criminal matters.
+(c) The individual claiming the exemption from disclosure must do so by filing the
+claim in writing with the public body for which the exemption from disclosure is being
+claimed on a form prescribed by the public body. Unless the claim is filed with the
+county clerk, the claim form shall list the public records in the possession of the public
+body to which the exemption applies. The exemption applies until the individual
+claiming the exemption requests termination of the exemption or ceases to qualify for
+the exemption.
+(33) The following voluntary conservation agreements and reports:
+(a) Land management plans required for voluntary stewardship agreements entered
+into under ORS 541.973; and
+(b) Written agreements relating to the conservation of greater sage grouse entered
+into voluntarily by owners or occupiers of land with a soil and water conservation
+district under ORS 568.550.
+(34) Sensitive business records or financial or commercial information of the State
+Accident Insurance Fund Corporation that is not customarily provided to business
+competitors. This exemption does not:
+(a) Apply to the formulas for determining dividends to be paid to employers insured
+by the State Accident Insurance Fund Corporation;
+(b) Apply to contracts for advertising, public relations or lobbying services or to
+documents related to the formation of such contracts;
+(c) Apply to group insurance contracts or to documents relating to the formation of
+such contracts, except that employer account records shall remain exempt from
+disclosure as provided in ORS 192.355 (35); or
+
+(d) Provide the basis for opposing the discovery of documents in litigation pursuant
+to the applicable rules of civil procedure.
+(35) Records of the Department of Public Safety Standards and Training relating to
+investigations conducted under ORS 181A.640 or 181A.870 (6), until the department
+issues the report described in ORS 181A.640 or 181A.870.
+(36) A medical examiner’s report, autopsy report or laboratory test report ordered by
+a medical examiner under ORS 146.117.
+(37) Any document or other information related to an audit of a public body, as
+defined in ORS 174.109, that is in the custody of an auditor or audit organization
+operating under nationally recognized government auditing standards, until the auditor
+or audit organization issues a final audit report in accordance with those standards or the
+audit is abandoned. This exemption does not prohibit disclosure of a draft audit report
+that is provided to the audited entity for the entity’s response to the audit findings.
+(38)(a) Personally identifiable information collected as part of an electronic fare
+collection system of a mass transit system.
+(b) The exemption from disclosure in paragraph (a) of this subsection does not apply
+to public records that have attributes of anonymity that are sufficient, or that are
+aggregated into groupings that are broad enough, to ensure that persons cannot be
+identified by disclosure of the public records.
+(c) As used in this subsection:
+(A) “Electronic fare collection system” means the software and hardware used for,
+associated with or relating to the collection of transit fares for a mass transit system,
+including but not limited to computers, radio communication systems, personal mobile
+devices, wearable technology, fare instruments, information technology, data storage or
+collection equipment, or other equipment or improvements.
+(B) “Mass transit system” has the meaning given that term in ORS 267.010.
+(C) “Personally identifiable information” means all information relating to a person
+that acquires or uses a transit pass or other fare payment medium in connection with an
+electronic fare collection system, including but not limited to:
+(i) Customer account information, date of birth, telephone number, physical address,
+electronic mail address, credit or debit card information, bank account information,
+Social Security or taxpayer identification number or other identification number, transit
+pass or fare payment medium balances or history, or similar personal information; or
+(ii) Travel dates, travel times, frequency of use, travel locations, service types or
+vehicle use, or similar travel information.
+(39)(a) If requested by a civil code enforcement officer:
+
+(A) The home address and home telephone number of the civil code enforcement
+officer contained in the voter registration records for the officer.
+(B) The name of the civil code enforcement officer contained in county real property
+assessment or taxation records. This exemption:
+(i) Applies only to the name of the civil code enforcement officer and any other
+owner of the property in connection with a specific property identified by the officer in a
+request for exemption from disclosure;
+(ii) Applies only to records that may be made immediately available to the public
+upon request in person, by telephone or using the Internet;
+(iii) Applies until the civil code enforcement officer requests termination of the
+exemption;
+(iv) Does not apply to disclosure of records among public bodies as defined in ORS
+174.109 for governmental purposes; and
+(v) May not result in liability for the county if the name of the civil code enforcement
+officer is disclosed after a request for exemption from disclosure is made under this
+subsection.
+(b) As used in this subsection, “civil code enforcement officer” means an employee
+of a public body, as defined in ORS 174.109, who is charged with enforcing laws or
+ordinances relating to land use, zoning, use of rights-of-way, solid waste, hazardous
+waste, sewage treatment and disposal or the state building code.
+(40) Audio or video recordings, whether digital or analog, resulting from a law
+enforcement officer’s operation of a video camera worn upon the officer’s person that
+records the officer’s interactions with members of the public while the officer is on duty.
+When a recording described in this subsection is subject to disclosure, the following
+apply:
+(a) Recordings that have been sealed in a court’s record of a court proceeding or
+otherwise ordered by a court not to be disclosed may not be disclosed.
+(b) A request for disclosure under this subsection must identify the approximate date
+and time of an incident for which the recordings are requested and be reasonably tailored
+to include only that material for which a public interest requires disclosure.
+(c) A video recording disclosed under this subsection must, prior to disclosure, be
+edited in a manner as to render the faces of all persons within the recording
+unidentifiable.
+(41) The contents of tips reported to a tip line, as defined in ORS 339.329. However,
+personally identifiable information, as defined in ORS 339.329, is not subject to public
+
+interest balancing under this section and remains exempt from disclosure except as
+provided in ORS 339.329.
+(42) Residential addresses of individuals with intellectual or developmental
+disabilities residing in adult foster homes as defined in ORS 443.705 or residential
+training facilities or residential training homes as those terms are defined in ORS
+443.400.
+(43) The name, home address, professional address or location of an individual who
+is authorized to provide physical and behavioral health care services in this state and
+who provides reproductive and gender-affirming health care services. [Formerly
+192.501; 2019 c.61 §1; 2019 c.130 §2; 2019 c.532 §§3,4; 2021 c.318 §§1,2; 2021 c.489
+§§22,23; 2023 c.228 §§39,40]
+Note: See note under 192.338.
+192.355 Public records exempt from disclosure. The following public records are
+exempt from disclosure under ORS 192.311 to 192.478:
+(1) Communications within a public body or between public bodies of an advisory
+nature to the extent that they cover other than purely factual materials and are
+preliminary to any final agency determination of policy or action. This exemption shall
+not apply unless the public body shows that in the particular instance the public interest
+in encouraging frank communication between officials and employees of public bodies
+clearly outweighs the public interest in disclosure.
+(2)(a) Information of a personal nature such as but not limited to that kept in a
+personal, medical or similar file, if public disclosure would constitute an unreasonable
+invasion of privacy, unless the public interest by clear and convincing evidence requires
+disclosure in the particular instance. The party seeking disclosure shall have the burden
+of showing that public disclosure would not constitute an unreasonable invasion of
+privacy.
+(b) Images of a dead body, or parts of a dead body, that are part of a law enforcement
+agency investigation, if public disclosure would create an unreasonable invasion of
+privacy of the family of the deceased person, unless the public interest by clear and
+convincing evidence requires disclosure in the particular instance. The party seeking
+disclosure shall have the burden of showing that public disclosure would not constitute
+an unreasonable invasion of privacy.
+(3) Upon compliance with ORS 192.363, public body employee or volunteer
+residential addresses, residential telephone numbers, personal cellular telephone
+numbers, personal electronic mail addresses, driver license numbers, employer-issued
+
+identification card numbers, emergency contact information, Social Security numbers,
+dates of birth and other telephone numbers contained in records maintained by the
+public body that is the employer or the recipient of volunteer services. This exemption:
+(a) Does not apply to the addresses, dates of birth and telephone numbers of
+employees or volunteers who are elected officials, except that a judge or district attorney
+subject to election may seek to exempt the judge’s or district attorney’s address or
+telephone number, or both, under the terms of ORS 192.368;
+(b) Does not apply to employees or volunteers to the extent that the party seeking
+disclosure shows by clear and convincing evidence that the public interest requires
+disclosure in a particular instance pursuant to ORS 192.363;
+(c) Does not apply to a substitute teacher as defined in ORS 342.815 when requested
+by a professional education association of which the substitute teacher may be a
+member; and
+(d) Does not relieve a public employer of any duty under ORS 243.650 to 243.809.
+(4) Information submitted to a public body in confidence and not otherwise required
+by law to be submitted, where such information should reasonably be considered
+confidential, the public body has obliged itself in good faith not to disclose the
+information, and when the public interest would suffer by the disclosure.
+(5) Information or records of the Department of Corrections, including the State
+Board of Parole and Post-Prison Supervision, to the extent that disclosure would
+interfere with the rehabilitation of a person in custody of the department or substantially
+prejudice or prevent the carrying out of the functions of the department, if the public
+interest in confidentiality clearly outweighs the public interest in disclosure.
+(6) Records, reports and other information received or compiled by the Director of
+the Department of Consumer and Business Services in the administration of ORS
+chapters 723 and 725 not otherwise required by law to be made public, to the extent that
+the interests of lending institutions, their officers, employees and customers in
+preserving the confidentiality of such information outweighs the public interest in
+disclosure.
+(7) Reports made to or filed with the court under ORS 137.077 or 137.530.
+(8) Any public records or information the disclosure of which is prohibited by federal
+law or regulations.
+(9)(a) Public records or information the disclosure of which is prohibited or restricted
+or otherwise made confidential or privileged under Oregon law.
+(b) Subject to ORS 192.360, paragraph (a) of this subsection does not apply to factual
+information compiled in a public record when:
+
+(A) The basis for the claim of exemption is ORS 40.225;
+(B) The factual information is not prohibited from disclosure under any applicable
+state or federal law, regulation or court order and is not otherwise exempt from
+disclosure under ORS 192.311 to 192.478;
+(C) The factual information was compiled by or at the direction of an attorney as part
+of an investigation on behalf of the public body in response to information of possible
+wrongdoing by the public body;
+(D) The factual information was not compiled in preparation for litigation, arbitration
+or an administrative proceeding that was reasonably likely to be initiated or that has
+been initiated by or against the public body; and
+(E) The holder of the privilege under ORS 40.225 has made or authorized a public
+statement characterizing or partially disclosing the factual information compiled by or at
+the attorney’s direction.
+(10) Public records or information described in this section, furnished by the public
+body originally compiling, preparing or receiving them to any other public officer or
+public body in connection with performance of the duties of the recipient, if the
+considerations originally giving rise to the confidential or exempt nature of the public
+records or information remain applicable.
+(11) Records of the Energy Facility Siting Council concerning the review or approval
+of security programs pursuant to ORS 469.530.
+(12) Employee and retiree address, telephone number and other nonfinancial
+membership records and employee financial records maintained by the Public
+Employees Retirement System pursuant to ORS chapters 238 and 238A or by another
+retirement system operated by a public body.
+(13) Records of or submitted to the State Treasurer, the Oregon Investment Council
+or the agents of the treasurer or the council relating to active or proposed publicly traded
+investments under ORS chapter 293, including but not limited to records regarding the
+acquisition, exchange or liquidation of the investments. For the purposes of this
+subsection:
+(a) The exemption does not apply to:
+(A) Information in investment records solely related to the amount paid directly into
+an investment by, or returned from the investment directly to, the treasurer or council; or
+(B) The identity of the entity to which the amount was paid directly or from which
+the amount was received directly.
+(b) An investment in a publicly traded investment is no longer active when
+acquisition, exchange or liquidation of the investment has been concluded.
+
+(14)(a) Records of or submitted to the State Treasurer, the Oregon Investment
+Council, the Oregon Growth Board or the agents of the treasurer, council or board
+relating to actual or proposed investments under ORS chapter 293 or 348 in a privately
+placed investment fund or a private asset including but not limited to records regarding
+the solicitation, acquisition, deployment, exchange or liquidation of the investments
+including but not limited to:
+(A) Due diligence materials that are proprietary to an investment fund, to an asset
+ownership or to their respective investment vehicles.
+(B) Financial statements of an investment fund, an asset ownership or their respective
+investment vehicles.
+(C) Meeting materials of an investment fund, an asset ownership or their respective
+investment vehicles.
+(D) Records containing information regarding the portfolio positions in which an
+investment fund, an asset ownership or their respective investment vehicles invest.
+(E) Capital call and distribution notices of an investment fund, an asset ownership or
+their respective investment vehicles.
+(F) Investment agreements and related documents.
+(b) The exemption under this subsection does not apply to:
+(A) The name, address and vintage year of each privately placed investment fund.
+(B) The dollar amount of the commitment made to each privately placed investment
+fund since inception of the fund.
+(C) The dollar amount of cash contributions made to each privately placed
+investment fund since inception of the fund.
+(D) The dollar amount, on a fiscal year-end basis, of cash distributions received by
+the State Treasurer, the Oregon Investment Council, the Oregon Growth Board or the
+agents of the treasurer, council or board from each privately placed investment fund.
+(E) The dollar amount, on a fiscal year-end basis, of the remaining value of assets in
+a privately placed investment fund attributable to an investment by the State Treasurer,
+the Oregon Investment Council, the Oregon Growth Board or the agents of the treasurer,
+council or board.
+(F) The net internal rate of return of each privately placed investment fund since
+inception of the fund.
+(G) The investment multiple of each privately placed investment fund since inception
+of the fund.
+(H) The dollar amount of the total management fees and costs paid on an annual
+fiscal year-end basis to each privately placed investment fund.
+
+(I) The dollar amount of cash profit received from each privately placed investment
+fund on a fiscal year-end basis.
+(15) The monthly reports prepared and submitted under ORS 293.761 and 293.766
+concerning the Public Employees Retirement Fund and the Industrial Accident Fund
+may be uniformly treated as exempt from disclosure for a period of up to 90 days after
+the end of the calendar quarter.
+(16) Reports of unclaimed property filed by the holders of such property to the extent
+permitted by ORS 98.352.
+(17)(a) The following records, communications and supporting information
+submitted to the Oregon Business Development Commission, the Oregon Business
+Development Department, the State Department of Agriculture, the Oregon Growth
+Board, the Port of Portland or other ports as defined in ORS 777.005, or a county or city
+governing body and any board, department, commission, council or agency of a county
+or city, by applicants as part of an application for investment funds, grants, loans,
+services or economic development moneys, support or assistance including, but not
+limited to, those described in ORS 285A.224:
+(A) Financial statements.
+(B) Customer lists.
+(C) Information pertaining to litigation to which the applicant or a proposed
+beneficiary of the application is a party if the complaint has been filed, or if the
+complaint has not been filed, if the applicant shows that such litigation is reasonably
+likely to occur. This exemption does not apply to litigation which has been concluded,
+and nothing in this subparagraph shall limit any right or opportunity granted by
+discovery or deposition statutes to a party to litigation or potential litigation.
+(D) Production, sales and cost data.
+(E) Marketing strategy information that relates to the applicant’s plan or a proposed
+beneficiary of the application to address specific markets and strategy regarding specific
+competitors.
+(b) The following records, communications and information submitted to the State
+Department of Energy by applicants for tax credits or for grants awarded under ORS
+469B.256:
+(A) Personal financial statements.
+(B) Financial statements of applicants.
+(C) Customer lists.
+(D) Information of an applicant pertaining to litigation to which the applicant is a
+party if the complaint has been filed, or if the complaint has not been filed, if the
+
+applicant shows that such litigation is reasonably likely to occur; this exemption does
+not apply to litigation which has been concluded, and nothing in this subparagraph shall
+limit any right or opportunity granted by discovery or deposition statutes to a party to
+litigation or potential litigation.
+(E) Production, sales and cost data.
+(F) Marketing strategy information that relates to applicant’s plan to address specific
+markets and applicant’s strategy regarding specific competitors.
+(18) Records, reports or returns submitted by private concerns or enterprises required
+by law to be submitted to or inspected by a governmental body to allow it to determine
+the amount of any transient lodging tax payable and the amounts of such tax payable or
+paid, to the extent that such information is in a form which would permit identification
+of the individual concern or enterprise. Nothing in this subsection shall limit the use
+which can be made of such information for regulatory purposes or its admissibility in
+any enforcement proceedings. The public body shall notify the taxpayer of the
+delinquency immediately by certified mail. However, in the event that the payment or
+delivery of transient lodging taxes otherwise due to a public body is delinquent by over
+60 days, the public body shall disclose, upon the request of any person, the following
+information:
+(a) The identity of the individual concern or enterprise that is delinquent over 60 days
+in the payment or delivery of the taxes.
+(b) The period for which the taxes are delinquent.
+(c) The actual, or estimated, amount of the delinquency.
+(19) All information supplied by a person under ORS 151.485 for the purpose of
+requesting appointed counsel, and all information supplied to the court from whatever
+source for the purpose of verifying the financial eligibility of a person pursuant to ORS
+151.485.
+(20) Workers’ compensation claim records of the Department of Consumer and
+Business Services, except in accordance with rules adopted by the Director of the
+Department of Consumer and Business Services, in any of the following circumstances:
+(a) When necessary for insurers, self-insured employers and third party claim
+administrators to process workers’ compensation claims.
+(b) When necessary for the director, other governmental agencies of this state or the
+United States to carry out their duties, functions or powers.
+(c) When the disclosure is made in such a manner that the disclosed information
+cannot be used to identify any worker who is the subject of a claim.
+
+(d) When a worker or the worker’s representative requests review of the worker’s
+claim record.
+(21) Sensitive business records or financial or commercial information of the Oregon
+Health and Science University that is not customarily provided to business competitors.
+(22) Records of Oregon Health and Science University regarding candidates for the
+position of president of the university.
+(23) The records of a library, including:
+(a) Circulation records, showing use of specific library material by a named person;
+(b) The name of a library patron together with the address or telephone number of the
+patron; and
+(c) The electronic mail address of a patron.
+(24) The following records, communications and information obtained by the
+Housing and Community Services Department in connection with the department’s
+monitoring or administration of financial assistance or of housing or other
+developments:
+(a) Personal and corporate financial statements and information, including tax
+returns.
+(b) Credit reports.
+(c) Project appraisals, excluding appraisals obtained in the course of transactions
+involving an interest in real estate that is acquired, leased, rented, exchanged, transferred
+or otherwise disposed of as part of the project, but only after the transactions have closed
+and are concluded.
+(d) Market studies and analyses.
+(e) Articles of incorporation, partnership agreements and operating agreements.
+(f) Commitment letters.
+(g) Project pro forma statements.
+(h) Project cost certifications and cost data.
+(i) Audits.
+(j) Project tenant correspondence.
+(k) Personal information about a tenant.
+(L) Housing assistance payments.
+(25) Raster geographic information system (GIS) digital databases, provided by
+private forestland owners or their representatives, voluntarily and in confidence to the
+State Forestry Department, that is not otherwise required by law to be submitted.
+(26) Sensitive business, commercial or financial information furnished to or
+developed by a public body engaged in the business of providing electricity or electricity
+
+services, if the information is directly related to a transaction described in ORS 261.348,
+or if the information is directly related to a bid, proposal or negotiations for the sale or
+purchase of electricity or electricity services, and disclosure of the information would
+cause a competitive disadvantage for the public body or its retail electricity customers.
+This subsection does not apply to cost-of-service studies used in the development or
+review of generally applicable rate schedules.
+(27) Sensitive business, commercial or financial information furnished to or
+developed by the City of Klamath Falls, acting solely in connection with the ownership
+and operation of the Klamath Cogeneration Project, if the information is directly related
+to a transaction described in ORS 225.085 and disclosure of the information would
+cause a competitive disadvantage for the Klamath Cogeneration Project. This subsection
+does not apply to cost-of-service studies used in the development or review of generally
+applicable rate schedules.
+(28) Personally identifiable information about customers of a municipal electric
+utility or a people’s utility district or the names, dates of birth, driver license numbers,
+telephone numbers, electronic mail addresses or Social Security numbers of customers
+who receive water, sewer or storm drain services from a public body as defined in ORS
+174.109. The utility or district may release personally identifiable information about a
+customer, and a public body providing water, sewer or storm drain services may release
+the name, date of birth, driver license number, telephone number, electronic mail address
+or Social Security number of a customer, if the customer consents in writing or
+electronically, if the disclosure is necessary for the utility, district or other public body to
+render services to the customer, if the disclosure is required pursuant to a court order or
+if the disclosure is otherwise required by federal or state law. The utility, district or other
+public body may charge as appropriate for the costs of providing such information. The
+utility, district or other public body may make customer records available to third party
+credit agencies on a regular basis in connection with the establishment and management
+of customer accounts or in the event such accounts are delinquent.
+(29) A record of the street and number of an employee’s address submitted to a
+special district to obtain assistance in promoting an alternative to single occupant motor
+vehicle transportation.
+(30) Sensitive business records, capital development plans or financial or commercial
+information of Oregon Corrections Enterprises that is not customarily provided to
+business competitors.
+(31) Documents, materials or other information submitted to the Director of the
+Department of Consumer and Business Services in confidence by a state, federal,
+
+foreign or international regulatory or law enforcement agency or by the National
+Association of Insurance Commissioners, its affiliates or subsidiaries under ORS
+86A.095 to 86A.198, 697.005 to 697.095, 697.602 to 697.842, 705.137, 717.200 to
+717.320, 717.900 or 717.905, ORS chapter 59, 723, 725 or 726, the Bank Act or the
+Insurance Code when:
+(a) The document, material or other information is received upon notice or with an
+understanding that it is confidential or privileged under the laws of the jurisdiction that
+is the source of the document, material or other information; and
+(b) The director has obligated the Department of Consumer and Business Services
+not to disclose the document, material or other information.
+(32) A county elections security plan developed and filed under ORS 254.074.
+(33) Information about review or approval of programs relating to the security of:
+(a) Generation, storage or conveyance of:
+(A) Electricity;
+(B) Gas in liquefied or gaseous form;
+(C) Hazardous substances as defined in ORS 453.005 (7)(a), (b) and (d);
+(D) Petroleum products;
+(E) Sewage; or
+(F) Water.
+(b) Telecommunication systems, including cellular, wireless or radio systems.
+(c) Data transmissions by whatever means provided.
+(34) The information specified in ORS 25.020 (8) if the Chief Justice of the Supreme
+Court designates the information as confidential by rule under ORS 1.002.
+(35)(a) Employer account records of the State Accident Insurance Fund Corporation.
+(b) As used in this subsection, “employer account records” means all records
+maintained in any form that are specifically related to the account of any employer
+insured, previously insured or under consideration to be insured by the State Accident
+Insurance Fund Corporation and any information obtained or developed by the
+corporation in connection with providing, offering to provide or declining to provide
+insurance to a specific employer. “Employer account records” includes, but is not
+limited to, an employer’s payroll records, premium payment history, payroll
+classifications, employee names and identification information, experience modification
+factors, loss experience and dividend payment history.
+(c) The exemption provided by this subsection may not serve as the basis for
+opposition to the discovery documents in litigation pursuant to applicable rules of civil
+procedure.
+
+(36)(a) Claimant files of the State Accident Insurance Fund Corporation.
+(b) As used in this subsection, “claimant files” includes, but is not limited to, all
+records held by the corporation pertaining to a person who has made a claim, as defined
+in ORS 656.005, and all records pertaining to such a claim.
+(c) The exemption provided by this subsection may not serve as the basis for
+opposition to the discovery documents in litigation pursuant to applicable rules of civil
+procedure.
+(37) Except as authorized by ORS 408.425, records that certify or verify an
+individual’s discharge or other separation from military service.
+(38) Records of or submitted to a domestic violence service or resource center that
+relate to the name or personal information of an individual who visits a center for
+service, including the date of service, the type of service received, referrals or contact
+information or personal information of a family member of the individual. As used in
+this subsection, “domestic violence service or resource center” means an entity, the
+primary purpose of which is to assist persons affected by domestic or sexual violence by
+providing referrals, resource information or other assistance specifically of benefit to
+domestic or sexual violence victims.
+(39) Information reported to the Oregon Health Authority under ORS 431A.860,
+except as provided in ORS 431A.865 (3)(b), information disclosed by the authority
+under ORS 431A.865 and any information related to disclosures made by the authority
+under ORS 431A.865, including information identifying the recipient of the information.
+(40)(a) Electronic mail addresses in the possession or custody of an agency or
+subdivision of the executive department, as defined in ORS 174.112, the legislative
+department, as defined in ORS 174.114, a local government or local service district, as
+defined in ORS 174.116, or a special government body, as defined in ORS 174.117.
+(b) This subsection does not apply to electronic mail addresses assigned by a public
+body to public employees for use by the employees in the ordinary course of their
+employment.
+(c) This subsection and ORS 244.040 do not prohibit the campaign office of the
+current officeholder or current candidates who have filed to run for that elective office
+from receiving upon request the electronic mail addresses used by the current
+officeholder’s legislative office for newsletter distribution, except that a campaign office
+that receives electronic mail addresses under this paragraph may not make a further
+disclosure of those electronic mail addresses to any other person.
+(41) Residential addresses, residential telephone numbers, personal cellular telephone
+numbers, personal electronic mail addresses, driver license numbers, emergency contact
+
+information, Social Security numbers, dates of birth and other telephone numbers of
+individuals currently or previously certified or licensed by the Department of Public
+Safety Standards and Training contained in the records maintained by the department.
+(42) Personally identifiable information and contact information of veterans as
+defined in ORS 408.225 and of persons serving on active duty or as reserve members
+with the Armed Forces of the United States, National Guard or other reserve component
+that was obtained by the Department of Veterans’ Affairs in the course of performing its
+duties and functions, including but not limited to names, residential and employment
+addresses, dates of birth, driver license numbers, telephone numbers, electronic mail
+addresses, Social Security numbers, marital status, dependents, the character of
+discharge from military service, military rating or rank, that the person is a veteran or
+has provided military service, information relating to an application for or receipt of
+federal or state benefits, information relating to the basis for receipt or denial of federal
+or state benefits and information relating to a home loan or grant application, including
+but not limited to financial information provided in connection with the application.
+(43) Business, commercial, financial, operational and research data and information,
+including but not limited to pricing, intellectual property and customer records,
+furnished to, developed by or generated in connection with the ownership and operation
+of an unmanned aerial system test range, if disclosure of the information would cause a
+competitive disadvantage to the test range or its users.
+(44) Personally identifiable information about a child under the age of 16 years that is
+submitted to the State Fish and Wildlife Commission or an agent of the commission to
+obtain a license, tag or permit under the wildlife laws.
+(45) Proprietary information subject to a nondisclosure agreement that is provided to
+the Oregon Broadband Office pursuant to ORS 285A.176.
+(46) With respect to records held by the State Treasurer relating to unclaimed
+properties under ORS 98.302 to 98.436:
+(a) All materials or communications received during an examination under ORS
+98.412 (2) and (3), except to the extent that the information in the materials or
+communications appears within a report under ORS 98.412 (4) or 98.352 and the
+information is not otherwise exempt under ORS 98.352 (4).
+(b) All materials or communications assembled or used by the state or its auditor
+during the preparation of a report under ORS 98.412 (4), including drafts,
+correspondence, working papers and other preparatory documents.
+
+(c) Information obtained during an examination under ORS 98.412 (2) and (3)
+concerning an unclaimed property holder’s potential liability in a state other than
+Oregon, even if that information is included in a report under ORS 98.412 (4) or 98.352.
+(d) Information in or supporting claims to unclaimed property under ORS 98.392,
+except to the extent that the claimant consents to the information’s disclosure.
+(47) Any document, record or plan for protection relating to the existence, nature,
+location or function of cybersecurity devices, programs or systems designed to protect
+computer, information technology or communications systems against threat or attack,
+including but not limited to:
+(a) Records pertaining to devices, programs or systems that depend for their
+effectiveness in whole or part upon a lack of public knowledge; and
+(b) Contractual records or insurance records that set forth cybersecurity
+specifications, insurance application and coverage details.
+(48) Sensitive business, commercial or financial information, that is not customarily
+provided to business competitors, that is furnished to or developed by the Oregon
+Prescription Drug Program in connection with purchasing prescription drugs or
+contracting for the services of a pharmacy benefit manager or pharmacy networks
+pursuant to ORS 414.312. [Formerly 192.502; 2019 c.470 §10; 2021 c.174 §1; 2021
+c.657 §1; 2022 c.60 §5; 2023 c.50 §1; 2023 c.238 §8; 2023 c.307 §1; 2024 c.87 §13;
+2025 c.565 §1]
+Note: See note under 192.338.
+192.360 Condensation of public record subject to disclosure; petition to review
+denial of right to inspect public record; adequacy of condensation. (1) When a
+public record is subject to disclosure under ORS 192.355 (9)(b), in lieu of making the
+public record available for inspection by providing a copy of the record, the public body
+may prepare and release a condensation from the record of the significant facts that are
+not otherwise exempt from disclosure under ORS 192.311 to 192.478. The release of the
+condensation does not waive any privilege under ORS 40.225 to 40.295.
+(2) The person seeking to inspect or receive a copy of any public record for which a
+condensation of facts has been provided under this section may petition for review of the
+denial to inspect or receive a copy of the records under ORS 192.311 to 192.478. In such
+a review, the Attorney General, district attorney or court shall, in addition to reviewing
+the records to which access was denied, compare those records to the condensation to
+determine whether the condensation adequately describes the significant facts contained
+in the records. [Formerly 192.423]
+
+Note: 192.360 was added to and made a part of 192.311 to 192.478 by legislative
+action but was not added to any smaller series therein. See Preface to Oregon Revised
+Statutes for further explanation.
+(Records Containing Personal Information)
+192.363 Contents of certain requests for disclosure. (1) A request for the disclosure
+of records described in ORS 192.355 (3) or 192.365 must include the following
+information:
+(a) The names of the individuals for whom personal information is sought;
+(b) A statement describing the personal information being sought; and
+(c) A statement that satisfies subsection (2) of this section.
+(2) The party seeking disclosure shall show by clear and convincing evidence that the
+public interest requires disclosure in a particular instance.
+(3) Upon receiving a request described in subsection (1) of this section, a public body
+shall forward a copy of the request and any materials submitted with the request to the
+individuals whose personal information is being sought or to any representatives of each
+class of persons whose personal information is the subject of the request.
+(4) For purposes of subsection (3) of this section, the public body has sole discretion
+to determine the classes of persons whose personal information is the subject of the
+request and to identify the representatives for each class.
+(5) The public body may not disclose information pursuant to the request for at least
+seven days after forwarding copies of the request under subsection (3) of this section.
+(6) The public body shall consider all information submitted under this section and
+shall disclose requested information only if the public body determines that the party
+seeking disclosure has demonstrated by clear and convincing evidence that the public
+interest requires disclosure in a particular instance. [Formerly 192.437]
+Note: 192.363 was added to and made a part of 192.311 to 192.478 by legislative
+action but was not added to any smaller series therein. See Preface to Oregon Revised
+Statutes for further explanation.
+192.365 Disclosure of information pertaining to home care worker, personal
+support worker, operator of child care facility, exempt child care provider or
+operator of adult foster home. (1) Upon compliance with ORS 192.363, a public body
+that is the custodian of or is otherwise in possession of the following information
+
+pertaining to a home care worker or personal support worker as defined in ORS 410.600,
+an operator of a child care facility as defined in ORS 329A.250, an exempt family child
+care provider as defined in ORS 329A.430 or an operator of an adult foster home as
+defined in ORS 443.705 shall disclose that information in response to a request to
+inspect public records under ORS 192.311 to 192.478:
+(a) Residential address and telephone numbers;
+(b) Personal electronic mail addresses and personal cellular telephone numbers;
+(c) Social Security numbers and employer-issued identification card numbers; and
+(d) Emergency contact information.
+(2) Subsection (1) of this section does not apply to the Judicial Department or the
+Department of Transportation or to any records in the custody of the Judicial
+Department or the Department of Transportation. [Formerly 192.435; 2018 c.75 §10]
+Note: 192.365 was added to and made a part of 192.311 to 192.478 by legislative
+action but was not added to any smaller series therein. See Preface to Oregon Revised
+Statutes for further explanation.
+192.368 Nondisclosure on request of home address, home telephone number and
+electronic mail address; rules of procedure; duration of effect of request; liability;
+when not applicable. (1) An individual may submit a written request to a public body
+not to disclose a specified public record indicating the home address, personal telephone
+number or electronic mail address of the individual. A public body may not disclose the
+specified public record if the individual demonstrates to the satisfaction of the public
+body that the personal safety of the individual or the personal safety of a family member
+residing with the individual is in danger if the home address, personal telephone number
+or electronic mail address remains available for public inspection.
+(2) The Attorney General shall adopt rules describing:
+(a) The procedures for submitting the written request described in subsection (1) of
+this section.
+(b) The evidence an individual shall provide to the public body to establish that
+disclosure of the home address, telephone number or electronic mail address of the
+individual would constitute a danger to personal safety. The evidence may include but is
+not limited to evidence that the individual or a family member residing with the
+individual has:
+(A) Been a victim of domestic violence;
+(B) Obtained an order issued under ORS 133.055;
+
+(C) Contacted a law enforcement officer involving domestic violence or other
+physical abuse;
+(D) Obtained a temporary restraining order or other no contact order to protect the
+individual from future physical abuse; or
+(E) Filed other criminal or civil legal proceedings regarding physical protection.
+(c) The procedures for submitting the written notification from the individual that
+disclosure of the home address, personal telephone number or electronic mail address of
+the individual no longer constitutes a danger to personal safety.
+(3) A request described in subsection (1) of this section remains effective:
+(a) Until the public body receives a written request for termination but no later than
+five years after the date that a public body receives the request; or
+(b) In the case of a voter registration record, until the individual must update the
+individual’s voter registration, at which time the individual may apply for another
+exemption from disclosure.
+(4) A public body may disclose a home address, personal telephone number or
+electronic mail address of an individual exempt from disclosure under subsection (1) of
+this section upon court order, on request from any law enforcement agency or with the
+consent of the individual.
+(5) A public body may not be held liable for granting or denying an exemption from
+disclosure under this section or any other unauthorized release of a home address,
+personal telephone number or electronic mail address granted an exemption from
+disclosure under this section.
+(6) This section does not apply to county property and lien records. [Formerly
+192.445]
+Note: 192.368 was added to and made a part of 192.311 to 192.478 by legislative
+action but was not added to any smaller series therein. See Preface to Oregon Revised
+Statutes for further explanation.
+192.371 Nondisclosure of public employee identification badge or card. (1) As
+used in this section, “public body” has the meaning given that term in ORS 174.109.
+(2) A public body may not disclose the identification badge or card of an employee of
+the public body without the written consent of the employee if:
+(a) The badge or card contains the photograph of the employee; and
+(b) The badge or card was prepared solely for internal use by the public body to
+identify employees of the public body.
+
+(3) The public body may not disclose a duplicate of the photograph used on the
+badge or card. [Formerly 192.447]
+Note: 192.371 was enacted into law by the Legislative Assembly but was not added to
+or made a part of ORS chapter 192 or any series therein by legislative action. See
+Preface to Oregon Revised Statutes for further explanation.
+192.374 Nondisclosure of concealed handgun license records or information;
+exceptions; limitations; rules. (1) A public body may not disclose records or
+information that identifies a person as a current or former holder of, or applicant for, a
+concealed handgun license, unless:
+(a) The disclosure is made to another public body and is necessary for criminal
+justice purposes;
+(b) A court enters an order in a criminal or civil case directing the public body to
+disclose the records or information;
+(c) The holder of, or applicant for, the concealed handgun license consents to the
+disclosure in writing;
+(d) The public body determines that a compelling public interest requires disclosure
+in the particular instance and the disclosure is limited to the name, age and county of
+residence of the holder or applicant;
+(e)(A) The disclosure is limited to confirming or denying that a person convicted of a
+person crime, or restrained by a protective order, is a current holder of a concealed
+handgun license; and
+(B) The disclosure is made to a victim of the person crime or to a person who is
+protected by the protective order, in response to a request for disclosure that provides the
+public body with the name and age of the person convicted of the person crime or
+restrained by the protective order; or
+(f)(A) The disclosure is limited to confirming or denying that a person convicted of a
+crime involving the use or possession of a firearm is a current holder of a concealed
+handgun license; and
+(B) The disclosure is made to a bona fide representative of the news media in
+response to a request for disclosure that provides the name and age of the person
+convicted of the crime involving the use or possession of a firearm.
+(2) A public body may not confirm or deny that a person described in subsection (1)
+(e)(A) or (f)(A) of this section is a current holder of a concealed handgun license unless
+the person seeking disclosure:
+
+(a) Under subsection (1)(e) of this section provides the public body with written
+proof that the person is a victim of the person crime or is protected by the protective
+order.
+(b) Under subsection (1)(f) of this section provides the public body with written
+proof that the person is a bona fide representative of the news media.
+(3) Notwithstanding any other provision of law, a public body that receives a request
+for disclosure under subsection (1)(e) or (f) of this section may conduct an investigation,
+including a criminal records check, to determine whether a person described in
+subsection (1)(e)(A) or (f)(A) of this section has been convicted of a person crime or a
+crime involving the use or possession of a firearm or is restrained by a protective order.
+(4) The Attorney General shall adopt rules to carry out the provisions of this section.
+The rules must include a description of:
+(a) The procedures for submitting the written request described in subsection (1)(d)
+of this section; and
+(b) The materials an individual must provide to the public body to establish a
+compelling public interest that supports the disclosure of the name, age and county of
+residence of the holder or applicant.
+(5) The prohibition described in subsection (1) of this section does not apply to the
+Judicial Department.
+(6) As used in this section:
+(a) “Convicted” does not include a conviction that has been reversed, vacated or set
+aside or a conviction for which the person has been pardoned.
+(b) “Person crime” means a person felony or person Class A misdemeanor, as those
+terms are defined in the rules of the Oregon Criminal Justice Commission, or any other
+crime constituting domestic violence, as defined in ORS 135.230.
+(c) “Protective order” has the meaning given that term in ORS 135.886.
+(d) “Victim” has the meaning given that term in ORS 131.007. [Formerly 192.448]
+Note: 192.374 was added to and made a part of 192.311 to 192.478 by legislative
+action but was not added to any smaller series therein. See Preface to Oregon Revised
+Statutes for further explanation.
+192.377 Required redaction of certain personal information. A public body that is
+the custodian of or is otherwise in possession of information that was submitted to the
+public body in confidence and is not otherwise required by law to be submitted, must
+redact all of the following information before making a disclosure described in ORS
+192.355 (4):
+
+(1) Residential address and telephone numbers;
+(2) Personal electronic mail addresses and personal cellular telephone numbers;
+(3) Social Security numbers and employer-issued identification card numbers; and
+(4) Emergency contact information. [Formerly 192.504]
+Note: 192.377 was added to and made a part of 192.311 to 192.478 by legislative
+action but was not added to any smaller series therein. See Preface to Oregon Revised
+Statutes for further explanation.
+192.380 Immunity from liability for disclosure of certain personal information;
+recovery of costs. (1) A public body or any official of the public body that determines
+that a party requesting information under ORS 192.355 (3), 192.363 or 192.365 has
+demonstrated by clear and convincing evidence that the public interest requires
+disclosure in a particular instance is immune from civil or criminal liability associated
+with the disclosure.
+(2) A public body that receives a request for disclosure of records under ORS
+192.355 (3) or 192.365 is entitled to recover the cost of complying with ORS 192.363
+without regard to whether the public body determines that the party requesting
+disclosure has demonstrated by clear and convincing evidence that the public interest
+requires disclosure in a particular instance. [Formerly 192.497]
+Note: 192.380 was added to and made a part of 192.311 to 192.478 by legislative
+action but was not added to any smaller series therein. See Preface to Oregon Revised
+Statutes for further explanation.
+(Investigation Records)
+192.385 Nondisclosure of certain public safety officer investigation records;
+exceptions. (1) As used in this section:
+(a) “Law enforcement unit” has the meaning given that term in ORS 181A.355.
+(b) “Public body” has the meaning given that term in ORS 192.311.
+(c) “Public safety officer” has the meaning given that term in ORS 181A.355.
+(2) A public body may not disclose audio or video records of internal investigation
+interviews of public safety officers.
+(3) Subsection (2) of this section does not prohibit disclosure of the records described
+in subsection (2) of this section to:
+(a) A law enforcement unit for purposes of the investigation;
+
+(b) An attorney representing a public safety officer who is the subject of the
+investigation;
+(c) The Department of Public Safety Standards and Training as required by ORS
+181A.670;
+(d) A district attorney, as defined in ORS 131.005;
+(e) A public safety officer who is the subject of the investigation;
+(f) An attorney for a defendant in a criminal proceeding related to the investigation,
+for use in preparation for the criminal proceeding;
+(g) A labor organization, as defined in ORS 243.650, for use in an action by an
+employer against a member of the labor organization for the purpose of punishing the
+member;
+(h) A public body responsible for civilian oversight or a citizen review body
+designated by the public body for the purposes of fulfilling the investigative and
+oversight functions of the body;
+(i) A federal law enforcement agency for purposes of the investigation; or
+(j) The Attorney General.
+(4) The disclosure of records under subsection (3) of this section does not make the
+records subject to further disclosure. [Formerly 192.405]
+Note: 192.385 was enacted into law by the Legislative Assembly but was not added
+to or made a part of ORS chapter 192 or any series therein by legislative action. See
+Preface to Oregon Revised Statutes for further explanation.
+(Old Records)
+192.390 Inspection of records more than 25 years old. Notwithstanding ORS
+192.338, 192.345 and 192.355 and except as otherwise provided in ORS 192.398, public
+records that are more than 25 years old shall be available for inspection. [Formerly
+192.495]
+Note: 192.390 was added to and made a part of 192.311 to 192.478 by legislative
+action but was not added to any smaller series therein. See Preface to Oregon Revised
+Statutes for further explanation.
+(Health Records)
+
+192.395 Health services costs. A record of an agency of the executive department as
+defined in ORS 174.112 that contains the following information is a public record
+subject to inspection under ORS 192.314 and is not exempt from disclosure under ORS
+192.345 or 192.355 except to the extent that the record discloses information about an
+individual’s health or is proprietary to a person:
+(1) The amounts determined by an independent actuary retained by the agency to
+cover the costs of providing each of the following health services under ORS 414.591,
+414.631 and 414.688 to 414.745 for the six months preceding the report:
+(a) Inpatient hospital services;
+(b) Outpatient hospital services;
+(c) Laboratory and X-ray services;
+(d) Physician and other licensed practitioner services;
+(e) Prescription drugs;
+(f) Dental services;
+(g) Vision services;
+(h) Mental health services;
+(i) Chemical dependency services;
+(j) Durable medical equipment and supplies; and
+(k) Other health services provided under a coordinated care organization contract
+under ORS 414.591 or a contract with a prepaid managed care health services
+organization, as defined in ORS 414.025;
+(2) The amounts the agency and each contractor have paid under each coordinated
+care organization contract under ORS 414.591 or prepaid managed care health services
+organization contract for administrative costs and the provision of each of the health
+services described in subsection (1) of this section for the six months preceding the
+report;
+(3) Any adjustments made to the amounts reported under this section to account for
+geographic or other differences in providing the health services; and
+(4) The numbers of individuals served under each coordinated care organization
+contract or prepaid managed care health services organization contract, listed by
+category of individual. [Formerly 192.493]
+Note: 192.395 was enacted into law by the Legislative Assembly but was not added
+to or made a part of ORS chapter 192 or any series therein by legislative action. See
+Preface to Oregon Revised Statutes for further explanation.
+
+192.398 Medical records; sealed records; records of individual in custody or
+under supervision; student records. The following public records are exempt from
+disclosure:
+(1) Records less than 75 years old which contain information about the physical or
+mental health or psychiatric care or treatment of a living individual, if the public
+disclosure thereof would constitute an unreasonable invasion of privacy. The party
+seeking disclosure shall have the burden of showing by clear and convincing evidence
+that the public interest requires disclosure in the particular instance and that public
+disclosure would not constitute an unreasonable invasion of privacy.
+(2) Records less than 75 years old which were sealed in compliance with statute or by
+court order. Such records may be disclosed upon order of a court of competent
+jurisdiction or as otherwise provided by law.
+(3) Records of a person who is or has been in the custody or under the lawful
+supervision of a state agency, a court or a unit of local government, are exempt from
+disclosure for a period of 25 years after termination of such custody or supervision to the
+extent that disclosure thereof would interfere with the rehabilitation of the person if the
+public interest in confidentiality clearly outweighs the public interest in disclosure.
+Nothing in this subsection, however, shall be construed as prohibiting disclosure of the
+fact that a person is in custody.
+(4) Student records required by state or federal law to be exempt from disclosure.
+[Formerly 192.496]
+Note: 192.398 was added to and made a part of 192.311 to 192.478 by legislative
+action but was not added to any smaller series therein. See Preface to Oregon Revised
+Statutes for further explanation.
+192.401 Records of health professional regulatory boards, Health Licensing
+Office. (1)(a) A person denied the right to inspect or to receive a copy of a public record
+of a health professional regulatory board, as defined in ORS 676.160, that contains
+information concerning a licensee or applicant, and petitioning the Attorney General to
+review the public record shall, on or before the date of filing the petition with the
+Attorney General, send a copy of the petition by first class mail to the health
+professional regulatory board. Not more than 48 hours after the board receives a copy of
+the petition, the board shall send a copy of the petition by first class mail to the licensee
+or applicant who is the subject of a public record for which disclosure is sought. When
+sending a copy of the petition to the licensee or applicant, the board shall include a
+notice informing the licensee or applicant that a written response by the licensee or
+
+applicant may be filed with the Attorney General not later than seven days after the date
+that the notice was sent by the board. Immediately upon receipt of any written response
+from the licensee or applicant, the Attorney General shall send a copy of the response to
+the petitioner by first class mail.
+(b) A person denied the right to inspect or to receive a copy of a public record of the
+Health Licensing Office that contains information concerning an individual who holds,
+or an applicant for, an authorization to practice a profession to which ORS 676.595
+applies, and petitioning the Attorney General to review the public record shall, on or
+before the date of filing the petition with the Attorney General, send a copy of the
+petition by first class mail to the office. Not more than 48 hours after the office receives
+a copy of the petition, the office shall send a copy of the petition by first class mail to the
+holder of the authorization or the applicant who is the subject of a public record for
+which disclosure is sought. When sending a copy of the petition to the holder of the
+authorization or the applicant, the office shall include a notice informing the holder of
+the authorization or the applicant that a written response by the holder of the
+authorization or the applicant may be filed with the Attorney General not later than
+seven days after the date that the notice was sent by the office. Immediately upon receipt
+of any written response from the holder of the authorization or the applicant, the
+Attorney General shall send a copy of the response to the petitioner by first class mail.
+(2)(a) The person seeking disclosure of a public record of a health professional
+regulatory board, as defined in ORS 676.160, that is confidential or exempt from
+disclosure under ORS 676.165 or 676.175 shall have the burden of demonstrating to the
+Attorney General by clear and convincing evidence that the public interest in disclosure
+outweighs other interests in nondisclosure, including but not limited to the public
+interest in nondisclosure. The Attorney General shall issue an order denying or granting
+the petition, or denying or granting it in part, not later than the 15th day following the
+day that the Attorney General receives the petition. A copy of the Attorney General’s
+order granting a petition or part of a petition shall be served by first class mail on the
+health professional regulatory board, the petitioner and the licensee or applicant who is
+the subject of a public record ordered to be disclosed. The health professional regulatory
+board shall not disclose a public record prior to the seventh day following the service of
+the Attorney General’s order on a licensee or applicant entitled to receive notice under
+this paragraph.
+(b) The person seeking disclosure of a public record of the Health Licensing Office
+that is confidential or exempt from disclosure as described in ORS 676.595 shall have
+the burden of demonstrating to the Attorney General by clear and convincing evidence
+
+that the public interest in disclosure outweighs other interests in nondisclosure, including
+but not limited to the public interest in nondisclosure. The Attorney General shall issue
+an order denying or granting the petition, or denying or granting the petition in part, not
+later than the 15th day following the day that the Attorney General receives the petition.
+A copy of the Attorney General’s order granting a petition or part of a petition shall be
+served by first class mail on the office, the petitioner and the holder of the authorization
+or the applicant who is the subject of a public record ordered to be disclosed. The office
+shall not disclose a public record prior to the seventh day following the service of the
+Attorney General’s order on a holder of an authorization or an applicant entitled to
+receive notice under this paragraph.
+(3)(a) If the Attorney General grants or denies the petition for a public record of a
+health professional regulatory board, as defined in ORS 676.160, that contains
+information concerning a licensee or applicant, the board, a person denied the right to
+inspect or receive a copy of the public record or the licensee or applicant who is the
+subject of the public record may institute proceedings for injunctive or declaratory relief
+in the circuit court for the county where the public record is held. The party seeking
+disclosure of the public record shall have the burden of demonstrating by clear and
+convincing evidence that the public interest in disclosure outweighs other interests in
+nondisclosure, including but not limited to the public interest in nondisclosure.
+(b) If the Attorney General grants or denies the petition for a public record of the
+Health Licensing Office that contains information concerning a holder of an
+authorization to practice a profession or an applicant, the office, a person denied the
+right to inspect or receive a copy of the public record or the holder of the authorization
+or the applicant who is the subject of the public record may institute proceedings for
+injunctive or declaratory relief in the circuit court for the county where the public record
+is held. The party seeking disclosure of the public record shall have the burden of
+demonstrating by clear and convincing evidence that the public interest in disclosure
+outweighs other interests in nondisclosure, including but not limited to the public
+interest in nondisclosure.
+(4) The Attorney General may comply with a request of a health professional
+regulatory board or the Health Licensing Office to be represented by independent
+counsel in any proceeding under subsection (3) of this section. [Formerly subsections (4)
+to (7) of 192.450]
+192.405 [2011 c.485 §1; renumbered 192.385 in 2017]
+(Appeals)
+
+192.407 When petition for review of public records request allowed; order
+granting petition; penalty. (1) A person who has submitted a written public records
+request in compliance with a public body’s policy may seek review of the following, in
+the same manner as a person petitions when inspection of a public record is denied
+under ORS 192.311 to 192.478:
+(a) The failure of a public body to provide the response required by ORS 192.329
+within the prescribed period. A failure of the public body to timely respond shall be
+treated as a denial of the request unless the public body demonstrates that compliance
+was not required under ORS 192.329.
+(b) An estimate of time provided by a public body pursuant to ORS 192.329, if the
+person believes that the estimated time frame for the response is unreasonably long and
+will result in undue delay of disclosure.
+(c) Any other instance in which the person believes that the public body has failed to
+comply with ORS 192.329.
+(2) Except as provided in subsection (3) of this section, the Attorney General, the
+district attorney and the court have the same authority with respect to petitions under this
+section as when inspection of a public record is denied.
+(3) If the Attorney General, the district attorney or a court grants a petition filed
+under this section, the order granting the petition:
+(a) May require disclosure of nonexempt material responsive to the request within
+seven days, or within any other period that the Attorney General, district attorney or
+court concludes is appropriate to comply with ORS 192.329;
+(b) May require the public body to pay a penalty of $200 to the requester if the
+Attorney General, district attorney or court determines that the public body responded to
+the request with undue delay or failed to respond to the request; and
+(c) May order a fee waiver or a fee reduction if a public body has responded to the
+request with undue delay or has failed to respond to the request in the time and manner
+prescribed in ORS 192.329. Nothing in this subsection prohibits a reviewing body from
+finding an unreasonable denial of a fee waiver or a fee reduction on other grounds.
+(4) Nothing in this section limits the authority of a court to act under ORS 192.431.
+[2017 c.456 §5; 2019 c.205 §1]
+Note: 192.407 was added to and made a part of 192.311 to 192.478 by legislative
+action but was not added to any smaller series therein. See Preface to Oregon Revised
+Statutes for further explanation.
+
+192.410 [1973 c.794 §2; 1989 c.377 §1; 1993 c.787 §4; 2001 c.237 §1; 2005 c.659
+§4; 2017 c.456 §2; renumbered 192.311 in 2017]
+192.411 Petition to review denial of right to inspect state public record; appeal
+from decision of Attorney General denying inspection. (1) Subject to ORS 192.401
+(1) and 192.427, any person denied the right to inspect or to receive a copy of any public
+record of a state agency may petition the Attorney General to review the public record to
+determine if it may be withheld from public inspection. Except as provided in ORS
+192.401 (2), the burden is on the agency to sustain its action. Except as provided in ORS
+192.401 (2), the Attorney General shall issue an order denying or granting the petition,
+or denying it in part and granting it in part, within seven days from the day the Attorney
+General receives the petition.
+(2) If the Attorney General grants the petition and orders the state agency to disclose
+the public record, or if the Attorney General grants the petition in part and orders the
+state agency to disclose a portion of the public record, the state agency shall comply
+with the order in full within seven days after issuance of the order, unless within the
+seven-day period it issues a notice of its intention to institute proceedings for injunctive
+or declaratory relief in the Circuit Court for Marion County or, as provided in ORS
+192.401 (3), in the circuit court of the county where the public record is held. Copies of
+the notice shall be sent to the Attorney General and by certified mail to the petitioner at
+the address shown on the petition. The state agency shall institute the proceedings within
+seven days after it issues its notice of intention to do so. If the Attorney General denies
+the petition in whole or in part, or if the state agency continues to withhold the public
+record or a part of it notwithstanding an order to disclose by the Attorney General, the
+person seeking disclosure may institute such proceedings.
+(3) The Attorney General shall serve as counsel for the state agency in a suit filed
+under subsection (2) of this section if the suit arises out of a determination by the
+Attorney General that the public record should not be disclosed, or that a part of the
+public record should not be disclosed if the state agency has fully complied with the
+order of the Attorney General requiring disclosure of another part or parts of the public
+record, and in no other case. In any case in which the Attorney General is prohibited
+from serving as counsel for the state agency, the agency may retain special counsel.
+[Formerly subsections (1) to (3) of 192.450]
+192.415 Procedure to review denial of right to inspect other public records;
+effect of disclosure. (1) ORS 192.401 and 192.411 apply to the case of a person denied
+
+the right to inspect or to receive a copy of any public record of a public body other than
+a state agency, except that:
+(a) The district attorney of the county in which the public body is located, or if it is
+located in more than one county the district attorney of the county in which the
+administrative offices of the public body are located, shall carry out the functions of the
+Attorney General;
+(b) Any suit filed must be filed in the circuit court for the county described in
+paragraph (a) of this subsection; and
+(c) The district attorney may not serve as counsel for the public body, in the cases
+permitted under ORS 192.411 (3), unless the district attorney ordinarily serves as
+counsel for the public body.
+(2) Disclosure of a record to the district attorney in compliance with subsection (1) of
+this section does not waive any privilege or claim of privilege regarding the record or its
+contents.
+(3) Disclosure of a record or part of a record as ordered by the district attorney is a
+compelled disclosure for purposes of ORS 40.285. [Formerly 192.460]
+192.418 Effect of failure of Attorney General, district attorney or elected official
+to take timely action on inspection petition. (1) The failure of the Attorney General or
+district attorney to issue an order under ORS 192.401, 192.411 or 192.415 denying,
+granting, or denying in part and granting in part a petition to require disclosure within
+seven days from the day of receipt of the petition shall be treated as an order denying the
+petition for the purpose of determining whether a person may institute proceedings for
+injunctive or declaratory relief under ORS 192.401, 192.411 or 192.415.
+(2) The failure of an elected official to deny, grant, or deny in part and grant in part a
+request to inspect or receive a copy of a public record within seven days from the day of
+receipt of the request shall be treated as a denial of the request for the purpose of
+determining whether a person may institute proceedings for injunctive or declaratory
+relief under ORS 192.401, 192.411 or 192.415. [Formerly 192.465]
+192.420 [1973 c.794 §3; 1999 c.574 §1; 2003 c.403 §1; renumbered 192.314 in
+2017]
+192.422 Petition form; procedure when petition received. (1) A petition to the
+Attorney General or district attorney requesting the Attorney General or district attorney
+to order a public record to be made available for inspection or to be produced shall be in
+substantially the following form, or in a form containing the same information:
+
+_______________________________________________________________________
+_______
+______
+(Date)
+I (we), ____________ (name(s)), the undersigned, request the Attorney General (or
+District Attorney of ______ County) to order ______ (name of governmental body) and
+its employees to (make available for inspection) (produce a copy or copies of) the
+following records:
+1. ____________________
+(Name or description of record)
+2. ____________________
+(Name or description of record)
+I (we) asked to inspect and/or copy these records on ______ (date) at ______
+(address). The request was denied by the following person(s):
+1. ____________________
+(Name of public officer or employee;
+title or position, if known)
+2. ____________________
+(Name of public officer or employee;
+title or position, if known)
+______________________
+(Signature(s))
+_______________________________________________________________________
+_______
+This form should be delivered or mailed to the Attorney General’s office in Salem, or the
+district attorney’s office in the county courthouse.
+
+(2) Promptly upon receipt of such a petition, the Attorney General or district attorney
+shall notify the public body involved. The public body shall thereupon transmit the
+public record disclosure of which is sought, or a copy, to the Attorney General, together
+with a statement of its reasons for believing that the public record should not be
+disclosed. In an appropriate case, with the consent of the Attorney General, the public
+body may instead disclose the nature or substance of the public record to the Attorney
+General. [Formerly 192.470]
+192.423 [2007 c.513 §2; renumbered 192.360 in 2017]
+192.427 Procedure to review denial by elected official of right to inspect public
+records. In any case in which a person is denied the right to inspect or to receive a copy
+of a public record in the custody of an elected official, or in the custody of any other
+person but as to which an elected official claims the right to withhold disclosure, no
+petition to require disclosure may be filed with the Attorney General or district attorney,
+or if a petition is filed it shall not be considered by the Attorney General or district
+attorney after a claim of right to withhold disclosure by an elected official. In such case a
+person denied the right to inspect or to receive a copy of a public record may institute
+proceedings for injunctive or declaratory relief in the appropriate circuit court, as
+specified in ORS 192.401, 192.411 or 192.415, and the Attorney General or district
+attorney may upon request serve or decline to serve, in the discretion of the Attorney
+General or district attorney, as counsel in such suit for an elected official for which the
+Attorney General or district attorney ordinarily serves as counsel. Nothing in this section
+shall preclude an elected official from requesting advice from the Attorney General or a
+district attorney as to whether a public record should be disclosed. [Formerly 192.480]
+192.430 [1973 c.794 §4; 1989 c.546 §1; renumbered 192.318 in 2017]
+192.431 Court authority in reviewing action denying right to inspect public
+records; docketing; costs and attorney fees. (1) In any suit filed under ORS 192.401,
+192.411, 192.415, 192.422 or 192.427, the court has jurisdiction to enjoin the public
+body from withholding records and to order the production of any records improperly
+withheld from the person seeking disclosure. The court shall determine the matter de
+novo and the burden is on the public body to sustain its action. The court, on its own
+motion, may view the documents in controversy in camera before reaching a decision.
+Any noncompliance with the order of the court may be punished as contempt of court.
+
+(2) Except as to causes the court considers of greater importance, proceedings arising
+under ORS 192.401, 192.411, 192.415, 192.422 or 192.427 take precedence on the
+docket over all other causes and shall be assigned for hearing and trial at the earliest
+practicable date and expedited in every way.
+(3) If a person seeking the right to inspect or to receive a copy of a public record
+prevails in the suit, the person shall be awarded costs and disbursements and reasonable
+attorney fees at trial and on appeal. If the person prevails in part, the court may in its
+discretion award the person costs and disbursements and reasonable attorney fees at trial
+and on appeal, or an appropriate portion thereof. If the state agency failed to comply
+with the Attorney General’s order in full and did not issue a notice of intention to
+institute proceedings pursuant to ORS 192.411 (2) within seven days after issuance of
+the order, or did not institute the proceedings within seven days after issuance of the
+notice, the petitioner shall be awarded costs of suit at the trial level and reasonable
+attorney fees regardless of which party instituted the suit and regardless of which party
+prevailed therein. [Formerly 192.490]
+192.435 [2015 c.26 §3; 2015 c.805 §2; renumbered 192.365 in 2017]
+192.437 [2015 c.805 §3; renumbered 192.363 in 2017]
+192.440 [1973 c.794 §5; 1979 c.548 §4; 1989 c.111 §12; 1989 c.377 §2; 1989 c.546
+§2; 1999 c.824 §5; 2001 c.445 §168; 2005 c.272 §1; 2007 c.467 §1; 2017 c.456 §3;
+renumbered 192.324 in 2017]
+192.445 [1993 c.787 §5; 1995 c.742 §12; 2003 c.807 §1; renumbered 192.368 in
+2017]
+192.447 [2003 c.282 §1; renumbered 192.371 in 2017]
+192.448 [2012 c.93 §2; 2012 c.93 §5; renumbered 192.374 in 2017]
+192.450 [1973 c.794 §6; 1975 c.308 §2; 1997 c.791 §8; 1999 c.751 §4; 2017 c.101
+§4; subsections (1) to (3) renumbered 192.411 and subsections (4) to (7) renumbered
+192.401 in 2017]
+192.460 [1973 c.794 §7; 2007 c.513 §4; renumbered 192.415 in 2017]
+PUBLIC RECORDS ADVOCATE
+
+192.461 Public Records Advocate. (1) The office of the Public Records Advocate is
+created as an independent office within the executive department, separate and distinct
+from any other state agency.
+(2) The Public Records Advocate shall be appointed by the Public Records Advisory
+Council under ORS 192.481.
+(3) The Public Records Advocate shall be a licensee in good standing of the Oregon
+State Bar.
+(4) The term of office of the Public Records Advocate shall be four years, except that
+the advocate may be removed for cause by the Public Records Advisory Council. A
+determination to remove for cause may be appealed as a contested case proceeding
+under ORS chapter 183.
+(5) The advocate may be reappointed to consecutive terms.
+(6) The Public Records Advocate is in the exempt service.
+(7)(a) The Public Records Advocate shall select, appoint and fix the compensation of
+a Deputy Public Records Advocate. The Deputy Public Records Advocate shall be a
+licensee in good standing of the Oregon State Bar.
+(b) The Public Records Advocate may delegate to the Deputy Public Records
+Advocate any authority, power or duty to act possessed by the Public Records Advocate
+except the power to delegate set forth in this paragraph.
+(c) If the position of the Public Records Advocate becomes vacant, the Deputy Public
+Records Advocate shall serve as the acting Public Records Advocate until a new Public
+Records Advocate has been appointed.
+(8)(a) The Public Records Advocate may hire and fix the compensation of other
+professional staff to assist in performing the duties assigned to the Public Records
+Advocate.
+(b) Officers and employees of the office of the Public Records Advocate are in the
+exempt service.
+(9) The Public Records Advocate may seek out office facilities and administrative
+support from other state agencies or local public bodies. State agencies shall assist the
+advocate. Local public bodies may assist the advocate. [2017 c.728 §1; 2017 c.728 §16;
+2019 c.107 §1; 2021 c.582 §1; 2025 c.32 §97]
+192.464 Facilitated dispute resolution services of Public Records Advocate. (1)(a)
+The Public Records Advocate shall provide facilitated dispute resolution services when
+requested by a person described in subsection (2) of this section or by a state agency
+under the conditions described in subsection (3) of this section.
+
+(b) The Public Records Advocate may provide facilitated dispute resolution services
+when requested by a person described in subsection (6) of this section and a city.
+(2) A person may seek facilitated dispute resolution services under this section when
+seeking to inspect or receive copies of public records from a state agency and the
+person:
+(a) Has been denied access to all or a portion of the records being sought;
+(b) Has been denied a fee waiver or reduction in fees after asserting under ORS
+192.324 (5) that a fee waiver or reduction of fees is in the public interest; or
+(c) Received a written fee estimate under ORS 192.324 (4) that the person believes
+exceeds the actual cost to be incurred by the public body in producing the requested
+records.
+(3)(a) A state agency may seek facilitated dispute resolution services under this
+section if, in response to a request for public records, the agency asserts:
+(A) That the records being sought are not public records;
+(B) That the records being sought are exempt from mandatory disclosure; or
+(C) That the agency is, under ORS 192.324, entitled to the fees the agency is seeking
+in order to produce the records being requested.
+(b) A person seeking to inspect or receive copies of public records may opt out of
+facilitated dispute resolution services being sought by a state agency by giving written
+notice of the requester’s election within five days of the requester’s receipt of the
+agency’s request for facilitated dispute resolution. If written notice is given under this
+paragraph, the state agency may not determine under subsection (4)(a) of this section
+that the person seeking to inspect or receive copies of public records has failed to engage
+in good faith in the facilitated dispute resolution process.
+(4) Notwithstanding any other provision of ORS 192.311 to 192.478:
+(a) The failure of a person seeking to inspect or receive copies of public records to
+engage in good faith in the facilitated dispute resolution process described in this section
+upon being authorized to do so under subsection (2) of this section shall be grounds for
+the state agency to deny the request and refuse to disclose the requested records.
+(b) The failure of a state agency to engage in good faith in the facilitated dispute
+resolution process described in this section after a public records requester seeks
+facilitated dispute resolution services under subsection (2) of this section shall be
+grounds for the award of costs and attorney fees to the public records requester for all
+costs and attorney fees incurred in pursuing the request after a good faith determination
+under subsection (5) of this section.
+
+(5)(a) Either party to the facilitated dispute resolution may request that the Public
+Records Advocate make a determination concerning whether a party is acting in good
+faith for purposes of applying the remedies described in subsection (4) of this section.
+(b) A determination by the advocate that a party failed to engage in good faith
+facilitated dispute resolution and an award of costs and attorney fees are subject to
+review by the Circuit Court of Marion County as a proceeding under ORS 183.484.
+(6) In the case of a person seeking to inspect or obtain copies of public records from
+a city, either the person seeking records or the city may seek facilitated dispute
+resolution services under this section, but only if both the person seeking records and the
+city agree to have the Public Records Advocate facilitate resolution of the dispute and
+the advocate consents to facilitated resolution of the dispute. A dispute described in this
+subsection is not subject to subsections (4) and (5) of this section.
+(7) Facilitated dispute resolution shall be requested by submitting a written request
+for facilitated dispute resolution and such other information as may be required by the
+Public Records Advocate. Facilitated dispute resolution between parties shall be
+conducted and completed within 21 days following receipt by the advocate of the
+request for facilitated dispute resolution. The facilitated dispute resolution period may be
+extended by unanimous agreement among the public records requester, the public body
+and the advocate.
+(8) If the facilitated dispute resolution results in an agreement between the public
+records requester and the state agency or city, the advocate shall prepare a written
+document memorializing the agreement. The written agreement shall be executed by the
+public records requester and an authorized representative of the state agency or city. The
+written agreement shall control the resolution of the records request. [2017 c.728 §2]
+192.465 [1975 c.308 §5; renumbered 192.418 in 2017]
+192.468 Discretion of Public Records Advocate in dispute resolution
+services. Consistent with ORS 192.464 and rules adopted thereunder, the Public
+Records Advocate possesses sole discretion over the conduct of facilitated dispute
+resolution sessions. [2017 c.728 §3]
+192.470 [1973 c.794 §10; renumbered 192.422 in 2017]
+192.472 Confidentiality of Public Records Advocate records. Written records,
+documents, notes or statements of any kind prepared for or submitted to the Public
+Records Advocate, prepared by the advocate or exchanged between parties seeking a
+
+facilitated dispute resolution are subject to ORS 36.220 to 36.238. The Public Records
+Advocate may claim any exemption from disclosure under ORS 192.311 to 192.478 that
+a public body that is a party to the facilitated dispute resolution may claim with respect
+to a request for public records described in this section. [2017 c.728 §4]
+192.475 Public records request training. (1) The Public Records Advocate shall
+provide training for state agencies and local governments on the requirements and best
+practices for processing and responding to public records requests.
+(2) The Public Records Advocate shall perform training sessions throughout this
+state.
+(3) Upon the written request of a state agency or local government, the Public
+Records Advocate may provide guidance and advice on matters pertaining to public
+records request processing and the disclosure and applicability of exemptions from
+disclosure of public records.
+(4) Guidance and advice provided pursuant to subsection (3) of this section is purely
+advisory and must cease when the particular advice sought relates to a matter that is
+referred to facilitated dispute resolution under ORS 192.464. [2017 c.728 §5]
+192.476 Estimate of expenses; rules. (1) On or before January 1 preceding the start
+of a biennium, the Public Records Advocate shall estimate the expenses the advocate
+will incur for the upcoming biennium in carrying out the provisions of ORS 192.461 to
+192.477. The advocate shall report the estimate to the Oregon Department of
+Administrative Services and the Legislative Fiscal Officer.
+(2) The advocate shall charge an assessment to each public body in state government
+so as to recoup the costs estimated under subsection (1) of this section. Each public body
+in state government shall pay to the credit of the advocate the amount the public body
+was assessed under this subsection as an administrative expense from funds or
+appropriations available to the public body in the same manner as other claims against
+the public body are paid.
+(3) The advocate shall adopt rules specifying the method for allocating the expenses
+described in subsection (1) of this section among public bodies in state government and
+for collecting the assessments described in this section.
+(4) As used in this section, “state government” has the meaning given that term in
+ORS 174.111. [2023 c.155 §1]
+192.477 Public Records Advocate Fund. (1) The Public Records Advocate Fund is
+established in the State Treasury, separate and distinct from the General Fund. Interest
+
+earned by the Public Records Advocate Fund shall be credited to the Public Records
+Advocate Fund.
+(2) The Public Records Advocate Fund shall consist of:
+(a) Moneys collected under ORS 192.476;
+(b) Moneys appropriated or otherwise transferred to the fund by the Legislative
+Assembly; and
+(c) Interest earnings of the fund.
+(3) Moneys in the Public Records Advocate Fund are continuously appropriated to
+the Public Records Advocate for the purpose of funding the operations of the office of
+the Public Records Advocate and the Public Records Advisory Council. [2021 c.582 §4;
+2023 c.155 §2]
+
+
