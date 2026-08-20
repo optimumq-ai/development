@@ -1,0 +1,249 @@
+PROVENANCE: Supplied by Kevin 2026-08-20 (exchange/oklahoma/'oklahoma Open Records One Pager.pdf', text-extracted).
+SOURCE: Oklahoma Open Records one-pager (official state guidance summary). GUIDANCE, not statute.
+----------------------------------------------------------------
+OKLAHOMA OPEN RECORDS ONE PAGER
+PURPOSE AND SCOPE
+
+▶ The public policy of the Open Records Act (“ORA”) is
+that “the people are vested with the inherent right to
+know and be fully informed about their government.”
+51 O.S. § 24A.2.
+▶ The ORA ensures and facilitates the public’s right to
+access government records so citizens may exercise their
+political power effectively. 51 O.S. § 24A.2.
+▶ All records of public bodies and officials are presumed
+open unless specifically exempted. 51 O.S. § 24A.5.
+▶ All public bodies must maintain complete records of
+receipts and expenditures. 51 O.S. § 24A.4.
+▶ There is no duty to create a new record to fulfill a
+request. 51 O.S. § 24A.18.
+
+PRIVILEGE AND CONFIDENTIALITY
+
+Privileged is confidential. Confidential is not privileged.
+What may be confidential under the ORA and not subject
+to production but may be subpoenaed or discoverable.
+McKesson Corp. v. Campbell, 2022 OK 6, 502 P.3d 110.
+
+FEES AND LIMITATIONS
+(51 O.S. § 24A.5(4))
+
+▶ Copying fees: Up to $0.25 per page or $1.00 per certified
+page. Higher reasonable fees allowed for commercial or
+disruptive requests.
+▶ No search fees for public interest requests (e.g., media,
+scholars, taxpayers). Fee schedules must be posted publicly
+at the public body’s office and with the county clerk.
+▶ Fees cannot be used by a public body to discourage a
+person from requesting records under the ORA.
+
+ENFORCEMENT AND PENALTIES
+(51 O.S. § 24A.17)
+
+▶ Willful violation is a misdemeanor: up to $500 fine and/or
+one year in jail. 51 O.S. § 24A.17(A).
+▶ Civil remedies include injunctive relief and recovery of
+attorney fees for successful plaintiffs. 51 O.S. § 24A.17(B).
+▶ Prior to filing for declaratory or injunctive relief, requester
+must notify public body or official ten (10) business days
+prior to filing suit, copying the Attorney General.
+51 O.S. § 24A.17(C).
+▶ Party urging an exemption to a record under the ORA
+bears a burden of proof to establish that such exemption
+applies. Tulsa Tribune Co. v. Okla. Horseracing Comm’n,
+1986 OK 24, 735 P.2d 548.
+
+LITIGATION FILES & INVESTIGATORY REPORTS
+(51 O.S. § 24A.12)
+
+The Attorney General, agency attorneys authorized by law,
+the Workers’ Compensation Commission, and the office of
+district attorney of any county, and the municipal attorney
+of any county may keep its litigation files and investigatory
+reports confidential.
+
+Updated by OAG July 2025
+
+KEY DEFINITIONS
+
+▶ RECORD: Any document (physical or digital) related to
+public business or public funds, excluding nongovernmental
+personal effects and software. 51 O.S. § 24A.3(1).
+– Include electronic communications, regardless of
+whether sent from a public or personal device—
+if they concern public business. 2001 OK AG 46;
+2009 OK AG 12; and 51 O.S. § 24A.3(1)
+▶ PUBLIC BODY: Entities supported by or administering
+public funds, including state agencies, boards,
+commissions, and local governments. 51 O.S. § 24A.3(2).
+▶ PUBLIC OFFICIAL: Any official or employee of a public
+body. 51 O.S. § 24A.3(4).
+▶ LAW ENFORCEMENT AGENCY: Any public body charged
+with enforcing state or local criminal laws and
+initiating criminal prosecutions . . . . 51 O.S. § 24A.3(5).
+
+PROMPT, REASONABLE ACCESS
+(51 O.S. § 24A.5(6))
+
+▶ Public bodies must provide prompt, reasonable access to
+records during regular business hours.
+▶ No “first-in, first-out” queue: Agencies may not delay a
+simpler or current request while working on older, more
+complex ones.
+▶ Delays are allowed only to prepare documents or avoid
+excessive disruption of core functions.
+▶ Posting online to website satisfies the duty of providing
+prompt, reasonable access.
+▶ For public bodies or officials that are open for business
+less than 30 hours a week, consult title 51, section 24A.6.
+▶ Must produce reasonably segregable portions of a record,
+removing all exempt materials by redaction.
+
+PERSONNEL RECORDS
+(51 O.S. 24A.7)
+
+▶ Public body has “sole discretion” to keep certain
+personnel records confidential under subsection A.
+▶ Must disclose: Name, title, salary, dates of employment,
+job description, office location, and final disciplinary
+actions.
+▶ May redact: Personal details (e.g., address, phone, ID
+numbers) if disclosure would be a clearly unwarranted
+invasion of personal privacy. Requires a case-by-case
+balancing test. (§ 24A.7(A)(2); Okla. Public Employees Ass’n,
+2011 OK 68, 267 P.3d 838)
+▶ Always redact: Social Security numbers. (§ 24A.7(D))
+▶ A public body can withhold employee birth dates and
+employee identification numbers as confidential. Okla.
+Public Employees Ass’n.
+
+SCAN TO READ THE FULL OPEN RECORDS ACT OR VISIT
+https://www.oscn.net/applications/oscn/DeliverDocument.asp?CiteID=80288
+
+DISCLAIMER: As this is a “one pager,” it is not meant to be comprehensive. Please consult the ORA, case law, and AG opinions if necessary.
+
+EXEMPTIONS TO ORA
+(51 O.S. § 24A.5)
+
+▶ Privileged legal materials, including attorney–client
+communications, work product, and informant identities
+(12 O.S. §§ 2502, 2510, and 3226(B)(3)).
+▶ Executive session minutes and materials from lawfully
+closed meetings under the OMA.
+▶ Driver records protected under the Driver’s Privacy
+Protection Act (18 U.S.C. §§ 2721–2725).
+▶ Confidential medical examiner files, including unverified
+findings or hearsay.
+▶ Licensing exams: test forms, question banks, and
+answer keys.
+▶ Lottery winners’ personal data.
+▶ OTA toll system data: vehicle movements and
+security recordings.
+▶ Personal financial or credit info submitted to public
+bodies for licensure, permits, or contracts. Any digital
+audio/video recordings of the toll collection and
+safeguarding activities of the Oklahoma Transportation
+Authority,
+▶ Tourism guest or purchaser information held by the
+Oklahoma Tourism and Recreation Department.
+▶ Military discharge records (DD Form 214) filed with
+county clerks.
+▶ Motor Vehicle Reports and personal driver data
+maintained by DPS.
+▶ Contact information in license applications, including
+addresses, phone numbers, and IDs (refer to statute
+for scope).
+▶ Long-Term Care Administrator investigation files.
+▶ Investigative materials held by the AG or Insurance
+Department related to:
+– The Patient’s Right to Pharmacy Choice Act,
+– The Pharmacy Audit Integrity Act, or
+– 59 O.S. §§ 357–360.
+
+PROTECTIVE ORDERS AND COURT RECORDS
+(51 O.S. §§ 24A.29 & 24A.30)
+
+▶ For protective orders, parties must comply with § 24A.29
+and 12 O.S. § 3226(C).
+▶ Parties cannot stipulate to overly broad protective orders
+than is necessary. State v. Rivero, 2021 OK 31, 489 P.3d 36.
+▶ Court records are public records unless otherwise
+confidential.
+▶ To seal a court record or a portion of, the moving party
+must demonstrate a “compelling privacy interest exists
+which outweighs the public’s interest in the record.
+▶ Prior to sealing a record or a portion of a record, the court
+must enter a public order and shall:
+– Make findings of fact which identify facts which the
+court relied on to enter its order,
+– Make conclusions of law specific enough to explain
+the legal basis for sealing the record,
+– Utilize the least restrictive means to achieve
+confidentiality
+– Narrowly tailor the order so that only portions of
+the record that are confidential are sealed and the
+remainder is kept open.
+
+OTHER NOTEWORTHY SECTIONS
+
+▶ Public bodies may require requests be in writing and include
+contact info and such other information to allow a public
+body to determine whether the request is for a commercial
+purpose. 1999 OK AG 55.
+▶ Public officials can keep personal notes and personally
+created materials confidential prior to action being taken. 51
+O.S. § 24A.9.
+▶ Generally, information, records, or other materials voluntarily
+supplied to a public body are subject to full disclosure. 51
+O.S. § 24A.10.
+– Public bodies can keep certain records confidential to
+prevent unfair advantage to competitors or bidders,
+these include:
+1. Bid specifications for competitive bidding prior to
+publication by the public body,
+2. Contents of sealed bids prior to being opened
+by a public body
+3. Computer programs or software but not
+data thereon
+4. Appraisals relating to the sale or acquisition
+of real estate by a public body prior to award
+of a contract
+5. Prospective location of a private business or industry
+prior to public disclosure of such prospect except
+for records otherwise open to inspection such as
+applications for permits or licenses
+▶ Records coming into the possession of a public body from
+the federal government or records generated or gathered
+as required by federal law may be kept confidential to the
+extent required by federal law. 51 O.S. § 24A.13.
+▶ A record otherwise available for public inspection shall not
+be denied because a public body or official has placed it in a
+confidential file. 51 O.S. § 24A.20.
+▶ Information related to the following may be kept
+confidential by a public body:
+– Vulnerability assessments of government facilities or
+public improvements;
+– Terrorism records concerning deterrence, prevention,
+protection, response, or remediation or terrorism
+investigative evidence;
+– Information technology of a public body to the extent it
+specifies:
+ Design or functional schematics demonstrating
+relationships or connections between devices or
+systems,
+ System configuration information
+ Security monitoring and response equipment
+placement and configuration,
+ Specific location or placement of systems,
+components, or devices,
+ System identification numbers, names or connecting
+circuits,
+ Business continuity and disaster planning, or response
+plans,
+ Investigative information on security penetrations or
+denial of services.
+ 51 O.S. § 24A.28(A)(1)–(6).
+
+DISCLAIMER: As this is a “one pager,” it is not meant to be comprehensive. Please consult the ORA, case law, and AG opinions if necessary.
+
+
