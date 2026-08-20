@@ -1,0 +1,59 @@
+PROVENANCE: Supplied by Kevin 2026-08-20 (exchange/minn/minncopycosts.pdf, text-extracted).
+SOURCE: MN Dept. of Administration Data Practices Office 'Copy Costs' page (mn.gov/admin/data-practices), fetched 2026-08-20. OFFICIAL GUIDANCE, not statute — cite as guidance layer. Cross-references Minn. Rules 1205.0300 subp. 4 and 1205.0400 subp. 5 (admin-rule layer).
+----------------------------------------------------------------
+8/20/26, 11:32 AM
+
+Copy Costs / Data Practices Office
+
+Copy Costs
+The Data Practices Act allows, but does not require, government to charge for copies of government data. If
+the government charges for copies, the amount that can be charged depends on whether the requester is a
+member of the public or data subject. However, government may not charge any data requester for inspection.
+When the requester only inspects data and does not receive copies from the government, government may
+not charge costs.
+Requirements relating to copy costs are in Minnesota Statutes, section 13.03
+(https://www.revisor.mn.gov/statutes/cite/13.03) (members of the public), section 13.04
+(https://www.revisor.mn.gov/statutes/cite/13.04) (data subjects), Minnesota Rules, part 1205.0300, subpart 4
+(https://www.revisor.mn.gov/rules/1205.0300/) (public data), and part 1205.0400, subpart 5
+(https://www.revisor.mn.gov/rules/1205.0400/) (private data). If specific charges are set by statute or rule,
+government should use those specific charges instead of following Chapter 13's requirements for copy costs.
+
+Members of the Public
+When the data requester is a member of the public, the amount government can charge for copies is:
+25 cents per page for paper copies of 100 or fewer pages
+For 100 or fewer pages of black and white, letter or legal sized paper copies, the maximum charge
+allowed is 25 cents for each page copied, or 50 cents for a two-sided copy. This charge is a flat rate;
+government cannot add on any additional charges, such as cost of mailing or paper.
+Actual cost for most other copies
+For copies of other data (more than 100-page paper copies, data stored electronically, photographs, etc.)
+government may charge the actual cost for an employee to search for and retrieve the data, and to make
+and transmit the copies. Government may not charge any fee for redaction or separation of public data
+from not public data.
+
+Data Subjects
+When the data requester is a data subject, the amount government can charge for copies is:
+
+https://mn.gov/admin/data-practices/data/rules/copy-costs/
+
+1/2
+
+8/20/26, 11:32 AM
+
+Copy Costs / Data Practices Office
+
+Actual cost
+Government may charge the actual cost for an employee to make and transmit the copies, as well as the
+actual cost of materials. Government may not charge any fee for redaction or for searching for and
+retrieving data. Note that the standard of 25 cents per page for paper copies of 100 or fewer pages does
+not apply to a data subject requester unless that is the actual cost to make the copies.
+For more information on how to calculate actual cost, please visit our page on Actual Cost (/admin/datapractices/data/rules/copy-costs/actual-cost/index.jsp).
+Our Model Access Policies (/admin/data-practices/data/rules/policies/index.jsp) include language related to
+copy costs.
+Additionally, Advisory Opinions issued by the Commissioner of Administration that discuss copy costs are
+available on our Advisory Opinions Library Page (https://mn.gov/admin/data-practices/opinions/opinionslibrary/?query=keywords:%22copy%20costs%22&keywords=Copy%20costs&sortby=date&s=topics).
+
+https://mn.gov/admin/data-practices/data/rules/copy-costs/
+
+2/2
+
+

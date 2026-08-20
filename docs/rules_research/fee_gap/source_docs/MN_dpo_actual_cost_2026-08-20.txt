@@ -1,0 +1,53 @@
+PROVENANCE: Supplied by Kevin 2026-08-20 (exchange/minn/minnactualcosts.pdf, text-extracted).
+SOURCE: MN Dept. of Administration Data Practices Office 'Actual Cost' page, fetched 2026-08-20. OFFICIAL GUIDANCE with Commissioner advisory-opinion cites (04-056 lowest-paid-employee rate; 04-072 no redaction charge; etc.).
+----------------------------------------------------------------
+8/20/26, 11:33 AM
+
+Actual Cost / Data Practices Office
+
+Actual Cost
+There are certain things that can be included when government calculates actual cost for the purpose of
+charging for making copies of data to respond to a data request.
+
+Things That Can Be Included
+Cost of media (paper, USB flash drives, etc.)
+Mailing costs
+Employee time to prepare copies
+Costs of reproduction that cannot be done by the entity, such as photographs (Advisory Opinions 95-044
+(http://mn.gov/admin/data-practices/opinions/library/opinions-library.jsp?id=36-267781) and 97-012
+(http://mn.gov/admin/data-practices/opinions/library/opinions-library.jsp?id=36-267345))
+Employee time to search for and retrieve data for copying (Advisory Opinion 00-054
+(http://mn.gov/admin/data-practices/opinions/library/opinions-library.jsp?id=36-266998)) (Entities
+cannot charge for search and retrieval time when the requestor is the data subject)
+
+Things That Cannot Be Included
+Employee time to separate public from not public data (Advisory Opinion 04-072
+(http://mn.gov/admin/data-practices/opinions/library/opinions-library.jsp?id=36-267629))
+Operating expenses of copier, such as electricity, wear and tear, etc. (Advisory Opinions 01-066
+(http://mn.gov/admin/data-practices/opinions/library/opinions-library.jsp?id=36-267598) and 04-040
+(http://mn.gov/admin/data-practices/opinions/library/opinions-library.jsp?id=36-267403))
+Costs not related to copying, such as preparing an invoice (Advisory Opinion 04-055
+(http://mn.gov/admin/data-practices/opinions/library/opinions-library.jsp?id=36-267937))
+Returning data to off-site storage (Advisory Opinion 95-044 (http://mn.gov/admin/datapractices/opinions/library/opinions-library.jsp?id=36-267781))
+Sorting, reviewing, or verifying accuracy if not necessary for copying (Advisory Opinion 04-072
+(http://mn.gov/admin/data-practices/opinions/library/opinions-library.jsp?id=36-267629))
+Sales tax (Advisory Opinions 94-059 (http://mn.gov/admin/data-practices/opinions/library/opinionslibrary.jsp?id=36-267741) and 99-024 (http://mn.gov/admin/data-practices/opinions/library/opinionslibrary.jsp?id=36-267560))
+Accounting functions (Advisory Opinion 04-003 (http://mn.gov/admin/datapractices/opinions/library/opinions-library.jsp?id=36-267827))
+Costs related to inspection (Advisory Opinion 04-038 (http://mn.gov/admin/datapractices/opinions/library/opinions-library.jsp?id=36-267597))
+
+https://mn.gov/admin/data-practices/data/rules/copy-costs/actual-cost/
+
+1/2
+
+8/20/26, 11:33 AM
+
+Actual Cost / Data Practices Office
+
+Note: Employee time must be calculated based on the wages/salary (may include benefits) of the lowest-paid
+entity employee who could complete the task (Advisory Opinion 04-056 (http://mn.gov/admin/datapractices/opinions/library/opinions-library.jsp?id=36-267275))
+
+https://mn.gov/admin/data-practices/data/rules/copy-costs/actual-cost/
+
+2/2
+
+
