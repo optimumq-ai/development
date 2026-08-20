@@ -1,0 +1,375 @@
+PROVENANCE: Supplied by Kevin 2026-08-20 (exchange/'MCL - Section 15.234 - Michigan Legislature.pdf', text-extracted).
+SOURCE: legislature.mi.gov official MCL page, § 15.234 complete (FOIA § 4, all 14 subsections); site banner 'Complete Through PA 91 of 2026'; history ends Am. 2020, Act 38.
+NOTE: Official current text; treat as openable-source equivalent for the MI gap pass. Abandonment rule in subsec. (14) corresponds to existing library rule MI-0059.
+----------------------------------------------------------------
+8/20/26, 11:57 AM
+
+MCL - Section 15.234 - Michigan Legislature
+
+Michigan Legislature
+Michigan Compiled Laws Complete Through PA 91 of 2026
+Senate adjourned until Wednesday, August 26, 2026 10:00 AM
+House adjourned until Tuesday, August 25, 2026 1:30 PM
+
+Home
+
+Legislature
+
+Laws
+
+Sign Up
+
+More
+
+Log In
+
+MCL - Section 15.234
+Download Section
+Chapter 15
+Act 442 of 1976
+Previous Section
+
+Next Section
+
+FREEDOM OF INFORMATION ACT (EXCERPT)
+Act 442 of 1976
+15.234 Fee; limitation on total fee; labor costs; establishment of
+procedures and guidelines; creation of written public summary;
+detailed itemization; availability of information on website;
+notification to requestor; deposit; failure to respond in timely
+manner; increased estimated fee deposit; deposit as fee; failure to
+pay or appeal deposit; request abandoned.
+Sec. 4.
+(1) A public body may charge a fee for a public record search, for the necessary
+copying of a public record for inspection, or for providing a copy of a public record if
+it has established, makes publicly available, and follows procedures and guidelines
+to implement this section as described in subsection (4). Subject to subsections (2),
+(3), (4), (5), and (9), the fee must be limited to actual mailing costs, and to the
+actual incremental cost of duplication or publication including labor, the cost of
+search, examination, review, and the deletion and separation of exempt from
+nonexempt information as provided in section 14. Except as otherwise provided in
+this act, if the public body estimates or charges a fee in accordance with this act,
+the total fee must not exceed the sum of the following components:
+(a) That portion of labor costs directly associated with the necessary searching
+for, locating, and examining of public records in conjunction with receiving and
+fulfilling a granted written request. The public body shall not charge more than the
+hourly wage of its lowest-paid employee capable of searching for, locating, and
+examining the public records in the particular instance regardless of whether that
+person is available or who actually performs the labor. Labor costs under this
+subdivision shall be estimated and charged in increments of 15 minutes or more,
+with all partial time increments rounded down.
+https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234
+
+1/7
+
+8/20/26, 11:57 AM
+
+MCL - Section 15.234 - Michigan Legislature
+
+(b) That portion of labor costs, including necessary review, if any, directly
+associated with the separating and deleting of exempt information from nonexempt
+information as provided in section 14. For services performed by an employee of
+the public body, the public body shall not charge more than the hourly wage of its
+lowest-paid employee capable of separating and deleting exempt information from
+nonexempt information in the particular instance as provided in section 14,
+regardless of whether that person is available or who actually performs the labor. If
+a public body does not employ a person capable of separating and deleting exempt
+information from nonexempt information in the particular instance as provided in
+section 14 as determined by the public body's FOIA coordinator on a case-by-case
+basis, it may treat necessary contracted labor costs used for the separating and
+deleting of exempt information from nonexempt information in the same manner as
+employee labor costs when calculating charges under this subdivision if it clearly
+notes the name of the contracted person or firm on the detailed itemization
+described under subsection (4). Total labor costs calculated under this subdivision
+for contracted labor costs must not exceed an amount equal to 6 times the state
+minimum hourly wage rate determined under section 4 of the improved workforce
+opportunity wage act, 2018 PA 337, MCL 408.934. Labor costs under this
+subdivision shall be estimated and charged in increments of 15 minutes or more,
+with all partial time increments rounded down. A public body shall not charge for
+labor directly associated with redaction under section 14 if it knows or has reason to
+know that it previously redacted the public record in question and the redacted
+version is still in the public body's possession.
+(c) For public records provided to the requestor on any form of nonpaper physical
+media, the actual and most reasonably economical cost of the nonpaper physical
+media. The requestor may stipulate that the public records be provided on
+nonpaper physical media, electronically mailed, or otherwise electronically provided
+to him or her in lieu of paper copies. This subdivision does not apply if a public body
+lacks the technological capability necessary to provide records on the particular
+nonpaper physical media stipulated in the particular instance.
+(d) For paper copies of public records provided to the requestor, the actual total
+incremental cost of necessary duplication or publication, not including labor. The
+cost of paper copies shall be calculated as a total cost per sheet of paper and shall
+be itemized and noted in a manner that expresses both the cost per sheet and the
+number of sheets provided. The fee must not exceed 10 cents per sheet of paper
+for copies of public records made on 8-1/2- by 11-inch paper or 8-1/2- by 14-inch
+paper. A public body shall utilize the most economical means available for making
+copies of public records, including using double-sided printing, if cost saving and
+available.
+(e) The cost of labor directly associated with duplication or publication, including
+making paper copies, making digital copies, or transferring digital public records to
+be given to the requestor on nonpaper physical media or through the internet or
+other electronic means as stipulated by the requestor. The public body shall not
+charge more than the hourly wage of its lowest-paid employee capable of
+necessary duplication or publication in the particular instance, regardless of
+whether that person is available or who actually performs the labor. Labor costs
+under this subdivision may be estimated and charged in time increments of the
+public body's choosing; however, all partial time increments shall be rounded down.
+https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234
+
+2/7
+
+8/20/26, 11:57 AM
+
+MCL - Section 15.234 - Michigan Legislature
+
+(f) The actual cost of mailing, if any, for sending the public records in a
+reasonably economical and justifiable manner. The public body shall not charge
+more for expedited shipping or insurance unless specifically stipulated by the
+requestor, but may otherwise charge for the least expensive form of postal delivery
+confirmation when mailing public records.
+(2) When calculating labor costs under subsection (1)(a), (b), or (e), fee
+components shall be itemized in a manner that expresses both the hourly wage and
+the number of hours charged. The public body may also add up to 50% to the
+applicable labor charge amount to cover or partially cover the cost of fringe benefits
+if it clearly notes the percentage multiplier used to account for benefits in the
+detailed itemization described in subsection (4). Subject to the 50% limitation, the
+public body shall not charge more than the actual cost of fringe benefits, and
+overtime wages shall not be used in calculating the cost of fringe benefits. Overtime
+wages shall not be included in the calculation of labor costs unless overtime is
+specifically stipulated by the requestor and clearly noted on the detailed itemization
+described in subsection (4). A search for a public record may be conducted or
+copies of public records may be furnished without charge or at a reduced charge if
+the public body determines that a waiver or reduction of the fee is in the public
+interest because searching for or furnishing copies of the public record can be
+considered as primarily benefiting the general public. A public record search shall
+be made and a copy of a public record shall be furnished without charge for the first
+$20.00 of the fee for each request by either of the following:
+(a) An individual who is entitled to information under this act and who submits an
+affidavit stating that the individual is indigent and receiving specific public
+assistance or, if not receiving public assistance, stating facts showing inability to
+pay the cost because of indigency. If the requestor is eligible for a requested
+discount, the public body shall fully note the discount on the detailed itemization
+described under subsection (4). If a requestor is ineligible for the discount, the
+public body shall inform the requestor specifically of the reason for ineligibility in the
+public body's written response. An individual is ineligible for this fee reduction if any
+of the following apply:
+(i) The individual has previously received discounted copies of public records
+under this subsection from the same public body twice during that calendar year.
+(ii) The individual requests the information in conjunction with outside parties who
+are offering or providing payment or other remuneration to the individual to make
+the request. A public body may require a statement by the requestor in the affidavit
+that the request is not being made in conjunction with outside parties in exchange
+for payment or other remuneration.
+(b) A nonprofit organization formally designated by the state to carry out activities
+under subtitle C of the developmental disabilities assistance and bill of rights act of
+2000, Public Law 106-402, and the protection and advocacy for individuals with
+mental illness act, Public Law 99-319, or their successors, if the request meets all
+of the following requirements:
+(i) Is made directly on behalf of the organization or its clients.
+(ii) Is made for a reason wholly consistent with the mission and provisions of
+those laws under section 931 of the mental health code, 1974 PA 258, MCL
+330.1931.
+(iii) Is accompanied by documentation of its designation by the state, if requested
+by the public body.
+https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234
+
+3/7
+
+8/20/26, 11:57 AM
+
+MCL - Section 15.234 - Michigan Legislature
+
+(3) A fee as described in subsection (1) shall not be charged for the cost of
+search, examination, review, and the deletion and separation of exempt from
+nonexempt information as provided in section 14 unless failure to charge a fee
+would result in unreasonably high costs to the public body because of the nature of
+the request in the particular instance, and the public body specifically identifies the
+nature of these unreasonably high costs.
+(4) A public body shall establish procedures and guidelines to implement this act
+and shall create a written public summary of the specific procedures and guidelines
+relevant to the general public regarding how to submit written requests to the public
+body and explaining how to understand a public body's written responses, deposit
+requirements, fee calculations, and avenues for challenge and appeal. The written
+public summary shall be written in a manner so as to be easily understood by the
+general public. If the public body directly or indirectly administers or maintains an
+official internet presence, it shall post and maintain the procedures and guidelines
+and its written public summary on its website. A public body shall make the
+procedures and guidelines publicly available by providing free copies of the
+procedures and guidelines and its written public summary both in the public body's
+response to a written request and upon request by visitors at the public body's
+office. A public body that posts and maintains procedures and guidelines and its
+written public summary on its website may include the website link to the
+documents in lieu of providing paper copies in its response to a written request. A
+public body's procedures and guidelines must include the use of a standard form for
+detailed itemization of any fee amount in its responses to written requests under
+this act. The detailed itemization must clearly list and explain the allowable charges
+for each of the 6 fee components listed under subsection (1) that compose the total
+fee used for estimating or charging purposes. Other public bodies may use a form
+created by the department of technology, management, and budget or create a
+form of their own that complies with this subsection. A public body that has not
+established procedures and guidelines, has not created a written public summary,
+or has not made those items publicly available without charge as required in this
+subsection is not relieved of its duty to comply with any requirement of this act and
+shall not require deposits or charge fees otherwise permitted under this act until it is
+in compliance with this subsection. Notwithstanding this subsection and despite any
+law to the contrary, a public body's procedures and guidelines under this act are not
+exempt public records under section 13.
+(5) If the public body directly or indirectly administers or maintains an official
+internet presence, any public records available to the general public on that internet
+site at the time the request is made are exempt from any charges under subsection
+(1)(b). If the FOIA coordinator knows or has reason to know that all or a portion of
+the requested information is available on its website, the public body shall notify the
+requestor in its written response that all or a portion of the requested information is
+available on its website. The written response, to the degree practicable in the
+specific instance, must include a specific webpage address where the requested
+information is available. On the detailed itemization described in subsection (4), the
+public body shall separate the requested public records that are available on its
+website from those that are not available on the website and shall inform the
+requestor of the additional charge to receive copies of the public records that are
+available on its website. If the public body has included the website address for a
+record in its written response to the requestor and the requestor thereafter
+https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234
+
+4/7
+
+8/20/26, 11:57 AM
+
+MCL - Section 15.234 - Michigan Legislature
+
+stipulates that the public record be provided to him or her in a paper format or other
+form as described under subsection (1)(c), the public body shall provide the public
+records in the specified format but may use a fringe benefit multiplier greater than
+the 50% limitation in subsection (2), not to exceed the actual costs of providing the
+information in the specified format.
+(6) A public body may provide requested information available in public records
+without receipt of a written request.
+(7) If a verbal request for information is for information that a public body believes
+is available on the public body's website, the public employee shall, where
+practicable and to the best of the public employee's knowledge, inform the
+requestor about the public body's pertinent website address.
+(8) In either the public body's initial response or subsequent response as
+described under section 5(2)(d), the public body may require a good-faith deposit
+from the person requesting information before providing the public records to the
+requestor if the entire fee estimate or charge authorized under this section exceeds
+$50.00, based on a good-faith calculation of the total fee described in subsection
+(4). Subject to subsection (10), the deposit must not exceed 1/2 of the total
+estimated fee, and a public body's request for a deposit must include a detailed
+itemization as required under subsection (4). The response must also contain a
+best efforts estimate by the public body regarding the time frame it will take the
+public body to comply with the law in providing the public records to the requestor.
+The time frame estimate is nonbinding upon the public body, but the public body
+shall provide the estimate in good faith and strive to be reasonably accurate and to
+provide the public records in a manner based on this state's public policy under
+section 1 and the nature of the request in the particular instance. If a public body
+does not respond in a timely manner as described under section 5(2), it is not
+relieved from its requirements to provide proper fee calculations and time frame
+estimates in any tardy responses. Providing an estimated time frame does not
+relieve a public body from any of the other requirements of this act.
+(9) If a public body does not respond to a written request in a timely manner as
+required under section 5(2), the public body shall do the following:
+(a) Reduce the charges for labor costs otherwise permitted under this section by
+5% for each day the public body exceeds the time permitted under section 5(2) for
+a response to the request, with a maximum 50% reduction, if either of the following
+applies:
+(i) The late response was willful and intentional.
+(ii) The written request included language that conveyed a request for information
+within the first 250 words of the body of a letter, facsimile, electronic mail, or
+electronic mail attachment, or specifically included the words, characters, or
+abbreviations for "freedom of information", "information", "FOIA", "copy", or a
+recognizable misspelling of such, or appropriate legal code reference for this act,
+on the front of an envelope, or in the subject line of an electronic mail, letter, or
+facsimile cover page.
+(b) If a charge reduction is required under subdivision (a), fully note the charge
+reduction on the detailed itemization described under subsection (4).
+(10) This section does not apply to public records prepared under an act or
+statute specifically authorizing the sale of those public records to the public, or if the
+amount of the fee for providing a copy of the public record is otherwise specifically
+provided by an act or statute.
+https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234
+
+5/7
+
+8/20/26, 11:57 AM
+
+MCL - Section 15.234 - Michigan Legislature
+
+(11) Subject to subsection (12), after a public body has granted and fulfilled a
+written request from an individual under this act, if the public body has not been
+paid in full the total amount under subsection (1) for the copies of public records
+that the public body made available to the individual as a result of that written
+request, the public body may require a deposit of up to 100% of the estimated fee
+before it begins a full public record search for any subsequent written request from
+that individual if all of the following apply:
+(a) The final fee for the prior written request was not more than 105% of the
+estimated fee.
+(b) The public records made available contained the information being sought in
+the prior written request and are still in the public body's possession.
+(c) The public records were made available to the individual, subject to payment,
+within the time frame estimate described under subsection (8).
+(d) Ninety days have passed since the public body notified the individual in
+writing that the public records were available for pickup or mailing.
+(e) The individual is unable to show proof of prior payment to the public body.
+(f) The public body calculates a detailed itemization, as required under
+subsection (4), that is the basis for the current written request's increased estimated
+fee deposit.
+(12) A public body shall no longer require an increased estimated fee deposit
+from an individual as described under subsection (11) if any of the following apply:
+(a) The individual is able to show proof of prior payment in full to the public body.
+(b) The public body is subsequently paid in full for the applicable prior written
+request.
+(c) Three hundred sixty-five days have passed since the individual made the
+written request for which full payment was not remitted to the public body.
+(13) A deposit required by a public body under this act is a fee.
+(14) If a deposit that is required under subsection (8) or (11) is not received by
+the public body within 45 days from receipt by the requesting person of the notice
+that a deposit is required, and if the requesting person has not filed an appeal of the
+deposit amount pursuant to section 10a, the request shall be considered
+abandoned by the requesting person and the public body is no longer required to
+fulfill the request. Notice of a deposit requirement under subsection (8) or (11) is
+considered received 3 days after it is sent, regardless of the means of transmission.
+Notice of a deposit requirement under subsection (8) or (11) must include notice of
+the date by which the deposit must be received, which date is 48 days after the
+date the notice is sent.
+History: 1976, Act 442, Eff. Apr. 13, 1977 ;-- Am. 1988, Act 99, Imd. Eff. Apr. 11, 1988 ;-Am. 1996, Act 553, Eff. Mar. 31, 1997 ;-- Am. 2014, Act 563, Eff. July 1, 2015 ;-- Am.
+2018, Act 523, Imd. Eff. Dec. 28, 2018 ;-- Am. 2020, Act 38, Imd. Eff. Mar. 3, 2020
+Constitutionality: The disclosure of public records under the freedom of information act
+impartially to the general public for the incremental cost of creating the record is not a
+granting of credit by the state in aid of private persons and does not justify nondisclosure
+on the theory that the information is proprietary information belonging to a public body.
+Kestenbaum v Michigan State University, 414 Mich 510; 417 NW2d 1102 (1982).
+Popular Name: Act 442
+Popular Name: FOIA
+https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234
+
+6/7
+
+8/20/26, 11:57 AM
+
+MCL - Section 15.234 - Michigan Legislature
+
+Acceptable Use Policy Privacy Policy DMCA Policy Comment Form
+Legislative Directory Accessibility Site Map
+Bills
+
+Meetings
+
+Laws
+
+The Michigan Legislature Website is a free service of the Legislative Service Bureau in
+cooperation with the Michigan Legislative Council, the Michigan House of
+Representatives, the Michigan Senate, and the Library of Michigan. This site is intended
+to provide accurate and timely legislative information to the citizens of the State of
+Michigan and other interested parties. Additional historical documents can be found at
+https://www.michigan.gov/libraryofmichigan. The information obtained from this site is not
+intended to replace official versions of that information and is subject to revision. The
+Legislature presents this information, without warranties, express or implied, regarding the
+accuracy of the information, timeliness, or completeness. If you believe the information is
+inaccurate, out-of-date, or incomplete or if you have problems accessing or reading the
+information, please send your concerns to the appropriate agency using the online
+Comment Form in the bar above this text.
+
+https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234
+
+7/7
+
+
