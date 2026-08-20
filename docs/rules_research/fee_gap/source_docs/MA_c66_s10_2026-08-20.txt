@@ -1,0 +1,272 @@
+PROVENANCE: Supplied by Kevin 2026-08-20 (exchange/'mass General Law - Part I, Title X, Chapter 66, Section 10.pdf', text-extracted).
+SOURCE: malegislature.gov official General Laws page, c. 66 § 10 complete (subsections a-f), fetched 2026-08-20.
+NOTE: malegislature.gov pages do not print an amendment-history line — currency confirmation (post-2016-reform amendments, if any) is a discover-time check. Companion still needed: 950 CMR 32.00 (esp. 32.07 fee regs, Secretary of the Commonwealth).
+----------------------------------------------------------------
+8/20/26, 11:48 AM
+
+General Law - Part I, Title X, Chapter 66, Section 10
+
+Part I
+Title X
+Chapter 66
+Section 10
+
+Section 10. (a) A records access officer appointed pursuant to section 6A,
+or a designee, shall at reasonable times and without unreasonable delay
+permit inspection or furnish a copy of any public record as defined in
+clause twenty-sixth of section 7 of chapter 4, or any segregable portion of
+a public record, not later than 10 business days following the receipt of
+the request, provided that:
+(i) the request reasonably describes the public record sought;
+(ii) the public record is within the possession, custody or control of the
+agency or municipality that the records access officer serves; and
+(iii) the records access officer receives payment of a reasonable fee as set
+forth in subsection (d).
+A request for public records may be delivered to the records access
+officer by hand or via first class mail at the record officer's business
+address, or via electronic mail to the address posted by the agency or
+municipality that the records access officer serves.
+
+https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10
+
+1/8
+
+8/20/26, 11:48 AM
+
+General Law - Part I, Title X, Chapter 66, Section 10
+
+(b) If the agency or municipality does not intend to permit inspection or
+furnish a copy of a requested record, or the magnitude or difficulty of the
+request, or of multiple requests from the same requestor, unduly burdens
+the other responsibilities of the agency or municipality such that the
+agency or municipality is unable to do so within the timeframe
+established in subsection (a), the agency or municipality shall inform the
+requestor in writing not later than 10 business days after the initial receipt
+of the request for public records. The written response shall be made via
+first class or electronic mail and shall:
+(i) confirm receipt of the request;
+(ii) identify any public records or categories of public records sought that
+are not within the possession, custody, or control of the agency or
+municipality that the records access officer serves;
+(iii) identify the agency or municipality that may be in possession,
+custody or control of the public record sought, if known;
+(iv) identify any records, categories of records or portions of records that
+the agency or municipality intends to withhold, and provide the specific
+reasons for such withholding, including the specific exemption or
+exemptions upon which the withholding is based, provided that nothing
+in the written response shall limit an agency's or municipality's ability to
+redact or withhold information in accordance with state or federal law;
+(v) identify any public records, categories of records, or portions of
+records that the agency or municipality intends to produce, and provide a
+detailed statement describing why the magnitude or difficulty of the
+request unduly burdens the other responsibilities of the agency or
+municipality and therefore requires additional time to produce the public
+records sought;
+https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10
+
+2/8
+
+8/20/26, 11:48 AM
+
+General Law - Part I, Title X, Chapter 66, Section 10
+
+(vi) identify a reasonable timeframe in which the agency or municipality
+shall produce the public records sought; provided, that for an agency, the
+timeframe shall not exceed 15 business days following the initial receipt
+of the request for public records and for a municipality the timeframe
+shall not exceed 25 business days following the initial receipt of the
+request for public records; and provided further, that the requestor may
+voluntarily agree to a response date beyond the timeframes set forth
+herein;
+(vii) suggest a reasonable modification of the scope of the request or offer
+to assist the requestor to modify the scope of the request if doing so
+would enable the agency or municipality to produce records sought more
+efficiently and affordably;
+(viii) include an itemized, good faith estimate of any fees that may be
+charged to produce the records; and
+(ix) include a statement informing the requestor of the right of appeal to
+the supervisor of records under subsection (a) of section 10A and the
+right to seek judicial review of an unfavorable decision by commencing a
+civil action in the superior court under subsection (c) of section 10A.
+(c) If the magnitude or difficulty of a request, or the receipt of multiple
+requests from the same requestor, unduly burdens the other
+responsibilities of the agency or municipality such that an agency or
+municipality is unable to complete the request within the time provided in
+clause (vi) of subsection (b), a records access officer may, as soon as
+practical and within 20 business days after initial receipt of the request, or
+within 10 business days after receipt of a determination by the supervisor
+of public records that the requested record constitutes a public record,
+petition the supervisor of records for an extension of the time for the
+https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10
+
+3/8
+
+8/20/26, 11:48 AM
+
+General Law - Part I, Title X, Chapter 66, Section 10
+
+agency or municipality to furnish copies of the requested record, or any
+portion of the requested record, that the agency or municipality has
+within its possession, custody or control and intends to furnish. The
+records access officer shall, upon submitting the petition to the supervisor
+of records, furnish a copy of the petition to the requestor. Upon a showing
+of good cause, the supervisor of records may grant a single extension to
+an agency not to exceed 20 business days and a single extension to a
+municipality not to exceed 30 business days. In determining whether the
+agency or municipality has established good cause, the supervisor of
+records shall consider, but shall not be limited to considering:
+(i) the need to search for, collect, segregate or examine records;
+(ii) the scope of redaction required to prevent unlawful disclosure;
+(iii) the capacity or the normal business hours of operation of the agency
+or municipality to produce the request without the extension;
+(iv) efforts undertaken by the agency or municipality in fulfilling the
+current request and previous requests;
+(v) whether the request, either individually or as part of a series of
+requests from the same requestor, is frivolous or intended to harass or
+intimidate the agency or municipality; and
+(vi) the public interest served by expeditious disclosure.
+If the supervisor of records determines that the request is part of a series
+of contemporaneous requests that are frivolous or designed to intimidate
+or harass, and the requests are not intended for the broad dissemination of
+information to the public about actual or alleged government activity, the
+supervisor of records may grant a longer extension or relieve the agency
+or municipality of its obligation to provide copies of the records sought.
+https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10
+
+4/8
+
+8/20/26, 11:48 AM
+
+General Law - Part I, Title X, Chapter 66, Section 10
+
+The supervisor of records shall issue a written decision regarding a
+petition submitted by a records access officer under this subsection within
+5 business days following receipt of the petition. The supervisor of
+records shall provide the decision to the agency or municipality and the
+requestor and shall inform the requestor of the right to seek judicial
+review of an unfavorable decision by commencing a civil action in the
+superior court.
+(d) A records access officer may assess a reasonable fee for the
+production of a public record except those records that are freely
+available for public inspection. The reasonable fee shall not exceed the
+actual cost of reproducing the record. Unless expressly provided for
+otherwise, the fee shall be determined in accordance with the following:
+(i) the actual cost of any storage device or material provided to a person
+in response to a request for public records under subsection (a) may be
+included as part of the fee, but the fee assessed for standard black and
+white paper copies or printouts of records shall not exceed 5 cents per
+page, for both single and double-sided black and white copies or
+printouts;
+(ii) if an agency is required to devote more than 4 hours of employee time
+to search for, compile, segregate, redact or reproduce the record or
+records requested, the records access officer may also include as part of
+the fee an hourly rate equal to or less than the hourly rate attributed to the
+lowest paid employee who has the necessary skill required to search for,
+compile, segregate, redact or reproduce a record requested, but the fee
+(A) shall not be more than $25 per hour; (B) shall not be assessed for the
+first 4 hours of work performed; and (C) shall not be assessed for time
+
+https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10
+
+5/8
+
+8/20/26, 11:48 AM
+
+General Law - Part I, Title X, Chapter 66, Section 10
+
+spent segregating or redacting records unless such segregation or
+redaction is required by law or approved by the supervisor of records
+under clause (iv);
+(iii) if a municipality is required to devote more than 2 hours of employee
+time to search for, compile, segregate, redact or reproduce a record
+requested, the records access officer may include as part of the fee an
+hourly rate equal to or less than the hourly rate attributed to the lowest
+paid employee who has the necessary skill required to search for,
+compile, segregate, redact or reproduce the record requested but the fee
+(A) shall not be more than $25 per hour unless such rate is approved by
+the supervisor of records under clause (iv); (B) shall not be assessed for
+the first 2 hours of work performed where the responding municipality
+has a population of over 20,000 people; and (C) shall not be assessed for
+time spent segregating or redacting records unless such segregation or
+redaction is required by law or approved by the supervisor of records
+under clause (iv);
+(iv) the supervisor of records may approve a petition from an agency or
+municipality to charge for time spent segregating or redacting, or a
+petition from a municipality to charge in excess of $25 per hour, if the
+supervisor of records determines that (A) the request is for a commercial
+purpose; or (B) the fee represents an actual and good faith representation
+by the agency or municipality to comply with the request, the fee is
+necessary such that the request could not have been prudently completed
+without the redaction, segregation or fee in excess of $25 per hour and
+the amount of the fee is reasonable and the fee is not designed to limit,
+deter or prevent access to requested public records; provided, however,
+that:
+https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10
+
+6/8
+
+8/20/26, 11:48 AM
+
+General Law - Part I, Title X, Chapter 66, Section 10
+
+1. in making a determination regarding any such petition, the supervisor
+of records shall consider the public interest served by limiting the cost of
+public access to the records, the financial ability of the requestor to pay
+the additional or increased fees and any other relevant extenuating
+circumstances;
+2. an agency or municipality, upon submitting a petition under this clause,
+shall furnish a copy of the petition to the requestor;
+3. the supervisor of records shall issue a written determination with
+findings regarding any such petition within 5 business days following
+receipt of the petition by the supervisor of public records; and
+4. the supervisor of records shall provide the determination to the agency
+or municipality and the requestor and shall inform the requestor of the
+right to seek judicial review of an unfavorable decision by commencing a
+civil action in the superior court;
+(v) the records access officer may waive or reduce the amount of any fee
+charged under this subsection upon a showing that disclosure of a
+requested record is in the public interest because it is likely to contribute
+significantly to public understanding of the operations or activities of the
+government and is not primarily in the commercial interest of the
+requestor, or upon a showing that the requestor lacks the financial ability
+to pay the full amount of the reasonable fee;
+(vi) the records access officer may deny public records requests from a
+requester who has failed to compensate the agency or municipality for
+previously produced public records;
+
+https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10
+
+7/8
+
+8/20/26, 11:48 AM
+
+General Law - Part I, Title X, Chapter 66, Section 10
+
+(vii) the records access officer shall provide a written notification to the
+requester detailing the reasons behind the denial, including an itemized
+list of any balances attributed to previously produced records;
+(viii) a records access officer may not require the requester to specify the
+purpose for a request, except to determine whether the records are
+requested for a commercial purpose or whether to grant a request for a fee
+waiver; and
+(ix) as used in this section ''commercial purpose'' shall mean the sale or
+resale of any portion of the public record or the use of information from
+the public record to advance the requester's strategic business interests in
+a manner that the requester can reasonably expect to make a profit, and
+shall not include gathering or reporting news or gathering information to
+promote citizen oversight or further the understanding of the operation or
+activities of government or for academic, scientific, journalistic or public
+research or education
+(e) A records access officer shall not charge a fee for a public record
+unless the records access officer responded to the requestor within 10
+business days under subsection (b).
+(f) As used in this section, ''employee time'' means time required by
+employees or necessary vendors, including outside legal counsel,
+technology and payroll consultants or others as needed by the
+municipality.
+
+https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10
+
+8/8
+
+
