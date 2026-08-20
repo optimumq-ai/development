@@ -1,0 +1,572 @@
+PROVENANCE: Supplied by Kevin 2026-08-20 (exchange/jud-lib-950cmr32.pdf, text-extracted).
+SOURCE: 950 CMR 32.00 (Public Records Access), Office of the Secretary of the Commonwealth — complete regulation 32.01-32.10; fee section 32.07. The delegated instrument for MA fees, companion to MA_c66_s10_2026-08-20.txt.
+NOTE: Regulation adds beyond the statute: no fee for electronic/fax copies (32.07(2)(f)); online-availability notice duty; postage only on request at lowest cost; small-municipality first-2-hours charging with census-data burden on the RAO; fee-rights waiver on 32.06(4) noncompliance; 90-day appeal windows (32.08).
+----------------------------------------------------------------
+950 CMR: OFFICE OF THE SECRETARY OF THE COMMONWEALTH
+950 CMR 32.00:
+
+PUBLIC RECORDS ACCESS
+
+Section
+32.01:
+32.02:
+32.03:
+32.04:
+32.05:
+32.06:
+32.07:
+32.08:
+32.09:
+32.10:
+
+Scope and Purpose
+Definitions
+General Provisions
+Records Access Officers
+Additional Records Access Officer Responsibilities
+Rights of Access
+Copies of Records; Fees
+Appeals
+Enforcement of Orders
+Advisory Opinions
+
+32.01:
+
+Scope and Purpose
+(1) 950 CMR 32.00 describes the practices and procedures of the Division of Public Records
+relative to the requirements of governmental entities or political subdivisions of the
+Commonwealth with respect to disclosure of public records, reporting requirements for certain
+records access officers and ensuring that disputes regarding access to particular records are
+resolved expeditiously and fairly. 950 CMR 32.00 shall not limit the availability of other
+remedies provided by law.
+(2) The Division of Public Records is under the supervision of the Supervisor of Public
+Records. The Supervisor may amend and rescind such rules, forms and orders as are
+contemplated by the provisions of the Massachusetts General Laws and as are necessary to carry
+out their purposes.
+(3) The Supervisor of Public Records may authorize exceptions to 950 CMR 32.00 with respect
+to any specific requirement provided that such exceptions to 950 CMR 32.00 are in conformity
+with the provisions of the Massachusetts General Laws.
+
+32.02: Definitions
+For the purposes of 950 CMR 32.00 unless the context otherwise requires, the following
+terms shall have the meanings indicated:
+Advisory Opinion. An opinion issued by the Supervisor of Public Records intended to provide
+guidance on issues related to public records access and retention.
+Agency. Any agency, executive office, department, board, commission, bureau, division or
+authority of the commonwealth that is identified in M.G.L. c. 66, § 6A and c. 4, § 7, clause
+Twenty-sixth and makes or receives "public records", as defined in 950 CMR 32.02. Agency
+includes any person, corporation, association, partnership or other legal entity which receives or
+expends public funds for the payment or administration of pensions for any current or former
+employees of the commonwealth or any political subdivision as defined in M.G.L. c. 32, § 1.
+Business Day. Monday through Friday. Business day does not include Saturdays, Sundays, legal
+holidays, or other weekdays where a custodian's office is closed unexpectedly.
+Commercial Purpose. The sale or resale of any portion of the public record or the use of
+information from the public record to advance the requester's strategic business interests in a
+manner that the requester can reasonably expect to make a profit including in addition to the
+foregoing, obtaining names and addresses from the public record for the purpose of solicitation.
+It does not include gathering or reporting news or gathering information to promote citizen
+oversight or further the understanding of the operation or activities of government or for
+academic, scientific, journalistic, or public research or education.
+Custodian. Any governmental entity that makes or receives public records.
+
+(Mass. Register #1445 6/11/21)
+
+950 CMR: OFFICE OF THE SECRETARY OF THE COMMONWEALTH
+32.02: continued
+Division. Division of Public Records, Office of the Secretary of the Commonwealth of
+Massachusetts.
+Governmental Entity. Any agency or municipality as defined in 950 CMR 32.02. It includes any
+quasi-governmental agency that is considered a body politic and corporate or public
+instrumentality. It does not include the legislature and the judiciary.
+Municipality. Cities and towns, local housing, redevelopment or similar authorities. A
+consortium, consolidation or combination of entities within a single political subdivision of the
+commonwealth or among multiple political subdivisions of the commonwealth shall be deemed
+a municipality.
+Public Record. All books, papers, maps, photographs, recorded tapes, financial statements,
+statistical tabulations, or other documentary materials or data, regardless of physical form or
+characteristics, made or received by a governmental entity unless such materials or data fall
+within one or more of the exemptions found within M.G.L. c. 4, § 7, clause Twenty-sixth or
+other legally applicable privileges.
+Records Access Officer. The employee designated within a governmental entity to perform
+duties described in 950 CMR 32.00 including coordinating a response to requests for access to
+public records, assisting individuals seeking public records in identifying the records requested,
+and preparing guidelines that enable requesters to make informed requests regarding the
+availability of such public records electronically or otherwise.
+Requester. Any person or entity seeking to inspect or obtain copies of public records.
+Redact. To delete, or otherwise expurgate that part of a public record that is exempt from
+disclosure under M.G.L. c. 4, § 7, clause Twenty-sixth or other legally applicable privileges from
+non-exempt material.
+Search Time. The time needed to locate and identify, pull from the files, copy and reshelve or
+refile a public record. However, it shall not include the time expended to create the original
+record.
+Secretary. The Secretary of the Commonwealth of Massachusetts.
+Segregation Time. The time used to review records to determine what portions are subject to
+redaction or withholding under M.G.L. c. 4, § 7, clause Twenty-sixth or other legally applicable
+privileges. Segregation time shall not include time expended to review record for accuracy and
+correct errors.
+Supervisor. Supervisor of Public Records or Supervisor of Records.
+Withhold. To hold back from disclosure a record under M.G. L. c. 4, § 7, clause Twenty-sixth
+or other legally applicable privileges.
+32.03: General Provisions
+(1) Division Mailing Address and Electronic Mail Address. All communications shall be
+addressed or delivered to:
+Supervisor of Records
+Division of Public Records
+Office of the Secretary of the Commonwealth
+One Ashburton Place, Room 1719
+Boston, Massachusetts 02108
+or: pre@sec.state.ma.us
+Electronic communication is strongly encouraged and is the preferred method of
+correspondence.
+
+950 CMR: OFFICE OF THE SECRETARY OF THE COMMONWEALTH
+32.03: continued
+(2) Division Business Hours. The regular hours of the Division are from 8:45 A.M. to
+5:00 P.M. each business day.
+(3) Computation of Time. Unless otherwise provided, the computation of time referred to in
+950 CMR 32.00 shall begin with the first business day following the date of receipt of any
+request, regardless of form.
+(4) Presumptions. In all proceedings pursuant to 950 CMR 32.00, there shall be a presumption
+that the record sought is public.
+32.04: Records Access Officers
+(1) Each agency and municipality shall designate one or more employees as records access
+officer(s).
+(2) In a municipality, the municipal clerk, or the clerk's designees, or any designee of a
+municipality that the chief executive officer of the municipality may appoint, shall serve as
+records access officers.
+(3) The designation of a records access officer shall not be construed to prohibit employees who
+have been previously authorized by the agency or municipality to make public records or
+information available to the public from continuing to do so in accordance with 950 CMR 32.00.
+(4) Each agency and municipality shall post in a conspicuous location at its offices and on its
+website, if any, the name, title, business address, business telephone number, and business email
+address of each records access officer.
+(5) A records access officer shall:
+(a) coordinate the custodian's response to requests for access to public records and shall
+facilitate the resolution of such requests by the timely and thorough production of public
+records;
+(b) assist persons seeking public records to identify the records sought;
+(c) assist the custodian in preserving public records in accordance with all applicable laws,
+rules, regulations and retention schedules;
+(d) to the extent feasible, provide public records to a requester in electronic format unless
+the record is not available in electronic form or the requester does not have the ability to
+receive or access the records in electronic format and if feasible, in the requester’s preferred
+format. In the absence of a preferred format, the records shall be provided in a searchable
+machine-readable form;
+Where the requester is an individual held in custody in any correctional facility, as
+defined in M.G.L. c. 125, § l(d), the records access officer shall presume that the requester
+does not have the ability to receive or access records in usable electronic form;
+(e) to the extent feasible, furnish the public records by providing reasonable assistance in
+locating the records on an appropriately indexed and searchable public website;
+(f) prepare guidelines of the agency or municipality that enable the person seeking access
+to public records in the custody of the agency or municipality to make informed requests
+regarding the availability of such public records electronically or otherwise. The guidelines
+shall include a list of categories of public records maintained by the agency or municipality
+and such list shall be updated periodically; each agency or municipality that maintains a
+website shall post the guidelines on its website; and
+(g) a municipal records access officer shall, to the extent feasible, post commonly available
+public record documents on a website maintained by the municipality. The website copy
+shall not be deemed the record copy for retention purposes.
+32.05: Additional Records Access Officer Responsibilities
+(1) Agency Records Access Officers. The requirements of 950 CMR 32.05(1) shall apply only
+to agency records access officers.
+
+950 CMR: OFFICE OF THE SECRETARY OF THE COMMONWEALTH
+32.05: continued
+(a) agency designation of primary and secondary records access officers; reporting
+requirements:
+1. each agency shall designate one primary records access officer responsible for
+reporting information to the Secretary pursuant to M.G.L. c. 66, § 6A(e) and 950 CMR
+32.05(1)(c).
+2. a primary records access officer shall submit a notification of such designation to the
+Division electronically in a manner determined by the Division.
+3. the primary records access officer may notify the secondary record access officers to
+facilitate reporting such information.
+4. the primary records access officer shall electronically notify the Secretary of the
+designation of secondary records access officers electronically in a manner determined
+by the Division.
+5. the agency shall maintain and update information regarding primary and secondary
+records access officers electronically, including changes in personnel identified as
+primary and secondary records access officers, in a manner determined by the Division.
+(b) agency records access officers shall electronically report to the Secretary the information
+described in 950 CMR 32.05(1)(c)1. through 9. in a manner determined by the Secretary.
+(c) an agency records access officer shall report to the Secretary with respect to written
+requests for public records and responses to these requests for each calendar year ending
+December 31st:
+1. the nature of each request and the date on which each request was received;
+2. the date on which a response is provided to the requester;
+3. the date on which a public record is provided to the requester;
+4. the number of hours required to fulfill the request;
+5. fees charged to the requester, if any;
+6. records access officer petitions to the Supervisor submitted under M.G.L. c. 66,
+§ 10(d)(iv), and 950 CMR 32.06(4)(g) and (h);
+7. requests appealed to the Supervisor under M.G.L. c. 66, § 10A, and 950 CMR
+32.08(1);
+8. the time required to comply with the Supervisor's orders under M.G.L. c. 66, § 10A;
+and
+9. the final adjudication of any associated court proceedings under M.G.L. c. 66,
+§ 10A(d).
+(d) the Supervisor may make exceptions to the reporting requirement in 950 CMR
+32.05(1)(c) for particular classes of records, such as:
+1. certified copies of records;
+2. registry of deeds records;
+3. incorporation records;
+4. vital records; and
+5. criminal offender record information requested by the offender, representative, or
+other authorized recipient.
+(e) all information must be provided in accordance with 950 CMR 32.05(1) by February 1st
+of the calendar year following the date of the request.
+(f) an agency shall provide on a searchable website electronic copies, accessible in a
+commonly available electronic format, of the following types of records, provided that any
+agency may withhold any record or portion thereof in accordance with state or federal law:
+1. final opinions, decisions, orders, or votes from agency proceedings;
+2. annual reports;
+3. notices of regulations proposed under M.G.L. c. 30A;
+4. notices of hearings;
+5. winning bids for public contracts;
+6. awards of federal, state and municipal government grants;
+7. minutes of open meetings;
+8. agency budgets; and
+9. any public record information of significant interest that the agency deems
+appropriate to post, such determination to be made by each agency on a case-by-case
+basis.
+
+950 CMR: OFFICE OF THE SECRETARY OF THE COMMONWEALTH
+32.05: continued
+(g) an agency shall post records online pursuant to 950 CMR 32.05(1)(f) as soon as
+practicable on a website maintained by the agency. The website copy shall not be deemed
+the record copy for retention purposes. 950 CMR 32.05(1)(f) and (g) shall apply only to
+records made or received on or after January 1, 2017.
+(h) an agency may fulfill the requirements of 950 CMR 32.05(1)(f) and (g) by providing
+links to other agency websites that provide access to the categories of records described in
+950 CMR 32.05(1)(f)1. through 9.; provided, however, that the website is searchable and
+provides electronic copies, accessible in a commonly available electronic format.
+32.06: Rights of Access
+(1) Requests for Public Records.
+(a) requests for public records may be made orally, in person, to a records access officer or
+custodian, or may be written. Telephone requests may be accepted at the discretion of the
+records access officer.
+(b) requests for public records shall include a reasonable description of the requested record
+to the records access officer so that the records can be identified and located promptly.
+(c) written requests may be delivered by a requester to the business address or designated
+website or email address of a records access officer or custodian:
+1. by hand;
+2. by mail;
+3. electronically; or
+4. by facsimile, if custodian has facsimile access.
+(d) a records access officer shall not require a particular form be used by requesters, but may
+make forms available for requesters.
+(e) a person shall not be required to make a personal inspection of the record prior to
+receiving a copy.
+(f) calculation of time will commence only for requests that are made in accordance with
+950 CMR 32.06(1).
+(2) Records Access Officer Response to Requests for Records.
+(a) a records access officer or designee shall permit inspection or provide or furnish a copy
+of all public records within the custody and control of the custodian at reasonable times and
+without unreasonable delay under M.G.L. c. 66, § 10(a).
+(b)
+if applicable, a records access officer shall provide a written response under
+M.G.L. c. 66, § 10(b) to a request for public records no later than the tenth business day
+following the receipt of a request notwithstanding the applicability of any petition filed
+pursuant to 950 CMR 32.06(4).
+(c) a records access officer shall not charge a fee for the provision of a public record unless
+the records access officer responded to the requester within ten business days following
+receipt of the request under M.G.L. c. 66, § 10(b).
+(d) if a records access officer intends to provide records, access to such records must be
+provided no later than the tenth business day following the receipt of a request, unless an
+extension of time is permitted in a manner consistent with 950 CMR 32.06(2)(i) and (4).
+(e) if a request is received on a Saturday, Sunday, legal holiday or day when the custodian's
+office is unexpectedly closed, the receipt will be deemed received on the following business
+day.
+(f) a records access officer may delay provision of records until all fees related to such
+requests are paid in full by the person seeking access to the requested records in accordance
+with 950 CMR 32.07.
+(g) a records access officer shall, when appropriate, suggest a reasonable modification of
+the scope of the request or offer to assist the requester to modify the scope of the request if
+doing so would enable the agency or municipality to produce records sought more efficiently
+and affordably.
+(h) a records access officer may not require the requester to specify the purpose for a request
+except:
+1. to determine whether the records are requested for a commercial purpose; or
+2. to determine whether to grant a request for a fee waiver.
+
+950 CMR: OFFICE OF THE SECRETARY OF THE COMMONWEALTH
+32.06: continued
+(i) a records access officer shall identify a reasonable timeframe in which it shall produce
+the public records sought in a manner consistent with M.G.L. c. 66, § 10(b)(vi), provided that
+the requester may voluntarily agree to a response date beyond these timeframes.
+(3) Denial by Records Access Officer.
+(a) a records access officer shall provide written notice by first class mail or electronic mail
+to a requester of any denial of access to records.
+(b) a records access officer shall provide such written notice of denial of access within ten
+business days following receipt of a request for public records in accordance with 950 CMR
+32.06(2)(b).
+(c) such written notice of denial shall include:
+1. the date of the request;
+2. identification of any records sought that are not within the possession, custody, or
+control of the agency or municipality the records access officer serves;
+3. identification of the agency or municipality that may be in possession, custody or
+control of the public record sought, if known to the records access officer;
+4. identification of any records, categories of records or portions of records that the
+agency or municipality intends to withhold;
+5. identification of any specific exemption to the Public Records Law or common law
+privilege that applies to the withhold record or records;
+6. identification of the applicability of each cited exemption or privilege to each portion
+of the withheld record or records;
+7. identification of any portions of responsive records that the agency or municipality
+intends to produce; and
+8. a statement informing the requester of the right of administrative appeal to the
+Supervisor under 950 CMR 32.08(1) and the right to seek judicial review of an
+unfavorable decision by commencing a civil action in the superior court.
+(d) where a record has been withheld based on a claim of the attorney-client privilege the
+records access officer shall provide in its written denial a detailed description of the record,
+including the names of the author and recipients, and in general terms, the subject matter of
+the withheld information.
+(4) Petition for Modification or Waiver by a Records Access Officer to the Supervisor.
+(a) petitions requesting an extension of time to furnish copies of the requested records or
+waive statutory limits to fees from a records access officer to the Supervisor shall be in
+writing and delivered to the Supervisor in accordance with 950 CMR 32.03(1). A copy of
+the petition shall be provided by the records access officer to the requester. The Supervisor
+shall issue a written determination with findings regarding any such petition within five
+business days following receipt of a records access officer petition.
+(b) petitions filed under 950 CMR 32.06(4) do not affect the requirement that a records
+access officer shall provide an initial response to a requester within ten business days
+following receipt of a request for public records, pursuant to 950 CMR 32.06(2)(a) or (b).
+Failure to comply with 950 CMR 32.06(4) will result in a waiver of the right to assess fees
+for public records.
+(c) all such petitions shall be considered public records both in the custody of the records
+access officer and the Supervisor.
+(d) petitions seeking an extension of time to furnish copies of the requested records must
+be made by a records access officer within 20 business days following receipt of a request
+for public records, or within ten business days following the records access officer's receipt
+of a determination by the Supervisor that a requested record constitutes a public record.
+(e) a petition for extension of time described in 950 CMR 32.06(4)(d) shall include a brief
+narrative detailing why an extension of time is necessary. Upon a showing of good cause,
+the Supervisor may grant a single extension. For an agency, such extension may not exceed
+20 business days from the date of the grant of the extension by the Supervisor. For a
+municipality, such extension may not exceed 30 business days from the date of the grant of
+the extension by the Supervisor.
+
+950 CMR: OFFICE OF THE SECRETARY OF THE COMMONWEALTH
+32.06: continued
+(f) if, when reviewing a petition for extension of time described in 950 CMR 32.06(4)(d),
+the Supervisor determines that the request is part of a series of contemporaneous requests
+that are frivolous or designed to intimidate or harass, and the requests are not intended for
+the broad dissemination of information to the public about actual or alleged government
+activity, the Supervisor may grant a longer extension or relieve the custodian of its obligation
+to provide copies of the records sought.
+(g) petitions seeking a waiver of statutory limits to fees assessed to segregate and/or redact
+public records must be made within ten business days following receipt of a request for
+public records.
+(h) a petition seeking a waiver of statutory limits to fees described in 950 CMR 32.06(4)(g)
+must be made in accordance with the following:
+1. any records access officer may petition the Supervisor to charge for time spent
+segregating or redacting records.
+2. only a municipal records access officer may petition the Supervisor for permission
+to charge fees in excess of the maximum hourly rate of $25 per hour for time required
+to comply with a request.
+3. records access officers shall not petition the Supervisor seeking a waiver associated
+with the provisions of 950 CMR 32.07(2)(l)1. and (m)1.
+4. a records access officer shall respond to a request within five business days of receipt
+of the Supervisor's determination regarding a petition submitted under 950 CMR
+32.06(4)(g).
+32.07: Copies of Records; Fees
+(1) Copies of Paper and Electronic Records.
+(a) upon request, a requester shall be entitled to receive in hand, by mail, by facsimile or
+electronically one copy of a public record or any desired portion of a public record.
+(b) as an alternative to obtaining copies of records from a records access officer a requester
+shall be permitted, to the extent feasible, and at reasonable times:
+1. view and inspect records; or
+2. use a personal device such as a camera or portable scanner to copy records.
+(c) the records access officer shall presume that a requester prefers copies provided in
+machine-readable electronic form, when electronic form is available, unless the requester
+specifies an alternative preference.
+(d) the records access officer must provide electronic records in native form when possible.
+(e) when designing or acquiring an electronic record keeping system or database, the
+records access officer, in cooperation, with the custodian shall ensure, to the extent feasible
+that:
+1. newly acquired or implemented electronic record keeping systems or databases are
+capable of providing data in a commonly available electronic, machine readable format;
+and
+2. the newly acquired or implemented electronic record keeping system allows for
+information storage and retrieval methods permitting retrieval of public portions of
+records to provide maximum public access.
+(f) furnishing a segregable portion of a public record shall not be deemed to be creation of
+a new record. This applies to a responsive record in the form of an extract of existing data,
+as such data exists at the time of the request and is segregable from nonresponsive and
+exempt data.
+(2) Fees.
+(a) a records access officer may assess a reasonable fee for the production of a public
+record, except those records that are freely available for public inspection, subject to the
+provisions of 950 CMR 32.04(5)(d). A records access officer shall inform a requester of the
+availability of records online to avoid delays and fees associated with the provision of public
+records.
+(b) if fees are being assessed, a records access officer shall provide a written, itemized, good
+faith estimate of any fees that may be charged to produce the records prior to complying with
+a public records request within ten business days following receipt of a request.
+
+950 CMR: OFFICE OF THE SECRETARY OF THE COMMONWEALTH
+32.07: continued
+(c) the reasonable fee for reproduction shall not exceed the actual cost of reproducing the
+record.
+(d) a fee shall not be assessed for time spent segregating or redacting records, unless such
+segregation or redaction is required by law or approved by the Supervisor under 950 CMR
+32.06(4)(g) and (h).
+(e) the charge for black and white paper copies or printouts of records of any size
+susceptible to ordinary means of production shall not exceed $0.05 per page, for both single
+and double-sided black and white copies or printouts.
+(f) a records access officer shall not assess a copying fee for electronic copies or copies of
+public records transmitted via facsimile.
+(g) the actual cost of any storage device or material provided to a person in response to a
+request for public records may be included as part of the fee.
+(h) for copies of public records not susceptible to ordinary means of reproduction, the actual
+cost incurred in providing a copy may be assessed.
+(i) a records access officer shall assess no fee greater than the lowest hourly rate of a person
+capable of compiling, segregating, redacting and reproducing a requested record, subject to
+the requirements of 950 CMR 32.07.
+(j) a records access officer may assess the actual cost of postage to mail copies of public
+records, provided:
+1. the requester specifically requests that records be mailed or is unable to receive
+copies in person; and
+2. the records access officer shall charge the lowest cost available for such mailings, at
+the discretion of the requester.
+(k) Waiver of Fees. Records access officers may waive or reduce the amount of any
+assessed fee upon a showing that:
+1. disclosure of a requested record is in the public interest;
+2. the request for records is not primarily in the commercial interest of the requester; or
+3. the requester lacks the financial ability to pay the full amount of the reasonable fee.
+(l) Agency Records Access Officers.
+1. an agency records access officer shall not assess a fee for the first four hours of time
+spent searching for, compiling, segregating, redacting and reproducing a requested
+record.
+2. an agency records access officer shall not assess a fee for time spent segregating and
+redacting a requested record, unless such segregation or redaction is required by law or
+approved by the Supervisor under 950 CMR 32.06(4)(g) and (h).
+3. an agency records access officer shall assess no fee of more than $25 per hour for the
+cost to comply with a request for public records.
+(m) Municipal Records Access Officers.
+1. a municipal records access officer shall not assess a fee for the first two hours of time
+spent searching for, compiling, segregating, redacting and reproducing a requested record
+in a municipality with a population of over 20,000.
+2. a municipal records access officer in a municipality with a population of 20,000
+persons or fewer may assess a fee for the first two hours of time spent compiling,
+segregating, redacting and reproducing a requested record, provided:
+i. population data shall be determined by the decennial U.S. Census; and
+ii. it shall be the burden of the municipal records access officer to provide
+population data information in responses in which it seeks to assess such fees.
+3. a municipal records access officer shall assess no fee of more than $25 per hour for
+the cost to comply with a request for public records, unless approved by the Supervisor
+under 950 CMR 32.06(4)(g) and (h).
+4. a municipal records access officer shall not assess a fee for time spent segregating
+and redacting a requested record, unless such segregation or redaction is required by law
+or approved by the Supervisor under 950 CMR 32.06(4)(g) and (h).
+(n) Failure to Pay Fee. A records access officer may provide written notice denying access
+to public records to a requester who has failed to compensate the custodian for previously
+produced public records, provided:
+1. a fee estimate for a previous request was prepared in compliance with 950 CMR
+32.00 and the requester agreed to pay the previous fee;
+2. the written notice details the reasons for denial, including an itemized list of any
+balances attributed to previously produced records.
+
+950 CMR: OFFICE OF THE SECRETARY OF THE COMMONWEALTH
+32.08: Appeals
+(1) Appeal to the Supervisor.
+(a) a requester may petition the Supervisor for failure by a records access officer to comply
+with a requirement of 950 CMR 32.00.
+(b) an oral request, while valid as a public record request, shall not be the basis of an appeal
+under 950 CMR 32.08.
+(c) petitions for appeal of a response by a records access officer must be made within 90
+calendar days of the date of the response by a records access officer.
+(d) petitions for appeal of a failure to respond within the timeliness requirements of
+950 CMR 32.00 must be made within 90 calendar days of the request.
+(e) all petitions for appeal shall be in writing and shall specifically describe the nature of
+the requester's objections to the response or failure to timely respond.
+(f) requesters shall provide to the Supervisor complete copies of all correspondence
+associated with the petition, including:
+1. a complete copy of the letter by which the request was made, including in the case
+of electronic communications all header information indicating time, date, subject,
+sender and recipient email addresses; and
+2. a complete copy of all written responses associated with requests subject to the
+petition for appeal, including in the case of electronic communications all header
+information indicating time, date, subject, sender and recipient email addresses.
+(g) in petitioning the Supervisor, the requester shall provide a copy of such petition to the
+records access officer associated with such petition.
+(h) if the requester's petition for appeal is related to a previous appeal to the Supervisor, the
+requester's petition shall refer to the previous appeal number.
+(2) Dispositions of Appeals and Records Access Officer Petitions.
+(a) the Supervisor shall issue a written determination regarding any petition submitted in
+accordance with 950 CMR 32.08(1) not later than ten business days following receipt of the
+petition. The Supervisor shall issue a written determination regarding any petition submitted
+in accordance with M.G. L. c. 66, § 10(c)(vi) and M.G. L. c. 66, § 10(d)(iv) within five
+business days following receipt of the petition. If necessary, additional time may be granted
+as agreed upon by both the requester and the records custodian.
+(b) the Supervisor may deny an appeal for, among other reasons if, in the opinion of the
+Supervisor:
+1. the public records in question are the subjects of disputes in active litigation,
+administrative hearings or mediation;
+2. the request is designed or intended to harass, intimidate, or assist in the commission
+of a crime;
+3. the public records request is made solely for a commercial purpose; or
+4. the requester has failed to comply with the provisions of 950 CMR 32.08(2).
+(c) upon a determination by the Supervisor that a violation has occurred, the Supervisor
+shall order timely and appropriate relief.
+(3) Hearings and Conferences.
+(a) the Supervisor may conduct a hearing pursuant to the provisions of 801 CMR
+1.00: Standard Adjudicatory Rules of Practice and Procedure. The decision to hold a
+hearing shall be solely in the discretion of the Supervisor.
+
+950 CMR: OFFICE OF THE SECRETARY OF THE COMMONWEALTH
+32.08: continued
+1. said rules shall govern the conduct and procedure of all hearings conducted pursuant
+to 950 CMR 32.08.
+2.
+nothing in 950 CMR 32.08 shall limit the Supervisor from employing any
+administrative means available to resolve summarily any appeal arising under 950 CMR
+32.00.
+(b) the Supervisor may order conferences for the purpose of clarifying and simplifying
+issues and otherwise facilitating or expediting the investigation or proceeding. The decision
+to hold a conference shall be solely in the discretion of the Supervisor.
+(4) In Camera Inspections and Submissions of Data.
+(a) the Supervisor may require an inspection of the requested record(s) in camera during any
+investigation or any proceeding initiated pursuant to 950 CMR 32.08.
+(b) the Supervisor may require the records access officer to produce other records and
+information necessary to reach a determination pursuant to 950 CMR 32.08.
+(c) the Supervisor does not maintain custody of documents received from a records access
+officer submitted for an in camera review. The documents submitted for an in camera review
+do not fall within the definition of public records. M.G.L. c. 4, § 7(26).
+(d) upon a determination of the public record status of the documents, they are promptly
+returned to the custodian, and no copies shall be retained by the Supervisor.
+(e) any public record request made to the Division for records being reviewed in camera
+would necessarily be denied, as the office would not be the custodian of those records.
+(f) attorney-client privileged records voluntarily submitted to Supervisor:
+1. a records access officer may voluntarily submit documents to the Supervisor for in
+camera review;
+2. such submission shall not waive any legally applicable privileges claimed by the
+agency or municipality.
+(5) Custodial Indexing of Records.
+(a) the Supervisor may require a records access officer or custodian to compile an index of
+the requested records within the context of a public records appeal under 950 CMR 32.08.
+(b) said index shall be a public record and shall meet the following requirements:
+1. the index shall be contained in one document, complete in itself;
+2. the index shall adequately describe each withheld record or redaction from a released
+record;
+3. the index must state the exemption or exemptions claimed for each withheld record
+or each redaction of a record; and
+4. the descriptions of the withheld material and the exemption or exemptions claimed
+for the withheld material must be sufficiently specific to permit the Supervisor to make
+a reasoned judgment as to whether the material is exempt.
+(c) nothing in 950 CMR 32.08 shall preclude the Supervisor from employing alternative or
+supplemental procedures to meet the particular circumstances of each appeal.
+32.09: Enforcement of Orders
+A records access officer shall promptly take such steps as may be necessary to comply with
+an order of the Supervisor. If a records access officer fails to comply with an order issued by the
+Supervisor, the Supervisor, upon the Supervisor's initiative, may notify the Attorney General to
+ensure compliance.
+32.10: Advisory Opinions
+Advisory opinions from the Supervisor may be requested. However, it shall be in the
+Supervisor's discretion whether to issue an advisory opinion. The Supervisor has and will
+continue to provide a staff member on call every day during regular business hours to offer
+informal information to any person, whether a requester or custodian.
+REGULATORY AUTHORITY
+950 CMR 32.00: M.G.L. c. 66, § 1.
+
+
