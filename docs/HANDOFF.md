@@ -8332,3 +8332,31 @@ SPEC_auth_security_platform §1 (inventory).
   (MN first), (c) merge step (verified layer into fee_master_list.json + the new deferral-anchor rules),
   then step 3 (template fee_schedule value/unit/basis/engine_field). Fees role-gate hardening still PAUSED.
 - Standing board unchanged.
+
+## 2026-08-20 (f) — VERIFY-ONLY PASS COMPLETE except SC (session limit); 21/22 discovered states verified
+
+### What ran
+- Kevin approved the verify-only pass for the 18 discovered-but-unverified states. New script
+  `fee_gap/scripts/fee-gap-verify-slice.js` (04f7fbf): 1 refuter agent per state over the existing
+  raw/<ST>.json, short-circuits if verified/<ST>.json exists. Ran as 4 parallel disjoint workflows.
+- RESULTS (all committed: fce6e62, af20228, 3d3203c): 17 of 18 verified. 36/36 CONFIRMED: CT? no —
+  breakdown: FL IL KS LA NE NJ NV OH PA TN UT all 36/36 confirmed; TX 34+2 corrected (rules.minFee,
+  waiver.forfeiture); ID 34+2 corrected (rules.deposit.percent, payment.productionGate); IN 35+1
+  (certification), NC 35+1 (av), CT 35+1 (rules.deposit.percent); GA 35 confirmed + 1 UNVERIFIABLE
+  (payment.method — source unopenable, manual check). Corrections live in each verified file's
+  corrected_row. ZERO REFUTED rows across all 21 verified states.
+- **SC is the ONLY gap**: its verify agent died on the session limit (resets 2:10am UTC 2026-08-20).
+  To finish: `Workflow({scriptPath: 'docs/rules_research/fee_gap/scripts/fee-gap-verify-slice.js',
+  args: {states: ["SC"]}})` — one agent, ~20 min. Kevin approved this pass, so the relaunch is
+  pre-authorized once the limit resets.
+
+### State of the corpus
+- raw/: 22/32 (missing MA MI MN MO NY OK OR VA WA WI — full gap pass not yet approved for these).
+- verified/: 21/22 of discovered (missing SC only).
+
+### Next (Kevin's queue, from the regime-review session)
+1. SC verify relaunch (pre-approved, above). 2. Kevin decides: full gap pass for the 10 pending states
+   (MN first — thinnest + confirmed 2025 recency gap). 3. Merge step: fold CONFIRMED/CORRECTED
+   resolutions + new rule rows into alignment/fee_master_list.json as the verified layer, then RESULTS.md
+   aggregate. 4. Step 3 of the fee plan (template fee_schedule gains value/unit/basis/engine_field).
+- Fees role-gate hardening still PAUSED. Standing board unchanged.
