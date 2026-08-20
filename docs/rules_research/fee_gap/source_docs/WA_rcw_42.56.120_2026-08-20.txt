@@ -1,0 +1,106 @@
+PROVENANCE: Supplied by Kevin 2026-08-20 (exchange/'washington fees RCW 42.56.120_.pdf', text-extracted).
+SOURCE: apps.leg.wa.gov official RCW page for 42.56.120 (Charges for copying), fetched 2026-08-20; history line ends 2017 c 304 s 3 (current codified text).
+NOTE: Official current text; treat as openable-source equivalent for the WA gap pass.
+----------------------------------------------------------------
+8/20/26, 3:46 AM
+
+RCW 42.56.120:
+
+RCW 42.56.120
+Charges for copying.
+(1) No fee shall be charged for the inspection of public records or locating public documents and
+making them available for copying, except as provided in RCW 42.56.240(14) and subsection (3) of this
+section. A reasonable charge may be imposed for providing copies of public records and for the use by any
+person of agency equipment or equipment of the office of the secretary of the senate or the office of the chief
+clerk of the house of representatives to copy public records, which charges shall not exceed the amount
+necessary to reimburse the agency, the office of the secretary of the senate, or the office of the chief clerk of
+the house of representatives for its actual costs directly incident to such copying. When calculating any fees
+authorized under this section, an agency shall use the most reasonable cost-efficient method available to the
+agency as part of its normal operations. If any agency translates a record into an alternative electronic format
+at the request of a requestor, the copy created does not constitute a new public record for purposes of this
+chapter. Scanning paper records to make electronic copies of such records is a method of copying paper
+records and does not amount to the creation of a new public record.
+(2)(a) Agency charges for actual costs may only be imposed in accordance with the costs established
+and published by the agency pursuant to RCW 42.56.070(7), and in accordance with the statement of factors
+and manner used to determine the actual costs. In no event may an agency charge a per page cost greater
+than the actual cost as established and published by the agency.
+(b) An agency need not calculate the actual costs it charges for providing public records if it has rules
+or regulations declaring the reasons doing so would be unduly burdensome. To the extent the agency has not
+determined the actual costs of copying public records, the agency may not charge in excess of:
+(i) Fifteen cents per page for photocopies of public records, printed copies of electronic public records
+when requested by the person requesting records, or for the use of agency equipment to photocopy public
+records;
+(ii) Ten cents per page for public records scanned into an electronic format or for the use of agency
+equipment to scan the records;
+(iii) Five cents per each four electronic files or attachment uploaded to email, cloud-based data storage
+service, or other means of electronic delivery; and
+(iv) Ten cents per gigabyte for the transmission of public records in an electronic format or for the use
+of agency equipment to send the records electronically. The agency shall take reasonable steps to provide the
+records in the most efficient manner available to the agency in its normal operations; and
+(v) The actual cost of any digital storage media or device provided by the agency, the actual cost of any
+container or envelope used to mail the copies to the requestor, and the actual postage or delivery charge.
+(c) The charges in (b) of this subsection may be combined to the extent that more than one type of
+charge applies to copies produced in response to a particular request.
+
+https://apps.leg.wa.gov/rcw/default.aspx?cite=42.56.120
+
+1/3
+
+8/20/26, 3:46 AM
+
+RCW 42.56.120:
+
+(d) An agency may charge a flat fee of up to two dollars for any request as an alternative to fees
+authorized under (a) or (b) of this subsection when the agency reasonably estimates and documents that the
+costs allowed under this subsection are clearly equal to or more than two dollars. An additional flat fee shall
+not be charged for any installment after the first installment of a request produced in installments. An agency
+that has elected to charge the flat fee in this subsection for an initial installment may not charge the fees
+authorized under (a) or (b) of this subsection on subsequent installments.
+(e) An agency shall not impose copying charges under this section for access to or downloading of
+records that the agency routinely posts on its public internet website prior to receipt of a request unless the
+requestor has specifically requested that the agency provide copies of such records through other means.
+(f) A requestor may ask an agency to provide, and if requested an agency shall provide, a summary of
+the applicable charges before any copies are made and the requestor may revise the request to reduce the
+number of copies to be made and reduce the applicable charges.
+(3)(a)(i) In addition to the charge imposed for providing copies of public records and for the use by any
+person of agency equipment copying costs, an agency may include a customized service charge. A
+customized service charge may only be imposed if the agency estimates that the request would require the
+use of information technology expertise to prepare data compilations, or provide customized electronic access
+services when such compilations and customized access services are not used by the agency for other
+agency purposes.
+(ii) The customized service charge may reimburse the agency up to the actual cost of providing the
+services in this subsection.
+(b) An agency may not assess a customized service charge unless the agency has notified the
+requestor of the customized service charge to be applied to the request, including an explanation of why the
+customized service charge applies, a description of the specific expertise, and a reasonable estimate cost of
+the charge. The notice also must provide the requestor the opportunity to amend his or her request in order to
+avoid or reduce the cost of a customized service charge.
+(4) An agency may require a deposit in an amount not to exceed ten percent of the estimated cost of
+providing copies for a request, including a customized service charge. If an agency makes a request available
+on a partial or installment basis, the agency may charge for each part of the request as it is provided. If an
+installment of a records request is not claimed or reviewed, the agency is not obligated to fulfill the balance of
+the request. An agency may waive any charge assessed for a request pursuant to agency rules and
+regulations. An agency may enter into any contract, memorandum of understanding, or other agreement with a
+requestor that provides an alternative fee arrangement to the charges authorized in this section, or in
+response to a voluminous or frequently occurring request.
+[ 2017 c 304 s 3; 2016 c 163 s 4; 2005 c 483 s 2. Prior: 1995 c 397 s 14; 1995 c 341 s 2; 1973 c 1 s 30
+(Initiative Measure No. 276, approved November 7, 1972). Formerly RCW 42.17.300.]
+
+Notes:
+Finding—Intent—2016 c 163: See note following RCW 42.56.240.
+https://apps.leg.wa.gov/rcw/default.aspx?cite=42.56.120
+
+2/3
+
+8/20/26, 3:46 AM
+
+RCW 42.56.120:
+
+Effective date—1995 c 397: See note following RCW 29B.40.020.
+Effective date—Construction—1973 c 1: See notes following RCW 29B.05.010.
+
+https://apps.leg.wa.gov/rcw/default.aspx?cite=42.56.120
+
+3/3
+
+
