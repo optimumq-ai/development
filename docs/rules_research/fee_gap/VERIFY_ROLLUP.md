@@ -49,8 +49,13 @@ or (b) one substantive trim (CT).
 
 ## Follow-ups
 
-1. **GA payment.method** — the only row with no opened source. One manual check:
-   O.C.G.A. § 50-1-6 (electronic payment acceptance) via a browser.
+1. **GA payment.method — RESOLVED by scope decision (Kevin, 2026-08-20).** No manual check
+   needed: `payment.method` is OUT OF SCOPE for the state rules profile. Card acceptance is
+   citywide finance-department policy, not an open-records rule (across all 22 states the item
+   is either silent in the records law or rests on a general municipal-payments statute; only
+   TN/TX have records-specific content, and only at guidance level). **Exclude the item at
+   merge.** Bonus: Kevin's Justia 2025 copy of § 50-18-71 confirms GA fee subsections current
+   through SB 12 (eff. 5/14/2025, non-fee amendment).
 2. Decisions parked with Kevin: (a) merge CONFIRMED/CORRECTED resolutions + new 9NNN rule
    rows into `alignment/fee_master_list.json` as the `verified` layer; (b) whether to run the
    full gap pass for the 10 undiscovered states (MA MI MN MO NY OK OR VA WA WI — MN first).

@@ -8366,3 +8366,7 @@ SPEC_auth_security_platform §1 (inventory).
 - Verify pass is now COMPLETE: 22/22 discovered states, 792 rows, 773 confirmed / 18 corrected / 1 unverifiable (GA payment.method, needs manual browser check of O.C.G.A. § 50-1-6) / 0 refuted.
 - Rollup: docs/rules_research/fee_gap/VERIFY_ROLLUP.md
 - Parked with Kevin: (a) merge verified layer into alignment/fee_master_list.json; (b) gap pass for the 10 remaining states (MA MI MN MO NY OK OR VA WA WI — MN first). No agent spawns without explicit go.
+
+## Session (g) addendum — 2026-08-20
+- Kevin decision: payment.method is OUT OF SCOPE (finance-dept policy, not a records rule) — exclude at merge and in any future gap pass. GA UNVERIFIABLE row resolved by this decision; no § 50-1-6 fetch needed.
+- Kevin-supplied Justia 2025 copy of GA § 50-18-71 (exchange PDF) confirms GA fee subsections current through SB 12 (eff. 5/14/2025, non-fee amendment) — noted in verified/GA.json.
