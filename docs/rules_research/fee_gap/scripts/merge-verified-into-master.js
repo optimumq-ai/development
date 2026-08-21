@@ -20,11 +20,16 @@ const path = require('path')
 const RR = '/opt/optimumq/docs/rules_research'
 const MASTER = path.join(RR, 'alignment/fee_master_list.json')
 const NEW_RULES_OUT = path.join(RR, 'alignment/fee_gap_new_rules.json')
-const STATES = ['AL','AZ','CA','CO','CT','FL','GA','ID','IL','IN','KS','LA','NC','NE','NJ','NV','OH','PA','SC','TN','TX','UT']
 const EXCLUDED_ITEM = 'payment.method'
 const MERGED_AT = '2026-08-21'
 
 const master = JSON.parse(fs.readFileSync(MASTER, 'utf8'))
+
+// Merge every state that has BOTH a raw and a verified file — full idempotent rebuild.
+const STATES = master.states.filter(st =>
+  fs.existsSync(path.join(RR, `fee_gap/raw/${st}.json`)) &&
+  fs.existsSync(path.join(RR, `fee_gap/verified/${st}.json`)))
+console.log('merging states:', STATES.join(' '))
 
 // ---- load raw + verified per state --------------------------------------
 const rawByState = {}, verByState = {}
@@ -78,7 +83,9 @@ master.items = master.items.filter(item => {
   if (item.id === EXCLUDED_ITEM) { excludedItem = item; return false }
   return true
 })
-if (!excludedItem) throw new Error(`master list has no item ${EXCLUDED_ITEM} — already merged?`)
+const alreadyExcluded = !excludedItem &&
+  (master.excluded_items || []).some(e => e.item && e.item.id === EXCLUDED_ITEM)
+if (!excludedItem && !alreadyExcluded) throw new Error(`master list has no item ${EXCLUDED_ITEM} and no excluded_items record`)
 
 for (const item of master.items) {
   for (const st of STATES) {
@@ -136,18 +143,23 @@ master.verified_layer = {
   method: 'Per item-state cell, states[ST].verified holds the gap-pass resolution row (verify verdict CONFIRMED, or the verify agent\'s corrected_row where CORRECTED). Rows and full verify evidence: fee_gap/raw/<ST>.json + fee_gap/verified/<ST>.json; rollup: fee_gap/VERIFY_ROLLUP.md. New 9NNN rules: alignment/fee_gap_new_rules.json. The auto-derived status fields alongside are the ORIGINAL 2026-08-19 auto layer, kept for comparison; step 3 consumes the verified layer.',
 }
 master.excluded_items = master.excluded_items || []
-master.excluded_items.push({
-  excluded_at: MERGED_AT,
-  reason: 'Owner decision 2026-08-20 (Kevin): card/payment-instrument acceptance is finance-department policy, applies broadly to a city, not specifically to open records; a rules-profile item for it would be confusing. Excluded from the state rules profile at merge and in future gap passes.',
-  excluded_new_rule_ids_by_state: excludedRuleIds,
-  item: excludedItem,
-})
+const existingExclusion = master.excluded_items.find(e => e.item && e.item.id === EXCLUDED_ITEM)
+if (existingExclusion) {
+  existingExclusion.excluded_new_rule_ids_by_state = excludedRuleIds
+} else {
+  master.excluded_items.push({
+    excluded_at: MERGED_AT,
+    reason: 'Owner decision 2026-08-20 (Kevin): card/payment-instrument acceptance is finance-department policy, applies broadly to a city, not specifically to open records; a rules-profile item for it would be confusing. Excluded from the state rules profile at merge and in future gap passes.',
+    excluded_new_rule_ids_by_state: excludedRuleIds,
+    item: excludedItem,
+  })
+}
 
 fs.writeFileSync(MASTER, JSON.stringify(master, null, 1))
 
 // ---- report ----------------------------------------------------------------
 console.log('MERGE COMPLETE')
-console.log('items in master now:', master.items.length, '(was 36; payment.method moved to excluded_items)')
+console.log('items in master now:', master.items.length, '(payment.method in excluded_items)')
 console.log('verified cells written:', counts.cells, `(expect ${master.items.length * STATES.length})`)
 console.log('confirmed:', counts.confirmed, 'corrected:', counts.corrected)
 console.log('payment.method rows excluded:', counts.excluded_rows)
