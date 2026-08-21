@@ -1,10 +1,23 @@
 # Fee Gap Pass — Verify Rollup
 
-Status as of 2026-08-20. Covers the verify (refute) pass over the 22 discovered states'
+Status as of 2026-08-21. Covers the verify (refute) pass over ALL 32 states'
 `raw/<ST>.json` files. Verdicts per row: CONFIRMED | CORRECTED | REFUTED | UNVERIFIABLE.
 Source files: `verified/<ST>.json` (one row per resolution item, 36 per state).
+The final 10 states (MA MI MN MO NY OK OR VA WA WI) ran the source-grounded variant:
+Kevin-supplied official texts in `source_docs/` were the primary evidence; web research
+only for gaps, delegated instruments and flagged currency checks.
 
-## Grand tally (COMPLETE — all 22 discovered states verified)
+## Grand tally (COMPLETE — all 32 states verified)
+
+| Verdict | Rows | Share |
+|---|---|---|
+| CONFIRMED | 1129 | 98.0% |
+| CORRECTED | 22 | 1.9% |
+| UNVERIFIABLE | 1 (resolved by scope decision) | 0.1% |
+| **REFUTED** | **0** | — |
+| Total checked | 1152 | 32 states × 36 |
+
+### The first 22 states (2026-08-20)
 
 | Verdict | Rows | Share |
 |---|---|---|
@@ -47,6 +60,30 @@ or (b) one substantive trim (CT).
 | UT | 36 | 0 | 0 | 0 | — |
 | SC | 32 | 4 | 0 | 0 | estimate.requesterResponseDays, payment.reissue (both: quote is in § 30-4-30(C), not (B)), av (§ 23-1-240(G)(1) quote not on the row's official_link), commercial (§ 30-4-50(B) paraphrase flagged verbatim) — all four resolutions ("silent") stand |
 
+## The final 10 states (source-grounded, 2026-08-21)
+
+| State | C | c | R | U | Not-confirmed items |
+|---|---|---|---|---|---|
+| MA | 36 | 0 | 0 | 0 | verified against Kevin-supplied c.66 §10 + 950 CMR 32; currency check clean (no post-2016-reform amendment) |
+| MI | 35 | 1 | 0 | 0 | **labor.increment — "15 minutes or more" is a floor on the billing increment, not a fixed value.** Web-only sources (MCL 15.235, 408.934) re-fetched with repaired TLS chain, all figures confirmed, clean texts banked in source_docs |
+| MN | 36 | 0 | 0 | 0 | 2025 subd. 3(g) suspension rule captured; Minn. Rules 1205.x delegated layer followed |
+| MO | 36 | 0 | 0 | 0 | HB 145 withdrawal regime (90/150 days) captured; Gross v. Parson no-attorney-review-time honored |
+| NY | 35 | 1 | 0 | 0 | dup.specialty.rate — source_language updated to current § 87(1)(c) saver-clause placement (DOS page prints a stale rendering); substance stands |
+| OK | 36 | 0 | 0 | 0 | SB 2184 § 72 check: only swaps "Service Oklahoma" into ¶3 driving-records proviso — NO fee change; 25¢ cap regime stands |
+| OR | 36 | 0 | 0 | 0 | 2026 c.93 currency check done in discover; county-clerk delegation (ORS 205.320) followed |
+| VA | 36 | 0 | 0 | 0 | SB 56 (2026) correctly NOT imported (passed Senate, not enacted); history ends 2023 c.534 |
+| WA | 34 | 2 | 0 | 0 | media, delivery — basis fixed→**ceiling**: RCW 42.56.120(2)(b) "may not charge in excess of" makes actual cost a ceiling, matching the discover pass's own convention on sibling rows |
+| WI | 36 | 0 | 0 | 0 | DOJ 25¢ guidance correctly kept out of statutory values; § 19.35(3)(h) body-cam regime and no-redaction-fee case law captured |
+
+## Merge status (2026-08-21)
+
+**DONE — full 32-state verified layer merged into `alignment/fee_master_list.json`**
+(1120 cells = 35 items × 32 states; 1098 CONFIRMED rows as-is + 22 with the verify agent's
+corrected_row). `payment.method` moved to `excluded_items` per the owner decision; its 13
+payment-only 9NNN anchor rules excluded with it. The other 346 new 9NNN rules are banked in
+`alignment/fee_gap_new_rules.json`. Merge script (idempotent, full rebuild):
+`fee_gap/scripts/merge-verified-into-master.js`.
+
 ## Follow-ups
 
 1. **GA payment.method — RESOLVED by scope decision (Kevin, 2026-08-20).** No manual check
@@ -56,6 +93,8 @@ or (b) one substantive trim (CT).
    TN/TX have records-specific content, and only at guidance level). **Exclude the item at
    merge.** Bonus: Kevin's Justia 2025 copy of § 50-18-71 confirms GA fee subsections current
    through SB 12 (eff. 5/14/2025, non-fee amendment).
-2. Decisions parked with Kevin: (a) merge CONFIRMED/CORRECTED resolutions + new 9NNN rule
-   rows into `alignment/fee_master_list.json` as the `verified` layer; (b) whether to run the
-   full gap pass for the 10 undiscovered states (MA MI MN MO NY OK OR VA WA WI — MN first).
+2. ~~Decisions parked with Kevin~~ — both executed 2026-08-21: (a) the verified layer is
+   merged (see Merge status above); (b) the 10-state gap pass ran source-grounded on
+   Kevin-supplied official texts and is complete. **Step 2 is DONE for all 32 states.**
+   Next: step 3 — template `fee_schedule` gains `value/unit/basis/engine_field/applies_to`
+   from the verified layer.

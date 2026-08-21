@@ -8380,3 +8380,21 @@ SPEC_auth_security_platform §1 (inventory).
 ## Session (g) continued — 2026-08-20 evening
 - Kevin hand-sourced OFFICIAL fee statutes/regs for ALL 10 pending states; banked in fee_gap/source_docs/ (20 files, each with provenance header): WI WA VA OR MN MA MI MO NY OK. Highlights: MN subd.3(g) + MO HB 145 recency gaps closed at source; MA both layers (c.66 §10 + 950 CMR 32.00); OK text includes BOTH 2025 SB 535 and a previously unknown 2026 SB 2184 c.217 §72 amendment (discover must identify what SB 2184 changed); OR flagged 2026 c.93 check; NY agency-only docs banked with CAUTION labels.
 - NEXT (Kevin decisions): (1) discover+verify gap pass for the 10 states, grounded in source_docs/ first, web only for gaps — needs explicit go; (2) merge step for the 22 verified states — ready, nothing blocking. payment.method excluded everywhere per standing decision.
+
+## 2026-08-21 — Step 2 fee gap pass COMPLETE (all 32 states) + full merge
+- Relaunched the four 10-state workflows after the session-limit reset; file short-circuits skipped the
+  8 already-complete discovers + VA verify. All 20 agents finished: 10/10 discovers, 10/10 verifies.
+- 10-state verify results: 356 CONFIRMED + 4 CORRECTED, 0 REFUTED (WA media/delivery basis fixed→ceiling;
+  MI labor.increment value→floor; NY dup.specialty.rate stale DOS rendering). OK SB 2184 §72 checked:
+  no fee change. VA SB 56 correctly not imported.
+- MI TLS incident: both MI agents fetched legislature.mi.gov with the site's broken chain bypassed
+  (leaf-only, missing DigiCert G2 intermediate). Cleared by re-fetching MCL 15.235 + 408.934 with the
+  repaired chain (--cacert w/ intermediate from cacerts.digicert.com); all figures matched; clean texts
+  banked as source_docs/MI_mcl_15_235_tlsverified* / MI_mcl_408_934_tlsverified*.
+- MERGE DONE (fe0a20d 22-state, 754acfd full 32): fee_master_list.json now carries states[ST].verified on
+  every cell — 1120/1120 (35 items × 32 states). payment.method → excluded_items (owner decision
+  2026-08-20); 346 new 9NNN rules banked in alignment/fee_gap_new_rules.json (13 payment-only excluded).
+  Merge script rebuilds idempotently: fee_gap/scripts/merge-verified-into-master.js.
+- Rollup extended to 32 states: fee_gap/VERIFY_ROLLUP.md (grand tally 1129 C / 22 c / 0 R on 1152 rows).
+- NEXT: step 3 — template fee_schedule gains value/unit/basis/engine_field/applies_to from the verified
+  layer. Also parked: classifier hint on child assign-picker (Draft 5 §3 residuals, with Kevin).
