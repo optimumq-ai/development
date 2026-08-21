@@ -1,0 +1,299 @@
+{
+  "code": "WA",
+  "verified_at": "2026-08-21",
+  "rows": [
+    {
+      "item_id": "dup.bw.rate",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim clause string-matched in owner-supplied official RCW 42.56.120 text (source_docs/WA_rcw_42.56.120_2026-08-20.txt, (2)(b)(i)). 'May not charge in excess of' fifteen cents = ceiling under Permission — resolution word correct. Chapter 42.56 'agency' includes local agencies, so all_public_bodies is right. History ends 2017 c 304; the 2026-08-20 official fetch shows no 2024-2026 amendment.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt (apps.leg.wa.gov RCW 42.56.120, fetched 2026-08-20)",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.color.rate",
+      "verdict": "CONFIRMED",
+      "why": "Same verbatim (2)(b)(i) clause present in the source doc; the statute sets no color-specific rate and the photocopy ceiling is not limited by color, so applying it to color pages is a defensible scope judgment that the row transparently flags (confidence medium, manual_verification noted). Ceiling word correct; municipal scope correct.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.oversized.rate",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim 120(1) actual-cost clause string-matched in the source doc. No oversized-specific rate exists anywhere in .120/.070 (full texts read). Soft standard recorded WITHOUT a number — actual_cost_standard is the right word; judgment flagged in manual_verification.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.specialty.rate",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim 120(3)(a)(ii) clause ('may reimburse the agency up to the actual cost') string-matched in the source doc. actual_cost_standard with basis ceiling matches the 'up to' structure; no number recorded. Municipal scope correct.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "dup.tiers",
+      "verdict": "CONFIRMED",
+      "why": "Full text of RCW 42.56.120 and 42.56.070(7) read from the source docs — no graduated page bands anywhere; the default rates are flat per-unit ceilings combinable under (2)(c). Silent with coverage note is correct.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt; source_docs/WA_rcw_42.56.070_certified_2026-07-15.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.freePages",
+      "verdict": "CONFIRMED",
+      "why": "No numeric free-page allowance in the full texts of .120 or .070(7). The zero-charge categories the notes cite (inspection/locating free; routinely-posted records) are present verbatim in the source docs and are categorical, not page counts. Silent is correct.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt; source_docs/WA_rcw_42.56.070_certified_2026-07-15.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.search.rate",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim 120(1) prohibition ('No fee shall be charged for the inspection ... or locating public documents ... except as provided in RCW 42.56.240(14) and subsection (3)') string-matched in the source doc. Categorical non-chargeability makes a search labor rate impossible — not_applicable is the right word; both statutory exceptions are noted.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.review.rate",
+      "verdict": "CONFIRMED",
+      "why": "Quoted 120(1) clause verbatim in source doc; the combined-effect reasoning (only copying chargeable at actual costs directly incident to copying + 070(7)(b) excluding staff salaries/overhead except copy-and-send time) is supported by both source texts read in full. Row honestly flags the inference in manual_verification; body-cam redaction exception correctly carved out.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt; source_docs/WA_rcw_42.56.070_certified_2026-07-15.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.programming.rate",
+      "verdict": "CONFIRMED",
+      "why": "Both quoted 120(3) sentences string-matched verbatim in the source doc. No hourly figure in statute; 'up to the actual cost' = actual_cost_standard with ceiling basis — correct word. Notice gate accurately described.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.billableWhen",
+      "verdict": "CONFIRMED",
+      "why": "Quoted sentence ('Staff time to copy and send ... may be included in an agency's costs') verbatim in the certified 42.56.070 text (7)(b). The four-branch gate shape in the notes matches all four cited provisions, each verified verbatim (120(1), 120(3), 070(7)(b) in source docs; 240(14)(f) on the web). Structural is the right word — no page/hour threshold exists.",
+      "checked_link": "source_docs/WA_rcw_42.56.070_certified_2026-07-15.txt; https://app.leg.wa.gov/RCW/default.aspx?cite=42.56.240",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.overheadPct",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim 070(7)(b) exclusion clause string-matched in the certified 7/15/2026 text. Overhead/fringe surcharge affirmatively prohibited — not_applicable under a Prohibition is correct; no 2024-2026 amendment (history ends 2017 c 304 s 1).",
+      "checked_link": "source_docs/WA_rcw_42.56.070_certified_2026-07-15.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.increment",
+      "verdict": "CONFIRMED",
+      "why": "Full texts of .120 and .070(7) contain no billing-increment or rounding rule. Silent with coverage note is correct; the mootness observation is accurate given search labor is non-chargeable.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt; source_docs/WA_rcw_42.56.070_certified_2026-07-15.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.freeLaborHours",
+      "verdict": "CONFIRMED",
+      "why": "No free-labor-hours allowance in the full fee-section texts. Silent is correct.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt; source_docs/WA_rcw_42.56.070_certified_2026-07-15.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "labor.periodicFreeHours",
+      "verdict": "CONFIRMED",
+      "why": "No periodic per-requestor free-time figure in the fee sections (source docs read in full). The 240(14)(f)(iii) note verified verbatim on the web: 'allocation of, or limitation on, time or costs spent responding to public records requests under this chapter, as established pursuant to local ordinance, policy, procedure, or state law' — statute acknowledges local allocations but creates no state figure. Silent is correct.",
+      "checked_link": "https://app.leg.wa.gov/RCW/default.aspx?cite=42.56.240",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.estimateNotifyThreshold",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim 120(2)(f) on-request summary-of-charges clause string-matched in the source doc; the 120(3)(b) mandatory notice gate also verified verbatim. No dollar/hour threshold exists — structural (trigger-based duties, no threshold) is the right word.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.requesterResponseDays",
+      "verdict": "CONFIRMED",
+      "why": "RCW 42.56.520 opened on the web: it contains no fee-estimate response window (only the 5-day acknowledgment, 'reasonable estimate of the time', and the (3)(b) clarification-nonresponse rule, which is about clarification, not estimates; history ends 2017 c 303). 120(4) has no day count. Silent is correct.",
+      "checked_link": "https://app.leg.wa.gov/RCW/default.aspx?cite=42.56.520",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.revisionNotifyPercent",
+      "verdict": "CONFIRMED",
+      "why": "No revised-estimate-on-variance percentage in the full texts of .120/.070(7) (source docs) or in .520 (web, no fee content). Silent is correct.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt; https://app.leg.wa.gov/RCW/default.aspx?cite=42.56.520",
+      "corrected_row": null
+    },
+    {
+      "item_id": "estimate.validityDays",
+      "verdict": "CONFIRMED",
+      "why": "No estimate validity period in .120/.070(7) (source docs) or .520 (web). Silent is correct.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt; https://app.leg.wa.gov/RCW/default.aspx?cite=42.56.520",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deposit.threshold",
+      "verdict": "CONFIRMED",
+      "why": "120(4) read verbatim in the source doc: deposit permitted for any request with no dollar trigger, bounded only by the 10% cap. Silent (no state threshold) is correct.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deposit.percent",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim 120(4) clause ('not to exceed ten percent of the estimated cost of providing copies for a request, including a customized service charge') string-matched in the source doc. 'Not to exceed' = ceiling under Permission — resolution word correct; unit correctly captures the customized-service-charge base.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.productionGate",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim per-installment charging clause string-matched in 120(4). Structural is correct; the note honestly states the statute does not expressly authorize withholding a completed non-installment production.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.nonpayment",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim unclaimed-installment clause string-matched in 120(4). Terminal trigger with no statutory day count — structural is correct.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.depositClock",
+      "verdict": "CONFIRMED",
+      "why": "120(4) (source doc) and .520 (web) both silent on the clock while a deposit is unpaid — no grace period or lapse action anywhere. Silent is correct.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt; https://app.leg.wa.gov/RCW/default.aspx?cite=42.56.520",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.reissue",
+      "verdict": "CONFIRMED",
+      "why": "No overrun re-issue rule in .120/.070(7) (source docs) or .520 (web). Silent is correct.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt; https://app.leg.wa.gov/RCW/default.aspx?cite=42.56.520",
+      "corrected_row": null
+    },
+    {
+      "item_id": "payment.method",
+      "verdict": "CONFIRMED",
+      "why": "Out of scope per owner decision 2026-08-20. Row correctly recorded as not_applicable with the out-of-scope note ('finance-department policy, excluded from state rules profile') — verified as instructed, no source check required.",
+      "checked_link": "n/a (owner decision)",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.maxFee",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim 120(1) actual-cost cap clause string-matched in the source doc; 120(2)(a) published-actual-cost cap and the 070(7) notice-and-hearing adoption gate both verified verbatim in the source docs. actual_cost_standard with ceiling basis is correct — no number converted from the soft standard.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt; source_docs/WA_rcw_42.56.070_certified_2026-07-15.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.deMinimis",
+      "verdict": "CONFIRMED",
+      "why": "No de-minimis floor in the fee sections. The $2 flat fee characterization matches 120(2)(d) verbatim in the source doc (optional alternative, available only when documented costs clearly >= $2). Silent is correct.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "rules.minFee",
+      "verdict": "CONFIRMED",
+      "why": "No minimum fee in the fee sections; the 120(2)(d) flat-fee mechanics (no flat fee on later installments; flat fee on first installment forecloses per-unit fees on subsequent ones) match the source doc text. Silent is correct.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "media",
+      "verdict": "CORRECTED",
+      "why": "Quote, value (none), unit, applies_to and resolution word all check out — the (2)(b)(v) clause is verbatim in the source doc. But basis 'fixed' is wrong: (2)(b)(v) sits under 'the agency may not charge in excess of', so actual cost is a CEILING on the charge, not a state-fixed figure — and 'ceiling' is the discover pass's own convention on its sibling actual-cost rows (dup.specialty.rate, labor.programming.rate, rules.maxFee). basis corrected fixed -> ceiling; all else unchanged.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt",
+      "corrected_row": {
+        "state": "WA",
+        "item_id": "media",
+        "resolution": "actual_cost_standard",
+        "value": null,
+        "unit": null,
+        "basis": "ceiling",
+        "rule_type": "Permission",
+        "applies_to": "all_public_bodies",
+        "resolved_by_rule_ids": [],
+        "new_rule_ids": ["WA-9010"],
+        "source_authority": "RCW 42.56.120(2)(b)(v)",
+        "source_type": "Statute",
+        "official_link": "https://app.leg.wa.gov/RCW/default.aspx?cite=42.56.120",
+        "source_language": "The actual cost of any digital storage media or device provided by the agency, the actual cost of any container or envelope used to mail the copies to the requestor, and the actual postage or delivery charge.",
+        "is_paraphrase": false,
+        "effective_status": "Current",
+        "confidence": "high",
+        "manual_verification": null,
+        "notes": "CD/DVD/USB and other digital storage media/devices: chargeable at ACTUAL COST under the default schedule (no fixed dollar figure) — (2)(b)(v) sits under the 'may not charge in excess of' chapeau, so actual cost is a ceiling. Electronic delivery instead has numeric defaults: five cents per each four electronic files uploaded ((b)(iii), WA-0023) and ten cents per gigabyte transmitted ((b)(iv), WA-0024). Charges under (b) may be combined ((c))."
+      }
+    },
+    {
+      "item_id": "delivery",
+      "verdict": "CORRECTED",
+      "why": "Same as media: (2)(b)(v) quote verbatim in the source doc, resolution word and scope correct, but basis 'fixed' misstates the 'may not charge in excess of' structure — actual cost is a ceiling. basis corrected fixed -> ceiling; all else unchanged.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt",
+      "corrected_row": {
+        "state": "WA",
+        "item_id": "delivery",
+        "resolution": "actual_cost_standard",
+        "value": null,
+        "unit": null,
+        "basis": "ceiling",
+        "rule_type": "Permission",
+        "applies_to": "all_public_bodies",
+        "resolved_by_rule_ids": ["WA-0023", "WA-0024"],
+        "new_rule_ids": ["WA-9010"],
+        "source_authority": "RCW 42.56.120(2)(b)(iii)-(v)",
+        "source_type": "Statute",
+        "official_link": "https://app.leg.wa.gov/RCW/default.aspx?cite=42.56.120",
+        "source_language": "The actual cost of any digital storage media or device provided by the agency, the actual cost of any container or envelope used to mail the copies to the requestor, and the actual postage or delivery charge.",
+        "is_paraphrase": false,
+        "effective_status": "Current",
+        "confidence": "high",
+        "manual_verification": null,
+        "notes": "Mail delivery: actual cost of container/envelope plus actual postage or delivery charge ((b)(v), WA-9010) — a ceiling under the 'may not charge in excess of' chapeau. Electronic delivery defaults (absent published actual costs): 5 cents per each four files/attachments uploaded ((b)(iii)) and 10 cents per gigabyte transmitted ((b)(iv)); agency must use the most efficient manner available in its normal operations. No pickup charge exists (inspection is free, 120(1))."
+      }
+    },
+    {
+      "item_id": "certification",
+      "verdict": "CONFIRMED",
+      "why": "The PRA fee sections (.120, .070(7)) contain no certification or certified-copy charge — verified against both full source-doc texts. Silent with the officer-specific-statutes caveat (flagged for manual verification) is correct for a general municipal PRA request.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt; source_docs/WA_rcw_42.56.070_certified_2026-07-15.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "av",
+      "verdict": "CONFIRMED",
+      "why": "RCW 42.56.240 opened on the web (the discover pass's own flag): the (14)(f) source_language matches the current official text VERBATIM, and the section's history confirms currency through 2026 c 174 s 6 — the 2024/2026 amendments did not alter the quoted clause. No per-recording/per-minute/free-minutes figures exist; structural is correct, and the law-enforcement/corrections-only scope and (14)(e) exemptions are accurately noted. Discover's manual_verification flag on this row is hereby cleared.",
+      "checked_link": "https://app.leg.wa.gov/RCW/default.aspx?cite=42.56.240",
+      "corrected_row": null
+    },
+    {
+      "item_id": "commercial",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim 070(8) commercial-lists prohibition (including the professional-license-list proviso) string-matched in the certified 7/15/2026 text. Structural/Prohibition is the right shape — WA gates DENIAL of commercial list requests, no fee schedule.",
+      "checked_link": "source_docs/WA_rcw_42.56.070_certified_2026-07-15.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "waiver",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim 120(4) waiver sentence string-matched in the source doc. Express delegation to agency rules with no statutory grounds/tests/duties — defers_to_city under Discretion is the right word.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt",
+      "corrected_row": null
+    },
+    {
+      "item_id": "waiver.forfeiture",
+      "verdict": "CONFIRMED",
+      "why": "No fee-forfeiture-on-late-response rule in .120/.070 (source docs) or .520 (web). Silent is correct; the RCW 42.56.550 penalties observation is out of fee scope as noted.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt; https://app.leg.wa.gov/RCW/default.aspx?cite=42.56.520",
+      "corrected_row": null
+    },
+    {
+      "item_id": "repeat",
+      "verdict": "CONFIRMED",
+      "why": "Verbatim 120(4) alternative-fee-arrangement clause string-matched in the source doc. Structural (negotiated contract/MOU path, no formula) is the right word; the 240(14)(f)(iii) local-allocation note verified verbatim on the web.",
+      "checked_link": "source_docs/WA_rcw_42.56.120_2026-08-20.txt; https://app.leg.wa.gov/RCW/default.aspx?cite=42.56.240",
+      "corrected_row": null
+    }
+  ],
+  "notes": "Verified 2026-08-21. Sources: owner-supplied official texts (source_docs/WA_rcw_42.56.120_2026-08-20.txt, apps.leg.wa.gov fetch; source_docs/WA_rcw_42.56.070_certified_2026-07-15.txt, certified PDF) — every .120/.070 quote string-matched verbatim; plus web opens of RCW 42.56.240 (av row: (14)(f) verbatim match, current through 2026 c 174 s 6 — discover's manual_verification flag cleared) and RCW 42.56.520 (no fee/estimate/deposit content; history ends 2017 c 303 — confirms the six silent rows that lean on it). Currency: .120 and .070 histories end at 2017 c 304 in 2026-dated official texts, so no 2024-2026 amendments to the fee sections. WA runs one regime for state and local bodies (chapter 42.56 'agency' includes local agencies), so all_public_bodies scoping is correct throughout; no agency-only figure was recorded as municipal. payment.method confirmed as not_applicable per owner out-of-scope decision. 34 CONFIRMED, 2 CORRECTED (media, delivery: basis 'fixed' -> 'ceiling' to match the 'may not charge in excess of' chapeau; quotes, values, scope and resolution words were otherwise correct). 0 REFUTED, 0 UNVERIFIABLE."
+}

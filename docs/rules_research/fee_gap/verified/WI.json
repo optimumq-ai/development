@@ -1,0 +1,259 @@
+{
+ "code": "WI",
+ "verified_at": "2026-08-21",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim s. 19.35(3)(a) actual/necessary/direct clause string-matches the certified source doc; no per-page number anywhere in subch. II (only $1.29/$5/$50/$10,000 appear in the 19.35 region); 'authority' per s. 19.32(1) covers local bodies; s. 19.35 history ends 2023 a. 253 (2025 a. 7/25/130 amended s. 19.36 only). Soft standard correctly carried with value=null.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same (3)(a) verbatim matches; confirmed no separate color provision in the certified subch. II text; soft standard, value=null, municipal scope via s. 19.32(1).",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same (3)(a) verbatim matches; no oversized/nonstandard provision exists in the certified text; soft standard correctly recorded.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (3)(b) photographing/photographic-processing clause matches the certified source exactly; actual-cost soft standard, value=null; municipal scope confirmed.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative verified: full (3) FEES subsection read in certified source (paras (a)-(h)); no graduated/tiered band provision; only dollar figures in the 19.35 region are $1.29 (annotation), $5, $50, $10,000.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative verified against the full certified (3) subsection: no free-page allowance; (3)(e) discretionary waiver sets no page number.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (3)(c) location clause incl. 'if the cost is $50 or more' matches certified source; no hourly rate anywhere; soft standard with the $50 threshold correctly parked at labor.billableWhen.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim Milwaukee Journal Sentinel four-tasks annotation matches the certified annotations; (3)(h) LE A/V exception verbatim also matches (WI-9001). not_applicable/Prohibition is the right word: redaction labor is categorically non-chargeable for general records.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim '72 Atty. Gen. 68' annotation line matches the certified source; row honestly flags (manual_verification) that the opinion body was not separately opened; confidence medium is appropriate.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (3)(c) matches; $50 is a fixed statutory chargeability threshold ('if the cost is $50 or more'), so resolution=value with basis=fixed and the threshold-explaining unit is correct, not a ceiling misread.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative verified: no overhead/fringe percentage anywhere in the certified (3) subsection; 'direct cost' wording confirmed in (a)-(d).",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative verified: no time-increment or rounding rule in the certified (3) subsection.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative verified: no hours-based free-labor allowance; the only analogous mechanism is the $50 location-cost threshold, correctly resolved elsewhere.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative verified: no periodic free personnel time provision; the (3)(h)3.b counter counts A/V requests, not hours, as the row states.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "General-regime silence verified against the full (3) and (4) text (no estimate threshold); the quoted narrow exception, (3)(h)7 written-estimate precondition, string-matches the certified source verbatim.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative verified: no requester response window or deemed-withdrawal in ss. 19.35/19.37 certified text.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative verified: no revised-estimate-on-variance percentage in the certified text.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative verified: no estimate validity period in the certified text.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (3)(f) first sentence matches ('exceeds $5'); value=5 with exceed-semantics in the unit is exact; Permission is right (may require). Borzych annotation present in source.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative verified: (3)(f) permits prepayment of 'any fee or fees' with no percentage cap; nothing else in the certified subsection supplies one.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "Both verbatim clauses match the certified source ((3)(f) and the s. 19.35(1)(i) mail-request sentence, which wraps across lines in the source file but matches after whitespace normalization); structural resolution is right — no number to record.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (3)(f) prisoner prior-debt sentence matches the certified source exactly; correctly limited to prisoner requesters with the general regime silent.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative verified: (4)(a) 'as soon as practicable and without delay' confirmed in certified text at s. 19.35(4)(a); no grace/lapse mechanics anywhere.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative verified: no overrun/re-issue rule in the certified text; (3)(h)7 is a precondition, not a re-issue mechanism, as the row says.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "Out of scope per owner decision (2026-08-20): recorded as not_applicable with the out-of-scope note and no source fields — exactly the required shape.",
+   "checked_link": "n/a (out of scope by owner decision; no source to open)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim Milwaukee Journal Sentinel annotation matches; structural actual-cost ceiling correctly recorded with value=null; s. 19.37(4) $1,000 forfeiture note confirmed in certified text (line re: excessive fees).",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative verified: no request-level de-minimis in the certified (3) subsection; the two task-scoped analogues ($50 location, $5 prepayment) are correctly resolved on their own items.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative verified: no minimum fee in the certified text.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (3)(a) matches; row honestly flags the medium-as-reproduction-cost scope judgment in manual_verification with confidence medium; Lueders annotation present in certified source.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (3)(d) mailing/shipping clause matches the certified source exactly; actual-cost soft standard correctly recorded.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim '72 Atty. Gen. 36' annotation line matches the certified source; structural/Prohibition (no charge for unrequested certification) is the right shape; opinion-body caveat honestly flagged.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (3)(h)2 matches the certified source ((h) created by 2023 Wis. Act 253, present in full at s. 19.35(3)(h)1.-7.); general A/V copies under (3)(a) actual cost; LE-only scope of (h) correctly confined to notes.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "General-regime silence verified (no commercial schedule in certified (3)); the quoted s. 19.35(1)(i) purpose sentence string-matches the certified source; the (3)(h)3.a commercial fork is verbatim-confirmed via WI-9001.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (3)(e) public-interest waiver clause matches exactly; Discretion is the right word (may provide without charge); George v. Record Custodian annotation verbatim confirmed (WI-9004).",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative verified: no fee-forfeiture-on-late-response rule; s. 19.37 certified text confirms the up-to-$1,000 forfeiture is an enforcement penalty, and s. 19.35(4)(a) has no fixed deadline to trigger on.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (3)(h)3.b 10-requests-per-calendar-year clause matches the certified source exactly; structural resolution right (a counter, not a fee value); binds municipal police as LE authorities, so municipal applicability stands.",
+   "checked_link": "source_doc:docs/rules_research/fee_gap/source_docs/WI_ch19_certified_2026-08-05.txt (verified against owner-supplied certified text; official_link https://docs.legis.wisconsin.gov/statutes/statutes/19/ii/35)",
+   "corrected_row": null
+  }
+ ],
+ "notes": "All 36 rows verified against the owner-supplied certified source document WI_ch19_certified_2026-08-05.txt (PROVENANCE: certified 2023-24 Wisconsin Statutes & Annotations, published 2026-08-05 under s. 35.18, through 2025 Wis. Act 247), which the gap-pass instructions treat as openable-source equivalent for docs.legis.wisconsin.gov ch. 19 subch. II citations. Every is_paraphrase=false quote (20 resolution rows plus new rules WI-9001..WI-9004) string-matches the source after whitespace/typographic normalization. Every structured negative was checked against the complete s. 19.35(3)(a)-(h) and (4) text; the only dollar figures in the 19.35 region are $1.29 (Borzych annotation), $5, $50, and $10,000, corroborating the no-per-page-rate and other absence claims. Currency: the s. 19.35 history line ends at 2023 a. 253; the 2025 acts in the certified volume (2025 a. 7, 25, 130) amended s. 19.36, not the fee section — no 2024-2026 amendment of s. 19.35. Municipal scope: s. 19.32(1) 'authority' expressly includes local offices/bodies, so the single fee regime binds municipalities; no agency-only figure is recorded as municipal. payment.method confirmed as not_applicable with the out-of-scope owner note per instructions. Residual caveats already flagged inside the rows (annotation-line verbatims for 72 Atty. Gen. 68/36 whose opinion bodies were not opened; media scope judgment) are honest manual_verification flags, not defects."
+}
