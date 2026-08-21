@@ -185,6 +185,14 @@ function loadTemplate(code) {
   return { tpl: tpl, sha256: crypto.createHash('sha256').update(raw, 'utf8').digest('hex'), file: path.basename(p) };
 }
 
+// The fee-plan step-3 templates carry fee_schedule = { items, statutory_evidence } (the verified
+// per-state rate rows joined in beside the evidence). The import consumes only the concept-keyed
+// evidence; older single-block templates ARE that block.
+function feeEvidenceOf(tpl) {
+  var fs2 = tpl.fee_schedule || {};
+  return fs2.statutory_evidence || fs2;
+}
+
 function listTemplates() {
   return fs.readdirSync(TEMPLATE_DIR)
     .filter(function (f) { return /^[A-Z]{2}\.json$/.test(f); })
@@ -404,7 +412,7 @@ function policedDomain(domain, mod, tpl, report) {
   Object.keys(tpl.knobs || {}).forEach(function (k) { blocks.push(tpl.knobs[k].statutory); });
   Object.keys(tpl.branches || {}).forEach(function (k) { blocks.push(tpl.branches[k].activated_by); });
   Object.keys(tpl.clock_matrix || {}).forEach(function (k) { blocks.push(tpl.clock_matrix[k].statutory); });
-  blocks.push(tpl.fee_schedule); blocks.push(tpl.ledger);
+  blocks.push(feeEvidenceOf(tpl)); blocks.push(tpl.ledger);
 
   var relevant = {};
   Object.keys(map).forEach(function (c) { relevant[c] = 1; });
@@ -484,7 +492,7 @@ function buildConfigs(meta, opts) {
   domains.fee = evidenceDomain(meta, knobs.fee || {}, {
     // The statutory fee CONSTRAINTS. The live rate table stays in `fee_profiles` — this is the evidence
     // a city's fee schedule has to sit inside, not a replacement for it.
-    fee_schedule: evidence(tpl.fee_schedule).concepts
+    fee_schedule: evidence(feeEvidenceOf(tpl)).concepts
   });
   domains.exemption = evidenceDomain(meta, knobs.exemption || {}, {});
   domains.redaction = evidenceDomain(meta, knobs.redaction || {}, {});

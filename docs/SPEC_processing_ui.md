@@ -160,7 +160,11 @@ identity + taxonomy (derived read-only fields from their REAL stores — the pro
 config, and record_types counts — with an edited-elsewhere pointer; added 2026-08-14 after both
 fell to raw-null and rendered "No content" over configured, attested sections while the index,
 reading the same sources via the signature, said configured — the row and the detail must agree;
-verify_bw9b_editors A9b/A9c), rest read-only raw. Composer: citation + note required; compose-time validators are
+verify_bw9b_editors A9b/A9c), rest read-only raw. **Fees section composer upgraded 2026-08-21:**
+the raw-JSON fallback is replaced by the structured fee composer (Draft 11) — labeled rows with
+statutory bounds beside each input, refused inline + 422 server-side, files a DRAFT fee-profile
+version (`SPEC_jurisdiction_configuration.md` §5b, bounds gate in Domain 6 §1).
+Composer: citation + note required; compose-time validators are
 configIntegrity's OWN `validateDomainConfig`/`validateClockMatrix` (factored pure — same code,
 same wording, re-run at apply); proposals land `source_ref='editor'` in the existing review/apply
 flow; editor applies write the jurisdiction_rules row + re-sync (drift-warn). Senior Legal
