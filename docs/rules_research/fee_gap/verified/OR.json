@@ -1,0 +1,259 @@
+{
+ "code": "OR",
+ "verified_at": "2026-08-21",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Full chapter print opened (192.311–192.501 present in source doc); only dollar figures anywhere are $25 (192.324(4)(c)) and the $200 penalty (192.407(3)(b)); no provision of this kind exists in ch.192; coverage note names the search scope; 2026 c.93 non-fee.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Full chapter print opened (192.311–192.501 present in source doc); only dollar figures anywhere are $25 (192.324(4)(c)) and the $200 penalty (192.407(3)(b)); no provision of this kind exists in ch.192; coverage note names the search scope; 2026 c.93 non-fee.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Full chapter print opened (192.311–192.501 present in source doc); only dollar figures anywhere are $25 (192.324(4)(c)) and the $200 penalty (192.407(3)(b)); no provision of this kind exists in ch.192; coverage note names the search scope; 2026 c.93 non-fee.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "Full chapter print opened (192.311–192.501 present in source doc); only dollar figures anywhere are $25 (192.324(4)(c)) and the $200 penalty (192.407(3)(b)); no provision of this kind exists in ch.192; coverage note names the search scope; 2026 c.93 non-fee.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Full chapter print opened (192.311–192.501 present in source doc); only dollar figures anywhere are $25 (192.324(4)(c)) and the $200 penalty (192.407(3)(b)); no provision of this kind exists in ch.192; coverage note names the search scope; 2026 c.93 non-fee.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Full chapter print opened (192.311–192.501 present in source doc); only dollar figures anywhere are $25 (192.324(4)(c)) and the $200 penalty (192.407(3)(b)); no provision of this kind exists in ch.192; coverage note names the search scope; 2026 c.93 non-fee.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Full chapter print opened (192.311–192.501 present in source doc); only dollar figures anywhere are $25 (192.324(4)(c)) and the $200 penalty (192.407(3)(b)); no provision of this kind exists in ch.192; coverage note names the search scope; 2026 c.93 non-fee.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "Full chapter print opened (192.311–192.501 present in source doc); only dollar figures anywhere are $25 (192.324(4)(c)) and the $200 penalty (192.407(3)(b)); no provision of this kind exists in ch.192; coverage note names the search scope; 2026 c.93 non-fee.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Full chapter print opened (192.311–192.501 present in source doc); only dollar figures anywhere are $25 (192.324(4)(c)) and the $200 penalty (192.407(3)(b)); no provision of this kind exists in ch.192; coverage note names the search scope; 2026 c.93 non-fee.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "Recorded as not_applicable with the owner out-of-scope note (finance-dept policy, decision 2026-08-20) — exactly as required.",
+   "checked_link": "n/a (owner decision)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Full chapter print opened (192.311–192.501 present in source doc); only dollar figures anywhere are $25 (192.324(4)(c)) and the $200 penalty (192.407(3)(b)); no provision of this kind exists in ch.192; coverage note names the search scope; 2026 c.93 non-fee.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Full chapter print opened (192.311–192.501 present in source doc); only dollar figures anywhere are $25 (192.324(4)(c)) and the $200 penalty (192.407(3)(b)); no provision of this kind exists in ch.192; coverage note names the search scope; 2026 c.93 non-fee.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "Full chapter print opened (192.311–192.501 present in source doc); only dollar figures anywhere are $25 (192.324(4)(c)) and the $200 penalty (192.407(3)(b)); no provision of this kind exists in ch.192; coverage note names the search scope; 2026 c.93 non-fee.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "Full chapter print opened (192.311–192.501 present in source doc); only dollar figures anywhere are $25 (192.324(4)(c)) and the $200 penalty (192.407(3)(b)); no provision of this kind exists in ch.192; coverage note names the search scope; 2026 c.93 non-fee.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "Quote is an accurately elided 192.407(3) (\"...\") — checked against the full subsection text in the source doc; discretionary petition-triggered remedy correctly recorded as structural/Discretion, not automatic. Verbatim clause string-matched in the official ORS ch.192 print (source doc, oregonlegislature.gov, 192.324 history ends 2025 c.30 s1); value/unit/basis/rule_type confirmed against full 192.324/192.329/192.407 text; ORS 192.311(4) includes cities so all_public_bodies is correct; 2026 Or. Laws ch.93 opened — health-care privacy act, does not amend 192.324/192.329.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt (covers https://www.oregonlegislature.gov/bills_laws/ors/ors192.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Full chapter print opened (192.311–192.501 present in source doc); only dollar figures anywhere are $25 (192.324(4)(c)) and the $200 penalty (192.407(3)(b)); no provision of this kind exists in ch.192; coverage note names the search scope; 2026 c.93 non-fee.",
+   "checked_link": "source_doc:/opt/optimumq/docs/rules_research/fee_gap/source_docs/OR_ors192_2026-08-20.txt",
+   "corrected_row": null
+  }
+ ],
+ "notes": "36/36 CONFIRMED. Verification against the Kevin-supplied official ORS ch.192 print (OR_ors192_2026-08-20.txt); every verbatim quote string-matched after curly-quote/whitespace normalization. The source-doc CAVEAT (2026 acts not incorporated) was closed independently: 2026 Or. Laws ch. 93 (SB 1570) PDF opened from oregonlegislature.gov — it adds a section to ORS 192.553–192.581 (health-care facility privacy) and does not amend 192.324 or 192.329, and the chapter header names ch. 93 as the only 2026 act touching ch. 192. Silent-row absences verified by full-chapter sweep: only dollar figures in the chapter are the $25 estimate gate and the $200 penalty; all deposit hits are \"deposition\". ORS 205.320 county-clerk figures appear only in notes/OR-9003 (labeled non-municipal) and were not re-opened — they back no municipal resolution value. AG Manual remains unopened as discover disclosed; it is guidance-layer and affects no verdict."
+}
