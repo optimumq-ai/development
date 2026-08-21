@@ -9,8 +9,28 @@ const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const engine = require('../services/feeEngine');
 const feePolicyExtract = require('../services/feePolicyExtract');
+const feeBounds = require('../services/feeBounds');
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
+
+// state code for a jurisdiction id (or the active jurisdiction when none given)
+async function stateCodeFor(jid) {
+  if (!jid) {
+    var sc = await get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'");
+    jid = sc && sc.value;
+  }
+  if (!jid) return null;
+  var row = await get('SELECT code FROM jurisdiction_profiles WHERE id = ?', [jid]);
+  return row ? { jid: jid, code: row.code } : null;
+}
+
+// refuse a config that contradicts state law — same gate for hand edits and AI-extracted values
+async function boundsGate(config, jid) {
+  var st = await stateCodeFor(jid);
+  if (!st) return null;
+  var violations = feeBounds.check(config || {}, st.code);
+  return violations.length ? { code: st.code, violations: violations } : null;
+}
 function parseConfig(row) { if (!row) return row; var c = {}; try { c = JSON.parse(row.config_json || '{}'); } catch (e) { c = {}; } row.config = c; delete row.config_json; return row; }
 
 // jurisdictions for the selector
@@ -29,6 +49,17 @@ router.post('/extract', requireAuth, async function (req, res) {
     var result = await feePolicyExtract.extract(text, { context: context });
     res.json(result);
   } catch (e) { res.status(502).json({ error: 'Extraction failed: ' + (e && e.message ? e.message : 'unknown error') }); }
+});
+
+// statutory bounds for a jurisdiction's state (default: the active jurisdiction) — what the
+// law allows per fee-config value, for display beside the inputs. Source: the verified
+// 32-state fee layer. MUST be registered before GET /:id.
+router.get('/bounds', requireAuth, async function (req, res) {
+  try {
+    var st = await stateCodeFor(req.query.jurisdiction_id || null);
+    if (!st) return res.json({ jurisdiction_id: null, code: null, bounds: null });
+    res.json({ jurisdiction_id: st.jid, code: st.code, bounds: feeBounds.forState(st.code) });
+  } catch (e) { res.status(500).json({ error: 'Could not load the state fee bounds.' }); }
 });
 
 // pure preview: { config, request } -> itemized feeContext (no persistence)
@@ -65,6 +96,11 @@ router.post('/', requireAuth, async function (req, res) {
   try {
     var b = req.body || {};
     var context = (b.context === 'SS') ? 'SS' : 'FR';
+    var gate = await boundsGate(b.config, b.jurisdiction_id || null);
+    if (gate) return res.status(422).json({
+      error: 'Refused: ' + gate.violations.length + ' value(s) contradict ' + gate.code + ' state law.',
+      violations: gate.violations,
+    });
     var id = 'feeprof-' + uuidv4().slice(0, 8);
     var now = nowStr();
     await run(
@@ -82,6 +118,13 @@ router.put('/:id', requireAuth, async function (req, res) {
     var b = req.body || {};
     var existing = await get('SELECT * FROM fee_profiles WHERE id = ?', [req.params.id]);
     if (!existing) return res.status(404).json({ error: 'Fee profile not found.' });
+    if (b.config != null) {
+      var gate = await boundsGate(b.config, existing.jurisdiction_id || null);
+      if (gate) return res.status(422).json({
+        error: 'Refused: ' + gate.violations.length + ' value(s) contradict ' + gate.code + ' state law.',
+        violations: gate.violations,
+      });
+    }
     var sets = [], params = [];
     if (b.name != null) { sets.push('name = ?'); params.push(b.name); }
     if (b.status != null) { sets.push('status = ?'); params.push(b.status); }

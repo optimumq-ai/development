@@ -252,6 +252,205 @@ function ResearchPopup(props) {
 // The proposal composer — every content edit is a proposal, one audit path, no exceptions.
 // `seed` shapes the form: {clockType, row} → the structured Frame C editor; {field} → a policy
 // field editor; otherwise the full-config JSON editor. Submit builds the FULL proposed config.
+// ── FEE VALUE COMPOSER (Draft 11, approved mockup 2026-08-21) ────────────────────────────────
+// Replaces the raw-JSON fallback for the fees section: one labeled row per fee value, with what
+// state law allows shown beside the input (bounds from the verified 32-state fee layer). An entry
+// above a state ceiling is refused inline AND server-side. Files a DRAFT fee-profile version —
+// review, test and activate stay on the Fee Configuration screen.
+var FEE_FIELDS = [
+  { g: 'Copy charges', key: 'duplication.bw.rate', label: 'Charge per black-and-white copy', unit: '$ / page' },
+  { g: 'Copy charges', key: 'duplication.color.rate', label: 'Charge per color copy', unit: '$ / page' },
+  { g: 'Copy charges', key: 'duplication.oversized.rate', label: 'Charge per oversized copy', unit: '$ / page' },
+  { g: 'Copy charges', key: 'duplication.specialty.rate', label: 'Charge per specialty item', unit: '$ / item' },
+  { g: 'Copy charges', key: 'certification.rate', label: 'Charge to certify a copy', unit: '$ / record' },
+  { g: 'Staff time', key: 'labor.search.rate', label: 'Search time — hourly rate', unit: '$ / hour' },
+  { g: 'Staff time', key: 'labor.review.rate', label: 'Review & redaction time — hourly rate', unit: '$ / hour' },
+  { g: 'Staff time', key: 'labor.programming.rate', label: 'Programming time — hourly rate', unit: '$ / hour' },
+  { g: 'Staff time', key: 'labor.overheadPct', label: 'Overhead added to staff-time charges', unit: '%' },
+  { g: 'Free allowances', key: 'requestRules.freePageAllowance', label: 'Free pages before copy charges start', unit: 'pages' },
+  { g: 'Free allowances', key: 'requestRules.freeLaborHours', label: 'Free staff hours before time charges start', unit: 'hours' },
+  { g: 'Estimates & deposits', key: 'requestRules.estimateNotifyThreshold', label: 'Send a written estimate when the total reaches', unit: '$' },
+  { g: 'Estimates & deposits', key: 'requestRules.deposit.threshold', label: 'Require a deposit when the estimate reaches', unit: '$' },
+  { g: 'Estimates & deposits', key: 'requestRules.deposit.percent', label: 'Deposit amount', unit: '% of estimate' },
+  { g: 'Estimates & deposits', key: 'estimatePolicy.requesterResponseDays', label: 'Days a requestor has to respond to an estimate', unit: 'business days' },
+  { g: 'Estimates & deposits', key: 'estimatePolicy.revisionNotifyPercent', label: 'Re-notify the requestor if the cost changes by more than', unit: '%' },
+  { g: 'Estimates & deposits', key: 'estimatePolicy.estimateValidityDays', label: 'Days an estimate stays valid', unit: 'days' },
+  { g: 'Limits & rounding', key: 'requestRules.deMinimis', label: 'Waive totals at or below', unit: '$' },
+  { g: 'Limits & rounding', key: 'requestRules.minFee', label: 'Minimum charge', unit: '$' },
+  { g: 'Limits & rounding', key: 'requestRules.maxFee', label: 'Maximum charge per request', unit: '$' },
+  { g: 'Media & delivery', key: 'media.cd', label: 'CD', unit: '$ / item' },
+  { g: 'Media & delivery', key: 'media.dvd', label: 'DVD', unit: '$ / item' },
+  { g: 'Media & delivery', key: 'media.usb', label: 'USB drive', unit: '$ / item' },
+  { g: 'Media & delivery', key: 'delivery.mail', label: 'Postage & mailing', unit: '$' },
+  { g: 'Media & delivery', key: 'delivery.handling', label: 'Handling', unit: '$' },
+  { g: 'Media & delivery', key: 'av.perRecording', label: 'Audio / video — per recording', unit: '$' },
+  { g: 'Media & delivery', key: 'av.perMinute', label: 'Audio / video — per minute', unit: '$ / minute' }
+];
+function getPath(obj, dotted) {
+  var cur = obj; var parts = dotted.split('.');
+  for (var i = 0; i < parts.length; i++) { if (cur == null || typeof cur !== 'object') return undefined; cur = cur[parts[i]]; }
+  return cur;
+}
+function setPath(obj, dotted, val) {
+  var parts = dotted.split('.'); var cur = obj;
+  for (var i = 0; i < parts.length - 1; i++) {
+    if (cur[parts[i]] == null || typeof cur[parts[i]] !== 'object') cur[parts[i]] = {};
+    cur = cur[parts[i]];
+  }
+  cur[parts[parts.length - 1]] = val;
+}
+function boundProblem(bound, num) {
+  if (!bound || bound.value == null || num == null || isNaN(num)) return null;
+  if (bound.kind === 'ceiling' && num > bound.value) return 'Above the state limit — this cannot be submitted.';
+  if (bound.kind === 'fixed' && num > bound.value) return 'Above the statute-set figure — this cannot be submitted.';
+  if (bound.kind === 'floor' && num < bound.value) return 'Below the state minimum — this cannot be submitted.';
+  return null;
+}
+
+function FeeComposerPopup(props) {
+  var [loading, setLoading] = useState(true);
+  var [loadErr, setLoadErr] = useState('');
+  var [code, setCode] = useState(null);
+  var [jid, setJid] = useState(null);
+  var [bounds, setBounds] = useState({});
+  var [base, setBase] = useState(null);      // the active FR profile config (or {} when none)
+  var [baseName, setBaseName] = useState('');
+  var [entries, setEntries] = useState({});  // key -> raw input string
+  var [note, setNote] = useState('');
+  var [citation, setCitation] = useState('');
+  var [busy, setBusy] = useState(false);
+  var [err, setErr] = useState('');
+  var [filed, setFiled] = useState(null);
+
+  useEffect(function () {
+    var alive = true;
+    (async function () {
+      try {
+        var b = await api.get('/fee-profiles/bounds');
+        if (!alive) return;
+        setCode(b.data.code); setJid(b.data.jurisdiction_id); setBounds(b.data.bounds || {});
+        var list = await api.get('/fee-profiles', { params: { jurisdiction_id: b.data.jurisdiction_id } });
+        var rows = (list.data.profiles || []).filter(function (p) { return p.context === 'FR'; });
+        var pick = rows.find(function (p) { return p.status === 'active'; }) || rows[0];
+        if (pick) {
+          var full = await api.get('/fee-profiles/' + pick.id);
+          if (!alive) return;
+          setBase(full.data.profile.config || {}); setBaseName(pick.name || pick.id);
+        } else { setBase({}); setBaseName('(no fee configuration exists yet — values start blank)'); }
+      } catch (e) { if (alive) setLoadErr('Could not load the fee configuration or the state bounds.'); }
+      if (alive) setLoading(false);
+    })();
+    return function () { alive = false; };
+  }, []);
+
+  var rows = FEE_FIELDS.map(function (f) {
+    var bound = bounds && bounds[f.key];
+    var cur = base ? getPath(base, f.key) : undefined;
+    var raw = entries[f.key];
+    var touched = raw != null && String(raw).trim() !== '';
+    var num = touched ? Number(String(raw).replace(/[$,]/g, '')) : null;
+    var bad = touched && isNaN(num) ? 'Enter a number.' : boundProblem(bound, num);
+    var statutory = bound && (bound.kind === 'ceiling' || bound.kind === 'floor' || bound.kind === 'fixed' || bound.kind === 'actual_cost');
+    return { f: f, bound: bound, cur: cur, raw: raw, touched: touched, num: num, bad: bad, statutory: statutory };
+  });
+  var changed = rows.filter(function (r) { return r.touched && !r.bad; });
+  var blocked = rows.filter(function (r) { return r.touched && r.bad; });
+  var statutoryChanged = changed.some(function (r) { return r.statutory; });
+  var canSubmit = !busy && changed.length > 0 && blocked.length === 0 && note.trim() && (!statutoryChanged || citation.trim());
+
+  function submit() {
+    setErr(''); setBusy(true);
+    var cfg = JSON.parse(JSON.stringify(base || {}));
+    changed.forEach(function (r) { setPath(cfg, r.f.key, r.num); });
+    cfg._proposal = { note: note, citation: citation || null, changed: changed.map(function (r) { return r.f.key; }),
+      from: baseName, via: 'jurisdiction-config/fees composer' };
+    api.post('/fee-profiles', { jurisdiction_id: jid, context: 'FR',
+      name: 'Proposed from Fee & cost schedule — ' + new Date().toISOString().slice(0, 10), config: cfg })
+      .then(function () { setFiled('Filed as a DRAFT fee configuration (' + changed.length + ' change' + (changed.length === 1 ? '' : 's') + '). It does not price anything until it is reviewed, tested and made active on the Fee Configuration screen.'); })
+      .catch(function (e) {
+        var d = e.response && e.response.data;
+        setErr((d && d.error) || 'Refused.');
+        if (d && d.violations) setErr(d.error + ' ' + d.violations.map(function (v) { return v.message; }).join(' '));
+      })
+      .then(function () { setBusy(false); });
+  }
+
+  var inputStyle = { font: 'inherit', fontSize: 12.5, border: '1px solid ' + G.line, borderRadius: 5, padding: '6px 9px', background: C.surface, color: C.ink, width: 90 };
+  var groups = [];
+  rows.forEach(function (r) { if (!groups.length || groups[groups.length - 1].g !== r.f.g) groups.push({ g: r.f.g, rows: [] }); groups[groups.length - 1].rows.push(r); });
+
+  return (
+    <ConfirmPopup open={true} onClose={props.onClose} title={'Propose change — Fee & cost schedule' + (code ? ' (' + code + ')' : '')}
+      actions={filed ? [<button key="c" type="button" style={btnQuiet} onClick={function () { props.onDone(null); }}>Close</button>]
+        : [
+          <button key="s" type="button" disabled={!canSubmit} style={canSubmit ? btn : btnOff} onClick={submit}>File as draft fee configuration</button>,
+          <button key="x" type="button" style={btnQuiet} onClick={props.onClose}>Cancel</button>
+        ]}>
+      {filed ? <div style={{ fontSize: 12.5, color: C.ink }}>{filed}</div>
+        : loading ? <div style={kv}>Loading the current fee configuration and this state's legal limits…</div>
+        : loadErr ? <div style={{ color: C.crit, fontSize: 12.5 }}>{loadErr}</div>
+        : (
+        <div>
+          <div style={Object.assign({}, kv, { marginBottom: 8 })}>
+            Every answer shows what state law allows next to it. Change only what you need — untouched answers stay as they are.
+            Starting from: <b style={{ color: C.ink }}>{baseName}</b>
+          </div>
+          <div style={{ maxHeight: '48vh', overflowY: 'auto', paddingRight: 4 }}>
+            {groups.map(function (grp) {
+              return (
+                <div key={grp.g}>
+                  <div style={Object.assign({}, railHead, { marginTop: 6 })}>{grp.g}</div>
+                  {grp.rows.map(function (r) {
+                    var rowStyle = r.statutory
+                      ? { border: '1px solid ' + G.line, borderLeft: '4px solid ' + G.navy, borderRadius: 5, padding: '7px 10px', marginBottom: 6, background: C.surface, display: 'flex', gap: 12, alignItems: 'flex-start' }
+                      : { border: '1px dashed ' + G.amberLine, borderLeft: '4px solid ' + G.amberLine, borderRadius: 5, padding: '7px 10px', marginBottom: 6, background: G.amberBg, display: 'flex', gap: 12, alignItems: 'flex-start' };
+                    return (
+                      <div key={r.f.key} style={rowStyle}>
+                        <div style={{ flex: '1 1 0', minWidth: 0 }}>
+                          <div style={{ fontSize: 12.5, fontWeight: 600, color: C.ink }}>{r.f.label}</div>
+                          <div style={{ display: 'inline-block', marginTop: 4, fontSize: 10.5, fontWeight: 600, borderRadius: 3, padding: '1px 7px',
+                            color: r.statutory ? G.navy : G.amberInk,
+                            background: r.statutory ? C.surface2 : C.surface,
+                            border: r.statutory ? '1px solid ' + G.line : '1px dashed ' + G.amberLine }}>
+                            {r.bound ? r.bound.text : 'THE LAW IS SILENT — your city decides.'}
+                          </div>
+                        </div>
+                        <div style={{ flex: 'none', width: 200 }}>
+                          <div style={{ fontSize: 11, color: C.faint }}>Current: <b style={{ color: C.ink }}>{r.cur == null ? '—' : String(r.cur)}</b></div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 3 }}>
+                            <input value={r.raw || ''} placeholder="unchanged"
+                              onChange={function (e) { var v = e.target.value; setEntries(function (prev) { var n = Object.assign({}, prev); n[r.f.key] = v; return n; }); }}
+                              style={r.bad ? Object.assign({}, inputStyle, { border: '1px solid ' + C.crit, background: C.critTint }) : inputStyle} />
+                            <span style={{ fontSize: 11, color: C.muted }}>{r.f.unit}</span>
+                          </div>
+                          {r.bad ? <div style={{ fontSize: 11, color: C.crit, fontWeight: 600, marginTop: 3 }}>{r.bad}</div>
+                            : r.touched ? <div style={{ fontSize: 11, color: C.green, fontWeight: 600, marginTop: 3 }}>Will be included.</div> : null}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+          <div style={Object.assign({}, kv, { margin: '9px 0 3px' })}>Citation <i>{statutoryChanged ? '(required — you are changing a law-bounded answer)' : '(needed only if you change a law-bounded answer)'}</i></div>
+          <input value={citation} onChange={function (e) { setCitation(e.target.value); }}
+            style={{ width: '100%', boxSizing: 'border-box', font: 'inherit', fontSize: 12.5, border: '1px solid ' + G.line, borderRadius: 5, padding: '7px 9px', background: C.surface, color: C.ink }} />
+          <div style={Object.assign({}, kv, { margin: '8px 0 3px' })}>Note <i>(required — the next reader needs to know why)</i></div>
+          <textarea rows={2} value={note} onChange={function (e) { setNote(e.target.value); }}
+            style={{ width: '100%', boxSizing: 'border-box', font: 'inherit', fontSize: 12.5, border: '1px solid ' + G.line, borderRadius: 5, padding: '7px 9px', background: C.surface, color: C.ink }} />
+          <div style={Object.assign({}, kv, { marginTop: 8 })}>
+            This files a <b style={{ color: C.ink }}>draft fee configuration</b>: <b style={{ color: C.ink }}>{changed.length} change{changed.length === 1 ? '' : 's'} ready</b>
+            {blocked.length ? <span> · <b style={{ color: C.crit }}>{blocked.length} blocked by a state limit</b></span> : null}.
+            Review, test and activate it on the Fee Configuration screen. Nothing prices differently until then.
+          </div>
+          {err ? <div style={{ color: C.crit, fontSize: 12.5, marginTop: 7 }}>{err}</div> : null}
+        </div>
+      )}
+    </ConfirmPopup>
+  );
+}
+
 function ComposerPopup(props) {
   var seed = props.seed || {};
   var cur = props.currentConfig || {};
@@ -715,6 +914,10 @@ export default function JurisdictionConfigPage() {
         </div>
 
         {composer ? (
+          sec.section === 'fees' && !composer.seed.clockType && !composer.seed.field ? (
+            <FeeComposerPopup onClose={function () { setComposer(null); }}
+              onDone={function () { setComposer(null); reload(); }} />
+          ) : (
           <ComposerPopup open={true} onClose={function () { setComposer(null); }}
             section={sec.section} domain={composer.domain} title={composer.title} seed={composer.seed}
             currentConfig={(rules && rules.configs && rules.configs[composer.domain]) || {}}
@@ -724,6 +927,7 @@ export default function JurisdictionConfigPage() {
               if (r && r.drifted && r.driftNote) setErr(r.driftNote);
               reload();
             }} />
+          )
         ) : null}
         <ResearchPopup ruleId={drill} onClose={function () { setDrill(null); }} />
         {err ? <div style={{ color: G.amberInk, fontSize: 12.5, marginTop: 8, background: G.amberBg, border: '1px solid ' + G.amberLine, borderRadius: 5, padding: '7px 10px' }}>{err}</div> : null}
