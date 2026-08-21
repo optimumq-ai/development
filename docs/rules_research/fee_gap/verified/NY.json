@@ -1,0 +1,279 @@
+{
+ "code": "NY",
+ "verified_at": "2026-08-21",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim § 87(1)(b)(iii) saver + clause (1) present in the official COOG FOIL law text (opengovernment.ny.gov/foil-law-text PDF, page updated 2026-05-29 — current rendering with (1)/(2) structure); 'shall not exceed twenty-five cents' = ceiling, not value; 21 NYCRR 1401.8(b)(1) 25-cent ceiling confirmed on official COOG regs page with Part 1401 heading expressly covering counties/cities/towns/villages, so municipal applies_to holds. official_link nysenate.gov returned HTTP 500/403 — same statutory text verified on the official ny.gov COOG print instead.",
+   "checked_link": "https://opengovernment.ny.gov/foil-law-text",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same verbatim clause confirmed (official COOG FOIL law text); neither § 87 nor 1401.8 distinguishes color, so the same $0.25 ceiling by scope judgment is faithfully recorded as ceiling with medium confidence and an explicit manual_verification flag for COOG opinions — no overreach to refute.",
+   "checked_link": "https://opengovernment.ny.gov/foil-law-text",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 1401.8(b)(2) ('shall not exceed the actual cost of reproduction') confirmed PRESENT on the official COOG regs page; correctly recorded as actual_cost_standard with no invented number; Part 1401 heading confirms municipal scope.",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CORRECTED",
+   "why": "Substance correct (any-other-record at actual cost, § 87(1)(c) exclusive components), but the recorded source_language is the SUPERSEDED rendering with the 'except when a different fee is otherwise prescribed by statute' saver trailing the clause (as printed on the stale DOS page). In the current statute the saver PRECEDES clauses (1)/(2); the recorded string is absent from the current official text (checked in the COOG FOIL law text PDF). Corrected source_language to the current rendering.",
+   "checked_link": "https://opengovernment.ny.gov/foil-law-text",
+   "corrected_row": {
+    "state": "NY",
+    "item_id": "dup.specialty.rate",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard (\"actual cost of reproducing any other record\")",
+    "rule_type": "Permission",
+    "applies_to": "all_public_bodies",
+    "resolved_by_rule_ids": ["NY-0025", "NY-0027", "NY-0030"],
+    "new_rule_ids": ["NY-9005"],
+    "source_authority": "N.Y. Pub. Off. Law § 87(1)(b)(iii)(1), § 87(1)(c)",
+    "source_type": "Statute",
+    "official_link": "https://www.nysenate.gov/legislation/laws/PBO/87",
+    "source_language": "except when a different fee is otherwise prescribed by statute: (1) the fees for paper copies of records shall not exceed twenty-five cents per photocopy not in excess of nine inches by fourteen inches, or the actual cost of reproducing any other record in accordance with the provisions of paragraph (c) of this subdivision.",
+    "is_paraphrase": false,
+    "effective_status": "Current",
+    "confidence": "high",
+    "manual_verification": null,
+    "notes": "Photos, maps, transcripts and other non-photocopy media are 'any other record' — fee capped at actual cost with only the § 87(1)(c) components (lowest-paid qualified employee's hourly salary, storage media actual cost, qualifying outside-service cost). The 'different fee otherwise prescribed by statute' saver (which PRECEDES the fee clauses in the current rendering) matters here: several record types (e.g., vital records, court transcripts) carry their own statutory fees outside FOIL. [VERIFY: source_language updated to current § 87(1)(b)(iii) rendering; the prior quote reflected the pre-amendment DOS print.]"
+   }
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative with coverage note; full POL Article 6 text (owner-supplied DOS print read in full + current COOG law text) and 1401.8 (opened) contain no volume/page bands — single flat ceiling plus actual-cost regime.",
+   "checked_link": "https://opengovernment.ny.gov/foil-law-text",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "No free-page allowance anywhere in Article 6 or 1401.8 (both read in full/opened); adjacent no-charge rules correctly distinguished in notes.",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim § 87(1)(c)(iv) string-matched in owner-supplied DOS source doc (provenance dos.ny.gov/coog/foil2.html = official_link) and present in current COOG law text; search time categorically excluded, so not_applicable/Prohibition is the right shape; 1401.8(a)(2) municipal no-charge confirmed on COOG regs page.",
+   "checked_link": "source_docs/NY_pol_article6_2026-08-20.txt (dos.ny.gov/coog/foil2.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 1401.8(a)(3) (intro 'An agency shall not charge a fee for the following' + review clause) confirmed PRESENT on official COOG regs page; Part 1401 heading confirms it binds local agencies; not_applicable/Prohibition correct; electronic-redaction edge properly flagged for manual verification.",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim § 87(1)(c)(i) string-matched in DOS source doc and present in current COOG law text; correctly a soft standard (lowest-paid-qualified hourly salary) with no invented dollar figure; § 89(3)(a) programming-not-new-record clause verified in DOS doc.",
+   "checked_link": "source_docs/NY_pol_article6_2026-08-20.txt (dos.ny.gov/coog/foil2.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 'no fee shall be charged unless at least two hours...' string-matched in DOS source doc and current COOG law text; value 2 hours as fixed statutory threshold is correct; statute-vs-reg 'at least' vs 'more than' discrepancy is real (1401.8(c)(i) 'more than two hours' confirmed on COOG regs page) and properly flagged with the statute governing.",
+   "checked_link": "source_docs/NY_pol_article6_2026-08-20.txt (dos.ny.gov/coog/foil2.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim § 87(1)(c) 'may include only' exclusive enumeration string-matched in DOS source doc; overhead/fringe cannot exist under an exclusive list that names only salary, media, outside service; § 87(1)(c)(iv) separately bars administrative costs.",
+   "checked_link": "source_docs/NY_pol_article6_2026-08-20.txt (dos.ny.gov/coog/foil2.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative with coverage note; no increment/rounding rule in Article 6 (read in full) or 1401.8 (opened); only time figure is the 2-hour threshold, carried elsewhere.",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim § 87(1)(c)(iv) matched in DOS source doc; 'structural' is the right resolution — NY is a 2-hour gate, not a free-hours deduction — and the hours-0-2-once-gate-opens ambiguity is properly parked as manual verification, not resolved by guess.",
+   "checked_link": "source_docs/NY_pol_article6_2026-08-20.txt (dos.ny.gov/coog/foil2.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative; no per-requestor periodic free-time provision in Article 6 (full read) or 1401.8 (opened).",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim estimate-notice sentence string-matched in DOS source doc and present in current COOG law text; value 2 hours (trigger 'more than two hours' OR outside-service retention) with Requirement type is correct; 1401.8(e) restatement for local agencies confirmed on COOG regs page.",
+   "checked_link": "source_docs/NY_pol_article6_2026-08-20.txt (dos.ny.gov/coog/foil2.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative; no requester response window or deemed-withdrawal in Article 6 (full read) or 1401.8 (opened in full — subdivisions (a)-(g) all fee/waiver/prepayment, nothing procedural on estimates beyond the notice).",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative; no percentage-overrun revision rule in Article 6 or 1401.8.",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative; no estimate validity/expiry period in Article 6 or 1401.8.",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 1401.8(f) advance-payment permission confirmed PRESENT on official COOG regs page; resolution 'silent' is right — no dollar threshold gates prepayment anywhere; the permission itself is carried by NY-9003/payment.productionGate, not smuggled in as a threshold value.",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative; no partial-deposit percentage scheme; 1401.8(f) permits full prepayment (confirmed verbatim).",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 1401.8(f) confirmed on COOG regs page; § 89(3)(a) 'Upon payment of, or offer to pay...' backstop string-matched in DOS source doc and present in current COOG law text; structural/Permission shape correct (discretionary prepayment gate); Part 1401 heading confirms municipal scope.",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative; full Article 6 read confirms no withdrawal-after-N-days or prior-debt rule; consequence correctly framed as production duty never attaching under § 89(3)(a).",
+   "checked_link": "https://opengovernment.ny.gov/foil-law-text",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative; § 89(3)(a) clocks (5 business days / 20 business days / date certain) read in full in DOS source doc — no tolling tied to fees or deposits.",
+   "checked_link": "source_docs/NY_pol_article6_2026-08-20.txt (dos.ny.gov/coog/foil2.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative; only the initial estimate notice exists; no overrun re-issue/collection-block/window-restart rule in Article 6 or 1401.8.",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "Recorded as not_applicable with the out-of-scope-per-owner-decision note (2026-08-20, finance-department policy) — exactly the required treatment; no substantive verification performed per owner decision.",
+   "checked_link": "",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "Both quoted fragments present in current COOG law text (clause (1) ending '...paragraph (c) of this subdivision.' and '(c) In determining the actual cost of reproducing a record, an agency may include only:'); structural ceiling correctly recorded as actual_cost_standard, no invented request-level dollar cap.",
+   "checked_link": "https://opengovernment.ny.gov/foil-law-text",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative; no de-minimis floor in Article 6 or 1401.8; related no-fee categories properly kept distinct in notes.",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 1401.8(b)(1) anti-minimum sentence ('shall not be construed to mandate the raising of fees...') confirmed PRESENT on COOG regs page; resolution 'silent' with the anti-minimum clause noted is the right treatment (no minimum exists).",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim § 87(1)(c)(ii) string-matched in DOS source doc and present in current COOG law text; actual_cost_standard with no fixed media rates is correct; 1401.8(c)(ii) mirror noted.",
+   "checked_link": "source_docs/NY_pol_article6_2026-08-20.txt (dos.ny.gov/coog/foil2.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative; 'postage' appears nowhere in Article 6 (grep of full DOS text: 0 hits) and is not among the exclusive § 87(1)(c) components; 1401.8 (a)-(g) opened, no delivery charge provision; COOG-opinion postage practice properly flagged for manual verification.",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 1401.8(a)(4) ('any certification required pursuant to this Part' under the shall-not-charge intro) confirmed PRESENT on COOG regs page; value 0 / Prohibition correct; Part 1401 municipal scope confirmed; other-statute certified-copy fees properly excepted in notes.",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "Quoted fragment ends at '...paragraph (c) of this subdivision.' which matches the CURRENT clause (1) rendering exactly (verified in COOG law text PDF); actual_cost_standard with no per-minute figures is correct.",
+   "checked_link": "https://opengovernment.ny.gov/foil-law-text",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative; FOIL fees purpose-blind — full Article 6 read confirms the only purpose-sensitive rule is the § 89(3)(a) solicitation certification (non-fee), correctly noted.",
+   "checked_link": "https://opengovernment.ny.gov/foil-law-text",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 1401.8(g) confirmed PRESENT on COOG regs page; structural/Discretion with no statutory grounds is exactly right — statute itself is silent, permission lives in the regulation, which Part 1401's heading makes municipal authority.",
+   "checked_link": "https://opengovernment.ny.gov/freedom-information-law",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "Structured negative; § 89(4) read in full in DOS source doc — late response constitutes a denial (appeal) and can support attorney fees, never fee forfeiture.",
+   "checked_link": "source_docs/NY_pol_article6_2026-08-20.txt (dos.ny.gov/coog/foil2.html)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim § 87(1)(b)(iii)(2) 6-month/identical-record clause string-matched PRESENT in the official COOG FOIL law text PDF (opengovernment.ny.gov/foil-law-text, updated 2026-05-29) — an official ny.gov print of the current statute; also corroborated by the 2025 Justia code mirror. The stale DOS print's omission of this clause (flagged by discover) is confirmed: the old 'fees for copies of records which shall not exceed' rendering is ABSENT from the current text. nysenate.gov official_link itself returned HTTP 500/403.",
+   "checked_link": "https://opengovernment.ny.gov/foil-law-text",
+   "corrected_row": null
+  }
+ ],
+ "notes": "Verified 2026-08-21. Sources opened: (1) owner-supplied DOS Article 6 print (source_docs/NY_pol_article6_2026-08-20.txt) — all 8 dos.ny.gov-anchored quotes string-matched exactly (python whitespace-normalized matching); (2) official COOG regs page https://opengovernment.ny.gov/freedom-information-law — all seven 21 NYCRR 1401.8 quotes confirmed PRESENT verbatim, Part 1401 heading ('...STATE AND LOCAL AGENCIES, INCLUDING COUNTIES, CITIES, TOWNS, VILLAGES...') confirms municipal applies_to, and 1401.8(c)(i) 'more than two hours' vs statute 'at least two hours' discrepancy confirmed as discover flagged; (3) official COOG FOIL law text PDF https://opengovernment.ny.gov/foil-law-text (page updated 2026-05-29) — carries the CURRENT § 87(1)(b)(iii) rendering (saver first, clauses (1)/(2), 6-month identical-record clause), text extracted with pdftotext and string-matched. The nominal official_link www.nysenate.gov was NOT openable this pass (HTTP 500 via WebFetch, 403 via curl — bot-blocked); every nysenate-anchored quote was instead verified against the official ny.gov COOG print of the same current text, plus 2025 Justia mirror corroboration for the 6-month clause. Discover's GUIDANCE-VS-LAW GAP finding independently confirmed: the DOS consolidated page prints the pre-amendment § 87(1)(b)(iii) and lacks the 6-month clause. One correction: dup.specialty.rate's source_language was the superseded trailing-saver rendering; corrected to the current leading-saver rendering (substance, value, resolution unchanged). Discover's own gaps_manual_verification item 6 (re-confirm 1401.8 on the NYCRR Westlaw compilation) remains open — the COOG official page was treated as authoritative publication; Westlaw compilation not opened. payment.method verified only as out-of-scope-recorded per owner decision. No 2024-2026 fee-provision amendment surfaced in any opened source, consistent with discover's session review."
+}

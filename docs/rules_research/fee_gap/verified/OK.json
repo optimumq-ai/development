@@ -1,0 +1,259 @@
+{
+ "code": "OK",
+ "verified_at": "2026-08-21",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim cap clause matched in the OSCN 2026 print of s 24A.5(4); $0.25/page for <=8.5x14 is \"in no instance shall...exceed\" = ceiling; \"Notwithstanding any state or local provision\" binds municipalities (s 24A.3(2) includes city/town, verified in definitions print).",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same verbatim cap clause matched; statute is size-based with no color carve-out, so the $0.25 ceiling facially covers color; OAG $0.50 color rate correctly treated as agency-only (verified in guidance file) and the tension is flagged for manual verification.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim \"reasonable, direct costs of record copying, or mechanical reproduction\" matched; the $0.25 cap is expressly limited to <=8.5x14 pages, leaving oversized to the soft standard with no number recorded.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim standard clause matched; no specialty schedule anywhere in s 24A.5; the s 24A.5(4) first-sentence other-statute branch is correctly noted, not numerified.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Full read of the s 24A.5 print: no graduated per-page bands exist; flat ceiling only. Coverage note names the sources searched.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Full read of the print: no free-page allowance provision exists.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim commercial/disruptive clause matched; no municipal hourly figure in statute; OAG $55/$85 rates correctly excluded as agency-only. Soft standard kept verbatim, no number recorded.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Both quoted sentences matched verbatim (s 24A.5(3) segregation duty; s 24A.5(4) exclusive \"only...copying, or mechanical reproduction\" basis) with ellipsis marked. not_applicable rests on the exclusive-basis reading, honestly flagged for human review given the OAG agency practice of billing review time.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "Full read of the print: no programming/data-extraction fee provision; only electronic-data text is the news-media cap and the DPS-specific sentence (agency-only, correctly not attached).",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "Both quoted clauses matched verbatim (commercial/disruptive gate; public-interest search-fee prohibition). Structural is the right word: a classification gate, no value.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "Full read of the print: no overhead/fringe percentage exists.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Full read of the print: no time-increment rule; OAG quarter-hour billing correctly excluded as agency-only (verified in guidance file).",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "Full read of the print: no free-labor-hours figure exists.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Full read of the print: no per-requestor periodic free-hours regime exists.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "Full read of the print incl. the SB 535 sentence: advance-payment clause presupposes an estimate but imposes no notice duty or threshold. Silent is right.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Full read of the print: no requester response window exists.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Full read of the print: no revision-percentage rule; the only reconciliation rule is the refund duty, correctly placed under payment.reissue.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Full read of the print: no estimate validity period exists.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim SB 535 sentence matched in the OSCN 2026 print: \"exceeds Seventy-five Dollars ($75.00)\". Fixed statutory trigger under a Permission = value, matching the prompt schema pattern; Historical Data confirms Laws 2025 c.404 s 2 eff. 11/1/2025, carried by Laws 2026 SB 2184 c.217 s 72.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause matched. The 100% ceiling is grammatically entailed (the permission is to require advance payment \"of the estimated fees\" - the full estimate is the maximum, excess refundable) and the inference is transparently flagged in manual_verification. Not a soft-standard-to-number conversion.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause matched; correctly recorded as a structural gate (two triggers), no value.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause matched; prior-debt prepayment gate is the only statutory nonpayment consequence; structural is right.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "Full read of the print: s 24A.5(6) prompt-access standard says nothing about unpaid advance payments; no numeric clock exists to toll. Silent is right.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim refund sentence matched: \"shall be returned to the requestor\" = mandatory Requirement; structural is right.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "Recorded as not_applicable with the out-of-scope-per-owner-decision-2026-08-20 note, exactly as the owner decision requires. Confirmed per verify instruction.",
+   "checked_link": "n/a (out of scope by owner decision)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim exclusive-basis clause matched; request-level cap is the soft standard kept verbatim, no number recorded.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Full read of the print: no de-minimis threshold; the prior misattribution is correctly cleared.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Full read of the print: no municipal minimum fee; OAG $55 minimum search fee correctly excluded as agency-only (verified in guidance file).",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim standard clause matched; no media figure in statute; OAG flash-drive +$5.00 correctly excluded as agency-only. Scope judgment (medium confidence) is disclosed.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Full read of the print: no delivery/postage fee provision; OAG postage note correctly treated as agency practice.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim cap clause matched: \"a maximum of One Dollar ($1.00) per copied page for a certified copy\" - ceiling, binds municipalities via the notwithstanding clause.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim standard clause matched; s 24A.3(1) definition (sound recording, film recording, video record) verified in the definitions print; no per-minute/per-recording figure exists.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "Full commercial/disruptive + news-media clause matched verbatim; correctly a structural gate, no multiplier.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "Both sentences matched verbatim and are consecutive in the print (search-fee prohibition; anti-discouragement). Mandatory but search-fee-scoped, correctly described; s 24A.21 LDA note verified against its own OSCN print (which cites paragraph 3 of s 24A.5, as the row notes).",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "Full read of the print and the one-pager s 24A.17 summary: no forfeiture-on-late-response rule and no numeric deadline to be late against.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause matched; the prior-debt gate is the only cross-request rule; structural is right.",
+   "checked_link": "/opt/optimumq/docs/rules_research/fee_gap/source_docs/OK_24A.5_oscn2026.txt (OSCN 2026 print, Kevin-supplied 2026-08-20)",
+   "corrected_row": null
+  }
+ ],
+ "notes": "All 36 rows verified against the Kevin-supplied OSCN 2026 official prints (s 24A.5, s 24A.3, s 24A.21) and the two OAG guidance files, per the source-documents provenance rule; every quoted source_language clause string-matched the s 24A.5 print verbatim after whitespace normalization (PDF line-wrap only). Currency: the print's Historical Data ends at Laws 2025 SB 535 c.404 s 2 (eff. 11/1/2025) as amended by Laws 2026 SB 2184 c.217 s 72 (emerg. eff. 5/6/2026, para-3 Service Oklahoma substitution only; fee paragraph 4 untouched) - matching every effective_status claim. Municipal scope: s 24A.3(2) public body includes county, city, village, town; the copy caps carry an express notwithstanding-any-local-provision override. CAUTION labels honored: no OAG agency-schedule figure ($0.50 color, $0.15 digital, $55/$85 hourly, quarter-hour, $55 minimum, flash drive +$5.00) was used to resolve any municipal item, and the DPS sentence was excluded. Two rows rest on flagged interpretive judgments (rules.deposit.percent 100% inferred ceiling; labor.review.rate not_applicable on the exclusive-basis reading) - both textually grounded and carrying manual_verification flags, so confirmed as recorded; the flags remain live for the human pass. payment.method confirmed as not_applicable per owner out-of-scope decision 2026-08-20."
+}

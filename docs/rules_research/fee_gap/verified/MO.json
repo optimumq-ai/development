@@ -1,0 +1,259 @@
+{
+ "code": "MO",
+ "verified_at": "2026-08-21",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Quote verbatim in the owner-supplied revisor print (docs/rules_research/fee_gap/source_docs/MO_610.026_eff2025-08-28.txt); \"shall not exceed ten cents per page\" correctly recorded as ceiling 0.10 USD/page for paper <=9x14; \"each public governmental body\" covers municipalities; page lists exactly two versions, current effective 8/28/2025 — no later amendment.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same verbatim clause; no color-specific rate exists anywhere in ch. 610 — the <=9x14 paper ceiling covers color pages; the scope judgment is properly flagged in manual_verification, confidence medium.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim subdiv. (2) clause present; oversized paper >9x14 expressly listed in the \"shall include only\" cost-component formula — actual_cost_standard is the right word, no number invented.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "Maps/blueprints/plats sentence verbatim; \"may include the actual rate of compensation\" — Permission + actual_cost_standard correct.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Quoted anchor clause verbatim in the owner-supplied revisor print; the full section (opened in the print, all subsections 1-5 plus history and annotation) contains no provision for this item — silent is correct; applies to each public governmental body incl. municipalities; current version effective 8/28/2025, no later amendment.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Quoted anchor clause verbatim in the owner-supplied revisor print; the full section (opened in the print, all subsections 1-5 plus history and annotation) contains no provision for this item — silent is correct; applies to each public governmental body incl. municipalities; current version effective 8/28/2025, no later amendment.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "Both sentences verbatim and consecutive in the source; \"actual cost of research time\" not converted to a number; lowest-cost-staff duty correctly attached.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Source_language is the revisor's official Gross v. Parson annotation, verbatim in the source doc print; statute silent on a review rate; the Prohibition (attorney review not chargeable) is the annotation's holding; non-attorney redaction time properly left to manual_verification.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "Both operative clauses verbatim (ellipsis spans only the media enumeration and maps sentence, as the notes state); \"shall not exceed the average hourly rate of pay\" is a formula ceiling — ceiling is the right word; beyond-customary programming at actual costs verbatim.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "Quote verbatim; no free-hour or page threshold anywhere in the opened section; \"always\" enum matches the permissive charging clauses covering paper and electronic records.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "Quote verbatim; the 0% is a Prohibition derived from the exclusive \"shall include only\" enumeration plus unloaded \"rate of PAY\" ceilings — not a soft standard converted to a number; the inference is expressly flagged in manual_verification (confidence medium) and must carry that flag into the library.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Quoted anchor clause verbatim in the owner-supplied revisor print; the full section (opened in the print, all subsections 1-5 plus history and annotation) contains no provision for this item — silent is correct; applies to each public governmental body incl. municipalities; current version effective 8/28/2025, no later amendment.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "Quoted anchor clause verbatim in the owner-supplied revisor print; the full section (opened in the print, all subsections 1-5 plus history and annotation) contains no provision for this item — silent is correct; applies to each public governmental body incl. municipalities; current version effective 8/28/2025, no later amendment.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Quoted anchor clause verbatim in the owner-supplied revisor print; the full section (opened in the print, all subsections 1-5 plus history and annotation) contains no provision for this item — silent is correct; applies to each public governmental body incl. municipalities; current version effective 8/28/2025, no later amendment.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "Quote verbatim; estimate is requester-initiated with no dollar threshold obliging a body-initiated notice — structural is the right word.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Quote verbatim from the 2025 subsec. 2(2); 90/150-day split at $1,000 exactly as enacted; fixed/Trigger correct; effective 8/28/2025 confirmed by the version list on the print.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Quoted anchor clause verbatim in the owner-supplied revisor print; the full section (opened in the print, all subsections 1-5 plus history and annotation) contains no provision for this item — silent is correct; applies to each public governmental body incl. municipalities; current version effective 8/28/2025, no later amendment.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Quoted anchor clause verbatim in the owner-supplied revisor print; the full section (opened in the print, all subsections 1-5 plus history and annotation) contains no provision for this item — silent is correct; applies to each public governmental body incl. municipalities; current version effective 8/28/2025, no later amendment.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "\"Payment of fees may be requested prior to fulfilling the request.\" verbatim at subsec. 2(1); no dollar threshold exists — value \"none\" records the documented absence of a gate on the advance-payment permission.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "Quoted anchor clause verbatim in the owner-supplied revisor print; the full section (opened in the print, all subsections 1-5 plus history and annotation) contains no provision for this item — silent is correct; applies to each public governmental body incl. municipalities; current version effective 8/28/2025, no later amendment.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "Quote verbatim; discretionary prepayment gate (\"may be requested prior to fulfilling\") — structural/Permission correct.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "Both sentences verbatim and consecutive; withdrawal at 90/150 days plus mandatory warning notice plus 6-month carryover all match the enacted 2025 text; fixed/Trigger correct.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "Both quoted fragments verbatim in the 610.026 print; the 610.023.3 three-business-day claim checked on the live revisor page (version effective 8/28/2004, no other versions listed — unchanged by the 2025 act); the unresolved clock-interaction is properly flagged in manual_verification.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Quoted anchor clause verbatim in the owner-supplied revisor print; the full section (opened in the print, all subsections 1-5 plus history and annotation) contains no provision for this item — silent is correct; applies to each public governmental body incl. municipalities; current version effective 8/28/2025, no later amendment.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "Recorded as not_applicable with the owner out-of-scope note (finance-department policy, decision 2026-08-20) — exactly the required treatment.",
+   "checked_link": "",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "Quote verbatim; no request-level dollar cap exists — actual_cost_standard (structural cap from component ceilings + lowest-cost-staff duty + subsec. 5 cost-recovery gloss) is right; AG-opinion check properly left in manual_verification.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Quoted anchor clause verbatim in the owner-supplied revisor print; the full section (opened in the print, all subsections 1-5 plus history and annotation) contains no provision for this item — silent is correct; applies to each public governmental body incl. municipalities; current version effective 8/28/2025, no later amendment.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Quoted anchor clause verbatim in the owner-supplied revisor print; the full section (opened in the print, all subsections 1-5 plus history and annotation) contains no provision for this item — silent is correct; applies to each public governmental body incl. municipalities; current version effective 8/28/2025, no later amendment.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "Quote verbatim; medium charged at \"the cost of the disk, tape, or other medium\" — actual_cost_standard correct, no fixed rate invented.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Quoted anchor clause verbatim in the owner-supplied revisor print; the full section (opened in the print, all subsections 1-5 plus history and annotation) contains no provision for this item — silent is correct; applies to each public governmental body incl. municipalities; current version effective 8/28/2025, no later amendment.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "Quoted anchor clause verbatim in the owner-supplied revisor print; the full section (opened in the print, all subsections 1-5 plus history and annotation) contains no provision for this item — silent is correct; applies to each public governmental body incl. municipalities; current version effective 8/28/2025, no later amendment.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "Quote verbatim; audio/visual items priced by the same three-component formula — actual_cost_standard correct.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "Quoted anchor clause verbatim in the owner-supplied revisor print; the full section (opened in the print, all subsections 1-5 plus history and annotation) contains no provision for this item — silent is correct; applies to each public governmental body incl. municipalities; current version effective 8/28/2025, no later amendment.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "Quote verbatim including the conjunctive commercial-interest limiter; Discretion/structural correct (\"may be furnished without charge or at a reduced charge\").",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "The 610.023.3 sentence confirmed verbatim on the live revisor page (source doc does not cover 610.023); page shows single version effective 8/28/2004 and no fee-forfeiture or fee-waiver-on-late-response provision anywhere in the section — silent correct.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.023",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Six-month carryover sentence verbatim; permissive fee carryover (not aggregation) correctly shaped; effective 8/28/2025 confirmed.",
+   "checked_link": "https://revisor.mo.gov/main/OneSection.aspx?section=610.026",
+   "corrected_row": null
+  }
+ ],
+ "notes": "Verified against the owner-supplied official revisor print docs/rules_research/fee_gap/source_docs/MO_610.026_eff2025-08-28.txt (PROVENANCE: revisor.mo.gov, sec. 610.026 complete, version effective 8/28/2025, A.L. 2025 H.B. 145 & 59, incl. Gross v. Parson annotation) — verbatim string-match of all 35 quoted rows succeeded with whitespace normalization only. waiver.forfeiture and the sec. 610.023.3 claims in payment.depositClock were checked on the live revisor page for 610.023 (https://revisor.mo.gov/main/OneSection.aspx?section=610.023): quote verbatim, single version effective 8/28/2004, no fee-forfeiture provision. Currency: the 610.026 print lists exactly two versions (8/28/2004 ended 8/28/2025; 8/28/2025 current) and no enacted-awaiting-effect 2026 version; 610.023 single version. payment.method confirmed as not_applicable per owner decision (out of scope). All 36 rows CONFIRMED; the rows carrying manual_verification flags (dup.color.rate, labor.review.rate, labor.overheadPct, payment.depositClock, rules.maxFee) keep those flags — CONFIRMED here means quote/value/scope/currency check out, not that the flagged judgment calls are settled."
+}
