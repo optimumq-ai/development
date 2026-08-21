@@ -8421,3 +8421,24 @@ SPEC_auth_security_platform §1 (inventory).
   composer; spec update (SPEC_fees_estimates_payments.md §1 bounds gate + SPEC_jurisdiction_configuration.md)
   in the finishing commit. Then the jurisdiction-config inventory doc Kevin asked for (15 line items:
   what/where-edited/protected/testing) — docs/WORKING_jurisdiction_config_inventory.md.
+
+## 2026-08-21 (evening) — Composer slice FINISHED (8d89e25): suite green, composer verified in-app
+- verify_fee_bounds in the suite (23 assertions): pure feeBounds.check cases + the API gate — POST/PUT
+  violations 422 AND provably no row written / stored config untouched; GET /bounds both forms; lawful
+  saves and name-only PUT ungated.
+- CAUGHT + FIXED a step-3 regression: templates' fee_schedule reshape to {items, statutory_evidence}
+  broke stateTemplateImport (importState threw; 7 harnesses red incl. both e2e — suite had not been run
+  since 212394f). feeEvidenceOf() consumes either shape. Full suite: 2481/2481 GREEN, live untouched.
+  (Transient extra reds during debugging were my own --keep test API holding :3101 with stale code —
+  kill any kept stack before re-running the suite.)
+- Frontend built + deployed (nginx 200). Composer verified visually (screenshots sent to Kevin):
+  bounds + citations beside inputs, amber law-silent rows, inline over-ceiling refusal (overhead 25 vs
+  fixed 20 → "0 changes ready · 1 blocked by a state limit", submit disabled), citation required when a
+  law-bounded answer changes. No live writes — refusal check is client-side; filing was NOT exercised
+  against the live API (covered by the harness against the test stack instead).
+- Specs updated in the same commit: Domain 6 §1 bounds gate; Domain 10 §5b composer; processing-UI §6 pointer.
+- Live API restarted after the import fix (still supervised by root PM2; kill-^node pattern works).
+- NEXT: (1) the jurisdiction-config inventory doc Kevin asked for (15 line items: what/where-edited/
+  protected/testing) — docs/WORKING_jurisdiction_config_inventory.md; (2) revisit exemption/redaction/
+  template sections' composer scope after Kevin's setup-shell sketches; (3) fees role-gate hardening
+  still PAUSED; classifier hint on child assign-picker still parked with Kevin.
