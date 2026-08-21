@@ -4,7 +4,7 @@
  "_meta": {
   "phase": 6,
   "generated_by": "build_state_templates.js",
-  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables. fee_schedule.items = the step-3 verified fee layer (value/unit/basis/engine_field/applies_to per master-list item, every cell verify-confirmed); fee_schedule.statutory_evidence = concept-level evidence."
  },
  "knobs": {
   "Master.g1": {
@@ -618,51 +618,716 @@
   }
  },
  "fee_schedule": {
-  "fee.labor_charge": [
-   {
-    "rule_id": "UT-0031",
-    "authority": "Utah Code § 63G-2-203(2)(b)",
-    "summary": "An hourly staff-time charge may not exceed the salary of the lowest paid employee who has the necessary skill and training to perform the request."
-   }
-  ],
-  "fee.actual_cost_basis": [
-   {
-    "rule_id": "UT-0028",
-    "authority": "Utah Code § 63G-2-203(1)",
-    "summary": "An entity may charge a reasonable fee to cover its actual cost of providing a record; the fee must be approved by the entity's executive officer."
+  "items": {
+   "dup.bw.rate": {
+    "label": "Copy rate — B&W page",
+    "engine_field": "fee_profiles:duplication.bw.rate",
+    "type": "rate_usd",
+    "resolution": "defers_to_city",
+    "value": null,
+    "unit": "USD per page (city sets by ordinance/policy under the actual-cost standard)",
+    "basis": "ceiling",
+    "applies_to": "municipalities",
+    "rule_type": "Permission",
+    "authority": "Utah Code § 63G-2-203(1)(a), (3)(c); § 63G-2-701(3)(c)",
+    "rule_ids": [
+     "UT-0030",
+     "UT-0028",
+     "UT-9007"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Utah sets no per-page or per-item figure for any public body. The state's binding constraint is the § 63G-2-203(1)(a) 'reasonable fee to cover ... actual cost' standard; the operative figure is set by the political subdivision by ordinance or written formal policy adopted by the governing body (§…"
    },
-   {
-    "rule_id": "UT-0029",
-    "authority": "Utah Code § 63G-2-203(2)(a)",
-    "summary": "When compiling a record in a form other than normally maintained, actual costs may include staff time for compiling/formatting/tailoring, staff time for search/retrieval and direct administrative costs, and (for non-word-processing computer output) actual incremental cost plus a reasonable portio…"
-   }
-  ],
-  "fee.free_allowance": [
-   {
-    "rule_id": "UT-0035",
-    "authority": "Utah Code § 63G-2-203(5)(b)(iii)",
-    "summary": "An entity may not charge a fee for the first quarter hour of staff time spent responding to a request."
+   "dup.color.rate": {
+    "label": "Copy rate — color page",
+    "engine_field": "fee_profiles:duplication.color.rate",
+    "type": "rate_usd",
+    "resolution": "defers_to_city",
+    "value": null,
+    "unit": "USD per page (city sets by ordinance/policy under the actual-cost standard)",
+    "basis": "ceiling",
+    "applies_to": "municipalities",
+    "rule_type": "Permission",
+    "authority": "Utah Code § 63G-2-203(1)(a), (3)(c)",
+    "rule_ids": [
+     "UT-0030",
+     "UT-0028",
+     "UT-9007"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No color-specific provision anywhere in GRAMA or Utah guidance; the general actual-cost standard + ordinance mandate governs every copy type. Utah sets no per-page or per-item figure for any public body. The state's binding constraint is the § 63G-2-203(1)(a) 'reasonable fee to cover ... actual c…"
    },
-   {
-    "rule_id": "UT-0036",
-    "authority": "Utah Code § 63G-2-203(5)(c)",
-    "summary": "The free first quarter hour does not apply if the requester is not a Utah media representative AND previously submitted a separate request within the 10-day period immediately before the current request."
+   "dup.oversized.rate": {
+    "label": "Copy rate — oversized / nonstandard page",
+    "engine_field": "fee_profiles:duplication.oversized.rate",
+    "type": "rate_usd",
+    "resolution": "defers_to_city",
+    "value": null,
+    "unit": "USD per page/sheet (city sets by ordinance/policy under the actual-cost standard)",
+    "basis": "ceiling",
+    "applies_to": "municipalities",
+    "rule_type": "Permission",
+    "authority": "Utah Code § 63G-2-203(1)(a), (3)(c)",
+    "rule_ids": [
+     "UT-0030",
+     "UT-0028",
+     "UT-9007"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No oversized/nonstandard-page provision in GRAMA or Utah guidance; general actual-cost standard + ordinance mandate governs. Utah sets no per-page or per-item figure for any public body. The state's binding constraint is the § 63G-2-203(1)(a) 'reasonable fee to cover ... actual cost' standard; th…"
+   },
+   "dup.specialty.rate": {
+    "label": "Specialty reproduction (photos, maps, transcripts)",
+    "engine_field": "fee_profiles:duplication.specialty.rate",
+    "type": "actual_or_usd",
+    "resolution": "defers_to_city",
+    "value": null,
+    "unit": "USD or actual cost per item (city sets by ordinance/policy under the actual-cost standard)",
+    "basis": "ceiling",
+    "applies_to": "municipalities",
+    "rule_type": "Permission",
+    "authority": "Utah Code § 63G-2-203(1)(a), (2)(a), (3)(c); § 63G-2-201(8)(c)",
+    "rule_ids": [
+     "UT-0030",
+     "UT-0028",
+     "UT-0029",
+     "UT-9007",
+     "UT-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No specialty-reproduction figure. Where the entity compiles/formats a record into a form or medium not normally maintained (which is what a photo print, map plot or transcript usually is), § 63G-2-203(2)(a) lists the actual-cost components that may be included and § 63G-2-201(8)(c) authorizes cha…"
+   },
+   "dup.tiers": {
+    "label": "Graduated page bands (per-page rate by volume)",
+    "engine_field": "fee_profiles:duplication.*.tiers",
+    "type": "tiers",
+    "resolution": "silent",
+    "value": null,
+    "unit": "tiers",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Utah Code § 63G-2-203 (searched in full)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No graduated page bands anywhere in GRAMA. The only volume-linked provisions are non-fee: § 63G-2-201(10) lets an entity require a requester of >50 pages to make the copies (and waive copy fees) and § 63G-2-204(6)(c) treats voluminous requests as an 'extraordinary circumstance' for the response c…"
+   },
+   "rules.freePages": {
+    "label": "Free page allowance per request",
+    "engine_field": "fee_profiles:requestRules.freePageAllowance",
+    "type": "pages",
+    "resolution": "silent",
+    "value": null,
+    "unit": "pages",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Utah Code § 63G-2-203(5)(b)(ii)-(iii); § 63G-2-201(1)(a), (10)",
+    "rule_ids": [
+     "UT-9004",
+     "UT-9005"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Utah has no free page allowance. Free items are: inspecting a record (§ 63G-2-203(5)(b)(ii); § 63G-2-201(1)(a) 'inspect a public record free of charge') and the first quarter hour of staff time (§ 63G-2-203(5)(b)(iii)). § 63G-2-201(10)(b)(ii) permits an entity to let a >50-page requester copy wit…"
+   },
+   "labor.search.rate": {
+    "label": "Labor rate — search / retrieval ($/hr)",
+    "engine_field": "fee_profiles:labor.search.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "ceiling",
+    "value": "salary of the lowest paid employee who, in the discretion of the custodian of records, has the necessary skill and training to perform the request",
+    "unit": "USD per hour (formula ceiling, no statewide dollar figure; hourly rate set by city ordinance/policy under the cap)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Calculation",
+    "authority": "Utah Code § 63G-2-203(2)(a)(ii), (2)(b), (3)(c)",
+    "rule_ids": [
+     "UT-0031",
+     "UT-0029",
+     "UT-0030"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Search/retrieval staff time is an enumerated actual-cost component ((2)(a)(ii)); the hourly charge is capped at the lowest-paid qualified employee's salary ((2)(b)). The cap is a formula, not a number: the city computes its own hourly figure by ordinance/policy. Textual ambiguity flagged: (2)(a)'…"
+   },
+   "labor.review.rate": {
+    "label": "Labor rate — review / redaction ($/hr)",
+    "engine_field": "fee_profiles:labor.review.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "ceiling",
+    "value": "salary of the lowest paid employee who, in the discretion of the custodian of records, has the necessary skill and training to perform the request (for any chargeable staff time); review-for-disclosability time itself is NOT chargeable",
+    "unit": "USD per hour (formula ceiling); classification-review component = $0",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Utah Code § 63G-2-203(5)(b)(i), (2)(b)",
+    "rule_ids": [
+     "UT-0034",
+     "UT-0031"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Two-part answer: (a) time 'reviewing a record to determine whether it is subject to disclosure' may not be charged (§ 63G-2-203(5)(b)(i)) except as permitted for search/retrieval/direct administrative costs under (2)(a)(ii); (b) any staff time that IS chargeable is capped by the lowest-paid-quali…"
+   },
+   "labor.programming.rate": {
+    "label": "Labor rate — programming / data extraction ($/hr)",
+    "engine_field": "fee_profiles:labor.programming.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "ceiling",
+    "value": "staff time: salary of the lowest paid employee with the necessary skill and training; computer output other than word processing: actual incremental cost of the electronic services and products plus a reasonable portion of formatting/interfacing costs and administrative costs",
+    "unit": "USD per hour (formula ceiling) + actual incremental cost (no figure)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Calculation",
+    "authority": "Utah Code § 63G-2-203(2)(a)(i), (2)(a)(iii), (2)(b); § 63G-2-201(8)(c)",
+    "rule_ids": [
+     "UT-0029",
+     "UT-0031",
+     "UT-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Programming/data extraction is the compilation case (2)(a) is written for: staff time for compiling/formatting/manipulating (2)(a)(i) at an hourly charge capped by (2)(b), plus, for computer output other than word processing, the actual incremental cost and a reasonable portion of formatting/inte…"
+   },
+   "labor.billableWhen": {
+    "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+    "engine_field": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+    "type": "enum+threshold",
+    "resolution": "value",
+    "value": "only_over_threshold: staff time chargeable after the first quarter hour (0.25 h) per request; not paper-only (any response staff time); exception — the free quarter hour may be charged to a non-media requester who submitted a separate request within the prior 10 days",
+    "unit": "enum + hours (threshold = 0.25 hour per request; media/10-day-repeat exception)",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Utah Code § 63G-2-203(5)(b)(iii), (5)(c), (2)(a)",
+    "rule_ids": [
+     "UT-0035",
+     "UT-0036",
+     "UT-0031",
+     "UT-0034"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Labor is chargeable in Utah (staff time for search, retrieval, compiling, and direct administrative costs, § 63G-2-203(2)(a)) but never for the first quarter hour of staff time in responding to a request ((5)(b)(iii)), never for inspection ((5)(b)(ii)), and never for classification review ((5)(b)…"
+   },
+   "labor.overheadPct": {
+    "label": "Overhead / fringe surcharge on labor (%)",
+    "engine_field": "fee_profiles:labor.overheadPct",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": "pct",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Utah Code § 63G-2-203(2)(b) (searched)",
+    "rule_ids": [
+     "UT-0031"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No overhead or fringe surcharge figure. The hourly cap is expressed as the lowest-paid qualified employee's 'salary', which on its face leaves no room for a fringe/overhead multiplier on top of salary; (2)(a)(iii) allows 'a reasonable portion of' formatting/interfacing and administrative costs on…"
+   },
+   "labor.increment": {
+    "label": "Labor time increment + rounding",
+    "engine_field": "fee_profiles:labor.*.increment / rounding",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": "hours",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Utah Code § 63G-2-203 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No statutory or guidance increment. Cities set their own increment by ordinance/policy under § 63G-2-203(3)(c). Searched: Utah Code § 63G-2-203 (all subsections, current text as amended 2025), §§ 63G-2-201, -204, -209, -401, -701; Utah Municipal Code § 10-8-85.6; 2024–2026 General Session passed-…"
+   },
+   "rules.freeLaborHours": {
+    "label": "Free labor hours per request",
+    "engine_field": "fee_profiles:requestRules.freeLaborHours",
+    "type": "hours",
+    "resolution": "value",
+    "value": "0.25",
+    "unit": "hours per request (first quarter hour of staff time)",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Utah Code § 63G-2-203(5)(b)(iii), (5)(c)",
+    "rule_ids": [
+     "UT-0035",
+     "UT-0036"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Fixed statutory free allotment of 15 minutes of staff time per request, applicable to every governmental entity. Exception (5)(c): may be charged to a non-Utah-media requester who submitted a separate request within the 10 days before the current request (UT-0036)."
+   },
+   "labor.periodicFreeHours": {
+    "label": "Free personnel time per requestor per month/year (TX § 552.275 pattern)",
+    "engine_field": "NOT IN ENGINE (fee_profiles gap — requestor-ledger counter)",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": "hours per requestor per period",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Utah Code § 63G-2-203(5)(b)(iii), (5)(c) (searched)",
+    "rule_ids": [
+     "UT-0036"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Utah has no Texas-style per-requestor monthly/annual free-hours budget. The per-request quarter hour is the only free labor, and it is itself conditioned on requester history: a non-media requester who filed a separate request within the prior 10 days loses it (§ 63G-2-203(5)(c)) — an engine shou…"
+   },
+   "rules.estimateNotifyThreshold": {
+    "label": "Itemized estimate / cost notice required above ($ or hours)",
+    "engine_field": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD or hours",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Utah Code § 63G-2-203(8)(a) (searched); Utah Division of Archives and Records Service, GRAMA Request Form & GRAMA Request for Payment or Prepayment (2025)",
+    "rule_ids": [
+     "UT-0037",
+     "UT-0038",
+     "UT-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "GRAMA imposes no estimate-notice duty or threshold. The $50 figure in § 63G-2-203(8)(a)(i) is a PREPAYMENT trigger, not an estimate-notice threshold (do not conflate). Official Archives forms supply the practice: the GRAMA Request Form lets the requester name an amount above which they want to be…"
+   },
+   "estimate.requesterResponseDays": {
+    "label": "Requester must respond to an estimate within N days (else withdrawn)",
+    "engine_field": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": "days",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Utah Code § 63G-2-203, -204 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Neither statute nor Archives forms set a window within which a requester must accept an estimate or pay a prepayment, nor a deemed-withdrawal consequence. Searched: Utah Code § 63G-2-203 (all subsections, current text as amended 2025), §§ 63G-2-201, -204, -209, -401, -701; Utah Municipal Code § 1…"
+   },
+   "estimate.revisionNotifyPercent": {
+    "label": "Revised estimate required when actual exceeds estimate by N%",
+    "engine_field": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": "pct",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Utah Code § 63G-2-203(8)(b) (searched)",
+    "rule_ids": [
+     "UT-0039"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No percentage or duty to re-notice when actual cost exceeds an estimate. Only the refund of excess prepayment is addressed (§ 63G-2-203(8)(b), UT-0039); the Archives payment form separately has a checkbox 'The requester authorized a lesser amount. Agreement to pay the total cost is required to pr…"
+   },
+   "estimate.validityDays": {
+    "label": "Estimate validity period (days)",
+    "engine_field": "fee_profiles:estimatePolicy.estimateValidityDays",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": "days",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Utah Code § 63G-2-203 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Searched: Utah Code § 63G-2-203 (all subsections, current text as amended 2025), §§ 63G-2-201, -204, -209, -401, -701; Utah Municipal Code § 10-8-85.6; 2024–2026 General Session passed-bill lists (records/fee bills); Utah Division of Archives and Records Service GRAMA FAQ, guidelines page, and of…"
+   },
+   "rules.deposit.threshold": {
+    "label": "Deposit / prepayment may be required above ($)",
+    "engine_field": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+    "type": "usd",
+    "resolution": "value",
+    "value": "50",
+    "unit": "USD (fees expected to exceed $50)",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Utah Code § 63G-2-203(8)(a)(i)",
+    "rule_ids": [
+     "UT-0037",
+     "UT-0038"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Fixed statutory threshold: prepayment of past fees and future estimated fees may be required before beginning to process a request when fees are expected to exceed $50 (or, regardless of amount, when a prior invoice is unpaid — see payment.nonpayment). Applies to all governmental entities incl. p…"
+   },
+   "rules.deposit.percent": {
+    "label": "Deposit capped at (% of estimate)",
+    "engine_field": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+    "type": "pct",
+    "resolution": "ceiling",
+    "value": "100",
+    "unit": "% of estimated fees ('future estimated fees') plus any past unpaid fees",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Utah Code § 63G-2-203(8)(a)-(b)",
+    "rule_ids": [
+     "UT-0037",
+     "UT-0038",
+     "UT-0039"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No partial-deposit cap: the entity may require the whole estimated fee (and any past unpaid fees) up front, with mandatory refund of any excess ((8)(b)). A city may, by ordinance/policy, choose a lower deposit share."
+   },
+   "payment.productionGate": {
+    "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+    "engine_field": "paymentTiming gates + fee_profiles bands",
+    "type": "enum",
+    "resolution": "structural",
+    "value": "prepay_before_processing (permitted when estimate > $50 or a prior invoice is unpaid); certified copies conditioned on payment of lawful fees; official form also offers 'Payment will be required upon receipt of records'",
+    "unit": "enum",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Utah Code § 63G-2-203(8)(a); § 63G-2-201(6)(c); Archives GRAMA Request for Payment or Prepayment (2025)",
+    "rule_ids": [
+     "UT-0037",
+     "UT-0038",
+     "UT-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Two statutory gates: (1) discretionary prepay-before-processing when the $50 threshold or prior-debt condition is met (§ 63G-2-203(8)(a)); (2) certified copies are provided only if 'the person pays the lawful fees' (§ 63G-2-201(6)(c)). Below $50 with no prior debt, the statute is silent on withho…"
+   },
+   "payment.nonpayment": {
+    "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+    "engine_field": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+    "type": "enum+int",
+    "resolution": "value",
+    "value": "prior_debt_prepayment: after an invoice is sent and the requester has not paid fees from a previous request, the entity may require payment of past fees and future estimated fees before beginning to process the new request; no withdrawal-after-N-days rule",
+    "unit": "enum + int (int = none)",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Utah Code § 63G-2-203(8)(a)(ii)",
+    "rule_ids": [
+     "UT-0037"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Prior-debt prepayment is expressly authorized (any amount — the $50 threshold does not apply to the prior-debt prong). No statutory deemed-withdrawal or lapse period for nonpayment; the request simply is not processed until prepayment. Cities may add lapse rules by ordinance/policy under § 63G-2-…"
+   },
+   "payment.depositClock": {
+    "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+    "engine_field": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+    "type": "enum",
+    "resolution": "structural",
+    "value": "pause: processing (and, per the Archives official form, the 10-business-day response time) does not begin until prepayment or authorization is provided; no statutory grace period or lapse action",
+    "unit": "enum",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Utah Code § 63G-2-203(8)(a); Utah Division of Archives and Records Service, GRAMA Request for Payment or Prepayment (2025), 'Statement about the processing time'",
+    "rule_ids": [
+     "UT-0037",
+     "UT-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Statute: prepayment may be required 'before beginning to process a request' — the request sits in a hold state. Official Archives form (offered to all governmental entities): 'The response time for processing this request will begin on the date prepayment, or authorization is provided.' Treat the…"
+   },
+   "payment.reissue": {
+    "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+    "engine_field": "jurisdiction_rules:payment.reissue_*",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": "bool",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Utah Code § 63G-2-203(8)(b) (searched)",
+    "rule_ids": [
+     "UT-0039"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No rule requiring a revised estimate, blocking collection above the estimate, or restarting a window on overrun. Searched: Utah Code § 63G-2-203 (all subsections, current text as amended 2025), §§ 63G-2-201, -204, -209, -401, -701; Utah Municipal Code § 10-8-85.6; 2024–2026 General Session passed…"
+   },
+   "rules.maxFee": {
+    "label": "Request-level ceiling (actual cost cap / statutory max)",
+    "engine_field": "fee_profiles:requestRules.maxFee",
+    "type": "usd_or_rule",
+    "resolution": "actual_cost_standard",
+    "value": "reasonable fee to cover the governmental entity's actual cost of providing a record",
+    "unit": "USD (request-level ceiling = actual cost, bounded by 'reasonable'; no statutory dollar maximum)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Utah Code § 63G-2-203(1)(a), (2)(a)",
+    "rule_ids": [
+     "UT-0028",
+     "UT-0029"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Two-word standard: 'reasonable' and 'actual cost'. Actual-cost components are enumerated in (2)(a) for compiled records; the executive officer must approve the fee ((1)(b)); fees fixed by other statutes are preserved ((9)). Applies to every governmental entity incl. political subdivisions."
+   },
+   "rules.deMinimis": {
+    "label": "De-minimis: no charge below ($)",
+    "engine_field": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Utah Code § 63G-2-203(4) (searched)",
+    "rule_ids": [
+     "UT-0032"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No de-minimis threshold. Discretionary waiver under (4) is grounds-based, not amount-based. Cities may adopt a de-minimis by ordinance/policy. Searched: Utah Code § 63G-2-203 (all subsections, current text as amended 2025), §§ 63G-2-201, -204, -209, -401, -701; Utah Municipal Code § 10-8-85.6; 20…"
+   },
+   "rules.minFee": {
+    "label": "Minimum fee",
+    "engine_field": "fee_profiles:requestRules.minFee",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Utah Code § 63G-2-203 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Searched: Utah Code § 63G-2-203 (all subsections, current text as amended 2025), §§ 63G-2-201, -204, -209, -401, -701; Utah Municipal Code § 10-8-85.6; 2024–2026 General Session passed-bill lists (records/fee bills); Utah Division of Archives and Records Service GRAMA FAQ, guidelines page, and of…"
+   },
+   "media": {
+    "label": "Electronic media (CD/DVD/USB) charge",
+    "engine_field": "fee_profiles:media.{cd,dvd,usb}",
+    "type": "actual_or_usd",
+    "resolution": "defers_to_city",
+    "value": null,
+    "unit": "USD or actual cost per medium (city sets by ordinance/policy under the actual-cost standard)",
+    "basis": "ceiling",
+    "applies_to": "municipalities",
+    "rule_type": "Permission",
+    "authority": "Utah Code § 63G-2-203(1)(a), (2)(a)(iii), (3)(c); § 63G-2-201(8)(c), (13)",
+    "rule_ids": [
+     "UT-0030",
+     "UT-0028",
+     "UT-0029",
+     "UT-9007",
+     "UT-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No statewide media charge. Electronic copies must be provided in lieu of paper when requested and the record is maintained electronically without reformatting (§ 63G-2-201(13)); a medium not currently maintained is discretionary and chargeable 'in accordance with Section 63G-2-203' (§ 63G-2-201(8…"
+   },
+   "delivery": {
+    "label": "Delivery: mail / handling / email / pickup",
+    "engine_field": "fee_profiles:delivery.*",
+    "type": "actual_or_usd",
+    "resolution": "defers_to_city",
+    "value": null,
+    "unit": "USD or actual cost (city sets by ordinance/policy under the actual-cost standard)",
+    "basis": "ceiling",
+    "applies_to": "municipalities",
+    "rule_type": "Permission",
+    "authority": "Utah Code § 63G-2-203(1)(a), (2)(a)(ii), (3)(c); Archives GRAMA Request for Payment or Prepayment (2025) line item 'Mailing or shipping cost'",
+    "rule_ids": [
+     "UT-0030",
+     "UT-0028",
+     "UT-9007"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No statutory postage/handling figure; mailing is an actual/direct administrative cost of providing the record and the Archives official payment form carries a 'Mailing or shipping cost' line. Email/pickup: no provision (inspection is free; electronic copies must be provided when maintained electr…"
+   },
+   "certification": {
+    "label": "Certification / certified-copy charge",
+    "engine_field": "fee_profiles:certification.{rate,unit}",
+    "type": "rate_usd",
+    "resolution": "defers_to_city",
+    "value": null,
+    "unit": "USD per certified copy (city sets 'lawful fees' by ordinance/policy under the actual-cost standard)",
+    "basis": "ceiling",
+    "applies_to": "municipalities",
+    "rule_type": "Permission",
+    "authority": "Utah Code § 63G-2-201(6); § 63G-2-203(1)(a), (3)(c), (9); Archives payment form line 'Certification fee'",
+    "rule_ids": [
+     "UT-0030",
+     "UT-0028",
+     "UT-9007"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "A certified copy must be provided when the requester has a right to inspect, identifies the record with reasonable specificity, and 'pays the lawful fees' (§ 63G-2-201(6)); GRAMA sets no certification figure and § 63G-2-203(9) preserves fees fixed by other statutes (none found for municipal recor…"
+   },
+   "av": {
+    "label": "Audio/video: per recording, per minute, free minutes",
+    "engine_field": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+    "type": "rate_usd",
+    "resolution": "defers_to_city",
+    "value": null,
+    "unit": "USD per recording / per minute (city sets by ordinance/policy under the actual-cost standard); no free-minutes rule",
+    "basis": "ceiling",
+    "applies_to": "municipalities",
+    "rule_type": "Permission",
+    "authority": "Utah Code § 63G-2-203(1)(a), (2)(a), (3)(c)",
+    "rule_ids": [
+     "UT-0030",
+     "UT-0028",
+     "UT-0029",
+     "UT-9007"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No audio/video-specific fee provision in GRAMA (§ 63G-2-203 searched in full) or in the body-worn-camera chapter (Utah Code Title 77, Ch. 7a, chapter index reviewed — no fee section). Recordings are records; the general actual-cost standard, the staff-time components (2)(a) and the free first qua…"
+   },
+   "commercial": {
+    "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+    "engine_field": "fee_profiles:purposeOverrides.commercial",
+    "type": "pct+bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": "pct + bool",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Utah Code § 63G-2-203 (searched); § 63G-2-203(4)(a); § 63G-2-201(11)",
+    "rule_ids": [
+     "UT-0032"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Utah has no commercial-purpose fee regime: labor is chargeable for every requester alike (after the free quarter hour), and purpose matters only (a) as a discretionary waiver ground — release 'primarily benefits the public rather than a person' (§ 63G-2-203(4)(a)); (b) for the expedited-response …"
+   },
+   "waiver": {
+    "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+    "engine_field": "jurisdiction_rules:fee_waiver.*",
+    "type": "enum_list+bool",
+    "resolution": "structural",
+    "value": "discretionary ('may ... and is encouraged to'); grounds: (a) release primarily benefits the public rather than a person, (b) requester is the subject of the record or a § 63G-2-202(1)/(2) person, (c) requester's legal rights are directly implicated and requester is impecunious; mandatory = false; purpose statement not required by law (official form invites justification); written denial not expressly required; appeal: to chief administrative officer within 30 days of notice of denial, then GRO director / local appeals board / court, de novo review",
+    "unit": "enum_list + bool",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Discretion",
+    "authority": "Utah Code § 63G-2-203(4), (6); § 63G-2-401(1)(a)(ii); § 63G-2-201(10)(b)(ii)",
+    "rule_ids": [
+     "UT-0032",
+     "UT-0040",
+     "UT-9004"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Waiver is discretionary but 'encouraged' on three statutory grounds; no requester purpose statement is required by statute (GRAMA never requires a purpose), though the Archives GRAMA Request Form invites the requester to tick waiver grounds and 'Explain other justification'. Denial: no express wr…"
+   },
+   "waiver.forfeiture": {
+    "label": "Late response forfeits the fee",
+    "engine_field": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": "bool",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Utah Code § 63G-2-203, -204(9) (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "A late response is a deemed denial (§ 63G-2-204(9)) — it triggers appeal rights, not loss of the fee. No forfeiture rule in statute, rule, or Archives guidance. Searched: Utah Code § 63G-2-203 (all subsections, current text as amended 2025), §§ 63G-2-201, -204, -209, -401, -701; Utah Municipal Co…"
+   },
+   "repeat": {
+    "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+    "engine_field": "NOT IN ENGINE (requestor-ledger)",
+    "type": "structural",
+    "resolution": "structural",
+    "value": "(a) fee carry-forward: a non-Utah-media requester who submitted a separate request within the 10 days before the current request loses the free first quarter hour (10-day look-back per requestor); (b) no fee aggregation threshold; related non-fee rules: entity need not fulfill a request that 'unreasonably duplicates prior records requests from that person' (§ 63G-2-201(7)(a)(iv)); a substantial number of records requested within five working days of each other is an 'extraordinary circumstance' extending the response clock (§ 63G-2-204(6)(c)(ii)); vexatious-requester relief (§ 63G-2-209)",
+    "unit": "structural",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Exception",
+    "authority": "Utah Code § 63G-2-203(5)(c); § 63G-2-201(7)(a)(iv); § 63G-2-204(6)(c)(ii); § 63G-2-209",
+    "rule_ids": [
+     "UT-0036",
+     "UT-0035"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "The only fee-side repeat rule is the 10-day look-back that strips the free quarter hour from non-media repeat requesters (UT-0036). Utah has no cost-aggregation threshold across requests. The duplication, five-working-day clustering, and vexatious-requester provisions are processing/clock rules, …"
    }
-  ],
-  "fee.no_charge_categories": [
-   {
-    "rule_id": "UT-0034",
-    "authority": "Utah Code § 63G-2-203(5)(b)(i)",
-    "summary": "An entity may not charge a fee for reviewing a record to determine whether it is subject to disclosure, except as permitted for search/retrieval staff time under 203(2)(a)(ii)."
-   }
-  ],
-  "fee.schedule_and_authority": [
-   {
-    "rule_id": "UT-0030",
-    "authority": "Utah Code § 63G-2-203(3)(c)",
-    "summary": "Political subdivisions must establish records fees by ordinance or written formal policy adopted by the governing body."
-   }
-  ]
+  },
+  "statutory_evidence": {
+   "fee.labor_charge": [
+    {
+     "rule_id": "UT-0031",
+     "authority": "Utah Code § 63G-2-203(2)(b)",
+     "summary": "An hourly staff-time charge may not exceed the salary of the lowest paid employee who has the necessary skill and training to perform the request."
+    }
+   ],
+   "fee.actual_cost_basis": [
+    {
+     "rule_id": "UT-0028",
+     "authority": "Utah Code § 63G-2-203(1)",
+     "summary": "An entity may charge a reasonable fee to cover its actual cost of providing a record; the fee must be approved by the entity's executive officer."
+    },
+    {
+     "rule_id": "UT-0029",
+     "authority": "Utah Code § 63G-2-203(2)(a)",
+     "summary": "When compiling a record in a form other than normally maintained, actual costs may include staff time for compiling/formatting/tailoring, staff time for search/retrieval and direct administrative costs, and (for non-word-processing computer output) actual incremental cost plus a reasonable portio…"
+    }
+   ],
+   "fee.free_allowance": [
+    {
+     "rule_id": "UT-0035",
+     "authority": "Utah Code § 63G-2-203(5)(b)(iii)",
+     "summary": "An entity may not charge a fee for the first quarter hour of staff time spent responding to a request."
+    },
+    {
+     "rule_id": "UT-0036",
+     "authority": "Utah Code § 63G-2-203(5)(c)",
+     "summary": "The free first quarter hour does not apply if the requester is not a Utah media representative AND previously submitted a separate request within the 10-day period immediately before the current request."
+    }
+   ],
+   "fee.no_charge_categories": [
+    {
+     "rule_id": "UT-0034",
+     "authority": "Utah Code § 63G-2-203(5)(b)(i)",
+     "summary": "An entity may not charge a fee for reviewing a record to determine whether it is subject to disclosure, except as permitted for search/retrieval staff time under 203(2)(a)(ii)."
+    }
+   ],
+   "fee.schedule_and_authority": [
+    {
+     "rule_id": "UT-0030",
+     "authority": "Utah Code § 63G-2-203(3)(c)",
+     "summary": "Political subdivisions must establish records fees by ordinance or written formal policy adopted by the governing body."
+    }
+   ]
+  }
  },
  "program_setup": {
   "custody.records_officer_designation": [

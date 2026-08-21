@@ -4,7 +4,7 @@
  "_meta": {
   "phase": 6,
   "generated_by": "build_state_templates.js",
-  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables. fee_schedule.items = the step-3 verified fee layer (value/unit/basis/engine_field/applies_to per master-list item, every cell verify-confirmed); fee_schedule.statutory_evidence = concept-level evidence."
  },
  "knobs": {
   "Master.g1": {
@@ -524,20 +524,660 @@
   }
  },
  "fee_schedule": {
-  "fee.copy_rate_per_page": [
-   {
-    "rule_id": "AZ-0018",
+  "items": {
+   "dup.bw.rate": {
+    "label": "Copy rate — B&W page",
+    "engine_field": "fee_profiles:duplication.bw.rate",
+    "type": "rate_usd",
+    "resolution": "defers_to_city",
+    "value": null,
+    "unit": "USD per page",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ariz. Rev. Stat. § 39-121.01(D)(1); Ariz. Att'y Gen. Op. I13-012 (R13-018); Ariz. Att'y Gen. Agency Handbook § 6.5.5",
+    "rule_ids": [
+     "AZ-0018",
+     "AZ-9004",
+     "AZ-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Statute is a bare Permission ('may charge a fee if the facilities are available') with no per-page number and no rulemaking delegation; the custodian (for a city, the city) sets the rate. AG guidance frames the permissible non-commercial fee as one that offsets copying costs, 'including a reasona…"
+   },
+   "dup.color.rate": {
+    "label": "Copy rate — color page",
+    "engine_field": "fee_profiles:duplication.color.rate",
+    "type": "rate_usd",
+    "resolution": "defers_to_city",
+    "value": null,
+    "unit": "USD per page",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
     "authority": "Ariz. Rev. Stat. § 39-121.01(D)(1)",
-    "summary": "The custodian may charge a fee for furnishing copies, printouts or photographs if the facilities are available; the statute sets no rate."
+    "rule_ids": [
+     "AZ-0018",
+     "AZ-9004"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No separate color-copy provision; the same undifferentiated 'may charge a fee' permission covers 'copies, printouts or photographs'. City sets the color rate within the copying-cost gloss noted on dup.bw.rate."
+   },
+   "dup.oversized.rate": {
+    "label": "Copy rate — oversized / nonstandard page",
+    "engine_field": "fee_profiles:duplication.oversized.rate",
+    "type": "rate_usd",
+    "resolution": "defers_to_city",
+    "value": null,
+    "unit": "USD per page/sheet",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ariz. Rev. Stat. § 39-121.01(D)(1)",
+    "rule_ids": [
+     "AZ-0018",
+     "AZ-9004"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No oversized/nonstandard-page provision anywhere in Title 39 art. 2 or in AG/Ombudsman guidance; the general copy-fee permission governs and the city sets the amount."
+   },
+   "dup.specialty.rate": {
+    "label": "Specialty reproduction (photos, maps, transcripts)",
+    "engine_field": "fee_profiles:duplication.specialty.rate",
+    "type": "actual_or_usd",
+    "resolution": "defers_to_city",
+    "value": null,
+    "unit": "USD per item / actual cost",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ariz. Rev. Stat. § 39-121.01(D)(1); § 39-129 (law-enforcement video only)",
+    "rule_ids": [
+     "AZ-0018",
+     "AZ-9004",
+     "AZ-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "'Photographs' are expressly within the § 39-121.01(D)(1) fee permission (no rate). Maps/transcripts: no provision. The only specialty figure in Arizona law is the local law-enforcement video-recording fee ceiling ($46 per video-hour reviewed, § 39-129 — see item av). Crime-victim free copies of p…"
+   },
+   "dup.tiers": {
+    "label": "Graduated page bands (per-page rate by volume)",
+    "engine_field": "fee_profiles:duplication.*.tiers",
+    "type": "tiers",
+    "resolution": "silent",
+    "value": null,
+    "unit": "tiers",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. § 39-121.01(D)(1)",
+    "rule_ids": [
+     "AZ-0018"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No graduated per-page bands anywhere in statute, AG opinion or Ombudsman guidance. Searched: A.R.S. Title 39, ch. 1, art. 2 (§§ 39-121 to 39-129, incl. § 39-171) opened at azleg.gov 2026-08-19; A.R.S. § 39-121.03 (commercial); Ariz. Att'y Gen. Op. I13-012 (R13-018) and the AG Agency Handbook ch. …"
+   },
+   "rules.freePages": {
+    "label": "Free page allowance per request",
+    "engine_field": "fee_profiles:requestRules.freePageAllowance",
+    "type": "pages",
+    "resolution": "silent",
+    "value": null,
+    "unit": "pages",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. § 39-121.01(D)(1); §§ 39-122, 39-127",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No free-page allowance. Arizona's only statutory no-charge rules are purpose/requester-based (claims against the United States, § 39-122; crime victims' police report/audio/video, § 39-127), not volume-based. Searched: A.R.S. Title 39, ch. 1, art. 2 (§§ 39-121 to 39-129, incl. § 39-171) opened at…"
+   },
+   "labor.search.rate": {
+    "label": "Labor rate — search / retrieval ($/hr)",
+    "engine_field": "fee_profiles:labor.search.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": "USD per hour",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Ariz. Att'y Gen. Op. I13-012 (R13-018) (restating Hanania v. City of Tucson, 128 Ariz. 135 (App. 1980) and Ariz. Att'y Gen. Op. I86-090); Ariz. Rev. Stat. § 39-121.01(D)(1)",
+    "rule_ids": [
+     "AZ-9002",
+     "AZ-9004"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "For NON-commercial requests a search/retrieval labor rate cannot exist: the fee is limited to copying and postage. For COMMERCIAL requests § 39-121.03(A)(2) permits 'a reasonable fee for the cost of time, materials, equipment and personnel in producing such reproduction' (AZ-0019, see item commer…"
+   },
+   "labor.review.rate": {
+    "label": "Labor rate — review / redaction ($/hr)",
+    "engine_field": "fee_profiles:labor.review.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": "USD per hour",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Ariz. Att'y Gen. Op. I13-012 (R13-018); Arizona Ombudsman-Citizens' Aide, Public Records FAQ ('Can the public body charge me for copies?')",
+    "rule_ids": [
+     "AZ-9002",
+     "AZ-9005",
+     "AZ-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Non-commercial: review/redaction labor is not a chargeable component (fee limited to copying and postage). Exceptions: commercial requests (§ 39-121.03(A)(2)); local law-enforcement video recordings, where 'the reasonable cost of reviewing ... and, as necessary, redacting the video recording' may…"
+   },
+   "labor.programming.rate": {
+    "label": "Labor rate — programming / data extraction ($/hr)",
+    "engine_field": "fee_profiles:labor.programming.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD per hour",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. § 39-121.01(D)(1); Ariz. Att'y Gen. Agency Handbook § 6.5.5",
+    "rule_ids": [
+     "AZ-9004"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No statute, rule, AG opinion or guidance addresses programming/data-extraction charges. The AG handbook's copying-fee gloss admits 'a reasonable amount for the cost of time, equipment, and personnel used in producing copies' (AZ-9004) while the Ombudsman FAQ says no charge for 'labor' (AZ-9005). …"
+   },
+   "labor.billableWhen": {
+    "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+    "engine_field": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+    "type": "enum+threshold",
+    "resolution": "structural",
+    "value": "noncommercial: never (search/retrieval/review labor not chargeable; only copying and postage) | commercial: chargeable ('a reasonable fee for the cost of time, materials, equipment and personnel in producing such reproduction') | local law-enforcement video: review/redaction cost may be considered within the $46/video-hour onetime-fee ceiling",
+    "unit": "enum",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Ariz. Att'y Gen. Op. I13-012 (R13-018); Ariz. Rev. Stat. § 39-121.03(A); § 39-129; § 39-121.01(D)(1)",
+    "rule_ids": [
+     "AZ-0019",
+     "AZ-9002",
+     "AZ-9001",
+     "AZ-9007"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Engine shape: purpose gate (commercial vs non-commercial, driven by the requester's affirmation at intake — AZ-9007) → labor lines enabled only on the commercial branch; special branch for local LE video (§ 39-129). No page/hour threshold; no paper-only scope."
+   },
+   "labor.overheadPct": {
+    "label": "Overhead / fringe surcharge on labor (%)",
+    "engine_field": "fee_profiles:labor.overheadPct",
+    "type": "pct",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": "percent",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Arizona Ombudsman-Citizens' Aide, Public Records FAQ; Ariz. Att'y Gen. Op. I13-012 (R13-018)",
+    "rule_ids": [
+     "AZ-9005",
+     "AZ-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No overhead/fringe surcharge exists for non-commercial requests (no labor charge to surcharge; guidance expressly excludes 'overhead costs'). Commercial: no percentage set; § 39-121.03(A) components only."
+   },
+   "labor.increment": {
+    "label": "Labor time increment + rounding",
+    "engine_field": "fee_profiles:labor.*.increment / rounding",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": "hours",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. Title 39, ch. 1, art. 2",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No time-increment or rounding rule for any chargeable time (commercial 'reasonable fee', § 39-129 'per video-hour reviewed' — the latter is stated per video-hour with no rounding rule). Searched: A.R.S. Title 39, ch. 1, art. 2 (§§ 39-121 to 39-129, incl. § 39-171) opened at azleg.gov 2026-08-19; …"
+   },
+   "rules.freeLaborHours": {
+    "label": "Free labor hours per request",
+    "engine_field": "fee_profiles:requestRules.freeLaborHours",
+    "type": "hours",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": "hours",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Ariz. Att'y Gen. Op. I13-012 (R13-018)",
+    "rule_ids": [
+     "AZ-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Moot for non-commercial requests: labor is never chargeable, so a free-hours allowance cannot exist. No free-time allowance found on the commercial branch (§ 39-121.03(A)) or for § 39-129 video."
+   },
+   "labor.periodicFreeHours": {
+    "label": "Free personnel time per requestor per month/year (TX § 552.275 pattern)",
+    "engine_field": "NOT IN ENGINE (fee_profiles gap — requestor-ledger counter)",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": "hours per requestor per period",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. Title 39, ch. 1, art. 2",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No per-requestor periodic free-time allowance (TX § 552.275 pattern) anywhere; largely moot because non-commercial labor is not chargeable at all (item labor.search.rate). Searched: A.R.S. Title 39, ch. 1, art. 2 (§§ 39-121 to 39-129, incl. § 39-171) opened at azleg.gov 2026-08-19; A.R.S. § 39-12…"
+   },
+   "rules.estimateNotifyThreshold": {
+    "label": "Itemized estimate / cost notice required above ($ or hours)",
+    "engine_field": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD or hours",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. Title 39, ch. 1, art. 2",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Arizona law contains no fee-estimate or cost-notice requirement at any threshold. Searched: A.R.S. Title 39, ch. 1, art. 2 (§§ 39-121 to 39-129, incl. § 39-171) opened at azleg.gov 2026-08-19; A.R.S. § 39-121.03 (commercial); Ariz. Att'y Gen. Op. I13-012 (R13-018) and the AG Agency Handbook ch. 6…"
+   },
+   "estimate.requesterResponseDays": {
+    "label": "Requester must respond to an estimate within N days (else withdrawn)",
+    "engine_field": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": "days",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. Title 39, ch. 1, art. 2",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No estimate-response window or deemed-withdrawal rule. Searched: A.R.S. Title 39, ch. 1, art. 2 (§§ 39-121 to 39-129, incl. § 39-171) opened at azleg.gov 2026-08-19; A.R.S. § 39-121.03 (commercial); Ariz. Att'y Gen. Op. I13-012 (R13-018) and the AG Agency Handbook ch. 6 (§§ 6.5.4–6.5.7, rev. 2018…"
+   },
+   "estimate.revisionNotifyPercent": {
+    "label": "Revised estimate required when actual exceeds estimate by N%",
+    "engine_field": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": "percent",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. Title 39, ch. 1, art. 2",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No revised-estimate rule (no estimate rule at all). Searched: A.R.S. Title 39, ch. 1, art. 2 (§§ 39-121 to 39-129, incl. § 39-171) opened at azleg.gov 2026-08-19; A.R.S. § 39-121.03 (commercial); Ariz. Att'y Gen. Op. I13-012 (R13-018) and the AG Agency Handbook ch. 6 (§§ 6.5.4–6.5.7, rev. 2018, a…"
+   },
+   "estimate.validityDays": {
+    "label": "Estimate validity period (days)",
+    "engine_field": "fee_profiles:estimatePolicy.estimateValidityDays",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": "days",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. Title 39, ch. 1, art. 2",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No estimate validity period. Searched: A.R.S. Title 39, ch. 1, art. 2 (§§ 39-121 to 39-129, incl. § 39-171) opened at azleg.gov 2026-08-19; A.R.S. § 39-121.03 (commercial); Ariz. Att'y Gen. Op. I13-012 (R13-018) and the AG Agency Handbook ch. 6 (§§ 6.5.4–6.5.7, rev. 2018, azag.gov 2025 posting); …"
+   },
+   "rules.deposit.threshold": {
+    "label": "Deposit / prepayment may be required above ($)",
+    "engine_field": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+    "type": "usd",
+    "resolution": "structural",
+    "value": "advance payment permitted for mailed copies (copying + postage) at any amount; no dollar threshold",
+    "unit": "USD",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ariz. Rev. Stat. § 39-121.01(D)(1)",
+    "rule_ids": [
+     "AZ-0022"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "The only prepayment authority is a gate, not a threshold: when the requester asks the custodian to MAIL a copy, the custodian may require advance payment of 'any copying and postage charges'. No threshold; no advance-payment provision for in-person or electronic delivery of non-commercial copies.…"
+   },
+   "rules.deposit.percent": {
+    "label": "Deposit capped at (% of estimate)",
+    "engine_field": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": "percent of estimate",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. § 39-121.01(D)(1)",
+    "rule_ids": [
+     "AZ-0022"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No percentage cap on a deposit. The mailed-copy authority permits advance payment of 'any copying and postage charges' (i.e., the full charge), not a fractional deposit. Searched: A.R.S. Title 39, ch. 1, art. 2 (§§ 39-121 to 39-129, incl. § 39-171) opened at azleg.gov 2026-08-19; A.R.S. § 39-121.…"
+   },
+   "payment.productionGate": {
+    "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+    "engine_field": "paymentTiming gates + fee_profiles bands",
+    "type": "enum",
+    "resolution": "structural",
+    "value": "mailed copies: pay in advance (copying + postage) permitted | commercial reproductions: provided upon being paid the § 39-121.03(A) fee | in-person/electronic non-commercial: no statutory gate | inspection: never conditioned on a fee",
+    "unit": "enum",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ariz. Rev. Stat. § 39-121.01(D)(1); § 39-121.03(B); Ariz. Att'y Gen. Op. I13-012 (R13-018)",
+    "rule_ids": [
+     "AZ-0022",
+     "AZ-0023",
+     "AZ-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Two express gates (mail → advance payment; commercial → payment before release after the 30-day governor window). AG Op. I13-012: inspection is not conditioned on any fee and no copying fee may be charged for personal-device copies (AZ-9003)."
+   },
+   "payment.nonpayment": {
+    "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+    "engine_field": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+    "type": "enum+int",
+    "resolution": "silent",
+    "value": null,
+    "unit": "enum + days",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. Title 39, ch. 1, art. 2",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No withdrawal-after-N-days, no prior-debt prepayment rule, no nonpayment consequence beyond the implicit right to withhold mailed/commercial copies until paid (AZ-0022, AZ-0023). Searched: A.R.S. Title 39, ch. 1, art. 2 (§§ 39-121 to 39-129, incl. § 39-171) opened at azleg.gov 2026-08-19; A.R.S. …"
+   },
+   "payment.depositClock": {
+    "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+    "engine_field": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+    "type": "enum",
+    "resolution": "silent",
+    "value": null,
+    "unit": "enum",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. § 39-121.01(D)(1), (E)",
+    "rule_ids": [
+     "AZ-0022"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Arizona has no numeric response clock (only 'promptly', with deemed denial for failure to promptly respond) and no provision that an unpaid advance payment tolls, pauses or affects it; no grace period; no lapse action. Searched: A.R.S. Title 39, ch. 1, art. 2 (§§ 39-121 to 39-129, incl. § 39-171)…"
+   },
+   "payment.reissue": {
+    "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+    "engine_field": "jurisdiction_rules:payment.reissue_*",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": "bool",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. Title 39, ch. 1, art. 2",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No estimate → no overrun/re-issue rule. Searched: A.R.S. Title 39, ch. 1, art. 2 (§§ 39-121 to 39-129, incl. § 39-171) opened at azleg.gov 2026-08-19; A.R.S. § 39-121.03 (commercial); Ariz. Att'y Gen. Op. I13-012 (R13-018) and the AG Agency Handbook ch. 6 (§§ 6.5.4–6.5.7, rev. 2018, azag.gov 2025…"
+   },
+   "rules.maxFee": {
+    "label": "Request-level ceiling (actual cost cap / statutory max)",
+    "engine_field": "fee_profiles:requestRules.maxFee",
+    "type": "usd_or_rule",
+    "resolution": "actual_cost_standard",
+    "value": "non-commercial: 'copying fees to offset copying costs' — 'a reasonable amount for the cost of time, equipment, and personnel used in producing copies of records, but not for costs of searching for the records' (plus postage for mailed copies)",
+    "unit": "standard (no number)",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Ariz. Att'y Gen. Op. I13-012 (R13-018); Ariz. Att'y Gen. Agency Handbook § 6.5.5; Ariz. Rev. Stat. § 39-121.01(D)(1)",
+    "rule_ids": [
+     "AZ-0018",
+     "AZ-9002",
+     "AZ-9004"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No request-level dollar maximum. Non-commercial fees are bounded to copying (and postage) costs; commercial charges (§ 39-121.03(A)) may include market value and are unbounded. Local LE video: $46 per video-hour reviewed ceiling (item av). 2026 SB 1437 would have imposed 'material costs only' — n…"
+   },
+   "rules.deMinimis": {
+    "label": "De-minimis: no charge below ($)",
+    "engine_field": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. § 39-121.01(D)(1); §§ 39-122, 39-127",
+    "rule_ids": [
+     "AZ-0020",
+     "AZ-0021"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No de-minimis (no-charge-below-$X) rule. The § 39-122 / § 39-127 no-charge rules cited in the prior are purpose/requester-based waivers, not a de-minimis floor. Ombudsman FAQ: 'public bodies are not required to impose a charge for copies' (discretionary). Searched: A.R.S. Title 39, ch. 1, art. 2 …"
+   },
+   "rules.minFee": {
+    "label": "Minimum fee",
+    "engine_field": "fee_profiles:requestRules.minFee",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. Title 39, ch. 1, art. 2",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No minimum fee. Searched: A.R.S. Title 39, ch. 1, art. 2 (§§ 39-121 to 39-129, incl. § 39-171) opened at azleg.gov 2026-08-19; A.R.S. § 39-121.03 (commercial); Ariz. Att'y Gen. Op. I13-012 (R13-018) and the AG Agency Handbook ch. 6 (§§ 6.5.4–6.5.7, rev. 2018, azag.gov 2025 posting); Arizona Ombud…"
+   },
+   "media": {
+    "label": "Electronic media (CD/DVD/USB) charge",
+    "engine_field": "fee_profiles:media.{cd,dvd,usb}",
+    "type": "actual_or_usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD per unit / actual cost",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. § 39-121.01(D)(1); Ariz. Att'y Gen. Agency Handbook § 6.5.5",
+    "rule_ids": [
+     "AZ-0018",
+     "AZ-9004"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No electronic-media charge provision. The general 'may charge a fee' for 'copies, printouts or photographs' plus the AG handbook copying-cost gloss (AZ-9004) is the only hook; the city sets any media charge. Searched: A.R.S. Title 39, ch. 1, art. 2 (§§ 39-121 to 39-129, incl. § 39-171) opened at …"
+   },
+   "delivery": {
+    "label": "Delivery: mail / handling / email / pickup",
+    "engine_field": "fee_profiles:delivery.*",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": "mail: 'postage charges' (advance payment permitted) | email / pickup: no fee provision (inspection is free)",
+    "unit": "USD (postage at cost)",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ariz. Rev. Stat. § 39-121.01(D)(1); Ariz. Att'y Gen. Op. I13-012 (R13-018)",
+    "rule_ids": [
+     "AZ-0022",
+     "AZ-9002",
+     "AZ-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Statute names only 'postage charges' (with advance payment) for mailed copies; no handling/processing surcharge is authorized in any opened source. Requester may be directed to records already on the public body's website (mail right is limited to records 'not otherwise available on the public bo…"
+   },
+   "certification": {
+    "label": "Certification / certified-copy charge",
+    "engine_field": "fee_profiles:certification.{rate,unit}",
+    "type": "rate_usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD per certification",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. § 39-122(A); (agency-only comparator: § 41-126(A)(10) Secretary of State certification 'no more than three dollars')",
+    "rule_ids": [
+     "AZ-0020",
+     "AZ-9008"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No general certified-copy fee for municipalities in Title 39 or Title 9. Only rule found is the NO-charge rule for certified copies (and searches) used in claims/benefits presented to the United States (§ 39-122). The Secretary of State's own certification cap (§ 41-126, 'no more than three dolla…"
+   },
+   "av": {
+    "label": "Audio/video: per recording, per minute, free minutes",
+    "engine_field": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+    "type": "rate_usd",
+    "resolution": "ceiling",
+    "value": "46",
+    "unit": "USD per video-hour reviewed (onetime fee per copy; local law-enforcement video recordings only) | audio: no provision | free minutes: none",
+    "basis": "ceiling",
+    "applies_to": "municipalities",
+    "rule_type": "Permission",
+    "authority": "Ariz. Rev. Stat. § 39-129 (Laws 2023, ch. 190, SB 1148); exception § 39-127",
+    "rule_ids": [
+     "AZ-9001",
+     "AZ-9009"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Binds counties, cities, towns and political subdivisions (local law-enforcement agencies); does not reach state agencies (e.g., DPS). Cap is per video-hour REVIEWED, charged as a onetime fee per copy; factors include reasonable cost of reviewing, transmitting, copying and redacting. Crime victims…"
+   },
+   "commercial": {
+    "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+    "engine_field": "fee_profiles:purposeOverrides.commercial",
+    "type": "pct+bool",
+    "resolution": "actual_cost_standard",
+    "value": "components: (1) a portion of the cost of obtaining the original/copies, (2) 'a reasonable fee for the cost of time, materials, equipment and personnel in producing such reproduction', (3) commercial-market value as best determined by the public body | surcharge %: none | labor chargeable: yes (component 2) | purpose statement: required; requester must affirm non-commercial purpose at intake",
+    "unit": "components (no number)",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Calculation",
+    "authority": "Ariz. Rev. Stat. § 39-121.03(A), (B), (D); § 39-121.01(D)(1)",
+    "rule_ids": [
+     "AZ-0019",
+     "AZ-0023",
+     "AZ-9007"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "'Shall include' the three components (Requirement as to composition; amounts left to the public body). Statutory definition of 'commercial purpose' at § 39-121.03(D); custodian may apply to the governor to bar abusive commercial use, and must furnish 'upon being paid the fee' if no order issues w…"
+   },
+   "waiver": {
+    "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+    "engine_field": "jurisdiction_rules:fee_waiver.*",
+    "type": "enum_list+bool",
+    "resolution": "structural",
+    "value": "mandatory no-charge: (a) certified copies + searches for claims/benefits presented to the United States (§ 39-122); (b) one copy of police report, audio and video recordings to qualifying crime victims/representatives (§ 39-127) | otherwise discretionary: public bodies 'are not required to impose a charge' but no hardship waiver is required | purpose statement: not required for waiver (non-commercial affirmation only) | written denial / appeal of a fee-waiver refusal: none",
+    "unit": "enum_list + bool",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Ariz. Rev. Stat. § 39-121.01(D)(1); § 39-122(A), (C); § 39-127(A)–(C); Arizona Ombudsman-Citizens' Aide Public Records FAQ",
+    "rule_ids": [
+     "AZ-0020",
+     "AZ-0021",
+     "AZ-0018",
+     "AZ-9008",
+     "AZ-9009",
+     "AZ-9006"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Two mandatory statutory waiver categories (both qualification workflows: US-claim purpose; crime-victim status incl. attorney or immediate family of killed/incapacitated victim; DV/sexual-offense victims under (C)); § 39-127(D) also requires law-enforcement agencies to prioritize processing of vi…"
+   },
+   "waiver.forfeiture": {
+    "label": "Late response forfeits the fee",
+    "engine_field": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": "bool",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. § 39-121.01(E); § 39-121.02",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No fee-forfeiture-on-late-response rule. Consequence of failing to respond promptly is deemed denial (§ 39-121.01(E)) and a special action with possible attorney fees/damages (§ 39-121.02) — remedies, not a fee waiver. Searched: A.R.S. Title 39, ch. 1, art. 2 (§§ 39-121 to 39-129, incl. § 39-171)…"
+   },
+   "repeat": {
+    "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+    "engine_field": "NOT IN ENGINE (requestor-ledger)",
+    "type": "structural",
+    "resolution": "silent",
+    "value": null,
+    "unit": "structural",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ariz. Rev. Stat. Title 39, ch. 1, art. 2",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No repeat-request carry-forward, aggregation threshold or per-requestor ledger rule. Searched: A.R.S. Title 39, ch. 1, art. 2 (§§ 39-121 to 39-129, incl. § 39-171) opened at azleg.gov 2026-08-19; A.R.S. § 39-121.03 (commercial); Ariz. Att'y Gen. Op. I13-012 (R13-018) and the AG Agency Handbook ch…"
    }
-  ],
-  "fee.commercial_charge": [
-   {
-    "rule_id": "AZ-0019",
-    "authority": "Ariz. Rev. Stat. § 39-121.03(A)",
-    "summary": "For a commercial-purpose request the charge may include (1) a portion of the cost to the public body for obtaining the original or copies, (2) a reasonable fee for time, materials, equipment and personnel in producing the reproduction, and (3) the value of the reproduction on the commercial marke…"
-   }
-  ]
+  },
+  "statutory_evidence": {
+   "fee.copy_rate_per_page": [
+    {
+     "rule_id": "AZ-0018",
+     "authority": "Ariz. Rev. Stat. § 39-121.01(D)(1)",
+     "summary": "The custodian may charge a fee for furnishing copies, printouts or photographs if the facilities are available; the statute sets no rate."
+    }
+   ],
+   "fee.commercial_charge": [
+    {
+     "rule_id": "AZ-0019",
+     "authority": "Ariz. Rev. Stat. § 39-121.03(A)",
+     "summary": "For a commercial-purpose request the charge may include (1) a portion of the cost to the public body for obtaining the original or copies, (2) a reasonable fee for time, materials, equipment and personnel in producing the reproduction, and (3) the value of the reproduction on the commercial marke…"
+    }
+   ]
+  }
  },
  "program_setup": {},
  "ledger": {

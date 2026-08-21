@@ -4,7 +4,7 @@
  "_meta": {
   "phase": 6,
   "generated_by": "build_state_templates.js",
-  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables. fee_schedule.items = the step-3 verified fee layer (value/unit/basis/engine_field/applies_to per master-list item, every cell verify-confirmed); fee_schedule.statutory_evidence = concept-level evidence."
  },
  "knobs": {
   "Master.g1": {
@@ -724,65 +724,692 @@
   }
  },
  "fee_schedule": {
-  "fee.copy_rate_per_page": [
-   {
-    "rule_id": "MA-0030",
-    "authority": "M.G.L. c. 66, § 10(d)(i)",
-    "summary": "The fee for standard black-and-white paper copies or printouts shall not exceed 5 cents per page, for both single- and double-sided copies."
-   }
-  ],
-  "fee.labor_charge": [
-   {
-    "rule_id": "MA-0032",
+  "items": {
+   "dup.bw.rate": {
+    "label": "Copy rate — B&W page",
+    "engine_field": "fee_profiles:duplication.bw.rate",
+    "type": "rate_usd",
+    "resolution": "ceiling",
+    "value": "0.05",
+    "unit": "USD per page (single- or double-sided, B&W paper copies/printouts)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Calculation",
+    "authority": "M.G.L. c. 66, § 10(d)(i); 950 CMR 32.07(2)(e)",
+    "rule_ids": [
+     "MA-0030",
+     "MA-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Ceiling under a Permission (§ 10(d): RAO 'may assess a reasonable fee'); city sets its operative rate at or under $0.05. Regulation extends the same cap to B&W copies 'of any size susceptible to ordinary means of production' (MA-9001). Overall bound: fee shall not exceed actual cost of reproducin…"
+   },
+   "dup.color.rate": {
+    "label": "Copy rate — color page",
+    "engine_field": "fee_profiles:duplication.color.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "M.G.L. c. 66, § 10(d); 950 CMR 32.07(2)(c)",
+    "rule_ids": [
+     "MA-0029"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "The prior snippet's 5-cent figure belongs to the B&W item only — § 10(d)(i) and 950 CMR 32.07(2)(e) both say 'black and white'. No color-specific rate exists; color copies fall under the general standard: reasonable fee not to exceed actual cost of reproduction."
+   },
+   "dup.oversized.rate": {
+    "label": "Copy rate — oversized / nonstandard page",
+    "engine_field": "fee_profiles:duplication.oversized.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "950 CMR 32.07(2)(h); 950 CMR 32.07(2)(e)",
+    "rule_ids": [
+     "MA-9001",
+     "MA-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Two-branch rule: an oversized B&W page still 'susceptible to ordinary means of production' is capped at $0.05/page 'of any size' (32.07(2)(e), MA-9001); a copy NOT susceptible to ordinary means of reproduction may be charged at actual cost incurred (32.07(2)(h), MA-9002). No fixed oversized rate …"
+   },
+   "dup.specialty.rate": {
+    "label": "Specialty reproduction (photos, maps, transcripts)",
+    "engine_field": "fee_profiles:duplication.specialty.rate",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "950 CMR 32.07(2)(h)",
+    "rule_ids": [
+     "MA-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Specialty reproduction (photographs, maps, and similar non-ordinary media) is governed by the actual-cost-incurred standard of 32.07(2)(h); no per-item schedule. Storage device/material also at actual cost (MA-0031). No transcription-specific fee provision in c. 66 § 10 or 950 CMR 32.00."
+   },
+   "dup.tiers": {
+    "label": "Graduated page bands (per-page rate by volume)",
+    "engine_field": "fee_profiles:duplication.*.tiers",
+    "type": "tiers",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "M.G.L. c. 66, § 10(d) (searched); 950 CMR 32.07 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full text of c. 66 § 10(d)(i)-(ix) and 950 CMR 32.07 read — the per-page cap is flat ($0.05 at any volume); no graduated page bands exist. The prior's '2 hours'/'4 hours' figures are the free-LABOR-hour thresholds, not page tiers; the machine-derived value_present status was a mis-join."
+   },
+   "rules.freePages": {
+    "label": "Free page allowance per request",
+    "engine_field": "fee_profiles:requestRules.freePageAllowance",
+    "type": "pages",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "M.G.L. c. 66, § 10(d) (searched); 950 CMR 32.07 (searched)",
+    "rule_ids": [
+     "MA-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No free-PAGE allowance exists (the free allowance is stated in labor hours — see rules.freeLaborHours). Material adjacent rule captured as MA-9003: no copying fee may be assessed at all for electronic copies or copies transmitted by facsimile (950 CMR 32.07(2)(f)) — a no-charge category, not a pa…"
+   },
+   "labor.search.rate": {
+    "label": "Labor rate — search / retrieval ($/hr)",
+    "engine_field": "fee_profiles:labor.search.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "ceiling",
+    "value": "25",
+    "unit": "USD per hour (and not more than the hourly rate of the lowest-paid employee with the necessary skill)",
+    "basis": "ceiling",
+    "applies_to": "municipalities",
+    "rule_type": "Calculation",
     "authority": "M.G.L. c. 66, § 10(d)(iii)",
-    "summary": "For a municipality, the hourly labor rate must equal or be less than the lowest-paid capable employee's rate and shall not exceed $25 per hour, unless a higher rate is approved by the Supervisor."
+    "rule_ids": [
+     "MA-0032"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Municipal double ceiling: lower of $25/hr and the lowest-paid capable employee's hourly rate; a municipality (only) may exceed $25/hr with Supervisor of Records approval under § 10(d)(iv) (MA-0037). Agency regime (noted): same structure with a 4-hour trigger and a hard $25 cap with no exceedance …"
    },
-   {
-    "rule_id": "MA-0033",
-    "authority": "M.G.L. c. 66, § 10(d)(ii)",
-    "summary": "For a (state) agency, the hourly labor rate must equal or be less than the lowest-paid capable employee's rate and shall not be more than $25 per hour."
+   "labor.review.rate": {
+    "label": "Labor rate — review / redaction ($/hr)",
+    "engine_field": "fee_profiles:labor.review.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "ceiling",
+    "value": "25",
+    "unit": "USD per hour (when chargeable at all)",
+    "basis": "ceiling",
+    "applies_to": "municipalities",
+    "rule_type": "Prohibition",
+    "authority": "M.G.L. c. 66, § 10(d)(iii)(C), (iv)",
+    "rule_ids": [
+     "MA-0036",
+     "MA-0032",
+     "MA-0037"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Default: segregation/redaction time is NOT chargeable at all unless (a) the segregation/redaction is required by law, or (b) the Supervisor of Records approves a petition (§ 10(d)(iv), MA-0037). When chargeable, it sits inside the same municipal labor ceiling ($25/hr / lowest-paid capable employe…"
    },
-   {
-    "rule_id": "MA-0037",
-    "authority": "M.G.L. c. 66, § 10(d)(iv)",
-    "summary": "The Supervisor may approve a petition to charge for segregation/redaction time, or a municipal petition to charge over $25/hour, if the request is for a commercial purpose or the fee is a necessary, reasonable good-faith cost not designed to deter access; the entity must furnish the petition to t…",
-    "clock_spec": "Supervisor written determination within 5 business-days of receipt of the petition",
-    "clock_effect": "sets-deadline"
-   }
-  ],
-  "fee.actual_cost_basis": [
-   {
-    "rule_id": "MA-0029",
-    "authority": "M.G.L. c. 66, § 10(d)",
-    "summary": "A records access officer may assess a reasonable fee for production (except freely-inspectable records), and the fee shall not exceed the actual cost of reproducing the record."
-   }
-  ],
-  "fee.electronic_media_charge": [
-   {
-    "rule_id": "MA-0031",
-    "authority": "M.G.L. c. 66, § 10(d)(i)",
-    "summary": "The actual cost of any storage device or material provided in response to a request may be included as part of the fee."
-   }
-  ],
-  "fee.free_allowance": [
-   {
-    "rule_id": "MA-0034",
-    "authority": "M.G.L. c. 66, § 10(d)(iii)(B)",
-    "summary": "For a municipality with a population over 20,000, no labor fee may be assessed for the first 2 hours of work performed."
+   "labor.programming.rate": {
+    "label": "Labor rate — programming / data extraction ($/hr)",
+    "engine_field": "fee_profiles:labor.programming.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "ceiling",
+    "value": "25",
+    "unit": "USD per hour",
+    "basis": "ceiling",
+    "applies_to": "municipalities",
+    "rule_type": "Calculation",
+    "authority": "M.G.L. c. 66, § 10(d)(iii), (f)",
+    "rule_ids": [
+     "MA-0032",
+     "MA-9004"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No separate programming/data-extraction rate: 'compile ... or reproduce' labor is billed under the single municipal labor ceiling (MA-0032), and § 10(f) expressly folds necessary VENDOR time (technology consultants, outside counsel) into 'employee time' (new row MA-9004) — so extraction work by a…"
    },
-   {
-    "rule_id": "MA-0035",
-    "authority": "M.G.L. c. 66, § 10(d)(ii)(B)",
-    "summary": "For a (state) agency, no labor fee may be assessed for the first 4 hours of work performed."
+   "labor.billableWhen": {
+    "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+    "engine_field": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+    "type": "enum+threshold",
+    "resolution": "value",
+    "value": ">2",
+    "unit": "hours of employee time devoted to the request (municipal chargeability trigger)",
+    "basis": "fixed",
+    "applies_to": "municipalities",
+    "rule_type": "Permission",
+    "authority": "M.G.L. c. 66, § 10(d)(iii), (iii)(B); 950 CMR 32.07(2)(m)",
+    "rule_ids": [
+     "MA-0032",
+     "MA-0034",
+     "MA-9005"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Labor is chargeable only when the municipality must devote MORE than 2 hours of employee time (agency: 4 hours, § 10(d)(ii)). Population gate on the free tier: municipalities over 20,000 (decennial U.S. Census) may not assess the first 2 hours; municipalities of 20,000 or fewer MAY assess the fir…"
+   },
+   "labor.overheadPct": {
+    "label": "Overhead / fringe surcharge on labor (%)",
+    "engine_field": "fee_profiles:labor.overheadPct",
+    "type": "pct",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "municipalities",
+    "rule_type": "Prohibition",
+    "authority": "M.G.L. c. 66, § 10(d)(iii)(A); 950 CMR 32.07(2)(i)",
+    "rule_ids": [
+     "MA-0032"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No overhead or fringe surcharge exists in MA law; the labor fee is structurally capped at the base hourly rate of the lowest-paid capable employee (§ 10(d)(iii)(A) 'an hourly rate equal to or less than the hourly rate attributed to the lowest paid employee'; reg parallel quoted). A percentage add…"
+   },
+   "labor.increment": {
+    "label": "Labor time increment + rounding",
+    "engine_field": "fee_profiles:labor.*.increment / rounding",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "M.G.L. c. 66, § 10(d) (searched); 950 CMR 32.07 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full text of c. 66 § 10 and 950 CMR 32.00 read — no billing-increment or rounding rule (no quarter-hour/15-minute provision). Cities set their own increment policy under the general reasonable-fee/actual-cost ceiling."
+   },
+   "rules.freeLaborHours": {
+    "label": "Free labor hours per request",
+    "engine_field": "fee_profiles:requestRules.freeLaborHours",
+    "type": "hours",
+    "resolution": "value",
+    "value": "2",
+    "unit": "free hours of employee time per request (municipality with population over 20,000)",
+    "basis": "fixed",
+    "applies_to": "municipalities",
+    "rule_type": "Prohibition",
+    "authority": "M.G.L. c. 66, § 10(d)(iii)(B); 950 CMR 32.07(2)(m)1.-2.",
+    "rule_ids": [
+     "MA-0034",
+     "MA-9005"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Population-gated: 2 free hours per request applies only to municipalities over 20,000 (decennial U.S. Census); a municipality of 20,000 or fewer may assess a fee for the first two hours, bearing the burden to provide population data (950 CMR 32.07(2)(m)2, MA-9005). Agency regime (noted): 4 free h…"
+   },
+   "labor.periodicFreeHours": {
+    "label": "Free personnel time per requestor per month/year (TX § 552.275 pattern)",
+    "engine_field": "NOT IN ENGINE (fee_profiles gap — requestor-ledger counter)",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "M.G.L. c. 66, § 10 (searched); 950 CMR 32.00 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full text of c. 66 § 10 and 950 CMR 32.00 read — no per-requestor per-month/per-year free personnel-time ledger (no TX § 552.275 analogue). The 2-hour/4-hour free tiers are PER REQUEST (see rules.freeLaborHours); the prior's value_present status mis-joined them to this item."
+   },
+   "rules.estimateNotifyThreshold": {
+    "label": "Itemized estimate / cost notice required above ($ or hours)",
+    "engine_field": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+    "type": "usd",
+    "resolution": "structural",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "950 CMR 32.07(2)(b); M.G.L. c. 66, § 10(b)(viii)",
+    "rule_ids": [
+     "MA-0039",
+     "MA-9009"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No dollar/hours threshold: the written, itemized, good-faith estimate is required WHENEVER any fee will be assessed (threshold effectively $0), and it must precede compliance and land within the 10-business-day response. Companion notice duty (MA-9009): the RAO shall inform the requester of recor…"
+   },
+   "estimate.requesterResponseDays": {
+    "label": "Requester must respond to an estimate within N days (else withdrawn)",
+    "engine_field": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "M.G.L. c. 66, § 10 (searched); 950 CMR 32.06-32.07 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full text of c. 66 § 10 and 950 CMR 32.00 read — no deadline for the requester to accept/respond to an estimate and no deemed-withdrawal clock. The prior's defers_to_city status overstated it: the law is silent, not an express deferral; a city response-window policy would sit in unregul…"
+   },
+   "estimate.revisionNotifyPercent": {
+    "label": "Revised estimate required when actual exceeds estimate by N%",
+    "engine_field": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "M.G.L. c. 66, § 10 (searched); 950 CMR 32.07 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full text of c. 66 § 10 and 950 CMR 32.00 read — no revised-estimate trigger at any overrun percentage. The 'good faith estimate' standard (32.07(2)(b)) is the only constraint on estimate accuracy."
+   },
+   "estimate.validityDays": {
+    "label": "Estimate validity period (days)",
+    "engine_field": "fee_profiles:estimatePolicy.estimateValidityDays",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "M.G.L. c. 66, § 10 (searched); 950 CMR 32.07 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full text of c. 66 § 10 and 950 CMR 32.00 read — no estimate validity/expiry period."
+   },
+   "rules.deposit.threshold": {
+    "label": "Deposit / prepayment may be required above ($)",
+    "engine_field": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+    "type": "usd",
+    "resolution": "structural",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "950 CMR 32.06(2)(f); M.G.L. c. 66, § 10(a)(iii)",
+    "rule_ids": [
+     "MA-0044",
+     "MA-0043"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "MA has no deposit-threshold mechanism. The state's shape is a payment GATE, not a deposit: production may be conditioned on payment of the assessed fee at any amount (§ 10(a)(iii) conditions the production duty on 'payment of a reasonable fee'; the RAO may delay provision until fees are paid in f…"
+   },
+   "rules.deposit.percent": {
+    "label": "Deposit capped at (% of estimate)",
+    "engine_field": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "M.G.L. c. 66, § 10 (searched); 950 CMR 32.06-32.07 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full text of c. 66 § 10 and 950 CMR 32.00 read — no partial-deposit concept and therefore no deposit cap percentage. The regulation instead permits withholding production until fees are paid IN FULL (32.06(2)(f)); a city adopting a partial-deposit practice operates in unregulated space …"
+   },
+   "payment.productionGate": {
+    "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+    "engine_field": "paymentTiming gates + fee_profiles bands",
+    "type": "enum",
+    "resolution": "structural",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "M.G.L. c. 66, § 10(a)(iii); 950 CMR 32.06(2)(f)",
+    "rule_ids": [
+     "MA-0043",
+     "MA-0044"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Gate confirmed both ways: the 10-business-day production duty is expressly conditioned on receipt of payment (§ 10(a)(iii)), and the RAO 'may delay provision of records until all fees related to such requests are paid in full' (32.06(2)(f), MA-0044). Pay-in-full-before-release model; permission (…"
+   },
+   "payment.nonpayment": {
+    "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+    "engine_field": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+    "type": "enum+int",
+    "resolution": "structural",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "M.G.L. c. 66, § 10(d)(vi)-(vii); 950 CMR 32.07(2)(n)",
+    "rule_ids": [
+     "MA-0041",
+     "MA-9006"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No withdrawn-after-N-days rule. The nonpayment consequences are: (1) the current request may be held unreleased until paid in full (MA-0044); (2) NEW requests from a requester with unpaid prior balances may be denied — but per 950 CMR 32.07(2)(n) (MA-9006) only if the prior fee estimate complied …"
+   },
+   "payment.depositClock": {
+    "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+    "engine_field": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+    "type": "enum",
+    "resolution": "structural",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "M.G.L. c. 66, § 10(a)(iii); 950 CMR 32.06(2)(f)",
+    "rule_ids": [
+     "MA-0043",
+     "MA-0044"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "MA has no deposit clock because it has no deposit stage; the analogous effect is that production may lawfully be withheld while assessed fees are unpaid (pause-like gate on delivery). No statutory grace period and no request-lapse/withdrawal action for nonpayment of the current request — the requ…"
+   },
+   "payment.reissue": {
+    "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+    "engine_field": "jurisdiction_rules:payment.reissue_*",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "M.G.L. c. 66, § 10 (searched); 950 CMR 32.07 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full text of c. 66 § 10 and 950 CMR 32.00 read — no rule requiring a revised estimate when actual cost overruns the estimate, none blocking collection of an overrun, none restarting a window. Practical bounds that survive: the fee may never exceed actual reproduction cost (MA-0029) and …"
+   },
+   "rules.maxFee": {
+    "label": "Request-level ceiling (actual cost cap / statutory max)",
+    "engine_field": "fee_profiles:requestRules.maxFee",
+    "type": "usd_or_rule",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "M.G.L. c. 66, § 10(d); 950 CMR 32.07(2)(c)",
+    "rule_ids": [
+     "MA-0029"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Request-level cap is the actual-cost standard: 'reasonable fee' that 'shall not exceed the actual cost of reproducing the record' (verbatim; reg parallel 32.07(2)(c)). The itemized component ceilings ($0.05/page, $25/hr, free hours) all sit under this envelope. Records freely available for public…"
+   },
+   "rules.deMinimis": {
+    "label": "De-minimis: no charge below ($)",
+    "engine_field": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "M.G.L. c. 66, § 10(d) (searched); 950 CMR 32.07 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full text of c. 66 § 10 and 950 CMR 32.00 read — no de-minimis dollar floor below which charging is barred. Adjacent no-charge categories that are NOT a de-minimis rule: freely-inspectable records (§ 10(d)), electronic/fax copies (32.07(2)(f), MA-9003), and the discretionary waiver powe…"
+   },
+   "rules.minFee": {
+    "label": "Minimum fee",
+    "engine_field": "fee_profiles:requestRules.minFee",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "M.G.L. c. 66, § 10(d) (searched); 950 CMR 32.07 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full text of c. 66 § 10 and 950 CMR 32.00 read — no minimum-fee provision. A flat minimum charge exceeding actual reproduction cost would collide with the actual-cost ceiling (MA-0029), so any municipal minimum must stay within actual cost."
+   },
+   "media": {
+    "label": "Electronic media (CD/DVD/USB) charge",
+    "engine_field": "fee_profiles:media.{cd,dvd,usb}",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "M.G.L. c. 66, § 10(d)(i); 950 CMR 32.07(2)(g)",
+    "rule_ids": [
+     "MA-0031"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "CD/DVD/USB and similar media: actual cost of the storage device or material, verbatim standard, no fixed schedule. Note the transmission itself must be free when electronic: no copying fee for electronic copies (32.07(2)(f), MA-9003) — only the physical device's actual cost is chargeable."
+   },
+   "delivery": {
+    "label": "Delivery: mail / handling / email / pickup",
+    "engine_field": "fee_profiles:delivery.*",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "950 CMR 32.07(2)(j), (f)",
+    "rule_ids": [
+     "MA-9007",
+     "MA-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Postage: actual cost only, only when the requester asks for mailing or cannot receive in person, and at the lowest available mailing cost (MA-9007). Electronic delivery and facsimile: no copying fee may be assessed at all (32.07(2)(f), MA-9003). No handling/processing surcharge is authorized. Ele…"
+   },
+   "certification": {
+    "label": "Certification / certified-copy charge",
+    "engine_field": "fee_profiles:certification.{rate,unit}",
+    "type": "rate_usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "municipalities",
+    "rule_type": null,
+    "authority": "M.G.L. c. 66, § 10 (searched); 950 CMR 32.07 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "The Public Records Law fee scheme (c. 66 § 10(d); 950 CMR 32.07) contains no certification or certified-copy charge. 950 CMR 32.05(1)(d)1 acknowledges 'certified copies of records' only as a class the Supervisor may except from agency reporting — not a fee rule. Silence here is silence of the rec…"
+   },
+   "av": {
+    "label": "Audio/video: per recording, per minute, free minutes",
+    "engine_field": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "950 CMR 32.07(2)(h); M.G.L. c. 66, § 10(d)(i)",
+    "rule_ids": [
+     "MA-0031",
+     "MA-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No A/V-specific schedule. Reproduction of recordings resolves through the general components: actual cost incurred for copies not susceptible to ordinary reproduction (2)(h), actual cost of the storage device (MA-0031), labor above the free-hour threshold at the capped rate (MA-0032/MA-0034), and…"
+   },
+   "commercial": {
+    "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+    "engine_field": "fee_profiles:purposeOverrides.commercial",
+    "type": "pct+bool",
+    "resolution": "structural",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Classification",
+    "authority": "M.G.L. c. 66, § 10(d)(iv)(A), (viii), (ix)",
+    "rule_ids": [
+     "MA-0004",
+     "MA-0037"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No commercial surcharge percentage or separate commercial schedule. Commercial purpose (defined § 10(d)(ix), MA-0004; reg definition also covers solicitation lists, 32.02) operates structurally: (1) it is a ground for the Supervisor to approve redaction-time charging or municipal rates above $25/…"
+   },
+   "waiver": {
+    "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+    "engine_field": "jurisdiction_rules:fee_waiver.*",
+    "type": "enum_list+bool",
+    "resolution": "structural",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Discretion",
+    "authority": "M.G.L. c. 66, § 10(d)(v), (viii); 950 CMR 32.07(2)(k)",
+    "rule_ids": [
+     "MA-0038"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Discretionary ('may waive or reduce'), never mandatory. Grounds: (1) public-interest disclosure not primarily commercial; (2) requestor's inability to pay. Purpose statement: may be required from the requester ONLY to evaluate commercial purpose or the waiver (§ 10(d)(viii)). No waiver-specific w…"
+   },
+   "waiver.forfeiture": {
+    "label": "Late response forfeits the fee",
+    "engine_field": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+    "type": "bool",
+    "resolution": "structural",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "M.G.L. c. 66, § 10(e); 950 CMR 32.06(2)(c), (4)(b)",
+    "rule_ids": [
+     "MA-0040",
+     "MA-9008"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Confirmed TRUE, two independent forfeiture triggers: (1) missing the 10-business-day § 10(b) response forfeits the entire fee right (§ 10(e), MA-0040; reg parallel 32.06(2)(c)); (2) failure to comply with the 950 CMR 32.06(4) petition provisions 'will result in a waiver of the right to assess fee…"
+   },
+   "repeat": {
+    "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+    "engine_field": "NOT IN ENGINE (requestor-ledger)",
+    "type": "structural",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "M.G.L. c. 66, § 10 (searched); 950 CMR 32.00 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full text of c. 66 § 10 and 950 CMR 32.00 read — no FEE aggregation threshold and no unpaid-fee carry-forward-to-new-request pricing rule. Multiple requests from the same requestor matter only to TIME relief, not fees: undue burden from 'multiple requests from the same requestor' suppor…"
    }
-  ],
-  "fee.no_charge_categories": [
-   {
-    "rule_id": "MA-0036",
-    "authority": "M.G.L. c. 66, § 10(d)(ii)(C), (iii)(C)",
-    "summary": "A fee shall not be assessed for time spent segregating or redacting records unless such segregation/redaction is required by law or approved by the Supervisor."
-   }
-  ]
+  },
+  "statutory_evidence": {
+   "fee.copy_rate_per_page": [
+    {
+     "rule_id": "MA-0030",
+     "authority": "M.G.L. c. 66, § 10(d)(i)",
+     "summary": "The fee for standard black-and-white paper copies or printouts shall not exceed 5 cents per page, for both single- and double-sided copies."
+    }
+   ],
+   "fee.labor_charge": [
+    {
+     "rule_id": "MA-0032",
+     "authority": "M.G.L. c. 66, § 10(d)(iii)",
+     "summary": "For a municipality, the hourly labor rate must equal or be less than the lowest-paid capable employee's rate and shall not exceed $25 per hour, unless a higher rate is approved by the Supervisor."
+    },
+    {
+     "rule_id": "MA-0033",
+     "authority": "M.G.L. c. 66, § 10(d)(ii)",
+     "summary": "For a (state) agency, the hourly labor rate must equal or be less than the lowest-paid capable employee's rate and shall not be more than $25 per hour."
+    },
+    {
+     "rule_id": "MA-0037",
+     "authority": "M.G.L. c. 66, § 10(d)(iv)",
+     "summary": "The Supervisor may approve a petition to charge for segregation/redaction time, or a municipal petition to charge over $25/hour, if the request is for a commercial purpose or the fee is a necessary, reasonable good-faith cost not designed to deter access; the entity must furnish the petition to t…",
+     "clock_spec": "Supervisor written determination within 5 business-days of receipt of the petition",
+     "clock_effect": "sets-deadline"
+    }
+   ],
+   "fee.actual_cost_basis": [
+    {
+     "rule_id": "MA-0029",
+     "authority": "M.G.L. c. 66, § 10(d)",
+     "summary": "A records access officer may assess a reasonable fee for production (except freely-inspectable records), and the fee shall not exceed the actual cost of reproducing the record."
+    }
+   ],
+   "fee.electronic_media_charge": [
+    {
+     "rule_id": "MA-0031",
+     "authority": "M.G.L. c. 66, § 10(d)(i)",
+     "summary": "The actual cost of any storage device or material provided in response to a request may be included as part of the fee."
+    }
+   ],
+   "fee.free_allowance": [
+    {
+     "rule_id": "MA-0034",
+     "authority": "M.G.L. c. 66, § 10(d)(iii)(B)",
+     "summary": "For a municipality with a population over 20,000, no labor fee may be assessed for the first 2 hours of work performed."
+    },
+    {
+     "rule_id": "MA-0035",
+     "authority": "M.G.L. c. 66, § 10(d)(ii)(B)",
+     "summary": "For a (state) agency, no labor fee may be assessed for the first 4 hours of work performed."
+    }
+   ],
+   "fee.no_charge_categories": [
+    {
+     "rule_id": "MA-0036",
+     "authority": "M.G.L. c. 66, § 10(d)(ii)(C), (iii)(C)",
+     "summary": "A fee shall not be assessed for time spent segregating or redacting records unless such segregation/redaction is required by law or approved by the Supervisor."
+    }
+   ]
+  }
  },
  "program_setup": {
   "custody.records_officer_designation": [

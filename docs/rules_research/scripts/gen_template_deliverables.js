@@ -8,8 +8,11 @@ const OUT = '/home/optimumq/exchange/config_templates';
 fs.mkdirSync(OUT, { recursive: true });
 
 let ExcelJS;
-for (const p of ['/tmp/claude-998/-home-optimumq/fb4aa3f1-bf0e-4830-8e27-3fd6a744a532/scratchpad/node_modules/exceljs',
-                 '/tmp/claude-998/-home-optimumq/4610cbeb-c70f-4f3a-88f2-ce8c29cc92af/scratchpad/node_modules/exceljs']) {
+for (const p of ['exceljs',
+                 process.env.EXCELJS_PATH,
+                 '/tmp/claude-998/-opt-optimumq/083ddf6b-6471-4372-9073-4b11016dbdb3/scratchpad/node_modules/exceljs',
+                 '/tmp/claude-998/-home-optimumq/fb4aa3f1-bf0e-4830-8e27-3fd6a744a532/scratchpad/node_modules/exceljs',
+                 '/tmp/claude-998/-home-optimumq/4610cbeb-c70f-4f3a-88f2-ce8c29cc92af/scratchpad/node_modules/exceljs'].filter(Boolean)) {
   try { ExcelJS = require(p); break; } catch (e) {}
 }
 if (!ExcelJS) { console.error('exceljs not found — npm install exceljs in the scratchpad'); process.exit(1); }
@@ -44,6 +47,21 @@ const evRows = ev => ev.map(e =>
 
 const conceptTable = block => Object.entries(block).map(([k, ev]) =>
   `<tr><td style="width:26%"><b>${esc(k)}</b></td><td>${evRows(ev)}</td></tr>`).join('');
+
+const RES_BADGE = { value: '#1a7f37', ceiling: '#b25000', floor: '#b25000', range: '#b25000',
+  actual_cost_standard: '#0b5cad', defers_to_city: '#5a2ea6', structural: '#555',
+  silent: '#8a94a0', delegated_unresolved: '#c00', not_applicable: '#8a94a0' };
+const feeItemsTable = items => `<table><tr><th>Item</th><th>Engine field</th><th>Resolution</th>
+<th>Value</th><th>Unit</th><th>Basis</th><th>Applies to</th><th>Authority</th></tr>` +
+  Object.entries(items).map(([id, it]) => {
+    const badge = `<span style="background:${RES_BADGE[it.resolution] || '#555'};color:#fff;border-radius:3px;padding:1px 7px;font-size:12px;white-space:nowrap">${esc(it.resolution)}</span>`;
+    const note = it.notes ? `<br><span class="note">${esc(it.notes)}</span>` : '';
+    return `<tr><td style="width:16%"><b>${esc(id)}</b><br><span class="note">${esc(it.label)}</span></td>` +
+      `<td class="rid">${esc(it.engine_field)}</td><td>${badge}</td>` +
+      `<td>${esc(it.value == null ? '—' : it.value)}</td><td>${esc(it.unit || '—')}</td>` +
+      `<td>${esc(it.basis || '—')}</td><td>${esc(it.applies_to || '—')}</td>` +
+      `<td><span class="auth">${esc(it.authority || '—')}</span>${note}</td></tr>`;
+  }).join('') + '</table>';
 
 for (const t of templates) {
   const knobRows = Object.entries(t.knobs).map(([node, k]) => {
@@ -81,7 +99,12 @@ Audit: ${t.audit.rules_referenced}/${t.audit.rules_total} state rules carried in
 <h2>◆ Value knobs (${Object.keys(t.knobs).length})</h2><table><tr><th>Node</th><th>Statutory constraints & city config</th></tr>${knobRows}</table>
 <h2>▲ State-gated branches (${Object.keys(t.branches).length})</h2><table><tr><th>Node</th><th>State</th><th>Why</th></tr>${brRows}</table>
 <h2>Clock matrix (named timers)</h2><table><tr><th>Timer</th><th>Basis</th><th>Evidence</th></tr>${clkRows}</table>
-<h2>Fee schedule</h2>${secTable(t.fee_schedule)}
+<h2>Fee schedule — verified fee layer (step 3)</h2>
+<p class="note">One row per engine fee item. Every row was verify-confirmed against the official source
+(fee gap pass, 2026-08). "silent" = the state law sets nothing — city policy decides. Value shown only
+where the state prints a figure; basis says whether it is a fixed value, a ceiling, a floor, or a standard.</p>
+${feeItemsTable(t.fee_schedule.items)}
+<h3 style="font-size:14px;color:#0b5cad">Concept-level statutory evidence</h3>${secTable(t.fee_schedule.statutory_evidence)}
 <h2>Program setup (org-level obligations)</h2>${secTable(t.program_setup)}
 <h2>Requestor-ledger triggers</h2>${secTable(t.ledger)}
 <p class="note">Generated ${new Date().toISOString().slice(0, 10)} · source: docs/rules_research/workflow/templates/${esc(t.code)}.json</p>
@@ -141,6 +164,21 @@ for (const k of timerKeys) {
   tm.addRow(row);
 }
 paint(tm);
+
+const fsheet = wb.addWorksheet('Fee schedule');
+fsheet.columns = [
+  { header: 'State', key: 'st', width: 6 }, { header: 'Item', key: 'id', width: 26 },
+  { header: 'Label', key: 'lb', width: 38 }, { header: 'Engine field', key: 'ef', width: 34 },
+  { header: 'Resolution', key: 're', width: 18 }, { header: 'Value', key: 'va', width: 22 },
+  { header: 'Unit', key: 'un', width: 16 }, { header: 'Basis', key: 'ba', width: 14 },
+  { header: 'Applies to', key: 'ap', width: 18 }, { header: 'Authority', key: 'au', width: 44 },
+  { header: 'Notes', key: 'no', width: 60 }];
+for (const t of templates) for (const [id, it] of Object.entries(t.fee_schedule.items))
+  fsheet.addRow({ st: t.code, id, lb: it.label, ef: it.engine_field, re: it.resolution,
+    va: it.value == null ? '' : String(it.value), un: it.unit || '', ba: it.basis || '',
+    ap: it.applies_to || '', au: it.authority || '', no: it.notes || '' });
+fsheet.autoFilter = 'A1:K1';
+paint(fsheet);
 
 wb.xlsx.writeFile(path.join(OUT, 'Config_templates.xlsx')).then(() => {
   console.log(`wrote ${templates.length} state HTMLs + index.html + Config_templates.xlsx to ${OUT}`);

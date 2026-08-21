@@ -4,7 +4,7 @@
  "_meta": {
   "phase": 6,
   "generated_by": "build_state_templates.js",
-  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables. fee_schedule.items = the step-3 verified fee layer (value/unit/basis/engine_field/applies_to per master-list item, every cell verify-confirmed); fee_schedule.statutory_evidence = concept-level evidence."
  },
  "knobs": {
   "Master.g1": {
@@ -637,60 +637,682 @@
   }
  },
  "fee_schedule": {
-  "fee.copy_rate_per_page": [
-   {
-    "rule_id": "WI-0035",
+  "items": {
+   "dup.bw.rate": {
+    "label": "Copy rate — B&W page",
+    "engine_field": "fee_profiles:duplication.bw.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
     "authority": "Wis. Stat. § 19.35(3)(a)",
-    "summary": "An authority may impose a fee for a copy of a record not exceeding the actual, necessary and direct cost of reproduction and transcription, unless a fee is otherwise specifically established or authorized by law.",
-    "clock_spec": "ceiling: actual, necessary and direct cost of reproduction and transcription"
-   }
-  ],
-  "fee.labor_charge": [
-   {
-    "rule_id": "WI-0041",
-    "authority": "Wis. Stat. § 19.35(3)(am), created by 2023 Wis. Act 253",
-    "summary": "A law enforcement agency may impose a fee for the actual, necessary and direct cost of redacting recorded audio or video content to the extent redaction is required by law, but may not charge if: the requester (an individual) certifies non-commercial use; the event is an officer-involved shooting…",
-    "clock_spec": "ceiling: actual, necessary and direct cost of redacting recorded audio/video content"
-   }
-  ],
-  "fee.actual_cost_basis": [
-   {
-    "rule_id": "WI-0037",
-    "authority": "Wis. Stat. § 19.35(3)(c)",
-    "summary": "An authority may impose a fee for locating a record, not exceeding the actual, necessary and direct cost of location, but only if that cost is $50 or more.",
-    "clock_spec": "ceiling: actual, necessary and direct cost of location; chargeable only if cost is $50 or more"
+    "rule_ids": [
+     "WI-0035"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No statutory per-page number for B&W copies; the ceiling is the 'actual, necessary and direct cost' standard. The city sets its rate under that standard. The oft-cited 25 cents/page is WI DOJ GUIDANCE on presumptive reasonableness, not law — not recorded as a value per state note. The prior_value…"
    },
-   {
-    "rule_id": "WI-0040",
-    "authority": "Wis. Stat. § 19.35(3)(g)",
-    "summary": "If a record is produced or collected by a non-authority under contract with an authority, the authorized fee for a copy may not exceed the actual, necessary and direct cost of reproduction or transcription incurred by that person, unless a fee is otherwise established by law.",
-    "clock_spec": "ceiling: actual, necessary and direct cost of reproduction/transcription incurred by the contractor"
-   }
-  ],
-  "fee.delivery_charge": [
-   {
-    "rule_id": "WI-0038",
-    "authority": "Wis. Stat. § 19.35(3)(d)",
-    "summary": "An authority may impose a fee for the actual, necessary and direct cost of mailing or shipping any copy or photograph of a record that is mailed or shipped to the requester.",
-    "clock_spec": "ceiling: actual, necessary and direct cost of mailing or shipping"
-   }
-  ],
-  "fee.nonstandard_rate": [
-   {
-    "rule_id": "WI-0036",
+   "dup.color.rate": {
+    "label": "Copy rate — color page",
+    "engine_field": "fee_profiles:duplication.color.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Wis. Stat. § 19.35(3)(a)",
+    "rule_ids": [
+     "WI-0035"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No separate color-copy provision anywhere in ch. 19 subch. II or its annotations; color copies fall under the same actual/necessary/direct reproduction-cost ceiling of § 19.35(3)(a). A city's color rate may reflect the higher actual cost of color reproduction but nothing more."
+   },
+   "dup.oversized.rate": {
+    "label": "Copy rate — oversized / nonstandard page",
+    "engine_field": "fee_profiles:duplication.oversized.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Wis. Stat. § 19.35(3)(a), (b)",
+    "rule_ids": [
+     "WI-0035",
+     "WI-0036"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No distinct oversized/nonstandard-page provision; oversized reproduction is governed by the § 19.35(3)(a) actual-cost standard (or (3)(b) photographing standard where the form does not permit copying). City sets any oversized rate under actual, necessary and direct cost."
+   },
+   "dup.specialty.rate": {
+    "label": "Specialty reproduction (photos, maps, transcripts)",
+    "engine_field": "fee_profiles:duplication.specialty.rate",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
     "authority": "Wis. Stat. § 19.35(3)(b)",
-    "summary": "Where an authority provides a photograph of a record whose form does not permit copying, it may impose a fee not exceeding the actual, necessary and direct cost of photographing and photographic processing.",
-    "clock_spec": "ceiling: actual, necessary and direct cost of photographing and photographic processing"
+    "rule_ids": [
+     "WI-0036",
+     "WI-0035"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Photographs of non-copyable records: actual/necessary/direct cost of photographing and photographic processing (§ 19.35(3)(b)). Transcription is inside the (3)(a) reproduction-and-transcription standard. Record-specific fee statutes may override via the 'otherwise provided by law' clause (e.g., §…"
+   },
+   "dup.tiers": {
+    "label": "Graduated page bands (per-page rate by volume)",
+    "engine_field": "fee_profiles:duplication.*.tiers",
+    "type": "tiers",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. § 19.35(3) (searched; no provision)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Structured negative. Wisconsin has a pure actual-cost regime with no volume bands. A city may design tiers only insofar as each tier stays within the actual, necessary and direct cost ceiling of § 19.35(3)(a)."
+   },
+   "rules.freePages": {
+    "label": "Free page allowance per request",
+    "engine_field": "fee_profiles:requestRules.freePageAllowance",
+    "type": "pages",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. § 19.35(3) (searched; no provision)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Structured negative. The prior slice attached WI-0033 (no fee for redaction, Milwaukee Journal Sentinel 2012 WI 65) to this item, but that is a no-charge task category, not a free-page allowance — it belongs to labor.review.rate/labor.billableWhen. The discretionary public-interest waiver (§ 19.3…"
+   },
+   "labor.search.rate": {
+    "label": "Labor rate — search / retrieval ($/hr)",
+    "engine_field": "fee_profiles:labor.search.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Wis. Stat. § 19.35(3)(c)",
+    "rule_ids": [
+     "WI-0037"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No fixed hourly rate: location (search) labor is charged at actual, necessary and direct cost, and ONLY when that cost is $50 or more (chargeability threshold resolved at labor.billableWhen). DOJ guidance says the staff-time rate should be based on the lowest-paid employee capable of the task (gu…"
+   },
+   "labor.review.rate": {
+    "label": "Labor rate — review / redaction ($/hr)",
+    "engine_field": "fee_profiles:labor.review.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Milwaukee Journal Sentinel v. City of Milwaukee, 2012 WI 65, 341 Wis. 2d 607, 815 N.W.2d 367; Wis. Stat. § 19.35(3)(h)",
+    "rule_ids": [
+     "WI-0033",
+     "WI-0041",
+     "WI-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Review/redaction labor is categorically non-chargeable for general records, so a review labor rate is moot — fee is $0. SOLE exception: a law enforcement agency redacting recorded audio/video under § 19.35(3)(h) (verbatim now captured in WI-9001, amending the previously paraphrased WI-0041): actu…"
+   },
+   "labor.programming.rate": {
+    "label": "Labor rate — programming / data extraction ($/hr)",
+    "engine_field": "fee_profiles:labor.programming.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "72 Atty. Gen. 68; Wis. Stat. § 19.35(3)(a)",
+    "rule_ids": [
+     "WI-0035",
+     "WI-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No programming rate exists. The cost of a computer run is chargeable as a copying (reproduction) fee under the § 19.35(3)(a) actual-cost standard — not as a location fee (so the $50 location threshold does not attach to it). Note also § 19.35(1)(L): no duty to create a new record by extracting an…"
+   },
+   "labor.billableWhen": {
+    "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+    "engine_field": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+    "type": "enum+threshold",
+    "resolution": "value",
+    "value": "50",
+    "unit": "USD (location-cost chargeability threshold: location/search labor chargeable only if its actual cost is $50 or more)",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Wis. Stat. § 19.35(3)(c); Milwaukee Journal Sentinel v. City of Milwaukee, 2012 WI 65; Wis. Stat. § 19.35(3)(h)",
+    "rule_ids": [
+     "WI-0037",
+     "WI-0033",
+     "WI-0041",
+     "WI-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Engine shape: (1) location/search labor: chargeable only when the location cost reaches $50 (below $50 it is free, and per WI-0037 notes sub-$50 location costs may not be folded into reproduction charges); (2) review/redaction labor: never chargeable for general records (Milwaukee Journal Sentine…"
+   },
+   "labor.overheadPct": {
+    "label": "Overhead / fringe surcharge on labor (%)",
+    "engine_field": "fee_profiles:labor.overheadPct",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. § 19.35(3) (searched; no provision)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Structured negative. No overhead multiplier is authorized. The statutory standard is 'actual, necessary and DIRECT cost' — the word 'direct' cuts against loading indirect/overhead costs onto any fee, though the statute does not expressly address a percentage. A city should not configure an overhe…"
+   },
+   "labor.increment": {
+    "label": "Labor time increment + rounding",
+    "engine_field": "fee_profiles:labor.*.increment / rounding",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. § 19.35(3) (searched; no provision)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Structured negative. Any billing increment a city adopts must still keep the resulting charge within actual, necessary and direct cost (§ 19.35(3)(a)-(c)); an increment that systematically overshoots actual cost would exceed the ceiling."
+   },
+   "rules.freeLaborHours": {
+    "label": "Free labor hours per request",
+    "engine_field": "fee_profiles:requestRules.freeLaborHours",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. § 19.35(3) (searched; no provision)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Structured negative. Wisconsin's functional analogue is a COST threshold, not an hours threshold: location labor is free until its cost reaches $50 (§ 19.35(3)(c), resolved at labor.billableWhen). Do not convert $50 into an hours figure."
+   },
+   "labor.periodicFreeHours": {
+    "label": "Free personnel time per requestor per month/year (TX § 552.275 pattern)",
+    "engine_field": "NOT IN ENGINE (fee_profiles gap — requestor-ledger counter)",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. § 19.35(3) (searched; no provision)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Structured negative. The only per-requestor periodic counter in Wisconsin law is the § 19.35(3)(h)3.b 10-requests-per-calendar-year threshold gating the LE A/V redaction fee (see repeat item) — it counts requests, not free hours."
+   },
+   "rules.estimateNotifyThreshold": {
+    "label": "Itemized estimate / cost notice required above ($ or hours)",
+    "engine_field": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. § 19.35(3) (searched; general regime has no provision); cf. § 19.35(3)(h)7",
+    "rule_ids": [
+     "WI-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "General regime: silent — no dollar/hours threshold triggering a mandatory estimate. One narrow statutory estimate gate exists: § 19.35(3)(h)7 makes a prior WRITTEN estimate a precondition of charging the LE A/V redaction fee (any amount — no threshold; captured in WI-9001). DOJ guidance encourage…"
+   },
+   "estimate.requesterResponseDays": {
+    "label": "Requester must respond to an estimate within N days (else withdrawn)",
+    "engine_field": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. § 19.35 (searched; no provision)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Structured negative. Defers in practice to city policy; state law is silent."
+   },
+   "estimate.revisionNotifyPercent": {
+    "label": "Revised estimate required when actual exceeds estimate by N%",
+    "engine_field": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. § 19.35 (searched; no provision)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Structured negative. The final charge is independently capped at actual, necessary and direct cost regardless of any estimate."
+   },
+   "estimate.validityDays": {
+    "label": "Estimate validity period (days)",
+    "engine_field": "fee_profiles:estimatePolicy.estimateValidityDays",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. § 19.35 (searched; no provision)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Structured negative. Defers in practice to city policy."
+   },
+   "rules.deposit.threshold": {
+    "label": "Deposit / prepayment may be required above ($)",
+    "engine_field": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+    "type": "usd",
+    "resolution": "value",
+    "value": "5",
+    "unit": "USD (prepayment may be required only if total fees exceed $5)",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Wis. Stat. § 19.35(3)(f)",
+    "rule_ids": [
+     "WI-0042"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Fixed statutory threshold: prepayment (Wisconsin's deposit mechanism) is permitted only when total fees EXCEED $5; demanding prepayment of $1.29 on a mail request was unlawful (State ex rel. Borzych v. Paluszcyk, 201 Wis. 2d 523 — confirmed in certified annotations). Amount demanded may rest on a…"
+   },
+   "rules.deposit.percent": {
+    "label": "Deposit capped at (% of estimate)",
+    "engine_field": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. § 19.35(3)(f) (searched; no cap provision)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Structured negative. § 19.35(3)(f) permits prepayment of 'any fee or fees' — i.e., up to 100% of the (reasonably estimated) total; no statutory percentage ceiling below that."
+   },
+   "payment.productionGate": {
+    "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+    "engine_field": "paymentTiming gates + fee_profiles bands",
+    "type": "enum",
+    "resolution": "structural",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Wis. Stat. § 19.35(3)(f); § 19.35(1)(i); State ex rel. Hill v. Zimmerman, 196 Wis. 2d 419",
+    "rule_ids": [
+     "WI-0042",
+     "WI-0044"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Shape of the gate: production MAY be conditioned on payment in advance when total fees exceed $5 (prepay-before-copies); the prepayment amount may be based on a reasonable estimate (Hill v. Zimmerman). § 19.35(1)(i) expressly recognizes withholding fulfillment of a mail request pending required p…"
+   },
+   "payment.nonpayment": {
+    "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+    "engine_field": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+    "type": "enum+int",
+    "resolution": "structural",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Wis. Stat. § 19.35(3)(f)",
+    "rule_ids": [
+     "WI-0043"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "The only statutory nonpayment consequence is the prior-debt prepayment rule, and it is limited to prisoner requesters: unpaid fees from a previous request let the authority demand prepayment of BOTH the old and the new amounts before fulfilling the current request. There is NO general deemed-with…"
+   },
+   "payment.depositClock": {
+    "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+    "engine_field": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+    "type": "enum",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. §§ 19.35(3)(f), 19.35(4)(a) (searched; no clock provision)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Structured negative — and there is no numeric statutory clock to toll in the first place: § 19.35(4)(a) requires action 'as soon as practicable and without delay' (a soft standard). Practically, § 19.35(1)(i) + (3)(f) let the authority hold fulfillment until a lawful prepayment demand is met, but…"
+   },
+   "payment.reissue": {
+    "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+    "engine_field": "jurisdiction_rules:payment.reissue_*",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. § 19.35 (searched; no provision)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Structured negative. The narrow § 19.35(3)(h)7 written-estimate rule is a precondition of charging the LE A/V redaction fee at all, not an overrun/re-issue mechanism. The actual-cost ceiling independently caps the final charge whatever was estimated."
+   },
+   "rules.maxFee": {
+    "label": "Request-level ceiling (actual cost cap / statutory max)",
+    "engine_field": "fee_profiles:requestRules.maxFee",
+    "type": "usd_or_rule",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Wis. Stat. § 19.35(3)(a)-(d); Milwaukee Journal Sentinel v. City of Milwaukee, 2012 WI 65",
+    "rule_ids": [
+     "WI-0035",
+     "WI-0036",
+     "WI-0037",
+     "WI-0038",
+     "WI-0033",
+     "WI-0040"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Request-level ceiling is structural, not numeric: total charge = sum of actual, necessary and direct cost of the enumerated chargeable tasks (reproduction/transcription, photographing/processing, location if ≥$50, mailing/shipping, plus LE A/V redaction under (3)(h)) and nothing else. Enforcement…"
+   },
+   "rules.deMinimis": {
+    "label": "De-minimis: no charge below ($)",
+    "engine_field": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. § 19.35(3) (searched; no general de-minimis provision)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Structured negative for a REQUEST-LEVEL de minimis. Two task-scoped analogues exist and are resolved elsewhere: location fees are barred below $50 of location cost (§ 19.35(3)(c), labor.billableWhen) and prepayment is barred at $5 or less (§ 19.35(3)(f), rules.deposit.threshold). A city MAY waive…"
+   },
+   "rules.minFee": {
+    "label": "Minimum fee",
+    "engine_field": "fee_profiles:requestRules.minFee",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. § 19.35(3) (searched; no provision)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Structured negative. A flat minimum fee that exceeds actual, necessary and direct cost on a small request would violate the § 19.35(3)(a) ceiling — do not configure one for Wisconsin."
+   },
+   "media": {
+    "label": "Electronic media (CD/DVD/USB) charge",
+    "engine_field": "fee_profiles:media.{cd,dvd,usb}",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Wis. Stat. § 19.35(3)(a)",
+    "rule_ids": [
+     "WI-0035"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No statutory media price. The actual cost of the storage medium used to deliver the copy is chargeable under the § 19.35(3)(a) reproduction standard; nothing beyond actual cost. Electronic-form requests must be answered in electronic form (Lueders v. Krug, 2019 WI App 36 — in certified annotation…"
+   },
+   "delivery": {
+    "label": "Delivery: mail / handling / email / pickup",
+    "engine_field": "fee_profiles:delivery.*",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Wis. Stat. § 19.35(3)(d)",
+    "rule_ids": [
+     "WI-0038"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Mailing/shipping chargeable at actual, necessary and direct cost. No statute authorizes a handling surcharge, an email-delivery charge, or a pickup charge — mailing/shipping is one of only four (now five with (3)(h)) chargeable tasks (Milwaukee Journal Sentinel), so email delivery and pickup carr…"
+   },
+   "certification": {
+    "label": "Certification / certified-copy charge",
+    "engine_field": "fee_profiles:certification.{rate,unit}",
+    "type": "rate_usd",
+    "resolution": "structural",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "72 Atty. Gen. 36",
+    "rule_ids": [
+     "WI-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "The records law sets NO certification rate. Operative rule is a gate: an UNREQUESTED certification may not be charged to the requester (WI-9003). A requested certification's charge, if any, comes from a record-specific fee statute (via the § 19.35(3)(a) 'otherwise established by law' clause) or s…"
+   },
+   "av": {
+    "label": "Audio/video: per recording, per minute, free minutes",
+    "engine_field": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Wis. Stat. § 19.35(1)(c)-(d), (3)(a), (3)(h)",
+    "rule_ids": [
+     "WI-0035",
+     "WI-0041",
+     "WI-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No per-recording, per-minute, or free-minutes values anywhere. Copies of audio ((1)(c)) and video ((1)(d)) records are charged as reproduction at actual, necessary and direct cost ((3)(a)). Law enforcement agencies (including municipal police) may additionally charge actual A/V REDACTION cost und…"
+   },
+   "commercial": {
+    "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+    "engine_field": "fee_profiles:purposeOverrides.commercial",
+    "type": "pct+bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. § 19.35 (searched; no general commercial schedule); cf. § 19.35(3)(h)3.a",
+    "rule_ids": [
+     "WI-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Structured negative for a commercial schedule; § 19.35(1)(i) generally bars conditioning access on stated purpose (and examination of records cannot be denied for commercial purpose, 58 Atty. Gen. 67). ONE commercial-sensitive fork exists: under § 19.35(3)(h)3.a an individual requester escapes th…"
+   },
+   "waiver": {
+    "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+    "engine_field": "jurisdiction_rules:fee_waiver.*",
+    "type": "enum_list+bool",
+    "resolution": "structural",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Discretion",
+    "authority": "Wis. Stat. § 19.35(3)(e); George v. Record Custodian, 169 Wis. 2d 573, 485 N.W.2d 460 (Ct. App. 1992)",
+    "rule_ids": [
+     "WI-0039",
+     "WI-9004"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Shape: single DISCRETIONARY waiver/reduction branch, sole statutory ground = authority's own public-interest determination. No mandatory waiver categories; no indigency waiver as of right (George v. Record Custodian, verbatim in WI-9004); no purpose-statement requirement (indeed § 19.35(1)(i) gen…"
+   },
+   "waiver.forfeiture": {
+    "label": "Late response forfeits the fee",
+    "engine_field": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Wis. Stat. §§ 19.35, 19.37 (searched; no provision)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Structured negative. Do not confuse with § 19.37(4): the up-to-$1,000 forfeiture for arbitrary/capricious delay or excessive fees is a penalty paid to the state/county via AG/DA enforcement, not a waiver of the requester's fee. Wisconsin also has no fixed response deadline ('as soon as practicabl…"
+   },
+   "repeat": {
+    "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+    "engine_field": "NOT IN ENGINE (requestor-ledger)",
+    "type": "structural",
+    "resolution": "structural",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Wis. Stat. § 19.35(3)(h)3.b",
+    "rule_ids": [
+     "WI-0041",
+     "WI-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "General repeat/aggregation regime: silent — no fee carry-forward and no request-aggregation threshold for ordinary records. The one statutory per-requestor counter is § 19.35(3)(h)3.b: a requester-ledger of audio/video requests per authority per calendar year; at more than 10 such requests, the n…"
    }
-  ],
-  "fee.no_charge_categories": [
-   {
-    "rule_id": "WI-0033",
-    "authority": "Milwaukee Journal Sentinel v. City of Milwaukee, 2012 WI 65, 341 Wis. 2d 607",
-    "summary": "Redaction is not one of the four statutory fee tasks (reproduction/transcription, photographing/processing, locating, mailing/shipping); an authority generally may not impose a fee for the process of redacting information from a record.",
-    "clock_spec": "fixed: $0 for redaction/separation of information (general records)"
-   }
-  ]
+  },
+  "statutory_evidence": {
+   "fee.copy_rate_per_page": [
+    {
+     "rule_id": "WI-0035",
+     "authority": "Wis. Stat. § 19.35(3)(a)",
+     "summary": "An authority may impose a fee for a copy of a record not exceeding the actual, necessary and direct cost of reproduction and transcription, unless a fee is otherwise specifically established or authorized by law.",
+     "clock_spec": "ceiling: actual, necessary and direct cost of reproduction and transcription"
+    }
+   ],
+   "fee.labor_charge": [
+    {
+     "rule_id": "WI-0041",
+     "authority": "Wis. Stat. § 19.35(3)(am), created by 2023 Wis. Act 253",
+     "summary": "A law enforcement agency may impose a fee for the actual, necessary and direct cost of redacting recorded audio or video content to the extent redaction is required by law, but may not charge if: the requester (an individual) certifies non-commercial use; the event is an officer-involved shooting…",
+     "clock_spec": "ceiling: actual, necessary and direct cost of redacting recorded audio/video content"
+    }
+   ],
+   "fee.actual_cost_basis": [
+    {
+     "rule_id": "WI-0037",
+     "authority": "Wis. Stat. § 19.35(3)(c)",
+     "summary": "An authority may impose a fee for locating a record, not exceeding the actual, necessary and direct cost of location, but only if that cost is $50 or more.",
+     "clock_spec": "ceiling: actual, necessary and direct cost of location; chargeable only if cost is $50 or more"
+    },
+    {
+     "rule_id": "WI-0040",
+     "authority": "Wis. Stat. § 19.35(3)(g)",
+     "summary": "If a record is produced or collected by a non-authority under contract with an authority, the authorized fee for a copy may not exceed the actual, necessary and direct cost of reproduction or transcription incurred by that person, unless a fee is otherwise established by law.",
+     "clock_spec": "ceiling: actual, necessary and direct cost of reproduction/transcription incurred by the contractor"
+    }
+   ],
+   "fee.delivery_charge": [
+    {
+     "rule_id": "WI-0038",
+     "authority": "Wis. Stat. § 19.35(3)(d)",
+     "summary": "An authority may impose a fee for the actual, necessary and direct cost of mailing or shipping any copy or photograph of a record that is mailed or shipped to the requester.",
+     "clock_spec": "ceiling: actual, necessary and direct cost of mailing or shipping"
+    }
+   ],
+   "fee.nonstandard_rate": [
+    {
+     "rule_id": "WI-0036",
+     "authority": "Wis. Stat. § 19.35(3)(b)",
+     "summary": "Where an authority provides a photograph of a record whose form does not permit copying, it may impose a fee not exceeding the actual, necessary and direct cost of photographing and photographic processing.",
+     "clock_spec": "ceiling: actual, necessary and direct cost of photographing and photographic processing"
+    }
+   ],
+   "fee.no_charge_categories": [
+    {
+     "rule_id": "WI-0033",
+     "authority": "Milwaukee Journal Sentinel v. City of Milwaukee, 2012 WI 65, 341 Wis. 2d 607",
+     "summary": "Redaction is not one of the four statutory fee tasks (reproduction/transcription, photographing/processing, locating, mailing/shipping); an authority generally may not impose a fee for the process of redacting information from a record.",
+     "clock_spec": "fixed: $0 for redaction/separation of information (general records)"
+    }
+   ]
+  }
  },
  "program_setup": {
   "custody.custodian_definition_and_role": [

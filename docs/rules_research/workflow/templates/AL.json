@@ -4,7 +4,7 @@
  "_meta": {
   "phase": 6,
   "generated_by": "build_state_templates.js",
-  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables. fee_schedule.items = the step-3 verified fee layer (value/unit/basis/engine_field/applies_to per master-list item, every cell verify-confirmed); fee_schedule.statutory_evidence = concept-level evidence."
  },
  "knobs": {
   "Master.g1": {
@@ -737,13 +737,659 @@
   }
  },
  "fee_schedule": {
-  "fee.schedule_and_authority": [
-   {
-    "rule_id": "AL-0039",
-    "authority": "Ala. Code § 36-12-44(a)(2), § 36-12-41 (SB270, 2024 Reg. Sess.)",
-    "summary": "A public officer may require the requester to pay a reasonable fee set by the public officer before the requester may receive any public records (standard request); more generally, a certified copy is furnished on payment of a reasonable fee."
+  "items": {
+   "dup.bw.rate": {
+    "label": "Copy rate — B&W page",
+    "engine_field": "fee_profiles:duplication.bw.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per page",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2); § 36-12-41 (as amended by Act 2024-278, §1)",
+    "rule_ids": [
+     "AL-0039",
+     "AL-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No statewide per-page rate or ceiling for municipalities; the operative standard is 'a reasonable fee set by the public officer' (standard request: may charge; time-intensive request: shall charge). Article applies to every 'public officer' (state, county, municipal) except the judicial branch/Ar…"
+   },
+   "dup.color.rate": {
+    "label": "Copy rate — color page",
+    "engine_field": "fee_profiles:duplication.color.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per page",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2); § 36-12-41",
+    "rule_ids": [
+     "AL-0039",
+     "AL-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No item-specific provision found (statute, full-text Code search). Any color-copy charge falls under the general reasonable-fee standard the officer sets. Searched: Ala. Code Title 36, ch. 12, art. 3 (§§ 36-12-40 to 36-12-47) as codified on the Legislature's official Code of Alabama viewer (curre…"
+   },
+   "dup.oversized.rate": {
+    "label": "Copy rate — oversized / nonstandard page",
+    "engine_field": "fee_profiles:duplication.oversized.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per page",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2); § 36-12-41",
+    "rule_ids": [
+     "AL-0039",
+     "AL-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No item-specific provision. EO 734 §4.c lets STATE agencies recover actual costs of 'special paper sizes' with advance notice (state_agencies_only; AL-9008). Searched: Ala. Code Title 36, ch. 12, art. 3 (§§ 36-12-40 to 36-12-47) as codified on the Legislature's official Code of Alabama viewer (cu…"
+   },
+   "dup.specialty.rate": {
+    "label": "Specialty reproduction (photos, maps, transcripts)",
+    "engine_field": "fee_profiles:duplication.specialty.rate",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD or actual cost per item",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2); § 36-12-41; cf. § 36-21-213(b) (law-enforcement recordings)",
+    "rule_ids": [
+     "AL-0039",
+     "AL-9001",
+     "AL-9005"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No general provision. Record-specific figures exist only for particular custodians (911 call transcripts: 'a reasonable fee not to exceed the actual cost of transcription', § 11-98-12(d)(1); law-enforcement body/dash-cam recordings: 'reasonable fee for redaction and editing', § 36-21-213(b)). Sea…"
+   },
+   "dup.tiers": {
+    "label": "Graduated page bands (per-page rate by volume)",
+    "engine_field": "fee_profiles:duplication.*.tiers",
+    "type": "tiers",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Ala. Code §§ 36-12-40 to 36-12-47 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No graduated per-page bands anywhere in Article 3 or elsewhere for municipal records; the only volume distinction in state law is the 8-hour staff-time split between standard and time-intensive requests (§ 36-12-43(b)(4),(6)), which drives process, not rate. Official link is the Legislature's Cod…"
+   },
+   "rules.freePages": {
+    "label": "Free page allowance per request",
+    "engine_field": "fee_profiles:requestRules.freePageAllowance",
+    "type": "pages",
+    "resolution": "silent",
+    "value": null,
+    "unit": "pages",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Ala. Code §§ 36-12-40 to 36-12-47 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No free-page allowance in state law for any public body; § 36-12-44(h) preserves the officer's freedom to process 'in a manner that is less expensive' (AL-9009), so a city may adopt one. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3; section t…"
+   },
+   "labor.search.rate": {
+    "label": "Labor rate — search / retrieval ($/hr)",
+    "engine_field": "fee_profiles:labor.search.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per hour",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2); § 36-12-45(b)(3) (default form text); § 36-12-43(b)(4),(6)",
+    "rule_ids": [
+     "AL-0039",
+     "AL-0044",
+     "AL-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Search/retrieval labor is within the 'reasonable fee set by the public officer'; the statute's own default request form warns that 'extensive requests ... may increase the fees to cover the administrative cost of searching and copying'. No rate. Agency regime (does NOT bind municipalities): Gover…"
+   },
+   "labor.review.rate": {
+    "label": "Labor rate — review / redaction ($/hr)",
+    "engine_field": "fee_profiles:labor.review.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per hour",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2); § 36-12-43(b)(4),(6) (redaction time counts toward the 8-hour classification); § 36-21-213(b)",
+    "rule_ids": [
+     "AL-0039",
+     "AL-0044",
+     "AL-9005"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "For municipalities no figure; general reasonable-fee standard. Redaction/editing of law-enforcement recordings expressly chargeable at a 'reasonable fee' (§ 36-21-213(b)). Contrast: EO 734 §4.a forbids STATE agencies from charging for legal review or redaction (state_agencies_only). Official link…"
+   },
+   "labor.programming.rate": {
+    "label": "Labor rate — programming / data extraction ($/hr)",
+    "engine_field": "fee_profiles:labor.programming.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per hour",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2); § 36-12-44(d) (no duty to create a new record)",
+    "rule_ids": [
+     "AL-0039",
+     "AL-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No item-specific provision. EO 734 §4.c lets STATE agencies recover 'costs associated with searching electronic databases' with advance notice (state_agencies_only). Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3; section text also served by it…"
+   },
+   "labor.billableWhen": {
+    "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+    "engine_field": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+    "type": "enum+threshold",
+    "resolution": "actual_cost_standard",
+    "value": "always-permitted-within-reasonable-fee; no page/hour threshold; not paper-only",
+    "unit": "enum (trigger=always | threshold=none | paperOnly=false)",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2); § 36-12-45(b)(3); § 36-12-43(b)(4),(6)",
+    "rule_ids": [
+     "AL-0039",
+     "AL-0044",
+     "AL-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No statutory trigger or threshold limiting when labor may be charged for municipalities; the 8-hour staff-time line (§ 36-12-43) changes the process track (fee becomes mandatory for time-intensive requests, AL-0044) but does not itself switch labor charging on or off. Official link is the Legisla…"
+   },
+   "labor.overheadPct": {
+    "label": "Overhead / fringe surcharge on labor (%)",
+    "engine_field": "fee_profiles:labor.overheadPct",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": "%",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Ala. Code §§ 36-12-40 to 36-12-47 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No overhead/fringe multiplier in state law. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3; section text also served by its GraphQL endpoint https://alison.legislature.state.al.us/graphql, query codeOfAlabamaSection); alternate direct text: enr…"
+   },
+   "labor.increment": {
+    "label": "Labor time increment + rounding",
+    "engine_field": "fee_profiles:labor.*.increment / rounding",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": "hours",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Ala. Code §§ 36-12-40 to 36-12-47 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No time-increment or rounding rule in state law. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3; section text also served by its GraphQL endpoint https://alison.legislature.state.al.us/graphql, query codeOfAlabamaSection); alternate direct text…"
+   },
+   "rules.freeLaborHours": {
+    "label": "Free labor hours per request",
+    "engine_field": "fee_profiles:requestRules.freeLaborHours",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": "hours",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Ala. Code §§ 36-12-40 to 36-12-47 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No free labor hours per request in state law; the 8-hour figure in § 36-12-43(b)(4),(6) is a classification threshold (standard vs time-intensive), NOT a free-labor allowance — do not read it as one. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article…"
+   },
+   "labor.periodicFreeHours": {
+    "label": "Free personnel time per requestor per month/year (TX § 552.275 pattern)",
+    "engine_field": "NOT IN ENGINE (fee_profiles gap — requestor-ledger counter)",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": "hours per requestor per period",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Ala. Code §§ 36-12-40 to 36-12-47 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No per-requestor periodic free-time allowance (no TX § 552.275 analogue). Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3; section text also served by its GraphQL endpoint https://alison.legislature.state.al.us/graphql, query codeOfAlabamaSectio…"
+   },
+   "rules.estimateNotifyThreshold": {
+    "label": "Itemized estimate / cost notice required above ($ or hours)",
+    "engine_field": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+    "type": "usd",
+    "resolution": "structural",
+    "value": "0",
+    "unit": "USD (any fee charged triggers the estimated-fee notice)",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2), (b)(4)",
+    "rule_ids": [
+     "AL-0040",
+     "AL-0045"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No dollar/hour threshold: whenever the officer elects to charge for a standard request the estimated fee must be noticed; for a time-intensive request likely fees must be noticed in advance (and again at the time-intensive designation, with an option to withdraw). Engine shape: notice gate with t…"
+   },
+   "estimate.requesterResponseDays": {
+    "label": "Requester must respond to an estimate within N days (else withdrawn)",
+    "engine_field": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": "days",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(4) (searched)",
+    "rule_ids": [
+     "AL-0042"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No statutory response window after an estimate: the requester 'may opt not to pay' (no deadline, no deemed-withdrawal); a time-intensive requester may withdraw and resubmit, again with no deadline stated. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Ar…"
+   },
+   "estimate.revisionNotifyPercent": {
+    "label": "Revised estimate required when actual exceeds estimate by N%",
+    "engine_field": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": "%",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2); § 36-12-45(b)(3) (searched)",
+    "rule_ids": [
+     "AL-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No revised-estimate trigger or percentage; the default form only warns that extensive requests 'may increase the fees'. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3; section text also served by its GraphQL endpoint https://alison.legislature.…"
+   },
+   "estimate.validityDays": {
+    "label": "Estimate validity period (days)",
+    "engine_field": "fee_profiles:estimatePolicy.estimateValidityDays",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": "days",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Ala. Code §§ 36-12-40 to 36-12-47 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No estimate validity period in state law. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3; section text also served by its GraphQL endpoint https://alison.legislature.state.al.us/graphql, query codeOfAlabamaSection); alternate direct text: enrol…"
+   },
+   "rules.deposit.threshold": {
+    "label": "Deposit / prepayment may be required above ($)",
+    "engine_field": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+    "type": "usd",
+    "resolution": "structural",
+    "value": "no dollar threshold; officer discretion (standard) / mandatory prepayment (time-intensive)",
+    "unit": "USD",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Discretion",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2)",
+    "rule_ids": [
+     "AL-0043",
+     "AL-0046",
+     "AL-0044",
+     "AL-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Prepayment of 'all or a portion of the estimated fee prior to searching' is at the officer's discretion for every request regardless of amount (no threshold); for time-intensive requests payment of the reasonable fee before any substantive response is mandatory. A city may set its own threshold u…"
+   },
+   "rules.deposit.percent": {
+    "label": "Deposit capped at (% of estimate)",
+    "engine_field": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+    "type": "pct",
+    "resolution": "ceiling",
+    "value": "100",
+    "unit": "% of the estimated fee",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Discretion",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2)",
+    "rule_ids": [
+     "AL-0043",
+     "AL-0046",
+     "AL-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "State sets no percentage; the deposit may be any portion up to the entire estimated fee, so the engine ceiling is 100% of estimate and the city chooses the operative percentage. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3; section text also …"
+   },
+   "payment.productionGate": {
+    "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+    "engine_field": "paymentTiming gates + fee_profiles bands",
+    "type": "enum",
+    "resolution": "structural",
+    "value": "pay-before-release (mandatory once a fee is charged); optional pay-before-search (all or portion of estimate)",
+    "unit": "enum",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2)",
+    "rule_ids": [
+     "AL-0041",
+     "AL-0043",
+     "AL-0046",
+     "AL-0044",
+     "AL-0045"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Standard: if a fee is charged the officer 'shall ... withhold any public records until receipt of payment'; time-intensive: 'shall withhold any substantive response until receipt of payment'. Both tracks permit a discretionary pre-search deposit. Official link is the Legislature's Code of Alabama…"
+   },
+   "payment.nonpayment": {
+    "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+    "engine_field": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+    "type": "enum+int",
+    "resolution": "structural",
+    "value": "no substantive response / no records; no statutory withdrawal period; no prior-debt rule",
+    "unit": "enum+int (days: none)",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ala. Code § 36-12-44(a)(2)",
+    "rule_ids": [
+     "AL-0042",
+     "AL-0041"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Consequence is structural (records/response withheld). No N-day deemed-withdrawal and no prior-unpaid-balance prepayment rule in state law — city policy. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3; section text also served by its GraphQL en…"
+   },
+   "payment.depositClock": {
+    "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+    "engine_field": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+    "type": "enum",
+    "resolution": "structural",
+    "value": "production presumption clock starts only on payment of the estimated fees (30 business/60 calendar days standard; 180 business/270 calendar days time-intensive); no grace period; no lapse action",
+    "unit": "enum",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Presumption",
+    "authority": "Ala. Code § 36-12-44(a)(5)b, (b)(6)b, (b)(2)",
+    "rule_ids": [
+     "AL-0041",
+     "AL-0045",
+     "AL-0028"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "While the estimated fee is unpaid the production-side denial presumption has not started; the substantive-response clock (15 business days from acknowledgment; 45 business days from election to proceed) is separate. For time-intensive requests the officer 'shall withhold any substantive response …"
+   },
+   "payment.reissue": {
+    "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+    "engine_field": "jurisdiction_rules:payment.reissue_*",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": "bool",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2); § 36-12-45(b)(3) (searched)",
+    "rule_ids": [
+     "AL-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No overrun/re-issue rule (no revised-estimate duty, no collection block, no restarted window). The default form's 'may increase the fees' warning is notice text, not a re-issue procedure. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3; section …"
+   },
+   "rules.maxFee": {
+    "label": "Request-level ceiling (actual cost cap / statutory max)",
+    "engine_field": "fee_profiles:requestRules.maxFee",
+    "type": "usd_or_rule",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per request",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2); § 36-12-41; § 36-12-43(a)",
+    "rule_ids": [
+     "AL-0039",
+     "AL-0044",
+     "AL-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No dollar cap; the request-level bound is reasonableness ('a reasonable fee set by the public officer'). Statute does not use 'actual cost'. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3; section text also served by its GraphQL endpoint https:…"
+   },
+   "rules.deMinimis": {
+    "label": "De-minimis: no charge below ($)",
+    "engine_field": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Ala. Code §§ 36-12-40 to 36-12-47 (searched); § 36-12-44(h)",
+    "rule_ids": [
+     "AL-9009"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No de-minimis floor in state law; § 36-12-44(h) leaves the officer free to process at lower cost, so a city may adopt one. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3; section text also served by its GraphQL endpoint https://alison.legislatu…"
+   },
+   "rules.minFee": {
+    "label": "Minimum fee",
+    "engine_field": "fee_profiles:requestRules.minFee",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Ala. Code §§ 36-12-40 to 36-12-47 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No minimum fee for municipalities. EO 734 §4.a's 'standard, minimum fee of $20.00' applies to STATE executive-branch agencies only (AL-9006). Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3; section text also served by its GraphQL endpoint https…"
+   },
+   "media": {
+    "label": "Electronic media (CD/DVD/USB) charge",
+    "engine_field": "fee_profiles:media.{cd,dvd,usb}",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per unit or actual cost",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2); § 36-12-41",
+    "rule_ids": [
+     "AL-0039",
+     "AL-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No item-specific provision. EO 734 §4.c: STATE agencies may charge actual cost of 'a flash drive or other hardware' with advance notice (state_agencies_only, AL-9008). Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3; section text also served by …"
+   },
+   "delivery": {
+    "label": "Delivery: mail / handling / email / pickup",
+    "engine_field": "fee_profiles:delivery.*",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD or actual cost",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2); § 36-12-41",
+    "rule_ids": [
+     "AL-0039",
+     "AL-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No item-specific provision. Statute contemplates production 'at a set time, place, and location' or 'as attached or enclosed' (§ 36-12-43(b)(5)a,b) without fee terms. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3; section text also served by i…"
+   },
+   "certification": {
+    "label": "Certification / certified-copy charge",
+    "engine_field": "fee_profiles:certification.{rate,unit}",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per document",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ala. Code § 36-12-41 (as amended by Act 2024-278)",
+    "rule_ids": [
+     "AL-0039",
+     "AL-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No general certification-fee statute for municipal records found; certification charges fall under the reasonable-fee umbrella. Record-specific certified-copy fees exist for other custodians (e.g., probate judge § 12-19-90; voter lists § 17-13-77 $1/page) — not municipal. Official link is the Leg…"
+   },
+   "av": {
+    "label": "Audio/video: per recording, per minute, free minutes",
+    "engine_field": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per recording / per minute",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2); § 36-21-213(b) (law-enforcement body-worn/dash-cam recordings)",
+    "rule_ids": [
+     "AL-0039",
+     "AL-9001",
+     "AL-9005"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "General audio/video copies: reasonable-fee umbrella. Law-enforcement recordings: custodial agency (incl. municipal police) 'may charge a reasonable fee for redaction and editing of a recording'; 911 call transcripts capped at actual cost of transcription (§ 11-98-12(d)(1)). Official link is the L…"
+   },
+   "commercial": {
+    "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+    "engine_field": "fee_profiles:purposeOverrides.commercial",
+    "type": "pct+bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": "pct+bool",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Ala. Code §§ 36-12-40 to 36-12-47 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No commercial-purpose surcharge or purpose-based fee schedule in the public-records article; the article distinguishes requests by staff time (standard/time-intensive) and by requester residency, not by purpose. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter …"
+   },
+   "waiver": {
+    "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+    "engine_field": "jurisdiction_rules:fee_waiver.*",
+    "type": "enum_list+bool",
+    "resolution": "structural",
+    "value": "discretionary for standard requests (officer 'may' charge; may process 'in a manner that is less expensive'); fee mandatory for time-intensive requests ('shall require'); no statutory waiver grounds, purpose statement, written-denial or appeal provisions",
+    "unit": "enum_list+bool",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Discretion",
+    "authority": "Ala. Code § 36-12-44(a)(2), (b)(2), (h)",
+    "rule_ids": [
+     "AL-0039",
+     "AL-0044",
+     "AL-9009"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "State law has no fee-waiver scheme; the only structure is the may/shall split by request track plus § 36-12-44(h). Grounds, purpose statements, written denial and appeal are all absent (silent) — city policy. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 …"
+   },
+   "waiver.forfeiture": {
+    "label": "Late response forfeits the fee",
+    "engine_field": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": "bool",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Ala. Code § 36-12-44(a)(5),(6), (b)(6),(7) (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No fee-forfeiture on late response; the statutory consequence of delay is a rebuttable presumption of denial (which supports suit), not loss of the fee. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3; section text also served by its GraphQL end…"
+   },
+   "repeat": {
+    "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+    "engine_field": "NOT IN ENGINE (requestor-ledger)",
+    "type": "structural",
+    "resolution": "silent",
+    "value": null,
+    "unit": "structural",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Ala. Code §§ 36-12-40 to 36-12-47 (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No repeat-request carry-forward or aggregation rule; § 36-12-44(b)(4) lets a time-intensive requester withdraw and submit a new (non-time-intensive) request, with no aggregation consequence stated. Official link is the Legislature's Code of Alabama viewer (browse Title 36 > Chapter 12 > Article 3…"
    }
-  ]
+  },
+  "statutory_evidence": {
+   "fee.schedule_and_authority": [
+    {
+     "rule_id": "AL-0039",
+     "authority": "Ala. Code § 36-12-44(a)(2), § 36-12-41 (SB270, 2024 Reg. Sess.)",
+     "summary": "A public officer may require the requester to pay a reasonable fee set by the public officer before the requester may receive any public records (standard request); more generally, a certified copy is furnished on payment of a reasonable fee."
+    }
+   ]
+  }
  },
  "program_setup": {
   "custody.custodian_definition_and_role": [

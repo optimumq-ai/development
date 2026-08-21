@@ -98,4 +98,15 @@ Data fixes en route: TX-0009/0010 re-homed to completion_window (RULE_OVERRIDES)
 (§ 552.221(e) 60-day withdrawal) added and verified. Kevin deliverables in
 `exchange/config_templates/` (32 HTML + index + Config_templates.xlsx). See `templates/README.md`.
 
+**Fee layer in templates: DONE (step 3, 2026-08-21).** Each template's `fee_schedule` is now
+`{ items, statutory_evidence }`: `items` carries the step-2 verified fee layer — one row per
+master-list item (35 per state) with `value / unit / basis / engine_field / applies_to`, plus
+resolution word, authority, rule ids and verify verdict, joined from
+`../alignment/fee_master_list.json` (1,120 cells, every one CONFIRMED or verify-corrected, 0
+refuted); `statutory_evidence` is the original concept-level evidence block. `payment.method`
+is absent by owner decision (finance-department policy, see fee_master_list `excluded_items`).
+Build fails loud on any missing verified cell. Kevin deliverables regenerated: per-state HTML
+now renders the fee table with resolution badges; `Config_templates.xlsx` gained a filterable
+**Fee schedule** sheet (1,120 rows: State × Item).
+
 **Not started:** the build (Phase 7 — engine + config loader off the templates).

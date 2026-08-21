@@ -4,7 +4,7 @@
  "_meta": {
   "phase": 6,
   "generated_by": "build_state_templates.js",
-  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables. fee_schedule.items = the step-3 verified fee layer (value/unit/basis/engine_field/applies_to per master-list item, every cell verify-confirmed); fee_schedule.statutory_evidence = concept-level evidence."
  },
  "knobs": {
   "Master.g1": {
@@ -614,49 +614,683 @@
   }
  },
  "fee_schedule": {
-  "fee.labor_charge": [
-   {
-    "rule_id": "KS-0035",
+  "items": {
+   "dup.bw.rate": {
+    "label": "Copy rate — B&W page",
+    "engine_field": "fee_profiles:duplication.bw.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per page",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "K.S.A. 45-219(c), (c)(1)",
+    "rule_ids": [
+     "KS-0034",
+     "KS-0033",
+     "KS-0037",
+     "KS-0038"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No statewide per-page rate for municipalities. Standard = 'reasonable fees' capped at 'the actual cost of furnishing the requested records, including the cost of staff time'; incidental non-attributable costs excluded. The city supplies the per-page value under this ceiling. AG Op. 87-4 (1987) fo…"
+   },
+   "dup.color.rate": {
+    "label": "Copy rate — color page",
+    "engine_field": "fee_profiles:duplication.color.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per page",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
     "authority": "K.S.A. 45-219(c)(1)",
-    "summary": "Actual costs may include the cost to review and redact the requested records but shall not include incidental costs not attributable to furnishing the requested records."
+    "rule_ids": [
+     "KS-0034",
+     "KS-0033"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "KORA does not distinguish color from B&W copies; no color-specific figure anywhere in statute, K.A.R., AG opinions or agency schedules opened. Any color rate a city sets is governed by the same actual-cost-of-furnishing ceiling. Documented absence of a color-specific figure; resolution reflects t…"
    },
-   {
-    "rule_id": "KS-0038",
-    "authority": "K.S.A. 45-219(c)(3)",
-    "summary": "Charges for staff time shall be based on the employee's salary or hourly wage and shall not include the costs of employee benefits."
-   }
-  ],
-  "fee.actual_cost_basis": [
-   {
-    "rule_id": "KS-0034",
-    "authority": "K.S.A. 45-219(c)(1)",
-    "summary": "Fees for copies shall not exceed the actual cost of furnishing the requested records, including the cost of staff time required to make the information available."
+   "dup.oversized.rate": {
+    "label": "Copy rate — oversized / nonstandard page",
+    "engine_field": "fee_profiles:duplication.oversized.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per page",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "K.S.A. 45-219(c)(1); 45-219(b)",
+    "rule_ids": [
+     "KS-0034",
+     "KS-0033",
+     "KS-0040"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No oversized/nonstandard-page figure in KORA. Same actual-cost ceiling governs; where copying must be done at other facilities (e.g., large-format), 45-219(b) makes the requester pay that facility cost plus the same supervision fee as for furnishing copies (KS-0040)."
    },
-   {
-    "rule_id": "KS-0037",
-    "authority": "K.S.A. 45-219(c)(3)",
-    "summary": "If the agency incurs staff-time costs, it shall use in good faith the lowest-cost category of staff reasonably necessary to provide access or furnish copies."
+   "dup.specialty.rate": {
+    "label": "Specialty reproduction (photos, maps, transcripts)",
+    "engine_field": "fee_profiles:duplication.specialty.rate",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD (actual cost)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "K.S.A. 45-219(a), (b), (c)(1), (h)",
+    "rule_ids": [
+     "KS-0034",
+     "KS-0044",
+     "KS-0040"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No specialty-reproduction schedule. Copies of photos/AV items are not required unless shown or played at a public meeting of the governing body (KS-0044); when furnished, the actual-cost ceiling applies. Transcripts by certified shorthand reporters are carved out of (c) and priced under Kansas Su…"
    },
-   {
-    "rule_id": "KS-0040",
-    "authority": "K.S.A. 45-219(b)",
-    "summary": "If it is necessary to use other facilities for copying, the requester shall pay that cost; the agency may also charge the same supervision fee as for furnishing copies under subsection (c)."
-   }
-  ],
-  "fee.electronic_media_charge": [
-   {
-    "rule_id": "KS-0036",
-    "authority": "K.S.A. 45-219(c)(2)",
-    "summary": "Fees for providing access to records maintained on computer facilities shall include only the cost of any computer services, including staff time required."
-   }
-  ],
-  "fee.schedule_and_authority": [
-   {
-    "rule_id": "KS-0033",
+   "dup.tiers": {
+    "label": "Graduated page bands (per-page rate by volume)",
+    "engine_field": "fee_profiles:duplication.*.tiers",
+    "type": "tiers",
+    "resolution": "silent",
+    "value": null,
+    "unit": "tiers",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
     "authority": "K.S.A. 45-219(c)",
-    "summary": "Except where fees are prescribed by statute or subsection (h) applies, each public agency may prescribe reasonable fees for providing access to or furnishing copies of public records, subject to enumerated limits."
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No graduated per-page bands by volume in KORA, K.A.R., AG opinions or agency schedules opened. Nothing bars a city from adopting bands so long as each band stays within the actual-cost ceiling ('each public agency may prescribe reasonable fees'). Searched: K.S.A. 45-215 through 45-254 (KORA, Revi…"
+   },
+   "rules.freePages": {
+    "label": "Free page allowance per request",
+    "engine_field": "fee_profiles:requestRules.freePageAllowance",
+    "type": "pages",
+    "resolution": "silent",
+    "value": null,
+    "unit": "pages",
+    "basis": null,
+    "applies_to": "municipalities",
+    "rule_type": null,
+    "authority": "K.S.A. 45-219(c); Executive Order 18-05 (state executive branch only)",
+    "rule_ids": [
+     "KS-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No free-page allowance for municipalities. Governor's Executive Order 18-05 (2018) waives copy charges for the first 100 pages for Kansas residents, but binds only executive-branch agencies under the Governor (new row KS-9002, state_agencies_only). Dept. of Administration additionally provides re…"
+   },
+   "labor.search.rate": {
+    "label": "Labor rate — search / retrieval ($/hr)",
+    "engine_field": "fee_profiles:labor.search.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per hour",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "K.S.A. 45-219(c)(1), (c)(3)",
+    "rule_ids": [
+     "KS-0034",
+     "KS-0037",
+     "KS-0038"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No dollar rate. Search/retrieval staff time is chargeable as part of 'the cost of staff time required to make the information available'; the rate is capped at 'the employee's salary or hourly wage', excluding benefits, and the agency must use in good faith 'the lowest-cost category of staff reas…"
+   },
+   "labor.review.rate": {
+    "label": "Labor rate — review / redaction ($/hr)",
+    "engine_field": "fee_profiles:labor.review.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per hour",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "K.S.A. 45-219(c)(1), (c)(3)",
+    "rule_ids": [
+     "KS-0035",
+     "KS-0038",
+     "KS-0037"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Review and redaction time is expressly chargeable ('Actual costs may include the cost to review and redact the requested records'); AG Op. 2009-14 confirms 'The cost of redaction may be assigned to the record requestor.' Rate capped at salary/hourly wage of lowest-cost reasonably necessary staff,…"
+   },
+   "labor.programming.rate": {
+    "label": "Labor rate — programming / data extraction ($/hr)",
+    "engine_field": "fee_profiles:labor.programming.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per hour",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "K.S.A. 45-219(c)(2), (c)(3)",
+    "rule_ids": [
+     "KS-0036",
+     "KS-0038",
+     "KS-0037"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "For records maintained on computer facilities, fees 'shall include only the cost of any computer services, including staff time required'; staff time at salary/wage, no benefits. No dollar figure. AG Op. 93-126: an agency 'is not required to acquire or design a special program to produce informat…"
+   },
+   "labor.billableWhen": {
+    "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+    "engine_field": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+    "type": "enum+threshold",
+    "resolution": "value",
+    "value": "always",
+    "unit": "enum (always | never | over N pages | over N hours); paper-only scope: no — applies to paper copies, access, and computer-facility records alike",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "K.S.A. 45-219(c)(1)-(3)",
+    "rule_ids": [
+     "KS-0034",
+     "KS-0035",
+     "KS-0036",
+     "KS-0038"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Staff time (search, making available, review/redaction, computer services) is chargeable from the first minute — KORA sets no page or hour threshold below which labor is free, and applies to both 'providing access to' and 'furnishing copies of' records. Requirement-vs-permission: chargeability is…"
+   },
+   "labor.overheadPct": {
+    "label": "Overhead / fringe surcharge on labor (%)",
+    "engine_field": "fee_profiles:labor.overheadPct",
+    "type": "pct",
+    "resolution": "value",
+    "value": "0",
+    "unit": "pct",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "K.S.A. 45-219(c)(3), (c)(1)",
+    "rule_ids": [
+     "KS-0038",
+     "KS-0034"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No overhead/fringe surcharge is permitted: staff-time charges 'shall not include the costs of employee benefits', and 'incidental costs ... not attributable to furnishing the requested records' are excluded. Engine value 0%. (Added by L. 2025 ch. 89.)"
+   },
+   "labor.increment": {
+    "label": "Labor time increment + rounding",
+    "engine_field": "fee_profiles:labor.*.increment / rounding",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": "hours",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "K.S.A. 45-219(c)(3)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No statutory billing increment or rounding rule; charges must be 'based on the employee's salary or hourly wage'. Agency schedules opened (DoA, SOS) state hourly rates but no increment. Searched: K.S.A. 45-215 through 45-254 (KORA, Revisor of Statutes, current through the 2026 session — 45-218, 4…"
+   },
+   "rules.freeLaborHours": {
+    "label": "Free labor hours per request",
+    "engine_field": "fee_profiles:requestRules.freeLaborHours",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": "hours",
+    "basis": null,
+    "applies_to": "municipalities",
+    "rule_type": null,
+    "authority": "K.S.A. 45-219(c)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No free labor hours for municipalities. Dept. of Administration's practice of providing requests needing 'less than one hour of staff time' at no charge is a single-agency policy (admin.ks.gov), not law and not municipal. Searched: K.S.A. 45-215 through 45-254 (KORA, Revisor of Statutes, current …"
+   },
+   "labor.periodicFreeHours": {
+    "label": "Free personnel time per requestor per month/year (TX § 552.275 pattern)",
+    "engine_field": "NOT IN ENGINE (fee_profiles gap — requestor-ledger counter)",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": "hours per requestor per period",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "K.S.A. 45-215 et seq.",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No per-requestor periodic free-time allowance (TX § 552.275 pattern) anywhere in KORA. Searched: K.S.A. 45-215 through 45-254 (KORA, Revisor of Statutes, current through the 2026 session — 45-218, 45-219, 45-220, 45-221, 45-230, 45-240, 45-254 opened); 2024, 2025 and 2026 Session Laws amended/rep…"
+   },
+   "rules.estimateNotifyThreshold": {
+    "label": "Itemized estimate / cost notice required above ($ or hours)",
+    "engine_field": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+    "type": "usd",
+    "resolution": "value",
+    "value": "5 | 200",
+    "unit": "hours of staff time | USD (estimated actual cost of staff time) — whichever is exceeded",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "K.S.A. 45-219(e)(1); (c)(4)",
+    "rule_ids": [
+     "KS-0041",
+     "KS-0039"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Shape differs from a classic itemized-estimate trigger: above the threshold the agency 'shall make reasonable efforts to contact the requester and engage in interactive communication about mitigating costs' ('reasonable efforts' = using the contact means the requester provided, (e)(3)); the reque…"
+   },
+   "estimate.requesterResponseDays": {
+    "label": "Requester must respond to an estimate within N days (else withdrawn)",
+    "engine_field": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+    "type": "int",
+    "resolution": "value",
+    "value": "3",
+    "unit": "business days (from the agency's reasonable-efforts contact under 45-219(e))",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Trigger",
+    "authority": "K.S.A. 45-219(e)(2)",
+    "rule_ids": [
+     "KS-0042",
+     "KS-0041"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "The window attaches to the cost-mitigation contact (triggered at 5 hours/$200), not to a formal estimate. Consequence is 'deemed to be withdrawn UNTIL a subsequent contact has been made by the requester' — reversible, not a permanent closure. 'Business day' defined at 45-217(b) (excludes Sat/Sun/…"
+   },
+   "estimate.revisionNotifyPercent": {
+    "label": "Revised estimate required when actual exceeds estimate by N%",
+    "engine_field": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": "pct",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "K.S.A. 45-219",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No revised-estimate percentage or overrun-notice rule in KORA. Only related duty: itemized statement of costs actually incurred and charged, upon request ((c)(4)). SOS policy states it will 'promptly advise the requestor of any correction to the fee' — agency practice, not law. Searched: K.S.A. 4…"
+   },
+   "estimate.validityDays": {
+    "label": "Estimate validity period (days)",
+    "engine_field": "fee_profiles:estimatePolicy.estimateValidityDays",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": "days",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "K.S.A. 45-219",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No estimate validity/expiry period in KORA. Searched: K.S.A. 45-215 through 45-254 (KORA, Revisor of Statutes, current through the 2026 session — 45-218, 45-219, 45-220, 45-221, 45-230, 45-240, 45-254 opened); 2024, 2025 and 2026 Session Laws amended/repealed tables (only 45-219 [L. 2025 ch. 89, …"
+   },
+   "rules.deposit.threshold": {
+    "label": "Deposit / prepayment may be required above ($)",
+    "engine_field": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+    "type": "usd",
+    "resolution": "value",
+    "value": "none (no statutory threshold — advance payment may be required for any amount)",
+    "unit": "USD",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "K.S.A. 45-218(f); 45-219(a)",
+    "rule_ids": [
+     "KS-0043",
+     "KS-0009"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Advance payment 'of a fee' / 'of the prescribed fee' may be required without any minimum-amount condition. AG Op. 87-4 (citing State ex rel. Stephan v. Harder, 230 Kan. 573, Syl. ¶ 7 (1982)): 'An agency may require advance payment of the fee before copies are made.' State-agency practice (DoA, SO…"
+   },
+   "rules.deposit.percent": {
+    "label": "Deposit capped at (% of estimate)",
+    "engine_field": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+    "type": "pct",
+    "resolution": "ceiling",
+    "value": "100",
+    "unit": "pct of the (prescribed/estimated) fee",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "K.S.A. 45-218(f); 45-219(a)",
+    "rule_ids": [
+     "KS-0043",
+     "KS-0009"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No partial-deposit cap: the statute permits advance payment of 'the prescribed fee' (the fee itself), so a city may require anything up to 100% before providing access or copies. Recorded as a ceiling because the city chooses the portion."
+   },
+   "payment.productionGate": {
+    "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+    "engine_field": "paymentTiming gates + fee_profiles bands",
+    "type": "enum",
+    "resolution": "value",
+    "value": "prepay_permitted (agency may require advance payment before providing access to or furnishing copies)",
+    "unit": "enum (pay-before-copies | pay-in-full-before-release | none)",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "K.S.A. 45-218(f); 45-219(a)",
+    "rule_ids": [
+     "KS-0043",
+     "KS-0009"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Production (and even access) may be conditioned on advance payment; it is a Permission, so a city may also release before payment. Nothing in KORA requires the agency to release records before the fee is paid."
+   },
+   "payment.nonpayment": {
+    "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+    "engine_field": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+    "type": "enum+int",
+    "resolution": "structural",
+    "value": null,
+    "unit": "enum+int",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Trigger",
+    "authority": "K.S.A. 45-219(e)(2); 45-218(f)",
+    "rule_ids": [
+     "KS-0042",
+     "KS-0043"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "KORA has no 'withdrawn after N days of nonpayment' clock and no prior-debt prepayment rule. Shape the engine must express: (1) the agency may withhold access/copies until advance payment is made (KS-0043); (2) the only deemed-withdrawal trigger is requester silence for 3 business days after the a…"
+   },
+   "payment.depositClock": {
+    "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+    "engine_field": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+    "type": "enum",
+    "resolution": "silent",
+    "value": null,
+    "unit": "enum (tolls | pauses | none)",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "K.S.A. 45-218(d), (f); 45-219(e)(2)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "KORA states no clock effect (tolling/pause), grace period, or lapse action for an unpaid deposit. The three-business-day 'act upon' deadline (45-218(d)) is unaffected by payment status in the text; the agency may simply not furnish copies until advance payment (KS-0043). The only lapse mechanism …"
+   },
+   "payment.reissue": {
+    "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+    "engine_field": "jurisdiction_rules:payment.reissue_*",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": "bool",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "K.S.A. 45-219(c)(4), (e)(1)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No overrun/re-issue rule (no revised-estimate requirement, no collection bar, no window restart). The prior '$200' figure belongs to the cost-mitigation trigger, not to a re-issue rule. Interplay only: if a revised estimate of staff-time cost crosses $200 (or 5 hours), the (e)(1) mandatory contac…"
+   },
+   "rules.maxFee": {
+    "label": "Request-level ceiling (actual cost cap / statutory max)",
+    "engine_field": "fee_profiles:requestRules.maxFee",
+    "type": "usd_or_rule",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD (request-level cap)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "K.S.A. 45-219(c)(1), (c)(2)",
+    "rule_ids": [
+     "KS-0034",
+     "KS-0036",
+     "KS-0033"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Request-level ceiling is 'the actual cost of furnishing the requested records, including the cost of staff time' (copies) / 'only the cost of any computer services, including staff time required' (computer-facility access); no dollar maximum. Fee-reasonableness appeal to the Secretary of Administ…"
+   },
+   "rules.deMinimis": {
+    "label": "De-minimis: no charge below ($)",
+    "engine_field": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD",
+    "basis": null,
+    "applies_to": "municipalities",
+    "rule_type": null,
+    "authority": "K.S.A. 45-219(c)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No de-minimis no-charge floor for municipalities. State-agency analogues (EO 18-05 first 100 pages free for residents; DoA <1 hour/<100 pages free; SOS 'discretion to not charge a fee for small or infrequent requests') are executive-branch/agency policies. Searched: K.S.A. 45-215 through 45-254 (…"
+   },
+   "rules.minFee": {
+    "label": "Minimum fee",
+    "engine_field": "fee_profiles:requestRules.minFee",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "K.S.A. 45-219(c)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No minimum fee in KORA. Searched: K.S.A. 45-215 through 45-254 (KORA, Revisor of Statutes, current through the 2026 session — 45-218, 45-219, 45-220, 45-221, 45-230, 45-240, 45-254 opened); 2024, 2025 and 2026 Session Laws amended/repealed tables (only 45-219 [L. 2025 ch. 89, HB 2134], 45-221 and…"
+   },
+   "media": {
+    "label": "Electronic media (CD/DVD/USB) charge",
+    "engine_field": "fee_profiles:media.{cd,dvd,usb}",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD (actual cost)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "K.S.A. 45-219(c)(1), (c)(2)",
+    "rule_ids": [
+     "KS-0034",
+     "KS-0036"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No CD/DVD/USB figure. Media cost falls within 'the actual cost of furnishing the requested records'; for computer-facility records fees include only computer-services cost incl. staff time. 45-219(i): agency need not let the requester attach their own device (KS-0047). SOS charges $0.125/page for…"
+   },
+   "delivery": {
+    "label": "Delivery: mail / handling / email / pickup",
+    "engine_field": "fee_profiles:delivery.*",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD (actual cost)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "K.S.A. 45-219(c)(1); 45-219(b)",
+    "rule_ids": [
+     "KS-0034",
+     "KS-0040"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No mailing/handling/pickup/email figures. Actual-cost ceiling governs; costs of copying at other facilities are borne by the requester (KS-0040). Agency schedules (DoA/SOS mailing $0.50 first 5 pages, $0.25 per further 5 pages; express delivery arranged and paid by requester) are agency policies,…"
+   },
+   "certification": {
+    "label": "Certification / certified-copy charge",
+    "engine_field": "fee_profiles:certification.{rate,unit}",
+    "type": "rate_usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD per document",
+    "basis": null,
+    "applies_to": "municipalities",
+    "rule_type": null,
+    "authority": "K.S.A. 45-215 et seq.",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "KORA contains no certified-copy fee. Certification fees that exist in Kansas law are officer-specific outside KORA (e.g., register of deeds fees, K.S.A. 28-115 — county officers) and are not municipal open-records fees; KS-0010 'certification' is the requester's non-commercial-use certification, …"
+   },
+   "av": {
+    "label": "Audio/video: per recording, per minute, free minutes",
+    "engine_field": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD (reasonable fee / actual cost) — no per-recording, per-minute or free-minute figures",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "K.S.A. 45-219(a), (c)(1); 45-254(b)",
+    "rule_ids": [
+     "KS-0044",
+     "KS-0034",
+     "KS-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Two layers: (1) copies of audio/video items are not required unless shown or played at a public meeting of the governing body (KS-0044); when furnished, the actual-cost ceiling applies. (2) Body-camera/vehicle-camera recordings are criminal investigation records; a law enforcement agency (includi…"
+   },
+   "commercial": {
+    "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+    "engine_field": "fee_profiles:purposeOverrides.commercial",
+    "type": "pct+bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": "pct+bool",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "K.S.A. 45-219(c); 45-220(c); 45-230",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No commercial-purpose fee schedule or surcharge in KORA, and no definition of 'commercial purpose'. Because every fee is capped at actual cost regardless of requester and labor is already chargeable to all requesters, a purpose-based surcharge has no room under (c)(1). Kansas instead restricts co…"
+   },
+   "waiver": {
+    "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+    "engine_field": "jurisdiction_rules:fee_waiver.*",
+    "type": "enum_list+bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": "enum_list+bool",
+    "basis": null,
+    "applies_to": "municipalities",
+    "rule_type": null,
+    "authority": "K.S.A. 45-219(c)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "KORA has no fee-waiver framework (no public-interest/indigency grounds, no purpose statement, no written-denial or appeal for waiver). Whether to charge at all is discretionary under the permissive 'may prescribe reasonable fees'. Executive Order 18-05 (first 100 pages free for Kansas residents) …"
+   },
+   "waiver.forfeiture": {
+    "label": "Late response forfeits the fee",
+    "engine_field": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": "bool",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "K.S.A. 45-218(d); 45-219",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No provision that a late response forfeits the fee. The prior linkage to KS-0042 was wrong: 45-219(e)(2) is a REQUESTER-side non-response withdrawal, not an agency-side forfeiture. Remedies for agency non-compliance are judicial (45-222) and outside the fee engine. Searched: K.S.A. 45-215 through…"
+   },
+   "repeat": {
+    "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+    "engine_field": "NOT IN ENGINE (requestor-ledger)",
+    "type": "structural",
+    "resolution": "silent",
+    "value": null,
+    "unit": "structural",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "K.S.A. 45-218(e); 45-219(e)(1)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No fee aggregation threshold or carry-forward: the 5-hour/$200 mitigation trigger applies per 'records request'. The only repeat-request rule is a non-fee refusal permission for 'repeated requests ... intended to disrupt other essential functions' (KS-0031, Denials). Searched: K.S.A. 45-215 throu…"
    }
-  ]
+  },
+  "statutory_evidence": {
+   "fee.labor_charge": [
+    {
+     "rule_id": "KS-0035",
+     "authority": "K.S.A. 45-219(c)(1)",
+     "summary": "Actual costs may include the cost to review and redact the requested records but shall not include incidental costs not attributable to furnishing the requested records."
+    },
+    {
+     "rule_id": "KS-0038",
+     "authority": "K.S.A. 45-219(c)(3)",
+     "summary": "Charges for staff time shall be based on the employee's salary or hourly wage and shall not include the costs of employee benefits."
+    }
+   ],
+   "fee.actual_cost_basis": [
+    {
+     "rule_id": "KS-0034",
+     "authority": "K.S.A. 45-219(c)(1)",
+     "summary": "Fees for copies shall not exceed the actual cost of furnishing the requested records, including the cost of staff time required to make the information available."
+    },
+    {
+     "rule_id": "KS-0037",
+     "authority": "K.S.A. 45-219(c)(3)",
+     "summary": "If the agency incurs staff-time costs, it shall use in good faith the lowest-cost category of staff reasonably necessary to provide access or furnish copies."
+    },
+    {
+     "rule_id": "KS-0040",
+     "authority": "K.S.A. 45-219(b)",
+     "summary": "If it is necessary to use other facilities for copying, the requester shall pay that cost; the agency may also charge the same supervision fee as for furnishing copies under subsection (c)."
+    }
+   ],
+   "fee.electronic_media_charge": [
+    {
+     "rule_id": "KS-0036",
+     "authority": "K.S.A. 45-219(c)(2)",
+     "summary": "Fees for providing access to records maintained on computer facilities shall include only the cost of any computer services, including staff time required."
+    }
+   ],
+   "fee.schedule_and_authority": [
+    {
+     "rule_id": "KS-0033",
+     "authority": "K.S.A. 45-219(c)",
+     "summary": "Except where fees are prescribed by statute or subsection (h) applies, each public agency may prescribe reasonable fees for providing access to or furnishing copies of public records, subject to enumerated limits."
+    }
+   ]
+  }
  },
  "program_setup": {
   "custody.custodian_definition_and_role": [

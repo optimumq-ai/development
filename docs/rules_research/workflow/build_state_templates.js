@@ -13,6 +13,9 @@ const overlay = require(path.join(HERE, 'workflow_overlay.json'));
 const map = require(path.join(HERE, 'node_concept_map.json'));
 const dict = require(path.join(HERE, '..', 'alignment', 'master_concept_dictionary.json'));
 const pruned = require(path.join(HERE, '..', 'pruned', 'pruned_discovery.json'));
+// Step 3 (2026-08-21): the verified fee layer — 35 items × 32 states, every cell
+// CONFIRMED/CORRECTED by the step-2 gap pass. Source of fee_schedule.items below.
+const feeMaster = require(path.join(HERE, '..', 'alignment', 'fee_master_list.json'));
 
 const byKey = new Map(dict.map(c => [c.canonical_key, c]));
 const ruleById = new Map();
@@ -92,7 +95,7 @@ for (const sm of stateMeta) {
     _meta: {
       phase: 6,
       generated_by: 'build_state_templates.js',
-      reading: 'knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables.'
+      reading: 'knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables. fee_schedule.items = the step-3 verified fee layer (value/unit/basis/engine_field/applies_to per master-list item, every cell verify-confirmed); fee_schedule.statutory_evidence = concept-level evidence.'
     },
     knobs: {}, branches: {}, clock_matrix: {}, fee_schedule: {}, program_setup: {}, ledger: {},
     audit: {}
@@ -133,8 +136,36 @@ for (const sm of stateMeta) {
       ? { present: true, statutory: ev }
       : { present: false, note: 'No statutory timer — city operational target only (soft-standard pattern S-002).' };
   }
-  for (const [sec, secKey] of [['fee_schedule', 'fee_schedule'], ['program_setup', 'program_setup'], ['ledger', 'ledger']])
+  for (const [sec, secKey] of [['program_setup', 'program_setup'], ['ledger', 'ledger']])
     t[sec] = conceptBlock(map[secKey].concepts, code);
+
+  // fee_schedule (step 3 shape): items = the verified fee layer (one row per master-list
+  // item — value/unit/basis/engine_field/applies_to); statutory_evidence = the original
+  // concept-level evidence block.
+  const feeItems = {};
+  for (const item of feeMaster.items) {
+    const cell = (item.states[code] || {}).verified;
+    if (!cell) { errors.push(`fee_schedule: no verified cell for ${item.id}/${code}`); continue; }
+    const row = {
+      label: item.label,
+      engine_field: item.home,
+      type: item.type,
+      resolution: cell.resolution,
+      value: cell.value,
+      unit: cell.unit,
+      basis: cell.basis,
+      applies_to: cell.applies_to,
+      rule_type: cell.rule_type,
+      authority: cell.source_authority,
+      rule_ids: [...(cell.resolved_by_rule_ids || []), ...(cell.new_rule_ids || [])],
+      verdict: cell.verdict,
+      verified_at: cell.verified_at,
+    };
+    if (cell.notes) row.notes = cell.notes.length > 300 ? cell.notes.slice(0, 297) + '…' : cell.notes;
+    feeItems[item.id] = row;
+  }
+  t.fee_schedule = { items: feeItems, statutory_evidence: conceptBlock(map.fee_schedule.concepts, code) };
+  if (errors.length) { console.error('FEE LAYER FAILED:\n' + errors.join('\n')); process.exit(1); }
 
   // audit: every state rule reachable through some home
   const reach = new Set();

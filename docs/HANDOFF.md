@@ -8398,3 +8398,12 @@ SPEC_auth_security_platform §1 (inventory).
 - Rollup extended to 32 states: fee_gap/VERIFY_ROLLUP.md (grand tally 1129 C / 22 c / 0 R on 1152 rows).
 - NEXT: step 3 — template fee_schedule gains value/unit/basis/engine_field/applies_to from the verified
   layer. Also parked: classifier hint on child assign-picker (Draft 5 §3 residuals, with Kevin).
+
+## 2026-08-21 (later) — Step 3 DONE: verified fee layer joined into the config templates
+- build_state_templates.js now joins alignment/fee_master_list.json: each template's fee_schedule is
+  { items, statutory_evidence } — items = 35 verified rows/state (value/unit/basis/engine_field/applies_to
+  + resolution word + authority + verdict), fail-loud on missing cells. All 32 rebuilt, audit clean.
+- gen_template_deliverables.js renders the fee table (resolution badges) in each state HTML and adds a
+  filterable "Fee schedule" xlsx sheet (1,120 rows). Regenerated to /home/optimumq/exchange/config_templates.
+- Shape documented in workflow/README.md (step-3 entry). NEXT: Phase 7 build can now read
+  fee_schedule.items directly for engine config defaults.

@@ -4,7 +4,7 @@
  "_meta": {
   "phase": 6,
   "generated_by": "build_state_templates.js",
-  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables. fee_schedule.items = the step-3 verified fee layer (value/unit/basis/engine_field/applies_to per master-list item, every cell verify-confirmed); fee_schedule.statutory_evidence = concept-level evidence."
  },
  "knobs": {
   "Master.g1": {
@@ -488,46 +488,686 @@
   }
  },
  "fee_schedule": {
-  "fee.labor_charge": [
-   {
-    "rule_id": "ID-0020",
-    "authority": "Idaho Code § 74-102(10)(e)",
-    "summary": "Fees for resident requests shall not exceed reasonable labor costs necessarily incurred, charged at the per-hour pay rate of the lowest-paid administrative staff employee or public official of the agency."
-   }
-  ],
-  "fee.actual_cost_basis": [
-   {
-    "rule_id": "ID-0019",
-    "authority": "Idaho Code § 74-102(10)(c)",
-    "summary": "The fee charged to a resident may not exceed the actual cost to the agency of copying the record."
+  "items": {
+   "dup.bw.rate": {
+    "label": "Copy rate — B&W page",
+    "engine_field": "fee_profiles:duplication.bw.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": "actual cost to the agency of copying the record (resident); actual costs of the public agency (nonresident)",
+    "unit": "USD per page (city-set under the standard)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Idaho Code § 74-102(10)(c), (10)(g)",
+    "rule_ids": [
+     "ID-0019",
+     "ID-0022",
+     "ID-9001",
+     "ID-9013",
+     "ID-9012"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Idaho sets no cents-per-page figure. Two regimes: residents (§ 74-101(15)) — fee may not exceed actual cost of copying, and the first 100 paper pages are free (ID-0018); nonresidents — rate and schedule at agency discretion, not to exceed actual costs. 'Public agency' = state or local agency (§ 7…"
    },
-   {
-    "rule_id": "ID-0022",
+   "dup.color.rate": {
+    "label": "Copy rate — color page",
+    "engine_field": "fee_profiles:duplication.color.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": "actual cost to the agency of copying the record",
+    "unit": "USD per page (city-set)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Idaho Code § 74-102(10)(c)",
+    "rule_ids": [
+     "ID-0019"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No color-specific rate anywhere in Title 74, the AG manual, or IDAPA. A color copy is a 'copy' (§ 74-101(2)) and falls under the general actual-cost copying ceiling; the city sets its own color rate under it. Resident free 100-page allotment applies to 'paper records' without distinguishing color."
+   },
+   "dup.oversized.rate": {
+    "label": "Copy rate — oversized / nonstandard page",
+    "engine_field": "fee_profiles:duplication.oversized.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": "actual cost to the agency of copying the record",
+    "unit": "USD per page/sheet (city-set)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Idaho Code § 74-102(10)(c)",
+    "rule_ids": [
+     "ID-0019"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No oversized/nonstandard figure found. Governed by the general actual-cost copying ceiling (resident) / actual-costs discretion (nonresident, § 74-102(10)(g))."
+   },
+   "dup.specialty.rate": {
+    "label": "Specialty reproduction (photos, maps, transcripts)",
+    "engine_field": "fee_profiles:duplication.specialty.rate",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": "actual cost to the agency of copying the record; for computer tape/disc/microfilm duplicates: sum of direct copying cost + standard publication cost + conversion cost",
+    "unit": "USD (city-set)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Idaho Code § 74-102(10)(c), (10)(d)(i)",
+    "rule_ids": [
+     "ID-0019",
+     "ID-0021",
+     "ID-9008"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No photo/map/transcript figure. 'Copy' includes 'reproducing by any other means' (§ 74-101(2)); microfilm/computer media duplicates carry the (10)(d)(i) three-component cost ceiling (resident, uniform); (10)(a) preserves fees 'authorized or prescribed under other provisions of Idaho law' (ID-9013)."
+   },
+   "dup.tiers": {
+    "label": "Graduated page bands (per-page rate by volume)",
+    "engine_field": "fee_profiles:duplication.*.tiers",
+    "type": "tiers",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
     "authority": "Idaho Code § 74-102(10)",
-    "summary": "The agency may charge nonresidents higher fees than residents (including for labor and copies without the resident free allotments), but such fees may not exceed the actual cost to the agency."
-   }
-  ],
-  "fee.electronic_media_charge": [
-   {
-    "rule_id": "ID-0021",
-    "authority": "Idaho Code § 74-102(10)(d)(i)",
-    "summary": "For computer records, the agency may charge a fee that does not exceed the sum of the direct cost of copying, the standard cost of publication, and the cost of conversion."
-   }
-  ],
-  "fee.free_allowance": [
-   {
-    "rule_id": "ID-0017",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No volume-graduated per-page bands. The only volume break is the resident free allotment (first 100 paper pages free, then actual cost) — captured under rules.freePages, not a tiered rate. Searched: Idaho Code Title 74 ch. 1 (§§ 74-101 to 74-127, opened §§ 74-101, -102, -103, -113, -115, -120 on …"
+   },
+   "rules.freePages": {
+    "label": "Free page allowance per request",
+    "engine_field": "fee_profiles:requestRules.freePageAllowance",
+    "type": "pages",
+    "resolution": "value",
+    "value": "100",
+    "unit": "pages (paper records; resident requesters only)",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
     "authority": "Idaho Code § 74-102(10)(a)",
-    "summary": "No fee shall be charged for the first two (2) hours of labor in responding to a resident's public records request."
-   }
-  ],
-  "fee.no_charge_categories": [
-   {
-    "rule_id": "ID-0018",
+    "rule_ids": [
+     "ID-0018"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Resident-only ('a request submitted by a resident'; resident defined § 74-101(15): 30-day continuous Idaho domicile, incl. domestic entities). Nonresidents get no free allotment (§ 74-102(10)(g), ID-9001). Carve-out: fees 'authorized or prescribed under other provisions of Idaho law' (e.g. record…"
+   },
+   "labor.search.rate": {
+    "label": "Labor rate — search / retrieval ($/hr)",
+    "engine_field": "fee_profiles:labor.search.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "ceiling",
+    "value": "per-hour pay rate of the lowest paid administrative staff employee or public official of the public agency who is necessary and qualified to process the request (resident); nonresident: agency discretion not to exceed actual costs",
+    "unit": "USD per hour (city's own pay rate for that employee)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Idaho Code § 74-102(10)(e), (10)(g)",
+    "rule_ids": [
+     "ID-0020",
+     "ID-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "The bound is a formula (a specific pay rate), not a dollar figure; the city supplies the number. Also bounded by 'reasonable labor costs necessarily incurred' and must 'reflect the personnel and quantity of time that are reasonably necessary'. Only chargeable when § 74-102(10)(b) is met and after…"
+   },
+   "labor.review.rate": {
+    "label": "Labor rate — review / redaction ($/hr)",
+    "engine_field": "fee_profiles:labor.review.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "ceiling",
+    "value": "non-attorney: per-hour pay rate of the lowest paid administrative staff employee or public official necessary and qualified; attorney redaction (in-house): per-hour rate of the lowest paid attorney within the agency necessary and qualified; attorney redaction (no attorney on staff): usual and customary rate of the attorney retained for that purpose (resident)",
+    "unit": "USD per hour (city's own pay rates)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Idaho Code § 74-102(10)(e)",
+    "rule_ids": [
+     "ID-0020",
+     "ID-9004"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Three-tier ceiling for redaction labor by who performs it. Applies to residents; nonresidents at agency discretion ≤ actual costs (§ 74-102(10)(g)). Redaction is one of the three triggers that make fees chargeable at all (§ 74-102(10)(b)(ii))."
+   },
+   "labor.programming.rate": {
+    "label": "Labor rate — programming / data extraction ($/hr)",
+    "engine_field": "fee_profiles:labor.programming.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "ceiling",
+    "value": "per-hour pay rate of the lowest paid administrative staff employee or public official of the public agency who is necessary and qualified to process the request (resident); nonresident: agency discretion not to exceed actual costs; plus, for converting an existing electronic record to another electronic form, the agency's cost of conversion or the cost charged by a third party",
+    "unit": "USD per hour (city's own pay rate) / actual conversion cost",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Idaho Code § 74-102(10)(e), (10)(d)(i)3.",
+    "rule_ids": [
+     "ID-0020",
+     "ID-0021",
+     "ID-9008"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Idaho has no distinct programming rate. Labor of any kind for residents is bound to the lowest-paid qualified staff pay rate; third-party conversion cost is a separately recoverable component."
+   },
+   "labor.billableWhen": {
+    "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+    "engine_field": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+    "type": "enum+threshold",
+    "resolution": "value",
+    "value": "Resident: no charge for the first 2 hours of labor (and first 100 paper pages); fees to recover actual labor and copying costs may be established only if (i) request >100 pages of paper records, or (ii) records require deletion of nonpublic information, or (iii) actual labor exceeds 2 person-hours. Nonresident: labor and copying fees may be charged at agency discretion (≤ actual costs), no free allotment.",
+    "unit": "enum + threshold (2 hours / 100 pages)",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Idaho Code § 74-102(10)(a), (10)(b), (10)(g)",
+    "rule_ids": [
+     "ID-0017",
+     "ID-0018",
+     "ID-0020",
+     "ID-9002",
+     "ID-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Not paper-only: labor is chargeable for electronic records too, subject to the same triggers. Trigger (iii) reads 'requests' (plural) 'in compliance with the provisions of this chapter'."
+   },
+   "labor.overheadPct": {
+    "label": "Overhead / fringe surcharge on labor (%)",
+    "engine_field": "fee_profiles:labor.overheadPct",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Idaho Code § 74-102(10)(e)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No overhead or fringe percentage anywhere in Title 74, the AG manual, or IDAPA. Searched: Idaho Code Title 74 ch. 1 (§§ 74-101 to 74-127, opened §§ 74-101, -102, -103, -113, -115, -120 on legislature.idaho.gov, codified text updated July 1, 2026); Title 50 ch. 9 (§§ 50-907, 50-908) and Title 63 (…"
+   },
+   "labor.increment": {
+    "label": "Labor time increment + rounding",
+    "engine_field": "fee_profiles:labor.*.increment / rounding",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Idaho Code § 74-102(10)(e), (10)(h)",
+    "rule_ids": [
+     "ID-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No billing increment or rounding rule. Fees must 'reflect the personnel and quantity of time that are reasonably necessary' and statements must show 'the actual time spent'; no lump sums (ID-9003) — an increment the city adopts must fit those constraints. Searched: Idaho Code Title 74 ch. 1 (§§ 7…"
+   },
+   "rules.freeLaborHours": {
+    "label": "Free labor hours per request",
+    "engine_field": "fee_profiles:requestRules.freeLaborHours",
+    "type": "hours",
+    "resolution": "value",
+    "value": "2",
+    "unit": "hours of labor per request (resident requesters only)",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
     "authority": "Idaho Code § 74-102(10)(a)",
-    "summary": "No fee shall be charged for copying the first one hundred (100) pages of paper records in responding to a resident's request."
+    "rule_ids": [
+     "ID-0017"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Per request, resident-only; nonresidents receive no free labor (§ 74-102(10)(g)). Anti-splitting: agency may aggregate requests segregated to avoid fees (§ 74-102(11), ID-9005)."
+   },
+   "labor.periodicFreeHours": {
+    "label": "Free personnel time per requestor per month/year (TX § 552.275 pattern)",
+    "engine_field": "NOT IN ENGINE (fee_profiles gap — requestor-ledger counter)",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Idaho Code § 74-102(10)(a), (11)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Idaho's free allotment is per request, not per requester per period; there is no TX § 552.275-style periodic cap. The related control is aggregation of split requests (§ 74-102(11)). Searched: Idaho Code Title 74 ch. 1 (§§ 74-101 to 74-127, opened §§ 74-101, -102, -103, -113, -115, -120 on legisl…"
+   },
+   "rules.estimateNotifyThreshold": {
+    "label": "Itemized estimate / cost notice required above ($ or hours)",
+    "engine_field": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+    "type": "usd",
+    "resolution": "structural",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Idaho Code § 74-102(10)(h); see also (9)",
+    "rule_ids": [
+     "ID-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No dollar or hour threshold triggers an estimate. Shape: whenever fees are stated, the statement must be itemized (per-page cost, hourly rates of employees and attorneys, actual time spent); no lump sums; nonresident fees separately identified. § 74-102(9) permits (does not require) the agency to…"
+   },
+   "estimate.requesterResponseDays": {
+    "label": "Requester must respond to an estimate within N days (else withdrawn)",
+    "engine_field": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Idaho Code § 74-102, 74-103",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No requester response window for an estimate; no withdrawal-on-nonresponse rule. Searched: Idaho Code Title 74 ch. 1 (§§ 74-101 to 74-127, opened §§ 74-101, -102, -103, -113, -115, -120 on legislature.idaho.gov, codified text updated July 1, 2026); Title 50 ch. 9 (§§ 50-907, 50-908) and Title 63 …"
+   },
+   "estimate.revisionNotifyPercent": {
+    "label": "Revised estimate required when actual exceeds estimate by N%",
+    "engine_field": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Idaho Code § 74-102(12)",
+    "rule_ids": [
+     "ID-9006"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No revised-estimate percentage. The only overrun mechanic is that advance payment in excess of actual costs must be returned (ID-9006). Searched: Idaho Code Title 74 ch. 1 (§§ 74-101 to 74-127, opened §§ 74-101, -102, -103, -113, -115, -120 on legislature.idaho.gov, codified text updated July 1, …"
+   },
+   "estimate.validityDays": {
+    "label": "Estimate validity period (days)",
+    "engine_field": "fee_profiles:estimatePolicy.estimateValidityDays",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Idaho Code § 74-102",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No estimate validity period. Searched: Idaho Code Title 74 ch. 1 (§§ 74-101 to 74-127, opened §§ 74-101, -102, -103, -113, -115, -120 on legislature.idaho.gov, codified text updated July 1, 2026); Title 50 ch. 9 (§§ 50-907, 50-908) and Title 63 (§§ 63-1311, 63-1311A); AG Idaho Public Records Law …"
+   },
+   "rules.deposit.threshold": {
+    "label": "Deposit / prepayment may be required above ($)",
+    "engine_field": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+    "type": "usd",
+    "resolution": "defers_to_city",
+    "value": null,
+    "unit": "USD (no statutory threshold)",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Idaho Code § 74-102(12)",
+    "rule_ids": [
+     "ID-0024"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "'The custodian may require advance payment of fees authorized by this section' — any amount of authorized fees, no dollar floor. Excess over actual cost must be refunded (ID-9006). After-hours examination compensation must be funded in advance (§ 74-102(8), ID-9010). AG Manual Q17 (July 2026) res…"
+   },
+   "rules.deposit.percent": {
+    "label": "Deposit capped at (% of estimate)",
+    "engine_field": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": "% of estimate",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Idaho Code § 74-102(12)",
+    "rule_ids": [
+     "ID-0024",
+     "ID-9006"
+    ],
+    "verdict": "CORRECTED",
+    "verified_at": "2026-08-19",
+    "notes": "No percentage cap; the statute permits advance payment of 'fees authorized' (i.e. up to the full anticipated fee) with mandatory refund of any excess over actual costs. Searched: Idaho Code Title 74 ch. 1 (§§ 74-101 to 74-127, opened §§ 74-101, -102, -103, -113, -115, -120 on legislature.idaho.go…"
+   },
+   "payment.productionGate": {
+    "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+    "engine_field": "paymentTiming gates + fee_profiles bands",
+    "type": "enum",
+    "resolution": "structural",
+    "value": "advance payment may be required before production (custodian discretion); any excess over actual costs refunded",
+    "unit": "enum",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Idaho Code § 74-102(12)",
+    "rule_ids": [
+     "ID-0024",
+     "ID-9006"
+    ],
+    "verdict": "CORRECTED",
+    "verified_at": "2026-08-19",
+    "notes": "Permission, not requirement: the city chooses whether to gate production on payment. Statute does not distinguish 'pay before copies' from 'pay before release'."
+   },
+   "payment.nonpayment": {
+    "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+    "engine_field": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+    "type": "enum+int",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Idaho Code § 74-102, 74-103",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No withdrawn-after-N-days rule and no prior-debt prepayment rule. Searched: Idaho Code Title 74 ch. 1 (§§ 74-101 to 74-127, opened §§ 74-101, -102, -103, -113, -115, -120 on legislature.idaho.gov, codified text updated July 1, 2026); Title 50 ch. 9 (§§ 50-907, 50-908) and Title 63 (§§ 63-1311, 63…"
+   },
+   "payment.depositClock": {
+    "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+    "engine_field": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+    "type": "enum",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Idaho Code § 74-102(12); 74-103(2)-(3)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No provision pauses, tolls or restarts the § 74-103 response clock while an advance payment is outstanding. Searched: Idaho Code Title 74 ch. 1 (§§ 74-101 to 74-127, opened §§ 74-101, -102, -103, -113, -115, -120 on legislature.idaho.gov, codified text updated July 1, 2026); Title 50 ch. 9 (§§ 50…"
+   },
+   "payment.reissue": {
+    "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+    "engine_field": "jurisdiction_rules:payment.reissue_*",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Idaho Code § 74-102(12)",
+    "rule_ids": [
+     "ID-9006"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No overrun re-issue rule; only the refund of excess advance payment (ID-9006). Searched: Idaho Code Title 74 ch. 1 (§§ 74-101 to 74-127, opened §§ 74-101, -102, -103, -113, -115, -120 on legislature.idaho.gov, codified text updated July 1, 2026); Title 50 ch. 9 (§§ 50-907, 50-908) and Title 63 (§…"
+   },
+   "rules.maxFee": {
+    "label": "Request-level ceiling (actual cost cap / statutory max)",
+    "engine_field": "fee_profiles:requestRules.maxFee",
+    "type": "usd_or_rule",
+    "resolution": "actual_cost_standard",
+    "value": "actual cost (copying: 'actual cost to the agency of copying the record'; labor: 'reasonable labor costs necessarily incurred'; nonresident: 'actual costs of the public agency'); advance payment above actual costs must be refunded",
+    "unit": "USD (request-level, cost-based)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Idaho Code § 74-102(10)(c), (10)(e), (10)(g), (12)",
+    "rule_ids": [
+     "ID-0019",
+     "ID-0020",
+     "ID-0022",
+     "ID-9001",
+     "ID-9006",
+     "ID-9013",
+     "ID-9012"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No statutory dollar maximum; the request-level cap is actual cost in every regime. AG Legal Guideline 1/25/1993 (ID-9012): a city may not by ordinance exceed actual cost of reproduction."
+   },
+   "rules.deMinimis": {
+    "label": "De-minimis: no charge below ($)",
+    "engine_field": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Idaho Code § 74-102(10)(a)",
+    "rule_ids": [
+     "ID-0017",
+     "ID-0018"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No 'no charge below $X' rule. The functional no-charge zone is the resident free allotment (2 hours / 100 pages), which is a quantity threshold, not a dollar de minimis. Searched: Idaho Code Title 74 ch. 1 (§§ 74-101 to 74-127, opened §§ 74-101, -102, -103, -113, -115, -120 on legislature.idaho.g…"
+   },
+   "rules.minFee": {
+    "label": "Minimum fee",
+    "engine_field": "fee_profiles:requestRules.minFee",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Idaho Code § 74-102(10)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No minimum fee; a minimum would have to sit under the actual-cost ceiling and the no-lump-sum itemization rule (§ 74-102(10)(h)). Searched: Idaho Code Title 74 ch. 1 (§§ 74-101 to 74-127, opened §§ 74-101, -102, -103, -113, -115, -120 on legislature.idaho.gov, codified text updated July 1, 2026);…"
+   },
+   "media": {
+    "label": "Electronic media (CD/DVD/USB) charge",
+    "engine_field": "fee_profiles:media.{cd,dvd,usb}",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": "sum of (1) the agency's direct cost of copying the information in that form, (2) the standard cost, if any, for selling the same information as a publication, (3) the agency's or third party's cost of conversion to another electronic form (resident, uniform); nonresidents: additional fees permitted, uniform to nonresidents",
+    "unit": "USD per medium/job (city-set under the standard)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Idaho Code § 74-102(10)(d)(i)-(ii)",
+    "rule_ids": [
+     "ID-0021",
+     "ID-9008",
+     "ID-9009"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "'Computer tape, computer disc, microfilm or similar or analogous record system' — read as covering CD/DVD/USB media. Fee must be uniform to all residents. AG Manual Q13 reads component 2 as allowing the agency to offer an already-printed publication at its standard sale price."
+   },
+   "delivery": {
+    "label": "Delivery: mail / handling / email / pickup",
+    "engine_field": "fee_profiles:delivery.*",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": "actual mailing or telecommunications costs (AG guidance); e-mail delivery permitted by statute",
+    "unit": "USD (actual postage/telecom cost)",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "AG Idaho Public Records Law Manual (July 2026), Q&A No. 14; Idaho Code § 74-102(4)",
+    "rule_ids": [
+     "ID-9011"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Statute: 'A request for public records and delivery of the public records may be made by electronic mail' (§ 74-102(4)). AG manual: agency is not required to send records; may recover actual mailing/fax costs when asked to send. No handling fee authority."
+   },
+   "certification": {
+    "label": "Certification / certified-copy charge",
+    "engine_field": "fee_profiles:certification.{rate,unit}",
+    "type": "rate_usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD per certified copy",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Idaho Code § 74-102(3), (10)(a), (10)(c)",
+    "rule_ids": [
+     "ID-9013"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Custodian must furnish a certified copy on demand (§ 74-102(3)); no certification fee is set for municipal records in Title 74 or Title 50 (§ 50-907(6)(c) makes a clerk-certified reproduction a certified copy but sets no fee). (10)(a)/(10)(c) preserve fees 'otherwise provided by law' (e.g. county…"
+   },
+   "av": {
+    "label": "Audio/video: per recording, per minute, free minutes",
+    "engine_field": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+    "type": "rate_usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Idaho Code § 74-102(10)(c), (10)(d)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No per-recording, per-minute or free-minutes figure. Audio/video duplicates fall under the general copying ceiling (actual cost) or, if supplied on tape/disc, the (10)(d)(i) media formula. Note: 2026 H0894 (open meetings, recording) became law but concerns meeting recordings, not records fees. Se…"
+   },
+   "commercial": {
+    "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+    "engine_field": "fee_profiles:purposeOverrides.commercial",
+    "type": "pct+bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Idaho Code § 74-102(10)(g); 74-120",
+    "rule_ids": [
+     "ID-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Idaho has no commercial-purpose fee schedule or surcharge; the requester must not be asked purpose (§ 74-102(5)). The state's analogous fork is residency (resident vs nonresident schedules), which is captured in ID-0022/ID-9001. § 74-120 restricts mailing/telephone-list uses but sets no fee. Sear…"
+   },
+   "waiver": {
+    "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+    "engine_field": "jurisdiction_rules:fee_waiver.*",
+    "type": "enum_list+bool",
+    "resolution": "structural",
+    "value": "Mandatory ('shall not charge any cost or fee for copies or labor') when a RESIDENT requester demonstrates all three: (i) likely to contribute significantly to public understanding of government operations; (ii) not primarily in the requester's individual interest (incl. litigation interest); (iii) will not occur if fees are charged because of insufficient financial resources. Purpose showing: requester must 'demonstrate'. No written-denial, appeal, or form requirement specific to waiver in statute.",
+    "unit": "enum_list + bool (mandatory)",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Idaho Code § 74-102(10)(f)",
+    "rule_ids": [
+     "ID-0023",
+     "ID-9007"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Conjunctive three-part test kept in one row per grain rule. Nonresidents excluded from the mandatory waiver by the 2025 amendment (ch. 298). Denial of a fee waiver is not itself a 'denial' under § 74-103 on the face of the statute; no separate waiver appeal path."
+   },
+   "waiver.forfeiture": {
+    "label": "Late response forfeits the fee",
+    "engine_field": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Idaho Code § 74-103(3); 74-102(10)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No fee forfeiture for a late response; a late response is a deemed denial (§ 74-103(3)) with judicial review under § 74-115. Searched: Idaho Code Title 74 ch. 1 (§§ 74-101 to 74-127, opened §§ 74-101, -102, -103, -113, -115, -120 on legislature.idaho.gov, codified text updated July 1, 2026); Titl…"
+   },
+   "repeat": {
+    "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+    "engine_field": "NOT IN ENGINE (requestor-ledger)",
+    "type": "structural",
+    "resolution": "structural",
+    "value": "Aggregation permitted: when the agency reasonably believes one or more requesters is segregating a request into a series to avoid fees, it may aggregate the requests and charge appropriate fees, considering the time period of the requests; it shall NOT aggregate multiple requests on unrelated subjects from one requester. No aggregation threshold or carry-forward rule.",
+    "unit": "structural (no threshold)",
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Idaho Code § 74-102(11)",
+    "rule_ids": [
+     "ID-9005"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Effect: aggregated requests share one free 2-hour/100-page allotment. No numeric window ('may consider the time period') and no carry-forward of unpaid balances. Belief standard is 'reasonably believes'."
    }
-  ]
+  },
+  "statutory_evidence": {
+   "fee.labor_charge": [
+    {
+     "rule_id": "ID-0020",
+     "authority": "Idaho Code § 74-102(10)(e)",
+     "summary": "Fees for resident requests shall not exceed reasonable labor costs necessarily incurred, charged at the per-hour pay rate of the lowest-paid administrative staff employee or public official of the agency."
+    }
+   ],
+   "fee.actual_cost_basis": [
+    {
+     "rule_id": "ID-0019",
+     "authority": "Idaho Code § 74-102(10)(c)",
+     "summary": "The fee charged to a resident may not exceed the actual cost to the agency of copying the record."
+    },
+    {
+     "rule_id": "ID-0022",
+     "authority": "Idaho Code § 74-102(10)",
+     "summary": "The agency may charge nonresidents higher fees than residents (including for labor and copies without the resident free allotments), but such fees may not exceed the actual cost to the agency."
+    }
+   ],
+   "fee.electronic_media_charge": [
+    {
+     "rule_id": "ID-0021",
+     "authority": "Idaho Code § 74-102(10)(d)(i)",
+     "summary": "For computer records, the agency may charge a fee that does not exceed the sum of the direct cost of copying, the standard cost of publication, and the cost of conversion."
+    }
+   ],
+   "fee.free_allowance": [
+    {
+     "rule_id": "ID-0017",
+     "authority": "Idaho Code § 74-102(10)(a)",
+     "summary": "No fee shall be charged for the first two (2) hours of labor in responding to a resident's public records request."
+    }
+   ],
+   "fee.no_charge_categories": [
+    {
+     "rule_id": "ID-0018",
+     "authority": "Idaho Code § 74-102(10)(a)",
+     "summary": "No fee shall be charged for copying the first one hundred (100) pages of paper records in responding to a resident's request."
+    }
+   ]
+  }
  },
  "program_setup": {
   "custody.records_officer_designation": [

@@ -4,7 +4,7 @@
  "_meta": {
   "phase": 6,
   "generated_by": "build_state_templates.js",
-  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables. fee_schedule.items = the step-3 verified fee layer (value/unit/basis/engine_field/applies_to per master-list item, every cell verify-confirmed); fee_schedule.statutory_evidence = concept-level evidence."
  },
  "knobs": {
   "Master.g1": {
@@ -502,22 +502,714 @@
   }
  },
  "fee_schedule": {
-  "fee.copy_rate_per_page": [
-   {
-    "rule_id": "OH-0018",
+  "items": {
+   "dup.bw.rate": {
+    "label": "Copy rate — B&W page",
+    "engine_field": "fee_profiles:duplication.bw.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per page",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Ohio Rev. Code § 149.43(B)(1); State ex rel. Warren Newspapers v. Hutson, 1994-Ohio-5, ¶ 25-26; AG Model Public Records Policy",
+    "rule_ids": [
+     "OH-0018",
+     "OH-9001",
+     "OH-9002",
+     "OH-9015"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Standard = 'at cost' = 'actual cost' (Hutson). No statewide per-page figure for municipalities; the city sets its per-page value by policy under the actual-cost ceiling (AG model policy: '[X] cents per page'). Actual cost excludes employee labor (OH-9002); Bonnell (cited in Hutson) describes cost…"
+   },
+   "dup.color.rate": {
+    "label": "Copy rate — color page",
+    "engine_field": "fee_profiles:duplication.color.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per page",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Ohio Rev. Code § 149.43(B)(1); Hutson ¶ 25-26",
+    "rule_ids": [
+     "OH-0018",
+     "OH-9001",
+     "OH-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No separate color-copy provision anywhere in Ohio law; the same 'at cost' ceiling governs. The prior 'value_present' figures ($75, $750, 'five dollars') do NOT belong to this item: $75/$750 are the law-enforcement video caps (OH-0019) and 'five dollars' is the initial-page charge struck down in H…"
+   },
+   "dup.oversized.rate": {
+    "label": "Copy rate — oversized / nonstandard page",
+    "engine_field": "fee_profiles:duplication.oversized.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per page/sheet",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Ohio Rev. Code § 149.43(B)(1); Hutson ¶ 25-26",
+    "rule_ids": [
+     "OH-0018",
+     "OH-9001",
+     "OH-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No oversized/nonstandard-page provision; 'at cost' governs. Prior snippet's $75/$750 figures are the video caps (OH-0019), not an oversized-page rate. If a private contractor is reasonably used for large-format copying, the contractor's cost may be passed through (AG Manual n.177-178, Gibbs v. Co…"
+   },
+   "dup.specialty.rate": {
+    "label": "Specialty reproduction (photos, maps, transcripts)",
+    "engine_field": "fee_profiles:duplication.specialty.rate",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per item (medium/contractor cost)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Ohio Rev. Code § 149.43(B)(1), (B)(6); Hutson ¶ 25-26; 1999 OAG 99-012; R.C. 5502.12(A) (accident reports)",
+    "rule_ids": [
+     "OH-0018",
+     "OH-9001",
+     "OH-9002",
+     "OH-9004",
+     "OH-9017"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "General rule: actual cost of the medium chosen (paper, native medium, or other reasonable medium), no labor or programming time even for customized compilations (OAG 99-012). Record-specific statutory fees control over 'at cost' (Manual ch. 2 § 12; R.C. 1.51): motor-vehicle accident report copy $…"
+   },
+   "dup.tiers": {
+    "label": "Graduated page bands (per-page rate by volume)",
+    "engine_field": "fee_profiles:duplication.*.tiers",
+    "type": "tiers",
+    "resolution": "silent",
+    "value": null,
+    "unit": "tiers",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
     "authority": "Ohio Rev. Code § 149.43(B)(1)",
-    "summary": "Copies of public records shall be made available 'at cost' — the office may not charge more than its actual cost of making the copy.",
-    "clock_spec": "ceiling: actual cost of the copy (no statutory per-page rate)"
+    "rule_ids": [
+     "OH-0018"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No graduated/volume page bands anywhere in R.C. 149.43, the AG manual or model policy. Any banding a city adopts must still reflect actual cost per copy. Searched: R.C. 149.43 (all versions Oct. 24, 2024 through Sept. 7, 2026 on codes.ohio.gov, including the H.B. 315 (Apr. 9, 2025), H.B. 96 (Sept…"
+   },
+   "rules.freePages": {
+    "label": "Free page allowance per request",
+    "engine_field": "fee_profiles:requestRules.freePageAllowance",
+    "type": "pages",
+    "resolution": "silent",
+    "value": null,
+    "unit": "pages",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ohio Rev. Code § 149.43(B)(1); AG 2026 Sunshine Laws Manual ch. 2 § 11; AG Model Policy",
+    "rule_ids": [
+     "OH-9019",
+     "OH-9016"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No free-page allowance. Related no-charge facts: inspection is free (OH-9019); e-mailed documents carry no charge per the AG model policy (OH-9016). Searched: R.C. 149.43 (all versions Oct. 24, 2024 through Sept. 7, 2026 on codes.ohio.gov, including the H.B. 315 (Apr. 9, 2025), H.B. 96 (Sept. 30,…"
+   },
+   "labor.search.rate": {
+    "label": "Labor rate — search / retrieval ($/hr)",
+    "engine_field": "fee_profiles:labor.search.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": "USD per hour",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "State ex rel. Warren Newspapers v. Hutson, 70 Ohio St.3d 619, 1994-Ohio-5, ¶ 26 (construing R.C. 149.43(B)); AG 2026 Sunshine Laws Manual ch. 2 § 12",
+    "rule_ids": [
+     "OH-0018",
+     "OH-9002",
+     "OH-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Labor (search / retrieval) is categorically not chargeable under 'at cost' for municipal records, so no hourly rate exists. Sole statutory exception: video records of state/local law-enforcement agencies and prosecutors, where 'actual cost' includes staff time and overhead but is capped at $75 pe…"
+   },
+   "labor.review.rate": {
+    "label": "Labor rate — review / redaction ($/hr)",
+    "engine_field": "fee_profiles:labor.review.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": "USD per hour",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "State ex rel. Warren Newspapers v. Hutson, 70 Ohio St.3d 619, 1994-Ohio-5, ¶ 26 (construing R.C. 149.43(B)); AG 2026 Sunshine Laws Manual ch. 2 § 12",
+    "rule_ids": [
+     "OH-0018",
+     "OH-9002",
+     "OH-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Labor (review / redaction) is categorically not chargeable under 'at cost' for municipal records, so no hourly rate exists. Sole statutory exception: video records of state/local law-enforcement agencies and prosecutors, where 'actual cost' includes staff time and overhead but is capped at $75 pe…"
+   },
+   "labor.programming.rate": {
+    "label": "Labor rate — programming / data extraction ($/hr)",
+    "engine_field": "fee_profiles:labor.programming.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": "USD per hour",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "State ex rel. Warren Newspapers v. Hutson, 70 Ohio St.3d 619, 1994-Ohio-5, ¶ 26 (construing R.C. 149.43(B)); AG 2026 Sunshine Laws Manual ch. 2 § 12",
+    "rule_ids": [
+     "OH-0018",
+     "OH-9002",
+     "OH-9001",
+     "OH-9004"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Labor (programming / data extraction) is categorically not chargeable under 'at cost' for municipal records, so no hourly rate exists. 1999 OAG 99-012 (customized/compiled documents): 'at cost' is 'exclusive of any charges for employee labor or computer programming time' (OH-9004). Sole statutory…"
+   },
+   "labor.billableWhen": {
+    "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+    "engine_field": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+    "type": "enum+threshold",
+    "resolution": "value",
+    "value": "never (exception: law-enforcement/prosecutor video records)",
+    "unit": "enum (never | always | over_threshold) + exception scope",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "State ex rel. Warren Newspapers v. Hutson, 1994-Ohio-5, ¶ 26; Ohio Rev. Code § 149.43(B)(1) (second paragraph, video records)",
+    "rule_ids": [
+     "OH-0018",
+     "OH-0019",
+     "OH-9002",
+     "OH-9011"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Labor is never chargeable for municipal records regardless of page count, hours, or paper/electronic format. Exception: video records prepared by a state or local law enforcement agency or prosecutor's office — staff time and overhead are within 'actual cost' (OH-9011), bounded by OH-0019. Applie…"
+   },
+   "labor.overheadPct": {
+    "label": "Overhead / fringe surcharge on labor (%)",
+    "engine_field": "fee_profiles:labor.overheadPct",
+    "type": "pct",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": "percent",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Hutson, 1994-Ohio-5, ¶ 26; Ohio Rev. Code § 149.43(B)(1) (video definition of 'actual cost')",
+    "rule_ids": [
+     "OH-0018",
+     "OH-9002",
+     "OH-9011"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No labor charge, hence no overhead/fringe surcharge. Video-record exception: 'any other relevant overhead necessary to comply with the request' is within actual cost (OH-9011) but no percentage is stated and the total is capped (OH-0019). BMV bulk commercial extraction '+ ten per cent' (R.C. 149.…"
+   },
+   "labor.increment": {
+    "label": "Labor time increment + rounding",
+    "engine_field": "fee_profiles:labor.*.increment / rounding",
+    "type": "hours",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": "hours",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Hutson, 1994-Ohio-5, ¶ 26",
+    "rule_ids": [
+     "OH-0018",
+     "OH-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No chargeable labor, so no time increment/rounding rule. Video records: the cap is stated per 'hour of video produced' with no rounding rule (OH-0019)."
+   },
+   "rules.freeLaborHours": {
+    "label": "Free labor hours per request",
+    "engine_field": "fee_profiles:requestRules.freeLaborHours",
+    "type": "hours",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": "hours",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Hutson, 1994-Ohio-5, ¶ 26",
+    "rule_ids": [
+     "OH-0018",
+     "OH-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "All labor is free (never chargeable), so a free-hours allowance is moot."
+   },
+   "labor.periodicFreeHours": {
+    "label": "Free personnel time per requestor per month/year (TX § 552.275 pattern)",
+    "engine_field": "NOT IN ENGINE (fee_profiles gap — requestor-ledger counter)",
+    "type": "hours",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": "hours per requester per period",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Hutson, 1994-Ohio-5, ¶ 26; Ohio Rev. Code § 149.43(E)(2)",
+    "rule_ids": [
+     "OH-0018",
+     "OH-9002",
+     "OH-9018"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No labor charges and no per-requester time ledger; moreover a public records policy may not limit records per person or per period (OH-9018). No TX § 552.275 analogue."
+   },
+   "rules.estimateNotifyThreshold": {
+    "label": "Itemized estimate / cost notice required above ($ or hours)",
+    "engine_field": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+    "type": "usd",
+    "resolution": "structural",
+    "value": null,
+    "unit": "USD or hours (none stated)",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Ohio Attorney General, 2026 Ohio Sunshine Laws: An Open Government Resource Manual, ch. 2, § 12 'Copies, and delivery or transmission, \"at cost\"' (pp. 21-22) (citing State ex rel. Ware v. City of Akron, 2021-Ohio-624); Ohio Rev. Code § 149.43(B)(1) (video records)",
+    "rule_ids": [
+     "OH-9014",
+     "OH-9009"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No dollar/hour threshold triggers an itemized estimate for general municipal records. Structural rules instead: (1) a cost notice (amount due) must precede any denial for nonpayment (OH-9014); (2) law-enforcement/prosecutor video: estimated actual cost within five business days of receipt (OH-900…"
+   },
+   "estimate.requesterResponseDays": {
+    "label": "Requester must respond to an estimate within N days (else withdrawn)",
+    "engine_field": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": "days",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ohio Rev. Code § 149.43",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No requester-response window after an estimate and no deemed-withdrawal period. Nonpayment simply leaves the copies unfurnished (OH-9013). Searched: R.C. 149.43 (all versions Oct. 24, 2024 through Sept. 7, 2026 on codes.ohio.gov, including the H.B. 315 (Apr. 9, 2025), H.B. 96 (Sept. 30, 2025) and…"
+   },
+   "estimate.revisionNotifyPercent": {
+    "label": "Revised estimate required when actual exceeds estimate by N%",
+    "engine_field": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+    "type": "pct",
+    "resolution": "ceiling",
+    "value": "20",
+    "unit": "% of estimated actual cost — law-enforcement/prosecutor VIDEO RECORDS ONLY (overrun collectible up to this cap, only with advance notice); no rule for other municipal records",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ohio Rev. Code § 149.43(B)(1) (second paragraph)",
+    "rule_ids": [
+     "OH-0019",
+     "OH-9010"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Record-specific: state or local law enforcement agencies and prosecuting attorneys' offices only (municipal police departments included). Not a rule for the city's other records. Ohio's mechanism is not a 'revised estimate': the agency may bill the difference on fulfillment if it warned in advanc…"
+   },
+   "estimate.validityDays": {
+    "label": "Estimate validity period (days)",
+    "engine_field": "fee_profiles:estimatePolicy.estimateValidityDays",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": "days",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ohio Rev. Code § 149.43",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No estimate validity period in statute, manual, model policy or AG opinions. Searched: R.C. 149.43 (all versions Oct. 24, 2024 through Sept. 7, 2026 on codes.ohio.gov, including the H.B. 315 (Apr. 9, 2025), H.B. 96 (Sept. 30, 2025) and H.B. 31 (Sept. 7, 2026) versions); R.C. 149.011, 109.43; the …"
+   },
+   "rules.deposit.threshold": {
+    "label": "Deposit / prepayment may be required above ($)",
+    "engine_field": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ohio Rev. Code § 149.43(B)(6)",
+    "rule_ids": [
+     "OH-0020"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No dollar threshold: advance payment of 'the cost involved in providing the copy' may be required for ANY copy request regardless of amount (OH-0020). Any threshold is a local policy choice. Video records: prepayment of the estimated actual cost may be required by policy (OH-9008)."
+   },
+   "rules.deposit.percent": {
+    "label": "Deposit capped at (% of estimate)",
+    "engine_field": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": "% of estimate",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ohio Rev. Code § 149.43(B)(6); (B)(1) (video)",
+    "rule_ids": [
+     "OH-0020",
+     "OH-9008"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No cap on the advance amount: the office may require 'the cost involved' (i.e., the full copy cost) in advance; for video, 'the estimated actual cost ... paid in full'. No 'deposit' concept distinct from full prepayment exists in Ohio law."
+   },
+   "payment.productionGate": {
+    "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+    "engine_field": "paymentTiming gates + fee_profiles bands",
+    "type": "enum",
+    "resolution": "structural",
+    "value": "pay_before_copies (Permission); video: production obligation begins on full payment of estimate",
+    "unit": "enum",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ohio Rev. Code § 149.43(B)(6); (B)(1) (second paragraph); (B)(7)(a)",
+    "rule_ids": [
+     "OH-0020",
+     "OH-0021",
+     "OH-9008",
+     "OH-9013"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Copies may be conditioned on advance payment (statute); inspection may not be conditioned on any fee (Manual ch. 2 § 11; OH-9019). Video: only if the prepayment requirement is in the office's written public records policy. Postage/delivery/supplies may also be required in advance (OH-9005)."
+   },
+   "payment.nonpayment": {
+    "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+    "engine_field": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+    "type": "enum+int",
+    "resolution": "structural",
+    "value": "not_fulfilled_until_paid; notice of amount due required first; no statutory withdrawal period",
+    "unit": "enum + int (none)",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ohio Attorney General, 2026 Ohio Sunshine Laws: An Open Government Resource Manual, ch. 2, § 12 'Copies, and delivery or transmission, \"at cost\"' (pp. 21-22) (citing Call v. Fragale 2004-Ohio-6589; Ware v. Akron 2021-Ohio-624)",
+    "rule_ids": [
+     "OH-0020",
+     "OH-9013",
+     "OH-9014"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No N-day withdrawal rule and no prior-debt prepayment rule in Ohio law. Consequence of nonpayment: copies are not furnished (Manual: no obligation to provide free copies), but the office must first state the amount due."
+   },
+   "payment.depositClock": {
+    "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+    "engine_field": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+    "type": "enum",
+    "resolution": "structural",
+    "value": "general: no statutory clock effect stated (copies due 'within a reasonable period of time'; obligation contingent on advance payment); video: production obligation BEGINS once estimated actual cost is paid in full",
+    "unit": "enum",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ohio Rev. Code § 149.43(B)(1) (second paragraph); (B)(6)",
+    "rule_ids": [
+     "OH-0008",
+     "OH-0020",
+     "OH-9008",
+     "OH-9013"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Ohio has no numeric statutory clock, so 'tolling' is undefined; for video records the statute makes the production duty start at full payment (structural clock rule, OH-9008). For other records the manual/case law treat prepayment as a precondition to the copy duty (OH-9013). No grace period; no …"
+   },
+   "payment.reissue": {
+    "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+    "engine_field": "jurisdiction_rules:payment.reissue_*",
+    "type": "bool",
+    "resolution": "structural",
+    "value": "video: no revised estimate; overrun (max 20%) collectible on fulfillment only if advance notice given; general records: no rule",
+    "unit": "bool",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ohio Rev. Code § 149.43(B)(1) (second paragraph)",
+    "rule_ids": [
+     "OH-0019",
+     "OH-9010"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Record-specific: state or local law enforcement agencies and prosecuting attorneys' offices only (municipal police departments included). Not a rule for the city's other records. The advance notice ('actual cost may be up to twenty per cent higher') is a gate on collecting any overrun; nothing re…"
+   },
+   "rules.maxFee": {
+    "label": "Request-level ceiling (actual cost cap / statutory max)",
+    "engine_field": "fee_profiles:requestRules.maxFee",
+    "type": "usd_or_rule",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per request (rule: total may not exceed actual cost); video: $750 total cap",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Ohio Rev. Code § 149.43(B)(1); Hutson ¶ 25",
+    "rule_ids": [
+     "OH-0018",
+     "OH-0019",
+     "OH-9001",
+     "OH-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "The request-level ceiling IS the actual-cost standard (copies + delivery/supplies at actual cost, no labor). Only numeric cap: $750 total per video-record request for law-enforcement/prosecutor offices (OH-0019, record-specific)."
+   },
+   "rules.deMinimis": {
+    "label": "De-minimis: no charge below ($)",
+    "engine_field": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ohio Rev. Code § 149.43",
+    "rule_ids": [
+     "OH-9016"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No de-minimis waiver threshold. Nearest facts: e-mailed copies carry no charge (AG model policy, OH-9016) and inspection is free (OH-9019). Searched: R.C. 149.43 (all versions Oct. 24, 2024 through Sept. 7, 2026 on codes.ohio.gov, including the H.B. 315 (Apr. 9, 2025), H.B. 96 (Sept. 30, 2025) an…"
+   },
+   "rules.minFee": {
+    "label": "Minimum fee",
+    "engine_field": "fee_profiles:requestRules.minFee",
+    "type": "usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Hutson, 1994-Ohio-5, ¶ 26; Ohio Rev. Code § 149.43(B)(1)",
+    "rule_ids": [
+     "OH-0018",
+     "OH-9003",
+     "OH-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No statutory minimum fee. A minimum/initial-page charge is permissible only to the extent it reflects actual copying cost; the $5 initial-page charge in Hutson was struck as untethered to cost (OH-9003). Coroner's $1.00 minimum (R.C. 313.10(B)) is county-specific."
+   },
+   "media": {
+    "label": "Electronic media (CD/DVD/USB) charge",
+    "engine_field": "fee_profiles:media.{cd,dvd,usb}",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per disc/drive (cost of the medium)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ohio Rev. Code § 149.43(B)(6); AG Model Public Records Policy ('[X] per disc')",
+    "rule_ids": [
+     "OH-0018",
+     "OH-0021",
+     "OH-9015",
+     "OH-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Requester chooses the medium (paper / same medium the office keeps / other reasonable medium); the office may charge the actual cost involved in providing the copy in that medium, i.e., the cost of the CD/DVD/USB itself, not staff time. AG model policy treats the per-disc charge as a fill-in valu…"
+   },
+   "delivery": {
+    "label": "Delivery: mail / handling / email / pickup",
+    "engine_field": "fee_profiles:delivery.*",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD (postage / delivery / supplies at actual cost; e-mail: no charge per AG model policy)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ohio Rev. Code § 149.43(B)(7)(a); AG Model Public Records Policy",
+    "rule_ids": [
+     "OH-0023",
+     "OH-0024",
+     "OH-0025",
+     "OH-0026",
+     "OH-9005",
+     "OH-9006",
+     "OH-9016"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Postage (mail), delivery cost (other carrier) and other supplies used in mailing/delivery/transmission may be charged and required in advance. Structural companion: office may cap physical delivery (and, with a free searchable website, digital delivery) at ten records per month unless the request…"
+   },
+   "certification": {
+    "label": "Certification / certified-copy charge",
+    "engine_field": "fee_profiles:certification.{rate,unit}",
+    "type": "rate_usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD per document",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ohio Rev. Code § 149.43(B)(1); AG 2026 Sunshine Laws Manual ch. 2 (citing State ex rel. Mobley v. LaRose, 2024-Ohio-1909, ¶ 14-15)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "The Public Records Act neither requires certified copies nor sets a certification fee for municipal records. Where another statute sets a certified-copy fee for a specific record type it controls, and if the requester does not ask for certification only actual cost may be charged (Manual ch. 2 § …"
+   },
+   "av": {
+    "label": "Audio/video: per recording, per minute, free minutes",
+    "engine_field": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+    "type": "rate_usd",
+    "resolution": "ceiling",
+    "value": "75 | 750",
+    "unit": "USD per hour of video PRODUCED (not staff hours) | USD total per request — state/local law-enforcement and prosecutor VIDEO records only; other audio/video: actual cost of the medium, no labor",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ohio Rev. Code § 149.43(B)(1) (second paragraph)",
+    "rule_ids": [
+     "OH-0019",
+     "OH-0018",
+     "OH-9011",
+     "OH-9008",
+     "OH-9009",
+     "OH-9010",
+     "OH-9012"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Record-specific: state or local law enforcement agencies and prosecuting attorneys' offices only (municipal police departments included). Not a rule for the city's other records. perRecording: none; perMinute: none (cap is per hour of video produced); freeMinutes: none. Charging is optional; char…"
+   },
+   "commercial": {
+    "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+    "engine_field": "fee_profiles:purposeOverrides.commercial",
+    "type": "pct+bool",
+    "resolution": "structural",
+    "value": "no commercial surcharge; commercial purpose only triggers the ten-per-month delivery caps (physical; digital if free searchable website), lifted by written non-commercial certification; 'commercial' narrowly construed",
+    "unit": "pct+bool (surcharge: none; labor chargeable: no)",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ohio Rev. Code § 149.43(B)(7)(c)(i)-(iii); (B)(4)",
+    "rule_ids": [
+     "OH-0024",
+     "OH-0025",
+     "OH-0026",
+     "OH-9006",
+     "OH-9007"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No commercial-purpose fee schedule for municipalities; labor stays non-chargeable regardless of purpose; the office may not condition access on disclosure of intended use ((B)(4), OH-0002). State-agency-only analogue: BMV bulk commercial special extraction — actual cost + special extraction costs…"
+   },
+   "waiver": {
+    "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+    "engine_field": "jurisdiction_rules:fee_waiver.*",
+    "type": "enum_list+bool",
+    "resolution": "structural",
+    "value": "mandatory no-fee for victims/counsel/insurers on affidavit — law-enforcement/prosecutor VIDEO records only; general records: no statutory waiver grounds, no purpose statement, no written-denial or appeal rule (local discretion)",
+    "unit": "enum_list+bool",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Ohio Rev. Code § 149.43(B)(11)",
+    "rule_ids": [
+     "OH-0019",
+     "OH-9012"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Record-specific: state or local law enforcement agencies and prosecuting attorneys' offices only (municipal police departments included). Not a rule for the city's other records. Grounds: victim status (Ohio Const. art. I § 10a or tort victim, R.C. 2307.011) + reasonable assertion the video relat…"
+   },
+   "waiver.forfeiture": {
+    "label": "Late response forfeits the fee",
+    "engine_field": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": "bool",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "n/a",
+    "authority": "Ohio Rev. Code § 149.43(C)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No fee forfeiture for a late response. Ohio's late-response remedies are statutory damages/attorney fees via the Court of Claims or mandamus (R.C. 149.43(C); R.C. 2743.75) — remedies, excluded from this pass. Searched: R.C. 149.43 (all versions Oct. 24, 2024 through Sept. 7, 2026 on codes.ohio.go…"
+   },
+   "repeat": {
+    "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+    "engine_field": "NOT IN ENGINE (requestor-ledger)",
+    "type": "structural",
+    "resolution": "silent",
+    "value": null,
+    "unit": "structural",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Ohio Rev. Code § 149.43(E)(2); (B)(7)(c)",
+    "rule_ids": [
+     "OH-0024",
+     "OH-9018"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No fee aggregation, carry-forward or aggregation threshold. The opposite constraint applies: a public records policy may not limit records per person or per period (OH-9018); the only per-requester volume rule is the ten-per-month DELIVERY cap for commercial-purpose requesters (OH-0024/OH-9006). …"
    }
-  ],
-  "fee.nonstandard_rate": [
-   {
-    "rule_id": "OH-0019",
-    "authority": "Ohio Rev. Code § 149.43(B)(1)",
-    "summary": "A law enforcement agency or prosecuting attorney's office may charge the actual cost of preparing a video record, not to exceed $75 per hour of video produced and not to exceed $750 total.",
-    "clock_spec": "ceiling: $75.00 per hour of video produced; ceiling: $750.00 total"
-   }
-  ]
+  },
+  "statutory_evidence": {
+   "fee.copy_rate_per_page": [
+    {
+     "rule_id": "OH-0018",
+     "authority": "Ohio Rev. Code § 149.43(B)(1)",
+     "summary": "Copies of public records shall be made available 'at cost' — the office may not charge more than its actual cost of making the copy.",
+     "clock_spec": "ceiling: actual cost of the copy (no statutory per-page rate)"
+    }
+   ],
+   "fee.nonstandard_rate": [
+    {
+     "rule_id": "OH-0019",
+     "authority": "Ohio Rev. Code § 149.43(B)(1)",
+     "summary": "A law enforcement agency or prosecuting attorney's office may charge the actual cost of preparing a video record, not to exceed $75 per hour of video produced and not to exceed $750 total.",
+     "clock_spec": "ceiling: $75.00 per hour of video produced; ceiling: $750.00 total"
+    }
+   ]
+  }
  },
  "program_setup": {},
  "ledger": {

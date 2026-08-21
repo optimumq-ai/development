@@ -4,7 +4,7 @@
  "_meta": {
   "phase": 6,
   "generated_by": "build_state_templates.js",
-  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables. fee_schedule.items = the step-3 verified fee layer (value/unit/basis/engine_field/applies_to per master-list item, every cell verify-confirmed); fee_schedule.statutory_evidence = concept-level evidence."
  },
  "knobs": {
   "Master.g1": {
@@ -455,56 +455,729 @@
   }
  },
  "fee_schedule": {
-  "fee.copy_rate_per_page": [
-   {
-    "rule_id": "FL-0020",
-    "authority": "§ 119.07(4)(a)1., Fla. Stat.",
-    "summary": "For duplicated copies of records not larger than 14 by 8.5 inches, the agency may charge up to 15 cents per one-sided copy."
+  "items": {
+   "dup.bw.rate": {
+    "label": "Copy rate — B&W page",
+    "engine_field": "fee_profiles:duplication.bw.rate",
+    "type": "rate_usd",
+    "resolution": "ceiling",
+    "value": "0.15",
+    "unit": "USD per one-sided duplicated copy, page not more than 14 x 8.5 inches (two-sided: no more than an additional 0.05)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "§ 119.07(4)(a)1.-2., Fla. Stat.",
+    "rule_ids": [
+     "FL-0020",
+     "FL-0021",
+     "FL-0023",
+     "FL-9001",
+     "FL-9013"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Ceiling under a Permission ('up to 15 cents'); city sets the operative rate at or below. Applies 'if a fee is not prescribed by law' — other statutes may prescribe fees for particular records (e.g., s. 28.24 clerks of court; not municipal). 'Duplicated copies' = s. 119.011(7)/s. 283.30 (electroph…"
    },
-   {
-    "rule_id": "FL-0021",
-    "authority": "§ 119.07(4)(a)2., Fla. Stat.",
-    "summary": "For a two-sided copy, the agency may charge no more than an additional 5 cents."
-   }
-  ],
-  "fee.actual_cost_basis": [
-   {
-    "rule_id": "FL-0023",
-    "authority": "§ 119.011(1), Fla. Stat.",
-    "summary": "'Actual cost of duplication' means the cost of the material and supplies used to duplicate the record, and does not include labor cost or overhead cost associated with such duplication."
-   }
-  ],
-  "fee.certified_copy_charge": [
-   {
-    "rule_id": "FL-0024",
-    "authority": "§ 119.07(4)(c), Fla. Stat.",
-    "summary": "An agency may charge up to $1 per copy for a certified copy of a public record."
-   }
-  ],
-  "fee.nonstandard_rate": [
-   {
-    "rule_id": "FL-0022",
-    "authority": "§ 119.07(4)(a)3., Fla. Stat.",
-    "summary": "For all copies other than standard-size paper copies, the agency charges the actual cost of duplication of the public record."
+   "dup.color.rate": {
+    "label": "Copy rate — color page",
+    "engine_field": "fee_profiles:duplication.color.rate",
+    "type": "rate_usd",
+    "resolution": "ceiling",
+    "value": "0.15",
+    "unit": "USD per one-sided duplicated copy, page not more than 14 x 8.5 inches (statute draws no color/B&W distinction)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "§ 119.07(4)(a)1.-3., Fla. Stat.",
+    "rule_ids": [
+     "FL-0020",
+     "FL-0021",
+     "FL-0022"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Judgment call: standard-size color copies read as (a)1. 'duplicated copies' (15-cent ceiling); non-standard or non-duplicated color output falls to (a)3. actual cost of material and supplies (FL-0022/FL-0023). Many Florida cities charge actual cost for color — that practice would rest on (a)3."
    },
-   {
-    "rule_id": "FL-0026",
-    "authority": "§ 119.07(4)(e)2., Fla. Stat.",
-    "summary": "When a person photographs public records, the custodian may charge for supervision services at a rate agreed upon by the parties; if they cannot agree, the custodian determines the charge."
+   "dup.oversized.rate": {
+    "label": "Copy rate — oversized / nonstandard page",
+    "engine_field": "fee_profiles:duplication.oversized.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "actual cost of duplication (material and supplies only)",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "§ 119.07(4)(a)3. and § 119.011(1), Fla. Stat.",
+    "rule_ids": [
+     "FL-0022",
+     "FL-0023"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Copies larger than 14 x 8.5 inches are 'all other copies': charge = actual cost of duplication, which by definition excludes labor and overhead. County maps/aerial photographs may add labor and overhead only when supplied by COUNTY constitutional officers (s. 119.07(4)(b)) — not municipalities."
    },
-   {
-    "rule_id": "FL-0027",
-    "authority": "§ 119.07(4)(e)1., Fla. Stat.",
-    "summary": "Where another room or place is necessary to photograph public records, the expense of providing it is paid by the person desiring to photograph the records."
-   }
-  ],
-  "fee.special_service_charge": [
-   {
-    "rule_id": "FL-0025",
+   "dup.specialty.rate": {
+    "label": "Specialty reproduction (photos, maps, transcripts)",
+    "engine_field": "fee_profiles:duplication.specialty.rate",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "actual cost of duplication (material and supplies) + special service charge only if 'extensive'",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "§ 119.07(4)(a)3., (d), § 119.011(1), § 119.01(2)(f), Fla. Stat.",
+    "rule_ids": [
+     "FL-0022",
+     "FL-0023",
+     "FL-0025",
+     "FL-9004",
+     "FL-9009"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Photographs, maps, transcripts, media: material/supplies at actual cost; no development-cost recoupment (AGO 88-23, FL-9009). The (4)(b) labor-and-overhead allowance for maps/aerial photographs is limited to county constitutional officers — resolves as not available to municipalities. Requester-m…"
+   },
+   "dup.tiers": {
+    "label": "Graduated page bands (per-page rate by volume)",
+    "engine_field": "fee_profiles:duplication.*.tiers",
+    "type": "tiers",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "§ 119.07(4)(a), Fla. Stat.",
+    "rule_ids": [
+     "FL-0020",
+     "FL-0021"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No graduated page bands in Florida law: flat per-copy ceilings (15 cents one-sided; +5 cents two-sided). A city may band below the ceiling but nothing in statute, rule, AGO or the Manual addresses tiers. Searched: ch. 119 Fla. Stat. (ss. 119.01, 119.011, 119.07, 119.071 as displayed in the 2025 F…"
+   },
+   "rules.freePages": {
+    "label": "Free page allowance per request",
+    "engine_field": "fee_profiles:requestRules.freePageAllowance",
+    "type": "pages",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 188 (AGO 90-81)",
+    "rule_ids": [
+     "FL-9008"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No statutory free-page allowance; the only related authority is discretionary — an agency 'is not precluded from choosing to provide informational copies of public records without charge' (AGO 90-81). Searched: ch. 119 Fla. Stat. (ss. 119.01, 119.011, 119.07, 119.071 as displayed in the 2025 Flor…"
+   },
+   "labor.search.rate": {
+    "label": "Labor rate — search / retrieval ($/hr)",
+    "engine_field": "fee_profiles:labor.search.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per hour = 'labor cost of the personnel providing the service that is actually incurred by the agency' (salary and benefits allowed), chargeable only where assistance is 'extensive'",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
     "authority": "§ 119.07(4)(d), Fla. Stat.",
-    "summary": "If the nature or volume of records requires extensive use of IT resources or extensive clerical/supervisory assistance, the agency may charge, in addition to actual duplication cost, a reasonable special service charge based on the cost actually incurred."
+    "rule_ids": [
+     "FL-0025",
+     "FL-0023",
+     "FL-9009",
+     "FL-9012"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No statewide hourly rate for municipalities. Rate = actual labor cost (Colby: salary + benefits; Trout: not required to use lowest-paid capable employee; Gudinas: clerical rate for copying) and must be 'reasonable'. No overhead, travel or development costs (FL-9009). Search labor below the 'exten…"
+   },
+   "labor.review.rate": {
+    "label": "Labor rate — review / redaction ($/hr)",
+    "engine_field": "fee_profiles:labor.review.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "USD per hour = actual labor cost of personnel actually incurred (attorney/paralegal rate approved where only they could do the review), only via the special service charge for voluminous exemption review",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "§ 119.07(4)(d), Fla. Stat.; Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 186 (AGO 84-81; Zuckerman Spaeder (1st DCA 2017); Dorchester Holdings (2d DCA 2021))",
+    "rule_ids": [
+     "FL-0025",
+     "FL-9010",
+     "FL-9009"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Ordinarily not chargeable (AGO 84-81) but chargeable through the special service charge where volume and number of exemptions make review/redaction time-consuming (Dorchester — a city). No fixed rate."
+   },
+   "labor.programming.rate": {
+    "label": "Labor rate — programming / data extraction ($/hr)",
+    "engine_field": "fee_profiles:labor.programming.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "'cost incurred for such extensive use of information technology resources' (IT resources = hardware, software, services, communications, supplies, personnel, facility resources, maintenance, training)",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "§ 119.07(4)(d), § 119.011(9), § 119.01(2)(f), Fla. Stat.",
+    "rule_ids": [
+     "FL-0025",
+     "FL-9004",
+     "FL-9009"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Programming/compilation not routinely done is charged 'in accordance with s. 119.07(4)' — i.e., the special service charge, only where use of IT resources is 'extensive' (AGOs 99-41, 13-03: mere use is not enough). No rate figure. Cost to develop or maintain the database is not chargeable (AGO 99…"
+   },
+   "labor.billableWhen": {
+    "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+    "engine_field": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+    "type": "enum+threshold",
+    "resolution": "structural",
+    "value": "only_when_extensive",
+    "unit": "enum: labor chargeable only when the nature or volume of the request requires 'extensive' IT resources or clerical/supervisory assistance (undefined; case-by-case; not routinely imposed); no page/hour number; not paper-only (applies to inspection and copies, paper and electronic)",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "§ 119.07(4)(d), Fla. Stat.; Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 184-186 (AGO 13-03; AGO 00-11; Florida Institutional Legal Services v. DOC (1st DCA 1991); Colby (2d DCA 2008))",
+    "rule_ids": [
+     "FL-0025",
+     "FL-9012",
+     "FL-9002",
+     "FL-9010"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Municipal regime: labor is never chargeable as a routine matter; it becomes chargeable only through the special service charge once 'extensive'. State-agency regime (guidance only for cities): DOS defines 'extensive' as more than 15 minutes (FL-9002); DOC's similar 15-minute rule was upheld. Appl…"
+   },
+   "labor.overheadPct": {
+    "label": "Overhead / fringe surcharge on labor (%)",
+    "engine_field": "fee_profiles:labor.overheadPct",
+    "type": "pct",
+    "resolution": "value",
+    "value": "0",
+    "unit": "% overhead surcharge on labor (overhead not chargeable; salary and fringe benefits may enter the base labor cost only as actually incurred)",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "§ 119.011(1) and § 119.07(4)(d), Fla. Stat.; Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 186, 189 (AGO 99-41; Colby)",
+    "rule_ids": [
+     "FL-0023",
+     "FL-0025",
+     "FL-9009"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Overhead is excluded from 'actual cost of duplication' by definition and, per AGO 99-41, may not be added to any public-records charge; the special service charge is limited to labor cost actually incurred, which Colby read to include salary and benefits. Engine mapping: overheadPct = 0; benefits…"
+   },
+   "labor.increment": {
+    "label": "Labor time increment + rounding",
+    "engine_field": "fee_profiles:labor.*.increment / rounding",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Fla. Admin. Code R. 1-2.0031(2)(a) (Department of State) — agency-specific only",
+    "rule_ids": [
+     "FL-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Nothing in ch. 119, AGO or the Manual fixes a billing increment for municipalities; the DOS rule's quarter-hour increment binds only that department and is recorded as guidance. Searched: ch. 119 Fla. Stat. (ss. 119.01, 119.011, 119.07, 119.071 as displayed in the 2025 Florida Statutes), Fla. Adm…"
+   },
+   "rules.freeLaborHours": {
+    "label": "Free labor hours per request",
+    "engine_field": "fee_profiles:requestRules.freeLaborHours",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "§ 119.07(4)(d), Fla. Stat.",
+    "rule_ids": [
+     "FL-0025",
+     "FL-9012"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No numeric free-labor allowance. Functionally, all non-'extensive' assistance is free (labor.billableWhen), but the statute states no hours; state agencies have used 15 minutes (agency-only, FL-9002). Searched: ch. 119 Fla. Stat. (ss. 119.01, 119.011, 119.07, 119.071 as displayed in the 2025 Flor…"
+   },
+   "labor.periodicFreeHours": {
+    "label": "Free personnel time per requestor per month/year (TX § 552.275 pattern)",
+    "engine_field": "NOT IN ENGINE (fee_profiles gap — requestor-ledger counter)",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "ch. 119, Fla. Stat. (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No per-requestor periodic free-time allowance in Florida law (no TX s. 552.275 analogue). Searched: ch. 119 Fla. Stat. (ss. 119.01, 119.011, 119.07, 119.071 as displayed in the 2025 Florida Statutes), Fla. Admin. Code (no rule binds municipal fees; DOS r. 1-2.0031 is agency-specific), the AG's Go…"
+   },
+   "rules.estimateNotifyThreshold": {
+    "label": "Itemized estimate / cost notice required above ($ or hours)",
+    "engine_field": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+    "type": "usd",
+    "resolution": "structural",
+    "value": "respond_to_cost_inquiries; follow own estimate/invoice policy before production",
+    "unit": "no dollar or hour threshold in law",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 188 (Wootton v. Cook (1st DCA 1991); Woodard v. State (4th DCA 2004); Miami Dade College v. Nader + Museu I (3d DCA 2022); AGO 13-03)",
+    "rule_ids": [
+     "FL-9007"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Statute sets no estimate threshold. Operative rules: the agency must answer requests for cost information with the total cost, not just a schedule; if the agency's own policy requires an estimate/invoice before production, collection after production can be denied when none was given (Nader + Mus…"
+   },
+   "estimate.requesterResponseDays": {
+    "label": "Requester must respond to an estimate within N days (else withdrawn)",
+    "engine_field": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "ch. 119, Fla. Stat.; AG Manual 2024 ed. § G (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No requester response window / deemed-withdrawal after an estimate in Florida law. Searched: ch. 119 Fla. Stat. (ss. 119.01, 119.011, 119.07, 119.071 as displayed in the 2025 Florida Statutes), Fla. Admin. Code (no rule binds municipal fees; DOS r. 1-2.0031 is agency-specific), the AG's Governmen…"
+   },
+   "estimate.revisionNotifyPercent": {
+    "label": "Revised estimate required when actual exceeds estimate by N%",
+    "engine_field": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 188 (AGO 05-28)",
+    "rule_ids": [
+     "FL-9006"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No revised-estimate percentage trigger; the only related authority permits billing the shortfall between deposit and actual cost (AGO 05-28, a city). Searched: ch. 119 Fla. Stat. (ss. 119.01, 119.011, 119.07, 119.071 as displayed in the 2025 Florida Statutes), Fla. Admin. Code (no rule binds muni…"
+   },
+   "estimate.validityDays": {
+    "label": "Estimate validity period (days)",
+    "engine_field": "fee_profiles:estimatePolicy.estimateValidityDays",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "ch. 119, Fla. Stat.; AG Manual 2024 ed. § G (searched)",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No estimate validity period in Florida law. Searched: ch. 119 Fla. Stat. (ss. 119.01, 119.011, 119.07, 119.071 as displayed in the 2025 Florida Statutes), Fla. Admin. Code (no rule binds municipal fees; DOS r. 1-2.0031 is agency-specific), the AG's Government-in-the-Sunshine Manual (2024 ed.) fee…"
+   },
+   "rules.deposit.threshold": {
+    "label": "Deposit / prepayment may be required above ($)",
+    "engine_field": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+    "type": "usd",
+    "resolution": "defers_to_city",
+    "value": null,
+    "unit": "no statutory dollar threshold; deposit/advance payment permitted under a reasonable agency policy for extensive/voluminous requests",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "§ 119.07(4), Fla. Stat. (introductory clause); Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 187 (Colby (2d DCA 2008); Morris Publishing (1st DCA 2015); Dorchester Holdings (2d DCA 2021); Promenade D'Iberville (1st DCA 2014))",
+    "rule_ids": [
+     "FL-9005",
+     "FL-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "The threshold is whatever the city's written policy sets, subject to reasonableness; nothing in law fixes a dollar figure. State-agency regime example: DOS requires prepayment of the full estimated special service charge (r. 1-2.0031(2)(b), FL-9002)."
+   },
+   "rules.deposit.percent": {
+    "label": "Deposit capped at (% of estimate)",
+    "engine_field": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "ch. 119, Fla. Stat.; AG Manual 2024 ed. § G; Fla. Admin. Code R. 1-2.0031(2)(b) (agency-specific)",
+    "rule_ids": [
+     "FL-9005",
+     "FL-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No deposit cap percentage for municipalities anywhere in Florida law; the DOS rule (agency-only) requires 100% of the estimated special service charge in advance. Searched: ch. 119 Fla. Stat. (ss. 119.01, 119.011, 119.07, 119.071 as displayed in the 2025 Florida Statutes), Fla. Admin. Code (no ru…"
+   },
+   "payment.productionGate": {
+    "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+    "engine_field": "paymentTiming gates + fee_profiles bands",
+    "type": "enum",
+    "resolution": "value",
+    "value": "pay_before_release",
+    "unit": "enum: copies furnished 'upon payment of the fee prescribed by law'; production may be delayed until fees are remitted; advance deposit permitted for extensive requests",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "§ 119.07(4), Fla. Stat. (introductory clause)",
+    "rule_ids": [
+     "FL-9001",
+     "FL-9005"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Statutory gate: copies upon payment. Inspection remains free of any charge (AGO 85-03; FL-9013) except an 'extensive'-triggered special service charge, which courts allow to be collected in advance (Colby; Morris Publishing; Zuckerman Spaeder; Dorchester)."
+   },
+   "payment.nonpayment": {
+    "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+    "engine_field": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+    "type": "enum+int",
+    "resolution": "structural",
+    "value": "withhold_further_records_until_prior_balance_paid; no_permanent_ban; bill_deposit_shortfall",
+    "unit": "no statutory N-day withdrawal period",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 187-188 (Lozman v. City of Riviera Beach (4th DCA 2008); Smith v. State (2d DCA 2022); AGO 05-28)",
+    "rule_ids": [
+     "FL-9006"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Prior-debt prepayment: permitted (city case, Lozman) but not a lifetime ban (Smith). Florida law has no 'request deemed withdrawn after N days of nonpayment' rule — that is a city-policy matter."
+   },
+   "payment.depositClock": {
+    "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+    "engine_field": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+    "type": "enum",
+    "resolution": "structural",
+    "value": "production_may_be_delayed_until_fees_remitted; no statutory grace or lapse",
+    "unit": "Florida has no fixed statutory response clock ('promptly'/'reasonable time'); the payment gate suspends the duty to furnish copies, not a numeric clock",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "§ 119.07(4) intro and § 119.07(1)(c), Fla. Stat.; Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 187 (Promenade D'Iberville, LLC v. Sundy, 145 So. 3d 980 (Fla. 1st DCA 2014))",
+    "rule_ids": [
+     "FL-9005",
+     "FL-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No grace days or lapse action in law. The custodian must still 'acknowledge requests ... promptly and respond ... in good faith' (s. 119.07(1)(c)) while payment is outstanding."
+   },
+   "payment.reissue": {
+    "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+    "engine_field": "jurisdiction_rules:payment.reissue_*",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 188 (AGO 05-28)",
+    "rule_ids": [
+     "FL-9006"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No revised-estimate / re-issue requirement on overrun; shortfall billing is permitted (AGO 05-28) and, per Nader + Museu, an agency that skips its own estimate/invoice policy may forfeit collection — that is captured under rules.estimateNotifyThreshold. Searched: ch. 119 Fla. Stat. (ss. 119.01, 1…"
+   },
+   "rules.maxFee": {
+    "label": "Request-level ceiling (actual cost cap / statutory max)",
+    "engine_field": "fee_profiles:requestRules.maxFee",
+    "type": "usd_or_rule",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "request-level cap = statutory schedule only: duplication ceilings + actual cost of duplication + a special service charge that 'shall be reasonable and shall be based on the cost incurred'; no fees beyond those authorized by statute; not revenue-generating",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "§ 119.07(4)(d), § 119.011(1), Fla. Stat.; Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 184, 189 (AGO 85-03; AGO 84-03; AGO 76-34; AGO 89-93; Carden v. Chief of Police (2d DCA 1996))",
+    "rule_ids": [
+     "FL-0023",
+     "FL-0025",
+     "FL-0020",
+     "FL-9013",
+     "FL-9009"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No dollar cap. The cap is structural: only statutorily authorized charges; excessive special service charges must be explained (Carden: >$4,000 remanded); a city may not sell records above cost (AGO 89-93)."
+   },
+   "rules.deMinimis": {
+    "label": "De-minimis: no charge below ($)",
+    "engine_field": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 188 (AGO 90-81)",
+    "rule_ids": [
+     "FL-9008"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No de-minimis waiver threshold in Florida law; a city may choose not to charge (AGO 90-81). Searched: ch. 119 Fla. Stat. (ss. 119.01, 119.011, 119.07, 119.071 as displayed in the 2025 Florida Statutes), Fla. Admin. Code (no rule binds municipal fees; DOS r. 1-2.0031 is agency-specific), the AG's …"
+   },
+   "rules.minFee": {
+    "label": "Minimum fee",
+    "engine_field": "fee_profiles:requestRules.minFee",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "§ 119.07(4)(a), Fla. Stat.",
+    "rule_ids": [
+     "FL-0020"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No minimum fee; all statutory figures are ceilings ('up to', 'no more than'). Searched: ch. 119 Fla. Stat. (ss. 119.01, 119.011, 119.07, 119.071 as displayed in the 2025 Florida Statutes), Fla. Admin. Code (no rule binds municipal fees; DOS r. 1-2.0031 is agency-specific), the AG's Government-in-…"
+   },
+   "media": {
+    "label": "Electronic media (CD/DVD/USB) charge",
+    "engine_field": "fee_profiles:media.{cd,dvd,usb}",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "actual cost of duplication of the medium (material and supplies — e.g., the disc/drive itself); no labor or overhead; special service charge only if IT use is 'extensive'",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "§ 119.07(4)(a)3., § 119.011(1), § 119.01(2)(f), Fla. Stat.; Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 185 (AGO 13-03)",
+    "rule_ids": [
+     "FL-0022",
+     "FL-0023",
+     "FL-0025",
+     "FL-9004",
+     "FL-9011"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "CD/DVD/USB = 'all other copies' at actual cost of duplication (material and supplies). E-mail delivery: no identifiable duplication cost and no labor (AGO 13-03, City of Miami Gardens). Must supply in the medium requested if maintained in that medium."
+   },
+   "delivery": {
+    "label": "Delivery: mail / handling / email / pickup",
+    "engine_field": "fee_profiles:delivery.*",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "mail: requester pays postage (actual cost); e-mail: no labor/overhead — only any actual cost of duplication; pickup/handling: no separate handling fee authorized",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 185, 188 (Yanke v. State, 588 So. 2d 4 (Fla. 2d DCA 1991); AGO 13-03); § 119.011(1), Fla. Stat.",
+    "rule_ids": [
+     "FL-0023",
+     "FL-9011",
+     "FL-9013"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No delivery fee schedule; postage at actual cost is the accepted practice per Yanke; e-mail effectively free (AGO 13-03)."
+   },
+   "certification": {
+    "label": "Certification / certified-copy charge",
+    "engine_field": "fee_profiles:certification.{rate,unit}",
+    "type": "rate_usd",
+    "resolution": "ceiling",
+    "value": "1.00",
+    "unit": "USD per certified copy",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "§ 119.07(4)(c), Fla. Stat.",
+    "rule_ids": [
+     "FL-0024"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Ceiling under a Permission ('up to $1 per copy'); city sets the operative certification charge at or below $1.00, in addition to the duplication charge."
+   },
+   "av": {
+    "label": "Audio/video: per recording, per minute, free minutes",
+    "engine_field": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": "per recording: actual cost of duplication of the tape/disc (material and supplies); no per-minute rate; no free-minutes rule; special service charge only if 'extensive' IT/clerical work (e.g., voluminous redaction of recordings, with deposit permitted)",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "§ 119.07(4)(a)3., (d), § 119.011(1), Fla. Stat.; Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 187, 189 (AGO 88-23; Morris Publishing Group v. State (1st DCA 2015))",
+    "rule_ids": [
+     "FL-0022",
+     "FL-0023",
+     "FL-0025",
+     "FL-9009",
+     "FL-9005"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Audio/video copies are 'all other copies' at actual cost of duplication; a videotape or viewing machine is not an 'information technology resource' (AGO 88-23). Body-camera and other special-record fee provisions were not inventoried (out of scope)."
+   },
+   "commercial": {
+    "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+    "engine_field": "fee_profiles:purposeOverrides.commercial",
+    "type": "pct+bool",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 164, 184 (Curry v. State (4th DCA 2002); Barfield (2d DCA 2014); AGO 85-03; AGO 84-03; AGO 76-34)",
+    "rule_ids": [
+     "FL-9014",
+     "FL-9013"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "A commercial-purpose surcharge or purpose-dependent labor rule has no footing under ch. 119: the requester need not state a purpose and only statutorily authorized fees may be imposed. Record-specific commercial-purpose statutes outside ch. 119 (e.g., DHSMV motor vehicle records) are not municipa…"
+   },
+   "waiver": {
+    "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+    "engine_field": "jurisdiction_rules:fee_waiver.*",
+    "type": "enum_list+bool",
+    "resolution": "defers_to_city",
+    "value": "discretionary; no statutory grounds; no purpose statement (purpose may not be required); no written-denial or appeal step",
+    "unit": "enum_list: grounds=none in law; mandatory=false; purpose_statement=not permitted to require; written_denial=not required; appeal=none",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Discretion",
+    "authority": "Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 188 (AGO 90-81; Roesch v. State (Fla. 1993))",
+    "rule_ids": [
+     "FL-9008",
+     "FL-9014"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Florida has no fee-waiver statute; an agency may choose to furnish copies free (AGO 90-81) but is not required to, even for indigent persons or inmates (Roesch)."
+   },
+   "waiver.forfeiture": {
+    "label": "Late response forfeits the fee",
+    "engine_field": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "ch. 119, Fla. Stat.; AG Manual 2024 ed. § G (searched)",
+    "rule_ids": [
+     "FL-9007"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No late-response fee forfeiture in Florida law. The only forfeiture-like holding is Nader + Museu (fees not collectible where the agency skipped its own pre-production estimate/invoice policy) — recorded under rules.estimateNotifyThreshold, not a timing forfeiture. Searched: ch. 119 Fla. Stat. (s…"
+   },
+   "repeat": {
+    "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+    "engine_field": "NOT IN ENGINE (requestor-ledger)",
+    "type": "structural",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": "ch. 119, Fla. Stat.; AG Manual 2024 ed. § G (searched); Fla. Att'y Gen., Government-in-the-Sunshine Manual (2024 ed., Vol. 46), Part II § G, p. 187-188 (Lozman; Smith)",
+    "rule_ids": [
+     "FL-9006"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No aggregation threshold or carry-forward rule for repeat requests; the only cross-request rule is the prior-unpaid-balance gate (payment.nonpayment). Searched: ch. 119 Fla. Stat. (ss. 119.01, 119.011, 119.07, 119.071 as displayed in the 2025 Florida Statutes), Fla. Admin. Code (no rule binds mun…"
    }
-  ]
+  },
+  "statutory_evidence": {
+   "fee.copy_rate_per_page": [
+    {
+     "rule_id": "FL-0020",
+     "authority": "§ 119.07(4)(a)1., Fla. Stat.",
+     "summary": "For duplicated copies of records not larger than 14 by 8.5 inches, the agency may charge up to 15 cents per one-sided copy."
+    },
+    {
+     "rule_id": "FL-0021",
+     "authority": "§ 119.07(4)(a)2., Fla. Stat.",
+     "summary": "For a two-sided copy, the agency may charge no more than an additional 5 cents."
+    }
+   ],
+   "fee.actual_cost_basis": [
+    {
+     "rule_id": "FL-0023",
+     "authority": "§ 119.011(1), Fla. Stat.",
+     "summary": "'Actual cost of duplication' means the cost of the material and supplies used to duplicate the record, and does not include labor cost or overhead cost associated with such duplication."
+    }
+   ],
+   "fee.certified_copy_charge": [
+    {
+     "rule_id": "FL-0024",
+     "authority": "§ 119.07(4)(c), Fla. Stat.",
+     "summary": "An agency may charge up to $1 per copy for a certified copy of a public record."
+    }
+   ],
+   "fee.nonstandard_rate": [
+    {
+     "rule_id": "FL-0022",
+     "authority": "§ 119.07(4)(a)3., Fla. Stat.",
+     "summary": "For all copies other than standard-size paper copies, the agency charges the actual cost of duplication of the public record."
+    },
+    {
+     "rule_id": "FL-0026",
+     "authority": "§ 119.07(4)(e)2., Fla. Stat.",
+     "summary": "When a person photographs public records, the custodian may charge for supervision services at a rate agreed upon by the parties; if they cannot agree, the custodian determines the charge."
+    },
+    {
+     "rule_id": "FL-0027",
+     "authority": "§ 119.07(4)(e)1., Fla. Stat.",
+     "summary": "Where another room or place is necessary to photograph public records, the expense of providing it is paid by the person desiring to photograph the records."
+    }
+   ],
+   "fee.special_service_charge": [
+    {
+     "rule_id": "FL-0025",
+     "authority": "§ 119.07(4)(d), Fla. Stat.",
+     "summary": "If the nature or volume of records requires extensive use of IT resources or extensive clerical/supervisory assistance, the agency may charge, in addition to actual duplication cost, a reasonable special service charge based on the cost actually incurred."
+    }
+   ]
+  }
  },
  "program_setup": {
   "custody.custodian_definition_and_role": [

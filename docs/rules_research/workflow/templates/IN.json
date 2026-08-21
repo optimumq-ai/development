@@ -4,7 +4,7 @@
  "_meta": {
   "phase": 6,
   "generated_by": "build_state_templates.js",
-  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables. fee_schedule.items = the step-3 verified fee layer (value/unit/basis/engine_field/applies_to per master-list item, every cell verify-confirmed); fee_schedule.statutory_evidence = concept-level evidence."
  },
  "knobs": {
   "Master.g1": {
@@ -464,46 +464,701 @@
   }
  },
  "fee_schedule": {
-  "fee.copy_rate_per_page": [
-   {
-    "rule_id": "IN-0015",
-    "authority": "Ind. Code § 5-14-3-8(b)-(d)",
-    "summary": "The fee for copying documents may not exceed the greater of ten cents ($0.10) per non-color page or twenty-five cents ($0.25) per color page, or the agency's actual cost."
-   }
-  ],
-  "fee.electronic_media_charge": [
-   {
-    "rule_id": "IN-0012",
-    "authority": "Ind. Code § 5-14-3-6(c)",
-    "summary": "An agency may charge the requester the agency's direct cost of reprogramming a computer system where reprogramming is required to separate disclosable from nondisclosable information stored electronically."
-   },
-   {
-    "rule_id": "IN-0017",
-    "authority": "Ind. Code § 5-14-3-8(g)",
-    "summary": "An agency may charge a fee for providing an electronic map based upon a reasonable percentage of the agency's direct cost of maintaining, upgrading, and enhancing the electronic map."
-   }
-  ],
-  "fee.certified_copy_charge": [
-   {
-    "rule_id": "IN-0016",
-    "authority": "Ind. Code § 5-14-3-8(b)",
-    "summary": "The fee for certification of documents may not exceed five dollars ($5) per document."
-   }
-  ],
-  "fee.special_service_charge": [
-   {
-    "rule_id": "IN-0018",
-    "authority": "Ind. Code § 5-14-3-8(h)",
-    "summary": "An agency may charge any reasonable fee agreed on in an enhanced-access contract under section 3.5 for providing enhanced access to public records."
-   }
-  ],
-  "fee.schedule_and_authority": [
-   {
-    "rule_id": "IN-0019",
+  "items": {
+   "dup.bw.rate": {
+    "label": "Copy rate — B&W page",
+    "engine_field": "fee_profiles:duplication.bw.rate",
+    "type": "rate_usd",
+    "resolution": "ceiling",
+    "value": "0.10",
+    "unit": "USD per page (non-color), or the agency's actual cost of copying if greater (actual cost = paper + per-page equipment cost only; no labor or overhead)",
+    "basis": "ceiling",
+    "applies_to": "municipalities",
+    "rule_type": "Requirement",
     "authority": "Ind. Code § 5-14-3-8(d)",
-    "summary": "For a local public agency, the fiscal body of the political subdivision establishes the copying fee schedule by ordinance, and the fee must be uniform."
+    "rule_ids": [
+     "IN-0015",
+     "IN-0019",
+     "IN-9004"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Local regime: the fiscal body (city/town council) 'shall establish a fee schedule' by ordinance; the schedule may not exceed the greater of $0.10/page (non-color) or actual cost as narrowly defined. PAC opinions (19-FC-67, 21-FC-1, 22-FC-145) treat $0.10 as the practical cap for standard-size B&W…"
+   },
+   "dup.color.rate": {
+    "label": "Copy rate — color page",
+    "engine_field": "fee_profiles:duplication.color.rate",
+    "type": "rate_usd",
+    "resolution": "ceiling",
+    "value": "0.25",
+    "unit": "USD per page (color), or the agency's actual cost of copying if greater (paper + per-page equipment cost only)",
+    "basis": "ceiling",
+    "applies_to": "municipalities",
+    "rule_type": "Requirement",
+    "authority": "Ind. Code § 5-14-3-8(d)(1)",
+    "rule_ids": [
+     "IN-0015",
+     "IN-0019",
+     "IN-9004"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Same clause as dup.bw.rate; color ceiling $0.25/page. Fiscal body sets the operative rate under the ceiling; must be uniform throughout the agency and to all purchasers."
+   },
+   "dup.oversized.rate": {
+    "label": "Copy rate — oversized / nonstandard page",
+    "engine_field": "fee_profiles:duplication.oversized.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": "actual cost to the agency of copying the document (cost of paper and the per-page cost for use of copying or facsimile equipment; excludes labor and overhead)",
+    "unit": "USD per page",
+    "basis": "ceiling",
+    "applies_to": "municipalities",
+    "rule_type": "Requirement",
+    "authority": "Ind. Code § 5-14-3-8(d)(2); PAC Op. 19-FC-67",
+    "rule_ids": [
+     "IN-0015",
+     "IN-9004",
+     "IN-9016"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No separate oversized/nonstandard rate for local agencies; § 8(d) lets the fee reach 'the actual cost to the agency of copying the document' when that exceeds $0.10/$0.25, and the PAC reads that branch as the one for 'unusually sized pieces of paper' (19-FC-67, quoted). Statutory 'actual cost' de…"
+   },
+   "dup.specialty.rate": {
+    "label": "Specialty reproduction (photos, maps, transcripts)",
+    "engine_field": "fee_profiles:duplication.specialty.rate",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": "electronic maps: 'reasonable percentage of the agency's direct cost of maintaining, upgrading, and enhancing the electronic map' plus 'the direct cost of supplying the electronic map in the form requested', subject to fiscal-body approval; other specialty duplicates (photos, transcripts, microfilm): § 8(g) 'direct cost of supplying the information in that form' or § 8(d) actual cost",
+    "unit": "USD",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ind. Code § 5-14-3-8(j) (electronic map); § 5-14-3-8(g) (duplicates of microfilm/electronic media); § 5-14-3-8(d)",
+    "rule_ids": [
+     "IN-0017",
+     "IN-0018",
+     "IN-9010",
+     "IN-9005"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No statutory dollar figure for photos, maps or transcripts. Electronic map fee is a soft standard with a structural gate (fiscal-body approval) and a noncommercial waiver (§ 8(k), IN-9011). PAC 25-FC-145 (2025) upheld a $750 commercial GIS fee computed under a county ordinance."
+   },
+   "dup.tiers": {
+    "label": "Graduated page bands (per-page rate by volume)",
+    "engine_field": "fee_profiles:duplication.*.tiers",
+    "type": "tiers",
+    "resolution": "silent",
+    "value": null,
+    "unit": "tiers",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ind. Code § 5-14-3-8(d)",
+    "rule_ids": [
+     "IN-9004"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No graduated per-page bands anywhere in APRA. § 8(d) requires a fee schedule 'uniform throughout the public agency and uniform to all purchasers' — a single ceiling per page type, not volume tiers. Searched: Ind. Code 5-14-3 (APRA) §§ 3, 3.3, 3.5, 6, 8, 8.1, 8.3, 8.5, 9 as reproduced in the PAC H…"
+   },
+   "rules.freePages": {
+    "label": "Free page allowance per request",
+    "engine_field": "fee_profiles:requestRules.freePageAllowance",
+    "type": "pages",
+    "resolution": "silent",
+    "value": null,
+    "unit": "pages",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ind. Code § 5-14-3-8(b), (d)",
+    "rule_ids": [
+     "IN-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No free-page allowance in statute for local agencies. Only categorical free items: inspection (§ 8(b)(1)) and electronic copies sent by e-mail (§ 8(b)(4), IN-9002). Some state offices publish courtesy allowances (e.g., Treasurer of State guide: e-mail up to five pages free) — agency practice, not…"
+   },
+   "labor.search.rate": {
+    "label": "Labor rate — search / retrieval ($/hr)",
+    "engine_field": "fee_profiles:labor.search.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": "USD per hour",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Ind. Code § 5-14-3-8(b)(3) (formerly (b)(2)); § 5-14-3-8(n) (exception, eff. 7/1/2026)",
+    "rule_ids": [
+     "IN-9001",
+     "IN-9007"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Search/retrieval labor is categorically non-chargeable for ordinary requests, so no rate exists to configure. Exceptions that DO carry staff-time money: (i) HEA 1360 § 8(n) supplemental fee for non-Indiana residents/out-of-state entities — ceiling $25 per hour of staff time (IN-9007, eff. July 1,…"
+   },
+   "labor.review.rate": {
+    "label": "Labor rate — review / redaction ($/hr)",
+    "engine_field": "fee_profiles:labor.review.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": "USD per hour",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Ind. Code § 5-14-3-8(b)(3); PAC Op. 25-FC-121",
+    "rule_ids": [
+     "IN-9001"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No fee 'to search for, examine, or review a record to determine whether the record may be disclosed' — review/redaction labor is not chargeable. PAC 25-FC-121 (Feb. 17, 2026): where redaction of a body-camera recording requires making a copy, the § 8(g) copy fee (≤ $150) applies, but no separate …"
+   },
+   "labor.programming.rate": {
+    "label": "Labor rate — programming / data extraction ($/hr)",
+    "engine_field": "fee_profiles:labor.programming.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "actual_cost_standard",
+    "value": "direct cost of reprogramming a computer system — 'direct cost' = 105% of the sum of (1) initial program development, if any, (2) labor required to retrieve electronically stored data, and (3) any medium used for electronic output",
+    "unit": "USD (direct cost)",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ind. Code § 5-14-3-6(c); § 5-14-3-2 ('direct cost')",
+    "rule_ids": [
+     "IN-0012",
+     "IN-9006"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No hourly rate; the standard is the statutorily defined 'direct cost' (with a fixed 105% multiplier — see labor.overheadPct). Chargeable only when reprogramming is required to separate disclosable from nondisclosable electronically stored information; agencies are not required to reprogram to pro…"
+   },
+   "labor.billableWhen": {
+    "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+    "engine_field": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+    "type": "enum+threshold",
+    "resolution": "value",
+    "value": "never for ordinary requests — no fee to inspect or to search/examine/review (§ 8(b)(1),(3)), and paper 'actual cost' expressly excludes labor and overhead (§ 8(d)); labor enters only via (a) 'direct cost' for electronic duplicates/reprogramming (§ 8(g), § 6(c)); (b) HEA 1360 § 8(n) supplemental fee for non-Indiana requesters (≤ $25/hr staff time, eff. 7/1/2026); (c) school corporations only, electronic search > 5 hours (§ 8(m))",
+    "unit": "enum",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Ind. Code § 5-14-3-8(b), (d), (g), (n); § 5-14-3-6(c)",
+    "rule_ids": [
+     "IN-0012",
+     "IN-9001",
+     "IN-9004",
+     "IN-9005",
+     "IN-9007"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Statute-set (not city-set): the city cannot make labor chargeable for standard paper/electronic requests. PAC 19-FC-67 and 19-FC-90 struck local ordinances that folded labor/overhead into copy fees."
+   },
+   "labor.overheadPct": {
+    "label": "Overhead / fringe surcharge on labor (%)",
+    "engine_field": "fee_profiles:labor.overheadPct",
+    "type": "pct",
+    "resolution": "value",
+    "value": "5",
+    "unit": "% (the 'direct cost' formula is 105% of program-development + retrieval-labor + medium costs) — applies ONLY to § 8(g) electronic duplicates and § 6(c) reprogramming; for paper copies § 8(d) 'actual cost' expressly excludes labor and overhead",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Definition",
+    "authority": "Ind. Code § 5-14-3-2 ('direct cost'); § 5-14-3-8(d)",
+    "rule_ids": [
+     "IN-0012",
+     "IN-9006",
+     "IN-9004"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "The 105% multiplier is the only overhead-type figure in Indiana public-records fee law. Not a general fringe/overhead surcharge on labor — labor itself is non-chargeable outside the direct-cost contexts. Also note (g)(1) caps law-enforcement-recording copies at $150 regardless of direct cost."
+   },
+   "labor.increment": {
+    "label": "Labor time increment + rounding",
+    "engine_field": "fee_profiles:labor.*.increment / rounding",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": "hours",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ind. Code § 5-14-3-8(m), (n)",
+    "rule_ids": [
+     "IN-9015",
+     "IN-9007"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No time-increment/rounding rule for municipalities (labor is not chargeable). The only increment language is school-only § 8(m): 'The fee must be prorated to reflect any search time of less than one (1) hour' and 'may charge only for time that the person making the search actually spends'; § 8(n)…"
+   },
+   "rules.freeLaborHours": {
+    "label": "Free labor hours per request",
+    "engine_field": "fee_profiles:requestRules.freeLaborHours",
+    "type": "hours",
+    "resolution": "not_applicable",
+    "value": null,
+    "unit": "hours",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "Prohibition",
+    "authority": "Ind. Code § 5-14-3-8(b)(3); cf. § 8(m) (schools: first 5 hours free)",
+    "rule_ids": [
+     "IN-9001",
+     "IN-9015"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Moot for municipalities: search/review labor is never chargeable, so there is no 'free hours before billing' threshold. The five-free-hours rule exists only for school corporations and charter schools (§ 8(m), IN-9015). Not a municipal parameter."
+   },
+   "labor.periodicFreeHours": {
+    "label": "Free personnel time per requestor per month/year (TX § 552.275 pattern)",
+    "engine_field": "NOT IN ENGINE (fee_profiles gap — requestor-ledger counter)",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": "hours per requestor per period",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ind. Code § 5-14-3-8",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No per-requestor periodic free-time allowance (no TX § 552.275 analogue). Labor is non-chargeable regardless. Searched: Ind. Code 5-14-3 (APRA) §§ 3, 3.3, 3.5, 6, 8, 8.1, 8.3, 8.5, 9 as reproduced in the PAC Handbook (rev. Mar. 2022) and PAC HEA 1360 (2026) statutory-additions document; PAC advis…"
+   },
+   "rules.estimateNotifyThreshold": {
+    "label": "Itemized estimate / cost notice required above ($ or hours)",
+    "engine_field": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD or hours",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ind. Code § 5-14-3-8(e); PAC Op. 25-FC-326",
+    "rule_ids": [
+     "IN-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "APRA contains no itemized-estimate or cost-notice requirement or threshold. The PAC (25-FC-326, quoted) found a violation where copies were mailed with an unannounced bill and advised that requesters 'should also be aware of the cost' — guidance, not a statutory threshold; no number. Searched: In…"
+   },
+   "estimate.requesterResponseDays": {
+    "label": "Requester must respond to an estimate within N days (else withdrawn)",
+    "engine_field": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": "days",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ind. Code § 5-14-3",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No estimate mechanism, hence no requester-response window or deemed-withdrawal after an estimate. Searched: Ind. Code 5-14-3 (APRA) §§ 3, 3.3, 3.5, 6, 8, 8.1, 8.3, 8.5, 9 as reproduced in the PAC Handbook (rev. Mar. 2022) and PAC HEA 1360 (2026) statutory-additions document; PAC advisory opinions…"
+   },
+   "estimate.revisionNotifyPercent": {
+    "label": "Revised estimate required when actual exceeds estimate by N%",
+    "engine_field": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": "%",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ind. Code § 5-14-3",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No estimate-revision rule. Searched: Ind. Code 5-14-3 (APRA) §§ 3, 3.3, 3.5, 6, 8, 8.1, 8.3, 8.5, 9 as reproduced in the PAC Handbook (rev. Mar. 2022) and PAC HEA 1360 (2026) statutory-additions document; PAC advisory opinions 2019–2026 citing § 5-14-3-8 (17 opinions read); PAC HEA 1360 Overview;…"
+   },
+   "estimate.validityDays": {
+    "label": "Estimate validity period (days)",
+    "engine_field": "fee_profiles:estimatePolicy.estimateValidityDays",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": "days",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ind. Code § 5-14-3",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No estimate-validity period. Searched: Ind. Code 5-14-3 (APRA) §§ 3, 3.3, 3.5, 6, 8, 8.1, 8.3, 8.5, 9 as reproduced in the PAC Handbook (rev. Mar. 2022) and PAC HEA 1360 (2026) statutory-additions document; PAC advisory opinions 2019–2026 citing § 5-14-3-8 (17 opinions read); PAC HEA 1360 Overvie…"
+   },
+   "rules.deposit.threshold": {
+    "label": "Deposit / prepayment may be required above ($)",
+    "engine_field": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+    "type": "usd",
+    "resolution": "structural",
+    "value": "no statutory threshold — a public agency 'may require that the payment for search and copying costs be made in advance' for any amount; the city decides whether and when to invoke prepayment",
+    "unit": "USD",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ind. Code § 5-14-3-8(e) (last sentence); PAC Ops. 25-FC-121, 25-FC-326",
+    "rule_ids": [
+     "IN-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Advance payment is a Permission with no dollar trigger; not a 'deposit' concept — full payment of search and copying costs may be required before copies are made (25-FC-121 upheld advance payment of a $150 body-cam copy fee). Inspection can never be conditioned on a fee (§ 8(b)(1))."
+   },
+   "rules.deposit.percent": {
+    "label": "Deposit capped at (% of estimate)",
+    "engine_field": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+    "type": "pct",
+    "resolution": "ceiling",
+    "value": "100",
+    "unit": "% of the search and copying costs (full advance payment may be required); no partial-deposit cap in statute",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ind. Code § 5-14-3-8(e) (last sentence)",
+    "rule_ids": [
+     "IN-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "APRA has no deposit-percentage concept; the permission runs to the full copying/search cost. City may choose a smaller deposit as local policy."
+   },
+   "payment.productionGate": {
+    "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+    "engine_field": "paymentTiming gates + fee_profiles bands",
+    "type": "enum",
+    "resolution": "structural",
+    "value": "copies: agency may require payment of search and copying costs in advance (pay-before-copies gate permitted) | inspection: never conditioned on any fee | e-mailed electronic copies: no fee at all | law-enforcement recording copies: advance payment of the ≤$150 copy fee upheld (25-FC-121)",
+    "unit": "enum",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ind. Code § 5-14-3-8(e), (b)(1), (b)(4); PAC Op. 25-FC-121",
+    "rule_ids": [
+     "IN-9003",
+     "IN-9001",
+     "IN-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Gate is discretionary (may), not mandatory. Also § 8(f): agency 'shall collect' any fee specified by statute or ordered by a court (IN-9009)."
+   },
+   "payment.nonpayment": {
+    "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+    "engine_field": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+    "type": "enum+int",
+    "resolution": "silent",
+    "value": null,
+    "unit": "enum+int",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ind. Code § 5-14-3-8(e); § 5-14-3-9",
+    "rule_ids": [
+     "IN-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No deemed-withdrawal period, no prior-debt prepayment rule; the only statutory lever is advance payment (§ 8(e)). § 5-14-3-9's denial-timing rules (24 hours in person; 7 days for mail/fax requests) do not address nonpayment. Searched: Ind. Code 5-14-3 (APRA) §§ 3, 3.3, 3.5, 6, 8, 8.1, 8.3, 8.5, 9…"
+   },
+   "payment.depositClock": {
+    "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+    "engine_field": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+    "type": "enum",
+    "resolution": "silent",
+    "value": null,
+    "unit": "enum",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ind. Code § 5-14-3-3(b); § 5-14-3-9",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "APRA's production standard is 'within a reasonable time' (undefined-soft), so there is no numeric clock for an unpaid deposit to toll; statute is silent on any effect of nonpayment on timing. Searched: Ind. Code 5-14-3 (APRA) §§ 3, 3.3, 3.5, 6, 8, 8.1, 8.3, 8.5, 9 as reproduced in the PAC Handboo…"
+   },
+   "payment.reissue": {
+    "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+    "engine_field": "jurisdiction_rules:payment.reissue_*",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": "bool",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ind. Code § 5-14-3",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No estimate → no overrun re-issue rule. Searched: Ind. Code 5-14-3 (APRA) §§ 3, 3.3, 3.5, 6, 8, 8.1, 8.3, 8.5, 9 as reproduced in the PAC Handbook (rev. Mar. 2022) and PAC HEA 1360 (2026) statutory-additions document; PAC advisory opinions 2019–2026 citing § 5-14-3-8 (17 opinions read); PAC HEA 1…"
+   },
+   "rules.maxFee": {
+    "label": "Request-level ceiling (actual cost cap / statutory max)",
+    "engine_field": "fee_profiles:requestRules.maxFee",
+    "type": "usd_or_rule",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD or rule",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ind. Code § 5-14-3-8(d), (g)",
+    "rule_ids": [
+     "IN-9004",
+     "IN-9005"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No request-level cap or statutory maximum for a whole request; ceilings are per unit (per page, per document certification $5, per law-enforcement-recording copy $150). Prior 'defers_to_city' status reflected IN-0019 (fiscal body sets schedule) — the schedule is bounded per unit, not per request.…"
+   },
+   "rules.deMinimis": {
+    "label": "De-minimis: no charge below ($)",
+    "engine_field": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ind. Code § 5-14-3-8",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No de-minimis waiver threshold. Categorical zero-fee items only (inspection; e-mailed electronic copies). Searched: Ind. Code 5-14-3 (APRA) §§ 3, 3.3, 3.5, 6, 8, 8.1, 8.3, 8.5, 9 as reproduced in the PAC Handbook (rev. Mar. 2022) and PAC HEA 1360 (2026) statutory-additions document; PAC advisory …"
+   },
+   "rules.minFee": {
+    "label": "Minimum fee",
+    "engine_field": "fee_profiles:requestRules.minFee",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": "USD",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ind. Code § 5-14-3-8(d); PAC Op. 19-FC-67; cf. § 8(m) (schools: no minimum search fee)",
+    "rule_ids": [
+     "IN-9004",
+     "IN-9015"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No minimum-fee provision for municipalities; but a flat per-report fee that exceeds the per-page ceiling is unlawful (PAC 19-FC-67: $8 flat police-report fee 'not justifiable'), so any minimum must fit under $0.10/$0.25 × pages or actual cost. Schools are expressly barred from a minimum search fe…"
+   },
+   "media": {
+    "label": "Electronic media (CD/DVD/USB) charge",
+    "engine_field": "fee_profiles:media.{cd,dvd,usb}",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": "'direct cost of supplying the information in that form' — statutorily defined as 105% of (program development, if any) + (labor required to retrieve electronically stored data) + (medium used for electronic output); alternatively the standard price of a published version; law-enforcement recording copies capped at $150",
+    "unit": "USD per duplicate",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ind. Code § 5-14-3-8(g); § 5-14-3-2 ('direct cost'); § 5-14-3-8(b)(4)",
+    "rule_ids": [
+     "IN-0012",
+     "IN-0017",
+     "IN-9005",
+     "IN-9006",
+     "IN-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Ceiling = direct cost (fee must be 'uniform to all purchasers'). Copies delivered by e-mail are free (§ 8(b)(4)) unless the fee is authorized under (f)/(j)/§ 6(c)/county-recorder statutes. Prior status pointed at IN-0012 (reprogramming) and IN-0017 (electronic map) — neither is the CD/DVD/USB rul…"
+   },
+   "delivery": {
+    "label": "Delivery: mail / handling / email / pickup",
+    "engine_field": "fee_profiles:delivery.*",
+    "type": "actual_or_usd",
+    "resolution": "structural",
+    "value": "e-mail delivery of electronic copies: no fee (statute) | postal delivery: postage may be recouped as an actual cost per PAC guidance (19-FC-67 'postage costs to remote requesters'; 25-FC-326 'copying and postage') | in-person pickup: copy fee only | facsimile: 'facsimile machine transmission' fee only where specified by statute or court order (§ 8(f)); (d) 'actual cost' includes per-page cost of facsimile equipment",
+    "unit": "enum",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ind. Code § 5-14-3-8(b)(4), (d), (f); PAC Ops. 19-FC-67, 25-FC-326",
+    "rule_ids": [
+     "IN-9002",
+     "IN-9016",
+     "IN-9009"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "E-mail no-fee rule is a Prohibition binding all public agencies. No statutory handling/mailing rate."
+   },
+   "certification": {
+    "label": "Certification / certified-copy charge",
+    "engine_field": "fee_profiles:certification.{rate,unit}",
+    "type": "rate_usd",
+    "resolution": "ceiling",
+    "value": "5.00",
+    "unit": "USD per document",
+    "basis": "ceiling",
+    "applies_to": "municipalities",
+    "rule_type": "Requirement",
+    "authority": "Ind. Code § 5-14-3-8(d)",
+    "rule_ids": [
+     "IN-0016",
+     "IN-0019",
+     "IN-9004"
+    ],
+    "verdict": "CORRECTED",
+    "verified_at": "2026-08-19",
+    "notes": "Fiscal body sets the certification fee in the schedule, ≤ $5 per document. § 8(f): any certification fee 'specified by statute or … ordered by a court' must be collected notwithstanding (b)–(i). Official link repointed by verify pass: the full § 8(d) block including the certification sentence is …"
+   },
+   "av": {
+    "label": "Audio/video: per recording, per minute, free minutes",
+    "engine_field": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+    "type": "rate_usd",
+    "resolution": "ceiling",
+    "value": "150",
+    "unit": "USD per copy of a law enforcement recording (body-worn/vehicle camera); other audio/video duplicates: direct cost (105% of retrieval labor + medium); no per-minute rate; no free minutes",
+    "basis": "ceiling",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ind. Code § 5-14-3-8(g)(1); § 5-14-3-2 ('direct cost', 'law enforcement recording'); PAC Ops. 21-FC-131, 25-FC-121, 25-FC-152, 25-FC-221",
+    "rule_ids": [
+     "IN-9005",
+     "IN-9006"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "$150 is a cap, not a flat fee (21-FC-131: 'The $150 fee is the ceiling … instead of the floor. An agency may only recoup its direct cost up to $150'); PAC has upheld local ordinances setting $150 where direct cost exceeds it (25-FC-121 Tippecanoe Co. Ord. 2019-19-CL; 25-FC-221 Valparaiso Ord. 35.…"
+   },
+   "commercial": {
+    "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+    "engine_field": "fee_profiles:purposeOverrides.commercial",
+    "type": "pct+bool",
+    "resolution": "structural",
+    "value": "no commercial surcharge and no labor-becomes-chargeable rule; instead (i) a political subdivision MAY by ordinance prescribe conditions on commercial use of data received on disk/tape and bar violators from further data (§ 3(e)); (ii) electronic-map maintenance fee MAY be waived for noncommercial use (§ 8(k)); (iii) HEA 1360 (eff. 7/1/2026): agencies MAY prioritize Indiana residents and civic/journalistic/academic/personal-use requests and MAY charge non-Indiana/out-of-state requesters a supplemental fee ≤ $0.25/page + $25/hr (§§ 8.1, 8(n)); (iv) no purpose statement may be demanded as a condition of access (§ 3(a)), though a purpose is needed to receive § 8.1 priority",
+    "unit": "enum",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ind. Code § 5-14-3-3(e); § 5-14-3-8(k), (n); § 5-14-3-8.1",
+    "rule_ids": [
+     "IN-9012",
+     "IN-9011",
+     "IN-9007",
+     "IN-9014"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "The fee-bearing distinction Indiana draws is residency (in-state vs out-of-state) rather than commercial purpose. Lists of names/addresses may not be disclosed to commercial entities for commercial purposes (§ 3(f)) — a disclosure rule, not a fee."
+   },
+   "waiver": {
+    "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+    "engine_field": "jurisdiction_rules:fee_waiver.*",
+    "type": "enum_list+bool",
+    "resolution": "structural",
+    "value": "no general fee-waiver provision (no indigence/public-interest waiver of copy fees; § 8(d) requires the local schedule to be 'uniform to all purchasers'); discretionary waivers exist only for: § 8(o) supplemental non-resident fee 'if the public agency finds that the public records request serves the public interest' (eff. 7/1/2026); § 8(k) electronic-map maintenance fee for noncommercial use; § 8(i) governmental-entity electronic-device inspection fee; no purpose statement may be required for access (§ 3(a)); no written-denial or appeal procedure for waiver decisions (PAC formal complaint is the general remedy)",
+    "unit": "enum_list+bool",
+    "basis": "n/a",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Ind. Code § 5-14-3-8(o), (k), (i), (d); § 5-14-3-3(a)",
+    "rule_ids": [
+     "IN-9008",
+     "IN-9011",
+     "IN-9004"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "Waivers are Permissions (may), never mandatory. Categorical zero-fee items (inspection; e-mailed electronic copies) are prohibitions, not waivers."
+   },
+   "waiver.forfeiture": {
+    "label": "Late response forfeits the fee",
+    "engine_field": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": "bool",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ind. Code § 5-14-3-8, -9, -9.5",
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No provision forfeits fees for a late response; APRA's remedies for untimely response are the deemed-denial triggers (§ 9(b)-(c)), PAC complaint, court action, and civil penalties (§ 9.5) — none touches fees. Searched: Ind. Code 5-14-3 (APRA) §§ 3, 3.3, 3.5, 6, 8, 8.1, 8.3, 8.5, 9 as reproduced i…"
+   },
+   "repeat": {
+    "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+    "engine_field": "NOT IN ENGINE (requestor-ledger)",
+    "type": "structural",
+    "resolution": "silent",
+    "value": null,
+    "unit": "structural",
+    "basis": "n/a",
+    "applies_to": "municipalities",
+    "rule_type": "n/a",
+    "authority": "Ind. Code § 5-14-3-8.1; § 5-14-3-3.3 (HEA 1360)",
+    "rule_ids": [
+     "IN-9014"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-19",
+    "notes": "No fee aggregation threshold or carry-forward rule for repeat requests. HEA 1360 (2026) lets agencies delay/deprioritize requests 'identified as originating from out-of-state entities or automated systems' and decline suspected data-scraping/phishing requests (§ 3.3(b)) — routing/priority rules, …"
    }
-  ]
+  },
+  "statutory_evidence": {
+   "fee.copy_rate_per_page": [
+    {
+     "rule_id": "IN-0015",
+     "authority": "Ind. Code § 5-14-3-8(b)-(d)",
+     "summary": "The fee for copying documents may not exceed the greater of ten cents ($0.10) per non-color page or twenty-five cents ($0.25) per color page, or the agency's actual cost."
+    }
+   ],
+   "fee.electronic_media_charge": [
+    {
+     "rule_id": "IN-0012",
+     "authority": "Ind. Code § 5-14-3-6(c)",
+     "summary": "An agency may charge the requester the agency's direct cost of reprogramming a computer system where reprogramming is required to separate disclosable from nondisclosable information stored electronically."
+    },
+    {
+     "rule_id": "IN-0017",
+     "authority": "Ind. Code § 5-14-3-8(g)",
+     "summary": "An agency may charge a fee for providing an electronic map based upon a reasonable percentage of the agency's direct cost of maintaining, upgrading, and enhancing the electronic map."
+    }
+   ],
+   "fee.certified_copy_charge": [
+    {
+     "rule_id": "IN-0016",
+     "authority": "Ind. Code § 5-14-3-8(b)",
+     "summary": "The fee for certification of documents may not exceed five dollars ($5) per document."
+    }
+   ],
+   "fee.special_service_charge": [
+    {
+     "rule_id": "IN-0018",
+     "authority": "Ind. Code § 5-14-3-8(h)",
+     "summary": "An agency may charge any reasonable fee agreed on in an enhanced-access contract under section 3.5 for providing enhanced access to public records."
+    }
+   ],
+   "fee.schedule_and_authority": [
+    {
+     "rule_id": "IN-0019",
+     "authority": "Ind. Code § 5-14-3-8(d)",
+     "summary": "For a local public agency, the fiscal body of the political subdivision establishes the copying fee schedule by ordinance, and the fee must be uniform."
+    }
+   ]
+  }
  },
  "program_setup": {
   "fee.schedule_and_authority": [

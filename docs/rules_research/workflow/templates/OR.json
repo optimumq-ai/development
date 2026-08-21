@@ -4,7 +4,7 @@
  "_meta": {
   "phase": 6,
   "generated_by": "build_state_templates.js",
-  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables."
+  "reading": "knobs = fill a value per ◆ (statutory blocks are the evidence; city_config marks local policy). branches = ▲ on/off. clock_matrix/fee_schedule/program_setup/ledger = engine data tables. fee_schedule.items = the step-3 verified fee layer (value/unit/basis/engine_field/applies_to per master-list item, every cell verify-confirmed); fee_schedule.statutory_evidence = concept-level evidence."
  },
  "knobs": {
   "Master.g1": {
@@ -644,20 +644,635 @@
   }
  },
  "fee_schedule": {
-  "fee.labor_charge": [
-   {
-    "rule_id": "OR-0021",
-    "authority": "Or. Rev. Stat. § 192.324(4)(b)",
-    "summary": "A public body may include in the fee the cost of attorney time spent reviewing, redacting, or segregating records into exempt and nonexempt, but may NOT include attorney time spent determining the application of ORS 192.311 to 192.478."
-   }
-  ],
-  "fee.actual_cost_basis": [
-   {
-    "rule_id": "OR-0020",
+  "items": {
+   "dup.bw.rate": {
+    "label": "Copy rate — B&W page",
+    "engine_field": "fee_profiles:duplication.bw.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
     "authority": "Or. Rev. Stat. § 192.324(4)(a)",
-    "summary": "A public body may establish fees reasonably calculated to reimburse it for its actual cost of making public records available, including costs for summarizing, compiling or tailoring the records in organization or media to meet the request."
+    "rule_ids": [
+     "OR-0020"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No statewide per-page B&W rate for any Oregon public body. The standard is 'fees reasonably calculated to reimburse ... actual cost'; the city supplies the operative rate. ORS 192.311(4) 'public body' expressly includes every city governing body, so the standard binds municipalities. Exception: r…"
+   },
+   "dup.color.rate": {
+    "label": "Copy rate — color page",
+    "engine_field": "fee_profiles:duplication.color.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Or. Rev. Stat. § 192.324(4)(a)",
+    "rule_ids": [
+     "OR-0020"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No color-specific provision anywhere in ORS 192.311–192.478; color copying is simply one actual-cost component under the same 192.324(4)(a) standard. City sets the operative rate."
+   },
+   "dup.oversized.rate": {
+    "label": "Copy rate — oversized / nonstandard page",
+    "engine_field": "fee_profiles:duplication.oversized.rate",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Or. Rev. Stat. § 192.324(4)(a)",
+    "rule_ids": [
+     "OR-0020"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No oversized/nonstandard-format provision in ORS 192.311–192.478; governed by the general actual-cost standard. City sets the operative rate."
+   },
+   "dup.specialty.rate": {
+    "label": "Specialty reproduction (photos, maps, transcripts)",
+    "engine_field": "fee_profiles:duplication.specialty.rate",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Or. Rev. Stat. § 192.324(4)(a)",
+    "rule_ids": [
+     "OR-0020"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Specialty reproduction is expressly inside the standard: 'including costs for summarizing, compiling or tailoring the public records, either in organization or media, to meet the request.' No fixed specialty rates. City sets operative rates within actual cost."
+   },
+   "dup.tiers": {
+    "label": "Graduated page bands (per-page rate by volume)",
+    "engine_field": "fee_profiles:duplication.*.tiers",
+    "type": "tiers",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": null,
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full ORS 192.311–192.478 text opened (fee sections 192.324, 192.329; petition/review 192.407–192.431; advocate 192.461–192.478); no graduated per-page band or volume-tier provision exists; no Oregon administrative rule binds municipal records fees. A city may structure tiers itself so l…"
+   },
+   "rules.freePages": {
+    "label": "Free page allowance per request",
+    "engine_field": "fee_profiles:requestRules.freePageAllowance",
+    "type": "pages",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": null,
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full ORS 192.311–192.478 opened — no free-page allowance anywhere in the chapter; no administrative rule binds municipal fees. Cities may adopt a free allowance voluntarily (charging is permissive, never mandatory) or waive under 192.324(5) (OR-0023)."
+   },
+   "labor.search.rate": {
+    "label": "Labor rate — search / retrieval ($/hr)",
+    "engine_field": "fee_profiles:labor.search.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Or. Rev. Stat. § 192.324(4)(a)",
+    "rule_ids": [
+     "OR-0020"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No statutory $/hr search rate; staff search/retrieval time is an actual-cost component under 192.324(4)(a). Rates seen at state agencies (e.g., $25/hr clerical) are agency policy under the standard, not statewide law and not binding on cities. City sets the operative rate."
+   },
+   "labor.review.rate": {
+    "label": "Labor rate — review / redaction ($/hr)",
+    "engine_field": "fee_profiles:labor.review.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Or. Rev. Stat. § 192.324(4)(a)-(b)",
+    "rule_ids": [
+     "OR-0020",
+     "OR-0021"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No $/hr rate. Review/redaction time — including attorney review/redaction/segregation time — is chargeable at actual cost; attorney time spent determining whether the exemptions APPLY is expressly NOT chargeable (192.324(4)(b), OR-0021). City sets the operative rate within actual cost."
+   },
+   "labor.programming.rate": {
+    "label": "Labor rate — programming / data extraction ($/hr)",
+    "engine_field": "fee_profiles:labor.programming.rate",
+    "type": "rate_usd_per_hour",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Or. Rev. Stat. § 192.324(4)(a)",
+    "rule_ids": [
+     "OR-0020"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Programming/data extraction sits squarely in 'summarizing, compiling or tailoring the public records, either in organization or media'. No fixed rate; city sets the operative $/hr within actual cost."
+   },
+   "labor.billableWhen": {
+    "label": "When labor is chargeable at all (never / always / only over N pages or N hours; paper-only scope)",
+    "engine_field": "fee_profiles:labor.*.billable / billableWhen{trigger,threshold,paperOnly}",
+    "type": "enum+threshold",
+    "resolution": "structural",
+    "value": "always (no page/hour threshold); attorney exemption-analysis time never chargeable",
+    "unit": "enum",
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Or. Rev. Stat. § 192.324(4)(a)-(b)",
+    "rule_ids": [
+     "OR-0020",
+     "OR-0021"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Shape: labor is chargeable from the first minute (no free-hours or page threshold gates it), bounded only by the actual-cost standard; the sole categorical carve-out is attorney time analyzing whether exemptions apply (Prohibition, OR-0021). Charging is permissive — a city may choose not to charg…"
+   },
+   "labor.overheadPct": {
+    "label": "Overhead / fringe surcharge on labor (%)",
+    "engine_field": "fee_profiles:labor.overheadPct",
+    "type": "pct",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Or. Rev. Stat. § 192.324(4)(a)",
+    "rule_ids": [
+     "OR-0020"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No express overhead/fringe surcharge provision anywhere in ORS 192.311–192.478 (contrast Michigan's 50% fringe cap). Any loading a city applies must fit within 'reasonably calculated to reimburse ... actual cost'; no statutory percentage exists."
+   },
+   "labor.increment": {
+    "label": "Labor time increment + rounding",
+    "engine_field": "fee_profiles:labor.*.increment / rounding",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": null,
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full ORS 192.311–192.478 opened — no billing-increment or rounding provision; no administrative rule binds municipal fees. City sets its own increment within the actual-cost standard and publishes the manner of calculation (192.324(7)(b), OR-9004)."
+   },
+   "rules.freeLaborHours": {
+    "label": "Free labor hours per request",
+    "engine_field": "fee_profiles:requestRules.freeLaborHours",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": null,
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full ORS 192.311–192.478 opened — no free-labor-hours allowance (contrast WA/TN first-hour-free patterns); no administrative rule binds municipal fees. Labor is chargeable from the first minute (see labor.billableWhen); a city may self-adopt a free allowance."
+   },
+   "labor.periodicFreeHours": {
+    "label": "Free personnel time per requestor per month/year (TX § 552.275 pattern)",
+    "engine_field": "NOT IN ENGINE (fee_profiles gap — requestor-ledger counter)",
+    "type": "hours",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": null,
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full ORS 192.311–192.478 opened — no TX § 552.275-style per-requestor periodic free-time ledger or requestor-level cap exists in Oregon law."
+   },
+   "rules.estimateNotifyThreshold": {
+    "label": "Itemized estimate / cost notice required above ($ or hours)",
+    "engine_field": "fee_profiles:requestRules.estimateNotifyThreshold  (DUPLICATE: jurisdiction_rules fee_waiver.estimate_required_above)",
+    "type": "usd",
+    "resolution": "value",
+    "value": "25",
+    "unit": "USD (estimated fee; written notice + requester confirmation required to exceed)",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Prohibition",
+    "authority": "Or. Rev. Stat. § 192.324(4)(c)",
+    "rule_ids": [
+     "OR-0022"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Fixed statutory trigger — a city cannot raise it. Above $25 the body must send a written fee estimate AND obtain the requester's confirmation before proceeding. Confirmed unchanged by 2025 c.30 §1 (in base text) and untouched by 2026 c.93. Binds all public bodies including cities (ORS 192.311(4))."
+   },
+   "estimate.requesterResponseDays": {
+    "label": "Requester must respond to an estimate within N days (else withdrawn)",
+    "engine_field": "fee_profiles:estimatePolicy.requesterResponseDays  (also fee_waiver.response_window_*)",
+    "type": "int",
+    "resolution": "value",
+    "value": "60",
+    "unit": "calendar days from the date the public body informed the requester of the fee (or of the fee-waiver denial); on lapse without payment the request is closed",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Or. Rev. Stat. § 192.329(3)(b)",
+    "rule_ids": [
+     "OR-0025",
+     "OR-0022"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Oregon frames the window as pay-within-60-days rather than confirm-the-estimate-within-N-days: the >$25 estimate must be confirmed (192.324(4)(c)) with no stated confirmation deadline, but the 60-day payment clock from fee notification is the operative response window — nonresponse/nonpayment for…"
+   },
+   "estimate.revisionNotifyPercent": {
+    "label": "Revised estimate required when actual exceeds estimate by N%",
+    "engine_field": "fee_profiles:estimatePolicy.revisionNotifyPercent  (also payment.reissue_required_on_variance)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": null,
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full ORS 192.311–192.478 opened — no revised-estimate or variance-percentage provision. Related but distinct: a requester who believes a written fee estimate exceeds actual cost may seek Public Records Advocate facilitated dispute resolution (192.464(2)(c)) — mandatory-on-request only a…"
+   },
+   "estimate.validityDays": {
+    "label": "Estimate validity period (days)",
+    "engine_field": "fee_profiles:estimatePolicy.estimateValidityDays",
+    "type": "int",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": null,
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full ORS 192.311–192.478 opened — no estimate expiry/validity period. The functional outer bound is the 60-day nonpayment close (192.329(3)(b)): an unconfirmed/unpaid fee ends the request at 60 days rather than the estimate expiring."
+   },
+   "rules.deposit.threshold": {
+    "label": "Deposit / prepayment may be required above ($)",
+    "engine_field": "fee_profiles:requestRules.deposit.threshold  (DUPLICATE: fee_waiver.deposit_allowed_above)",
+    "type": "usd",
+    "resolution": "structural",
+    "value": "no dollar threshold — full prepayment enforceable at any fee amount via suspension of the response obligation",
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Or. Rev. Stat. § 192.329(3)(a)",
+    "rule_ids": [
+     "OR-0024",
+     "OR-0022"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Oregon has no deposit-specific scheme (no threshold, no partial-deposit machinery). Instead, once ANY permitted fee is noticed, the body's duty to complete its response is suspended until payment/waiver — i.e., prepayment in full is enforceable at any amount, subject to the >$25 estimate+confirma…"
+   },
+   "rules.deposit.percent": {
+    "label": "Deposit capped at (% of estimate)",
+    "engine_field": "fee_profiles:requestRules.deposit.percent  (DUPLICATE: fee_waiver.deposit_cap_pct)",
+    "type": "pct",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": null,
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full ORS 192.311–192.478 opened — no deposit-cap percentage (no deposit scheme at all; see rules.deposit.threshold). The statute contemplates payment of the noticed fee, not a partial deposit."
+   },
+   "payment.productionGate": {
+    "label": "Production may be conditioned on payment (pay before copies / pay in full before release)",
+    "engine_field": "paymentTiming gates + fee_profiles bands",
+    "type": "enum",
+    "resolution": "structural",
+    "value": "pay-before-completion: response obligation suspended until noticed fee is paid, waived, or ordered waived",
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Or. Rev. Stat. § 192.329(3)(a)",
+    "rule_ids": [
+     "OR-0024"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Production may lawfully be conditioned on payment: the completion duty is statutorily suspended while a noticed fee is unpaid. Exit ramps: payment, the body's own 192.324(5) waiver, or a waiver ordered on review (192.324(6), 192.407(3)(c) — OR-9001/OR-9002)."
+   },
+   "payment.nonpayment": {
+    "label": "Nonpayment consequence (withdrawn after N days; prior-debt prepayment)",
+    "engine_field": "feeNonpayment + estimatePolicy + jurisdiction_rules payment.deposit_lapse_action",
+    "type": "enum+int",
+    "resolution": "value",
+    "value": "60",
+    "unit": "calendar days from fee notification (or fee-waiver denial); the public body SHALL close the request on lapse",
+    "basis": "fixed",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Or. Rev. Stat. § 192.329(3)(b)",
+    "rule_ids": [
+     "OR-0025"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Mandatory close ('shall'), fixed 60-day count, two alternative start events (fee notice; waiver denial). No prior-debt-prepayment provision exists in ORS 192. Untouched by 2026 c.93."
+   },
+   "payment.depositClock": {
+    "label": "Statutory clock effect while a deposit is unpaid; grace; lapse action",
+    "engine_field": "jurisdiction_rules:payment.{deposit_clock_effect,deposit_grace_days,deposit_lapse_action}",
+    "type": "enum",
+    "resolution": "structural",
+    "value": "clock effect: completion obligation tolled while noticed fee unpaid; lapse action: mandatory close at 60 days; no grace period stated",
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Requirement",
+    "authority": "Or. Rev. Stat. § 192.329(3)(a)-(b)",
+    "rule_ids": [
+     "OR-0024",
+     "OR-0025"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Applies to the noticed FEE (Oregon has no deposit scheme): (3)(a) tolls the completion duty from fee notification until payment/waiver; (3)(b) is the terminal event — mandatory close at 60 days. The engine's deposit-clock knobs map to fee-clock: effect=tolls, grace=none, lapse=close."
+   },
+   "payment.reissue": {
+    "label": "Overrun re-issue rules (revised estimate required / blocks collection / restarts window)",
+    "engine_field": "jurisdiction_rules:payment.reissue_*",
+    "type": "bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": null,
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full ORS 192.311–192.478 opened — no overrun/re-issue provision (no revised-estimate duty, no collection block, no window restart). The only estimate machinery is the >$25 notice+confirmation gate (OR-0022); the statute does not say what happens when actual cost exceeds the confirmed es…"
+   },
+   "rules.maxFee": {
+    "label": "Request-level ceiling (actual cost cap / statutory max)",
+    "engine_field": "fee_profiles:requestRules.maxFee",
+    "type": "usd_or_rule",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Or. Rev. Stat. § 192.324(4)(a)",
+    "rule_ids": [
+     "OR-0020"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Request-level cap is the soft standard itself: fees must be 'reasonably calculated to reimburse ... actual cost' — no dollar maximum. Enforcement teeth: a requester who believes an estimate exceeds actual cost can invoke 192.464(2)(c) FDR (agencies; cities only by mutual agreement) or petition on…"
+   },
+   "rules.deMinimis": {
+    "label": "De-minimis: no charge below ($)",
+    "engine_field": "fee_profiles:requestRules.deMinimis (+ de-minimis knob)",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": null,
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full ORS 192.311–192.478 opened — no de-minimis no-charge floor. Distinct: the discretionary public-interest waiver (192.324(5), OR-0023) lets a custodian furnish copies free, but that is a public-interest determination, not a below-$X rule. A city may self-adopt a de-minimis floor (cha…"
+   },
+   "rules.minFee": {
+    "label": "Minimum fee",
+    "engine_field": "fee_profiles:requestRules.minFee",
+    "type": "usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": null,
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full ORS 192.311–192.478 opened — no minimum-fee provision. Any city minimum must still be 'reasonably calculated to reimburse ... actual cost' (192.324(4)(a)); a flat minimum untethered from cost would strain the standard."
+   },
+   "media": {
+    "label": "Electronic media (CD/DVD/USB) charge",
+    "engine_field": "fee_profiles:media.{cd,dvd,usb}",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Or. Rev. Stat. § 192.324(4)(a)",
+    "rule_ids": [
+     "OR-0020"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Physical media (CD/DVD/USB) is an actual-cost component — the standard expressly reaches tailoring 'in organization or media'. Note 192.324(3): electronic records must be provided in the requested form if available (a duty, no separate fee rule). City sets media charges at actual cost."
+   },
+   "delivery": {
+    "label": "Delivery: mail / handling / email / pickup",
+    "engine_field": "fee_profiles:delivery.*",
+    "type": "actual_or_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Or. Rev. Stat. § 192.324(4)(a)",
+    "rule_ids": [
+     "OR-0020"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "No delivery-specific statute. Mailing/postage is conventionally recovered as actual cost under the general standard; no rate exists. City sets delivery charges at actual cost; email delivery has no statutory charge basis beyond staff time actually incurred."
+   },
+   "certification": {
+    "label": "Certification / certified-copy charge",
+    "engine_field": "fee_profiles:certification.{rate,unit}",
+    "type": "rate_usd",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "municipalities",
+    "rule_type": null,
+    "authority": null,
+    "rule_ids": [
+     "OR-9003"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full ORS 192.311–192.478 opened — no certified-copy fee for municipal records; a city certification charge falls back to the 192.324(4)(a) actual-cost standard. Contrast the carved-out regimes (OR-9003): records filed with a COUNTY CLERK carry fixed fees under ORS 205.320 (certification…"
+   },
+   "av": {
+    "label": "Audio/video: per recording, per minute, free minutes",
+    "engine_field": "fee_profiles:av.{perRecording,perMinute,freeMinutes}",
+    "type": "rate_usd",
+    "resolution": "actual_cost_standard",
+    "value": null,
+    "unit": null,
+    "basis": "soft-standard",
+    "applies_to": "all_public_bodies",
+    "rule_type": "Permission",
+    "authority": "Or. Rev. Stat. § 192.324(4)(a)",
+    "rule_ids": [
+     "OR-0020"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "'Writing' includes 'sounds' and 'electronic recordings' (ORS 192.311(7)), so audio/video duplication (including redaction labor, e.g. body-cam blurring) is priced under the same actual-cost standard. No per-recording, per-minute, or free-minutes figures exist. City sets operative rates."
+   },
+   "commercial": {
+    "label": "Commercial-purpose schedule (surcharge %, labor becomes chargeable)",
+    "engine_field": "fee_profiles:purposeOverrides.commercial",
+    "type": "pct+bool",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": null,
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full ORS 192.311–192.478 opened — no commercial-purpose fee schedule, surcharge, or purpose-statement requirement in the general public-records fee law. (Record-specific commercial-use restrictions exist elsewhere in Oregon law, e.g. DMV records, but create no municipal records-fee diff…"
+   },
+   "waiver": {
+    "label": "Fee waiver: grounds, mandatory vs discretionary, purpose statement, written denial, appeal",
+    "engine_field": "jurisdiction_rules:fee_waiver.*",
+    "type": "enum_list+bool",
+    "resolution": "structural",
+    "value": "discretionary public-interest waiver/reduction; no purpose statement required; denial reviewable by petition to AG/DA/court; reviewing body may also order waiver for untimely response",
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Discretion",
+    "authority": "Or. Rev. Stat. § 192.324(5)-(6); § 192.407(3)(c)",
+    "rule_ids": [
+     "OR-0023",
+     "OR-9001",
+     "OR-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Shape: (1) grounds = public interest / primarily benefits the general public (192.324(5), OR-0023) — DISCRETIONARY ('may'), never mandatory; (2) no statutory purpose-statement or written-denial-form requirement; (3) appeal = petition to AG or DA 'in the same manner as' a records-denial petition, …"
+   },
+   "waiver.forfeiture": {
+    "label": "Late response forfeits the fee",
+    "engine_field": "jurisdiction_rules:fee_waiver.fee_forfeiture_on_late_response",
+    "type": "bool",
+    "resolution": "structural",
+    "value": "no automatic forfeiture; AG/DA/court MAY order a fee waiver or reduction on petition if the body responded with undue delay or failed to respond as prescribed",
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": "Discretion",
+    "authority": "Or. Rev. Stat. § 192.407(3)(c)",
+    "rule_ids": [
+     "OR-9002"
+    ],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Oregon has a late-response fee consequence, but it is remedial and discretionary, not self-executing: forfeiture happens only if a requester petitions under 192.407 and the AG/DA/court orders the waiver (the same order may also carry a $200 penalty for undue delay, 192.407(3)(b) — penalty amount …"
+   },
+   "repeat": {
+    "label": "Repeat / aggregated requests (carry-forward, aggregation threshold)",
+    "engine_field": "NOT IN ENGINE (requestor-ledger)",
+    "type": "structural",
+    "resolution": "silent",
+    "value": null,
+    "unit": null,
+    "basis": null,
+    "applies_to": "all_public_bodies",
+    "rule_type": null,
+    "authority": null,
+    "rule_ids": [],
+    "verdict": "CONFIRMED",
+    "verified_at": "2026-08-21",
+    "notes": "Coverage: full ORS 192.311–192.478 opened — no repeat-request carry-forward, prior-unpaid-balance prepayment, or multi-request aggregation provision (contrast SC's 6-month re-request bar or TX aggregation). Each request stands alone; the only closure-and-return path is the 60-day nonpayment close…"
    }
-  ]
+  },
+  "statutory_evidence": {
+   "fee.labor_charge": [
+    {
+     "rule_id": "OR-0021",
+     "authority": "Or. Rev. Stat. § 192.324(4)(b)",
+     "summary": "A public body may include in the fee the cost of attorney time spent reviewing, redacting, or segregating records into exempt and nonexempt, but may NOT include attorney time spent determining the application of ORS 192.311 to 192.478."
+    }
+   ],
+   "fee.actual_cost_basis": [
+    {
+     "rule_id": "OR-0020",
+     "authority": "Or. Rev. Stat. § 192.324(4)(a)",
+     "summary": "A public body may establish fees reasonably calculated to reimburse it for its actual cost of making public records available, including costs for summarizing, compiling or tailoring the records in organization or media to meet the request."
+    }
+   ]
+  }
  },
  "program_setup": {
   "custody.custodian_definition_and_role": [
