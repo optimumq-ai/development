@@ -1,0 +1,259 @@
+{
+ "code": "MA",
+ "verified_at": "2026-08-21",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim in c66 s10 source (s10(d)(i)); ceiling 'shall not exceed 5 cents per page' single/double-sided; s10(d) applies to agency and municipal RAOs alike so all_public_bodies is right; ceiling word correct (permission 'may assess' + cap); source print dated 2026-08-20, no 2024-2026 amendment of s10 found.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim s10(d) general reasonable-fee/actual-cost clause present; 5-cent cap is expressly 'black and white' only, so color falls to the actual-cost standard; no number recorded \u2014 soft standard correctly left unvalued; manual_verification flag on Supervisor guidance appropriately retained.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 32.07(2)(h) present in CMR source; two-branch note matches 32.07(2)(e) 'of any size susceptible to ordinary means of production'; actual_cost_standard with no number is the right word.",
+   "checked_link": "https://www.mass.gov/regulations/950-CMR-3200-public-records-access (verified against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same verbatim 32.07(2)(h) clause present; no per-item schedule exists anywhere in either source; actual_cost_standard correct.",
+   "checked_link": "https://www.mass.gov/regulations/950-CMR-3200-public-records-access (verified against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: full text of s10(d)(i)-(ix) and 32.07 read; the $0.05 cap is flat, no page bands; 2/4-hour figures are labor thresholds, as the row says.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no free-page allowance in either source; 32.07(2)(f) no-fee-for-electronic/fax correctly recorded as adjacent rule, not a page allowance.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim s10(d)(iii) incl. (A) present; double ceiling ($25/hr and lowest-paid capable employee) with s10(d)(iv) exceedance path accurately captured; applies_to municipalities correct (agency 4-hr/$25 hard-cap regime separately noted, not recorded as municipal).",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim s10(d)(iii)(C) present; default non-chargeability of segregation/redaction time plus the $25 municipal ceiling when chargeable both check out against s10(d)(iii)(A),(C) and 32.07(2)(d),(m)3-4.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim s10(f) employee-time definition present (vendor/technology-consultant time folded in); no separate programming rate exists; the $25 municipal ceiling via s10(d)(iii) is correct; 32.07(1)(f) extract-not-new-record note verified.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "Both quoted fragments verbatim in s10(d)(iii) and (iii)(B); >2 hours municipal trigger correct; population gate on the free tier and the small-municipality first-2-hours permission match 32.07(2)(m)1-2 verbatim.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 32.07(2)(i) present in CMR source; no overhead/fringe provision exists in either source and the base-wage cap structurally precludes a surcharge; not_applicable (vs silent) is a flagged interpretive call with manual_verification retained \u2014 value/unit/scope all consistent.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no billing-increment or rounding rule anywhere in s10 or 950 CMR 32.00.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim s10(d)(iii)(B) present; 2 free hours gated to municipalities over 20,000; small-municipality charging and census burden match 32.07(2)(m)2 verbatim; per-request framing correct.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no per-requestor periodic free-time ledger in either source; free tiers are per request.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 32.07(2)(b) present in CMR source; structural (no dollar threshold, estimate whenever fees assessed, within 10 business days) is the right word; s10(b)(viii) statutory hook verified.",
+   "checked_link": "https://www.mass.gov/regulations/950-CMR-3200-public-records-access (verified against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no requester response deadline or deemed-withdrawal clock in either source.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no revised-estimate trigger at any overrun percentage in either source.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no estimate validity/expiry period in either source.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 32.06(2)(f) present in CMR source; structural payment-gate (no deposit threshold mechanism) is the right word; s10(a)(iii) proviso verified.",
+   "checked_link": "https://www.mass.gov/regulations/950-CMR-3200-public-records-access (verified against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no partial-deposit concept in either source; pay-in-full gate correctly cited.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim s10(a)(iii) present; gate confirmed both statute-side and reg-side (32.06(2)(f)); Permission characterization correct ('may delay').",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim s10(d)(vi)-(vii) present; 32.07(2)(n) narrowing conditions (compliant prior estimate + requester agreement) verbatim in CMR source.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 32.06(2)(f) present; structural no-deposit-clock reading matches sources; inferential tolling reading properly flagged in manual_verification, no overclaim.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no overrun/re-estimate/window-restart rule in either source; surviving bounds (actual-cost ceiling, good-faith standard) correctly cited.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "Out of scope per owner decision 2026-08-20: recorded as not_applicable with the out-of-scope note as required \u2014 confirmed per verify-pass exception.",
+   "checked_link": "n/a (out of scope per owner decision; no source cited by design)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim s10(d) actual-cost clause present; actual_cost_standard (no number) is the right word; reg parallel 32.07(2)(c) verified.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no de-minimis floor; adjacent no-charge categories correctly distinguished.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no minimum-fee provision in either source.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim s10(d)(i) storage-device clause present; actual_cost_standard correct; no-fee-for-electronic-transmission companion (32.07(2)(f)) verified.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 32.07(2)(j) present in CMR source incl. both conditions and lowest-cost duty; electronic/fax no-fee (32.07(2)(f)) verified; actual_cost_standard correct.",
+   "checked_link": "https://www.mass.gov/regulations/950-CMR-3200-public-records-access (verified against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified within the records-law regime: no certification charge in s10 or 950 CMR 32.00; 32.05(1)(d)1 is a reporting exception, not a fee rule; out-of-scope c.262 caveat properly flagged in manual_verification.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim 32.07(2)(h) present; A/V never named in either source; scope-judgment application to A/V properly flagged in manual_verification; actual_cost_standard correct.",
+   "checked_link": "https://www.mass.gov/regulations/950-CMR-3200-public-records-access (verified against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim s10(d)(iv)(A) present; structural (classification gate, no surcharge schedule) is the right word; (viii)/(ix) and 32.02/32.08(2)(b)3 cross-references verified.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim s10(d)(v) present; Discretion ('may waive or reduce') correct, never mandatory; purpose-statement limit (viii) and reg variant 32.07(2)(k) verified.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim s10(e) present; second trigger 32.06(4)(b) fee-rights waiver verbatim in CMR source; structural/Prohibition correct.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no fee-aggregation or carry-forward pricing rule; multiple-request language in s10(b)/(c) is time relief only, as the row says.",
+   "checked_link": "https://malegislature.gov/Laws/GeneralLaws/PartI/TitleX/Chapter66/Section10 (verified against source_docs/MA_c66_s10_2026-08-20.txt; reg cross-refs against source_docs/MA_950cmr32_2026-08-20.txt)",
+   "corrected_row": null
+  }
+ ],
+ "notes": "All 36 rows verified against the two owner-supplied official source documents (MA_c66_s10_2026-08-20.txt, malegislature.gov print of M.G.L. c. 66 s. 10 complete (a)-(f); MA_950cmr32_2026-08-20.txt, complete 950 CMR 32.00, Mass. Register #1445 stamp) \u2014 both carry PROVENANCE headers and no CAUTION labels, and together cover every official_link cited by the rows, so file string-matching counts as opening the source. Every non-null source_language string-matched verbatim. Currency: the statute source is an official print fetched 2026-08-20 (day before verify) reflecting current law; discover's 2024-2026 session-law check found the 2025 amendments hit c. 66 s. 10B, not s. 10, and nothing later than Mass. Register #1445 for the regulation \u2014 no contrary evidence found. Silent rows verified by reading both complete sources end to end. payment.method confirmed as not_applicable/out-of-scope per owner decision (verify-pass exception). Discover's manual_verification flags (color-rate negative implication, overheadPct structural preclusion, depositClock inferential tolling, c. 262 certification statutes, A/V scope judgment, mass.gov reg-page recheck) remain open as human items but none rises to a refute \u2014 each row's recorded resolution is supported by the opened sources."
+}

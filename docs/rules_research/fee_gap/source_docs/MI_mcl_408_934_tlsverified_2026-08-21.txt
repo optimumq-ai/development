@@ -1,0 +1,286 @@
+PROVENANCE: https://legislature.mi.gov/Laws/MCL?objectName=mcl-408-934
+Fetched 2026-08-21 by Claude (session merge/verify pass) with FULL TLS verification: legislature.mi.gov serves an incomplete chain (leaf only); the missing DigiCert Global G2 TLS RSA SHA256 2020 CA1 intermediate was obtained from https://cacerts.digicert.com over verified TLS and supplied via curl --cacert. Banner on page: MCL Complete Through PA 91 of 2026.
+Purpose: independent clean-TLS cross-check of the discover/verify agents 2026-08-21 fetches of MCL 408.934, which had used a TLS bypass on the broken chain. All relied-on figures matched.
+====
+ 
+ 
+ 
+ 
+ 
+
+ MCL - Section 408.934 - Michigan Legislature 
+
+ 
+
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Skip to content 
+ 
+
+ 
+
+ 
+ 
+ Michigan Legislature 
+ 
+ 
+ 
+ Michigan Compiled Laws Complete Through PA 91 of 2026
+ 
+ 
+ MCL Complete Through PA 91 of 2026
+ 
+ 
+ 
+ 
+ 
+ 
+ Senate adjourned until Wednesday, August 26, 2026 10:00 AM
+ 
+ 
+ Senate adjourned until 08/26/26 10:00 AM
+ 
+ 
+ 
+ 
+ House adjourned until Tuesday, August 25, 2026 1:30 PM
+ 
+ 
+ House adjourned until 08/25/26 1:30 PM
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+ 
+ Home 
+ 
+
+ 
+ Legislature 
+ 
+ Legislative Document Search 
+ Bills 
+ Resolutions 
+ Joint Resolutions 
+ Concurrent Resolutions 
+ Calendars 
+ Committees 
+ Committee Bill Records 
+ Committee Meetings 
+ Initiatives/Alternative Measures 
+ Journals 
+ Legislators 
+ Public and Local Acts (Signed Bills) 
+ Rules and Schedules 
+ 
+ 
+
+ 
+ Laws 
+ 
+ MCL Search 
+ Public Act MCL Search 
+ Michigan Constitution 
+ MCL Chapter Index 
+ Executive Orders 
+ Executive Reorganization Orders 
+ MCL Tables and Appropriation Acts 
+ 
+ 
+
+ 
+ More 
+ 
+ Archives 
+ Historical Documents 
+ Committee Meeting Notifications 
+ Legislative Directory 
+ Michigan Manuals 
+ Publications 
+ Related Sites 
+ Help 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+
+ 
+ Sign Up 
+ 
+ 
+ Log In 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+ 
+
+ MCL - Section 408.934 
+
+ 
+ 
+ 
+ Download Section 
+
+
+
+ 
+ 
+ 
+
+
+ 
+ 
+ Chapter 408 
+ Act 337 of 2018 
+ 
+ 
+ 
+ 
+ Previous Section 
+ 
+ 
+ Next Section 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ IMPROVED WORKFORCE OPPORTUNITY WAGE ACT (EXCERPT) Act 337 of 2018 
+ 408.934 Minimum hourly wage rate. 
+ Sec. 4. 
+ (1) Subject to the exceptions specified in this act, the minimum hourly wage rate is: 
+ (a) Beginning February 21, 2025, $12.48. 
+ (b) Beginning January 1, 2026, $13.73. 
+ (c) Beginning January 1, 2027, $15.00. 
+ (2) Every October beginning in October, 2027, the state treasurer shall calculate an adjusted minimum wage rate. The adjustment must increase the minimum wage by the rate of inflation. The state treasurer shall calculate the increase by multiplying the otherwise applicable minimum wage by the 12-month percentage increase, if any, in the Consumer Price Index for the midwest region, CPI-U, or a successor index, as published by the Bureau of Labor Statistics of the United States Department of Labor, based on the most recent 12-month period for which data are available. The state treasurer shall publish the adjusted minimum wage rate by November 1 of the year in which it is calculated. The adjusted minimum wage rate is effective beginning January 1 of the immediately succeeding year. 
+ (3) An increase in the minimum hourly wage rate as prescribed in subsection (2) does not take effect if the unemployment rate, as determined by the Bureau of Labor Statistics of the United States Department of Labor, for this state is 8.5% or greater for the year immediately preceding the year of the prescribed increase. 
+ 
+ 
+ 
+ 
+ 
+ History: 2018, Act 337 , Eff. Mar. 29, 2019 
+ ;--
+ 
+Am. 2018, Act 368 , Eff. Mar. 29, 2019 
+ ;--
+ 
+ 2018, Act 337 , Eff. Feb. 21, 2025 
+ ;--
+ 
+Am. 2025, Act 1 , Imd. Eff. Feb. 21, 2025 Compiler's Notes: Public Act 337 was proposed by initiative petition pursuant to Const. 1963, art 2, section 9. On September 5, 2018, the initiative petition was approved by an affirmative vote of the majority of the members of the Senate and an affirmative vote of the majority of the members of the House of Representatives, and filed with the Secretary of State on September 5, 2018.For the transfer of powers and duties of the department of licensing and regulatory affairs and the powers and duties of the director of the department of licensing and regulatory affairs to the department of labor and economic opportunity, see E.R.O. No. 2019-3, compiled at MCL 125.1998.See Mothering Justice v Attorney General, case no. 165325, July 31, 2024. The Michigan Supreme Court held that 2018 PA 368 was unconstitutional and, therefore void and revived the original initiative as enacted by the Legislature on September 5, 2018, effective February 21, 2025. 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ Acceptable Use Policy 
+ 
+ Privacy Policy 
+ 
+ DMCA Policy 
+ 
+ Comment Form 
+ 
+ Legislative Directory 
+ 
+ Accessibility 
+ 
+ Site Map 
+ 
+ 
+ 
+ 
+ 
+ 
+ Bills 
+ Meetings 
+ Laws 
+ 
+ 
+ 
+ 
+ 
+ The Michigan Legislature Website is a free service of the Legislative Service Bureau in cooperation with the Michigan Legislative Council, the Michigan House
+ of Representatives, the Michigan Senate, and the Library of Michigan. This site is intended to provide accurate and timely legislative information to the
+ citizens of the State of Michigan and other interested parties. Additional historical documents can be found at
+ https://www.michigan.gov/libraryofmichigan . The information obtained from this site is not intended to replace
+ official versions of that information and is subject to revision. The Legislature presents this information, without warranties, express or implied, regarding
+ the accuracy of the information, timeliness, or completeness. If you believe the information is inaccurate, out-of-date, or incomplete or if you have problems
+ accessing or reading the information, please send your concerns to the appropriate agency using the online Comment Form in the bar above this text.
+ 
+ 
+ 
+ 
+ 
+ 

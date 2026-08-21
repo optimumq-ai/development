@@ -1,0 +1,315 @@
+PROVENANCE: https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-235
+Fetched 2026-08-21 by Claude (session merge/verify pass) with FULL TLS verification: legislature.mi.gov serves an incomplete chain (leaf only); the missing DigiCert Global G2 TLS RSA SHA256 2020 CA1 intermediate was obtained from https://cacerts.digicert.com over verified TLS and supplied via curl --cacert. Banner on page: MCL Complete Through PA 91 of 2026.
+Purpose: independent clean-TLS cross-check of the discover/verify agents 2026-08-21 fetches of MCL 15.235, which had used a TLS bypass on the broken chain. All relied-on figures matched.
+====
+ 
+ 
+ 
+ 
+ 
+
+ MCL - Section 15.235 - Michigan Legislature 
+
+ 
+
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ Skip to content 
+ 
+
+ 
+
+ 
+ 
+ Michigan Legislature 
+ 
+ 
+ 
+ Michigan Compiled Laws Complete Through PA 91 of 2026
+ 
+ 
+ MCL Complete Through PA 91 of 2026
+ 
+ 
+ 
+ 
+ 
+ 
+ Senate adjourned until Wednesday, August 26, 2026 10:00 AM
+ 
+ 
+ Senate adjourned until 08/26/26 10:00 AM
+ 
+ 
+ 
+ 
+ House adjourned until Tuesday, August 25, 2026 1:30 PM
+ 
+ 
+ House adjourned until 08/25/26 1:30 PM
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+ 
+ Home 
+ 
+
+ 
+ Legislature 
+ 
+ Legislative Document Search 
+ Bills 
+ Resolutions 
+ Joint Resolutions 
+ Concurrent Resolutions 
+ Calendars 
+ Committees 
+ Committee Bill Records 
+ Committee Meetings 
+ Initiatives/Alternative Measures 
+ Journals 
+ Legislators 
+ Public and Local Acts (Signed Bills) 
+ Rules and Schedules 
+ 
+ 
+
+ 
+ Laws 
+ 
+ MCL Search 
+ Public Act MCL Search 
+ Michigan Constitution 
+ MCL Chapter Index 
+ Executive Orders 
+ Executive Reorganization Orders 
+ MCL Tables and Appropriation Acts 
+ 
+ 
+
+ 
+ More 
+ 
+ Archives 
+ Historical Documents 
+ Committee Meeting Notifications 
+ Legislative Directory 
+ Michigan Manuals 
+ Publications 
+ Related Sites 
+ Help 
+ 
+ 
+ 
+
+ 
+ 
+
+ 
+ 
+ 
+
+ 
+ Sign Up 
+ 
+ 
+ Log In 
+ 
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+ 
+
+ MCL - Section 15.235 
+
+ 
+ 
+ 
+ Download Section 
+
+
+
+ 
+ 
+ 
+
+
+ 
+ 
+ Chapter 15 
+ Act 442 of 1976 
+ 
+ 
+ 
+ 
+ Previous Section 
+ 
+ 
+ Next Section 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+ 
+ 
+ 
+ FREEDOM OF INFORMATION ACT (EXCERPT) Act 442 of 1976 
+ 15.235 Request to inspect or receive copy of public record; response to request; failure to respond; damages; contents of notice denying request; signing notice of denial; notice extending period of response; action by requesting person; law enforcement records management system; alternate responses. 
+ Sec. 5. 
+ (1) Except as provided in section 3, a person desiring to inspect or receive a copy of a public record shall make a written request for the public record to the FOIA coordinator of a public body. A written request made by facsimile, electronic mail, or other electronic transmission is not received by a public body's FOIA coordinator until 1 business day after the electronic transmission is made. However, if a written request is sent by electronic mail and delivered to the public body's spam or junk-mail folder, the request is not received until 1 day after the public body first becomes aware of the written request. The public body shall note in its records both the time a written request is delivered to its spam or junk-mail folder and the time the public body first becomes aware of that request. 
+ (2) Unless otherwise agreed to in writing by the person making the request, a public body shall, subject to subsection (10), respond to a request for a public record within 5 business days after the public body receives the request by doing 1 of the following: 
+ (a) Granting the request. 
+ (b) Issuing a written notice to the requesting person denying the request. 
+ (c) Granting the request in part and issuing a written notice to the requesting person denying the request in part. 
+ (d) Issuing a notice extending for not more than 10 business days the period during which the public body shall respond to the request. A public body shall not issue more than 1 notice of extension for a particular request. 
+ (3) Failure to respond to a request under subsection (2) constitutes a public body's final determination to deny the request if either of the following applies: 
+ (a) The failure was willful and intentional. 
+ (b) The written request included language that conveyed a request for information within the first 250 words of the body of a letter, facsimile, electronic mail, or electronic mail attachment, or specifically included the words, characters, or abbreviations for "freedom of information", "information", "FOIA", "copy", or a recognizable misspelling of such, or appropriate legal code reference to this act, on the front of an envelope or in the subject line of an electronic mail, letter, or facsimile cover page. 
+ (4) In a civil action to compel a public body's disclosure of a public record under section 10, the court shall assess damages against the public body under section 10(7) if the court has done both of the following: 
+ (a) Determined that the public body has not complied with subsection (2). 
+ (b) Ordered the public body to disclose or provide copies of all or a portion of the public record. 
+ (5) A written notice denying a request for a public record in whole or in part is a public body's final determination to deny the request or portion of that request. The written notice must contain: 
+ (a) An explanation of the basis under this act or other statute for the determination that the public record, or portion of that public record, is exempt from disclosure, if that is the reason for denying all or a portion of the request. 
+ (b) A certificate that the public record does not exist under the name given by the requester or by another name reasonably known to the public body, if that is the reason for denying the request or a portion of the request. 
+ (c) A description of a public record or information on a public record that is separated or deleted under section 14, if a separation or deletion is made. 
+ (d) A full explanation of the requesting person's right to do either of the following: 
+ (i) Submit to the head of the public body a written appeal that specifically states the word "appeal" and identifies the reason or reasons for reversal of the disclosure denial. 
+ (ii) Seek judicial review of the denial under section 10. 
+ (e) Notice of the right to receive attorneys' fees and damages as provided in section 10 if, after judicial review, the court determines that the public body has not complied with this section and orders disclosure of all or a portion of a public record. 
+ (6) The individual designated in section 6 as responsible for the denial of the request shall sign the written notice of denial. 
+ (7) If a public body issues a notice extending the period for a response to the request, the notice must specify the reasons for the extension and the date by which the public body will do 1 of the following: 
+ (a) Grant the request. 
+ (b) Issue a written notice to the requesting person denying the request. 
+ (c) Grant the request in part and issue a written notice to the requesting person denying the request in part. 
+ (8) If a public body makes a final determination to deny in whole or in part a request to inspect or receive a copy of a public record or portion of that public record, the requesting person may do either of the following: 
+ (a) Appeal the denial to the head of the public body under section 10. 
+ (b) Commence a civil action, under section 10. 
+ (9) Notwithstanding any other provision of this act to the contrary, a public body that maintains a law enforcement records management system and stores public records for another public body that subscribes to the law enforcement records management system is not in possession of, retaining, or the custodian of, a public record stored on behalf of the subscribing public body. If the public body that maintains a law enforcement records management system receives a written request for a public record that is stored on behalf of a subscribing public body, the public body that maintains the law enforcement records management system shall, within 10 business days after receipt of the request, give written notice to the requesting person identifying the subscribing public body and stating that the requesting person shall submit the request to the subscribing public body. As used in this subsection, "law enforcement records management system" means a data storage system that may be used voluntarily by subscribers, including any subscribing public bodies, to share information and facilitate intergovernmental collaboration in the provision of law enforcement services. 
+ (10) A person making a request under subsection (1) may stipulate that the public body's response under subsection (2) be electronically mailed, delivered by facsimile, or delivered by first-class mail. This subsection does not apply if the public body lacks the technological capability to provide an electronically mailed response. 
+ 
+ 
+ 
+ 
+ History: 1976, Act 442, Eff. Apr. 13, 1977 
+ ;--
+ 
+Am. 1978, Act 329, Imd. Eff. July 11, 1978 
+ ;--
+ 
+Am. 1996, Act 553 , Eff. Mar. 31, 1997 
+ ;--
+ 
+Am. 2014, Act 563 , Eff. July 1, 2015 
+ ;--
+ 
+Am. 2018, Act 105 , Imd. Eff. Apr. 5, 2018 
+ ;--
+ 
+Am. 2020, Act 36 , Imd. Eff. Mar. 3, 2020 Popular Name: Act 442 Popular Name: FOIA 
+ 
+ 
+ 
+ 
+ 
+
+ 
+ 
+
+
+ 
+ 
+
+ 
+
+ 
+ 
+ 
+ 
+ 
+ Acceptable Use Policy 
+ 
+ Privacy Policy 
+ 
+ DMCA Policy 
+ 
+ Comment Form 
+ 
+ Legislative Directory 
+ 
+ Accessibility 
+ 
+ Site Map 
+ 
+ 
+ 
+ 
+ 
+ 
+ Bills 
+ Meetings 
+ Laws 
+ 
+ 
+ 
+ 
+ 
+ The Michigan Legislature Website is a free service of the Legislative Service Bureau in cooperation with the Michigan Legislative Council, the Michigan House
+ of Representatives, the Michigan Senate, and the Library of Michigan. This site is intended to provide accurate and timely legislative information to the
+ citizens of the State of Michigan and other interested parties. Additional historical documents can be found at
+ https://www.michigan.gov/libraryofmichigan . The information obtained from this site is not intended to replace
+ official versions of that information and is subject to revision. The Legislature presents this information, without warranties, express or implied, regarding
+ the accuracy of the information, timeliness, or completeness. If you believe the information is inaccurate, out-of-date, or incomplete or if you have problems
+ accessing or reading the information, please send your concerns to the appropriate agency using the online Comment Form in the bar above this text.
+ 
+ 
+ 
+ 
+ 
+ 

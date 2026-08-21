@@ -1,0 +1,282 @@
+{
+ "code": "MI",
+ "verified_at": "2026-08-21",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (1)(d) cap sentence string-matched; 'must not exceed 10 cents per sheet' on 8-1/2x11 / 8-1/2x14 is a ceiling, correctly recorded as ceiling not value; MI FOIA binds all public bodies incl. municipalities (MCL 15.232); verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Same (1)(d) quote matched; the statute draws no B&W/color distinction — the 10-cent ceiling covers any print type on letter/legal paper; ceiling word correct; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (1)(d) opening clause matched; the 10-cent cap is textually limited to the two named sizes, so other sizes fall to 'actual total incremental cost... not including labor' — actual_cost_standard is the right word (no number converted); verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (1) chapeau matched; no specialty schedule exists anywhere in the section; actual_cost_standard with the 6-component structure is correct; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: full § 15.234 read — single flat per-sheet ceiling, no graduated bands; coverage note names the searched span (MCL 15.231-15.246, no local-binding admin rules); verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: the only no-charge figure is the $20.00 waiver in (2)(a)-(b), which is dollar-denominated and limited to indigent-affidavit/P&A-nonprofit requesters — not a page allowance; correctly rejected; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (1)(a) matched; 'shall not charge more than the hourly wage of its lowest-paid employee capable...' is a formula ceiling, correctly recorded as ceiling (no fixed number invented); verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Both quote segments verbatim in (1)(b) of the source doc; the 6x contracted-labor cap's delegated figure checked by opening MCL 408.934 directly on legislature.mi.gov (curl, incomplete TLS chain bypassed): (1)(a) $12.48 from Feb 21 2025, (b) $13.73 from Jan 1 2026, (c) $15.00 from Jan 1 2027, CPI from Oct 2027, 8.5%-unemployment skip; history 'Am. 2025, Act 1, Imd. Eff. Feb. 21, 2025' + Mothering Justice compiler's note, banner PA 91 of 2026 — 6 x 13.73 = $82.38/hr for 2026 arithmetic correct; ceiling word correct.",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-408-934",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (1)(e) matched; digital copying/transfer labor is (1)(e) duplication labor under the lowest-paid-capable-employee formula ceiling; the (3) gate indeed covers only search/examination/review/separation, not (1)(e); ceiling word correct; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (3) matched; the unreasonably-high-costs gate is qualitative — no page/hour threshold exists — so structural (not a value) is the right word; (4)'s publish-first absolute bar also verified in source ('shall not require deposits or charge fees... until it is in compliance'); verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (2) matched; 'may also add up to 50%' capped at actual fringe cost, overtime excluded — ceiling under a Permission, correctly not recorded as a value; the >50% exception confined to the (5) website-then-paper scenario also verified; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CORRECTED",
+   "why": "Quote verbatim in (1)(a)/(1)(b), but the statute says increments 'of 15 minutes or more' — the state sets a minimum increment, the body may choose a larger one, so this is a floor bound, not a fixed value; recorded resolution 'value'/basis 'fixed' misstates a bound as the operative figure (same error class as ceiling-recorded-as-value). Corrected row supplied: resolution=floor, basis=floor, value 15 minutes.",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": {
+    "state": "MI",
+    "item_id": "labor.increment",
+    "resolution": "floor",
+    "value": "15",
+    "unit": "minutes — minimum billing increment for search (1)(a) and redaction (1)(b) labor ('increments of 15 minutes or more', all partial increments rounded down); duplication labor (1)(e): increments of the public body's choosing, rounded down",
+    "basis": "floor",
+    "rule_type": "Calculation",
+    "applies_to": "all_public_bodies",
+    "resolved_by_rule_ids": [
+     "MI-0035",
+     "MI-0039"
+    ],
+    "new_rule_ids": [],
+    "source_authority": "Mich. Comp. Laws § 15.234(1)(a), (1)(b), (1)(e)",
+    "source_type": "Statute",
+    "official_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+    "source_language": "Labor costs under this subdivision shall be estimated and charged in increments of 15 minutes or more, with all partial time increments rounded down.",
+    "is_paraphrase": false,
+    "effective_status": "Current (Am. 2020 PA 38; MCL complete through PA 91 of 2026, no 2024-2026 amendment)",
+    "confidence": "high",
+    "manual_verification": null,
+    "notes": "FLOOR, not a fixed value: '15 minutes or more' bounds the increment from below — the city sets the operative increment at or above 15 minutes (a larger increment favors the requester under mandatory round-down). Identical sentence in (1)(a) and (1)(b); (1)(e) leaves the increment to the body but keeps round-down."
+   }
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no free-labor-hours allowance anywhere in § 15.234; the (3) gate and the targeted $20 waiver are correctly distinguished from an hours allowance; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no per-requestor periodic free-time ledger; the (11)-(12) prior-nonpayer deposit regime and the (2)(a)(i) twice-per-calendar-year indigent-discount limit are correctly identified as the only requestor-ledger mechanisms and neither is free personnel time; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (4) matched; itemization on the standard form is required for 'any fee amount' — no dollar trigger — so structural (effectively $0 threshold) is the right word; deposit-notice add-ons under (8) also verified; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (14) matched; 45 days from receipt of the deposit notice, notice deemed received 3 days after sending, stated due date 48 days after sending — value/fixed/Trigger correct, and the row correctly scopes it to deposit demands only; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no revised-estimate trigger exists; (11)(a)'s 105% is an eligibility condition for the prior-nonpayer 100% deposit on a later request, correctly rejected for this item (verified at (11)(a) in the source); verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no estimate validity period; only deposit-linked lifetimes exist (45-day abandonment (14), 365-day expiry (12)(c)), both verified in source; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (8) matched; deposit permitted only if the entire fee estimate or charge 'exceeds $50.00' — the statutory trigger figure is fixed, value/fixed under a Permission is correct; publish-first bar (4) cross-check verified; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (8) matched ('the deposit must not exceed 1/2 of the total estimated fee' — source text reads 'Subject to subsection (10)' exactly as quoted); 50% ceiling correct, and the up-to-100% prior-nonpayer exception with its (12) expiries verified at (11)-(12); verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (8) matched; the express statutory gate is deposit-before-providing (estimate > $50); recorded as structural with medium confidence and an honest manual_verification flag on the full-balance question — (11)(c) 'made available to the individual, subject to payment' and (13) 'a deposit... is a fee' verified in source as supporting-not-stating; correctly not overclaimed; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (14) matched; unpaid required deposit 45 days after receipt of notice = request abandoned, tolled only by a § 15.240a deposit appeal — value/fixed/Trigger correct; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "All four quoted sentences verbatim in the source ((8) best-efforts/nonbinding timeframe; (14) 3-day receipt and 48-day due-date mechanics) — note the quote concatenates the two passages without an ellipsis marker, a formatting nit only since source_authority cites both subsections. The § 15.235 negative claim checked by opening MCL 15.235 directly on legislature.mi.gov: 5-business-day response, one extension 'for not more than 10 business days', zero occurrences of 'deposit' (no tolling provision), history ends Am. 2020 PA 36, banner PA 91 of 2026 — structural resolution correct.",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-235",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no overrun re-issue/collection-block rule in the section; the (4) itemization duty and (11)(a) 105% disqualifier are correctly cited as nearest provisions, not the item's value; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "Out of scope per owner decision 2026-08-20 (finance-department policy); recorded as not_applicable with the out-of-scope note as required — verified as such, no source check needed.",
+   "checked_link": "",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (1) chapeau matched; the cap is the exclusive 6-component sum limited to actual costs — structural/soft, no number, so actual_cost_standard is right; (10) statutory-price carve-out verified; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: the $20.00 in (2) is a targeted mandatory waiver (indigent affidavit / P&A nonprofits, twice-per-year limit), not a general de-minimis floor — correctly rejected; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: ceiling-only structure, no minimum fee anywhere in § 15.234; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (1)(c) matched; 'actual and most reasonably economical cost of the nonpaper physical media' — actual_cost_standard correct; stipulation and no-capability provisos verified; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (1)(f) matched; actual mailing cost, no expedited/insurance unless stipulated, least-expensive delivery confirmation chargeable — actual_cost_standard correct; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no certification surcharge among the exclusive 6 components; medium confidence with a manual_verification flag on (1)(e) treatment is appropriately conservative; (10) carve-out for statutorily-priced records verified; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: no per-recording/per-minute/free-minutes figures in the act; AV correctly routed through (1)(c)/(1)(e)/(1)(b)+(3); verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "Silent verified: fees are purpose-neutral; only purpose-sensitive elements are the (2) waivers, correctly noted; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (2) matched; two grounds (discretionary public-interest waiver; mandatory first-$20 for indigent/P&A requesters with the (2)(a)(i)-(ii) ineligibility rules) — structural under Discretion is right, itemization/ineligibility-notice duties verified; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (9)(a) incl. (i)/(ii) matched; mandatory 5%-per-day / max-50% reduction of labor charges only, conditions (willful-and-intentional OR FOIA-flagging language) correct — value/fixed/Requirement right, partial-not-full forfeiture correctly noted; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim (11) chapeau matched; up-to-100% deposit for prior non-payers under six conditions with (12) expiries, plus the (2)(a)(i) twice-per-year indigent-discount counter — structural correct, no aggregation rule exists; verified against owner-supplied official print docs/rules_research/fee_gap/source_docs/MI_mcl_15.234_2026-08-20.txt (banner 'Complete Through PA 91 of 2026', history ends Am. 2020 PA 38 — no 2024-2026 amendment).",
+   "checked_link": "https://legislature.mi.gov/Laws/MCL?objectName=mcl-15-234",
+   "corrected_row": null
+  }
+ ],
+ "notes": "Verification basis: 34 rows checked by string-match against the owner-supplied official print source_docs/MI_mcl_15.234_2026-08-20.txt (legislature.mi.gov, banner 'Complete Through PA 91 of 2026', § 15.234 history ends Am. 2020 PA 38 — currency confirmed, no 2024-2026 amendment of the fee section). Two rows additionally required web sources not in the doc set, both opened directly on legislature.mi.gov via curl with the site's incomplete TLS certificate chain bypassed (same condition the discover agent logged): MCL 408.934 (labor.review.rate's 6x minimum-wage delegation — $12.48/$13.73/$15.00 steps and 2025 PA 1 history confirmed verbatim, $82.38/hr 2026 arithmetic checked) and MCL 15.235 (payment.depositClock — 5 business days + one 10-business-day extension, no deposit-tolling language, history ends 2020 PA 36). All 23 quoted rows matched verbatim (payment.depositClock's quote concatenates § 15.234(8) and (14) passages without an ellipsis marker — formatting nit, both passages verbatim and both subsections cited). One correction: labor.increment — '15 minutes or more' is a floor on the billing increment, not a fixed value. payment.method confirmed as not_applicable per owner out-of-scope decision. applies_to=all_public_bodies verified sound: MCL 15.232 defines public body to include municipalities, and Michigan has a single FOIA fee regime with no separate agency schedule."
+}

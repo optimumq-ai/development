@@ -1,0 +1,259 @@
+{
+ "code": "MN",
+ "verified_at": "2026-08-21",
+ "rows": [
+  {
+   "item_id": "dup.bw.rate",
+   "verdict": "CONFIRMED",
+   "why": "Verbatim clause matched in owner-supplied 2025 MN Statutes 13.03 text (subd. 3(c)); 'may charge no more than 25 cents' correctly a ceiling under Permission; <=100-page b/w letter/legal scope correct; ch. 13 binds municipalities; live revisor page shows no 2026 amendment (history ends 2025 c 35).",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.color.rate",
+   "verdict": "CONFIRMED",
+   "why": "Quote matched (subd. 3(c) first sentence). 25-cent path expressly limited to 'black and white, letter or legal size paper copies', so color falls to actual cost \u2014 actual_cost_standard is the right word, no number forced. DPO Copy Costs page confirms 'actual cost for most other copies'.",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.oversized.rate",
+   "verdict": "CONFIRMED",
+   "why": "Quote matched (subd. 3(c)). 'Letter or legal size' limitation verified in source; oversized correctly resolves to actual_cost_standard. No oversized rate anywhere in 13.03 full text or DPO pages.",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.specialty.rate",
+   "verdict": "CONFIRMED",
+   "why": "Quote matched (subd. 3(c)). DPO Actual Cost page verbatim includes 'Costs of reproduction that cannot be done by the entity, such as photographs (Advisory Opinions 95-044 and 97-012)'. actual_cost_standard correct.",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "dup.tiers",
+   "verdict": "CONFIRMED",
+   "why": "Quote matched. The 100-page boundary genuinely switches basis (actual costs 'shall not be used' below; actual cost above) \u2014 structural is the right word for the state-created two-band shape.",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freePages",
+   "verdict": "CONFIRMED",
+   "why": "Silent with proper coverage note (13.03/13.04, Minn. R. 1205, DPO pages). Full 13.03 text read: no free-page allowance; DPO confirms charging is permissive.",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.search.rate",
+   "verdict": "CONFIRMED",
+   "why": "Quote matched (subd. 3(c): actual costs of searching/retrieving incl. employee time). No fixed rate exists; DPO lowest-paid-employee note verified verbatim on the Actual Cost page. actual_cost_standard correct.",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.review.rate",
+   "verdict": "CONFIRMED",
+   "why": "Quote matched ('may not charge for separating public from not public data'). DPO Actual Cost page confirms (Advisory Opinion 04-072) and Copy Costs page: 'may not charge any fee for redaction or separation'. Categorical prohibition -> not_applicable is the right word.",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.programming.rate",
+   "verdict": "CONFIRMED",
+   "why": "Quote matched (subd. 3(e) last sentence). Subd. 3(e) also verified: entity not required to provide a different format/program. actual_cost_standard correct.",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.billableWhen",
+   "verdict": "CONFIRMED",
+   "why": "All three stitched segments matched verbatim (subd. 3(a) no-inspection-fee; subd. 3(c) actual-costs and flat-rate band). Data-subject search/retrieval carve-out verified on DPO Actual Cost page ('Entities cannot charge for search and retrieval time when the requestor is the data subject'). structural correct.",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.overheadPct",
+   "verdict": "CONFIRMED",
+   "why": "Quote verbatim on DPO Actual Cost page (initial string-match failure was the embedded hyperlink URL inside '(Advisory Opinion 04-056 (http://...))' in the text extraction). Copier operating expenses/invoice/sales tax/accounting exclusions all present on the page. Guidance-layer status and manual_verification correctly flagged; no percentage anywhere.",
+   "checked_link": "https://mn.gov/admin/data-practices/data/rules/copy-costs/actual-cost/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.increment",
+   "verdict": "CONFIRMED",
+   "why": "Silent with coverage note; 13.03 full text and DPO pages contain no increment/rounding rule.",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.freeLaborHours",
+   "verdict": "CONFIRMED",
+   "why": "Silent with coverage note; no free-labor-hours allowance in 13.03, 1205 rules, or DPO pages.",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "labor.periodicFreeHours",
+   "verdict": "CONFIRMED",
+   "why": "Silent with coverage note; no per-requestor periodic free-time provision in ch. 13 text read.",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.estimateNotifyThreshold",
+   "verdict": "CONFIRMED",
+   "why": "Silent with coverage note; 13.03 full text has no estimate duty \u2014 only the subd. 3(d) justify-on-request documentation duty, correctly distinguished in notes (verified verbatim).",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.requesterResponseDays",
+   "verdict": "CONFIRMED",
+   "why": "Silent; correct, and the row properly distinguishes the 2025 subd. 3(g) post-production 5-day collection window from an estimate-response window.",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.revisionNotifyPercent",
+   "verdict": "CONFIRMED",
+   "why": "Silent with coverage note; no estimate regime exists in 13.03.",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "estimate.validityDays",
+   "verdict": "CONFIRMED",
+   "why": "Silent with coverage note; no estimate regime exists in 13.03.",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.threshold",
+   "verdict": "CONFIRMED",
+   "why": "Silent with coverage note; 13.03 full text has no deposit/prepayment threshold. Agency advance-payment practice correctly quarantined to manual_verification, not recorded as municipal authority.",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deposit.percent",
+   "verdict": "CONFIRMED",
+   "why": "Silent with coverage note; no deposit regime in 13.03.",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.productionGate",
+   "verdict": "CONFIRMED",
+   "why": "Subd. 3(g) quote matched verbatim in owner-supplied text AND on the live revisor page. 'Collects and pays for' gate correctly read as post-production and permissive. structural correct.",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.nonpayment",
+   "verdict": "CONFIRMED",
+   "why": "Subd. 3(g) quote matched verbatim; 5 business days and suspension-not-withdrawal consequence both accurate; 2025 c 35 art 5 s 1 provenance confirmed in the history line.",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.depositClock",
+   "verdict": "CONFIRMED",
+   "why": "Subd. 3(g) quote matched; row honestly records that no deposit regime exists and maps only the real payment-linked clock effect. structural correct.",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.reissue",
+   "verdict": "CONFIRMED",
+   "why": "Silent with coverage note; no estimate/overrun regime in 13.03.",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "payment.method",
+   "verdict": "CONFIRMED",
+   "why": "Recorded as not_applicable with the out-of-scope-per-owner-decision note \u2014 exactly per owner decision 2026-08-20; verified as such.",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.maxFee",
+   "verdict": "CONFIRMED",
+   "why": "Quote matched (subd. 3(c)). Actual-cost standard as request-level cap correct; Minn. R. 1205.0300 subp. 4 reasonable-fee factors verified on live revisor rules page; commercial-value exception correctly noted.",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.deMinimis",
+   "verdict": "CONFIRMED",
+   "why": "Silent with coverage note; DPO permissive-charging language verified verbatim on Copy Costs page.",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "rules.minFee",
+   "verdict": "CONFIRMED",
+   "why": "Silent with coverage note; 25 cents verified as a per-page ceiling, not a minimum.",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "media",
+   "verdict": "CONFIRMED",
+   "why": "Quote matched (subd. 3(e)). DPO Actual Cost page verbatim lists 'Cost of media (paper, USB flash drives, etc.)' as includable. actual_cost_standard correct.",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "delivery",
+   "verdict": "CONFIRMED",
+   "why": "Both quote segments verified verbatim on the live revisor page for Minn. R. 1205.0300 subp. 4 (item E 'mailing costs'; published electronically July 13, 2007; authority MS s 13.07). Flat-rate-band no-add-ons gloss verified verbatim on DPO Copy Costs page and correctly labeled guidance-only.",
+   "checked_link": "https://www.revisor.mn.gov/rules/1205.0300/",
+   "corrected_row": null
+  },
+  {
+   "item_id": "certification",
+   "verdict": "CONFIRMED",
+   "why": "Quote matched (subd. 3(c) 'making, certifying, and electronically transmitting'). Data-subject making-and-certifying standard consistent with DPO Copy Costs page. No fixed certification fee in sources.",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "av",
+   "verdict": "CONFIRMED",
+   "why": "Quote matched (subd. 3(c)). No AV-specific fee schedule in 13.03 full text; DPO groups electronic/photograph data under actual cost. actual_cost_standard correct.",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "commercial",
+   "verdict": "CONFIRMED",
+   "why": "Subd. 3(d) quote matched verbatim in full. Correctly characterized as a data-based add-on capped at demonstrable development costs, not a requester-purpose surcharge. structural correct.",
+   "checked_link": "https://www.revisor.mn.gov/statutes/cite/13.03",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver",
+   "verdict": "CONFIRMED",
+   "why": "Silent with coverage note; 13.03/13.04 full text contains no waiver provisions; permissive-charging reading verified.",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "waiver.forfeiture",
+   "verdict": "CONFIRMED",
+   "why": "Silent with coverage note; no numeric deadline exists in 13.03 ('appropriate and prompt' / 'as soon as reasonably possible' verified in source text), so no forfeiture trigger.",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  },
+  {
+   "item_id": "repeat",
+   "verdict": "CONFIRMED",
+   "why": "Silent with coverage note; no aggregation/repeat-request fee rules in 13.03 full text or DPO pages.",
+   "checked_link": "source_docs/MN_13.03_2025_statutes.txt + MN_dpo_copy_costs + MN_dpo_actual_cost (owner-supplied official text)",
+   "corrected_row": null
+  }
+ ],
+ "notes": "All 36 rows CONFIRMED, 0 corrected/refuted/unverifiable. Method: statute rows string-matched against owner-supplied official 2025 MN Statutes 13.03 text (source_docs/MN_13.03_2025_statutes.txt, history through 2025 c 35 art 5 s 1; art 9 s 1); DPO guidance rows matched against the two owner-supplied DPO pages (Copy Costs, Actual Cost); the one row citing Minn. R. 1205.0300 subp. 4 (delivery) plus currency of 13.03 checked on the live revisor.mn.gov pages 2026-08-21 \u2014 live 13.03 is the 2025 edition with no 2026 session law in the history, and 1205.0300 subp. 4 matches verbatim (published electronically July 13, 2007, authority MS s 13.07). Ceiling-vs-value discipline verified (25 cents = ceiling under 'may charge no more than'); no soft standard was numberized; ch. 13 'government entity' scope means all figures bind municipalities directly and the agency-only subd. 10 was correctly excluded; the 2025 subd. 3(g) recency gap is captured with correct suspension (not withdrawal) semantics; payment.method recorded not_applicable per owner out-of-scope decision. One string-match artifact investigated and cleared: labor.overheadPct's DPO quote initially failed exact match only because the source extraction embeds a hyperlink URL inside '(Advisory Opinion 04-056 (http://...))'."
+}
