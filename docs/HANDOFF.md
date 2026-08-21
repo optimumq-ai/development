@@ -8407,3 +8407,17 @@ SPEC_auth_security_platform §1 (inventory).
   filterable "Fee schedule" xlsx sheet (1,120 rows). Regenerated to /home/optimumq/exchange/config_templates.
 - Shape documented in workflow/README.md (step-3 entry). NEXT: Phase 7 build can now read
   fee_schedule.items directly for engine config defaults.
+
+## 2026-08-21 (checkpoint, usage limit) — composer build WIP at 96a7c31
+- DONE+verified: bounds data gen (backend/scripts/gen_state_fee_bounds.js → src/data/state_fee_bounds.json),
+  feeBounds.check (live TX profile passes; OK 0.35>0.25 refused; tiers; fixed=authorization-ceiling),
+  422 gate on POST/PUT /fee-profiles, GET /fee-profiles/bounds (returns jid+code+bounds).
+- WIP not verified: FeeComposerPopup in JurisdictionConfigPage.js (fees section propose → structured rows,
+  files DRAFT FR profile with _proposal metadata; JSON fallback remains for exemption/redaction/template
+  sections BY SCOPE — their editing semantics differ, revisit after Kevin's setup-shell sketches).
+- NEXT: restart API (kill ^node pattern) + curl bounds endpoint; test 422 via API with nonexistent-id-safe
+  probe (live-probes memory!) — better: run suite (cd backend && npm test, NOT concurrent with CRA build);
+  then CI=false NODE_OPTIONS=--openssl-legacy-provider npm run build; verify nginx 200 + screenshot fees
+  composer; spec update (SPEC_fees_estimates_payments.md §1 bounds gate + SPEC_jurisdiction_configuration.md)
+  in the finishing commit. Then the jurisdiction-config inventory doc Kevin asked for (15 line items:
+  what/where-edited/protected/testing) — docs/WORKING_jurisdiction_config_inventory.md.
