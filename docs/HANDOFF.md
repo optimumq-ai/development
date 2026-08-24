@@ -8540,3 +8540,44 @@ team managers/supervisors; SysAdmin bypass removed (technical-only). §9 rewritt
 mapping table), §13 marked resolved. **NEXT:** Kevin says go → S1 (tables, seed, wipe/bootstrap,
 claim shim, auth_version, verify_user_types) — first code of the user-type build.
 
+
+## 2026-08-24 (later, e) — SPEC_user_type_model RATIFIED; S1 BUILT and CUT OVER on live (813c377 + this)
+
+Kevin: "go — ratify the spec and build S1". Done end-to-end.
+
+**Built (S1, `SPEC_user_type_model.md` §12):** catalog tables + seed in `schema.postgres.sql` (11 types;
+authority / permission-group / task-menu tables; `legacy_perm_map` for the pool SQL; `users.auth_version`);
+`services/userTypes.js` (spec tables as constants, `claimsFor` — legacy `roles`/`perms` DERIVED from types
+per §9.1, never from the legacy tables; grant/revoke bump `auth_version`); tokens carry
+`userTypes/authorities/permissionGroups/inOro/av`; `requireAuth` rejects stale or av-less tokens (60s cache,
+1s under test); `POST /staff` no longer grants every permission role (grant-all bug dead); the four non-auth
+readers of the legacy tables (`taskRouting`, `objections` — whose supervisor finder was querying the wrong
+catalog and always found nobody —, `coverageGap`, `importIngest`) + `seed_task_type_grants` resolve through
+types. `db/user_types_cutover.js` (dry-run default). `verify_user_types` 44/44.
+
+**Live cutover APPLIED 2026-08-24 ~21:50:** API restarted (schema landed), `user_types_cutover.js --apply`
+removed 219 legacy assignment rows, bootstrapped u-kruss with oro_sysadmin + oro_director, bumped every
+auth_version (all pre-existing sessions are dead — everyone signs in again). `seed_user_types_demo_staff.sql`
+typed the demo/fixture accounts (testers = sysadmin+director; team supers/managers; Okafor = senior legal;
+Cho = team_manager + oro_finance; staff = team_staff). **The five real accounts (mkh@, wjennings@, tjones@,
+tjackson@, admin@optimumq.ai) hold NO type** — they log in and see nothing gated until Kevin assigns types
+(needs S3's picker; until then only via `userTypes.grant` in a node script). Read-only live probe: u-kruss
+`/auth/me` shows both types + go_live etc.; an av-less legacy token → 401; an untyped account → empty claims.
+
+**Suite:** run 2 = 2505 pass / 12 fail in `bw6_mrr` + `external_links` (their "stranger" landed on a team
+supervisor after the typed-actor reordering); fixed, re-run 101/101; LIVE UNTOUCHED both runs. Together
+they cover every committed file — no third full run. Harness changes worth knowing: 16 harnesses now grant
+user types via `tests/userTypeHelpers.js` (`grantLegacy` maps old ids → nearest type); 23 harnesses that
+picked "first active user" now prefer a TYPED actor (office admin > supervisor > any type) — the old picks
+only worked because every account held every permission role; 5 assertions whose premise was that bug
+(e.g. "clarifier lacks SEARCH_AND_TRIAGE", "team_staff holds no FEE_MANAGER") were re-pointed at honest
+controls. `usersWithLegacyRole(teamId)` matches the team a team-type was granted AGAINST or the home team;
+perms (work eligibility) stay home-team only.
+
+**Fixture:** regenerated from the test DB (old fixture + S1 changes). A regen from live differs only in
+`updated_at` timestamps on identical config rows + column order — kept the committed one.
+
+**NEXT:** S2 — gate primitives (`requireAuthority` / `requirePermission`), §8 rows 1–7 (fee-profile,
+departments/teams, agent-rules, settlement timing-safe compare, go-live, attest), frontend
+`hasPermission/hasAuthority`, `verify_user_types` parts 4–5, 8. S2 unblocks the hub build. Also parked:
+the five real accounts need types (S3 picker, or a one-off script if Kevin wants in sooner).
