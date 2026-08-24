@@ -1,17 +1,87 @@
 {
   "pages": [
-    { "id": "page-1", "name": "Hub concept" },
-    { "id": "page-2", "name": "Plan layouts" }
+    {
+      "id": "page-1",
+      "name": "Hub concept"
+    },
+    {
+      "id": "page-2",
+      "name": "Plan layouts"
+    }
   ],
   "artboards": [
-    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 1300, "title": "The hub", "page": "page-1" },
-    { "file": "ItemStates.dc.html", "x": 1560, "y": 0, "w": 900, "h": 1260, "title": "Item anatomy, states and dependencies", "page": "page-1" },
-    { "file": "SignoffA.dc.html", "x": 0, "y": 1460, "w": 500, "h": 840, "title": "Sign-off A — Mark it done", "page": "page-1" },
-    { "file": "SignoffB.dc.html", "x": 600, "y": 1460, "w": 500, "h": 1000, "title": "Sign-off B — Put your name to it", "page": "page-1" },
-    { "file": "SignoffC.dc.html", "x": 1200, "y": 1460, "w": 500, "h": 1040, "title": "Sign-off C — Send it for review", "page": "page-1" },
-    { "file": "PlanGantt.dc.html", "x": 0, "y": 0, "w": 1480, "h": 1560, "title": "Plan A — full Gantt", "page": "page-2" },
-    { "file": "PlanSwimlanes.dc.html", "x": 1600, "y": 0, "w": 1360, "h": 960, "title": "Plan B — swimlane map", "page": "page-2" },
-    { "file": "PlanOutline.dc.html", "x": 1600, "y": 1080, "w": 1080, "h": 1560, "title": "Plan C — numbered outline", "page": "page-2" }
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1640,
+      "h": 1300,
+      "title": "The hub",
+      "page": "page-1"
+    },
+    {
+      "file": "ItemStates.dc.html",
+      "x": 1760,
+      "y": 0,
+      "w": 900,
+      "h": 1260,
+      "title": "Item anatomy, states and dependencies",
+      "page": "page-1"
+    },
+    {
+      "file": "SignoffA.dc.html",
+      "x": 0,
+      "y": 1460,
+      "w": 500,
+      "h": 840,
+      "title": "Sign-off A — Mark it done",
+      "page": "page-1"
+    },
+    {
+      "file": "SignoffB.dc.html",
+      "x": 600,
+      "y": 1460,
+      "w": 500,
+      "h": 1000,
+      "title": "Sign-off B — Put your name to it",
+      "page": "page-1"
+    },
+    {
+      "file": "SignoffC.dc.html",
+      "x": 1200,
+      "y": 1460,
+      "w": 500,
+      "h": 1040,
+      "title": "Sign-off C — Send it for review",
+      "page": "page-1"
+    },
+    {
+      "file": "PlanGantt.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1480,
+      "h": 1560,
+      "title": "Plan A — full Gantt",
+      "page": "page-2"
+    },
+    {
+      "file": "PlanSwimlanes.dc.html",
+      "x": 1600,
+      "y": 0,
+      "w": 1360,
+      "h": 960,
+      "title": "Plan B — swimlane map",
+      "page": "page-2"
+    },
+    {
+      "file": "PlanOutline.dc.html",
+      "x": 1600,
+      "y": 1080,
+      "w": 1080,
+      "h": 1560,
+      "title": "Plan C — numbered outline",
+      "page": "page-2"
+    }
   ],
   "annotations": [
     {
@@ -28,7 +98,7 @@
       "y": 330,
       "w": 280,
       "page": "page-1",
-      "text": "Drawn honestly, the lanes are lopsided: 12, 13, 4, 7.\n\nLane 2 is doing too much. Roughly half of it is fees and estimates, the other half is redaction and release behaviour. If it wants splitting, that is a five-lane page — worth deciding now rather than after it is built.\n\nTwo lane placements to check: the go-live flip sits in lane 1 but is the System Administrator's act alone, and lane 1's header names Legal for a lane where only four items are actually Legal-gated."
+      "text": "Decided 2026-08-24 (Kevin): Lane 2 is split in two — Fees, Estimates and Routing (8) and Redaction and Release (5) — so the page is five lanes: 11 / 8 / 5 / 4 / 7.\n\nLane names are Kevin's: Compliance and Policies Setup · Request Fulfillment Process Setup (both halves) · Organization Departments, Teams, and Staff Setup · Technical Setup.\n\nGo-live stays at the bottom of lane 1; the ORO System Administrator or the ORO Director may flip it.\n\nSign-off is 'Mark it done' for now (Option A); Kevin may make it conditional on validation of the configured data item by item as the screens are worked through. Prerequisites are open-with-warning, never locked."
     },
     {
       "id": "signoff-mix",
@@ -47,5 +117,8 @@
       "text": "Three project-plan takes on the same content, per your ask (24 Aug). No dates anywhere — the horizontal axis is ORDER, so dependencies read left to right.\n\nPlan A keeps every task as its own row, grouped into six phases by when a city would do them (a different cut than the four owner lanes — the owner moves into the group title). Most complete, most arrows.\n\nPlan B folds the 36 tasks into 11 groups so the arrows stay sparse, and keeps your four owner lanes as the rows. Each card would expand into its short task list.\n\nPlan C is the no-chart version: a numbered outline where Waits-for chips replace arrows. Complete like A, compact like a spreadsheet, but you trace dependencies by number instead of seeing them.\n\nWhat to judge: whether phases or owner lanes are the better grouping, and whether arrows earn their space or the chips are enough. A hybrid is possible — the hub page for doing the work, one of these as the overview tab beside it."
     }
   ],
-  "launch": { "view": "canvas", "page": "page-2" }
+  "launch": {
+    "view": "canvas",
+    "page": "page-1"
+  }
 }

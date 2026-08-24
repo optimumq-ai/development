@@ -8501,3 +8501,19 @@ gantt (three marked "no screen yet"); artboard grew 120px; canvas republished to
 **NEXT:** remaining canvas-page-1 questions (sign-off A/B/C, hard-lock vs warn, item names,
 lane-2 split, two lane-placement flags) → then spec the user-type slice per the locked plan.
 
+## 2026-08-24 (later, b) — Page-1 canvas questions all decided; hub artboard updated
+
+Walked Kevin through the five open page-1 questions. Decisions (full detail in WORKING_setup_inventory.md
+"Page-1 decisions"): sign-off = Mark it done (A) for now, may become validation-conditional per item;
+dependencies = open with warning; Lane 2 split into Fees/Estimates/Routing + Redaction/Release (five lanes);
+go-live stays at bottom of lane 1, ORO SysAdmin OR ORO Director may flip; lane names renamed in Kevin's
+words (Compliance and Policies Setup · Request Fulfillment Process Setup · Organization Departments, Teams,
+and Staff Setup · Technical Setup); item names accepted as drawn. Main.dc.html + canvas.json updated,
+canvas republished (same URL).
+
+**Design phase for the hub is now closed.** NEXT per the locked plan: spec the v3 user-type slice
+(catalog, authority axis, permission groups, migration, ratification) — start from
+DESIGN_user_type_role_model.md + MASTER_task_types_permission_groups.md; the hub's lane ownership
+(ORO membership + fulfillment supervisors; SysAdmin-or-Director for go-live) is now a concrete requirement
+for that model. Still no build until the user-type spec is agreed.
+

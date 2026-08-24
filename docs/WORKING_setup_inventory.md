@@ -163,3 +163,23 @@ not something to route around. The hub gates on the real v3 user-type catalog, b
   **2.6, 2.7, 2.10, 2.12, 2.13**. Expanded into their own rows at his request (`docs/mockups/setup_hub/PlanGantt.dc.html`).
   Three of the five (2.10, 2.12, 2.13) have no screen today — flagged "no screen yet" on the row.
 
+## Page-1 decisions (Kevin, 2026-08-24, later session) — ALL canvas-page-1 questions now closed
+
+1. **Sign-off = Option A "Mark it done" for now.** Kevin reserves the right to make Ready conditional on
+   validation of the configured data, item by item, as each item's UI is worked through. (Not B, not C.)
+2. **Dependencies = open with warning.** A row whose prerequisite isn't Ready stays clickable; it shows
+   "waiting on X" and the evidence line says what's missing. Never a hard lock.
+3. **Lane 2 splits in two** → five lanes: 2a Fees, Estimates and Routing (2.1–2.8) · 2b Redaction and
+   Release (2.9–2.13). Counts 11 / 8 / 5 / 4 / 7.
+4. **Go-live (1.12) stays at the bottom of lane 1.** The ORO System Administrator **or** the ORO Director
+   may flip it (was: SysAdmin only). Lane-1 header mismatch resolved by the rename below, not by moving items.
+5. **Lane names (Kevin's words):**
+   - Lane 1: **Compliance and Policies Setup**
+   - Lane 2a/2b: **Request Fulfillment Process Setup** — "Fees, Estimates and Routing" / "Redaction and Release"
+     (the sub-titles are mine; the split was Kevin's, the sub-naming is open to change)
+   - Lane 3: **Organization Departments, Teams, and Staff Setup**
+   - Lane 4: **Technical Setup** (unchanged)
+6. **Item names:** the plain-language names on the hub artboard were presented in full; Kevin changed none → accepted as drawn.
+
+Hub artboard (`mockups/setup_hub/Main.dc.html`) updated to match; canvas republished.
+
