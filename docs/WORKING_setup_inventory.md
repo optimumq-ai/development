@@ -155,3 +155,11 @@ not something to route around. The hub gates on the real v3 user-type catalog, b
    and the phases dissolve into the lane items above? (My read: dissolve — every phase maps to rows
    in this inventory, and the readiness signals + approval flow carry over item-by-item.)
 4. The no-door items: which are worth screens for v1 of the hub, which stay backend-only, which die?
+
+## Plan layout decision (Kevin, 2026-08-24, later session)
+
+- **Plan A (full gantt) chosen** as the overview layout. Plans B/C stay on canvas page 2 for reference.
+- Kevin asked what the gantt's collapsed "5 more settings with no prerequisites" row held; it was Lane-2 items
+  **2.6, 2.7, 2.10, 2.12, 2.13**. Expanded into their own rows at his request (`docs/mockups/setup_hub/PlanGantt.dc.html`).
+  Three of the five (2.10, 2.12, 2.13) have no screen today — flagged "no screen yet" on the row.
+

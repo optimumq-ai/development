@@ -8489,3 +8489,15 @@ ask which two and what to change, fold the choice into WORKING_setup_inventory.m
 then proceed per the locked plan (design → user-type spec/build → hub build; no
 stopgap — see the earlier 2026-08-24 note). Canvas:
 https://claude.ai/code/artifact/1c473eef-a5f6-47bd-a766-1003e9393060 (page 2).
+
+## 2026-08-24 (later) — Kevin picked Plan A; collapsed gantt row expanded
+
+Kevin chose **Plan A (full gantt)** and asked what the "5 more settings with no prerequisites" row
+was: inventory items 2.6 task time budgets, 2.7 time-tracking mode, 2.10 release switches,
+2.12 decision reasons library, 2.13 mass-redaction schedule. Expanded into five rows on the
+gantt (three marked "no screen yet"); artboard grew 120px; canvas republished to the same URL
+(checked first — no GUI saves since last publish). Decision recorded in WORKING_setup_inventory.md.
+
+**NEXT:** remaining canvas-page-1 questions (sign-off A/B/C, hard-lock vs warn, item names,
+lane-2 split, two lane-placement flags) → then spec the user-type slice per the locked plan.
+
