@@ -11,7 +11,7 @@ import { useAuthStore } from '../../store/authStore';
 export default function GoLiveBanner() {
   var store = useAuthStore();
   var [s, setS] = useState(null);
-  var show = store.hasAnyRole('SYSTEM_ADMIN', 'DIRECTOR');
+  var show = store.hasAuthority('go_live');   // v3 (S2): whoever may flip go-live sees the board
   useEffect(function () {
     if (!show) return undefined;
     var alive = true;

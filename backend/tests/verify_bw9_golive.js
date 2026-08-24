@@ -273,10 +273,12 @@ function isOpen(s) { return s.kind === 'dimension' ? (s.gated && !s.confirmed) :
     ok('D6 un-attest draws the same line', d6.status === 403);
 
     // ==============================================================================================
-    console.log('\n=== E2. ENFORCEMENT — the flip stays the SysAdmin\'s, and the summary reports it ===');
+    console.log('\n=== E2. ENFORCEMENT — the flip is the go_live AUTHORITY (SysAdmin OR Director, Kevin 2026-08-24), and the summary reports it ===');
+    // v3 (S2): SPEC_user_type_model §4 — go_live is held by oro_sysadmin AND oro_director; a supervisor holds it not.
+    var f0 = await req('POST', '/api/jurisdiction-profile/enforcement', { devMode: false }, TSUP);
     var f1 = await req('POST', '/api/jurisdiction-profile/enforcement', { devMode: false }, TDIR);
-    ok('E2a the Director cannot flip enforcement (SADMIN-only — the checklist informs the act, it does not own it)',
-      f1.status === 403);
+    ok('E2a the Supervisor cannot flip enforcement (no go_live authority); the Director CAN (spec §4)',
+      f0.status === 403 && f1.status === 200);
     var f2 = await req('POST', '/api/jurisdiction-profile/enforcement', { devMode: false }, TSA);
     var s4 = await req('GET', '/api/jurisdiction-profile/go-live', null, TDIR);
     ok('E2b the SysAdmin flip lands and the summary reports live', f2.status === 200 && s4.json.devMode === false && s4.json.live === true);

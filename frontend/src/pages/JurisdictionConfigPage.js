@@ -566,9 +566,11 @@ export default function JurisdictionConfigPage() {
   var [busy, setBusy] = useState(false);
   var [tick, setTick] = useState(0);
 
-  var isSA = store.hasAnyRole('SYSTEM_ADMIN');
-  var isDir = store.hasAnyRole('SYSTEM_ADMIN', 'DIRECTOR');
-  var isLegal = store.hasAnyRole('ATTORNEY_REVIEWER');
+  // v3 (S2): the API now decides by user-type claims — go_live authority for the flip, compliance_policy for
+  // non-legal sections, legal_rules for the Legal Rules sections (oro_sysadmin does NOT hold legal_rules).
+  var isSA = store.hasAuthority('go_live');
+  var isDir = store.hasPermission('compliance_policy');
+  var isLegal = store.hasPermission('legal_rules');
 
   var [rules, setRules] = useState(null);       // BW9b: the section's Content/Provenance/Proposals payload
   var [zone, setZone] = useState('content');
@@ -595,8 +597,8 @@ export default function JurisdictionConfigPage() {
   }, [tick, params.section]);
 
   function reload() { setTick(function (t) { return t + 1; }); }
-  function canAttest(sectionKey) { return isDir || (isLegal && LEGAL_SECTIONS[sectionKey]); }
-  function canConfirm(domain) { return isDir || (isLegal && LEGAL_DOMAINS[domain]); }
+  function canAttest(sectionKey) { return LEGAL_SECTIONS[sectionKey] ? isLegal : isDir; }
+  function canConfirm(domain) { return LEGAL_DOMAINS[domain] ? isLegal : isDir; }
 
   function doAttest(section, un) {
     setBusy(true);
@@ -623,7 +625,7 @@ export default function JurisdictionConfigPage() {
     var isLegalSection = rules ? rules.legal : !!LEGAL_SECTIONS[sec.section];
     // Edit rights mirror the server: Director/SysAdmin everywhere; Senior Legal on Legal domains.
     var canPropose = isDir || (isLegal && isLegalSection);
-    var canApplyContent = isSA || (isLegalSection ? isLegal : isDir);
+    var canApplyContent = isLegalSection ? isLegal : isDir;
     var proposals = (rules && rules.proposals) || [];
     var secFindings = findings.filter(function (f) { return String(f.where || '').indexOf(sec.section) >= 0 ||
       ((rules ? rules.domains : []) || []).some(function (d) { return String(f.where || '').indexOf('/' + d) >= 0; }); });
@@ -1035,7 +1037,7 @@ export default function JurisdictionConfigPage() {
               <button type="button" style={summary.ready && isSA ? btn : btnOff} disabled={!summary.ready || !isSA}
                 onClick={function () { setPopup({ kind: 'ceremony' }); }}>Begin go-live…</button>
               {!summary.ready ? <span style={Object.assign({}, kv, { marginLeft: 8 })}>blocked: the pills above say why</span>
-                : (!isSA ? <span style={Object.assign({}, kv, { marginLeft: 8 })}>System Administrator only</span> : null)}
+                : (!isSA ? <span style={Object.assign({}, kv, { marginLeft: 8 })}>System Administrator or Director only</span> : null)}
             </div>
           ) : (
             <div>

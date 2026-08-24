@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requirePermission } = require('../middleware/auth');
+// v3 (S2): departments / teams / record ownership are the operations_config group (§8 row 2). Reads stay requireAuth.
+const OPS = requirePermission('operations_config');
 const { all, get, run } = require('../db');
 
 function nid(p){ return p + '-' + Math.random().toString(36).slice(2,10); }
@@ -10,7 +12,7 @@ router.get('/', requireAuth, async function(req, res) {
   res.json({ departments: departments });
 });
 
-router.post('/', requireAuth, async function(req, res) {
+router.post('/', requireAuth, OPS, async function(req, res) {
   var b = req.body || {};
   if (!b.name || !b.code) return res.status(400).json({ error: 'name and code are required' });
   var kind = (b.kind === 'team') ? 'team' : 'department';
@@ -22,7 +24,7 @@ router.post('/', requireAuth, async function(req, res) {
   res.json({ department: row });
 });
 
-router.patch('/:id', requireAuth, async function(req, res) {
+router.patch('/:id', requireAuth, OPS, async function(req, res) {
   var b = req.body || {};
   var fields = ['name','code','color','kind','parent_id','processed_by','is_open_records','is_catch_all','sort_order','active','routing_specialization','auto_load_balancing'];
   var sets = [], vals = [];
@@ -40,7 +42,7 @@ router.patch('/:id', requireAuth, async function(req, res) {
   res.json({ department: row });
 });
 
-router.post('/:id/fulfills', requireAuth, async function(req, res) {
+router.post('/:id/fulfills', requireAuth, OPS, async function(req, res) {
   var teamId = req.params.id;
   var ids = Array.isArray(req.body.departmentIds) ? req.body.departmentIds : [];
   await run('UPDATE departments SET processed_by = NULL WHERE processed_by = ?', [teamId]);

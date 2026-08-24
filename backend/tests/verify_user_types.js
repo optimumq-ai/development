@@ -166,6 +166,99 @@ async function api(method, path, tok) {
   var after = await db.get('SELECT auth_version FROM users WHERE id = ?', [fu2]);
   ok('F5 revoke bumps auth_version too', Number(after.auth_version) === Number(before.auth_version) + 1);
 
+  // ---------------------------------------------------------------------------------------------------
+  // S2 — the gate primitives and the §8 rows 1–9 migrations (hub gaps, go-live, attest).
+  // Every harness user below already exists from section C: 'u-<TAG>-<type>' holds exactly ONE type
+  // (department team-police). Calls are shaped to be REFUSED by the gate or to fail validation AFTER the
+  // gate, so a passing gate is provable without writing config (400/404 = through; 403 = gated).
+  // ---------------------------------------------------------------------------------------------------
+  async function callAs(key, method, path, body) {
+    var uu = await db.get('SELECT * FROM users WHERE id = ?', ['u-' + TAG + '-' + key]);
+    var t = await auth.signAccessToken(uu);
+    var r = await fetch('http://localhost:' + PORT + '/api' + path, { method: method, headers: { Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+    var j = null; try { j = await r.json(); } catch (e) {}
+    return { status: r.status, body: j };
+  }
+  function gated(r) { return r.status === 403; }
+  function through(r) { return r.status !== 403 && r.status !== 401; }
+
+  console.log('\n=== H. THE GATE PRIMITIVES (§7) read the user-type claims, never legacy roles, no SysAdmin bypass ===');
+  // fee_configuration (row 1): PUT /fee-profiles/<nonexistent> is 404 AFTER the gate (writes nothing).
+  var feeAssoc = await callAs('oro_associate', 'PUT', '/fee-profiles/no-such-' + TAG, {});
+  var feeMgmt = await callAs('city_management', 'PUT', '/fee-profiles/no-such-' + TAG, {});
+  var feeStaff = await callAs('team_staff', 'PUT', '/fee-profiles/no-such-' + TAG, {});
+  ok('H1 fee-profile write: operations holder (oro_associate) passes the gate; city_management and team_staff are 403', through(feeAssoc) && gated(feeMgmt) && gated(feeStaff), feeAssoc.status + '/' + feeMgmt.status + '/' + feeStaff.status);
+  ok('H2 refusal is worded and coded (PERMISSION_REQUIRED, names the group)', feeMgmt.body && feeMgmt.body.code === 'PERMISSION_REQUIRED' && /fee_configuration/.test(feeMgmt.body.error));
+  // operations_config (row 2): departments POST with no name -> 400 after the gate.
+  var depSup = await callAs('team_supervisor', 'POST', '/departments', {});
+  var depMgmt = await callAs('city_management', 'POST', '/departments', {});
+  var depStaff = await callAs('team_staff', 'PATCH', '/departments/team-police', { name: 'x' });
+  ok('H3 departments/teams write: team_supervisor passes (400 validation); city_management 403; team_staff PATCH 403', depSup.status === 400 && gated(depMgmt) && gated(depStaff));
+  // system_admin (row 5): agent rules.
+  var arSys = await callAs('oro_sysadmin', 'POST', '/agent-rules', {});
+  var arDir = await callAs('oro_director', 'POST', '/agent-rules', {});
+  ok('H4 agent rules write: oro_sysadmin passes (400 validation); oro_director 403 (Lane 4 is technical-only)', arSys.status === 400 && gated(arDir));
+  // manage_users (rows 3): account creation / user-type assignment.
+  var mkSup = await callAs('oro_supervisor', 'POST', '/staff', {});
+  var mkDir = await callAs('oro_director', 'POST', '/staff', {});
+  var utSup = await callAs('oro_supervisor', 'PATCH', '/staff/u-' + TAG + '-team_staff/user-types', { userTypes: [] });
+  ok('H5 create account / assign user types: oro_director passes; oro_supervisor 403 (AUTHORITY_REQUIRED manage_users)', mkDir.status === 400 && gated(mkSup) && gated(utSup) && utSup.body.code === 'AUTHORITY_REQUIRED');
+  // operations_config + subset scope (row 4): task-subset PATCH.
+  var tsAssoc = await callAs('oro_associate', 'PATCH', '/staff/u-' + TAG + '-team_staff/task-types', { taskTypes: ['estimate'] });
+  var tsMgr = await callAs('team_manager', 'PATCH', '/staff/u-' + TAG + '-team_staff/task-types', { taskTypes: ['estimate'] });
+  var tsMgrOther = await callAs('team_manager', 'PATCH', '/staff/u-hr-staff/task-types', { taskTypes: ['estimate'] });
+  var tsDir = await callAs('oro_director', 'PATCH', '/staff/u-' + TAG + '-team_staff/task-types', { taskTypes: [] });
+  ok('H6 task subset: oro_associate has operations_config but no subset authority -> 403; team_manager passes for own team, 403 for another team; oro_director (global) passes',
+    gated(tsAssoc) && tsAssoc.body.code === 'AUTHORITY_REQUIRED' && tsMgr.status === 200 && gated(tsMgrOther) && tsDir.status === 200);
+  await db.run('DELETE FROM user_task_types WHERE user_id = ?', ['u-' + TAG + '-team_staff']);
+  // PATCH /user-types itself (S2 write; S3 UI): director sets a type on the harness user, then clears it.
+  var setT = await callAs('oro_director', 'PATCH', '/staff/u-' + TAG + '-team_staff/user-types', { userTypes: [{ key: 'team_staff', teamId: 'team-police' }, { key: 'team_supervisor', teamId: 'team-fire' }] });
+  var badT = await callAs('oro_director', 'PATCH', '/staff/u-' + TAG + '-team_staff/user-types', { userTypes: [{ key: 'team_manager' }] });
+  var nowT = (await ut.typesOf('u-' + TAG + '-team_staff')).map(function (t) { return t.key + '@' + t.teamId; });
+  ok('H7 PATCH /staff/:id/user-types replaces the set (multi-team OK: staff@police + supervisor@fire); team type without teamId -> 400',
+    setT.status === 200 && badT.status === 400 && sameSet(nowT, ['team_staff@team-police', 'team_supervisor@team-fire']));
+  await callAs('oro_director', 'PATCH', '/staff/u-' + TAG + '-team_staff/user-types', { userTypes: [{ key: 'team_staff', teamId: 'team-police' }] });
+
+  console.log('\n=== I. ATTEST / CONFIRM / PROPOSE by permission group (§8 rows 8–9) ===');
+  // Legal section: legal_rules holders only. 'no-such' section fails validation AFTER the gate (400).
+  var atLegalSL = await callAs('oro_senior_legal', 'POST', '/jurisdiction-profile/attest', { section: 'exemption' });
+  var atLegalSA = await callAs('oro_sysadmin', 'POST', '/jurisdiction-profile/attest', { section: 'exemption' });
+  var atLegalDir = await callAs('oro_director', 'POST', '/jurisdiction-profile/unattest', { section: 'exemption' });
+  ok('I1 legal section attest: oro_senior_legal passes the gate; oro_sysadmin is REFUSED (no legal_rules); oro_director may',
+    through(atLegalSL) && gated(atLegalSA) && /legal_rules/.test(atLegalSA.body.error) && through(atLegalDir), atLegalSL.status + '/' + atLegalSA.status + '/' + atLegalDir.status);
+  // If senior legal's attest actually landed, undo it so the fixture is as found.
+  if (atLegalSL.status === 200) await callAs('oro_senior_legal', 'POST', '/jurisdiction-profile/unattest', { section: 'exemption' });
+  var atNonSL = await callAs('oro_senior_legal', 'POST', '/jurisdiction-profile/unattest', { section: 'fees' });
+  var atNonSA = await callAs('oro_sysadmin', 'POST', '/jurisdiction-profile/unattest', { section: 'fees' });
+  var atNonSup = await callAs('oro_supervisor', 'POST', '/jurisdiction-profile/unattest', { section: 'fees' });
+  ok('I2 non-legal section: oro_sysadmin passes (compliance_policy); oro_senior_legal 403; oro_supervisor 403 (no group at all)',
+    through(atNonSA) && gated(atNonSL) && gated(atNonSup), atNonSA.status + '/' + atNonSL.status + '/' + atNonSup.status);
+  var cfLegal = await callAs('oro_sysadmin', 'POST', '/jurisdiction-profile/policy-settings/confirm', { domain: 'exemption', path: 'nope', value: 1 });
+  var cfNon = await callAs('oro_senior_legal', 'POST', '/jurisdiction-profile/policy-settings/confirm', { domain: 'fee', path: 'nope', value: 1 });
+  var cfOk = await callAs('oro_senior_legal', 'POST', '/jurisdiction-profile/policy-settings/confirm', { domain: 'exemption', path: 'no.such.path', value: 1 });
+  ok('I3 confirm by domain: sysadmin on a legal domain 403; senior legal on a non-legal domain 403; senior legal on a legal domain passes (400 unknown path)', gated(cfLegal) && gated(cfNon) && cfOk.status === 400);
+  var prLegal = await callAs('oro_sysadmin', 'POST', '/jurisdiction-profile/rules/exemption/propose', { domain: 'exemption', config: {} });
+  var prNon = await callAs('oro_director', 'POST', '/jurisdiction-profile/rules/fees/propose', { domain: 'fee', config: {} });
+  ok('I4 propose by domain: sysadmin on a legal domain 403 ("proposed by"); director on a non-legal domain passes the gate', gated(prLegal) && /proposed by/.test(prLegal.body.error) && through(prNon));
+
+  console.log('\n=== J. GO-LIVE (§4 go_live = oro_sysadmin OR oro_director) ===');
+  // POST /enforcement with devMode=true is a no-op on a dev-mode fixture; 200 proves the gate passed.
+  var glDir = await callAs('oro_director', 'POST', '/jurisdiction-profile/enforcement', { devMode: true });
+  var glSA = await callAs('oro_sysadmin', 'POST', '/jurisdiction-profile/enforcement', { devMode: true });
+  var glSup = await callAs('oro_supervisor', 'POST', '/jurisdiction-profile/enforcement', { devMode: true });
+  ok('J1 go-live flip: oro_director passes, oro_sysadmin passes, oro_supervisor 403 (AUTHORITY_REQUIRED go_live)',
+    glDir.status === 200 && glSA.status === 200 && gated(glSup) && glSup.body.code === 'AUTHORITY_REQUIRED', glDir.status + '/' + glSA.status + '/' + glSup.status);
+  var glLegacy = jwt.sign({ sub: 'u-' + TAG + '-oro_supervisor', roles: ['SYSTEM_ADMIN'], perms: [], av: (await db.get('SELECT auth_version FROM users WHERE id = ?', ['u-' + TAG + '-oro_supervisor'])).auth_version }, process.env.JWT_SECRET || 'optimumq-dev-secret', { expiresIn: '1h' });
+  var glForged = await fetch('http://localhost:' + PORT + '/api/jurisdiction-profile/enforcement', { method: 'POST', headers: { Authorization: 'Bearer ' + glLegacy, 'Content-Type': 'application/json' }, body: '{"devMode":true}' });
+  ok('J2 a token claiming the legacy SYSTEM_ADMIN role but no go_live authority is refused — the new gates never read legacy claims', glForged.status === 403);
+
+  console.log('\n=== K. SETTLEMENT WEBHOOK compare is timing-safe (§8 row 6, unit) ===');
+  var SM = require('/opt/optimumq/backend/src/routes/settlement').secretMatches;
+  var sm = require('/opt/optimumq/backend/src/routes/settlement.js');
+  var src = require('fs').readFileSync('/opt/optimumq/backend/src/routes/settlement.js', 'utf8');
+  ok('K1 equal secrets match; different / prefix / empty do not', SM('abc123', 'abc123') && !SM('abc124', 'abc123') && !SM('abc', 'abc123') && !SM('', 'abc123'));
+  ok('K2 the compare goes through crypto.timingSafeEqual and the handler no longer uses !== on the secret', /timingSafeEqual/.test(src) && !/\) !== expected\)/.test(src));
+
   console.log('\n=== G. CLEANUP ===');
   var ids = ut.TYPE_KEYS.map(function (k) { return 'u-' + TAG + '-' + k; }).concat([uid]);
   if (created.userId) ids.push(created.userId);

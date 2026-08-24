@@ -35,11 +35,22 @@ router.get('/request/:requestId/charges', requireAuth, async function (req, res)
   catch (e) { res.status(500).json({ error: 'Could not load ERP charges.' }); }
 });
 
+// v3 (S2, §8 row 6): the shared-secret compare is constant-time. A plain `!==` short-circuits on the first
+// differing byte, which leaks the secret's prefix one byte at a time to anyone who can time the endpoint.
+// Length is compared on digests so mismatched lengths do not short-circuit either. No secret configured =>
+// every call refused (the check above), never "open".
+function secretMatches(given, expected) {
+  var crypto = require('crypto');
+  var a = crypto.createHash('sha256').update(String(given)).digest();
+  var b = crypto.createHash('sha256').update(String(expected)).digest();
+  return crypto.timingSafeEqual(a, b);
+}
+router.secretMatches = secretMatches;   // the module exports the router; hang the unit-testable compare on it
 // Inbound payment-applied webhook from the ERP/gateway. Authenticated by shared secret, not a session.
 router.post('/payment-applied', async function (req, res) {
   try {
     var expected = await erp.getWebhookSecret();
-    if (!expected || (req.get('X-Webhook-Secret') || '') !== expected) return res.status(401).json({ error: 'Invalid webhook secret' });
+    if (!expected || !secretMatches(req.get('X-Webhook-Secret') || '', expected)) return res.status(401).json({ error: 'Invalid webhook secret' });
     var b = req.body || {};
     var erpChargeId = b.chargeId;
     var amountApplied = Number(b.amountApplied) || 0;

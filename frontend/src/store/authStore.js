@@ -55,6 +55,20 @@ export const useAuthStore = create(function(set, get) {
       }
       return false;
     },
+    // v3 user-type model (SPEC_user_type_model §7, S2): /auth/me carries authorities, permissionGroups, inOro.
+    // New screens gate on these; hasRole/hasAnyRole/hasAnyPerm are the legacy shim and go away in S4/S5.
+    hasAuthority: function(key) {
+      var u = get().user;
+      return !!(u && Array.isArray(u.authorities) && u.authorities.indexOf(key) !== -1);
+    },
+    hasPermission: function() {
+      var groups = Array.prototype.slice.call(arguments);
+      var u = get().user;
+      if (!u || !Array.isArray(u.permissionGroups)) return false;
+      for (var i = 0; i < groups.length; i++) { if (u.permissionGroups.indexOf(groups[i]) !== -1) return true; }
+      return false;
+    },
+    inOro: function() { var u = get().user; return !!(u && u.inOro); },
     // Capability (permission-role) check, e.g. FINANCE. /auth/me already returns user.permissionRoles;
     // this lets the UI gate on a capability, not just a job title (financial-authority reconciliation, D4 §8).
     hasAnyPerm: function() {

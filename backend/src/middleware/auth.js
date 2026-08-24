@@ -83,4 +83,30 @@ const requireRequestWork = requireRoleOrPerm(['DIRECTOR', 'SUPERVISOR', 'DEPT_MA
 // EDIT precedent. Compute-only discovery (variant scan proposes, inserts nothing) and reads stay
 // requireAuth. Previously requireAuth only.
 const requireTaxonomyEdit = requireRole('SYSTEM_ADMIN', 'DIRECTOR');
-module.exports = { requireAuth, requireRole, requireRoleOrPerm, requireRedactionWork, requireRequestWork, requireTaxonomyEdit, forgetAuthVersion };
+// ---- v3 GATE PRIMITIVES (SPEC_user_type_model §7, S2) ---------------------------------------------------
+// These read ONLY the user-type claims minted at login (authorities / permissionGroups). They never consult
+// the legacy roles/perms, and there is deliberately NO SYSTEM_ADMIN short-circuit: oro_sysadmin holds exactly
+// the authorities and groups the catalog gives it (§4 — in particular not legal_rules / legal_decision).
+function hasAuthority(user, key) { return !!(user && Array.isArray(user.authorities) && user.authorities.indexOf(key) !== -1); }
+function hasPermission(user, group) { return !!(user && Array.isArray(user.permissionGroups) && user.permissionGroups.indexOf(group) !== -1); }
+function requireAuthority(key) {
+  return function (req, res, next) {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    if (!hasAuthority(req.user, key)) return res.status(403).json({ error: 'This action needs the "' + key + '" authority, which none of your user types carries.', code: 'AUTHORITY_REQUIRED', authority: key });
+    next();
+  };
+}
+function requireAnyPermission() {
+  const groups = Array.prototype.slice.call(arguments);
+  return function (req, res, next) {
+    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
+    if (!groups.some(function (g) { return hasPermission(req.user, g); })) {
+      return res.status(403).json({ error: 'Changing this configuration needs the "' + groups.join('" or "') + '" permission group, which none of your user types carries.', code: 'PERMISSION_REQUIRED', permission: groups });
+    }
+    next();
+  };
+}
+function requirePermission(group) { return requireAnyPermission(group); }
+
+module.exports = { requireAuth, requireRole, requireRoleOrPerm, requireRedactionWork, requireRequestWork, requireTaxonomyEdit, forgetAuthVersion,
+  requireAuthority, requirePermission, requireAnyPermission, hasAuthority, hasPermission };

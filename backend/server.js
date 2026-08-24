@@ -145,8 +145,6 @@ async function seedAdmin() {
   var existing = await get('SELECT id FROM users WHERE email = ?', ['admin@optimumq.ai']);
   if (existing) return;
   console.log('Seeding default admin...');
-  var sysAdminRole = await get('SELECT id FROM function_roles WHERE name = ?', ['SYSTEM_ADMIN']);
-  var allPerms = await all('SELECT id FROM permission_roles');
   var uid = uuidv4();
   var crypto = require('crypto');
   // Use ADMIN_PASSWORD env var if provided, otherwise generate a strong random one
@@ -165,9 +163,11 @@ async function seedAdmin() {
   var hash = crypto.createHash('sha256').update(adminPassword + 'optimumq_salt_2024').digest('hex');
   await run('INSERT INTO users (id,email,display_name,title,department_id,password_hash,temp_password) VALUES (?,?,?,?,?,?,?)',
     [uid,'admin@optimumq.ai','System Administrator','System Administrator','dept-openrecords',hash,1]);
-  if (sysAdminRole) await run('INSERT OR IGNORE INTO user_function_roles VALUES (?,?)',[uid,sysAdminRole.id]);
-  for (var p of allPerms) { await run('INSERT OR IGNORE INTO user_permission_roles VALUES (?,?)',[uid,p.id]); }
-  console.log('Admin created: admin@optimumq.ai');
+  // v3 (S2): the first admin holds oro_sysadmin + oro_director (SPEC_user_type_model §4/§9) — no legacy rows.
+  var UT = require('./src/services/userTypes');
+  await UT.grant(uid, 'oro_sysadmin', null, 'install');
+  await UT.grant(uid, 'oro_director', null, 'install');
+  console.log('Admin created: admin@optimumq.ai (oro_sysadmin + oro_director)');
 }
 
 async function start() {

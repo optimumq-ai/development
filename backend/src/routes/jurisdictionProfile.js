@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
 const router = express.Router();
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requireRole, requireAuthority, requireAnyPermission, hasPermission } = require('../middleware/auth');
 const { get } = require('../db');
 const JP = require('../services/jurisdictionProfile');
 const enforcement = require('../services/enforcement');
@@ -10,25 +10,30 @@ const ROLE = requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER
 // Rules sections (exemption, redaction, deadlines); everything else stays Director | System
 // Admin. requireRole lets SYSTEM_ADMIN through unconditionally, so the per-section line is drawn
 // by attestScopeError below, and the refusal is worded, not just a 403.
-const ATTEST = requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'ATTORNEY_REVIEWER');
-const SADMIN = requireRole('SYSTEM_ADMIN');
+// v3 (S2, SPEC_user_type_model §8 rows 7–9): attestation and confirmation are PERMISSION GROUPS read off the
+// user's types — legal_rules for the Legal Rules sections/domains (owner: ORO Senior Legal; the Director may),
+// compliance_policy for everything else (Director, System Administrator). No role name is consulted and there
+// is no SysAdmin bypass: oro_sysadmin does NOT hold legal_rules, so it cannot attest a legal section.
+const ATTEST = requireAnyPermission('legal_rules', 'compliance_policy');
 const GL = require('../services/goLive');
 function attestScopeError(req, section) {
-  var roles = (req.user && req.user.roles) || [];
-  if (roles.indexOf('SYSTEM_ADMIN') !== -1 || roles.indexOf('DIRECTOR') !== -1) return null;
-  if (section && GL.LEGAL_SECTIONS[section]) return null;
-  return 'Senior Legal attests the Legal Rules sections (exemption, redaction, deadlines). The ' +
-         (section || 'requested') + ' section is attested by the Director or a System Administrator.';
+  var legal = !!(section && GL.LEGAL_SECTIONS[section]);
+  if (legal && hasPermission(req.user, 'legal_rules')) return null;
+  if (!legal && hasPermission(req.user, 'compliance_policy')) return null;
+  return legal
+    ? 'The ' + section + ' section is a Legal Rules section: it is attested by ORO Senior Legal (or the Director) — the legal_rules permission group.'
+    : 'The ' + (section || 'requested') + ' section is not one of the Legal Rules sections (exemption, redaction, deadlines): it is attested by the Director or a System Administrator — the compliance_policy permission group.';
 }
 // Confirming a local policy setting follows the same ownership line, by DOMAIN: Senior Legal
 // confirms settings on the Legal Rules domains; the Director everywhere.
 var LEGAL_DOMAINS = { exemption: 1, redaction: 1, deadline: 1, clock_matrix: 1 };
 function confirmScopeError(req, domain) {
-  var roles = (req.user && req.user.roles) || [];
-  if (roles.indexOf('SYSTEM_ADMIN') !== -1 || roles.indexOf('DIRECTOR') !== -1) return null;
-  if (domain && LEGAL_DOMAINS[domain]) return null;
-  return 'Senior Legal confirms settings on the Legal Rules domains. Settings on ' +
-         (domain || 'this domain') + ' are confirmed by the Director or a System Administrator.';
+  var legal = !!(domain && LEGAL_DOMAINS[domain]);
+  if (legal && hasPermission(req.user, 'legal_rules')) return null;
+  if (!legal && hasPermission(req.user, 'compliance_policy')) return null;
+  return legal
+    ? 'Settings on the ' + domain + ' domain are Legal Rules: confirmed by ORO Senior Legal (or the Director) — the legal_rules permission group.'
+    : 'Settings on ' + (domain || 'this domain') + ' are not Legal Rules: they are confirmed by the Director or a System Administrator — the compliance_policy permission group.';
 }
 
 async function activeJid() { var r = await get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'"); return (r && r.value) || null; }
@@ -60,7 +65,7 @@ router.get('/policy-settings', requireAuth, READ, async function (req, res) {
 });
 // The one genuinely missing piece of plumbing Draft 6 named: set value + confirmed + who/when.
 // Never creates a setting — an unknown path is refused in words.
-router.post('/policy-settings/confirm', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'ATTORNEY_REVIEWER'), async function (req, res) {
+router.post('/policy-settings/confirm', requireAuth, ATTEST, async function (req, res) {
   var b = req.body || {};
   var scope = confirmScopeError(req, b.domain);
   if (scope) return res.status(403).json({ error: scope });
@@ -88,13 +93,10 @@ router.get('/rules-research/:ruleId', requireAuth, READ, async function (req, re
 // The proposal composer: every content edit lands as a proposal — citation + note required, the
 // WS1–WS3 police rules run BEFORE anything is written, and the owner may apply in the same act
 // (a Director's edit on a Legal Rules domain files for Senior Legal instead — never self-applied).
-router.post('/rules/:section/propose', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'ATTORNEY_REVIEWER'), async function (req, res) {
+router.post('/rules/:section/propose', requireAuth, ATTEST, async function (req, res) {
   var b = req.body || {};
-  var roles = (req.user && req.user.roles) || [];
-  if (roles.indexOf('SYSTEM_ADMIN') === -1 && roles.indexOf('DIRECTOR') === -1 &&
-      !(b.domain && require('../services/ruleEditors').LEGAL_DOMAINS[b.domain])) {
-    return res.status(403).json({ error: 'Senior Legal proposes changes on the Legal Rules domains; content on ' + (b.domain || 'this domain') + ' is proposed by the Director.' });
-  }
+  var scopeP = confirmScopeError(req, b.domain);   // same ownership line as confirm, by domain (v3 permission groups)
+  if (scopeP) return res.status(403).json({ error: scopeP.replace('confirmed by', 'proposed by') });
   try {
     var out = await require('../services/ruleEditors').propose(await activeJid(), req.params.section, b.domain, b.config, {
       citation: b.citation, note: b.note, applyNow: b.applyNow === true,
@@ -110,7 +112,8 @@ router.get('/go-live', requireAuth, READ, async function (req, res) {
 router.get('/enforcement', requireAuth, async function (req, res) {
   try { res.json({ devMode: await enforcement.devMode() }); } catch (e) { res.status(500).json({ error: e.message }); }
 });
-router.post('/enforcement', requireAuth, SADMIN, async function (req, res) {
+// v3 (S2, §8 row 7): the go-live flip is the go_live AUTHORITY — oro_sysadmin OR oro_director (Kevin 2026-08-24).
+router.post('/enforcement', requireAuth, requireAuthority('go_live'), async function (req, res) {
   try { var on = !!(req.body && (req.body.devMode === true || req.body.devMode === '1' || req.body.on === true)); var v = await enforcement.setDevMode(on); res.json({ devMode: v }); } catch (e) { res.status(500).json({ error: e.message }); }
 });
 

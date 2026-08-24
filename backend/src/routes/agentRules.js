@@ -1,7 +1,9 @@
 const express = require('express');
 const router = express.Router();
 const { get, all, run } = require('../db');
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requirePermission } = require('../middleware/auth');
+// v3 (S2): portal agent rules are Lane 4 — the system_admin group (§8 row 5). Reads stay requireAuth.
+const SYS = requirePermission('system_admin');
 const { v4: uuidv4 } = require('uuid');
 
 // List all rules
@@ -11,7 +13,7 @@ router.get('/', requireAuth, async function(req, res) {
 });
 
 // Create a new rule
-router.post('/', requireAuth, async function(req, res) {
+router.post('/', requireAuth, SYS, async function(req, res) {
   var text = (req.body.rule_text || '').trim();
   if (!text) return res.status(400).json({ error: 'rule_text is required' });
   var maxRow = await get('SELECT MAX(sort_order) as m FROM agent_rules');
@@ -23,7 +25,7 @@ router.post('/', requireAuth, async function(req, res) {
 });
 
 // Update a rule (text and/or enabled)
-router.patch('/:id', requireAuth, async function(req, res) {
+router.patch('/:id', requireAuth, SYS, async function(req, res) {
   var rule = await get('SELECT * FROM agent_rules WHERE id = ?', [req.params.id]);
   if (!rule) return res.status(404).json({ error: 'Rule not found' });
   var newText = req.body.rule_text !== undefined ? String(req.body.rule_text).trim() : rule.rule_text;
@@ -33,7 +35,7 @@ router.patch('/:id', requireAuth, async function(req, res) {
 });
 
 // Delete a rule
-router.delete('/:id', requireAuth, async function(req, res) {
+router.delete('/:id', requireAuth, SYS, async function(req, res) {
   var rule = await get('SELECT id FROM agent_rules WHERE id = ?', [req.params.id]);
   if (!rule) return res.status(404).json({ error: 'Rule not found' });
   await run('DELETE FROM agent_rules WHERE id = ?', [req.params.id]);

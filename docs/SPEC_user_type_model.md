@@ -2,8 +2,8 @@
 
 **Status:** **RATIFIED 2026-08-24** (Kevin: "go — ratify the spec and build S1"). This is the contract. It
 supersedes `SPEC_tasks_roles_mrr_fees.md` §8 (roles) and `ARCHITECTURE.md` §4 ("one role catalog") is rewritten to point here.
-**Build status:** **S1 BUILT 2026-08-24** (`verify_user_types`, see §12) — tables + catalog seed, cutover, derived claims, `auth_version`.
-S2–S6 open. As-built notes that differ from the draft are marked *(as built)* inline.
+**Build status:** **S1 BUILT 2026-08-24** (tables + catalog seed, cutover, derived claims, `auth_version`); **S2 BUILT 2026-08-24**
+(gate primitives; §8 rows 1–9; frontend `hasAuthority/hasPermission`; `verify_user_types` H–K). **The setup-hub build is unblocked.** S2b–S6 open. As-built notes that differ from the draft are marked *(as built)* inline.
 **Sources:** `DESIGN_user_type_role_model.md` (v3, Kevin's concept, decisions of 2026-07-09),
 `MASTER_task_types_permission_groups.md` (canonical enumerations), `WORKING_setup_inventory.md` (hub
 decisions of 2026-08-24), and a code survey of 2026-08-24 (§2).
@@ -252,6 +252,20 @@ chips.
 | every other `requireRole(...)` (~43 sites) | role names | **compat period:** unchanged (§9 mints legacy `roles` from user types); then migrated file-by-file to authority/permission |
 | Menu / page checks (frontend, §2) | `hasAnyRole` | `hasPermission` / `hasAuthority` |
 
+*(as built, S2)* Rows 1–9 are live: `requireAuthority` / `requirePermission` / `requireAnyPermission` in `middleware/auth.js`
+(refusals carry `code: AUTHORITY_REQUIRED | PERMISSION_REQUIRED` and name the key/group). Attest, confirm and propose take
+`requireAnyPermission('legal_rules','compliance_policy')` and then draw the per-section / per-domain line with the groups —
+oro_sysadmin is refused on the Legal Rules sections (verified). Staff: `POST /staff`, `PATCH /:id/status` and the new
+`PATCH /:id/user-types` (body `{userTypes:[{key, teamId}]}`, replaces the set, validates team ids, multi-team allowed) are
+`manage_users`; profile/team/specialization/task-types are `operations_config`, and task-types additionally needs
+`assign_task_subsets_global` or `assign_task_subsets_team` for someone on the caller's own team (`req.user.dept`). The
+settlement webhook compares SHA-256 digests with `crypto.timingSafeEqual`; "secret required at boot" is NOT built — an
+empty secret refuses every call (as before), which is the safe direction. `server.js` seeds the first-install admin with
+oro_sysadmin + oro_director instead of legacy rows. Frontend: `authStore.hasAuthority/hasPermission/inOro`; the
+jurisdiction-config page and go-live banner gate on `go_live` / `compliance_policy` / `legal_rules`; `AppLayout` menu
+checks stay on the legacy shim until S4. The financial rows (fee-waiver, objections, parentFinance, decisionReasons) and
+`mrr.js` / `parentFinance.js` dead roles remain S4.
+
 ---
 
 ## 9. Migration and compatibility
@@ -342,7 +356,7 @@ Plus the existing 20 role-touching harnesses stay green through steps 3–5.
 | # | Slice | Unblocks |
 |---|---|---|
 | S1 | **BUILT 2026-08-24.** Tables, seed, wipe + bootstrap script, claim minting with §9.1 shim, `auth_version`, `verify_user_types` parts 1–3, 6. Also (needed to keep the suite green): the four non-auth readers of the legacy tables (`taskRouting` pool predicate + legacy fallback, `objections` supervisor finder, `coverageGap`, `importIngest`) now resolve legacy names through user types; `POST /staff` no longer grants every permission role; 16 harnesses grant user types via `tests/userTypeHelpers.js` instead of inserting legacy rows | — |
-| S2 | Gate primitives; §8 rows 1–7 (hub gaps + go-live + attest); frontend `hasPermission/hasAuthority`; `verify_user_types` parts 4–5, 8 | **Hub build** |
+| S2 | **BUILT 2026-08-24.** Gate primitives; §8 rows 1–9 (hub gaps + go-live + attest); `PATCH /staff/:id/user-types`; frontend `hasPermission/hasAuthority`; `verify_user_types` H–K | **Hub build** |
 | S2b | Multi-team membership (§6.1): eligibility/pool/claim read team membership from `user_user_types.team_id`; `department_id` demoted to home dept; `verify_user_types` part 9 | S3 picker semantics |
 | S3 | Staff Management user-type picker + PATCH; picker constraint; User-types admin page | Hub 3.4 |
 | S4 | Migrate remaining `requireRole` sites (17 route files) + frontend checks; retire `SYSTEM_ADMIN` short-circuit | — |

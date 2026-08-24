@@ -8586,3 +8586,37 @@ the five real accounts need types (S3 picker, or a one-off script if Kevin wants
 `kevin-2026-08-24`): Kevin Hargrove (admin@) = oro_sysadmin + oro_director · Michael Hargrove = oro_supervisor +
 oro_associate · Tom Jones = oro_associate · Wayne Jennings = team_manager@team-police · Thomas Jackson =
 team_manager@team-clerk-archives. Chosen from titles/legacy roles; adjust with `userTypes.revoke`/`grant` (or S3's picker).
+
+## 2026-08-24 (night) — S2 BUILT and LIVE: gate primitives + hub-gap gates; multi-team added to the spec (S2b)
+
+Before S2, Kevin asked whether one person can be on several fulfillment teams and/or in the ORO too. Answer:
+the catalog already stores it (a team type is held *against* a team; office types sit alongside), but WORK
+eligibility still reads `users.department_id`. Recorded as **§6.1 + slice S2b** (4420ef0): membership for work
+= teams the person holds a team-scoped type against; `department_id` becomes home/display only; eligibility,
+pool predicate, claim guard and the legacy fallback move onto it; subset stays per person; picker allows one
+chip per team; `verify_user_types` part 9.
+
+**S2 (spec §8 rows 1–9), all live:** `requireAuthority` / `requirePermission` / `requireAnyPermission` in
+`middleware/auth.js` (claims-only, no SysAdmin bypass, coded refusals). fee-profile writes →
+`fee_configuration`; departments/teams → `operations_config`; agent rules → `system_admin`; staff create /
+status / **new `PATCH /staff/:id/user-types`** → `manage_users`; staff profile/team/specialization/task-types →
+`operations_config` (+ `assign_task_subsets_global` or `_team` for own team); go-live flip → `go_live`
+(**sysadmin OR director now**); attest / confirm / propose → `legal_rules` vs `compliance_policy` by
+section/domain — oro_sysadmin is refused on Legal Rules sections (verified, and probed live). Settlement
+webhook compare is `timingSafeEqual` over SHA-256 digests. Fresh-install admin (`server.js`) gets
+oro_sysadmin + oro_director, not legacy rows. Frontend: `authStore.hasAuthority/hasPermission/inOro`;
+jurisdiction-config page + go-live banner gate on them; built + deployed (nginx 200). `AppLayout` menu
+checks stay on the legacy shim (S4).
+
+**Suite:** run 4 = 2525 pass / 5 fail — my `secretMatches` export was clobbered by `module.exports = router`,
+and the two BW9 harnesses encoded the OLD rules (Director can't flip; "Senior Legal" refusal phrasing).
+Fixed export, re-worded the non-legal refusals to still name the Legal Rules line, E2a now asserts
+supervisor 403 / Director 200 per spec §4. Re-run of the three: 123/123. LIVE UNTOUCHED every run.
+Live probe after restart (pre-write refusals only): supervisor on /enforcement → 403 AUTHORITY_REQUIRED;
+team_staff POST /departments → 403 PERMISSION_REQUIRED; senior legal attest `fees` → 403 in words;
+u-kruss GET /go-live → 200.
+
+**THE SETUP-HUB BUILD IS UNBLOCKED** (spec §9.2 step 4). Remaining slices: S2b multi-team · S3 Staff
+Management picker (writes to the S2 PATCH) + user-types admin page · S4 migrate the ~43 remaining
+`requireRole` sites + financial rows + retire the SYSTEM_ADMIN short-circuit · S5 delete shim + legacy tables ·
+S6 coverage-gap email. **NEXT:** Kevin's call — hub build vs S2b/S3 first.

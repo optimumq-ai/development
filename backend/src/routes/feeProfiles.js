@@ -4,7 +4,10 @@
 // result that updates as you edit. AI extraction (later) will write into these same profiles.
 const express = require('express');
 const router = express.Router();
-const { requireAuth } = require('../middleware/auth');
+const { requireAuth, requirePermission } = require('../middleware/auth');
+// v3 (S2): fee-schedule writes are the fee_configuration group (SPEC_user_type_model §8 row 1). Reads, preview and
+// AI extraction (no persistence) stay requireAuth.
+const FEE_CONFIG = requirePermission('fee_configuration');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const engine = require('../services/feeEngine');
@@ -92,7 +95,7 @@ router.get('/:id', requireAuth, async function (req, res) {
 });
 
 // create
-router.post('/', requireAuth, async function (req, res) {
+router.post('/', requireAuth, FEE_CONFIG, async function (req, res) {
   try {
     var b = req.body || {};
     var context = (b.context === 'SS') ? 'SS' : 'FR';
@@ -113,7 +116,7 @@ router.post('/', requireAuth, async function (req, res) {
 });
 
 // update (name / status / config)
-router.put('/:id', requireAuth, async function (req, res) {
+router.put('/:id', requireAuth, FEE_CONFIG, async function (req, res) {
   try {
     var b = req.body || {};
     var existing = await get('SELECT * FROM fee_profiles WHERE id = ?', [req.params.id]);
