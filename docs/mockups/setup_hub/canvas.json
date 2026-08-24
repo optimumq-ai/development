@@ -9,9 +9,9 @@
     { "file": "SignoffA.dc.html", "x": 0, "y": 1460, "w": 500, "h": 840, "title": "Sign-off A — Mark it done", "page": "page-1" },
     { "file": "SignoffB.dc.html", "x": 600, "y": 1460, "w": 500, "h": 1000, "title": "Sign-off B — Put your name to it", "page": "page-1" },
     { "file": "SignoffC.dc.html", "x": 1200, "y": 1460, "w": 500, "h": 1040, "title": "Sign-off C — Send it for review", "page": "page-1" },
-    { "file": "PlanGantt.dc.html", "x": 0, "y": 0, "w": 1430, "h": 1260, "title": "Plan A — full Gantt", "page": "page-2" },
-    { "file": "PlanSwimlanes.dc.html", "x": 1550, "y": 0, "w": 1310, "h": 880, "title": "Plan B — swimlane map", "page": "page-2" },
-    { "file": "PlanOutline.dc.html", "x": 1550, "y": 1000, "w": 1080, "h": 1500, "title": "Plan C — numbered outline", "page": "page-2" }
+    { "file": "PlanGantt.dc.html", "x": 0, "y": 0, "w": 1480, "h": 1440, "title": "Plan A — full Gantt", "page": "page-2" },
+    { "file": "PlanSwimlanes.dc.html", "x": 1600, "y": 0, "w": 1360, "h": 960, "title": "Plan B — swimlane map", "page": "page-2" },
+    { "file": "PlanOutline.dc.html", "x": 1600, "y": 1080, "w": 1080, "h": 1560, "title": "Plan C — numbered outline", "page": "page-2" }
   ],
   "annotations": [
     {
