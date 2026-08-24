@@ -42,7 +42,7 @@ built on it. No gating ships on derived team membership.
 | **No route to edit a user's function roles after creation** (frontend roster shows them read-only) | `routes/staff.js` PATCHes; `StaffManagementPage.js:262` |
 | Roles and perms are minted into the 8h JWT; a change takes effect at next login | `services/auth.js:11-17` |
 | `SYSTEM_ADMIN` short-circuits every gate | `middleware/auth.js:21,38` |
-| There is **no teams table**: a team is a `departments` row with `kind='team'`; membership is `users.department_id` (one team per person) | `routes/departments.js`, `staff.js:53` |
+| There is **no teams table**: a team is a `departments` row with `kind='team'`; membership is `users.department_id` (one team per person) — *multi-team is §6.1 / S2b* | `routes/departments.js`, `staff.js:53` |
 | Hub gating gaps: fee_profiles writes, departments/teams writes, agent-rules writes = `requireAuth` only; settlement webhook = shared secret, non-constant-time compare | `feeProfiles.js:45,95,116`; `departments.js:13,26,44`; `agentRules.js:14,26,36`; `settlement.js:42` |
 | Go-live flip = `SYSTEM_ADMIN` only; attest scope drawn inline by role name | `jurisdictionProfile.js:13-14,16-26,112` |
 | Routing already runs on the per-person subset (`user_task_types`); permission roles are endpoint gates only | SPEC_tasks_roles_mrr_fees §8, cutover 2026-08-13 |
@@ -176,8 +176,33 @@ user type they hold** (union of menus). Menus (from the master list Part C, keys
 | team_manager / team_supervisor | estimate, record_search, redaction, redaction_qa |
 | team_staff | estimate, record_search, redaction, redaction_qa |
 
-Team-level grants are still team-scoped by `users.department_id` as today (§2: one team per person).
+Team-level grants are still team-scoped by `users.department_id` as today (§2: one team per person) —
+**until slice S2b (§6.1) moves team membership onto `user_user_types.team_id`.**
 `eligibleUsers(team, taskType)` is unchanged by this spec — it already resolves on the subset.
+
+### 6.1 Multi-team membership (Kevin, 2026-08-24 — added after S1; built in S2b)
+
+A person may work on **more than one fulfillment team**, and may be **in the ORO and on one or more
+fulfillment teams** at the same time. The catalog already stores this (a team-scoped type is held *against*
+a team: `team_staff@team-police` and `team_staff@team-fire` can both be held; office types sit alongside).
+What S1 still assumes is one team per person for WORK: eligibility reads `users.department_id`.
+
+Rules once S2b lands:
+1. **Team membership for work = the set of teams the person holds any team-scoped type against**
+   (`SELECT team_id FROM user_user_types WHERE user_id = ? AND team_id IS NOT NULL`). `users.department_id`
+   becomes the person's *home / display department* only — it no longer gates anything.
+2. `eligibleUsers(team, type)`, the task-pool predicate (`POOL_ELIGIBILITY_SQL`) and the claim guard resolve
+   "on the team" through rule 1. `usersWithLegacyPerm(teamId)` (the compat fallback) does the same; the
+   chain-of-command lookup already does (S1).
+3. The task subset (`user_task_types`) stays **per person**, applied on every team they are on. Per-team
+   subsets are not a v1 need.
+4. Staff Management (S3) lets a team-type chip be added once per team; the person's home department is a
+   separate field. Organization → "View staff" lists a person under every team they hold a type against.
+5. Coverage-gap email (below) already keys on the team a `team_manager` type is held against.
+
+Verification (`verify_user_types` part 9, S2b): a person typed on two teams is offered and can claim work on
+both; is NOT eligible on a third; a person whose `department_id` is team A but who holds a type only against
+team B is eligible on B and not on A; office-only staff are eligible on no team.
 
 **Coverage-gap email** (design §6): when `spawnForStage` finds an empty pool for (team, type), email
 every `team_manager` of that team (fallback: `oro_director`). Small; ships in slice S6.
@@ -318,6 +343,7 @@ Plus the existing 20 role-touching harnesses stay green through steps 3–5.
 |---|---|---|
 | S1 | **BUILT 2026-08-24.** Tables, seed, wipe + bootstrap script, claim minting with §9.1 shim, `auth_version`, `verify_user_types` parts 1–3, 6. Also (needed to keep the suite green): the four non-auth readers of the legacy tables (`taskRouting` pool predicate + legacy fallback, `objections` supervisor finder, `coverageGap`, `importIngest`) now resolve legacy names through user types; `POST /staff` no longer grants every permission role; 16 harnesses grant user types via `tests/userTypeHelpers.js` instead of inserting legacy rows | — |
 | S2 | Gate primitives; §8 rows 1–7 (hub gaps + go-live + attest); frontend `hasPermission/hasAuthority`; `verify_user_types` parts 4–5, 8 | **Hub build** |
+| S2b | Multi-team membership (§6.1): eligibility/pool/claim read team membership from `user_user_types.team_id`; `department_id` demoted to home dept; `verify_user_types` part 9 | S3 picker semantics |
 | S3 | Staff Management user-type picker + PATCH; picker constraint; User-types admin page | Hub 3.4 |
 | S4 | Migrate remaining `requireRole` sites (17 route files) + frontend checks; retire `SYSTEM_ADMIN` short-circuit | — |
 | S5 | Delete shim + legacy tables + `FUNCTION_ROLES` frontend constant; ARCHITECTURE §4 + SPEC_tasks_roles §8 rewritten | — |
