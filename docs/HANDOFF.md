@@ -8581,3 +8581,8 @@ perms (work eligibility) stay home-team only.
 departments/teams, agent-rules, settlement timing-safe compare, go-live, attest), frontend
 `hasPermission/hasAuthority`, `verify_user_types` parts 4–5, 8. S2 unblocks the hub build. Also parked:
 the five real accounts need types (S3 picker, or a one-off script if Kevin wants in sooner).
+
+**Addendum (same evening):** Kevin had the five real accounts typed right away (via `userTypes.grant`, actor
+`kevin-2026-08-24`): Kevin Hargrove (admin@) = oro_sysadmin + oro_director · Michael Hargrove = oro_supervisor +
+oro_associate · Tom Jones = oro_associate · Wayne Jennings = team_manager@team-police · Thomas Jackson =
+team_manager@team-clerk-archives. Chosen from titles/legacy roles; adjust with `userTypes.revoke`/`grant` (or S3's picker).
