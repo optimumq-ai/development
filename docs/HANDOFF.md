@@ -8473,3 +8473,19 @@ dependencies, plain-language item names, lane-2 split question, two lane-placeme
 flip is SysAdmin-only but sits in the Legal lane; lane-1 header overstates Legal's ownership).
 
 **NEXT:** Kevin marks up the canvas → fold into inventory → spec the user-type slice.
+
+## 2026-08-24 (closing) — plan-layout drafts added; Kevin picking between them next session
+
+After the earlier note: Kevin asked for the hub content re-drawn as a project plan
+(dependencies visible, no dates). Canvas page 2 now has three drafts — Plan A full
+gantt (one row per task, phase grouping, arrows), Plan B swimlane map (owner lanes,
+12 group cards, sparse arrows), Plan C numbered outline (waits-for chips, complete).
+Review-pass fixes committed d0b4cd8; sources in docs/mockups/setup_hub/ (gantt is
+generated — regen script pattern lives in the session scratchpad; re-creating it from
+the .dc.html is trivial if needed).
+
+**Kevin: "i like two of the mock ups"** — which two is NOT yet said. NEXT SESSION:
+ask which two and what to change, fold the choice into WORKING_setup_inventory.md,
+then proceed per the locked plan (design → user-type spec/build → hub build; no
+stopgap — see the earlier 2026-08-24 note). Canvas:
+https://claude.ai/code/artifact/1c473eef-a5f6-47bd-a766-1003e9393060 (page 2).
