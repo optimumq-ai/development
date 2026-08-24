@@ -1,0 +1,177 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; } a:hover { color: #0E3A5C; }
+
+    .panel { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .ph { padding: 12px 16px; border-bottom: 1px solid #D2DCE3; }
+    .pt { font-size: 14px; font-weight: 700; color: #12232E; }
+    .ps { font-size: 12px; color: #5C6F7C; margin-top: 3px; line-height: 1.45; }
+    .pb { padding: 16px; }
+
+    .pill { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 999px;
+            padding: 2px 9px; white-space: nowrap; }
+    .p-ready { background: #E1F2E9; color: #1B8A5A; }
+    .p-prog  { background: #F6EBD6; color: #9A6512; }
+    .p-none  { background: #FFFFFF; color: #8296A4; border: 1px dashed #BECAD3; padding: 1px 8px; }
+    .p-act   { background: #F8E7E8; color: #B02A37; }
+    .p-wait  { background: #FFFFFF; color: #5C6F7C; border: 1px solid #BECAD3; padding: 1px 8px; }
+
+    .item { display: block; border: 1px solid #D2DCE3; border-radius: 8px;
+            background: #FFFFFF; padding: 8px 10px; }
+    .iname { font-size: 13px; font-weight: 600; color: #12232E; flex-grow: 1; line-height: 1.3; }
+    .ev { font-size: 11.5px; color: #8296A4; line-height: 1.35; }
+
+    .callout { display: inline-flex; align-items: center; justify-content: center;
+               width: 17px; height: 17px; border-radius: 999px; background: #1E6091;
+               color: #FFFFFF; font-size: 10.5px; font-weight: 700; }
+    .annot { font-size: 12px; color: #5C6F7C; line-height: 1.5; }
+    .annot b { color: #12232E; font-weight: 600; }
+
+    .btn { border: 1px solid #1E6091; background: #1E6091; color: #FFFFFF;
+           border-radius: 8px; padding: 8px 14px; font-size: 13px; font-weight: 600;
+           font-family: inherit; cursor: pointer; }
+    .btn.ghost { background: #FFFFFF; color: #1E6091; }
+  </style>
+</helmet>
+
+<div style="padding: 20px; display: flex; flex-direction: column; gap: 14px;">
+
+  <!-- ANATOMY -->
+  <div class="panel">
+    <div class="ph">
+      <div class="pt">What one item looks like</div>
+      <div class="ps">The status is read from the system, not from a checkbox somebody ticked. Every chip is backed by a line saying what the system actually found.</div>
+    </div>
+    <div class="pb" style="display: flex; gap: 20px; align-items: flex-start;">
+
+      <div style="flex: 0 0 320px;">
+        <div class="item">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <span class="iname">How long each record type takes</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+          </div>
+          <div style="display: flex; align-items: center; gap: 7px; margin-top: 6px;">
+            <span class="pill p-prog">In progress</span>
+            <span class="ev">4 of 11 record types have a time estimate</span>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 10px; align-items: baseline;">
+          <span class="callout">1</span><span class="annot">The whole row is the button. One click, straight into the screen that sets this.</span>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 7px; align-items: baseline;">
+          <span class="callout">2</span><span class="annot">Plain-language name. Not the name of the database table or the menu tab it lives under today.</span>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 7px; align-items: baseline;">
+          <span class="callout">3</span><span class="annot">The evidence line. This is the part that makes the status honest — and it tells you what is left to do without opening anything.</span>
+        </div>
+      </div>
+
+      <div style="flex-grow: 1; background: #F2F6F9; border: 1px solid #D2DCE3; border-radius: 8px; padding: 14px;">
+        <div style="font-size: 12px; font-weight: 700; color: #5C6F7C; text-transform: uppercase; letter-spacing: 0.05em;">Why not just Complete / Incomplete</div>
+        <div class="annot" style="margin-top: 8px;">Your mock-up had three states, which is the right instinct — but a bare <b>Incomplete</b> tells someone to go looking, and they may open a screen that turns out to be nearly done. Because the system can already count what is configured, the chip can say <b>which</b> part is missing at no extra cost.</div>
+        <div class="annot" style="margin-top: 10px;">There is one thing the evidence cannot answer: whether a person is <b>willing to say this is ready</b>. That is a separate act, and it is what unlocks anything downstream. The three artboards below are three ways to ask for it.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- STATUS VOCABULARY -->
+  <div class="panel">
+    <div class="ph">
+      <div class="pt">The five states</div>
+      <div class="ps">Each one is computed. Nothing here needs a person to maintain it.</div>
+    </div>
+    <div class="pb" style="display: flex; flex-direction: column; gap: 10px;">
+
+      <div style="display: flex; gap: 14px; align-items: baseline;">
+        <span style="flex: 0 0 110px;"><span class="pill p-ready">Ready</span></span>
+        <span class="annot" style="flex-grow: 1;">Everything this item needs is set, and where a sign-off is required it has been given. <b>Example:</b> 34 redaction rules, each with a citation, confirmed by R. Ellis on 14 Aug.</span>
+      </div>
+
+      <div style="display: flex; gap: 14px; align-items: baseline;">
+        <span style="flex: 0 0 110px;"><span class="pill p-prog">In progress</span></span>
+        <span class="annot" style="flex-grow: 1;">Someone has started and part of it is set. The evidence line names the gap. <b>Example:</b> provider set, no test message sent.</span>
+      </div>
+
+      <div style="display: flex; gap: 14px; align-items: baseline;">
+        <span style="flex: 0 0 110px;"><span class="pill p-none">Not started</span></span>
+        <span class="annot" style="flex-grow: 1;">Nothing set. Where the system ships with a working default, the evidence line says so — running on defaults is a real answer, not a blank.</span>
+      </div>
+
+      <div style="display: flex; gap: 14px; align-items: baseline;">
+        <span style="flex: 0 0 110px;"><span class="pill p-act">Needs attention</span></span>
+        <span class="annot" style="flex-grow: 1;">Was set, and something has changed since: a proposed rule change is waiting, a rate now exceeds a state limit, a nightly connection started failing. This state is the reason the page stays useful after go-live instead of becoming a page nobody opens again.</span>
+      </div>
+
+      <div style="display: flex; gap: 14px; align-items: baseline;">
+        <span style="flex: 0 0 110px;"><span class="pill p-wait">Waiting</span></span>
+        <span class="annot" style="flex-grow: 1;">Something else has to happen first. The row is dimmed and carries a <b>Why</b> button that explains it in a sentence.</span>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- DEPENDENCY -->
+  <div class="panel">
+    <div class="ph">
+      <div class="pt">What the Why button opens</div>
+      <div class="ps">Your taxonomy-and-connectors example, drawn two ways. The difference is whether a dependency is a wall or a warning.</div>
+    </div>
+    <div class="pb" style="display: flex; gap: 16px; align-items: flex-start;">
+
+      <!-- hard -->
+      <div style="flex: 1 1 0; min-width: 0;">
+        <div style="font-size: 12px; font-weight: 700; color: #5C6F7C; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Treatment A — locked</div>
+        <div style="background: #FFFFFF; border: 1px solid #BECAD3; border-radius: 10px; box-shadow: 0 2px 8px rgba(18,35,46,0.10);">
+          <div style="padding: 13px 15px; border-bottom: 1px solid #D2DCE3;">
+            <div style="font-size: 13.5px; font-weight: 700;">Record types and categories is waiting</div>
+          </div>
+          <div style="padding: 14px 15px;">
+            <div class="annot">This step uses your connected record systems to suggest the record types your city actually holds. Until at least one system is connected and has finished a scan, there is nothing for it to read.</div>
+            <div class="annot" style="margin-top: 10px;"><b>Waiting on:</b> Where the records live — Technical Setup, set up by your System Administrator. Two of three systems are connected; the Laserfiche scan last failed on 20 Aug.</div>
+            <div style="display: flex; gap: 8px; margin-top: 14px;">
+              <button class="btn">Go to Where the records live</button>
+              <button class="btn ghost">Close</button>
+            </div>
+          </div>
+        </div>
+        <div class="annot" style="margin-top: 9px;"><b>Trade-off.</b> Nobody wastes time in a screen that cannot work yet. But record types can also be typed in by hand, so this blocks a person who does not want the suggestions at all — and in a city with no connectors, it blocks them permanently.</div>
+      </div>
+
+      <!-- soft -->
+      <div style="flex: 1 1 0; min-width: 0;">
+        <div style="font-size: 12px; font-weight: 700; color: #5C6F7C; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px;">Treatment B — open, with a warning</div>
+        <div style="background: #FFFFFF; border: 1px solid #BECAD3; border-radius: 10px; box-shadow: 0 2px 8px rgba(18,35,46,0.10);">
+          <div style="padding: 13px 15px; border-bottom: 1px solid #D2DCE3;">
+            <div style="font-size: 13.5px; font-weight: 700;">One part of this step is not available yet</div>
+          </div>
+          <div style="padding: 14px 15px;">
+            <div class="annot">You can add record types by hand right now. What you cannot do yet is have the system suggest them from your own records — that needs a connected record system that has finished a scan.</div>
+            <div class="annot" style="margin-top: 10px;"><b>Waiting on:</b> Where the records live — Technical Setup, set up by your System Administrator.</div>
+            <div style="display: flex; gap: 8px; margin-top: 14px;">
+              <button class="btn">Add record types by hand</button>
+              <button class="btn ghost">Go to Where the records live</button>
+            </div>
+          </div>
+        </div>
+        <div class="annot" style="margin-top: 9px;"><b>Trade-off.</b> Nobody is stuck, and a small city with no connectors can still finish setup. But the lane no longer reads top-to-bottom as a sequence, and someone can do work by hand that the scan would have done for them in a minute.</div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

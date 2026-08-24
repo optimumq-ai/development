@@ -1,0 +1,33 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 1200, "title": "The hub" },
+    { "file": "ItemStates.dc.html", "x": 1560, "y": 0, "w": 900, "h": 1140, "title": "Item anatomy, states and dependencies" },
+    { "file": "SignoffA.dc.html", "x": 0, "y": 1360, "w": 500, "h": 800, "title": "Sign-off A — Mark it done" },
+    { "file": "SignoffB.dc.html", "x": 600, "y": 1360, "w": 500, "h": 920, "title": "Sign-off B — Put your name to it" },
+    { "file": "SignoffC.dc.html", "x": 1200, "y": 1360, "w": 500, "h": 1020, "title": "Sign-off C — Send it for review" }
+  ],
+  "annotations": [
+    {
+      "id": "brief",
+      "x": -340,
+      "y": 0,
+      "w": 280,
+      "text": "Four lanes, every real setup item from the inventory — 36 of them, plus agency identity promoted to the top.\n\nStatuses and counts are realistic samples so you can see what the evidence lines read like. They are not live data.\n\nItem names are written the way a clerk would say them, not the way the menu says them today. That is the part most worth marking up."
+    },
+    {
+      "id": "lanes",
+      "x": -340,
+      "y": 330,
+      "w": 280,
+      "text": "Drawn honestly, the lanes are lopsided: 12, 13, 4, 7.\n\nLane 2 is doing too much. Roughly half of it is fees and estimates, the other half is redaction and release behaviour. If it wants splitting, that is a five-lane page — worth deciding now rather than after it is built."
+    },
+    {
+      "id": "signoff-mix",
+      "x": 1800,
+      "y": 1360,
+      "w": 300,
+      "text": "These three are not necessarily exclusive.\n\nA workable mix: B for the legal lane, where a name against a decision is the point; A everywhere else, so setup never stalls; C only on the handful of items something else is actually waiting on.\n\nThat mix needs the permission half of the user-type model, but not the authority half — which would make the role build noticeably smaller."
+    }
+  ],
+  "launch": { "view": "canvas" }
+}

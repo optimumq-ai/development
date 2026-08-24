@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; } a:hover { color: #0E3A5C; }
+    .panel { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .annot { font-size: 12px; color: #5C6F7C; line-height: 1.5; }
+    .annot b { color: #12232E; font-weight: 600; }
+    .cap { font-size: 11.5px; font-weight: 700; color: #5C6F7C; text-transform: uppercase; letter-spacing: 0.05em; }
+    .pill { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 2px 9px; }
+    .p-ready { background: #E1F2E9; color: #1B8A5A; }
+    .btn { border: 1px solid #1E6091; background: #1E6091; color: #FFFFFF; border-radius: 8px;
+           padding: 8px 14px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; }
+    .btn.ghost { background: #FFFFFF; color: #1E6091; }
+    .ev { font-size: 11.5px; color: #8296A4; line-height: 1.35; }
+  </style>
+</helmet>
+
+<div style="padding: 20px; display: flex; flex-direction: column; gap: 13px;">
+
+  <div>
+    <div style="font-size: 17px; font-weight: 700;">Option B — Put your name to it</div>
+    <div class="annot" style="margin-top: 4px;">The act the legal sections already use, extended to every item on the page.</div>
+  </div>
+
+  <div class="panel">
+    <div style="padding: 11px 15px; border-bottom: 1px solid #D2DCE3;">
+      <span class="cap">At the bottom of the setup screen</span>
+    </div>
+    <div style="padding: 15px;">
+      <div style="background: #F2F6F9; border: 1px solid #D2DCE3; border-radius: 8px; padding: 14px;">
+        <div style="font-size: 13.5px; font-weight: 600;">Confirm this step</div>
+        <div style="background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 6px; padding: 11px 12px; margin-top: 9px;">
+          <div style="font-size: 12.5px; line-height: 1.55; color: #12232E;">I have reviewed the record systems connected here, and these are the systems this city will search when it answers a records request.</div>
+        </div>
+        <div style="display: flex; align-items: center; gap: 10px; margin-top: 11px; flex-wrap: wrap;">
+          <span class="annot"><b>T. Alvarez</b> · System Administrator · 24 Aug 2026</span>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 12px;">
+          <button class="btn">Confirm</button>
+          <button class="btn ghost">Not yet</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div style="padding: 11px 15px; border-bottom: 1px solid #D2DCE3;">
+      <span class="cap">On the hub afterwards</span>
+    </div>
+    <div style="padding: 15px;">
+      <div style="border: 1px solid #D2DCE3; border-radius: 8px; padding: 8px 10px;">
+        <div style="font-size: 13px; font-weight: 600;">Where the records live</div>
+        <div style="display: flex; align-items: center; gap: 7px; margin-top: 6px;">
+          <span class="pill p-ready">Ready</span>
+          <span class="ev">3 of 3 connected · confirmed by T. Alvarez, 24 Aug</span>
+        </div>
+      </div>
+      <div class="annot" style="margin-top: 10px;">Same sentence pattern the go-live checklist already prints for the legal sections, so the whole page reads in one voice. If the connectors change afterwards, the confirmation goes stale and the row turns to <b>Needs attention</b> — that behaviour already exists.</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div style="padding: 15px; display: flex; flex-direction: column; gap: 11px;">
+      <div>
+        <div class="cap">Why you might want this</div>
+        <div class="annot" style="margin-top: 5px;">The act already exists and is already built for the legal sections, so the page speaks one language instead of two. It produces a real record of who stood behind each decision, which is exactly what a city needs when a request is challenged a year later.</div>
+      </div>
+      <div>
+        <div class="cap">What it costs you</div>
+        <div class="annot" style="margin-top: 5px;">A formal confirmation means something on <b>exemptions and appeals</b>. Asking for the same ceremony on <b>how long each task should take</b> spends that weight on something trivial, and people who confirm twenty things stop reading the twenty-first. It also does not stop somebody confirming their own work.</div>
+      </div>
+      <div>
+        <div class="cap">What it needs from the role model</div>
+        <div class="annot" style="margin-top: 5px;">A rule for who may confirm what. That is the permission-group half of the user-type design — the part that says Senior Legal owns the legal rules and the System Administrator does not.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>

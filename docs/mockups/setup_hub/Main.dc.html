@@ -1,0 +1,354 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; } a:hover { color: #0E3A5C; }
+
+    .lane { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px;
+            display: flex; flex-direction: column; }
+    .lanehead { padding: 12px 14px; border-bottom: 1px solid #D2DCE3; }
+    .lanename { font-size: 13.5px; font-weight: 700; color: #12232E; line-height: 1.3; }
+    .laneowner { font-size: 11.5px; color: #5C6F7C; margin-top: 3px; }
+    .lanecount { font-size: 11.5px; color: #8296A4; margin-top: 5px; }
+    .lanebody { padding: 10px; display: flex; flex-direction: column; gap: 7px; }
+
+    .item { display: block; border: 1px solid #D2DCE3; border-radius: 8px;
+            background: #FFFFFF; padding: 8px 10px; cursor: pointer; }
+    .item:hover { border-color: #BECAD3; background: #F2F6F9; }
+    .item.waiting { background: #F2F6F9; opacity: 0.72; cursor: not-allowed; }
+    .itop { display: flex; align-items: center; gap: 8px; }
+    .iname { font-size: 13px; font-weight: 600; color: #12232E; flex-grow: 1; line-height: 1.3; }
+    .ibot { display: flex; align-items: center; gap: 7px; margin-top: 6px; flex-wrap: wrap; }
+    .ev { font-size: 11.5px; color: #8296A4; line-height: 1.35; }
+
+    .pill { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 999px;
+            padding: 2px 9px; white-space: nowrap; }
+    .p-ready { background: #E1F2E9; color: #1B8A5A; }
+    .p-prog  { background: #F6EBD6; color: #9A6512; }
+    .p-none  { background: #FFFFFF; color: #8296A4; border: 1px dashed #BECAD3; padding: 1px 8px; }
+    .p-act   { background: #F8E7E8; color: #B02A37; }
+    .p-wait  { background: #FFFFFF; color: #5C6F7C; border: 1px solid #BECAD3; padding: 1px 8px; }
+
+    .tag { display: inline-block; font-size: 10.5px; font-weight: 600; color: #8296A4;
+           border: 1px dashed #BECAD3; border-radius: 4px; padding: 1px 6px; white-space: nowrap; }
+    .dep { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600;
+           color: #1E6091; border: 1px solid #BECAD3; border-radius: 999px; padding: 1px 8px; cursor: pointer; }
+    .dep:hover { background: #E4EEF6; }
+  </style>
+</helmet>
+
+<div style="padding: 20px;">
+
+  <!-- page header -->
+  <div style="background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; margin-bottom: 14px;">
+    <div style="padding: 14px 18px; display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+      <div style="flex-grow: 1;">
+        <div style="font-size: 19px; font-weight: 700; color: #12232E;">Setup and Configuration</div>
+        <div style="font-size: 12.5px; color: #5C6F7C; margin-top: 3px;">Everything this city has to decide before it can answer records requests for real. Each item opens the screen that sets it.</div>
+      </div>
+      <div style="display: flex; align-items: center; gap: 8px;">
+        <span class="pill p-ready">14 ready</span>
+        <span class="pill p-prog">8 in progress</span>
+        <span class="pill p-none">13 not started</span>
+        <span class="pill p-act">1 needs attention</span>
+      </div>
+    </div>
+    <div style="padding: 11px 18px; border-top: 1px solid #D2DCE3; background: #F2F6F9; border-radius: 0 0 10px 10px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap;">
+      <span style="font-size: 12px; font-weight: 700; color: #5C6F7C; text-transform: uppercase; letter-spacing: 0.05em;">Start here</span>
+      <div style="flex-grow: 1; display: flex; align-items: center; gap: 9px;">
+        <span style="font-size: 13px; font-weight: 600; color: #12232E;">Agency name, address and contact</span>
+        <span class="pill p-ready">Ready</span>
+        <span class="ev">City of Fair Ridge, TX · confirmed by M. Hargrove, 12 Aug</span>
+      </div>
+      <span style="font-size: 12px; color: #8296A4;">Nothing else can be set up until this is filled in.</span>
+    </div>
+  </div>
+
+  <!-- four lanes -->
+  <div style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; align-items: start;">
+
+    <!-- LANE 1 -->
+    <div class="lane">
+      <div class="lanehead" style="border-top: 3px solid #1E6091; border-radius: 9px 9px 0 0;">
+        <div class="lanename">Statutory and Policy Rules</div>
+        <div class="laneowner">Senior Legal · ORO Director</div>
+        <div class="lanecount">6 of 12 ready</div>
+      </div>
+      <div class="lanebody">
+
+        <a class="item">
+          <div class="itop"><span class="iname">Jurisdiction, statute and exemption model</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-ready">Ready</span><span class="ev">Texas · Gov't Code ch. 552 · confirmed 12 Aug</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">State rules import</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-ready">Ready</span><span class="ev">Texas template imported · 6 sections created</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Response deadlines and tolling</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-ready">Ready</span><span class="ev">10 business days · 4 tolling rules · confirmed by R. Ellis, 14 Aug</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">What the law lets you charge</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-ready">Ready</span><span class="ev">27 figures cited · nothing above a state limit</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Deposits and payment clock</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-prog">In progress</span><span class="ev">3 of 5 choices made</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Fee waivers and who approves them</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-prog">In progress</span><span class="ev">policy written · approver not named yet</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Vague requests and clarification</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-none">Not started</span><span class="tag">no screen yet</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Exemptions and appeals</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-ready">Ready</span><span class="ev">confirmed by R. Ellis, 14 Aug</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Redaction rules library</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-ready">Ready</span><span class="ev">34 rules, each with a citation · confirmed by R. Ellis, 14 Aug</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Choices the statute left to the city</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-prog">In progress</span><span class="ev">17 of 23 answered</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Keeping up with changes in the law</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-act">Needs attention</span><span class="ev">2 proposed changes waiting for Senior Legal</span></div>
+        </a>
+
+        <a class="item waiting">
+          <div class="itop"><span class="iname">Turn the rules on for real</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
+          <div class="ibot"><span class="pill p-wait">Waiting</span><span class="ev">until every rule above is confirmed</span><span class="dep">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1E6091" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>Why</span></div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- LANE 2 -->
+    <div class="lane">
+      <div class="lanehead" style="border-top: 3px solid #1E6091; border-radius: 9px 9px 0 0;">
+        <div class="lanename">How This City Works a Request</div>
+        <div class="laneowner">Anyone in the Open Records Office · fulfillment team supervisors</div>
+        <div class="lanecount">3 of 13 ready</div>
+      </div>
+      <div class="lanebody">
+
+        <a class="item">
+          <div class="itop"><span class="iname">What this city actually charges</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-ready">Ready</span><span class="ev">version 4 in use · every rate within the state limits</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Try a test estimate</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-prog">In progress</span><span class="ev">last run was against version 3, not the one in use</span></div>
+        </a>
+
+        <a class="item waiting">
+          <div class="itop"><span class="iname">Record types and categories</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg></div>
+          <div class="ibot"><span class="pill p-wait">Waiting</span><span class="ev">on Connectors</span><span class="dep">
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#1E6091" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>Why</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">How long each record type takes</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-none">Not started</span><span class="ev">0 of 11 record types have a time estimate</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Who gets which request</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-none">Not started</span><span class="ev">no routing rules written</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">How long each task should take</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-ready">Ready</span><span class="ev">6 task types, all with a day budget</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Whether staff record their time</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-ready">Ready</span><span class="ev">always required</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">When the system warns you</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-prog">In progress</span><span class="ev">overdue alerts set · no escalation day set</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Automatic redaction decisions</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-none">Not started</span><span class="tag">no screen yet</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Review before records go out</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-none">Not started</span><span class="tag">no screen yet</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Redaction layout templates</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-none">Not started</span><span class="ev">0 templates</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Standard wording for denials</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-none">Not started</span><span class="tag">no screen yet</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">When bulk redaction runs</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-none">Not started</span><span class="tag">no screen yet</span></div>
+        </a>
+
+      </div>
+    </div>
+
+    <!-- LANE 3 -->
+    <div class="lane">
+      <div class="lanehead" style="border-top: 3px solid #1E6091; border-radius: 9px 9px 0 0;">
+        <div class="lanename">People and Departments</div>
+        <div class="laneowner">Anyone in the Open Records Office · fulfillment team supervisors</div>
+        <div class="lanecount">1 of 4 ready</div>
+      </div>
+      <div class="lanebody">
+
+        <a class="item">
+          <div class="itop"><span class="iname">City departments</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-ready">Ready</span><span class="ev">9 departments</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Fulfillment teams</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-prog">In progress</span><span class="ev">2 departments have no team to serve them</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Staff and what each person does</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-prog">In progress</span><span class="ev">11 people · nobody assigned to record search</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Which department owns which records</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-none">Not started</span><span class="ev">0 of 11 record types have an owner</span></div>
+        </a>
+
+        <div style="margin-top: 4px; padding: 10px 11px; background: #F2F6F9; border: 1px solid #D2DCE3; border-radius: 8px;">
+          <div style="font-size: 11.5px; font-weight: 700; color: #5C6F7C; text-transform: uppercase; letter-spacing: 0.05em;">A note on this lane</div>
+          <div style="font-size: 12px; color: #5C6F7C; line-height: 1.5; margin-top: 5px;">This lane is short because agency name and address moved to the top of the page. It is also the lane the other two depend on — until staff and teams exist, the system cannot tell who is allowed to open the middle two lanes at all.</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- LANE 4 -->
+    <div class="lane">
+      <div class="lanehead" style="border-top: 3px solid #1E6091; border-radius: 9px 9px 0 0;">
+        <div class="lanename">Technical Setup</div>
+        <div class="laneowner">System Administrator</div>
+        <div class="lanecount">3 of 7 ready</div>
+      </div>
+      <div class="lanebody">
+
+        <a class="item">
+          <div class="itop"><span class="iname">Where the records live</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-prog">In progress</span><span class="ev">2 of 3 connected · Laserfiche last run failed</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">AI service keys</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-ready">Ready</span><span class="ev">both tested 21 Aug</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Where AI processing happens</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-ready">Ready</span><span class="ev">GovCloud · 7 touchpoints routed</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Outgoing email</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-prog">In progress</span><span class="ev">provider set · no test message sent</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">How staff sign in</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-ready">Ready</span><span class="ev">password + MFA · 30 minute timeout</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">What the public portal assistant may say</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-none">Not started</span><span class="ev">running on the shipped defaults</span></div>
+        </a>
+
+        <a class="item">
+          <div class="itop"><span class="iname">Sending charges to the finance system</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg></div>
+          <div class="ibot"><span class="pill p-none">Not started</span><span class="tag">no screen yet</span></div>
+        </a>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

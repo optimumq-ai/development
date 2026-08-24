@@ -19,3 +19,6 @@ uploads/
 *.bak
 docker-compose.yml.bak.*
 demo_sources/
+
+# Seeded design-canvas payloads (2 MB generated wrappers — re-seed from the .dc.html sources)
+docs/mockups/**/setup-configuration-hub.html

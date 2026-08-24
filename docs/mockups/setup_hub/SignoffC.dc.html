@@ -1,0 +1,104 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; } a:hover { color: #0E3A5C; }
+    .panel { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .annot { font-size: 12px; color: #5C6F7C; line-height: 1.5; }
+    .annot b { color: #12232E; font-weight: 600; }
+    .cap { font-size: 11.5px; font-weight: 700; color: #5C6F7C; text-transform: uppercase; letter-spacing: 0.05em; }
+    .pill { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 999px; padding: 2px 9px; }
+    .p-prog { background: #F6EBD6; color: #9A6512; }
+    .p-wait { background: #FFFFFF; color: #5C6F7C; border: 1px solid #BECAD3; padding: 1px 8px; }
+    .btn { border: 1px solid #1E6091; background: #1E6091; color: #FFFFFF; border-radius: 8px;
+           padding: 8px 14px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; }
+    .btn.ghost { background: #FFFFFF; color: #1E6091; }
+    .ev { font-size: 11.5px; color: #8296A4; line-height: 1.35; }
+    .sel { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 6px;
+           padding: 7px 10px; font-size: 12.5px; color: #12232E; }
+  </style>
+</helmet>
+
+<div style="padding: 20px; display: flex; flex-direction: column; gap: 13px;">
+
+  <div>
+    <div style="font-size: 17px; font-weight: 700;">Option C — Send it for review</div>
+    <div class="annot" style="margin-top: 4px;">A second person signs it off before anything downstream opens. This is the closest reading of your note.</div>
+  </div>
+
+  <div class="panel">
+    <div style="padding: 11px 15px; border-bottom: 1px solid #D2DCE3;">
+      <span class="cap">At the bottom of the setup screen</span>
+    </div>
+    <div style="padding: 15px;">
+      <div style="background: #F2F6F9; border: 1px solid #D2DCE3; border-radius: 8px; padding: 14px;">
+        <div style="font-size: 13.5px; font-weight: 600;">Submit this step as complete</div>
+        <div class="annot" style="margin-top: 5px;">It goes to one person to check. Until they agree, the steps waiting on this one stay closed.</div>
+        <div style="margin-top: 10px;">
+          <div class="cap" style="margin-bottom: 5px;">Send to</div>
+          <div class="sel" style="display: flex; align-items: center; gap: 8px;">
+            <span style="flex-grow: 1;">M. Hargrove — Open Records Director</span>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#5C6F7C" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </div>
+        </div>
+        <div style="display: flex; gap: 8px; margin-top: 12px;">
+          <button class="btn">Submit</button>
+          <button class="btn ghost">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div style="padding: 11px 15px; border-bottom: 1px solid #D2DCE3;">
+      <span class="cap">On the hub afterwards</span>
+    </div>
+    <div style="padding: 15px;">
+      <div style="border: 1px solid #D2DCE3; border-radius: 8px; padding: 8px 10px;">
+        <div style="font-size: 13px; font-weight: 600;">Where the records live</div>
+        <div style="display: flex; align-items: center; gap: 7px; margin-top: 6px; flex-wrap: wrap;">
+          <span class="pill p-prog">In progress</span>
+          <span class="ev">3 of 3 connected · with M. Hargrove for review since 24 Aug</span>
+        </div>
+      </div>
+      <div style="border: 1px solid #D2DCE3; border-radius: 8px; padding: 8px 10px; margin-top: 7px; background: #F2F6F9; opacity: 0.72;">
+        <div style="font-size: 13px; font-weight: 600;">Record types and categories</div>
+        <div style="display: flex; align-items: center; gap: 7px; margin-top: 6px;">
+          <span class="pill p-wait">Waiting</span>
+          <span class="ev">until Where the records live is reviewed</span>
+        </div>
+      </div>
+      <div class="annot" style="margin-top: 10px;">This is the one option where the hub genuinely shows work in flight. It is also the one where a step can sit still for a week because one person is on leave.</div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div style="padding: 15px; display: flex; flex-direction: column; gap: 11px;">
+      <div>
+        <div class="cap">Why you might want this</div>
+        <div class="annot" style="margin-top: 5px;">It is the only option that actually guarantees a second pair of eyes before a later step builds on an earlier one. For a city rolling this out across several departments, it also gives the Director a single place to see what is being set up and by whom.</div>
+      </div>
+      <div>
+        <div class="cap">What it costs you</div>
+        <div class="annot" style="margin-top: 5px;">Setup now stalls on people. In a small city the reviewer and the person who did the work are often the same person, which turns the whole ceremony into clicking your own name twice. It also needs a queue, a notification, and somewhere for the reviewer to say no and explain why — the largest build of the three.</div>
+      </div>
+      <div>
+        <div class="cap">What it needs from the role model</div>
+        <div class="annot" style="margin-top: 5px;">A reviewer for each lane, and the authority to approve somebody else's work. That is the <b>authority</b> axis of the user-type design — the one part of it that was never built at all.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</x-dc>
+</body>
+</html>
