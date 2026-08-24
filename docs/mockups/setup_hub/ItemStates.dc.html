@@ -32,9 +32,6 @@
     .iname { font-size: 13px; font-weight: 600; color: #12232E; flex-grow: 1; line-height: 1.3; }
     .ev { font-size: 11.5px; color: #8296A4; line-height: 1.35; }
 
-    .callout { display: inline-flex; align-items: center; justify-content: center;
-               width: 17px; height: 17px; border-radius: 999px; background: #1E6091;
-               color: #FFFFFF; font-size: 10.5px; font-weight: 700; }
     .annot { font-size: 12px; color: #5C6F7C; line-height: 1.5; }
     .annot b { color: #12232E; font-weight: 600; }
 
@@ -58,22 +55,18 @@
       <div style="flex: 0 0 320px;">
         <div class="item">
           <div style="display: flex; align-items: center; gap: 8px;">
-            <span class="iname">How long each record type takes</span>
+            <span class="iname">Choices the statute left to the city</span>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
           </div>
           <div style="display: flex; align-items: center; gap: 7px; margin-top: 6px;">
             <span class="pill p-prog">In progress</span>
-            <span class="ev">4 of 11 record types have a time estimate</span>
+            <span class="ev">17 of 23 answered</span>
           </div>
         </div>
-        <div style="display: flex; gap: 8px; margin-top: 10px; align-items: baseline;">
-          <span class="callout">1</span><span class="annot">The whole row is the button. One click, straight into the screen that sets this.</span>
-        </div>
-        <div style="display: flex; gap: 8px; margin-top: 7px; align-items: baseline;">
-          <span class="callout">2</span><span class="annot">Plain-language name. Not the name of the database table or the menu tab it lives under today.</span>
-        </div>
-        <div style="display: flex; gap: 8px; margin-top: 7px; align-items: baseline;">
-          <span class="callout">3</span><span class="annot">The evidence line. This is the part that makes the status honest — and it tells you what is left to do without opening anything.</span>
+        <div style="margin-top: 11px;">
+          <div class="annot" style="margin-bottom: 7px;"><b>The row itself is the button.</b> One click, straight into the screen that sets this. No sub-menu, no tab to find first.</div>
+          <div class="annot" style="margin-bottom: 7px;"><b>The name is plain language.</b> Not the name of the database table, and not the name of the menu tab it happens to live under today.</div>
+          <div class="annot"><b>The evidence line is the honest part.</b> It is counted from what is actually configured, and it tells you what is left without opening anything.</div>
         </div>
       </div>
 
@@ -90,7 +83,7 @@
   <div class="panel">
     <div class="ph">
       <div class="pt">The five states</div>
-      <div class="ps">Each one is computed. Nothing here needs a person to maintain it.</div>
+      <div class="ps">Four of these are counted by the system and need nobody to maintain them. Only <b>Ready</b> can also depend on a person having signed off — which is the decision the three artboards below are about.</div>
     </div>
     <div class="pb" style="display: flex; flex-direction: column; gap: 10px;">
 
@@ -111,7 +104,7 @@
 
       <div style="display: flex; gap: 14px; align-items: baseline;">
         <span style="flex: 0 0 110px;"><span class="pill p-act">Needs attention</span></span>
-        <span class="annot" style="flex-grow: 1;">Was set, and something has changed since: a proposed rule change is waiting, a rate now exceeds a state limit, a nightly connection started failing. This state is the reason the page stays useful after go-live instead of becoming a page nobody opens again.</span>
+        <span class="annot" style="flex-grow: 1;">Was finished, and something has changed since: a proposed rule change is waiting, a rate now exceeds a state limit, a connection that was working has started failing. This state is the reason the page stays useful after go-live instead of becoming a page nobody opens again. Note the difference from <b>In progress</b> — that one has never been finished; this one has come undone.</span>
       </div>
 
       <div style="display: flex; gap: 14px; align-items: baseline;">
@@ -139,7 +132,7 @@
           </div>
           <div style="padding: 14px 15px;">
             <div class="annot">This step uses your connected record systems to suggest the record types your city actually holds. Until at least one system is connected and has finished a scan, there is nothing for it to read.</div>
-            <div class="annot" style="margin-top: 10px;"><b>Waiting on:</b> Where the records live — Technical Setup, set up by your System Administrator. Two of three systems are connected; the Laserfiche scan last failed on 20 Aug.</div>
+            <div class="annot" style="margin-top: 10px;"><b>Waiting on:</b> Where the records live — Technical Setup, set up by your System Administrator. Two of three systems are connected; Laserfiche has not finished its first scan.</div>
             <div style="display: flex; gap: 8px; margin-top: 14px;">
               <button class="btn">Go to Where the records live</button>
               <button class="btn ghost">Close</button>
@@ -159,9 +152,9 @@
           <div style="padding: 14px 15px;">
             <div class="annot">You can add record types by hand right now. What you cannot do yet is have the system suggest them from your own records — that needs a connected record system that has finished a scan.</div>
             <div class="annot" style="margin-top: 10px;"><b>Waiting on:</b> Where the records live — Technical Setup, set up by your System Administrator.</div>
-            <div style="display: flex; gap: 8px; margin-top: 14px;">
+            <div style="display: flex; gap: 8px; margin-top: 14px; flex-wrap: wrap;">
               <button class="btn">Add record types by hand</button>
-              <button class="btn ghost">Go to Where the records live</button>
+              <button class="btn ghost">Open Technical Setup</button>
             </div>
           </div>
         </div>

@@ -24,7 +24,7 @@ citation-bearing, edits as a proposal, and lands in the attestation/go-live flow
 | # | Item | Where edited today | Protected by | Evidence of done | Depends on |
 |---|------|--------------------|--------------|------------------|------------|
 | 1.1 | Jurisdiction identity & statutes (state, statute, exemption model) | Jurisdiction Config → identity | Director/SysAdmin propose; attest | section attested | — |
-| 1.2 | State rules import (the 32-state template: evidence, clocks, branch profile) | Jurisdiction Config (import act) | SysAdmin/Director | template imported; 6 template sections appear | 1.1 |
+| 1.2 | State rules import (the 32-state template: evidence, clocks, branch profile) — **not a hub item (Kevin 2026-08-24): fires automatically when agency state is saved (1.1 / 3.1)**. ⚠ Reality check: today the import is `backend/src/db/import_state_template.js`, a CLI with **no UI door at all** (the config screen even says "import a state template" with no way to do it), and the importer leaves the profile at `status='library'` without switching the city over. The auto-load is a build item: wire `importState()` + activation to the agency-identity save. Its human residue (statute name, unresolved timers, no-clock states) surfaces as unconfirmed items in this lane. | Jurisdiction Config (import act) | SysAdmin/Director | template imported; 6 template sections appear | 1.1 |
 | 1.3 | Response deadlines & tolling | Jurisdiction Config → deadlines | **Legal section**: Senior Legal or Director; attest | attested; clock matrix populated | 1.2 |
 | 1.4 | Fee & cost schedule — *statutory layer* (what the law allows; bounds) | Jurisdiction Config → fees (new composer) | Director/SysAdmin; citation required on law-bounded values; server refuses violations | attested; 0 bounds violations | 1.2 |
 | 1.5 | Deposit & payment clock rules | Jurisdiction Config → payment | Director/SysAdmin; attest | attested | 1.2 |
@@ -131,13 +131,18 @@ permission roles, and the design doc is still DRAFT, unratified into `ARCHITECTU
 mapped ORO types onto whatever existed: ORO Senior Legal = `ATTORNEY_REVIEWER` (that is the gate the
 Legal attestation actually checks), ORO Finance = the `FINANCE` permission role.
 
-So the hub needs a membership answer before it can gate lanes 2 and 3. Two candidates: (a) derive
-"in the ORO" from team membership — a person whose team is the Open Records Office (`dept-openrecords`,
-the staffing-only unit realized 2026-08-15) or the Open Records Fulfillment Team; or (b) build the
-v3 user-type catalog for real and gate on office-level type. (a) is cheap and uses data that already
-exists; (b) is the ratification this design has been deferring since July. Recommend (a) for the
-hub's v1 gate, with (b) as its own slice — **but note that (a) makes lanes 2 and 3 depend on Lane 3
-item 3.4 being done first**, which is a real dependency arrow the mockup does not yet draw.
+**DECIDED (Kevin, 2026-08-24): no stopgap.** A team-membership derivation of "in the ORO" was
+considered and rejected — the broken underlying model is part of what this redesign exists to fix,
+not something to route around. The hub gates on the real v3 user-type catalog, built properly first.
+
+**The plan (sequencing, decided 2026-08-24):**
+1. **Finish the hub design on paper** — the design pass defines what the permission model must
+   express (lane rights, who may confirm/sign off what, who reviews). No hub build during this.
+2. **Spec and build the v3 user-type model for real** — the user-type catalog, the authority axis,
+   permission groups as data, migration off the pre-v3 function/permission-role pair, ratification
+   into `ARCHITECTURE.md` and `SPEC_tasks_roles_mrr_fees.md` §8. The gating gaps above get closed
+   ON this model, not patched twice.
+3. **Build the hub on top** of the finished role model.
 
 ## Open questions (yours)
 

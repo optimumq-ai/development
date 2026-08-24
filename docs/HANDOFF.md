@@ -8442,3 +8442,34 @@ SPEC_auth_security_platform §1 (inventory).
   protected/testing) — docs/WORKING_jurisdiction_config_inventory.md; (2) revisit exemption/redaction/
   template sections' composer scope after Kevin's setup-shell sketches; (3) fees role-gate hardening
   still PAUSED; classifier hint on child assign-picker still parked with Kevin.
+
+## 2026-08-24 — setup-hub redesign: design phase, decisions locked, NO build
+
+Design-only session (Kevin's standing constraint: no build until the revised design is worked
+through). A stretch of it ran on a different model (14:55–16:03); the decisions below were
+re-verified and confirmed by Kevin afterwards.
+
+**Decisions (Kevin, 2026-08-24):**
+1. **Lanes 2 and 3 owners:** anyone in the Open Records Office, plus fulfillment team supervisors.
+2. **State rules import is not a hub item.** Saving the agency's state applies the state rule
+   profile automatically (lock + import + populate jurisdiction config). Today the importer is
+   CLI-only (`import_state_template.js`, no UI door; imports land `status='library'` unactivated)
+   — the auto-load wiring is a build item, recorded on inventory item 1.2.
+3. **NO STOPGAP on lane gating.** The team-membership derivation of "in the ORO" (proposed as a
+   cheap v1 gate) is REJECTED. Sequencing: finish hub design → spec+build the v3 user-type model
+   for real (catalog, authority axis, permission groups, migration, ratification) → build the hub
+   on it. The gating gaps (ungated fee-profile writes, ungated departments/teams, ungated agent
+   rules, unauthenticated settlement webhook) get closed ON the new model, once.
+
+**Artifacts:** `docs/WORKING_setup_inventory.md` (36 hub items + the decisions; copy in exchange/)
+· design canvas https://claude.ai/code/artifact/1c473eef-a5f6-47bd-a766-1003e9393060 (5 artboards:
+hub, item anatomy/states/dependencies, sign-off options A/B/C) · `DESIGN_user_type_role_model.md`
++ `MASTER_task_types_permission_groups.md` re-surfaced as the role-model base (Word copies in
+exchange/); status note added: prerequisite, build is smaller than the July framing (task-subset
+axis already live; only 5 of 9 legacy function roles checked anywhere, 46 call sites).
+
+**Open on the canvas for Kevin:** sign-off choice (A/B/C or mix), hard-lock vs open-with-warning
+dependencies, plain-language item names, lane-2 split question, two lane-placement flags (go-live
+flip is SysAdmin-only but sits in the Legal lane; lane-1 header overstates Legal's ownership).
+
+**NEXT:** Kevin marks up the canvas → fold into inventory → spec the user-type slice.

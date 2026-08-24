@@ -1,6 +1,7 @@
 # DESIGN — User-Type Role Model (v3 proposal)
 
 **Status:** DRAFT / proposal, pending ratification. Not yet a contract. If adopted, this replaces the current two-catalog role setup and updates `SPEC_tasks_roles_mrr_fees.md` §8 + the `ARCHITECTURE.md` "one task-routing role catalog" invariant.
+**2026-08-24 (Kevin):** this model is a **prerequisite of the setup-hub redesign** (`WORKING_setup_inventory.md`) and is to be specced and built for real — user-type catalog, authority axis, permission groups as data, migration off the two legacy catalogs — after the hub design pass fixes its requirements and BEFORE any hub build. A team-membership stopgap for "in the ORO" was considered and **rejected**: no gating ships on derived membership. Note the build is smaller than this doc's July framing implies: the task-subset axis is already live (`user_task_types`, routing cutover 2026-08-13), and only five of the nine legacy function roles are checked anywhere (SYSTEM_ADMIN, DIRECTOR, SUPERVISOR, DEPT_MANAGER, ATTORNEY_REVIEWER — 46 call sites in 17 route files).
 **Authors:** Kevin (concept), Claude (structure/analysis). Started 2026-07-09; v3 incorporates Kevin's markup (§10 answers resolved, ORO Finance added, Departments/Teams and Smart Routing sections added) 2026-07-09.
 
 ---
