@@ -9,9 +9,10 @@ Columns: **where edited today** (the door that exists now) · **protected by** (
 gate, not the UI's) · **evidence of done** (what the system can honestly display as status — this is
 what the hub's chips should read, never a bare checkbox) · **depends on** (first-pass dependency map).
 
-Lane ownership as proposed in the mockup: Lane 1 → Legal / ORO Director · Lane 4 → Technical System
-Admin · Lanes 2–3 → *cut off in the document; assumed Director/Supervisor (2) and Director/Dept
-managers (3) — confirm.*
+Lane ownership **settled 2026-08-24 (Kevin)**: Lane 1 → Legal / ORO Director · Lane 4 → Technical
+System Admin · **Lanes 2 and 3 → anyone in the Open Records Office, plus fulfillment team
+supervisors.** See the note under "Gating gaps" for what that costs to enforce — neither lane has a
+server-side gate today, and "in the ORO" is not yet a thing the data can answer.
 
 ---
 
@@ -35,7 +36,7 @@ citation-bearing, edits as a proposal, and lands in the attestation/go-live flow
 | 1.11 | Ongoing statutory updates (upload a legal change → review → apply/schedule) | Admin → Update Configuration | upload: Director band; **apply: + Senior Legal** | no pending proposals | 1.1–1.10 (maintenance of) |
 | 1.12 | Go-live enforcement (turn the gates from simulated to real) | Jurisdiction Config front page | **SysAdmin only** (the flip); checklist informs it | dev mode OFF | everything attested |
 
-## Lane 2 — Request Processing Operational Configuration *(assumed Director / Supervisor)*
+## Lane 2 — Request Processing Operational Configuration *(any ORO user; fulfillment team supervisors)*
 
 How this city actually works a request: the rates it charges, how work routes, what automates.
 
@@ -55,7 +56,7 @@ How this city actually works a request: the rates it charges, how work routes, w
 | 2.12 | Decision reasons library (statutory denial/waiver texts) | **No curation screen** (grows only as a side-effect of decisions) | Director/Supervisor/Finance | library non-empty | 1.2 |
 | 2.13 | Mass-redaction schedule (after-hours window, nightly budget) | **No screen** (keys read with hardcoded defaults) | — | set | — |
 
-## Lane 3 — Organization Configuration *(assumed Director / Dept managers)*
+## Lane 3 — Organization Configuration *(any ORO user; fulfillment team supervisors)*
 
 Who exists and who does what. (The mockup's top-level "Organization name and address" lives here as 3.1.)
 
@@ -120,9 +121,28 @@ no dedicated screen (reachable only through 1.6).
 - One silent bug: the AV-redaction default (Configuration → Redaction tab) saves to a key the server
   refuses to write — the save is silently dropped. Needs a fix whichever screen survives.
 
+**What the lanes-2-and-3 answer costs (2026-08-24).** "Anyone in the ORO, plus fulfillment team
+supervisors" is not expressible against today's data. `DESIGN_user_type_role_model.md` (v3) defines
+the eight ORO user types, but **only half of that model was built**: the per-person task-subset axis
+is live (`user_task_types`, routing cut over 2026-08-13), while the user-type catalog never landed —
+the DB still carries the pre-v3 nine function roles (COORDINATOR, SUPERVISOR, REDACTION_REVIEWER,
+REDACTION_APPROVER, ATTORNEY_REVIEWER, CUSTODIAN, DEPT_MANAGER, DIRECTOR, SYSTEM_ADMIN) plus eleven
+permission roles, and the design doc is still DRAFT, unratified into `ARCHITECTURE.md`. Later work
+mapped ORO types onto whatever existed: ORO Senior Legal = `ATTORNEY_REVIEWER` (that is the gate the
+Legal attestation actually checks), ORO Finance = the `FINANCE` permission role.
+
+So the hub needs a membership answer before it can gate lanes 2 and 3. Two candidates: (a) derive
+"in the ORO" from team membership — a person whose team is the Open Records Office (`dept-openrecords`,
+the staffing-only unit realized 2026-08-15) or the Open Records Fulfillment Team; or (b) build the
+v3 user-type catalog for real and gate on office-level type. (a) is cheap and uses data that already
+exists; (b) is the ratification this design has been deferring since July. Recommend (a) for the
+hub's v1 gate, with (b) as its own slice — **but note that (a) makes lanes 2 and 3 depend on Lane 3
+item 3.4 being done first**, which is a real dependency arrow the mockup does not yet draw.
+
 ## Open questions (yours)
 
-1. Lane owners for lanes 2 and 3 (the cut-off sentence).
+1. ~~Lane owners for lanes 2 and 3 (the cut-off sentence).~~ **Answered 2026-08-24:** anyone in the
+   ORO, plus fulfillment team supervisors — for both lanes. Consequences in the gating-gaps section.
 2. Does "submitted as complete" (your dependency trigger) mean the existing reviewer-approval flow,
    the attestation act, or a lighter self-serve "mark complete"? Today all three exist in different
    places; the hub could unify on approval-where-gated / mark-complete-elsewhere.
