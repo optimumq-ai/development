@@ -8517,3 +8517,17 @@ DESIGN_user_type_role_model.md + MASTER_task_types_permission_groups.md; the hub
 (ORO membership + fulfillment supervisors; SysAdmin-or-Director for go-live) is now a concrete requirement
 for that model. Still no build until the user-type spec is agreed.
 
+## 2026-08-24 (later, c) — User-type model spec DRAFTED (docs only, no build)
+
+`docs/SPEC_user_type_model.md` written as the build contract for the v3 user-type model, from the
+design doc + master list + a fresh code survey. Survey findings that drive it: every new user is
+granted ALL 11 permission roles at creation (`staff.js:40-41`) so perm gates are no-ops; no route
+edits roles after creation; roles ride an 8h JWT; 3 function roles + 1 perm have 0 call sites; two
+checked roles exist in no catalog (`mrr.js:22`, `parentFinance.js:22`); no teams table.
+Spec: 11-type catalog as data; authority keys (§4) incl. `go_live` = sysadmin OR director; six
+permission groups incl. new `operations_config` = "anyone in the ORO + fulfillment supervisors";
+gate primitives; route migration map for the hub gaps; migration + compat-shim plan; 6 slices
+(S2 unblocks the hub build). §13 lists 5 questions for Kevin before S1.
+
+**NEXT:** Kevin reviews SPEC_user_type_model.md (§13 first) → ratify → S1.
+
