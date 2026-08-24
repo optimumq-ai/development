@@ -38,8 +38,8 @@ function api(method, path, body) { return call(TOKEN, method, path, body); }
   TOKEN = await auth.signAccessToken(await db.get("SELECT * FROM users WHERE id = 'u-kruss'"));
   var plain = await db.get(
     "SELECT u.* FROM users u WHERE u.status = 'active' AND NOT EXISTS (" +
-    " SELECT 1 FROM user_function_roles r WHERE r.user_id = u.id" +
-    " AND r.function_role_id IN ('fr-sysadmin','fr-supervisor','fr-deptmanager')) LIMIT 1");
+    " SELECT 1 FROM user_user_types r WHERE r.user_id = u.id" +
+    " AND r.user_type_id IN ('ut-oro_sysadmin','ut-oro_director','ut-oro_supervisor','ut-team_supervisor','ut-team_manager')) LIMIT 1");
   PLAIN_TOKEN = plain ? await auth.signAccessToken(plain) : null;
   var cat = await db.get('SELECT id FROM categories ORDER BY sort_order LIMIT 1');
 

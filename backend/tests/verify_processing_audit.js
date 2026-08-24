@@ -13,6 +13,7 @@ process.chdir('/opt/optimumq/backend');
 require('/opt/optimumq/backend/node_modules/dotenv').config({ path: '/opt/optimumq/backend/.env' });
 require(__dirname + '/testEnv').enforce();
 var db = require('/opt/optimumq/backend/src/db');
+var UT = require(__dirname + '/userTypeHelpers');
 var auth = require('/opt/optimumq/backend/src/services/auth');
 var { v4: uuidv4 } = require('/opt/optimumq/backend/node_modules/uuid');
 
@@ -46,7 +47,7 @@ async function history(jobId) {
   // seeded sysadmin. Fixture template: minimal layout profile (the create path only reads id/kind/record_type_id).
   var uNone = await mkUser('u-pa-none-' + TAG, 'PA NoRoles');
   var uRed = await mkUser('u-pa-red-' + TAG, 'PA RedactionWorker');
-  await db.run("INSERT INTO user_permission_roles (user_id, permission_role_id) VALUES (?, 'pr-redworker')", [uRed.id]);
+  await UT.grantLegacy(uRed.id, 'pr-redworker', 'team-police');   // v3: team_staff mints REDACTION_WORKER
   var tNone = await auth.signAccessToken(uNone);
   var tRed = await auth.signAccessToken(uRed);
   var tAdmin = await auth.signAccessToken(await db.get("SELECT * FROM users WHERE id = 'u-kruss'"));
@@ -124,7 +125,7 @@ async function history(jobId) {
   await db.run('DELETE FROM processing_history WHERE entity_id IN (?,?,?)', jobIds);
   await db.run('DELETE FROM mass_redaction_jobs WHERE id IN (?,?,?)', jobIds);
   await db.run('DELETE FROM layout_profiles WHERE id = ?', [tplId]);
-  await db.run('DELETE FROM user_permission_roles WHERE user_id IN (?,?)', [uNone.id, uRed.id]);
+  await UT.revokeAll([uNone.id, uRed.id]);
   await db.run('DELETE FROM users WHERE id IN (?,?)', [uNone.id, uRed.id]);
   var left1 = await db.get("SELECT count(*)::int AS n FROM mass_redaction_jobs WHERE name LIKE '%' || ?", [TAG]);
   var left2 = await db.get("SELECT count(*)::int AS n FROM users WHERE title = 'Test ' || ?", [TAG]);

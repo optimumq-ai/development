@@ -54,7 +54,7 @@ async function newRequest(label) {
 (async function () {
   await db.initDb();
   try {
-    var user = await db.get("SELECT id, email, display_name, department_id FROM users WHERE status='active' AND display_name IS NOT NULL LIMIT 1");
+    var user = await db.get("SELECT id, email, display_name, department_id FROM users WHERE status='active' AND display_name IS NOT NULL ORDER BY (CASE WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id AND x.user_type_id IN ('ut-oro_director','ut-oro_sysadmin')) THEN 0 WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id AND x.user_type_id IN ('ut-oro_supervisor','ut-team_manager','ut-team_supervisor')) THEN 1 WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id) THEN 2 ELSE 3 END), id LIMIT 1");   // v3: prefer a TYPED actor (office admin > supervisor > any type) — untyped accounts hold no claims
     TOKEN = await auth.signAccessToken(user);
     ORIGINAL = (await db.get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'")).value;
     ok('the active jurisdiction is TX before we start (' + ORIGINAL + ')', ORIGINAL === 'jur-tx');

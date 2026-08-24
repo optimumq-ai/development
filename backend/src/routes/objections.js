@@ -26,12 +26,17 @@ async function getUser(id) { if (!id) return null; return await get('SELECT id, 
 async function resolveSupervisor(callerId) {
   var me = await get('SELECT department_id FROM users WHERE id = ?', [callerId]);
   var dept = me && me.department_id;
-  var sql = "SELECT u.id, u.display_name FROM users u JOIN user_permission_roles upr ON upr.user_id = u.id JOIN permission_roles pr ON pr.id = upr.permission_role_id WHERE pr.name IN ('SUPERVISOR','DEPT_MANAGER') AND u.status = 'active' AND u.id <> ?";
+  // v3 model (S1): SUPERVISOR / DEPT_MANAGER are legacy FUNCTION roles derived from user types. (The
+  // previous query looked them up in permission_roles, where they never existed, so it always found nobody.)
+  var ut = require('../services/userTypes');
+  var pick = function (rows) { return rows.length ? { id: rows[0].id, display_name: rows[0].display_name } : null; };
   if (dept) {
-    var inDept = await get(sql + " AND u.department_id = ? ORDER BY CASE WHEN pr.name='SUPERVISOR' THEN 0 ELSE 1 END LIMIT 1", [callerId, dept]);
+    var inDept = pick(await ut.usersWithLegacyRole(['SUPERVISOR'], { teamId: dept, exclude: callerId }));
+    if (!inDept) inDept = pick(await ut.usersWithLegacyRole(['DEPT_MANAGER'], { teamId: dept, exclude: callerId }));
     if (inDept) return inDept;
   }
-  return await get(sql + " ORDER BY CASE WHEN pr.name='SUPERVISOR' THEN 0 ELSE 1 END LIMIT 1", [callerId]);
+  return pick(await ut.usersWithLegacyRole(['SUPERVISOR'], { exclude: callerId })) ||
+         pick(await ut.usersWithLegacyRole(['DEPT_MANAGER'], { exclude: callerId }));
 }
 
 // Whether an open objection tolls the clock for the active jurisdiction (per-jurisdiction policy on

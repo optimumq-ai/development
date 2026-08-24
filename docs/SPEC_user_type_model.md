@@ -1,7 +1,9 @@
 # SPEC — User-Type Model (v3, build contract)
 
-**Status:** DRAFT — §13 questions RESOLVED with Kevin 2026-08-24; ready for ratification. Becomes the contract once ratified; on ratification it
-supersedes `SPEC_tasks_roles_mrr_fees.md` §8 (roles) and rewrites `ARCHITECTURE.md` §4 ("one role catalog").
+**Status:** **RATIFIED 2026-08-24** (Kevin: "go — ratify the spec and build S1"). This is the contract. It
+supersedes `SPEC_tasks_roles_mrr_fees.md` §8 (roles) and `ARCHITECTURE.md` §4 ("one role catalog") is rewritten to point here.
+**Build status:** **S1 BUILT 2026-08-24** (`verify_user_types`, see §12) — tables + catalog seed, cutover, derived claims, `auth_version`.
+S2–S6 open. As-built notes that differ from the draft are marked *(as built)* inline.
 **Sources:** `DESIGN_user_type_role_model.md` (v3, Kevin's concept, decisions of 2026-07-09),
 `MASTER_task_types_permission_groups.md` (canonical enumerations), `WORKING_setup_inventory.md` (hub
 decisions of 2026-08-24), and a code survey of 2026-08-24 (§2).
@@ -82,6 +84,14 @@ user_user_types       (user_id, user_type_id, team_id NULL, PRIMARY KEY (user_id
 ```
 
 `user_task_types` (existing) is unchanged; §6 constrains what it may contain.
+
+*(as built, S1)* `user_user_types` carries `assigned_by`, `assigned_at`, and its uniqueness is a UNIQUE index on
+`(user_id, user_type_id, COALESCE(team_id,''))` — a Postgres PRIMARY KEY cannot hold the NULL `team_id` an
+office type needs. Catalog ids are `ut-<key>`. The tables and catalog rows are seeded by `schema.postgres.sql`
+(applied at API boot, idempotent) and carried by `seed_fixture.sql`. The compat shim's type→legacy-perm mapping
+is also a small seeded table, `legacy_perm_map`, so the task-pool SQL predicate can join it; it is dropped in S5
+with the shim. `services/userTypes.js` holds the spec's tables as constants (`CATALOG`, `AUTHORITY`,
+`PERMISSION`, `TASK_MENU`, `LEGACY`) and `verify_user_types` A4 fails if the seeded tables ever differ from them.
 
 Legacy `function_roles`, `permission_roles`, `user_function_roles`, `user_permission_roles`: kept
 through the compatibility period (§9), then dropped.
@@ -233,7 +243,14 @@ users' names. The cutover therefore *wipes* role assignments rather than mapping
    after the build, and may instead choose to delete and recreate all users.
 4. `user_task_types` rows that fall outside the union of a person's type menus (§6) are left in place
    but **ignored by the router** until a matching type is assigned; the picker shows them as "not
-   covered by a user type" so they can be cleaned up.
+   covered by a user type" so they can be cleaned up. *(S3 — not yet enforced in S1.)*
+
+*(as built, S1)* The cutover is `src/db/user_types_cutover.js` (dry-run default, `--apply` to run; idempotent;
+also bumps every user's `auth_version` so legacy-minted tokens die at once). The **demo/fixture accounts**
+(`seed_test_staff.sql`, `seed_testers.sql` — not real people) are typed by `seed_user_types_demo_staff.sql`
+so the suite has typed actors: testers → oro_sysadmin + oro_director; team supervisors → team_supervisor;
+finance/IT supers → team_manager (Robert Cho also oro_finance); David Okafor → oro_senior_legal; staff →
+team_staff. The five real accounts hold no type until re-set by hand, exactly as item 3 says.
 
 ### 9.1 Derived legacy claims (compat shim, deleted in S5)
 
@@ -299,7 +316,7 @@ Plus the existing 20 role-touching harnesses stay green through steps 3–5.
 
 | # | Slice | Unblocks |
 |---|---|---|
-| S1 | Tables, seed, wipe + bootstrap script, claim minting with §9.1 shim, `auth_version`, `verify_user_types` parts 1–3, 6 | — |
+| S1 | **BUILT 2026-08-24.** Tables, seed, wipe + bootstrap script, claim minting with §9.1 shim, `auth_version`, `verify_user_types` parts 1–3, 6. Also (needed to keep the suite green): the four non-auth readers of the legacy tables (`taskRouting` pool predicate + legacy fallback, `objections` supervisor finder, `coverageGap`, `importIngest`) now resolve legacy names through user types; `POST /staff` no longer grants every permission role; 16 harnesses grant user types via `tests/userTypeHelpers.js` instead of inserting legacy rows | — |
 | S2 | Gate primitives; §8 rows 1–7 (hub gaps + go-live + attest); frontend `hasPermission/hasAuthority`; `verify_user_types` parts 4–5, 8 | **Hub build** |
 | S3 | Staff Management user-type picker + PATCH; picker constraint; User-types admin page | Hub 3.4 |
 | S4 | Migrate remaining `requireRole` sites (17 route files) + frontend checks; retire `SYSTEM_ADMIN` short-circuit | — |

@@ -72,7 +72,7 @@ function noteProfile(link) { if (link && link.profile_id && profiles.indexOf(lin
 (async function () {
   await db.initDb();
   try {
-    var users = await db.all("SELECT * FROM users WHERE status = 'active' ORDER BY id LIMIT 1");
+    var users = await db.all("SELECT * FROM users WHERE status = 'active' ORDER BY (CASE WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id AND x.user_type_id IN ('ut-oro_director','ut-oro_sysadmin')) THEN 0 WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id AND x.user_type_id IN ('ut-oro_supervisor','ut-team_manager','ut-team_supervisor')) THEN 1 WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id) THEN 2 ELSE 3 END), id LIMIT 1");   // v3: prefer a TYPED actor (office admin > supervisor > any type) — untyped accounts hold no claims
     TOKEN = await auth.signAccessToken(users[0]);
 
     // ================================================================================================

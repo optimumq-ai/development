@@ -11,6 +11,7 @@ process.chdir('/opt/optimumq/backend');
 require('/opt/optimumq/backend/node_modules/dotenv').config({ path: '/opt/optimumq/backend/.env' });
 require(__dirname + '/testEnv').enforce();
 var db = require('/opt/optimumq/backend/src/db');
+var UT = require(__dirname + '/userTypeHelpers');
 var auth = require('/opt/optimumq/backend/src/services/auth');
 
 var pass = 0, fail = 0;
@@ -34,7 +35,7 @@ function through(s) { return s !== 403 && s !== 401; }
   await db.initDb();
   await db.run("INSERT INTO users (id, email, display_name, title, status) VALUES (?,?,?,?, 'active')", ['u-pg-none-' + TAG, 'pgn-' + TAG + '@test.optimumq.ai', 'PG NoRoles', 'Test ' + TAG]);
   await db.run("INSERT INTO users (id, email, display_name, title, status) VALUES (?,?,?,?, 'active')", ['u-pg-red-' + TAG, 'pgr-' + TAG + '@test.optimumq.ai', 'PG Worker', 'Test ' + TAG]);
-  await db.run("INSERT INTO user_permission_roles (user_id, permission_role_id) VALUES (?, 'pr-redworker')", ['u-pg-red-' + TAG]);
+  await UT.grantLegacy('u-pg-red-' + TAG, 'pr-redworker', 'team-police');   // v3: team_staff mints REDACTION_WORKER
   var tNone = await auth.signAccessToken(await db.get('SELECT * FROM users WHERE id = ?', ['u-pg-none-' + TAG]));
   var tRed = await auth.signAccessToken(await db.get('SELECT * FROM users WHERE id = ?', ['u-pg-red-' + TAG]));
   var tAdmin = await auth.signAccessToken(await db.get("SELECT * FROM users WHERE id = 'u-kruss'"));
@@ -82,7 +83,7 @@ function through(s) { return s !== 403 && s !== 401; }
   console.log('\n=== F. CLEANUP ===');
   await db.run("DELETE FROM redaction_rules WHERE title = 'PG rule ' || ?", [TAG]);
   await db.run("DELETE FROM redaction_jobs WHERE created_by IN (?, ?)", ['PG Worker', 'u-pg-red-' + TAG]);
-  await db.run('DELETE FROM user_permission_roles WHERE user_id IN (?,?)', ['u-pg-none-' + TAG, 'u-pg-red-' + TAG]);
+  await UT.revokeAll(['u-pg-none-' + TAG, 'u-pg-red-' + TAG]);
   await db.run('DELETE FROM users WHERE id IN (?,?)', ['u-pg-none-' + TAG, 'u-pg-red-' + TAG]);
   var left = await db.get("SELECT count(*)::int AS n FROM users WHERE title = 'Test ' || ?", [TAG]);
   ok('F1 fixture users are gone', Number(left.n) === 0);

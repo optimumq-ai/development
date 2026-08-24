@@ -73,7 +73,7 @@ async function submit(email, desc) {
   var ADMIN = await auth.signAccessToken(await db.get("SELECT * FROM users WHERE id = 'u-kruss'"));
   var plainU = await db.get(
     "SELECT u.* FROM users u WHERE u.status = 'active' AND NOT EXISTS (" +
-    " SELECT 1 FROM user_function_roles r WHERE r.user_id = u.id AND r.function_role_id IN ('fr-sysadmin'))" +
+    " SELECT 1 FROM user_user_types r WHERE r.user_id = u.id AND r.user_type_id IN ('ut-oro_sysadmin'))" +
     " LIMIT 1");
   var PLAIN = await auth.signAccessToken(plainU);
 

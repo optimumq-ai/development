@@ -1751,3 +1751,161 @@ CREATE TABLE IF NOT EXISTS processing_history (
   created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS'))
 );
 CREATE INDEX IF NOT EXISTS idx_prochist_entity ON processing_history(entity_type, entity_id);
+
+-- ---- USER-TYPE MODEL (v3) — SPEC_user_type_model.md §3.1. One catalog; task menu / authority / permission
+-- groups hang off the type. Seeded here (fixed key set; display names editable per city). The legacy
+-- function_roles / permission_roles tables stay through the compatibility period (§9) and are dropped in S5.
+CREATE TABLE IF NOT EXISTS user_types (id TEXT PRIMARY KEY, key TEXT UNIQUE NOT NULL, display_name TEXT NOT NULL, scope TEXT NOT NULL CHECK (scope IN ('office','team')), sort_order INTEGER DEFAULT 0, active INTEGER DEFAULT 1);
+CREATE TABLE IF NOT EXISTS user_type_task_menu (user_type_id TEXT NOT NULL REFERENCES user_types(id), task_type TEXT NOT NULL, PRIMARY KEY (user_type_id, task_type));
+CREATE TABLE IF NOT EXISTS user_type_authority (user_type_id TEXT NOT NULL REFERENCES user_types(id), authority_key TEXT NOT NULL, PRIMARY KEY (user_type_id, authority_key));
+CREATE TABLE IF NOT EXISTS user_type_permission (user_type_id TEXT NOT NULL REFERENCES user_types(id), permission_group TEXT NOT NULL, PRIMARY KEY (user_type_id, permission_group));
+-- team_id REQUIRED when the type's scope is 'team' (a departments row, kind='team'), NULL for office types.
+-- Uniqueness is on COALESCE(team_id,'') because a Postgres PRIMARY KEY cannot hold NULL.
+CREATE TABLE IF NOT EXISTS user_user_types (user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE, user_type_id TEXT NOT NULL REFERENCES user_types(id), team_id TEXT, assigned_by TEXT, assigned_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
+CREATE UNIQUE INDEX IF NOT EXISTS uq_user_user_types ON user_user_types(user_id, user_type_id, COALESCE(team_id, ''));
+CREATE INDEX IF NOT EXISTS idx_user_user_types_type ON user_user_types(user_type_id);
+-- §7 token freshness: bumped on every user-type / subset / status change; the JWT carries it as `av`.
+ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_version INTEGER DEFAULT 1;
+-- §9.1 compat shim data: user type -> legacy permission-role name, joinable from SQL (task pool). Dropped in S5.
+CREATE TABLE IF NOT EXISTS legacy_perm_map (user_type_key TEXT NOT NULL, perm TEXT NOT NULL, PRIMARY KEY (user_type_key, perm));
+INSERT INTO user_types (id, key, display_name, scope, sort_order) VALUES
+  ('ut-city_management', 'city_management', 'City Management', 'office', 1),
+  ('ut-oro_sysadmin', 'oro_sysadmin', 'ORO System Administrator', 'office', 2),
+  ('ut-oro_director', 'oro_director', 'ORO Director / Manager', 'office', 3),
+  ('ut-oro_supervisor', 'oro_supervisor', 'ORO Supervisor', 'office', 4),
+  ('ut-oro_senior_legal', 'oro_senior_legal', 'ORO Senior Legal', 'office', 5),
+  ('ut-oro_legal_associate', 'oro_legal_associate', 'ORO Legal Associate', 'office', 6),
+  ('ut-oro_associate', 'oro_associate', 'ORO Associate', 'office', 7),
+  ('ut-oro_finance', 'oro_finance', 'ORO Finance', 'office', 8),
+  ('ut-team_manager', 'team_manager', '[Team] Fulfillment Manager', 'team', 9),
+  ('ut-team_supervisor', 'team_supervisor', '[Team] Fulfillment Supervisor', 'team', 10),
+  ('ut-team_staff', 'team_staff', '[Team] Fulfillment Staff', 'team', 11)
+ON CONFLICT DO NOTHING;
+INSERT INTO user_type_authority (user_type_id, authority_key) VALUES
+  ('ut-oro_sysadmin', 'assign_task_subsets_global'),
+  ('ut-oro_sysadmin', 'manage_users'),
+  ('ut-oro_sysadmin', 'system'),
+  ('ut-oro_sysadmin', 'go_live'),
+  ('ut-oro_director', 'act_any_request'),
+  ('ut-oro_director', 'reassign_any'),
+  ('ut-oro_director', 'override_stage'),
+  ('ut-oro_director', 'escalate'),
+  ('ut-oro_director', 'financial_approval'),
+  ('ut-oro_director', 'assign_task_subsets_global'),
+  ('ut-oro_director', 'manage_users'),
+  ('ut-oro_director', 'go_live'),
+  ('ut-oro_supervisor', 'act_any_request'),
+  ('ut-oro_supervisor', 'reassign_any'),
+  ('ut-oro_supervisor', 'escalate'),
+  ('ut-oro_senior_legal', 'legal_decision'),
+  ('ut-oro_associate', 'act_any_request'),
+  ('ut-oro_finance', 'financial_approval'),
+  ('ut-team_manager', 'reassign_team'),
+  ('ut-team_manager', 'escalate'),
+  ('ut-team_manager', 'assign_task_subsets_team'),
+  ('ut-team_supervisor', 'reassign_team')
+ON CONFLICT DO NOTHING;
+INSERT INTO user_type_permission (user_type_id, permission_group) VALUES
+  ('ut-city_management', 'reporting'),
+  ('ut-oro_sysadmin', 'compliance_policy'),
+  ('ut-oro_sysadmin', 'system_admin'),
+  ('ut-oro_sysadmin', 'reporting'),
+  ('ut-oro_sysadmin', 'operations_config'),
+  ('ut-oro_sysadmin', 'fee_configuration'),
+  ('ut-oro_director', 'legal_rules'),
+  ('ut-oro_director', 'compliance_policy'),
+  ('ut-oro_director', 'reporting'),
+  ('ut-oro_director', 'operations_config'),
+  ('ut-oro_director', 'fee_configuration'),
+  ('ut-oro_supervisor', 'reporting'),
+  ('ut-oro_supervisor', 'operations_config'),
+  ('ut-oro_supervisor', 'fee_configuration'),
+  ('ut-oro_senior_legal', 'legal_rules'),
+  ('ut-oro_senior_legal', 'reporting'),
+  ('ut-oro_senior_legal', 'operations_config'),
+  ('ut-oro_senior_legal', 'fee_configuration'),
+  ('ut-oro_legal_associate', 'reporting'),
+  ('ut-oro_legal_associate', 'operations_config'),
+  ('ut-oro_legal_associate', 'fee_configuration'),
+  ('ut-oro_associate', 'reporting'),
+  ('ut-oro_associate', 'operations_config'),
+  ('ut-oro_associate', 'fee_configuration'),
+  ('ut-oro_finance', 'reporting'),
+  ('ut-oro_finance', 'operations_config'),
+  ('ut-oro_finance', 'fee_configuration'),
+  ('ut-team_manager', 'reporting'),
+  ('ut-team_manager', 'operations_config'),
+  ('ut-team_manager', 'fee_configuration'),
+  ('ut-team_supervisor', 'operations_config'),
+  ('ut-team_supervisor', 'fee_configuration')
+ON CONFLICT DO NOTHING;
+INSERT INTO user_type_task_menu (user_type_id, task_type) VALUES
+  ('ut-oro_director', '*'),
+  ('ut-oro_supervisor', 'release_review'),
+  ('ut-oro_supervisor', 'close_approval'),
+  ('ut-oro_supervisor', 'process_withdrawal'),
+  ('ut-oro_senior_legal', 'legal_review'),
+  ('ut-oro_senior_legal', 'legal_redaction'),
+  ('ut-oro_legal_associate', 'legal_redaction'),
+  ('ut-oro_legal_associate', 'legal_review'),
+  ('ut-oro_associate', 'intake_review'),
+  ('ut-oro_associate', 'mrr_management'),
+  ('ut-oro_finance', 'fee_waiver'),
+  ('ut-team_manager', 'estimate'),
+  ('ut-team_manager', 'record_search'),
+  ('ut-team_manager', 'redaction'),
+  ('ut-team_manager', 'redaction_qa'),
+  ('ut-team_supervisor', 'estimate'),
+  ('ut-team_supervisor', 'record_search'),
+  ('ut-team_supervisor', 'redaction'),
+  ('ut-team_supervisor', 'redaction_qa'),
+  ('ut-team_staff', 'estimate'),
+  ('ut-team_staff', 'record_search'),
+  ('ut-team_staff', 'redaction'),
+  ('ut-team_staff', 'redaction_qa')
+ON CONFLICT DO NOTHING;
+INSERT INTO legacy_perm_map (user_type_key, perm) VALUES
+  ('oro_sysadmin', 'REQUEST_MANAGER'),
+  ('oro_sysadmin', 'SEARCH_AND_TRIAGE'),
+  ('oro_sysadmin', 'REDACTION_WORKER'),
+  ('oro_sysadmin', 'REDACTION_AUTHORITY'),
+  ('oro_sysadmin', 'FEE_MANAGER'),
+  ('oro_sysadmin', 'CLARIFICATION_SENDER'),
+  ('oro_sysadmin', 'DELIVERY_AND_CLOSURE'),
+  ('oro_sysadmin', 'DENIAL_AND_LEGAL'),
+  ('oro_sysadmin', 'ESCALATION_HANDLER'),
+  ('oro_sysadmin', 'REQUEST_REOPENER'),
+  ('oro_director', 'REQUEST_MANAGER'),
+  ('oro_director', 'SEARCH_AND_TRIAGE'),
+  ('oro_director', 'REDACTION_WORKER'),
+  ('oro_director', 'REDACTION_AUTHORITY'),
+  ('oro_director', 'FEE_MANAGER'),
+  ('oro_director', 'FINANCE'),
+  ('oro_director', 'CLARIFICATION_SENDER'),
+  ('oro_director', 'DELIVERY_AND_CLOSURE'),
+  ('oro_director', 'DENIAL_AND_LEGAL'),
+  ('oro_director', 'ESCALATION_HANDLER'),
+  ('oro_director', 'REQUEST_REOPENER'),
+  ('oro_supervisor', 'REQUEST_MANAGER'),
+  ('oro_supervisor', 'DELIVERY_AND_CLOSURE'),
+  ('oro_supervisor', 'CLARIFICATION_SENDER'),
+  ('oro_supervisor', 'ESCALATION_HANDLER'),
+  ('oro_supervisor', 'REQUEST_REOPENER'),
+  ('oro_senior_legal', 'DENIAL_AND_LEGAL'),
+  ('oro_senior_legal', 'REDACTION_AUTHORITY'),
+  ('oro_legal_associate', 'REDACTION_WORKER'),
+  ('oro_legal_associate', 'DENIAL_AND_LEGAL'),
+  ('oro_associate', 'REQUEST_MANAGER'),
+  ('oro_associate', 'SEARCH_AND_TRIAGE'),
+  ('oro_associate', 'CLARIFICATION_SENDER'),
+  ('oro_finance', 'FINANCE'),
+  ('team_manager', 'SEARCH_AND_TRIAGE'),
+  ('team_manager', 'REDACTION_WORKER'),
+  ('team_manager', 'FEE_MANAGER'),
+  ('team_supervisor', 'SEARCH_AND_TRIAGE'),
+  ('team_supervisor', 'REDACTION_WORKER'),
+  ('team_supervisor', 'FEE_MANAGER'),
+  ('team_staff', 'SEARCH_AND_TRIAGE'),
+  ('team_staff', 'REDACTION_WORKER'),
+  ('team_staff', 'FEE_MANAGER')
+ON CONFLICT DO NOTHING;

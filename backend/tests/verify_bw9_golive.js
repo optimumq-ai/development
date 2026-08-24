@@ -33,6 +33,7 @@ require('/opt/optimumq/backend/node_modules/dotenv').config({ path: '/opt/optimu
 require(__dirname + '/testEnv').enforce(); // refuses to run against a non-test DB
 var http = require('http');
 var db = require('/opt/optimumq/backend/src/db');
+var UT = require(__dirname + '/userTypeHelpers');
 var auth = require('/opt/optimumq/backend/src/services/auth');
 var JR = require('/opt/optimumq/backend/src/services/jurisdictionRules');
 var JP = require('/opt/optimumq/backend/src/services/jurisdictionProfile');
@@ -72,7 +73,7 @@ async function makeUser(suffix, name, roleIds) {
   await db.run("INSERT INTO users (id, email, display_name, status) VALUES (?,?,?,'active')",
     [id, id + '@harness.local', name]);
   for (var i = 0; i < roleIds.length; i++) {
-    await db.run('INSERT INTO user_function_roles (user_id, function_role_id) VALUES (?,?)', [id, roleIds[i]]);
+    await UT.grantLegacy(id, roleIds[i]);   // v3: legacy role id -> user type; claims derive from the type
   }
   return await db.get('SELECT * FROM users WHERE id = ?', [id]);
 }

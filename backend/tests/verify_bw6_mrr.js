@@ -100,8 +100,11 @@ async function stageOf(id) { var r = await db.get('SELECT stage, status FROM req
     jid = await JR.activeJid();
     try { savedBranches = jid ? await JR.read(jid, 'branches') : null; hadBranches = !!savedBranches; } catch (e) { savedBranches = null; }
 
-    var users = await db.all("SELECT * FROM users WHERE status = 'active' AND department_id IS NOT NULL ORDER BY id LIMIT 3");
+    var users = await db.all("SELECT * FROM users WHERE status = 'active' AND department_id IS NOT NULL ORDER BY (CASE WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id AND x.user_type_id IN ('ut-oro_director','ut-oro_sysadmin')) THEN 0 WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id AND x.user_type_id IN ('ut-oro_supervisor','ut-team_manager','ut-team_supervisor')) THEN 1 WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id) THEN 2 ELSE 3 END), id LIMIT 3");   // v3: prefer a TYPED actor (office admin > supervisor > any type) — untyped accounts hold no claims
     var mgr = users[0], worker = users[1] || users[0], stranger = users[2] || users[0];
+    // v3: the typed-actor ordering makes users[2] a team SUPERVISOR (an oversight role that passes manager gates);
+    // the stranger must be plain fulfillment staff on another team.
+    stranger = await db.get("SELECT * FROM users WHERE id = 'u-hr-staff'");
     TOKEN = await auth.signAccessToken(mgr);
     var WORKER_TOKEN = await auth.signAccessToken(worker);
     var STRANGER_TOKEN = await auth.signAccessToken(stranger);

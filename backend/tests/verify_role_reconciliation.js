@@ -57,8 +57,9 @@ async function api(method, path, tok, body) {
   ok('A4 no user is still assigned the retired function role', Number(deadFn.c) === 0);
   var deadTask = await db.get("SELECT COUNT(*) AS c FROM tasks WHERE role_required = 'FEE_AUTHORITY'");
   ok('A5 no task still names the old routing role', Number(deadTask.c) === 0);
-  var holders = await db.get("SELECT COUNT(*) AS c FROM user_permission_roles WHERE permission_role_id = 'pr-finance'");
-  ok('A6 the FINANCE role actually has holders (assignments carried over)', Number(holders.c) > 0);
+  // v3 (S1): FINANCE is minted from the oro_finance / oro_director user types, not the legacy table.
+  var holders = await require('/opt/optimumq/backend/src/services/userTypes').usersWithLegacyPerm('FINANCE');
+  ok('A6 the FINANCE role actually has holders (derived from user types)', holders.length > 0);
 
   console.log('\n=== B. ROUTING — the fee-waiver task points at FINANCE ===');
   ok('B1 TASK_ROLES.fee_waiver === FINANCE', tr.TASK_ROLES && tr.TASK_ROLES.fee_waiver === 'FINANCE');

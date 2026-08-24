@@ -14,6 +14,7 @@ process.chdir('/opt/optimumq/backend');
 require('/opt/optimumq/backend/node_modules/dotenv').config({ path: '/opt/optimumq/backend/.env' });
 require(__dirname + '/testEnv').enforce();
 var db = require('/opt/optimumq/backend/src/db');
+var UT = require(__dirname + '/userTypeHelpers');
 var auth = require('/opt/optimumq/backend/src/services/auth');
 var RC = require('/opt/optimumq/backend/src/services/requestCreate');
 
@@ -40,9 +41,9 @@ var U = { none: 'u-ob-none-' + TAG, super: 'u-ob-super-' + TAG, dir: 'u-ob-dir-'
   for (var k in U) {
     await db.run("INSERT INTO users (id, email, display_name, title, status) VALUES (?,?,?,?, 'active')", [U[k], k + '-' + TAG + '@test.optimumq.ai', 'OB ' + k, 'Test ' + TAG]);
   }
-  await db.run("INSERT INTO user_function_roles (user_id, function_role_id) VALUES (?, 'fr-supervisor')", [U.super]);
-  await db.run("INSERT INTO user_function_roles (user_id, function_role_id) VALUES (?, 'fr-director')", [U.dir]);
-  await db.run("INSERT INTO user_function_roles (user_id, function_role_id) VALUES (?, 'fr-attorney')", [U.legal]);
+  await UT.grantLegacy(U.super, 'fr-supervisor');
+  await UT.grantLegacy(U.dir, 'fr-director');
+  await UT.grantLegacy(U.legal, 'fr-attorney');
   var T = {};
   for (var k2 in U) T[k2] = await auth.signAccessToken(await db.get('SELECT * FROM users WHERE id = ?', [U[k2]]));
   T.admin = await auth.signAccessToken(await db.get("SELECT * FROM users WHERE id = 'u-kruss'"));
@@ -101,7 +102,7 @@ var U = { none: 'u-ob-none-' + TAG, super: 'u-ob-super-' + TAG, dir: 'u-ob-dir-'
   ok('D1 onboarding rows restored', after.reviewer_id === before.fees.reviewer_id && after.status === before.fees.status && after.test_status === before.fees.test_status);
   var ids = Object.keys(U).map(function (k) { return U[k]; });
   var ph3 = ids.map(function () { return '?'; }).join(',');
-  await db.run('DELETE FROM user_function_roles WHERE user_id IN (' + ph3 + ')', ids);
+  await UT.revokeAll(ids);
   await db.run('DELETE FROM users WHERE id IN (' + ph3 + ')', ids);
   var tabs = await db.all("SELECT table_name FROM information_schema.columns WHERE column_name='request_id'");
   for (var ti = 0; ti < tabs.length; ti++) for (var rid of [P1, C1]) { try { await db.run('DELETE FROM ' + tabs[ti].table_name + ' WHERE request_id = ?', [rid]); } catch (e) {} }

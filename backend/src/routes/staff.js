@@ -4,6 +4,7 @@ const { requireAuth, requireRole } = require('../middleware/auth');
 const { all, get, run } = require('../db');
 const { createUser, getFunctionRoles, hashPassword } = require('../services/auth');
 const { ROUTABLE_TASK_TYPES } = require('../services/taskRouting');
+const userTypes = require('../services/userTypes');
 const { v4: uuidv4 } = require('uuid');
 
 // A user's per-person routable task-type subset (v3 role model).
@@ -16,7 +17,7 @@ router.get('/', requireAuth, async function(req, res) {
   var staff = await all('SELECT u.*, d.name as department_name FROM users u LEFT JOIN departments d ON d.id = u.department_id ORDER BY u.display_name');
   var staffOut = [];
   for (var s of staff) {
-    staffOut.push(Object.assign({}, s, { functionRoles: await getFunctionRoles(s.id), taskTypes: await getTaskTypes(s.id), password_hash: undefined }));
+    staffOut.push(Object.assign({}, s, { functionRoles: await getFunctionRoles(s.id), userTypes: await userTypes.typesOf(s.id), taskTypes: await getTaskTypes(s.id), password_hash: undefined, mfa_secret: undefined }));
   }
   res.json({ staff: staffOut });
 });
@@ -31,14 +32,9 @@ router.post('/', requireAuth, requireRole('SYSTEM_ADMIN','DIRECTOR','SUPERVISOR'
     var hash = hashPassword(b.tempPassword);
     await run('INSERT INTO users (id, email, display_name, title, department_id, password_hash, temp_password) VALUES (?, ?, ?, ?, ?, ?, 1)',
       [userId, b.email, b.displayName, b.title || '', b.departmentId || null, hash]);
-    if (b.functionRoles && b.functionRoles.length > 0) {
-      for (var roleName of b.functionRoles) {
-        var role = await get('SELECT id FROM function_roles WHERE name = ?', [roleName]);
-        if (role) await run('INSERT OR IGNORE INTO user_function_roles (user_id, function_role_id) VALUES (?, ?)', [userId, role.id]);
-      }
-    }
-    var allPerms = await all('SELECT id FROM permission_roles');
-    for (var p of allPerms) { await run('INSERT OR IGNORE INTO user_permission_roles (user_id, permission_role_id) VALUES (?, ?)', [userId, p.id]); }
+    // v3 user-type model (S1): a new account holds NO user types until a manage_users holder assigns them
+    // (SPEC_user_type_model §9). The legacy grant-every-permission-role loop that lived here is gone —
+    // legacy roles/perms are now derived from user types, and `functionRoles` in the body is ignored.
     res.status(201).json({ success: true, userId: userId });
   } catch(e) { res.status(500).json({ error: e.message }); }
 });
@@ -47,6 +43,7 @@ router.patch('/:id/status', requireAuth, requireRole('SYSTEM_ADMIN','DIRECTOR'),
   var status = req.body.status;
   if (status !== 'active' && status !== 'inactive') return res.status(400).json({ error: 'Invalid status' });
   await run('UPDATE users SET status = ? WHERE id = ?', [status, req.params.id]);
+  await userTypes.bumpAuthVersion(req.params.id);   // a deactivated account's live tokens die within the cache window
   res.json({ success: true });
 });
 
@@ -66,8 +63,8 @@ router.patch('/:id/specialization', requireAuth, requireRole('SYSTEM_ADMIN','DIR
 router.get('/:id', requireAuth, async function(req, res) {
   var u = await get('SELECT u.*, d.name as department_name FROM users u LEFT JOIN departments d ON d.id = u.department_id WHERE u.id = ?', [req.params.id]);
   if (!u) return res.status(404).json({ error: 'Staff member not found' });
-  u.password_hash = undefined;
-  res.json({ user: Object.assign({}, u, { functionRoles: await getFunctionRoles(u.id), taskTypes: await getTaskTypes(u.id) }) });
+  u.password_hash = undefined; u.mfa_secret = undefined;
+  res.json({ user: Object.assign({}, u, { functionRoles: await getFunctionRoles(u.id), userTypes: await userTypes.typesOf(u.id), taskTypes: await getTaskTypes(u.id) }) });
 });
 
 // Edit profile fields (name, title, email, team). Only the provided fields are changed.
@@ -94,6 +91,7 @@ router.patch('/:id/task-types', requireAuth, requireRole('SYSTEM_ADMIN','DIRECTO
   var types = incoming.filter(function(t) { return ROUTABLE_TASK_TYPES.indexOf(t) !== -1; });
   await run('DELETE FROM user_task_types WHERE user_id = ?', [req.params.id]);
   for (var t of types) { await run('INSERT OR IGNORE INTO user_task_types (user_id, task_type) VALUES (?, ?)', [req.params.id, t]); }
+  await userTypes.bumpAuthVersion(req.params.id);
   res.json({ success: true, taskTypes: types });
 });
 

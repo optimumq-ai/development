@@ -17,6 +17,7 @@ process.chdir('/opt/optimumq/backend');
 require('/opt/optimumq/backend/node_modules/dotenv').config({ path: '/opt/optimumq/backend/.env' });
 require(__dirname + '/testEnv').enforce();
 var db = require('/opt/optimumq/backend/src/db');
+var UT = require(__dirname + '/userTypeHelpers');
 var auth = require('/opt/optimumq/backend/src/services/auth');
 var RC = require('/opt/optimumq/backend/src/services/requestCreate');
 var tr = require('/opt/optimumq/backend/src/services/taskRouting');
@@ -54,11 +55,11 @@ var U = {
   for (var k in U) {
     await db.run("INSERT INTO users (id, email, display_name, title, status) VALUES (?,?,?,?, 'active')", [U[k], k + '-' + TAG + '@test.optimumq.ai', 'RA ' + k, 'Test ' + TAG]);
   }
-  await db.run("INSERT INTO user_permission_roles (user_id, permission_role_id) VALUES (?, 'pr-searchtriage')", [U.search]);
-  await db.run("INSERT INTO user_permission_roles (user_id, permission_role_id) VALUES (?, 'pr-clarify')", [U.clarify]);
-  await db.run("INSERT INTO user_permission_roles (user_id, permission_role_id) VALUES (?, 'pr-reqmgr')", [U.reqmgr]);
-  await db.run("INSERT INTO user_function_roles (user_id, function_role_id) VALUES (?, 'fr-attorney')", [U.legal]);
-  await db.run("INSERT INTO user_function_roles (user_id, function_role_id) VALUES (?, 'fr-supervisor')", [U.super]);
+  await UT.grantLegacy(U.search, 'pr-searchtriage', 'team-police');
+  await UT.grantLegacy(U.clarify, 'pr-clarify');
+  await UT.grantLegacy(U.reqmgr, 'pr-reqmgr');
+  await UT.grantLegacy(U.legal, 'fr-attorney');
+  await UT.grantLegacy(U.super, 'fr-supervisor');
   var T = {};
   for (var k2 in U) T[k2] = await auth.signAccessToken(await db.get('SELECT * FROM users WHERE id = ?', [U[k2]]));
 
@@ -150,7 +151,8 @@ var U = {
   ok('D8 effort: searcher passes (400 on a bogus action)', (await call(T.search, 'POST', '/requests/' + P1 + '/effort', { action: 'BOGUS' })).status === 400);
   ok('D9 effort: task holder passes', (await call(T.holder, 'POST', '/requests/' + P1 + '/effort', { action: 'BOGUS' })).status === 400);
   ok('D10 search-intent resolve: no-role 403', gated(await call(T.none, 'POST', '/requests/' + P1 + '/search-intents/' + NX + '/resolve', {})));
-  ok('D11 search-intent resolve: clarifier 403 (not SEARCH_AND_TRIAGE)', gated(await call(T.clarify, 'POST', '/requests/' + P1 + '/search-intents/' + NX + '/resolve', {})));
+  // v3: the clarifier is an ORO Associate, who legitimately holds SEARCH_AND_TRIAGE (§9.1); the non-searcher control is the legal reviewer.
+  ok('D11 search-intent resolve: legal reviewer 403 (not SEARCH_AND_TRIAGE, not an acting role for search)', gated(await call(T.legal, 'POST', '/requests/' + P1 + '/search-intents/' + NX + '/resolve', {})));
   ok('D12 search-intent resolve: searcher passes', through(await call(T.search, 'POST', '/requests/' + P1 + '/search-intents/' + NX + '/resolve', {})));
   ok('D13 eligibility confirm: no-role 403', gated(await call(T.none, 'POST', '/requests/' + P1 + '/eligibility-findings/' + NX + '/confirm', {})));
   ok('D14 eligibility confirm: REQUEST_MANAGER passes', through(await call(T.reqmgr, 'POST', '/requests/' + P1 + '/eligibility-findings/' + NX + '/confirm', {})));
@@ -183,8 +185,7 @@ var U = {
   }
   var ids = Object.keys(U).map(function (k) { return U[k]; });
   var ph = ids.map(function () { return '?'; }).join(',');
-  await db.run('DELETE FROM user_permission_roles WHERE user_id IN (' + ph + ')', ids);
-  await db.run('DELETE FROM user_function_roles WHERE user_id IN (' + ph + ')', ids);
+  await UT.revokeAll(ids);
   await db.run('DELETE FROM users WHERE id IN (' + ph + ')', ids);
   var left = await db.get("SELECT count(*)::int AS n FROM users WHERE title = 'Test ' || ?", [TAG]);
   ok('F1 fixture users are gone', Number(left.n) === 0);

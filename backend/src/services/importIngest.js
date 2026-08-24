@@ -29,9 +29,8 @@ function fileKey(name, st) { return name + ':' + st.size + ':' + Math.floor(st.m
 // to their source repository and passive prompts become Notifications (Tasks spec §1-2; Sources spec §4).
 async function notifyRecipients(cfg) {
   if (cfg && cfg.review_assignee) return [cfg.review_assignee];
-  var rows = await db.all(
-    "SELECT DISTINCT u.id FROM users u JOIN user_function_roles ufr ON ufr.user_id = u.id " +
-    "JOIN function_roles fr ON fr.id = ufr.function_role_id WHERE fr.name IN ('SYSTEM_ADMIN','DIRECTOR') AND u.status <> 'inactive'");
+  // v3 model (S1): SYSTEM_ADMIN / DIRECTOR are derived from user types (oro_sysadmin / oro_director).
+  var rows = await require('./userTypes').usersWithLegacyRole(['SYSTEM_ADMIN', 'DIRECTOR']);
   return (rows || []).map(function (r) { return r.id; });
 }
 

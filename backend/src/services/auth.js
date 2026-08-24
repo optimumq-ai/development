@@ -2,19 +2,30 @@ const crypto = require('crypto');
 const jwt = require('jsonwebtoken');
 const { v4: uuidv4 } = require('uuid');
 const { all, get, run } = require('../db');
+const userTypes = require('./userTypes');
 const JWT_SECRET = process.env.JWT_SECRET || 'optimumq-dev-secret';
 
 function hashPwd(password) {
   return crypto.createHash('sha256').update(password + 'optimumq_salt_2024').digest('hex');
 }
-async function getFunctionRoles(userId) {
-  return (await all('SELECT fr.name FROM user_function_roles ufr JOIN function_roles fr ON fr.id = ufr.function_role_id WHERE ufr.user_id = ?', [userId])).map(function(r) { return r.name; });
-}
-async function getPermissionRoles(userId) {
-  return (await all('SELECT pr.name FROM user_permission_roles upr JOIN permission_roles pr ON pr.id = upr.permission_role_id WHERE upr.user_id = ?', [userId])).map(function(r) { return r.name; });
+// v3 user-type model (SPEC_user_type_model §7, §9.1): the legacy `roles` / `perms` claims are DERIVED from the
+// person's user types — never read from user_function_roles / user_permission_roles, which the cutover
+// emptied. That is where the grant-all bug died: perms come from type, not from "every row in the catalog".
+async function getFunctionRoles(userId) { return (await userTypes.claimsFor(userId)).roles; }
+async function getPermissionRoles(userId) { return (await userTypes.claimsFor(userId)).perms; }
+async function getAuthVersion(userId) {
+  var r = await get('SELECT auth_version FROM users WHERE id = ?', [userId]);
+  return r ? (r.auth_version || 1) : null;
 }
 async function signAccessToken(user) {
-  return jwt.sign({ sub: user.id, email: user.email, name: user.display_name, dept: user.department_id, roles: await getFunctionRoles(user.id), perms: await getPermissionRoles(user.id) }, JWT_SECRET, { expiresIn: '8h' });
+  var c = await userTypes.claimsFor(user.id);
+  var av = await getAuthVersion(user.id);
+  return jwt.sign({
+    sub: user.id, email: user.email, name: user.display_name, dept: user.department_id,
+    roles: c.roles, perms: c.perms,
+    userTypes: c.userTypes, authorities: c.authorities, permissionGroups: c.permissionGroups, inOro: c.inOro,
+    av: av,
+  }, JWT_SECRET, { expiresIn: '8h' });
 }
 function verifyAccessToken(token) { return jwt.verify(token, JWT_SECRET); }
 async function localLogin(email, password) {
@@ -31,16 +42,15 @@ async function changePassword(userId, newPassword) {
   var hash = hashPwd(newPassword);
   await run('UPDATE users SET password_hash = ?, temp_password = 0 WHERE id = ?', [hash, userId]);
 }
+// Accounts are created with NO user types (§9: nothing is inferred; types are assigned by a manage_users
+// holder afterwards). opts.userTypes = [{key, teamId}] is accepted for callers that already know them.
 async function createUser(opts) {
   var userId = uuidv4();
   var passwordHash = opts.tempPassword ? hashPwd(opts.tempPassword) : null;
   await run('INSERT INTO users (id, email, display_name, title, department_id, password_hash, temp_password) VALUES (?, ?, ?, ?, ?, ?, ?)',
     [userId, opts.email, opts.displayName, opts.title || '', opts.departmentId || null, passwordHash, opts.tempPassword ? 1 : 0]);
-  if (opts.functionRoles) for (var roleId of opts.functionRoles) {
-    await run('INSERT OR IGNORE INTO user_function_roles (user_id, function_role_id) VALUES (?, ?)', [userId, roleId]);
-  }
-  if (opts.permissionRoles) for (var permId of opts.permissionRoles) {
-    await run('INSERT OR IGNORE INTO user_permission_roles (user_id, permission_role_id) VALUES (?, ?)', [userId, permId]);
+  if (opts.userTypes) for (var t of opts.userTypes) {
+    await userTypes.grant(userId, t.key, t.teamId || opts.departmentId || null, opts.actorId || null);
   }
   return userId;
 }
@@ -50,10 +60,14 @@ function sanitizeUser(user) {
 async function getUserById(userId) {
   var user = await get('SELECT * FROM users WHERE id = ?', [userId]);
   if (!user) return null;
-  return Object.assign(sanitizeUser(user), { functionRoles: await getFunctionRoles(userId), permissionRoles: await getPermissionRoles(userId) });
+  var c = await userTypes.claimsFor(userId);
+  return Object.assign(sanitizeUser(user), {
+    functionRoles: c.roles, permissionRoles: c.perms,
+    userTypes: c.userTypes, authorities: c.authorities, permissionGroups: c.permissionGroups, inOro: c.inOro,
+  });
 }
 async function getAuthMode() {
   var c = await get('SELECT value FROM system_config WHERE key = ?', ['auth_mode']);
   return c ? c.value : 'local';
 }
-module.exports = { localLogin, signAccessToken, verifyAccessToken, hashPassword, changePassword, createUser, getUserById, getFunctionRoles, getPermissionRoles, getAuthMode, sanitizeUser };
+module.exports = { localLogin, signAccessToken, verifyAccessToken, hashPassword, changePassword, createUser, getUserById, getFunctionRoles, getPermissionRoles, getAuthVersion, getAuthMode, sanitizeUser };

@@ -181,7 +181,6 @@ async function call(token, method, path, body) {
     [['le-' + TAG + '@example.com', 'lemrr-' + TAG + '@example.com']]);
   await db.run('DELETE FROM requests WHERE requestor_email = ANY($1::text[])', [['le-' + TAG + '@example.com', 'lemrr-' + TAG + '@example.com']]); // cascades tasks + inputs + snapshots
   await db.run('DELETE FROM user_task_types WHERE user_id = ANY($1::text[])', [[legalU.id, plainU.id]]);
-  await db.run('DELETE FROM user_function_roles WHERE user_id = ANY($1::text[])', [[legalU.id, plainU.id]]);
   await db.run('DELETE FROM users WHERE id = ANY($1::text[])', [[legalU.id, plainU.id]]);
   var left = await db.get(
     "SELECT (SELECT count(*) FROM requests WHERE requestor_email LIKE ?) + (SELECT count(*) FROM users WHERE email LIKE ?) " +

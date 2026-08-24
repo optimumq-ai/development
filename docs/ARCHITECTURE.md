@@ -14,8 +14,16 @@ Every request — even single-record — is a **parent with one or more children
 ## 3. Notifications are their own model, request-independent
 A Notification = description + hyperlink + recipient; no completion UI, no request dependency. Passive/monitor items and heads-ups are Notifications, never faked as tasks or requests. Shown in their own My Tasks area.
 
-## 4. One role catalog
-A single task-routing role set (System Function Roles), with Department Display Roles as a naming layer on top. **Never two overlapping catalogs.** Rationale: v1's function_roles + permission_roles split caused routing confusion and the "too many roles" pushback. Includes the Finance consolidation (fee waiver + objection + future commercial approvals under one role).
+## 4. One role catalog — the user-type model
+**Rewritten 2026-08-24 on ratification of `SPEC_user_type_model.md` (binding).** One catalog: a person holds
+**user types** (eleven, seeded; office-wide or against one fulfillment team). Three axes derive from the
+types and each answers one question — **task menu** (routing, via the per-person `user_task_types` subset),
+**authority** (what I may do to work I don't own), **permission groups** (what configuration I may change —
+the setup hub's lanes). "In the ORO" is a fact in the data (any office-level type). **Never two overlapping
+catalogs.** The v1 `function_roles` + `permission_roles` split is retired: as of S1 their assignment tables
+are empty and the legacy `roles`/`perms` claims are *derived* from user types (compat shim, gone in S5).
+Rationale unchanged: two catalogs caused routing confusion, the "too many roles" pushback, and the grant-all
+bug (every new account held every permission role). Includes the Finance consolidation (`financial_approval`).
 
 ## 5. One request-creation helper
 Every path that creates a request (portal chat, staff form, connectors, imports, API) calls ONE shared helper. Wrap-in-master (item 1), numbering, deadlines, defaults live there once. Rationale: v1 had 5 independent INSERT sites, which is how conventions drift.

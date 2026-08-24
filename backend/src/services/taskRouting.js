@@ -168,18 +168,10 @@ async function eligibleUsers(teamId, roleName) {
       );
     }
   }
-  // Legacy fallback: the old permission-role catalog.
-  var params = [roleName];
-  var deptClause = '';
-  if (teamId) { deptClause = ' AND u.department_id = ?'; params.push(teamId); }
-  return await all(
-    "SELECT u.id, u.display_name, u.routing_specialization " +
-    "FROM users u " +
-    "JOIN user_permission_roles upr ON upr.user_id = u.id " +
-    "JOIN permission_roles pr ON pr.id = upr.permission_role_id " +
-    "WHERE pr.name = ? AND u.status = 'active'" + deptClause,
-    params
-  );
+  // Legacy fallback: holders of the legacy permission-role NAME — derived from user types (v3 model S1,
+  // SPEC_user_type_model §9.1); the legacy assignment tables are empty and no longer consulted.
+  return (await require('./userTypes').usersWithLegacyPerm(roleName, { teamId: teamId || null }))
+    .map(function (u) { return { id: u.id, display_name: u.display_name, routing_specialization: u.routing_specialization }; });
 }
 
 // (Re)embed a user's specialization text so Smart Routing can match against it.
@@ -454,7 +446,7 @@ var POOL_ELIGIBILITY_SQL =
   // ⚠️ `t.role_required IS NULL` used to be the FIRST branch here — i.e. a role-less task was advertised to
   // every authenticated user. It is gone: a task nobody's competence gates is shown to nobody, matching the
   // claim guard. Creation refuses to make one, so this only ever applies to a legacy row.
-  "AND (t.role_required IN (SELECT pr.name FROM user_permission_roles upr JOIN permission_roles pr ON pr.id = upr.permission_role_id WHERE upr.user_id = ?) " +
+  "AND (t.role_required IN (SELECT m.perm FROM user_user_types uut JOIN user_types ut ON ut.id = uut.user_type_id JOIN legacy_perm_map m ON m.user_type_key = ut.key WHERE uut.user_id = ?) " +
   "  OR t.role_required IN (SELECT task_type FROM user_task_types WHERE user_id = ?))";
 
 // TWO EYES IN THE POOL. A task this person may not take must not be OFFERED to them: showing it and then

@@ -58,8 +58,8 @@ async function primaryState(rid) {
   try {
     // Extending a deadline is a request act (clocks.js gate, 2026-08-19): act as a REQUEST_MANAGER holder,
     // not an arbitrary row — `LIMIT 1` can be a role-less fixture user another harness created.
-    var user = await db.get("SELECT u.id, u.email, u.display_name, u.department_id FROM users u JOIN user_permission_roles upr ON upr.user_id = u.id " +
-      "WHERE upr.permission_role_id = 'pr-reqmgr' AND u.status='active' AND u.display_name IS NOT NULL ORDER BY u.id LIMIT 1");
+    var user = (await require('/opt/optimumq/backend/src/services/userTypes').usersWithLegacyPerm('REQUEST_MANAGER'))
+      .filter(function (x) { return x.display_name; }).sort(function (a, b) { return a.id < b.id ? -1 : 1; })[0];
     TOKEN = await auth.signAccessToken(user);
     savedDeadline = JSON.stringify(await JR.read(JID, 'deadline'));
 

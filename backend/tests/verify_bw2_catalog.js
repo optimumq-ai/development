@@ -24,6 +24,7 @@ require(__dirname + '/testEnv').enforce(); // refuses to run against a non-test 
 var fs = require('fs');
 var http = require('http');
 var db = require('/opt/optimumq/backend/src/db');
+var UT = require(__dirname + '/userTypeHelpers');
 var auth = require('/opt/optimumq/backend/src/services/auth');
 var tr = require('/opt/optimumq/backend/src/services/taskRouting');
 var IR = require('/opt/optimumq/backend/src/services/intakeReview');
@@ -75,7 +76,7 @@ var UNROUTABLE_MATCH = { classification: 'standard', recordTypeConfidence: 0, fl
     jid = await JR.activeJid();
     try { savedProcessing = jid ? await JR.read(jid, PC.DOMAIN) : null; } catch (e) { savedProcessing = null; }
 
-    var user = await db.get("SELECT * FROM users WHERE status = 'active' AND department_id IS NOT NULL LIMIT 1");
+    var user = await db.get("SELECT * FROM users WHERE status = 'active' AND department_id IS NOT NULL ORDER BY (CASE WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id AND x.user_type_id IN ('ut-oro_director','ut-oro_sysadmin')) THEN 0 WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id AND x.user_type_id IN ('ut-oro_supervisor','ut-team_manager','ut-team_supervisor')) THEN 1 WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id) THEN 2 ELSE 3 END), id LIMIT 1");   // v3: prefer a TYPED actor (office admin > supervisor > any type) — untyped accounts hold no claims
     var other = await db.get("SELECT * FROM users WHERE status = 'active' AND id <> ? AND department_id = ? LIMIT 1",
       [user.id, user.department_id]);
     if (!other) other = await db.get("SELECT * FROM users WHERE status = 'active' AND id <> ? LIMIT 1", [user.id]);
@@ -266,11 +267,13 @@ var UNROUTABLE_MATCH = { classification: 'standard', recordTypeConfidence: 0, fl
     var deptId = 'dept-' + TAG;
     await db.run("INSERT INTO departments (id, name, code, kind, active) VALUES (?,?,?,'team',1)",
       [deptId, 'BW2 Empty Team ' + TAG, 'BW2' + Date.now().toString().slice(-6)]);
-    var mgrRole = await db.get("SELECT id FROM function_roles WHERE name = 'DEPT_MANAGER'");
     var mgrId = 'u-' + TAG;
+    // v3: the manager is the team's manager by holding team_manager AGAINST deptId (chain of command), but
+    // their home team (department_id — where they are eligible for work) is elsewhere: a team_manager
+    // legitimately holds SEARCH_AND_TRIAGE now, so a manager homed on the team would fill the pool.
     await db.run("INSERT INTO users (id, email, display_name, department_id, status) VALUES (?,?,?,?,'active')",
-      [mgrId, 'bw2mgr+' + TAG + '@example.com', 'BW2 Manager', deptId]);
-    if (mgrRole) await db.run("INSERT INTO user_function_roles (user_id, function_role_id) VALUES (?,?) ON CONFLICT DO NOTHING", [mgrId, mgrRole.id]);
+      [mgrId, 'bw2mgr+' + TAG + '@example.com', 'BW2 Manager', null]);
+    await UT.grant(mgrId, 'team_manager', deptId);   // [Team] Fulfillment Manager of deptId (mints legacy DEPT_MANAGER)
 
     var who = await CG.managersFor(deptId);
     ok('F1 the team\'s manager is resolvable — DEPT_MANAGER stands in for the unbuilt v3 Fulfillment Manager',

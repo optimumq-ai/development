@@ -36,9 +36,8 @@ async function plan() {
     "SELECT u.id, u.display_name FROM users u WHERE u.status = 'active' ORDER BY u.id");
   var out = [];
   for (var u of users) {
-    var perms = (await db.all(
-      'SELECT pr.name FROM user_permission_roles upr JOIN permission_roles pr ON pr.id = upr.permission_role_id WHERE upr.user_id = ?',
-      [u.id])).map(function (r) { return r.name; });
+    // v3 (S1): legacy permission-role names derive from the user's types (SPEC_user_type_model §9.1).
+    var perms = (await require('../services/userTypes').claimsFor(u.id)).perms;
     var current = (await db.all(
       'SELECT task_type FROM user_task_types WHERE user_id = ?', [u.id]))
       .map(function (r) { return r.task_type; });
@@ -61,9 +60,8 @@ async function main() {
   for (var c of changes) console.log('  ' + c.id + ' (' + c.name + '): +[' + c.added.join(', ') + '] -> [' + c.target.join(', ') + ']');
   if (!APPLY) { console.log('\nRe-run with --apply to execute via PATCH /api/staff/:id/task-types.'); process.exit(0); }
 
-  var admin = await db.get(
-    "SELECT u.* FROM users u JOIN user_function_roles ufr ON ufr.user_id = u.id " +
-    "JOIN function_roles fr ON fr.id = ufr.function_role_id WHERE fr.name = 'SYSTEM_ADMIN' AND u.status = 'active' LIMIT 1");
+  var adminRow = (await require('../services/userTypes').usersWithLegacyRole('SYSTEM_ADMIN'))[0];
+  var admin = adminRow ? await db.get('SELECT * FROM users WHERE id = ?', [adminRow.id]) : null;
   if (!admin) { console.error('No active SYSTEM_ADMIN user found — cannot call the staff API.'); process.exit(1); }
   var tok = await auth.signAccessToken(admin);
   for (var c of changes) {

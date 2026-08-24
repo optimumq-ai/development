@@ -35,16 +35,10 @@ var KIND = 'coverage_gap';
 var TEAM_ROLES = ['DEPT_MANAGER', 'SUPERVISOR'];
 var OFFICE_ROLES = ['DIRECTOR', 'SYSTEM_ADMIN'];
 
+// v3 model (S1): legacy function-role names are derived from user types (SPEC_user_type_model §9.1).
 async function usersWithRole(roleName, teamId) {
-  var params = [roleName];
-  var clause = '';
-  if (teamId) { clause = ' AND u.department_id = ?'; params.push(teamId); }
-  return await all(
-    'SELECT u.id, u.display_name, u.email FROM users u ' +
-    'JOIN user_function_roles ufr ON ufr.user_id = u.id ' +
-    'JOIN function_roles fr ON fr.id = ufr.function_role_id ' +
-    "WHERE fr.name = ? AND u.status = 'active'" + clause,
-    params);
+  return (await require('./userTypes').usersWithLegacyRole(roleName, { teamId: teamId || null }))
+    .map(function (u) { return { id: u.id, display_name: u.display_name, email: u.email }; });
 }
 
 // The first non-empty rung of the chain. Returns [] only if the install has no active manager, supervisor,

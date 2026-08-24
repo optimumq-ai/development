@@ -93,7 +93,7 @@ async function makeClock(requestId, startedDaysAgo, durationDays) {
 (async function () {
   await db.initDb();
   try {
-    var users = await db.all("SELECT * FROM users WHERE status = 'active' AND department_id IS NOT NULL ORDER BY id LIMIT 3");
+    var users = await db.all("SELECT * FROM users WHERE status = 'active' AND department_id IS NOT NULL ORDER BY (CASE WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id AND x.user_type_id IN ('ut-oro_director','ut-oro_sysadmin')) THEN 0 WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id AND x.user_type_id IN ('ut-oro_supervisor','ut-team_manager','ut-team_supervisor')) THEN 1 WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id) THEN 2 ELSE 3 END), id LIMIT 3");   // v3: prefer a TYPED actor (office admin > supervisor > any type) — untyped accounts hold no claims
     var u1 = users[0], u2 = users[1] || users[0];
     var T1 = await auth.signAccessToken(u1);
     var T2 = await auth.signAccessToken(u2);

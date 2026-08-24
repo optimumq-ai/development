@@ -39,16 +39,16 @@ function req(method, p, body, token) {
   });
 }
 async function userWithRole(role, needDept) {
-  return await db.get(
-    "SELECT u.* FROM users u JOIN user_function_roles ufr ON ufr.user_id = u.id " +
-    "JOIN function_roles fr ON fr.id = ufr.function_role_id WHERE fr.name = ? AND u.status = 'active'" +
-    (needDept ? ' AND u.department_id IS NOT NULL' : '') + ' LIMIT 1', [role]);
+  // v3: legacy role NAME -> holders via user types (SPEC_user_type_model §9.1)
+  var rows = await require('/opt/optimumq/backend/src/services/userTypes').usersWithLegacyRole(role);
+  var pick = rows.filter(function (u) { return !needDept || u.department_id; })[0];
+  return pick ? await db.get('SELECT * FROM users WHERE id = ?', [pick.id]) : null;
 }
 async function plainUser() {
   return await db.get(
     "SELECT u.* FROM users u WHERE u.status = 'active' AND u.department_id IS NOT NULL AND NOT EXISTS (" +
-    "  SELECT 1 FROM user_function_roles ufr JOIN function_roles fr ON fr.id = ufr.function_role_id " +
-    "  WHERE ufr.user_id = u.id AND fr.name IN ('SUPERVISOR','DIRECTOR','SYSTEM_ADMIN','DEPT_MANAGER','ATTORNEY_REVIEWER')) LIMIT 1");
+    "  SELECT 1 FROM user_user_types uut JOIN user_types ut ON ut.id = uut.user_type_id " +
+    "  WHERE uut.user_id = u.id AND ut.key IN ('oro_supervisor','team_supervisor','oro_director','oro_sysadmin','team_manager','oro_senior_legal')) LIMIT 1");
 }
 var HOUR = 3600000, DAY = 24 * HOUR;
 function agoStr(ms) { return new Date(Date.now() - ms).toISOString().slice(0, 19).replace('T', ' '); }

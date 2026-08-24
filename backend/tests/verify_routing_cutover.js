@@ -28,11 +28,8 @@ var FOUR = ['estimate', 'record_search', 'redaction', 'redaction_qa', 'fee_waive
 var LEGACY_OF = { estimate: 'FEE_MANAGER', record_search: 'SEARCH_AND_TRIAGE', redaction: 'REDACTION_WORKER', redaction_qa: 'REDACTION_WORKER', fee_waiver: 'FINANCE' };
 
 async function legacyHolders(teamId, roleName) {
-  var p = [roleName]; var dc = '';
-  if (teamId) { dc = ' AND u.department_id = ?'; p.push(teamId); }
-  return (await db.all(
-    "SELECT u.id FROM users u JOIN user_permission_roles upr ON upr.user_id = u.id " +
-    "JOIN permission_roles pr ON pr.id = upr.permission_role_id WHERE pr.name = ? AND u.status='active'" + dc, p))
+  // v3: legacy permission-role holders derive from user types (SPEC_user_type_model §9.1)
+  return (await require('/opt/optimumq/backend/src/services/userTypes').usersWithLegacyPerm(roleName, { teamId: teamId || null }))
     .map(function (r) { return r.id; }).sort();
 }
 function ids(users) { return users.map(function (u) { return u.id; }).sort(); }
@@ -44,7 +41,11 @@ function runSeed(args) {
 
 (async function () {
   await db.initDb();
-  var TEAM = 'team-police', SUPER = 'u-police-super', STAFF = 'u-police-staff';
+  var TEAM = 'team-police', SUPER = 'u-police-super', FIN = 'u-finance-super';
+  // v3: u-police-staff (team_staff) legitimately holds FEE_MANAGER now, so the "non-holder" for D4 is a
+  // throwaway TYPELESS account on the team (no types -> no legacy perms, no grants).
+  var STAFF = 'u-rc-none-' + Date.now().toString().slice(-6);
+  await db.run("INSERT INTO users (id, email, display_name, department_id, status) VALUES (?,?,?,?,'active')", [STAFF, STAFF + '@test.optimumq.ai', 'RC NoType', TEAM]);
 
   console.log('\n=== A. PRE-CUTOVER — legacy tags, legacy pools, pool/claim agreement ===');
   await db.run('DELETE FROM user_task_types WHERE task_type IN (?,?,?,?,?)', FOUR);
@@ -106,15 +107,16 @@ function runSeed(args) {
   var tleg = await tr.createTask({ type: 'redaction_qa', requestId: null, roleRequired: 'legal_redaction', teamId: null, createdBy: 'test' });
   ok('D7 an explicit roleRequired override (legal path) is respected, never switched', tleg.role_required === 'legal_redaction');
   var tfw = await tr.createTask({ type: 'fee_waiver', requestId: null, teamId: null, createdBy: 'test' });
-  var claimFw = await tr.claim(tfw.id, SUPER); // SUPER holds FINANCE -> mirrored fee_waiver grant
+  var claimFw = await tr.claim(tfw.id, FIN); // FIN holds FINANCE (oro_finance) -> mirrored fee_waiver grant
   ok('D8 team-agnostic fee_waiver spawns on its key and a mirrored FINANCE holder claims it',
-    tfw.role_required === 'fee_waiver' && !!claimFw.task && claimFw.task.assigned_to === SUPER);
+    tfw.role_required === 'fee_waiver' && !!claimFw.task && claimFw.task.assigned_to === FIN);
 
   console.log('\n=== E. LEAVE THE WORLD AS FOUND — later harnesses assert the UNSEEDED fixture ===');
   // verify_qa_routing §C proves the unseeded->seeded transition from a grantless team; the mirror this
   // harness applied must not leak into that precondition (it did once: C0/C1 went red suite-wide).
   for (var tid of [tA.id, tD.id, tqa.id, tleg.id, tfw.id]) { await db.run('DELETE FROM tasks WHERE id = ?', [tid]); }
   await db.run('DELETE FROM user_task_types WHERE task_type IN (?,?,?,?,?)', FOUR);
+  await db.run('DELETE FROM users WHERE id = ?', [STAFF]);
   ok('E1 grants and tasks from this harness are gone (the fixture is unseeded again)',
     (await tr.hasSeededType('redaction_qa', TEAM)) === false &&
     Number((await db.get('SELECT count(*)::int AS n FROM user_task_types WHERE task_type IN (?,?,?,?,?)', FOUR)).n) === 0);

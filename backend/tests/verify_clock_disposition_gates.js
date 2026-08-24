@@ -14,6 +14,7 @@ process.chdir('/opt/optimumq/backend');
 require('/opt/optimumq/backend/node_modules/dotenv').config({ path: '/opt/optimumq/backend/.env' });
 require(__dirname + '/testEnv').enforce();
 var db = require('/opt/optimumq/backend/src/db');
+var UT = require(__dirname + '/userTypeHelpers');
 var auth = require('/opt/optimumq/backend/src/services/auth');
 var RC = require('/opt/optimumq/backend/src/services/requestCreate');
 var tr = require('/opt/optimumq/backend/src/services/taskRouting');
@@ -48,10 +49,11 @@ var U = {
   for (var k in U) {
     await db.run("INSERT INTO users (id, email, display_name, title, status) VALUES (?,?,?,?, 'active')", [U[k], k + '-' + TAG + '@test.optimumq.ai', 'CD ' + k, 'Test ' + TAG]);
   }
-  await db.run("INSERT INTO user_permission_roles (user_id, permission_role_id) VALUES (?, 'pr-reqmgr')", [U.reqmgr]);
-  await db.run("INSERT INTO user_permission_roles (user_id, permission_role_id) VALUES (?, 'pr-searchtriage')", [U.search]);
-  await db.run("INSERT INTO user_function_roles (user_id, function_role_id) VALUES (?, 'fr-attorney')", [U.legal]);
-  await db.run("INSERT INTO user_function_roles (user_id, function_role_id) VALUES (?, 'fr-supervisor')", [U.super]);
+  // v3 user types (legacy claims derive from them): oro_associate mints REQUEST_MANAGER, team_staff SEARCH_AND_TRIAGE, ...
+  await UT.grantLegacy(U.reqmgr, 'pr-reqmgr');
+  await UT.grantLegacy(U.search, 'pr-searchtriage', 'team-police');
+  await UT.grantLegacy(U.legal, 'fr-attorney');
+  await UT.grantLegacy(U.super, 'fr-supervisor');
   var T = {};
   for (var k2 in U) T[k2] = await auth.signAccessToken(await db.get('SELECT * FROM users WHERE id = ?', [U[k2]]));
 
@@ -118,8 +120,7 @@ var U = {
   console.log('\n=== D. CLEANUP ===');
   var ids = Object.keys(U).map(function (k) { return U[k]; });
   var ph = ids.map(function () { return '?'; }).join(',');
-  await db.run('DELETE FROM user_permission_roles WHERE user_id IN (' + ph + ')', ids);
-  await db.run('DELETE FROM user_function_roles WHERE user_id IN (' + ph + ')', ids);
+  await UT.revokeAll(ids);
   await db.run('DELETE FROM users WHERE id IN (' + ph + ')', ids);
   var tabs = await db.all("SELECT table_name FROM information_schema.columns WHERE column_name='request_id'");
   for (var ti = 0; ti < tabs.length; ti++) for (var rid of [P, C]) {

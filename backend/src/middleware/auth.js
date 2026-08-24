@@ -1,17 +1,39 @@
-const { verifyAccessToken } = require('../services/auth');
-function requireAuth(req, res, next) {
+const { verifyAccessToken, getAuthVersion } = require('../services/auth');
+
+// TOKEN FRESHNESS (SPEC_user_type_model §7). Claims ride an 8h JWT; a user-type / subset / status change
+// bumps users.auth_version, and a token whose `av` is behind it is rejected — one indexed read per request,
+// cached briefly so the check is not a DB round trip on every call. A token minted before the model existed
+// (no `av` at all) is rejected outright: its role claims came from the legacy tables.
+const AV_TTL_MS = Number(process.env.AUTH_VERSION_CACHE_MS) || (process.env.NODE_ENV === 'test' ? 1000 : 60000);
+const avCache = new Map();
+async function currentAuthVersion(userId) {
+  const hit = avCache.get(userId);
+  const now = Date.now();
+  if (hit && now - hit.at < AV_TTL_MS) return hit.av;
+  const av = await getAuthVersion(userId);
+  avCache.set(userId, { av: av, at: now });
+  return av;
+}
+function forgetAuthVersion(userId) { avCache.delete(userId); }
+
+async function requireAuth(req, res, next) {
   const header = req.headers.authorization;
   if (!header || !header.startsWith('Bearer ')) return res.status(401).json({ error: 'Authentication required' });
-  try {
-    req.user = verifyAccessToken(header.slice(7));
-    // The JWT carries the user id as `sub` (JWT convention); routes have repeatedly written
-    // `req.user.id` expecting it (found 2026-08-13: every req.user.id in mrr.js was undefined, so
-    // manager-by-task-holder and assignee gates never matched and "My MRRs" was empty for its own
-    // manager — masked in tests because oversight roles pass every gate). Alias it once, here.
-    if (req.user && req.user.id == null) req.user.id = req.user.sub;
-    next();
-  }
+  let user;
+  try { user = verifyAccessToken(header.slice(7)); }
   catch(e) { return res.status(401).json({ error: 'Invalid or expired token' }); }
+  if (user.av == null) return res.status(401).json({ error: 'Session is out of date — sign in again' });
+  let av;
+  try { av = await currentAuthVersion(user.sub); }
+  catch(e) { return res.status(500).json({ error: 'Authorization check failed' }); }
+  if (av === null || Number(user.av) !== Number(av)) return res.status(401).json({ error: 'Session is out of date — sign in again' });
+  req.user = user;
+  // The JWT carries the user id as `sub` (JWT convention); routes have repeatedly written
+  // `req.user.id` expecting it (found 2026-08-13: every req.user.id in mrr.js was undefined, so
+  // manager-by-task-holder and assignee gates never matched and "My MRRs" was empty for its own
+  // manager — masked in tests because oversight roles pass every gate). Alias it once, here.
+  if (req.user.id == null) req.user.id = req.user.sub;
+  next();
 }
 function requireRole() {
   const roles = Array.prototype.slice.call(arguments);
@@ -61,4 +83,4 @@ const requireRequestWork = requireRoleOrPerm(['DIRECTOR', 'SUPERVISOR', 'DEPT_MA
 // EDIT precedent. Compute-only discovery (variant scan proposes, inserts nothing) and reads stay
 // requireAuth. Previously requireAuth only.
 const requireTaxonomyEdit = requireRole('SYSTEM_ADMIN', 'DIRECTOR');
-module.exports = { requireAuth, requireRole, requireRoleOrPerm, requireRedactionWork, requireRequestWork, requireTaxonomyEdit };
+module.exports = { requireAuth, requireRole, requireRoleOrPerm, requireRedactionWork, requireRequestWork, requireTaxonomyEdit, forgetAuthVersion };

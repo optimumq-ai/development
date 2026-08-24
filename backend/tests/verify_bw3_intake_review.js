@@ -85,7 +85,7 @@ function finding(dimension, label, extra) {
     jid = await JR.activeJid();
     try { savedProcessing = jid ? await JR.read(jid, PC.DOMAIN) : null; } catch (e) { savedProcessing = null; }
 
-    var user = await db.get("SELECT * FROM users WHERE status = 'active' AND department_id IS NOT NULL LIMIT 1");
+    var user = await db.get("SELECT * FROM users WHERE status = 'active' AND department_id IS NOT NULL ORDER BY (CASE WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id AND x.user_type_id IN ('ut-oro_director','ut-oro_sysadmin')) THEN 0 WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id AND x.user_type_id IN ('ut-oro_supervisor','ut-team_manager','ut-team_supervisor')) THEN 1 WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id) THEN 2 ELSE 3 END), id LIMIT 1");   // v3: prefer a TYPED actor (office admin > supervisor > any type) — untyped accounts hold no claims
     TOKEN = await auth.signAccessToken(user);
     var TEAM = user.department_id;
 

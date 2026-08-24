@@ -65,8 +65,8 @@ async function stageOf(rid) { return (await db.get('SELECT stage FROM requests W
   // Act as a SEARCHER — the files mutations (attach/delete) take the request-work gate now, so an
   // arbitrary `LIMIT 1` row (which can be a role-less user another harness created) is no longer a
   // valid actor. A SEARCH_AND_TRIAGE holder is exactly who this screen is for.
-  var u = await db.get("SELECT u.* FROM users u JOIN user_permission_roles upr ON upr.user_id = u.id " +
-    "WHERE upr.permission_role_id = 'pr-searchtriage' AND u.status = 'active' ORDER BY u.id LIMIT 1");
+  var holders = await require('/opt/optimumq/backend/src/services/userTypes').usersWithLegacyPerm('SEARCH_AND_TRIAGE');
+  var u = await db.get('SELECT * FROM users WHERE id = ?', [holders.sort(function (a, b) { return a.id < b.id ? -1 : 1; })[0].id]);
   TOKEN = await auth.signAccessToken(u);
 
   // Build our OWN source record with a real blob on disk. The deterministic fixture deliberately carries

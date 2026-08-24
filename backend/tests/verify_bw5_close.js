@@ -101,7 +101,7 @@ async function stageOf(id) { return (await db.get('SELECT stage FROM requests WH
     try { savedProcessing = jid ? await JR.read(jid, PC.DOMAIN) : null; } catch (e) { savedProcessing = null; }
     try { savedBranches = jid ? await JR.read(jid, 'branches') : null; hadBranches = !!savedBranches; } catch (e) { savedBranches = null; }
 
-    var users = await db.all("SELECT * FROM users WHERE status = 'active' AND department_id IS NOT NULL ORDER BY id LIMIT 3");
+    var users = await db.all("SELECT * FROM users WHERE status = 'active' AND department_id IS NOT NULL ORDER BY (CASE WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id AND x.user_type_id IN ('ut-oro_director','ut-oro_sysadmin')) THEN 0 WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id AND x.user_type_id IN ('ut-oro_supervisor','ut-team_manager','ut-team_supervisor')) THEN 1 WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id) THEN 2 ELSE 3 END), id LIMIT 3");   // v3: prefer a TYPED actor (office admin > supervisor > any type) — untyped accounts hold no claims
     var user = users[0], other = users[1] || users[0];
     TOKEN = await auth.signAccessToken(user);
     var TEAM = user.department_id;
@@ -286,7 +286,10 @@ async function stageOf(id) { return (await db.get('SELECT stage FROM requests WH
     ok('F11 …and the trigger is registered as WIRED', IR.WIRED_TRIGGERS.indexOf('reopen_retriage') >= 0);
 
     // Director authority lives on the route.
-    var notDirector = await req('POST', '/api/requests/' + rF2 + '/reopen', { note: 'me too' });
+    // v3: the harness actor is now an office admin (oro_director), so the "ordinary user" is an explicit
+    // team supervisor — SUPERVISOR role, no DIRECTOR.
+    var ORDINARY = await auth.signAccessToken(await db.get("SELECT * FROM users WHERE id = 'u-police-super'"));
+    var notDirector = await req('POST', '/api/requests/' + rF2 + '/reopen', { note: 'me too' }, ORDINARY);
     ok('F12 reopening is a Director’s act — an ordinary user is refused with a reason',
       notDirector.status === 403 && notDirector.body.code === 'DIRECTOR_REQUIRED');
 
