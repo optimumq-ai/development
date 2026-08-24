@@ -8531,3 +8531,12 @@ gate primitives; route migration map for the hub gaps; migration + compat-shim p
 
 **NEXT:** Kevin reviews SPEC_user_type_model.md (§13 first) → ratify → S1.
 
+## 2026-08-24 (later, d) — SPEC_user_type_model §13 resolved; ready to ratify
+
+Kevin's answers: **no data migration** — wipe role assignments (keep users' names/logins), bootstrap
+the seeded admin with oro_sysadmin + oro_director, re-assign everyone by hand after the build (or
+delete+recreate users); supervisor task menu confirmed; operations_config = anyone in the ORO +
+team managers/supervisors; SysAdmin bypass removed (technical-only). §9 rewritten (wipe + shim, no
+mapping table), §13 marked resolved. **NEXT:** Kevin says go → S1 (tables, seed, wipe/bootstrap,
+claim shim, auth_version, verify_user_types) — first code of the user-type build.
+

@@ -1,6 +1,6 @@
 # SPEC — User-Type Model (v3, build contract)
 
-**Status:** DRAFT for Kevin's review — 2026-08-24. Becomes the contract once ratified; on ratification it
+**Status:** DRAFT — §13 questions RESOLVED with Kevin 2026-08-24; ready for ratification. Becomes the contract once ratified; on ratification it
 supersedes `SPEC_tasks_roles_mrr_fees.md` §8 (roles) and rewrites `ARCHITECTURE.md` §4 ("one role catalog").
 **Sources:** `DESIGN_user_type_role_model.md` (v3, Kevin's concept, decisions of 2026-07-09),
 `MASTER_task_types_permission_groups.md` (canonical enumerations), `WORKING_setup_inventory.md` (hub
@@ -111,7 +111,7 @@ work I don't own". They are NOT configuration rights (that is §5).
 Rules:
 - `SYSTEM_ADMIN` no longer short-circuits every gate. `oro_sysadmin` holds exactly the authorities and
   permissions listed here; in particular it does **not** hold `legal_decision` or the Legal Rules group.
-  (Today's "SysAdmin passes everything" is the single biggest reason the two catalogs drifted.)
+  (Today's "SysAdmin passes everything" is the single biggest reason the two catalogs drifted.) **Confirmed Kevin 2026-08-24.** The demo admin account is seeded with BOTH `oro_sysadmin` and `oro_director` so it keeps its reach.
 - `oro_director` is the operational superset. It deliberately lacks `system` and `legal_decision`.
 
 ---
@@ -125,7 +125,7 @@ decisions of 2026-08-24 need a group that "anyone in the ORO plus fulfillment te
 |---|---|---|
 | `legal_rules` | Lane 1 legal sections: 1.3 deadlines, 1.8 exemptions & appeals, 1.9 redaction rules library; attest on those | **oro_senior_legal (owner)**, oro_director (may) |
 | `compliance_policy` | Lane 1 non-legal items: 1.1 state, 1.4 statutory fees, 1.5 deposits, 1.6 waiver policy, 1.7 clarification, 1.10 city choices, 1.11 statutory updates (upload/apply) | oro_director, oro_sysadmin *(propose/edit; attest stays with §4 rules)* |
-| `operations_config` | Lanes 2a + 2b + 3: 2.1–2.13, 3.2–3.5 (rates, sandbox, taxonomy catalog, calibration, routing rules, time budgets, time-tracking, notifications, redaction automation, release switches, layout templates, decision reasons, bulk schedule; departments, teams, staff records, record ownership) | **every office-level type except city_management**, plus team_manager and team_supervisor |
+| `operations_config` | Lanes 2a + 2b + 3: 2.1–2.13, 3.2–3.5 (rates, sandbox, taxonomy catalog, calibration, routing rules, time budgets, time-tracking, notifications, redaction automation, release switches, layout templates, decision reasons, bulk schedule; departments, teams, staff records, record ownership) | **every office-level type except city_management**, plus team_manager and team_supervisor *(confirmed Kevin 2026-08-24: "anyone in ORO or a fulfillment team manager or supervisor")* |
 | `fee_configuration` | *(subset marker within operations_config — 2.1, 2.2)* kept as its own group so a city can narrow it later without a schema change | same as operations_config in v1 |
 | `system_admin` | Lane 4: 4.1 connectors, 4.2 AI keys, 4.3 AI deployment, 4.4 email, 4.5 auth policy, 4.6 portal agent rules, 4.7 settlement | oro_sysadmin |
 | `reporting` | dashboards, reports (view) | all office types incl. city_management; team_manager |
@@ -221,27 +221,24 @@ chips.
 
 ## 9. Migration and compatibility
 
-**Principle:** one cutover for the *data* (user types assigned to everyone), a *gradual* cutover for
-the *call sites*. During the gap, legacy `roles` and `perms` claims are **derived** from user types so
-untouched routes keep behaving.
+**Decision (Kevin, 2026-08-24): no data migration.** Existing role data has no value beyond the
+users' names. The cutover therefore *wipes* role assignments rather than mapping them:
 
-### 9.1 Legacy → user-type mapping (seed migration `migrate_user_types.js`)
+1. `users` rows are **kept** (names, emails, passwords, teams, specialization text, `user_task_types`).
+2. `user_function_roles` and `user_permission_roles` are **emptied**. No user-type is inferred for anyone.
+3. A bootstrap seed assigns `oro_sysadmin` + `oro_director` to the seeded admin login
+   (`kruss@optimumq.ai`, `seed_testers.sql`) so someone can sign in and assign everyone else through
+   Staff Management (S3). Until then no other user holds any type: they can log in and see only what
+   an untyped user sees (nothing gated). This is acceptable — Kevin will re-set every user by hand
+   after the build, and may instead choose to delete and recreate all users.
+4. `user_task_types` rows that fall outside the union of a person's type menus (§6) are left in place
+   but **ignored by the router** until a matching type is assigned; the picker shows them as "not
+   covered by a user type" so they can be cleaned up.
 
-| legacy function role | → user type |
-|---|---|
-| SYSTEM_ADMIN | oro_sysadmin |
-| DIRECTOR | oro_director |
-| SUPERVISOR | oro_supervisor *(office)* — if the user's `department_id` is a `kind='team'` row, **team_supervisor** on that team instead |
-| DEPT_MANAGER | team_manager on `department_id` *(if that row is a team; else oro_associate — flag for review)* |
-| COORDINATOR | oro_associate |
-| ATTORNEY_REVIEWER | oro_senior_legal |
-| CUSTODIAN, REDACTION_REVIEWER, REDACTION_APPROVER | team_staff on `department_id` (0 call sites today — nothing changes behaviourally) |
-| *(perm)* FINANCE — only if NOT the grant-all default (i.e., held by design) | oro_finance *(the migration cannot tell design from default because §2 grants all 11 to everyone → **manual list from Kevin**; default: nobody gets oro_finance automatically, Director's `financial_approval` covers the interim)* |
+### 9.1 Derived legacy claims (compat shim, deleted in S5)
 
-Kevin accepted (design §9) that test data need not migrate perfectly; the script prints the mapping
-per user for review and is idempotent.
-
-### 9.2 Derived legacy claims (compat shim, deleted in S5)
+Untouched legacy `requireRole` / `requireRoleOrPerm` call sites keep working during S2–S4 because
+the legacy `roles` and `perms` claims are **derived from user types** at login:
 
 | user type | legacy `roles` minted | legacy `perms` minted |
 |---|---|---|
@@ -257,18 +254,17 @@ per user for review and is idempotent.
 | team_staff | — | SEARCH_AND_TRIAGE, REDACTION_WORKER, FEE_MANAGER |
 
 This is where the **grant-all bug is fixed**: perms come from type, never from "every row in
-permission_roles". Expect some legacy gate to start refusing someone it used to let through — that is
-the bug surfacing, and `verify_user_types` (§11) enumerates each such change before cutover.
+permission_roles". The `SYSTEM_ADMIN` short-circuit in `middleware/auth.js` is retired in S4; until
+then the shim's `SYSTEM_ADMIN` claim still trips it for legacy sites only — the new primitives never
+consult legacy claims.
 
-### 9.3 Sequence
+### 9.2 Sequence
 
 1. Add tables + seed catalog (no behaviour change).
-2. Run `migrate_user_types.js`; review its report with Kevin; fix by hand where flagged.
-3. Switch claim minting to §9.2 (legacy claims now derived). Run the full suite (1790) + `verify_user_types`.
+2. Empty the two legacy assignment tables; seed the bootstrap admin (§9 item 3).
+3. Switch claim minting to §9.1 (legacy claims now derived). Run the full suite (1790) + `verify_user_types`.
 4. Land the hub-gap gates (§8 rows 1–7) on the new primitives. **This is the point the hub build is unblocked.**
 5. Migrate remaining call sites file-by-file; delete the shim and the four legacy tables.
-
----
 
 ## 10. UI
 
@@ -288,8 +284,8 @@ the bug surfacing, and `verify_user_types` (§11) enumerates each such change be
 
 `backend/tests/verify_user_types.js`:
 - catalog seeded, 11 types, menus/authorities/groups match §4–§6 exactly (table-driven from this spec).
-- migration mapping per §9.1 on a fixture set of users; idempotent.
-- derived claims per §9.2; **diff report**: for every existing user, legacy-claims-before vs derived-after — any lost role/perm listed.
+- wipe + bootstrap per §9: legacy assignment tables empty, seeded admin holds oro_sysadmin + oro_director; idempotent.
+- derived claims per §9.1; **diff report**: for every existing user, legacy-claims-before vs derived-after — any lost role/perm listed.
 - each §8 gate: allowed type passes, non-holder gets 403, oro_sysadmin refused on `legal_rules` and `legal_decision`.
 - go-live: oro_director passes, oro_sysadmin passes, oro_supervisor 403.
 - token freshness: user-type change → old token rejected within the cache window.
@@ -303,7 +299,7 @@ Plus the existing 20 role-touching harnesses stay green through steps 3–5.
 
 | # | Slice | Unblocks |
 |---|---|---|
-| S1 | Tables, seed, `migrate_user_types.js` + report, claim minting with §9.2 shim, `auth_version`, `verify_user_types` parts 1–3, 6 | — |
+| S1 | Tables, seed, wipe + bootstrap script, claim minting with §9.1 shim, `auth_version`, `verify_user_types` parts 1–3, 6 | — |
 | S2 | Gate primitives; §8 rows 1–7 (hub gaps + go-live + attest); frontend `hasPermission/hasAuthority`; `verify_user_types` parts 4–5, 8 | **Hub build** |
 | S3 | Staff Management user-type picker + PATCH; picker constraint; User-types admin page | Hub 3.4 |
 | S4 | Migrate remaining `requireRole` sites (17 route files) + frontend checks; retire `SYSTEM_ADMIN` short-circuit | — |
@@ -312,16 +308,15 @@ Plus the existing 20 role-touching harnesses stay green through steps 3–5.
 
 ---
 
-## 13. Open for Kevin (decide before S1)
+## 13. Questions — RESOLVED (Kevin, 2026-08-24)
 
-1. **Who is ORO Finance today?** The migration cannot infer it (§9.1) — name the people, or confirm
-   "nobody yet; Director covers it".
-2. **oro_supervisor task menu** — I put `release_review`, `close_approval`, `process_withdrawal` on it
-   (the master list suggested release_review as its default holder). Confirm or move.
-3. **`operations_config` includes ORO Legal Associate and ORO Finance** (they are "anyone in the ORO").
-   Confirm that Finance may edit taxonomy/routing rules, or narrow to `fee_configuration` + reporting.
-4. **SysAdmin loses the universal bypass.** Today every gate lets SYSTEM_ADMIN through. Under this spec
-   the ORO System Administrator cannot attest legal rules or approve a fee waiver. Confirm — this is the
-   design's intent (§4 "technical-only") but it is a visible behaviour change on the demo account.
-5. **DEPT_MANAGER → team_manager** assumes today's DEPT_MANAGER holders sit on a `kind='team'` row.
-   The migration report will show any that don't.
+1. **ORO Finance holders:** moot — no migration. Existing role data is discarded (names kept); Kevin
+   re-assigns user types by hand after the build, or deletes and recreates users. §9 rewritten.
+2. **oro_supervisor task menu** = `release_review`, `close_approval`, `process_withdrawal` — confirmed.
+3. **`operations_config` holders** = anyone in the ORO (every office type except City Management) plus
+   fulfillment team managers and supervisors — confirmed as drafted.
+4. **SysAdmin universal bypass removed** — confirmed, technical-only. Demo admin gets both
+   `oro_sysadmin` and `oro_director`.
+5. **DEPT_MANAGER mapping:** moot (no migration).
+
+Ratification = Kevin's go on S1.
