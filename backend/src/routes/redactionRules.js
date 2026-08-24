@@ -3,7 +3,7 @@
 // from is_active (in effect). New rules enter pending_review + inactive; a supervisor approves them.
 const express = require('express');
 const router = express.Router();
-const { requireAuth, requireRedactionWork } = require('../middleware/auth');
+const { requireAuth, requireRedactionWork, isElevated } = require('../middleware/auth');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 
@@ -12,10 +12,7 @@ async function activeJurisdiction() {
   return (row && row.value) || 'jur-tx';
 }
 
-function isElevated(req) {
-  var roles = req.user.roles || [];
-  return ['SUPERVISOR','DIRECTOR','SYSTEM_ADMIN'].some(function(r){ return roles.indexOf(r) !== -1; });
-}
+function isElevatedReq(req) { return isElevated(req.user); }   // S4: authority-based (see middleware/auth ELEVATED)
 
 async function sourcesForRules(ruleIds) {
   if (!ruleIds.length) return {};
@@ -101,7 +98,7 @@ router.post('/rules', requireAuth, requireRedactionWork, async function(req, res
 
 // PATCH /rules/:id/approve -> approve a pending rule (elevated)
 router.patch('/rules/:id/approve', requireAuth, requireRedactionWork, async function(req, res) {
-  if (!isElevated(req)) return res.status(403).json({ error: 'Only a supervisor can approve redaction rules' });
+  if (!isElevatedReq(req)) return res.status(403).json({ error: 'Only a supervisor can approve redaction rules' });
   var rule = await get('SELECT id FROM redaction_rules WHERE id = ?', [req.params.id]);
   if (!rule) return res.status(404).json({ error: 'Rule not found' });
   await run("UPDATE redaction_rules SET approval_status = 'approved', approved_by = ?, approved_at = datetime('now'), updated_at = datetime('now') WHERE id = ?", [req.user.name || req.user.sub, req.params.id]);
@@ -110,7 +107,7 @@ router.patch('/rules/:id/approve', requireAuth, requireRedactionWork, async func
 
 // PATCH /rules/:id -> general field update incl. activate/deactivate (elevated)
 router.patch('/rules/:id', requireAuth, requireRedactionWork, async function(req, res) {
-  if (!isElevated(req)) return res.status(403).json({ error: 'Only a supervisor can modify redaction rules' });
+  if (!isElevatedReq(req)) return res.status(403).json({ error: 'Only a supervisor can modify redaction rules' });
   var rule = await get('SELECT id FROM redaction_rules WHERE id = ?', [req.params.id]);
   if (!rule) return res.status(404).json({ error: 'Rule not found' });
   var b = req.body || {};
@@ -127,7 +124,7 @@ router.patch('/rules/:id', requireAuth, requireRedactionWork, async function(req
 
 // DELETE /rules/:id -> permanent delete (elevated)
 router.delete('/rules/:id', requireAuth, requireRedactionWork, async function(req, res) {
-  if (!isElevated(req)) return res.status(403).json({ error: 'Only a supervisor can delete redaction rules' });
+  if (!isElevatedReq(req)) return res.status(403).json({ error: 'Only a supervisor can delete redaction rules' });
   await run('DELETE FROM rule_legal_sources WHERE rule_id = ?', [req.params.id]);
   await run('DELETE FROM redaction_rules WHERE id = ?', [req.params.id]);
   res.json({ success: true });
@@ -135,7 +132,7 @@ router.delete('/rules/:id', requireAuth, requireRedactionWork, async function(re
 
 // POST /discover -> AI auto-population: add jurisdiction-appropriate exemptions as pending drafts (elevated)
 router.post('/discover', requireAuth, requireRedactionWork, async function(req, res) {
-  if (!isElevated(req)) return res.status(403).json({ error: 'Only a supervisor can auto-populate rules' });
+  if (!isElevatedReq(req)) return res.status(403).json({ error: 'Only a supervisor can auto-populate rules' });
   var jur = await activeJurisdiction();
   try {
     var ruleDiscovery = require('../services/ruleDiscovery');

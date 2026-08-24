@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { all, get, run } = require('../db');
-const { requireAuth, requireRole, requireRoleOrPerm } = require('../middleware/auth');
+const { requireAuth, requireAuthority } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 
 // List reasons for a category (most-used first).
@@ -15,7 +15,7 @@ router.get('/', requireAuth, async function (req, res) {
 
 // Add a reason to the library (or return the existing match). Directors/Supervisors, or a FINANCE holder
 // (the fee-waiver-denial reasons are theirs to curate); SYSTEM_ADMIN always passes.
-router.post('/', requireAuth, requireRoleOrPerm(['DIRECTOR', 'SUPERVISOR'], ['FINANCE']), async function (req, res) {
+router.post('/', requireAuth, requireAuthority('financial_approval'), async function (req, res) {
   var b = req.body || {};
   if (!b.category || !b.text || !b.text.trim()) return res.status(400).json({ error: 'category and text are required' });
   var t = b.text.trim();
@@ -27,7 +27,7 @@ router.post('/', requireAuth, requireRoleOrPerm(['DIRECTOR', 'SUPERVISOR'], ['FI
 });
 
 // Soft-remove a reason (keeps it from future pickers without breaking history).
-router.delete('/:id', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR'), async function (req, res) {
+router.delete('/:id', requireAuth, requireAuthority('financial_approval'), async function (req, res) {
   await run('UPDATE decision_reasons SET is_active = 0 WHERE id = ?', [req.params.id]);
   res.json({ success: true });
 });

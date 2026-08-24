@@ -1,11 +1,11 @@
 'use strict';
 const express = require('express');
 const router = express.Router();
-const { requireAuth, requireRole, requireAuthority, requireAnyPermission, hasPermission } = require('../middleware/auth');
+const { requireAuth, requireAuthority, requirePermission, requireAnyPermission, hasPermission } = require('../middleware/auth');
 const { get } = require('../db');
 const JP = require('../services/jurisdictionProfile');
 const enforcement = require('../services/enforcement');
-const ROLE = requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER');
+const ROLE = requirePermission('compliance_policy');   // S4: profile sync is a Lane-1 act
 // BW9a (Kevin 2026-08-11): Senior Legal — function role ATTORNEY_REVIEWER — attests the Legal
 // Rules sections (exemption, redaction, deadlines); everything else stays Director | System
 // Admin. requireRole lets SYSTEM_ADMIN through unconditionally, so the per-section line is drawn
@@ -58,7 +58,7 @@ router.post('/unattest', requireAuth, ATTEST, async function (req, res) {
 // BW9a — the go-live checklist's three reads/writes (Draft 6, residuals decided 2026-08-11).
 // READ includes ATTORNEY_REVIEWER: Senior Legal attests the Legal sections, and nobody can attest
 // a checklist they cannot see.
-const READ = requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER', 'ATTORNEY_REVIEWER');
+const READ = requireAnyPermission('compliance_policy', 'legal_rules', 'operations_config');   // S4: anyone who configures may read the checklist
 // Every local policy setting, grouped by profile section, with who/when on the confirmed ones.
 router.get('/policy-settings', requireAuth, READ, async function (req, res) {
   try { res.json(await GL.settings(await activeJid())); } catch (e) { res.status(500).json({ error: e.message }); }
@@ -100,7 +100,7 @@ router.post('/rules/:section/propose', requireAuth, ATTEST, async function (req,
   try {
     var out = await require('../services/ruleEditors').propose(await activeJid(), req.params.section, b.domain, b.config, {
       citation: b.citation, note: b.note, applyNow: b.applyNow === true,
-      actor: req.user && req.user.name, roles: (req.user && req.user.roles) || []
+      actor: req.user && req.user.name, user: req.user
     });
     res.json(out);
   } catch (e) { res.status(400).json({ error: e.message, refusals: e.refusals || undefined }); }

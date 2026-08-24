@@ -105,7 +105,8 @@ var U = {
   ok('B9 installment request: no-role 403', gated(await call(T.none, 'POST', '/dispositions/' + C + '/installment-request', {})));
   ok('B10 installment request: nonexistent → through (404)', (await call(T.none, 'POST', '/dispositions/' + NX + '/installment-request', {})).status === 404);
   ok('B11 disposition record read stays open', (await call(T.none, 'GET', '/dispositions/' + C)).status === 200);
-  ok('B12 knobs keep their Director bar (REQUEST_MANAGER 403 DIRECTOR_REQUIRED)', (await call(T.reqmgr, 'PUT', '/dispositions/knobs/auto_release', {})).body.code === 'DIRECTOR_REQUIRED');
+  // S4: release switches are operations_config (§5 item 2.10); the ORO Associate (reqmgr) holds it, team staff does not.
+  ok('B12 knobs are gated on operations_config (team staff 403 PERMISSION_REQUIRED)', (await call(T.search, 'PUT', '/dispositions/knobs/auto_release', {})).body.code === 'PERMISSION_REQUIRED');
   var cl = await call(T.none, 'POST', '/dispositions/' + C + '/close/withdrawn', {});
   ok('B13 manual endings keep BW5’s own rights (no-role 403 NOT_PERMITTED, not NOT_YOUR_REQUEST)', cl.status === 403 && cl.body && cl.body.code === 'NOT_PERMITTED');
   ok('B14 no token → 401 before any gate', (await call(null, 'POST', '/clocks/' + clk.id + '/toll', {})).status === 401);

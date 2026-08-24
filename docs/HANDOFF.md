@@ -8656,3 +8656,42 @@ the router does not ignore pre-existing uncovered `user_task_types` rows (§9 it
 
 **NEXT:** the setup-hub build (unblocked since S2), or S4 (migrate the ~43 `requireRole` sites + financial
 rows + retire the SYSTEM_ADMIN short-circuit) — Kevin's call.
+
+## 2026-08-25 (early) — S4 BUILT and LIVE: every gate on the user-type model; SysAdmin bypass retired
+
+Kevin: "do S4 next." Done — the compatibility period is over for gates.
+
+**What moved (35 gates + 25 raw role reads, 17 route files, 3 services):** every `requireRole` /
+`requireRoleOrPerm` call and every `req.user.roles` read is gone from routes and services (N1/N2 in
+`verify_user_types` grep the tree to keep it so). Two derived helper sets in `middleware/auth.js`:
+**ELEVATED** (`act_any_request, reassign_any, reassign_team, override_stage, legal_decision, system` — may SEE
+across teams: queue, dashboards, ops summary, rule libraries) and **ROUTING** (`act_any_request, reassign_any,
+reassign_team` — may act on / assign work that is not theirs; the old canRoute/ACTING_ROLES set).
+`requireRequestAct`'s acting set = ROUTING; its `roles:` extras translate (ATTORNEY_REVIEWER → `legal_decision`).
+The three presets are on the new **`taskMenu` token claim** (the §6 union, `'*'` for oro_director):
+`requireRedactionWork` = redaction in the menu or legal/acting authority; `requireRequestWork` = any menu or
+acting authority; `requireTaxonomyEdit` = `operations_config`. `ruleEditors.mayApplyEditor` now takes the user:
+APPLY on a Legal Rules domain is the **owner's** act (oro_senior_legal) — the Director holds `legal_rules` to
+attest but a Director's edit there still files for Senior Legal (BW9b C-series kept green on the model).
+Dashboard default panes by authority. Frontend `hasAnyRole/hasAnyPerm` consumers moved (AppLayout menu by
+ELEVATED; jurisdiction menu by the three configuring groups; approvals by `financial_approval`; Administration's
+technical tabs by `system`; workspace Director acts by `override_stage`); the sidebar shows the first user type.
+
+**Behaviour changes worth knowing (all per spec §4/§5):** oro_sysadmin can no longer reopen requests, decide
+fee waivers / objections / commercial rate, or read the parent ledger; oro_director can no longer open the
+magic demo, integrations, or `POST /config`; supervisors and every ORO type CAN edit taxonomy, workflow rules,
+estimate calibration, time budgets, release switches (`operations_config`); legal escalation is the `escalate`
+authority (director, ORO supervisor, team manager); statutory updates / clarification policy / onboarding /
+profile sync are `compliance_policy`. The `perms` claim survives as the derived **act-permission** axis that
+`requireRequestAct({perms})` matches (spec §9.1 as-built note) — the `roles` claim is consulted by nothing and
+is deleted in S5.
+
+**Suite:** targeted 16-harness run 694/16 → the 16 were five harness premises from the old rules (supervisor
+403 on taxonomy; Director bar on release knobs; synthetic users built with `roles:`; the owner-only legal
+apply) — re-pointed; then full run 16: **2557/2557**. LIVE UNTOUCHED every run. Frontend rebuilt + served;
+screenshots: team staff sees Dashboard + Queue only; admin sees the full menu + go-live banner. Live API
+restarted after green.
+
+**NEXT:** S5 (delete the `roles` claim + the four legacy tables + `FUNCTION_ROLES` frontend constant + the
+`requireRole` functions; rewrite ARCHITECTURE §4 / SPEC_tasks_roles §8 as history) is small now. Then the
+hub build. S6 (coverage-gap email) any time.

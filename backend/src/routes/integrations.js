@@ -1,13 +1,12 @@
 'use strict';
 var express = require('express');
 var router = express.Router();
-var { requireAuth } = require('../middleware/auth');
+var { requireAuth, hasAuthority } = require('../middleware/auth');
 var db = require('../db');
 var secrets = require('../services/secrets');
 
 function admin(req, res, next) {
-  var roles = (req.user && req.user.roles) || [];
-  if (roles.indexOf('SYSTEM_ADMIN') < 0) return res.status(403).json({ error: 'Administrator access required.' });
+  if (!hasAuthority(req.user, 'system')) return res.status(403).json({ error: 'Technical administration (the system authority) is required.', code: 'AUTHORITY_REQUIRED' });
   next();
 }
 async function cfg(key) { var r = await db.get('SELECT value FROM system_config WHERE key = ?', [key]); return r ? r.value : null; }

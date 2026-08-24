@@ -443,7 +443,7 @@ async function stageOf(id) { return (await db.get('SELECT stage FROM requests WH
       rightsHolder.withdrawn.viaTaskHolder === true && rightsHolder.withdrawn.allowed === true);
     ok('J6 …but that second door does NOT extend to Previously furnished — a cross-request certification ' +
        'is an office-level act', rightsHolder.previously_furnished.viaOro === false);
-    var rightsDir = await DISP.manualEndingRights(rJ, { sub: other.id, roles: ['DIRECTOR'] });
+    var rightsDir = await DISP.manualEndingRights(rJ, { sub: other.id, inOro: true, authorities: ['act_any_request'] });   // S4: v3 claims
     ok('J7 an ORO Associate+ may close either', rightsDir.withdrawn.allowed && rightsDir.previously_furnished.allowed);
 
     var closedJ = await DISP.close(rJ, 'withdrawn', { actorName: 'A. Clerk', payload: { note: 'Requester cancelled.' } });

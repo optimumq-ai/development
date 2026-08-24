@@ -11,7 +11,7 @@
 // Request Manager is, so the refusal is useful rather than merely correct.
 var express = require('express');
 var router = express.Router();
-var { requireAuth } = require('../middleware/auth');
+var { requireAuth, hasAuthority } = require('../middleware/auth');
 var { all, get, run } = require('../db');
 var HUB = require('../services/mrrHub');
 
@@ -19,12 +19,9 @@ var HUB = require('../services/mrrHub');
 //
 // The manager of an MRR is the holder of its `mrr_management` task. Oversight roles may READ (the
 // all-office view is theirs by authority — it is simply not built as a tab here).
-var OVERSIGHT = ['SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'ORO_SUPERVISOR', 'RECORDS_MANAGER'];
-
-function hasOversight(user) {
-  var roles = (user && user.roles) || [];
-  return OVERSIGHT.some(function (r) { return roles.indexOf(r) >= 0; });
-}
+// S4: oversight = the act_any_request authority (oro_director / oro_supervisor / oro_associate). The two dead
+// role names this used to list (ORO_SUPERVISOR, RECORDS_MANAGER) never existed in any catalog.
+function hasOversight(user) { return hasAuthority(user, 'act_any_request'); }
 
 async function hubTaskFor(parentId) {
   return await get("SELECT * FROM tasks WHERE request_id = ? AND type = 'mrr_management' ORDER BY created_at DESC LIMIT 1", [parentId]);

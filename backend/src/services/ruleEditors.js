@@ -310,14 +310,18 @@ function validate(domain, cfg) {
   return errs.concat(policedEnumErrors(domain, cfg || {}));
 }
 
-function mayApplyEditor(roles, domain) {
-  roles = roles || [];
-  if (roles.indexOf('SYSTEM_ADMIN') !== -1) return null;
+// S4 (SPEC_user_type_model §5): who may APPLY is a permission group — legal_rules on the Legal Rules domains
+// (ORO Senior Legal owns; the Director may), compliance_policy elsewhere. No SysAdmin bypass.
+// APPLY on a Legal Rules domain is the OWNER's act (ORO Senior Legal, §5 "owner vs may"): the Director holds
+// legal_rules to ATTEST, but a Director's content edit there files for Senior Legal and is never self-applied.
+function mayApplyEditor(user, domain) {
+  var groups = (user && user.permissionGroups) || [];
+  var types = ((user && user.userTypes) || []).map(function (t) { return t.key; });
   if (LEGAL_DOMAINS[domain]) {
-    if (roles.indexOf('ATTORNEY_REVIEWER') !== -1) return null;
+    if (types.indexOf('oro_senior_legal') !== -1) return null;
     return 'Senior Legal applies content changes on the Legal Rules domains (' + domain + '). Your proposal is filed for their review — it was not lost, and it was not applied.';
   }
-  if (roles.indexOf('DIRECTOR') !== -1) return null;
+  if (groups.indexOf('compliance_policy') !== -1) return null;
   return 'The ' + domain + ' domain’s owner (the Director) applies content changes. Your proposal is filed for review.';
 }
 
@@ -352,7 +356,7 @@ async function propose(jid, section, domain, proposedCfg, opts) {
   var row = await get('SELECT * FROM config_proposals WHERE id = ?', [id]);
 
   if (opts.applyNow) {
-    var refusal = mayApplyEditor(opts.roles, domain);
+    var refusal = mayApplyEditor(opts.user || null, domain);
     if (refusal) return { proposal: row, applied: false, refusal: refusal };
     var applied = await applyEditorProposal(row, opts.actor || 'staff');
     return { proposal: applied.proposal, applied: true, drifted: applied.drifted };

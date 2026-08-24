@@ -313,7 +313,21 @@ the legacy `roles` and `perms` claims are **derived from user types** at login:
 | team_staff | — | SEARCH_AND_TRIAGE, REDACTION_WORKER, FEE_MANAGER |
 
 This is where the **grant-all bug is fixed**: perms come from type, never from "every row in
-permission_roles". The `SYSTEM_ADMIN` short-circuit in `middleware/auth.js` is retired in S4; until
+permission_roles".
+
+*(as built, S4)* The `roles` claim is now consulted by NOTHING (N2 proves it) and is deleted in S5. The `perms` claim
+survives S5 **renamed in concept, not in wire format**: it is the per-type **act-permission** list (`REQUEST_MANAGER`,
+`CLARIFICATION_SENDER`, `SEARCH_AND_TRIAGE`, …) that `requireRequestAct({perms})` matches — a v3 axis derived from
+user types (§9.1's table), never assigned per person. The token also carries `taskMenu` (the §6 union, `'*'` for
+oro_director). Two derived helper sets live in `middleware/auth.js`: **ELEVATED** = `act_any_request, reassign_any,
+reassign_team, override_stage, legal_decision, system` (may SEE across teams — queues, dashboards, rule libraries) and
+**ROUTING** = `act_any_request, reassign_any, reassign_team` (may act on / assign work that is not theirs — the old
+`canRoute` set). Migration choices worth knowing: reopen → `override_stage` (so **oro_sysadmin can no longer reopen**);
+legal-escalate → `escalate`; fee-waiver / commercial / objections / decision reasons / parent ledger → `financial_approval`
+(oro_sysadmin no longer passes them); magic demo + integrations + `POST /config` → `system` (oro_director no longer
+passes them); release-policy knobs, workflow rules, estimate calibration, time budgets/capture, taxonomy, repositories,
+redaction config → `operations_config`; onboarding, clarification policy, statutory updates, profile sync → `compliance_policy`;
+the go-live checklist READ = any of the three configuring groups. The `SYSTEM_ADMIN` short-circuit in `middleware/auth.js` is retired in S4; until
 then the shim's `SYSTEM_ADMIN` claim still trips it for legacy sites only — the new primitives never
 consult legacy claims.
 
@@ -369,7 +383,7 @@ Plus the existing 20 role-touching harnesses stay green through steps 3–5.
 | S2 | **BUILT 2026-08-24.** Gate primitives; §8 rows 1–9 (hub gaps + go-live + attest); `PATCH /staff/:id/user-types`; frontend `hasPermission/hasAuthority`; `verify_user_types` H–K | **Hub build** |
 | S2b | **BUILT 2026-08-24.** Multi-team membership (§6.1): eligibility/pool/claim/seeded-check and the legacy fallback read team membership from `user_user_types.team_id` (`userTypes.teamMemberSql` / `teamsOf`); `department_id` demoted to home dept; subset scope "own team" = a team the caller is team_manager of AND the target is a member of; `verify_user_types` L0–L8 | S3 picker semantics |
 | S3 | **BUILT 2026-08-24.** Staff Management user-type picker (office chips; team chips per team, home team first, "add another team"); create = `POST /staff` + `PATCH /user-types`; edit modal gated on `manage_users` for types; task-type picker offers only the menu union and flags held-but-uncovered types; `GET /api/user-types` catalog + `PATCH /api/user-types/:key` display name (`manage_users`); `PATCH /staff/:id/task-types` refuses outside-menu grants (400 `OUTSIDE_TASK_MENU`); Administration → **User Types** matrix; `verify_user_types` M1–M4 | Hub 3.4 |
-| S4 | Migrate remaining `requireRole` sites (17 route files) + frontend checks; retire `SYSTEM_ADMIN` short-circuit | — |
+| S4 | **BUILT 2026-08-24.** Every `requireRole` / `requireRoleOrPerm` site and every raw `req.user.roles` read (35 gates + 25 reads in 17 route files and 3 services) migrated onto authorities / permission groups; the three presets (`requireRedactionWork`, `requireRequestWork`, `requireTaxonomyEdit`) re-implemented on the `taskMenu` claim / `operations_config`; `requestAccess` acting set = the routing authorities; `ruleEditors.mayApplyEditor` by group; dashboard default panes by authority; frontend `hasAnyRole/hasAnyPerm` consumers moved; `SYSTEM_ADMIN` short-circuit retired; `verify_user_types` N1–N12 | — |
 | S5 | Delete shim + legacy tables + `FUNCTION_ROLES` frontend constant; ARCHITECTURE §4 + SPEC_tasks_roles §8 rewritten | — |
 | S6 | Coverage-gap email | — |
 

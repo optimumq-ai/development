@@ -1,7 +1,7 @@
 'use strict';
 const express = require('express');
 const router = express.Router();
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requirePermission, requireAnyPermission, hasPermission } = require('../middleware/auth');
 const { all, get, run } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const F = require('../services/configFreshness');
@@ -14,15 +14,13 @@ const _upDir = '/tmp/oq-cfsrc'; try { fs.mkdirSync(_upDir, { recursive: true });
 const upload = multer({ dest: _upDir, limits: { fileSize: 15 * 1024 * 1024 } });
 
 function nowStr() { return new Date().toISOString().slice(0, 19).replace('T', ' '); }
-const ROLE = requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER');
+const ROLE = requirePermission('compliance_policy');   // S4: statutory updates = Lane 1
 // BW9b: Senior Legal (ATTORNEY_REVIEWER) reviews proposals too — editor proposals on the Legal
 // Rules domains route to them (Kevin 2026-08-11), and a reviewer who cannot reach the review
 // queue reviews nothing. Scope: an attorney without a broader role acts ONLY on Legal domains.
-const REVIEW = requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER', 'ATTORNEY_REVIEWER');
+const REVIEW = requireAnyPermission('compliance_policy', 'legal_rules');
 function attorneyScopeError(req, domain) {
-  var roles = (req.user && req.user.roles) || [];
-  var broader = ['SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER'].some(function (r) { return roles.indexOf(r) !== -1; });
-  if (broader) return null;
+  if (hasPermission(req.user, 'compliance_policy')) return null;
   var RE = require('../services/ruleEditors');
   if (RE.LEGAL_DOMAINS[domain]) return null;
   return 'Senior Legal reviews the Legal Rules domains; proposals on ' + domain + ' are reviewed by the Director.';
@@ -135,7 +133,7 @@ router.post('/proposals/:id/apply', requireAuth, REVIEW, async function (req, re
     // adapters, which these domains do not have.
     if (pr.source_ref === 'editor') {
       var RE = require('../services/ruleEditors');
-      var refusal = RE.mayApplyEditor((req.user && req.user.roles) || [], pr.domain);
+      var refusal = RE.mayApplyEditor(req.user, pr.domain);
       if (refusal) return res.status(403).json({ error: refusal });
       if (b.editedConfig != null) pr.proposed_json = JSON.stringify(b.editedConfig);
       try {

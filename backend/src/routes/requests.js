@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth, requireRequestWork } = require('../middleware/auth');
+const { requireAuth, requireRequestWork, hasAuthority, isElevated: elevatedUser, canRoute: canRouteUser } = require('../middleware/auth');
 // PER-REQUEST ACT GATE (2026-08-18) — services/requestAccess: acting role OR act permission OR the work is
 // yours (request or an open task on its cluster assigned to you). One factory, one bar per act, declared
 // where the route is. Acts that already carried their own authority (reopen, route, fee-waiver-decision,
@@ -68,8 +68,7 @@ async function logHistory(requestId, actorId, actorName, action, notes) {
 }
 
 router.get('/stats/dashboard', requireAuth, async function(req, res) {
-  const userRoles = req.user.roles || [];
-  const isElevated = ['SUPERVISOR','DIRECTOR','SYSTEM_ADMIN','DEPT_MANAGER'].some(function(r) { return userRoles.indexOf(r) !== -1; });
+  const isElevated = elevatedUser(req.user);
   let where = "status = 'active'";
   const params = [];
   if (!isElevated) { where += ' AND (department_id = ? OR assigned_to = ?)'; params.push(req.user.dept, req.user.sub); }
@@ -84,8 +83,7 @@ router.get('/stats/dashboard', requireAuth, async function(req, res) {
 });
 
 router.get('/', requireAuth, async function(req, res) {
-  const userRoles = req.user.roles || [];
-  const isElevated = ['SUPERVISOR','DIRECTOR','SYSTEM_ADMIN','DEPT_MANAGER','ATTORNEY_REVIEWER'].some(function(r) { return userRoles.indexOf(r) !== -1; });
+  const isElevated = elevatedUser(req.user);
   // THE QUEUE LISTS WORK ROWS — children (§7: "filters, reports and worklists operate on CHILD rows"). But four
   // of the columns it renders are PARENT facts, and reading them off the leaf is wrong now that children exist:
   //
@@ -323,8 +321,7 @@ router.patch('/:id/stage', requireAuth, ACT.stage, async function(req, res) {
 // SILENT BY DESIGN. No requestor notice fires and the response says so (`requestorNotified: false`), so a
 // screen cannot offer to send one on the strength of a hopeful assumption.
 router.post('/:id/reopen', requireAuth, async function (req, res) {
-  var roles = req.user.roles || [];
-  if (['SYSTEM_ADMIN', 'DIRECTOR'].every(function (r) { return roles.indexOf(r) === -1; })) {
+  if (!hasAuthority(req.user, 'override_stage')) {   // S4: the override_stage authority (oro_director)
     return res.status(403).json({
       error: 'Reopening a closed request is a Director’s act. It reverses a recorded public response, so it ' +
              'sits with the authority that answers for one.',
@@ -357,8 +354,7 @@ router.post('/:id/reopen', requireAuth, async function (req, res) {
 
 
 router.patch('/:id/route', requireAuth, async function(req, res) {
-  var userRoles = req.user.roles || [];
-  var canRoute = ['SUPERVISOR','DIRECTOR','SYSTEM_ADMIN','DEPT_MANAGER','COORDINATOR'].some(function(r){ return userRoles.indexOf(r) !== -1; });
+  var canRoute = canRouteUser(req.user);
   if (!canRoute) return res.status(403).json({ error: 'You do not have permission to re-route requests' });
   var request = await get('SELECT * FROM requests WHERE id = ?', [req.params.id]);
   if (!request) return res.status(404).json({ error: 'Request not found' });
@@ -576,8 +572,7 @@ router.post('/:id/fee-waiver-decision', requireAuth, async function(req, res) {
   // Authorize: managers/admins by function role, OR the FINANCE permission role (the same role the
   // fee-waiver task routes to — so whoever receives the task can act on it). FINANCE is the reconciled
   // financial-authority capability (D4 §8; renamed from FEE_AUTHORITY, retiring the orphan FEE_WAIVER_APPROVER).
-  var fRoles = req.user.roles || [], perms = req.user.perms || [];
-  var canDecide = ['SYSTEM_ADMIN','DIRECTOR','SUPERVISOR'].some(function(r){ return fRoles.indexOf(r) !== -1; }) || perms.indexOf('FINANCE') !== -1;
+  var canDecide = hasAuthority(req.user, 'financial_approval');   // S4: oro_finance, oro_director
   // PHASE 7 / BW3 — THE INLINE DECIDER. `mode: 'intake_review'` means "the intake reviewer decides the
   // waiver inline, no extra hop" (DESIGN_fee_waiver_commercial.md; WS4). That is a promise this route was
   // quietly breaking: the ORO Associate who holds the intake_review task holds none of the roles above, so
@@ -661,9 +656,8 @@ router.post('/:id/fee-waiver-decision', requireAuth, async function(req, res) {
 // redaction stage spawns legal_redaction (office-level, routed to legal staff) instead of ordinary
 // redaction. If a plain redaction task is already active, it is superseded and re-spawned as legal.
 router.post('/:id/legal-escalate', requireAuth, async function(req, res) {
-  var fRoles = req.user.roles || [];
-  var canEscalate = ['SYSTEM_ADMIN','DIRECTOR'].some(function(r){ return fRoles.indexOf(r) !== -1; });
-  if (!canEscalate) return res.status(403).json({ error: 'Only a Director can escalate for legal redaction' });
+  var canEscalate = hasAuthority(req.user, 'escalate');   // S4: the escalate authority (director, ORO supervisor, team manager)
+  if (!canEscalate) return res.status(403).json({ error: 'Escalating for legal redaction needs the escalate authority (Director, ORO Supervisor, or a Fulfillment Manager).', code: 'AUTHORITY_REQUIRED' });
   var request = await get('SELECT * FROM requests WHERE id = ? OR request_number = ?', [req.params.id, req.params.id]);
   if (!request) return res.status(404).json({ error: 'Request not found' });
   var actor = (req.user && req.user.name) || (req.user && req.user.sub) || 'system';
@@ -837,9 +831,7 @@ router.post('/:id/commercial-classification', requireAuth, async function (req, 
   try {
     var request = await get('SELECT * FROM requests WHERE id = ? OR request_number = ?', [req.params.id, req.params.id]);
     if (!request) return res.status(404).json({ error: 'Request not found' });
-    var fRoles = (req.user && req.user.roles) || [], perms = (req.user && req.user.perms) || [];
-    var canDecide = ['SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR'].some(function (r) { return fRoles.indexOf(r) !== -1; }) ||
-      perms.indexOf('FINANCE') !== -1;
+    var canDecide = hasAuthority(req.user, 'financial_approval');
     var AM = require('../services/approvalModules');
     var cfg = await AM.config(null);
     var mod = (cfg && cfg.modules && cfg.modules.commercial_rate) || {};

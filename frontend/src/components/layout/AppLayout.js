@@ -14,7 +14,8 @@ export default function AppLayout() {
   const [overdueCount, setOverdueCount] = useState(0);
   const user = store.user;
   const agencyName = store.agencyName;
-  const isElev = store.hasAnyRole('SYSTEM_ADMIN','DIRECTOR','SUPERVISOR','DEPT_MANAGER');
+  // S4: "elevated" = any oversight / routing / legal / technical authority (middleware/auth ELEVATED).
+  const isElev = store.hasAnyAuthority('act_any_request', 'reassign_any', 'reassign_team', 'override_stage', 'legal_decision', 'system');
   // MENU REORGANIZATION 2026-08-01 (Kevin): 24 links were overwhelming. Daily work stays visible;
   // the two report surfaces became ONE item (top tabs inside), the 13 technical-setup screens live
   // under Administration (tabbed; admin-only tabs hidden per role there), and the Simulator is
@@ -43,7 +44,7 @@ export default function AppLayout() {
     // BW9a: the go-live checklist. Senior Legal (ATTORNEY_REVIEWER) sees it too — they attest the
     // Legal Rules sections and cannot attest what they cannot see.
     { to: '/jurisdiction-config', label: 'Jurisdiction Configuration',
-      show: store.hasAnyRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'ATTORNEY_REVIEWER') },
+      show: store.hasPermission('compliance_policy', 'legal_rules', 'operations_config') },
     { to: '/admin', label: 'Administration', show: isElev },
   ].filter(x => x.show);
 
@@ -94,7 +95,7 @@ export default function AppLayout() {
             </div>
             {open && <div style={{ textAlign: 'left', minWidth: 0, flex: 1 }}>
               <div style={{ fontSize: '12px', fontWeight: '600', color: '#111', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.display_name}</div>
-              <div style={{ fontSize: '11px', color: '#9CA3AF' }}>{user?.functionRoles?.[0]?.replace(/_/g, ' ')}</div>
+              <div style={{ fontSize: '11px', color: '#9CA3AF' }}>{user?.userTypes?.[0]?.displayName || (user?.userTypes?.length === 0 ? 'No user type' : '')}</div>
             </div>}
           </button>
           {uMenu && open && (

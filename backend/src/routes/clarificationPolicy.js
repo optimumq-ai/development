@@ -5,12 +5,12 @@
 // re-syncs the jurisdiction profile section (re-arming attestation on drift), exactly like other areas.
 const express = require('express');
 const router = express.Router();
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requirePermission } = require('../middleware/auth');
 const { get } = require('../db');
 const CP = require('../services/clarificationPolicy');
 const effectiveConfig = require('../services/effectiveConfig');
 
-const EDIT = requireRole('SYSTEM_ADMIN', 'DIRECTOR');
+const EDIT = requirePermission('compliance_policy');   // S4: clarification policy = Lane 1 (1.7)
 
 async function activeJid() { var r = await get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'"); return (r && r.value) || null; }
 

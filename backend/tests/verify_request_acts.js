@@ -99,13 +99,13 @@ var U = {
   ok('A5 task-type narrowing: a record_search holder is not a legal_review holder', !d.ok);
   d = await access.decide({ sub: U.owner, roles: [], perms: [] }, C1, {});
   ok('A6 request assigned to you on the parent → acts on the child id (by assignee)', d.ok && d.by === 'assignee');
-  d = await access.decide({ sub: 'x', roles: ['COORDINATOR'], perms: [] }, P1, {});
-  ok('A7 acting role passes without a lookup', d.ok && d.by === 'role');
+  d = await access.decide({ sub: 'x', authorities: ['act_any_request'], perms: [] }, P1, {});   // S4: the acting set is the routing authorities
+  ok('A7 acting role passes without a lookup', d.ok && d.by === 'authority');
   d = await access.decide({ sub: 'x', roles: [], perms: ['CLARIFICATION_SENDER'] }, P1, { perms: ['CLARIFICATION_SENDER'] });
   ok('A8 act permission passes', d.ok && d.by === 'perm');
-  d = await access.decide({ sub: 'x', roles: ['ATTORNEY_REVIEWER'], perms: [] }, P1, { roles: ['ATTORNEY_REVIEWER'] });
-  ok('A9 extra acting role (ATTORNEY_REVIEWER for legal acts) passes', d.ok && d.by === 'role');
-  d = await access.decide({ sub: 'x', roles: ['ATTORNEY_REVIEWER'], perms: [] }, P1, {});
+  d = await access.decide({ sub: 'x', authorities: ['legal_decision'], perms: [] }, P1, { roles: ['ATTORNEY_REVIEWER'] });
+  ok('A9 extra acting role (ATTORNEY_REVIEWER for legal acts) passes', d.ok && d.by === 'authority');
+  d = await access.decide({ sub: 'x', authorities: ['legal_decision'], perms: [] }, P1, {});
   ok('A10 ...but ATTORNEY_REVIEWER is not a general acting role', !d.ok);
   await db.run("UPDATE tasks SET status = 'completed' WHERE id = ?", [task.id]);
   d = await access.decide({ sub: U.holder, roles: [], perms: [] }, P1, {});

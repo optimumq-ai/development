@@ -173,7 +173,7 @@ function chip(text, kind) {
 
 export default function MyTasksPage() {
   var store = useAuthStore();
-  var canApprove = store.hasAnyRole('SYSTEM_ADMIN', 'DIRECTOR') || store.hasAnyPerm('FINANCE');
+  var canApprove = store.hasAuthority('financial_approval');   // S4
   var [mine, setMine] = useState([]);
   var [myHealth, setMyHealth] = useState(null);
   var [pool, setPool] = useState([]);

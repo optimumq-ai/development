@@ -68,6 +68,13 @@ export const useAuthStore = create(function(set, get) {
       for (var i = 0; i < groups.length; i++) { if (u.permissionGroups.indexOf(groups[i]) !== -1) return true; }
       return false;
     },
+    hasAnyAuthority: function() {
+      var keys = Array.prototype.slice.call(arguments);
+      var u = get().user;
+      if (!u || !Array.isArray(u.authorities)) return false;
+      for (var i = 0; i < keys.length; i++) { if (u.authorities.indexOf(keys[i]) !== -1) return true; }
+      return false;
+    },
     inOro: function() { var u = get().user; return !!(u && u.inOro); },
     // Capability (permission-role) check, e.g. FINANCE. /auth/me already returns user.permissionRoles;
     // this lets the UI gate on a capability, not just a job title (financial-authority reconciliation, D4 §8).

@@ -333,6 +333,49 @@ async function api(method, path, tok) {
   var one = await callAs('oro_director', 'GET', '/staff/u-' + TAG + '-team_staff');
   ok('M4 GET /staff/:id carries taskMenu (the union) and memberTeams for the picker', one.status === 200 && sameSet(one.body.user.taskMenu || [], ['estimate', 'record_search', 'redaction', 'redaction_qa']) && sameSet(one.body.user.memberTeams || [], ['team-police']), one.status + ' ' + JSON.stringify({ taskMenu: one.body.user && one.body.user.taskMenu, memberTeams: one.body.user && one.body.user.memberTeams }));
 
+  console.log('\n=== N. S4 — every remaining gate is on the model; the SysAdmin bypass is gone ===');
+  var fs2 = require('fs'), pathN = require('path');
+  var legacySites = [];
+  (function walk(d) { fs2.readdirSync(d).forEach(function (n) { var p = pathN.join(d, n); if (fs2.statSync(p).isDirectory()) return walk(p); if (!/\.js$/.test(n) || /middleware\/auth\.js$/.test(p)) return; var src = fs2.readFileSync(p, 'utf8'); if (/requireRole\(|requireRoleOrPerm\(/.test(src)) legacySites.push(pathN.relative('/opt/optimumq/backend/src', p)); }); })('/opt/optimumq/backend/src');
+  ok('N1 no route or service calls requireRole / requireRoleOrPerm any more', legacySites.length === 0, legacySites.join(', '));
+  var rawRoleReads = [];
+  (function walk2(d) { fs2.readdirSync(d).forEach(function (n) { var p = pathN.join(d, n); if (fs2.statSync(p).isDirectory()) return walk2(p); if (!/\.js$/.test(n) || /services\/(userTypes|auth)\.js$|middleware\/auth\.js$/.test(p)) return; fs2.readFileSync(p, 'utf8').split('\n').forEach(function (line, i) { if (/^\s*\/\//.test(line)) return; if (/\.roles\b/.test(line) && !/opts\.roles/.test(line)) rawRoleReads.push(pathN.relative('/opt/optimumq/backend/src', p) + ':' + (i + 1)); }); }); })('/opt/optimumq/backend/src');
+  ok('N2 no route or service reads req.user.roles directly (the legacy claim is consulted by nothing but the act-permission list)', rawRoleReads.length === 0, rawRoleReads.join(', '));
+  var mid = fs2.readFileSync('/opt/optimumq/backend/src/middleware/auth.js', 'utf8');
+  ok('N3 the SYSTEM_ADMIN short-circuit is gone from requireRole / requireRoleOrPerm', !/indexOf\('SYSTEM_ADMIN'\) !== -1\) return next\(\)/.test(mid));
+  // Migrated gates, by authority:
+  var mgSA = await callAs('oro_sysadmin', 'GET', '/magic/status');
+  var mgDir = await callAs('oro_director', 'GET', '/magic/status');
+  ok('N4 magic demo surface = system authority: oro_sysadmin passes the gate; oro_director 403', !gated(mgSA) && gated(mgDir), mgSA.status + '/' + mgDir.status);
+  var asMgr = await callAs('team_manager', 'POST', '/tasks/no-such-task-' + TAG + '/assign', { assigneeId: 'x' });
+  var asStaff = await callAs('team_staff', 'POST', '/tasks/no-such-task-' + TAG + '/assign', { assigneeId: 'x' });
+  ok('N5 task assign = routing authority: team_manager passes the gate (404 after); team_staff 403', asMgr.status !== 403 && gated(asStaff), asMgr.status + '/' + asStaff.status);
+  var roDir = await callAs('oro_director', 'POST', '/requests/no-such-' + TAG + '/reopen', { note: 'x' });
+  var roSA = await callAs('oro_sysadmin', 'POST', '/requests/no-such-' + TAG + '/reopen', { note: 'x' });
+  var roSup = await callAs('oro_supervisor', 'POST', '/requests/no-such-' + TAG + '/reopen', { note: 'x' });
+  ok('N6 reopen = override_stage: oro_director passes the gate; oro_sysadmin 403 (no bypass); oro_supervisor 403', roDir.status !== 403 && gated(roSA) && gated(roSup), roDir.status + '/' + roSA.status + '/' + roSup.status);
+  var obFin = await callAs('oro_finance', 'GET', '/objections/pending-approval');
+  var obSup = await callAs('oro_supervisor', 'GET', '/objections/pending-approval');
+  var obSA = await callAs('oro_sysadmin', 'GET', '/objections/pending-approval');
+  ok('N7 fee-objection approvals = financial_approval: oro_finance 200; oro_supervisor 403; oro_sysadmin 403', obFin.status === 200 && gated(obSup) && gated(obSA));
+  var esMgr = await callAs('team_manager', 'POST', '/requests/no-such-' + TAG + '/legal-escalate', {});
+  var esStaff = await callAs('team_staff', 'POST', '/requests/no-such-' + TAG + '/legal-escalate', {});
+  ok('N8 legal escalation = escalate authority: team_manager passes the gate (404 after); team_staff 403', esMgr.status !== 403 && gated(esStaff), esMgr.status + '/' + esStaff.status);
+  var inSA = await callAs('oro_sysadmin', 'GET', '/integrations');
+  var inDir = await callAs('oro_director', 'GET', '/integrations');
+  ok('N9 integrations = system authority: oro_sysadmin through; oro_director 403', !gated(inSA) && gated(inDir), inSA.status + '/' + inDir.status);
+  // Work-competence presets on the task-menu claim.
+  var rwStaff = await callAs('team_staff', 'POST', '/redaction/rules', {});
+  var rwMgmt = await callAs('city_management', 'POST', '/redaction/rules', {});
+  var rwLegal = await callAs('oro_legal_associate', 'POST', '/redaction/rules', {});
+  ok('N10 requireRedactionWork on the task-menu claim: team_staff and legal associate pass the gate; city_management 403', !gated(rwStaff) && !gated(rwLegal) && gated(rwMgmt), rwStaff.status + '/' + rwLegal.status + '/' + rwMgmt.status);
+  var tokSA = jwt.decode(await auth.signAccessToken(await db.get('SELECT * FROM users WHERE id = ?', ['u-' + TAG + '-oro_director'])));
+  ok('N11 the token carries taskMenu (oro_director = "*"; team_staff = the four team types)', tokSA.taskMenu === '*' && sameSet(jwt.decode(await auth.signAccessToken(await db.get('SELECT * FROM users WHERE id = ?', ['u-' + TAG + '-team_staff']))).taskMenu, ['estimate', 'record_search', 'redaction', 'redaction_qa']));
+  var cfDirS4 = await callAs('oro_director', 'GET', '/config/dashboard-panes');
+  var cfMgrS4 = await callAs('team_manager', 'GET', '/config/dashboard-panes');
+  ok('N12 dashboard default panes follow authority: director org-wide (lateByTeam); team_manager team board (teamInProcess)',
+    cfDirS4.status === 200 && cfDirS4.body.panes.some(function (p) { return p.key === 'lateByTeam'; }) && cfMgrS4.status === 200 && cfMgrS4.body.panes.some(function (p) { return p.key === 'teamInProcess'; }));
+
   console.log('\n=== G. CLEANUP ===');
   var ids = ut.TYPE_KEYS.map(function (k) { return 'u-' + TAG + '-' + k; }).concat([uid]);
   if (created.userId) ids.push(created.userId);

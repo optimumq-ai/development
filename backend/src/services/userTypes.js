@@ -137,8 +137,12 @@ async function claimsFor(userId) {
     keys.forEach(function (k) { var l = LEGACY[k] || { roles: [], perms: [] }; roles = roles.concat(l.roles); perms = perms.concat(l.perms); });
   }
   var inOro = types.some(function (t) { return t.scope === 'office'; });
+  // S4: the task-menu union rides the token ('*' = any) so work-competence gates need no DB read.
+  var menu = [];
+  for (var mi = 0; mi < keys.length; mi++) { var mm = TASK_MENU[keys[mi]] || []; if (mm.indexOf('*') !== -1) { menu = '*'; break; } mm.forEach(function (x) { if (menu.indexOf(x) === -1) menu.push(x); }); }
   return {
-    userTypes: types.map(function (t) { return { key: t.key, teamId: t.teamId }; }),
+    userTypes: types.map(function (t) { return { key: t.key, teamId: t.teamId, displayName: t.displayName }; }),
+    taskMenu: menu,
     authorities: uniq(authorities).sort(),
     permissionGroups: uniq(groups).sort(),
     inOro: inOro,

@@ -2,9 +2,9 @@
 // Redaction automation config editor (SPEC_redaction_automation.md slice 6). SYSTEM_ADMIN / DIRECTOR only.
 var express = require('express');
 var router = express.Router();
-var { requireAuth, requireRole } = require('../middleware/auth');
+var { requireAuth, requirePermission } = require('../middleware/auth');
 var cfg = require('../services/redactionConfig');
-var EDIT = requireRole('SYSTEM_ADMIN', 'DIRECTOR');
+var EDIT = requirePermission('operations_config');   // S4: redaction automation config = operations_config (Lane 2b)
 
 router.get('/', requireAuth, EDIT, async function (req, res) {
   res.json({ config: await cfg.read(), defaults: cfg.normalize({}) });

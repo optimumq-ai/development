@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth, requireRole, requireRedactionWork } = require('../middleware/auth');
+const { requireAuth, requireRedactionWork, requirePermission } = require('../middleware/auth');
 // Connecting/reconfiguring a records repository is system configuration (the redactionConfig EDIT
 // precedent); running an ingest sweep is processing work, so it takes the shared redaction gate.
-const EDIT = requireRole('SYSTEM_ADMIN', 'DIRECTOR');
+const EDIT = requirePermission('operations_config');   // S4: sources / record ownership = operations_config (Lane 3)
 const { all, get, run } = require('../db');
 const catalog = require('../services/connectors/registry');
 

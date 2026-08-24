@@ -52,7 +52,8 @@ export default function RequestWorkspacePage() {
   const [identity, setIdentity] = useState(null);
   const [identityBusy, setIdentityBusy] = useState(false);
   const user = useAuthStore(function(s){ return s.user; });
-  const isDirector = !!(user && user.functionRoles && (user.functionRoles.indexOf('DIRECTOR') !== -1 || user.functionRoles.indexOf('SYSTEM_ADMIN') !== -1));
+  // S4: the Director's acts here (reopen / stage override) are the override_stage authority.
+  const isDirector = !!(user && Array.isArray(user.authorities) && user.authorities.indexOf('override_stage') !== -1);
 
   useEffect(function() { load(); loadStaff(); loadTeams(); loadRecords(); loadClocks(); loadIdentity(); }, [id]);
 

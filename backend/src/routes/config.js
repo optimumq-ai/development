@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requireAuthority, requirePermission, hasAuthority } = require('../middleware/auth');
 const { all, get, run } = require('../db');
 const timeCapture = require('../services/timeCaptureConfig');
 const db = { get: get, run: run };
@@ -12,7 +12,7 @@ router.get('/', requireAuth, async function(req, res) {
   res.json(config);
 });
 
-router.post('/', requireAuth, requireRole('SYSTEM_ADMIN'), async function(req, res) {
+router.post('/', requireAuth, requireAuthority('system'), async function(req, res) {
   var allowed = ['agency_name','agency_short_name','jurisdiction_type','state','contact_email','contact_phone','auth_mode','mfa_mode','session_timeout','min_password_length','fee_threshold','deadline_simple','deadline_standard','deadline_complex','deadline_redaction','cost_per_page','labor_rate','overdue_alert_days','escalation_days','ack_email','smtp_host','smtp_port','smtp_user','smtp_pass','smtp_from','new_request_alert_email','resend_api_key','resend_from'];
   var body = req.body;
   for (var key of allowed) {
@@ -37,7 +37,7 @@ router.get('/time-capture', requireAuth, async function (req, res) {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-router.put('/time-capture', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR'), async function (req, res) {
+router.put('/time-capture', requireAuth, requirePermission('operations_config'), async function (req, res) {
   try {
     var next = await timeCapture.set(db, (req.body && req.body.config) || req.body || {});
     res.json({ config: next, uis: timeCapture.UIS, modes: timeCapture.MODES });
@@ -62,7 +62,7 @@ router.get('/time-budgets', requireAuth, async function (req, res) {
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
-router.put('/time-budgets', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR'), async function (req, res) {
+router.put('/time-budgets', requireAuth, requirePermission('operations_config'), async function (req, res) {
   try {
     var t = String((req.body && req.body.taskType) || '').trim();
     var d = Number(req.body && req.body.budgetDays);
@@ -102,10 +102,10 @@ var PANE_LIBRARY = [
   { key: 'generic', label: 'Overview', scopable: false,
     description: 'The simple agency-wide counts.' }
 ];
-function defaultPanes(roles, dept) {
-  var r = roles || [];
-  var orgWide = r.indexOf('DIRECTOR') >= 0 || r.indexOf('SYSTEM_ADMIN') >= 0;
-  var teamLead = r.indexOf('SUPERVISOR') >= 0 || r.indexOf('DEPT_MANAGER') >= 0;
+function defaultPanes(user, dept) {
+  // S4: org-wide board for org-wide authority (reassign_any / system); team board for team authority.
+  var orgWide = hasAuthority(user, 'reassign_any') || hasAuthority(user, 'system');
+  var teamLead = hasAuthority(user, 'reassign_team');
   if (orgWide) return [{ key: 'health', scope: 'all' }, { key: 'lateByTeam' }, { key: 'finance' }, { key: 'taskNodes', scope: 'all' }, { key: 'statutory' }];
   if (teamLead && dept) return [{ key: 'health', scope: 'own' }, { key: 'teamInProcess', scope: 'own' }, { key: 'taskNodes', scope: 'own' }, { key: 'statutory' }];
   return [{ key: 'generic' }, { key: 'statutory' }];
@@ -116,7 +116,7 @@ router.get('/dashboard-panes', requireAuth, async function (req, res) {
     var panes = null;
     if (row) { try { panes = JSON.parse(row.panes_json); } catch (e) { panes = null; } }
     var defaulted = !Array.isArray(panes) || !panes.length;
-    if (defaulted) panes = defaultPanes(req.user.roles, req.user.dept);
+    if (defaulted) panes = defaultPanes(req.user, req.user.dept);
     res.json({ panes: panes, defaultsApplied: defaulted, library: PANE_LIBRARY });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });

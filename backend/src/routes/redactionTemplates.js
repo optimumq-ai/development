@@ -4,7 +4,7 @@
 // consumed two ways: batch processing, and on-demand when a request pulls a not-yet-public record.
 const express = require('express');
 const router = express.Router();
-const { requireAuth, requireRedactionWork } = require('../middleware/auth');
+const { requireAuth, requireRedactionWork, isElevated } = require('../middleware/auth');
 const { run, get, all } = require('../db');
 const { v4: uuidv4 } = require('uuid');
 const docProcessing = require('../services/docProcessing');
@@ -12,8 +12,7 @@ const redactionApply = require('../services/redactionApply');
 const structuredRedaction = require('../services/structuredRedaction');
 const libraryShelf = require('../services/libraryShelf');
 
-var ELEVATED = ['SUPERVISOR', 'DIRECTOR', 'SYSTEM_ADMIN', 'DEPT_MANAGER'];
-function isElevated(req) { return (req.user.roles || []).some(function(r){ return ELEVATED.indexOf(r) >= 0; }); }
+function isElevatedReq(req) { return isElevated(req.user); }   // S4: authority-based (see middleware/auth ELEVATED)
 async function activeJurisdiction() {
   var row = await get("SELECT value FROM system_config WHERE key = 'jurisdiction_profile'");
   return (row && row.value) || 'jur-tx';
@@ -90,7 +89,7 @@ async function applyTemplateToFile(t, file, zones, actorName, actorSub, destinat
 
 // POST / -> create a template from zones (elevated)
 router.post('/', requireAuth, async function(req, res) {
-  if (!isElevated(req)) return res.status(403).json({ error: 'Only a supervisor can create templates' });
+  if (!isElevatedReq(req)) return res.status(403).json({ error: 'Only a supervisor can create templates' });
   var b = req.body || {};
   if (!b.name) return res.status(400).json({ error: 'name is required' });
   var kind = b.kind === 'fields' ? 'fields' : 'pages';
@@ -149,7 +148,7 @@ router.get('/opportunities', requireAuth, async function(req, res) {
 // POST /opportunities/:recordTypeId/dismiss -> "Not needed": clear the flag by hand (elevated, same
 // bar as creating a template). The variant itself is untouched — only the suggestion goes away.
 router.post('/opportunities/:recordTypeId/dismiss', requireAuth, async function(req, res) {
-  if (!isElevated(req)) return res.status(403).json({ error: 'Only a supervisor can dismiss a suggestion' });
+  if (!isElevatedReq(req)) return res.status(403).json({ error: 'Only a supervisor can dismiss a suggestion' });
   var rt = await get('SELECT id, mass_redaction_candidate FROM record_types WHERE id = ?', [req.params.recordTypeId]);
   if (!rt || !rt.mass_redaction_candidate) return res.status(404).json({ error: 'No open suggestion for that record type' });
   await run('UPDATE record_types SET mass_redaction_candidate = 0 WHERE id = ?', [rt.id]);
@@ -176,7 +175,7 @@ router.get('/:id/sample', requireAuth, async function(req, res) {
 
 // PATCH /:id -> update (elevated)
 router.patch('/:id', requireAuth, async function(req, res) {
-  if (!isElevated(req)) return res.status(403).json({ error: 'Only a supervisor can edit templates' });
+  if (!isElevatedReq(req)) return res.status(403).json({ error: 'Only a supervisor can edit templates' });
   var t = await get('SELECT * FROM layout_profiles WHERE id = ?', [req.params.id]);
   if (!t) return res.status(404).json({ error: 'Template not found' });
   var b = req.body || {};
@@ -195,7 +194,7 @@ router.patch('/:id', requireAuth, async function(req, res) {
 
 // DELETE /:id (soft delete; elevated)
 router.delete('/:id', requireAuth, async function(req, res) {
-  if (!isElevated(req)) return res.status(403).json({ error: 'Only a supervisor can delete templates' });
+  if (!isElevatedReq(req)) return res.status(403).json({ error: 'Only a supervisor can delete templates' });
   await run("UPDATE layout_profiles SET status = 'deleted', updated_at = datetime('now') WHERE id = ?", [req.params.id]);
   res.json({ success: true });
 });
@@ -230,7 +229,7 @@ router.get('/:id/candidates', requireAuth, async function(req, res) {
 
 // POST /:id/apply-batch -> safety check (commit:false) or process (commit:true) over many files. Body: { file_ids:[], commit }
 router.post('/:id/apply-batch', requireAuth, async function(req, res) {
-  if (!isElevated(req)) return res.status(403).json({ error: 'Only a supervisor can run batch redaction' });
+  if (!isElevatedReq(req)) return res.status(403).json({ error: 'Only a supervisor can run batch redaction' });
   var t = await get('SELECT * FROM layout_profiles WHERE id = ?', [req.params.id]);
   if (!t) return res.status(404).json({ error: 'Template not found' });
   var b = req.body || {};

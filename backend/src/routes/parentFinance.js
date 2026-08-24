@@ -15,24 +15,20 @@
 // place to take money is a second cash-handling procedure, and cities do not have those.
 var express = require('express');
 var router = express.Router();
-var { requireAuth, requireRoleOrPerm } = require('../middleware/auth');
+var { requireAuth, requireAuthority, hasAuthority } = require('../middleware/auth');
 var { get } = require('../db');
 var PF = require('../services/parentFinance');
 
-var OVERSIGHT = ['SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'ORO_SUPERVISOR', 'RECORDS_MANAGER'];
-var FINANCE_ACT = requireRoleOrPerm(['DIRECTOR', 'SYSTEM_ADMIN'], ['FINANCE']);
-
-function canAct(user) {
-  var roles = (user && user.roles) || [], perms = (user && user.perms) || [];
-  return roles.indexOf('SYSTEM_ADMIN') !== -1 || roles.indexOf('DIRECTOR') !== -1 || perms.indexOf('FINANCE') !== -1;
-}
+// S4: money acts are the financial_approval AUTHORITY (oro_finance, oro_director); reading the ledger is oversight
+// (act_any_request) or financial authority. The dead ORO_SUPERVISOR / RECORDS_MANAGER names are gone.
+var FINANCE_ACT = requireAuthority('financial_approval');
+function canAct(user) { return hasAuthority(user, 'financial_approval'); }
 function actorName(req) {
   return (req.user && (req.user.name || req.user.display_name)) || (req.user && req.user.sub) || 'Staff';
 }
 // READ authorization: oversight by authority, or the person holding this request's management task.
 async function canRead(user, pid) {
-  var roles = (user && user.roles) || [];
-  if (OVERSIGHT.some(function (r) { return roles.indexOf(r) !== -1; })) return true;
+  if (hasAuthority(user, 'act_any_request') || hasAuthority(user, 'financial_approval')) return true;
   var t = await get("SELECT assigned_to FROM tasks WHERE request_id = ? AND type IN ('mrr_management','request_management') ORDER BY created_at DESC LIMIT 1", [pid]);
   if (t && t.assigned_to === (user && user.sub)) return true;
   // ANY task on the TREE, not only on the parent. On an MRR the person working item 3 holds a task on the

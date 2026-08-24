@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { get, all, run } = require('../db');
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requirePermission } = require('../middleware/auth');
 const { v4: uuidv4 } = require('uuid');
 const Anthropic = require('@anthropic-ai/sdk');
 
@@ -32,7 +32,7 @@ router.get('/rules', requireAuth, async function(req, res) {
   res.json({ rules: rules.map(function(r){ return Object.assign({}, r, { conditions: safe(r.conditions, []), actions: safe(r.actions, {}) }); }) });
 });
 
-router.post('/rules', requireAuth, requireRole('SYSTEM_ADMIN','DIRECTOR','SUPERVISOR'), async function(req, res) {
+router.post('/rules', requireAuth, requirePermission('operations_config'), async function(req, res) {
   var b = req.body || {};
   if (!b.name || !b.name.trim()) return res.status(400).json({ error: 'name is required' });
   var id = 'wfr-' + uuidv4().substring(0,8);
@@ -41,7 +41,7 @@ router.post('/rules', requireAuth, requireRole('SYSTEM_ADMIN','DIRECTOR','SUPERV
   res.json({ rule: await get('SELECT * FROM workflow_rules WHERE id = ?', [id]) });
 });
 
-router.patch('/rules/:id', requireAuth, requireRole('SYSTEM_ADMIN','DIRECTOR','SUPERVISOR'), async function(req, res) {
+router.patch('/rules/:id', requireAuth, requirePermission('operations_config'), async function(req, res) {
   var b = req.body || {};
   var sets = [], vals = [];
   if (b.hasOwnProperty('name')) { sets.push('name = ?'); vals.push(b.name); }
@@ -56,13 +56,13 @@ router.patch('/rules/:id', requireAuth, requireRole('SYSTEM_ADMIN','DIRECTOR','S
   res.json({ rule: await get('SELECT * FROM workflow_rules WHERE id = ?', [req.params.id]) });
 });
 
-router.delete('/rules/:id', requireAuth, requireRole('SYSTEM_ADMIN','DIRECTOR','SUPERVISOR'), async function(req, res) {
+router.delete('/rules/:id', requireAuth, requirePermission('operations_config'), async function(req, res) {
   await run('DELETE FROM workflow_rules WHERE id = ?', [req.params.id]);
   res.json({ success: true });
 });
 
 // ---- AI authoring: plain English -> structured draft rule (the human confirms before saving) ----
-router.post('/rules/draft', requireAuth, requireRole('SYSTEM_ADMIN','DIRECTOR','SUPERVISOR'), async function(req, res) {
+router.post('/rules/draft', requireAuth, requirePermission('operations_config'), async function(req, res) {
   var text = (req.body && req.body.text || '').trim();
   if (!text) return res.status(400).json({ error: 'text is required' });
   var prompt = 'You translate a plain-English public-records routing rule into a STRICT JSON object the workflow engine can run. '

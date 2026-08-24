@@ -1,13 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requirePermission, hasPermission } = require('../middleware/auth');
 // SETUP IS SYSTEM CONFIGURATION (2026-08-19). Assigning a reviewer, requesting a review, moving a phase's
 // status and recording the fee-test outcome were requireAuth-only. Now: SYSTEM_ADMIN / DIRECTOR (the
 // System Administration permission group; the redactionConfig / repository / taxonomy EDIT precedent).
 // Two deliberate carve-outs keep the review flow honest: /approve keeps its own decided authority (the
 // DESIGNATED reviewer of the phase, or an administrator), and the fee-test outcome may also be recorded by
 // the Fees phase's designated reviewer — they run the sandbox test before they can approve. Reads open.
-const EDIT = requireRole('SYSTEM_ADMIN', 'DIRECTOR');
+const EDIT = requirePermission('compliance_policy');   // S4: setup / go-live readiness is Lane 1 (compliance_policy)
 async function isPhaseReviewer(phaseKey, user) {
   if (!user || !user.sub) return false;
   const p = await get("SELECT reviewer_id FROM onboarding_progress WHERE phase_key = ?", [phaseKey]);
@@ -16,8 +16,7 @@ async function isPhaseReviewer(phaseKey, user) {
 // EDIT, or the designated reviewer of the named phase.
 function editOrReviewer(phaseKey) {
   return async function (req, res, next) {
-    const roles = (req.user && req.user.roles) || [];
-    if (['SYSTEM_ADMIN', 'DIRECTOR'].some(function (r) { return roles.indexOf(r) !== -1; })) return next();
+    if (hasPermission(req.user, 'compliance_policy')) return next();
     try {
       if (await isPhaseReviewer(phaseKey, req.user)) return next();
     } catch (e) { return res.status(500).json({ error: 'Could not verify your access to this phase.' }); }
@@ -135,8 +134,7 @@ router.post('/:phase/request-review', requireAuth, EDIT, async function (req, re
 router.post('/:phase/approve', requireAuth, async function (req, res) {
   const p = await get("SELECT * FROM onboarding_progress WHERE phase_key = ?", [req.params.phase]);
   if (!p) return res.status(404).json({ error: 'Unknown phase' });
-  const roles = req.user.roles || [];
-  const isAdmin = ['SYSTEM_ADMIN', 'SUPERVISOR', 'DIRECTOR'].some(function (x) { return roles.indexOf(x) >= 0; });
+  const isAdmin = hasPermission(req.user, 'compliance_policy');
   if (p.requires_review && p.reviewer_id && p.reviewer_id !== req.user.sub && !isAdmin) {
     return res.status(403).json({ error: 'Only the designated reviewer or an administrator can approve this phase' });
   }

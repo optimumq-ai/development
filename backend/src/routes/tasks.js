@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const { all, get, run } = require('../db');
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requireAnyAuthority, isElevated, canRoute } = require('../middleware/auth');
 const tr = require('../services/taskRouting');
 const scope = require('../services/requestScope');
 const SI = require('../services/searchIntents');
@@ -189,9 +189,7 @@ router.get('/release-review-queue', requireAuth, async function (req, res) {
 // capture "ops-summary" as a task id.
 router.get('/ops-summary', requireAuth, async function (req, res) {
   try {
-    var userRoles = req.user.roles || [];
-    var elevated = ['SUPERVISOR', 'DIRECTOR', 'SYSTEM_ADMIN', 'DEPT_MANAGER', 'ATTORNEY_REVIEWER']
-      .some(function (r) { return userRoles.indexOf(r) !== -1; });
+    var elevated = isElevated(req.user);
     // A non-elevated user with no department must not widen to all teams — scope to an impossible id.
     var teamId = elevated ? (req.query.team || null) : (req.user.dept || '__none__');
     res.json(await require('../services/opsSummary').summary({ teamId: teamId || null }));
@@ -334,8 +332,7 @@ router.patch('/:id/intake-routing', requireAuth, async function (req, res) {
     if (!tr.isActionable(t.status)) {
       return res.status(409).json({ error: 'This task is ' + t.status + ' and can no longer be edited.', code: 'TASK_NOT_ACTIONABLE' });
     }
-    var roles = (req.user && req.user.roles) || [];
-    var mayRoute = ['SUPERVISOR', 'DIRECTOR', 'SYSTEM_ADMIN', 'DEPT_MANAGER', 'COORDINATOR'].some(function (r) { return roles.indexOf(r) !== -1; });
+    var mayRoute = canRoute(req.user);
     if (t.assigned_to !== (req.user && req.user.sub) && !mayRoute) {
       return res.status(403).json({ error: 'This intake review is not yours.' });
     }
@@ -396,14 +393,14 @@ router.get('/:id/suggest', requireAuth, async function (req, res) {
 });
 
 // Manually assign a task to a user.
-router.post('/:id/assign', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER'), async function (req, res) {
+router.post('/:id/assign', requireAuth, requireAnyAuthority('act_any_request', 'reassign_any', 'reassign_team'), async function (req, res) {
   if (!req.body || !req.body.userId) return res.status(400).json({ error: 'userId is required' });
   var task = await tr.assign(req.params.id, req.body.userId, 'manual', null);
   res.json({ task: task });
 });
 
 // Create a task and (optionally) route it now: Smart Routing to a person, else leave in the pool.
-router.post('/', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER'), async function (req, res) {
+router.post('/', requireAuth, requireAnyAuthority('act_any_request', 'reassign_any', 'reassign_team'), async function (req, res) {
   var b = req.body || {};
   if (!b.requestId || !b.type) return res.status(400).json({ error: 'requestId and type are required' });
   var task = await tr.createTask({ requestId: b.requestId, type: b.type, title: b.title, teamId: b.teamId, roleRequired: b.roleRequired, createdBy: req.user.sub });
@@ -455,8 +452,7 @@ router.post('/:id/work', requireAuth, async function (req, res) {
 router.post('/:id/work/finalize', requireAuth, async function (req, res) {
   var t = await get('SELECT assigned_to, request_id, type, work_seconds, work_finalized FROM tasks WHERE id = ?', [req.params.id]);
   if (!t) return res.status(404).json({ error: 'Task not found' });
-  var roles = req.user.roles || [];
-  var elevated = roles.indexOf('SYSTEM_ADMIN') !== -1 || roles.indexOf('DIRECTOR') !== -1 || roles.indexOf('SUPERVISOR') !== -1;
+  var elevated = canRoute(req.user);
   if (t.assigned_to && t.assigned_to !== req.user.sub && !elevated) return res.status(403).json({ error: 'Only the assignee can log time on this task.' });
   var measured = Math.max(0, Math.floor(Number(req.body && req.body.seconds != null ? req.body.seconds : t.work_seconds) || 0));
   var b = req.body || {};

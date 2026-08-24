@@ -1,12 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { all, get } = require('../db');
-const { requireAuth, requireRole } = require('../middleware/auth');
+const { requireAuth, requireAnyAuthority } = require('../middleware/auth');
 const tickler = require('../services/tickler');
 const scope = require('../services/requestScope');
 
 // Manually run the sweep (admin/elevated).
-router.post('/run', requireAuth, requireRole('SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER'), async function (req, res) {
+router.post('/run', requireAuth, requireAnyAuthority('reassign_any', 'reassign_team'), async function (req, res) {
   try { res.json(await tickler.runSweep({ trigger: 'manual' })); }
   catch (e) { res.status(500).json({ error: 'Sweep failed: ' + (e && e.message) }); }
 });

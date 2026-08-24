@@ -25,7 +25,10 @@
 // either. "Assigned to you" is answered across parent + every child.
 var db = require('../db');
 
-var ACTING_ROLES = ['SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR', 'DEPT_MANAGER', 'COORDINATOR'];
+// S4 (SPEC_user_type_model §7): the acting set is the ROUTING authorities (act_any_request / reassign_any /
+// reassign_team). Act-specific extra "roles" callers still pass by legacy name are translated to authorities here.
+var ACTING_AUTHORITIES = ['act_any_request', 'reassign_any', 'reassign_team'];
+var LEGACY_ROLE_TO_AUTHORITY = { ATTORNEY_REVIEWER: 'legal_decision', DIRECTOR: 'override_stage', SYSTEM_ADMIN: 'system', SUPERVISOR: 'reassign_any', DEPT_MANAGER: 'reassign_team', COORDINATOR: 'act_any_request' };
 
 // Resolve an addressed id (or citizen number) to its cluster: the parent row + every child id.
 // Returns null when nothing is addressed.
@@ -62,8 +65,9 @@ async function holdsOpenTask(userId, ids, taskTypes) {
 // Returns { ok: true } or { ok: false, error } — never throws on a missing request (that is `found: false`).
 async function decide(user, idOrNumber, opts) {
   opts = opts || {};
-  var roles = (user && user.roles) || [], perms = (user && user.perms) || [];
-  if (hasAny(roles, ACTING_ROLES.concat(opts.roles || []))) return { ok: true, found: true, by: 'role' };
+  var auths = (user && user.authorities) || [], perms = (user && user.perms) || [];
+  var extra = (opts.roles || []).map(function (r) { return LEGACY_ROLE_TO_AUTHORITY[r] || r; });
+  if (hasAny(auths, ACTING_AUTHORITIES.concat(extra))) return { ok: true, found: true, by: 'authority' };
   if (hasAny(perms, opts.perms || [])) return { ok: true, found: true, by: 'perm' };
   var c = await cluster(idOrNumber);
   if (!c) return { ok: false, found: false };
@@ -80,4 +84,4 @@ function refusal(opts) {
     ', or the request (or an open task on it) must be assigned to you.';
 }
 
-module.exports = { ACTING_ROLES: ACTING_ROLES, cluster: cluster, holdsOpenTask: holdsOpenTask, decide: decide };
+module.exports = { ACTING_AUTHORITIES: ACTING_AUTHORITIES, LEGACY_ROLE_TO_AUTHORITY: LEGACY_ROLE_TO_AUTHORITY, cluster: cluster, holdsOpenTask: holdsOpenTask, decide: decide };

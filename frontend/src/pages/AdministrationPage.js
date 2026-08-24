@@ -40,7 +40,7 @@ const TABS = [
 export default function AdministrationPage() {
   const [params, setParams] = useSearchParams();
   const store = useAuthStore();
-  const isAdmin = store.hasAnyRole('SYSTEM_ADMIN');
+  const isAdmin = store.hasAuthority('system');   // S4: technical tabs = the system authority (oro_sysadmin)
   const tabs = TABS.filter(function (t) { return !t.admin || isAdmin; });
   const activeKey = params.get('tab') || tabs[0].key;
   // RETIRED 2026-08-12: the v1 Jurisdiction Profile tab. BW9a/BW9b replaced it wholesale — the

@@ -9,7 +9,7 @@
 // No task type; nothing queues here.
 var express = require('express');
 var router = express.Router();
-var { requireAuth } = require('../middleware/auth');
+var { requireAuth, hasPermission } = require('../middleware/auth');
 var { all, get, run } = require('../db');
 var DISP = require('../services/disposition');
 var AR = require('../services/autoRelease');
@@ -40,11 +40,11 @@ router.get('/knobs', requireAuth, async function (req, res) {
 });
 
 router.put('/knobs/:knob', requireAuth, async function (req, res) {
-  var roles = req.user.roles || [];
-  if (['SYSTEM_ADMIN', 'DIRECTOR'].every(function (r) { return roles.indexOf(r) === -1; })) {
+  // S4: release switches are Lane 2b — the operations_config group (SPEC_user_type_model §5, item 2.10).
+  if (!hasPermission(req.user, 'operations_config')) {
     return res.status(403).json({
-      error: 'Confirming a release policy setting is a Director’s act — the confirming act IS the decision to automate.',
-      code: 'DIRECTOR_REQUIRED' });
+      error: 'Confirming a release policy setting needs the Operations Configuration permission group — the confirming act IS the decision to automate.',
+      code: 'PERMISSION_REQUIRED' });
   }
   try {
     if (!AR.KNOBS[req.params.knob]) return res.status(404).json({ error: 'No such release-pipeline policy setting.' });

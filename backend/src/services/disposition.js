@@ -521,8 +521,8 @@ var ORO_TOKENS = ['intake_review', 'mrr_management', 'release_review'];
 
 async function isOroAssociatePlus(user) {
   if (!user) return false;
-  var roles = user.roles || [];
-  if (['SYSTEM_ADMIN', 'DIRECTOR', 'SUPERVISOR'].some(function (r) { return roles.indexOf(r) >= 0; })) return true;
+  // S4: any office type (inOro) or oversight authority counts as ORO Associate-plus.
+  if (user.inOro === true || (Array.isArray(user.authorities) && user.authorities.indexOf('act_any_request') !== -1)) return true;
   if (!user.sub) return false;
   var ph = ORO_TOKENS.map(function () { return '?'; }).join(',');
   var row = await get('SELECT 1 AS x FROM user_task_types WHERE user_id = ? AND task_type IN (' + ph + ') LIMIT 1',

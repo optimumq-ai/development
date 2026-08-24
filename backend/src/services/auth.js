@@ -23,7 +23,7 @@ async function signAccessToken(user) {
   return jwt.sign({
     sub: user.id, email: user.email, name: user.display_name, dept: user.department_id,
     roles: c.roles, perms: c.perms,
-    userTypes: c.userTypes, authorities: c.authorities, permissionGroups: c.permissionGroups, inOro: c.inOro,
+    userTypes: c.userTypes, authorities: c.authorities, permissionGroups: c.permissionGroups, inOro: c.inOro, taskMenu: c.taskMenu,
     av: av,
   }, JWT_SECRET, { expiresIn: '8h' });
 }
@@ -63,7 +63,7 @@ async function getUserById(userId) {
   var c = await userTypes.claimsFor(userId);
   return Object.assign(sanitizeUser(user), {
     functionRoles: c.roles, permissionRoles: c.perms,
-    userTypes: c.userTypes, authorities: c.authorities, permissionGroups: c.permissionGroups, inOro: c.inOro,
+    userTypes: c.userTypes, authorities: c.authorities, permissionGroups: c.permissionGroups, inOro: c.inOro, taskMenu: c.taskMenu,
   });
 }
 async function getAuthMode() {
