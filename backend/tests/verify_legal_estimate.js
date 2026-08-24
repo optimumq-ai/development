@@ -44,6 +44,8 @@ async function call(token, method, path, body) {
   }
   var legalU = await mkUser('Legal ' + TAG, 'legal-' + TAG + '@example.com');
   var plainU = await mkUser('Plain ' + TAG, 'plain-' + TAG + '@example.com');
+  // S3 (§6): a task type must be inside the union of the person's type menus — make them ORO Legal Associate first.
+  await call(ADMIN, 'PATCH', '/staff/' + legalU.id + '/user-types', { userTypes: [{ key: 'oro_legal_associate' }] });
   await call(ADMIN, 'PATCH', '/staff/' + legalU.id + '/task-types', { taskTypes: ['legal_review'] });
   var LEGAL = await auth.signAccessToken(legalU);
   var PLAIN = await auth.signAccessToken(plainU);

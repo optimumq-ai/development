@@ -176,6 +176,9 @@ async function api(method, path, tok) {
     var uu = await db.get('SELECT * FROM users WHERE id = ?', ['u-' + TAG + '-' + key]);
     var t = await auth.signAccessToken(uu);
     var r = await fetch('http://localhost:' + PORT + '/api' + path, { method: method, headers: { Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+    // A 401 right after this user's own auth_version was bumped is the API's 1s freshness cache (§7), not a
+    // gate verdict: wait the window out and retry once with a re-minted token.
+    if (r.status === 401) { await sleep(1100); t = await auth.signAccessToken(uu); r = await fetch('http://localhost:' + PORT + '/api' + path, { method: method, headers: { Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined }); }
     var j = null; try { j = await r.json(); } catch (e) {}
     return { status: r.status, body: j };
   }
@@ -258,6 +261,77 @@ async function api(method, path, tok) {
   var src = require('fs').readFileSync('/opt/optimumq/backend/src/routes/settlement.js', 'utf8');
   ok('K1 equal secrets match; different / prefix / empty do not', SM('abc123', 'abc123') && !SM('abc124', 'abc123') && !SM('abc', 'abc123') && !SM('', 'abc123'));
   ok('K2 the compare goes through crypto.timingSafeEqual and the handler no longer uses !== on the secret', /timingSafeEqual/.test(src) && !/\) !== expected\)/.test(src));
+
+  console.log('\n=== L. MULTI-TEAM MEMBERSHIP (§6.1, S2b) — work eligibility follows the teams a type is held against ===');
+  var tr = require('/opt/optimumq/backend/src/services/taskRouting');
+  var two = 'u-' + TAG + '-two', mis = 'u-' + TAG + '-mis', off = 'u-' + TAG + '-off';
+  // two: staff on police AND fire (home dept police). mis: home dept police, but the only team type is on FIRE.
+  // off: office-only (oro_associate), home dept police. All three hold the `estimate` subset.
+  await db.run("INSERT INTO users (id, email, display_name, title, department_id, status) VALUES (?,?,?,?,?, 'active')", [two, TAG + '-two@test.optimumq.ai', 'UT Two Teams', 'Test ' + TAG, 'team-police']);
+  await db.run("INSERT INTO users (id, email, display_name, title, department_id, status) VALUES (?,?,?,?,?, 'active')", [mis, TAG + '-mis@test.optimumq.ai', 'UT Mismatched Home', 'Test ' + TAG, 'team-police']);
+  await db.run("INSERT INTO users (id, email, display_name, title, department_id, status) VALUES (?,?,?,?,?, 'active')", [off, TAG + '-off@test.optimumq.ai', 'UT Office Only', 'Test ' + TAG, 'team-police']);
+  await ut.grant(two, 'team_staff', 'team-police', 'harness'); await ut.grant(two, 'team_staff', 'team-fire', 'harness');
+  await ut.grant(mis, 'team_staff', 'team-fire', 'harness');
+  await ut.grant(off, 'oro_associate', null, 'harness');
+  var seededBefore = Number((await db.get("SELECT count(*)::int AS n FROM user_task_types WHERE task_type = 'estimate'")).n);
+  for (var lu of [two, mis, off]) await db.run("INSERT INTO user_task_types (user_id, task_type) VALUES (?, 'estimate') ON CONFLICT DO NOTHING", [lu]);
+  ok('L0 teamsOf reads membership from the types held (two -> police+fire; mis -> fire; off -> none)',
+    sameSet(await ut.teamsOf(two), ['team-police', 'team-fire']) && sameSet(await ut.teamsOf(mis), ['team-fire']) && (await ut.teamsOf(off)).length === 0);
+  var ePol = (await tr.eligibleUsers('team-police', 'estimate')).map(function (x) { return x.id; });
+  var eFire = (await tr.eligibleUsers('team-fire', 'estimate')).map(function (x) { return x.id; });
+  var eHr = (await tr.eligibleUsers('team-hr', 'estimate')).map(function (x) { return x.id; });
+  ok('L1 two-team person is eligible on BOTH teams and not on a third', ePol.indexOf(two) !== -1 && eFire.indexOf(two) !== -1 && eHr.indexOf(two) === -1);
+  ok('L2 home department no longer gates: mis (home police, type on fire) is eligible on FIRE and NOT on police', eFire.indexOf(mis) !== -1 && ePol.indexOf(mis) === -1);
+  ok('L3 office-only staff are eligible on no team', ePol.indexOf(off) === -1 && eFire.indexOf(off) === -1);
+  var tPol = await tr.createTask({ type: 'estimate', requestId: null, teamId: 'team-police', createdBy: 'harness' });
+  var tFire = await tr.createTask({ type: 'estimate', requestId: null, teamId: 'team-fire', createdBy: 'harness' });
+  var poolTwo = (await tr.poolForUser(two)).map(function (t) { return t.id; });
+  var poolMis = (await tr.poolForUser(mis)).map(function (t) { return t.id; });
+  ok('L4 the pool OFFERS both teams\' tasks to the two-team person; only fire\'s to the mismatched-home person',
+    poolTwo.indexOf(tPol.id) !== -1 && poolTwo.indexOf(tFire.id) !== -1 && poolMis.indexOf(tFire.id) !== -1 && poolMis.indexOf(tPol.id) === -1);
+  var cPol = await tr.claim(tPol.id, two);
+  var cMisPol = await tr.claim(tPol.id, mis);
+  ok('L5 the claim guard agrees with the pool: two claims police; mis is refused on police', !!cPol.task && cPol.task.assigned_to === two && !!cMisPol.error);
+  var cFire = await tr.claim(tFire.id, mis);
+  ok('L6 ...and mis claims fire', !!cFire.task && cFire.task.assigned_to === mis);
+  // subset scope (§8 row 4) under §6.1: a team_manager of FIRE may set the subset of someone who is a fire member
+  // even though that person's home department is police.
+  var mgrF = 'u-' + TAG + '-mgrfire';
+  await db.run("INSERT INTO users (id, email, display_name, title, department_id, status) VALUES (?,?,?,?,?, 'active')", [mgrF, TAG + '-mgrfire@test.optimumq.ai', 'UT Fire Manager', 'Test ' + TAG, 'team-fire']);
+  await ut.grant(mgrF, 'team_manager', 'team-fire', 'harness');
+  var mgrTok = await auth.signAccessToken(await db.get('SELECT * FROM users WHERE id = ?', [mgrF]));
+  var subOk = await fetch('http://localhost:' + PORT + '/api/staff/' + mis + '/task-types', { method: 'PATCH', headers: { Authorization: 'Bearer ' + mgrTok, 'Content-Type': 'application/json' }, body: JSON.stringify({ taskTypes: ['estimate'] }) });
+  var subNo = await fetch('http://localhost:' + PORT + '/api/staff/' + off + '/task-types', { method: 'PATCH', headers: { Authorization: 'Bearer ' + mgrTok, 'Content-Type': 'application/json' }, body: JSON.stringify({ taskTypes: ['estimate'] }) });
+  ok('L7 subset scope by membership: fire\'s manager may set a fire member\'s subset (home dept police) — 200; not a non-member — 403', subOk.status === 200 && subNo.status === 403);
+  // Leave the world as found: the fixture is UNSEEDED for estimate (verify_qa_routing asserts it).
+  await db.run('DELETE FROM tasks WHERE id IN (?, ?)', [tPol.id, tFire.id]);
+  await db.run('DELETE FROM user_task_types WHERE user_id IN (?, ?, ?)', [two, mis, off]);
+  var seededAfter = Number((await db.get("SELECT count(*)::int AS n FROM user_task_types WHERE task_type = 'estimate'")).n);
+  ok('L8 harness grants and tasks removed (estimate seeding back to ' + seededBefore + ')', seededAfter === seededBefore);
+  for (var lu2 of [two, mis, off, mgrF]) { await ut.revokeAll(lu2); await db.run('DELETE FROM users WHERE id = ?', [lu2]); }
+
+  console.log('\n=== M. S3 — the catalog endpoint, display-name rename, and the §6 picker constraint ===');
+  var cat = await callAs('team_staff', 'GET', '/user-types');
+  var catTypes = (cat.body && cat.body.userTypes) || [];
+  ok('M1 GET /user-types lists the 11 types with menus / authorities / groups (readable by any signed-in user)', cat.status === 200 && catTypes.length === 11 &&
+    catTypes.every(function (t) { return sameSet(t.taskMenu, ut.TASK_MENU[t.key]) && sameSet(t.authorities, ut.AUTHORITY[t.key]) && sameSet(t.permissionGroups, ut.PERMISSION[t.key]); }));
+  var rnNo = await callAs('oro_supervisor', 'PATCH', '/user-types/oro_associate', { displayName: 'Records Coordinator' });
+  var rnYes = await callAs('oro_director', 'PATCH', '/user-types/oro_associate', { displayName: 'Records Coordinator' });
+  var rnBad = await callAs('oro_director', 'PATCH', '/user-types/oro_associate', { displayName: '' });
+  var renamed = await db.get("SELECT display_name FROM user_types WHERE key = 'oro_associate'");
+  ok('M2 display-name rename: manage_users holder 200 and it lands; supervisor 403; empty name 400', rnYes.status === 200 && renamed.display_name === 'Records Coordinator' && gated(rnNo) && rnBad.status === 400);
+  await db.run("UPDATE user_types SET display_name = 'ORO Associate' WHERE key = 'oro_associate'");
+  // Picker constraint: team_staff's menu is the four team types; legal_review is outside it.
+  var pcOut = await callAs('oro_director', 'PATCH', '/staff/u-' + TAG + '-team_staff/task-types', { taskTypes: ['estimate', 'legal_review'] });
+  var pcIn = await callAs('oro_director', 'PATCH', '/staff/u-' + TAG + '-team_staff/task-types', { taskTypes: ['estimate', 'redaction'] });
+  var pcNone = await callAs('oro_director', 'PATCH', '/staff/u-' + TAG + '-city_management/task-types', { taskTypes: ['estimate'] });
+  var pcDir = await callAs('oro_director', 'PATCH', '/staff/u-' + TAG + '-oro_director/task-types', { taskTypes: ['legal_review', 'estimate'] });
+  ok('M3 granting a task type outside the menu union -> 400 OUTSIDE_TASK_MENU naming it; inside -> 200; empty menu refuses everything; oro_director (any) accepts all',
+    pcOut.status === 400 && pcOut.body.code === 'OUTSIDE_TASK_MENU' && sameSet(pcOut.body.outside, ['legal_review']) && pcIn.status === 200 && pcNone.status === 400 && pcDir.status === 200);
+  await db.run('DELETE FROM user_task_types WHERE user_id IN (?, ?)', ['u-' + TAG + '-team_staff', 'u-' + TAG + '-oro_director']);
+  await sleep(1100);   // M3 changed the director's OWN subset (auth_version bump); let the API's 1s auth_version cache expire
+  var one = await callAs('oro_director', 'GET', '/staff/u-' + TAG + '-team_staff');
+  ok('M4 GET /staff/:id carries taskMenu (the union) and memberTeams for the picker', one.status === 200 && sameSet(one.body.user.taskMenu || [], ['estimate', 'record_search', 'redaction', 'redaction_qa']) && sameSet(one.body.user.memberTeams || [], ['team-police']), one.status + ' ' + JSON.stringify({ taskMenu: one.body.user && one.body.user.taskMenu, memberTeams: one.body.user && one.body.user.memberTeams }));
 
   console.log('\n=== G. CLEANUP ===');
   var ids = ut.TYPE_KEYS.map(function (k) { return 'u-' + TAG + '-' + k; }).concat([uid]);

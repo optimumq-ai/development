@@ -41,9 +41,12 @@ async function plan() {
     var current = (await db.all(
       'SELECT task_type FROM user_task_types WHERE user_id = ?', [u.id]))
       .map(function (r) { return r.task_type; });
+    // S3 (§6 picker constraint): a grant outside the union of the person's type menus is refused by the API,
+    // so the mirror only plans grants the menus cover (office admins mint team perms but carry no team menu).
+    var menu = await require('../services/userTypes').taskMenuFor(u.id);
     var target = current.slice();
     for (var p of perms) {
-      for (var t of (MIRROR[p] || [])) { if (target.indexOf(t) < 0) target.push(t); }
+      for (var t of (MIRROR[p] || [])) { if (target.indexOf(t) < 0 && (menu === null || menu.indexOf(t) !== -1)) target.push(t); }
     }
     target.sort();
     var added = target.filter(function (t) { return current.indexOf(t) < 0; });

@@ -1,9 +1,51 @@
 import React, { useEffect, useState } from 'react';
 import api from '../lib/api';
+import { useAuthStore } from '../store/authStore';
 
-// FEE_WAIVER_APPROVER retired (D4 §8): financial authority is the FINANCE capability (a task/permission role,
-// held via the fee_waiver task type below), not a function/job role.
-const FUNCTION_ROLES = ['COORDINATOR','SUPERVISOR','REDACTION_REVIEWER','REDACTION_APPROVER','ATTORNEY_REVIEWER','CUSTODIAN','DEPT_MANAGER','DIRECTOR','SYSTEM_ADMIN'];
+// v3 user-type model (SPEC_user_type_model §10.1, S3): people hold USER TYPES, fetched from /user-types. Office
+// types are held office-wide; team types are held against a fulfillment team (one chip per team — multi-team is
+// allowed, and office + team together). The legacy function-role chips are gone.
+const TYPE_COLORS = { oro_sysadmin:{bg:'#FEF2F2',color:'#991B1B'}, oro_director:{bg:'#EDE9FE',color:'#6D28D9'}, oro_supervisor:{bg:'#DBEAFE',color:'#1E40AF'}, oro_senior_legal:{bg:'#FCE7F3',color:'#9D174D'}, oro_legal_associate:{bg:'#FCE7F3',color:'#9D174D'}, oro_associate:{bg:'#FEF3C7',color:'#92400E'}, oro_finance:{bg:'#ECFDF5',color:'#047857'}, city_management:{bg:'#F3F4F6',color:'#374151'}, team_manager:{bg:'#D1FAE5',color:'#065F46'}, team_supervisor:{bg:'#D1FAE5',color:'#065F46'}, team_staff:{bg:'#F0FDF4',color:'#166534'} };
+function sameType(a,b){ return a.key===b.key && (a.teamId||null)===(b.teamId||null); }
+
+// The USER-TYPE PICKER (§10.1) — module-scope so its own state survives the parent's re-renders: office types as chips; team types as chips per team (defaults to the
+// person's home team, more teams via the selector).
+function TypePicker(props) {
+  var ut = props.userTypes, homeTeam = props.homeTeam, catalog = props.catalog, departments = props.departments, onToggle = props.onToggle;
+  var teamName = function(id){ var d = departments.filter(function(x){ return x.id===id; })[0]; return d ? d.name : id; };
+  var teams = departments.filter(function(d){ return d.kind==='team'; });
+  var pickedTeams = []; ut.forEach(function(t){ if (t.teamId && pickedTeams.indexOf(t.teamId)===-1) pickedTeams.push(t.teamId); });
+  if (homeTeam && pickedTeams.indexOf(homeTeam)===-1) pickedTeams.unshift(homeTeam);
+  var [extraTeam, setExtraTeam] = useState('');
+  var office = catalog.filter(function(c){ return c.scope==='office'; }), teamTypes = catalog.filter(function(c){ return c.scope==='team'; });
+  var chipStyle = function(active, col){ return { padding:'5px 12px', borderRadius:'20px', border:'2px solid '+(active?col.color:'#E5E7EB'), background:active?col.bg:'white', color:active?col.color:'#6B7280', fontSize:'12px', fontWeight:'600', cursor:'pointer' }; };
+  return (
+    <div>
+      <div style={{fontSize:'11px',fontWeight:'700',color:'#6B7280',textTransform:'uppercase',letterSpacing:'0.04em',margin:'0 0 6px'}}>Open Records Office</div>
+      <div style={{display:'flex',flexWrap:'wrap',gap:'8px'}}>
+        {office.map(function(c){ var active = ut.some(function(x){ return x.key===c.key; }); var col = TYPE_COLORS[c.key]||{bg:'#F3F4F6',color:'#374151'};
+          return <button key={c.key} type="button" onClick={function(){ onToggle(c.key, null); }} style={chipStyle(active,col)}>{c.displayName}</button>; })}
+      </div>
+      {pickedTeams.map(function(teamId){
+        return <div key={teamId} style={{marginTop:'10px'}}>
+          <div style={{fontSize:'11px',fontWeight:'700',color:'#6B7280',textTransform:'uppercase',letterSpacing:'0.04em',margin:'0 0 6px'}}>{teamName(teamId)}{teamId===homeTeam?' · home team':''}</div>
+          <div style={{display:'flex',flexWrap:'wrap',gap:'8px'}}>
+            {teamTypes.map(function(c){ var active = ut.some(function(x){ return x.key===c.key && x.teamId===teamId; }); var col = TYPE_COLORS[c.key]||{bg:'#F3F4F6',color:'#374151'};
+              return <button key={c.key} type="button" onClick={function(){ onToggle(c.key, teamId); }} style={chipStyle(active,col)}>{c.displayName.replace('[Team] ','')}</button>; })}
+          </div>
+        </div>; })}
+      <div style={{display:'flex',gap:'8px',alignItems:'center',marginTop:'10px'}}>
+        <select value={extraTeam} onChange={function(e){ setExtraTeam(e.target.value); }} style={{padding:'6px 8px',border:'1px solid #E5E7EB',borderRadius:'6px',fontSize:'12px'}}>
+          <option value="">Add another team…</option>
+          {teams.filter(function(d){ return pickedTeams.indexOf(d.id)===-1; }).map(function(d){ return <option key={d.id} value={d.id}>{d.name}</option>; })}
+        </select>
+        <button type="button" disabled={!extraTeam} onClick={function(){ if (extraTeam) { onToggle('team_staff', extraTeam); setExtraTeam(''); } }}
+          style={{padding:'6px 10px',background:extraTeam?'#1F4E79':'#E5E7EB',color:'white',border:'none',borderRadius:'6px',fontSize:'12px',fontWeight:'600',cursor:extraTeam?'pointer':'default'}}>Add as staff</button>
+      </div>
+      <div style={{fontSize:'12px',color:'#9CA3AF',marginTop:'6px'}}>A person may hold several types, on several teams, and be in the Open Records Office at the same time.</div>
+    </div>
+  );
+}
 // Canonical routable task types (docs/MASTER_task_types_permission_groups.md §A1). The per-person subset
 // a staff member can be assigned; this is what task routing resolves eligibility against.
 const TASK_TYPES = [
@@ -32,14 +74,16 @@ const TASK_TYPES = [
   // them to any person with no eligibility rules, so they aren't a per-person subset.
 ];
 const TASK_TYPE_LABEL = TASK_TYPES.reduce(function(m,t){ m[t.key]=t.label; return m; }, {});
-const ROLE_COLORS = { SYSTEM_ADMIN:{bg:'#FEF2F2',color:'#991B1B'}, DIRECTOR:{bg:'#EDE9FE',color:'#6D28D9'}, SUPERVISOR:{bg:'#DBEAFE',color:'#1E40AF'}, DEPT_MANAGER:{bg:'#D1FAE5',color:'#065F46'}, COORDINATOR:{bg:'#FEF3C7',color:'#92400E'}, CUSTODIAN:{bg:'#E0E7FF',color:'#3730A3'}, REDACTION_REVIEWER:{bg:'#CCFBF1',color:'#0F766E'}, REDACTION_APPROVER:{bg:'#CCFBF1',color:'#0F766E'}, ATTORNEY_REVIEWER:{bg:'#FEE2E2',color:'#B91C1C'} };
 
 export default function StaffManagementPage({ embedded }) {
   const [staff, setStaff] = useState([]);
   const [departments, setDepartments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
-  const [form, setForm] = useState({ displayName:'', email:'', title:'', departmentId:'', tempPassword:'', functionRoles:[] });
+  const [form, setForm] = useState({ displayName:'', email:'', title:'', departmentId:'', tempPassword:'', userTypes:[] });
+  const [catalog, setCatalog] = useState([]);   // /user-types
+  const store = useAuthStore();
+  const canManageUsers = store.hasAuthority('manage_users');
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
   const [success, setSuccess] = useState('');
@@ -47,7 +91,7 @@ export default function StaffManagementPage({ embedded }) {
   const [specText, setSpecText] = useState('');
   const [specSaving, setSpecSaving] = useState(false);
   const [editFor, setEditFor] = useState(null);
-  const [editForm, setEditForm] = useState({ displayName:'', title:'', departmentId:'', taskTypes:[] });
+  const [editForm, setEditForm] = useState({ displayName:'', title:'', departmentId:'', taskTypes:[], userTypes:[] });
   const [editSaving, setEditSaving] = useState(false);
 
   useEffect(function() { load(); }, []);
@@ -55,7 +99,8 @@ export default function StaffManagementPage({ embedded }) {
   async function load() {
     setLoading(true);
     try {
-      const [sr, dr] = await Promise.all([api.get('/staff'), api.get('/departments')]);
+      const [sr, dr, ur] = await Promise.all([api.get('/staff'), api.get('/departments'), api.get('/user-types').catch(function(){ return { data:{ userTypes:[] } }; })]);
+      setCatalog(ur.data.userTypes || []);
       setStaff(sr.data.staff);
       setDepartments(dr.data.departments);
     } catch(e) { console.error(e); }
@@ -75,7 +120,7 @@ export default function StaffManagementPage({ embedded }) {
 
   function openEdit(s) {
     setEditFor(s);
-    setEditForm({ displayName: s.display_name || '', title: s.title || '', departmentId: s.department_id || '', taskTypes: (s.taskTypes || []).slice() });
+    setEditForm({ displayName: s.display_name || '', title: s.title || '', departmentId: s.department_id || '', taskTypes: (s.taskTypes || []).slice(), userTypes: (s.userTypes || []).map(function(t){ return { key:t.key, teamId:t.teamId||null }; }) });
     setErr('');
   }
 
@@ -94,6 +139,7 @@ export default function StaffManagementPage({ embedded }) {
     setEditSaving(true);
     try {
       await api.patch('/staff/' + editFor.id, { displayName: editForm.displayName, title: editForm.title, departmentId: editForm.departmentId || null });
+      if (canManageUsers) await api.patch('/staff/' + editFor.id + '/user-types', { userTypes: editForm.userTypes });
       await api.patch('/staff/' + editFor.id + '/task-types', { taskTypes: editForm.taskTypes });
       setEditFor(null);
       await load();
@@ -103,12 +149,29 @@ export default function StaffManagementPage({ embedded }) {
 
   function setF(k,v){ setForm(function(f){ return Object.assign({},f,{[k]:v}); }); }
 
-  function toggleRole(role) {
-    setForm(function(f) {
-      var roles = f.functionRoles.includes(role) ? f.functionRoles.filter(function(r){ return r!==role; }) : f.functionRoles.concat(role);
-      return Object.assign({},f,{functionRoles:roles});
+  // Toggle a user type on a form's userTypes list. Team types carry the team they are held against.
+  function toggleType(setter, key, teamId) {
+    var t = { key:key, teamId: teamId || null };
+    setter(function(f) {
+      var has = f.userTypes.some(function(x){ return sameType(x,t); });
+      return Object.assign({}, f, { userTypes: has ? f.userTypes.filter(function(x){ return !sameType(x,t); }) : f.userTypes.concat([t]) });
     });
   }
+  // The union of the task menus of the types held (§6): what the task-type picker may offer. null = any.
+  function menuUnion(userTypes) {
+    var menu = [];
+    for (var i = 0; i < userTypes.length; i++) {
+      var c = catalog.filter(function(x){ return x.key === userTypes[i].key; })[0];
+      if (!c) continue;
+      if (c.taskMenu.indexOf('*') !== -1) return null;
+      c.taskMenu.forEach(function(k){ if (menu.indexOf(k) === -1) menu.push(k); });
+    }
+    return menu;
+  }
+  function teamName(id){ var d = departments.filter(function(x){ return x.id===id; })[0]; return d ? d.name : id; }
+  function typeLabel(key){ var c = catalog.filter(function(x){ return x.key===key; })[0]; return c ? c.displayName : key; }
+
+
 
   async function createTeam(){
     var name = window.prompt('New fulfillment team name:');
@@ -127,12 +190,13 @@ export default function StaffManagementPage({ embedded }) {
     e.preventDefault(); setErr(''); setSuccess('');
     if (!form.displayName || !form.email || !form.tempPassword) { setErr('Name, email and temporary password are required'); return; }
     if (form.tempPassword.length < 8) { setErr('Temporary password must be at least 8 characters'); return; }
-    if (form.functionRoles.length === 0) { setErr('At least one role must be assigned'); return; }
+    if (form.userTypes.length === 0) { setErr('At least one user type must be assigned'); return; }
     setSaving(true);
     try {
-      await api.post('/staff', form);
+      var created = await api.post('/staff', { displayName: form.displayName, email: form.email, title: form.title, departmentId: form.departmentId || null, tempPassword: form.tempPassword });
+      await api.patch('/staff/' + created.data.userId + '/user-types', { userTypes: form.userTypes });
       setSuccess('Staff member created successfully. They will be prompted to change their password on first login.');
-      setForm({ displayName:'', email:'', title:'', departmentId:'', tempPassword:'', functionRoles:[] });
+      setForm({ displayName:'', email:'', title:'', departmentId:'', tempPassword:'', userTypes:[] });
       setShowAdd(false);
       await load();
     } catch(e) { setErr(e.response && e.response.data ? e.response.data.error : 'Failed to create staff member'); }
@@ -197,18 +261,8 @@ export default function StaffManagementPage({ embedded }) {
               </div>
             </div>
             <div>
-              <label style={lbl}>Function Roles <span style={{color:'#DC2626'}}>*</span></label>
-              <div style={{display:'flex',flexWrap:'wrap',gap:'8px',marginTop:'4px'}}>
-                {FUNCTION_ROLES.map(function(role){
-                  var active = form.functionRoles.includes(role);
-                  var rc = ROLE_COLORS[role] || {bg:'#F3F4F6',color:'#374151'};
-                  return <button key={role} type="button" onClick={function(){toggleRole(role);}}
-                    style={{padding:'6px 14px',borderRadius:'20px',border:'2px solid '+(active?rc.color:'#E5E7EB'),background:active?rc.bg:'white',color:active?rc.color:'#6B7280',fontSize:'12px',fontWeight:active?'700':'500',cursor:'pointer'}}>
-                    {role.replace(/_/g,' ')}
-                  </button>;
-                })}
-              </div>
-              <div style={{fontSize:'12px',color:'#9CA3AF',marginTop:'6px'}}>Click to toggle roles. Multiple roles can be assigned.</div>
+              <label style={lbl}>User types <span style={{color:'#DC2626'}}>*</span></label>
+              <div style={{marginTop:'6px'}}><TypePicker userTypes={form.userTypes} homeTeam={form.departmentId||null} catalog={catalog} departments={departments} onToggle={function(k,t){ toggleType(setForm,k,t); }}/></div>
             </div>
             {err && <div style={{background:'#FEF2F2',border:'1px solid #FCA5A5',borderRadius:'8px',padding:'12px',fontSize:'14px',color:'#DC2626'}}>{err}</div>}
             <div style={{display:'flex',gap:'10px',justifyContent:'flex-end'}}>
@@ -234,7 +288,7 @@ export default function StaffManagementPage({ embedded }) {
           <table style={{width:'100%',borderCollapse:'collapse'}}>
             <thead>
               <tr style={{background:'#F9FAFB'}}>
-                {['Name','Email','Team','Roles','Status','Last Login',''].map(function(h){
+                {['Name','Email','Home dept','User types','Status','Last Login',''].map(function(h){
                   return <th key={h} style={{textAlign:'left',fontSize:'11px',fontWeight:'600',color:'#6B7280',textTransform:'uppercase',letterSpacing:'.05em',padding:'10px 16px'}}>{h}</th>;
                 })}
               </tr>
@@ -259,10 +313,12 @@ export default function StaffManagementPage({ embedded }) {
                     <td style={{padding:'14px 16px',fontSize:'13px',color:'#374151'}}>{s.department_name||<span style={{color:'#D1D5DB',fontStyle:'italic'}}>None</span>}</td>
                     <td style={{padding:'14px 16px'}}>
                       <div style={{display:'flex',flexWrap:'wrap',gap:'4px'}}>
-                        {(s.functionRoles||[]).map(function(role){
-                          var rc = ROLE_COLORS[role]||{bg:'#F3F4F6',color:'#374151'};
-                          return <span key={role} style={{background:rc.bg,color:rc.color,fontSize:'10px',fontWeight:'700',padding:'2px 8px',borderRadius:'20px'}}>{role.replace(/_/g,' ')}</span>;
+                        {(s.userTypes||[]).map(function(t){
+                          var rc = TYPE_COLORS[t.key]||{bg:'#F3F4F6',color:'#374151'};
+                          var label = t.teamId ? (t.displayName||typeLabel(t.key)).replace('[Team] ','') + ' · ' + teamName(t.teamId) : (t.displayName||typeLabel(t.key));
+                          return <span key={t.key+':'+(t.teamId||'')} style={{background:rc.bg,color:rc.color,fontSize:'10px',fontWeight:'700',padding:'2px 8px',borderRadius:'20px'}}>{label}</span>;
                         })}
+                        {!(s.userTypes||[]).length && <span style={{color:'#D1D5DB',fontStyle:'italic',fontSize:'11px'}}>No user type — sees nothing gated</span>}
                       </div>
                     </td>
                     <td style={{padding:'14px 16px'}}>
@@ -314,19 +370,32 @@ export default function StaffManagementPage({ embedded }) {
                 <input value={editForm.title} onChange={function(e){setEF('title',e.target.value);}} style={inp}/>
               </div>
               <div style={{gridColumn:'1 / span 2'}}>
-                <label style={lbl}>Request Fulfillment Team</label>
+                <label style={lbl}>Home department (display only — team membership comes from user types)</label>
                 <select value={editForm.departmentId} onChange={function(e){setEF('departmentId',e.target.value);}} style={inp}>
                   <option value="">— No team assigned —</option>
                   {departments.filter(function(d){ return d.kind==='team'; }).map(function(d){ return <option key={d.id} value={d.id}>{d.name}</option>; })}
                 </select>
               </div>
             </div>
+            {canManageUsers ? (
+              <div style={{marginTop:'16px'}}>
+                <label style={lbl}>User types</label>
+                <div style={{marginTop:'6px'}}><TypePicker userTypes={editForm.userTypes} homeTeam={editForm.departmentId||null} catalog={catalog} departments={departments} onToggle={function(k,t){ toggleType(setEditForm,k,t); }}/></div>
+              </div>
+            ) : (
+              <div style={{marginTop:'16px',fontSize:'12px',color:'#9CA3AF'}}>User types: {editForm.userTypes.length ? editForm.userTypes.map(function(t){ return typeLabel(t.key) + (t.teamId ? ' · ' + teamName(t.teamId) : ''); }).join(', ') : 'none'} — assigning user types needs the Manage Users authority.</div>
+            )}
             <div style={{marginTop:'16px'}}>
               <label style={lbl}>Task types</label>
               <div style={{fontSize:'12px',color:'#9CA3AF',margin:'0 0 8px'}}>The request work this person can be assigned within their team. Task routing offers a task only to eligible people who hold its type.</div>
               <div style={{display:'flex',flexWrap:'wrap',gap:'8px'}}>
                 {TASK_TYPES.map(function(t){
                   var active = editForm.taskTypes.includes(t.key);
+                  var menu = menuUnion(editForm.userTypes);
+                  var covered = menu === null || menu.indexOf(t.key) !== -1;
+                  if (!covered && !active) return null;   // §6: the picker offers only what the person's types cover
+                  if (!covered && active) return <button key={t.key} type="button" title="Not covered by any user type this person holds — the router ignores it; remove it or add a covering type" onClick={function(){toggleEditTaskType(t.key);}}
+                    style={{padding:'6px 14px',borderRadius:'20px',border:'2px dashed #F59E0B',background:'#FFFBEB',color:'#92400E',fontSize:'12px',fontWeight:'600',cursor:'pointer'}}>{t.label} · not covered</button>;
                   return <button key={t.key} type="button" onClick={function(){toggleEditTaskType(t.key);}}
                     style={{padding:'6px 14px',borderRadius:'20px',border:'2px solid '+(active?'#1F4E79':'#E5E7EB'),background:active?'#EFF6FF':'white',color:active?'#1F4E79':'#6B7280',fontSize:'12px',fontWeight:active?'700':'500',cursor:'pointer'}}>
                     {t.label}

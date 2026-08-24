@@ -200,7 +200,10 @@ Rules once S2b lands:
    separate field. Organization → "View staff" lists a person under every team they hold a type against.
 5. Coverage-gap email (below) already keys on the team a `team_manager` type is held against.
 
-Verification (`verify_user_types` part 9, S2b): a person typed on two teams is offered and can claim work on
+*(as built, S2b 2026-08-24)* Rules 1–3 and the subset-scope reading of "own team" are live; rule 4 (picker) is S3.
+The request's team (`requests.department_id`) is untouched — it names the team the WORK belongs to, not a person.
+
+Verification (`verify_user_types` part 9 = section L, S2b): a person typed on two teams is offered and can claim work on
 both; is NOT eligible on a third; a person whose `department_id` is team A but who holds a type only against
 team B is eligible on B and not on A; office-only staff are eligible on no team.
 
@@ -334,6 +337,13 @@ consult legacy claims.
 3. **Organization** screen: the team "View staff" popup shows each member's team-level types.
 4. Hub lane headers and the go-live row read owners from §5 (built in the hub slice, not here).
 
+*(as built, S3)* Item 1: the roster shows user-type chips (team chips carry the team name); "Request Fulfillment Team" is
+relabelled **Home department (display only)** per §6.1. Item 2: the matrix is a tab of Administration (`?tab=user-types`),
+readable by anyone who can open Administration; Rename is shown only to `manage_users` holders. Item 3 (Organization
+"View staff" by team) is NOT built yet — it still lists by `department_id`. §9 item 4 (router ignoring uncovered
+`user_task_types` rows) is not enforced in the router; the API now refuses NEW uncovered grants and the picker flags
+existing ones, which closes the gap going forward.
+
 ---
 
 ## 11. Verification
@@ -357,8 +367,8 @@ Plus the existing 20 role-touching harnesses stay green through steps 3–5.
 |---|---|---|
 | S1 | **BUILT 2026-08-24.** Tables, seed, wipe + bootstrap script, claim minting with §9.1 shim, `auth_version`, `verify_user_types` parts 1–3, 6. Also (needed to keep the suite green): the four non-auth readers of the legacy tables (`taskRouting` pool predicate + legacy fallback, `objections` supervisor finder, `coverageGap`, `importIngest`) now resolve legacy names through user types; `POST /staff` no longer grants every permission role; 16 harnesses grant user types via `tests/userTypeHelpers.js` instead of inserting legacy rows | — |
 | S2 | **BUILT 2026-08-24.** Gate primitives; §8 rows 1–9 (hub gaps + go-live + attest); `PATCH /staff/:id/user-types`; frontend `hasPermission/hasAuthority`; `verify_user_types` H–K | **Hub build** |
-| S2b | Multi-team membership (§6.1): eligibility/pool/claim read team membership from `user_user_types.team_id`; `department_id` demoted to home dept; `verify_user_types` part 9 | S3 picker semantics |
-| S3 | Staff Management user-type picker + PATCH; picker constraint; User-types admin page | Hub 3.4 |
+| S2b | **BUILT 2026-08-24.** Multi-team membership (§6.1): eligibility/pool/claim/seeded-check and the legacy fallback read team membership from `user_user_types.team_id` (`userTypes.teamMemberSql` / `teamsOf`); `department_id` demoted to home dept; subset scope "own team" = a team the caller is team_manager of AND the target is a member of; `verify_user_types` L0–L8 | S3 picker semantics |
+| S3 | **BUILT 2026-08-24.** Staff Management user-type picker (office chips; team chips per team, home team first, "add another team"); create = `POST /staff` + `PATCH /user-types`; edit modal gated on `manage_users` for types; task-type picker offers only the menu union and flags held-but-uncovered types; `GET /api/user-types` catalog + `PATCH /api/user-types/:key` display name (`manage_users`); `PATCH /staff/:id/task-types` refuses outside-menu grants (400 `OUTSIDE_TASK_MENU`); Administration → **User Types** matrix; `verify_user_types` M1–M4 | Hub 3.4 |
 | S4 | Migrate remaining `requireRole` sites (17 route files) + frontend checks; retire `SYSTEM_ADMIN` short-circuit | — |
 | S5 | Delete shim + legacy tables + `FUNCTION_ROLES` frontend constant; ARCHITECTURE §4 + SPEC_tasks_roles §8 rewritten | — |
 | S6 | Coverage-gap email | — |

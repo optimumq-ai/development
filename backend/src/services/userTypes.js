@@ -99,6 +99,20 @@ function uniq(arr) { return arr.filter(function (x, i) { return arr.indexOf(x) =
 function scopeOf(key) { var t = CATALOG.filter(function (c) { return c.key === key; })[0]; return t ? t.scope : null; }
 
 // ---- reads -------------------------------------------------------------------------------------------
+// S2b (§6.1): TEAM MEMBERSHIP FOR WORK = the teams a person holds any team-scoped type against.
+// `users.department_id` is the home / display department only and gates nothing.
+// SQL fragment: true when the user row aliased `<alias>` is a member of the team bound to the next `?`.
+function teamMemberSql(alias) {
+  alias = alias || 'u';
+  return "EXISTS (SELECT 1 FROM user_user_types mm JOIN user_types mt ON mt.id = mm.user_type_id WHERE mm.user_id = " + alias + ".id AND mt.scope = 'team' AND mt.active = 1 AND mm.team_id = ?)";
+}
+// Subquery of the team ids the user bound to the next `?` is a member of.
+function memberTeamsSql() {
+  return "SELECT mm.team_id FROM user_user_types mm JOIN user_types mt ON mt.id = mm.user_type_id WHERE mm.user_id = ? AND mt.scope = 'team' AND mt.active = 1 AND mm.team_id IS NOT NULL";
+}
+async function teamsOf(userId) {
+  return (await all(memberTeamsSql(), [userId])).map(function (r) { return r.team_id; });
+}
 
 // The person's held types: [{key, teamId, displayName, scope}].
 async function typesOf(userId) {
@@ -161,12 +175,12 @@ async function usersWithLegacy(kind, names, opts) {
   var sql = 'SELECT DISTINCT u.id, u.display_name, u.email, u.department_id, u.routing_specialization, u.status FROM users u ' +
     'JOIN user_user_types uut ON uut.user_id = u.id JOIN user_types ut ON ut.id = uut.user_type_id ' +
     'WHERE ut.key IN (' + ph + ') AND ut.active = 1';
-  // Team scoping differs by axis: WORK eligibility (perms) is the person's home team (users.department_id,
-  // §2/§6); the CHAIN OF COMMAND (function roles: who manages / supervises team X) is the team the
-  // team-scoped type was granted AGAINST (user_user_types.team_id) — or the home team for office types.
+  // S2b (§6.1): both axes scope by the team the type is held AGAINST. WORK eligibility (perms) = membership
+  // of the team (any team-scoped type against it); CHAIN OF COMMAND (function roles) = the team this very
+  // type was granted against. users.department_id gates neither.
   if (opts.teamId) {
-    if (kind === 'roles') { sql += " AND (u.department_id = ? OR (ut.scope = 'team' AND uut.team_id = ?))"; params.push(opts.teamId, opts.teamId); }
-    else { sql += ' AND u.department_id = ?'; params.push(opts.teamId); }
+    if (kind === 'roles') { sql += " AND ut.scope = 'team' AND uut.team_id = ?"; params.push(opts.teamId); }
+    else { sql += ' AND ' + teamMemberSql('u'); params.push(opts.teamId); }
   }
   if (opts.status !== 'any') { sql += " AND u.status = 'active'"; }
   if (opts.exclude) { sql += ' AND u.id <> ?'; params.push(opts.exclude); }
@@ -218,7 +232,7 @@ async function revokeAll(userId) {
 
 module.exports = {
   CATALOG, TYPE_KEYS, AUTHORITY, AUTHORITY_KEYS, PERMISSION, PERMISSION_GROUPS, LEGAL_RULES_OWNER, TASK_MENU, LEGACY, ALL_PERMS,
-  typesOf, claimsFor, taskMenuFor, scopeOf,
+  typesOf, claimsFor, taskMenuFor, scopeOf, teamMemberSql, memberTeamsSql, teamsOf,
   usersWithLegacyRole, usersWithLegacyPerm, legacyPermHoldersSql, typesMinting,
   grant, revoke, revokeAll, bumpAuthVersion,
 };

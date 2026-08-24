@@ -48,9 +48,11 @@ function req(method, p) {
 
 (async function () {
   await db.initDb();
-  var user = await db.get("SELECT * FROM users WHERE status = 'active' AND department_id IS NOT NULL ORDER BY (CASE WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id AND x.user_type_id IN ('ut-oro_director','ut-oro_sysadmin')) THEN 0 WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id AND x.user_type_id IN ('ut-oro_supervisor','ut-team_manager','ut-team_supervisor')) THEN 1 WHEN EXISTS (SELECT 1 FROM user_user_types x WHERE x.user_id = users.id) THEN 2 ELSE 3 END), id LIMIT 1");   // v3: prefer a TYPED actor (office admin > supervisor > any type) — untyped accounts hold no claims
+  // S2b (§6.1): the actor must be a MEMBER of a fulfillment team (holds a team-scoped type against it); the team under test is that team.
+  var member = await db.get("SELECT u.*, x.team_id AS member_team FROM users u JOIN user_user_types x ON x.user_id = u.id JOIN user_types ut ON ut.id = x.user_type_id WHERE u.status = 'active' AND ut.scope = 'team' AND x.team_id IS NOT NULL ORDER BY u.id LIMIT 1");
+  var user = member;
   TOKEN = await auth.signAccessToken(user);
-  var TEAM = user.department_id;
+  var TEAM = user.member_team;
 
   // A request on the SAME team as our user, so team-scoped eligibility is exercised rather than bypassed.
   var rid = 'req-' + TAG;

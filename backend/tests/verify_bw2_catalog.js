@@ -273,10 +273,13 @@ var UNROUTABLE_MATCH = { classification: 'standard', recordTypeConfidence: 0, fl
     // legitimately holds SEARCH_AND_TRIAGE now, so a manager homed on the team would fill the pool.
     await db.run("INSERT INTO users (id, email, display_name, department_id, status) VALUES (?,?,?,?,'active')",
       [mgrId, 'bw2mgr+' + TAG + '@example.com', 'BW2 Manager', null]);
-    await UT.grant(mgrId, 'team_manager', deptId);   // [Team] Fulfillment Manager of deptId (mints legacy DEPT_MANAGER)
+    // S2b (§6.1): a team_manager is a MEMBER of the team and legitimately eligible for its search work, so a
+    // typed-on-the-team manager cannot leave the pool empty. The genuine gap is a team with NOBODY typed on it:
+    // the chain of command then falls to the office rung (Director), which is who this manager is.
+    await UT.grant(mgrId, 'oro_director', null);
 
     var who = await CG.managersFor(deptId);
-    ok('F1 the team\'s manager is resolvable — DEPT_MANAGER stands in for the unbuilt v3 Fulfillment Manager',
+    ok('F1 the team\'s manager is resolvable — nobody typed on the team, so the office rung (Director) answers',
       who.users.filter(function (u) { return u.id === mgrId; }).length === 1);
 
     var r7 = await makeRequest('req-' + TAG + '-F', { stage: 'record_search', departmentId: deptId });

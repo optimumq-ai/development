@@ -8620,3 +8620,39 @@ u-kruss GET /go-live → 200.
 Management picker (writes to the S2 PATCH) + user-types admin page · S4 migrate the ~43 remaining
 `requireRole` sites + financial rows + retire the SYSTEM_ADMIN short-circuit · S5 delete shim + legacy tables ·
 S6 coverage-gap email. **NEXT:** Kevin's call — hub build vs S2b/S3 first.
+
+## 2026-08-24 (late night) — S2b (multi-team) and S3 (user-type picker + User Types page) BUILT and LIVE
+
+Kevin: "do S2b and S3 before the hub build." Both done, one commit (their edits interleave in `staff.js`/`server.js`).
+
+**S2b — multi-team membership (§6.1):** "on the team" for WORK now means holding a team-scoped type against that
+team (`userTypes.teamMemberSql` / `teamsOf`); `users.department_id` is home/display only and gates nothing.
+Moved: `eligibleUsers`, the pool predicate (`POOL_ELIGIBILITY_SQL`), `hasSeededType`, the legacy-perm
+fallback, and the staff subset-scope "own team" (= a team the caller is team_manager of AND the target is a
+member of). Chain-of-command lookups already keyed on the granted team. `verify_user_types` L0–L8: a person
+typed on two teams is offered and claims work on both, not a third; home-dept mismatch follows the type;
+office-only is eligible on no team. Two harness premises re-pointed (`qa_routing` actor must be a team member;
+`bw2_catalog` coverage-gap manager is now the office rung — a typed-on-team manager is legitimately eligible).
+Full suite run 8: **2541/2541, live untouched.**
+
+**S3 — the picker and the catalog page (§10):** `GET /api/user-types` (catalog with menus/authorities/groups)
++ `PATCH /api/user-types/:key` display name (`manage_users`); `PATCH /staff/:id/task-types` refuses grants
+outside the union of the person's type menus (400 `OUTSIDE_TASK_MENU`) — `seed_task_type_grants` mirror plans
+within the menu. Staff Management: user-type picker (office chips; team chips per team, home team first, "Add
+another team"), roster shows type chips (+ team name), create = POST + PATCH /user-types, edit modal gates
+type edits on `manage_users`, task-type chips filtered to the menu union with held-but-uncovered ones flagged
+amber; "Home dept" relabelled. Administration → **User Types** tab: the read-only matrix, Rename for
+`manage_users`. Screenshots checked (edit modal, matrix, roster). `verify_user_types` M1–M4 (64/64). Full suite
+run 9: 2544/1 — the one red was a harness race with the 1s auth_version cache (a user's OWN subset change
+inside the window); `callAs` now waits the window out on a 401 and retries once. Frontend rebuilt + served.
+Live API restarted (has `/api/user-types`).
+
+**Noticed on the live roster:** Evelyn Brooks — home dept "Finance Records Team" but typed team_staff on
+City Clerk Records & Archives (the seed typed her by her fixture team). Under §6.1 her WORK follows the type
+(archives). Fix whichever is wrong via Staff Management.
+
+**Not built (spec says so):** Organization "View staff" per team still lists by `department_id` (§10.3);
+the router does not ignore pre-existing uncovered `user_task_types` rows (§9 item 4) — new ones are refused.
+
+**NEXT:** the setup-hub build (unblocked since S2), or S4 (migrate the ~43 `requireRole` sites + financial
+rows + retire the SYSTEM_ADMIN short-circuit) — Kevin's call.

@@ -57,6 +57,7 @@ app.use('/api/clocks', require('./src/routes/clocks'));
 app.use('/api/stages', require('./src/routes/stages'));
 app.use('/api/config-integrity', require('./src/routes/configIntegrity'));
 app.use('/api/staff', require('./src/routes/staff'));
+app.use('/api/user-types', require('./src/routes/userTypes'));   // v3 catalog (S3)
 app.use('/api/departments', require('./src/routes/departments'));
 app.use('/api/repositories', require('./src/routes/repositories'));
 app.use('/api/config', require('./src/routes/config'));

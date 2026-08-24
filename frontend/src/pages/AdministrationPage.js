@@ -13,6 +13,7 @@ import RedactionRulesPage from './RedactionRulesPage';
 import IntegrationsPage from './IntegrationsPage';
 import AIDataFlowPage from './AIDataFlowPage';
 import SecurityPage from './SecurityPage';
+import UserTypesPage from './UserTypesPage';
 
 // ADMINISTRATION (2026-08-01, Kevin's menu reorganization): the thirteen technical-setup screens under
 // ONE panel item, tabbed — the Organization-tab pattern applied to the config surface. Each tab RENDERS
@@ -32,6 +33,8 @@ const TABS = [
   { key: 'integrations', label: 'Integrations & API Keys', el: IntegrationsPage, admin: true },
   { key: 'ai-data',      label: 'AI Data Flow',         el: AIDataFlowPage, admin: true },
   { key: 'security',     label: 'Portal Agent Security', el: SecurityPage, admin: true },
+  // v3 user-type model (SPEC_user_type_model §10.2, S3): the catalog matrix. Visible to anyone who may see Administration.
+  { key: 'user-types',   label: 'User Types',           el: UserTypesPage },
 ];
 
 export default function AdministrationPage() {

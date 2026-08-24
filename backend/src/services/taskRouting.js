@@ -116,6 +116,7 @@ var TASK_ROLES = {
 // BW5 adds `close_approval` and `process_withdrawal`. Both arrive WITH their spawners in this workstream
 // (the close-approval router and the withdrawal-communication spawner), so the promise above holds for
 // both: a city that grants either token will actually receive that work.
+var UT = require('./userTypes');   // S2b: team membership + legacy-claim lookups derive from user types
 var ROUTABLE_TASK_TYPES = ['estimate', 'record_search', 'redaction', 'redaction_qa', 'legal_redaction', 'legal_review', 'fee_waiver', 'routing_review', 'intake_review', 'mrr_management', 'release_review', 'close_approval', 'process_withdrawal'];
 // Task types the Request Manager hand-assigns per MRR child. Deliberately NOT routable (see TASK_ROLES):
 // no eligibility, no team filter, no smart routing, never offered in the per-person picker.
@@ -147,9 +148,10 @@ async function eligibleUsers(teamId, roleName) {
   if (taskType) {
     var seeded;
     if (teamId) {
+      // S2b: "on the team" = holds a team-scoped user type against it (SPEC_user_type_model §6.1)
       seeded = await get(
         "SELECT 1 AS x FROM user_task_types utt JOIN users u ON u.id = utt.user_id " +
-        "WHERE utt.task_type = ? AND u.department_id = ? LIMIT 1",
+        "WHERE utt.task_type = ? AND " + UT.teamMemberSql('u') + " LIMIT 1",
         [taskType, teamId]
       );
     } else {
@@ -158,7 +160,7 @@ async function eligibleUsers(teamId, roleName) {
     if (seeded) {
       var p = [taskType];
       var dc = '';
-      if (teamId) { dc = ' AND u.department_id = ?'; p.push(teamId); }
+      if (teamId) { dc = ' AND ' + UT.teamMemberSql('u'); p.push(teamId); }
       return await all(
         "SELECT u.id, u.display_name, u.routing_specialization " +
         "FROM users u " +
@@ -440,7 +442,8 @@ async function autoRouteOrPool(taskId, requestText, opts) {
 // Expects THREE bound params in order: userId (team), userId (permission roles), userId (task types).
 var POOL_ELIGIBILITY_SQL =
   "t.status = 'open' AND t.assigned_to IS NULL " +
-  "AND (t.team_id IS NULL OR t.team_id = (SELECT department_id FROM users WHERE id = ?)) " +
+  // S2b: team membership = the teams the person holds a team-scoped type against (§6.1), not department_id.
+  "AND (t.team_id IS NULL OR t.team_id IN (SELECT mm.team_id FROM user_user_types mm JOIN user_types mt ON mt.id = mm.user_type_id WHERE mm.user_id = ? AND mt.scope = 'team' AND mt.active = 1 AND mm.team_id IS NOT NULL)) " +
   // Eligible if role_required is null, OR the user holds it as a legacy permission role, OR (v3 model)
   // it is a task type in the user's per-person subset — the latter is how legal/new task types resolve.
   // ⚠️ `t.role_required IS NULL` used to be the FIRST branch here — i.e. a role-less task was advertised to
@@ -476,7 +479,7 @@ async function poolForUser(userId) {
 async function hasSeededType(taskType, teamId) {
   var row = teamId
     ? await get("SELECT 1 AS x FROM user_task_types utt JOIN users u ON u.id = utt.user_id " +
-                "WHERE utt.task_type = ? AND u.department_id = ? AND u.status = 'active' LIMIT 1", [taskType, teamId])
+                "WHERE utt.task_type = ? AND " + UT.teamMemberSql('u') + " AND u.status = 'active' LIMIT 1", [taskType, teamId])
     : await get("SELECT 1 AS x FROM user_task_types utt JOIN users u ON u.id = utt.user_id " +
                 "WHERE utt.task_type = ? AND u.status = 'active' LIMIT 1", [taskType]);
   return !!row;
