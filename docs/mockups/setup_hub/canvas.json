@@ -1,10 +1,17 @@
 {
+  "pages": [
+    { "id": "page-1", "name": "Hub concept" },
+    { "id": "page-2", "name": "Plan layouts" }
+  ],
   "artboards": [
-    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 1300, "title": "The hub" },
-    { "file": "ItemStates.dc.html", "x": 1560, "y": 0, "w": 900, "h": 1260, "title": "Item anatomy, states and dependencies" },
-    { "file": "SignoffA.dc.html", "x": 0, "y": 1460, "w": 500, "h": 840, "title": "Sign-off A — Mark it done" },
-    { "file": "SignoffB.dc.html", "x": 600, "y": 1460, "w": 500, "h": 1000, "title": "Sign-off B — Put your name to it" },
-    { "file": "SignoffC.dc.html", "x": 1200, "y": 1460, "w": 500, "h": 1040, "title": "Sign-off C — Send it for review" }
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1440, "h": 1300, "title": "The hub", "page": "page-1" },
+    { "file": "ItemStates.dc.html", "x": 1560, "y": 0, "w": 900, "h": 1260, "title": "Item anatomy, states and dependencies", "page": "page-1" },
+    { "file": "SignoffA.dc.html", "x": 0, "y": 1460, "w": 500, "h": 840, "title": "Sign-off A — Mark it done", "page": "page-1" },
+    { "file": "SignoffB.dc.html", "x": 600, "y": 1460, "w": 500, "h": 1000, "title": "Sign-off B — Put your name to it", "page": "page-1" },
+    { "file": "SignoffC.dc.html", "x": 1200, "y": 1460, "w": 500, "h": 1040, "title": "Sign-off C — Send it for review", "page": "page-1" },
+    { "file": "PlanGantt.dc.html", "x": 0, "y": 0, "w": 1430, "h": 1260, "title": "Plan A — full Gantt", "page": "page-2" },
+    { "file": "PlanSwimlanes.dc.html", "x": 1550, "y": 0, "w": 1310, "h": 880, "title": "Plan B — swimlane map", "page": "page-2" },
+    { "file": "PlanOutline.dc.html", "x": 1550, "y": 1000, "w": 1080, "h": 1500, "title": "Plan C — numbered outline", "page": "page-2" }
   ],
   "annotations": [
     {
@@ -12,6 +19,7 @@
       "x": -340,
       "y": 0,
       "w": 280,
+      "page": "page-1",
       "text": "Four lanes, every real setup item from the inventory — 35 of them, plus agency identity promoted to the top.\n\nStatuses and counts are realistic samples so you can see what the evidence lines read like. They are not live data.\n\nItem names are written the way a clerk would say them, not the way the menu says them today. That is the part most worth marking up.\n\nState rules import is gone as an item (Kevin, 24 Aug): saving the address loads the state's rules, and the band at the top reports what that produced. Today that import is a command-line script with no screen behind it at all — the biggest single gap this page surfaces."
     },
     {
@@ -19,15 +27,25 @@
       "x": -340,
       "y": 330,
       "w": 280,
+      "page": "page-1",
       "text": "Drawn honestly, the lanes are lopsided: 12, 13, 4, 7.\n\nLane 2 is doing too much. Roughly half of it is fees and estimates, the other half is redaction and release behaviour. If it wants splitting, that is a five-lane page — worth deciding now rather than after it is built.\n\nTwo lane placements to check: the go-live flip sits in lane 1 but is the System Administrator's act alone, and lane 1's header names Legal for a lane where only four items are actually Legal-gated."
     },
     {
       "id": "signoff-mix",
       "x": 1800,
-      "y": 1360,
+      "y": 1460,
       "w": 300,
+      "page": "page-1",
       "text": "These three are not necessarily exclusive.\n\nA workable mix: B for the legal lane, where a name against a decision is the point; A everywhere else, so setup never stalls; C only on the handful of items something else is actually waiting on.\n\nDecided 2026-08-24: the full user-type model gets built before the hub regardless — no stopgap — so this choice is purely about which ceremony fits which item, not about shrinking the role build."
+    },
+    {
+      "id": "plan-brief",
+      "x": -360,
+      "y": 0,
+      "w": 300,
+      "page": "page-2",
+      "text": "Three project-plan takes on the same content, per your ask (24 Aug). No dates anywhere — the horizontal axis is ORDER, so dependencies read left to right.\n\nPlan A keeps every task as its own row, grouped into six phases by when a city would do them (a different cut than the four owner lanes — the owner moves into the group title). Most complete, most arrows.\n\nPlan B folds the 36 tasks into 11 groups so the arrows stay sparse, and keeps your four owner lanes as the rows. Each card would expand into its short task list.\n\nPlan C is the no-chart version: a numbered outline where Waits-for chips replace arrows. Complete like A, compact like a spreadsheet, but you trace dependencies by number instead of seeing them.\n\nWhat to judge: whether phases or owner lanes are the better grouping, and whether arrows earn their space or the chips are enough. A hybrid is possible — the hub page for doing the work, one of these as the overview tab beside it."
     }
   ],
-  "launch": { "view": "canvas" }
+  "launch": { "view": "canvas", "page": "page-2" }
 }

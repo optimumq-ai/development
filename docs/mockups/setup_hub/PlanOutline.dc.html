@@ -1,0 +1,97 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; } a:hover { color: #0E3A5C; }
+    table { border-collapse: collapse; width: 100%; }
+    th { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #5C6F7C;
+         text-align: left; padding: 8px 10px; border-bottom: 2px solid #D2DCE3; font-weight: 700; }
+    td { padding: 6px 10px; border-bottom: 1px solid #EEF2F5; font-size: 12.5px; vertical-align: middle; }
+    tr.grp td { background: #F2F6F9; border-top: 1px solid #D2DCE3; font-weight: 700; color: #0E3A5C; font-size: 12.5px; padding: 7px 10px; }
+    .num { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 11.5px; color: #8296A4; white-space: nowrap; }
+    .task { color: #12232E; font-weight: 500; cursor: pointer; }
+    .pill { display: inline-block; font-size: 10.5px; font-weight: 700; border-radius: 999px; padding: 1px 8px; white-space: nowrap; }
+    .p-ready { background: #E1F2E9; color: #1B8A5A; }
+    .p-prog  { background: #F6EBD6; color: #9A6512; }
+    .p-none  { background: #FFFFFF; color: #8296A4; border: 1px dashed #BECAD3; }
+    .p-wait  { background: #F2F6F9; color: #5C6F7C; border: 1px solid #BECAD3; }
+    .p-auto  { background: #E4EEF6; color: #0E3A5C; }
+    .dep { display: inline-block; font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+           font-size: 10.5px; font-weight: 600; color: #1E6091; border: 1px solid #BECAD3;
+           border-radius: 4px; padding: 0 6px; margin-right: 4px; cursor: pointer; }
+    .who { font-size: 11px; color: #8296A4; white-space: nowrap; }
+  </style>
+</helmet>
+<div style="padding: 20px;">
+  <div style="background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; padding: 14px 18px; margin-bottom: 12px;">
+    <div style="font-size: 17px; font-weight: 700;">Plan C — the numbered outline</div>
+    <div style="font-size: 12.5px; color: #5C6F7C; margin-top: 3px;">No chart at all: a project plan as a numbered list, complete. Dependencies are the Waits-for column — each chip names another row, and clicking it would jump there. The least visual of the three, and the only one that shows every task and every dependency without abbreviating.</div>
+  </div>
+
+  <div style="background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; padding: 6px 10px 10px;">
+    <table>
+      <thead><tr><th style="width:44px;">#</th><th>Task</th><th style="width:104px;">Status</th><th style="width:120px;">Waits for</th><th style="width:180px;">Who</th></tr></thead>
+      <tbody>
+        <tr class="grp"><td colspan="5">1 · Foundation</td></tr>
+        <tr><td class="num">1.1</td><td class="task">Agency name, address and state</td><td><span class="pill p-ready">Ready</span></td><td>—</td><td class="who">System Administrator</td></tr>
+        <tr><td class="num">1.2</td><td class="task">State rules applied automatically</td><td><span class="pill p-auto">Automatic</span></td><td><span class="dep">1.1</span></td><td class="who">nobody — the system</td></tr>
+
+        <tr class="grp"><td colspan="5">2 · Technical connections</td></tr>
+        <tr><td class="num">2.1</td><td class="task">Where the records live</td><td><span class="pill p-prog">In progress</span></td><td><span class="dep">1.1</span></td><td class="who">System Administrator</td></tr>
+        <tr><td class="num">2.2</td><td class="task">AI service keys</td><td><span class="pill p-ready">Ready</span></td><td>—</td><td class="who">System Administrator</td></tr>
+        <tr><td class="num">2.3</td><td class="task">Where AI processing happens</td><td><span class="pill p-ready">Ready</span></td><td><span class="dep">2.2</span></td><td class="who">System Administrator</td></tr>
+        <tr><td class="num">2.4</td><td class="task">Outgoing email</td><td><span class="pill p-prog">In progress</span></td><td>—</td><td class="who">System Administrator</td></tr>
+        <tr><td class="num">2.5</td><td class="task">How staff sign in</td><td><span class="pill p-ready">Ready</span></td><td>—</td><td class="who">System Administrator</td></tr>
+        <tr><td class="num">2.6</td><td class="task">What the portal assistant may say</td><td><span class="pill p-none">Not started</span></td><td>—</td><td class="who">System Administrator</td></tr>
+        <tr><td class="num">2.7</td><td class="task">Sending charges to the finance system</td><td><span class="pill p-none">Not started</span></td><td><span class="dep">5.1</span></td><td class="who">System Administrator</td></tr>
+
+        <tr class="grp"><td colspan="5">3 · People and departments</td></tr>
+        <tr><td class="num">3.1</td><td class="task">City departments</td><td><span class="pill p-ready">Ready</span></td><td><span class="dep">1.1</span></td><td class="who">ORO · team supervisors</td></tr>
+        <tr><td class="num">3.2</td><td class="task">Fulfillment teams</td><td><span class="pill p-prog">In progress</span></td><td><span class="dep">3.1</span></td><td class="who">ORO · team supervisors</td></tr>
+        <tr><td class="num">3.3</td><td class="task">Staff accounts and user types</td><td><span class="pill p-prog">In progress</span></td><td><span class="dep">3.2</span></td><td class="who">ORO · team supervisors</td></tr>
+
+        <tr class="grp"><td colspan="5">4 · Review the rules the law set — all loaded by 1.2</td></tr>
+        <tr><td class="num">4.1</td><td class="task">Response deadlines and tolling</td><td><span class="pill p-ready">Ready</span></td><td><span class="dep">1.2</span></td><td class="who">Senior Legal</td></tr>
+        <tr><td class="num">4.2</td><td class="task">What the law lets you charge</td><td><span class="pill p-ready">Ready</span></td><td><span class="dep">1.2</span></td><td class="who">Director</td></tr>
+        <tr><td class="num">4.3</td><td class="task">Deposits and payment clock</td><td><span class="pill p-prog">In progress</span></td><td><span class="dep">1.2</span></td><td class="who">Director</td></tr>
+        <tr><td class="num">4.4</td><td class="task">Fee waivers and who approves them</td><td><span class="pill p-prog">In progress</span></td><td><span class="dep">1.2</span></td><td class="who">Director</td></tr>
+        <tr><td class="num">4.5</td><td class="task">Exemptions and appeals</td><td><span class="pill p-ready">Ready</span></td><td><span class="dep">1.2</span></td><td class="who">Senior Legal</td></tr>
+        <tr><td class="num">4.6</td><td class="task">Redaction rules library</td><td><span class="pill p-ready">Ready</span></td><td><span class="dep">1.2</span></td><td class="who">Senior Legal</td></tr>
+        <tr><td class="num">4.7</td><td class="task">Choices the statute left to the city</td><td><span class="pill p-prog">In progress</span></td><td><span class="dep">1.2</span></td><td class="who">Director</td></tr>
+        <tr><td class="num">4.8</td><td class="task">Vague requests and clarification</td><td><span class="pill p-none">Not started</span></td><td><span class="dep">1.2</span></td><td class="who">Director</td></tr>
+        <tr><td class="num">4.9</td><td class="task">Keeping up with changes in the law</td><td><span class="pill p-prog">Ongoing</span></td><td><span class="dep">4.1</span><span class="dep">…</span></td><td class="who">Senior Legal</td></tr>
+
+        <tr class="grp"><td colspan="5">5 · How this city works a request</td></tr>
+        <tr><td class="num">5.1</td><td class="task">Rates this city actually charges</td><td><span class="pill p-ready">Ready</span></td><td><span class="dep">4.2</span></td><td class="who">ORO · team supervisors</td></tr>
+        <tr><td class="num">5.2</td><td class="task">Record types and categories</td><td><span class="pill p-wait">Waiting</span></td><td><span class="dep">2.1</span></td><td class="who">ORO · team supervisors</td></tr>
+        <tr><td class="num">5.3</td><td class="task">How much work each record type takes</td><td><span class="pill p-wait">Waiting</span></td><td><span class="dep">5.2</span></td><td class="who">ORO · team supervisors</td></tr>
+        <tr><td class="num">5.4</td><td class="task">Which department owns which records</td><td><span class="pill p-wait">Waiting</span></td><td><span class="dep">5.2</span><span class="dep">3.1</span></td><td class="who">ORO · team supervisors</td></tr>
+        <tr><td class="num">5.5</td><td class="task">Who gets which request</td><td><span class="pill p-none">Not started</span></td><td><span class="dep">3.3</span></td><td class="who">ORO · team supervisors</td></tr>
+        <tr><td class="num">5.6</td><td class="task">Try a test estimate</td><td><span class="pill p-wait">Waiting</span></td><td><span class="dep">5.1</span><span class="dep">5.3</span></td><td class="who">ORO · team supervisors</td></tr>
+        <tr><td class="num">5.7</td><td class="task">When the system warns you</td><td><span class="pill p-prog">In progress</span></td><td><span class="dep">2.4</span></td><td class="who">ORO · team supervisors</td></tr>
+        <tr><td class="num">5.8</td><td class="task">How many days a task should take</td><td><span class="pill p-ready">Ready</span></td><td>—</td><td class="who">ORO · team supervisors</td></tr>
+        <tr><td class="num">5.9</td><td class="task">Whether staff record their time</td><td><span class="pill p-ready">Ready</span></td><td>—</td><td class="who">ORO · team supervisors</td></tr>
+        <tr><td class="num">5.10</td><td class="task">Automatic redaction decisions</td><td><span class="pill p-none">Not started</span></td><td><span class="dep">4.6</span></td><td class="who">ORO · team supervisors</td></tr>
+        <tr><td class="num">5.11</td><td class="task">Redaction layout templates</td><td><span class="pill p-none">Not started</span></td><td><span class="dep">4.6</span></td><td class="who">ORO · team supervisors</td></tr>
+        <tr><td class="num">5.12</td><td class="task">Review before records go out</td><td><span class="pill p-none">Not started</span></td><td>—</td><td class="who">ORO · team supervisors</td></tr>
+        <tr><td class="num">5.13</td><td class="task">Standard wording for denials</td><td><span class="pill p-none">Not started</span></td><td>—</td><td class="who">ORO · team supervisors</td></tr>
+        <tr><td class="num">5.14</td><td class="task">When bulk redaction runs</td><td><span class="pill p-none">Not started</span></td><td>—</td><td class="who">ORO · team supervisors</td></tr>
+
+        <tr class="grp"><td colspan="5">6 · Go live</td></tr>
+        <tr><td class="num">6.1</td><td class="task">Turn the rules on for real</td><td><span class="pill p-wait">Waiting</span></td><td><span class="dep">all</span></td><td class="who">System Administrator</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>
