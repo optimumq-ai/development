@@ -1,7 +1,7 @@
 import React from 'react';
 import { useSearchParams, Navigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
-import SetupPage from './SetupPage';
+import SetupHubPage from './SetupHubPage';
 import ConfigurationPage from './ConfigurationPage';
 import RuleUpdatesPage from './RuleUpdatesPage';
 import FeeConfigPage from './FeeConfigPage';
@@ -21,7 +21,8 @@ import UserTypesPage from './UserTypesPage';
 // redirect here with ?tab=, so bookmarks and the help assistant's deep links survive. Iterate on real
 // third-party user feedback before calling the grouping final.
 const TABS = [
-  { key: 'setup',        label: 'Setup',                el: SetupPage },
+  // H1 (2026-08-25): the Setup & Configuration HUB replaces the 7-phase wizard as the front door (SPEC_setup_hub.md).
+  { key: 'setup',        label: 'Setup',                el: SetupHubPage },
   { key: 'config',       label: 'Configuration',        el: ConfigurationPage, admin: true },
   { key: 'updates',      label: 'Update Configuration', el: RuleUpdatesPage },
   { key: 'fees',         label: 'Fee Configuration',    el: FeeConfigPage },

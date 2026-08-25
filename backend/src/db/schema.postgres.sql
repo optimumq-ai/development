@@ -1769,6 +1769,8 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_user_user_types ON user_user_types(user_id,
 CREATE INDEX IF NOT EXISTS idx_user_user_types_type ON user_user_types(user_type_id);
 -- §7 token freshness: bumped on every user-type / subset / status change; the JWT carries it as `av`.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_version INTEGER DEFAULT 1;
+-- SETUP HUB sign-offs (SPEC_setup_hub.md, Option A "Mark it done"): one row per item a person declared ready.
+CREATE TABLE IF NOT EXISTS setup_hub_signoffs (item_key TEXT PRIMARY KEY, marked_by TEXT, marked_by_name TEXT, marked_at TEXT);
 -- Act permissions per user type (SPEC_user_type_model §9.1 as built), joinable from SQL (task pool). Historical name.
 CREATE TABLE IF NOT EXISTS legacy_perm_map (user_type_key TEXT NOT NULL, perm TEXT NOT NULL, PRIMARY KEY (user_type_key, perm));
 INSERT INTO user_types (id, key, display_name, scope, sort_order) VALUES

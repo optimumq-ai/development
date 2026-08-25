@@ -8737,3 +8737,35 @@ Not built: per-recipient preference / digest (noted in the spec).
 
 **SPEC_user_type_model.md: all six slices built.** NEXT: the setup-hub build (design closed 2026-08-24;
 lane ownership reads off permission groups; go-live off `go_live`).
+
+**Addendum:** the post-S6 full-suite confirmation (run 21) came back 2558/2558, live untouched.
+
+## 2026-08-25 — HUB H1 BUILT and LIVE: the Setup & Configuration hub replaces the wizard as the front door
+
+Kevin: "start the hub build." New binding spec `docs/SPEC_setup_hub.md` (design closed 2026-08-24; canvas +
+`WORKING_setup_inventory.md`). Built: `services/setupHub.js` (five lanes; the 36-item catalog with plain names,
+doors, deps, owner GROUPS; one counted-evidence reader per item; Option-A sign-offs in `setup_hub_signoffs`),
+`routes/setupHub.js` (`GET /api/setup-hub`; `POST|DELETE /:key/done` gated by the lane's permission group,
+`legal_rules` on legal sections, go-live never markable), `pages/SetupHubPage.js` on Administration → Setup
+(header counts · Start-here agency card · five lane columns · row = button · chip + evidence · Why popup for
+waiting rows with "Open it anyway" + "Go to <prerequisite>" · Mark it done / Marked done). The 7-phase
+`SetupPage` is no longer mounted (file kept; `/onboarding` API untouched — the fee-test signal still reads it).
+
+**Rules as built:** states counted (ready / in_progress / not_started / needs_attention / waiting); running
+on defaults says so; dependencies open-with-warning (never a lock; a row's own progress wins over waiting);
+a mark shows by name + date, is reversible, never overrides needs_attention/waiting; every reader is
+defensive (a throw → honest "could not read" line, page still renders). Six no-screen items render with a
+counted state and no door (H2 builds their screens one at a time, design first).
+
+**Live today (Autumn Falls):** 23 ready · 6 in progress · 2 not started · 4 waiting · 1 needs attention (the redaction-rules section, once its count read correctly); lanes 7/11 · 3/8 · 5/5 · 3/4 · 4/7; zero reader errors after two column fixes found on the live read
+(fee-test reads `test_config_ref`/`test_by`/`test_at`; redaction rules read `approval_status`/`is_active`).
+Screenshot checked against the artboard.
+
+**Suite:** `verify_setup_hub` 22/22 (catalog shape; deps real; owners are groups only; counted evidence flips
+on an unserved department and on a pending proposal; waiting rows keep their door; go-live 400 NOT_MARKABLE;
+marks gated per lane/legal/technical; reversible; page builds when a reader throws). Full run 26: **2580/2580** (run 27; run 26 was wrecked by my own live restart mid-suite — the kill pattern also matches the test API; now a memory).
+Run 21 (post-S6 confirmation) was 2558/2558.
+
+**NEXT (SPEC_setup_hub §7):** H2 screens for the six no-door items (1.7, 2.9, 2.10, 2.12, 2.13, 4.7) —
+design first, one at a time; H3 auto-load the state rule profile on agency-state save; H4 retire the
+collisions; H5 validation-conditional Ready on demand.
