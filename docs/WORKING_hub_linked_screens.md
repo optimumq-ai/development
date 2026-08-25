@@ -70,4 +70,26 @@ Kevin is sketching a simpler UI for the state-rules content. Fact base handed ov
 15 sections, fixed by the app not the state; 9 core + 6 that appear after the state load; content varies by
 state (branches/clocks on or off), the section set never does; residency is a yes/no inside eligibility.
 
+## 2a. Fees — how the state profile actually flows today (traced 2026-08-25, read-only)
+
+- State load writes only the fee SENTENCES (`jurisdiction_rules.fee.fee_schedule` ← template
+  `fee_schedule.statutory_evidence`) → shown on /jurisdiction-config/fees Content tab. The 35 verified
+  dollar items per template (`fee_schedule.items`, each tagged with `engine_field`) are READ BY NOTHING.
+- Administration → Fee Configuration: skeleton hardcoded (`FeeConfigPage.js DEFAULT_CONFIG`), values from
+  `fee_profiles` (hand-seeded TX row). Profile dropdown = `fee_profiles` rows. Save config = in-place UPDATE,
+  no version; only gate is `feeBounds` (422 above a statutory ceiling). "Configure from policy text (AI)" =
+  paste box → `feePolicyExtract` (real model call) → proposes into the form, persists nothing.
+- Engine (`feeEngine.compute`) reads `fee_profiles` only. So: law → sentences → Content tab · dead end ·
+  hand-typed numbers → engine. No auto-config / regenerate path exists (designed 08-19, never built).
+- "Propose change" composer (built 08-21) files a DRAFT fee_profiles row; no screen can activate it.
+- Open from 08-19: duplicated homes (estimate/deposit thresholds in both fee_profiles.requestRules and
+  fee_waiver rules).
+
+**Kevin's direction (brainstorm):** state-entry screen → "State Mandate" window (fixed/ceiling/floor items
+with citations) + "Guidelines and Deferral to Local Policy" window (soft-standard/silent, "reasonable");
+local policy document upload → AI → local rules shown below the mandate → approved → new fee template
+version. Scope must split: fee COMPUTATION vs estimate/deposit/payment clocks. The `basis` field on every
+item already supports the mandate/deferral split mechanically. Next: table of TX items in the four
+buckets for Kevin to sketch over.
+
 ## 3. Next rows (not yet discussed)
