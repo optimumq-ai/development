@@ -8780,3 +8780,41 @@ finance-system connection): https://claude.ai/code/artifact/bb695abf-d2d1-49a2-b
 mine. **NEXT:** Kevin approves / marks up → build the six on the pattern one at a time (backend endpoints
 where missing: bulk-schedule config keys, settlement provider config + test charge), each committed green;
 then H3 (auto-load state rules on agency-state save), H4 (retire collisions).
+
+## 2026-08-25 (design day) — hub → linked screens brainstorm; agency artboard; TX fact bases for Kevin; NO build
+
+Kevin re-ordered the work: H2 (six no-door screens) is DEFERRED. Instead we are designing how each hub row
+links to its screen, walking the Plan A gantt (copy in `~/exchange/setup_hub_plan_gantt.{html,png}`). All of
+today is in `docs/WORKING_hub_linked_screens.md` (subject to change; not folded into SPEC_setup_hub yet).
+
+**Decided (Kevin):** lock the jurisdiction state via a button ("Lock state and load its rules" = slice H3,
+fired by the click, not by save); remove the old Agency tab from /admin Configuration once the new page
+exists. **Drafted:** shared "status strip" pattern (state chip = button back to the hub · evidence line ·
+Attest, gated on the screen's own completeness) + the agency screen artboards, before/after lock:
+https://claude.ai/code/artifact/76a93009-f5d2-4255-94bf-dd9d3ced3b3d (sources `docs/mockups/hub_links/agency/`).
+Awaiting Kevin's markup; explicitly NOT building yet — he wants to walk more rows first to see if the
+concept revises.
+
+**Facts established (read-only, in the working doc §1, §2, §2a):** phone edits on the config tab DO persist;
+no address fields exist anywhere; state save triggers nothing (importer is CLI-only). Jurisdiction sections:
+15, fixed by the app not the state (9 core + 6 after the state load); content varies by state, the set never
+does; residency is a yes/no inside `eligibility`. Fee flow: the state load writes only the fee SENTENCES to
+the Content tab; the 35 verified dollar items per template are read by nothing; Fee Configuration's
+template is a hardcoded skeleton over a hand-seeded `fee_profiles` row; Save config overwrites in place
+(bounds gate only); the "policy text (AI)" control is a paste box that persists nothing; the 08-21
+"Propose change" composer files a draft fee profile that NO screen can activate. Auto-config / regenerate
+from the 08-19 design were never built.
+
+**Kevin's emerging direction for fees:** state-entry screen → "State Mandate" window + "Guidelines and
+Deferral to Local Policy" window; local policy document → AI → local rules under the mandate → approved →
+new fee template version; scope split computation vs estimate/payment/clocks. The template's `basis` field
+makes the mandate/deferral split mechanical.
+
+**Handed to Kevin in `~/exchange/`:** `TX_STATE_RULES_SECTIONS_2026-08-25.md` (+ live screenshot),
+`TX_RULES_READABLE_2026-08-25.md` (all 37 TX rules by section; source defect: TX-S04 clipped in the template
+itself), `TX_FEE_FOUR_BUCKETS_2026-08-25.md` (13 / 9 / 10 / 3; two mandatory items have no engine home —
+need a requestor ledger; five numbers live in two places).
+
+Commits today: 3a700a1, 6de7833, 3a11dcb, 1208e24, 6e2f66f (docs + mockup sources only). No code, no DB
+writes, no suite run needed. **NEXT:** Kevin's sketches land in `~/exchange/`; react, fold decisions into
+the working doc; keep walking rows; build nothing until he says.
