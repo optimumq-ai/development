@@ -57,10 +57,11 @@ report "state not locked" as in_progress evidence.
 address_zip, mailing_* ×5, mailing_differs, state_locked_at/by) — or a dedicated `/api/agency` endpoint so
 this page stops posting the whole config object. Prefer the dedicated endpoint.
 
-**Open questions for Kevin**
-- Lock via button (proposed) vs. lock silently on first Save?
-- Should the old Agency tab on /admin Configuration disappear once this page exists? (Proposed: yes; the
-  other eight tabs stay until their own rows are done.)
+**Decided 2026-08-25 (Kevin):** lock via button; the old Agency tab on /admin Configuration is removed once
+this page exists (the other eight tabs stay until their own rows are done).
+
+**Artboard:** https://claude.ai/code/artifact/76a93009-f5d2-4255-94bf-dd9d3ced3b3d (sources in
+`docs/mockups/hub_links/agency/` — Main = before lock, Locked = after lock + attest). Awaiting markup.
 
 ## 2. Next rows (not yet discussed)
 Phase 1: 1.1 confirm state and statute · then Phase 2 …

@@ -1,0 +1,128 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; } a:hover { color: #0E3A5C; }
+    .card { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .lbl { font-size: 12.5px; font-weight: 600; color: #12232E; margin-bottom: 5px; }
+    .hint { font-size: 11.5px; color: #8296A4; margin-top: 4px; line-height: 1.4; }
+    .in { display: flex; align-items: center; height: 36px; border: 1px solid #BECAD3; border-radius: 7px;
+          background: #FFFFFF; padding: 0 11px; font-size: 13.5px; color: #12232E; }
+    .in.empty { color: #A9B7C2; }
+    .in.miss { border-color: #B02A37; }
+    .field { display: flex; flex-direction: column; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
+            border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+    .p-ready { background: #E1F2E9; color: #1B8A5A; }
+    .p-prog  { background: #F6EBD6; color: #9A6512; }
+    .ev { font-size: 12px; color: #5C6F7C; line-height: 1.35; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 36px; padding: 0 14px;
+           border-radius: 7px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; }
+    .b-pri { background: #1E6091; color: #FFFFFF; border: 1px solid #1E6091; }
+    .b-sec { background: #FFFFFF; color: #12232E; border: 1px solid #BECAD3; }
+    .b-dis { background: #F2F6F9; color: #A9B7C2; border: 1px solid #D2DCE3; cursor: default; }
+    .sect { font-size: 11.5px; font-weight: 700; color: #5C6F7C; text-transform: uppercase; letter-spacing: 0.05em; }
+    .req { color: #B02A37; font-weight: 700; }
+  </style>
+</helmet>
+
+<div style="padding: 20px; width: 1000px;">
+
+  <!-- status strip — the shared pattern for every hub-linked screen -->
+  <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 10px 14px; margin-bottom: 14px;">
+    <button class="pill p-prog" style="border: 0; height: 26px; padding: 0 11px; font-family: inherit; cursor: pointer;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9A6512" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+      In progress
+    </button>
+    <span class="ev" style="flex-grow: 1;">Name and contact set · street address missing · state not locked</span>
+    <span style="font-size: 11.5px; color: #8296A4;">Setup and Configuration · item 1 of 36</span>
+    <button class="btn b-dis" style="height: 30px;">Attest as complete</button>
+  </div>
+
+  <div class="card">
+    <div style="padding: 16px 20px; border-bottom: 1px solid #D2DCE3;">
+      <div style="font-size: 19px; font-weight: 700;">Agency name, address and contact</div>
+      <div style="font-size: 12.5px; color: #5C6F7C; margin-top: 3px;">Who this city is, where mail goes, and how the public reaches the records office. Shown on letters, the public portal and every request.</div>
+    </div>
+
+    <div style="padding: 18px 20px; display: flex; flex-direction: column; gap: 22px;">
+
+      <!-- identity -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="sect">Agency</div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
+          <div class="field"><div class="lbl">Agency name <span class="req">*</span></div><div class="in">City of Autumn Falls</div><div class="hint">Shown throughout the application and on correspondence</div></div>
+          <div class="field"><div class="lbl">Short name <span class="req">*</span></div><div class="in">Autumn Falls</div><div class="hint">Used in email subjects and compact displays</div></div>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
+          <div class="field"><div class="lbl">Jurisdiction type <span class="req">*</span></div>
+            <div class="in" style="justify-content: space-between;">City
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C6F7C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div></div>
+          <div></div>
+        </div>
+      </div>
+
+      <!-- address -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="sect">Street address</div>
+        <div class="field"><div class="lbl">Address line 1 <span class="req">*</span></div><div class="in empty miss">Street number and name</div></div>
+        <div class="field"><div class="lbl">Address line 2</div><div class="in empty">Suite, floor, building (optional)</div></div>
+        <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px;">
+          <div class="field"><div class="lbl">City <span class="req">*</span></div><div class="in empty miss">City</div></div>
+          <div class="field"><div class="lbl">State <span class="req">*</span></div>
+            <div class="in empty miss" style="justify-content: space-between;">Select
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C6F7C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div></div>
+          <div class="field"><div class="lbl">ZIP <span class="req">*</span></div><div class="in empty miss">ZIP</div></div>
+        </div>
+        <label style="display: flex; align-items: center; gap: 8px; font-size: 13px; color: #12232E; cursor: pointer;">
+          <span style="width: 16px; height: 16px; border: 1px solid #BECAD3; border-radius: 4px; background: #FFFFFF; display: inline-block;"></span>
+          Mailing address is different
+        </label>
+        <div class="hint" style="margin-top: -6px;">The address state is only for mail. The state whose law applies is set below and locked separately.</div>
+      </div>
+
+      <!-- contact -->
+      <div style="display: flex; flex-direction: column; gap: 12px;">
+        <div class="sect">Public records contact</div>
+        <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
+          <div class="field"><div class="lbl">Contact email <span class="req">*</span></div><div class="in">openrecords@cityofautumnfalls.gov</div></div>
+          <div class="field"><div class="lbl">Contact phone <span class="req">*</span></div><div class="in">(512) 555-0142</div></div>
+        </div>
+      </div>
+
+      <!-- jurisdiction state + lock -->
+      <div style="display: flex; flex-direction: column; gap: 12px; padding: 14px 16px; background: #F2F6F9; border: 1px solid #D2DCE3; border-radius: 8px;">
+        <div class="sect">State whose public records law applies</div>
+        <div style="display: flex; align-items: flex-end; gap: 12px;">
+          <div class="field" style="width: 320px;"><div class="lbl">State <span class="req">*</span></div>
+            <div class="in" style="justify-content: space-between;">Texas
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#5C6F7C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div></div>
+          <button class="btn b-pri">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+            Lock state and load its rules
+          </button>
+        </div>
+        <div class="hint" style="margin-top: 0;">Locking loads this state's public records rules — deadlines, what may be charged, exemptions, appeals — into the review items on the Setup hub. It happens once and cannot be undone from this screen. You will be asked to confirm.</div>
+      </div>
+
+    </div>
+
+    <div style="padding: 12px 20px; border-top: 1px solid #D2DCE3; background: #F2F6F9; border-radius: 0 0 10px 10px; display: flex; align-items: center; gap: 12px;">
+      <span class="hint" style="flex-grow: 1; margin-top: 0;"><span class="req">*</span> Required to attest. Attest becomes available when every required field is filled and the state is locked.</span>
+      <button class="btn b-sec">Cancel</button>
+      <button class="btn b-pri">Save</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

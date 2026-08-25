@@ -1,0 +1,11 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html",   "x": 0,    "y": 0, "w": 1040, "h": 1080, "title": "Before lock — in progress, attest disabled" },
+    { "file": "Locked.dc.html", "x": 1140, "y": 0, "w": 1040, "h": 1080, "title": "After lock + attest — ready" }
+  ],
+  "annotations": [
+    { "id": "strip-note", "x": 0, "y": -150, "w": 520, "text": "Status strip (top bar) is the shared pattern for every hub-linked screen: state chip = button back to the hub · hub's evidence line · Attest on the right. Attest never overrides needs-attention / waiting." },
+    { "id": "lock-note", "x": 1140, "y": -150, "w": 520, "text": "Decisions 25 Aug: lock via button (this is slice H3 — importState + activate on click, not on save) · old Agency tab on /admin Configuration is removed · address state is separate from the jurisdiction state." }
+  ],
+  "launch": { "view": "canvas" }
+}
