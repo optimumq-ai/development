@@ -7,7 +7,7 @@ export default function ConfigurationPage() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
   const [err, setErr] = useState('');
-  const [activeTab, setActiveTab] = useState('agency');
+  const [activeTab, setActiveTab] = useState('auth');
   const [rules, setRules] = useState([]);
   const [newRuleText, setNewRuleText] = useState('');
   const [editingRuleId, setEditingRuleId] = useState(null);
@@ -103,7 +103,6 @@ export default function ConfigurationPage() {
   var sectionTitle = { fontSize:'15px', fontWeight:'700', color:'#111', margin:'0 0 4px', paddingBottom:'14px', borderBottom:'1px solid #F3F4F6' };
 
   const tabs = [
-    { key:'agency', label:'Agency' },
     { key:'auth', label:'Authentication' },
     { key:'fees', label:'Fees & Deadlines' },
     { key:'notifications', label:'Notifications' },
@@ -134,48 +133,6 @@ export default function ConfigurationPage() {
       {err && <div style={{background:'#FEF2F2',border:'1px solid #FCA5A5',borderRadius:'8px',padding:'14px',fontSize:'14px',color:'#DC2626'}}>{err}</div>}
 
       <form onSubmit={save}>
-        {activeTab === 'agency' && (
-          <div style={section}>
-            <div style={sectionTitle}>Agency Information</div>
-            <div>
-              <label style={lbl}>Agency Name</label>
-              <input value={config.agency_name||''} onChange={function(e){set('agency_name',e.target.value);}} style={inp} placeholder="City of Optimum"/>
-              <div style={hint}>Displayed throughout the application and on correspondence</div>
-            </div>
-            <div>
-              <label style={lbl}>Agency Short Name</label>
-              <input value={config.agency_short_name||''} onChange={function(e){set('agency_short_name',e.target.value);}} style={inp} placeholder="City of Optimum"/>
-              <div style={hint}>Used in email subjects and compact displays</div>
-            </div>
-            <div>
-              <label style={lbl}>Jurisdiction Type</label>
-              <select value={config.jurisdiction_type||'city'} onChange={function(e){set('jurisdiction_type',e.target.value);}} style={inp}>
-                <option value="city">City</option>
-                <option value="county">County</option>
-                <option value="state">State Agency</option>
-                <option value="school">School District</option>
-                <option value="special">Special District</option>
-                <option value="other">Other</option>
-              </select>
-            </div>
-            <div>
-              <label style={lbl}>State</label>
-              <select value={config.state||'TX'} onChange={function(e){set('state',e.target.value);}} style={inp}>
-                {['TX','AL','AK','AZ','AR','CA','CO','CT','DE','FL','GA','HI','ID','IL','IN','IA','KS','KY','LA','ME','MD','MA','MI','MN','MS','MO','MT','NE','NV','NH','NJ','NM','NY','NC','ND','OH','OK','OR','PA','RI','SC','SD','TN','UT','VT','VA','WA','WV','WI','WY'].map(function(s){ return <option key={s} value={s}>{s}</option>; })}
-              </select>
-              <div style={hint}>Determines applicable public records statute and default response windows</div>
-            </div>
-            <div>
-              <label style={lbl}>Public Records Contact Email</label>
-              <input type="email" value={config.contact_email||''} onChange={function(e){set('contact_email',e.target.value);}} style={inp} placeholder="openrecords@city.gov"/>
-              <div style={hint}>Displayed to the public on the portal and in correspondence</div>
-            </div>
-            <div>
-              <label style={lbl}>Public Records Contact Phone</label>
-              <input value={config.contact_phone||''} onChange={function(e){set('contact_phone',e.target.value);}} style={inp} placeholder="(555) 000-0000"/>
-            </div>
-          </div>
-        )}
 
         {activeTab === 'auth' && (
           <div style={section}>

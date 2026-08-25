@@ -36,7 +36,7 @@ const LANES = [
 // legal_rules); `signoffRequired` = Ready also needs a person's mark (Option A, per item).
 const ITEMS = [
   // ── Start here ──
-  { key: 'agency', lane: 'organization', top: true, name: 'Agency name, address and contact', door: '/admin?tab=config', deps: [], groups: ['operations_config', 'system_admin'],
+  { key: 'agency', lane: 'organization', top: true, name: 'Agency name, address and contact', door: '/setup/agency', deps: [], groups: ['operations_config', 'system_admin'],
     note: 'Nothing else can be set up until this is filled in.' },
   // ── Lane 1 ──
   { key: 'jurisdiction', lane: 'compliance', name: "Which state's law this city follows", door: '/jurisdiction-config/identity', deps: ['agency'], section: 'identity' },
@@ -112,10 +112,22 @@ function sectionEvidence(sec, extraLine) {
 // ---- the evidence readers, one per item -----------------------------------------------------------
 const READERS = {
   agency: async function () {
+    // H3 (WORKING_hub_linked_screens §1): ready = name, short name, jurisdiction type, street address, contact
+    // email + phone, AND the jurisdiction state LOCKED (the lock is what loaded the rules).
     var name = await cfg('agency_name'), state = await cfg('state'), email = await cfg('contact_email');
     if (!name) return ev('not_started', 'no agency name yet');
-    if (!state || !email) return ev('in_progress', name + ' · ' + (!state ? 'no state chosen' : 'no contact email'));
-    return ev('ready', name + ', ' + state + ' · ' + email);
+    var lockedAt = await cfg('state_locked_at'), lockedBy = await cfg('state_locked_by');
+    var missing = [];
+    if (!(await cfg('agency_short_name'))) missing.push('short name');
+    if (!(await cfg('jurisdiction_type'))) missing.push('jurisdiction type');
+    if (!(await cfg('address_line1')) || !(await cfg('address_city')) || !(await cfg('address_state')) || !(await cfg('address_zip'))) missing.push('street address');
+    if (!email) missing.push('contact email');
+    if (!(await cfg('contact_phone'))) missing.push('contact phone');
+    if (!state) missing.push('state');
+    else if (!lockedAt) missing.push('state not locked');
+    var head = name + (state ? ', ' + state : '');
+    if (missing.length) return ev('in_progress', head + ' · ' + missing.map(function (m) { return m === 'state not locked' ? m : m + ' missing'; }).join(' · '));
+    return ev('ready', head + ' · ' + email + ' · ' + state + ' rules loaded' + (lockedBy ? ' by ' + lockedBy : '') + ', ' + String(lockedAt).slice(0, 10));
   },
   jurisdiction: async function (ctx) {
     if (!ctx.jid) return ev('not_started', 'no jurisdiction profile chosen');

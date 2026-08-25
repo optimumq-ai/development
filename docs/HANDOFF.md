@@ -8856,3 +8856,25 @@ node src/db/import_state_template.js TX` 3) `! node scripts/config_reset.js acti
 4) reload the hub / Jurisdiction Configuration and see what the import populated. Existing demo requests
 with fee estimates now point at a deleted fee profile — readers fall back to null/zero, nothing throws.
 No suite run (no code under test changed; the tool is ops-only). Commit follows.
+
+## 2026-08-25 (late) — H3 BUILT: /setup/agency with "Lock state and load its rules"
+
+Kevin, after the wipe: "this is a good place to build the change we discussed — the button that applies the
+state jurisdiction rule file." Built to the agency artboards (Main/Locked) and WORKING_hub_linked_screens §0–§1:
+- `backend/src/routes/agency.js` — `GET/PUT /api/agency` (agency name/short name/jurisdiction type, street +
+  optional mailing address, contact email/phone; the jurisdiction `state` moves with Save only until locked),
+  `POST /api/agency/lock-state {state}` → `importState()` + profile active + `system_config.jurisdiction_profile`
+  + `state_locked_at/by`, in that order so a failed import never says "locked". 409 on a second lock, 422 for no
+  state / no rules file (32 states have one), 403 outside the agency item's groups. Mounted in server.js.
+- `services/setupHub.js` — agency door `/setup/agency`; reader counts every required field and says
+  `state not locked` until the lock; ready evidence = "… · TX rules loaded by <name>, <date>".
+- `frontend/src/pages/AgencySetupPage.js` + route; status strip (chip → hub · hub evidence · Attest = the
+  item's own sign-off, enabled only when complete AND locked); confirm dialog; post-lock panel summarising what
+  loaded. ConfigurationPage: Agency tab removed (default tab now Authentication).
+- `tests/verify_agency_setup.js` (registered in run_suite): 18/18; with verify_setup_hub 22/22; live census
+  clean. Frontend rebuilt (exit 0, nginx 200), page screenshot checked against the artboard.
+
+**Live state right now:** config still wiped (backup_20260825); agency fields filled (200 Main Street …);
+state TX chosen, NOT locked — the lock click is Kevin's to make on /setup/agency. Full suite NOT run tonight
+(subset only); run it next session before anything else lands. Not done: hub reader shows the state code not
+name; the Locked panel's "Regenerate from state rules" link just goes to /jurisdiction-config.

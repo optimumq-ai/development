@@ -11,6 +11,7 @@ import StaffManagementPage from './pages/StaffManagementPage';
 import DepartmentsPage from './pages/DepartmentsPage';
 import OrgPage from './pages/OrgPage';
 import AdministrationPage from './pages/AdministrationPage';
+import AgencySetupPage from './pages/AgencySetupPage';
 import ReportsHubPage from './pages/ReportsHubPage';
 import SchemaDiscoveryPage from './pages/SchemaDiscoveryPage';
 import MyTasksPage from './pages/MyTasksPage';
@@ -143,6 +144,8 @@ export default function App() {
           <Route path="staff" element={<StaffManagementPage />} />
           <Route path="departments" element={<DepartmentsPage />} />
           <Route path="setup" element={<Navigate to="/admin?tab=setup" replace />} />
+          {/* H3 (2026-08-25): the first hub-linked screen — agency identity + "Lock state and load its rules". */}
+          <Route path="setup/agency" element={<AgencySetupPage />} />
           <Route path="taxonomy" element={<Navigate to="/admin?tab=taxonomy" replace />} />
           <Route path="workflow" element={<Navigate to="/admin?tab=workflow" replace />} />
           <Route path="workflow-map" element={<Navigate to="/admin?tab=map" replace />} />

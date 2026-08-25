@@ -57,6 +57,14 @@ report "state not locked" as in_progress evidence.
 address_zip, mailing_* ×5, mailing_differs, state_locked_at/by) — or a dedicated `/api/agency` endpoint so
 this page stops posting the whole config object. Prefer the dedicated endpoint.
 
+**BUILT 2026-08-25 (evening)** on Kevin's go: `/setup/agency` (`frontend/src/pages/AgencySetupPage.js`), `GET/PUT
+/api/agency` + `POST /api/agency/lock-state` (`backend/src/routes/agency.js`), hub `agency` reader counts every
+required field + the lock, door → `/setup/agency`, Agency tab removed from ConfigurationPage. Kept to the
+artboard; the lock response shows what loaded (sections written, primary clock or "service target", count of
+unconfirmed city choices) with a button back to the hub. Harness `verify_agency_setup` 18/18. Bound into
+SPEC_setup_hub §7 H3. Still open from this section: the hub reader's `state` evidence uses the code (TX) not the
+name; no unlock anywhere (by design).
+
 **Decided 2026-08-25 (Kevin):** lock via button; the old Agency tab on /admin Configuration is removed once
 this page exists (the other eight tabs stay until their own rows are done).
 
