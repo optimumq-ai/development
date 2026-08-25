@@ -8818,3 +8818,41 @@ need a requestor ledger; five numbers live in two places).
 Commits today: 3a700a1, 6de7833, 3a11dcb, 1208e24, 6e2f66f (docs + mockup sources only). No code, no DB
 writes, no suite run needed. **NEXT:** Kevin's sketches land in `~/exchange/`; react, fold decisions into
 the working doc; keep walking rows; build nothing until he says.
+
+## 2026-08-25 (evening) — live config WIPED (backed up) so Kevin can walk setup from zero; reset tool added
+
+Kevin: "delete the rules/jurisdiction configuration (back up first) so I can go through setup and watch the
+state rules file come in — I think what I see for fees/estimates/timelines/redaction was forced in during the
+build." Correct: it was. Storage map (read-only agent pass) → the config lives in 18 tables + 4 `system_config`
+keys, no FKs from operational rows, and `schema.postgres.sql` re-runs every boot and BACKFILLS
+`jurisdiction_rules` deadline/clarification from `system_config.deadline_rules`/`clarification_policy` — those
+keys had to go too or the wipe silently undoes itself on restart.
+
+**Tool:** `backend/scripts/config_reset.js` — `backup --tag` (copies the tables into schema `backup_<tag>` +
+a secrets-redacted JSON in `~/exchange/`) · `wipe --tag` (refuses unless the snapshot matches live) ·
+`restore --tag` · `status` · `activate --jid=jur-tx`.
+
+**Done on LIVE:** `backup --tag=20260825` (jurisdiction_profiles 21 · jurisdiction_rules 59 · fee_profiles 1 ·
+redaction_rules 26 · record_type_estimate_profiles 10 · sections 201 · proposals 8 · history 111 · system_config
+43 …) → `wipe` → API restarted → re-counted: everything 0 except `onboarding_progress` 7 (schema re-seeds it
+clean, test_status NULL = fee test not started) and `layout_profiles` 1 (schema default). Hub screenshot:
+**15 ready · 3 in progress · 4 not started · 14 waiting · 0 needs attention** (was 23/6/2/4/1); "Which state's
+law" = Not started, every compliance row Waiting on it. Agency, departments, record types, users, technical
+lane and all requests untouched. **Restore any time:** `node scripts/config_reset.js restore --tag=20260825`.
+
+**The finding that answers Kevin's question:** there is NO screen that loads state rules. The only loader is
+the CLI `node src/db/import_state_template.js TX` (dry run confirmed: creates `jur-tx` as status=library and
+writes 14 `jurisdiction_rules` domains — branches clarification clock_matrix deadline disposition eligibility
+exemption fee fee_waiver intake ledger payment redaction template_import; 26 city knobs arrive unconfirmed;
+no statutory response clock for TX → acknowledge/complete become city service targets). Nothing in the UI
+sets the active jurisdiction either (`system_config.jurisdiction_profile` — the seed did it by SQL; now
+`config_reset.js activate`). The importer does NOT write `fee_profiles` (the rate table the engine reads),
+`redaction_rules`, `record_type_estimate_profiles` or `layout_profiles` — those were all hand-seeded; after
+an import they stay empty and their hub rows stay not-started. That is the honest picture of what the app
+does on its own today, and it is the gap the H3 "Lock state and load its rules" button is meant to close.
+
+**Kevin's walk-through:** 1) Administration → Setup shows the from-zero hub. 2) `! cd /opt/optimumq/backend &&
+node src/db/import_state_template.js TX` 3) `! node scripts/config_reset.js activate --jid=jur-tx`
+4) reload the hub / Jurisdiction Configuration and see what the import populated. Existing demo requests
+with fee estimates now point at a deleted fee profile — readers fall back to null/zero, nothing throws.
+No suite run (no code under test changed; the tool is ops-only). Commit follows.
