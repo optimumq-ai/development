@@ -48,18 +48,17 @@ async function api(method, path, tok, body) {
 (async function () {
   await db.initDb();
 
-  console.log('\n=== A. THE CATALOG — one financial role, and the old names are gone ===');
-  var fin = await db.get("SELECT id, name FROM permission_roles WHERE name = 'FINANCE'");
-  ok('A1 FINANCE permission role exists (id pr-finance)', !!fin && fin.id === 'pr-finance');
-  ok('A2 the legacy FEE_AUTHORITY permission role is gone', !(await db.get("SELECT 1 FROM permission_roles WHERE name = 'FEE_AUTHORITY'")));
-  ok('A3 the orphan FEE_WAIVER_APPROVER function role is retired', !(await db.get("SELECT 1 FROM function_roles WHERE name = 'FEE_WAIVER_APPROVER'")));
-  var deadFn = await db.get("SELECT COUNT(*) AS c FROM user_function_roles WHERE function_role_id = 'fr-feewaiver'");
-  ok('A4 no user is still assigned the retired function role', Number(deadFn.c) === 0);
+  console.log('\n=== A. THE CATALOG — one financial capability, the old names and tables are gone (S5) ===');
+  var UT = require('/opt/optimumq/backend/src/services/userTypes');
+  ok('A1 FINANCE is an act permission carried by oro_finance and oro_director', UT.ACT_PERMS.oro_finance.indexOf('FINANCE') !== -1 && UT.ACT_PERMS.oro_director.indexOf('FINANCE') !== -1);
+  ok('A2 the legacy FEE_AUTHORITY name appears in no act-permission list', Object.keys(UT.ACT_PERMS).every(function (k) { return UT.ACT_PERMS[k].indexOf('FEE_AUTHORITY') === -1; }));
+  var legacyT = (await db.all("SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename IN ('function_roles','permission_roles','user_function_roles','user_permission_roles')")).length;
+  ok('A3 the v1 role catalogs no longer exist as tables', legacyT === 0);
+  ok('A4 oro_sysadmin does NOT carry FINANCE (technical-only)', UT.ACT_PERMS.oro_sysadmin.indexOf('FINANCE') === -1);
   var deadTask = await db.get("SELECT COUNT(*) AS c FROM tasks WHERE role_required = 'FEE_AUTHORITY'");
   ok('A5 no task still names the old routing role', Number(deadTask.c) === 0);
-  // v3 (S1): FINANCE is minted from the oro_finance / oro_director user types, not the legacy table.
-  var holders = await require('/opt/optimumq/backend/src/services/userTypes').usersWithLegacyPerm('FINANCE');
-  ok('A6 the FINANCE role actually has holders (derived from user types)', holders.length > 0);
+  var holders = await UT.usersWithActPerm('FINANCE');
+  ok('A6 the FINANCE capability actually has holders (derived from user types)', holders.length > 0);
 
   console.log('\n=== B. ROUTING — the fee-waiver task points at FINANCE ===');
   ok('B1 TASK_ROLES.fee_waiver === FINANCE', tr.TASK_ROLES && tr.TASK_ROLES.fee_waiver === 'FINANCE');

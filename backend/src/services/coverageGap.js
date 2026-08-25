@@ -31,13 +31,13 @@ var all = db.all, get = db.get;
 
 var KIND = 'coverage_gap';
 
-// The escalation chain above, in order. Function-role names as seeded in schema.sql.
-var TEAM_ROLES = ['DEPT_MANAGER', 'SUPERVISOR'];
-var OFFICE_ROLES = ['DIRECTOR', 'SYSTEM_ADMIN'];
+// The escalation chain above, in order — USER TYPES (v3, S5): the team's manager, then its supervisor (held
+// AGAINST the team), then the Director, then the System Administrator office-wide.
+var TEAM_ROLES = ['team_manager', 'team_supervisor'];
+var OFFICE_ROLES = ['oro_director', 'oro_sysadmin'];
 
-// v3 model (S1): legacy function-role names are derived from user types (SPEC_user_type_model §9.1).
-async function usersWithRole(roleName, teamId) {
-  return (await require('./userTypes').usersWithLegacyRole(roleName, { teamId: teamId || null }))
+async function usersWithRole(typeKey, teamId) {
+  return (await require('./userTypes').usersWithTypes([typeKey], { teamId: teamId || null }))
     .map(function (u) { return { id: u.id, display_name: u.display_name, email: u.email }; });
 }
 

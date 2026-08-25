@@ -20,8 +20,9 @@ A Notification = description + hyperlink + recipient; no completion UI, no reque
 types and each answers one question — **task menu** (routing, via the per-person `user_task_types` subset),
 **authority** (what I may do to work I don't own), **permission groups** (what configuration I may change —
 the setup hub's lanes). "In the ORO" is a fact in the data (any office-level type). **Never two overlapping
-catalogs.** The v1 `function_roles` + `permission_roles` split is retired: as of S1 their assignment tables
-are empty and the legacy `roles`/`perms` claims are *derived* from user types (compat shim, gone in S5).
+catalogs.** The v1 `function_roles` + `permission_roles` split is GONE (tables dropped, S5 2026-08-25). The
+only per-type act list that survives (`REQUEST_MANAGER`, `CLARIFICATION_SENDER`, …) is derived from user types
+and matched by `requireRequestAct` — never assigned per person.
 Rationale unchanged: two catalogs caused routing confusion, the "too many roles" pushback, and the grant-all
 bug (every new account held every permission role). Includes the Finance consolidation (`financial_approval`).
 

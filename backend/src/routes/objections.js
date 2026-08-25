@@ -26,17 +26,16 @@ async function getUser(id) { if (!id) return null; return await get('SELECT id, 
 async function resolveSupervisor(callerId) {
   var me = await get('SELECT department_id FROM users WHERE id = ?', [callerId]);
   var dept = me && me.department_id;
-  // v3 model (S1): SUPERVISOR / DEPT_MANAGER are legacy FUNCTION roles derived from user types. (The
-  // previous query looked them up in permission_roles, where they never existed, so it always found nobody.)
+  // v3 (S5): the team's supervisor, then its manager (types held AGAINST the team); then any ORO supervisor.
   var ut = require('../services/userTypes');
   var pick = function (rows) { return rows.length ? { id: rows[0].id, display_name: rows[0].display_name } : null; };
   if (dept) {
-    var inDept = pick(await ut.usersWithLegacyRole(['SUPERVISOR'], { teamId: dept, exclude: callerId }));
-    if (!inDept) inDept = pick(await ut.usersWithLegacyRole(['DEPT_MANAGER'], { teamId: dept, exclude: callerId }));
+    var inDept = pick(await ut.usersWithTypes(['team_supervisor'], { teamId: dept, exclude: callerId }));
+    if (!inDept) inDept = pick(await ut.usersWithTypes(['team_manager'], { teamId: dept, exclude: callerId }));
     if (inDept) return inDept;
   }
-  return pick(await ut.usersWithLegacyRole(['SUPERVISOR'], { exclude: callerId })) ||
-         pick(await ut.usersWithLegacyRole(['DEPT_MANAGER'], { exclude: callerId }));
+  return pick(await ut.usersWithTypes(['oro_supervisor'], { exclude: callerId })) ||
+         pick(await ut.usersWithTypes(['team_supervisor', 'team_manager'], { exclude: callerId }));
 }
 
 // Whether an open objection tolls the clock for the active jurisdiction (per-jurisdiction policy on

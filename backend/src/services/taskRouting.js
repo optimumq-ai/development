@@ -172,7 +172,7 @@ async function eligibleUsers(teamId, roleName) {
   }
   // Legacy fallback: holders of the legacy permission-role NAME — derived from user types (v3 model S1,
   // SPEC_user_type_model §9.1); the legacy assignment tables are empty and no longer consulted.
-  return (await require('./userTypes').usersWithLegacyPerm(roleName, { teamId: teamId || null }))
+  return (await require('./userTypes').usersWithActPerm(roleName, { teamId: teamId || null }))
     .map(function (u) { return { id: u.id, display_name: u.display_name, routing_specialization: u.routing_specialization }; });
 }
 

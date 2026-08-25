@@ -55,32 +55,6 @@ INSERT INTO "decision_reasons" ("id", "category", "text", "is_active", "usage_co
   ('dr-fw-5', 'fee_waiver_denial', 'The requested records are already publicly available at no cost.', 1, 0, 'seed', '2026-06-23 04:11:10')
 ON CONFLICT DO NOTHING;
 
-INSERT INTO "function_roles" ("id", "name", "sort_order") VALUES
-  ('fr-attorney', 'ATTORNEY_REVIEWER', 6),
-  ('fr-coordinator', 'COORDINATOR', 1),
-  ('fr-custodian', 'CUSTODIAN', 7),
-  ('fr-deptmanager', 'DEPT_MANAGER', 8),
-  ('fr-director', 'DIRECTOR', 9),
-  ('fr-redactionapprover', 'REDACTION_APPROVER', 5),
-  ('fr-redactionreviewer', 'REDACTION_REVIEWER', 4),
-  ('fr-supervisor', 'SUPERVISOR', 2),
-  ('fr-sysadmin', 'SYSTEM_ADMIN', 10)
-ON CONFLICT DO NOTHING;
-
-INSERT INTO "permission_roles" ("id", "name") VALUES
-  ('pr-clarify', 'CLARIFICATION_SENDER'),
-  ('pr-delivery', 'DELIVERY_AND_CLOSURE'),
-  ('pr-denial', 'DENIAL_AND_LEGAL'),
-  ('pr-escalation', 'ESCALATION_HANDLER'),
-  ('pr-feemgr', 'FEE_MANAGER'),
-  ('pr-finance', 'FINANCE'),
-  ('pr-redauth', 'REDACTION_AUTHORITY'),
-  ('pr-redworker', 'REDACTION_WORKER'),
-  ('pr-reopen', 'REQUEST_REOPENER'),
-  ('pr-reqmgr', 'REQUEST_MANAGER'),
-  ('pr-searchtriage', 'SEARCH_AND_TRIAGE')
-ON CONFLICT DO NOTHING;
-
 INSERT INTO "departments" ("id", "name", "code", "color", "is_open_records", "is_catch_all", "sort_order", "active", "kind", "parent_id", "processed_by", "routing_specialization", "auto_load_balancing") VALUES
   ('dept-attorney', 'City Attorney', 'CA', '#843C0C', 0, 0, 3, 1, 'department', NULL, 'team-legal', NULL, 0),
   ('dept-building', 'Building & Planning', 'BP', '#5B9BD5', 0, 0, 2, 1, 'department', NULL, 'dept-openrecords', NULL, 0),
@@ -126,10 +100,6 @@ INSERT INTO "users" ("id", "email", "display_name", "title", "department_id", "p
   ('u-police-super', 'dfoster@cityemail.gov', 'Diane Foster', 'Police Records Supervisor', 'team-police', NULL, NULL, 0, 1, 'active', '2026-07-09 01:46:35', '2026-06-09 14:34:00.20232+00', NULL, 3),
   ('u-sruss', 'sruss@optimumq.ai', 'Steve Russ', 'Administrator', 'dept-openrecords', NULL, NULL, 0, 1, 'active', NULL, '2026-06-09 14:50:10.016542+00', NULL, 3)
 ON CONFLICT DO NOTHING;
-
--- user_function_roles: (empty)
-
--- user_permission_roles: (empty)
 
 INSERT INTO "user_types" ("id", "key", "display_name", "scope", "sort_order", "active") VALUES
   ('ut-city_management', 'city_management', 'City Management', 'office', 1, 1),

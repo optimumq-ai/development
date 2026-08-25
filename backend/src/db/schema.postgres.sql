@@ -7,10 +7,13 @@ ALTER TABLE departments ADD COLUMN IF NOT EXISTS processed_by TEXT;
 ALTER TABLE departments ADD COLUMN IF NOT EXISTS routing_specialization TEXT;
 CREATE TABLE IF NOT EXISTS users (id TEXT PRIMARY KEY, email TEXT UNIQUE NOT NULL, display_name TEXT NOT NULL, title TEXT, department_id TEXT, password_hash TEXT, mfa_secret TEXT, mfa_enrolled INTEGER DEFAULT 0, temp_password INTEGER DEFAULT 0, status TEXT DEFAULT 'active', last_login TEXT, created_at TEXT DEFAULT (to_char(now() AT TIME ZONE 'UTC','YYYY-MM-DD HH24:MI:SS')));
 ALTER TABLE users ADD COLUMN IF NOT EXISTS routing_specialization TEXT;
-CREATE TABLE IF NOT EXISTS function_roles (id TEXT PRIMARY KEY, name TEXT UNIQUE NOT NULL, sort_order INTEGER DEFAULT 0);
-CREATE TABLE IF NOT EXISTS permission_roles (id TEXT PRIMARY KEY, name TEXT UNIQUE NOT NULL);
-CREATE TABLE IF NOT EXISTS user_function_roles (user_id TEXT NOT NULL, function_role_id TEXT NOT NULL, PRIMARY KEY (user_id, function_role_id));
-CREATE TABLE IF NOT EXISTS user_permission_roles (user_id TEXT NOT NULL, permission_role_id TEXT NOT NULL, PRIMARY KEY (user_id, permission_role_id));
+-- The v1 role catalogs (function_roles, permission_roles, user_function_roles, user_permission_roles) were RETIRED
+-- 2026-08-25 (SPEC_user_type_model S5). Dropped idempotently so an install that predates the user-type model
+-- sheds them on its first boot; the user-type tables below are the one catalog.
+DROP TABLE IF EXISTS user_function_roles;
+DROP TABLE IF EXISTS user_permission_roles;
+DROP TABLE IF EXISTS function_roles;
+DROP TABLE IF EXISTS permission_roles;
 -- Per-person routable task-type subset (v3 role model). Eligibility = active + on team + subset includes the task type.
 CREATE TABLE IF NOT EXISTS user_task_types (user_id TEXT NOT NULL, task_type TEXT NOT NULL, PRIMARY KEY (user_id, task_type));
 CREATE TABLE IF NOT EXISTS requests (id TEXT PRIMARY KEY, request_number TEXT UNIQUE NOT NULL, is_mrr INTEGER DEFAULT 0, master_request_id TEXT, component_label TEXT, requestor_name TEXT NOT NULL, requestor_email TEXT NOT NULL, requestor_phone TEXT, requestor_type TEXT DEFAULT 'individual', delivery_method TEXT DEFAULT 'email', description TEXT NOT NULL, record_types TEXT, classification TEXT DEFAULT 'standard', department_id TEXT, assigned_to TEXT, stage TEXT DEFAULT 'intake', status TEXT DEFAULT 'active', closure_reason TEXT,
@@ -1754,7 +1757,7 @@ CREATE INDEX IF NOT EXISTS idx_prochist_entity ON processing_history(entity_type
 
 -- ---- USER-TYPE MODEL (v3) — SPEC_user_type_model.md §3.1. One catalog; task menu / authority / permission
 -- groups hang off the type. Seeded here (fixed key set; display names editable per city). The legacy
--- function_roles / permission_roles tables stay through the compatibility period (§9) and are dropped in S5.
+-- v1 role catalogs were dropped in S5 (see the DROP TABLE block near the users table).
 CREATE TABLE IF NOT EXISTS user_types (id TEXT PRIMARY KEY, key TEXT UNIQUE NOT NULL, display_name TEXT NOT NULL, scope TEXT NOT NULL CHECK (scope IN ('office','team')), sort_order INTEGER DEFAULT 0, active INTEGER DEFAULT 1);
 CREATE TABLE IF NOT EXISTS user_type_task_menu (user_type_id TEXT NOT NULL REFERENCES user_types(id), task_type TEXT NOT NULL, PRIMARY KEY (user_type_id, task_type));
 CREATE TABLE IF NOT EXISTS user_type_authority (user_type_id TEXT NOT NULL REFERENCES user_types(id), authority_key TEXT NOT NULL, PRIMARY KEY (user_type_id, authority_key));
@@ -1766,7 +1769,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS uq_user_user_types ON user_user_types(user_id,
 CREATE INDEX IF NOT EXISTS idx_user_user_types_type ON user_user_types(user_type_id);
 -- §7 token freshness: bumped on every user-type / subset / status change; the JWT carries it as `av`.
 ALTER TABLE users ADD COLUMN IF NOT EXISTS auth_version INTEGER DEFAULT 1;
--- §9.1 compat shim data: user type -> legacy permission-role name, joinable from SQL (task pool). Dropped in S5.
+-- Act permissions per user type (SPEC_user_type_model §9.1 as built), joinable from SQL (task pool). Historical name.
 CREATE TABLE IF NOT EXISTS legacy_perm_map (user_type_key TEXT NOT NULL, perm TEXT NOT NULL, PRIMARY KEY (user_type_key, perm));
 INSERT INTO user_types (id, key, display_name, scope, sort_order) VALUES
   ('ut-city_management', 'city_management', 'City Management', 'office', 1),

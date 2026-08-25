@@ -63,7 +63,7 @@ async function main() {
   for (var c of changes) console.log('  ' + c.id + ' (' + c.name + '): +[' + c.added.join(', ') + '] -> [' + c.target.join(', ') + ']');
   if (!APPLY) { console.log('\nRe-run with --apply to execute via PATCH /api/staff/:id/task-types.'); process.exit(0); }
 
-  var adminRow = (await require('../services/userTypes').usersWithLegacyRole('SYSTEM_ADMIN'))[0];
+  var adminRow = (await require('../services/userTypes').usersWithTypes(['oro_sysadmin']))[0];
   var admin = adminRow ? await db.get('SELECT * FROM users WHERE id = ?', [adminRow.id]) : null;
   if (!admin) { console.error('No active SYSTEM_ADMIN user found — cannot call the staff API.'); process.exit(1); }
   var tok = await auth.signAccessToken(admin);

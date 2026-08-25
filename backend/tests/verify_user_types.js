@@ -3,22 +3,21 @@
 //
 //   1. The catalog is seeded and matches the spec's tables (§3–§6) EXACTLY — table-driven from the same
 //      constants the spec was written from, so a drift in either direction goes red.
-//   2. The cutover (§9): legacy assignment tables empty, the seeded admin holds oro_sysadmin + oro_director,
-//      and running it twice changes nothing.
-//   3. Derived claims (§9.1): every legacy `roles`/`perms` claim comes from user types; NOTHING comes from the
-//      legacy tables (a row planted there must not surface); the diff report for every fixture user.
+//   2. The v1 role catalogs are GONE (S5): no tables, no roles claim, no requireRole; the seeded admin holds
+//      oro_sysadmin + oro_director.
+//   3. Derived claims (§9.1 as built): act perms / authorities / groups / taskMenu come from user types and
+//      nothing else; the diff report for every fixture user.
 //   6. Token freshness (§7): a user-type change kills the outstanding token within the cache window; a
 //      token with no `av` claim is refused.
 //
-// BREAKS THIS SHOULD CATCH: give oro_sysadmin legal_decision (A red) · read perms from user_permission_roles
-// again (C3 red) · drop the av check from requireAuth (F red) · seed a 12th type (A1 red).
+// BREAKS THIS SHOULD CATCH: give oro_sysadmin legal_decision (A red) · recreate a legacy role table (B1 red) ·
+// drop the av check from requireAuth (F red) · seed a 12th type (A1 red) · a requireRole call anywhere (N1 red).
 process.chdir('/opt/optimumq/backend');
 require('/opt/optimumq/backend/node_modules/dotenv').config({ path: '/opt/optimumq/backend/.env' });
 require(__dirname + '/testEnv').enforce();
 var db = require('/opt/optimumq/backend/src/db');
 var auth = require('/opt/optimumq/backend/src/services/auth');
 var ut = require('/opt/optimumq/backend/src/services/userTypes');
-var cut = require('/opt/optimumq/backend/src/db/user_types_cutover');
 var jwt = require('/opt/optimumq/backend/node_modules/jsonwebtoken');
 
 var pass = 0, fail = 0;
@@ -52,7 +51,7 @@ async function api(method, path, tok) {
     if (!sameSet(a, ut.AUTHORITY[k])) drift.push(k + ':authority');
     if (!sameSet(p, ut.PERMISSION[k])) drift.push(k + ':permission');
     if (!sameSet(m, ut.TASK_MENU[k])) drift.push(k + ':menu');
-    if (!sameSet(l, ut.LEGACY[k].perms)) drift.push(k + ':legacy_perm_map');
+    if (!sameSet(l, ut.ACT_PERMS[k])) drift.push(k + ':legacy_perm_map');
   }
   ok('A4 authority / permission / task-menu / legacy-perm tables match the spec for every type', drift.length === 0, drift.join(', '));
   var sa = ut.AUTHORITY.oro_sysadmin, dir = ut.AUTHORITY.oro_director;
@@ -66,29 +65,15 @@ async function api(method, path, tok) {
   ok('A10 every authority key in the tables is in the closed §4 set', (await db.all('SELECT DISTINCT authority_key k FROM user_type_authority')).every(function (r) { return ut.AUTHORITY_KEYS.indexOf(r.k) !== -1; }));
   ok('A11 every permission group in the tables is in the closed §5 set', (await db.all('SELECT DISTINCT permission_group g FROM user_type_permission')).every(function (r) { return ut.PERMISSION_GROUPS.indexOf(r.g) !== -1; }));
 
-  console.log('\n=== B. THE CUTOVER (§9): wipe + bootstrap, idempotent ===');
-  // Plant legacy rows so the wipe has something to remove even on an already-cut-over fixture.
+  console.log('\n=== B. THE LEGACY CATALOGS ARE GONE (S5): no tables, no roles claim, no role gates ===');
+  var legacyTables = (await db.all("SELECT tablename FROM pg_tables WHERE schemaname='public' AND tablename IN ('function_roles','permission_roles','user_function_roles','user_permission_roles')")).map(function (r) { return r.tablename; });
+  ok('B1 function_roles / permission_roles / user_function_roles / user_permission_roles do not exist', legacyTables.length === 0, legacyTables.join(','));
+  var admin = await db.get('SELECT id, auth_version FROM users WHERE email = ?', ['kruss@optimumq.ai']);
+  ok('B2 the seeded admin exists and holds oro_sysadmin + oro_director', !!admin && (function (t) { return t.indexOf('oro_sysadmin') !== -1 && t.indexOf('oro_director') !== -1; })((await ut.typesOf(admin.id)).map(function (t) { return t.key; })));
+  var midS5 = require('fs').readFileSync('/opt/optimumq/backend/src/middleware/auth.js', 'utf8');
+  ok('B3 requireRole / requireRoleOrPerm no longer exist in the middleware', !/function requireRole\b|function requireRoleOrPerm\b/.test(midS5));
   var uid = 'u-' + TAG + '-legacy';
-  await db.run("INSERT INTO users (id, email, display_name, title, status) VALUES (?,?,?,?, 'active')", [uid, TAG + '-legacy@test.optimumq.ai', 'UT Legacy', 'Test ' + TAG]);
-  await db.run("INSERT INTO user_function_roles (user_id, function_role_id) VALUES (?, 'fr-director')", [uid]);
-  await db.run("INSERT INTO user_permission_roles (user_id, permission_role_id) VALUES (?, 'pr-finance')", [uid]);
-  var dry = await cut.cutover({ apply: false });
-  ok('B1 dry run reports the rows it would remove and writes nothing', dry.dryRun && dry.legacyRowsRemoved >= 2 &&
-    Number((await db.get('SELECT COUNT(*) c FROM user_function_roles')).c) >= 1);
-  var admin = await db.get('SELECT id, auth_version FROM users WHERE email = ?', [cut.BOOTSTRAP_EMAIL]);
-  ok('B2 the bootstrap login exists in the fixture', !!admin);
-  var r1 = await cut.cutover({ apply: true });
-  var fr = Number((await db.get('SELECT COUNT(*) c FROM user_function_roles')).c);
-  var pr = Number((await db.get('SELECT COUNT(*) c FROM user_permission_roles')).c);
-  ok('B3 legacy assignment tables are EMPTY after the cutover', fr === 0 && pr === 0, fr + '/' + pr);
-  var adminTypes = (await ut.typesOf(admin.id)).map(function (t) { return t.key; });
-  ok('B4 seeded admin holds oro_sysadmin + oro_director', adminTypes.indexOf('oro_sysadmin') !== -1 && adminTypes.indexOf('oro_director') !== -1, adminTypes.join(','));
-  ok('B5 users are kept (the planted user survives with no types)', !!(await db.get('SELECT 1 FROM users WHERE id = ?', [uid])) && (await ut.typesOf(uid)).length === 0);
-  var admin2 = await db.get('SELECT auth_version FROM users WHERE id = ?', [admin.id]);
-  ok('B6 every user\'s auth_version bumped (legacy-minted tokens die)', r1.authVersionBumped > 0 && Number(admin2.auth_version) > Number(admin.auth_version || 1));
-  var r2 = await cut.cutover({ apply: true });
-  var adminTypes2 = await ut.typesOf(admin.id);
-  ok('B7 idempotent: second run grants nothing new, admin still holds exactly the same types', r2.granted.length === 0 && adminTypes2.length === adminTypes.length);
+  await db.run("INSERT INTO users (id, email, display_name, title, status) VALUES (?,?,?,?, 'active')", [uid, TAG + '-legacy@test.optimumq.ai', 'UT Typeless', 'Test ' + TAG]);
 
   console.log('\n=== C. DERIVED CLAIMS (§9.1): legacy roles/perms come from user types, never from the legacy tables ===');
   var expectRows = [];
@@ -98,26 +83,20 @@ async function api(method, path, tok) {
     await db.run("INSERT INTO users (id, email, display_name, title, department_id, status) VALUES (?,?,?,?,?, 'active')", [u, TAG + '-' + key + '@test.optimumq.ai', 'UT ' + key, 'Test ' + TAG, 'team-police']);
     await ut.grant(u, key, 'team-police', 'harness');
     var c = await ut.claimsFor(u);
-    var want = ut.LEGACY[key];
-    if (!sameSet(c.roles, want.roles) || !sameSet(c.perms, want.perms)) expectRows.push(key + ' roles=' + c.roles + ' perms=' + c.perms);
+    if (!sameSet(c.perms, ut.ACT_PERMS[key])) expectRows.push(key + ' perms=' + c.perms);
     if (!sameSet(c.authorities, ut.AUTHORITY[key]) || !sameSet(c.permissionGroups, ut.PERMISSION[key])) expectRows.push(key + ':axes');
+    if (c.roles !== undefined) expectRows.push(key + ':roles-claim-present');
     if (c.inOro !== (ut.scopeOf(key) === 'office')) expectRows.push(key + ':inOro');
   }
-  ok('C1 for each of the 11 types, a holder\'s roles/perms/authorities/groups/inOro match §4–§5 and §9.1', expectRows.length === 0, expectRows.join(' | '));
+  ok('C1 for each of the 11 types, a holder\'s perms/authorities/groups/inOro match §4–§5 and §9.1, and there is no roles claim', expectRows.length === 0, expectRows.join(' | '));
   var sysTok = jwt.decode(await auth.signAccessToken(await db.get('SELECT * FROM users WHERE id = ?', ['u-' + TAG + '-oro_sysadmin'])));
-  ok('C2 oro_sysadmin token: SYSTEM_ADMIN role, every perm EXCEPT FINANCE, av present', sysTok.roles.indexOf('SYSTEM_ADMIN') !== -1 && sysTok.perms.indexOf('FINANCE') === -1 && sysTok.perms.length === ut.ALL_PERMS.length - 1 && sysTok.av != null);
-  // The anti-regression: a legacy row planted for a TYPELESS user must not surface anywhere.
-  await db.run("INSERT INTO user_permission_roles (user_id, permission_role_id) VALUES (?, 'pr-finance')", [uid]);
-  await db.run("INSERT INTO user_function_roles (user_id, function_role_id) VALUES (?, 'fr-director')", [uid]);
+  ok('C2 oro_sysadmin token: no roles claim, every act perm EXCEPT FINANCE, av present', sysTok.roles === undefined && sysTok.perms.indexOf('FINANCE') === -1 && sysTok.perms.length === ut.ALL_PERMS.length - 1 && sysTok.av != null);
   var planted = await ut.claimsFor(uid);
-  var plantedTok = jwt.decode(await auth.signAccessToken(await db.get('SELECT * FROM users WHERE id = ?', [uid])));
-  ok('C3 a legacy assignment row is IGNORED (typeless user mints no roles, no perms)', planted.roles.length === 0 && planted.perms.length === 0 && plantedTok.roles.length === 0 && plantedTok.perms.length === 0);
-  var finHolders = (await ut.usersWithLegacyPerm('FINANCE')).map(function (x) { return x.id; });
-  ok('C4 legacy-holder lookup derives from types (oro_finance + oro_director in, planted row out)', finHolders.indexOf('u-' + TAG + '-oro_finance') !== -1 && finHolders.indexOf('u-' + TAG + '-oro_director') !== -1 && finHolders.indexOf(uid) === -1);
+  ok('C3 a typeless user mints no perms, no authorities, no groups', planted.perms.length === 0 && planted.authorities.length === 0 && planted.permissionGroups.length === 0);
+  var finHolders = (await ut.usersWithActPerm('FINANCE')).map(function (x) { return x.id; });
+  ok('C4 act-perm holder lookup derives from types (oro_finance + oro_director in, typeless out)', finHolders.indexOf('u-' + TAG + '-oro_finance') !== -1 && finHolders.indexOf('u-' + TAG + '-oro_director') !== -1 && finHolders.indexOf(uid) === -1);
   var pool = await db.all('SELECT m.perm FROM user_user_types uut JOIN user_types t ON t.id = uut.user_type_id JOIN legacy_perm_map m ON m.user_type_key = t.key WHERE uut.user_id = ?', ['u-' + TAG + '-team_staff']);
   ok('C5 the task-pool SQL predicate resolves team_staff to SEARCH_AND_TRIAGE/REDACTION_WORKER/FEE_MANAGER', sameSet(pool.map(function (r) { return r.perm; }), ['SEARCH_AND_TRIAGE', 'REDACTION_WORKER', 'FEE_MANAGER']));
-  await db.run('DELETE FROM user_permission_roles WHERE user_id = ?', [uid]);
-  await db.run('DELETE FROM user_function_roles WHERE user_id = ?', [uid]);
   var menu = await ut.taskMenuFor('u-' + TAG + '-team_staff');
   var menuDir = await ut.taskMenuFor('u-' + TAG + '-oro_director');
   ok('C6 task-menu union: team_staff = the four team types; oro_director = any (null)', sameSet(menu, ['estimate', 'record_search', 'redaction', 'redaction_qa']) && menuDir === null);
@@ -132,22 +111,22 @@ async function api(method, path, tok) {
     var c2 = await ut.claimsFor(fu.id);
     var tl = (await ut.typesOf(fu.id)).map(function (t) { return t.key + (t.teamId ? '@' + t.teamId : ''); });
     if (!tl.length) lost++;
-    console.log('        ' + fu.id.padEnd(18) + ' types=[' + tl.join(',') + '] roles=[' + c2.roles.join(',') + '] perms=' + c2.perms.length);
+    console.log('        ' + fu.id.padEnd(18) + ' types=[' + tl.join(',') + '] authorities=' + c2.authorities.length + ' perms=' + c2.perms.length);
   }
   ok('D1 diff report printed (' + fixtureUsers.length + ' users, ' + lost + ' with no type — expected: real accounts are re-typed by hand per §9)', true);
-  ok('D2 no fixture user mints any claim from a legacy table (tables are empty)', Number((await db.get('SELECT COUNT(*) c FROM user_function_roles')).c) === 0 && Number((await db.get('SELECT COUNT(*) c FROM user_permission_roles')).c) === 0);
+  ok('D2 every claim a fixture user carries is derived (no legacy tables exist to read)', legacyTables.length === 0);
 
   console.log('\n=== E. THE API MINTS THE SAME CLAIMS (staff + /auth/me shapes) ===');
   var kTok = await auth.signAccessToken(await db.get('SELECT * FROM users WHERE id = ?', [admin.id]));
   var me = await (await fetch('http://localhost:' + PORT + '/api/auth/me', { headers: { Authorization: 'Bearer ' + kTok } })).json();
-  ok('E1 /auth/me carries userTypes, authorities, permissionGroups, inOro and the legacy functionRoles', me.user && Array.isArray(me.user.userTypes) && me.user.userTypes.length >= 2 && me.user.authorities.indexOf('go_live') !== -1 && me.user.permissionGroups.indexOf('system_admin') !== -1 && me.user.inOro === true && me.user.functionRoles.indexOf('SYSTEM_ADMIN') !== -1);
+  ok('E1 /auth/me carries userTypes, authorities, permissionGroups, inOro, taskMenu — and no functionRoles', me.user && Array.isArray(me.user.userTypes) && me.user.userTypes.length >= 2 && me.user.authorities.indexOf('go_live') !== -1 && me.user.permissionGroups.indexOf('system_admin') !== -1 && me.user.inOro === true && me.user.functionRoles === undefined && me.user.taskMenu === '*');
   var one = await (await fetch('http://localhost:' + PORT + '/api/staff/' + admin.id, { headers: { Authorization: 'Bearer ' + kTok } })).json();
   ok('E2 GET /staff/:id lists the user types and no secrets', one.user && one.user.userTypes.length >= 2 && one.user.password_hash === undefined && one.user.mfa_secret === undefined);
   // Account creation grants NO types and NO legacy perms (the grant-all bug, §2 row 4).
   var created = await (await fetch('http://localhost:' + PORT + '/api/staff', { method: 'POST', headers: { Authorization: 'Bearer ' + kTok, 'Content-Type': 'application/json' },
     body: JSON.stringify({ displayName: 'UT New ' + TAG, email: TAG + '-new@test.optimumq.ai', tempPassword: 'Temp!' + TAG, functionRoles: ['SYSTEM_ADMIN'] }) })).json();
   var newC = created.userId ? await ut.claimsFor(created.userId) : null;
-  ok('E3 POST /staff creates an account with NO user types, NO roles, NO perms (grant-all bug is dead)', !!newC && newC.userTypes.length === 0 && newC.roles.length === 0 && newC.perms.length === 0);
+  ok('E3 POST /staff creates an account with NO user types and NO perms (grant-all bug is dead)', !!newC && newC.userTypes.length === 0 && newC.perms.length === 0);
 
   console.log('\n=== F. TOKEN FRESHNESS (§7) ===');
   var fu2 = 'u-' + TAG + '-oro_supervisor';
@@ -158,8 +137,8 @@ async function api(method, path, tok) {
   ok('F2 after a user-type change the OLD token is rejected within the cache window', await api('GET', '/auth/me', tok) === 401);
   var tok2 = await auth.signAccessToken(await db.get('SELECT * FROM users WHERE id = ?', [fu2]));
   ok('F3 a re-minted token is accepted again', await api('GET', '/auth/me', tok2) === 200);
-  var noAv = jwt.sign({ sub: fu2, email: 'x', roles: ['SYSTEM_ADMIN'], perms: [] }, process.env.JWT_SECRET || 'optimumq-dev-secret', { expiresIn: '1h' });
-  ok('F4 a legacy-shaped token with no av claim is refused (even claiming SYSTEM_ADMIN)', await api('GET', '/auth/me', noAv) === 401);
+  var noAv = jwt.sign({ sub: fu2, email: 'x', authorities: ['system'], perms: [] }, process.env.JWT_SECRET || 'optimumq-dev-secret', { expiresIn: '1h' });
+  ok('F4 a token with no av claim is refused (even one claiming the system authority)', await api('GET', '/auth/me', noAv) === 401);
   await sleep(1100);
   var before = await db.get('SELECT auth_version FROM users WHERE id = ?', [fu2]);
   await ut.revoke(fu2, 'oro_finance', null);
@@ -342,7 +321,7 @@ async function api(method, path, tok) {
   (function walk2(d) { fs2.readdirSync(d).forEach(function (n) { var p = pathN.join(d, n); if (fs2.statSync(p).isDirectory()) return walk2(p); if (!/\.js$/.test(n) || /services\/(userTypes|auth)\.js$|middleware\/auth\.js$/.test(p)) return; fs2.readFileSync(p, 'utf8').split('\n').forEach(function (line, i) { if (/^\s*\/\//.test(line)) return; if (/\.roles\b/.test(line) && !/opts\.roles/.test(line)) rawRoleReads.push(pathN.relative('/opt/optimumq/backend/src', p) + ':' + (i + 1)); }); }); })('/opt/optimumq/backend/src');
   ok('N2 no route or service reads req.user.roles directly (the legacy claim is consulted by nothing but the act-permission list)', rawRoleReads.length === 0, rawRoleReads.join(', '));
   var mid = fs2.readFileSync('/opt/optimumq/backend/src/middleware/auth.js', 'utf8');
-  ok('N3 the SYSTEM_ADMIN short-circuit is gone from requireRole / requireRoleOrPerm', !/indexOf\('SYSTEM_ADMIN'\) !== -1\) return next\(\)/.test(mid));
+  ok('N3 the SYSTEM_ADMIN short-circuit is gone (and so are requireRole / requireRoleOrPerm)', !/indexOf\('SYSTEM_ADMIN'\) !== -1\) return next\(\)/.test(mid) && !/function requireRole\b/.test(mid));
   // Migrated gates, by authority:
   var mgSA = await callAs('oro_sysadmin', 'GET', '/magic/status');
   var mgDir = await callAs('oro_director', 'GET', '/magic/status');

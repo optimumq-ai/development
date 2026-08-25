@@ -28,12 +28,8 @@ const path = require('path');
 const REFERENCE_TABLES = [
   'system_config',
   'decision_reasons',
-  'function_roles',
-  'permission_roles',
   'departments',
   'users',
-  'user_function_roles',
-  'user_permission_roles',
   // v3 user-type model (SPEC_user_type_model §3.1): the catalog + who holds what. The schema seeds the
   // catalog too, but the reset TRUNCATEs after the schema, so the fixture must carry it.
   'user_types',

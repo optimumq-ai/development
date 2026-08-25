@@ -1,11 +1,11 @@
 'use strict';
 // THE USER-TYPE MODEL (v3) — SPEC_user_type_model.md. One catalog: a person holds user types (office-wide,
-// or against one fulfillment team); everything else — task menu, authority, permission groups, and during
-// the compatibility period the legacy `roles` / `perms` claims — is DERIVED from those types.
+// or against one fulfillment team); everything else — task menu, authority, permission groups, act
+// permissions — is DERIVED from those types.
 //
 // The catalog lives in TABLES (user_types, user_type_task_menu, user_type_authority, user_type_permission),
 // seeded from schema.postgres.sql; the constants below are the spec's tables in code so the harness can
-// assert the seed matches the spec and so the legacy shim (§9.1, deleted in S5) has something to map from.
+// assert the seed matches the spec.
 const { all, get, run } = require('../db');
 
 // §3 — the eleven types. `scope: 'team'` types are held against a departments row with kind='team'.
@@ -76,23 +76,25 @@ const TASK_MENU = {
   team_staff:          TEAM_MENU.slice(),
 };
 
-// §9.1 — the compatibility shim: legacy `roles` / `perms` claims minted FROM user types, never from the
-// legacy assignment tables (which the cutover empties). Deleted in S5 with the last requireRole site.
+// ACT PERMISSIONS — the per-type list of request ACTS a holder may perform on work that is not theirs but
+// that a permission carries (REQUEST_MANAGER, CLARIFICATION_SENDER, SEARCH_AND_TRIAGE, …). Matched by
+// requireRequestAct({perms}) and by the task-pool fallback for legacy-tagged tasks. Derived from the type,
+// never assigned per person. (Was the §9.1 "legacy perms" shim table; the legacy ROLES claim was deleted in S5.)
 const ALL_PERMS = ['REQUEST_MANAGER', 'SEARCH_AND_TRIAGE', 'REDACTION_WORKER', 'REDACTION_AUTHORITY', 'FEE_MANAGER', 'FINANCE',
   'CLARIFICATION_SENDER', 'DELIVERY_AND_CLOSURE', 'DENIAL_AND_LEGAL', 'ESCALATION_HANDLER', 'REQUEST_REOPENER'];
 const TEAM_PERMS = ['SEARCH_AND_TRIAGE', 'REDACTION_WORKER', 'FEE_MANAGER'];
-const LEGACY = {
-  city_management:     { roles: [], perms: [] },
-  oro_sysadmin:        { roles: ['SYSTEM_ADMIN'], perms: ALL_PERMS.filter(function (p) { return p !== 'FINANCE'; }) },
-  oro_director:        { roles: ['DIRECTOR'], perms: ALL_PERMS.slice() },
-  oro_supervisor:      { roles: ['SUPERVISOR'], perms: ['REQUEST_MANAGER', 'DELIVERY_AND_CLOSURE', 'CLARIFICATION_SENDER', 'ESCALATION_HANDLER', 'REQUEST_REOPENER'] },
-  oro_senior_legal:    { roles: ['ATTORNEY_REVIEWER'], perms: ['DENIAL_AND_LEGAL', 'REDACTION_AUTHORITY'] },
-  oro_legal_associate: { roles: [], perms: ['REDACTION_WORKER', 'DENIAL_AND_LEGAL'] },
-  oro_associate:       { roles: ['COORDINATOR'], perms: ['REQUEST_MANAGER', 'SEARCH_AND_TRIAGE', 'CLARIFICATION_SENDER'] },
-  oro_finance:         { roles: [], perms: ['FINANCE'] },
-  team_manager:        { roles: ['DEPT_MANAGER'], perms: TEAM_PERMS.slice() },
-  team_supervisor:     { roles: ['SUPERVISOR'], perms: TEAM_PERMS.slice() },
-  team_staff:          { roles: [], perms: TEAM_PERMS.slice() },
+const ACT_PERMS = {
+  city_management:     [],
+  oro_sysadmin:        ALL_PERMS.filter(function (p) { return p !== 'FINANCE'; }),
+  oro_director:        ALL_PERMS.slice(),
+  oro_supervisor:      ['REQUEST_MANAGER', 'DELIVERY_AND_CLOSURE', 'CLARIFICATION_SENDER', 'ESCALATION_HANDLER', 'REQUEST_REOPENER'],
+  oro_senior_legal:    ['DENIAL_AND_LEGAL', 'REDACTION_AUTHORITY'],
+  oro_legal_associate: ['REDACTION_WORKER', 'DENIAL_AND_LEGAL'],
+  oro_associate:       ['REQUEST_MANAGER', 'SEARCH_AND_TRIAGE', 'CLARIFICATION_SENDER'],
+  oro_finance:         ['FINANCE'],
+  team_manager:        TEAM_PERMS.slice(),
+  team_supervisor:     TEAM_PERMS.slice(),
+  team_staff:          TEAM_PERMS.slice(),
 };
 
 function uniq(arr) { return arr.filter(function (x, i) { return arr.indexOf(x) === i; }); }
@@ -123,18 +125,18 @@ async function typesOf(userId) {
 }
 
 // Everything a token needs, derived once at mint time (§7). Authorities and permission groups come from
-// the TABLES (a city may later narrow them); the legacy shim comes from LEGACY above.
+// the TABLES (a city may later narrow them); act permissions come from ACT_PERMS above.
 async function claimsFor(userId) {
   var types = await typesOf(userId);
   var keys = uniq(types.map(function (t) { return t.key; }));
-  var authorities = [], groups = [], roles = [], perms = [];
+  var authorities = [], groups = [], perms = [];
   if (keys.length) {
     var ph = keys.map(function () { return '?'; }).join(',');
     (await all('SELECT DISTINCT a.authority_key FROM user_type_authority a JOIN user_types ut ON ut.id = a.user_type_id WHERE ut.key IN (' + ph + ')', keys))
       .forEach(function (r) { authorities.push(r.authority_key); });
     (await all('SELECT DISTINCT p.permission_group FROM user_type_permission p JOIN user_types ut ON ut.id = p.user_type_id WHERE ut.key IN (' + ph + ')', keys))
       .forEach(function (r) { groups.push(r.permission_group); });
-    keys.forEach(function (k) { var l = LEGACY[k] || { roles: [], perms: [] }; roles = roles.concat(l.roles); perms = perms.concat(l.perms); });
+    keys.forEach(function (k) { perms = perms.concat(ACT_PERMS[k] || []); });
   }
   var inOro = types.some(function (t) { return t.scope === 'office'; });
   // S4: the task-menu union rides the token ('*' = any) so work-competence gates need no DB read.
@@ -146,7 +148,6 @@ async function claimsFor(userId) {
     authorities: uniq(authorities).sort(),
     permissionGroups: uniq(groups).sort(),
     inOro: inOro,
-    roles: uniq(roles),
     perms: uniq(perms),
   };
 }
@@ -163,41 +164,32 @@ async function taskMenuFor(userId) {
   return uniq(menu);
 }
 
-// Legacy-claim holder lookups for the readers that used to JOIN the legacy assignment tables
-// (task-pool fallback, objections' supervisor finder, coverage-gap chain, import notify). Derived from
-// user types via LEGACY, so an empty legacy table no longer means "nobody".
-function typesMinting(kind, names) {
+// Holders of an ACT PERMISSION (work eligibility — scoped by team MEMBERSHIP, §6.1). Used by the task-pool
+// fallback for legacy-tagged tasks and by harnesses.
+async function usersWithActPerm(names, opts) {
   names = Array.isArray(names) ? names : [names];
-  return TYPE_KEYS.filter(function (k) { return LEGACY[k][kind].some(function (n) { return names.indexOf(n) !== -1; }); });
+  var keys = TYPE_KEYS.filter(function (k) { return ACT_PERMS[k].some(function (n) { return names.indexOf(n) !== -1; }); });
+  return usersWithTypes(keys, Object.assign({ byMembership: true }, opts || {}));
 }
-async function usersWithLegacy(kind, names, opts) {
+// Holders of any of the given USER TYPES. With opts.teamId: team-scoped types must be held AGAINST that team
+// (chain of command); office types match regardless of team. opts.byMembership instead scopes by membership.
+async function usersWithTypes(keys, opts) {
   opts = opts || {};
-  var keys = typesMinting(kind, names);
+  keys = Array.isArray(keys) ? keys : [keys];
   if (!keys.length) return [];
   var ph = keys.map(function () { return '?'; }).join(',');
   var params = keys.slice();
   var sql = 'SELECT DISTINCT u.id, u.display_name, u.email, u.department_id, u.routing_specialization, u.status FROM users u ' +
     'JOIN user_user_types uut ON uut.user_id = u.id JOIN user_types ut ON ut.id = uut.user_type_id ' +
     'WHERE ut.key IN (' + ph + ') AND ut.active = 1';
-  // S2b (§6.1): both axes scope by the team the type is held AGAINST. WORK eligibility (perms) = membership
-  // of the team (any team-scoped type against it); CHAIN OF COMMAND (function roles) = the team this very
-  // type was granted against. users.department_id gates neither.
   if (opts.teamId) {
-    if (kind === 'roles') { sql += " AND ut.scope = 'team' AND uut.team_id = ?"; params.push(opts.teamId); }
-    else { sql += ' AND ' + teamMemberSql('u'); params.push(opts.teamId); }
+    if (opts.byMembership) { sql += ' AND ' + teamMemberSql('u'); params.push(opts.teamId); }
+    else { sql += " AND (ut.scope = 'office' OR uut.team_id = ?)"; params.push(opts.teamId); }
   }
   if (opts.status !== 'any') { sql += " AND u.status = 'active'"; }
   if (opts.exclude) { sql += ' AND u.id <> ?'; params.push(opts.exclude); }
   sql += ' ORDER BY u.display_name';
   return await all(sql, params);
-}
-function usersWithLegacyRole(names, opts) { return usersWithLegacy('roles', names, opts); }
-function usersWithLegacyPerm(names, opts) { return usersWithLegacy('perms', names, opts); }
-// SQL fragment: user ids that hold the legacy PERMISSION named by the bound parameter. Used inside the
-// task-pool eligibility predicate where a subquery is needed rather than a list.
-function legacyPermHoldersSql() {
-  return 'SELECT uut.user_id FROM user_user_types uut JOIN user_types ut ON ut.id = uut.user_type_id ' +
-    'JOIN legacy_perm_map m ON m.user_type_key = ut.key WHERE m.perm = ?';
 }
 
 // ---- writes ------------------------------------------------------------------------------------------
@@ -231,12 +223,12 @@ async function revokeAll(userId) {
   return r.changes;
 }
 
-// (legacy_perm_map — the type key -> legacy perm table SQL readers join — is seeded by schema.postgres.sql
-// from LEGACY; verify_user_types asserts the two agree.)
+// (legacy_perm_map — the type key -> act-perm table the task-pool SQL joins — is seeded by schema.postgres.sql
+// from ACT_PERMS; verify_user_types A4 asserts the two agree. The table keeps its historical name.)
 
 module.exports = {
-  CATALOG, TYPE_KEYS, AUTHORITY, AUTHORITY_KEYS, PERMISSION, PERMISSION_GROUPS, LEGAL_RULES_OWNER, TASK_MENU, LEGACY, ALL_PERMS,
+  CATALOG, TYPE_KEYS, AUTHORITY, AUTHORITY_KEYS, PERMISSION, PERMISSION_GROUPS, LEGAL_RULES_OWNER, TASK_MENU, ACT_PERMS, ALL_PERMS,
   typesOf, claimsFor, taskMenuFor, scopeOf, teamMemberSql, memberTeamsSql, teamsOf,
-  usersWithLegacyRole, usersWithLegacyPerm, legacyPermHoldersSql, typesMinting,
+  usersWithActPerm, usersWithTypes,
   grant, revoke, revokeAll, bumpAuthVersion,
 };

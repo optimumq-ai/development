@@ -35,34 +35,8 @@ async function requireAuth(req, res, next) {
   if (req.user.id == null) req.user.id = req.user.sub;
   next();
 }
-function requireRole() {
-  const roles = Array.prototype.slice.call(arguments);
-  return function(req, res, next) {
-    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
-    const userRoles = req.user.roles || [];
-    // S4: the SYSTEM_ADMIN short-circuit is RETIRED — oro_sysadmin passes only what it explicitly holds.
-    const hasRole = roles.some(function(r) { return userRoles.indexOf(r) !== -1; });
-    if (!hasRole) return res.status(403).json({ error: 'Insufficient role' });
-    next();
-  };
-}
-// Authorize by EITHER a function (job) role OR a permission (capability) role. The financial-authority gate
-// (fee-waiver decisions, fee-objection approvals) is a CAPABILITY — FINANCE, a permission role — not a job
-// title, and it is the same role the fee_waiver task routes to, so whoever receives the task can act on it.
-// SYSTEM_ADMIN always passes, mirroring requireRole. (D4 §8 role reconciliation; replaces the orphan
-// FEE_WAIVER_APPROVER function-role gate that no one held.)
-function requireRoleOrPerm(roles, perms) {
-  roles = roles || []; perms = perms || [];
-  return function(req, res, next) {
-    if (!req.user) return res.status(401).json({ error: 'Authentication required' });
-    const userRoles = req.user.roles || [];
-    const userPerms = req.user.perms || [];
-    const ok = roles.some(function(r) { return userRoles.indexOf(r) !== -1; }) ||
-               perms.some(function(p) { return userPerms.indexOf(p) !== -1; });
-    if (!ok) return res.status(403).json({ error: 'Insufficient role' });
-    next();
-  };
-}
+// (requireRole / requireRoleOrPerm — the legacy role gates — were DELETED in S5. Every gate is an authority,
+// a permission group, or a request act. See SPEC_user_type_model §7.)
 // THE redaction-work gate, shared by every processing-side route (mass jobs, workspace jobs/zones,
 // templates apply, rules library, structured/AV apply, publish) so the bar can't drift between files:
 // redaction permission-role holders plus the supervising function roles. REDACTION_AUTHORITY is
@@ -134,5 +108,5 @@ function requireAnyPermission() {
 }
 function requirePermission(group) { return requireAnyPermission(group); }
 
-module.exports = { requireAuth, requireRole, requireRoleOrPerm, requireRedactionWork, requireRequestWork, requireTaxonomyEdit, forgetAuthVersion,
+module.exports = { requireAuth, requireRedactionWork, requireRequestWork, requireTaxonomyEdit, forgetAuthVersion,
   requireAuthority, requireAnyAuthority, requirePermission, requireAnyPermission, hasAuthority, hasAnyAuthority, hasPermission, isElevated, canRoute, menuHas, ELEVATED, ROUTING };

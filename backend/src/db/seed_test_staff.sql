@@ -21,27 +21,4 @@ INSERT INTO users (id, email, display_name, title, department_id, password_hash,
 ON CONFLICT (id) DO UPDATE SET email=EXCLUDED.email, display_name=EXCLUDED.display_name, title=EXCLUDED.title, department_id=EXCLUDED.department_id, password_hash=EXCLUDED.password_hash, temp_password=1, status='active';
 
 -- 2) Clear any prior role mappings for these test ids, then reassign
-DELETE FROM user_function_roles WHERE user_id LIKE 'u-police-%' OR user_id LIKE 'u-finance-%' OR user_id LIKE 'u-legal-%' OR user_id LIKE 'u-it-%' OR user_id LIKE 'u-clerk-%' OR user_id LIKE 'u-hr-%' OR user_id LIKE 'u-fire-%';
-DELETE FROM user_permission_roles WHERE user_id LIKE 'u-police-%' OR user_id LIKE 'u-finance-%' OR user_id LIKE 'u-legal-%' OR user_id LIKE 'u-it-%' OR user_id LIKE 'u-clerk-%' OR user_id LIKE 'u-hr-%' OR user_id LIKE 'u-fire-%';
-
--- 3) Function (job) roles
-INSERT INTO user_function_roles (user_id, function_role_id) VALUES
- ('u-police-staff','fr-custodian'),('u-finance-staff','fr-custodian'),('u-legal-staff','fr-custodian'),
- ('u-it-staff','fr-custodian'),('u-clerk-staff','fr-custodian'),('u-hr-staff','fr-custodian'),('u-fire-staff','fr-custodian'),
- ('u-police-super','fr-supervisor'),('u-clerk-super','fr-supervisor'),('u-hr-super','fr-supervisor'),('u-fire-super','fr-supervisor'),
- ('u-finance-super','fr-deptmanager'),('u-it-super','fr-deptmanager'),
- ('u-legal-super','fr-attorney');
-
--- 4) Permission (capability) roles
--- 4a) Staffers: doer capabilities
-INSERT INTO user_permission_roles (user_id, permission_role_id)
-SELECT u.id, p.id
-FROM (VALUES ('u-police-staff'),('u-finance-staff'),('u-legal-staff'),('u-it-staff'),('u-clerk-staff'),('u-hr-staff'),('u-fire-staff')) AS u(id)
-CROSS JOIN (VALUES ('pr-searchtriage'),('pr-reqmgr'),('pr-clarify'),('pr-delivery'),('pr-redworker')) AS p(id);
--- 4b) Supervisors: doer + authority capabilities
-INSERT INTO user_permission_roles (user_id, permission_role_id)
-SELECT u.id, p.id
-FROM (VALUES ('u-police-super'),('u-finance-super'),('u-legal-super'),('u-it-super'),('u-clerk-super'),('u-hr-super'),('u-fire-super')) AS u(id)
-CROSS JOIN (VALUES ('pr-searchtriage'),('pr-reqmgr'),('pr-clarify'),('pr-delivery'),('pr-redworker'),('pr-feemgr'),('pr-finance'),('pr-escalation'),('pr-redauth'),('pr-reopen')) AS p(id);
--- 4c) Legal supervisor: denial/legal authority
-INSERT INTO user_permission_roles (user_id, permission_role_id) VALUES ('u-legal-super','pr-denial');
+-- Role assignments retired 2026-08-25 (S5): user types for these accounts live in seed_user_types_demo_staff.sql.

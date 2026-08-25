@@ -8695,3 +8695,31 @@ restarted after green.
 **NEXT:** S5 (delete the `roles` claim + the four legacy tables + `FUNCTION_ROLES` frontend constant + the
 `requireRole` functions; rewrite ARCHITECTURE §4 / SPEC_tasks_roles §8 as history) is small now. Then the
 hub build. S6 (coverage-gap email) any time.
+
+## 2026-08-25 (early) — S5 BUILT and LIVE: the v1 role catalogs are gone
+
+Kevin: "do S5." The user-type model is now the ONLY model in the codebase.
+
+**Deleted:** the `roles` JWT claim and `functionRoles` on `/auth/me` + staff payloads; `requireRole` /
+`requireRoleOrPerm`; the four v1 tables (`function_roles`, `permission_roles`, `user_function_roles`,
+`user_permission_roles`) — `schema.postgres.sql` now `DROP TABLE IF EXISTS` them idempotently, the fixture
+generator and `seed_fixture.sql` no longer carry them; `user_types_cutover.js` (its job is done);
+`usersWithLegacyRole` / `typesMinting` / `legacyPermHoldersSql`; frontend `hasRole/hasAnyRole/hasAnyPerm`.
+`seed_testers.sql` rewritten on user types; `seed_test_staff.sql` trimmed to accounts only.
+
+**Renamed/kept (the act-permission axis, spec §9.1 as built):** `LEGACY.perms` → `ACT_PERMS` (per-type act
+list matched by `requireRequestAct({perms})` and the pool fallback for legacy-tagged tasks); `usersWithLegacyPerm`
+→ `usersWithActPerm` (membership-scoped); new `usersWithTypes(keys, {teamId})` for chain-of-command lookups
+(coverage-gap chain = team_manager → team_supervisor against the team → oro_director → oro_sysadmin; objections'
+escalate = team supervisor → team manager → any ORO supervisor; import notify = sysadmin + director). The
+`legacy_perm_map` table keeps its historical name (seeded from `ACT_PERMS`; A4 asserts they agree).
+
+**Live:** before the drop (verified read-only) the two assignment tables held 0 rows and the two catalog tables only their 9 + 11 v1 seed rows; no FK referenced any of them; the API
+restart applied the DROPs. Frontend rebuilt + served.
+
+**Suite:** targeted 10 harnesses 369/0 (one census trip = the app's own `Scheduled Batch` REDACTION_APPLIED rows
+at 00:57, the known nightly-worker false positive — see memory); full run 18: **2533 + 21 (queue_parent_child re-run after its own role-name lookup was moved to authorities) = 2554/2554**.
+
+**Docs:** spec S5 row + §3.1/§9 notes; ARCHITECTURE §4; SPEC_tasks_roles §8 header; DOMAIN_MAP.
+
+**The user-type build is complete except S6 (coverage-gap email).** NEXT: the setup-hub build, or S6.

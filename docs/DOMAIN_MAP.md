@@ -35,9 +35,9 @@ Open: variant-level granularity decision (held by Kevin).
 
 ## 4. ✅ Tasks, Roles & My Tasks — `SPEC_tasks_roles_mrr_fees.md`
 Task lifecycle, routing (smart/pool/load-balance), roles, My Tasks, notifications, health scoring.
-**Roles → `SPEC_user_type_model.md` (RATIFIED 2026-08-24, S1 BUILT):** the v3 user-type model — one catalog of
-eleven user types; task menu / authority / permission groups derived from them; legacy `roles`/`perms` claims are a
-compat shim until S5. `services/userTypes.js`, `db/user_types_cutover.js`, `verify_user_types`. §8 of the tasks spec is historical.
+**Roles → `SPEC_user_type_model.md` (RATIFIED 2026-08-24; S1–S5 BUILT 2026-08-25):** the v3 user-type model — one
+catalog of eleven user types; task menu / authority / permission groups / act permissions derived from them; the v1
+role tables are gone. `services/userTypes.js`, `middleware/auth.js` primitives, `verify_user_types`. §8 of the tasks spec is historical.
 `tasks.js, staff.js; taskRouting` · Pages: MyTasksPage, EstimateTaskPage, StaffManagementPage
 
 ## 5. ✅ Request Lifecycle & Workflow Engine

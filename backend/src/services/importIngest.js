@@ -30,7 +30,7 @@ function fileKey(name, st) { return name + ':' + st.size + ':' + Math.floor(st.m
 async function notifyRecipients(cfg) {
   if (cfg && cfg.review_assignee) return [cfg.review_assignee];
   // v3 model (S1): SYSTEM_ADMIN / DIRECTOR are derived from user types (oro_sysadmin / oro_director).
-  var rows = await require('./userTypes').usersWithLegacyRole(['SYSTEM_ADMIN', 'DIRECTOR']);
+  var rows = await require('./userTypes').usersWithTypes(['oro_sysadmin', 'oro_director']);
   return (rows || []).map(function (r) { return r.id; });
 }
 

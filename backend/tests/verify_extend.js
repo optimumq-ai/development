@@ -58,7 +58,7 @@ async function primaryState(rid) {
   try {
     // Extending a deadline is a request act (clocks.js gate, 2026-08-19): act as a REQUEST_MANAGER holder,
     // not an arbitrary row — `LIMIT 1` can be a role-less fixture user another harness created.
-    var user = (await require('/opt/optimumq/backend/src/services/userTypes').usersWithLegacyPerm('REQUEST_MANAGER'))
+    var user = (await require('/opt/optimumq/backend/src/services/userTypes').usersWithActPerm('REQUEST_MANAGER'))
       .filter(function (x) { return x.display_name; }).sort(function (a, b) { return a.id < b.id ? -1 : 1; })[0];
     TOKEN = await auth.signAccessToken(user);
     savedDeadline = JSON.stringify(await JR.read(JID, 'deadline'));

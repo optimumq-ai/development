@@ -8,11 +8,8 @@ const JWT_SECRET = process.env.JWT_SECRET || 'optimumq-dev-secret';
 function hashPwd(password) {
   return crypto.createHash('sha256').update(password + 'optimumq_salt_2024').digest('hex');
 }
-// v3 user-type model (SPEC_user_type_model §7, §9.1): the legacy `roles` / `perms` claims are DERIVED from the
-// person's user types — never read from user_function_roles / user_permission_roles, which the cutover
-// emptied. That is where the grant-all bug died: perms come from type, not from "every row in the catalog".
-async function getFunctionRoles(userId) { return (await userTypes.claimsFor(userId)).roles; }
-async function getPermissionRoles(userId) { return (await userTypes.claimsFor(userId)).perms; }
+// v3 user-type model (SPEC_user_type_model §7): every claim is DERIVED from the person's user types. The legacy
+// roles claim and the legacy tables are gone (S5); `perms` is the per-type act-permission list (§9.1 as built).
 async function getAuthVersion(userId) {
   var r = await get('SELECT auth_version FROM users WHERE id = ?', [userId]);
   return r ? (r.auth_version || 1) : null;
@@ -22,7 +19,7 @@ async function signAccessToken(user) {
   var av = await getAuthVersion(user.id);
   return jwt.sign({
     sub: user.id, email: user.email, name: user.display_name, dept: user.department_id,
-    roles: c.roles, perms: c.perms,
+    perms: c.perms,
     userTypes: c.userTypes, authorities: c.authorities, permissionGroups: c.permissionGroups, inOro: c.inOro, taskMenu: c.taskMenu,
     av: av,
   }, JWT_SECRET, { expiresIn: '8h' });
@@ -62,7 +59,7 @@ async function getUserById(userId) {
   if (!user) return null;
   var c = await userTypes.claimsFor(userId);
   return Object.assign(sanitizeUser(user), {
-    functionRoles: c.roles, permissionRoles: c.perms,
+    permissionRoles: c.perms,
     userTypes: c.userTypes, authorities: c.authorities, permissionGroups: c.permissionGroups, inOro: c.inOro, taskMenu: c.taskMenu,
   });
 }
@@ -70,4 +67,4 @@ async function getAuthMode() {
   var c = await get('SELECT value FROM system_config WHERE key = ?', ['auth_mode']);
   return c ? c.value : 'local';
 }
-module.exports = { localLogin, signAccessToken, verifyAccessToken, hashPassword, changePassword, createUser, getUserById, getFunctionRoles, getPermissionRoles, getAuthVersion, getAuthMode, sanitizeUser };
+module.exports = { localLogin, signAccessToken, verifyAccessToken, hashPassword, changePassword, createUser, getUserById, getAuthVersion, getAuthMode, sanitizeUser };

@@ -50,8 +50,9 @@ async function api(method, path, tok) {
     var us = await db.all('SELECT id FROM users');
     for (var i = 0; i < us.length; i++) {
       var full = await auth.getUserById(us[i].id);
-      var fr = (full && full.functionRoles) || [];
-      if (fr.some(function (r) { return ['SUPERVISOR', 'DIRECTOR', 'SYSTEM_ADMIN'].indexOf(r) !== -1; })) { u = full; break; }
+      // v3 (S5): 'elevated' = an oversight/routing authority (middleware/auth ELEVATED), no role names
+      var au = (full && full.authorities) || [];
+      if (au.some(function (k) { return ['act_any_request', 'reassign_any', 'reassign_team', 'override_stage', 'legal_decision', 'system'].indexOf(k) !== -1; })) { u = full; break; }
     }
     if (!u) throw new Error('no elevated user to authenticate as');
     var TOKEN = await auth.signAccessToken(await db.get('SELECT * FROM users WHERE id = ?', [u.id]));

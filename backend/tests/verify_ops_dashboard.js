@@ -39,8 +39,9 @@ function req(method, p, body, token) {
   });
 }
 async function userWithRole(role, needDept) {
-  // v3: legacy role NAME -> holders via user types (SPEC_user_type_model §9.1)
-  var rows = await require('/opt/optimumq/backend/src/services/userTypes').usersWithLegacyRole(role);
+  // v3 (S5): legacy role NAME -> the user types that carry it
+  var TYPES_OF = { SUPERVISOR: ['team_supervisor', 'oro_supervisor'], SYSTEM_ADMIN: ['oro_sysadmin'], DIRECTOR: ['oro_director'], DEPT_MANAGER: ['team_manager'] };
+  var rows = await require('/opt/optimumq/backend/src/services/userTypes').usersWithTypes(TYPES_OF[role] || []);
   var pick = rows.filter(function (u) { return !needDept || u.department_id; })[0];
   return pick ? await db.get('SELECT * FROM users WHERE id = ?', [pick.id]) : null;
 }

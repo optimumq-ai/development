@@ -29,7 +29,7 @@ var LEGACY_OF = { estimate: 'FEE_MANAGER', record_search: 'SEARCH_AND_TRIAGE', r
 
 async function legacyHolders(teamId, roleName) {
   // v3: legacy permission-role holders derive from user types (SPEC_user_type_model §9.1)
-  return (await require('/opt/optimumq/backend/src/services/userTypes').usersWithLegacyPerm(roleName, { teamId: teamId || null }))
+  return (await require('/opt/optimumq/backend/src/services/userTypes').usersWithActPerm(roleName, { teamId: teamId || null }))
     .map(function (r) { return r.id; }).sort();
 }
 function ids(users) { return users.map(function (u) { return u.id; }).sort(); }

@@ -3,7 +3,7 @@
 **Status:** **RATIFIED 2026-08-24** (Kevin: "go — ratify the spec and build S1"). This is the contract. It
 supersedes `SPEC_tasks_roles_mrr_fees.md` §8 (roles) and `ARCHITECTURE.md` §4 ("one role catalog") is rewritten to point here.
 **Build status:** **S1 BUILT 2026-08-24** (tables + catalog seed, cutover, derived claims, `auth_version`); **S2 BUILT 2026-08-24**
-(gate primitives; §8 rows 1–9; frontend `hasAuthority/hasPermission`; `verify_user_types` H–K). **The setup-hub build is unblocked.** S2b–S6 open. As-built notes that differ from the draft are marked *(as built)* inline.
+(gate primitives; §8 rows 1–9; frontend `hasAuthority/hasPermission`; `verify_user_types` H–K). **The setup-hub build is unblocked.** S6 open. As-built notes that differ from the draft are marked *(as built)* inline.
 **Sources:** `DESIGN_user_type_role_model.md` (v3, Kevin's concept, decisions of 2026-07-09),
 `MASTER_task_types_permission_groups.md` (canonical enumerations), `WORKING_setup_inventory.md` (hub
 decisions of 2026-08-24), and a code survey of 2026-08-24 (§2).
@@ -93,8 +93,7 @@ is also a small seeded table, `legacy_perm_map`, so the task-pool SQL predicate 
 with the shim. `services/userTypes.js` holds the spec's tables as constants (`CATALOG`, `AUTHORITY`,
 `PERMISSION`, `TASK_MENU`, `LEGACY`) and `verify_user_types` A4 fails if the seeded tables ever differ from them.
 
-Legacy `function_roles`, `permission_roles`, `user_function_roles`, `user_permission_roles`: kept
-through the compatibility period (§9), then dropped.
+Legacy `function_roles`, `permission_roles`, `user_function_roles`, `user_permission_roles`: **dropped (S5, 2026-08-25)**.
 
 ---
 
@@ -384,7 +383,7 @@ Plus the existing 20 role-touching harnesses stay green through steps 3–5.
 | S2b | **BUILT 2026-08-24.** Multi-team membership (§6.1): eligibility/pool/claim/seeded-check and the legacy fallback read team membership from `user_user_types.team_id` (`userTypes.teamMemberSql` / `teamsOf`); `department_id` demoted to home dept; subset scope "own team" = a team the caller is team_manager of AND the target is a member of; `verify_user_types` L0–L8 | S3 picker semantics |
 | S3 | **BUILT 2026-08-24.** Staff Management user-type picker (office chips; team chips per team, home team first, "add another team"); create = `POST /staff` + `PATCH /user-types`; edit modal gated on `manage_users` for types; task-type picker offers only the menu union and flags held-but-uncovered types; `GET /api/user-types` catalog + `PATCH /api/user-types/:key` display name (`manage_users`); `PATCH /staff/:id/task-types` refuses outside-menu grants (400 `OUTSIDE_TASK_MENU`); Administration → **User Types** matrix; `verify_user_types` M1–M4 | Hub 3.4 |
 | S4 | **BUILT 2026-08-24.** Every `requireRole` / `requireRoleOrPerm` site and every raw `req.user.roles` read (35 gates + 25 reads in 17 route files and 3 services) migrated onto authorities / permission groups; the three presets (`requireRedactionWork`, `requireRequestWork`, `requireTaxonomyEdit`) re-implemented on the `taskMenu` claim / `operations_config`; `requestAccess` acting set = the routing authorities; `ruleEditors.mayApplyEditor` by group; dashboard default panes by authority; frontend `hasAnyRole/hasAnyPerm` consumers moved; `SYSTEM_ADMIN` short-circuit retired; `verify_user_types` N1–N12 | — |
-| S5 | Delete shim + legacy tables + `FUNCTION_ROLES` frontend constant; ARCHITECTURE §4 + SPEC_tasks_roles §8 rewritten | — |
+| S5 | **BUILT 2026-08-25.** `roles` claim deleted; `requireRole` / `requireRoleOrPerm` deleted; the four v1 tables dropped by the schema (`DROP TABLE IF EXISTS`, idempotent) and removed from the fixture/generator; `user_types_cutover.js` retired; `LEGACY` → `ACT_PERMS` (the act-permission axis, `usersWithActPerm`) + `usersWithTypes` for chain-of-command lookups; legacy seed files rewritten; frontend `hasRole/hasAnyRole/hasAnyPerm` deleted; `verify_user_types` B/C rewritten, `verify_role_reconciliation` §A on the model | — |
 | S6 | Coverage-gap email | — |
 
 ---
