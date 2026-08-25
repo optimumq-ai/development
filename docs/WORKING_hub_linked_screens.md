@@ -89,7 +89,9 @@ state (branches/clocks on or off), the section set never does; residency is a ye
 with citations) + "Guidelines and Deferral to Local Policy" window (soft-standard/silent, "reasonable");
 local policy document upload → AI → local rules shown below the mandate → approved → new fee template
 version. Scope must split: fee COMPUTATION vs estimate/deposit/payment clocks. The `basis` field on every
-item already supports the mandate/deferral split mechanically. Next: table of TX items in the four
-buckets for Kevin to sketch over.
+item already supports the mandate/deferral split mechanically. Delivered 2026-08-25:
+`~/exchange/TX_FEE_FOUR_BUCKETS_2026-08-25.md` — A mandate/computation 13 · B mandate/estimate-payment 9 ·
+C deferral/computation 10 · D deferral/estimate-payment 3. Two mandate items have no engine home (per-requestor
+free hours, repeat/aggregation → need a requestor ledger); five items live in two places. Kevin sketches next.
 
 ## 3. Next rows (not yet discussed)
