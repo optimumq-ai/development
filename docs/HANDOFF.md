@@ -8769,3 +8769,14 @@ Run 21 (post-S6 confirmation) was 2558/2558.
 **NEXT (SPEC_setup_hub §7):** H2 screens for the six no-door items (1.7, 2.9, 2.10, 2.12, 2.13, 4.7) —
 design first, one at a time; H3 auto-load the state rule profile on agency-state save; H4 retire the
 collisions; H5 validation-conditional Ready on demand.
+
+## 2026-08-25 (closing) — H2 design canvas up, awaiting Kevin's direction; no build
+
+Kevin: "do H2." Per the UI rule (design direction before a new screen) the six no-door items are drafted on a
+canvas — one shared "setting panel" pattern + one artboard per screen (clarification policy · automatic
+redaction decisions · review-before-release switches · standard denial wording · bulk-redaction schedule ·
+finance-system connection): https://claude.ai/code/artifact/bb695abf-d2d1-49a2-b6e5-904ad686dbe6
+(working files in the session scratchpad only; re-create from the canvas if needed). Static mockups; copy is
+mine. **NEXT:** Kevin approves / marks up → build the six on the pattern one at a time (backend endpoints
+where missing: bulk-schedule config keys, settlement provider config + test charge), each committed green;
+then H3 (auto-load state rules on agency-state save), H4 (retire collisions).
