@@ -63,5 +63,11 @@ this page exists (the other eight tabs stay until their own rows are done).
 **Artboard:** https://claude.ai/code/artifact/76a93009-f5d2-4255-94bf-dd9d3ced3b3d (sources in
 `docs/mockups/hub_links/agency/` — Main = before lock, Locked = after lock + attest). Awaiting markup.
 
-## 2. Next rows (not yet discussed)
-Phase 1: 1.1 confirm state and statute · then Phase 2 …
+## 2. Phase 1 · State rules applied automatically (inventory 1.2) — section list for Kevin's sketches
+
+Kevin is sketching a simpler UI for the state-rules content. Fact base handed over 2026-08-25 in
+`~/exchange/TX_STATE_RULES_SECTIONS_2026-08-25.md` (+ `jurisdiction_config_live_2026-08-25.png`):
+15 sections, fixed by the app not the state; 9 core + 6 that appear after the state load; content varies by
+state (branches/clocks on or off), the section set never does; residency is a yes/no inside eligibility.
+
+## 3. Next rows (not yet discussed)
