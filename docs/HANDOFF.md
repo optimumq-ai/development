@@ -8878,3 +8878,23 @@ state jurisdiction rule file." Built to the agency artboards (Main/Locked) and W
 state TX chosen, NOT locked — the lock click is Kevin's to make on /setup/agency. Full suite NOT run tonight
 (subset only); run it next session before anything else lands. Not done: hub reader shows the state code not
 name; the Locked panel's "Regenerate from state rules" link just goes to /jurisdiction-config.
+
+## 2026-08-25 (night) — Kevin locked TX live · fee_law row sketched and APPROVED · redaction direction decided
+
+Kevin clicked Lock on /setup/agency: jur-tx active, 15 rule rows; hub 15/7/3/11/0 (agency Ready · "TX rules
+loaded by Kevin Hargrove"; jurisdiction/deadlines/exemptions/city-choices In progress; fee_law/deposits/
+waiver/clarification still Waiting — importer files those as enabled:false safe defaults; fees check reads
+`fee_profiles`). New facts: the import DROPS TX.json's 35 `fee_schedule.items` (blob has 3 sentence concepts);
+the rules library has no exemption catalogue (52 Redaction rules are process); the wiped redaction library
+was 14 seed + 12 AI-drafted-from-text rules Kevin approved 06-10, with no source document recorded.
+
+**Canvas (approved by Kevin, revised twice):** https://claude.ai/code/artifact/50a65ce5-a37b-4ad4-a9ef-276474b0d4bd
+— State mandate window (one ceiling per row + "This city charges", **ceiling rows default to the ceiling for
+every state** — Kevin's call) · Deferral window (document → AI → page-referenced proposals → approve) ·
+Approve = fee schedule v1. Facts/decisions in WORKING_hub_linked_screens §2b–§2d.
+
+**Decided:** redaction library = document upload → AI drafts → legal approval, or hand-typed; no research pass.
+Jurisdiction Configuration screen + many admin links to be retired; hub to be simplified by Kevin; screens link
+to the revised hub. **NEXT: build the fee_law canvas** (importer keeps fee_schedule.items · approval writes a
+versioned fee_profiles row via engine_field · hub reader = version exists · document→AI with persisted refs),
+then decide next step. Full suite still not run since H3 — run it first.

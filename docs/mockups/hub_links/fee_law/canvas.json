@@ -1,0 +1,39 @@
+{
+  "artboards": [
+    {
+      "file": "Main.dc.html",
+      "x": 0,
+      "y": 0,
+      "w": 1460,
+      "h": 1600,
+      "title": "After the TX lock \u2014 nothing decided"
+    },
+    {
+      "file": "AfterPolicy.dc.html",
+      "x": 1560,
+      "y": 0,
+      "w": 1460,
+      "h": 1600,
+      "title": "After a fee policy document was read"
+    }
+  ],
+  "annotations": [
+    {
+      "id": "split",
+      "x": 0,
+      "y": -170,
+      "w": 640,
+      "text": "Two windows, four buckets (A 13 \u00b7 B 9 \u00b7 C 10 \u00b7 D 3 \u2014 TX_FEE_FOUR_BUCKETS). Left = law sets it (loaded by the lock, read-only, ceiling/fixed/floor). Right = law defers (city decides; document \u2192 AI \u2192 proposed with page refs \u2192 approve). Approve = fee schedule VERSION 1, the thing estimates price from \u2014 so the 5 numbers that live in two places today get ONE home here.\n\nDECIDED 2026-08-25 (Kevin): for every state template, a ceiling item's city value DEFAULTS TO THE CEILING \u2014 less setup work, and a demo city is priced from day one. The city can only lower it."
+    },
+    {
+      "id": "open",
+      "x": 1560,
+      "y": -170,
+      "w": 640,
+      "text": "Open questions for Kevin: (1) RESOLVED \u2014 the mandate side now shows ONE ceiling per row (this city's: AG rate + 25%) and a \"This city charges\" column, refused above the cap; fixed rows read \"as law\". (2) Two mandate items need a requestor ledger \u2014 show as gaps (drawn) or hide? (3) Rows the document didn't cover: block approval (drawn) or approve partial? (4) Where does the SS (special service) context live \u2014 same screen, second version, or a tab?"
+    }
+  ],
+  "launch": {
+    "view": "canvas"
+  }
+}

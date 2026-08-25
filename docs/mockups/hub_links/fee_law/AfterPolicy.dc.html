@@ -1,0 +1,178 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; } a:hover { color: #0E3A5C; }
+    .card { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .lbl { font-size: 12.5px; font-weight: 600; color: #12232E; margin-bottom: 5px; }
+    .hint { font-size: 11.5px; color: #8296A4; margin-top: 4px; line-height: 1.4; }
+    .in { display: flex; align-items: center; height: 32px; border: 1px solid #BECAD3; border-radius: 7px;
+          background: #FFFFFF; padding: 0 10px; font-size: 13px; color: #12232E; }
+    .in.empty { color: #A9B7C2; }
+    .in.miss { border-color: #B02A37; }
+    .in.ro { background: #F2F6F9; color: #5C6F7C; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
+            border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+    .p-ready { background: #E1F2E9; color: #1B8A5A; }
+    .p-prog  { background: #F6EBD6; color: #9A6512; }
+    .p-wait  { background: #EDE9FE; color: #5B21B6; }
+    .ev { font-size: 12px; color: #5C6F7C; line-height: 1.35; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 36px; padding: 0 14px;
+           border-radius: 7px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; }
+    .b-pri { background: #1E6091; color: #FFFFFF; border: 1px solid #1E6091; }
+    .b-sec { background: #FFFFFF; color: #12232E; border: 1px solid #BECAD3; }
+    .b-dis { background: #F2F6F9; color: #A9B7C2; border: 1px solid #D2DCE3; cursor: default; }
+    .sect { font-size: 11.5px; font-weight: 700; color: #5C6F7C; text-transform: uppercase; letter-spacing: 0.05em; }
+    .req { color: #B02A37; font-weight: 700; }
+    .row { display: grid; grid-template-columns: 200px 150px 78px 150px minmax(0, 1fr); gap: 10px; align-items: center;
+           padding: 8px 12px; border-top: 1px solid #EEF2F5; font-size: 12.5px; }
+    .row.head { border-top: 0; padding: 6px 12px; font-size: 11px; font-weight: 700; color: #8296A4; text-transform: uppercase; letter-spacing: 0.04em; }
+    .drow { display: grid; grid-template-columns: 220px 150px minmax(0, 1fr); gap: 10px; align-items: center;
+            padding: 8px 12px; border-top: 1px solid #EEF2F5; font-size: 12.5px; }
+    .drow.head { border-top: 0; padding: 6px 12px; font-size: 11px; font-weight: 700; color: #8296A4; text-transform: uppercase; letter-spacing: 0.04em; }
+    .val { font-weight: 600; font-variant-numeric: tabular-nums; }
+    .cite { font-size: 11px; color: #8296A4; line-height: 1.35; }
+    .bind { display: inline-flex; align-items: center; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 4px; white-space: nowrap; }
+    .b-fixed { background: #E8EEF4; color: #0E3A5C; border: 1px solid #C5D3DF; }
+    .b-ceil  { background: #FFF4E0; color: #9A6512; border: 1px solid #F1D9A8; }
+    .b-floor { background: #E1F2E9; color: #1B8A5A; border: 1px solid #B5E0C9; }
+    .b-soft  { background: #FFFFFF; color: #5C6F7C; border: 1px dashed #BECAD3; }
+    .gap { font-size: 10.5px; font-weight: 700; color: #B02A37; }
+    .grp { padding: 10px 12px 4px; font-size: 12px; font-weight: 700; color: #12232E; background: #F8FAFC; border-top: 1px solid #D2DCE3; }
+  </style>
+</helmet>
+
+<div style="padding: 20px; width: 1420px; background: #D8E0E8;">
+
+  <!-- status strip — the shared pattern -->
+  <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 10px 14px; margin-bottom: 14px;">
+    <button class="pill p-prog" style="border: 0; height: 26px; padding: 0 11px; font-family: inherit; cursor: pointer;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9A6512" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+      In progress
+    </button>
+    <span class="ev" style="flex-grow: 1;">Texas · 22 figures set by law · 7 rates under the law's ceilings, 7 proposed · 13 left to the city, 10 proposed from "Fee Policy 2024.pdf", 3 still blank · no fee schedule version yet</span>
+    <span style="font-size: 11.5px; color: #8296A4;">Compliance and Policies Setup · item 3 of 11</span>
+    <button class="btn b-dis" style="height: 30px;">Attest as complete</button>
+  </div>
+
+  <div class="card">
+    <div style="padding: 16px 20px; border-bottom: 1px solid #D2DCE3; display: flex; align-items: flex-start; gap: 16px;">
+      <div style="flex-grow: 1;">
+        <div style="font-size: 19px; font-weight: 700;">What the law lets you charge</div>
+        <div style="font-size: 12.5px; color: #5C6F7C; margin-top: 3px;">Every fee figure in one place: the ones Texas law sets, and the ones it leaves to this city. Together they become the fee schedule the estimates use.</div>
+      </div>
+      <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+        <span class="pill p-wait">Fee schedule · no version yet</span>
+        <span class="hint" style="margin-top: 0;">Approving the city's figures creates version 1</span>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 800px minmax(0, 1fr); gap: 0;">
+
+      <!-- ================= STATE MANDATE ================= -->
+      <div style="border-right: 1px solid #D2DCE3;">
+        <div style="padding: 14px 16px 10px; display: flex; align-items: center; gap: 10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E3A5C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+          <div style="flex-grow: 1;">
+            <div style="font-size: 14px; font-weight: 700;">State mandate</div>
+            <div class="hint" style="margin-top: 1px;">Set by Texas law, loaded when the state was locked. The law's figure is not editable here — a change means the law changed, which goes through a proposal with a citation. Where the law sets a ceiling, this city chooses what it charges under it.</div>
+          </div>
+          <span class="pill p-ready">22 loaded</span>
+        </div>
+
+        <div class="grp">Fee computation — the numbers the engine multiplies <span style="font-weight: 500; color: #8296A4;">· 13</span></div>
+        <div class="row head"><span>Item</span><span>Texas allows</span><span>Binding</span><span>This city charges</span><span>Authority</span></div>
+        <div class="row"><span>Copy rate — B&amp;W page</span><span class="val">up to $0.125 / page<div class="hint" style="margin-top:0; font-weight:500;">AG rate $0.10 + 25% for cities</div></span><span class="bind b-ceil">Ceiling</span><div class="in" style="justify-content: space-between;"><span class="val">$0.10</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.1</span></div><span class="cite">1 TAC § 70.3(b)(1); Gov't Code § 552.262(c)</span></div>
+        <div class="row"><span>Copy rate — color page</span><span class="val">up to $0.125 / page<div class="hint" style="margin-top:0; font-weight:500;">AG rate $0.10 + 25% for cities</div></span><span class="bind b-ceil">Ceiling</span><div class="in" style="justify-content: space-between;"><span class="val">$0.10</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.1</span></div><span class="cite">1 TAC § 70.3(b)(1); § 70.2(9)</span></div>
+        <div class="row"><span>Copy rate — oversized page</span><span class="val">up to $0.625 / page<div class="hint" style="margin-top:0; font-weight:500;">AG rate $0.50 + 25% for cities</div></span><span class="bind b-ceil">Ceiling</span><div class="in" style="justify-content: space-between;"><span class="val">$0.50</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.1</span></div><span class="cite">1 TAC § 70.3(b)(2)(L)</span></div>
+        <div class="row"><span>Labor — search / retrieval</span><span class="val">up to $18.75 / hr<div class="hint" style="margin-top:0; font-weight:500;">AG rate $15.00 + 25% for cities</div></span><span class="bind b-ceil">Ceiling</span><div class="in" style="justify-content: space-between;"><span class="val">$15.00</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.1</span></div><span class="cite">1 TAC § 70.3(d)(1)</span></div>
+        <div class="row"><span>Labor — review / redaction</span><span class="val">up to $18.75 / hr<div class="hint" style="margin-top:0; font-weight:500;">AG rate $15.00 + 25% for cities</div></span><span class="bind b-ceil">Ceiling</span><div class="in" style="justify-content: space-between;"><span class="val">$15.00</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.1</span></div><span class="cite">1 TAC § 70.3(d)(3), (d)(4)</span></div>
+        <div class="row"><span>Labor — programming</span><span class="val">up to $35.625 / hr<div class="hint" style="margin-top:0; font-weight:500;">AG rate $28.50 + 25% for cities</div></span><span class="bind b-ceil">Ceiling</span><div class="in" style="justify-content: space-between;"><span class="val">$28.50</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.1</span></div><span class="cite">1 TAC § 70.3(c)(1), (h)(3)</span></div>
+        <div class="row"><span>When labor is chargeable</span><span class="val">Only over 50 paper pages</span><span class="bind b-fixed">Fixed</span><div class="in ro">as law</div><span class="cite">Gov't Code § 552.261(a); 1 TAC § 70.3(d)(2)</span></div>
+        <div class="row"><span>Overhead surcharge on labor</span><span class="val">20%</span><span class="bind b-fixed">Fixed</span><div class="in ro">as law</div><span class="cite">1 TAC § 70.3(e)(1)–(3)</span></div>
+        <div class="row"><span>Free personnel time per requestor</span><span class="val">at least 36 hrs / yr · 15 hrs / mo</span><span class="bind b-floor">Floor</span><div class="in empty">36 hrs / yr · 15 hrs / mo (law's minimum)</div><span class="cite">Gov't Code § 552.275(a), (b) <span class="gap">· needs requestor ledger</span></span></div>
+        <div class="row"><span>Request-level ceiling</span><span class="val">Actual cost, never excessive</span><span class="bind b-fixed">Fixed</span><div class="in ro">as law</div><span class="cite">Gov't Code § 552.262(a); § 552.2615(d)</span></div>
+        <div class="row"><span>Electronic media (CD / DVD / USB)</span><span class="val">up to $1.25 · $3.75 · $1.25<div class="hint" style="margin-top:0; font-weight:500;">AG rate $1 · $3 · $1 + 25% for cities</div></span><span class="bind b-ceil">Ceiling</span><div class="in" style="justify-content: space-between;"><span class="val">$1.00 · $3.00 · $1.00</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.1</span></div><span class="cite">1 TAC § 70.3(b)(2)(A)–(I)</span></div>
+        <div class="row"><span>Audio / video (body-worn camera)</span><span class="val">$10 / recording + $1 / min</span><span class="bind b-fixed">Fixed</span><div class="in ro">as law</div><span class="cite">1 TAC § 70.13(b)</span></div>
+        <div class="row"><span>Repeat / aggregated requests</span><span class="val">Same-day aggregation</span><span class="bind b-fixed">Fixed</span><div class="in ro">as law</div><span class="cite">Gov't Code § 552.261(e); § 552.232 <span class="gap">· needs requestor ledger</span></span></div>
+
+        <div class="grp">Estimates, deposits, payment and their clocks <span style="font-weight: 500; color: #8296A4;">· 9</span></div>
+        <div class="row head"><span>Item</span><span>Texas allows</span><span>Binding</span><span>This city charges</span><span>Authority</span></div>
+        <div class="row"><span>Itemized estimate required above</span><span class="val">$40</span><span class="bind b-fixed">Fixed</span><div class="in ro">as law</div><span class="cite">Gov't Code § 552.2615(a); 1 TAC § 70.7(a)</span></div>
+        <div class="row"><span>Requestor must respond to estimate within</span><span class="val">10 business days</span><span class="bind b-fixed">Fixed</span><div class="in ro">as law</div><span class="cite">Gov't Code § 552.2615(b)</span></div>
+        <div class="row"><span>Revised estimate required over</span><span class="val">20% overrun</span><span class="bind b-fixed">Fixed</span><div class="in ro">as law</div><span class="cite">Gov't Code § 552.2615(c)</span></div>
+        <div class="row"><span>Deposit may be required above</span><span class="val">$100</span><span class="bind b-fixed">Fixed</span><div class="in ro">as law</div><span class="cite">Gov't Code § 552.263(a); 1 TAC § 70.7(d)</span></div>
+        <div class="row"><span>Production conditioned on payment</span><span class="val">Copies on payment</span><span class="bind b-fixed">Fixed</span><div class="in ro">as law</div><span class="cite">Gov't Code § 552.261(d); § 552.263(a),(c)</span></div>
+        <div class="row"><span>Nonpayment — request withdrawn after</span><span class="val">60 days</span><span class="bind b-fixed">Fixed</span><div class="in ro">as law</div><span class="cite">Gov't Code § 552.221(e); § 552.263(c), (f)</span></div>
+        <div class="row"><span>Clock while a deposit is unpaid</span><span class="val">Deemed received on payment</span><span class="bind b-fixed">Fixed</span><div class="in ro">as law</div><span class="cite">Gov't Code § 552.263(e), (e-1)</span></div>
+        <div class="row"><span>Overrun re-issue rules</span><span class="val">Revised estimate at ≥ 20%</span><span class="bind b-fixed">Fixed</span><div class="in ro">as law</div><span class="cite">Gov't Code § 552.2615(c), (d)</span></div>
+        <div class="row"><span>Fee waiver grounds</span><span class="val">Public interest (mandatory once found)</span><span class="bind b-fixed">Fixed</span><div class="in ro">as law</div><span class="cite">Gov't Code § 552.267(a), (b)</span></div>
+
+        <div style="padding: 10px 16px 14px; border-top: 1px solid #D2DCE3;">
+          <span class="hint" style="margin-top: 0;"><b>Ceiling</b> rows: Texas lets cities charge up to the AG rate + 25% (Gov't Code § 552.262(c)); the figure shown is this city's ceiling, and an entry above it is refused. <b>Fixed</b> rows apply as written. Two items marked <span class="gap">needs requestor ledger</span> are law today but have no home in the engine yet — shown so the gap is visible.</span>
+        </div>
+      </div>
+
+      <!-- ================= DEFERRAL TO LOCAL POLICY ================= -->
+      <div>
+        <div style="padding: 14px 16px 10px; display: flex; align-items: center; gap: 10px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A6512" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+          <div style="flex-grow: 1;">
+            <div style="font-size: 14px; font-weight: 700;">Guidelines and deferral to local policy</div>
+            <div class="hint" style="margin-top: 1px;">Texas says "actual cost", "reasonable", or nothing. This city decides. Every row needs a figure or a deliberate "no charge".</div>
+          </div>
+          <span class="pill p-prog">10 of 13 proposed · 0 approved</span>
+        </div>
+
+        <div style="margin: 0 16px 12px; padding: 12px 14px; background: #F2F6F9; border: 1px solid #D2DCE3; border-radius: 8px; display: flex; align-items: center; gap: 12px;">
+          <div style="flex-grow: 1;">
+            <div style="font-size: 12.5px; font-weight: 600;">Read from <a href="#">Fee Policy 2024.pdf</a> · Resolution 24-118 · 6 pages</div>
+            <div class="hint" style="margin-top: 1px;">17 figures found — 7 rates under the state ceilings (left) and 10 local choices (below), each with its page. 3 items were not in the document. Nothing is charged differently until you approve.</div>
+          </div>
+          <button class="btn b-sec" style="height: 32px;">Read a different document</button>
+        </div>
+
+        <div class="grp">Fee computation <span style="font-weight: 500; color: #8296A4;">· 10</span></div>
+        <div class="drow head"><span>Item</span><span>This city</span><span>What the law says</span></div>
+        <div class="drow"><span>Specialty reproduction (photos, maps)</span><div class="in" style="justify-content: space-between;"><span class="val">$2.00 photo · $5.00 map</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.3</span></div><span class="cite"><span class="bind b-soft">Actual cost</span> 1 TAC § 70.3(b)(2)(M)</span></div>
+        <div class="drow"><span>Graduated page bands</span><div class="in" style="justify-content: space-between;"><span class="val">none</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.3</span></div><span class="cite"><span class="bind b-soft">Silent</span> 1 TAC § 70.3(b)(1)</span></div>
+        <div class="drow"><span>Free page allowance per request</span><div class="in" style="justify-content: space-between;"><span class="val">10 pages</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.2</span></div><span class="cite"><span class="bind b-soft">Silent</span> Gov't Code § 552.261(a)</span></div>
+        <div class="drow"><span>Labor time increment + rounding</span><div class="in" style="justify-content: space-between;"><span class="val">15 min, round up</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.4</span></div><span class="cite"><span class="bind b-soft">Silent</span> 1 TAC § 70.3(d)(1)</span></div>
+        <div class="drow"><span>Free labor hours per request</span><div class="in" style="justify-content: space-between;"><span class="val">1 hour</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.4</span></div><span class="cite"><span class="bind b-soft">Silent</span> Gov't Code § 552.261(a); § 552.275</span></div>
+        <div class="drow"><span>De-minimis — no charge below</span><div class="in" style="justify-content: space-between;"><span class="val">$5.00</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.2</span></div><span class="cite"><span class="bind b-soft">Reasonable</span> Gov't Code § 552.267(b)</span></div>
+        <div class="drow"><span>Minimum fee</span><div class="in empty miss">not in document</div><span class="cite"><span class="bind b-soft">Silent</span> 1 TAC § 70.3(b)(1)</span></div>
+        <div class="drow"><span>Delivery — mail / handling</span><div class="in" style="justify-content: space-between;"><span class="val">actual postage</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.5</span></div><span class="cite"><span class="bind b-soft">Actual cost</span> 1 TAC § 70.3(j); § 70.10(9)</span></div>
+        <div class="drow"><span>Certified copy charge</span><div class="in" style="justify-content: space-between;"><span class="val">$1.00 per document</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.5</span></div><span class="cite"><span class="bind b-soft">Silent</span> Gov't Code § 552.232(c)</span></div>
+        <div class="drow"><span>Commercial-purpose surcharge</span><div class="in empty miss">not in document</div><span class="cite"><span class="bind b-soft">Silent</span> Gov't Code § 552.222(b)</span></div>
+
+        <div class="grp">Estimates, deposits, payment <span style="font-weight: 500; color: #8296A4;">· 3</span></div>
+        <div class="drow head"><span>Item</span><span>This city</span><span>What the law says</span></div>
+        <div class="drow"><span>Estimate valid for</span><div class="in" style="justify-content: space-between;"><span class="val">30 days</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.6</span></div><span class="cite"><span class="bind b-soft">Silent</span> Gov't Code § 552.2615; § 552.221(e)</span></div>
+        <div class="drow"><span>Deposit capped at</span><div class="in" style="justify-content: space-between;"><span class="val">50%</span><span style="font-size:10px; color:#1B8A5A; font-weight:700;">p.6</span></div><span class="cite"><span class="bind b-soft">Silent</span> Gov't Code § 552.263(a); 1 TAC § 70.7(d)</span></div>
+        <div class="drow"><span>Late response forfeits the fee</span><div class="in empty miss">not in document</div><span class="cite"><span class="bind b-soft">Silent</span> 1 TAC § 70.7(a)</span></div>
+
+        <div style="padding: 10px 16px 14px; border-top: 1px solid #D2DCE3;">
+          <span class="hint" style="margin-top: 0;"><span style="color:#1B8A5A; font-weight:700;">p.3</span> = where in the document the figure was read from — open it to check. Three rows the document did not cover need a value or a deliberate "none" before approval.</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding: 12px 20px; border-top: 1px solid #D2DCE3; background: #F2F6F9; border-radius: 0 0 10px 10px; display: flex; align-items: center; gap: 12px;">
+      <span class="hint" style="flex-grow: 1; margin-top: 0;">Approving records every figure — the state's and the city's — as <b>fee schedule version 1</b>, the schedule estimates price from. Attest becomes available once a version exists.</span>
+      <button class="btn b-sec">Save draft</button>
+      <button class="btn b-dis" title="3 rows still undecided">Approve as fee schedule v1 · 3 rows undecided</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

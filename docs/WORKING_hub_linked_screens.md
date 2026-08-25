@@ -102,4 +102,56 @@ item already supports the mandate/deferral split mechanically. Delivered 2026-08
 C deferral/computation 10 · D deferral/estimate-payment 3. Two mandate items have no engine home (per-requestor
 free hours, repeat/aggregation → need a requestor ledger); five items live in two places. Kevin sketches next.
 
+## 2b. Phase 1 · What the law lets you charge (hub key `fee_law`, section `fees`) — sketched 2026-08-25
+
+**Today (observed after Kevin's live TX lock):** door `/jurisdiction-config/fees` shows 3 statute SENTENCES
+(copy charge, 50-page allowance, AG rate + 25%) + 4 unconfirmed knobs (Estimate-Fee.addt/dreq/fcom/frev) +
+"Propose change…". Hub reads Waiting · not configured, because the section's configured check is
+`fee_profiles` (the city rate table) and the import never writes it. New fact: the imported
+`jurisdiction_rules.fee` blob carries only those 3 sentence concepts — the 35 verified `fee_schedule.items`
+in TX.json are dropped at import, not just unread.
+
+**Sketch (Kevin's direction, status-strip pattern):** one screen, two windows side by side, four buckets.
+- Left **State mandate** (A 13 + B 9): loaded by the lock, read-only, each row = plain name · TX value ·
+  Ceiling/Fixed/Floor chip · citation. Two rows flagged "needs requestor ledger" (drawn, not hidden).
+- Right **Guidelines and deferral to local policy** (C 10 + D 3): each row = value input · "what the law
+  says" chip (Actual cost / Reasonable / Silent) + citation. Header box: "Read a fee policy document" →
+  AI fills rows with page refs (second artboard) → rows the document missed stay red until decided.
+- Footer: **Approve as fee schedule v1** — approval writes ONE versioned schedule (the `fee_profiles`
+  version estimates price from), giving the 5 twice-homed numbers a single home. Attest gated on a version
+  existing. Canvas: https://claude.ai/code/artifact/50a65ce5-a37b-4ad4-a9ef-276474b0d4bd
+  (sources `docs/mockups/hub_links/fee_law/`).
+
+**Decided 2026-08-25 (Kevin):** the mandate side shows ONE ceiling per row (this city's: AG rate + 25% for TX
+cities, § 552.262(c)) plus a "This city charges" column; and **for every state template, a ceiling item's city
+value DEFAULTS TO THE CEILING** (basis = ceiling → prefill cap; the city may only lower it) — less setup work,
+and a demo city prices from day one. Fixed rows read "as law"; floor rows prefill the law's minimum.
+**Open for Kevin:** ledger gaps drawn or hidden? · block approval on undecided rows or allow partial? · where
+the SS context lives.
+**Build implications (not started):** importer must keep `fee_schedule.items`; approval = new
+`fee_profiles` row mapped by each item's `engine_field`; fee-law hub reader = "a version exists";
+document→AI reuses `feePolicyExtract` but must persist proposals with page refs.
+
+## 2c. Redaction rules library (hub key `redaction_rules`) — decided 2026-08-25
+
+**Fact (from the backup of the wiped library):** the 26 TX rules were 14 hand-seeded (`seed_jurisdiction_tx.sql`)
++ 12 AI-drafted from statute text through `configExtractors.redaction` (`extractRedactionRules`) on 2026-06-09,
+each approved by Kevin on 2026-06-10. The rows carry `source_document: null` — the extractor never recorded
+what text it read. The rules library (`pruned_discovery.json`) has 52 Redaction rules but they are PROCESS
+(segregability, notice, personnel-privacy procedure, a few named mandatory redactions) — no per-state
+exemption catalogue exists anywhere.
+
+**Decided (Kevin):** no new research pass — the project cannot wait. The row's screen = **upload documents →
+AI populates the redaction rule library as drafts (with page/document reference) → legal approval, or type
+rules by hand.** Same document-in / AI-proposes / human-approves pattern as the fee deferral window (§2b), so
+one shared component. Must fix: persist the source document and reference on each drafted rule.
+
+## 2d. Direction for the whole hub — stated by Kevin 2026-08-25
+
+- **Retire the Jurisdiction Configuration screen** and many of the Administration links; all
+  setup/configuration is driven from the hub.
+- Kevin will **modify the hub screen to reduce complexity** (his markup pending); every hub-linked screen
+  (agency — built; fee_law — canvas approved; redaction_rules — §2c) links to the REVISED hub.
+- **Next slice:** build the fee_law canvas (§2b) as approved. Then decide the next step.
+
 ## 3. Next rows (not yet discussed)
