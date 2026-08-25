@@ -15,15 +15,14 @@
 //
 // ══ WHO IS "THE TEAM'S FULFILLMENT MANAGER" ══
 //
-// The v3 user-type model is not built (MASTER Part C is a design, the code still carries function roles),
-// so the recipient is resolved through a documented fallback chain rather than a column that does not
-// exist. Each step is a real person with real authority over the gap, and the chain ends at someone who
-// always exists — because the ONE outcome this module refuses is "nobody was told":
+// The v3 user-type model (SPEC_user_type_model §6, S6): the recipient is EVERY [Team] Fulfillment Manager of
+// the owning team — the type held AGAINST that team — with a fallback chain so the ONE outcome this module
+// refuses, "nobody was told", cannot happen:
 //
-//   1. DEPT_MANAGER on the owning team        — the Fulfillment Manager in everything but name
-//   2. SUPERVISOR on the owning team          — the team's other staffing authority
-//   3. DIRECTOR (office-level)                — team-agnostic work has no team manager to tell
-//   4. SYSTEM_ADMIN (office-level)            — last resort; a gap nobody owns is still a gap
+//   1. team_manager held against the owning team     — the Fulfillment Manager(s)
+//   2. team_supervisor held against the owning team  — the team's other staffing authority
+//   3. oro_director (office-level)                   — team-agnostic work has no team manager to tell
+//   4. oro_sysadmin (office-level)                   — last resort; a gap nobody owns is still a gap
 //
 // When the v3 types land, step 1 becomes "the [Team] Fulfillment Manager" and the rest stays as fallback.
 var db = require('../db');
@@ -117,11 +116,13 @@ async function notifyEmptyPool(task, opts) {
     // the Resend key and the real staff email addresses. A harness that exercises this path would otherwise
     // mail an actual manager about a fabricated request. testEnv guards the DATABASE; this guards the
     // OUTBOUND SIDE EFFECT, which no database check can catch.
-    if (opts.email !== false && firstRaise.length && !/_test(\?|$)|_test\//.test(String(process.env.DATABASE_URL || ''))) {
+    // S6: `opts.send` injects a sender (the harness's capture); the REAL sender is never used under test.
+    var underTest = /_test(\?|$)|_test\//.test(String(process.env.DATABASE_URL || ''));
+    if (opts.email !== false && firstRaise.length && (opts.send || !underTest)) {
       var to = firstRaise.map(function (u) { return u.email; }).filter(Boolean);
       if (to.length) {
         try {
-          var mail = require('./email');
+          var mail = opts.send ? { send: opts.send } : require('./email');
           var r = await mail.send({
             to: to.join(', '), subject: msg.title,
             text: msg.body + (reqRow ? '\n\nRequest: ' + reqRow.request_number : ''),

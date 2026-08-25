@@ -8723,3 +8723,17 @@ at 00:57, the known nightly-worker false positive — see memory); full run 18: 
 **Docs:** spec S5 row + §3.1/§9 notes; ARCHITECTURE §4; SPEC_tasks_roles §8 header; DOMAIN_MAP.
 
 **The user-type build is complete except S6 (coverage-gap email).** NEXT: the setup-hub build, or S6.
+
+## 2026-08-25 — S6 BUILT: coverage-gap email verified; THE USER-TYPE BUILD IS COMPLETE (S1–S6)
+
+Kevin: "do S6 next." The email itself already existed (BW2's `coverageGap.notifyEmptyPool` mails on first raise)
+and S5 had put its recipient chain on user types; S6 made it true to the spec and PROVABLE: header rewritten
+(chain = every `team_manager` held against the team → `team_supervisor` → `oro_director` → `oro_sysadmin`);
+the sender is injectable (`opts.send`) so a harness can capture the message while the real sender stays
+guarded off under any `_test` database; `verify_user_types` O1–O5: both managers resolved (not the
+supervisor), fallback order, one email to both managers naming the task and the request number, no second
+email on the reconciler's re-raise, guard present. 77/77 + bw2 55/55, live untouched. Live restarted.
+Not built: per-recipient preference / digest (noted in the spec).
+
+**SPEC_user_type_model.md: all six slices built.** NEXT: the setup-hub build (design closed 2026-08-24;
+lane ownership reads off permission groups; go-live off `go_live`).

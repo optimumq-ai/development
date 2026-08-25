@@ -355,6 +355,39 @@ async function api(method, path, tok) {
   ok('N12 dashboard default panes follow authority: director org-wide (lateByTeam); team_manager team board (teamInProcess)',
     cfDirS4.status === 200 && cfDirS4.body.panes.some(function (p) { return p.key === 'lateByTeam'; }) && cfMgrS4.status === 200 && cfMgrS4.body.panes.some(function (p) { return p.key === 'teamInProcess'; }));
 
+  console.log('\n=== O. S6 — the coverage-gap email goes to EVERY team manager, once per task, with the request named ===');
+  var CG = require('/opt/optimumq/backend/src/services/coverageGap');
+  var trO = require('/opt/optimumq/backend/src/services/taskRouting');
+  var teamO = 'team-' + TAG;
+  await db.run("INSERT INTO departments (id, name, code, kind, active) VALUES (?,?,?,'team',1)", [teamO, 'UT Gap Team ' + TAG, 'G' + TAG.slice(-5)]);
+  var m1 = 'u-' + TAG + '-gapmgr1', m2 = 'u-' + TAG + '-gapmgr2', sv = 'u-' + TAG + '-gapsup';
+  for (var gi of [[m1, 'Gap Manager One'], [m2, 'Gap Manager Two'], [sv, 'Gap Supervisor']]) {
+    await db.run("INSERT INTO users (id, email, display_name, title, status) VALUES (?,?,?,?, 'active')", [gi[0], gi[0] + '@test.optimumq.ai', gi[1], 'Test ' + TAG]);
+  }
+  await ut.grant(m1, 'team_manager', teamO, 'harness'); await ut.grant(m2, 'team_manager', teamO, 'harness'); await ut.grant(sv, 'team_supervisor', teamO, 'harness');
+  var reqO = 'req-' + TAG + '-gap';
+  await db.run("INSERT INTO requests (id, request_number, requestor_name, requestor_email, description, stage, status, department_id) VALUES (?,?,?,?,?,?,'active',?)", [reqO, 'UT-' + TAG, 'UT Gap', 'gap-' + TAG + '@example.com', 'coverage gap harness', 'record_search', teamO]);
+  var chain = await CG.managersFor(teamO);
+  ok('O1 the chain resolves BOTH team managers (types held against the team), not the supervisor', chain.via === 'team_manager@team' && sameSet(chain.users.map(function (u) { return u.id; }), [m1, m2]));
+  await ut.revoke(m1, 'team_manager', teamO); await ut.revoke(m2, 'team_manager', teamO);
+  var chain2 = await CG.managersFor(teamO);
+  ok('O2 with no manager the chain falls to the team supervisor, then (no team types at all) to the Director', chain2.via === 'team_supervisor@team' && chain2.users[0].id === sv &&
+    (await (async function () { await ut.revoke(sv, 'team_supervisor', teamO); var c3 = await CG.managersFor(teamO); await ut.grant(sv, 'team_supervisor', teamO, 'harness'); return c3.via === 'oro_director@office' && c3.users.some(function (u) { return u.id === 'u-kruss'; }); })()));
+  await ut.grant(m1, 'team_manager', teamO, 'harness'); await ut.grant(m2, 'team_manager', teamO, 'harness');
+  var gapTask = await trO.createTask({ type: 'record_search', requestId: reqO, teamId: teamO, createdBy: 'harness' });
+  var sent = [];
+  var r1 = await CG.notifyEmptyPool(gapTask, { send: async function (m) { sent.push(m); return { sent: true }; } });
+  ok('O3 first raise: one email addressed to BOTH managers, subject names the task, body names the request', sent.length === 1 && sent[0].to.indexOf(m1 + '@test.optimumq.ai') !== -1 && sent[0].to.indexOf(m2 + '@test.optimumq.ai') !== -1 && /record_search/.test(sent[0].subject) && sent[0].text.indexOf('UT-' + TAG) !== -1 && r1.emailed === 2 && r1.notified === 2);
+  var r2 = await CG.notifyEmptyPool(gapTask, { send: async function (m) { sent.push(m); return { sent: true }; } });
+  ok('O4 a second sweep re-raises nothing: no second email, still one notification per manager', sent.length === 1 && r2.emailed === 0 && Number((await db.get('SELECT count(*)::int AS n FROM notifications WHERE kind = ? AND context_id = ?', [CG.KIND, gapTask.id])).n) === 2);
+  var srcCG = require('fs').readFileSync('/opt/optimumq/backend/src/services/coverageGap.js', 'utf8');
+  ok('O5 the REAL sender is never used under a test database (guard present); injected sender only', /underTest/.test(srcCG) && /opts\.send \|\| !underTest/.test(srcCG));
+  await db.run('DELETE FROM notifications WHERE context_id = ?', [gapTask.id]);
+  await db.run('DELETE FROM tasks WHERE id = ?', [gapTask.id]);
+  await db.run('DELETE FROM requests WHERE id = ?', [reqO]);
+  for (var gu of [m1, m2, sv]) { await ut.revokeAll(gu); await db.run('DELETE FROM users WHERE id = ?', [gu]); }
+  await db.run('DELETE FROM departments WHERE id = ?', [teamO]);
+
   console.log('\n=== G. CLEANUP ===');
   var ids = ut.TYPE_KEYS.map(function (k) { return 'u-' + TAG + '-' + k; }).concat([uid]);
   if (created.userId) ids.push(created.userId);
