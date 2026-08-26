@@ -1,0 +1,64 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #7A8A96; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; } a:hover { color: #0E3A5C; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 32px; padding: 0 14px;
+           border-radius: 7px; font-size: 12.5px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; }
+    .b-sec { background: #FFFFFF; color: #12232E; border: 1px solid #BECAD3; }
+    .hint { font-size: 11.5px; color: #5C6F7C; line-height: 1.45; }
+    .letter { font-family: Georgia, "Times New Roman", serif; font-size: 13.5px; line-height: 1.55; color: #111111; }
+    .letter p { margin: 0 0 12px; }
+  </style>
+</helmet>
+
+<!-- the letter viewer — opened by "View the letter" on the clarification tab -->
+<div style="padding: 28px; width: 760px; background: #7A8A96;">
+  <div style="background: #FFFFFF; border-radius: 10px; overflow: hidden; box-shadow: 0 12px 40px rgba(10, 25, 40, 0.35);">
+
+    <div style="display: flex; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid #D2DCE3; background: #F8FAFC;">
+      <div style="flex-grow: 1;">
+        <div style="font-size: 14px; font-weight: 700;">The clarification letter — standard wording</div>
+        <div class="hint">Exactly as the system sends it today, filled in from the request. Read-only in this slice.</div>
+      </div>
+      <button class="btn b-sec">Print</button>
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5C6F7C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="cursor: pointer;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+    </div>
+
+    <div class="letter" style="padding: 30px 40px 26px;">
+      <div style="border-bottom: 2px solid #1F4E79; padding-bottom: 10px; margin-bottom: 22px;">
+        <div style="font-size: 19px; font-weight: 700; color: #1F4E79;">City of Autumn Falls</div>
+        <div style="font-size: 11.5px; color: #555555; margin-top: 2px; font-family: Inter, system-ui, sans-serif;">Public Information</div>
+      </div>
+      <div style="margin-bottom: 18px;">August 26, 2026</div>
+      <div style="margin-bottom: 18px;">Jordan Sample<br>412 Pecan Street<br>Autumn Falls, TX 76500</div>
+      <div style="margin-bottom: 16px;"><strong>Re: Public Records Request 2026-000012</strong></div>
+
+      <p>Dear Jordan Sample,</p>
+      <p>Thank you for your public records request (2026-000012). Before we can continue, we need a little more information to be sure we locate the right records.</p>
+      <p>Here is what we have on file for your request:</p>
+      <p style="padding-left: 18px; color: #333333;">"Any records about the road work on my street."</p>
+      <p>To help us proceed, please reply with any additional detail you can provide — for example, the specific records, names, dates, or time period you are interested in, and the department or topic they relate to. The more specific you can be, the faster we can respond.</p>
+      <p><mark style="background: #FBEFD3; padding: 1px 2px;">Please reply within 61 days. If we do not hear from you, we may be unable to continue processing your request.</mark></p>
+      <p>Please keep your request number (2026-000012) with any reply so we can match your response to the correct request.</p>
+      <p>Questions? Contact us at openrecords@cityofautumnfalls.gov or 369-867-5309.</p>
+      <p style="margin-bottom: 0;">Sincerely,<br>City of Autumn Falls</p>
+    </div>
+
+    <div style="padding: 12px 18px; border-top: 1px solid #F1D9A8; background: #FDF9F0;">
+      <span class="hint"><b>The highlighted sentence</b> is the warning Texas requires (§ 552.222(e)) — the letter must say what happens if the requestor does not reply. The standard sentence says "we may be unable to continue"; the statute's actual consequence is that the request is treated as <b>withdrawn</b> on the 61st day. See the note beside this frame.</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; } a:hover { color: #0E3A5C; }
+    .card { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .hint { font-size: 11.5px; color: #8296A4; margin-top: 4px; line-height: 1.4; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
+            border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+    .p-ready { background: #E1F2E9; color: #1B8A5A; }
+    .p-prog  { background: #F6EBD6; color: #9A6512; }
+    .p-not   { background: #E8EEF4; color: #5C6F7C; }
+    .ev { font-size: 12px; color: #5C6F7C; line-height: 1.35; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 36px; padding: 0 14px;
+           border-radius: 7px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; }
+    .b-pri { background: #1E6091; color: #FFFFFF; border: 1px solid #1E6091; }
+    .b-sec { background: #FFFFFF; color: #12232E; border: 1px solid #BECAD3; }
+    .b-dis { background: #F2F6F9; color: #A9B7C2; border: 1px solid #D2DCE3; cursor: default; }
+    .cite { font-size: 11px; color: #8296A4; line-height: 1.35; }
+    .cl { color: #1E6091; text-decoration: underline dotted; cursor: pointer; }
+    .rid { display: inline-flex; align-items: center; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px;
+           background: #F2F6F9; color: #5C6F7C; border: 1px solid #D2DCE3; white-space: nowrap; }
+    .tab { display: flex; align-items: center; gap: 7px; padding: 12px 16px; font-size: 13px; font-weight: 600;
+           color: #5C6F7C; border-bottom: 2px solid transparent; cursor: pointer; }
+    .tab.on { color: #12232E; border-bottom-color: #1E6091; }
+    .dot { width: 8px; height: 8px; border-radius: 999px; }
+    .lr { display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 10px; align-items: start;
+          padding: 10px 16px; border-top: 1px solid #EEF2F5; font-size: 12.5px; line-height: 1.45; }
+    .sect { padding: 14px 16px 10px; display: flex; align-items: center; gap: 10px; }
+    .rad { width: 15px; height: 15px; border-radius: 999px; border: 1.5px solid #BECAD3; background: #FFFFFF;
+           flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+    .rad.on { border-color: #1E6091; }
+    .rad.on .d { width: 8px; height: 8px; border-radius: 999px; background: #1E6091; }
+    .nr { display: grid; grid-template-columns: 170px minmax(0, 1fr); gap: 10px; align-items: start;
+          padding: 9px 16px; border-top: 1px solid #EEF2F5; font-size: 12.5px; line-height: 1.4; }
+    .nrl { font-weight: 600; }
+    .ok { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; font-weight: 700; color: #1B8A5A; }
+  </style>
+</helmet>
+
+<div style="padding: 20px; width: 1220px; background: #D8E0E8;">
+
+  <!-- status strip — this tab's hub row (a new row; see note above this frame) -->
+  <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 10px 14px; margin-bottom: 14px;">
+    <button class="pill p-not" style="border: 0; height: 26px; padding: 0 11px; font-family: inherit; cursor: pointer;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5C6F7C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+      Not started
+    </button>
+    <span class="ev" style="flex-grow: 1;">Texas · one decision to confirm</span>
+    <span style="font-size: 11.5px; color: #8296A4;">Compliance and Policies Setup · new row</span>
+    <button class="btn b-dis" style="height: 30px;">Attest as complete</button>
+  </div>
+
+  <div class="card">
+    <div style="display: flex; align-items: center; border-bottom: 1px solid #D2DCE3; padding: 0 8px;">
+      <div class="tab"><span class="dot" style="background: #D9A441;"></span>Vague requests and clarification</div>
+      <div class="tab"><span class="dot" style="background: #D9A441;"></span>Exemptions and appeals</div>
+      <div class="tab on"><span class="dot" style="background: #A9B7C2;"></span>Who is allowed to request</div>
+    </div>
+
+    <div style="padding: 16px 20px; border-bottom: 1px solid #D2DCE3; display: flex; align-items: flex-start; gap: 16px;">
+      <div style="flex-grow: 1;">
+        <div style="font-size: 19px; font-weight: 700;">Who is allowed to request</div>
+        <div style="font-size: 12.5px; color: #5C6F7C; margin-top: 3px;">In Texas, anyone. One decision the statute leaves to the city — everything else is confirming what the law already settles.</div>
+      </div>
+      <span class="pill p-prog">1 decision to confirm</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 560px minmax(0, 1fr); gap: 0;">
+
+      <!-- ============ WHAT TEXAS LAW SAYS ============ -->
+      <div style="border-right: 1px solid #D2DCE3;">
+        <div class="sect">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E3A5C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+          <div style="flex-grow: 1;">
+            <div style="font-size: 14px; font-weight: 700;">What Texas law says</div>
+            <div class="hint" style="margin-top: 1px;">Loaded when the state was locked. Click a citation to read the statute text behind it.</div>
+          </div>
+          <span class="pill p-ready">4 rules</span>
+        </div>
+
+        <div class="lr">
+          <span class="rid">TX-0001</span>
+          <div>Any person may request public information, and the city must promptly produce it for inspection, copies, or both.
+            <div class="cite" style="margin-top: 3px;"><span class="cl">Tex. Gov't Code § 552.221(a)</span></div>
+          </div>
+        </div>
+        <div class="lr">
+          <span class="rid">TX-0002</span>
+          <div>The city may not ask what the information will be used for.
+            <div class="cite" style="margin-top: 3px;"><span class="cl">Tex. Gov't Code § 552.222(b)</span></div>
+          </div>
+        </div>
+        <div class="lr">
+          <span class="rid">TX-0003</span>
+          <div>There is no residency requirement — "any person" means anyone, wherever they live.
+            <div class="cite" style="margin-top: 3px;"><span class="cl">Tex. Gov't Code § 552.221(a)</span></div>
+          </div>
+        </div>
+        <div class="lr">
+          <span class="rid">TX-0004</span>
+          <div>The city is not required to accept a request from an incarcerated or confined person, or that person's agent — except the person's attorney asking for information that may be disclosed.
+            <div class="cite" style="margin-top: 3px;"><span class="cl">Tex. Gov't Code § 552.028(a)</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ============ THE CITY'S POSTURE ============ -->
+      <div>
+        <div class="sect">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A6512" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+          <div style="flex-grow: 1;">
+            <div style="font-size: 14px; font-weight: 700;">What this city decides</div>
+            <div class="hint" style="margin-top: 1px;">One decision. Confirming it records who decided, and when.</div>
+          </div>
+        </div>
+
+        <div style="margin: 0 16px 12px; padding: 12px 14px; border: 1px solid #F1D9A8; background: #FDF9F0; border-radius: 8px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div style="font-size: 12.5px; font-weight: 600; flex-grow: 1;">Requests from incarcerated individuals</div>
+            <span class="pill p-prog">Confirm the city's posture</span>
+          </div>
+          <div style="font-size: 12.5px; margin-top: 6px; line-height: 1.45;">Texas <b>allows</b> the city to refuse these requests; it does not require it. The system is set up to act on this rule, so the city must decide on the record.</div>
+          <div style="display: flex; align-items: flex-start; gap: 8px; margin-top: 9px;">
+            <div class="rad on"><div class="d"></div></div>
+            <span style="font-size: 12.5px;">Refuse them, as the statute allows — except through the person's attorney <span style="color: #8296A4;">(suggested — matches the state load)</span></span>
+          </div>
+          <div style="display: flex; align-items: flex-start; gap: 8px; margin-top: 6px;">
+            <div class="rad"></div>
+            <span style="font-size: 12.5px;">Accept and process them like any other request</span>
+          </div>
+          <div style="margin-top: 10px;"><button class="btn b-pri" style="height: 30px; font-size: 12px;">Confirm this decision</button></div>
+        </div>
+
+        <div class="sect" style="padding-top: 4px;">
+          <div style="flex-grow: 1;">
+            <div style="font-size: 13px; font-weight: 700;">Nothing else to decide</div>
+            <div class="hint" style="margin-top: 1px;">Texas keeps eligibility simple. Listed so it is clear the single decision above is all there is.</div>
+          </div>
+        </div>
+        <div class="nr"><span class="nrl">Identity</span><div>Anyone may request; contact details are only for replying. <span class="ok">✓ settled by law</span></div></div>
+        <div class="nr"><span class="nrl">Purpose</span><div>The city may not ask why — the system never records a purpose. <span class="ok">✓ settled by law</span></div></div>
+        <div class="nr"><span class="nrl">Residency</span><div>No requirement. <span class="ok">✓ settled by law</span></div></div>
+        <div class="nr"><span class="nrl">Requester class</span><div>No special classes of requester are switched on for Texas. <span class="ok">✓ nothing switched on</span></div></div>
+        <div class="nr" style="padding-bottom: 14px;"><span class="nrl">Repeat requesters</span><div>Texas handles heavy repeat use through time caps, not eligibility — those live with the fee rules and the requestor ledger. <span class="ok">✓ nothing switched on</span></div></div>
+      </div>
+    </div>
+
+    <div style="padding: 12px 20px; border-top: 1px solid #D2DCE3; background: #F2F6F9; border-radius: 0 0 10px 10px; display: flex; align-items: center; gap: 12px;">
+      <span class="hint" style="flex-grow: 1; margin-top: 0;">Attest becomes available once the one decision above is confirmed.</span>
+      <button class="btn b-dis">Attest as complete</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

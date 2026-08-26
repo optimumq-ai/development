@@ -175,4 +175,46 @@ staff-confirm-identity door; (3) **lookup by email** (finance staff, exact match
 **Open for Kevin:** who may open it · merge-two-addresses action · lookup by name? · where the lookup lives.
 Build after markup; first a real wizard submission on live (smoke test) so one true ledger exists.
 
+## 2f. Clarification · Exemptions · Eligibility — three-tab screen sketched 2026-08-26
+
+The slice decided at 2026-08-26 close (HANDOFF): ONE screen, three tabs, status-strip pattern, serving hub
+rows `clarification` (item 6, noScreen today), `exemptions` (item 7, `legal: true`) and a NEW eligibility row
+(the `eligibility` profile section exists — 6 dimensions, only `incarceration` gated — but no hub row yet).
+The strip follows the ACTIVE tab's row; each tab's dot on the tab bar shows its row's hub state.
+
+**Canvas:** https://claude.ai/code/artifact/ad29b14f-c181-407b-870c-f8045a840b61 (sources
+`docs/mockups/hub_links/clar_exempt_elig/` — Main = clarification tab, Exemptions, Eligibility,
+ClarificationLetter = the "View the letter" popup). Awaiting Kevin's markup.
+
+- **Clarification tab (TX_RULES_READABLE §4):** law panel = TX-0012/13/14/15 with citations (statute popup,
+  F1 pattern). A prominent master switch tops the choices column — the live import filed the domain
+  `enabled: false`, and while off the hub row can never leave Not started; the mock draws it ON with the
+  provenance in a hint. Five choices: vagueness screen wording · the clarification letter (standard wording +
+  View the letter; § 552.222(e) required-warning chip) · reply window (61 days, FIXED in TX, § 552.222(d)) ·
+  close-as-withdrawn (closure fixed, closing notice = city policy checkbox) · materially-revised reply (radio:
+  new request with new deadline, suggested / continue original).
+- **Exemptions tab (§7):** law panel drawn as the AG-process clock — by the 10th bd (ask AG + notify
+  requestor, TX-0016/18/S03/19), by the 15th bd (comments + copy, TX-0020/21), missed → presumed public
+  (TX-0022, red marker) — plus the no-AG-needed pair (previous determination TX-0017/S02; no responsive
+  records TX-S01, eff. 9/1/2025). Four choices: **where denial reasons come from** = amber card "the
+  Redaction rules library — not loaded yet", confirmable as understood (NOT `decision_reasons`; per the
+  handoff decision) · who may approve a denial = permission-group select, Legal Rules suggested · the denial
+  letter (standard wording + view; § 552.301(d) content chip) · denial-letter service deadline (days, city
+  policy). Footer notes attest needs the Legal Rules group.
+- **Eligibility tab (§11):** law panel TX-0001/02/03/04. One decision card — incarcerated requesters
+  (§ 552.028(a) allows refusal; radio refuse-as-allowed suggested, matches the gated dimension) with its own
+  Confirm. The other five dimensions listed under "Nothing else to decide" (settled by law / nothing switched
+  on) so the one-click attest is legible. Repeat-requester row cross-links time caps to fees/ledger.
+- **Letters:** standard wording only (decided 2026-08-26); the letter popup shows the REAL generated text
+  (`clarificationNotice.buildNotice` with graceDays 61, City of Autumn Falls letterhead). Flagged in-canvas:
+  the standard consequence sentence ("we may be unable to continue") is softer than TX's statutory
+  consequence (withdrawn on day 61) — strengthen now or wait for the template store?
+
+**Open for Kevin (drawn as sticky notes):** add the eligibility hub row to the Compliance lane with its door
+on tab 3? · one screen/three doors each preselecting its tab (like `/setup/fee-law?tab=test`) — OK? ·
+strengthen the TX consequence sentence now? **Build implications (not started):** switch-on writes
+`clarification.enabled = true` + the domain's five settings become confirmable goLive settings (today the
+section reports 0 settings); new hub item + reader for eligibility; exemption tab reuses the existing 4
+`knobs/Denial.*` settings; letter views render the existing code-generated text read-only.
+
 ## 3. Next rows (not yet discussed)

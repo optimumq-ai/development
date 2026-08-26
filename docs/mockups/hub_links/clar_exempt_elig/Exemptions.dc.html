@@ -1,0 +1,213 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; } a:hover { color: #0E3A5C; }
+    .card { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .hint { font-size: 11.5px; color: #8296A4; margin-top: 4px; line-height: 1.4; }
+    .in { display: flex; align-items: center; height: 32px; border: 1px solid #BECAD3; border-radius: 7px;
+          background: #FFFFFF; padding: 0 10px; font-size: 13px; color: #12232E; }
+    .in.empty { color: #A9B7C2; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
+            border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+    .p-ready { background: #E1F2E9; color: #1B8A5A; }
+    .p-prog  { background: #F6EBD6; color: #9A6512; }
+    .p-wait  { background: #EDE9FE; color: #5B21B6; }
+    .ev { font-size: 12px; color: #5C6F7C; line-height: 1.35; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 36px; padding: 0 14px;
+           border-radius: 7px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; }
+    .b-pri { background: #1E6091; color: #FFFFFF; border: 1px solid #1E6091; }
+    .b-sec { background: #FFFFFF; color: #12232E; border: 1px solid #BECAD3; }
+    .b-dis { background: #F2F6F9; color: #A9B7C2; border: 1px solid #D2DCE3; cursor: default; }
+    .cite { font-size: 11px; color: #8296A4; line-height: 1.35; }
+    .cl { color: #1E6091; text-decoration: underline dotted; cursor: pointer; }
+    .bind { display: inline-flex; align-items: center; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 4px; white-space: nowrap; }
+    .b-fixed { background: #E8EEF4; color: #0E3A5C; border: 1px solid #C5D3DF; }
+    .b-soft  { background: #FFFFFF; color: #5C6F7C; border: 1px dashed #BECAD3; }
+    .rid { display: inline-flex; align-items: center; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px;
+           background: #F2F6F9; color: #5C6F7C; border: 1px solid #D2DCE3; white-space: nowrap; }
+    .tab { display: flex; align-items: center; gap: 7px; padding: 12px 16px; font-size: 13px; font-weight: 600;
+           color: #5C6F7C; border-bottom: 2px solid transparent; cursor: pointer; }
+    .tab.on { color: #12232E; border-bottom-color: #1E6091; }
+    .dot { width: 8px; height: 8px; border-radius: 999px; }
+    .ml { display: grid; grid-template-columns: 128px minmax(0, 1fr); gap: 12px; align-items: start;
+          padding: 11px 16px; border-top: 1px solid #EEF2F5; font-size: 12.5px; line-height: 1.45; }
+    .day { font-size: 11px; font-weight: 700; color: #0E3A5C; background: #E8EEF4; border: 1px solid #C5D3DF;
+           border-radius: 6px; padding: 4px 8px; text-align: center; line-height: 1.3; }
+    .day.red { color: #B02A37; background: #FBEDEE; border-color: #EFC7CB; }
+    .sect { padding: 14px 16px 10px; display: flex; align-items: center; gap: 10px; }
+    .grp { padding: 10px 16px 4px; font-size: 12px; font-weight: 700; color: #12232E; background: #F8FAFC; border-top: 1px solid #D2DCE3; }
+    .cbx { margin: 0 16px 12px; padding: 12px 14px; border: 1px solid #D2DCE3; border-radius: 8px; }
+    .cb { width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid #BECAD3; background: #FFFFFF; flex-shrink: 0; margin-top: 1px; }
+    .chl { font-size: 12.5px; font-weight: 600; }
+  </style>
+</helmet>
+
+<div style="padding: 20px; width: 1220px; background: #D8E0E8;">
+
+  <!-- status strip — this tab's hub row (a Legal Rules section) -->
+  <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 10px 14px; margin-bottom: 14px;">
+    <button class="pill p-prog" style="border: 0; height: 26px; padding: 0 11px; font-family: inherit; cursor: pointer;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9A6512" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+      In progress
+    </button>
+    <span class="ev" style="flex-grow: 1;">Texas · 0 of 4 choices made · not yet confirmed</span>
+    <span style="font-size: 11.5px; color: #8296A4;">Compliance and Policies Setup · item 7 of 11</span>
+    <button class="btn b-dis" style="height: 30px;">Attest as complete</button>
+  </div>
+
+  <div class="card">
+    <div style="display: flex; align-items: center; border-bottom: 1px solid #D2DCE3; padding: 0 8px;">
+      <div class="tab"><span class="dot" style="background: #D9A441;"></span>Vague requests and clarification</div>
+      <div class="tab on"><span class="dot" style="background: #D9A441;"></span>Exemptions and appeals</div>
+      <div class="tab"><span class="dot" style="background: #A9B7C2;"></span>Who is allowed to request</div>
+    </div>
+
+    <div style="padding: 16px 20px; border-bottom: 1px solid #D2DCE3; display: flex; align-items: flex-start; gap: 16px;">
+      <div style="flex-grow: 1;">
+        <div style="font-size: 19px; font-weight: 700;">Exemptions and appeals</div>
+        <div style="font-size: 12.5px; color: #5C6F7C; margin-top: 3px;">Withholding information in Texas runs through the attorney general on strict clocks. The clocks are the law's; the city decides who approves a denial and how the letter goes out.</div>
+      </div>
+      <span class="pill p-wait">Reasons library · not loaded yet</span>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 640px minmax(0, 1fr); gap: 0;">
+
+      <!-- ============ WHAT TEXAS LAW SAYS ============ -->
+      <div style="border-right: 1px solid #D2DCE3;">
+        <div class="sect">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E3A5C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+          <div style="flex-grow: 1;">
+            <div style="font-size: 14px; font-weight: 700;">What Texas law says</div>
+            <div class="hint" style="margin-top: 1px;">Loaded when the state was locked. Click a citation to read the statute text behind it.</div>
+          </div>
+          <span class="pill p-ready">10 rules</span>
+        </div>
+
+        <div class="grp">Withholding needs the attorney general — the clock</div>
+        <div class="ml">
+          <div class="day">By the 10th<br>business day</div>
+          <div>Ask the attorney general for a decision, naming the exact exceptions claimed — and tell the requestor in writing that the city is withholding and has asked, with a copy of that letter.
+            <div class="cite" style="margin-top: 3px;"><span class="rid">TX-0016</span> <span class="rid">TX-0018</span> <span class="rid">TX-S03</span> <span class="rid">TX-0019</span> &nbsp;<span class="cl">§ 552.301(a), (b), (d)</span></div>
+          </div>
+        </div>
+        <div class="ml">
+          <div class="day">By the 15th<br>business day</div>
+          <div>Send the attorney general written comments on the exceptions, a copy of the request, and a copy or sample of the records — and copy those comments to the requestor.
+            <div class="cite" style="margin-top: 3px;"><span class="rid">TX-0020</span> <span class="rid">TX-0021</span> &nbsp;<span class="cl">§ 552.301(e), (e-1)</span></div>
+          </div>
+        </div>
+        <div class="ml">
+          <div class="day red">If a deadline<br>is missed</div>
+          <div>The information is presumed public and must be released, unless there is a compelling reason to withhold it.
+            <div class="cite" style="margin-top: 3px;"><span class="rid">TX-0022</span> &nbsp;<span class="cl">§ 552.302</span></div>
+          </div>
+        </div>
+
+        <div class="grp">When no attorney general ask is needed</div>
+        <div class="ml">
+          <div class="day">By the 10th<br>business day</div>
+          <div>A previous determination already covers the information — no new ask, but the requestor must still be told in writing which determination the city relies on.
+            <div class="cite" style="margin-top: 3px;"><span class="rid">TX-0017</span> <span class="rid">TX-S02</span> &nbsp;<span class="cl">§ 552.301(a); § 552.221(g)</span> <span style="color: #9A6512; font-weight: 600;">notice new, in force 9/1/2025</span></div>
+          </div>
+        </div>
+        <div class="ml">
+          <div class="day">By the 10th<br>business day</div>
+          <div>The city has no records answering the request — the requestor must be told so in writing.
+            <div class="cite" style="margin-top: 3px;"><span class="rid">TX-S01</span> &nbsp;<span class="cl">§ 552.221(f)</span> <span style="color: #9A6512; font-weight: 600;">new, in force 9/1/2025</span></div>
+          </div>
+        </div>
+
+        <div style="padding: 12px 16px; border-top: 1px solid #EEF2F5;">
+          <span class="hint" style="margin-top: 0;">These deadlines are the state's, not choices — shown so the choices on the right make sense.</span>
+        </div>
+      </div>
+
+      <!-- ============ THE CITY'S CHOICES ============ -->
+      <div>
+        <div class="sect">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A6512" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+          <div style="flex-grow: 1;">
+            <div style="font-size: 14px; font-weight: 700;">What this city decides</div>
+            <div class="hint" style="margin-top: 1px;">Four choices. Confirming a suggested answer is still a decision, and it is recorded with your name.</div>
+          </div>
+          <span class="pill p-prog">0 of 4 decided</span>
+        </div>
+
+        <!-- 1 · where reasons come from — the library is a different setup row -->
+        <div class="cbx" style="background: #FDF9F0; border-color: #F1D9A8;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="chl" style="flex-grow: 1;">Where denial reasons come from</div>
+            <span class="pill p-wait">Not loaded yet</span>
+          </div>
+          <div style="font-size: 12.5px; margin-top: 6px; line-height: 1.45;">Every denial cites a reason from the <b>Redaction rules library</b>, keyed to the statute it relies on. That library is its own setup row: documents go in, rules come out as drafts, legal approves them. Nothing is loaded yet.</div>
+          <div style="display: flex; align-items: flex-start; gap: 8px; margin-top: 9px;">
+            <div class="cb"></div>
+            <span style="font-size: 12.5px;">Understood — denials will pick their reasons from that library once it is loaded</span>
+          </div>
+          <div class="hint"><a href="#">Open the Redaction rules library →</a></div>
+        </div>
+
+        <!-- 2 · who approves -->
+        <div class="cbx">
+          <div style="display: flex; align-items: flex-start; gap: 12px;">
+            <div style="flex-grow: 1;">
+              <div class="chl">Who may approve a denial</div>
+              <div class="in" style="width: 330px; margin-top: 7px; justify-content: space-between;">
+                <span>Legal Rules — the Senior Legal attorney <span style="color: #8296A4;">(suggested)</span></span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg>
+              </div>
+              <div class="hint">Texas does not say who must approve — this is the city's own routing. A denial cannot go out without this group's approval.</div>
+            </div>
+            <span class="cite"><span class="bind b-soft">City routing</span></span>
+          </div>
+        </div>
+
+        <!-- 3 · the letter -->
+        <div class="cbx">
+          <div style="display: flex; align-items: flex-start; gap: 12px;">
+            <div style="flex-grow: 1;">
+              <div class="chl">The denial letter</div>
+              <div style="display: flex; align-items: center; gap: 10px; margin-top: 7px;">
+                <span style="font-size: 12.5px; font-weight: 600;">Standard wording</span>
+                <button class="btn b-sec" style="height: 28px; font-size: 12px;">View the letter</button>
+              </div>
+              <div class="hint">Must name the reason relied on and, where the attorney general was asked, carry the required notices. Every city sends the standard letter for now — letter wording a city can edit comes later, as its own piece of work.</div>
+            </div>
+            <span class="cite"><span class="bind b-fixed">Required content</span> <span class="cl">§ 552.301(d)</span></span>
+          </div>
+        </div>
+
+        <!-- 4 · the city's own deadline -->
+        <div class="cbx" style="margin-bottom: 16px;">
+          <div style="display: flex; align-items: flex-start; gap: 12px;">
+            <div style="flex-grow: 1;">
+              <div class="chl">How quickly the denial letter must go out</div>
+              <div class="in empty" style="width: 140px; margin-top: 7px;">days after the decision</div>
+              <div class="hint">Texas puts no deadline on this letter itself — the attorney-general notices on the left have their own clocks. This is the city's own service target.</div>
+            </div>
+            <span class="cite"><span class="bind b-soft">City policy</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding: 12px 20px; border-top: 1px solid #D2DCE3; background: #F2F6F9; border-radius: 0 0 10px 10px; display: flex; align-items: center; gap: 12px;">
+      <span class="hint" style="flex-grow: 1; margin-top: 0;">This is a legal section: attesting it requires the <b>Legal Rules</b> group — the Senior Legal attorney owns it.</span>
+      <button class="btn b-sec">Save choices</button>
+      <button class="btn b-dis">Attest as complete</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,225 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; } a:hover { color: #0E3A5C; }
+    .card { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .hint { font-size: 11.5px; color: #8296A4; margin-top: 4px; line-height: 1.4; }
+    .in { display: flex; align-items: center; height: 32px; border: 1px solid #BECAD3; border-radius: 7px;
+          background: #FFFFFF; padding: 0 10px; font-size: 13px; color: #12232E; }
+    .in.empty { color: #A9B7C2; }
+    .in.ro { background: #F2F6F9; color: #5C6F7C; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
+            border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+    .p-ready { background: #E1F2E9; color: #1B8A5A; }
+    .p-prog  { background: #F6EBD6; color: #9A6512; }
+    .p-wait  { background: #EDE9FE; color: #5B21B6; }
+    .p-not   { background: #E8EEF4; color: #5C6F7C; }
+    .ev { font-size: 12px; color: #5C6F7C; line-height: 1.35; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 36px; padding: 0 14px;
+           border-radius: 7px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; }
+    .b-pri { background: #1E6091; color: #FFFFFF; border: 1px solid #1E6091; }
+    .b-sec { background: #FFFFFF; color: #12232E; border: 1px solid #BECAD3; }
+    .b-dis { background: #F2F6F9; color: #A9B7C2; border: 1px solid #D2DCE3; cursor: default; }
+    .cite { font-size: 11px; color: #8296A4; line-height: 1.35; }
+    .cl { color: #1E6091; text-decoration: underline dotted; cursor: pointer; }
+    .bind { display: inline-flex; align-items: center; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 4px; white-space: nowrap; }
+    .b-fixed { background: #E8EEF4; color: #0E3A5C; border: 1px solid #C5D3DF; }
+    .b-soft  { background: #FFFFFF; color: #5C6F7C; border: 1px dashed #BECAD3; }
+    .rid { display: inline-flex; align-items: center; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 4px;
+           background: #F2F6F9; color: #5C6F7C; border: 1px solid #D2DCE3; white-space: nowrap; }
+    .tab { display: flex; align-items: center; gap: 7px; padding: 12px 16px; font-size: 13px; font-weight: 600;
+           color: #5C6F7C; border-bottom: 2px solid transparent; cursor: pointer; }
+    .tab.on { color: #12232E; border-bottom-color: #1E6091; }
+    .dot { width: 8px; height: 8px; border-radius: 999px; }
+    .lr { display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 10px; align-items: start;
+          padding: 10px 16px; border-top: 1px solid #EEF2F5; font-size: 12.5px; line-height: 1.45; }
+    .ch { display: grid; grid-template-columns: 190px minmax(0, 1fr) 170px; gap: 12px; align-items: start;
+          padding: 12px 16px; border-top: 1px solid #EEF2F5; }
+    .chl { font-size: 12.5px; font-weight: 600; line-height: 1.35; padding-top: 2px; }
+    .sect { padding: 14px 16px 10px; display: flex; align-items: center; gap: 10px; }
+    .ta { border: 1px solid #BECAD3; border-radius: 7px; background: #FFFFFF; padding: 8px 10px;
+          font-size: 12.5px; color: #12232E; line-height: 1.45; }
+    .sw { width: 34px; height: 20px; border-radius: 999px; position: relative; flex-shrink: 0; }
+    .sw.on { background: #1B8A5A; } .sw.off { background: #BECAD3; }
+    .sw .k { width: 16px; height: 16px; border-radius: 999px; background: #FFFFFF; position: absolute; top: 2px; }
+    .sw.on .k { right: 2px; } .sw.off .k { left: 2px; }
+    .rad { width: 15px; height: 15px; border-radius: 999px; border: 1.5px solid #BECAD3; background: #FFFFFF;
+           flex-shrink: 0; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+    .rad.on { border-color: #1E6091; }
+    .rad.on .d { width: 8px; height: 8px; border-radius: 999px; background: #1E6091; }
+    .cb { width: 15px; height: 15px; border-radius: 4px; border: 1.5px solid #BECAD3; background: #FFFFFF; flex-shrink: 0; margin-top: 1px; }
+  </style>
+</helmet>
+
+<div style="padding: 20px; width: 1220px; background: #D8E0E8;">
+
+  <!-- status strip — the shared pattern; reflects the ACTIVE tab's hub row -->
+  <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 10px 14px; margin-bottom: 14px;">
+    <button class="pill p-prog" style="border: 0; height: 26px; padding: 0 11px; font-family: inherit; cursor: pointer;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9A6512" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+      In progress
+    </button>
+    <span class="ev" style="flex-grow: 1;">Texas · clarification switched on · 0 of 5 choices made · not yet confirmed</span>
+    <span style="font-size: 11.5px; color: #8296A4;">Compliance and Policies Setup · item 6 of 11</span>
+    <button class="btn b-dis" style="height: 30px;">Attest as complete</button>
+  </div>
+
+  <div class="card">
+    <!-- tabs: one screen, three hub rows; the strip above follows the active tab -->
+    <div style="display: flex; align-items: center; border-bottom: 1px solid #D2DCE3; padding: 0 8px;">
+      <div class="tab on"><span class="dot" style="background: #D9A441;"></span>Vague requests and clarification</div>
+      <div class="tab"><span class="dot" style="background: #D9A441;"></span>Exemptions and appeals</div>
+      <div class="tab"><span class="dot" style="background: #A9B7C2;"></span>Who is allowed to request</div>
+    </div>
+
+    <div style="padding: 16px 20px; border-bottom: 1px solid #D2DCE3; display: flex; align-items: flex-start; gap: 16px;">
+      <div style="flex-grow: 1;">
+        <div style="font-size: 19px; font-weight: 700;">Vague requests and clarification</div>
+        <div style="font-size: 12.5px; color: #5C6F7C; margin-top: 3px;">What happens when a request is too unclear to search for: what Texas law says, and the few things this city decides.</div>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 560px minmax(0, 1fr); gap: 0;">
+
+      <!-- ============ WHAT TEXAS LAW SAYS ============ -->
+      <div style="border-right: 1px solid #D2DCE3;">
+        <div class="sect">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E3A5C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
+          <div style="flex-grow: 1;">
+            <div style="font-size: 14px; font-weight: 700;">What Texas law says</div>
+            <div class="hint" style="margin-top: 1px;">Loaded when the state was locked. Not editable — click a citation to read the statute text behind it.</div>
+          </div>
+          <span class="pill p-ready">4 rules</span>
+        </div>
+
+        <div class="lr">
+          <span class="rid">TX-0012</span>
+          <div>If a request is unclear, the city may ask the requestor to clarify it; for a very large request it may discuss narrowing the scope.
+            <div class="cite" style="margin-top: 3px;"><span class="cl">Tex. Gov't Code § 552.222(b)</span></div>
+          </div>
+        </div>
+        <div class="lr">
+          <span class="rid">TX-0013</span>
+          <div>A written clarification request must say what happens if the requestor does not reply in time.
+            <div class="cite" style="margin-top: 3px;"><span class="cl">Tex. Gov't Code § 552.222(e)</span></div>
+          </div>
+        </div>
+        <div class="lr">
+          <span class="rid">TX-0014</span>
+          <div>If no written reply has arrived by the 61st day after the clarification request was sent, the request is considered withdrawn.
+            <div class="cite" style="margin-top: 3px;"><span class="cl">Tex. Gov't Code § 552.222(d)</span></div>
+          </div>
+        </div>
+        <div class="lr">
+          <span class="rid">TX-0015</span>
+          <div>A good-faith clarification request pauses the 10-business-day clock for asking the attorney general, until the requestor replies.
+            <div class="cite" style="margin-top: 3px;"><span class="cl">City of Dallas v. Abbott, 304 S.W.3d 380 (Tex. 2010)</span></div>
+          </div>
+        </div>
+
+        <div style="padding: 12px 16px; border-top: 1px solid #EEF2F5;">
+          <span class="hint" style="margin-top: 0;">The deadlines here are the state's, not choices. They are shown so the choices on the right make sense.</span>
+        </div>
+      </div>
+
+      <!-- ============ THE CITY'S CHOICES ============ -->
+      <div>
+        <div class="sect">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9A6512" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>
+          <div style="flex-grow: 1;">
+            <div style="font-size: 14px; font-weight: 700;">What this city decides</div>
+            <div class="hint" style="margin-top: 1px;">Five choices. Confirming the suggested answer is still a decision, and it is recorded with your name.</div>
+          </div>
+          <span class="pill p-prog">0 of 5 decided</span>
+        </div>
+
+        <!-- the master switch — the act that lets this hub row move at all -->
+        <div style="margin: 0 16px 12px; padding: 12px 14px; background: #F2F6F9; border: 1px solid #D2DCE3; border-radius: 8px; display: flex; align-items: center; gap: 12px;">
+          <div class="sw on"><div class="k"></div></div>
+          <div style="flex-grow: 1;">
+            <div style="font-size: 12.5px; font-weight: 600;">Ask for clarification when a request is unclear</div>
+            <div class="hint" style="margin-top: 1px;">The Texas rule load arrived with this switched off. While it is off, staff cannot send a clarification letter and this row never leaves Not started. Shown switched on here.</div>
+          </div>
+        </div>
+
+        <div class="ch">
+          <div class="chl">When is a request too vague?</div>
+          <div>
+            <div class="ta">The request does not reasonably describe the records to search for — for example, no subject, date range, or department.</div>
+            <div class="hint">The wording intake staff see when they mark a request as too vague. The legal test itself comes from the statute.</div>
+          </div>
+          <span class="cite"><span class="bind b-soft">Statutory standard</span> <span class="cl">§ 552.222(b)</span></span>
+        </div>
+
+        <div class="ch">
+          <div class="chl">The clarification letter</div>
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <span style="font-size: 12.5px; font-weight: 600;">Standard wording</span>
+              <button class="btn b-sec" style="height: 28px; font-size: 12px;">View the letter</button>
+            </div>
+            <div class="hint">Every city sends the standard letter for now. Texas requires it to say what happens if the requestor does not reply — the standard letter's warning sentence is softer than the statute's actual consequence; see the letter view. Letter wording a city can edit comes later, as its own piece of work.</div>
+          </div>
+          <span class="cite"><span class="bind b-fixed">Required content</span> <span class="cl">§ 552.222(e)</span></span>
+        </div>
+
+        <div class="ch">
+          <div class="chl">How long may the requestor take to reply?</div>
+          <div>
+            <div class="in ro" style="width: 198px;">61 days — set by Texas law</div>
+            <div class="hint">If no written reply arrives by the 61st day, Texas law treats the request as withdrawn. Not a choice in Texas.</div>
+          </div>
+          <span class="cite"><span class="bind b-fixed">Fixed</span> <span class="cl">§ 552.222(d)</span></span>
+        </div>
+
+        <div class="ch">
+          <div class="chl">When the reply window passes</div>
+          <div>
+            <div style="font-size: 12.5px;">The request closes as withdrawn — Texas law decides that, not the city.</div>
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-top: 7px;">
+              <div class="cb"></div>
+              <span style="font-size: 12.5px;">Also send the requestor a short closing notice <span style="color: #8296A4;">(suggested)</span></span>
+            </div>
+            <div class="hint">The closing itself is the law's consequence; whether to send a notice about it is the city's own choice.</div>
+          </div>
+          <span class="cite"><span class="bind b-fixed">Closure: fixed</span> <span class="bind b-soft">Notice: city policy</span></span>
+        </div>
+
+        <div class="ch" style="padding-bottom: 16px;">
+          <div class="chl">If the reply asks for something different</div>
+          <div>
+            <div style="display: flex; align-items: flex-start; gap: 8px;">
+              <div class="rad on"><div class="d"></div></div>
+              <span style="font-size: 12.5px;">Treat it as a new request, with a new deadline <span style="color: #8296A4;">(suggested)</span></span>
+            </div>
+            <div style="display: flex; align-items: flex-start; gap: 8px; margin-top: 6px;">
+              <div class="rad"></div>
+              <span style="font-size: 12.5px;">Continue the original request and its deadline</span>
+            </div>
+            <div class="hint">A reply that only narrows or explains the original request always continues it. This choice is only about a reply that changes what is being asked for.</div>
+          </div>
+          <span class="cite"><span class="bind b-soft">City policy</span> the law is silent</span>
+        </div>
+      </div>
+    </div>
+
+    <div style="padding: 12px 20px; border-top: 1px solid #D2DCE3; background: #F2F6F9; border-radius: 0 0 10px 10px; display: flex; align-items: center; gap: 12px;">
+      <span class="hint" style="flex-grow: 1; margin-top: 0;">Attest becomes available once clarification is switched on and all five choices are confirmed.</span>
+      <button class="btn b-sec">Save choices</button>
+      <button class="btn b-dis">Attest as complete</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

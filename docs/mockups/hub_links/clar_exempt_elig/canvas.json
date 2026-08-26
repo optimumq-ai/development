@@ -1,0 +1,14 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1260, "h": 1120, "title": "Clarification tab" },
+    { "file": "Exemptions.dc.html", "x": 1380, "y": 0, "w": 1260, "h": 1060, "title": "Exemptions and appeals tab" },
+    { "file": "Eligibility.dc.html", "x": 2760, "y": 0, "w": 1260, "h": 920, "title": "Who is allowed to request tab" },
+    { "file": "ClarificationLetter.dc.html", "x": 0, "y": 1280, "w": 816, "h": 1000, "title": "View the letter" }
+  ],
+  "annotations": [
+    { "id": "note-off-switch", "x": 0, "y": -170, "w": 340, "text": "The Texas load files clarification switched OFF, and the hub row can never leave Not started until someone turns it on. The switch at the top of this tab is that act — drawn ON here so the rest of the tab is visible." },
+    { "id": "note-hub-row", "x": 2760, "y": -170, "w": 340, "text": "\"Who is allowed to request\" has no hub row today — the profile section exists, the row doesn't. Plan: add it to the Compliance lane and point its door at this screen's third tab; each of the three rows opens the same screen on its own tab. OK?" },
+    { "id": "note-letters", "x": 900, "y": 1300, "w": 360, "text": "Letters stay standard wording in this slice — an editable template store with per-state required-content checks is its own later piece (after the redaction library).\n\nOne question inside the letter: the reply-window sentence is softer than the Texas consequence (withdrawn on day 61). Strengthen the standard sentence for TX now, or wait for templates?" }
+  ],
+  "launch": { "view": "canvas" }
+}
