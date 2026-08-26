@@ -12,13 +12,10 @@ function r2(n) { return Math.round((Number(n) || 0) * 100) / 100; }
 // POST /api/fee-sandbox/preview - run the REAL fee engine on hypothetical inputs (no persistence).
 // Lets a reviewer validate fee/estimate behavior (waiver, extra costs, min/max, deposit, payment)
 // against the live config before approving the Fees phase. Same code path as a real estimate.
-router.post('/preview', requireAuth, async function (req, res) {
-  const jrow = await get("SELECT value FROM system_config WHERE key='jurisdiction_profile'");
-  const jid = jrow && jrow.value;
-  const prof = await get("SELECT * FROM fee_profiles WHERE jurisdiction_id = ? AND context = 'FR' ORDER BY CASE WHEN status='active' THEN 0 ELSE 1 END, version DESC LIMIT 1", [jid]);
-  if (!prof) return res.status(400).json({ error: 'No fee profile is configured for the active jurisdiction yet.' });
-  let config; try { config = JSON.parse(prof.config_json || '{}'); } catch (e) { config = {}; }
-  const b = req.body || {};
+// The pricing itself, reusable: `config` is any fee-engine config (the active profile, or the fee-law
+// screen's unapproved draft), `versionLabel` is what the result reports it priced against.
+async function previewWith(config, b, versionLabel) {
+  b = b || {};
   const q = b.quantities || {};
   const request = {
     components: [{ id: 'sandbox', recordType: b.recordTypeId || 'sandbox', quantities: {
@@ -53,8 +50,8 @@ router.post('/preview', requireAuth, async function (req, res) {
     { agencyName: (agencyRow && agencyRow.value) || 'the City', paymentPlan: paymentPlan }
   );
 
-  res.json({
-    configVersion: prof.version,
+  return {
+    configVersion: versionLabel,
     requestLevel: rl,
     computedTotal: rl.total,
     flags: { floorApplied: rl.floorApplied, ceilingApplied: rl.ceilingApplied, deMinimisWaived: rl.deMinimisWaived },
@@ -65,7 +62,18 @@ router.post('/preview', requireAuth, async function (req, res) {
     paymentPlan: paymentPlan,
     paymentTimingSource: hasProfilePT ? 'profile' : 'derived',
     requestorNotice: { subject: notice.subject, text: notice.text }
-  });
+  };
+}
+
+router.post('/preview', requireAuth, async function (req, res) {
+  const jrow = await get("SELECT value FROM system_config WHERE key='jurisdiction_profile'");
+  const jid = jrow && jrow.value;
+  const prof = await get("SELECT * FROM fee_profiles WHERE jurisdiction_id = ? AND context = 'FR' ORDER BY CASE WHEN status='active' THEN 0 ELSE 1 END, version DESC LIMIT 1", [jid]);
+  if (!prof) return res.status(400).json({ error: 'No fee profile is configured for the active jurisdiction yet.' });
+  let config; try { config = JSON.parse(prof.config_json || '{}'); } catch (e) { config = {}; }
+  try { res.json(await previewWith(config, req.body, prof.version)); }
+  catch (e) { res.status(500).json({ error: e.message }); }
 });
 
 module.exports = router;
+module.exports.previewWith = previewWith;

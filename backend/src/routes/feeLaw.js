@@ -54,6 +54,26 @@ router.post('/read-document', requireAuth, async function (req, res) {
   } catch (e) { fail(res, e, 'The document could not be read.'); }
 });
 
+// Price a sample request the way an estimate would — against the APPROVED schedule, or against the
+// screen's current DRAFT (the law's figures + today's decisions, composed but not saved) so the calculator
+// is useful before version 1 exists. Nothing is persisted either way.
+router.post('/preview', requireAuth, async function (req, res) {
+  try {
+    var jid = await JR.activeJid();
+    var s = await FL.screen(jid);
+    if (!s.jurisdiction) return res.status(409).json({ error: 'No jurisdiction is locked yet.' });
+    var against = (req.body && req.body.against) === 'active' && s.version ? 'active' : 'draft';
+    var config, label;
+    if (against === 'active') {
+      var row = await require('../db').get('SELECT config_json FROM fee_profiles WHERE id = ?', [s.version.id]);
+      config = JSON.parse((row && row.config_json) || '{}'); label = 'v' + s.version.version;
+    } else { config = FL.compose(s); label = 'draft'; }
+    var out = await require('./feeSandbox').previewWith(config, req.body || {}, label);
+    out.against = against; out.undecided = s.counts.undecided;
+    res.json(out);
+  } catch (e) { fail(res, e, 'The sample estimate could not be computed.'); }
+});
+
 router.post('/approve', requireAuth, async function (req, res) {
   if (!mayEdit(req.user)) return res.status(403).json({ error: 'Approving the fee schedule needs the compliance_policy or legal_rules permission group.', code: 'PERMISSION_REQUIRED' });
   try {

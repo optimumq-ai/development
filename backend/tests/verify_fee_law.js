@@ -88,6 +88,9 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
   var d1 = await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: dec });
   ok('C4 twelve decisions saved ("none" and "actual" count as decisions) → 12 of 13, 1 undecided', d1.status === 200 && d1.body.refused.length === 0 && d1.body.screen.counts.decided === 12 && d1.body.screen.counts.undecided === 1, JSON.stringify(d1.body.screen && d1.body.screen.counts));
 
+  var pv = await callAs(U.dir, 'POST', '/fee-law/preview', { against: 'active', quantities: { searchHours: 3, bwPages: 200 } });
+  ok('C5 the test calculator prices against the DRAFT before any version exists (200 pages less the 10 free at 0.125 = $23.75; 3 search hrs at the $12 decision, 1 free → $24)', pv.status === 200 && pv.body.against === 'draft' && pv.body.configVersion === 'draft' && Math.abs(pv.body.requestLevel.duplicationSubtotal - 23.75) < 0.01 && Math.abs(pv.body.requestLevel.laborSubtotal - 24) < 0.01, JSON.stringify(pv.body).slice(0, 200));
+
   console.log('\n=== D. APPROVING ===');
   var a0 = await callAs(U.dir, 'POST', '/fee-law/approve', {});
   ok('D1 approve is refused while a deferral row is undecided (422 UNDECIDED, names it)', a0.status === 422 && a0.body.code === 'UNDECIDED' && a0.body.undecided.length === 1 && a0.body.undecided[0] === 'waiver.forfeiture', JSON.stringify(a0.body));
@@ -100,6 +103,8 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
     cfg.requestRules.estimateNotifyThreshold === 40 && cfg.estimatePolicy.requesterResponseDays === 10 && cfg.estimatePolicy.revisionNotifyPercent === 20 && cfg.requestRules.deposit.threshold === 100 && cfg.media.cd === 1.25 && cfg.media.dvd === 3.75 && cfg.av.perRecording === 10 && cfg.av.perMinute === 1, JSON.stringify(cfg).slice(0, 400));
   ok('D2b …and the city\'s decisions: search $12 (under the cap) · free pages 10 · increment 15 min → 0.25 h · de-minimis $5 · min fee none → 0 · certification $1 · validity 30 · deposit 50% · specialty actual · no commercial override',
     cfg && cfg.labor.search.rate === 12 && cfg.requestRules.freePageAllowance === 10 && cfg.labor.search.increment === 0.25 && cfg.requestRules.deMinimis === 5 && cfg.requestRules.minFee === 0 && cfg.certification.rate === 1 && cfg.estimatePolicy.estimateValidityDays === 30 && cfg.requestRules.deposit.percent === 50 && cfg.duplication.specialty.rate === 'actual' && !cfg.purposeOverrides, JSON.stringify(cfg).slice(0, 400));
+  var pv2 = await callAs(U.dir, 'POST', '/fee-law/preview', { against: 'active', quantities: { searchHours: 0, bwPages: 200 } });
+  ok('D2c …and the calculator now prices against the approved v1 when asked', pv2.status === 200 && pv2.body.against === 'active' && pv2.body.configVersion === 'v1' && Math.abs(pv2.body.requestLevel.duplicationSubtotal - 23.75) < 0.01, JSON.stringify(pv2.body).slice(0, 160));
   var v1 = a1.body.profile.id;
   await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: { 'dup.bw.rate': { value: 0.1 } } });
   var a2 = await callAs(U.dir, 'POST', '/fee-law/approve', {});

@@ -382,12 +382,12 @@ function TestTab(props) {
   var [err, setErr] = useState('');
   var [busy, setBusy] = useState('');
   var [showNotice, setShowNotice] = useState(false);
+  var [against, setAgainst] = useState(data.version ? 'active' : 'draft');
   var run = useCallback(function () {
-    if (!data.version) return;
-    api.post('/fee-sandbox/preview', { quantities: q, delivery: { method: opt.delivery }, purpose: opt.purpose || null, waived: opt.waived, payment: num(opt.payment), certification: { count: num(opt.certification) }, other: { amount: num(opt.other), description: 'Extra cost' } })
+    api.post('/fee-law/preview', { against: against, quantities: q, delivery: { method: opt.delivery }, purpose: opt.purpose || null, waived: opt.waived, payment: num(opt.payment), certification: { count: num(opt.certification) }, other: { amount: num(opt.other), description: 'Extra cost' } })
       .then(function (r) { setOut(r.data); setErr(''); })
       .catch(function (e) { setErr(errText(e, 'The estimate could not be computed.')); });
-  }, [q, opt, data.version]);
+  }, [q, opt, against]);
   useEffect(function () { var t = setTimeout(run, 300); return function () { clearTimeout(t); }; }, [run]);
   async function record(outcome) {
     setBusy(outcome);
@@ -401,16 +401,17 @@ function TestTab(props) {
   var R = out && out.requestLevel;
   var tst = STATE[(ht && ht.state) || 'not_started'];
 
-  if (!data.version) return <div style={{ padding: '18px 20px' }}>
-    <div style={{ fontSize: '14px', fontWeight: '700' }}>No fee schedule version to test yet</div>
-    <div style={Object.assign({}, hint, { marginTop: '4px' })}>The test prices a sample request through the real fee engine against the approved schedule. Decide the city's figures and approve version 1 first.</div>
-    <button type="button" onClick={function () { props.goTab('city'); }} style={btn('pri', { marginTop: '12px' })}>Go to City decisions</button>
-  </div>;
-
+  var draftOnly = !data.version;
   return <div style={{ padding: '16px 20px', display: 'grid', gridTemplateColumns: '380px minmax(0, 1fr)', gap: '20px' }}>
     <div>
       <div style={{ fontSize: '14px', fontWeight: '700' }}>Sample request</div>
-      <div style={Object.assign({}, hint, { marginTop: '3px', marginBottom: '10px' })}>Priced through the real fee engine against <b>fee schedule v{data.version.version}</b> — the same code path as a real estimate. Nothing is saved.</div>
+      <div style={Object.assign({}, hint, { marginTop: '3px', marginBottom: '10px' })}>Priced through the real fee engine — the same code path as a real estimate. Nothing is saved.</div>
+      <div style={{ marginBottom: '12px', padding: '8px 10px', background: C.wash, border: '1px solid ' + C.line, borderRadius: '8px', fontSize: '12.5px' }}>
+        <div style={{ fontWeight: '600', marginBottom: '4px' }}>Price against</div>
+        <label style={{ display: 'flex', gap: '6px', alignItems: 'center', marginBottom: '3px' }}><input type="radio" name="against" checked={against === 'draft'} onChange={function () { setAgainst('draft'); }} />the figures as they stand now (unapproved draft{draftOnly ? '' : ''})</label>
+        <label style={{ display: 'flex', gap: '6px', alignItems: 'center', color: draftOnly ? C.ph : C.ink }}><input type="radio" name="against" disabled={draftOnly} checked={against === 'active'} onChange={function () { setAgainst('active'); }} />the approved schedule{data.version ? ' · v' + data.version.version : ' · none yet'}</label>
+        {draftOnly ? <div style={Object.assign({}, hint, { marginTop: '4px' })}>Undecided city items price as "none" until you decide them. Approve version 1 to make this the schedule real estimates use.</div> : null}
+      </div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
         <div><label style={lbl}>Search hours</label>{numInp('searchHours')}</div>
         <div><label style={lbl}>Review / redaction hours</label>{numInp('reviewHours')}</div>
@@ -430,15 +431,15 @@ function TestTab(props) {
           <span style={{ display: 'inline-flex', alignItems: 'center', height: '22px', padding: '0 9px', borderRadius: '999px', background: tst.bg, color: tst.color, fontSize: '11px', fontWeight: '700' }}>{tst.label}</span>
           <span style={{ fontSize: '12px', fontWeight: '600' }}>Try a test estimate</span>
         </div>
-        <div style={Object.assign({}, hint, { marginTop: '4px' })}>{ht ? ht.evidence : ''} — the hub row this records to. Does the estimate on the right look right for this city?</div>
+        <div style={Object.assign({}, hint, { marginTop: '4px' })}>{ht ? ht.evidence : ''} — the hub row this records to. {draftOnly ? 'The outcome can be recorded once a version is approved.' : 'Does the estimate on the right look right for this city?'}</div>
         <div style={{ display: 'flex', gap: '8px', marginTop: '10px' }}>
-          <button type="button" disabled={!can || busy !== ''} onClick={function () { record('confirmed'); }} style={btn(can ? 'pri' : 'dis', { height: '32px' })}>{busy === 'confirmed' ? 'Recording…' : 'It behaves correctly'}</button>
-          <button type="button" disabled={!can || busy !== ''} onClick={function () { record('issues'); }} style={btn(can ? 'sec' : 'dis', { height: '32px' })}>{busy === 'issues' ? 'Recording…' : 'Something is off'}</button>
+          <button type="button" disabled={!can || draftOnly || busy !== ''} onClick={function () { record('confirmed'); }} style={btn(can && !draftOnly ? 'pri' : 'dis', { height: '32px' })}>{busy === 'confirmed' ? 'Recording…' : 'It behaves correctly'}</button>
+          <button type="button" disabled={!can || draftOnly || busy !== ''} onClick={function () { record('issues'); }} style={btn(can && !draftOnly ? 'sec' : 'dis', { height: '32px' })}>{busy === 'issues' ? 'Recording…' : 'Something is off'}</button>
         </div>
       </div>
     </div>
     <div style={Object.assign({}, card, { background: '#F9FAFB', padding: '14px 16px', alignSelf: 'start' })}>
-      <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '8px' }}>Estimate</div>
+      <div style={{ fontSize: '14px', fontWeight: '700', marginBottom: '8px' }}>Estimate {out ? <span style={{ fontSize: '11px', fontWeight: '700', color: out.against === 'active' ? C.ok : C.amber, background: out.against === 'active' ? '#E1F2E9' : '#F6EBD6', borderRadius: '999px', padding: '2px 8px', marginLeft: '6px' }}>{out.against === 'active' ? 'approved ' + out.configVersion : 'unapproved draft'}</span> : null}</div>
       {err ? <div style={{ fontSize: '12.5px', color: C.red }}>{err}</div> : null}
       {!out && !err ? <div style={{ fontSize: '12px', color: C.ph }}>Calculating…</div> : null}
       {R ? <div style={{ fontSize: '12.5px' }}>

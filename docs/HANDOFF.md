@@ -8931,3 +8931,7 @@ statute text on the old screen — every authority citation on the new screen no
 `/setup/fee-law?tab=test`. Rebuilt; all four tabs screenshotted; popup verified by click; `verify_fee_law`
 22/22 + `verify_setup_hub` 22/22, live clean. Live still has no fee schedule version, so the Test tab shows
 its honest "approve v1 first" state — Kevin's walk-through will exercise it.
+Kevin: "why do I see nothing on the test tab?" — it was gated on an approved version. Now `POST /api/fee-law/preview`
+prices against the unapproved DRAFT (law figures + today's decisions, composed, not saved) or the approved
+version, with a radio on the tab; the outcome buttons stay disabled until a version exists. `verify_fee_law`
+24/24. Rebuilt; live shows the draft estimate ($82.50 on the 120-page sample).
