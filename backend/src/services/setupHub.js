@@ -52,7 +52,7 @@ const ITEMS = [
   { key: 'go_live', lane: 'compliance', name: 'Turn the rules on for real', door: '/jurisdiction-config', deps: [], goLive: true },
   // ── Lane 2a ──
   { key: 'fee_rates', lane: 'fulfillment_fees', name: 'What this city actually charges', door: '/admin?tab=fees', deps: ['fee_law'], groups: ['fee_configuration'] },
-  { key: 'fee_test', lane: 'fulfillment_fees', name: 'Try a test estimate', door: '/admin?tab=fees', deps: ['fee_rates', 'calibration'] },
+  { key: 'fee_test', lane: 'fulfillment_fees', name: 'Try a test estimate', door: '/setup/fee-law?tab=test', deps: ['fee_rates', 'calibration'] },
   { key: 'taxonomy', lane: 'fulfillment_fees', name: 'Record types and categories', door: '/admin?tab=taxonomy', deps: ['sources'], softDeps: true },
   { key: 'calibration', lane: 'fulfillment_fees', name: 'How much work each record type takes', door: '/admin?tab=taxonomy', deps: ['taxonomy'] },
   { key: 'routing_rules', lane: 'fulfillment_fees', name: 'Who gets which request', door: '/admin?tab=workflow', deps: ['departments', 'teams'] },

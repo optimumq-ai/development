@@ -8920,3 +8920,14 @@ identical in all 32; parser 0 errors over 1,120 cells). `verify_fee_law` 22/22 (
 green. Frontend rebuilt (exit 0); screenshots checked. Live: TX fee-law screen shows 22 loaded / 0 of 13
 decided / no version — Kevin's to walk. NOT done: PDF extraction, page bands, SS context.
 **NEXT:** Kevin walks /setup/fee-law; decide the TX clock/exemption_model gap; then the redaction row (§2c).
+
+## 2026-08-26 (cont.) — fee-law screen split into four tabs; test-estimate sandbox re-homed; statute popup
+
+Kevin, after seeing F1: too much on one screen → **four tabs** (State mandate · City decisions · Fee policy
+document · Test an estimate); the live fee calculation test moves here from Fee Configuration (the old
+preview stays on that page until the page is retired); keep the title. He also noticed the click-to-view
+statute text on the old screen — every authority citation on the new screen now opens the research record
+(verbatim statute language; fee-gap ids TX-9xxx honestly "no research record"). Hub `fee_test` door →
+`/setup/fee-law?tab=test`. Rebuilt; all four tabs screenshotted; popup verified by click; `verify_fee_law`
+22/22 + `verify_setup_hub` 22/22, live clean. Live still has no fee schedule version, so the Test tab shows
+its honest "approve v1 first" state — Kevin's walk-through will exercise it.
