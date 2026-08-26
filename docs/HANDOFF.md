@@ -9062,3 +9062,6 @@ missing "new 9/1/2025" tag on the § 552.221(g) notice. Committed c7054f8 (docs 
 no suite needed). **Open for Kevin on the canvas:** eligibility hub row placement · three doors → one screen
 with preselected tab · strengthen the TX consequence sentence now vs. with the template store. Build waits
 for markup.
+
+Addendum: canvas screenshots handed to Kevin in `~/exchange/clartabs_1_clarification.png … _2_exemptions
+… _3_eligibility … _4_letter.png` (clarification tab as balanced 62d84f9).
