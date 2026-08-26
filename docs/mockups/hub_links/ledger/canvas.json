@@ -6,7 +6,7 @@
       "y": 0,
       "w": 1040,
       "h": 900,
-      "title": "Ledger card \u2014 from a request (identified requestor)"
+      "title": "Ledger card — from a request (identified requestor)"
     },
     {
       "file": "Anonymous.dc.html",
@@ -14,7 +14,7 @@
       "y": 0,
       "w": 1040,
       "h": 420,
-      "title": "Ledger \u2014 anonymous request"
+      "title": "Ledger — anonymous request"
     },
     {
       "file": "Lookup.dc.html",
@@ -31,14 +31,21 @@
       "x": 0,
       "y": -170,
       "w": 640,
-      "text": "No requestor accounts, ever. A ledger exists per VERIFIED email (link clicked in the portal wizard) or staff-confirmed identity; it is created invisibly on the first identified request. Balance = sum of that requestor's own event rows (one small indexed scan, sub-millisecond) \u2014 never a scan across all requests. Sample names/figures are illustrative."
+      "text": "No requestor accounts, ever. A ledger exists per VERIFIED email (link clicked in the portal wizard) or staff-confirmed identity; it is created invisibly on the first identified request. Balance = sum of that requestor's own event rows (one small indexed scan, sub-millisecond) — never a scan across all requests. Sample names/figures are illustrative."
     },
     {
       "id": "open",
       "x": 1140,
       "y": -170,
       "w": 640,
-      "text": "Open for Kevin: (1) who may open the ledger \u2014 finance group only, or anyone who can see the request's Financial page? (2) Should the card offer 'Merge with another ledger' for one person with two verified addresses (a human judgment; never automatic)? (3) Lookup by name too, or email only (drawn: email only, exact)? (4) Where the lookup lives \u2014 Cash Drawer tab, or Reports?"
+      "text": "Open for Kevin: (1) who may open the ledger — finance group only, or anyone who can see the request's Financial page? (2) Should the card offer 'Merge with another ledger' for one person with two verified addresses (a human judgment; never automatic)? (3) Lookup by name too, or email only (drawn: email only, exact)? (4) Where the lookup lives — Cash Drawer tab, or Reports?"
+    },
+    {
+      "id": "see-also",
+      "x": 0,
+      "y": 960,
+      "w": 640,
+      "text": "Also awaiting your markup: the clarification / exemptions / who-may-request three-tab screen is drawn — canvas https://claude.ai/code/artifact/ad29b14f-c181-407b-870c-f8045a840b61, screenshots in ~/exchange/clartabs_1_clarification.png through clartabs_4_letter.png. Its eligibility tab points repeat-requester time caps back at THIS ledger."
     }
   ],
   "launch": {
