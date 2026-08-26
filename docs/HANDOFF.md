@@ -9003,3 +9003,44 @@ proposals** from the re-import. Harnesses: the 8 formerly red all green (clock_m
 TX assertions, e2e_tx 36/36, tolls 27/27, wrap_parent 43/43, legal_review 44/44, branch_profile 62/62,
 golive 35/35, editors 37/37); jurrules 27/27, deadline_rules 25/25, config_integrity 17/17 (alone); live
 clean. SPEC_phase7_build addendum. Full suite re-run started after this commit.
+
+## 2026-08-26 (closing) — day summary and the next slice (decided with Kevin)
+
+**Full suite after the clock fix: 2629/2630, live untouched.** The one red is `verify_bw9_golive` E1a ("a
+fresh import is honestly NOT ready") — it predates today, and Kevin DEFERRED it: its premise needs a fee
+profile and pending proposals that a fresh, unprofiled TX no longer produces. A diagnostics line was added
+to the harness (prints ready/unconfirmedSettings/proposalsPending/activeBranchUnconfirmed + what the import
+wrote) — the runner's summary did not surface it; read the harness's own stdout in the suite log next time.
+Re-visit once fee schedule v1 is approved and the data is in.
+
+**Today, in order:** config wiped behind `backup_20260825` (restore: `node scripts/config_reset.js restore
+--tag=20260825`) → H3 /setup/agency + lock built, Kevin locked TX live → F1 /setup/fee-law built (four tabs,
+ceiling defaults, draft/approved test estimate, statute popup) → actual-amount entry on the estimate
+screen → ledger design corrected (no accounts; verified email) + ledger canvas → live smoke with a real
+portal submission (2026-000005: first real ledger profile; estimate blocked pending fee schedule v1) → TX
+primary clock fixed in the reconciler (§ 552.221(d) produce-or-certify, 10 bd) and applied on live
+(2026-000005 due 2026-09-09).
+
+**Live state to know:** jur-tx active, primary `respond` clock, pre_clearance, statute name set; NO fee
+schedule version yet (Kevin to approve v1 on /setup/fee-law — unblocks the estimate beat of the smoke);
+two pending merge proposals from the re-import (fee, template_import) on the law-updates hub row; request
+2026-000005 kept as the ledger specimen; 12 integrity WARNINGS (unconfirmed imported suggestions) — honest.
+
+**Awaiting Kevin's markup:** ledger canvas (§2e) · fee-law approve-partial / ledger-gap questions (§2b).
+
+**NEXT SLICE (decided):** one screen, three tabs, status-strip pattern, for hub rows **4 Vague requests and
+clarification · 7 Exemptions and appeals · 11 Who is allowed to request** (TX_RULES_READABLE §4/§7/§11).
+Each tab = what the law says (citations → research popup) · the city's few choices · attest. Specifics:
+- §11: attest only; one gated dimension to confirm (incarcerated-requester exclusion, TX-0004).
+- §4: 5 knobs (vagueness wording · clarification letter · response window, TX 61 d statutory · close-as-
+  withdrawn notice · materially-revised = new request?) AND the tab must switch the clarification policy ON
+  (import filed it `enabled:false`) or the hub row never leaves "not configured".
+- §7: 4 knobs — "Select reason(s) from config library" IS the redaction/exemption rules library (not
+  `decision_reasons`, which is five seeded fee-waiver denial sentences) → show as "comes from the Redaction
+  rules library — not loaded yet", confirmable as such; "Legal approval" = designate a permission group;
+  denial letter; denial deadline (city policy).
+- Letters: NO letter-template store exists (clarification/fee letters are generated in code —
+  clarificationAction, feeNotice). Decision: this screen shows each letter as "standard wording" with a
+  view of the generated text; an editable template store with per-state required-element checks is its
+  OWN later slice (after the redaction library). Keep this screen small. Design canvas first.
+Uncommitted at close: the E1a diagnostics line in `verify_bw9_golive.js` — committed with this note.

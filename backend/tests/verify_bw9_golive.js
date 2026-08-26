@@ -216,6 +216,9 @@ function isOpen(s) { return s.kind === 'dimension' ? (s.gated && !s.confirmed) :
     // ==============================================================================================
     console.log('\n=== E1. THE WALK — drive the checklist with the checklist\'s own output ===');
     var before = await req('GET', '/api/jurisdiction-profile/go-live', null, TDIR);
+    if (!(before.json.ready === false && before.json.unconfirmedSettings > 0 && before.json.proposalsPending > 0 && before.json.activeBranchUnconfirmed.length > 0)) {
+      console.log('        E1a diagnostics: ' + JSON.stringify({ ready: before.json.ready, unconfirmedSettings: before.json.unconfirmedSettings, proposalsPending: before.json.proposalsPending, activeBranchUnconfirmed: before.json.activeBranchUnconfirmed, imported: { written: imp.written, proposed: imp.proposed.map(function (p) { return p.domain; }), unchanged: imp.unchanged } }));
+    }
     ok('E1a a fresh import is honestly NOT ready: unconfirmed settings, pending proposals, an active branch on an unconfirmed parameter',
       before.json.ready === false && before.json.unconfirmedSettings > 0 &&
       before.json.proposalsPending > 0 && before.json.activeBranchUnconfirmed.length > 0);
