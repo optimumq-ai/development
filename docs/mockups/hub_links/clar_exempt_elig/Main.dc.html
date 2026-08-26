@@ -42,7 +42,13 @@
     .tab.on { color: #12232E; border-bottom-color: #1E6091; }
     .dot { width: 8px; height: 8px; border-radius: 999px; }
     .lr { display: grid; grid-template-columns: 62px minmax(0, 1fr); gap: 10px; align-items: start;
-          padding: 10px 16px; border-top: 1px solid #EEF2F5; font-size: 12.5px; line-height: 1.45; }
+          padding: 16px; border-top: 1px solid #EEF2F5; font-size: 12.5px; line-height: 1.5; }
+    .grp { padding: 12px 16px 6px; font-size: 12px; font-weight: 700; color: #12232E; background: #F8FAFC; border-top: 1px solid #D2DCE3; }
+    .ml { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 12px; align-items: start;
+          padding: 15px 16px; border-top: 1px solid #EEF2F5; font-size: 12.5px; line-height: 1.5; }
+    .day { font-size: 11px; font-weight: 700; color: #0E3A5C; background: #E8EEF4; border: 1px solid #C5D3DF;
+           border-radius: 6px; padding: 4px 8px; text-align: center; line-height: 1.3; }
+    .day.red { color: #B02A37; background: #FBEDEE; border-color: #EFC7CB; }
     .ch { display: grid; grid-template-columns: 190px minmax(0, 1fr) 170px; gap: 12px; align-items: start;
           padding: 12px 16px; border-top: 1px solid #EEF2F5; }
     .chl { font-size: 12.5px; font-weight: 600; line-height: 1.35; padding-top: 2px; }
@@ -92,7 +98,7 @@
     <div style="display: grid; grid-template-columns: 560px minmax(0, 1fr); gap: 0;">
 
       <!-- ============ WHAT TEXAS LAW SAYS ============ -->
-      <div style="border-right: 1px solid #D2DCE3;">
+      <div style="border-right: 1px solid #D2DCE3; display: flex; flex-direction: column;">
         <div class="sect">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#0E3A5C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg>
           <div style="flex-grow: 1;">
@@ -127,7 +133,26 @@
           </div>
         </div>
 
-        <div style="padding: 12px 16px; border-top: 1px solid #EEF2F5;">
+        <div class="grp">How the rules play out — the clarification clock</div>
+        <div class="ml">
+          <div class="day">Letter sent</div>
+          <div>The reply window opens. A good-faith clarification request also pauses the 10-business-day clock for asking the attorney general.
+            <div class="cite" style="margin-top: 3px;"><span class="cl">City of Dallas v. Abbott</span></div>
+          </div>
+        </div>
+        <div class="ml">
+          <div class="day">Reply arrives</div>
+          <div>Processing continues and the paused clock resumes. If the reply changes what is being asked for, the last choice on the right decides what happens.
+          </div>
+        </div>
+        <div class="ml">
+          <div class="day red">61st day,<br>no reply</div>
+          <div>The request is considered withdrawn and is closed.
+            <div class="cite" style="margin-top: 3px;"><span class="cl">§ 552.222(d)</span></div>
+          </div>
+        </div>
+
+        <div style="padding: 12px 16px; border-top: 1px solid #EEF2F5; margin-top: auto;">
           <span class="hint" style="margin-top: 0;">The deadlines here are the state's, not choices. They are shown so the choices on the right make sense.</span>
         </div>
       </div>
