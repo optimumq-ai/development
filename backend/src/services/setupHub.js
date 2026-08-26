@@ -41,7 +41,7 @@ const ITEMS = [
   // ── Lane 1 ──
   { key: 'jurisdiction', lane: 'compliance', name: "Which state's law this city follows", door: '/jurisdiction-config/identity', deps: ['agency'], section: 'identity' },
   { key: 'deadlines', lane: 'compliance', name: 'Response deadlines and tolling', door: '/jurisdiction-config/deadlines', deps: ['jurisdiction'], section: 'deadlines', legal: true },
-  { key: 'fee_law', lane: 'compliance', name: 'What the law lets you charge', door: '/jurisdiction-config/fees', deps: ['jurisdiction'], section: 'fees' },
+  { key: 'fee_law', lane: 'compliance', name: 'What the law lets you charge', door: '/setup/fee-law', deps: ['jurisdiction'], section: 'fees' },
   { key: 'deposits', lane: 'compliance', name: 'Deposits and payment clock', door: '/jurisdiction-config/payment', deps: ['jurisdiction'], section: 'payment' },
   { key: 'waiver_policy', lane: 'compliance', name: 'Fee waivers and who approves them', door: '/jurisdiction-config/fee_waiver', deps: ['jurisdiction'], section: 'fee_waiver' },
   { key: 'clarification', lane: 'compliance', name: 'Vague requests and clarification', door: null, deps: ['jurisdiction'], section: 'clarification', noScreen: true },
@@ -135,7 +135,22 @@ const READERS = {
     return sectionEvidence(sec, ctx.settings && ctx.settings.jurisdiction && ctx.settings.jurisdiction.name ? ctx.settings.jurisdiction.name : 'profile ' + ctx.jid);
   },
   deadlines: async function (ctx) { return sectionEvidence(ctx.sections.deadlines); },
-  fee_law: async function (ctx) { return sectionEvidence(ctx.sections.fees); },
+  fee_law: async function (ctx) {
+    // The fee-law screen (services/feeLaw.js): the law's figures load with the state; the city's decisions
+    // and an approved fee schedule VERSION are what count. Attest (the `fees` section) still makes it ready.
+    if (!ctx.jid) return ev('not_started', 'no jurisdiction chosen yet');
+    var s = await require('./feeLaw').screen(ctx.jid);
+    if (!s.jurisdiction) return ev('not_started', 'no jurisdiction chosen yet');
+    var c = s.counts;
+    var line = c.mandate + ' figures set by ' + s.jurisdiction.code + ' law' + (c.deferral ? ' · ' + c.decided + ' of ' + c.deferral + ' city choices decided' : '');
+    if (!s.version) return ev(c.decided ? 'in_progress' : 'not_started', line + ' · no fee schedule version yet');
+    var sec = ctx.sections.fees;
+    var r = sectionEvidence(sec, 'fee schedule v' + s.version.version);
+    if (r.state === 'not_started') r = ev('in_progress', 'not yet confirmed');
+    if (r.state !== 'ready') r.evidence = 'fee schedule v' + s.version.version + ' · ' + r.evidence;
+    r.evidence = line + ' · ' + r.evidence;
+    return r;
+  },
   deposits: async function (ctx) { return sectionEvidence(ctx.sections.payment); },
   waiver_policy: async function (ctx) { return sectionEvidence(ctx.sections.fee_waiver); },
   clarification: async function (ctx) { var r = sectionEvidence(ctx.sections.clarification); if (r.state === 'not_started') r.evidence = 'no screen yet'; return r; },

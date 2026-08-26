@@ -1,0 +1,128 @@
+'use strict';
+// WHAT THE LAW LETS YOU CHARGE — services/feeLaw.js + routes/feeLaw.js (WORKING_hub_linked_screens §2b).
+//
+//   A. The catalog covers every template item for every state: 35 keys × 32 templates, every value parses,
+//      a ceiling row's figure is the MUNICIPAL ceiling (AG rate + 25% in TX), fixed rows read as law.
+//   B. Defaults (Kevin 2026-08-25): a ceiling row's city value starts AT the ceiling; deferral rows start
+//      undecided; the screen counts both.
+//   C. Deciding: the hub gate (403 outside it); a value above a ceiling is refused by name; "none" is a
+//      decision; clearing removes it.
+//   D. Approving: refused while deferral rows are undecided; then composes ONE fee_profiles row (FR, v1,
+//      active) with the state's figures mapped by engine path and the city's decisions; approving again
+//      makes v2 and supersedes v1 — never edits in place; config_history carries the decisions.
+//   E. The hub reads it: not_started with "no fee schedule version yet" → in_progress with "v1" → attest.
+//
+// BREAKS THIS SHOULD CATCH: take the AG rate instead of the municipal ceiling (A3) · let a city value exceed
+// the ceiling (C2) · approve with undecided rows (D1) · UPDATE the active profile instead of versioning (D3).
+process.chdir('/opt/optimumq/backend');
+require('/opt/optimumq/backend/node_modules/dotenv').config({ path: '/opt/optimumq/backend/.env' });
+require(__dirname + '/testEnv').enforce();
+var fs = require('fs');
+var db = require('/opt/optimumq/backend/src/db');
+var auth = require('/opt/optimumq/backend/src/services/auth');
+var ut = require('/opt/optimumq/backend/src/services/userTypes');
+var FL = require('/opt/optimumq/backend/src/services/feeLaw');
+var STI = require('/opt/optimumq/backend/src/services/stateTemplateImport');
+
+var pass = 0, fail = 0;
+function ok(l, c, extra) { (c ? pass++ : fail++); console.log((c ? '  PASS  ' : '  FAIL  ') + l + (c || !extra ? '' : '  -> ' + extra)); }
+var PORT = Number(process.env.API_PORT) || 3101;
+var TAG = 'fl' + Date.now().toString().slice(-6);
+async function mk(key, teamId) {
+  var id = 'u-' + TAG + '-' + key;
+  await db.run("INSERT INTO users (id, email, display_name, title, status) VALUES (?,?,?,?, 'active')", [id, id + '@test.optimumq.ai', 'FL ' + key, 'Test ' + TAG]);
+  if (key !== 'none') await ut.grant(id, key, teamId || null, 'harness');
+  return id;
+}
+async function callAs(id, method, path, body) {
+  var t = await auth.signAccessToken(await db.get('SELECT * FROM users WHERE id = ?', [id]));
+  var r = await fetch('http://localhost:' + PORT + '/api' + path, { method: method, headers: { Authorization: 'Bearer ' + t, 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+  var j = null; try { j = await r.json(); } catch (e) {}
+  return { status: r.status, body: j };
+}
+function rowOf(s, k) { return s.rows.filter(function (r) { return r.key === k; })[0]; }
+function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.forEach(function (x) { if (x.key === 'fee_law') f = x; }); }); return f; }
+
+(async function () {
+  await db.initDb();
+  var U = { dir: await mk('oro_director'), staff: await mk('team_staff', 'team-police') };
+
+  // A known starting point on the TEST db: TX locked and active, no fee schedule, no decisions.
+  await STI.importState('TX', { actor: 'harness' });
+  await db.run("UPDATE jurisdiction_profiles SET status = 'active' WHERE id = 'jur-tx'");
+  await db.run("INSERT INTO system_config (key, value) VALUES ('jurisdiction_profile', 'jur-tx') ON CONFLICT (key) DO UPDATE SET value = EXCLUDED.value");
+  await db.run("DELETE FROM fee_profiles WHERE jurisdiction_id = 'jur-tx'");
+  await db.run("DELETE FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx' AND domain = ?", [FL.DECISIONS_DOMAIN]);
+  await db.run("DELETE FROM setup_hub_signoffs WHERE item_key = 'fee_law'");
+  await db.run("DELETE FROM jurisdiction_profile_sections WHERE jurisdiction_id = 'jur-tx' AND section = 'fees'");
+
+  console.log('\n=== A. THE CATALOG ===');
+  var codes = STI.listTemplates();
+  var keyMismatch = [], parseErr = 0, cells = 0;
+  codes.forEach(function (c) {
+    var items = FL.templateItems(c).items; var keys = Object.keys(items).sort();
+    if (keys.join(',') !== FL.CATALOG.map(function (x) { return x.key; }).sort().join(',')) keyMismatch.push(c);
+    FL.CATALOG.forEach(function (it) { cells++; try { FL.parseValue(it, (items[it.key] || {}).value); } catch (e) { parseErr++; } });
+  });
+  ok('A1 the catalog is exactly the template item set, in all ' + codes.length + ' templates', codes.length >= 32 && keyMismatch.length === 0, keyMismatch.join(','));
+  ok('A2 every value in every template parses (' + cells + ' cells)', parseErr === 0, parseErr + ' errors');
+  var s0 = (await callAs(U.dir, 'GET', '/fee-law')).body;
+  var bw = rowOf(s0, 'dup.bw.rate'), prog = rowOf(s0, 'labor.programming.rate'), oh = rowOf(s0, 'labor.overheadPct'), media = rowOf(s0, 'media');
+  ok('A3 TX B&W copy: ceiling is the MUNICIPAL figure 0.125 (AG 0.10 + 25%), shown as the law\'s value', bw.binding === 'ceiling' && bw.ceiling === 0.125 && bw.law.ag === 0.1 && /0\.125/.test(bw.law.display), JSON.stringify(bw.law));
+  ok('A4 programming labor ceiling 35.625 · overhead FIXED at 20% reads "as law" (not editable) · media parsed cd 1.25 / dvd 3.75 / usb actual', prog.ceiling === 35.625 && oh.binding === 'fixed' && oh.editable === false && oh.city.value === 20 && media.law.parsed.cd === 1.25 && media.law.parsed.dvd === 3.75 && media.law.parsed.usb === 'actual', JSON.stringify([prog.ceiling, oh.city, media.law.parsed]));
+  ok('A5 the screen splits 22 mandate / 13 deferral, each bucketed computation vs estimate-payment; 2 ledger gaps flagged', s0.counts.mandate === 22 && s0.counts.deferral === 13 && s0.counts.gaps === 2 && s0.rows.every(function (r) { return r.bucket === 'computation' || r.bucket === 'estimate_payment'; }), JSON.stringify(s0.counts));
+
+  console.log('\n=== B. DEFAULTS ===');
+  ok('B1 every ceiling row starts AT the ceiling, source "default"', s0.rows.filter(function (r) { return r.binding === 'ceiling' && r.ceiling != null; }).every(function (r) { return r.city.value === r.ceiling && r.city.source === 'default'; }) && s0.counts.ceilingsDefaulted === s0.counts.ceilings);
+  ok('B2 every deferral row starts undecided; 0 of 13 decided; no version', s0.counts.decided === 0 && s0.counts.undecided === 13 && s0.version === null);
+
+  console.log('\n=== C. DECIDING ===');
+  var st = await callAs(U.staff, 'PUT', '/fee-law/decisions', { items: { 'rules.freePages': { value: 10 } } });
+  ok('C1 team staff may read but not decide (403)', st.status === 403 && (await callAs(U.staff, 'GET', '/fee-law')).body.canEdit === false);
+  var over = await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: { 'dup.bw.rate': { value: 0.2 }, 'labor.search.rate': { value: 12 } } });
+  var sAfter = over.body.screen;
+  ok('C2 a city value above the ceiling is refused BY NAME and not saved; one under it is saved', over.status === 200 && over.body.refused.length === 1 && over.body.refused[0].key === 'dup.bw.rate' && /ceiling of 0\.125/.test(over.body.refused[0].why) && rowOf(sAfter, 'dup.bw.rate').city.value === 0.125 && rowOf(sAfter, 'labor.search.rate').city.value === 12 && rowOf(sAfter, 'labor.search.rate').city.source === 'hand', JSON.stringify(over.body.refused));
+  var fx = await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: { 'labor.overheadPct': { value: 5 } } });
+  ok('C3 a fixed row cannot be decided ("set by law")', fx.body.refused.length === 1 && /set by law/.test(fx.body.refused[0].why) && rowOf(fx.body.screen, 'labor.overheadPct').city.value === 20);
+  var dec = { 'dup.specialty.rate': { value: 'actual' }, 'dup.tiers': { value: 'none' }, 'rules.freePages': { value: 10 }, 'labor.increment': { value: 15 }, 'rules.freeLaborHours': { value: 1 }, 'rules.deMinimis': { value: 5 }, 'rules.minFee': { value: 'none' }, 'delivery': { value: 'actual' }, 'certification': { value: 1 }, 'commercial': { value: 'none' }, 'estimate.validityDays': { value: 30 }, 'rules.deposit.percent': { value: 50 } };
+  var d1 = await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: dec });
+  ok('C4 twelve decisions saved ("none" and "actual" count as decisions) → 12 of 13, 1 undecided', d1.status === 200 && d1.body.refused.length === 0 && d1.body.screen.counts.decided === 12 && d1.body.screen.counts.undecided === 1, JSON.stringify(d1.body.screen && d1.body.screen.counts));
+
+  console.log('\n=== D. APPROVING ===');
+  var a0 = await callAs(U.dir, 'POST', '/fee-law/approve', {});
+  ok('D1 approve is refused while a deferral row is undecided (422 UNDECIDED, names it)', a0.status === 422 && a0.body.code === 'UNDECIDED' && a0.body.undecided.length === 1 && a0.body.undecided[0] === 'waiver.forfeiture', JSON.stringify(a0.body));
+  await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: { 'waiver.forfeiture': { value: 'none' } } });
+  var a1 = await callAs(U.dir, 'POST', '/fee-law/approve', {});
+  var cfg = a1.body && a1.body.profile && a1.body.profile.config;
+  ok('D2 approve → fee schedule v1, active, one fee_profiles row for jur-tx/FR', a1.status === 200 && a1.body.profile.version === 1 && a1.body.profile.status === 'active' && Number((await db.get("SELECT COUNT(*) n FROM fee_profiles WHERE jurisdiction_id = 'jur-tx' AND context = 'FR'")).n) === 1, JSON.stringify(a1.body).slice(0, 200));
+  ok('D2a the composed config carries the state\'s figures by engine path: bw 0.125 · programming 35.625 · overhead 20 · labor only over 50 pages · estimate threshold $40 · response 10 days · revision 20% · deposit above $100 · media cd 1.25 / dvd 3.75 · av 10 + 1/min',
+    cfg && cfg.duplication.bw.rate === 0.125 && cfg.labor.programming.rate === 35.625 && cfg.labor.overheadPct === 20 && cfg.labor.search.billableWhen && cfg.labor.search.billableWhen.trigger === 'pages' && cfg.labor.search.billableWhen.threshold === 50 &&
+    cfg.requestRules.estimateNotifyThreshold === 40 && cfg.estimatePolicy.requesterResponseDays === 10 && cfg.estimatePolicy.revisionNotifyPercent === 20 && cfg.requestRules.deposit.threshold === 100 && cfg.media.cd === 1.25 && cfg.media.dvd === 3.75 && cfg.av.perRecording === 10 && cfg.av.perMinute === 1, JSON.stringify(cfg).slice(0, 400));
+  ok('D2b …and the city\'s decisions: search $12 (under the cap) · free pages 10 · increment 15 min → 0.25 h · de-minimis $5 · min fee none → 0 · certification $1 · validity 30 · deposit 50% · specialty actual · no commercial override',
+    cfg && cfg.labor.search.rate === 12 && cfg.requestRules.freePageAllowance === 10 && cfg.labor.search.increment === 0.25 && cfg.requestRules.deMinimis === 5 && cfg.requestRules.minFee === 0 && cfg.certification.rate === 1 && cfg.estimatePolicy.estimateValidityDays === 30 && cfg.requestRules.deposit.percent === 50 && cfg.duplication.specialty.rate === 'actual' && !cfg.purposeOverrides, JSON.stringify(cfg).slice(0, 400));
+  var v1 = a1.body.profile.id;
+  await callAs(U.dir, 'PUT', '/fee-law/decisions', { items: { 'dup.bw.rate': { value: 0.1 } } });
+  var a2 = await callAs(U.dir, 'POST', '/fee-law/approve', {});
+  var rows = await db.all("SELECT id, version, status, config_json FROM fee_profiles WHERE jurisdiction_id = 'jur-tx' AND context = 'FR' ORDER BY version");
+  ok('D3 approving again → v2 active, v1 superseded and unchanged (never edited in place)', a2.body.profile.version === 2 && rows.length === 2 && rows[0].id === v1 && rows[0].status === 'superseded' && JSON.parse(rows[0].config_json).duplication.bw.rate === 0.125 && rows[1].status === 'active' && JSON.parse(rows[1].config_json).duplication.bw.rate === 0.1, JSON.stringify(rows.map(function (r) { return [r.version, r.status]; })));
+  var hist = await db.all("SELECT summary, effective_to FROM config_history WHERE jurisdiction_id = 'jur-tx' AND domain = 'fee_schedule' ORDER BY created_at");
+  ok('D4 config_history holds both approvals; v1\'s row is closed', hist.length === 2 && /v1 approved by FL oro_director/.test(hist[0].summary) && hist[0].effective_to && !hist[1].effective_to);
+  var bounds = require('/opt/optimumq/backend/src/services/feeBounds').check(JSON.parse(rows[1].config_json), 'TX');
+  ok('D5 the approved schedule passes the state fee-bounds gate', bounds.length === 0, JSON.stringify(bounds));
+
+  console.log('\n=== E. THE HUB ===');
+  await db.run("DELETE FROM fee_profiles WHERE jurisdiction_id = 'jur-tx'");
+  var h0 = hubRow((await callAs(U.dir, 'GET', '/setup-hub')).body);
+  ok('E1 with decisions but no version the row is in_progress "no fee schedule version yet"; door /setup/fee-law', h0.state === 'in_progress' && /no fee schedule version yet/.test(h0.evidence) && h0.door === '/setup/fee-law', h0.state + ' | ' + h0.evidence);
+  await callAs(U.dir, 'POST', '/fee-law/approve', {});
+  var h1 = hubRow((await callAs(U.dir, 'GET', '/setup-hub')).body);
+  ok('E2 after approval the row says "fee schedule v1" and is in_progress until confirmed', /fee schedule v1/.test(h1.evidence) && h1.state === 'in_progress', h1.state + ' | ' + h1.evidence);
+  var at = await callAs(U.dir, 'POST', '/setup-hub/fee_law/done');
+  var h2 = hubRow((await callAs(U.dir, 'GET', '/setup-hub')).body);
+  ok('E3 attest from the strip marks it ready by name', at.status === 200 && h2.state === 'ready' && /marked done by FL oro_director/.test(h2.evidence), h2.state + ' | ' + h2.evidence);
+  await callAs(U.dir, 'DELETE', '/setup-hub/fee_law/done');
+  ok('E4 the route and page exist', /path="setup\/fee-law"/.test(fs.readFileSync('/opt/optimumq/frontend/src/App.js', 'utf8')) && fs.existsSync('/opt/optimumq/frontend/src/pages/FeeLawPage.js'));
+
+  console.log('\n' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
+  process.exit(fail ? 1 : 0);
+})().catch(function (e) { console.error('HARNESS ERROR', e); process.exit(1); });

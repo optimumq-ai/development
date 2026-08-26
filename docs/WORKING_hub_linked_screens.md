@@ -132,6 +132,12 @@ the SS context lives.
 `fee_profiles` row mapped by each item's `engine_field`; fee-law hub reader = "a version exists";
 document→AI reuses `feePolicyExtract` but must persist proposals with page refs.
 
+**BUILT 2026-08-26 (F1):** `/setup/fee-law` + `GET/PUT/POST /api/fee-law` + `services/feeLaw.js`. Chosen route
+for the 35 items: read them from the locked state's template FILE (the rules library on disk) rather than
+re-importing them into the blob — no re-import needed for Kevin's live TX lock. Windows stack vertically in
+the app (the 1420-wide side-by-side canvas does not fit the 1170 content width). Document reading = text
+files / paste through the existing `feePolicyExtract`; PDF is a follow-up. Bound into SPEC_setup_hub §7 F1.
+
 ## 2c. Redaction rules library (hub key `redaction_rules`) — decided 2026-08-25
 
 **Fact (from the backup of the wiped library):** the 26 TX rules were 14 hand-seeded (`seed_jurisdiction_tx.sql`)

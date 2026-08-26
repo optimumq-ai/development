@@ -8898,3 +8898,25 @@ Jurisdiction Configuration screen + many admin links to be retired; hub to be si
 to the revised hub. **NEXT: build the fee_law canvas** (importer keeps fee_schedule.items · approval writes a
 versioned fee_profiles row via engine_field · hub reader = version exists · document→AI with persisted refs),
 then decide next step. Full suite still not run since H3 — run it first.
+
+## 2026-08-26 — full suite run (19 fails, all one root cause) · F1 "What the law lets you charge" BUILT
+
+**Full suite run 28: 2519/2538, 19 fails in 8 harnesses (concurrent_tolls, wrap_parent, legal_review,
+branch_profile, clock_matrix, bw9_golive, bw9b_editors, e2e_tx); live census clean.** Every failure is the same
+fact: live `jur-tx` now comes from Kevin's fresh template import, not the hand seed — it has NO primary
+`respond` clock (`complete` has no duration), `exemption_model` NULL, `statute_name` NULL. The backup had
+respond primary · complete 10 bd · pre_clearance · "Texas Public Information Act". So: (a) not a code
+regression; (b) a REAL gap in the state load that the seed was hiding — a city that locks TX today gets no
+statutory due date on new requests. Kevin's call: fix the importer's TX clock reconciliation (the template says
+TX's completion clock IS the statutory clock but WS3 leaves it unresolved) and let the lock set
+exemption_model/statute_name, or restore those three facts by hand. Until then those 19 stay red.
+
+**F1 built** (commit follows): `/setup/fee-law` to the approved canvas — State mandate (ceiling rows default
+to the ceiling, refused above; fixed "as law"; floor at minimum; 2 ledger gaps flagged) · Deferral (figure /
+none / actual, or a fee policy text read by `feePolicyExtract` into `document` decisions with references) ·
+Approve → `fee_profiles` FR v n active, previous superseded, `config_history` carries the decisions · hub
+`fee_law` reader + door. `services/feeLaw.js` reads the 35 items from the state's template file (key set
+identical in all 32; parser 0 errors over 1,120 cells). `verify_fee_law` 22/22 (twice), hub + agency 22 + 18
+green. Frontend rebuilt (exit 0); screenshots checked. Live: TX fee-law screen shows 22 loaded / 0 of 13
+decided / no version — Kevin's to walk. NOT done: PDF extraction, page bands, SS context.
+**NEXT:** Kevin walks /setup/fee-law; decide the TX clock/exemption_model gap; then the redaction row (§2c).
