@@ -160,4 +160,19 @@ one shared component. Must fix: persist the source document and reference on eac
   (agency — built; fee_law — canvas approved; redaction_rules — §2c) links to the REVISED hub.
 - **Next slice:** build the fee_law canvas (§2b) as approved. Then decide the next step.
 
+## 2e. Requestor ledger — views sketched 2026-08-26
+
+**Facts:** the ledger MVP (class A) is BUILT and inert on live (all 27 request links anonymous — demo data
+predates the wizard's verify-link gate). There are NO requestor accounts and will be none (Kevin, reaffirmed);
+the design doc's "portal account" wording was corrected — the verified email is the primary anchor, the
+`portal_account_id` column is dead. Balance = SUM over the requestor's own event rows (indexed), not a scan.
+
+**Sketch:** https://claude.ai/code/artifact/2c16b365-5198-4a1d-bf1e-50096cc3faf0 (sources
+`docs/mockups/hub_links/ledger/`): (1) **ledger card** from a request's Financial page — identity basis,
+outstanding, balance by request, the state rule that applies (TX $100 deposit), allowance meters (TX 36h/15h;
+manual until class B counting), flags; (2) **anonymous request** — "no ledger is kept", with the
+staff-confirm-identity door; (3) **lookup by email** (finance staff, exact match, never creates).
+**Open for Kevin:** who may open it · merge-two-addresses action · lookup by name? · where the lookup lives.
+Build after markup; first a real wizard submission on live (smoke test) so one true ledger exists.
+
 ## 3. Next rows (not yet discussed)

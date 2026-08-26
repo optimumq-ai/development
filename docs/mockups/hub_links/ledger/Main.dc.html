@@ -1,0 +1,113 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; } a:hover { color: #0E3A5C; }
+    .card { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .lbl { font-size: 12.5px; font-weight: 600; color: #12232E; margin-bottom: 5px; }
+    .hint { font-size: 11.5px; color: #8296A4; margin-top: 4px; line-height: 1.4; }
+    .in { display: flex; align-items: center; height: 36px; border: 1px solid #BECAD3; border-radius: 7px;
+          background: #FFFFFF; padding: 0 11px; font-size: 13.5px; color: #12232E; }
+    .in.empty { color: #A9B7C2; }
+    .in.miss { border-color: #B02A37; }
+    .field { display: flex; flex-direction: column; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
+            border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+    .p-ready { background: #E1F2E9; color: #1B8A5A; }
+    .p-prog  { background: #F6EBD6; color: #9A6512; }
+    .ev { font-size: 12px; color: #5C6F7C; line-height: 1.35; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 36px; padding: 0 14px;
+           border-radius: 7px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; }
+    .b-pri { background: #1E6091; color: #FFFFFF; border: 1px solid #1E6091; }
+    .b-sec { background: #FFFFFF; color: #12232E; border: 1px solid #BECAD3; }
+    .b-dis { background: #F2F6F9; color: #A9B7C2; border: 1px solid #D2DCE3; cursor: default; }
+    .sect { font-size: 11.5px; font-weight: 700; color: #5C6F7C; text-transform: uppercase; letter-spacing: 0.05em; }
+    .req { color: #B02A37; font-weight: 700; }
+    .tab { padding: 9px 16px; font-size: 13.5px; font-weight: 500; color: #5C6F7C; border-bottom: 2px solid transparent; }
+    .tab.on { color: #1E6091; font-weight: 700; border-bottom-color: #1E6091; }
+    .row { display: grid; gap: 10px; align-items: center; padding: 8px 12px; border-top: 1px solid #EEF2F5; font-size: 12.5px; }
+    .row.head { border-top: 0; padding: 6px 12px; font-size: 11px; font-weight: 700; color: #8296A4; text-transform: uppercase; letter-spacing: 0.04em; }
+    .num { font-variant-numeric: tabular-nums; text-align: right; }
+    .kv { font-size: 12px; color: #5C6F7C; }
+    .meter { height: 8px; background: #E8EEF4; border-radius: 999px; overflow: hidden; }
+    .meter > div { height: 100%; background: #1E6091; }
+    .p-warn { background: #FEE2E2; color: #991B1B; }
+    .p-info { background: #E8EEF4; color: #0E3A5C; }
+  </style>
+</helmet>
+
+
+<div style="padding: 20px; width: 1000px; background: #D8E0E8;">
+
+  <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 10px 14px; margin-bottom: 14px;">
+    <button class="pill p-info" style="border: 0; height: 26px; padding: 0 11px; font-family: inherit; cursor: pointer;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5C6F7C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg> Back to REQ-2026-0412</button>
+    <span class="ev" style="flex-grow: 1;">Requestor ledger · opened from the request's Financial page</span>
+    <span style="font-size: 11.5px; color: #8296A4;">Finance · view only for most; adjustments happen on the request</span>
+  </div>
+
+  <div class="card">
+    <div style="padding: 16px 20px; border-bottom: 1px solid #D2DCE3; display: flex; align-items: flex-start; gap: 16px;">
+      <div style="flex-grow: 1;">
+        <div style="font-size: 19px; font-weight: 700;">Dana Whitfield</div>
+        <div style="font-size: 12.5px; color: #5C6F7C; margin-top: 3px;">d.whitfield@example.com</div>
+        <div style="display: flex; gap: 8px; margin-top: 8px; align-items: center;">
+          <span class="pill p-ready"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1B8A5A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg> Verified email · link clicked 12 Mar 2026</span>
+          <span class="kv">3 requests since Jan 2026 · this ledger is kept because the address was verified</span>
+        </div>
+      </div>
+      <div style="text-align: right;">
+        <div class="sect">Outstanding balance</div>
+        <div style="font-size: 26px; font-weight: 800; color: #B02A37; margin-top: 2px;">$82.50</div>
+        <div class="hint" style="margin-top: 0;">invoiced $265.70 · paid $147.20 · waived $36.00</div>
+      </div>
+    </div>
+
+    <div style="display: flex; border-bottom: 1px solid #D2DCE3; padding: 0 20px;">
+      <div class="tab on">Balance by request</div>
+      <div class="tab">Allowances</div>
+      <div class="tab">Flags</div>
+      <div class="tab">Event log</div>
+    </div>
+
+    <div style="padding: 14px 20px 6px;">
+      <div class="row head" style="grid-template-columns: 130px minmax(0,1fr) 90px 90px 90px 100px;"><span>Request</span><span>Subject</span><span class="num">Invoiced</span><span class="num">Paid</span><span class="num">Waived</span><span class="num">Outstanding</span></div>
+      <div class="row" style="grid-template-columns: 130px minmax(0,1fr) 90px 90px 90px 100px;"><span>REQ-2026-0412</span><span>Police incident reports — Elm St, March</span><span class="num">$82.50</span><span class="num">$0.00</span><span class="num">—</span><span class="num"><b style="color:#B02A37;">$82.50</b></span></div><div class="row" style="grid-template-columns: 130px minmax(0,1fr) 90px 90px 90px 100px;"><span>REQ-2026-0298</span><span>Building permits — 14 Oak Ave</span><span class="num">$147.20</span><span class="num">$147.20</span><span class="num">—</span><span class="num">$0.00</span></div><div class="row" style="grid-template-columns: 130px minmax(0,1fr) 90px 90px 90px 100px;"><span>REQ-2026-0117</span><span>Council meeting recordings, Jan–Feb</span><span class="num">$36.00</span><span class="num">$0.00</span><span class="num">$36.00 <span class="hint" style="display:inline;">waived · public interest</span></span><span class="num">$0.00</span></div>
+      <div class="row" style="grid-template-columns: 130px minmax(0,1fr) 90px 90px 90px 100px; border-top: 2px solid #12232E; font-weight: 700;"><span></span><span>Total</span><span class="num">$265.70</span><span class="num">$147.20</span><span class="num">$36.00</span><span class="num" style="color:#B02A37;">$82.50</span></div>
+    </div>
+
+    <div style="margin: 12px 20px; padding: 12px 14px; background: #FFF4E0; border: 1px solid #F1D9A8; border-radius: 8px; display: flex; gap: 12px; align-items: flex-start;">
+      <span class="pill p-prog" style="margin-top: 1px;">Texas rule</span>
+      <div style="font-size: 12.5px; line-height: 1.5;">
+        <b>Unpaid balance is under the $100 threshold</b> — no deposit demand applies to a new request (Tex. Gov't Code § 552.263(c), TX-0035).
+        <div class="hint" style="margin-top: 2px;">If it were over $100 and the city has elected the rule, the next estimate would carry a deposit demand automatically. This card only reports; nothing is charged or demanded from here.</div>
+      </div>
+    </div>
+
+    <div style="padding: 0 20px 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px;">
+      <div style="border: 1px solid #D2DCE3; border-radius: 8px; padding: 12px 14px;">
+        <div class="sect">Free personnel time · TX § 552.275</div>
+        <div style="display: flex; justify-content: space-between; font-size: 12.5px; margin-top: 8px;"><span>12-month allowance</span><span class="num"><b>4.5</b> of 36 hrs used</span></div>
+        <div class="meter" style="margin-top: 4px;"><div style="width: 12.5%;"></div></div>
+        <div style="display: flex; justify-content: space-between; font-size: 12.5px; margin-top: 8px;"><span>This month</span><span class="num"><b>1.0</b> of 15 hrs used</span></div>
+        <div class="meter" style="margin-top: 4px;"><div style="width: 7%;"></div></div>
+        <div class="hint">Counted from finalized task timers on this requestor's requests (once class B counting is built; entered by hand until then).</div>
+      </div>
+      <div style="border: 1px solid #D2DCE3; border-radius: 8px; padding: 12px 14px;">
+        <div class="sect">Flags</div>
+        <div style="font-size: 12.5px; color: #5C6F7C; margin-top: 8px;">None. Flags here are recorded decisions — a court's vexatious designation, a director's order, an increased-deposit demand — with who set them and when they expire. The system never sets one on its own.</div>
+      </div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

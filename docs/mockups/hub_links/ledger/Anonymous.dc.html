@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; } a:hover { color: #0E3A5C; }
+    .card { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .lbl { font-size: 12.5px; font-weight: 600; color: #12232E; margin-bottom: 5px; }
+    .hint { font-size: 11.5px; color: #8296A4; margin-top: 4px; line-height: 1.4; }
+    .in { display: flex; align-items: center; height: 36px; border: 1px solid #BECAD3; border-radius: 7px;
+          background: #FFFFFF; padding: 0 11px; font-size: 13.5px; color: #12232E; }
+    .in.empty { color: #A9B7C2; }
+    .in.miss { border-color: #B02A37; }
+    .field { display: flex; flex-direction: column; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
+            border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+    .p-ready { background: #E1F2E9; color: #1B8A5A; }
+    .p-prog  { background: #F6EBD6; color: #9A6512; }
+    .ev { font-size: 12px; color: #5C6F7C; line-height: 1.35; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 36px; padding: 0 14px;
+           border-radius: 7px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; }
+    .b-pri { background: #1E6091; color: #FFFFFF; border: 1px solid #1E6091; }
+    .b-sec { background: #FFFFFF; color: #12232E; border: 1px solid #BECAD3; }
+    .b-dis { background: #F2F6F9; color: #A9B7C2; border: 1px solid #D2DCE3; cursor: default; }
+    .sect { font-size: 11.5px; font-weight: 700; color: #5C6F7C; text-transform: uppercase; letter-spacing: 0.05em; }
+    .req { color: #B02A37; font-weight: 700; }
+    .tab { padding: 9px 16px; font-size: 13.5px; font-weight: 500; color: #5C6F7C; border-bottom: 2px solid transparent; }
+    .tab.on { color: #1E6091; font-weight: 700; border-bottom-color: #1E6091; }
+    .row { display: grid; gap: 10px; align-items: center; padding: 8px 12px; border-top: 1px solid #EEF2F5; font-size: 12.5px; }
+    .row.head { border-top: 0; padding: 6px 12px; font-size: 11px; font-weight: 700; color: #8296A4; text-transform: uppercase; letter-spacing: 0.04em; }
+    .num { font-variant-numeric: tabular-nums; text-align: right; }
+    .kv { font-size: 12px; color: #5C6F7C; }
+    .meter { height: 8px; background: #E8EEF4; border-radius: 999px; overflow: hidden; }
+    .meter > div { height: 100%; background: #1E6091; }
+    .p-warn { background: #FEE2E2; color: #991B1B; }
+    .p-info { background: #E8EEF4; color: #0E3A5C; }
+  </style>
+</helmet>
+
+
+<div style="padding: 20px; width: 1000px; background: #D8E0E8;">
+  <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 10px 14px; margin-bottom: 14px;">
+    <button class="pill p-info" style="border: 0; height: 26px; padding: 0 11px; font-family: inherit; cursor: pointer;"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#5C6F7C" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg> Back to REQ-2026-0455</button>
+    <span class="ev" style="flex-grow: 1;">Requestor ledger · opened from the request's Financial page</span>
+  </div>
+  <div class="card" style="padding: 22px 24px;">
+    <div style="font-size: 17px; font-weight: 700;">No ledger is kept for this request</div>
+    <div style="font-size: 13px; color: #5C6F7C; margin-top: 6px; line-height: 1.55; max-width: 720px;">
+      REQ-2026-0455 was submitted with the address <b>j.q.public@example.com</b>, but that address was never verified — the requestor skipped the verification link — and no staff member confirmed their identity.
+      A typed address is only a string; the law does not let the city hold one person's balance against another who typed the same one, so nothing accrues here and no prior-balance rule can apply to this request.
+    </div>
+    <div style="margin-top: 14px; padding: 12px 14px; background: #F2F6F9; border: 1px solid #D2DCE3; border-radius: 8px; max-width: 720px;">
+      <div style="font-size: 12.5px; font-weight: 600;">If this person is in front of you</div>
+      <div class="hint" style="margin-top: 2px;">Confirming their identity on the request (an explicit act, recorded under your name) anchors this request to a ledger for that address — and to any ledger already kept for it.</div>
+      <button class="btn b-sec" style="margin-top: 10px; height: 32px;">Confirm identity on REQ-2026-0455…</button>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

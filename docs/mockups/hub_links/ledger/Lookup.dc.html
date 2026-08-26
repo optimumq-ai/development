@@ -1,0 +1,80 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; } a:hover { color: #0E3A5C; }
+    .card { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .lbl { font-size: 12.5px; font-weight: 600; color: #12232E; margin-bottom: 5px; }
+    .hint { font-size: 11.5px; color: #8296A4; margin-top: 4px; line-height: 1.4; }
+    .in { display: flex; align-items: center; height: 36px; border: 1px solid #BECAD3; border-radius: 7px;
+          background: #FFFFFF; padding: 0 11px; font-size: 13.5px; color: #12232E; }
+    .in.empty { color: #A9B7C2; }
+    .in.miss { border-color: #B02A37; }
+    .field { display: flex; flex-direction: column; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
+            border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+    .p-ready { background: #E1F2E9; color: #1B8A5A; }
+    .p-prog  { background: #F6EBD6; color: #9A6512; }
+    .ev { font-size: 12px; color: #5C6F7C; line-height: 1.35; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; height: 36px; padding: 0 14px;
+           border-radius: 7px; font-size: 13px; font-weight: 600; font-family: inherit; cursor: pointer; white-space: nowrap; }
+    .b-pri { background: #1E6091; color: #FFFFFF; border: 1px solid #1E6091; }
+    .b-sec { background: #FFFFFF; color: #12232E; border: 1px solid #BECAD3; }
+    .b-dis { background: #F2F6F9; color: #A9B7C2; border: 1px solid #D2DCE3; cursor: default; }
+    .sect { font-size: 11.5px; font-weight: 700; color: #5C6F7C; text-transform: uppercase; letter-spacing: 0.05em; }
+    .req { color: #B02A37; font-weight: 700; }
+    .tab { padding: 9px 16px; font-size: 13.5px; font-weight: 500; color: #5C6F7C; border-bottom: 2px solid transparent; }
+    .tab.on { color: #1E6091; font-weight: 700; border-bottom-color: #1E6091; }
+    .row { display: grid; gap: 10px; align-items: center; padding: 8px 12px; border-top: 1px solid #EEF2F5; font-size: 12.5px; }
+    .row.head { border-top: 0; padding: 6px 12px; font-size: 11px; font-weight: 700; color: #8296A4; text-transform: uppercase; letter-spacing: 0.04em; }
+    .num { font-variant-numeric: tabular-nums; text-align: right; }
+    .kv { font-size: 12px; color: #5C6F7C; }
+    .meter { height: 8px; background: #E8EEF4; border-radius: 999px; overflow: hidden; }
+    .meter > div { height: 100%; background: #1E6091; }
+    .p-warn { background: #FEE2E2; color: #991B1B; }
+    .p-info { background: #E8EEF4; color: #0E3A5C; }
+  </style>
+</helmet>
+
+
+<div style="padding: 20px; width: 1000px; background: #D8E0E8;">
+  <div class="card">
+    <div style="padding: 16px 20px; border-bottom: 1px solid #D2DCE3;">
+      <div style="font-size: 19px; font-weight: 700;">Requestor ledger lookup</div>
+      <div style="font-size: 12.5px; color: #5C6F7C; margin-top: 3px;">Finance staff only. Exact match on a verified address — a ledger exists only where the person verified their email or a staff member confirmed who they were. Looking up never creates one.</div>
+    </div>
+    <div style="padding: 18px 20px; display: flex; gap: 10px; align-items: flex-end;">
+      <div class="field" style="width: 420px;"><div class="lbl">Email address</div><div class="in">d.whitfield@example.com</div></div>
+      <button class="btn b-pri">View ledger</button>
+      <span class="hint" style="margin: 0 0 9px 6px;">exact address · no wildcards</span>
+    </div>
+
+    <div style="margin: 0 20px 18px; border: 1px solid #D2DCE3; border-radius: 8px;">
+      <div style="padding: 12px 14px; display: flex; align-items: center; gap: 14px; border-bottom: 1px solid #EEF2F5;">
+        <div style="flex-grow: 1;">
+          <div style="font-size: 14px; font-weight: 700;">Dana Whitfield <span style="font-weight: 400; color: #5C6F7C;">· d.whitfield@example.com</span></div>
+          <div style="display: flex; gap: 8px; margin-top: 4px; align-items: center;"><span class="pill p-ready"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#1B8A5A" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="11" width="16" height="10" rx="2"></rect><path d="M8 11V7a4 4 0 0 1 8 0v4"></path></svg> Verified email · 12 Mar 2026</span><span class="kv">3 requests · first Jan 2026</span></div>
+        </div>
+        <div style="text-align: right;"><div class="sect">Outstanding</div><div style="font-size: 20px; font-weight: 800; color: #B02A37;">$82.50</div></div>
+        <button class="btn b-sec" style="height: 32px;">Open ledger</button>
+      </div>
+      <div style="padding: 10px 14px; font-size: 12.5px; color: #5C6F7C;">1 request unpaid · REQ-2026-0412 ($82.50, estimate sent 2 May, awaiting payment) · allowance 4.5 of 36 hrs · no flags</div>
+    </div>
+
+    <div style="margin: 0 20px 18px; padding: 12px 14px; background: #F2F6F9; border: 1px dashed #BECAD3; border-radius: 8px; font-size: 12.5px; color: #5C6F7C;">
+      <b style="color: #12232E;">If nothing matches:</b> "No ledger for <i>name@example.com</i>. Either no request from this address was ever verified, or the person used a different address." Nothing is created by looking.
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

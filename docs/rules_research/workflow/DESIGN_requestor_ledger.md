@@ -51,8 +51,10 @@ MI increased-deposit flag (cleared by proof of payment — an explicit **clearin
 
 ### Entities
 
-**RequestorProfile** — identity anchor. Created lazily on first *identifiable* contact (portal account,
-verified email, staff-confirmed walk-in identity). Fields: verified channels (portal id, emails), display
+**RequestorProfile** — identity anchor. Created lazily and INVISIBLY on first *identifiable* contact (a
+link-verified email, or a staff-confirmed walk-in identity). There is no requestor account, login or sign-up
+anywhere in the product and there will not be one (Kevin, reaffirmed 2026-08-26): the profile is an internal
+record keyed by the verified address. Fields: verified channels (emails), display
 name, **class attestations** (media / elected official / legal-aid / scholar — with attestation artifact,
 since TX-0031 exemptions and OH commercial certification hang off them), status flags (below).
 
@@ -91,8 +93,8 @@ automation-beyond-the-compliant-subset ([[compliant-automation-principle]]).
 ### Identity & anonymity (the hard constraint)
 
 Most states forbid conditioning access on identity (OH B(4), TX no-purpose/pseudonymous email, etc.), so:
-- **Adverse triggers require an affirmative identity match** — same portal account, same verified email, or
-  requestor-admitted identity. Never fuzzy-matched. An anonymous request simply evaluates no adverse
+- **Adverse triggers require an affirmative identity match** — the same link-verified email, or a
+  staff-confirmed identity. Never fuzzy-matched, never a bare typed address. An anonymous request simply evaluates no adverse
   triggers (that is what the statutes themselves accept — e.g. OH may demand ID *only* on reasonable
   vexatious belief, OH-S02).
 - **Beneficial triggers** (NY-0026 free reuse) may use looser matching (same record scope suffices).
@@ -113,8 +115,11 @@ this: `payment.advance_payment` (14 states), `fee.personnel_time_free_allowance`
   the system only *records and applies* an externally-established status until expiry.
 
 ## Decisions (Kevin, 2026-07-26)
-1. **Identity model — DECIDED:** portal account is the primary anchor; verified email for the email
-   channel; walk-in/paper stays staff-confirmed. No fuzzy matching into adverse actions, ever.
+1. **Identity model — DECIDED (wording corrected 2026-08-26):** the **link-verified email** is the primary
+   anchor (the portal wizard already runs a real verify-link gate; request creation records `link_clicked`
+   only from our own token record); walk-in/paper stays staff-confirmed. **No requestor accounts** — the
+   earlier "portal account" wording described a feature Kevin never asked for; the `portal_account_id`
+   column is unused and stays dead. No fuzzy matching into adverse actions, ever.
 2. **MVP cut — DECIDED:** **Class A built fully** (balance ledger + deposit/advance/prepay/deny triggers —
    fed by parent-processor events, no new data entry). **Classes B and C ship as config stubs**: all knobs,
    downstream paperwork, and timers exist (a staff-entered number produces fully compliant output); the
@@ -128,3 +133,14 @@ this: `payment.advance_payment` (14 states), `fee.personnel_time_free_allowance`
    a diligent clerk."
 3. **OH non-commercial certification — DECIDED: per-request** (the statute's literal read; only ever
    surfaces on physical delivery beyond 10 records/month, so the friction is rare).
+
+## Addendum 2026-08-26 — storage shape and the ledger views (Kevin's questions)
+- **No running-total column, no scan of all requests.** The balance is a `SUM` over the requestor's OWN
+  `requestor_ledger_events` rows (indexed on `profile_id, created_at`) — one small index range scan per
+  estimate, sub-millisecond, independent of the city's request volume; auditable and reconstructable
+  (reconciliation supersedes, waiver zeroes, replay deduplicated on source). Windowed rules (TX 36h/12mo,
+  IL 7-day counts, OH deliveries/month) use the same shape with a `created_at >= window_start` bound.
+- **Views to build** (canvas 2026-08-26): a **View ledger** button on the request's Financial page / estimate
+  panel → the requestor's ledger card (per-request invoiced/paid/waived/outstanding, running balance,
+  allowance meters, flags, identity basis); an anonymous request shows "no ledger is kept" explicitly; and a
+  staff-only **lookup by email** (exact match on the verified address, never creates a profile).

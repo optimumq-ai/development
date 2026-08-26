@@ -8955,3 +8955,12 @@ Calculate and on Reconcile. SPEC_fees_estimates_payments §2a. `verify_actual_am
 `verify_bw4_estimate` 70/70, live clean. Frontend rebuilt. NOT screenshotted on live: no priced request exists
 until Kevin approves fee schedule v1 and runs an estimate — his walk-through will show the box. Not built:
 default-for-estimate postage figure.
+
+## 2026-08-26 — ledger: design doc corrected, views sketched; no build
+
+Kevin asked what "portal account" meant — answer: nothing built or wanted; the ledger's real anchor is the
+wizard's link-verified email (or staff confirmation). `DESIGN_requestor_ledger.md` decision 1 reworded
+(+ addendum on storage shape: per-requestor event SUM, not a scan). Live: 13 requests all unverified, 0
+profiles, 27 anonymous links → the built class-A ledger is inert until a real wizard submission lands.
+Canvas https://claude.ai/code/artifact/2c16b365-5198-4a1d-bf1e-50096cc3faf0 (ledger card · anonymous state ·
+email lookup); WORKING §2e. Awaiting Kevin's markup.
