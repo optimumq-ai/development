@@ -131,8 +131,20 @@ var PRIMARY_PREFERENCE = ['respond', 'complete'];
 // is a CHECKPOINT INSIDE that duty — if you cannot produce within 10 business days you must certify that
 // in writing and give a date. Getting this wrong would put a fabricated statutory deadline on Texas
 // requests, which is the same class of error as the 77-day clock configIntegrity was written to catch.
+// ── REVISED 2026-08-26 (Kevin's decision, after the fresh import left every Texas request with no due date) ──
+// § 552.221(d) binds on EVERY request: by the 10th business day the officer must have produced the
+// information OR certified in writing that it cannot and given a date. That is a dated, universal agency
+// duty — the working deadline every Texas records office runs to — not a fabricated production deadline.
+// It therefore takes the request-level RESPONSE slot (`respond`, primary, kind response) under the label
+// "Produce, or certify a delay", so a citizen sees the date the law actually sets and the words say what it
+// is. The soft production duty ("promptly", § 552.221(a)-(b)) stays a city service target beside it.
+// An override may name a CHECKPOINT slot that is not among the timer's ordinary slots; CHECKPOINT_SLOTS
+// defines how such a clock renders.
+var CHECKPOINT_SLOTS = {
+  respond: { label: 'Produce, or certify a delay', kind: 'response', primary: true }
+};
 var SLOT_OVERRIDES = {
-  'TX-0009': 'certify_delay'
+  'TX-0009': 'respond'
 };
 
 function uniqSorted(a) { var s = {}; (a || []).forEach(function (x) { if (x) s[x] = 1; }); return Object.keys(s).sort(); }
@@ -212,7 +224,11 @@ function reconcile(matrix, opts) {
     }
     free.forEach(function (s, i) { if (remaining[i]) assigned[s.key] = remaining[i]; });
 
-    spec.slots.forEach(function (s) {
+    var emitSlots = spec.slots.slice();
+    Object.keys(assigned).forEach(function (k) {
+      if (!spec.slots.some(function (s) { return s.key === k; }) && CHECKPOINT_SLOTS[k]) emitSlots.push(Object.assign({ key: k }, CHECKPOINT_SLOTS[k]));
+    });
+    emitSlots.forEach(function (s) {
       var g = assigned[s.key];
       if (!g) return;
       out.clocks[s.key] = {
@@ -352,7 +368,7 @@ function isOperationalTarget(def) { return kindOf(def) === 'operational_target' 
 function isLegalDeadline(def) { var k = kindOf(def); return k === 'response' || k === 'agency_action'; }
 
 module.exports = {
-  DOMAIN: DOMAIN, KINDS: KINDS, TIMERS: TIMERS, SLOT_OVERRIDES: SLOT_OVERRIDES,
+  DOMAIN: DOMAIN, KINDS: KINDS, TIMERS: TIMERS, SLOT_OVERRIDES: SLOT_OVERRIDES, CHECKPOINT_SLOTS: CHECKPOINT_SLOTS,
   PRIMARY_PREFERENCE: PRIMARY_PREFERENCE,
   reconcile: reconcile, deadlineConfig: deadlineConfig, forJurisdiction: forJurisdiction,
   kindOf: kindOf, isOperationalTarget: isOperationalTarget, isLegalDeadline: isLegalDeadline

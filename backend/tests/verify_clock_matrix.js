@@ -76,16 +76,17 @@ async function setActive(jid) {
     ok('...sourced to TX-S05', (TXC.nonpayment_window.source_rule_ids || []).indexOf('TX-S05') >= 0);
     ok('TX has the 61-day clarification window (§ 552.222(d))',
       !!TXC.clarification_window && TXC.clarification_window.duration === 61 && TXC.clarification_window.kind === 'requestor_window');
-    ok('TX has the 10-business-day certify-a-delay duty (§ 552.221(d))',
-      !!TXC.certify_delay && TXC.certify_delay.duration === 10 && TXC.certify_delay.kind === 'agency_action');
-    // The rule-id override earns its keep here: without it TX-0009 would be slot 1 and Texas would be
-    // given a 10-business-day statutory PRODUCTION deadline that does not exist.
-    ok('...and TX-0009 did NOT become a statutory production deadline',
-      (TXC.certify_delay.source_rule_ids || []).indexOf('TX-0009') >= 0 &&
-      (!TXC.complete || TXC.complete.kind === 'operational_target'));
+    // REVISED 2026-08-26 (Kevin): § 552.221(d) — produce OR certify a delay by the 10th business day — binds
+    // on every request, so it is Texas's primary RESPONSE clock, labelled for what it is. The production duty
+    // ("promptly") stays a service target beside it; TX-0009 is not a separate certify_delay clock any more
+    // (one duty, one clock).
+    ok('TX has the 10-business-day produce-or-certify duty (§ 552.221(d)) as its PRIMARY response clock',
+      !!TXC.respond && TXC.respond.duration === 10 && TXC.respond.basis === 'business_days' && TXC.respond.kind === 'response' && TXC.respond.primary === true &&
+      (TXC.respond.source_rule_ids || []).indexOf('TX-0009') >= 0 && /certify a delay/i.test(TXC.respond.label));
+    ok('...and it is not doubled as a certify_delay clock (one duty, one clock)', !TXC.certify_delay);
     ok('TX production duty is a SERVICE TARGET — its statute says "promptly", with no number',
       !!TXC.complete && TXC.complete.kind === 'operational_target' && TXC.complete.duration === null);
-    ok('...so TX reconciles to NO statutory response clock, and says so', !tx.report.primary && !!tx.report.noPrimary);
+    ok('...so TX reconciles to exactly one statutory response clock, respond', tx.report.primary === 'respond' && !tx.report.noPrimary);
 
     // ---- 2. THE OTHER ACCEPTANCE CRITERION: OH shows only operational targets
     var ohKinds = Object.keys(OHC).map(function (k) { return OHC[k].kind; });

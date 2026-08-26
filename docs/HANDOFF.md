@@ -8985,3 +8985,21 @@ Request **2026-000005** (parent 3e3069d1…, child 2026-000005-1 589026cd…), r
    NULL on the parent — the fresh-import TX profile has no primary clock (see the full-suite finding).
 Minor: a `submissionChannel: 'portal'` request is logged "Submitted via AI chat agent" (publicChat.js
 labels only manual_form separately) — cosmetic, unfixed. Kevin receives the verification email.
+
+## 2026-08-26 — TX primary clock: reconciler decision reversed on Kevin's call; live re-reconciled
+
+The "gap" was the reconciler's deliberate reading (TX-0009 → certify_delay, no primary; the old seed had
+supplied a legacy 5/10/20/30-day `respond` with no statutory basis). Kevin: fix it. Decision: § 552.221(d)
+(produce OR certify a delay by the 10th business day) binds on every request → it is TX's primary RESPONSE
+clock (`respond`, 10 bd, label "Produce, or certify a delay"); "promptly" stays a service target.
+`clockMatrix.CHECKPOINT_SLOTS` + `SLOT_OVERRIDES['TX-0009']='respond'`; all 32 templates diffed — only TX
+changed. Importer also fills `exemption_model` (pre_clearance when Denial.dag is active) and `statute_name`
+(known-names table) when empty. Live: re-import staged deadline/fee/template_import proposals; the deadline
+one applied via `effectiveConfig.applyConfig` (reviewer path); duplicate `certify_delay` removed from the
+live config and the smoke request; `startClocksForRequest` gave 2026-000005 a primary clock →
+**deadline_date 2026-09-09** on parent and child. Profile: pre_clearance · "Texas Public Information Act".
+**Still pending on live (Kevin to review on the hub's law-updates row): fee + template_import merge
+proposals** from the re-import. Harnesses: the 8 formerly red all green (clock_matrix 54/54 with updated
+TX assertions, e2e_tx 36/36, tolls 27/27, wrap_parent 43/43, legal_review 44/44, branch_profile 62/62,
+golive 35/35, editors 37/37); jurrules 27/27, deadline_rules 25/25, config_integrity 17/17 (alone); live
+clean. SPEC_phase7_build addendum. Full suite re-run started after this commit.

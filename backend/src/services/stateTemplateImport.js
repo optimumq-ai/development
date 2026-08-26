@@ -654,21 +654,34 @@ function deriveCitation(tpl) {
   return best;
 }
 
+// The exemption-handling model, derived from the template's Denial branches (2026-08-26): a state whose
+// "Mandatory EXTERNAL ruling" branch is active (Denial.dag — Texas's Attorney General pre-clearance) is
+// `pre_clearance`; anything else is left NULL for a human, never guessed.
+function deriveExemptionModel(tpl) {
+  var b = (tpl.branches || {})['Denial.dag'];
+  return b && b.active === true ? 'pre_clearance' : null;
+}
+// The statute's NAME is not in the templates (they carry authorities). The well-known names; anything not
+// listed stays for a human to enter.
+var STATUTE_NAMES = { TX: 'Texas Public Information Act', OH: 'Ohio Public Records Act', CA: 'California Public Records Act', NY: 'New York Freedom of Information Law', FL: 'Florida Public Records Act', IL: 'Illinois Freedom of Information Act', PA: 'Pennsylvania Right-to-Know Law', MI: 'Michigan Freedom of Information Act', WA: 'Washington Public Records Act', CO: 'Colorado Open Records Act', GA: 'Georgia Open Records Act', NJ: 'New Jersey Open Public Records Act', VA: 'Virginia Freedom of Information Act', MA: 'Massachusetts Public Records Law', WI: 'Wisconsin Public Records Law', MN: 'Minnesota Government Data Practices Act', AZ: 'Arizona Public Records Law', CT: 'Connecticut Freedom of Information Act', MO: 'Missouri Sunshine Law', OK: 'Oklahoma Open Records Act', TN: 'Tennessee Public Records Act', UT: 'Utah Government Records Access and Management Act', NC: 'North Carolina Public Records Law', SC: 'South Carolina Freedom of Information Act', IN: 'Indiana Access to Public Records Act', KS: 'Kansas Open Records Act', LA: 'Louisiana Public Records Act', NV: 'Nevada Public Records Act', OR: 'Oregon Public Records Law', AL: 'Alabama Open Records Act', ID: 'Idaho Public Records Act', NE: 'Nebraska Public Records Statutes' };
+
 async function upsertProfile(jid, tpl, actor) {
-  var existing = await get('SELECT id, code, name, statute_citation, status FROM jurisdiction_profiles WHERE id = ?', [jid]);
+  var existing = await get('SELECT id, code, name, statute_citation, statute_name, exemption_model, status FROM jurisdiction_profiles WHERE id = ?', [jid]);
   var cite = deriveCitation(tpl);
+  var model = deriveExemptionModel(tpl);
+  var name = STATUTE_NAMES[String(tpl.code).toUpperCase()] || null;
   if (!existing) {
     // `library`, never `active`: importing a template makes a state AVAILABLE, it does not switch the
     // city over to it. That is a deliberate, separate act.
-    await run('INSERT INTO jurisdiction_profiles (id, code, name, statute_citation, status) VALUES (?,?,?,?,?)',
-      [jid, tpl.code, tpl.state, cite, 'library']);
-    return { created: true, statuteNameMissing: true };
+    await run('INSERT INTO jurisdiction_profiles (id, code, name, statute_citation, statute_name, exemption_model, status) VALUES (?,?,?,?,?,?,?)',
+      [jid, tpl.code, tpl.state, cite, name, model, 'library']);
+    return { created: true, statuteNameMissing: !name };
   }
-  // Never touch `status` (the active jurisdiction must stay active) and never overwrite a citation a
-  // human already set.
-  if (!existing.statute_citation && cite) {
-    await run('UPDATE jurisdiction_profiles SET statute_citation = ? WHERE id = ?', [cite, jid]);
-  }
+  // Never touch `status` (the active jurisdiction must stay active) and never overwrite a citation, name
+  // or model a human already set — fill only what is empty.
+  if (!existing.statute_citation && cite) await run('UPDATE jurisdiction_profiles SET statute_citation = ? WHERE id = ?', [cite, jid]);
+  if (!existing.statute_name && name) await run('UPDATE jurisdiction_profiles SET statute_name = ? WHERE id = ?', [name, jid]);
+  if (!existing.exemption_model && model) await run('UPDATE jurisdiction_profiles SET exemption_model = ? WHERE id = ?', [model, jid]);
   var nm = await get('SELECT statute_name FROM jurisdiction_profiles WHERE id = ?', [jid]);
   return { created: false, statuteNameMissing: !(nm && nm.statute_name) };
 }

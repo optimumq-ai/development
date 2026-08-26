@@ -100,3 +100,18 @@ convention), message prefix `feat(phase7-wsN):`. After each backend change: rest
 optimumq-owned `node server.js` on :3001 (root PM2 respawns). Verify with
 `check_config_integrity.js` + the WS6 scripts as they come online. If a template value looks
 wrong, fix the Phase-6 pipeline (map/generator), never hand-edit a generated `<ST>.json`.
+
+
+## Addendum 2026-08-26 — Texas primary clock (Kevin's decision)
+WS3 originally reconciled Texas to NO statutory response clock (production duty "promptly", TX-0009's 10
+business days routed to a `certify_delay` agency action). After the 2026-08-25 wipe and a fresh import, every
+Texas request therefore had no due date — the hand seed had been supplying a legacy `respond` clock
+(5/10/20/30 days by classification) with no basis in the statute. Decision: **§ 552.221(d) binds on every
+request — by the 10th business day the officer must produce OR certify a delay in writing — so it is the
+primary RESPONSE clock**, key `respond`, kind `response`, label "Produce, or certify a delay", 10 business
+days from intake (`clockMatrix.CHECKPOINT_SLOTS` + `SLOT_OVERRIDES['TX-0009'] = 'respond'`). The soft
+production duty stays a city service target (`complete`, no number). No other state's reconciled clocks
+changed (all 32 diffed). The importer now also fills `exemption_model` (`pre_clearance` when the template's
+`Denial.dag` branch is active) and `statute_name` (well-known names table) when they are empty — never
+overwriting a human's value. Live `jur-tx` re-reconciled through the ordinary proposal → approve path;
+`certify_delay` removed as a duplicate of the same duty. `verify_clock_matrix` TX assertions updated to this.
