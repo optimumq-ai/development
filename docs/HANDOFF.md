@@ -8964,3 +8964,24 @@ wizard's link-verified email (or staff confirmation). `DESIGN_requestor_ledger.m
 profiles, 27 anonymous links → the built class-A ledger is inert until a real wizard submission lands.
 Canvas https://claude.ai/code/artifact/2c16b365-5198-4a1d-bf1e-50096cc3faf0 (ledger card · anonymous state ·
 email lookup); WORKING §2e. Awaiting Kevin's markup.
+
+## 2026-08-26 — live smoke with a REAL portal submission (kept, not purged): first real ledger exists
+
+Request **2026-000005** (parent 3e3069d1…, child 2026-000005-1 589026cd…), requestor
+`mkhargrove+smoke@gmail.com`, driven at machine speed through the real endpoints (scratchpad smoke*.js):
+1. **Verify** — POST /public/request-verification sent the real email (resend: sent:true); the link click
+   (GET /public/verify/:token) recorded verified_at. ✅
+2. **Submit** — POST /public/submit with the wizard's payload + token → 201; `email_verification_method =
+   link_clicked` on BOTH parent and child (the server-side token check, not a claim). ✅
+3. **Ledger anchoring** — `requestor_profiles` **rp-8d375b64** created ("created on first verified_email");
+   both rows linked `verified_email`; `evaluateEstimate` → identified, no triggers (nothing owed). **The
+   built class-A ledger is no longer inert: this is the first real ledger on live.** ✅
+4. **Route** — engine advanced intake → record_search itself; record_search + estimate tasks spawned;
+   AI classified (simple, council minutes); public status check answers "In Process · Record Search". ✅
+5. **Estimate — BLOCKED (expected):** 400 "No fee configuration exists for the active jurisdiction" — no
+   fee schedule version has been approved since the wipe. Kevin approving v1 on /setup/fee-law unblocks it.
+   Search/redact/deliver not attempted (downstream of the estimate gate). ⛔
+6. **Clock gap confirmed on live:** only `certify_delay` runs; NO primary respond clock, `deadline_date`
+   NULL on the parent — the fresh-import TX profile has no primary clock (see the full-suite finding).
+Minor: a `submissionChannel: 'portal'` request is logged "Submitted via AI chat agent" (publicChat.js
+labels only manual_form separately) — cosmetic, unfixed. Kevin receives the verification email.
