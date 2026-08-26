@@ -9044,3 +9044,21 @@ Each tab = what the law says (citations → research popup) · the city's few ch
   view of the generated text; an editable template store with per-state required-element checks is its
   OWN later slice (after the redaction library). Keep this screen small. Design canvas first.
 Uncommitted at close: the E1a diagnostics line in `verify_bw9_golive.js` — committed with this note.
+
+## 2026-08-26 — clarification/exemptions/eligibility three-tab screen: design canvas drawn; no build
+
+The decided slice, canvas-first per the UI rule. **Canvas
+https://claude.ai/code/artifact/ad29b14f-c181-407b-870c-f8045a840b61** (sources
+`docs/mockups/hub_links/clar_exempt_elig/`, WORKING_hub_linked_screens §2f). Four artboards: the three tabs
+(status strip follows the active tab; tab dots show each row's hub state) + the clarification-letter popup
+showing the REAL `buildNotice` text (City of Autumn Falls, graceDays 61). Facts drawn from live: clarification
+domain `enabled:false` / section not_configured with 0 settings; exemption section = the 4 `knobs/Denial.*`
+unconfirmed; eligibility = 6 dimensions, only `incarceration` gated (TX-0004); NO hub row exists for
+eligibility (new-row question drawn as a sticky note). Content from TX_RULES_READABLE §4/§7/§11; exemptions
+law panel drawn as the AG-process clock (10th bd / 15th bd / missed → presumed public § 552.302). A review
+pass fixed: letter-hint contradiction (standard sentence is softer than the § 552.222(d) withdrawal
+consequence — now says so and defers to the letter view), a 220px input clipping its grid column, and the
+missing "new 9/1/2025" tag on the § 552.221(g) notice. Committed c7054f8 (docs only, no code, no DB writes,
+no suite needed). **Open for Kevin on the canvas:** eligibility hub row placement · three doors → one screen
+with preselected tab · strengthen the TX consequence sentence now vs. with the template store. Build waits
+for markup.
