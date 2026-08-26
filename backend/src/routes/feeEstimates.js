@@ -216,7 +216,8 @@ router.post('/request/:requestId', requireAuth, async function (req, res) {
       certification: defaultCertification(b, loaded),
       other: b.other || null,
       purpose: b.purpose || 'standard',
-      rateOverrides: b.rateOverrides || {}
+      rateOverrides: b.rateOverrides || {},
+      actualAmounts: b.actualAmounts || {}
     };
     // Purpose is NOT decoration: commercial vs non-commercial drives the fee basis in several jurisdictions,
     // so a lost write can mean billing on the wrong basis with no trace. Unguarded on purpose — nothing has
@@ -562,7 +563,8 @@ router.post('/request/:requestId/reconcile', requireAuth, async function (req, r
       certification: defaultCertification(b, loaded),
       other: b.other || null,
       purpose: b.purpose || 'standard',
-      rateOverrides: b.rateOverrides || {}
+      rateOverrides: b.rateOverrides || {},
+      actualAmounts: b.actualAmounts || {}
     };
     // See the same write in POST /request/:requestId — purpose drives the fee basis, and the reconcile
     // recomputes against it. Unguarded: nothing is persisted before this line, so the outer catch's 500 is honest.

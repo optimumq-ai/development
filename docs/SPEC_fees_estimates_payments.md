@@ -165,3 +165,18 @@ returns (both § 70.3(d) and § 70.3(e)(2) cross-reference § 552.261(a)(1)-(2))
 - Commercial intake capture `[NOT BUILT]` + approval `[DEFERRED]` — Domain 1 spec §5.
 - Fee-waiver approval task routing `[NOT BUILT]` — Tasks spec §11.1.
 - Variant-level profiles blocked on taxonomy decision (Domain 3 §5).
+
+
+## 2a. Staff-entered actual amounts on 'actual'-rated lines `[BUILT 2026-08-26; verify_actual_amounts]`
+A fee-schedule rate of `actual` (specialty reproduction, postage, USB media, any copy rate a state prices at
+actual cost) makes the engine emit the line at **$0 with `needsActual`** and flag the component
+`hasUnpricedActuals` (release checks it). Kevin's rule (2026-08-26): such an item is **blank on the schedule and
+priced by a human on the estimate**, then corrected to the true actual at reconciliation. Mechanism:
+`request.actualAmounts = { dup_bw | dup_color | dup_oversized | 'media:<type>' | delivery : dollars }` —
+the entered figure lands on the request-level line (where subtotals are priced), is **pro-rated across the
+components' matching lines by quantity** (so per-record allocation, revenue-by-department and ERP line items see a
+real price), and clears `needsActual`. A blank/non-numeric entry, or a key for a line that is not `actual`,
+changes nothing. `POST /fee-estimates/request/:id` and `/reconcile` pass it through and it persists in the
+snapshot's `input_json`; `FeeEstimatePanel` renders an amber "Actual-cost items" box under the itemized
+estimate with one `$ actual` input per such line (estimate-time best figure; true actual at reconcile).
+Not built: a default-for-estimate postage figure (would need `delivery.mail` to carry both a default and 'actual').

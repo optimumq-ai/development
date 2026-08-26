@@ -8943,3 +8943,15 @@ no field for staff to enter the real amount for such a line (only labor-rate ove
 flow (blank on schedule → staff enters during estimate → true actuals at billing) needs that estimate-side
 input; a postage default-for-estimate would need the delivery config to carry both a default and 'actual'.
 Both parked for Kevin. Specialty-reproduction's citation ids are TX-9xxx (fee-gap rows) → no research record.
+
+## 2026-08-26 — actual-amount entry on the estimate screen (Kevin's go)
+
+`feeEngine`: `request.actualAmounts` {dup_bw|dup_color|dup_oversized|media:<type>|delivery → $} prices an
+'actual'-rated line at the entered figure on the request-level line, pro-rates it across components by
+quantity, clears needsActual/hasUnpricedActuals; blanks/non-numeric/non-actual keys ignored. Routes
+`/fee-estimates/request/:id` + `/reconcile` pass it through (persisted in the snapshot input). `FeeEstimatePanel`:
+amber "Actual-cost items" box under the itemized estimate, one `$ actual` input per such line, sent on
+Calculate and on Reconcile. SPEC_fees_estimates_payments §2a. `verify_actual_amounts` 9/9 (engine + API),
+`verify_bw4_estimate` 70/70, live clean. Frontend rebuilt. NOT screenshotted on live: no priced request exists
+until Kevin approves fee schedule v1 and runs an estimate — his walk-through will show the box. Not built:
+default-for-estimate postage figure.

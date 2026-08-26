@@ -17,6 +17,7 @@ export default function FeeEstimatePanel(props) {
   var [purpose, setPurpose] = useState('standard');
   var [rateOverrides, setRateOverrides] = useState({});
   var [actualRateDrivers, setActualRateDrivers] = useState([]);
+  var [actualAmounts, setActualAmounts] = useState({});   // staff-entered $ for 'actual'-rated lines (dup_bw, media:<type>, delivery)
   var [result, setResult] = useState(null);
   var [calc, setCalc] = useState(false);
   var [err, setErr] = useState('');
@@ -105,6 +106,7 @@ export default function FeeEstimatePanel(props) {
       if (r.data.latest && r.data.latest.input && r.data.latest.input.delivery) setDelivery(r.data.latest.input.delivery.method || 'email');
       if (r.data.request && r.data.request.purpose) setPurpose(r.data.request.purpose);
       var ard = r.data.actualRateDrivers || []; setActualRateDrivers(ard); if (ard.length) { var ro = {}; ard.forEach(function (k) { ro[k] = (r.data.laborRates || {})[k] || 0; }); setRateOverrides(ro); }
+      if (r.data.latest && r.data.latest.input && r.data.latest.input.actualAmounts) setActualAmounts(r.data.latest.input.actualAmounts);
       if (r.data.latest && r.data.latest.input && r.data.latest.input.other) setOther({ amount: r.data.latest.input.other.amount || 0, description: r.data.latest.input.other.description || '' });
       var certCtx = r.data.certification || {};
       var latestCert = r.data.latest && r.data.latest.input && r.data.latest.input.certification;
@@ -130,7 +132,7 @@ export default function FeeEstimatePanel(props) {
       });
       var otherPayload = (num(other.amount) !== 0 || (other.description || '').trim()) ? { amount: num(other.amount), description: other.description || 'Other' } : null;
       var certPayload = certification.requested ? { count: num(certification.count) || 1 } : { count: 0 };
-      var r = await api.post('/fee-estimates/request/' + requestId, { components: comps, delivery: { method: delivery }, certification: certPayload, other: otherPayload, purpose: purpose, rateOverrides: rateOverrides });
+      var r = await api.post('/fee-estimates/request/' + requestId, { components: comps, delivery: { method: delivery }, certification: certPayload, other: otherPayload, purpose: purpose, rateOverrides: rateOverrides, actualAmounts: actualAmounts });
       setResult(r.data.estimate.feeContext);
     } catch (e) { setErr((e.response && e.response.data && e.response.data.error) || 'Calculation failed.'); }
     setCalc(false);
@@ -328,7 +330,7 @@ export default function FeeEstimatePanel(props) {
         return { id: c.id, label: c.label, recordType: c.recordType, quantities: quant };
       });
       var certPayload = certification.requested ? { count: num(certification.count) || 1 } : { count: 0 };
-      var r = await api.post('/fee-estimates/request/' + requestId + '/reconcile', { components: comps, delivery: { method: delivery }, certification: certPayload, purpose: purpose, rateOverrides: rateOverrides });
+      var r = await api.post('/fee-estimates/request/' + requestId + '/reconcile', { components: comps, delivery: { method: delivery }, certification: certPayload, purpose: purpose, rateOverrides: rateOverrides, actualAmounts: actualAmounts });
       setReconResult(r.data);
     } catch (e) { setReconResult({ error: (e.response && e.response.data && e.response.data.error) || 'Reconcile failed.' }); }
     setReconBusy(false);
@@ -502,6 +504,18 @@ export default function FeeEstimatePanel(props) {
                     </div>
                   );
                 })}
+                {(function () {
+                  var lines = [];
+                  (R.duplication || []).forEach(function (d) { if (d.needsActual || d.actualEntered) lines.push({ key: d.kind, label: (d.kind === 'dup_bw' ? 'B&W copies' : d.kind === 'dup_color' ? 'Color copies' : 'Oversized copies') + ' — ' + (d.billablePages != null ? d.billablePages : d.pages) + ' pages at actual cost' }); });
+                  (R.media || []).forEach(function (m) { if (m.needsActual || m.actualEntered) lines.push({ key: 'media:' + m.type, label: 'Media: ' + m.type + ' — ' + m.count + ' at actual cost' }); });
+                  if (R.delivery && (R.delivery.needsActual || R.delivery.actualEntered)) lines.push({ key: 'delivery', label: 'Delivery by ' + R.delivery.method + ' at actual cost (postage)' });
+                  if (!lines.length) return null;
+                  return <div style={{ border: '1px solid #FDE68A', background: '#FFFBEB', borderRadius: '8px', padding: '8px 10px', margin: '6px 0 8px' }}>
+                    <div style={{ fontSize: '11.5px', fontWeight: 700, color: '#92400E', marginBottom: '4px' }}>Actual-cost items — enter the amount, then Calculate</div>
+                    <div style={{ fontSize: '11px', color: '#78350F', marginBottom: '6px' }}>The fee schedule prices these at actual cost. Enter your best figure for the estimate; correct it to the true actual when you reconcile for final billing. Left blank, the line reads "actual TBD" and the record cannot be released as fully priced.</div>
+                    {lines.map(function (l) { return <div key={l.key} style={{ display: 'grid', gridTemplateColumns: '1fr 110px', gap: '8px', alignItems: 'center', marginBottom: '4px', fontSize: '11.5px', color: '#374151' }}><span>{l.label}</span><input type="number" step="0.01" min="0" placeholder="$ actual" value={actualAmounts[l.key] == null ? '' : actualAmounts[l.key]} onChange={function (e) { var v = e.target.value; setActualAmounts(function (p) { var n = Object.assign({}, p); if (v === '') delete n[l.key]; else n[l.key] = parseFloat(v); return n; }); }} style={inp} /></div>; })}
+                  </div>;
+                })()}
                 <div style={{ borderTop: '1px solid #E5E7EB', paddingTop: '8px', fontSize: '12px', color: '#374151' }}>
                   <Row k="Labor" v={money(R.laborSubtotal)} />
                   {R.laborOverhead ? <Row k={"Labor overhead (" + R.laborOverheadPct + "%)"} v={money(R.laborOverhead)} /> : null}

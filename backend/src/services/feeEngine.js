@@ -223,7 +223,7 @@ function compute(profile, request) {
       if (!mt || mc <= 0) continue;
       mediaAgg[mt] = (mediaAgg[mt] || 0) + mc;
       var mr = media[mt];
-      if (mr === 'actual' || mr == null) items.push({ kind: 'media', description: 'Media: ' + mt, unit: 'item', quantity: mc, rate: (mr == null ? 0 : 'actual'), amount: 0, needsActual: mr === 'actual' });
+      if (mr === 'actual' || mr == null) items.push({ kind: 'media', type: mt, description: 'Media: ' + mt, unit: 'item', quantity: mc, rate: (mr == null ? 0 : 'actual'), amount: 0, needsActual: mr === 'actual' });
       else { var ma = r2(mc * num(mr)); items.push({ kind: 'media', description: 'Media: ' + mt, unit: 'item', quantity: mc, rate: num(mr), amount: ma }); gross += ma; }
     }
     var avq = q.av || null;
@@ -317,6 +317,39 @@ function compute(profile, request) {
   var other = request && request.other;
   if (other && num(other.amount) !== 0) { otherSubtotal = r2(num(other.amount)); otherItem = { kind: 'other', description: (other.description || 'Other'), amount: otherSubtotal }; }
 
+  // ---- staff-entered ACTUAL amounts for 'actual'-rated lines (Kevin 2026-08-26) ----
+  // A rate of 'actual' prices to $0 / needsActual until staff enter the real figure on the estimate screen:
+  // request.actualAmounts = { dup_bw | dup_color | dup_oversized | 'media:<type>' | delivery : dollars }.
+  // The amount lands on the request-level line (where the subtotal is priced) and is shared across the
+  // components' matching lines by quantity, so per-record allocation and release gating see it too.
+  var actuals = (request && request.actualAmounts) || {};
+  function actualFor(key) { var v = actuals[key]; return (v == null || v === '' || !isFinite(Number(v))) ? null : r2(num(v)); }
+  function applyActual(item, key) {
+    if (!item || !item.needsActual) return 0;
+    var v = actualFor(key); if (v == null) return 0;
+    item.amount = v; item.needsActual = false; item.actualEntered = true; return v;
+  }
+  var actualsEntered = [];
+  for (i = 0; i < dupItems.length; i++) { var dv = applyActual(dupItems[i], dupItems[i].kind); if (dupItems[i].actualEntered) { dupSubtotal += dv; actualsEntered.push(dupItems[i].kind); } }
+  for (i = 0; i < mediaItems.length; i++) { var mv = applyActual(mediaItems[i], 'media:' + mediaItems[i].type); if (mediaItems[i].actualEntered) { mediaSubtotal += mv; actualsEntered.push('media:' + mediaItems[i].type); } }
+  if (deliveryItem) { var dlv = applyActual(deliveryItem, 'delivery'); if (deliveryItem.actualEntered) { deliverySubtotal += dlv; actualsEntered.push('delivery'); } }
+  if (actualsEntered.length) {
+    var qtyTotals = { dup_bw: num(agg.bw), dup_color: num(agg.color), dup_oversized: num(agg.oversized) };
+    Object.keys(mediaAgg).forEach(function (t) { qtyTotals['media:' + t] = num(mediaAgg[t]); });
+    grossSubtotal = 0;
+    for (i = 0; i < compOut.length; i++) {
+      var cg = 0;
+      compOut[i].lineItems.forEach(function (li) {
+        var key = li.kind === 'media' ? 'media:' + li.type : li.kind;
+        var v = actualFor(key);
+        if (li.needsActual && v != null && qtyTotals[key] > 0) { li.amount = r2(v * num(li.quantity) / qtyTotals[key]); li.needsActual = false; li.actualEntered = true; }
+        cg += num(li.amount);
+      });
+      compOut[i].componentGross = r2(cg); grossSubtotal += compOut[i].componentGross;
+    }
+    grossSubtotal = r2(grossSubtotal);
+  }
+
   var adjustedSubtotal = r2(laborSubtotal + laborOverhead + dupSubtotal + mediaSubtotal + avSubtotal + deliverySubtotal + certSubtotal + otherSubtotal);
 
   // ---- purpose/commercial surcharge (percent of the subtotal) ----
@@ -397,6 +430,7 @@ function compute(profile, request) {
       delivery: deliveryItem, deliverySubtotal: r2(deliverySubtotal),
       certification: certItem, certificationSubtotal: r2(certSubtotal),
       other: otherItem, otherSubtotal: r2(otherSubtotal),
+      actualsEntered: actualsEntered,
       freeAllowances: { freeLaborHours: num(rules.freeLaborHours), freePageAllowance: freePages },
       adjustedSubtotal: adjustedSubtotal,
       surchargePct: surchargePct, surcharge: surcharge, surchargedSubtotal: surchargedSubtotal,
