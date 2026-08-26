@@ -8935,3 +8935,11 @@ Kevin: "why do I see nothing on the test tab?" — it was gated on an approved v
 prices against the unapproved DRAFT (law figures + today's decisions, composed, not saved) or the approved
 version, with a radio on the tab; the outcome buttons stay disabled until a version exists. `verify_fee_law`
 24/24. Rebuilt; live shows the draft estimate ($82.50 on the 120-page sample).
+Kevin's first hands-on: (1) focus lost after one keystroke on City decisions — row renderers were components
+defined inside render (remount per keystroke); now called as functions → fixed, verified by typing "2.50"
+in one go. (2) citations were in the tab order → tabIndex -1. (3) "actual cost" items: the engine already
+prices `actual` as "actual TBD"/$0 + `hasUnpricedActuals` (release checks it), but the ESTIMATE panel has
+no field for staff to enter the real amount for such a line (only labor-rate overrides) — Kevin's proposed
+flow (blank on schedule → staff enters during estimate → true actuals at billing) needs that estimate-side
+input; a postage default-for-estimate would need the delivery config to carry both a default and 'actual'.
+Both parked for Kevin. Specialty-reproduction's citation ids are TX-9xxx (fee-gap rows) → no research record.
