@@ -9069,3 +9069,47 @@ Addendum: canvas screenshots handed to Kevin in `~/exchange/clartabs_1_clarifica
 Addendum 2026-08-27: both canvas links (three-tab screen + requestor ledger) handed to Kevin in
 `~/exchange/CANVAS_LINKS_2026-08-27.md`, alongside the `clartabs_*` shots; the ledger canvas also carries a
 see-also note pointing at the three-tab canvas (46321d4).
+
+## 2026-08-27 — request-rules three-tab screen BUILT (R1); suite 2657/2658 (E1a deferred, as before)
+
+**Kevin's calls (this session):** design approved · new hub row `eligibility` "Requestor eligibility"
+(Compliance lane, item 8 of 12) · three doors, each opening its MATCHING tab · letter wording waits for the
+letter-template slice.
+
+**Built (b732b43, reworked c6cb21a):** `/setup/request-rules` (`RequestRulesPage.js`; status strip follows
+the active tab, tab dots = hub states) · `services/requestRules.js` + `routes/requestRules.js` · shared
+`components/StatutePopup.js` (FeeLawPage refactored onto it) · hub doors + eligibility row + readers ·
+`verify_request_rules` (28/28) registered in the suite. Law panels walk the locked state's TEMPLATE FILE by
+concept domain (TX 4/10/4 = the readable doc's exact lists; all 32 templates parse; statutory reply window
+found for TX 61 / MO 90 / VA 30). Clarification master switch materializes the five choices as confirmable
+`city_config` knobs and fills the statutory policy fields (61 d + withdrawal closure, § 552.222(d)
+provenance); confirms write through reply-window/closing-notice to the policy fields. Exemption tab = the 4
+`knobs/Denial.*` settings through the EXISTING Legal-Rules confirm endpoint; reasons = Redaction-rules-library
+acknowledgement card; denial letter = standard STRUCTURE view (no generator exists yet). Eligibility posture
+= gated + confirmed in one act. SPEC_setup_hub §7 R1 bound in the build commit.
+
+**The first full suite caught a real design fault — worth remembering:** the five choices first lived INSIDE
+the `clarification` policy domain, and configIntegrity polices that domain's schema as exactly
+enabled + provenance + the 7 fields (the BW9b editors render it the same way) — the extra key read as
+corruption (8 reds across 5 harnesses). Fix: the choices live in their OWN domain
+**`clarification_screen`** (unpoliced by design); `goLive.settings` folds it into the clarification SECTION
+so the hub counts the choices; `clarificationPolicy` reverted byte-identical. Harness made order-proof
+(imports TX itself when the fixture lacks the template domains) and residue-free (wholesale jur-tx
+snapshot/restore + its own integrity-clean cleanup assertions).
+
+**Full suite after the rework: 2657/2658, live untouched.** The one red is `verify_bw9_golive` E1a — the
+SAME deferred red as 2026-08-26 (Kevin: revisit once fee schedule v1 + real proposal data exist). Honesty
+note: E1a "passed" in this session's FIRST full run only because my harness's residue accidentally gave the
+go-live walk unconfirmed settings; the residue-free cleanup returns it to its known red. The E1a diagnostics
+line still does not surface through the runner (its FAIL-line filter) — unchanged from the 2026-08-26 note.
+
+**Live state:** screen live and verified by authenticated screenshots (real TX data); clarification still
+switched OFF (Kevin's act to make on the screen — flipping it is what moves the row off Not started),
+exemptions 0 of 4, eligibility "one decision to confirm"; `clarification_screen` domain does not exist on
+live until the switch is flipped. Fee schedule v1 still unapproved; the two law-updates merge proposals
+still pending. Earlier this session: three-tab + ledger canvases handed to Kevin (`~/exchange/clartabs_*`,
+`CANVAS_LINKS_2026-08-27.md`); ledger canvas got a see-also note.
+
+**NEXT:** Kevin walks the screen (switch on, record choices, attest) · fee schedule v1 approval unblocks the
+smoke's estimate beat and the E1a revisit · then the next hub row or the letter-template / redaction-library
+slices per the backlog.
