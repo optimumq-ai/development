@@ -232,7 +232,15 @@ https://claude.ai/code/artifact/8a77071f-3c95-4c1b-849e-e61715d2d669, sources
 the twice-homed money pair becomes ONE pointer card to the fee schedule (no editing here) · "Settled
 elsewhere" names the deposit-clock/nonpayment facts that run from the payment rules · the silent slots
 collapse to one expandable line (the wired forfeiture guardrail stays visible). DISPLAY-only; silence
-computed per state from provenance (uncited = silent), never TX-hardcoded. Open (drawn as a note): render
-the window card from the template's figures, or have the reconciler fill the null fields on import.
+computed per state from provenance (uncited = silent), never TX-hardcoded.
+**Redraw 2 (Kevin's direction, 2026-08-27):** the silent-slots panel is GONE from Content — mandate cards ·
+real local choices · pointer cards only, plus one quiet footer line; the negative space moves to the
+Provenance zone as **negative-finding records** (`{no_provision, researched, note}` per concept, authored in
+the research pipeline, imported as field provenance — distinguishes "researched, state silent" from "nobody
+looked"; Kevin's EXCLUDE-flag idea resolved as include-by-evidence + this record, never a second source of
+truth). A wired guardrail shows on Content only when TRUE. Third artboard = the silent-state empty case
+(Florida: no fee.waiver concept in 12 of 32 templates) — honest "law does not address fee waivers" card + the
+ONE choice silence leaves (offer a discretionary waiver? recording NO must count as CONFIGURED — same fix
+class as clarification's switch). Window-card question stands (template figures vs reconciler fill).
 Awaiting Kevin's markup. Related, also open from this session's discussion: split the fee-law screen's
 "Fee waiver grounds" mandate row into the two § 552.267 rules with a de-minimis echo (§6 ↔ fee-law tie-in).

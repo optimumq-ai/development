@@ -1,0 +1,63 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; }
+    .kv { font-size: 12.5px; color: #5C6F7C; line-height: 1.5; }
+    .panel { background: #FFFFFF; border: 1px solid #C3CFDA; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; }
+    .pol  { border: 1px dashed #D4A72C; border-left: 4px solid #D4A72C; border-radius: 5px; padding: 11px 14px; margin-bottom: 7px; background: #FFF8E5; }
+    .neg  { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+            background: #F2F6F9; color: #5C6F7C; border: 1px solid #C3CFDA; border-radius: 3px; padding: 1px 6px; }
+    .grp { font-size: 10.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: #5C6F7C; margin: 14px 0 7px; }
+    .tab { font-size: 12px; font-weight: 700; padding: 6px 13px; border-radius: 5px 5px 0 0; border: 1px solid transparent; border-bottom: none; color: #5C6F7C; }
+    .tab.on { color: #143D5C; background: #F2F6F9; border-color: #C3CFDA; }
+    .rad { width: 14px; height: 14px; border-radius: 999px; border: 1.5px solid #BECAD3; background: #FFFFFF;
+           display: inline-flex; align-items: center; justify-content: center; vertical-align: -2px; margin-right: 6px; }
+    .rad.on { border-color: #1E6091; }
+    .rad.on i { width: 7px; height: 7px; border-radius: 999px; background: #1E6091; display: block; }
+  </style>
+</helmet>
+
+<!-- the same rendering rule, in a state whose law says nothing: Florida -->
+<div style="padding: 18px 20px; width: 1160px; background: #D8E0E8;">
+  <div style="max-width: 1120px; margin: 0 auto;">
+    <div style="font-size: 17px; font-weight: 700; color: #143D5C; margin-bottom: 2px;">Fee-waiver policy <span style="font-weight: 500; color: #5C6F7C; font-size: 13px;">· Florida (illustration — same rendering rule, silent state)</span></div>
+    <div class="kv" style="margin-bottom: 14px;">What Florida law says about waiving fees — and the one choice that silence leaves to the city.</div>
+
+    <div style="display: flex; gap: 2px; border-bottom: 1px solid #C3CFDA; margin-bottom: 12px;">
+      <span class="tab on">Content</span><span class="tab">Local Policy Settings</span><span class="tab">Provenance</span><span class="tab">Proposals</span>
+    </div>
+
+    <div class="grp">What Florida law says</div>
+    <div class="panel">
+      <div style="font-size: 13px;"><b>Florida law does not address fee waivers.</b> <span class="neg">researched 2026-08 · no provision found</span></div>
+      <div class="kv" style="margin-top: 3px;">Chapter 119 sets copy charges and a service charge for extensive use, but says nothing about waiving them. Nothing here is loaded from the state — and nothing pretends to be.</div>
+    </div>
+
+    <div class="grp">What this city decides</div>
+    <div class="pol">
+      <div style="font-size: 12.5px; font-weight: 600; margin-bottom: 6px;">Does this city offer a discretionary fee waiver?</div>
+      <div style="font-size: 12.5px; line-height: 2;">
+        <div><span class="rad on"><i></i></span>No — fees apply as charged <span style="color: #8296A4;">(suggested — the statute's own posture)</span></div>
+        <div><span class="rad"></span>Yes — staff may waive on grounds this city defines</div>
+      </div>
+      <div class="kv" style="margin-top: 4px;">The one real choice silence leaves open. Recording "no waiver" completes this section — a deliberate no is a configuration, not an omission. Choosing yes opens the grounds and approval routing.</div>
+    </div>
+
+    <div class="kv" style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #C3CFDA;">
+      Florida is silent on every other point of the national fee-waiver schema — each <b>researched, no provision found</b>; the record lives under <a href="#">Provenance →</a>. The estimate and deposit figures Texas shows here do not appear for Florida: its statute sets none.
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -1,0 +1,74 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; }
+    .kv { font-size: 12.5px; color: #5C6F7C; line-height: 1.5; }
+    .panel { background: #FFFFFF; border: 1px solid #C3CFDA; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; }
+    .cite { display: inline-block; font-size: 10.5px; color: #143D5C; background: #F2F6F9; border: 1px solid #C3CFDA;
+            border-radius: 3px; padding: 0 6px; font-weight: 600; white-space: nowrap; }
+    .rid  { display: inline-block; font-size: 10.5px; color: #1E6091; background: #F2F6F9; border: 1px solid #C3CFDA;
+            border-radius: 3px; padding: 0 6px; font-weight: 600; }
+    .neg  { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+            background: #F2F6F9; color: #5C6F7C; border: 1px solid #C3CFDA; border-radius: 3px; padding: 1px 6px; }
+    .grp { font-size: 10.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: #5C6F7C; margin: 14px 0 7px; }
+    .row { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 10px; align-items: baseline;
+           padding: 7px 0; border-top: 1px solid #EEF2F5; font-size: 12.5px; }
+    .tab { font-size: 12px; font-weight: 700; padding: 6px 13px; border-radius: 5px 5px 0 0; border: 1px solid transparent; border-bottom: none; color: #5C6F7C; }
+    .tab.on { color: #143D5C; background: #F2F6F9; border-color: #C3CFDA; }
+  </style>
+</helmet>
+
+<!-- the Provenance zone: where the negative space lives — every field, cited or "no provision found" -->
+<div style="padding: 18px 20px; width: 1160px; background: #D8E0E8;">
+  <div style="max-width: 1120px; margin: 0 auto;">
+    <div style="font-size: 17px; font-weight: 700; color: #143D5C; margin-bottom: 2px;">Fee-waiver policy</div>
+    <div class="kv" style="margin-bottom: 14px;">Provenance — the receipt for every field: what the law says, or the recorded finding that it says nothing.</div>
+
+    <div style="display: flex; gap: 2px; border-bottom: 1px solid #C3CFDA; margin-bottom: 12px;">
+      <span class="tab">Content</span><span class="tab">Local Policy Settings</span><span class="tab on">Provenance</span><span class="tab">Proposals</span>
+    </div>
+
+    <div class="grp">Cited — Texas law speaks</div>
+    <div class="panel">
+      <div class="row" style="border-top: 0;"><span><b>Waiver grounds · binding</b></span>
+        <span><span class="cite">§ 552.267(a)</span> <span class="cite">§ 552.267(b)</span> <span class="rid">TX-0032</span> <span class="rid">TX-0033</span> <span class="kv">source: statute · imported with the TX lock</span></span></div>
+      <div class="row"><span><b>Itemized estimate required above</b></span>
+        <span><span class="cite">§ 552.2615(a)</span> <span class="kv">figure lives on the fee schedule</span></span></div>
+      <div class="row"><span><b>Deposit allowed above</b></span>
+        <span><span class="cite">§ 552.263(a)</span> <span class="kv">figure lives on the fee schedule</span></span></div>
+      <div class="row"><span><b>Pay-or-abandon window (days · trigger · expiry)</b></span>
+        <span><span class="cite">§ 552.2615(b)</span> <span class="cite">§ 552.263(f)</span> <span class="cite">§ 552.221(e)</span></span></div>
+    </div>
+
+    <div class="grp">No provision found — the negative-finding records</div>
+    <div class="panel">
+      <div class="kv" style="margin-bottom: 6px;">A silent field is not "nobody looked": each carries a record written at research time —
+        <span style="font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; background: #F2F6F9; border: 1px solid #C3CFDA; border-radius: 3px; padding: 0 5px;">{ no_provision: true, researched: 2026-08, note }</span>
+        — imported as the field's provenance. Absence of any record means NOT RESEARCHED, and renders as exactly that.</div>
+      <div class="row"><span>Requestor must state a purpose</span><span><span class="neg">no provision · researched 2026-08</span> <span class="kv">Tex. Gov't Code ch. 552 sets no purpose requirement — and § 552.222(b) forbids asking.</span></span></div>
+      <div class="row"><span>Denial must be written, with reasons</span><span><span class="neg">no provision · researched 2026-08</span> <span class="kv">No waiver-denial writing requirement found.</span></span></div>
+      <div class="row"><span>Silence counts as granted</span><span><span class="neg">no provision · researched 2026-08</span></span></div>
+      <div class="row"><span>Clock pauses while a waiver is pending / appealed</span><span><span class="neg">no provision · researched 2026-08</span> <span class="kv">Two fields, one finding.</span></span></div>
+      <div class="row"><span>Clock restarts when the deposit arrives</span><span><span class="neg">settled elsewhere</span> <span class="kv">§ 552.263(e) is real Texas law — it runs from the payment rules; this slot stays empty by design.</span></span></div>
+      <div class="row"><span>Appeals (forum · window · unit · can order · reviews amount)</span><span><span class="neg">no provision · researched 2026-08</span> <span class="kv">Five fields. The TX overcharge complaint reviews the AMOUNT (a fee fact), not the § 552.267 call.</span></span></div>
+      <div class="row"><span>Window unit</span><span><span class="neg">no provision · researched 2026-08</span></span></div>
+      <div class="row"><span>Deposit cap (% of estimate)</span><span><span class="neg">no provision · researched 2026-08</span> <span class="kv">Washington's rule; Texas silent.</span></span></div>
+      <div class="row"><span>Fee forfeiture on a blown clock · closed extension list</span><span><span class="neg">no provision · researched 2026-08</span> <span class="kv">Illinois's guardrails. Forfeiture is engine-wired; off here, so it renders nowhere on Content.</span></span></div>
+    </div>
+
+    <div class="kv">This zone is the auditor's view — the setup user never needs it. Every field of the national schema appears exactly once: cited, no-provision, settled-elsewhere, or (if research never ran) not researched.</div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

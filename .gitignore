@@ -26,3 +26,5 @@ docs/mockups/**/setup-configuration-hub.html
 # design-canvas bundles (2.5 MB seeded editors) — sources are the .dc.html + canvas.json
 docs/mockups/hub_links/*/*.html
 !docs/mockups/hub_links/*/*.dc.html
+docs/mockups/fee_waiver_content/*.html
+!docs/mockups/fee_waiver_content/*.dc.html
