@@ -258,7 +258,7 @@ unchanged, on City decisions). City decisions gains group "Fee waiver · 2": who
 (the existing approvalModules waiver module: inline at Intake Review, suggested / routed task) · the
 waiver-denial explanation (the 5 seeded `decision_reasons` sentences, view-only until the letter-template
 slice). Gates: waiver choices count toward ATTEST, never toward Approve (fee schedule v1 still waits only on
-the 13 money figures). Title drawn "Fee rules" (alternates on canvas). Silent state: mandate section = one
+the 13 money figures). Title DECIDED "Fee rules" (Kevin 2026-08-27: generic enough that a scanning user assumes anything fee/charging/deposit related is included; "Fee Parameter Domain" considered and dropped — register + "domain" already means the config stores). Silent state: mandate section = one
 honest "law does not address waivers (researched)" line; city section opens with offer-a-waiver-at-all.
 Hub after: `waiver_policy` row deleted, compliance lane 12 → 11 (HubLane artboard). Build implications on
 canvas notes (fee_waiver profile section attests through this screen — fold-into-fees vs dual-attest to
