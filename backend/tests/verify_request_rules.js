@@ -58,11 +58,27 @@ function tabChoices(scr, tab) { var m = {}; ((scr.tabs[tab] || {}).choices || []
   await db.initDb();
   var U = { dir: await mk('oro_director'), legal: await mk('oro_senior_legal'), staff: await mk('team_staff', 'team-police') };
 
-  // Baseline: the importer's state, whatever the clone of live holds (test DB only — testEnv refuses live).
-  // Clarification switched off with NO knobs; exemption knobs unconfirmed; incarceration gated, unconfirmed.
+  // Snapshot EVERYTHING this harness (or its precondition import) can touch, for a wholesale restore at
+  // the end — the config-integrity harness asserts a clean fixture baseline and must find no residue.
+  var SNAP = {};
+  SNAP.rules = await db.all("SELECT id, domain, config_json, updated_by, updated_at FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx'");
+  SNAP.sections = await db.all("SELECT * FROM jurisdiction_profile_sections WHERE jurisdiction_id = 'jur-tx'");
+  SNAP.proposalIds = (await db.all("SELECT id FROM config_proposals WHERE jurisdiction_id = 'jur-tx'")).map(function (r) { return r.id; });
+  SNAP.profile = await db.get("SELECT * FROM jurisdiction_profiles WHERE id = 'jur-tx'");
+  SNAP.signoffs = await db.all("SELECT item_key, marked_by, marked_by_name, marked_at FROM setup_hub_signoffs WHERE item_key IN ('clarification','exemptions','eligibility')");
+
+  // Precondition: the fixture ships without the imported template domains (they arrive when a harness or
+  // the agency lock imports TX). Import here so this harness holds in any run order.
+  if (!(await domain('eligibility'))) {
+    await require('/opt/optimumq/backend/src/services/stateTemplateImport').importState('TX', { actor: 'rr-harness-precondition' });
+  }
+
+  // Baseline: the importer's state (test DB only — testEnv refuses live).
+  // Clarification switched off; no screen domain; exemption knobs unconfirmed; incarceration gated, unconfirmed.
   var clar = await domain('clarification') || {};
-  delete clar.knobs; clar.enabled = false; clar.clarification_grace_days = null; clar.abandonment_closure = 'unspecified'; clar.closure_notice_required = false;
+  clar.enabled = false; clar.clarification_grace_days = null; clar.abandonment_closure = 'unspecified'; clar.closure_notice_required = false;
   await writeDomain('clarification', clar);
+  await db.run("DELETE FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx' AND domain = 'clarification_screen'");
   var ex = await domain('exemption');
   Object.keys((ex && ex.knobs) || {}).forEach(function (k) { var cc = ex.knobs[k].city_config; if (cc) { cc.confirmed = false; cc.value = null; delete cc.confirmed_by; delete cc.confirmed_at; } });
   await writeDomain('exemption', ex);
@@ -116,14 +132,14 @@ function tabChoices(scr, tab) { var m = {}; ((scr.tabs[tab] || {}).choices || []
   // record one decision, then prove it survives a re-enable AND a knobs-free policy write
   await callAs(U.dir, 'POST', '/request-rules/clarification/confirm', { path: 'knobs/Master.bv', value: 'Too vague to search.' });
   await callAs(U.dir, 'POST', '/request-rules/clarification/enabled', { enabled: true });
-  var afterRe = await domain('clarification');
+  var afterRe = await domain('clarification_screen');
   ok('B4 re-enabling keeps a recorded decision (idempotent materialization)',
     afterRe.knobs['Master.bv'].city_config.confirmed === true && afterRe.knobs['Master.bv'].city_config.value === 'Too vague to search.');
   var CP = require('/opt/optimumq/backend/src/services/clarificationPolicy');
   await CP.write('jur-tx', { enabled: true, clarification_grace_days: 61, abandonment_closure: 'allowed' }, 'harness-policy-edit');
   var afterPol = await domain('clarification');
-  ok('B5 a knobs-free policy write does NOT erase recorded decisions',
-    afterPol.knobs && afterPol.knobs['Master.bv'] && afterPol.knobs['Master.bv'].city_config.confirmed === true);
+  ok('B5 a policy write touches only the policy domain: no stray keys there, decisions intact next door',
+    !afterPol.knobs && (await domain('clarification_screen')).knobs['Master.bv'].city_config.confirmed === true);
 
   console.log('\n=== C. RECORDING CLARIFICATION DECISIONS ===');
   var c1 = await callAs(U.dir, 'POST', '/request-rules/clarification/confirm', { path: 'knobs/Clarification.n3', value: 61 });
@@ -177,6 +193,36 @@ function tabChoices(scr, tab) { var m = {}; ((scr.tabs[tab] || {}).choices || []
   ok('E6 the row can be attested once the decision is recorded', mark.status === 200 && hubItem(hub3.body, 'eligibility').state === 'ready');
   await db.run("DELETE FROM setup_hub_signoffs WHERE item_key = 'eligibility'");
 
-  console.log('\n  SUMMARY: ' + pass + ' passed, ' + fail + ' failed');
+  console.log('\n=== F. CLEANUP — the fixture is left exactly as found ===');
+  await db.run("DELETE FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx'");
+  for (var rr of SNAP.rules) {
+    await db.run('INSERT INTO jurisdiction_rules (id, jurisdiction_id, domain, config_json, updated_by, updated_at) VALUES (?,?,?,?,?,?)',
+      [rr.id, 'jur-tx', rr.domain, rr.config_json, rr.updated_by, rr.updated_at]);
+  }
+  await db.run("DELETE FROM jurisdiction_profile_sections WHERE jurisdiction_id = 'jur-tx'");
+  for (var sr of SNAP.sections) {
+    var cols = Object.keys(sr);
+    await db.run('INSERT INTO jurisdiction_profile_sections (' + cols.join(',') + ') VALUES (' + cols.map(function () { return '?'; }).join(',') + ')',
+      cols.map(function (c) { return sr[c]; }));
+  }
+  if (SNAP.proposalIds.length) await db.run("DELETE FROM config_proposals WHERE jurisdiction_id = 'jur-tx' AND id NOT IN (" + SNAP.proposalIds.map(function () { return '?'; }).join(',') + ')', SNAP.proposalIds);
+  else await db.run("DELETE FROM config_proposals WHERE jurisdiction_id = 'jur-tx'");
+  if (SNAP.profile) {
+    var pcols = Object.keys(SNAP.profile).filter(function (c) { return c !== 'id'; });
+    await db.run('UPDATE jurisdiction_profiles SET ' + pcols.map(function (c) { return c + ' = ?'; }).join(', ') + " WHERE id = 'jur-tx'",
+      pcols.map(function (c) { return SNAP.profile[c]; }));
+  }
+  await db.run("DELETE FROM setup_hub_signoffs WHERE item_key IN ('clarification','exemptions','eligibility')");
+  for (var sg of SNAP.signoffs) {
+    await db.run('INSERT INTO setup_hub_signoffs (item_key, marked_by, marked_by_name, marked_at) VALUES (?,?,?,?)', [sg.item_key, sg.marked_by, sg.marked_by_name, sg.marked_at]);
+  }
+  var CI = require('/opt/optimumq/backend/src/services/configIntegrity');
+  var ci = await CI.check();
+  var ciErr = (ci.findings || []).filter(function (f) { return f.severity === 'error' && !/A harness has leaked into production config/.test(f.issue); });
+  ok('F1 cleanup: config integrity clean (' + ciErr.length + ' errors): ' + ciErr.map(function (f) { return f.where; }).join(' '), ciErr.length === 0);
+  var rulesNow = await db.get("SELECT COUNT(*) n FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx'");
+  ok('F2 cleanup: exactly the fixture\'s jur-tx rule rows again (' + SNAP.rules.length + ')', Number(rulesNow.n) === SNAP.rules.length);
+
+  console.log('\n  SUMMARY  ' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
   process.exit(fail ? 1 : 0);
-})().catch(function (e) { console.error('  ERR', e); console.log('\n  SUMMARY: ' + pass + ' passed, ' + (fail + 1) + ' failed'); process.exit(1); });
+})().catch(function (e) { console.error('  ERR', e); console.log('\n  SUMMARY  ' + pass + '/' + (pass + fail + 1) + ' pass, ' + (fail + 1) + ' fail'); process.exit(1); });

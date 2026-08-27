@@ -166,6 +166,14 @@ async function settings(jid) {
         try { cfg = await JR.read(jid, domain); } catch (e) {}
         list = settingsInConfig(domain, cfg);
       }
+      // The request-rules screen's clarification choices live in their OWN domain (the policy domain's
+      // schema is policed as exactly the 7 fields) but belong to the clarification SECTION here, so the
+      // hub counts them and confirm-by-path finds them.
+      if (sec.section === 'clarification') {
+        var scr = null;
+        try { scr = await JR.read(jid, 'clarification_screen'); } catch (e) {}
+        if (scr) list = list.concat(settingsInConfig('clarification_screen', scr));
+      }
       list = list.concat(await codeSettingsFor(sec.section, jid));
       await stampCodeSettings(jid, list);
     }

@@ -1,7 +1,7 @@
 'use strict';
 // THE SETUP & CONFIGURATION HUB — SPEC_setup_hub.md (H1).
 //
-//   A. The catalog: five lanes, thirty-six items, every item has a name / lane / deps / owner group; every
+//   A. The catalog: five lanes, thirty-seven items, every item has a name / lane / deps / owner group; every
 //      dependency points at a real item; lane owners are permission GROUPS (the hub gates on the user-type
 //      model and nothing else — WORKING_setup_inventory "no stopgap").
 //   B. Evidence is COUNTED: a change in what is configured changes the row (a team with no serving department
@@ -46,15 +46,15 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
 
   console.log('\n=== A. THE CATALOG ===');
   ok('A1 five lanes in the decided order and names', HUB.LANES.length === 5 && /^Compliance and Policies Setup$/.test(HUB.LANES[0].title) && /Fees, Estimates and Routing$/.test(HUB.LANES[1].title) && /Redaction and Release$/.test(HUB.LANES[2].title) && /^Organization Departments, Teams, and Staff Setup$/.test(HUB.LANES[3].title) && HUB.LANES[4].title === 'Technical Setup');
-  ok('A2 thirty-six items (11 + 8 + 5 + 4 + 7 + the agency card on top)', HUB.ITEMS.length === 36 && HUB.ITEMS.filter(function (i) { return i.top; }).length === 1 &&
-    sameSet(HUB.LANES.map(function (l) { return HUB.ITEMS.filter(function (i) { return i.lane === l.key && !i.top; }).length; }), [11, 8, 5, 4, 7]));
+  ok('A2 thirty-seven items (12 + 8 + 5 + 4 + 7 + the agency card on top; eligibility added 2026-08-27)', HUB.ITEMS.length === 37 && HUB.ITEMS.filter(function (i) { return i.top; }).length === 1 &&
+    sameSet(HUB.LANES.map(function (l) { return HUB.ITEMS.filter(function (i) { return i.lane === l.key && !i.top; }).length; }), [12, 8, 5, 4, 7]));
   var badDeps = []; HUB.ITEMS.forEach(function (i) { (i.deps || []).forEach(function (d) { if (!HUB.BY_KEY[d]) badDeps.push(i.key + '->' + d); }); });
   ok('A3 every dependency points at a real item', badDeps.length === 0, badDeps.join(','));
   ok('A4 every lane owner is a permission GROUP from the user-type model (no role names anywhere)', HUB.LANES.every(function (l) { return l.groups.every(function (g) { return ut.PERMISSION_GROUPS.indexOf(g) !== -1; }); }) &&
     !/SYSTEM_ADMIN|DIRECTOR|SUPERVISOR|ATTORNEY_REVIEWER/.test(require('fs').readFileSync('/opt/optimumq/backend/src/services/setupHub.js', 'utf8')));
   ok('A5 every item has a reader', HUB.ITEMS.every(function (i) { return typeof HUB.READERS[i.key] === 'function'; }));
   var noDoor = HUB.ITEMS.filter(function (i) { return !i.door; }).map(function (i) { return i.key; });
-  ok('A6 the no-door items are exactly the inventory\'s "no screen yet" set', sameSet(noDoor, ['clarification', 'redaction_auto', 'release_review', 'decision_reasons', 'mass_schedule', 'settlement']), noDoor.join(','));
+  ok('A6 the no-door items are exactly the inventory\'s "no screen yet" set (clarification got its screen 2026-08-27)', sameSet(noDoor, ['redaction_auto', 'release_review', 'decision_reasons', 'mass_schedule', 'settlement']), noDoor.join(','));
 
   console.log('\n=== B. EVIDENCE IS COUNTED ===');
   var page = (await callAs(U.dir, 'GET', '/setup-hub')).body;
@@ -62,7 +62,7 @@ function find(page, key) { var f = null; page.lanes.forEach(function (l) { l.ite
   var states = ['ready', 'in_progress', 'not_started', 'waiting', 'needs_attention'];
   var allItems = []; page.lanes.forEach(function (l) { allItems = allItems.concat(l.items); }); allItems = allItems.concat(page.top);
   ok('B2 every row carries a known state and a non-empty evidence line', allItems.every(function (x) { return states.indexOf(x.state) !== -1 && typeof x.evidence === 'string' && x.evidence.length > 0; }));
-  ok('B3 header counts add up to 36', states.reduce(function (n, s) { return n + (page.counts[s] || 0); }, 0) === 36);
+  ok('B3 header counts add up to 37', states.reduce(function (n, s) { return n + (page.counts[s] || 0); }, 0) === 37);
   var teamsBefore = find(page, 'teams');
   var dept = 'dept-' + TAG;
   await db.run("INSERT INTO departments (id, name, code, kind, is_open_records, active) VALUES (?,?,?,'department',0,1)", [dept, 'HUB Unserved ' + TAG, 'H' + TAG.slice(-5)]);

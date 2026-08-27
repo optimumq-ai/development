@@ -80,19 +80,10 @@ function coerceField(f, v, strict) {
   return v;
 }
 
-// The request-rules screen (services/requestRules.js) materializes its five choices as city_config
-// KNOBS inside this domain so the existing policy-settings/confirm plumbing records each decision.
-// They are screen metadata, not policy fields — carried through normalize/validate untouched so a
-// policy write can never silently erase a recorded decision.
-function carryKnobs(raw, out) {
-  if (raw.knobs && typeof raw.knobs === 'object' && !Array.isArray(raw.knobs)) out.knobs = raw.knobs;
-}
-
 // Merge stored config over defaults, coercing every field. Lenient (never throws) — for reads.
 function normalize(raw) {
   raw = (raw && typeof raw === 'object') ? raw : {};
   var out = defaults();
-  carryKnobs(raw, out);
   out.enabled = raw.enabled === true || raw.enabled === 'true' || raw.enabled === 1 || raw.enabled === '1';
   FIELDS.forEach(function (f) { out[f.key] = coerceField(f, raw[f.key], false); });
   // provenance: keep only known fields with a sane source
@@ -120,7 +111,6 @@ function normalize(raw) {
 function validate(raw) {
   raw = (raw && typeof raw === 'object') ? raw : {};
   var out = defaults();
-  carryKnobs(raw, out);
   out.enabled = raw.enabled === true || raw.enabled === 'true' || raw.enabled === 1 || raw.enabled === '1';
   FIELDS.forEach(function (f) { out[f.key] = coerceField(f, raw[f.key], true); });
   var prov = (raw.provenance && typeof raw.provenance === 'object') ? raw.provenance : {};
@@ -155,15 +145,9 @@ async function read(jid) {
 }
 
 // Persist a validated policy for a jurisdiction. Returns the store target (for effectiveConfig history).
-// A caller writing only the POLICY (an editor PUTting the seven fields) must not erase the request-rules
-// screen's recorded decisions: when the incoming object carries no knobs, the stored ones are kept.
 async function write(jid, cfg, actor) {
   var clean = validate(cfg);
   if (!jid) jid = await JR.activeJid();
-  if (!clean.knobs) {
-    var stored = await JR.read(jid, DOMAIN);
-    if (stored && stored.knobs && typeof stored.knobs === 'object' && !Array.isArray(stored.knobs)) clean.knobs = stored.knobs;
-  }
   var r = await JR.write(jid, DOMAIN, clean, actor);
   return { target: r.target, policy: clean };
 }

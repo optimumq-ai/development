@@ -9,9 +9,14 @@
 //                        each tab's choices with value/confirmed state, and the letter previews.
 //   setEnabled(...)    — the clarification master switch. The state load files the domain enabled:false;
 //                        switching it ON is the act that lets the hub row leave "Not started". Enabling
-//                        also MATERIALIZES the five clarification choices as city_config knobs in the
-//                        clarification domain (idempotent), so the existing policy-settings/confirm
-//                        plumbing (goLive.confirm) records each decision with a name and date.
+//                        also MATERIALIZES the five clarification choices as city_config knobs — in
+//                        their OWN domain, `clarification_screen` (idempotent), so the existing
+//                        policy-settings/confirm plumbing (goLive.confirm) records each decision with a
+//                        name and date. They deliberately do NOT live inside the `clarification` policy
+//                        domain: configIntegrity polices that domain's schema (enabled + provenance +
+//                        the 7 fields) and the BW9b editors render it as exactly those fields — an
+//                        extra key there reads as corruption. goLive.settings folds the screen domain
+//                        into the clarification SECTION so the hub counts the choices all the same.
 //   confirmChoice(...) — clarification-tab confirms: goLive.confirm plus the policy-field side effects
 //                        (reply window days → clarification_grace_days; closing notice → closure_notice_
 //                        required). Exemption-tab choices go through the EXISTING policy-settings/confirm
@@ -30,6 +35,9 @@ const CP = require('./clarificationPolicy');
 const CN = require('./clarificationNotice');
 const GL = require('./goLive');
 const JP = require('./jurisdictionProfile');
+
+// Where the clarification tab's choices live (NOT the policy domain — see the header note).
+const CHOICES_DOMAIN = 'clarification_screen';
 
 // concept-domain prefixes each tab shows as "what the law says"
 const TAB_CONCEPTS = {
@@ -166,9 +174,10 @@ async function activeJurisdiction(jid) {
 function ccOf(node) { return (node && node.city_config && typeof node.city_config === 'object') ? node.city_config : null; }
 
 // ---- the clarification master switch ---------------------------------------------------------------
-// Enabling materializes the five choices as city_config knobs (idempotent — an existing knob and its
-// confirmation survive) and fills the statutory policy fields the template settles (TX: 61-day window,
-// withdrawal closure). Disabling only flips `enabled` — decisions already recorded are kept.
+// Enabling fills the statutory policy fields the template settles (TX: 61-day window, withdrawal
+// closure) in the POLICY domain, and materializes the five choices as city_config knobs in the SCREEN
+// domain (idempotent — an existing knob and its confirmation survive). Disabling only flips `enabled`
+// — decisions already recorded are kept.
 async function setEnabled(jid, enabled, user) {
   var prof = await activeJurisdiction(jid);
   if (!prof) throw Object.assign(new Error('No jurisdiction is locked yet — lock the state on the agency screen first.'), { status: 409 });
@@ -187,21 +196,23 @@ async function setEnabled(jid, enabled, user) {
         raw.provenance.clarification_grace_days = { source: 'statute', citation: stat.citation, confidence: 1 };
       }
     }
-    raw.knobs = raw.knobs || {};
+    var scr = (await JR.read(prof.id, CHOICES_DOMAIN)) || {};
+    scr.knobs = scr.knobs || {};
     var tplKnobs = (meta.tpl && meta.tpl.knobs) || {};
     CLAR_CHOICES.forEach(function (c) {
-      if (raw.knobs[c.key] && ccOf(raw.knobs[c.key])) return;   // already materialized — keep it
+      if (scr.knobs[c.key] && ccOf(scr.knobs[c.key])) return;   // already materialized — keep it
       var tk = tplKnobs[c.key] || {};
       var suggested = c.suggested;
       if (c.key === 'Clarification.n3' && stat && stat.days) suggested = stat.days;
-      raw.knobs[c.key] = {
+      scr.knobs[c.key] = {
         label: c.label,
         template_label: tk.label || null,
         statutory_days: (c.key === 'Clarification.n3' && stat) ? stat.days : undefined,
         city_config: { note: c.note, value: null, confirmed: false, suggested_default: suggested }
       };
-      if (raw.knobs[c.key].statutory_days === undefined) delete raw.knobs[c.key].statutory_days;
+      if (scr.knobs[c.key].statutory_days === undefined) delete scr.knobs[c.key].statutory_days;
     });
+    await JR.write(prof.id, CHOICES_DOMAIN, scr, actor);
   }
   await CP.write(prof.id, raw, actor);
   try { await JP.sync(prof.id, { source: 'request-rules', actor: actor }); } catch (e) {}
@@ -229,7 +240,7 @@ async function confirmChoice(jid, path, value, user) {
     throw Object.assign(new Error('Not one of the offered answers: ' + value), { status: 422 });
   }
 
-  await GL.confirm(prof.id, 'clarification', 'knobs/' + key, value, actor);
+  await GL.confirm(prof.id, CHOICES_DOMAIN, 'knobs/' + key, value, actor);
 
   // the two choices that ARE policy fields write through to them, so the engine reads what was decided
   if (key === 'Clarification.n3' || key === 'Clarification.close') {
@@ -298,10 +309,10 @@ async function screen(jid) {
     return s ? { status: s.status, readiness: s.readiness, attested: s.attested, attestedBy: s.attestedBy, attestedAt: s.attestedAt } : null;
   };
 
-  // clarification
-  var clarRaw = (await JR.read(prof.id, 'clarification')) || {};
-  var policy = CP.normalize(clarRaw);
-  var clarChoices = CLAR_CHOICES.map(function (c) { return choiceRow(c, (clarRaw.knobs || {})[c.key]); });
+  // clarification — policy from its domain, the screen's choices from theirs
+  var policy = CP.normalize((await JR.read(prof.id, 'clarification')) || {});
+  var scrRaw = (await JR.read(prof.id, CHOICES_DOMAIN)) || {};
+  var clarChoices = CLAR_CHOICES.map(function (c) { return choiceRow(c, (scrRaw.knobs || {})[c.key]); });
   var letterCtx = await CN.noticeContext(policy);
   var letter = CN.buildNotice({ requestor_name: '', request_number: '', description: '' }, letterCtx);
 
@@ -350,7 +361,7 @@ async function screen(jid) {
   };
 }
 
-module.exports = { TAB_CONCEPTS: TAB_CONCEPTS, CLAR_CHOICES: CLAR_CHOICES, EX_CHOICES: EX_CHOICES,
+module.exports = { TAB_CONCEPTS: TAB_CONCEPTS, CHOICES_DOMAIN: CHOICES_DOMAIN, CLAR_CHOICES: CLAR_CHOICES, EX_CHOICES: EX_CHOICES,
   APPROVAL_GROUPS: APPROVAL_GROUPS, collectRules: collectRules, rulesForTab: rulesForTab,
   statutoryGraceDays: statutoryGraceDays, screen: screen, setEnabled: setEnabled,
   confirmChoice: confirmChoice, setPosture: setPosture };
