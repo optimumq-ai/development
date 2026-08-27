@@ -136,6 +136,9 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
   ok('E4 the route and page exist', /path="setup\/fee-law"/.test(fs.readFileSync('/opt/optimumq/frontend/src/App.js', 'utf8')) && fs.existsSync('/opt/optimumq/frontend/src/pages/FeeLawPage.js'));
 
   console.log('\n=== F. FEE WAIVERS ON THIS SCREEN (Kevin 2026-08-27; the waiver_policy hub row is retired) ===');
+  // F4 writes the routing through to the approval_modules domain; snapshot it so verify_approval_modules
+  // (which runs AFTER this harness and asserts the shipped default) sees the store exactly as before.
+  var amSnap = await db.get("SELECT config_json FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx' AND domain = 'approval_modules'");
   var sW = (await callAs(U.dir, 'GET', '/fee-law')).body;
   ok('F1 the screen carries the two waiver choices, undecided, with the engine\'s current routing as the suggested answer',
     sW.waiver && sW.waiver.choices.length === 2 && sW.waiver.decided === 0 &&
@@ -161,6 +164,9 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
   var a3 = await callAs(U.dir, 'POST', '/fee-law/approve', {});
   ok('F6 Approve never waits on the waiver choices (they gate Attest, not the schedule)',
     a3.status === 200 && a3.body.profile.version >= 1, JSON.stringify(a3.body).slice(0, 120));
+  // restore the approval_modules store to its pre-F state (see the snapshot note above)
+  if (amSnap == null) await db.run("DELETE FROM jurisdiction_rules WHERE jurisdiction_id = 'jur-tx' AND domain = 'approval_modules'");
+  else await db.run("UPDATE jurisdiction_rules SET config_json = ? WHERE jurisdiction_id = 'jur-tx' AND domain = 'approval_modules'", [amSnap.config_json]);
 
   console.log('\n' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
   process.exit(fail ? 1 : 0);
