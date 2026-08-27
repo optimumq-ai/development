@@ -9065,3 +9065,7 @@ for markup.
 
 Addendum: canvas screenshots handed to Kevin in `~/exchange/clartabs_1_clarification.png … _2_exemptions
 … _3_eligibility … _4_letter.png` (clarification tab as balanced 62d84f9).
+
+Addendum 2026-08-27: both canvas links (three-tab screen + requestor ledger) handed to Kevin in
+`~/exchange/CANVAS_LINKS_2026-08-27.md`, alongside the `clartabs_*` shots; the ledger canvas also carries a
+see-also note pointing at the three-tab canvas (46321d4).
