@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../lib/api';
+import StatutePopup from '../components/StatutePopup';
 
 // WHAT THE LAW LETS YOU CHARGE — the hub's `fee_law` screen (canvas approved by Kevin 2026-08-25; split into
 // tabs on his direction 2026-08-26). Status strip · four tabs: State mandate · City decisions (deferral) ·
@@ -49,44 +50,6 @@ function fmt(n) { n = Number(n); return Number.isInteger(n) ? String(n) : (Math.
 function money(n) { return '$' + (Number(n) || 0).toFixed(2); }
 function num(x) { x = Number(x); return isFinite(x) ? x : 0; }
 function cityText(v) { if (v == null) return ''; if (typeof v === 'object') return Object.keys(v).map(function (k) { return k + ' ' + (v[k] === 'actual' ? 'actual' : v[k] == null ? '—' : fmt(v[k])); }).join(' · '); return String(v); }
-
-// The research-text drill-down: every rule behind a cited authority, with the statute language.
-function StatutePopup(props) {
-  var [recs, setRecs] = useState(null);
-  useEffect(function () {
-    if (!props.row) return undefined;
-    var alive = true; setRecs(null);
-    var ids = props.row.law.rules || [];
-    Promise.all(ids.map(function (id) { return api.get('/jurisdiction-profile/rules-research/' + id).then(function (r) { return { id: id, rule: r.data.rule }; }).catch(function (e) { return { id: id, error: errText(e, 'not available') }; }); }))
-      .then(function (out) { if (alive) setRecs(out); });
-    return function () { alive = false; };
-  }, [props.row]);
-  if (!props.row) return null;
-  var r = props.row;
-  return (
-    <div onClick={props.onClose} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(18,35,46,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
-      <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '12px', padding: '20px 22px', width: '680px', maxWidth: '94%', maxHeight: '84vh', overflowY: 'auto', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
-        <div style={{ fontSize: '15px', fontWeight: '700' }}>{r.label}</div>
-        <div style={{ fontSize: '12px', color: C.mute, marginTop: '3px' }}>{r.law.authority}</div>
-        {!recs ? <div style={{ fontSize: '12.5px', color: C.ph, marginTop: '12px' }}>Reading the research record…</div> : null}
-        {recs && !recs.some(function (x) { return x.rule; }) ? <div style={{ fontSize: '12.5px', color: C.mute, marginTop: '12px' }}>No research record is attached to this item beyond its citation.</div> : null}
-        {recs && recs.some(function (x) { return !x.rule; }) ? <div style={Object.assign({}, hint, { marginTop: '10px' })}>Also cited: {recs.filter(function (x) { return !x.rule; }).map(function (x) { return x.id; }).join(', ')} — verified fee rows whose citation and figure are all the research record carries.</div> : null}
-        {(recs || []).filter(function (x) { return x.rule; }).map(function (x) {
-          var rec = x.rule;
-          return <div key={x.id} style={{ borderTop: '1px solid ' + C.line, marginTop: '12px', paddingTop: '10px', fontSize: '12.5px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span style={{ fontSize: '10.5px', fontWeight: '700', color: C.navy, background: '#E8EEF4', border: '1px solid #C5D3DF', borderRadius: '3px', padding: '1px 6px' }}>{x.id}</span>{rec ? <span style={{ fontWeight: '700', color: C.navy }}>{rec.legal_concept}</span> : <span style={{ color: C.mute }}>{x.error || 'not available'}</span>}</div>
-            {rec ? <div style={{ margin: '6px 0' }}><b>The rule:</b> {rec.atomic_rule}</div> : null}
-            {rec && rec.source_language ? <div style={{ borderLeft: '4px solid ' + C.navy, background: C.wash, borderRadius: '4px', padding: '7px 10px', margin: '8px 0' }}>
-              <div style={{ fontSize: '10.5px', fontWeight: '800', letterSpacing: '.05em', textTransform: 'uppercase', color: C.mute, marginBottom: '3px' }}>Statute language{rec.is_paraphrase ? ' (paraphrase)' : ' (verbatim)'}</div>
-              <div style={{ fontStyle: 'italic' }}>{rec.source_language}</div></div> : null}
-            {rec && rec.source_authority ? <div style={hint}>{rec.source_authority}{rec.official_link ? <span> · <a href={rec.official_link} target="_blank" rel="noreferrer" style={{ color: C.pri }}>official source</a></span> : null}</div> : null}
-          </div>;
-        })}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '14px' }}><button type="button" onClick={props.onClose} style={btn('sec')}>Close</button></div>
-      </div>
-    </div>
-  );
-}
 
 export default function FeeLawPage() {
   var nav = useNavigate();
@@ -195,7 +158,7 @@ export default function FeeLawPage() {
     var hasRules = r.law.rules && r.law.rules.length;
     return <span style={cite}>
       {props.pre}
-      {hasRules ? <button type="button" tabIndex={-1} onClick={function () { setStatute(r); }} title="Open the statute text behind this figure" style={{ background: 'none', border: 0, padding: 0, font: 'inherit', color: C.pri, cursor: 'pointer', textAlign: 'left', textDecoration: 'underline dotted' }}>{r.law.authority}</button> : r.law.authority}
+      {hasRules ? <button type="button" tabIndex={-1} onClick={function () { setStatute({ title: r.label, authority: r.law.authority, ruleIds: r.law.rules }); }} title="Open the statute text behind this figure" style={{ background: 'none', border: 0, padding: 0, font: 'inherit', color: C.pri, cursor: 'pointer', textAlign: 'left', textDecoration: 'underline dotted' }}>{r.law.authority}</button> : r.law.authority}
       {r.gap ? <span style={{ fontSize: '10.5px', fontWeight: '700', color: C.red }}> · {r.gap}</span> : null}
     </span>;
   }
@@ -366,7 +329,7 @@ export default function FeeLawPage() {
         {tab === 'test' ? <TestTab data={data} hubTest={hub && hub.fee_test} can={can} onChanged={load} goTab={goTab} /> : null}
       </div>
 
-      <StatutePopup row={statute} onClose={function () { setStatute(null); }} />
+      <StatutePopup info={statute} onClose={function () { setStatute(null); }} />
     </div>
   );
 }

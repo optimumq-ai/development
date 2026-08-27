@@ -210,11 +210,11 @@ ClarificationLetter = the "View the letter" popup). Awaiting Kevin's markup.
   the standard consequence sentence ("we may be unable to continue") is softer than TX's statutory
   consequence (withdrawn on day 61) — strengthen now or wait for the template store?
 
-**Open for Kevin (drawn as sticky notes):** add the eligibility hub row to the Compliance lane with its door
-on tab 3? · one screen/three doors each preselecting its tab (like `/setup/fee-law?tab=test`) — OK? ·
-strengthen the TX consequence sentence now? **Build implications (not started):** switch-on writes
-`clarification.enabled = true` + the domain's five settings become confirmable goLive settings (today the
-section reports 0 settings); new hub item + reader for eligibility; exemption tab reuses the existing 4
-`knobs/Denial.*` settings; letter views render the existing code-generated text read-only.
+**Decided 2026-08-27 (Kevin):** design approved · new hub row `eligibility` "Requestor eligibility" in the
+Compliance lane · three doors, each opening its MATCHING tab · letter wording waits for the template slice.
+**BUILT 2026-08-27** on Kevin's go: `/setup/request-rules` (`RequestRulesPage.js`), `services/requestRules.js`
++ `routes/requestRules.js`, shared `components/StatutePopup.js` (FeeLawPage refactored onto it), hub doors +
+`eligibility` row + readers, `clarificationPolicy` carries screen knobs through policy writes. Bound into
+SPEC_setup_hub §7 R1; harness `verify_request_rules`.
 
 ## 3. Next rows (not yet discussed)

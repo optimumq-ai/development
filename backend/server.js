@@ -61,6 +61,7 @@ app.use('/api/user-types', require('./src/routes/userTypes'));   // v3 catalog (
 app.use('/api/setup-hub', require('./src/routes/setupHub'));      // Setup & Configuration hub (H1)
 app.use('/api/agency', require('./src/routes/agency'));           // Agency setup + "Lock state and load its rules" (H3)
 app.use('/api/fee-law', require('./src/routes/feeLaw'));          // "What the law lets you charge" — mandate / deferral → fee schedule version
+app.use('/api/request-rules', require('./src/routes/requestRules')); // Clarification · Exemptions · Requestor eligibility (three-tab screen)
 app.use('/api/departments', require('./src/routes/departments'));
 app.use('/api/repositories', require('./src/routes/repositories'));
 app.use('/api/config', require('./src/routes/config'));

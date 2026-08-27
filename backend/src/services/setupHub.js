@@ -44,8 +44,9 @@ const ITEMS = [
   { key: 'fee_law', lane: 'compliance', name: 'What the law lets you charge', door: '/setup/fee-law', deps: ['jurisdiction'], section: 'fees' },
   { key: 'deposits', lane: 'compliance', name: 'Deposits and payment clock', door: '/jurisdiction-config/payment', deps: ['jurisdiction'], section: 'payment' },
   { key: 'waiver_policy', lane: 'compliance', name: 'Fee waivers and who approves them', door: '/jurisdiction-config/fee_waiver', deps: ['jurisdiction'], section: 'fee_waiver' },
-  { key: 'clarification', lane: 'compliance', name: 'Vague requests and clarification', door: null, deps: ['jurisdiction'], section: 'clarification', noScreen: true },
-  { key: 'exemptions', lane: 'compliance', name: 'Exemptions and appeals', door: '/jurisdiction-config/exemption', deps: ['jurisdiction'], section: 'exemption', legal: true },
+  { key: 'clarification', lane: 'compliance', name: 'Vague requests and clarification', door: '/setup/request-rules?tab=clarification', deps: ['jurisdiction'], section: 'clarification' },
+  { key: 'exemptions', lane: 'compliance', name: 'Exemptions and appeals', door: '/setup/request-rules?tab=exemptions', deps: ['jurisdiction'], section: 'exemption', legal: true },
+  { key: 'eligibility', lane: 'compliance', name: 'Requestor eligibility', door: '/setup/request-rules?tab=eligibility', deps: ['jurisdiction'], section: 'eligibility' },
   { key: 'redaction_rules', lane: 'compliance', name: 'Redaction rules library', door: '/admin?tab=redaction', deps: ['jurisdiction'], section: 'redaction', legal: true },
   { key: 'city_choices', lane: 'compliance', name: 'Choices the statute left to the city', door: '/jurisdiction-config', deps: ['jurisdiction'] },
   { key: 'law_updates', lane: 'compliance', name: 'Keeping up with changes in the law', door: '/admin?tab=updates', deps: ['jurisdiction'] },
@@ -153,8 +154,21 @@ const READERS = {
   },
   deposits: async function (ctx) { return sectionEvidence(ctx.sections.payment); },
   waiver_policy: async function (ctx) { return sectionEvidence(ctx.sections.fee_waiver); },
-  clarification: async function (ctx) { var r = sectionEvidence(ctx.sections.clarification); if (r.state === 'not_started') r.evidence = 'no screen yet'; return r; },
+  clarification: async function (ctx) {
+    var r = sectionEvidence(ctx.sections.clarification);
+    if (r.state === 'not_started') r.evidence = 'not configured yet — clarification is switched off';
+    return r;
+  },
   exemptions: async function (ctx) { return sectionEvidence(ctx.sections.exemption); },
+  eligibility: async function (ctx) {
+    var sec = ctx.sections.eligibility;
+    var r = sectionEvidence(sec);
+    if (r.state === 'not_started' && sec) {
+      var n = Number(sec.unconfirmed) || 0;
+      r.evidence = n === 1 ? 'one decision to confirm' : n > 1 ? n + ' decisions to confirm' : r.evidence;
+    }
+    return r;
+  },
   redaction_rules: async function (ctx) {
     var n = await count("SELECT COUNT(*) n FROM redaction_rules WHERE approval_status = 'approved' AND is_active = 1");
     var r = sectionEvidence(ctx.sections.redaction, n + ' rules');
