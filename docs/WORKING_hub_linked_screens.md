@@ -244,3 +244,23 @@ ONE choice silence leaves (offer a discretionary waiver? recording NO must count
 class as clarification's switch). Window-card question stands (template figures vs reconciler fill).
 Awaiting Kevin's markup. Related, also open from this session's discussion: split the fee-law screen's
 "Fee waiver grounds" mandate row into the two § 552.267 rules with a de-minimis echo (§6 ↔ fee-law tie-in).
+
+## 2h. Fee rules — the fee-law screen absorbs fee waivers; hub row retired (sketched 2026-08-27, no build)
+
+Kevin: everything fee-related, waivers included, belongs on the fee-law screen; retitle it broader; delete
+the "Fee waivers and who approves them" hub row. **His structural call: NO fifth tab — a "Fee waiver"
+SECTION on each existing tab.** Canvas
+https://claude.ai/code/artifact/4286a33e-b35e-488b-9f93-35b7d7acdb46 (sources
+`docs/mockups/fee_law_waivers/`): State mandate gains group "Fee waiver · 2" — the conflated "Fee waiver
+grounds" row splits into the two § 552.267 rules with their own must/may verbs (22 → 23 loaded; estimates
+group 9 → 8); the cost-of-collection row's city column echoes the De-minimis threshold (single home
+unchanged, on City decisions). City decisions gains group "Fee waiver · 2": who decides a waiver request
+(the existing approvalModules waiver module: inline at Intake Review, suggested / routed task) · the
+waiver-denial explanation (the 5 seeded `decision_reasons` sentences, view-only until the letter-template
+slice). Gates: waiver choices count toward ATTEST, never toward Approve (fee schedule v1 still waits only on
+the 13 money figures). Title drawn "Fee rules" (alternates on canvas). Silent state: mandate section = one
+honest "law does not address waivers (researched)" line; city section opens with offer-a-waiver-at-all.
+Hub after: `waiver_policy` row deleted, compliance lane 12 → 11 (HubLane artboard). Build implications on
+canvas notes (fee_waiver profile section attests through this screen — fold-into-fees vs dual-attest to
+decide at build; verify_setup_hub counts change). Uses the §2g pruned-waiver rendering + negative-finding
+records throughout. Awaiting Kevin's markup.

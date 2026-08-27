@@ -1,0 +1,106 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; }
+    .card { background: #FFFFFF; border: 1px solid #D2DCE3; border-radius: 10px; }
+    .hint { font-size: 11.5px; color: #8296A4; margin-top: 4px; line-height: 1.4; }
+    .pill { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
+            border-radius: 999px; padding: 2px 9px; white-space: nowrap; }
+    .p-prog { background: #F6EBD6; color: #9A6512; }
+    .p-wait { background: #EDE9FE; color: #5B21B6; }
+    .ev { font-size: 12px; color: #5C6F7C; line-height: 1.35; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; height: 30px; padding: 0 14px;
+           border-radius: 7px; font-size: 13px; font-weight: 600; font-family: inherit; white-space: nowrap; }
+    .b-dis { background: #F2F6F9; color: #A9B7C2; border: 1px solid #D2DCE3; }
+    .b-sec { background: #FFFFFF; color: #12232E; border: 1px solid #BECAD3; cursor: pointer; }
+    .cite { font-size: 11px; color: #8296A4; line-height: 1.35; }
+    .cl { color: #1E6091; text-decoration: underline dotted; cursor: pointer; }
+    .bind { display: inline-flex; align-items: center; font-size: 10.5px; font-weight: 700; padding: 1px 7px; border-radius: 4px; white-space: nowrap; background: #FFFFFF; color: #5C6F7C; border: 1px dashed #BECAD3; }
+    .tab { display: inline-flex; align-items: center; gap: 8px; padding: 9px 16px; font-size: 13.5px; font-weight: 500;
+           color: #5C6F7C; border-bottom: 2px solid transparent; }
+    .tab.on { color: #1E6091; font-weight: 700; border-bottom-color: #1E6091; }
+    .badge { font-size: 10.5px; font-weight: 700; color: #8296A4; background: #F2F6F9; border-radius: 999px; padding: 1px 7px; }
+    .tab.on .badge { color: #1E6091; background: #E8EEF4; }
+    .grp { padding: 10px 12px 4px; font-size: 12px; font-weight: 700; background: #F8FAFC; border-top: 1px solid #D2DCE3; }
+    .drow { display: grid; grid-template-columns: 250px 320px minmax(0, 1fr); gap: 10px; align-items: center;
+            padding: 8px 12px; border-top: 1px solid #EEF2F5; font-size: 12.5px; }
+    .drow.head { border-top: 0; padding: 6px 12px; font-size: 11px; font-weight: 700; color: #8296A4; text-transform: uppercase; letter-spacing: 0.04em; }
+    .in { display: flex; align-items: center; height: 32px; border: 1px solid #BECAD3; border-radius: 7px;
+          background: #FFFFFF; padding: 0 10px; font-size: 13px; }
+    .in.empty { color: #A9B7C2; }
+    .skip { padding: 8px 12px; border-top: 1px dashed #BECAD3; font-size: 11.5px; color: #A9B7C2; text-align: center; letter-spacing: .04em; }
+  </style>
+</helmet>
+
+<div style="padding: 20px; width: 1460px; background: #D8E0E8;">
+
+  <div class="card" style="display: flex; align-items: center; gap: 14px; padding: 10px 14px; margin-bottom: 14px;">
+    <span class="pill p-prog" style="height: 26px; padding: 0 11px;">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9A6512" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"></path></svg>
+      In progress
+    </span>
+    <span class="ev" style="flex-grow: 1;">Texas · 23 figures set by law · 0 of 15 city choices decided · no fee schedule version yet</span>
+    <span style="font-size: 11.5px; color: #8296A4;">Compliance and Policies Setup</span>
+    <span class="btn b-dis">Attest as complete</span>
+  </div>
+
+  <div class="card">
+    <div style="padding: 16px 20px 0; border-bottom: 1px solid #D2DCE3;">
+      <div style="display: flex; align-items: flex-start; gap: 16px;">
+        <div style="flex-grow: 1;">
+          <div style="font-size: 19px; font-weight: 700;">Fee rules</div>
+          <div style="font-size: 12.5px; color: #5C6F7C; margin-top: 3px;">Everything about fees in one place: what Texas law sets, what this city decides, and when a fee is waived. Together they become the fee schedule the estimates use.</div>
+        </div>
+        <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 4px;">
+          <span class="pill p-wait">Fee schedule · no version yet</span>
+          <span class="hint" style="margin-top: 0;">Approving the city's figures creates version 1</span>
+        </div>
+      </div>
+      <div style="display: flex; gap: 2px; margin-top: 12px;">
+        <span class="tab">State mandate <span class="badge">23 loaded</span></span>
+        <span class="tab on" style="margin-bottom: -1px;">City decisions <span class="badge">0 of 15 decided</span></span>
+        <span class="tab">Fee policy document <span class="badge">none read</span></span>
+        <span class="tab">Test an estimate <span class="badge">no version</span></span>
+      </div>
+    </div>
+
+    <div class="grp">Fee computation <span style="font-weight: 500; color: #8296A4;">· 10</span></div>
+    <div class="drow head"><span>Item</span><span>This city</span><span>What the law says</span></div>
+    <div class="drow"><span>De-minimis — no charge below</span><div class="in empty" style="border-color: #B02A37;">$</div><span class="cite"><span class="bind">Reasonable</span> <span class="cl">Gov't Code § 552.267(b)</span> — the cost-of-collection waiver's threshold</span></div>
+    <div class="skip">⋯ 9 more computation choices, unchanged ⋯</div>
+
+    <div class="grp">Estimates, deposits, payment <span style="font-weight: 500; color: #8296A4;">· 3</span></div>
+    <div class="skip" style="border-top: 0;">⋯ 3 rows, unchanged ⋯</div>
+
+    <!-- ============ NEW SECTION: FEE WAIVER ============ -->
+    <div class="grp">Fee waiver <span style="font-weight: 500; color: #8296A4;">· 2</span></div>
+    <div class="drow head"><span>Item</span><span>This city</span><span>What the law says</span></div>
+    <div class="drow">
+      <span>Who decides a waiver request</span>
+      <div class="in" style="justify-content: space-between;"><span>Decided inline at Intake Review <span style="color: #8296A4;">(suggested)</span></span>
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8296A4" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"></path></svg></div>
+      <span class="cite"><span class="bind">Silent</span> city routing — or routed as its own task to a role. The estimate cannot go out while a waiver request is undecided.</span>
+    </div>
+    <div class="drow">
+      <span>The waiver-denial explanation</span>
+      <div style="display: flex; align-items: center; gap: 10px;"><span style="font-weight: 600;">Standard wording — 5 stock sentences</span><span class="btn b-sec" style="height: 28px; font-size: 12px;">View them</span></div>
+      <span class="cite"><span class="bind">Silent</span> the sentence a denial folds into the estimate notice; editable wording comes with the letter-template slice</span>
+    </div>
+    <div style="padding: 10px 16px 14px; border-top: 1px solid #D2DCE3;">
+      <span class="hint" style="margin-top: 0;">These two are recorded like every other decision, and they gate <b>Attest</b> — but not <b>Approve</b>: the fee schedule's approval still waits only on the 13 money figures above. The public-interest waiver itself needs no setting here — the law makes it a per-request call by whoever "Who decides" names. In a state whose law is silent on waivers entirely, this group opens with one extra question: whether this city offers a discretionary waiver at all.</span>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

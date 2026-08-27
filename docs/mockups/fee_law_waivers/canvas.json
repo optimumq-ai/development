@@ -1,0 +1,14 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1500, "h": 840, "title": "State mandate tab — new Fee waiver section" },
+    { "file": "CityDecisions.dc.html", "x": 0, "y": 960, "w": 1500, "h": 800, "title": "City decisions tab — new Fee waiver section" },
+    { "file": "HubLane.dc.html", "x": 1600, "y": 0, "w": 600, "h": 620, "title": "The hub lane after — waiver row retired" }
+  ],
+  "annotations": [
+    { "id": "note-title", "x": 1600, "y": 660, "w": 380, "text": "Title drawn: \"Fee rules\" (plain, covers charging AND waiving; the hub row renames to match). Alternates if you prefer: \"Fees and waivers\" · \"What the law says about fees\" · keep \"What the law lets you charge\"." },
+    { "id": "note-sections", "x": 1600, "y": 880, "w": 380, "text": "Kevin's call 2026-08-27: NO fifth tab — the waiver content joins the EXISTING tabs as a \"Fee waiver\" section on each. State mandate: the old conflated \"Fee waiver grounds\" row splits into the two § 552.267 rules (22 → 23 loaded; the estimates group drops from 9 to 8). City decisions: two policy questions (who decides · denial wording); de-minimis stays where it was, cross-referenced as the § 552.267(b) threshold." },
+    { "id": "note-gates", "x": 2020, "y": 660, "w": 380, "text": "Gates: the two waiver choices count toward ATTEST (and the hub evidence line) but NOT toward Approve — fee schedule v1 still waits only on the 13 money figures. Silent-state behavior: the Fee waiver section renders one honest \"law does not address waivers (researched)\" line on the mandate tab, and the city-decisions group opens with the offer-a-waiver-at-all question." },
+    { "id": "note-build", "x": 2020, "y": 1000, "w": 380, "text": "Build implications: hub row `waiver_policy` deleted (lane 12 → 11; verify_setup_hub counts change again) · the fee_waiver profile SECTION stays (15-section set is fixed) and attests through this screen — fee_law attest covers both sections, or fee_waiver folds into fees (decide at build) · who-decides is the existing approvalModules waiver module · the 5 stock sentences are the existing decision_reasons store, read-only until the letter-template slice." }
+  ],
+  "launch": { "view": "canvas" }
+}

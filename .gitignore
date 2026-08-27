@@ -28,3 +28,5 @@ docs/mockups/hub_links/*/*.html
 !docs/mockups/hub_links/*/*.dc.html
 docs/mockups/fee_waiver_content/*.html
 !docs/mockups/fee_waiver_content/*.dc.html
+docs/mockups/fee_law_waivers/*.html
+!docs/mockups/fee_law_waivers/*.dc.html
