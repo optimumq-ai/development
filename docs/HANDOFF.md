@@ -9113,3 +9113,51 @@ still pending. Earlier this session: three-tab + ledger canvases handed to Kevin
 **NEXT:** Kevin walks the screen (switch on, record choices, attest) · fee schedule v1 approval unblocks the
 smoke's estimate beat and the E1a revisit · then the next hub row or the letter-template / redaction-library
 slices per the backlog.
+
+## 2026-08-27 (later) — "Fee rules": the fee-law screen absorbs waivers (F2 BUILT); waiver-content canvases; suite 2664/2665
+
+Started from Kevin reconciling /jurisdiction-config/fee_waiver Content against TX_RULES_READABLE §6 and
+finding a wall of pale yellow. **Traced:** yellow = uncited = the national 22-field substrate rendering in
+full; for TX, 15 fields are uncited and — except the forfeiture guardrail (wired, off, IL's rule) — read by
+NO engine code; the cited estimate/deposit lines are the known twice-homed pair whose real home is the
+fee-law screen. **Kevin's design principle confirmed:** mandates render as fixed facts, real local choices
+as knobs, everything else off the setup surface. His EXCLUDE-flag idea resolved as INCLUDE-BY-EVIDENCE (the
+citation IS the flag; a second flag would drift) plus **negative-finding records** — `{no_provision,
+researched, note}` per concept, authored in the research pipeline, imported as provenance, distinguishing
+"researched, state silent" from "nobody looked".
+
+**Canvases (sources committed, awaiting markup where noted):**
+- Fee-waiver Content pruned, redraw 2: docs/mockups/fee_waiver_content/ →
+  https://claude.ai/code/artifact/8a77071f-3c95-4c1b-849e-e61715d2d669 — TX Content = cited cards + pointer
+  cards + one silence footer; Provenance zone carries the negative-finding records; Florida artboard = the
+  silent-state empty case with the one offer-a-waiver-at-all choice ("no waiver" must count as CONFIGURED —
+  open build item, same class as clarification's switch). This slice is NOT built.
+- "Fee rules" consolidation: docs/mockups/fee_law_waivers/ →
+  https://claude.ai/code/artifact/4286a33e-b35e-488b-9f93-35b7d7acdb46 — superseded by the build below.
+
+**Kevin's decisions (all this session):** everything fee-related, waivers included, lives on the fee-law
+screen · title **"Fee rules"** ("Fee Parameter Domain" considered, dropped — register + "domain" overload) ·
+NO fifth tab: a "Fee waiver" SECTION on each existing tab · the `waiver_policy` hub row is DELETED · the two
+waiver choices gate **Attest, never Approve** · no exchange copies of built-screen screenshots (memory noted).
+
+**BUILT (4475c50 + harness fix c08acee), verified on live:** `feeLaw.waiverRows()` (mandate rows per ground
+the state's waiver item names; TX both, generic fallback; new `discretionary` chip; cost-of-collection row
+echoes De-minimis, single home unchanged) · `waiverState()/decideWaiver()` + `POST /api/fee-law/waiver`
+(who-decides validated + written through to the approvalModules store the engine reads, with the engine's
+CURRENT routing as the suggested answer; standard-wording ack; the 5 `decision_reasons` sentences viewable) ·
+FeeLawPage retitled with both sections · hub: `waiver_policy` gone (compliance lane 12 → 11, 36 items),
+`fee_law` → "Fee rules", evidence appends "waivers: X of 2 decided" · RequestRulesPage lane indexes follow.
+SPEC_setup_hub §3 amended + §7 F2; WORKING §2h. Harness lesson worth keeping: verify_fee_law's write-through
+residue broke verify_approval_modules (runs LATER in suite order, asserts the shipped default) — snapshot/
+restore added; pair green in suite order 91/91.
+
+**Full suite: 2664/2665, live untouched** — the one red is the SAME deferred `verify_bw9_golive` E1a
+(needs fee schedule v1; unchanged since 2026-08-26). Live state otherwise unchanged from the morning
+handoff: clarification still switched off, fee schedule v1 unapproved, two law-updates proposals pending.
+
+**Open:** fee-waiver Content-tab pruning build (§2g canvas — negative-finding records land in the research
+pipeline; "no waiver" as configured; window card from template figures vs reconciler fill) · fee_waiver
+profile section still attests on jurisdiction-config (fold-into-fees pending) · the §6↔fee-law mandate-row
+work is DONE via F2. **NEXT:** Kevin's walk-through (clarification switch, waiver choices, fee schedule v1 —
+which also unblocks the smoke's estimate beat and the E1a revisit) · then the Content-tab pruning slice or
+the letter-template / redaction-library slices.
