@@ -1,0 +1,124 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; } a:hover { color: #0E3A5C; }
+    .panel { background: #FFFFFF; border: 1px solid #C3CFDA; border-radius: 8px; padding: 12px 14px; margin-bottom: 12px; }
+    .kv { font-size: 12.5px; color: #5C6F7C; line-height: 1.5; }
+    .fact { border: 1px solid #C3CFDA; border-left: 4px solid #143D5C; border-radius: 5px; padding: 8px 11px; margin-bottom: 7px; background: #FFFFFF; }
+    .pol  { border: 1px dashed #D4A72C; border-left: 4px solid #D4A72C; border-radius: 5px; padding: 8px 11px; margin-bottom: 7px; background: #FFF8E5; }
+    .cite { display: inline-block; font-size: 10.5px; color: #143D5C; background: #F2F6F9; border: 1px solid #C3CFDA;
+            border-radius: 3px; padding: 0 6px; font-weight: 600; white-space: nowrap; vertical-align: bottom; }
+    .rid  { display: inline-block; font-size: 10.5px; color: #1E6091; background: #F2F6F9; border: 1px solid #C3CFDA;
+            border-radius: 3px; padding: 0 6px; font-weight: 600; cursor: pointer; }
+    .wired { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+             background: #EAF4EF; color: #2F6B4F; border: 1px solid #2F6B4F; border-radius: 3px; padding: 1px 6px; }
+    .off { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+           background: #F2F6F9; color: #5C6F7C; border: 1px solid #C3CFDA; border-radius: 3px; padding: 1px 6px; }
+    .grp { font-size: 10.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: #5C6F7C; margin: 14px 0 7px; }
+    .val { font-weight: 700; color: #143D5C; }
+    .tab { font-size: 12px; font-weight: 700; padding: 6px 13px; border-radius: 5px 5px 0 0; border: 1px solid transparent; border-bottom: none; color: #5C6F7C; }
+    .tab.on { color: #143D5C; background: #F2F6F9; border-color: #C3CFDA; }
+    .btnq { display: inline-block; font-size: 12.5px; font-weight: 500; border-radius: 5px; padding: 5px 12px;
+            background: #F2F6F9; color: #12232E; border: 1px solid #C3CFDA; cursor: pointer; }
+  </style>
+</helmet>
+
+<div style="padding: 18px 20px; width: 1160px; background: #D8E0E8;">
+  <div style="max-width: 1120px; margin: 0 auto;">
+    <div style="font-size: 17px; font-weight: 700; color: #143D5C; margin-bottom: 2px;">Fee-waiver policy</div>
+    <div class="kv" style="margin-bottom: 14px;">What Texas law says about waiving fees, and the policy slots it leaves silent. Pruned view — sketch 2026-08-27.</div>
+
+    <div style="display: flex; gap: 2px; border-bottom: 1px solid #C3CFDA; margin-bottom: 12px;">
+      <span class="tab on">Content</span><span class="tab">Local Policy Settings</span><span class="tab">Provenance</span><span class="tab">Proposals</span>
+    </div>
+
+    <div class="panel" style="background: #F2F6F9;">
+      <span class="kv">This policy is not enabled — what is shown below is what the import carried; nothing acts on it yet.</span>
+    </div>
+
+    <!-- ============ WHAT TEXAS LAW SAYS — the only fields TX speaks to ============ -->
+    <div class="grp">What Texas law says</div>
+
+    <div class="fact">
+      <div style="display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap;">
+        <span style="font-weight: 600;">Waiver ground — public interest:</span>
+        <span class="val">must waive or reduce</span>
+        <span class="cite">Tex. Gov't Code § 552.267(a)</span><span class="rid">TX-0032</span>
+        <span class="btnq" style="margin-left: auto;">Propose…</span>
+      </div>
+      <div class="kv" style="margin-top: 2px;">When the body determines the copy primarily benefits the general public. The statute says "shall", but it triggers only on the body's own determination — functionally discretionary. Who decides it in this city is set on the <a href="#">Fee waivers hub row →</a></div>
+    </div>
+
+    <div class="fact">
+      <div style="display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap;">
+        <span style="font-weight: 600;">Waiver ground — cost of collection:</span>
+        <span class="val">may waive</span>
+        <span class="cite">Tex. Gov't Code § 552.267(b)</span><span class="rid">TX-0033</span>
+        <span class="btnq" style="margin-left: auto;">Propose…</span>
+      </div>
+      <div class="kv" style="margin-top: 2px;">When collecting the charge would cost more than the charge itself. This city's answer is the <b>De-minimis threshold</b> on the fee schedule — <a href="#">set on "What the law lets you charge" →</a></div>
+    </div>
+
+    <div class="fact">
+      <div style="display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap;">
+        <span style="font-weight: 600;">Pay-or-abandon window:</span>
+        <span class="val">10 business days to respond to an estimate · withdrawn after 60 days unpaid</span>
+        <span class="cite">§ 552.2615(b) · § 552.263(f) · § 552.221(e)</span>
+        <span class="btnq" style="margin-left: auto;">Propose…</span>
+      </div>
+      <div class="kv" style="margin-top: 2px;">Started by the cost estimate or a deposit demand — never by a waiver denial, which by itself does nothing procedurally in Texas.</div>
+    </div>
+
+    <!-- ============ FIGURES WHOSE HOME IS THE FEE SCHEDULE — pointer, not a second editor ============ -->
+    <div class="grp">Figures that live on the fee schedule</div>
+    <div class="panel" style="display: flex; align-items: center; gap: 14px;">
+      <div style="flex-grow: 1;">
+        <div style="font-size: 12.5px;"><b>Itemized estimate required above</b> <span class="val">$40</span> <span class="cite">§ 552.2615(a)</span>
+          &nbsp;·&nbsp; <b>Deposit allowed above</b> <span class="val">$100</span> <span class="cite">§ 552.263(a)</span></div>
+        <div class="kv" style="margin-top: 2px;">These two figures are shown and edited in ONE place — the fee schedule. The duplicate entry rows that used to sit here are gone.</div>
+      </div>
+      <span class="btnq" style="white-space: nowrap;">Open "What the law lets you charge" →</span>
+    </div>
+
+    <!-- ============ SETTLED ELSEWHERE ============ -->
+    <div class="grp">Settled elsewhere</div>
+    <div class="panel">
+      <div style="font-size: 12.5px; line-height: 1.7;">
+        <div><b>Clock while a deposit is unpaid</b> — deemed received on payment <span class="cite">§ 552.263(e)</span> · lives with <a href="#">Deposit &amp; payment clock →</a></div>
+        <div><b>Nonpayment — request withdrawn after 60 days</b> <span class="cite">§ 552.263(f)</span> · lives with <a href="#">Deposit &amp; payment clock →</a></div>
+      </div>
+      <div class="kv" style="margin-top: 4px;">Listed so nothing looks lost — the engine reads these from the payment rules, not from this section.</div>
+    </div>
+
+    <!-- ============ THE SILENT SLOTS — collapsed by default ============ -->
+    <div class="grp">Where the statute is silent</div>
+    <div class="pol" style="padding: 11px 14px;">
+      <div style="display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap;">
+        <span style="font-size: 12.5px;"><b>Texas law is silent on 14 further points</b> — purpose statements, written denial reasons, clock pauses, appeals, forfeiture.</span>
+        <span class="btnq" style="margin-left: auto;">Show the 14 ▾</span>
+      </div>
+      <div class="kv" style="margin-top: 3px;">Kept as policy slots so a rule has a home before anything automates it. None of them is read by the engine today, except the one below.</div>
+      <div style="border-top: 1px dashed #D4A72C; margin-top: 8px; padding-top: 8px; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap;">
+        <span style="font-weight: 600; font-size: 12.5px;">A blown response clock forfeits the fee:</span>
+        <span class="val">false</span>
+        <span class="wired">wired</span><span class="off">off for Texas</span>
+        <span class="kv">— the one silent slot the engine consumes (it hard-disables invoicing when true). Illinois's rule; correctly off here.</span>
+      </div>
+    </div>
+
+    <div class="kv" style="margin-top: 4px;">Pruning changes DISPLAY only: every field stays in the store and in Local Policy Settings; the silence list is computed per state from provenance (a field with no citation is "silent"), never hardcoded to Texas.</div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

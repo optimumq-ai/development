@@ -218,3 +218,21 @@ Compliance lane · three doors, each opening its MATCHING tab · letter wording 
 SPEC_setup_hub §7 R1; harness `verify_request_rules`.
 
 ## 3. Next rows (not yet discussed)
+
+## 2g. Fee-waiver Content tab — pruned view sketched 2026-08-27 (no build)
+
+Kevin, reconciling /jurisdiction-config/fee_waiver Content against TX_RULES_READABLE §6, found most of the
+page pale-yellow (uncited = "city policy" cards). Traced: the 22-field national fee-waiver substrate renders
+in full for every state; for TX, 15 fields are uncited and — except `fee_forfeiture_on_late_response`
+(wired, false, IL's rule) — read by NO engine code; the cited estimate/deposit lines are the known
+twice-homed pair whose real home is now the fee-law screen. **Sketch (canvas
+https://claude.ai/code/artifact/8a77071f-3c95-4c1b-849e-e61715d2d669, sources
+`docs/mockups/fee_waiver_content/`):** Content renders only what the state's law speaks to (the two
+§ 552.267 grounds split with their own must/may verbs + rule ids; the pay-or-abandon window as one card) ·
+the twice-homed money pair becomes ONE pointer card to the fee schedule (no editing here) · "Settled
+elsewhere" names the deposit-clock/nonpayment facts that run from the payment rules · the silent slots
+collapse to one expandable line (the wired forfeiture guardrail stays visible). DISPLAY-only; silence
+computed per state from provenance (uncited = silent), never TX-hardcoded. Open (drawn as a note): render
+the window card from the template's figures, or have the reconciler fill the null fields on import.
+Awaiting Kevin's markup. Related, also open from this session's discussion: split the fee-law screen's
+"Fee waiver grounds" mandate row into the two § 552.267 rules with a de-minimis echo (§6 ↔ fee-law tie-in).

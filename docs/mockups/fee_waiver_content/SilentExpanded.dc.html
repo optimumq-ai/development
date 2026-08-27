@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+  <style>
+    body { margin: 0; background: #D8E0E8; color: #12232E;
+           font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; }
+    a { color: #1E6091; text-decoration: none; }
+    .kv { font-size: 12.5px; color: #5C6F7C; line-height: 1.5; }
+    .pol  { border: 1px dashed #D4A72C; border-left: 4px solid #D4A72C; border-radius: 5px; padding: 11px 14px; background: #FFF8E5; }
+    .row { display: grid; grid-template-columns: 300px 130px minmax(0, 1fr); gap: 10px; align-items: baseline;
+           padding: 6px 0; border-top: 1px dashed #E7CE8C; font-size: 12.5px; }
+    .row.head { border-top: 0; font-size: 10.5px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase; color: #9A6700; }
+    .val { font-weight: 700; color: #143D5C; }
+    .off { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+           background: #F2F6F9; color: #5C6F7C; border: 1px solid #C3CFDA; border-radius: 3px; padding: 1px 6px; }
+    .wired { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .05em; text-transform: uppercase;
+             background: #EAF4EF; color: #2F6B4F; border: 1px solid #2F6B4F; border-radius: 3px; padding: 1px 6px; }
+    .grp { font-size: 10.5px; font-weight: 800; letter-spacing: .07em; text-transform: uppercase; color: #5C6F7C; margin: 0 0 7px; }
+    .btnq { display: inline-block; font-size: 12.5px; font-weight: 500; border-radius: 5px; padding: 5px 12px;
+            background: #F2F6F9; color: #12232E; border: 1px solid #C3CFDA; cursor: pointer; }
+  </style>
+</helmet>
+
+<!-- the "Show the 13" panel, expanded — one compact line per silent slot, grouped by what they would govern -->
+<div style="padding: 18px 20px; width: 1160px; background: #D8E0E8;">
+  <div style="max-width: 1120px; margin: 0 auto;">
+    <div class="grp">Where the statute is silent — expanded</div>
+    <div class="pol">
+      <div style="display: flex; gap: 10px; align-items: baseline; flex-wrap: wrap; margin-bottom: 4px;">
+        <span style="font-size: 12.5px;"><b>Texas law is silent on these 14 points.</b> Each is a policy slot with a safe default; none is read by the engine today except the forfeiture guardrail.</span>
+        <span class="btnq" style="margin-left: auto;">Hide ▴</span>
+      </div>
+
+      <div class="row head"><span>Asking and deciding</span><span>Default</span><span>&nbsp;</span></div>
+      <div class="row"><span>Requestor must state a purpose</span><span class="val">no</span><span class="kv">Illinois requires this; Texas may not even ask the purpose (§ 552.222(b)).</span></div>
+      <div class="row"><span>Denial must be written, with reasons</span><span class="val">yes</span><span class="kv">No state requires it for a waiver denial — kept on as good practice.</span></div>
+      <div class="row"><span>Silence counts as granted</span><span class="val">no</span><span class="kv">Every state that addresses silence makes it a denial.</span></div>
+
+      <div class="row head"><span>The clock</span><span>Default</span><span>&nbsp;</span></div>
+      <div class="row"><span>Clock pauses while a waiver is pending</span><span class="val">no</span><span class="kv">False in all seven researched states.</span></div>
+      <div class="row"><span>Clock pauses while a denial is appealed</span><span class="val">no</span><span class="kv">False in all seven researched states.</span></div>
+      <div class="row"><span>Clock restarts when the deposit arrives</span><span class="val">no</span><span class="kv">Texas DOES have this rule (§ 552.263(e)) — it runs from the payment rules, not this slot. See "Settled elsewhere".</span></div>
+      <div class="row"><span>Window unit</span><span class="val">business days</span><span class="kv">Only meaningful once a window is set.</span></div>
+
+      <div class="row head"><span>Appeals</span><span>Default</span><span>&nbsp;</span></div>
+      <div class="row"><span>Where a denial is appealed</span><span class="val">none</span><span class="kv">Texas provides no waiver-specific appeal forum.</span></div>
+      <div class="row"><span>Appeal window · unit</span><span class="val">— · calendar</span><span class="kv">&nbsp;</span></div>
+      <div class="row"><span>Can that forum order the waiver?</span><span class="val">no</span><span class="kv">The sleeper field: never route a requestor to a forum that cannot grant what they came for.</span></div>
+      <div class="row"><span>Can it review the fee amount?</span><span class="val">no</span><span class="kv">Distinct question — the TX overcharge complaint reviews the AMOUNT, not the § 552.267 call.</span></div>
+
+      <div class="row head"><span>Guardrails</span><span>Default</span><span>&nbsp;</span></div>
+      <div class="row"><span>A blown response clock forfeits the fee</span><span class="val">no <span class="wired">wired</span> <span class="off">off for Texas</span></span><span class="kv">Illinois's rule. The one slot the engine consumes — when true, a blown clock hard-disables invoicing.</span></div>
+      <div class="row"><span>Extension grounds are a closed list</span><span class="val">no</span><span class="kv">Illinois's rule.</span></div>
+
+      <div class="kv" style="margin-top: 8px;">Deposit cap (% of estimate) moved with the money figures to the fee schedule — Washington's 10% rule; Texas silent.</div>
+    </div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

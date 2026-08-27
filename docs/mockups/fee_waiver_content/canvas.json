@@ -1,0 +1,12 @@
+{
+  "artboards": [
+    { "file": "Main.dc.html", "x": 0, "y": 0, "w": 1200, "h": 980, "title": "Content tab — pruned" },
+    { "file": "SilentExpanded.dc.html", "x": 0, "y": 1100, "w": 1200, "h": 760, "title": "The silent slots, expanded" }
+  ],
+  "annotations": [
+    { "id": "note-what-changed", "x": 1260, "y": 0, "w": 360, "text": "What the pruning does — DISPLAY only, nothing leaves the store:\n\n· Only the fields Texas actually speaks to render as cards (grounds split into the two § 552.267 rules, each with its own must/may verb and rule id).\n\n· The twice-homed money pair (estimate $40 / deposit $100) stops being editable here — one pointer card to the fee schedule, its single home.\n\n· 'Settled elsewhere' names the two facts that look missing but run from the payment rules.\n\n· The 14 silent slots collapse to one line, expandable; the one engine-wired guardrail stays visible." },
+    { "id": "note-generic", "x": 1260, "y": 380, "w": 360, "text": "State-generic by construction: 'silent' = a field whose imported provenance carries no citation — computed per state, never hardcoded to Texas. Illinois would show its forfeiture and purpose rules as cited cards; Washington its 10% deposit cap." },
+    { "id": "note-window", "x": 1260, "y": 620, "w": 360, "text": "Honesty note: the import currently files the pay-or-abandon window fields as null (with § 552.221(e) cites). The card here is drawn with the law's figures (10 bd / 60 d) — same numbers the fee-law screen already shows. Build choice: render from the template's figures, or have the reconciler fill the fields on import. Your call." }
+  ],
+  "launch": { "view": "canvas" }
+}
