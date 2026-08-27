@@ -41,9 +41,10 @@ const ITEMS = [
   // ── Lane 1 ──
   { key: 'jurisdiction', lane: 'compliance', name: "Which state's law this city follows", door: '/jurisdiction-config/identity', deps: ['agency'], section: 'identity' },
   { key: 'deadlines', lane: 'compliance', name: 'Response deadlines and tolling', door: '/jurisdiction-config/deadlines', deps: ['jurisdiction'], section: 'deadlines', legal: true },
-  { key: 'fee_law', lane: 'compliance', name: 'What the law lets you charge', door: '/setup/fee-law', deps: ['jurisdiction'], section: 'fees' },
+  // 'Fee rules' (Kevin 2026-08-27): the fee-law screen absorbs fee waivers; the separate
+  // 'Fee waivers and who approves them' row is retired — its content lives on this screen's tabs.
+  { key: 'fee_law', lane: 'compliance', name: 'Fee rules', door: '/setup/fee-law', deps: ['jurisdiction'], section: 'fees' },
   { key: 'deposits', lane: 'compliance', name: 'Deposits and payment clock', door: '/jurisdiction-config/payment', deps: ['jurisdiction'], section: 'payment' },
-  { key: 'waiver_policy', lane: 'compliance', name: 'Fee waivers and who approves them', door: '/jurisdiction-config/fee_waiver', deps: ['jurisdiction'], section: 'fee_waiver' },
   { key: 'clarification', lane: 'compliance', name: 'Vague requests and clarification', door: '/setup/request-rules?tab=clarification', deps: ['jurisdiction'], section: 'clarification' },
   { key: 'exemptions', lane: 'compliance', name: 'Exemptions and appeals', door: '/setup/request-rules?tab=exemptions', deps: ['jurisdiction'], section: 'exemption', legal: true },
   { key: 'eligibility', lane: 'compliance', name: 'Requestor eligibility', door: '/setup/request-rules?tab=eligibility', deps: ['jurisdiction'], section: 'eligibility' },
@@ -144,6 +145,7 @@ const READERS = {
     if (!s.jurisdiction) return ev('not_started', 'no jurisdiction chosen yet');
     var c = s.counts;
     var line = c.mandate + ' figures set by ' + s.jurisdiction.code + ' law' + (c.deferral ? ' · ' + c.decided + ' of ' + c.deferral + ' city choices decided' : '');
+    if (s.waiver && s.waiver.choices.length) line += ' · waivers: ' + s.waiver.decided + ' of ' + s.waiver.choices.length + ' decided';
     if (!s.version) return ev(c.decided ? 'in_progress' : 'not_started', line + ' · no fee schedule version yet');
     var sec = ctx.sections.fees;
     var r = sectionEvidence(sec, 'fee schedule v' + s.version.version);
@@ -153,7 +155,6 @@ const READERS = {
     return r;
   },
   deposits: async function (ctx) { return sectionEvidence(ctx.sections.payment); },
-  waiver_policy: async function (ctx) { return sectionEvidence(ctx.sections.fee_waiver); },
   clarification: async function (ctx) {
     var r = sectionEvidence(ctx.sections.clarification);
     if (r.state === 'not_started') r.evidence = 'not configured yet — clarification is switched off';

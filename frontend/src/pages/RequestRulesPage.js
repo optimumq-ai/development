@@ -144,7 +144,7 @@ export default function RequestRulesPage() {
   var td = data.tabs[tab === 'exemptions' ? 'exemptions' : tab];
   var can = !!(data.canEdit && data.canEdit[tab]);
   var attested = hubRow && hubRow.signoff;
-  var laneIndex = { clarification: 'item 6 of 12', exemptions: 'item 7 of 12', eligibility: 'item 8 of 12' }[tab];
+  var laneIndex = { clarification: 'item 5 of 11', exemptions: 'item 6 of 11', eligibility: 'item 7 of 11' }[tab];
 
   function edited(c) { return edits[c.path] !== undefined ? edits[c.path] : (c.value != null ? c.value : null); }
   function setEdit(path, v) { var o = Object.assign({}, edits); o[path] = v; setEdits(o); setMsg(''); }

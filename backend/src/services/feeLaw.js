@@ -63,7 +63,8 @@ const CATALOG = [
   { key: 'certification',               label: 'Certified copy charge',                 bucket: 'computation',      path: 'certification.rate',             parse: 'usd',      unit: '$ per document', noneOk: true },
   { key: 'av',                          label: 'Audio / video (body-worn camera)',      bucket: 'computation',      path: 'av',                             parse: 'av',       unit: '$' },
   { key: 'commercial',                  label: 'Commercial-purpose surcharge',          bucket: 'computation',      path: 'purposeOverrides.commercial.requestRules.surchargePct', parse: 'pct', unit: '%', noneOk: true },
-  { key: 'waiver',                      label: 'Fee waiver grounds',                    bucket: 'estimate_payment', path: null,                             parse: 'waiver',     unit: 'rule' },
+  // 2026-08-27 (Kevin, "Fee rules"): the conflated 'waiver' row is gone — the two § 552.267-style grounds
+  // render as their own 'waiver' bucket rows, built by waiverRows() below from the same template item.
   { key: 'waiver.forfeiture',           label: 'Late response forfeits the fee',        bucket: 'estimate_payment', path: null,                             parse: 'bool',     unit: 'yes / no', noneOk: true },
   { key: 'repeat',                      label: 'Repeat / aggregated requests',          bucket: 'computation',      path: null,                             parse: 'text',     unit: 'rule', gap: 'needs requestor ledger' },
 ];
@@ -138,6 +139,103 @@ function lawSays(t) {
   return 'Silent';
 }
 
+// ---- fee waivers (Kevin 2026-08-27: the fee-law screen absorbs them; the waiver_policy hub row is
+// retired). Two surfaces, both on the EXISTING tabs:
+//   · State mandate gains a 'waiver' bucket: one row per ground the state's waiver item actually names
+//     (public interest / cost of collection), each with its own must/may verb. A state whose item names
+//     neither parses to the single generic row; a state with no waiver item shows none.
+//   · City decisions gains two choices — who decides a waiver request (written through to the
+//     approvalModules fee_waiver module, the store the engine already reads) and the waiver-denial
+//     explanation (the seeded decision_reasons sentences, acknowledged as standard wording).
+//     They live in this screen's own decisions domain (dec.waiver) with who/when, and gate ATTEST,
+//     never Approve — routing and wording are not schedule figures.
+const WAIVER_GROUNDS = [
+  { key: 'waiver.public_interest', label: 'Waiver — public interest', match: /public_interest/i,
+    binding: 'fixed', display: 'Must waive or reduce when providing the copy primarily benefits the general public',
+    cityText: 'as law — decided per request' },
+  { key: 'waiver.cost_of_collection', label: 'Waiver — cost of collection', match: /collection_cost|cost[^|]{0,30}exceed/i,
+    binding: 'discretionary', display: 'May waive when collecting the charge would cost more than the charge',
+    cityText: null }   // filled with the de-minimis cross-reference at read time
+];
+function waiverRows(tplItems, dec) {
+  var t = tplItems['waiver'];
+  if (!t) return [];
+  var v = String(t.value || '');
+  var dm = dec && dec.items && dec.items['rules.deMinimis'];
+  var dmText = dm && dm.value != null && dm.value !== 'none'
+    ? 'De-minimis $' + fmt(dm.value) + ' · set on City decisions'
+    : 'De-minimis not set yet · City decisions';
+  var out = [];
+  WAIVER_GROUNDS.forEach(function (g) {
+    if (!g.match.test(v)) return;
+    out.push({
+      key: g.key, label: g.label, bucket: 'waiver', binding: g.binding, unit: 'rule', path: null, gap: null,
+      law: { display: g.display, num: null, ag: null, actual: false, parsed: {}, authority: t.authority || '', rules: t.rule_ids || [], says: null },
+      city: { value: g.key === 'waiver.cost_of_collection' ? dmText : g.cityText, source: 'law' },
+      editable: false
+    });
+  });
+  if (!out.length) {
+    var law = parseValue({ parse: 'waiver', unit: 'rule' }, t.value);
+    out.push({ key: 'waiver', label: 'Fee waiver grounds', bucket: 'waiver', binding: 'fixed', unit: 'rule', path: null, gap: null,
+      law: { display: law.display, num: null, ag: null, actual: false, parsed: {}, authority: t.authority || '', rules: t.rule_ids || [], says: null },
+      city: { value: 'as law', source: 'law' }, editable: false });
+  }
+  return out;
+}
+
+// The two city choices, with the engine's CURRENT waiver routing as the suggested answer.
+async function waiverState(jid, dec) {
+  var AM = require('./approvalModules');
+  var cfg = await AM.config(jid);
+  var mod = (cfg.modules && cfg.modules.fee_waiver) || {};
+  var w = (dec && dec.waiver) || {};
+  var sentences = await all("SELECT id, text FROM decision_reasons WHERE is_active = 1 AND id LIKE 'dr-fw-%' ORDER BY id");
+  var choices = [
+    { key: 'waiver.decider', label: 'Who decides a waiver request',
+      value: w.decider ? w.decider.value : null, by: w.decider ? w.decider.by : null, at: w.decider ? w.decider.at : null,
+      current: { enabled: mod.enabled !== false, mode: mod.mode || 'routed_task', role: (mod.routed_task && mod.routed_task.assignee_role) || 'FINANCE' },
+      options: [
+        { value: 'routed_task', label: 'Routed as its own task — ' + ((mod.routed_task && mod.routed_task.assignee_role) || 'FINANCE') },
+        { value: 'intake_review', label: 'Decided inline at Intake Review' }
+      ] },
+    { key: 'waiver.denial_wording', label: 'The waiver-denial explanation',
+      value: w.denial_wording ? w.denial_wording.value : null, by: w.denial_wording ? w.denial_wording.by : null, at: w.denial_wording ? w.denial_wording.at : null }
+  ];
+  return { choices: choices, decided: choices.filter(function (c) { return c.value != null; }).length,
+    sentences: sentences.map(function (s) { return { id: s.id, text: s.text }; }) };
+}
+
+// Record the waiver choices: who/when in this screen's decisions domain; the routing choice written
+// through to the approvalModules store the engine reads. Gates Attest, never Approve.
+async function decideWaiver(jid, body, user) {
+  var s = await screen(jid);
+  if (!s.jurisdiction) throw Object.assign(new Error('No jurisdiction is locked yet.'), { status: 409 });
+  var AM = require('./approvalModules');
+  var dec = await decisions(jid);
+  dec.waiver = dec.waiver || {};
+  var who = user.name || user.email || user.sub;
+  var when = nowStr();
+  if (body.decider !== undefined) {
+    var mode = body.decider;
+    if (['intake_review', 'routed_task'].indexOf(mode) < 0) {
+      throw Object.assign(new Error('Who decides a waiver takes "intake_review" or "routed_task" — nothing else is a decision.'), { status: 422 });
+    }
+    var raw = (await JR.read(jid, AM.DOMAIN)) || {};
+    var fw = raw.fee_waiver || {};
+    fw.mode = mode;
+    raw.fee_waiver = fw;
+    await AM.write(jid, raw, who);
+    dec.waiver.decider = { value: mode, by: who, at: when };
+  }
+  if (body.denialWording !== undefined) {
+    if (body.denialWording === true) dec.waiver.denial_wording = { value: 'standard_wording', by: who, at: when };
+    else delete dec.waiver.denial_wording;
+  }
+  await JR.write(jid, DECISIONS_DOMAIN, dec, who);
+  return { waiver: await waiverState(jid, dec), screen: await screen(jid) };
+}
+
 // ---- reading -------------------------------------------------------------------------------------
 async function activeJurisdiction() {
   var jid = await JR.activeJid();
@@ -193,6 +291,7 @@ async function screen(jid) {
   var tpl = templateItems(prof.code);
   var dec = await decisions(prof.id);
   var rows = CATALOG.map(function (item) { return row(item, tpl.items[item.key] || {}, dec); });
+  rows = rows.concat(waiverRows(tpl.items, dec));
   var mandate = rows.filter(function (r) { return r.binding !== 'deferral'; });
   var deferral = rows.filter(function (r) { return r.binding === 'deferral'; });
   var undecided = deferral.filter(function (r) { return r.city.value == null && r.city.source == null; });
@@ -204,6 +303,7 @@ async function screen(jid) {
     rows: rows,
     counts: { mandate: mandate.length, ceilings: ceilings.length, ceilingsDefaulted: ceilings.filter(function (r) { return r.city.source === 'default'; }).length, deferral: deferral.length, decided: deferral.length - undecided.length, undecided: undecided.length, gaps: rows.filter(function (r) { return r.gap; }).length },
     document: dec.document || null,
+    waiver: await waiverState(prof.id, dec),
     version: ver ? { id: ver.id, version: ver.version, name: ver.name, by: ver.created_by, at: ver.created_at } : null
   };
 }
@@ -348,4 +448,4 @@ async function readDocument(jid, text, docName, user) {
   return { found: found, skipped: skipped, refused: res.refused, notes: r.notes || '', screen: await screen(jid) };
 }
 
-module.exports = { CATALOG: CATALOG, BY_KEY: BY_KEY, DECISIONS_DOMAIN: DECISIONS_DOMAIN, parseValue: parseValue, screen: screen, decide: decide, approve: approve, compose: compose, readDocument: readDocument, templateItems: templateItems };
+module.exports = { CATALOG: CATALOG, BY_KEY: BY_KEY, DECISIONS_DOMAIN: DECISIONS_DOMAIN, WAIVER_GROUNDS: WAIVER_GROUNDS, parseValue: parseValue, screen: screen, decide: decide, decideWaiver: decideWaiver, approve: approve, compose: compose, readDocument: readDocument, templateItems: templateItems };

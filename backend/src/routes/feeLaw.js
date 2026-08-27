@@ -74,6 +74,19 @@ router.post('/preview', requireAuth, async function (req, res) {
   } catch (e) { fail(res, e, 'The sample estimate could not be computed.'); }
 });
 
+// The two fee-waiver choices (Kevin 2026-08-27): who decides a waiver request (written through to the
+// approvalModules store the engine reads) and the standard-wording acknowledgement. They gate Attest,
+// never Approve.
+router.post('/waiver', requireAuth, async function (req, res) {
+  if (!mayEdit(req.user)) return res.status(403).json({ error: 'Recording the waiver choices needs the compliance_policy or legal_rules permission group.', code: 'PERMISSION_REQUIRED' });
+  try {
+    var jid = await JR.activeJid();
+    var r = await FL.decideWaiver(jid, req.body || {}, req.user);
+    r.screen.canEdit = true;
+    res.json(r);
+  } catch (e) { fail(res, e, 'The waiver choices could not be recorded.'); }
+});
+
 router.post('/approve', requireAuth, async function (req, res) {
   if (!mayEdit(req.user)) return res.status(403).json({ error: 'Approving the fee schedule needs the compliance_policy or legal_rules permission group.', code: 'PERMISSION_REQUIRED' });
   try {

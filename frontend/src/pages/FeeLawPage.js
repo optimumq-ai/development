@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import api from '../lib/api';
 import StatutePopup from '../components/StatutePopup';
 
-// WHAT THE LAW LETS YOU CHARGE — the hub's `fee_law` screen (canvas approved by Kevin 2026-08-25; split into
+// FEE RULES — the hub's `fee_law` screen (canvas approved by Kevin 2026-08-25; split into
 // tabs on his direction 2026-08-26). Status strip · four tabs: State mandate · City decisions (deferral) ·
 // Fee policy document (AI reads it into decisions with references) · Test an estimate (the live fee-engine
 // sandbox, moved here from Fee Configuration). Authority citations open the research record (statute text).
@@ -22,6 +22,7 @@ var BIND = {
   fixed:    { label: 'Fixed',   bg: '#E8EEF4', color: '#0E3A5C', border: '#C5D3DF' },
   ceiling:  { label: 'Ceiling', bg: '#FFF4E0', color: '#9A6512', border: '#F1D9A8' },
   floor:    { label: 'Floor',   bg: '#E1F2E9', color: '#1B8A5A', border: '#B5E0C9' },
+  discretionary: { label: 'Discretionary', bg: 'white', color: '#5C6F7C', border: '#BECAD3', dashed: true },
 };
 var TABS = [
   { key: 'mandate', label: 'State mandate' },
@@ -41,7 +42,7 @@ function btn(kind, extra) {
   return Object.assign(base, k, extra || {});
 }
 function inp(missing, extra) { return Object.assign({ display: 'block', width: '100%', boxSizing: 'border-box', height: '32px', border: '1px solid ' + (missing ? C.red : C.edge), borderRadius: '7px', background: 'white', padding: '0 10px', fontSize: '13px', color: C.ink, fontFamily: 'inherit' }, extra || {}); }
-function Chip(props) { var b = BIND[props.kind]; if (!b) return null; return <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '10.5px', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', whiteSpace: 'nowrap', background: b.bg, color: b.color, border: '1px solid ' + b.border }}>{b.label}</span>; }
+function Chip(props) { var b = BIND[props.kind]; if (!b) return null; return <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '10.5px', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', whiteSpace: 'nowrap', background: b.bg, color: b.color, border: '1px ' + (b.dashed ? 'dashed' : 'solid') + ' ' + b.border }}>{b.label}</span>; }
 function Says(props) { return <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '10.5px', fontWeight: '700', padding: '1px 7px', borderRadius: '4px', whiteSpace: 'nowrap', background: 'white', color: C.mute, border: '1px dashed ' + C.edge, marginRight: '6px' }}>{props.text}</span>; }
 function Pill(props) { return <span style={{ display: 'inline-flex', alignItems: 'center', fontSize: '11px', fontWeight: '700', borderRadius: '999px', padding: '2px 9px', whiteSpace: 'nowrap', background: props.bg, color: props.color }}>{props.children}</span>; }
 function Group(props) { return <div style={{ padding: '10px 12px 4px', fontSize: '12px', fontWeight: '700', color: C.ink, background: '#F8FAFC', borderTop: '1px solid ' + C.line }}>{props.title} <span style={{ fontWeight: '500', color: C.faint }}>· {props.n}</span></div>; }
@@ -67,10 +68,12 @@ export default function FeeLawPage() {
   var [docName, setDocName] = useState('');
   var [approved, setApproved] = useState(null);
   var [statute, setStatute] = useState(null);
+  var [wEdits, setWEdits] = useState({});       // waiver-choice edits before save
+  var [sentences, setSentences] = useState(false);
 
   function load() {
     return Promise.all([api.get('/fee-law'), api.get('/setup-hub')]).then(function (r) {
-      setData(r[0].data); setEdits({});
+      setData(r[0].data); setEdits({}); setWEdits({});
       var h = {}; r[1].data.lanes.forEach(function (l) { l.items.forEach(function (x) { if (x.key === 'fee_law' || x.key === 'fee_test') h[x.key] = x; }); });
       setHub(h); setErr('');
     }).catch(function (e) { setErr(errText(e, 'The fee-law screen could not load.')); });
@@ -96,7 +99,9 @@ export default function FeeLawPage() {
   var rows = data.rows;
   var dirty = Object.keys(edits).length > 0;
   var attested = hubRow && hubRow.signoff;
-  var mayAttest = can && !!data.version && hubRow && hubRow.state !== 'waiting' && hubRow.state !== 'needs_attention';
+  var waiver = data.waiver || { choices: [], decided: 0, sentences: [] };
+  var waiverOpen = waiver.choices.length - waiver.decided;
+  var mayAttest = can && !!data.version && waiverOpen === 0 && hubRow && hubRow.state !== 'waiting' && hubRow.state !== 'needs_attention';
   var stateName = data.jurisdiction.stateName || data.jurisdiction.name;
   var nextVersion = data.version ? data.version.version + 1 : 1;
 
@@ -152,6 +157,18 @@ export default function FeeLawPage() {
     catch (e) { setErr(errText(e, 'Could not update.')); }
     setBusy('');
   }
+  async function saveWaiver() {
+    setBusy('waiver'); setMsg('');
+    try {
+      var body = {};
+      if (wEdits.decider !== undefined) body.decider = wEdits.decider;
+      if (wEdits.denialWording !== undefined) body.denialWording = wEdits.denialWording;
+      await api.post('/fee-law/waiver', body);
+      setWEdits({}); setMsg('Waiver choices recorded.');
+      await load();
+    } catch (e) { setErr(errText(e, 'The waiver choices could not be recorded.')); }
+    setBusy('');
+  }
 
   function Authority(props) {
     var r = props.row;
@@ -164,7 +181,7 @@ export default function FeeLawPage() {
   }
   function CityCell(props) {
     var r = props.row;
-    if (!r.editable) return <div style={inp(false, { display: 'flex', alignItems: 'center', background: C.wash, color: C.mute })}>as law</div>;
+    if (!r.editable) return <div style={inp(false, { display: 'flex', alignItems: 'center', background: C.wash, color: C.mute, fontSize: '12px' })}>{r.city && typeof r.city.value === 'string' ? r.city.value : 'as law'}</div>;
     if (r.city && r.city.value && typeof r.city.value === 'object' && edits[r.key] === undefined) {
       return <div style={inp(false, { display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: C.wash, color: C.mute, fontSize: '11.5px' })}>{cityText(r.city.value)}<span style={{ fontSize: '10px', color: C.faint, fontWeight: '700' }}>AS LOADED</span></div>;
     }
@@ -228,7 +245,7 @@ export default function FeeLawPage() {
         <span style={{ fontSize: '11.5px', color: C.faint }}>Compliance and Policies Setup</span>
         {attested
           ? <button type="button" disabled={busy === 'attest' || !can} onClick={toggleAttest} style={btn('sec', { height: '30px' })}>Attested · undo</button>
-          : <button type="button" disabled={!mayAttest || busy === 'attest'} onClick={toggleAttest} style={btn(mayAttest ? 'pri' : 'dis', { height: '30px' })} title={mayAttest ? 'Record that this item is complete' : 'Approve a fee schedule version first'}>Attest as complete</button>}
+          : <button type="button" disabled={!mayAttest || busy === 'attest'} onClick={toggleAttest} style={btn(mayAttest ? 'pri' : 'dis', { height: '30px' })} title={mayAttest ? 'Record that this item is complete' : (!data.version ? 'Approve a fee schedule version first' : 'Record the fee-waiver choices first')}>Attest as complete</button>}
       </div>
 
       {err ? <div style={{ background: '#FEF2F2', border: '1px solid #FCA5A5', borderRadius: '8px', padding: '10px 12px', fontSize: '13px', color: C.red, marginBottom: '12px' }}>{err}</div> : null}
@@ -242,8 +259,8 @@ export default function FeeLawPage() {
         <div style={{ padding: '16px 20px 0', borderBottom: '1px solid ' + C.line }}>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
             <div style={{ flexGrow: 1 }}>
-              <div style={{ fontSize: '19px', fontWeight: '700' }}>What the law lets you charge</div>
-              <div style={{ fontSize: '12.5px', color: C.mute, marginTop: '3px' }}>Every fee figure in one place: the ones {stateName} law sets, and the ones it leaves to this city. Together they become the fee schedule the estimates use.</div>
+              <div style={{ fontSize: '19px', fontWeight: '700' }}>Fee rules</div>
+              <div style={{ fontSize: '12.5px', color: C.mute, marginTop: '3px' }}>Everything about fees in one place: what {stateName} law sets, what this city decides, and when a fee is waived. Together they become the fee schedule the estimates use.</div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '4px' }}>
               {data.version ? <Pill bg="#E1F2E9" color={C.ok}>Fee schedule v{data.version.version} · active</Pill> : <Pill bg="#EDE9FE" color="#5B21B6">Fee schedule · no version yet</Pill>}
@@ -253,7 +270,7 @@ export default function FeeLawPage() {
           <div style={{ display: 'flex', gap: '2px', marginTop: '12px' }}>
             {TABS.map(function (t) {
               var active = tab === t.key;
-              var badge = t.key === 'mandate' ? c.mandate + ' loaded' : t.key === 'city' ? c.decided + ' of ' + c.deferral + ' decided' : t.key === 'document' ? (data.document ? data.document.found + ' from document' : 'none read') : (data.version ? 'v' + data.version.version : 'no version');
+              var badge = t.key === 'mandate' ? c.mandate + ' loaded' : t.key === 'city' ? (c.decided + waiver.decided) + ' of ' + (c.deferral + waiver.choices.length) + ' decided' : t.key === 'document' ? (data.document ? data.document.found + ' from document' : 'none read') : (data.version ? 'v' + data.version.version : 'no version');
               return <button key={t.key} type="button" onClick={function () { goTab(t.key); }}
                 style={{ padding: '9px 16px', background: 'none', border: 'none', borderBottom: active ? '2px solid ' + C.pri : '2px solid transparent', marginBottom: '-1px', fontSize: '13.5px', fontWeight: active ? '700' : '500', color: active ? C.pri : C.mute, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: '8px' }}>
                 {t.label}<span style={{ fontSize: '10.5px', fontWeight: '700', color: active ? C.pri : C.faint, background: active ? '#E8EEF4' : C.wash, borderRadius: '999px', padding: '1px 7px' }}>{badge}</span>
@@ -274,6 +291,10 @@ export default function FeeLawPage() {
           {head5}{by(mand, 'computation').map(function (r) { return <React.Fragment key={r.key}>{MandateRow({ row: r })}</React.Fragment>; })}
           <Group title="Estimates, deposits, payment and their clocks" n={by(mand, 'estimate_payment').length} />
           {head5}{by(mand, 'estimate_payment').map(function (r) { return <React.Fragment key={r.key}>{MandateRow({ row: r })}</React.Fragment>; })}
+          {by(mand, 'waiver').length ? <React.Fragment>
+            <Group title="Fee waiver" n={by(mand, 'waiver').length} />
+            {head5}{by(mand, 'waiver').map(function (r) { return <React.Fragment key={r.key}>{MandateRow({ row: r })}</React.Fragment>; })}
+          </React.Fragment> : null}
           <div style={{ padding: '10px 16px 14px', borderTop: '1px solid ' + C.line }}>
             <span style={hint}><b>Ceiling</b> rows: the figure shown is this city's ceiling and its rate is pre-filled there; an entry above it is refused. <b>Fixed</b> rows apply as written.{c.gaps ? <span> Items marked <span style={{ color: C.red, fontWeight: '700' }}>needs requestor ledger</span> are law today but have no home in the engine yet — shown so the gap is visible.</span> : null}</span>
           </div>
@@ -293,6 +314,42 @@ export default function FeeLawPage() {
           {head3}{by(defr, 'computation').map(function (r) { return <React.Fragment key={r.key}>{DeferralRow({ row: r })}</React.Fragment>; })}
           <Group title="Estimates, deposits, payment" n={by(defr, 'estimate_payment').length} />
           {head3}{by(defr, 'estimate_payment').map(function (r) { return <React.Fragment key={r.key}>{DeferralRow({ row: r })}</React.Fragment>; })}
+          {waiver.choices.length ? <React.Fragment>
+            <Group title="Fee waiver" n={waiver.choices.length} />
+            {head3}
+            {waiver.choices.map(function (w) {
+              var decided = w.value != null && wEdits[w.key === 'waiver.decider' ? 'decider' : 'denialWording'] === undefined;
+              return <div key={w.key} style={{ display: 'grid', gridTemplateColumns: grid3, gap: '10px', alignItems: 'center', padding: '8px 12px', borderTop: '1px solid #EEF2F5', fontSize: '12.5px' }}>
+                <span>{w.label}</span>
+                {w.key === 'waiver.decider' ? (
+                  <select value={wEdits.decider !== undefined ? wEdits.decider : (w.value || w.current.mode)} disabled={!can}
+                    onChange={function (e) { setWEdits(Object.assign({}, wEdits, { decider: e.target.value })); setMsg(''); }}
+                    style={inp(false, { color: C.ink })}>
+                    {w.options.map(function (o) { return <option key={o.value} value={o.value}>{o.label}{o.value === w.current.mode && !w.value ? ' (current)' : ''}</option>; })}
+                  </select>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <label style={{ display: 'flex', alignItems: 'center', gap: '6px', cursor: can ? 'pointer' : 'default' }}>
+                      <input type="checkbox" disabled={!can}
+                        checked={wEdits.denialWording !== undefined ? wEdits.denialWording : w.value != null}
+                        onChange={function (e) { setWEdits(Object.assign({}, wEdits, { denialWording: e.target.checked })); setMsg(''); }} />
+                      Standard wording
+                    </label>
+                    <button type="button" onClick={function () { setSentences(true); }} style={btn('sec', { height: '28px', fontSize: '12px' })}>View the {waiver.sentences.length} sentences</button>
+                  </div>
+                )}
+                <span style={cite}><Says text="Silent" />{w.key === 'waiver.decider'
+                  ? 'city routing — the estimate cannot go out while a waiver request is undecided'
+                  : 'the sentence a denial folds into the estimate notice; editable wording comes with the letter templates'}
+                  {decided ? <span style={{ color: C.ok, fontWeight: '600' }}> · ✓ decided by {w.by}{w.at ? ', ' + String(w.at).slice(0, 10) : ''}</span> : null}</span>
+              </div>;
+            })}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 12px', borderTop: '1px solid #EEF2F5' }}>
+              <span style={Object.assign({}, hint, { flexGrow: 1 })}>These two are recorded like every other decision and gate <b>Attest</b> — but not <b>Approve</b>: the fee schedule waits only on the money figures above.</span>
+              <button type="button" disabled={!can || busy === 'waiver' || (wEdits.decider === undefined && wEdits.denialWording === undefined)} onClick={saveWaiver}
+                style={btn(can && (wEdits.decider !== undefined || wEdits.denialWording !== undefined) ? 'pri' : 'dis', { height: '30px' })}>{busy === 'waiver' ? 'Recording…' : 'Record waiver choices'}</button>
+            </div>
+          </React.Fragment> : null}
           <div style={{ padding: '10px 16px 14px', borderTop: '1px solid ' + C.line }}>
             <span style={hint}>Type a figure, <b>none</b>, or <b>actual</b> where the law allows actual cost. "none" is a valid decision and is recorded as one when you approve. <b>actual</b> leaves the item unpriced on every estimate ("actual TBD") for staff to settle at billing. A green reference on a value means it came from the fee policy document.</span>
           </div>
@@ -330,6 +387,18 @@ export default function FeeLawPage() {
       </div>
 
       <StatutePopup info={statute} onClose={function () { setStatute(null); }} />
+      {sentences ? (
+        <div onClick={function () { setSentences(false); }} style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(18,35,46,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 50 }}>
+          <div onClick={function (e) { e.stopPropagation(); }} style={{ background: 'white', borderRadius: '12px', padding: '20px 22px', width: '620px', maxWidth: '94%', boxShadow: '0 10px 40px rgba(0,0,0,0.2)' }}>
+            <div style={{ fontSize: '15px', fontWeight: '700' }}>The waiver-denial explanation — standard wording</div>
+            <div style={Object.assign({}, hint, { marginTop: '3px' })}>The sentence staff pick when a fee-waiver request is denied; it folds into the estimate notice. Editable wording comes with the letter templates, as its own piece of work.</div>
+            <ol style={{ margin: '14px 0 0', paddingLeft: '20px', display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px', lineHeight: '1.5' }}>
+              {(waiver.sentences || []).map(function (x) { return <li key={x.id}>{x.text}</li>; })}
+            </ol>
+            <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: '14px' }}><button type="button" onClick={function () { setSentences(false); }} style={btn('sec')}>Close</button></div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

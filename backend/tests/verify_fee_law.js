@@ -60,17 +60,24 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
   var codes = STI.listTemplates();
   var keyMismatch = [], parseErr = 0, cells = 0;
   codes.forEach(function (c) {
-    var items = FL.templateItems(c).items; var keys = Object.keys(items).sort();
+    var items = FL.templateItems(c).items;
+    var keys = Object.keys(items).filter(function (k) { return k !== 'waiver'; }).sort();
     if (keys.join(',') !== FL.CATALOG.map(function (x) { return x.key; }).sort().join(',')) keyMismatch.push(c);
+    if (!items['waiver']) keyMismatch.push(c + ':no-waiver-item');
     FL.CATALOG.forEach(function (it) { cells++; try { FL.parseValue(it, (items[it.key] || {}).value); } catch (e) { parseErr++; } });
   });
-  ok('A1 the catalog is exactly the template item set, in all ' + codes.length + ' templates', codes.length >= 32 && keyMismatch.length === 0, keyMismatch.join(','));
+  ok('A1 the catalog is exactly the template item set less the waiver item (its rows are built per ground), in all ' + codes.length + ' templates', codes.length >= 32 && keyMismatch.length === 0, keyMismatch.join(','));
   ok('A2 every value in every template parses (' + cells + ' cells)', parseErr === 0, parseErr + ' errors');
   var s0 = (await callAs(U.dir, 'GET', '/fee-law')).body;
   var bw = rowOf(s0, 'dup.bw.rate'), prog = rowOf(s0, 'labor.programming.rate'), oh = rowOf(s0, 'labor.overheadPct'), media = rowOf(s0, 'media');
   ok('A3 TX B&W copy: ceiling is the MUNICIPAL figure 0.125 (AG 0.10 + 25%), shown as the law\'s value', bw.binding === 'ceiling' && bw.ceiling === 0.125 && bw.law.ag === 0.1 && /0\.125/.test(bw.law.display), JSON.stringify(bw.law));
   ok('A4 programming labor ceiling 35.625 · overhead FIXED at 20% reads "as law" (not editable) · media parsed cd 1.25 / dvd 3.75 / usb actual', prog.ceiling === 35.625 && oh.binding === 'fixed' && oh.editable === false && oh.city.value === 20 && media.law.parsed.cd === 1.25 && media.law.parsed.dvd === 3.75 && media.law.parsed.usb === 'actual', JSON.stringify([prog.ceiling, oh.city, media.law.parsed]));
-  ok('A5 the screen splits 22 mandate / 13 deferral, each bucketed computation vs estimate-payment; 2 ledger gaps flagged', s0.counts.mandate === 22 && s0.counts.deferral === 13 && s0.counts.gaps === 2 && s0.rows.every(function (r) { return r.bucket === 'computation' || r.bucket === 'estimate_payment'; }), JSON.stringify(s0.counts));
+  ok('A5 the screen splits 23 mandate / 13 deferral (the two waiver ground rows included); 2 ledger gaps flagged', s0.counts.mandate === 23 && s0.counts.deferral === 13 && s0.counts.gaps === 2 && s0.rows.every(function (r) { return r.bucket === 'computation' || r.bucket === 'estimate_payment' || r.bucket === 'waiver'; }), JSON.stringify(s0.counts));
+  var wpi = rowOf(s0, 'waiver.public_interest'), wcc = rowOf(s0, 'waiver.cost_of_collection');
+  ok('A6 TX names both waiver grounds: public interest (fixed, must) and cost of collection (discretionary, may, de-minimis cross-reference); neither is editable',
+    wpi && wpi.binding === 'fixed' && /must waive or reduce/i.test(wpi.law.display) && wpi.editable === false && /552\.267/.test(wpi.law.authority) &&
+    wcc && wcc.binding === 'discretionary' && /may waive/i.test(wcc.law.display) && wcc.editable === false && /De-minimis/.test(wcc.city.value),
+    JSON.stringify([wpi && wpi.law.display, wcc && wcc.city.value]));
 
   console.log('\n=== B. DEFAULTS ===');
   ok('B1 every ceiling row starts AT the ceiling, source "default"', s0.rows.filter(function (r) { return r.binding === 'ceiling' && r.ceiling != null; }).every(function (r) { return r.city.value === r.ceiling && r.city.source === 'default'; }) && s0.counts.ceilingsDefaulted === s0.counts.ceilings);
@@ -127,6 +134,33 @@ function hubRow(page) { var f = null; page.lanes.forEach(function (l) { l.items.
   ok('E3 attest from the strip marks it ready by name', at.status === 200 && h2.state === 'ready' && /marked done by FL oro_director/.test(h2.evidence), h2.state + ' | ' + h2.evidence);
   await callAs(U.dir, 'DELETE', '/setup-hub/fee_law/done');
   ok('E4 the route and page exist', /path="setup\/fee-law"/.test(fs.readFileSync('/opt/optimumq/frontend/src/App.js', 'utf8')) && fs.existsSync('/opt/optimumq/frontend/src/pages/FeeLawPage.js'));
+
+  console.log('\n=== F. FEE WAIVERS ON THIS SCREEN (Kevin 2026-08-27; the waiver_policy hub row is retired) ===');
+  var sW = (await callAs(U.dir, 'GET', '/fee-law')).body;
+  ok('F1 the screen carries the two waiver choices, undecided, with the engine\'s current routing as the suggested answer',
+    sW.waiver && sW.waiver.choices.length === 2 && sW.waiver.decided === 0 &&
+    sW.waiver.choices[0].key === 'waiver.decider' && sW.waiver.choices[0].current.mode === 'routed_task' &&
+    sW.waiver.sentences.length === 5, JSON.stringify(sW.waiver).slice(0, 250));
+  var hW = hubRow((await callAs(U.dir, 'GET', '/setup-hub')).body);
+  ok('F2 the hub row is named "Fee rules" and counts the waiver choices; the waiver_policy row is GONE',
+    hW.name === 'Fee rules' && /waivers: 0 of 2 decided/.test(hW.evidence) &&
+    !JSON.stringify((await callAs(U.dir, 'GET', '/setup-hub')).body.lanes).includes('waiver_policy'), hW.name + ' | ' + hW.evidence);
+  var wBad = await callAs(U.dir, 'POST', '/fee-law/waiver', { decider: 'coin_flip' });
+  ok('F3 a guessed mode is refused in words', wBad.status === 422 && /intake_review|routed_task/.test(wBad.body.error), JSON.stringify(wBad.body));
+  var w1 = await callAs(U.dir, 'POST', '/fee-law/waiver', { decider: 'intake_review', denialWording: true });
+  ok('F4 recording both choices: who/when on each, and the routing written through to the store the engine reads',
+    w1.status === 200 && w1.body.waiver.decided === 2 &&
+    w1.body.waiver.choices[0].by === 'FL oro_director' && w1.body.waiver.choices[1].value === 'standard_wording' &&
+    (await (async function () {
+      var AM = require('/opt/optimumq/backend/src/services/approvalModules');
+      var cfg = await AM.config('jur-tx');
+      return cfg.modules.fee_waiver.mode === 'intake_review';
+    })()), JSON.stringify(w1.body.waiver).slice(0, 250));
+  var wStaff = await callAs(U.staff, 'POST', '/fee-law/waiver', { decider: 'routed_task' });
+  ok('F5 staff cannot record waiver choices', wStaff.status === 403);
+  var a3 = await callAs(U.dir, 'POST', '/fee-law/approve', {});
+  ok('F6 Approve never waits on the waiver choices (they gate Attest, not the schedule)',
+    a3.status === 200 && a3.body.profile.version >= 1, JSON.stringify(a3.body).slice(0, 120));
 
   console.log('\n' + pass + '/' + (pass + fail) + ' pass, ' + fail + ' fail');
   process.exit(fail ? 1 : 0);
