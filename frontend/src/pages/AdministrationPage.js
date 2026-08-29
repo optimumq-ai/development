@@ -31,7 +31,9 @@ const TABS = [
   { key: 'map',          label: 'Process Map',          el: WorkflowMapPage },
   { key: 'sources',      label: 'Sources',              el: SourcesPage },
   { key: 'redaction',    label: 'Redaction Rules',      el: RedactionRulesPage },
-  { key: 'integrations', label: 'Integrations & API Keys', el: IntegrationsPage, admin: true },
+  // C3 cleanup (Kevin 2026-08-29): the nav tab is gone — the hub's "AI service keys" row is the one door
+  // (its ?tab=integrations deep link keeps working via `hidden`); the screen is titled "AI Service Keys".
+  { key: 'integrations', label: 'AI Service Keys', el: IntegrationsPage, admin: true, hidden: true },
   { key: 'ai-data',      label: 'AI Data Flow',         el: AIDataFlowPage, admin: true },
   { key: 'security',     label: 'Portal Agent Security', el: SecurityPage, admin: true },
   // v3 user-type model (SPEC_user_type_model §10.2, S3): the catalog matrix. Visible to anyone who may see Administration.
@@ -57,7 +59,7 @@ export default function AdministrationPage() {
         <p style={{ color: '#9CA3AF', fontSize: '13px', margin: 0 }}>Technical setup and configuration — everything that shapes how the system runs.</p>
       </div>
       <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', borderBottom: '2px solid #E5E7EB', marginBottom: '20px' }}>
-        {tabs.map(function (t) {
+        {tabs.filter(function (t) { return !t.hidden; }).map(function (t) {
           const on = t.key === active.key;
           return (
             <button key={t.key} onClick={function () { setParams({ tab: t.key }); }}

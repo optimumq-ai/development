@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../lib/api';
 
-// INTEGRATIONS — AI service keys only. The email section moved to its own screen (C2 cleanup, Kevin
-// 2026-08-29): Setup → Email configuration (/setup/email), behind the hub's renamed `email` row.
+// AI SERVICE KEYS — reached from the hub's 'AI service keys' row (?tab=integrations; the admin nav tab
+// was removed, C3 cleanup 2026-08-29). Email moved to its own screen (C2): Setup → Email configuration.
 
 var BLUE = '#1F4E79';
 var lbl = { fontSize: '12.5px', fontWeight: 600, color: '#374151', display: 'block', marginBottom: '5px' };
@@ -53,7 +53,7 @@ export default function IntegrationsPage() {
 
   return (
     <div style={{ maxWidth: '720px' }}>
-      <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#111', margin: '0 0 4px' }}>Integrations &amp; API Keys</h1>
+      <h1 style={{ fontSize: '22px', fontWeight: 800, color: '#111', margin: '0 0 4px' }}>AI Service Keys</h1>
       <p style={{ fontSize: '13px', color: '#6B7280', margin: '0 0 20px', lineHeight: 1.5 }}>Keys this installation uses for AI services. Entered values are stored on this server and never displayed again after saving. Email sending is set up on its own screen: <button type="button" onClick={function () { nav('/setup/email'); }} style={{ background: 'none', border: 0, padding: 0, font: 'inherit', color: BLUE, fontWeight: 700, cursor: 'pointer', textDecoration: 'underline dotted' }}>Email configuration</button>.</p>
 
       <div style={card}>
